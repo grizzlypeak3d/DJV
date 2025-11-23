@@ -3,7 +3,7 @@
 
 #include <djvApp/Models/AudioModel.h>
 
-#include <tlCore/AudioSystem.h>
+#include <tlRender/Core/AudioSystem.h>
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>

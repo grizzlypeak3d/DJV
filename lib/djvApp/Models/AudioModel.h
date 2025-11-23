@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <tlTimeline/CompareOptions.h>
+#include <tlRender/Timeline/CompareOptions.h>
 
-#include <tlCore/AudioSystem.h>
+#include <tlRender/Core/AudioSystem.h>
 
 #include <ftk/Core/ObservableList.h>
 #include <ftk/Core/ObservableValue.h>

@@ -5,9 +5,9 @@
 
 #include <djvApp/Models/SettingsModel.h>
 
-#include <tlTimelineUI/Window.h>
+#include <tlRender/UI/Window.h>
 
-#include <tlTimeline/Player.h>
+#include <tlRender/Timeline/Player.h>
 
 namespace tl
 {

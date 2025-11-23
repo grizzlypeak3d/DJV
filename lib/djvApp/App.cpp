@@ -18,26 +18,26 @@
 #include <djvApp/MainWindow.h>
 #include <djvApp/SecondaryWindow.h>
 
-#include <tlTimelineUI/ThumbnailSystem.h>
+#include <tlRender/UI/ThumbnailSystem.h>
 
-#include <tlTimeline/ColorOptions.h>
-#include <tlTimeline/CompareOptions.h>
-#include <tlTimeline/Util.h>
+#include <tlRender/Timeline/ColorOptions.h>
+#include <tlRender/Timeline/CompareOptions.h>
+#include <tlRender/Timeline/Util.h>
 
 #if defined(TLRENDER_BMD)
-#include <tlDevice/BMDDevicesModel.h>
-#include <tlDevice/BMDOutputDevice.h>
+#include <tlRender/Device/BMDDevicesModel.h>
+#include <tlRender/Device/BMDOutputDevice.h>
 #endif // TLRENDER_BMD
 
-#include <tlIO/System.h>
+#include <tlRender/IO/System.h>
 #if defined(TLRENDER_FFMPEG)
-#include <tlIO/FFmpeg.h>
+#include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG
 #if defined(TLRENDER_USD)
-#include <tlIO/USD.h>
+#include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
-#include <tlCore/FileLogSystem.h>
+#include <tlRender/Core/FileLogSystem.h>
 
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/Settings.h>
@@ -892,7 +892,9 @@ namespace djv
             {
                 if (p.cmdLine.compareFileName->hasValue())
                 {
-                    open(ftk::Path(p.cmdLine.compareFileName->getValue()));
+                    ftk::Path path;
+                    ftk::expandSeq(p.cmdLine.compareFileName->getValue(), path);
+                    open(path);
                     tl::timeline::CompareOptions options;
                     if (p.cmdLine.compare->hasValue())
                     {
@@ -917,9 +919,9 @@ namespace djv
                 }
                 for (const auto& input : p.cmdLine.inputs->getList())
                 {
-                    open(
-                        ftk::Path(input),
-                        ftk::Path(audioFileName));
+                    ftk::Path path;
+                    ftk::expandSeq(input, path);
+                    open(path, ftk::Path(audioFileName));
 
                     if (auto player = p.player->get())
                     {

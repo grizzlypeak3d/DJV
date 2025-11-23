@@ -43,9 +43,9 @@
 #include <djvApp/Widgets/WindowToolBar.h>
 #include <djvApp/App.h>
 
-#include <tlTimelineUI/TimelineWidget.h>
+#include <tlRender/UI/TimelineWidget.h>
 
-#include <tlTimelineGL/Render.h>
+#include <tlRender/GL/Render.h>
 
 #include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/Divider.h>
@@ -58,7 +58,7 @@
 #include <ftk/UI/ToolButton.h>
 
 #if defined(TLRENDER_BMD)
-#include <tlDevice/BMDOutputDevice.h>
+#include <tlRender/Device/BMDOutputDevice.h>
 #endif // TLRENDER_BMD
 
 namespace djv_resource

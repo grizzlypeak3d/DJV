@@ -1,3 +1,15 @@
+## 3.3.0
+
+Features:
+* Image sequences are shown in the file browser
+* Image sequences can be opened from the command line with the "#" character (render.#.exr)
+* Mouse wheel can scroll tab bars
+* Library updates:
+    - SDL2 2.32.10
+
+Fixes:
+
+
 ## 3.2.1
 
 Fixes:

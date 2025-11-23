@@ -9,14 +9,14 @@
 #include <djvApp/Models/ViewportModel.h>
 #include <djvApp/App.h>
 
-#include <tlTimelineGL/Render.h>
+#include <tlRender/GL/Render.h>
 
-#include <tlTimeline/IRender.h>
-#include <tlTimeline/Util.h>
+#include <tlRender/Timeline/IRender.h>
+#include <tlRender/Timeline/Util.h>
 
-#include <tlIO/System.h>
+#include <tlRender/IO/System.h>
 #if defined(TLRENDER_FFMPEG)
-#include <tlIO/FFmpeg.h>
+#include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG
 
 #include <ftk/UI/ComboBox.h>

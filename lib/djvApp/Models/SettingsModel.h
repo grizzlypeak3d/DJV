@@ -5,20 +5,20 @@
 
 #include <djvApp/Shortcuts.h>
 
-#include <tlTimelineUI/IItem.h>
+#include <tlRender/UI/IItem.h>
 
-#include <tlTimeline/Player.h>
+#include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/App.h>
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/Core/ObservableValue.h>
 
-#include <tlIO/SeqIO.h>
+#include <tlRender/IO/SeqIO.h>
 #if defined(TLRENDER_FFMPEG)
-#include <tlIO/FFmpeg.h>
+#include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG
 #if defined(TLRENDER_USD)
-#include <tlIO/USD.h>
+#include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
 #include <nlohmann/json.hpp>
@@ -60,7 +60,7 @@ namespace djv
         FTK_ENUM(ExportRenderSize);
 
         //! Get an export render size.
-        ftk::Size2I getSize(ExportRenderSize);
+        const ftk::Size2I& getSize(ExportRenderSize);
 
         //! Export file type.
         enum class ExportFileType

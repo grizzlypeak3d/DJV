@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <tlTimeline/BackgroundOptions.h>
-#include <tlTimeline/DisplayOptions.h>
-#include <tlTimeline/ForegroundOptions.h>
+#include <tlRender/Timeline/BackgroundOptions.h>
+#include <tlRender/Timeline/DisplayOptions.h>
+#include <tlRender/Timeline/ForegroundOptions.h>
 
 #include <ftk/Core/ObservableValue.h>
 

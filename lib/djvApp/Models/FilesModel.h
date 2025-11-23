@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <tlTimeline/CompareOptions.h>
+#include <tlRender/Timeline/CompareOptions.h>
 
 #include <ftk/Core/ObservableList.h>
 #include <ftk/Core/ObservableValue.h>

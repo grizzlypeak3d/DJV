@@ -30,9 +30,9 @@ namespace djv
             "Messages",
             "System Log");
 
-        std::string getIcon(Tool value)
+        const std::string& getIcon(Tool value)
         {
-            const std::array<std::string, static_cast<size_t>(Tool::Count)> data =
+            static const std::array<std::string, static_cast<size_t>(Tool::Count)> data =
             {
                 "",
                 "Files",
@@ -52,7 +52,7 @@ namespace djv
 
         std::vector<Tool> getToolsInToolbar()
         {
-            const std::vector<Tool> out
+            static const std::vector<Tool> out
             {
                 Tool::Files,
                 Tool::Export,

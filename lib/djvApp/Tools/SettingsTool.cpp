@@ -7,7 +7,7 @@
 #include <djvApp/App.h>
 
 #if defined(TLRENDER_USD)
-#include <tlIO/USD.h>
+#include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
 #include <ftk/UI/Bellows.h>

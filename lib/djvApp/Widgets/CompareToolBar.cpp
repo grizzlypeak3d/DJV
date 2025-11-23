@@ -3,7 +3,7 @@
 
 #include <djvApp/Widgets/CompareToolBar.h>
 
-#include <tlTimeline/CompareOptions.h>
+#include <tlRender/Timeline/CompareOptions.h>
 
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ToolButton.h>

@@ -13,10 +13,10 @@
 #include <djvApp/Widgets/SpeedPopup.h>
 #include <djvApp/App.h>
 
-#include <tlTimelineUI/TimeEdit.h>
-#include <tlTimelineUI/TimeLabel.h>
+#include <tlRender/UI/TimeEdit.h>
+#include <tlRender/UI/TimeLabel.h>
 
-#include <tlTimeline/Player.h>
+#include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DoubleEdit.h>

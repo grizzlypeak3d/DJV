@@ -6,7 +6,7 @@
 #include <djvApp/App.h>
 #include <djvApp/MainWindow.h>
 
-#include <tlTimelineUI/TimelineWidget.h>
+#include <tlRender/UI/TimelineWidget.h>
 
 namespace djv
 {

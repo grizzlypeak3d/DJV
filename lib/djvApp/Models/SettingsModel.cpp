@@ -35,9 +35,9 @@ namespace djv
             "4096x2160",
             "Custom");
 
-        ftk::Size2I getSize(ExportRenderSize value)
+        const ftk::Size2I& getSize(ExportRenderSize value)
         {
-            const std::array<ftk::Size2I, static_cast<size_t>(ExportRenderSize::Count)> data =
+            static const std::array<ftk::Size2I, static_cast<size_t>(ExportRenderSize::Count)> data =
             {
                 ftk::Size2I(),
                 ftk::Size2I(1920, 1080),
@@ -317,7 +317,7 @@ namespace djv
 
         int getTimelineThumbnailsSize(TimelineThumbnails value)
         {
-            const std::array<int, static_cast<size_t>(TimelineThumbnails::Count)> data =
+            static const std::array<int, static_cast<size_t>(TimelineThumbnails::Count)> data =
             {
                 0,
                 50,
@@ -329,7 +329,7 @@ namespace djv
 
         int getTimelineWaveformSize(TimelineThumbnails value)
         {
-            const std::array<int, static_cast<size_t>(TimelineThumbnails::Count)> data =
+            static const std::array<int, static_cast<size_t>(TimelineThumbnails::Count)> data =
             {
                 0,
                 50 / 2,

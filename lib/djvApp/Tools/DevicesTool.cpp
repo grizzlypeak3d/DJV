@@ -9,7 +9,7 @@
 #include <djvApp/App.h>
 
 #if defined(TLRENDER_BMD)
-#include <tlDevice/BMDOutputDevice.h>
+#include <tlRender/Device/BMDOutputDevice.h>
 #endif // TLRENDER_BMD
 
 #include <ftk/UI/Bellows.h>

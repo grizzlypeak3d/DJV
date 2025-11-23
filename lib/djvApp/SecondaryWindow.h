@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <tlTimelineUI/Window.h>
+#include <tlRender/UI/Window.h>
 
-#include <tlTimeline/Player.h>
+#include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/Window.h>
 

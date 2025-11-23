@@ -180,7 +180,7 @@ source_group("Widgets Header Files" FILES ${HEADERS_WIDGETS} ${HEADERS_PRIVATE_W
 source_group("Widgets Source Files" FILES ${SOURCE_WIDGETS})
 
 add_library(djvApp ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
-target_link_libraries(djvApp djvResource tlRender::tlTimelineUI tlRender::tlDevice)
+target_link_libraries(djvApp djvResource tlRender::tlUI tlRender::tlDevice)
 set_target_properties(djvApp PROPERTIES FOLDER lib)
 
 if(BUILD_SHARED_LIBS)

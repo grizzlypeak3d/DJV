@@ -3,7 +3,7 @@
 
 #include <djvApp/Tools/FilesToolPrivate.h>
 
-#include <tlTimelineUI/ThumbnailSystem.h>
+#include <tlRender/UI/ThumbnailSystem.h>
 
 #include <ftk/UI/DrawUtil.h>
 #include <ftk/Core/Context.h>
