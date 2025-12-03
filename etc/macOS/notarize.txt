@@ -1,0 +1,24 @@
+# Check code signing:
+codesign \
+    -vvv \
+    --deep \
+    --strict \
+    /Volumes/DJV-3.2.1-macOS-arm64/DJV.app
+
+# Notarize:
+xcrun notarytool submit \
+    build-Release/DJV-3.2.1-macOS-arm64.dmg \
+    --apple-id $DJV_MACOS_USER_ID  \
+    --team-id $DJV_MACOS_TEAM_ID \
+    --password $DJV_MACOS_USER_PASSWORD \
+    --wait
+xcrun stapler staple build-Release/djv-3.2.1-macOS-arm64.dmg
+
+# Check notarize:
+xcrun spctl \
+    --assess \
+    --type open \
+    --context context:primary-signature \
+    --ignore-cache \
+    --verbose=2 \
+    build-Release/djv-3.2.1-macOS-arm64.dmg
