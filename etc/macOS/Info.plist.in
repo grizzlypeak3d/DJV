@@ -18,6 +18,8 @@
 	<string>Copyright Contributors to the DJV project.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
     <key>CFBundleDocumentTypes</key>
     <array>
         <dict>

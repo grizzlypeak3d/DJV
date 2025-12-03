@@ -22,7 +22,6 @@ project(
 # Build options
 
 set(DJV_PACKAGE OFF CACHE BOOL "Create packages")
-set(DJV_MACOS_TEAM_ID "" CACHE STRING "The development team ID for macOS code signing")
 
 #-------------------------------------------------------------------------------
 # Internal configuration

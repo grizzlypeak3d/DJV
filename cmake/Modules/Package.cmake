@@ -310,11 +310,17 @@ elseif(APPLE)
     install(FILES ${PROJECT_BINARY_DIR}/Info.plist DESTINATION "..")
     install(FILES ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns DESTINATION ".")
 
-    set(CPACK_PRE_BUILD_SCRIPTS
-        "${PROJECT_SOURCE_DIR}/cmake/Modules/usdPluginsSymlink.cmake"
-        "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSAppSign.cmake")
-    set(CPACK_POST_BUILD_SCRIPTS
-        "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSPackageSign.cmake")
+    set(PRE_BUILD_SCRIPTS "${PROJECT_SOURCE_DIR}/cmake/Modules/usdPluginsSymlink.cmake")
+    set(POST_BUILD_SCRIPTS)
+    set(DJV_MACOS_TEAM_ID $ENV{DJV_MACOS_TEAM_ID})
+    if(DJV_MACOS_TEAM_ID)
+        list(APPEND PRE_BUILD_SCRIPTS
+            "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSAppSign.cmake")
+        list(APPEND POST_BUILD_SCRIPTS
+            "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSPackageSign.cmake")
+    endif()
+    set(CPACK_PRE_BUILD_SCRIPTS ${PRE_BUILD_SCRIPTS})
+    set(CPACK_POST_BUILD_SCRIPTS ${POST_BUILD_SCRIPTS})
 
 else()
 
