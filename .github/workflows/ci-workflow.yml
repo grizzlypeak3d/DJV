@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      JOBS: 4
+      DJV_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -47,6 +49,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      JOBS: 4
+      DJV_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: OFF
       TLRENDER_JPEG: ON
@@ -86,6 +90,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
+      JOBS: 4
       DJV_PACKAGE: ON
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
@@ -135,6 +140,8 @@ jobs:
     runs-on: macos-latest
 
     env:
+      JOBS: 4
+      DJV_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -178,6 +185,7 @@ jobs:
     runs-on: macos-latest
 
     env:
+      JOBS: 4
       DJV_PACKAGE: ON
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
@@ -234,6 +242,8 @@ jobs:
     runs-on: windows-latest
 
     env:
+      JOBS: 4
+      DJV_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -276,6 +286,7 @@ jobs:
     runs-on: windows-latest
 
     env:
+      JOBS: 4
       DJV_PACKAGE: ON
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
