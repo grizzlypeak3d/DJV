@@ -1,11 +1,10 @@
 include(ExternalProject)
 
 set(TLRENDER_GIT_REPOSITORY "https://github.com/grizzlypeak3d/tlRender.git")
-set(TLRENDER_GIT_TAG "f38a618ecd797476c613482b0c8d46b66acdcf3e")
+set(TLRENDER_GIT_TAG "ab0b4a70bb60c7ae461623ff749a8dcccc80f6a1")
 
 set(TLRENDER_DEPS)
 set(TLRENDER_ARGS
-    -Dftk_API=${ftk_API}
     -DTLRENDER_NET=${TLRENDER_NET}
     -DTLRENDER_OCIO=${TLRENDER_OCIO}
     -DTLRENDER_JPEG=${TLRENDER_JPEG}
@@ -21,6 +20,7 @@ set(TLRENDER_ARGS
     -DTLRENDER_PROGRAMS=OFF
     -DTLRENDER_EXAMPLES=OFF
     -DTLRENDER_TESTS=OFF
+    -Dftk_API=${ftk_API}
     ${DJV_EXTERNAL_ARGS})
 
 ExternalProject_Add(

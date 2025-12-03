@@ -19,6 +19,7 @@ jobs:
       TLRENDER_BMD: OFF
       TLRENDER_BMD_SDK:
       FTK_API: GL_4_1
+      BUILD_SHARED_LIBS: OFF
 
     steps:
     - uses: actions/checkout@v4
@@ -98,6 +99,7 @@ jobs:
       TLRENDER_BMD: OFF
       TLRENDER_BMD_SDK:
       FTK_API: GL_4_1
+      BUILD_SHARED_LIBS: OFF
 
     steps:
     - uses: actions/checkout@v4
@@ -145,6 +147,7 @@ jobs:
       TLRENDER_BMD: OFF
       TLRENDER_BMD_SDK:
       FTK_API: GL_4_1
+      BUILD_SHARED_LIBS: OFF
       CMAKE_OSX_DEPLOYMENT_TARGET: 14
       CMAKE_OSX_ARCHITECTURES: arm64
 
@@ -188,6 +191,7 @@ jobs:
       TLRENDER_BMD: OFF
       TLRENDER_BMD_SDK:
       FTK_API: GL_4_1
+      BUILD_SHARED_LIBS: OFF
       CMAKE_OSX_DEPLOYMENT_TARGET: 10.15
       CMAKE_OSX_ARCHITECTURES: arm64
 
@@ -242,6 +246,7 @@ jobs:
       TLRENDER_BMD: OFF
       TLRENDER_BMD_SDK:
       FTK_API: GL_4_1
+      BUILD_SHARED_LIBS: OFF
 
     steps:
     - uses: actions/checkout@v4
@@ -284,6 +289,7 @@ jobs:
       TLRENDER_BMD: OFF
       TLRENDER_BMD_SDK:
       FTK_API: GL_4_1
+      BUILD_SHARED_LIBS: OFF
 
     steps:
     - uses: actions/checkout@v4
