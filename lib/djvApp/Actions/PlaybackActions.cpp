@@ -5,7 +5,7 @@
 
 #include <djvApp/App.h>
 
-#include <tlTimelineUI/TimelineWidget.h>
+#include <tlRender/UI/TimelineWidget.h>
 
 namespace djv
 {
@@ -18,9 +18,9 @@ namespace djv
             std::map<tl::timeline::Playback, std::shared_ptr<ftk::Action> > playbackItems;
             std::map<tl::timeline::Loop, std::shared_ptr<ftk::Action> > loopItems;
 
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::Playback> > playbackObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::Loop> > loopObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::Playback> > playbackObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::Loop> > loopObserver;
         };
 
         void PlaybackActions::_init(
@@ -268,7 +268,7 @@ namespace djv
             _playbackUpdate();
             _loopUpdate();
 
-            p.playerObserver = ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::timeline::Player>& value)
                 {
@@ -302,14 +302,14 @@ namespace djv
 
             if (p.player)
             {
-                p.playbackObserver = ftk::ValueObserver<tl::timeline::Playback>::create(
+                p.playbackObserver = ftk::Observer<tl::timeline::Playback>::create(
                     p.player->observePlayback(),
                     [this](tl::timeline::Playback)
                     {
                         _playbackUpdate();
                     });
 
-                p.loopObserver = ftk::ValueObserver<tl::timeline::Loop>::create(
+                p.loopObserver = ftk::Observer<tl::timeline::Loop>::create(
                     p.player->observeLoop(),
                     [this](tl::timeline::Loop)
                     {

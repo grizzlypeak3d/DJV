@@ -13,10 +13,9 @@
 #include <djvApp/Widgets/SpeedPopup.h>
 #include <djvApp/App.h>
 
-#include <tlTimelineUI/TimeEdit.h>
-#include <tlTimelineUI/TimeLabel.h>
-
-#include <tlTimeline/Player.h>
+#include <tlRender/UI/TimeEdit.h>
+#include <tlRender/UI/TimeLabel.h>
+#include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DoubleEdit.h>
@@ -51,12 +50,12 @@ namespace djv
             std::shared_ptr<ftk::ToolButton> muteButton;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::TimeUnits> > timeUnitsObserver;
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::ValueObserver<double> > speedObserver;
-            std::shared_ptr<ftk::ValueObserver<double> > speedObserver2;
-            std::shared_ptr<ftk::ValueObserver<OTIO_NS::RationalTime> > currentTimeObserver;
-            std::shared_ptr<ftk::ValueObserver<OTIO_NS::TimeRange> > inOutRangeObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::TimeUnits> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<double> > speedObserver;
+            std::shared_ptr<ftk::Observer<double> > speedObserver2;
+            std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
+            std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
         };
 
         void BottomToolBar::_init(
@@ -248,21 +247,21 @@ namespace djv
                     }
                 });
 
-            p.timeUnitsObserver = ftk::ValueObserver<tl::timeline::TimeUnits>::create(
+            p.timeUnitsObserver = ftk::Observer<tl::timeline::TimeUnits>::create(
                 app->getTimeUnitsModel()->observeTimeUnits(),
                 [this](tl::timeline::TimeUnits value)
                 {
                     _p->timeUnitsComboBox->setCurrentIndex(static_cast<int>(value));
                 });
 
-            p.playerObserver = ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::timeline::Player>& value)
                 {
                     _playerUpdate(value);
                 });
 
-            p.speedObserver2 = ftk::ValueObserver<double>::create(
+            p.speedObserver2 = ftk::Observer<double>::create(
                 p.speedModel->observeValue(),
                 [this](double value)
                 {
@@ -311,8 +310,7 @@ namespace djv
 
         void BottomToolBar::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
-            IWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         void BottomToolBar::_playerUpdate(const std::shared_ptr<tl::timeline::Player>& value)
@@ -327,21 +325,21 @@ namespace djv
 
             if (p.player)
             {
-                p.speedObserver = ftk::ValueObserver<double>::create(
+                p.speedObserver = ftk::Observer<double>::create(
                     p.player->observeSpeed(),
                     [this](double value)
                     {
                         _p->speedModel->setValue(value);
                     });
 
-                p.currentTimeObserver = ftk::ValueObserver<OTIO_NS::RationalTime>::create(
+                p.currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
                     p.player->observeCurrentTime(),
                     [this](const OTIO_NS::RationalTime& value)
                     {
                         _p->currentTimeEdit->setValue(value);
                     });
 
-                p.inOutRangeObserver = ftk::ValueObserver<OTIO_NS::TimeRange>::create(
+                p.inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
                     p.player->observeInOutRange(),
                     [this](const OTIO_NS::TimeRange& value)
                     {

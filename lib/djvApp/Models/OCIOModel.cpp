@@ -45,8 +45,8 @@ namespace djv
 #if defined(TLRENDER_OCIO)
             OCIO_NAMESPACE::ConstConfigRcPtr ocioConfig;
 #endif // TLRENDER_OCIO
-            std::shared_ptr<ftk::ObservableValue<tl::timeline::OCIOOptions> > options;
-            std::shared_ptr<ftk::ObservableValue<OCIOModelData> > data;
+            std::shared_ptr<ftk::Observable<tl::timeline::OCIOOptions> > options;
+            std::shared_ptr<ftk::Observable<OCIOModelData> > data;
         };
 
         void OCIOModel::_init(const std::shared_ptr<ftk::Context>& context)
@@ -65,9 +65,9 @@ namespace djv
                 options.view = p.ocioConfig->getDefaultView(display);
             }
 #endif // TLRENDER_OCIO
-            p.options = ftk::ObservableValue<tl::timeline::OCIOOptions>::create(options);
+            p.options = ftk::Observable<tl::timeline::OCIOOptions>::create(options);
 
-            p.data = ftk::ObservableValue<OCIOModelData>::create();
+            p.data = ftk::Observable<OCIOModelData>::create();
         }
 
         OCIOModel::OCIOModel() :
@@ -84,7 +84,7 @@ namespace djv
             return out;
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::timeline::OCIOOptions> > OCIOModel::observeOptions() const
+        std::shared_ptr<ftk::IObservable<tl::timeline::OCIOOptions> > OCIOModel::observeOptions() const
         {
             return _p->options;
         }
@@ -151,7 +151,7 @@ namespace djv
             p.data->setIfChanged(_getData(options));
         }
 
-        std::shared_ptr<ftk::IObservableValue<OCIOModelData> > OCIOModel::observeData() const
+        std::shared_ptr<ftk::IObservable<OCIOModelData> > OCIOModel::observeData() const
         {
             return _p->data;
         }

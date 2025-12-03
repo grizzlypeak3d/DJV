@@ -9,14 +9,12 @@
 #include <djvApp/Models/ViewportModel.h>
 #include <djvApp/App.h>
 
-#include <tlTimelineGL/Render.h>
-
-#include <tlTimeline/IRender.h>
-#include <tlTimeline/Util.h>
-
-#include <tlIO/System.h>
+#include <tlRender/GL/Render.h>
+#include <tlRender/Timeline/IRender.h>
+#include <tlRender/Timeline/Util.h>
+#include <tlRender/IO/System.h>
 #if defined(TLRENDER_FFMPEG)
-#include <tlIO/FFmpeg.h>
+#include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG
 
 #include <ftk/UI/ComboBox.h>
@@ -85,8 +83,8 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> layout;
             std::shared_ptr<ftk::ProgressDialog> progressDialog;
 
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::ValueObserver<ExportSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<ExportSettings> > settingsObserver;
 
             std::shared_ptr<ftk::Timer> progressTimer;
         };
@@ -163,7 +161,7 @@ namespace djv
             scrollWidget->setWidget(p.layout);
             _setWidget(scrollWidget);
 
-            p.playerObserver = ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::timeline::Player>& value)
                 {
@@ -172,7 +170,7 @@ namespace djv
                     p.exportButton->setEnabled(value.get());
                 });
 
-            p.settingsObserver = ftk::ValueObserver<ExportSettings>::create(
+            p.settingsObserver = ftk::Observer<ExportSettings>::create(
                 p.model->observeExport(),
                 [this](const ExportSettings& value)
                 {

@@ -3,8 +3,8 @@
 
 #include <djvApp/App.h>
 
-#include <tlTimelineUI/Init.h>
-#include <tlDevice/Init.h>
+#include <tlRender/UI/Init.h>
+#include <tlRender/Device/Init.h>
 
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Error.h>

@@ -19,7 +19,7 @@ namespace djv
         {
             std::shared_ptr<ftk::ColorWidget> colorWidget;
 
-            std::shared_ptr<ftk::ValueObserver<ftk::Color4F> > colorPickerObserver;
+            std::shared_ptr<ftk::Observer<ftk::Color4F> > colorPickerObserver;
         };
 
         void ColorPickerTool::_init(
@@ -48,7 +48,7 @@ namespace djv
             scrollWidget->setWidget(layout);
             _setWidget(scrollWidget);
 
-            p.colorPickerObserver = ftk::ValueObserver<ftk::Color4F>::create(
+            p.colorPickerObserver = ftk::Observer<ftk::Color4F>::create(
                 app->getViewportModel()->observeColorPicker(),
                 [this](const ftk::Color4F& value)
                 {

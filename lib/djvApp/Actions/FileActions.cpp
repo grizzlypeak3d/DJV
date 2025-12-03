@@ -13,7 +13,7 @@ namespace djv
         struct FileActions::Private
         {
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > filesObserver;
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<FilesModelItem> > > aObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<FilesModelItem> > > aObserver;
         };
 
         void FileActions::_init(
@@ -161,7 +161,7 @@ namespace djv
                     _actions["Prev"]->setEnabled(value.size() > 1);
                 });
 
-            p.aObserver = ftk::ValueObserver<std::shared_ptr<FilesModelItem> >::create(
+            p.aObserver = ftk::Observer<std::shared_ptr<FilesModelItem> >::create(
                 app->getFilesModel()->observeA(),
                 [this](const std::shared_ptr<FilesModelItem>& value)
                 {

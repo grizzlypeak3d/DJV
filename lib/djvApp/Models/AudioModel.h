@@ -3,12 +3,11 @@
 
 #pragma once
 
-#include <tlTimeline/CompareOptions.h>
-
-#include <tlCore/AudioSystem.h>
+#include <tlRender/Timeline/CompareOptions.h>
+#include <tlRender/Core/AudioSystem.h>
 
 #include <ftk/Core/ObservableList.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 namespace ftk
 {
@@ -49,7 +48,7 @@ namespace djv
             const tl::audio::DeviceID& getDevice() const;
 
             //! Observe the output device.
-            std::shared_ptr<ftk::IObservableValue<tl::audio::DeviceID> > observeDevice() const;
+            std::shared_ptr<ftk::IObservable<tl::audio::DeviceID> > observeDevice() const;
 
             //! Set the output device.
             void setDevice(const tl::audio::DeviceID&);
@@ -58,7 +57,7 @@ namespace djv
             float getVolume() const;
 
             //! Observe the volume.
-            std::shared_ptr<ftk::IObservableValue<float> > observeVolume() const;
+            std::shared_ptr<ftk::IObservable<float> > observeVolume() const;
 
             //! Set the volume.
             void setVolume(float);
@@ -73,7 +72,7 @@ namespace djv
             bool isMuted() const;
 
             //! Observe the audio mute.
-            std::shared_ptr<ftk::IObservableValue<bool> > observeMute() const;
+            std::shared_ptr<ftk::IObservable<bool> > observeMute() const;
 
             //! Set the audio mute.
             void setMute(bool);
@@ -91,7 +90,7 @@ namespace djv
             double getSyncOffset() const;
 
             //! Set the audio sync offset.
-            std::shared_ptr<ftk::IObservableValue<double> > observeSyncOffset() const;
+            std::shared_ptr<ftk::IObservable<double> > observeSyncOffset() const;
 
             //! Set the audio sync offset.
             void setSyncOffset(double);

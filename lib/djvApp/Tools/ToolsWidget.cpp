@@ -27,7 +27,7 @@ namespace djv
         {
             std::map<Tool, std::shared_ptr<IToolWidget> > toolWidgets;
             std::shared_ptr<ftk::StackLayout> layout;
-            std::shared_ptr<ftk::ValueObserver<Tool> > activeObserver;
+            std::shared_ptr<ftk::Observer<Tool> > activeObserver;
         };
 
         void ToolsWidget::_init(
@@ -60,7 +60,7 @@ namespace djv
                 widget.second->setParent(p.layout);
             }
 
-            p.activeObserver = ftk::ValueObserver<Tool>::create(
+            p.activeObserver = ftk::Observer<Tool>::create(
                 app->getToolsModel()->observeActiveTool(),
                 [this](Tool value)
                 {
@@ -97,8 +97,7 @@ namespace djv
 
         void ToolsWidget::sizeHintEvent(const ftk::SizeHintEvent & event)
         {
-            IWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
     }
 }

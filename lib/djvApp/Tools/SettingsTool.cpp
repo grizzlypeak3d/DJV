@@ -7,7 +7,7 @@
 #include <djvApp/App.h>
 
 #if defined(TLRENDER_USD)
-#include <tlIO/USD.h>
+#include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
 #include <ftk/UI/Bellows.h>
@@ -44,7 +44,7 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> audioRequestsEdit;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<AdvancedSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<AdvancedSettings> > settingsObserver;
         };
 
         void AdvancedSettingsWidget::_init(
@@ -83,7 +83,7 @@ namespace djv
             formLayout->addRow("Video requests:", p.videoRequestsEdit);
             formLayout->addRow("Audio requests:", p.audioRequestsEdit);
 
-            p.settingsObserver = ftk::ValueObserver<AdvancedSettings>::create(
+            p.settingsObserver = ftk::Observer<AdvancedSettings>::create(
                 p.model->observeAdvanced(),
                 [this](const AdvancedSettings& value)
                 {
@@ -157,7 +157,7 @@ namespace djv
         void AdvancedSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct CacheSettingsWidget::Private
@@ -169,7 +169,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEdit> readBehindEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::PlayerCacheOptions> > settingsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::PlayerCacheOptions> > settingsObserver;
         };
 
         void CacheSettingsWidget::_init(
@@ -204,7 +204,7 @@ namespace djv
             p.layout->addRow("Audio cache (GB):", p.audioEdit);
             p.layout->addRow("Read behind (seconds):", p.readBehindEdit);
 
-            p.settingsObserver = ftk::ValueObserver<tl::timeline::PlayerCacheOptions>::create(
+            p.settingsObserver = ftk::Observer<tl::timeline::PlayerCacheOptions>::create(
                 p.model->observeCache(),
                 [this](const tl::timeline::PlayerCacheOptions& value)
                 {
@@ -268,7 +268,7 @@ namespace djv
         void CacheSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct FileBrowserSettingsWidget::Private
@@ -278,7 +278,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> nfdCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<FileBrowserSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<FileBrowserSettings> > settingsObserver;
         };
 
         void FileBrowserSettingsWidget::_init(
@@ -302,7 +302,7 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Native file dialog:", p.nfdCheckBox);
 
-            p.settingsObserver = ftk::ValueObserver<FileBrowserSettings>::create(
+            p.settingsObserver = ftk::Observer<FileBrowserSettings>::create(
                 p.model->observeFileBrowser(),
                 [this](const FileBrowserSettings& value)
                 {
@@ -346,7 +346,7 @@ namespace djv
         void FileBrowserSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ImageSeqSettingsWidget::Private
@@ -361,7 +361,7 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> threadsEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<ImageSeqSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<ImageSeqSettings> > settingsObserver;
         };
 
         void ImageSeqSettingsWidget::_init(
@@ -408,7 +408,7 @@ namespace djv
             p.layout->addRow("Default speed (FPS):", p.defaultSpeedEdit);
             p.layout->addRow("I/O threads:", p.threadsEdit);
 
-            p.settingsObserver = ftk::ValueObserver<ImageSeqSettings>::create(
+            p.settingsObserver = ftk::Observer<ImageSeqSettings>::create(
                 p.model->observeImageSeq(),
                 [this](const ImageSeqSettings& value)
                 {
@@ -504,7 +504,7 @@ namespace djv
         void ImageSeqSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct MiscSettingsWidget::Private
@@ -515,7 +515,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> showSetupCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<MiscSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<MiscSettings> > settingsObserver;
         };
 
         void MiscSettingsWidget::_init(
@@ -540,7 +540,7 @@ namespace djv
             p.layout->addRow("Enable tooltips:", p.tooltipsCheckBox);
             p.layout->addRow("Show setup dialog:", p.showSetupCheckBox);
 
-            p.settingsObserver = ftk::ValueObserver<MiscSettings>::create(
+            p.settingsObserver = ftk::Observer<MiscSettings>::create(
                 p.model->observeMisc(),
                 [this](const MiscSettings& value)
                 {
@@ -594,7 +594,7 @@ namespace djv
         void MiscSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct MouseSettingsWidget::Private
@@ -609,7 +609,7 @@ namespace djv
             std::map<MouseAction, std::shared_ptr<ftk::ComboBox> > modifierComboBoxes;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<MouseSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<MouseSettings> > settingsObserver;
         };
 
         void MouseSettingsWidget::_init(
@@ -669,7 +669,7 @@ namespace djv
             }
             p.layout->addRow("Wheel scale:", p.wheelScaleEdit);
 
-            p.settingsObserver = ftk::ValueObserver<MouseSettings>::create(
+            p.settingsObserver = ftk::Observer<MouseSettings>::create(
                 p.model->observeMouse(),
                 [this](const MouseSettings& value)
                 {
@@ -754,7 +754,7 @@ namespace djv
         void MouseSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct TimeSettingsWidget::Private
@@ -764,7 +764,7 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> timeUnitsComboBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::TimeUnits> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::TimeUnits> > timeUnitsObserver;
         };
 
         void TimeSettingsWidget::_init(
@@ -790,7 +790,7 @@ namespace djv
                     _p->timeUnitsModel->setTimeUnits(static_cast<tl::timeline::TimeUnits>(value));
                 });
 
-            p.timeUnitsObserver = ftk::ValueObserver<tl::timeline::TimeUnits>::create(
+            p.timeUnitsObserver = ftk::Observer<tl::timeline::TimeUnits>::create(
                 p.timeUnitsModel->observeTimeUnits(),
                 [this](tl::timeline::TimeUnits value)
                 {
@@ -825,7 +825,7 @@ namespace djv
         void TimeSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
 #if defined(TLRENDER_FFMPEG)
@@ -837,7 +837,7 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> threadsEdit;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::ffmpeg::Options> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ffmpeg::Options> > optionsObserver;
         };
 
         void FFmpegSettingsWidget::_init(
@@ -865,7 +865,7 @@ namespace djv
             formLayout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
             formLayout->addRow("I/O threads:", p.threadsEdit);
 
-            p.optionsObserver = ftk::ValueObserver<tl::ffmpeg::Options>::create(
+            p.optionsObserver = ftk::Observer<tl::ffmpeg::Options>::create(
                 p.model->observeFFmpeg(),
                 [this](const tl::ffmpeg::Options& value)
                 {
@@ -919,7 +919,7 @@ namespace djv
         void FFmpegSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
 #endif // TLRENDER_FFMPEG
@@ -938,7 +938,7 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> diskCacheEdit;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::usd::Options> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::usd::Options> > optionsObserver;
         };
 
         void USDSettingsWidget::_init(
@@ -985,7 +985,7 @@ namespace djv
             formLayout->addRow("Stage cache size:", p.stageCacheEdit);
             formLayout->addRow("Disk cache size (GB):", p.diskCacheEdit);
 
-            p.optionsObserver = ftk::ValueObserver<tl::usd::Options>::create(
+            p.optionsObserver = ftk::Observer<tl::usd::Options>::create(
                 p.model->observeUSD(),
                 [this](const tl::usd::Options& value)
                 {
@@ -1089,7 +1089,7 @@ namespace djv
         void USDSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 #endif // TLRENDER_USD
 

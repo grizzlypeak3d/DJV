@@ -12,8 +12,8 @@ namespace djv
     {
         struct AudioActions::Private
         {
-            std::shared_ptr<ftk::ValueObserver<float> > volumeObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > muteObserver;
+            std::shared_ptr<ftk::Observer<float> > volumeObserver;
+            std::shared_ptr<ftk::Observer<bool> > muteObserver;
         };
 
         void AudioActions::_init(
@@ -64,7 +64,7 @@ namespace djv
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
-            p.volumeObserver = ftk::ValueObserver<float>::create(
+            p.volumeObserver = ftk::Observer<float>::create(
                 app->getAudioModel()->observeVolume(),
                 [this](float value)
                 {
@@ -72,7 +72,7 @@ namespace djv
                     _actions["VolumeDown"]->setEnabled(value > 0.F);
                 });
 
-            p.muteObserver = ftk::ValueObserver<bool>::create(
+            p.muteObserver = ftk::Observer<bool>::create(
                 app->getAudioModel()->observeMute(),
                 [this](bool value)
                 {

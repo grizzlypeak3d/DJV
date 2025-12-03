@@ -62,8 +62,7 @@ namespace djv
 
         void SetupStartWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
-            IWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct SetupDialog::Private
@@ -75,8 +74,8 @@ namespace djv
             std::vector<std::shared_ptr<ftk::IWidget> > widgets;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<bool> > nextObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > prevObserver;
+            std::shared_ptr<ftk::Observer<bool> > nextObserver;
+            std::shared_ptr<ftk::Observer<bool> > prevObserver;
         };
 
         void SetupDialog::_init(
@@ -147,14 +146,14 @@ namespace djv
                     close();
                 });
 
-            p.nextObserver = ftk::ValueObserver<bool>::create(
+            p.nextObserver = ftk::Observer<bool>::create(
                 p.stackLayout->observeHasNextIndex(),
                 [this](bool value)
                 {
                     _p->nextButton->setEnabled(value);
                 });
 
-            p.prevObserver = ftk::ValueObserver<bool>::create(
+            p.prevObserver = ftk::Observer<bool>::create(
                 p.stackLayout->observeHasPrevIndex(),
                 [this](bool value)
                 {

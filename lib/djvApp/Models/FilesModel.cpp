@@ -15,14 +15,14 @@ namespace djv
             std::shared_ptr<ftk::Settings> settings;
 
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > files;
-            std::shared_ptr<ftk::ObservableValue<std::shared_ptr<FilesModelItem> > > a;
-            std::shared_ptr<ftk::ObservableValue<int> > aIndex;
+            std::shared_ptr<ftk::Observable<std::shared_ptr<FilesModelItem> > > a;
+            std::shared_ptr<ftk::Observable<int> > aIndex;
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > b;
             std::shared_ptr<ftk::ObservableList<int> > bIndexes;
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > active;
             std::shared_ptr<ftk::ObservableList<int> > layers;
-            std::shared_ptr<ftk::ObservableValue<tl::timeline::CompareOptions> > compareOptions;
-            std::shared_ptr<ftk::ObservableValue<tl::timeline::CompareTime> > compareTime;
+            std::shared_ptr<ftk::Observable<tl::timeline::CompareOptions> > compareOptions;
+            std::shared_ptr<ftk::Observable<tl::timeline::CompareTime> > compareTime;
         };
 
         void FilesModel::_init(const std::shared_ptr<ftk::Settings>& settings)
@@ -32,20 +32,20 @@ namespace djv
             p.settings = settings;
 
             p.files = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
-            p.a = ftk::ObservableValue<std::shared_ptr<FilesModelItem> >::create();
-            p.aIndex = ftk::ObservableValue<int>::create();
+            p.a = ftk::Observable<std::shared_ptr<FilesModelItem> >::create();
+            p.aIndex = ftk::Observable<int>::create();
             p.b = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.bIndexes = ftk::ObservableList<int>::create();
             p.active = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.layers = ftk::ObservableList<int>::create();
             tl::timeline::CompareOptions compareOptions;
             p.settings->getT("/Files/CompareOptions", compareOptions);
-            p.compareOptions = ftk::ObservableValue<tl::timeline::CompareOptions>::create(compareOptions);
+            p.compareOptions = ftk::Observable<tl::timeline::CompareOptions>::create(compareOptions);
             std::string s;
             p.settings->get("/Files/CompareTime", s);
             tl::timeline::CompareTime compareTime = tl::timeline::CompareTime::First;
             from_string(s, compareTime);
-            p.compareTime = ftk::ObservableValue<tl::timeline::CompareTime>::create(compareTime);
+            p.compareTime = ftk::Observable<tl::timeline::CompareTime>::create(compareTime);
         }
 
         FilesModel::FilesModel() :
@@ -81,7 +81,7 @@ namespace djv
             return _p->a->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<std::shared_ptr<FilesModelItem> > > FilesModel::observeA() const
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > FilesModel::observeA() const
         {
             return _p->a;
         }
@@ -91,7 +91,7 @@ namespace djv
             return _p->aIndex->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<int> > FilesModel::observeAIndex() const
+        std::shared_ptr<ftk::IObservable<int> > FilesModel::observeAIndex() const
         {
             return _p->aIndex;
         }
@@ -489,7 +489,7 @@ namespace djv
             return _p->compareOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::timeline::CompareOptions> > FilesModel::observeCompareOptions() const
+        std::shared_ptr<ftk::IObservable<tl::timeline::CompareOptions> > FilesModel::observeCompareOptions() const
         {
             return _p->compareOptions;
         }
@@ -560,7 +560,7 @@ namespace djv
             return _p->compareTime->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::timeline::CompareTime> > FilesModel::observeCompareTime() const
+        std::shared_ptr<ftk::IObservable<tl::timeline::CompareTime> > FilesModel::observeCompareTime() const
         {
             return _p->compareTime;
         }

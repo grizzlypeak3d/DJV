@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <tlTimeline/CompareOptions.h>
+#include <tlRender/Timeline/CompareOptions.h>
 
 #include <ftk/Core/ObservableList.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 #include <ftk/Core/Path.h>
 
 namespace ftk
@@ -59,13 +59,13 @@ namespace djv
             const std::shared_ptr<FilesModelItem>& getA() const;
 
             //! Observe the "A" file.
-            std::shared_ptr<ftk::IObservableValue<std::shared_ptr<FilesModelItem> > > observeA() const;
+            std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > observeA() const;
 
             //! Get the "A" file index.
             int getAIndex() const;
 
             //! Observe the "A" file index.
-            std::shared_ptr<ftk::IObservableValue<int> > observeAIndex() const;
+            std::shared_ptr<ftk::IObservable<int> > observeAIndex() const;
 
             //! Get the "B" files.
             const std::vector<std::shared_ptr<FilesModelItem> >& getB() const;
@@ -151,7 +151,7 @@ namespace djv
             const tl::timeline::CompareOptions& getCompareOptions() const;
 
             //! Observe the compare options.
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::CompareOptions> > observeCompareOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::CompareOptions> > observeCompareOptions() const;
 
             //! Set the compare options.
             void setCompareOptions(const tl::timeline::CompareOptions&);
@@ -160,7 +160,7 @@ namespace djv
             tl::timeline::CompareTime getCompareTime() const;
 
             //! Observe the compare time mode.
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::CompareTime> > observeCompareTime() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::CompareTime> > observeCompareTime() const;
 
             //! Set the compare time mode.
             void setCompareTime(tl::timeline::CompareTime);

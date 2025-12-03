@@ -5,9 +5,9 @@
 
 #include <djvApp/Models/SettingsModel.h>
 
-#include <tlTimelineUI/Window.h>
+#include <tlRender/Timeline/Player.h>
 
-#include <tlTimeline/Player.h>
+#include <ftk/UI/Window.h>
 
 namespace tl
 {
@@ -25,7 +25,7 @@ namespace djv
         class Viewport;
 
         //! Main window.
-        class MainWindow : public tl::timelineui::Window
+        class MainWindow : public ftk::Window
         {
             FTK_NON_COPYABLE(MainWindow);
 

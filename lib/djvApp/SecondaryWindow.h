@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include <tlTimelineUI/Window.h>
-
-#include <tlTimeline/Player.h>
+#include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/Window.h>
 
@@ -24,7 +22,7 @@ namespace djv
         class App;
 
         //! Secondary window.
-        class SecondaryWindow : public tl::timelineui::Window
+        class SecondaryWindow : public ftk::Window
         {
             FTK_NON_COPYABLE(SecondaryWindow);
 

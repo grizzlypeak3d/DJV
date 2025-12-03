@@ -12,8 +12,8 @@ namespace djv
     {
         struct ColorActions::Private
         {
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::OCIOOptions> > ocioObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::LUTOptions> > lutObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutObserver;
         };
 
         void ColorActions::_init(
@@ -60,14 +60,14 @@ namespace djv
             _actions["LUT"]->setEnabled(false);
 #endif // TLRENDER_OCIO
 
-            p.ocioObserver = ftk::ValueObserver<tl::timeline::OCIOOptions>::create(
+            p.ocioObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
                 [this](const tl::timeline::OCIOOptions& value)
                 {
                     _actions["OCIO"]->setChecked(value.enabled);
                 });
 
-            p.lutObserver = ftk::ValueObserver<tl::timeline::LUTOptions>::create(
+            p.lutObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
                 [this](const tl::timeline::LUTOptions& value)
                 {

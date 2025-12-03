@@ -8,7 +8,7 @@
 #include <djvApp/Models/ViewportModel.h>
 #include <djvApp/App.h>
 
-#include <tlTimelineUI/Viewport.h>
+#include <tlRender/UI/Viewport.h>
 
 namespace djv
 {
@@ -18,14 +18,14 @@ namespace djv
         {
             std::shared_ptr<tl::timelineui::Viewport> viewport;
 
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::BackgroundOptions> > backgroundOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<ftk::ImageType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > backgroundOptionsObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
         };
 
         void SecondaryWindow::_init(
@@ -39,56 +39,56 @@ namespace djv
             p.viewport = tl::timelineui::Viewport::create(context);
             p.viewport->setParent(shared_from_this());
 
-            p.playerObserver = ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::timeline::Player>& value)
                 {
                     _p->viewport->setPlayer(value);
                 });
 
-            p.compareOptionsObserver = ftk::ValueObserver<tl::timeline::CompareOptions>::create(
+            p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
                 app->getFilesModel()->observeCompareOptions(),
                 [this](const tl::timeline::CompareOptions& value)
                 {
                     _p->viewport->setCompareOptions(value);
                 });
 
-            p.ocioOptionsObserver = ftk::ValueObserver<tl::timeline::OCIOOptions>::create(
+            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
                 [this](const tl::timeline::OCIOOptions& value)
                 {
                     _p->viewport->setOCIOOptions(value);
                 });
 
-            p.lutOptionsObserver = ftk::ValueObserver<tl::timeline::LUTOptions>::create(
+            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
                 [this](const tl::timeline::LUTOptions& value)
                 {
                     _p->viewport->setLUTOptions(value);
                 });
 
-            p.imageOptionsObserver = ftk::ValueObserver<ftk::ImageOptions>::create(
+            p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
                 app->getViewportModel()->observeImageOptions(),
                 [this](const ftk::ImageOptions& value)
                 {
                     _p->viewport->setImageOptions({ value });
                 });
 
-            p.displayOptionsObserver = ftk::ValueObserver<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
                     _p->viewport->setDisplayOptions({ value });
                 });
 
-            p.backgroundOptionsObserver = ftk::ValueObserver<tl::timeline::BackgroundOptions>::create(
+            p.backgroundOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
                 app->getViewportModel()->observeBackgroundOptions(),
                 [this](const tl::timeline::BackgroundOptions& value)
                 {
                     _p->viewport->setBackgroundOptions(value);
                 });
 
-            p.colorBufferObserver = ftk::ValueObserver<ftk::ImageType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
                 app->getViewportModel()->observeColorBuffer(),
                 [this](ftk::ImageType value)
                 {

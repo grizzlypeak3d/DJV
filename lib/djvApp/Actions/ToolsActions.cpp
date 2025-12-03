@@ -12,7 +12,7 @@ namespace djv
     {
         struct ToolsActions::Private
         {
-            std::shared_ptr<ftk::ValueObserver<Tool> > activeObserver;
+            std::shared_ptr<ftk::Observer<Tool> > activeObserver;
         };
 
         void ToolsActions::_init(
@@ -60,7 +60,7 @@ namespace djv
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
-            p.activeObserver = ftk::ValueObserver<Tool>::create(
+            p.activeObserver = ftk::Observer<Tool>::create(
                 app->getToolsModel()->observeActiveTool(),
                 [this](Tool value)
                 {

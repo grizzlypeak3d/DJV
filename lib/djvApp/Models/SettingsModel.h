@@ -5,21 +5,19 @@
 
 #include <djvApp/Shortcuts.h>
 
-#include <tlTimelineUI/IItem.h>
-
-#include <tlTimeline/Player.h>
+#include <tlRender/UI/IItem.h>
+#include <tlRender/Timeline/Player.h>
+#include <tlRender/IO/SeqIO.h>
+#if defined(TLRENDER_FFMPEG)
+#include <tlRender/IO/FFmpeg.h>
+#endif // TLRENDER_FFMPEG
+#if defined(TLRENDER_USD)
+#include <tlRender/IO/USD.h>
+#endif // TLRENDER_USD
 
 #include <ftk/UI/App.h>
 #include <ftk/UI/FileBrowser.h>
-#include <ftk/Core/ObservableValue.h>
-
-#include <tlIO/SeqIO.h>
-#if defined(TLRENDER_FFMPEG)
-#include <tlIO/FFmpeg.h>
-#endif // TLRENDER_FFMPEG
-#if defined(TLRENDER_USD)
-#include <tlIO/USD.h>
-#endif // TLRENDER_USD
+#include <ftk/Core/Observable.h>
 
 #include <nlohmann/json.hpp>
 
@@ -282,7 +280,7 @@ namespace djv
             ///@{
 
             const AdvancedSettings& getAdvanced() const;
-            std::shared_ptr<ftk::IObservableValue<AdvancedSettings> > observeAdvanced() const;
+            std::shared_ptr<ftk::IObservable<AdvancedSettings> > observeAdvanced() const;
             void setAdvanced(const AdvancedSettings&);
 
             ///@}
@@ -291,7 +289,7 @@ namespace djv
             ///@{
 
             const tl::timeline::PlayerCacheOptions& getCache() const;
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::PlayerCacheOptions> > observeCache() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::PlayerCacheOptions> > observeCache() const;
             void setCache(const tl::timeline::PlayerCacheOptions&);
 
             ///@}
@@ -300,7 +298,7 @@ namespace djv
             ///@{
 
             const ExportSettings& getExport() const;
-            std::shared_ptr<ftk::IObservableValue<ExportSettings> > observeExport() const;
+            std::shared_ptr<ftk::IObservable<ExportSettings> > observeExport() const;
             void setExport(const ExportSettings&);
 
             ///@}
@@ -309,7 +307,7 @@ namespace djv
             ///@{
 
             const FileBrowserSettings& getFileBrowser() const;
-            std::shared_ptr<ftk::IObservableValue<FileBrowserSettings> > observeFileBrowser() const;
+            std::shared_ptr<ftk::IObservable<FileBrowserSettings> > observeFileBrowser() const;
             void setFileBrowser(const FileBrowserSettings&);
 
             ///@}
@@ -318,7 +316,7 @@ namespace djv
             ///@{
 
             const ImageSeqSettings& getImageSeq() const;
-            std::shared_ptr<ftk::IObservableValue<ImageSeqSettings> > observeImageSeq() const;
+            std::shared_ptr<ftk::IObservable<ImageSeqSettings> > observeImageSeq() const;
             void setImageSeq(const ImageSeqSettings&);
 
             ///@}
@@ -327,7 +325,7 @@ namespace djv
             ///@{
 
             const MiscSettings& getMisc() const;
-            std::shared_ptr<ftk::IObservableValue<MiscSettings> > observeMisc() const;
+            std::shared_ptr<ftk::IObservable<MiscSettings> > observeMisc() const;
             void setMisc(const MiscSettings&);
 
             ///@}
@@ -336,7 +334,7 @@ namespace djv
             ///@{
 
             const MouseSettings& getMouse() const;
-            std::shared_ptr<ftk::IObservableValue<MouseSettings> > observeMouse() const;
+            std::shared_ptr<ftk::IObservable<MouseSettings> > observeMouse() const;
             void setMouse(const MouseSettings&);
 
             ///@}
@@ -345,7 +343,7 @@ namespace djv
             ///@{
 
             const ShortcutsSettings& getShortcuts() const;
-            std::shared_ptr<ftk::IObservableValue<ShortcutsSettings> > observeShortcuts() const;
+            std::shared_ptr<ftk::IObservable<ShortcutsSettings> > observeShortcuts() const;
             void setShortcuts(const ShortcutsSettings&);
 
             ///@}
@@ -354,7 +352,7 @@ namespace djv
             ///@{
 
             const StyleSettings& getStyle() const;
-            std::shared_ptr<ftk::IObservableValue<StyleSettings> > observeStyle() const;
+            std::shared_ptr<ftk::IObservable<StyleSettings> > observeStyle() const;
             void setStyle(const StyleSettings&);
 
             ///@}
@@ -363,7 +361,7 @@ namespace djv
             ///@{
 
             const TimelineSettings& getTimeline() const;
-            std::shared_ptr<ftk::IObservableValue<TimelineSettings> > observeTimeline() const;
+            std::shared_ptr<ftk::IObservable<TimelineSettings> > observeTimeline() const;
             void setTimeline(const TimelineSettings&);
 
             ///@}
@@ -372,7 +370,7 @@ namespace djv
             ///@{
 
             const WindowSettings& getWindow() const;
-            std::shared_ptr<ftk::IObservableValue<WindowSettings> > observeWindow() const;
+            std::shared_ptr<ftk::IObservable<WindowSettings> > observeWindow() const;
             void setWindow(const WindowSettings&);
 
             ///@}
@@ -382,7 +380,7 @@ namespace djv
             ///@{
 
             const tl::ffmpeg::Options& getFFmpeg() const;
-            std::shared_ptr<ftk::IObservableValue<tl::ffmpeg::Options> > observeFFmpeg() const;
+            std::shared_ptr<ftk::IObservable<tl::ffmpeg::Options> > observeFFmpeg() const;
             void setFFmpeg(const tl::ffmpeg::Options&);
 
             ///@}
@@ -393,7 +391,7 @@ namespace djv
             ///@{
 
             const tl::usd::Options& getUSD() const;
-            std::shared_ptr<ftk::IObservableValue<tl::usd::Options> > observeUSD() const;
+            std::shared_ptr<ftk::IObservable<tl::usd::Options> > observeUSD() const;
             void setUSD(const tl::usd::Options&);
 
             ///@}

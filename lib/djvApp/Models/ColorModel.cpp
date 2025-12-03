@@ -12,8 +12,8 @@ namespace djv
         struct ColorModel::Private
         {
             std::shared_ptr<ftk::Settings> settings;
-            std::shared_ptr<ftk::ObservableValue<tl::timeline::OCIOOptions> > ocioOptions;
-            std::shared_ptr<ftk::ObservableValue<tl::timeline::LUTOptions> > lutOptions;
+            std::shared_ptr<ftk::Observable<tl::timeline::OCIOOptions> > ocioOptions;
+            std::shared_ptr<ftk::Observable<tl::timeline::LUTOptions> > lutOptions;
         };
 
         void ColorModel::_init(
@@ -26,11 +26,11 @@ namespace djv
 
             tl::timeline::OCIOOptions ocioOptions;
             p.settings->getT("/Color/OCIO", ocioOptions);
-            p.ocioOptions = ftk::ObservableValue<tl::timeline::OCIOOptions>::create(ocioOptions);
+            p.ocioOptions = ftk::Observable<tl::timeline::OCIOOptions>::create(ocioOptions);
 
             tl::timeline::LUTOptions lutOptions;
             p.settings->getT("/Color/LUT", lutOptions);
-            p.lutOptions = ftk::ObservableValue<tl::timeline::LUTOptions>::create(lutOptions);
+            p.lutOptions = ftk::Observable<tl::timeline::LUTOptions>::create(lutOptions);
         }
 
         ColorModel::ColorModel() :
@@ -58,7 +58,7 @@ namespace djv
             return _p->ocioOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::timeline::OCIOOptions> > ColorModel::observeOCIOOptions() const
+        std::shared_ptr<ftk::IObservable<tl::timeline::OCIOOptions> > ColorModel::observeOCIOOptions() const
         {
             return _p->ocioOptions;
         }
@@ -73,7 +73,7 @@ namespace djv
             return _p->lutOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::timeline::LUTOptions> > ColorModel::observeLUTOptions() const
+        std::shared_ptr<ftk::IObservable<tl::timeline::LUTOptions> > ColorModel::observeLUTOptions() const
         {
             return _p->lutOptions;
         }

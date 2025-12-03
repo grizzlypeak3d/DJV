@@ -42,11 +42,11 @@ namespace djv
             std::shared_ptr<ftk::GridLayout> widgetLayout;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > filesObserver;
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<FilesModelItem> > > aObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::CompareOptions> > compareObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::CompareTime> > compareTimeObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareTime> > compareTimeObserver;
         };
 
         void FilesTool::_init(
@@ -210,7 +210,7 @@ namespace djv
                     _filesUpdate(value);
                 });
 
-            p.aObserver = ftk::ValueObserver<std::shared_ptr<FilesModelItem> >::create(
+            p.aObserver = ftk::Observer<std::shared_ptr<FilesModelItem> >::create(
                 app->getFilesModel()->observeA(),
                 [this](const std::shared_ptr<FilesModelItem>& value)
                 {
@@ -231,14 +231,14 @@ namespace djv
                     _layersUpdate(value);
                 });
 
-            p.compareObserver = ftk::ValueObserver<tl::timeline::CompareOptions>::create(
+            p.compareObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
                 app->getFilesModel()->observeCompareOptions(),
                 [this](const tl::timeline::CompareOptions& value)
                 {
                     _compareUpdate(value);
                 });
 
-            p.compareTimeObserver = ftk::ValueObserver<tl::timeline::CompareTime>::create(
+            p.compareTimeObserver = ftk::Observer<tl::timeline::CompareTime>::create(
                 app->getFilesModel()->observeCompareTime(),
                 [this](const tl::timeline::CompareTime& value)
                 {

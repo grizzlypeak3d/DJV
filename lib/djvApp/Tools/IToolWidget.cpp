@@ -95,8 +95,7 @@ namespace djv
 
         void IToolWidget::sizeHintEvent(const ftk::SizeHintEvent & event)
         {
-            IWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         void IToolWidget::_loadSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >& value)

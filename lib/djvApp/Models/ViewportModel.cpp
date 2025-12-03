@@ -13,13 +13,13 @@ namespace djv
         {
             std::weak_ptr<ftk::Context> context;
             std::shared_ptr<ftk::Settings> settings;
-            std::shared_ptr<ftk::ObservableValue<ftk::Color4F> > colorPicker;
-            std::shared_ptr<ftk::ObservableValue<ftk::ImageOptions> > imageOptions;
-            std::shared_ptr<ftk::ObservableValue<tl::timeline::DisplayOptions> > displayOptions;
-            std::shared_ptr<ftk::ObservableValue<tl::timeline::BackgroundOptions> > backgroundOptions;
-            std::shared_ptr<ftk::ObservableValue<tl::timeline::ForegroundOptions> > foregroundOptions;
-            std::shared_ptr<ftk::ObservableValue<ftk::ImageType> > colorBuffer;
-            std::shared_ptr<ftk::ObservableValue<bool> > hud;
+            std::shared_ptr<ftk::Observable<ftk::Color4F> > colorPicker;
+            std::shared_ptr<ftk::Observable<ftk::ImageOptions> > imageOptions;
+            std::shared_ptr<ftk::Observable<tl::timeline::DisplayOptions> > displayOptions;
+            std::shared_ptr<ftk::Observable<tl::timeline::BackgroundOptions> > backgroundOptions;
+            std::shared_ptr<ftk::Observable<tl::timeline::ForegroundOptions> > foregroundOptions;
+            std::shared_ptr<ftk::Observable<ftk::ImageType> > colorBuffer;
+            std::shared_ptr<ftk::Observable<bool> > hud;
         };
 
         void ViewportModel::_init(
@@ -31,24 +31,24 @@ namespace djv
             p.context = context;
             p.settings = settings;
 
-            p.colorPicker = ftk::ObservableValue<ftk::Color4F>::create();
+            p.colorPicker = ftk::Observable<ftk::Color4F>::create();
 
             ftk::ImageOptions imageOptions;
             p.settings->getT("/Viewport/Image", imageOptions);
-            p.imageOptions = ftk::ObservableValue<ftk::ImageOptions>::create(imageOptions);
+            p.imageOptions = ftk::Observable<ftk::ImageOptions>::create(imageOptions);
 
             tl::timeline::DisplayOptions displayOptions;
             p.settings->getT("/Viewport/Display", displayOptions);
-            p.displayOptions = ftk::ObservableValue<tl::timeline::DisplayOptions>::create(displayOptions);
+            p.displayOptions = ftk::Observable<tl::timeline::DisplayOptions>::create(displayOptions);
 
             tl::timeline::BackgroundOptions backgroundOptions;
             p.settings->getT("/Viewport/Background", backgroundOptions);
-            p.backgroundOptions = ftk::ObservableValue<tl::timeline::BackgroundOptions>::create(
+            p.backgroundOptions = ftk::Observable<tl::timeline::BackgroundOptions>::create(
                 backgroundOptions);
 
             tl::timeline::ForegroundOptions foregroundOptions;
             p.settings->getT("/Viewport/Foreground", foregroundOptions);
-            p.foregroundOptions = ftk::ObservableValue<tl::timeline::ForegroundOptions>::create(
+            p.foregroundOptions = ftk::Observable<tl::timeline::ForegroundOptions>::create(
                 foregroundOptions);
 
             ftk::ImageType colorBuffer =
@@ -60,11 +60,11 @@ namespace djv
             std::string s = ftk::to_string(colorBuffer);
             p.settings->get("/Viewport/ColorBuffer", s);
             ftk::from_string(s, colorBuffer);
-            p.colorBuffer = ftk::ObservableValue<ftk::ImageType>::create(colorBuffer);
+            p.colorBuffer = ftk::Observable<ftk::ImageType>::create(colorBuffer);
 
             bool hud = false;
             p.settings->get("/Viewport/HUD/Enabled", hud);
-            p.hud = ftk::ObservableValue<bool>::create(hud);
+            p.hud = ftk::Observable<bool>::create(hud);
         }
 
         ViewportModel::ViewportModel() :
@@ -96,7 +96,7 @@ namespace djv
             return _p->colorPicker->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<ftk::Color4F> > ViewportModel::observeColorPicker() const
+        std::shared_ptr<ftk::IObservable<ftk::Color4F> > ViewportModel::observeColorPicker() const
         {
             return _p->colorPicker;
         }
@@ -111,7 +111,7 @@ namespace djv
             return _p->imageOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<ftk::ImageOptions> > ViewportModel::observeImageOptions() const
+        std::shared_ptr<ftk::IObservable<ftk::ImageOptions> > ViewportModel::observeImageOptions() const
         {
             return _p->imageOptions;
         }
@@ -126,7 +126,7 @@ namespace djv
             return _p->displayOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::timeline::DisplayOptions> > ViewportModel::observeDisplayOptions() const
+        std::shared_ptr<ftk::IObservable<tl::timeline::DisplayOptions> > ViewportModel::observeDisplayOptions() const
         {
             return _p->displayOptions;
         }
@@ -141,7 +141,7 @@ namespace djv
             return _p->backgroundOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::timeline::BackgroundOptions> > ViewportModel::observeBackgroundOptions() const
+        std::shared_ptr<ftk::IObservable<tl::timeline::BackgroundOptions> > ViewportModel::observeBackgroundOptions() const
         {
             return _p->backgroundOptions;
         }
@@ -157,7 +157,7 @@ namespace djv
             return _p->foregroundOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::timeline::ForegroundOptions> > ViewportModel::observeForegroundOptions() const
+        std::shared_ptr<ftk::IObservable<tl::timeline::ForegroundOptions> > ViewportModel::observeForegroundOptions() const
         {
             return _p->foregroundOptions;
         }
@@ -173,7 +173,7 @@ namespace djv
             return _p->colorBuffer->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<ftk::ImageType> > ViewportModel::observeColorBuffer() const
+        std::shared_ptr<ftk::IObservable<ftk::ImageType> > ViewportModel::observeColorBuffer() const
         {
             return _p->colorBuffer;
         }
@@ -188,7 +188,7 @@ namespace djv
             return _p->hud->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<bool> > ViewportModel::observeHUD() const
+        std::shared_ptr<ftk::IObservable<bool> > ViewportModel::observeHUD() const
         {
             return _p->hud;
         }

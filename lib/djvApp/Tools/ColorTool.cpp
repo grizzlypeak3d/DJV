@@ -39,9 +39,9 @@ namespace djv
             std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::OCIOOptions> > optionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::OCIOOptions> > optionsObserver2;
-            std::shared_ptr<ftk::ValueObserver<OCIOModelData> > dataObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > optionsObserver2;
+            std::shared_ptr<ftk::Observer<OCIOModelData> > dataObserver;
         };
 
         void OCIOWidget::_init(
@@ -90,7 +90,7 @@ namespace djv
             p.formLayout->addRow("View:", p.viewComboBox);
             p.formLayout->addRow("Look:", p.lookComboBox);
 
-            p.optionsObserver = ftk::ValueObserver<tl::timeline::OCIOOptions>::create(
+            p.optionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
                 [this](const tl::timeline::OCIOOptions& value)
                 {
@@ -98,7 +98,7 @@ namespace djv
                 });
 
             auto appWeak = std::weak_ptr<App>(app);
-            p.optionsObserver2 = ftk::ValueObserver<tl::timeline::OCIOOptions>::create(
+            p.optionsObserver2 = ftk::Observer<tl::timeline::OCIOOptions>::create(
                 p.ocioModel->observeOptions(),
                 [appWeak](const tl::timeline::OCIOOptions& value)
                 {
@@ -108,7 +108,7 @@ namespace djv
                     }
                 });
 
-            p.dataObserver = ftk::ValueObserver<OCIOModelData>::create(
+            p.dataObserver = ftk::Observer<OCIOModelData>::create(
                 p.ocioModel->observeData(),
                 [this](const OCIOModelData& value)
                 {
@@ -192,8 +192,7 @@ namespace djv
 
         void OCIOWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct LUTWidget::Private
@@ -203,7 +202,7 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> orderComboBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::LUTOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > optionsObservers;
         };
 
         void LUTWidget::_init(
@@ -232,7 +231,7 @@ namespace djv
             p.layout->addRow("File name:", p.fileEdit);
             p.layout->addRow("Order:", p.orderComboBox);
 
-            p.optionsObservers = ftk::ValueObserver<tl::timeline::LUTOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::timeline::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
                 [this](const tl::timeline::LUTOptions& value)
                 {
@@ -303,8 +302,7 @@ namespace djv
 
         void LUTWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ColorWidget::Private
@@ -314,7 +312,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> invertCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::DisplayOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > optionsObservers;
         };
 
         void ColorWidget::_init(
@@ -355,7 +353,7 @@ namespace djv
             p.layout->addRow("Tint:", p.sliders["Tint"]);
             p.layout->addRow("Invert:", p.invertCheckBox);
 
-            p.optionsObservers = ftk::ValueObserver<tl::timeline::DisplayOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::timeline::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
@@ -486,8 +484,7 @@ namespace djv
 
         void ColorWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct LevelsWidget::Private
@@ -499,7 +496,7 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::FloatEdit> > rangeEdits;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::DisplayOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > optionsObservers;
         };
 
         void LevelsWidget::_init(
@@ -573,7 +570,7 @@ namespace djv
             p.rangeEdits["OutMax"]->setParent(hLayout);
             p.layout->addRow("Out range:", hLayout);
 
-            p.optionsObservers = ftk::ValueObserver<tl::timeline::DisplayOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::timeline::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
@@ -731,8 +728,7 @@ namespace djv
 
         void LevelsWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct EXRDisplayWidget::Private
@@ -741,7 +737,7 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::DisplayOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > optionsObservers;
         };
 
         void EXRDisplayWidget::_init(
@@ -775,7 +771,7 @@ namespace djv
             p.layout->addRow("Knee low:", p.sliders["KneeLow"]);
             p.layout->addRow("Knee high:", p.sliders["KneeHigh"]);
 
-            p.optionsObservers = ftk::ValueObserver<tl::timeline::DisplayOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::timeline::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
@@ -872,8 +868,7 @@ namespace djv
 
         void EXRDisplayWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct SoftClipWidget::Private
@@ -882,7 +877,7 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::DisplayOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > optionsObservers;
         };
 
         void SoftClipWidget::_init(
@@ -904,7 +899,7 @@ namespace djv
             p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Soft clip:", p.sliders["SoftClip"]);
 
-            p.optionsObservers = ftk::ValueObserver<tl::timeline::DisplayOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::timeline::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
@@ -962,8 +957,7 @@ namespace djv
 
         void SoftClipWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ColorTool::Private

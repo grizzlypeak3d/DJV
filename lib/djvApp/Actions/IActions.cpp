@@ -13,7 +13,7 @@ namespace djv
     {
         struct IActions::Private
         {
-            std::shared_ptr<ftk::ValueObserver<ShortcutsSettings> > shortcutsSettingsObserver;
+            std::shared_ptr<ftk::Observer<ShortcutsSettings> > shortcutsSettingsObserver;
         };
 
         void IActions::_init(
@@ -25,7 +25,7 @@ namespace djv
 
             _name = name;
 
-            p.shortcutsSettingsObserver = ftk::ValueObserver<ShortcutsSettings>::create(
+            p.shortcutsSettingsObserver = ftk::Observer<ShortcutsSettings>::create(
                 app->getSettingsModel()->observeShortcuts(),
                 [this](const ShortcutsSettings& value)
                 {

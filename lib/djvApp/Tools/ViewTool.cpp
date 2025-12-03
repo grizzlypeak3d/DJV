@@ -38,7 +38,7 @@ namespace djv
             std::shared_ptr<ftk::DoubleResetButton> zoomReset;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<std::pair<ftk::V2I, double> > > posZoomObserver;
+            std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > posZoomObserver;
             bool updating = false;
         };
 
@@ -133,7 +133,7 @@ namespace djv
                     }
                 });
 
-            p.posZoomObserver = ftk::ValueObserver<std::pair<ftk::V2I, double> >::create(
+            p.posZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
                 mainWindow->getViewport()->observeViewPosAndZoom(),
                 [this](const std::pair<ftk::V2I, double>& value)
                 {
@@ -172,8 +172,7 @@ namespace djv
 
         void ViewPosZoomWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ViewOptionsWidget::Private
@@ -187,9 +186,9 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> colorBufferComboBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<ftk::ImageType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
         };
 
         void ViewOptionsWidget::_init(
@@ -243,14 +242,14 @@ namespace djv
             p.layout->addRow("Alpha blend:", p.alphaBlendComboBox);
             p.layout->addRow("Color buffer:", p.colorBufferComboBox);
 
-            p.imageOptionsObserver = ftk::ValueObserver<ftk::ImageOptions>::create(
+            p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
                 app->getViewportModel()->observeImageOptions(),
                 [this](const ftk::ImageOptions& value)
                 {
                     _p->alphaBlendComboBox->setCurrentIndex(static_cast<int>(value.alphaBlend));
                 });
 
-            p.displayOptionsObserver = ftk::ValueObserver<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
@@ -260,7 +259,7 @@ namespace djv
                     p.videoLevelsComboBox->setCurrentIndex(static_cast<int>(value.videoLevels));
                 });
 
-            p.colorBufferObserver = ftk::ValueObserver<ftk::ImageType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
                 app->getViewportModel()->observeColorBuffer(),
                 [this](ftk::ImageType value)
                 {
@@ -358,8 +357,7 @@ namespace djv
 
         void ViewOptionsWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct BackgroundWidget::Private
@@ -371,7 +369,7 @@ namespace djv
             std::pair< std::shared_ptr<ftk::ColorSwatch>, std::shared_ptr<ftk::ColorSwatch> > gradientSwatch;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::BackgroundOptions> > backgroundOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > backgroundOptionsObserver;
         };
 
         void BackgroundWidget::_init(
@@ -414,7 +412,7 @@ namespace djv
             p.layout->addRow("Color 1:", p.gradientSwatch.first);
             p.layout->addRow("Color 2:", p.gradientSwatch.second);
 
-            p.backgroundOptionsObserver = ftk::ValueObserver<tl::timeline::BackgroundOptions>::create(
+            p.backgroundOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
                 app->getViewportModel()->observeBackgroundOptions(),
                 [this](const tl::timeline::BackgroundOptions& value)
                 {
@@ -526,8 +524,7 @@ namespace djv
 
         void BackgroundWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         void BackgroundWidget::_optionsUpdate(const tl::timeline::BackgroundOptions& value)
@@ -556,7 +553,7 @@ namespace djv
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::ForegroundOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > optionsObservers;
         };
 
         void OutlineWidget::_init(
@@ -584,7 +581,7 @@ namespace djv
             p.layout->addRow("Width:", p.widthSlider);
             p.layout->addRow("Color:", p.colorSwatch);
 
-            p.optionsObservers = ftk::ValueObserver<tl::timeline::ForegroundOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::timeline::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
                 [this](const tl::timeline::ForegroundOptions& value)
                 {
@@ -651,8 +648,7 @@ namespace djv
 
         void OutlineWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         void OutlineWidget::_optionsUpdate(const tl::timeline::ForegroundOptions& value)
@@ -671,7 +667,7 @@ namespace djv
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::ForegroundOptions> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > optionsObserver;
         };
 
         void GridWidget::_init(
@@ -703,7 +699,7 @@ namespace djv
             p.layout->addRow("Line width:", p.lineWidthSlider);
             p.layout->addRow("Color:", p.colorSwatch);
 
-            p.optionsObserver = ftk::ValueObserver<tl::timeline::ForegroundOptions>::create(
+            p.optionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
                 [this](const tl::timeline::ForegroundOptions& value)
                 {
@@ -785,8 +781,7 @@ namespace djv
 
         void GridWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
         {
-            IWidget::sizeHintEvent(value);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ViewTool::Private

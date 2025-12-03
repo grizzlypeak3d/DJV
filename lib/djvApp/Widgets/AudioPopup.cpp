@@ -17,7 +17,7 @@ namespace djv
         {
             std::shared_ptr<ftk::IntEditSlider> volumeSlider;
 
-            std::shared_ptr<ftk::ValueObserver<float> > volumeObserver;
+            std::shared_ptr<ftk::Observer<float> > volumeObserver;
         };
 
         void AudioPopup::_init(
@@ -53,7 +53,7 @@ namespace djv
                     }
                 });
 
-            p.volumeObserver = ftk::ValueObserver<float>::create(
+            p.volumeObserver = ftk::Observer<float>::create(
                 app->getAudioModel()->observeVolume(),
                 [this](float value)
                 {

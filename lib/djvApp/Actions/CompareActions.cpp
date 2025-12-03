@@ -13,8 +13,8 @@ namespace djv
         struct CompareActions::Private
         {
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > filesObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::CompareOptions> > optionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::CompareTime> > timeObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareTime> > timeObserver;
         };
 
         void CompareActions::_init(
@@ -196,7 +196,7 @@ namespace djv
                     _actions["Prev"]->setEnabled(value.size() > 1);
                 });
 
-            p.optionsObserver = ftk::ValueObserver<tl::timeline::CompareOptions>::create(
+            p.optionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
                 app->getFilesModel()->observeCompareOptions(),
                 [this](const tl::timeline::CompareOptions& value)
                 {
@@ -209,7 +209,7 @@ namespace djv
                     }
                 });
 
-            p.timeObserver = ftk::ValueObserver<tl::timeline::CompareTime>::create(
+            p.timeObserver = ftk::Observer<tl::timeline::CompareTime>::create(
                 app->getFilesModel()->observeCompareTime(),
                 [this](tl::timeline::CompareTime value)
                 {

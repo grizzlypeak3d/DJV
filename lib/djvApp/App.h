@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <tlTimeline/Player.h>
+#include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/App.h>
 
@@ -94,7 +94,7 @@ namespace djv
             void reload();
 
             //! Observe the timeline player.
-            std::shared_ptr<ftk::IObservableValue<std::shared_ptr<tl::timeline::Player> > > observePlayer() const;
+            std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::timeline::Player> > > observePlayer() const;
 
             //! Get the color model.
             const std::shared_ptr<ColorModel>& getColorModel() const;
@@ -112,7 +112,7 @@ namespace djv
             const std::shared_ptr<MainWindow>& getMainWindow() const;
 
             //! Observe whether the secondary window is active.
-            std::shared_ptr<ftk::IObservableValue<bool> > observeSecondaryWindow() const;
+            std::shared_ptr<ftk::IObservable<bool> > observeSecondaryWindow() const;
 
             //! Set whether the secondary window is active.
             void setSecondaryWindow(bool);
@@ -125,10 +125,9 @@ namespace djv
             const std::shared_ptr<tl::bmd::OutputDevice>& getBMDOutputDevice() const;
 #endif // TLRENDER_BMD
 
-            void run() override;
+            void tick() override;
 
-        protected:
-            void _tick() override;
+            void run() override;
 
         private:
             void _modelsInit();

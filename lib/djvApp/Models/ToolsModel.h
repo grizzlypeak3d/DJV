@@ -4,7 +4,7 @@
 #pragma once
 
 #include <ftk/UI/Event.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 namespace ftk
 {
@@ -63,7 +63,7 @@ namespace djv
             Tool getActiveTool() const;
 
             //! Observe the active tool.
-            std::shared_ptr<ftk::ObservableValue<Tool> > observeActiveTool() const;
+            std::shared_ptr<ftk::Observable<Tool> > observeActiveTool() const;
 
             //! Set the active tool.
             void setActiveTool(Tool);

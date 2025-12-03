@@ -11,7 +11,6 @@
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
-
 #include <ftk/Core/Format.h>
 
 namespace djv
@@ -30,7 +29,7 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> displayScaleComboBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<StyleSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<StyleSettings> > settingsObserver;
         };
 
         void StyleSettingsWidget::_init(
@@ -70,7 +69,7 @@ namespace djv
             p.layout->addRow("Contrast:", p.contrastSlider);
             p.layout->addRow("Display scale:", p.displayScaleComboBox);
 
-            p.settingsObserver = ftk::ValueObserver<StyleSettings>::create(
+            p.settingsObserver = ftk::Observer<StyleSettings>::create(
                 app->getSettingsModel()->observeStyle(),
                 [this](const StyleSettings& value)
                 {
@@ -143,7 +142,7 @@ namespace djv
         void StyleSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         void StyleSettingsWidget::_widgetUpdate(const StyleSettings& value)

@@ -91,7 +91,7 @@ namespace djv
             {
                 sizeHint = p.iconImages.front()->getSize();
             }
-            _setSizeHint(sizeHint);
+            setSizeHint(sizeHint);
         }
 
         void ShuttleWidget::drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event)

@@ -19,7 +19,7 @@ namespace djv
             std::shared_ptr<ftk::DoubleEdit> zoomEdit;
             std::shared_ptr<ftk::DoubleResetButton> zoomReset;
 
-            std::shared_ptr<ftk::ValueObserver<std::pair<ftk::V2I, double> > > posZoomObserver;
+            std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > posZoomObserver;
             bool updating = false;
         };
 
@@ -63,7 +63,7 @@ namespace djv
                     }
                 });
 
-            p.posZoomObserver = ftk::ValueObserver<std::pair<ftk::V2I, double> >::create(
+            p.posZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
                 mainWindow->getViewport()->observeViewPosAndZoom(),
                 [this](const std::pair<ftk::V2I, double>& value)
                 {

@@ -3,7 +3,7 @@
 
 #include <djvApp/Models/AudioModel.h>
 
-#include <tlCore/AudioSystem.h>
+#include <tlRender/Core/AudioSystem.h>
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
@@ -17,11 +17,11 @@ namespace djv
         {
             std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<ftk::ObservableList<tl::audio::DeviceID> > devices;
-            std::shared_ptr<ftk::ObservableValue<tl::audio::DeviceID> > device;
-            std::shared_ptr<ftk::ObservableValue<float> > volume;
-            std::shared_ptr<ftk::ObservableValue<bool> > mute;
+            std::shared_ptr<ftk::Observable<tl::audio::DeviceID> > device;
+            std::shared_ptr<ftk::Observable<float> > volume;
+            std::shared_ptr<ftk::Observable<bool> > mute;
             std::shared_ptr<ftk::ObservableList<bool> > channelMute;
-            std::shared_ptr<ftk::ObservableValue<double> > syncOffset;
+            std::shared_ptr<ftk::Observable<double> > syncOffset;
             std::shared_ptr<ftk::ListObserver<tl::audio::DeviceInfo> > devicesObserver;
         };
 
@@ -34,19 +34,19 @@ namespace djv
             p.settings = settings;
 
             p.devices = ftk::ObservableList<tl::audio::DeviceID>::create();
-            p.device = ftk::ObservableValue<tl::audio::DeviceID>::create();
+            p.device = ftk::Observable<tl::audio::DeviceID>::create();
 
             float volume = 1.F;
             p.settings->get("/Audio/Volume", volume);
-            p.volume = ftk::ObservableValue<float>::create(volume);
+            p.volume = ftk::Observable<float>::create(volume);
 
             bool mute = false;
             p.settings->get("/Audio/Mute", mute);
-            p.mute = ftk::ObservableValue<bool>::create(mute);
+            p.mute = ftk::Observable<bool>::create(mute);
 
             p.channelMute = ftk::ObservableList<bool>::create();
 
-            p.syncOffset = ftk::ObservableValue<double>::create(0.0);
+            p.syncOffset = ftk::Observable<double>::create(0.0);
 
             auto audioSystem = context->getSystem<tl::audio::System>();
             p.devicesObserver = ftk::ListObserver<tl::audio::DeviceInfo>::create(
@@ -97,7 +97,7 @@ namespace djv
             return _p->device->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<tl::audio::DeviceID> > AudioModel::observeDevice() const
+        std::shared_ptr<ftk::IObservable<tl::audio::DeviceID> > AudioModel::observeDevice() const
         {
             return _p->device;
         }
@@ -112,7 +112,7 @@ namespace djv
             return _p->volume->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<float> > AudioModel::observeVolume() const
+        std::shared_ptr<ftk::IObservable<float> > AudioModel::observeVolume() const
         {
             return _p->volume;
         }
@@ -138,7 +138,7 @@ namespace djv
             return _p->mute->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<bool> > AudioModel::observeMute() const
+        std::shared_ptr<ftk::IObservable<bool> > AudioModel::observeMute() const
         {
             return _p->mute;
         }
@@ -168,7 +168,7 @@ namespace djv
             return _p->syncOffset->get();
         }
 
-        std::shared_ptr<ftk::IObservableValue<double> > AudioModel::observeSyncOffset() const
+        std::shared_ptr<ftk::IObservable<double> > AudioModel::observeSyncOffset() const
         {
             return _p->syncOffset;
         }

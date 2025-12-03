@@ -18,26 +18,22 @@
 #include <djvApp/MainWindow.h>
 #include <djvApp/SecondaryWindow.h>
 
-#include <tlTimelineUI/ThumbnailSystem.h>
-
-#include <tlTimeline/ColorOptions.h>
-#include <tlTimeline/CompareOptions.h>
-#include <tlTimeline/Util.h>
-
+#include <tlRender/UI/ThumbnailSystem.h>
+#include <tlRender/Timeline/ColorOptions.h>
+#include <tlRender/Timeline/CompareOptions.h>
+#include <tlRender/Timeline/Util.h>
 #if defined(TLRENDER_BMD)
-#include <tlDevice/BMDDevicesModel.h>
-#include <tlDevice/BMDOutputDevice.h>
+#include <tlRender/Device/BMDDevicesModel.h>
+#include <tlRender/Device/BMDOutputDevice.h>
 #endif // TLRENDER_BMD
-
-#include <tlIO/System.h>
+#include <tlRender/IO/System.h>
 #if defined(TLRENDER_FFMPEG)
-#include <tlIO/FFmpeg.h>
+#include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG
 #if defined(TLRENDER_USD)
-#include <tlIO/USD.h>
+#include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
-
-#include <tlCore/FileLogSystem.h>
+#include <tlRender/Core/FileLogSystem.h>
 
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/Settings.h>
@@ -99,13 +95,13 @@ namespace djv
             std::vector<std::shared_ptr<FilesModelItem> > activeFiles;
             std::shared_ptr<RecentFilesModel> recentFilesModel;
             std::vector<std::shared_ptr<tl::timeline::Timeline> > timelines;
-            std::shared_ptr<ftk::ObservableValue<std::shared_ptr<tl::timeline::Player> > > player;
+            std::shared_ptr<ftk::Observable<std::shared_ptr<tl::timeline::Player> > > player;
             std::shared_ptr<ColorModel> colorModel;
             std::shared_ptr<ViewportModel> viewportModel;
             std::shared_ptr<AudioModel> audioModel;
             std::shared_ptr<ToolsModel> toolsModel;
 
-            std::shared_ptr<ftk::ObservableValue<bool> > secondaryWindowActive;
+            std::shared_ptr<ftk::Observable<bool> > secondaryWindowActive;
             std::shared_ptr<MainWindow> mainWindow;
             std::shared_ptr<SecondaryWindow> secondaryWindow;
             std::shared_ptr<SeparateAudioDialog> separateAudioDialog;
@@ -117,32 +113,32 @@ namespace djv
             ftk::VideoLevels bmdOutputVideoLevels = ftk::VideoLevels::LegalRange;
 #endif // TLRENDER_BMD
 
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::PlayerCacheOptions> > cacheObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > activeObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::CompareTime> > compareTimeObserver;
-            std::shared_ptr<ftk::ValueObserver<std::pair<ftk::V2I, double> > > viewPosZoomObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > viewFramedObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::audio::DeviceID> > audioDeviceObserver;
-            std::shared_ptr<ftk::ValueObserver<float> > volumeObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > muteObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareTime> > compareTimeObserver;
+            std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosZoomObserver;
+            std::shared_ptr<ftk::Observer<bool> > viewFramedObserver;
+            std::shared_ptr<ftk::Observer<tl::audio::DeviceID> > audioDeviceObserver;
+            std::shared_ptr<ftk::Observer<float> > volumeObserver;
+            std::shared_ptr<ftk::Observer<bool> > muteObserver;
             std::shared_ptr<ftk::ListObserver<bool> > channelMuteObserver;
-            std::shared_ptr<ftk::ValueObserver<double> > syncOffsetObserver;
-            std::shared_ptr<ftk::ValueObserver<StyleSettings> > styleSettingsObserver;
-            std::shared_ptr<ftk::ValueObserver<MiscSettings> > miscSettingsObserver;
+            std::shared_ptr<ftk::Observer<double> > syncOffsetObserver;
+            std::shared_ptr<ftk::Observer<StyleSettings> > styleSettingsObserver;
+            std::shared_ptr<ftk::Observer<MiscSettings> > miscSettingsObserver;
 #if defined(TLRENDER_BMD)
-            std::shared_ptr<ftk::ValueObserver<tl::bmd::DevicesModelData> > bmdDevicesObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > bmdActiveObserver;
-            std::shared_ptr<ftk::ValueObserver<ftk::Size2I> > bmdSizeObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::bmd::FrameRate> > bmdFrameRateObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::ForegroundOptions> > fgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::bmd::DevicesModelData> > bmdDevicesObserver;
+            std::shared_ptr<ftk::Observer<bool> > bmdActiveObserver;
+            std::shared_ptr<ftk::Observer<ftk::Size2I> > bmdSizeObserver;
+            std::shared_ptr<ftk::Observer<tl::bmd::FrameRate> > bmdFrameRateObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > bgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
 #endif // TLRENDER_BMD
         };
 
@@ -449,7 +445,7 @@ namespace djv
             _activeUpdate(activeFiles);
         }
 
-        std::shared_ptr<ftk::IObservableValue<std::shared_ptr<tl::timeline::Player> > > App::observePlayer() const
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::timeline::Player> > > App::observePlayer() const
         {
             return _p->player;
         }
@@ -479,7 +475,7 @@ namespace djv
             return _p->mainWindow;
         }
 
-        std::shared_ptr<ftk::IObservableValue<bool> > App::observeSecondaryWindow() const
+        std::shared_ptr<ftk::IObservable<bool> > App::observeSecondaryWindow() const
         {
             return _p->secondaryWindowActive;
         }
@@ -523,6 +519,22 @@ namespace djv
         }
 #endif // TLRENDER_BMD
 
+        void App::tick()
+        {
+            ftk::App::tick();
+            FTK_P();
+            if (auto player = p.player->get())
+            {
+                player->tick();
+            }
+#if defined(TLRENDER_BMD)
+            if (p.bmdOutputDevice)
+            {
+                p.bmdOutputDevice->tick();
+            }
+#endif // TLRENDER_BMD
+        }
+
         void App::run()
         {
             FTK_P();
@@ -541,21 +553,6 @@ namespace djv
             _windowsInit();
 
             ftk::App::run();
-        }
-
-        void App::_tick()
-        {
-            FTK_P();
-            if (auto player = p.player->get())
-            {
-                player->tick();
-            }
-#if defined(TLRENDER_BMD)
-            if (p.bmdOutputDevice)
-            {
-                p.bmdOutputDevice->tick();
-            }
-#endif // TLRENDER_BMD
         }
 
         void App::_modelsInit()
@@ -699,9 +696,9 @@ namespace djv
         {
             FTK_P();
 
-            p.player = ftk::ObservableValue<std::shared_ptr<tl::timeline::Player> >::create();
+            p.player = ftk::Observable<std::shared_ptr<tl::timeline::Player> >::create();
 
-            p.cacheObserver = ftk::ValueObserver<tl::timeline::PlayerCacheOptions>::create(
+            p.cacheObserver = ftk::Observer<tl::timeline::PlayerCacheOptions>::create(
                 p.settingsModel->observeCache(),
                 [this](const tl::timeline::PlayerCacheOptions& value)
                 {
@@ -729,7 +726,7 @@ namespace djv
                 {
                     _layersUpdate(value);
                 });
-            p.compareTimeObserver = ftk::ValueObserver<tl::timeline::CompareTime>::create(
+            p.compareTimeObserver = ftk::Observer<tl::timeline::CompareTime>::create(
                 p.filesModel->observeCompareTime(),
                 [this](tl::timeline::CompareTime value)
                 {
@@ -739,7 +736,7 @@ namespace djv
                     }
                 });
 
-            p.audioDeviceObserver = ftk::ValueObserver<tl::audio::DeviceID>::create(
+            p.audioDeviceObserver = ftk::Observer<tl::audio::DeviceID>::create(
                 p.audioModel->observeDevice(),
                 [this](const tl::audio::DeviceID& value)
                 {
@@ -748,13 +745,13 @@ namespace djv
                         player->setAudioDevice(value);
                     }
                 });
-            p.volumeObserver = ftk::ValueObserver<float>::create(
+            p.volumeObserver = ftk::Observer<float>::create(
                 p.audioModel->observeVolume(),
                 [this](float)
                 {
                     _audioUpdate();
                 });
-            p.muteObserver = ftk::ValueObserver<bool>::create(
+            p.muteObserver = ftk::Observer<bool>::create(
                 p.audioModel->observeMute(),
                 [this](bool)
                 {
@@ -766,14 +763,14 @@ namespace djv
                 {
                     _audioUpdate();
                 });
-            p.syncOffsetObserver = ftk::ValueObserver<double>::create(
+            p.syncOffsetObserver = ftk::Observer<double>::create(
                 p.audioModel->observeSyncOffset(),
                 [this](double)
                 {
                     _audioUpdate();
                 });
 
-            p.styleSettingsObserver = ftk::ValueObserver<StyleSettings>::create(
+            p.styleSettingsObserver = ftk::Observer<StyleSettings>::create(
                 p.settingsModel->observeStyle(),
                 [this](const StyleSettings& value)
                 {
@@ -783,7 +780,7 @@ namespace djv
                     setDisplayScale(value.displayScale);
                 });
 
-            p.miscSettingsObserver = ftk::ValueObserver<MiscSettings>::create(
+            p.miscSettingsObserver = ftk::Observer<MiscSettings>::create(
                 p.settingsModel->observeMisc(),
                 [this](const MiscSettings& value)
                 {
@@ -791,7 +788,7 @@ namespace djv
                 });
 
 #if defined(TLRENDER_BMD)
-            p.bmdDevicesObserver = ftk::ValueObserver<tl::bmd::DevicesModelData>::create(
+            p.bmdDevicesObserver = ftk::Observer<tl::bmd::DevicesModelData>::create(
                 p.bmdDevicesModel->observeData(),
                 [this](const tl::bmd::DevicesModelData& value)
                 {
@@ -812,20 +809,20 @@ namespace djv
                     p.bmdOutputDevice->setDisplayOptions({ displayOptions });
                     p.bmdOutputDevice->setHDR(value.hdrMode, value.hdrData);
                 });
-            p.bmdActiveObserver = ftk::ValueObserver<bool>::create(
+            p.bmdActiveObserver = ftk::Observer<bool>::create(
                 p.bmdOutputDevice->observeActive(),
                 [this](bool value)
                 {
                     _p->bmdDeviceActive = value;
                     _audioUpdate();
                 });
-            p.bmdSizeObserver = ftk::ValueObserver<ftk::Size2I>::create(
+            p.bmdSizeObserver = ftk::Observer<ftk::Size2I>::create(
                 p.bmdOutputDevice->observeSize(),
                 [this](const ftk::Size2I& value)
                 {
                     //std::cout << "output device size: " << value << std::endl;
                 });
-            p.bmdFrameRateObserver = ftk::ValueObserver<tl::bmd::FrameRate>::create(
+            p.bmdFrameRateObserver = ftk::Observer<tl::bmd::FrameRate>::create(
                 p.bmdOutputDevice->observeFrameRate(),
                 [this](const tl::bmd::FrameRate& value)
                 {
@@ -835,25 +832,25 @@ namespace djv
                     //    std::endl;
                 });
 
-            p.ocioOptionsObserver = ftk::ValueObserver<tl::timeline::OCIOOptions>::create(
+            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
                 p.colorModel->observeOCIOOptions(),
                 [this](const tl::timeline::OCIOOptions& value)
                 {
                     _p->bmdOutputDevice->setOCIOOptions(value);
                 });
-            p.lutOptionsObserver = ftk::ValueObserver<tl::timeline::LUTOptions>::create(
+            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
                 p.colorModel->observeLUTOptions(),
                 [this](const tl::timeline::LUTOptions& value)
                 {
                     _p->bmdOutputDevice->setLUTOptions(value);
                 });
-            p.imageOptionsObserver = ftk::ValueObserver<ftk::ImageOptions>::create(
+            p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
                 p.viewportModel->observeImageOptions(),
                 [this](const ftk::ImageOptions& value)
                 {
                     _p->bmdOutputDevice->setImageOptions({ value });
                 });
-            p.displayOptionsObserver = ftk::ValueObserver<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
                 p.viewportModel->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
@@ -862,21 +859,21 @@ namespace djv
                     _p->bmdOutputDevice->setDisplayOptions({ tmp });
                 });
 
-            p.compareOptionsObserver = ftk::ValueObserver<tl::timeline::CompareOptions>::create(
+            p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
                 p.filesModel->observeCompareOptions(),
                 [this](const tl::timeline::CompareOptions& value)
                 {
                     _p->bmdOutputDevice->setCompareOptions(value);
                 });
 
-            p.bgOptionsObserver = ftk::ValueObserver<tl::timeline::BackgroundOptions>::create(
+            p.bgOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
                 p.viewportModel->observeBackgroundOptions(),
                 [this](const tl::timeline::BackgroundOptions& value)
                 {
                     _p->bmdOutputDevice->setBackgroundOptions(value);
                 });
 
-            p.fgOptionsObserver = ftk::ValueObserver<tl::timeline::ForegroundOptions>::create(
+            p.fgOptionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
                 p.viewportModel->observeForegroundOptions(),
                 [this](const tl::timeline::ForegroundOptions& value)
                 {
@@ -954,13 +951,13 @@ namespace djv
         {
             FTK_P();
 
-            p.secondaryWindowActive = ftk::ObservableValue<bool>::create(false);
+            p.secondaryWindowActive = ftk::Observable<bool>::create(false);
 
             p.mainWindow = MainWindow::create(
                 _context,
                 std::dynamic_pointer_cast<App>(shared_from_this()));
 
-            p.viewPosZoomObserver = ftk::ValueObserver<std::pair<ftk::V2I, double> >::create(
+            p.viewPosZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
                 p.mainWindow->getViewport()->observeViewPosAndZoom(),
                 [this](const std::pair<ftk::V2I, double>& value)
                 {
@@ -969,7 +966,7 @@ namespace djv
                         value.second,
                         _p->mainWindow->getViewport()->hasFrameView());
                 });
-            p.viewFramedObserver = ftk::ValueObserver<bool>::create(
+            p.viewFramedObserver = ftk::Observer<bool>::create(
                 p.mainWindow->getViewport()->observeFramed(),
                 [this](bool value)
                 {

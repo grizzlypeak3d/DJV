@@ -3,7 +3,7 @@
 
 #include <djvApp/Tools/FilesToolPrivate.h>
 
-#include <tlTimelineUI/ThumbnailSystem.h>
+#include <tlRender/UI/ThumbnailSystem.h>
 
 #include <ftk/UI/DrawUtil.h>
 #include <ftk/Core/Context.h>
@@ -150,7 +150,7 @@ namespace djv
                 std::max(p.size.fontMetrics.lineHeight, thumbnailSize.h) +
                 p.size.margin * 2 +
                 p.size.border * 4;
-            _setSizeHint(sizeHint);
+            setSizeHint(sizeHint);
         }
 
         void FileButton::clipEvent(const ftk::Box2I& clipRect, bool clipped)

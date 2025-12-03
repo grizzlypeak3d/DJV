@@ -5,7 +5,7 @@
 
 #include <djvApp/Tools/IToolWidget.h>
 
-#include <tlTimeline/Player.h>
+#include <tlRender/Timeline/Player.h>
 
 namespace djv
 {

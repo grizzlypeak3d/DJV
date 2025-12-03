@@ -12,10 +12,10 @@ namespace djv
     {
         struct WindowActions::Private
         {
-            std::shared_ptr<ftk::ValueObserver<bool> > fullScreenObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > floatOnTopObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > secondaryObserver;
-            std::shared_ptr<ftk::ValueObserver<WindowSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<bool> > fullScreenObserver;
+            std::shared_ptr<ftk::Observer<bool> > floatOnTopObserver;
+            std::shared_ptr<ftk::Observer<bool> > secondaryObserver;
+            std::shared_ptr<ftk::Observer<WindowSettings> > settingsObserver;
         };
 
         void WindowActions::_init(
@@ -175,28 +175,28 @@ namespace djv
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
-            p.fullScreenObserver = ftk::ValueObserver<bool>::create(
+            p.fullScreenObserver = ftk::Observer<bool>::create(
                 mainWindow->observeFullScreen(),
                 [this](bool value)
                 {
                     _actions["FullScreen"]->setChecked(value);
                 });
 
-            p.floatOnTopObserver = ftk::ValueObserver<bool>::create(
+            p.floatOnTopObserver = ftk::Observer<bool>::create(
                 mainWindow->observeFloatOnTop(),
                 [this](bool value)
                 {
                     _actions["FloatOnTop"]->setChecked(value);
                 });
 
-            p.secondaryObserver = ftk::ValueObserver<bool>::create(
+            p.secondaryObserver = ftk::Observer<bool>::create(
                 app->observeSecondaryWindow(),
                 [this](bool value)
                 {
                     _actions["Secondary"]->setChecked(value);
                 });
 
-            p.settingsObserver = ftk::ValueObserver<WindowSettings>::create(
+            p.settingsObserver = ftk::Observer<WindowSettings>::create(
                 app->getSettingsModel()->observeWindow(),
                 [this](const WindowSettings& value)
                 {

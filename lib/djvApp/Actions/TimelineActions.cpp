@@ -6,7 +6,7 @@
 #include <djvApp/App.h>
 #include <djvApp/MainWindow.h>
 
-#include <tlTimelineUI/TimelineWidget.h>
+#include <tlRender/UI/TimelineWidget.h>
 
 namespace djv
 {
@@ -16,7 +16,7 @@ namespace djv
         {
             std::weak_ptr<MainWindow> mainWindow;
 
-            std::shared_ptr<ftk::ValueObserver<TimelineSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<TimelineSettings> > settingsObserver;
         };
 
         void TimelineActions::_init(
@@ -153,7 +153,7 @@ namespace djv
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
-            p.settingsObserver = ftk::ValueObserver<TimelineSettings>::create(
+            p.settingsObserver = ftk::Observer<TimelineSettings>::create(
                 app->getSettingsModel()->observeTimeline(),
                 [this](const TimelineSettings& value)
                 {

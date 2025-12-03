@@ -11,7 +11,6 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/SearchBox.h>
-
 #include <ftk/Core/String.h>
 
 namespace djv
@@ -26,7 +25,7 @@ namespace djv
             std::shared_ptr<ftk::SearchBox> searchBox;
             std::shared_ptr<ftk::GridLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
         };
 
         void InfoTool::_init(
@@ -63,7 +62,7 @@ namespace djv
             p.searchBox->setParent(hLayout);
             _setWidget(layout);
 
-            p.playerObserver = ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::timeline::Player>& value)
                 {

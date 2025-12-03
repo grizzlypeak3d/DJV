@@ -16,10 +16,10 @@ namespace djv
     {
         struct ViewActions::Private
         {
-            std::shared_ptr<ftk::ValueObserver<bool> > frameViewObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::ForegroundOptions> > fgOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > hudObserver;
+            std::shared_ptr<ftk::Observer<bool> > frameViewObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
+            std::shared_ptr<ftk::Observer<bool> > hudObserver;
         };
 
         void ViewActions::_init(
@@ -190,14 +190,14 @@ namespace djv
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
-            p.frameViewObserver = ftk::ValueObserver<bool>::create(
+            p.frameViewObserver = ftk::Observer<bool>::create(
                 mainWindow->getViewport()->observeFrameView(),
                 [this](bool value)
                 {
                     _actions["Frame"]->setChecked(value);
                 });
 
-            p.displayOptionsObserver = ftk::ValueObserver<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
@@ -210,14 +210,14 @@ namespace djv
                     _actions["MirrorVertical"]->setChecked(value.mirror.y);
                 });
 
-            p.fgOptionsObserver = ftk::ValueObserver<tl::timeline::ForegroundOptions>::create(
+            p.fgOptionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
                 [this](const tl::timeline::ForegroundOptions& value)
                 {
                     _actions["Grid"]->setChecked(value.grid.enabled);
                 });
 
-            p.hudObserver = ftk::ValueObserver<bool>::create(
+            p.hudObserver = ftk::Observer<bool>::create(
                 app->getViewportModel()->observeHUD(),
                 [this](bool value)
                 {

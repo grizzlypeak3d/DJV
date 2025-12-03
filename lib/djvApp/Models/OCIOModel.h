@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <tlTimeline/ColorOptions.h>
+#include <tlRender/Timeline/ColorOptions.h>
 
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 namespace ftk
 {
@@ -52,13 +52,13 @@ namespace djv
             static std::shared_ptr<OCIOModel> create(const std::shared_ptr<ftk::Context>&);
 
             //! Observe the options.
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::OCIOOptions> > observeOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::OCIOOptions> > observeOptions() const;
 
             //! Set the options.
             void setOptions(const tl::timeline::OCIOOptions&);
 
             //! Observe the model data.
-            std::shared_ptr<ftk::IObservableValue<OCIOModelData> > observeData() const;
+            std::shared_ptr<ftk::IObservable<OCIOModelData> > observeData() const;
 
             //! Set whether the color configuration is enabled.
             void setEnabled(bool);

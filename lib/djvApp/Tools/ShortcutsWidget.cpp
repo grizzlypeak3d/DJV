@@ -130,7 +130,7 @@ namespace djv
                 p.draw.reset();
             }
 
-            _setSizeHint(_p->label->getSizeHint() + p.size.border * 2);
+            setSizeHint(_p->label->getSizeHint() + p.size.border * 2);
         }
 
         void ShortcutEdit::drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event)
@@ -315,8 +315,7 @@ namespace djv
 
         void ShortcutWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
-            IWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ShortcutsSettingsWidget::Private
@@ -350,7 +349,7 @@ namespace djv
             std::vector<std::shared_ptr<ftk::GroupBox> > groupBoxes;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<ShortcutsSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<ShortcutsSettings> > settingsObserver;
         };
 
         void ShortcutsSettingsWidget::_init(
@@ -366,7 +365,7 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
 
-            p.settingsObserver = ftk::ValueObserver<ShortcutsSettings>::create(
+            p.settingsObserver = ftk::Observer<ShortcutsSettings>::create(
                 p.model->observeShortcuts(),
                 [this](const ShortcutsSettings& value)
                 {
@@ -400,7 +399,7 @@ namespace djv
         void ShortcutsSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             ISettingsWidget::sizeHintEvent(event);
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         void ShortcutsSettingsWidget::_widgetUpdate(const ShortcutsSettings& settings)

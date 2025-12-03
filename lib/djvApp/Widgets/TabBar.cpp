@@ -18,7 +18,7 @@ namespace djv
             int aIndex = -1;
             std::shared_ptr<ftk::TabBar> tabBar;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > filesObserver;
-            std::shared_ptr<ftk::ValueObserver<int> > aIndexObserver;
+            std::shared_ptr<ftk::Observer<int> > aIndexObserver;
         };
 
         void TabBar::_init(
@@ -65,7 +65,7 @@ namespace djv
                     p.tabBar->setCurrentTab(p.aIndex);
                 });
 
-            p.aIndexObserver = ftk::ValueObserver<int>::create(
+            p.aIndexObserver = ftk::Observer<int>::create(
                 app->getFilesModel()->observeAIndex(),
                 [this](int value)
                 {
@@ -100,8 +100,7 @@ namespace djv
 
         void TabBar::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
-            IWidget::sizeHintEvent(event);
-            _setSizeHint(_p->tabBar->getSizeHint());
+            setSizeHint(_p->tabBar->getSizeHint());
         }
     }
 }

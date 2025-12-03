@@ -7,7 +7,7 @@
 #include <djvApp/App.h>
 
 #if defined(TLRENDER_BMD)
-#include <tlDevice/BMDOutputDevice.h>
+#include <tlRender/Device/BMDOutputDevice.h>
 #endif // TLRENDER_BMD
 
 #include <ftk/UI/Divider.h>
@@ -38,9 +38,9 @@ namespace djv
             std::shared_ptr<ftk::Timer> logTimer;
 
             std::shared_ptr<ftk::ListObserver<ftk::LogItem> > logObserver;
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
 #if defined(TLRENDER_BMD)
-            std::shared_ptr<ftk::ValueObserver<bool> > bmdActiveObserver;
+            std::shared_ptr<ftk::Observer<bool> > bmdActiveObserver;
 #endif // TLRENDER_BMD
         };
 
@@ -95,7 +95,7 @@ namespace djv
                     _logUpdate(value);
                 });
 
-            p.playerObserver = ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::timeline::Player>& player)
                 {
@@ -105,7 +105,7 @@ namespace djv
                 });
 
 #if defined(TLRENDER_BMD)
-            p.bmdActiveObserver = ftk::ValueObserver<bool>::create(
+            p.bmdActiveObserver = ftk::Observer<bool>::create(
                 app->getBMDOutputDevice()->observeActive(),
                 [this](bool value)
                 {
@@ -139,7 +139,7 @@ namespace djv
 
         void StatusBar::sizeHintEvent(const ftk::SizeHintEvent & event)
         {
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
 
         void StatusBar::mousePressEvent(ftk::MouseClickEvent& event)

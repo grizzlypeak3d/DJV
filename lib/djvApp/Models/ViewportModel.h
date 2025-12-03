@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include <tlTimeline/BackgroundOptions.h>
-#include <tlTimeline/DisplayOptions.h>
-#include <tlTimeline/ForegroundOptions.h>
+#include <tlRender/Timeline/BackgroundOptions.h>
+#include <tlRender/Timeline/DisplayOptions.h>
+#include <tlRender/Timeline/ForegroundOptions.h>
 
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 namespace ftk
 {
@@ -43,7 +43,7 @@ namespace djv
             const ftk::Color4F& getColorPicker() const;
 
             //! Observe the color picker.
-            std::shared_ptr<ftk::IObservableValue<ftk::Color4F> > observeColorPicker() const;
+            std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColorPicker() const;
 
             //! Set the color picker.
             void setColorPicker(const ftk::Color4F&);
@@ -52,7 +52,7 @@ namespace djv
             const ftk::ImageOptions& getImageOptions() const;
 
             //! Observe the image options.
-            std::shared_ptr<ftk::IObservableValue<ftk::ImageOptions> > observeImageOptions() const;
+            std::shared_ptr<ftk::IObservable<ftk::ImageOptions> > observeImageOptions() const;
 
             //! Set the image options.
             void setImageOptions(const ftk::ImageOptions&);
@@ -61,7 +61,7 @@ namespace djv
             const tl::timeline::DisplayOptions& getDisplayOptions() const;
 
             //! Observe the display options.
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::DisplayOptions> > observeDisplayOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::DisplayOptions> > observeDisplayOptions() const;
 
             //! Set the display options.
             void setDisplayOptions(const tl::timeline::DisplayOptions&);
@@ -70,7 +70,7 @@ namespace djv
             const tl::timeline::BackgroundOptions& getBackgroundOptions() const;
 
             //! Observe the background options.
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::BackgroundOptions> > observeBackgroundOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::BackgroundOptions> > observeBackgroundOptions() const;
 
             //! Set the background options.
             void setBackgroundOptions(const tl::timeline::BackgroundOptions&);
@@ -79,7 +79,7 @@ namespace djv
             const tl::timeline::ForegroundOptions& getForegroundOptions() const;
 
             //! Observe the foreground options.
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::ForegroundOptions> > observeForegroundOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::ForegroundOptions> > observeForegroundOptions() const;
 
             //! Set the foreground options.
             void setForegroundOptions(const tl::timeline::ForegroundOptions&);
@@ -88,7 +88,7 @@ namespace djv
             ftk::ImageType getColorBuffer() const;
 
             //! Observe the color buffer type.
-            std::shared_ptr<ftk::IObservableValue<ftk::ImageType> > observeColorBuffer() const;
+            std::shared_ptr<ftk::IObservable<ftk::ImageType> > observeColorBuffer() const;
 
             //! Set the color buffer type.
             void setColorBuffer(ftk::ImageType);
@@ -97,7 +97,7 @@ namespace djv
             bool getHUD() const;
 
             //! Observe whether the HUD is enabled.
-            std::shared_ptr<ftk::IObservableValue<bool> > observeHUD() const;
+            std::shared_ptr<ftk::IObservable<bool> > observeHUD() const;
 
             //! Set whether the HUD is enabled.
             void setHUD(bool);

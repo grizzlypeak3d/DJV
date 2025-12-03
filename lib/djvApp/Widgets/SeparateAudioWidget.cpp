@@ -131,7 +131,7 @@ namespace djv
 
         void SeparateAudioWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
-            _setSizeHint(_p->layout->getSizeHint());
+            setSizeHint(_p->layout->getSizeHint());
         }
     }
 }

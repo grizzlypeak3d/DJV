@@ -9,7 +9,7 @@
 #include <djvApp/App.h>
 
 #if defined(TLRENDER_BMD)
-#include <tlDevice/BMDOutputDevice.h>
+#include <tlRender/Device/BMDOutputDevice.h>
 #endif // TLRENDER_BMD
 
 #include <ftk/UI/Bellows.h>
@@ -39,7 +39,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> _444SDIVideoOutputCheckBox;
             std::shared_ptr<ftk::ComboBox> videoLevelsComboBox;
 
-            std::shared_ptr<ftk::ValueObserver<tl::bmd::DevicesModelData> > dataObserver;
+            std::shared_ptr<ftk::Observer<tl::bmd::DevicesModelData> > dataObserver;
 #endif // TLRENDER_BMD
         };
 
@@ -141,7 +141,7 @@ namespace djv
                     }
                 });
 
-            p.dataObserver = ftk::ValueObserver<tl::bmd::DevicesModelData>::create(
+            p.dataObserver = ftk::Observer<tl::bmd::DevicesModelData>::create(
                 app->getBMDDevicesModel()->observeData(),
                 [this](const tl::bmd::DevicesModelData& value)
                 {

@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <tlTimeline/ColorOptions.h>
+#include <tlRender/Timeline/ColorOptions.h>
 
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 namespace ftk
 {
@@ -41,7 +41,7 @@ namespace djv
             const tl::timeline::OCIOOptions& getOCIOOptions() const;
 
             //! Observe the OpenColorIO options.
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::OCIOOptions> > observeOCIOOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::OCIOOptions> > observeOCIOOptions() const;
 
             //! Set the OpenColorIO options.
             void setOCIOOptions(const tl::timeline::OCIOOptions&);
@@ -50,7 +50,7 @@ namespace djv
             const tl::timeline::LUTOptions& getLUTOptions() const;
 
             //! Observe the LUT options.
-            std::shared_ptr<ftk::IObservableValue<tl::timeline::LUTOptions> > observeLUTOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::timeline::LUTOptions> > observeLUTOptions() const;
 
             //! Set the LUT options.
             void setLUTOptions(const tl::timeline::LUTOptions&);

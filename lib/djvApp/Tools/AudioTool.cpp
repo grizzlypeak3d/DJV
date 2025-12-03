@@ -37,12 +37,12 @@ namespace djv
             std::shared_ptr<ftk::HorizontalLayout> channelMuteLayout;
 
             std::shared_ptr<ftk::ListObserver<tl::audio::DeviceID> > devicesObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::audio::DeviceID> > deviceObserver;
-            std::shared_ptr<ftk::ValueObserver<float> > volumeObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > muteObserver;
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::audio::DeviceID> > deviceObserver;
+            std::shared_ptr<ftk::Observer<float> > volumeObserver;
+            std::shared_ptr<ftk::Observer<bool> > muteObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
             std::shared_ptr<ftk::ListObserver<bool> > channelMuteObserver;
-            std::shared_ptr<ftk::ValueObserver<double> > syncOffsetObserver;
+            std::shared_ptr<ftk::Observer<double> > syncOffsetObserver;
         };
 
         void AudioTool::_init(
@@ -162,7 +162,7 @@ namespace djv
                     _p->deviceComboBox->setItems(names);
                 });
 
-            p.deviceObserver = ftk::ValueObserver<tl::audio::DeviceID>::create(
+            p.deviceObserver = ftk::Observer<tl::audio::DeviceID>::create(
                 app->getAudioModel()->observeDevice(),
                 [this](const tl::audio::DeviceID& value)
                 {
@@ -175,21 +175,21 @@ namespace djv
                     _p->deviceComboBox->setCurrentIndex(index);
                 });
 
-            p.volumeObserver = ftk::ValueObserver<float>::create(
+            p.volumeObserver = ftk::Observer<float>::create(
                 app->getAudioModel()->observeVolume(),
                 [this](float value)
                 {
                     _p->volumeSlider->setValue(std::roundf(value * 100.F));
                 });
 
-            p.muteObserver = ftk::ValueObserver<bool>::create(
+            p.muteObserver = ftk::Observer<bool>::create(
                 app->getAudioModel()->observeMute(),
                 [this](bool value)
                 {
                     _p->muteCheckBox->setChecked(value);
                 });
 
-            p.playerObserver = ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::timeline::Player>& value)
                 {
@@ -205,7 +205,7 @@ namespace djv
                     _widgetUpdate();
                 });
 
-            p.syncOffsetObserver = ftk::ValueObserver<double>::create(
+            p.syncOffsetObserver = ftk::Observer<double>::create(
                 app->getAudioModel()->observeSyncOffset(),
                 [this](double value)
                 {

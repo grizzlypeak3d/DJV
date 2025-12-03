@@ -4,7 +4,6 @@
 #include <djvApp/Widgets/SpeedPopup.h>
 
 #include <ftk/UI/ListItemsWidget.h>
-
 #include <ftk/Core/Format.h>
 
 namespace djv

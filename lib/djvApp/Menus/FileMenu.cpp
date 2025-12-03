@@ -7,9 +7,8 @@
 #include <djvApp/Models/RecentFilesModel.h>
 #include <djvApp/App.h>
 
-#include <tlTimeline/Util.h>
-
-#include <tlIO/System.h>
+#include <tlRender/Timeline/Util.h>
+#include <tlRender/IO/System.h>
 
 namespace djv
 {
@@ -26,8 +25,8 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::Menu> > menus;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > filesObserver;
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<FilesModelItem> > > aObserver;
-            std::shared_ptr<ftk::ValueObserver<int> > aIndexObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<FilesModelItem> > > aObserver;
+            std::shared_ptr<ftk::Observer<int> > aIndexObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
             std::shared_ptr<ftk::ListObserver<std::filesystem::path> > recentObserver;
         };
@@ -72,14 +71,14 @@ namespace djv
                     _filesUpdate(value);
                 });
 
-            p.aObserver = ftk::ValueObserver<std::shared_ptr<FilesModelItem> >::create(
+            p.aObserver = ftk::Observer<std::shared_ptr<FilesModelItem> >::create(
                 app->getFilesModel()->observeA(),
                 [this](const std::shared_ptr<FilesModelItem>& value)
                 {
                     _aUpdate(value);
                 });
 
-            p.aIndexObserver = ftk::ValueObserver<int>::create(
+            p.aIndexObserver = ftk::Observer<int>::create(
                 app->getFilesModel()->observeAIndex(),
                 [this](int value)
                 {

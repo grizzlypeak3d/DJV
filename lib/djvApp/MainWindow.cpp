@@ -43,9 +43,11 @@
 #include <djvApp/Widgets/WindowToolBar.h>
 #include <djvApp/App.h>
 
-#include <tlTimelineUI/TimelineWidget.h>
-
-#include <tlTimelineGL/Render.h>
+#include <tlRender/UI/TimelineWidget.h>
+#if defined(TLRENDER_BMD)
+#include <tlRender/Device/BMDOutputDevice.h>
+#endif // TLRENDER_BMD
+#include <tlRender/GL/Render.h>
 
 #include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/Divider.h>
@@ -56,10 +58,6 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/Splitter.h>
 #include <ftk/UI/ToolButton.h>
-
-#if defined(TLRENDER_BMD)
-#include <tlDevice/BMDOutputDevice.h>
-#endif // TLRENDER_BMD
 
 namespace djv_resource
 {
@@ -123,15 +121,15 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> splitterLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<tl::timeline::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::ValueObserver<ftk::ImageType> > colorBufferObserver;
-            std::shared_ptr<ftk::ValueObserver<MouseSettings> > mouseSettingsObserver;
-            std::shared_ptr<ftk::ValueObserver<TimelineSettings> > timelineSettingsObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > timelineFrameViewObserver;
-            std::shared_ptr<ftk::ValueObserver<WindowSettings> > windowSettingsObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<MouseSettings> > mouseSettingsObserver;
+            std::shared_ptr<ftk::Observer<TimelineSettings> > timelineSettingsObserver;
+            std::shared_ptr<ftk::Observer<bool> > timelineFrameViewObserver;
+            std::shared_ptr<ftk::Observer<WindowSettings> > windowSettingsObserver;
         };
 
         void MainWindow::_init(
@@ -286,7 +284,7 @@ namespace djv
                     });
             }
 
-            p.playerObserver = ftk::ValueObserver<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::timeline::Player>& player)
                 {
@@ -296,7 +294,7 @@ namespace djv
                 });
 
             auto appWeak = std::weak_ptr<App>(app);
-            p.compareOptionsObserver = ftk::ValueObserver<tl::timeline::CompareOptions>::create(
+            p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
                 p.viewport->observeCompareOptions(),
                 [appWeak](const tl::timeline::CompareOptions& value)
                 {
@@ -306,7 +304,7 @@ namespace djv
                     }
                 });
 
-            p.ocioOptionsObserver = ftk::ValueObserver<tl::timeline::OCIOOptions>::create(
+            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
                 [this](const tl::timeline::OCIOOptions& value)
                 {
@@ -315,7 +313,7 @@ namespace djv
                     _p->timelineWidget->setDisplayOptions(options);
                 });
 
-            p.lutOptionsObserver = ftk::ValueObserver<tl::timeline::LUTOptions>::create(
+            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
                 [this](const tl::timeline::LUTOptions& value)
                 {
@@ -324,28 +322,28 @@ namespace djv
                     _p->timelineWidget->setDisplayOptions(options);
                 });
 
-            p.colorBufferObserver = ftk::ValueObserver<ftk::ImageType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
                 app->getViewportModel()->observeColorBuffer(),
                 [this](ftk::ImageType value)
                 {
                     setFrameBufferType(value);
                 });
 
-            p.mouseSettingsObserver = ftk::ValueObserver<MouseSettings>::create(
+            p.mouseSettingsObserver = ftk::Observer<MouseSettings>::create(
                 p.settingsModel->observeMouse(),
                 [this](const MouseSettings& value)
                 {
                     _settingsUpdate(value);
                 });
 
-            p.timelineSettingsObserver = ftk::ValueObserver<TimelineSettings>::create(
+            p.timelineSettingsObserver = ftk::Observer<TimelineSettings>::create(
                 p.settingsModel->observeTimeline(),
                 [this](const TimelineSettings& value)
                 {
                     _settingsUpdate(value);
                 });
 
-            p.timelineFrameViewObserver = ftk::ValueObserver<bool>::create(
+            p.timelineFrameViewObserver = ftk::Observer<bool>::create(
                 p.timelineWidget->observeFrameView(),
                 [appWeak](bool value)
                 {
@@ -357,7 +355,7 @@ namespace djv
                     }
                 });
 
-            p.windowSettingsObserver = ftk::ValueObserver<WindowSettings>::create(
+            p.windowSettingsObserver = ftk::Observer<WindowSettings>::create(
                 p.settingsModel->observeWindow(),
                 [this](const WindowSettings& value)
                 {
@@ -488,7 +486,7 @@ namespace djv
 
             if (settings.minimize)
             {
-                if (p.splitter->getParent().lock())
+                if (p.splitter->getParent())
                 {
                     p.splitter->setParent(nullptr);
                     p.splitter2->setParent(p.splitterLayout);
@@ -497,7 +495,7 @@ namespace djv
             }
             else
             {
-                if (!p.splitter->getParent().lock())
+                if (!p.splitter->getParent())
                 {
                     p.splitter->setParent(p.splitterLayout);
                     p.splitter2->setParent(p.splitter);
