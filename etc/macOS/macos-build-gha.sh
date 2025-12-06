@@ -30,7 +30,6 @@ cmake --build sbuild-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
 cmake \
     -S DJV \
     -B build-$BUILD_TYPE \
-    -DDJV_PACKAGE=$DJV_PACKAGE \
     -DDJV_MACOS_TEAM_ID=$DJV_MACOS_TEAM_ID \
     -DTLRENDER_NET=$TLRENDER_NET \
     -DTLRENDER_OCIO=$TLRENDER_OCIO \

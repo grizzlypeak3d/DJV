@@ -182,12 +182,11 @@ source_group("Widgets Source Files" FILES ${SOURCE_WIDGETS})
 add_library(djvApp ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 target_link_libraries(djvApp djvResource tlRender::tlUI tlRender::tlDevice)
 set_target_properties(djvApp PROPERTIES FOLDER lib)
+set_target_properties(djvApp PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-if(BUILD_SHARED_LIBS)
-    install(
-        TARGETS djvApp
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
-endif()
-
+install(
+    TARGETS djvApp
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    PUBLIC_HEADER DESTINATION include/djvApp)

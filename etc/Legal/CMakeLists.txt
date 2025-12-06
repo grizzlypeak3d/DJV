@@ -4,4 +4,4 @@ set(LEGAL
 
 install(
     FILES ${LEGAL}
-    DESTINATION etc/Legal)
+    DESTINATION etc/DJV/Legal)

@@ -21,10 +21,8 @@ target_link_libraries(djvResource)
 set_target_properties(djvResource PROPERTIES FOLDER lib)
 set_target_properties(djvResource PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-if(BUILD_SHARED_LIBS)
-    install(
-        TARGETS djvResource
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
-endif()
+install(
+    TARGETS djvResource
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)

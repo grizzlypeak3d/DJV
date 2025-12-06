@@ -103,4 +103,4 @@ set(SAMPLE_DATA
 
 install(
     FILES ${SAMPLE_DATA}
-    DESTINATION etc/SampleData)
+    DESTINATION etc/DJV/SampleData)

@@ -19,11 +19,6 @@ project(
     LANGUAGES CXX)
 
 #-------------------------------------------------------------------------------
-# Build options
-
-set(DJV_PACKAGE OFF CACHE BOOL "Create packages")
-
-#-------------------------------------------------------------------------------
 # Internal configuration
 
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
@@ -84,8 +79,6 @@ endif()
 #-------------------------------------------------------------------------------
 # Packaging
 
-if(DJV_PACKAGE)
-    include(Package)
-    include(CPack)
-    include(InstallRequiredSystemLibraries)
-endif()
+include(Package)
+include(CPack)
+include(InstallRequiredSystemLibraries)

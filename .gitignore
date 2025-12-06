@@ -6,4 +6,4 @@ docs/doxygen
 *~
 .git
 .vscode
-
+.DS_Store
