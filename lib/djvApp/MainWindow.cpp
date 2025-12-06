@@ -61,12 +61,7 @@
 
 namespace djv_resource
 {
-    extern std::vector<uint8_t> DJV_Icon_512;
-    extern std::vector<uint8_t> DJV_Icon_256;
-    extern std::vector<uint8_t> DJV_Icon_128;
-    extern std::vector<uint8_t> DJV_Icon_64;
-    extern std::vector<uint8_t> DJV_Icon_32;
-    extern std::vector<uint8_t> DJV_Icon_16;
+    extern std::vector<uint8_t> DJV_Icon;
 }
 
 namespace djv
@@ -141,8 +136,8 @@ namespace djv
             FTK_P();
 
             auto iconSystem = context->getSystem<ftk::IconSystem>();
-            iconSystem->add("DJV_Icon_128", djv_resource::DJV_Icon_128);
-            setIcon(iconSystem->get("DJV_Icon_128", 1.0));
+            iconSystem->add("DJV_Icon", djv_resource::DJV_Icon);
+            setIcon(iconSystem->get("DJV_Icon", 1.0));
 
             p.app = app;
             p.settingsModel = app->getSettingsModel();
