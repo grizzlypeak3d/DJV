@@ -1,7 +1,7 @@
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Build Status](https://github.com/grizzlypeak3d/DJV/actions/workflows/ci-workflow.yml/badge.svg)](https://github.com/grizzlypeak3d/DJV/actions/workflows/ci-workflow.yml)
 
-# ![DJV Icon](etc/Icons/DJV_Icon_32.svg) DJV
+# ![DJV Icon](etc/Icons/DJV_Icon_64.png)&nbsp;DJV
 
 DJV is an open source application for playback and review of image
 sequences. DJV can playback high resolution image sequences in real
