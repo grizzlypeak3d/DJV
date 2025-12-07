@@ -2,9 +2,7 @@
 
 set -x
 
-export FTK_API=GL_4_1
-
-export DJV_PACKAGE=ON
+export DJV_MACOS_PACKAGE=ON
 export TLRENDER_NET=OFF
 export TLRENDER_OCIO=ON
 export TLRENDER_JPEG=ON
@@ -16,9 +14,9 @@ export TLRENDER_OIIO=ON
 export TLRENDER_USD=ON
 export TLRENDER_BMD=OFF
 export TLRENDER_BMD_SDK=
-
+export FTK_API=GL_4_1
 export CMAKE_OSX_DEPLOYMENT_TARGET=10.15
 export CMAKE_OSX_ARCHITECTURES=arm64
 
-sh DJV/etc/macOS/macos-build-gha.sh Release
-cmake --build build-Release --config Release --target package
+sh DJV/etc/macOS/macos-sbuild.sh Release
+sh DJV/etc/macOS/macos-package.sh Release

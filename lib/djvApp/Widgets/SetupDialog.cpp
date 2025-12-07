@@ -32,7 +32,7 @@ namespace djv
             FTK_P();
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            ftk::Label::create(context, ftk::Format("Welcome to DJV version {0}.").arg(DJV_VERSION), p.layout);
+            ftk::Label::create(context, ftk::Format("Welcome to DJV version {0}.").arg(DJV_VERSION_FULL), p.layout);
             ftk::Label::create(context, "Start by configuring some settings.", p.layout);
             ftk::Label::create(context, "Changes can also be made later in the settings tool.", p.layout);
         }
@@ -91,7 +91,7 @@ namespace djv
 
             auto label = ftk::Label::create(
                 context,
-                ftk::Format("Setup").arg(DJV_VERSION));
+                ftk::Format("Setup").arg(DJV_VERSION_FULL));
             label->setFontRole(ftk::FontRole::Title);
             label->setMarginRole(ftk::SizeRole::Margin);
 

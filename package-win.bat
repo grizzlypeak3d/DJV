@@ -1,6 +1,3 @@
-set FTK_API=GL_4_1
-
-set DJV_PACKAGE=ON
 set TLRENDER_NET=OFF
 set TLRENDER_OCIO=ON
 set TLRENDER_JPEG=ON
@@ -12,6 +9,7 @@ set TLRENDER_OIIO=ON
 set TLRENDER_USD=ON
 set TLRENDER_BMD=OFF
 set TLRENDER_BMD_SDK=
+set FTK_API=GL_4_1
 
-call DJV\etc\Windows\windows-build-gha.bat Release
-cmake --build build-Release --config Release --target package
+call DJV\etc\Windows\windows-sbuild.bat Release
+call DJV\etc\Windows\windows-package.bat Release

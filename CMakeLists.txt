@@ -3,20 +3,27 @@ cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0091 NEW)
 
 set(DJV_VERSION_MAJOR "3")
-set(DJV_VERSION_MINOR "2")
-set(DJV_VERSION_PATCH "2")
-set(DJV_VERSION ${DJV_VERSION_MAJOR}.${DJV_VERSION_MINOR}.${DJV_VERSION_PATCH})
+set(DJV_VERSION_MINOR "3")
+set(DJV_VERSION_PATCH "0")
+set(DJV_VERSION_DEV "-dev")
+set(DJV_VERSION_FULL "${DJV_VERSION_MAJOR}.${DJV_VERSION_MINOR}.${DJV_VERSION_PATCH}${DJV_VERSION_DEV}")
 add_definitions(-DDJV_VERSION_MAJOR=${DJV_VERSION_MAJOR})
 add_definitions(-DDJV_VERSION_MINOR=${DJV_VERSION_MINOR})
 add_definitions(-DDJV_VERSION_PATCH=${DJV_VERSION_PATCH})
-add_definitions(-DDJV_VERSION="${DJV_VERSION}")
+add_definitions(-DDJV_VERSION_DEV=${DJV_VERSION_DEV})
+add_definitions(-DDJV_VERSION_FULL="${DJV_VERSION_FULL}")
 
 project(
     DJV
-    VERSION ${DJV_VERSION}
+    VERSION ${DJV_VERSION_MAJOR}.${DJV_VERSION_MINOR}.${DJV_VERSION_PATCH}
     DESCRIPTION "DJV is an open source application for playback and review of image sequences."
     HOMEPAGE_URL "https://github.com/grizzlypeak3d/DJV"
     LANGUAGES CXX)
+
+#-------------------------------------------------------------------------------
+# Options
+
+set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
 
 #-------------------------------------------------------------------------------
 # Internal configuration

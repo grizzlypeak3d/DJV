@@ -22,4 +22,5 @@ export TLRENDER_BMD_SDK=
 export FTK_API=GL_4_1
 export BUILD_SHARED_LIBS=OFF
 
-sh DJV/etc/Linux/linux-build-gha.sh $BUILD_TYPE
+sh DJV/etc/Linux/linux-sbuild.sh $BUILD_TYPE
+sh DJV/etc/Linux/linux-build.sh $BUILD_TYPE

@@ -11,9 +11,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>@DJV_VERSION@</string>
+	<string>@DJV_VERSION_FULL@</string>
 	<key>CFBundleVersion</key>
-	<string>@DJV_VERSION@</string>
+	<string>@DJV_VERSION_FULL@</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright Contributors to the DJV project.</string>
 	<key>NSHighResolutionCapable</key>

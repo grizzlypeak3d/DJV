@@ -1009,7 +1009,7 @@ namespace djv
         {
             return appDocsPath / ftk::Format("{0}.{1}.log").
                 arg(appName).
-                arg(DJV_VERSION).
+                arg(DJV_VERSION_MAJOR).
                 str();
         }
 
@@ -1019,7 +1019,7 @@ namespace djv
         {
             return appDocsPath / ftk::Format("{0}.{1}.json").
                 arg(appName).
-                arg(DJV_VERSION).
+                arg(DJV_VERSION_MAJOR).
                 str();
         }
 

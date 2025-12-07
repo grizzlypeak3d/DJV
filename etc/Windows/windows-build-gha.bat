@@ -37,3 +37,5 @@ cmake ^
     -DCMAKE_INSTALL_PREFIX=%CD%/install-%BUILD_TYPE% ^
     -DCMAKE_PREFIX_PATH=%CD%/install-%BUILD_TYPE%
 cmake --build build-%BUILD_TYPE% -j %JOBS% --config %BUILD_TYPE%
+cmake --build build-%BUILD_TYPE% --config %BUILD_TYPE% --target install
+

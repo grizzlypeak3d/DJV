@@ -101,6 +101,10 @@ set(SAMPLE_DATA
     Counter.8.png
     Counter.9.png)
 
+set(DEST etc/DJV/SampleData)
+if(DJV_MACOS_PACKAGE)
+    set(DEST SampleData)
+endif()
 install(
     FILES ${SAMPLE_DATA}
-    DESTINATION etc/DJV/SampleData)
+    DESTINATION ${DEST})

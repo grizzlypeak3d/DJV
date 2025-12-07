@@ -8,7 +8,7 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_PACKAGE: OFF
+      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -41,8 +41,11 @@ jobs:
         python --version
         sh DJV/etc/Linux/linux-setup-gha.sh
 
+    - name: Super Build
+      run: sh DJV/etc/Linux/linux-sbuild.sh Debug
+
     - name: Build DJV
-      run: sh DJV/etc/Linux/linux-build-gha.sh Debug
+      run: sh DJV/etc/Linux/linux-build.sh Debug
 
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
   linux-gles2-build:
@@ -50,7 +53,7 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_PACKAGE: OFF
+      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: OFF
       TLRENDER_JPEG: ON
@@ -83,15 +86,18 @@ jobs:
         python --version
         sh DJV/etc/Linux/linux-setup-gha.sh
 
+    - name: Super Build
+      run: sh DJV/etc/Linux/linux-sbuild.sh Debug
+
     - name: Build DJV
-      run: sh DJV/etc/Linux/linux-build-gha.sh Debug
+      run: sh DJV/etc/Linux/linux-build.sh Debug
 
   linux-package:
     runs-on: ubuntu-22.04
 
     env:
       JOBS: 4
-      DJV_PACKAGE: ON
+      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -125,11 +131,11 @@ jobs:
         python --version
         sh DJV/etc/Linux/linux-setup-gha.sh
 
-    - name: Build DJV
-      run: sh DJV/etc/Linux/linux-build-gha.sh Release
+    - name: Super Build
+      run: sh DJV/etc/Linux/linux-sbuild.sh Release
 
-    - name: Package
-      run: cmake --build build-Release -j 4 --target package
+    - name: Build and package DJV
+      run: sh DJV/etc/Linux/linux-package.sh Release
 
     - uses: actions/upload-artifact@v4
       with:
@@ -141,7 +147,7 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_PACKAGE: OFF
+      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -176,17 +182,22 @@ jobs:
         cmake --version
         python --version
 
+    - name: Super Build
+      run: |
+        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
+        sh DJV/etc/macOS/macos-sbuild.sh Debug
+
     - name: Build DJV
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
-        sh DJV/etc/macOS/macos-build-gha.sh Debug
+        sh DJV/etc/macOS/macos-build.sh Debug
 
   macos-package:
     runs-on: macos-latest
 
     env:
       JOBS: 4
-      DJV_PACKAGE: ON
+      DJV_MACOS_PACKAGE: ON
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -221,17 +232,18 @@ jobs:
         cmake --version
         python --version
 
-    - name: Build DJV
+    - name: Super Build
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
-        sh DJV/etc/macOS/macos-build-gha.sh Release
+        sh DJV/etc/macOS/macos-sbuild.sh Release
 
     # \bug Sometimes the CI runs out of disk space when building the macOS
     # package, so free some up by removing the super build directory.
     - name: Package
       run: |
         rm -rf sbuild-Release
-        cmake --build build-Release -j 4 --target package
+        export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
+        sh DJV/etc/macOS/macos-package.sh Release
 
     - uses: actions/upload-artifact@v4
       with:
@@ -243,7 +255,7 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_PACKAGE: OFF
+      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -278,16 +290,20 @@ jobs:
         cmake --version
         python --version
         
+    - name: Super Build
+      shell: cmd
+      run: DJV\etc\Windows\windows-sbuild.bat Debug
+
     - name: Build DJV
       shell: cmd
-      run: DJV\etc\Windows\windows-build-gha.bat Debug
+      run: DJV\etc\Windows\windows-build.bat Debug
 
   windows-package:
     runs-on: windows-latest
 
     env:
       JOBS: 4
-      DJV_PACKAGE: ON
+      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -323,13 +339,13 @@ jobs:
         python --version
         winget install NSIS.NSIS --accept-package-agreements --accept-source-agreements --disable-interactivity
 
-    - name: Build DJV
+    - name: Super Build
       shell: cmd
-      run: DJV\etc\Windows\windows-build-gha.bat Release
+      run: DJV\etc\Windows\windows-sbuild.bat Release
 
-    - name: Package
+    - name: Build and package DJV
       shell: cmd
-      run: cmake --build build-Release -j 4 --config Release --target package
+      run: DJV\etc\Windows\windows-package.bat Release
 
     - uses: actions/upload-artifact@v4
       with:

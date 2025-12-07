@@ -24,4 +24,5 @@ export BUILD_SHARED_LIBS=OFF
 export CMAKE_OSX_DEPLOYMENT_TARGET=10.15
 export CMAKE_OSX_ARCHITECTURES=arm64
 
-sh DJV/etc/macOS/macos-build-gha.sh $BUILD_TYPE
+sh DJV/etc/macOS/macos-sbuild.sh $BUILD_TYPE
+sh DJV/etc/macOS/macos-build.sh $BUILD_TYPE

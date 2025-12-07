@@ -42,7 +42,7 @@ namespace djv
                     "DJV\n"
                     "Version {0}\n"
                     "Copyright Contributors to the DJV project."
-                ).arg(DJV_VERSION));
+                ).arg(DJV_VERSION_FULL));
 
             p.licenseButton = ftk::PushButton::create(context, "License");
             p.closeButton = ftk::PushButton::create(context, "Close");
