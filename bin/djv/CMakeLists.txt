@@ -6,7 +6,7 @@ if (WIN32)
 endif()
 
 set(INSTALL_DIR bin)
-if(APPLE)
+if(APPLE AND DJV_MACOS_PACKAGE)
     # \bug Why do we need to use ".." to avoid installing into the
     # "Resources" directory in the bundle?
     set(INSTALL_DIR ../MacOS)
