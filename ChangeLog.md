@@ -1,3 +1,18 @@
+## 3.3.0
+
+Features:
+* File sequences are shown in the built-in file browser.
+* The command line now accepts file sequences like "render.#.exr".
+* The tab key can now be assigned to shortcuts (e.g., Ctrl+Tab and
+  Ctrl+Shit+Tab for changing the current file).
+* Library updates:
+    - SDL2 release-2.32.10
+
+Fixes:
+* Fix for compiling on Rocky 8.
+* Fix compare overlay and difference flipping the image.
+
+
 ## 3.2.1
 
 Fixes:
