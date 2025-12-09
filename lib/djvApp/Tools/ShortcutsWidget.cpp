@@ -199,7 +199,6 @@ namespace djv
                 releaseKeyFocus();
                 break;
             case ftk::Key::Return: break;
-            case ftk::Key::Tab: break;
             case ftk::Key::CapsLock: break;
             case ftk::Key::ScrollLock: break;
             case ftk::Key::NumLock: break;
