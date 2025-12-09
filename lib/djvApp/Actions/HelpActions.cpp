@@ -28,7 +28,12 @@ namespace djv
                 "Documentation",
                 []
                 {
-                    ftk::openURL("https://grizzlypeak3d.github.io/DJV/index.html");
+                    try
+                    {
+                        ftk::openURL("https://grizzlypeak3d.github.io/DJV/index.html");
+                    }
+                    catch (const std::exception&)
+                    {}
                 });
 
             std::weak_ptr<MainWindow> mainWindowWeak(mainWindow);
