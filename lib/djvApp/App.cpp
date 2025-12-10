@@ -887,9 +887,17 @@ namespace djv
             FTK_P();
             if (!p.cmdLine.inputs->getList().empty())
             {
+                ftk::PathOptions pathOptions;
+                pathOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+
                 if (p.cmdLine.compareFileName->hasValue())
                 {
-                    open(ftk::Path(p.cmdLine.compareFileName->getValue()));
+                    ftk::Path path(p.cmdLine.compareFileName->getValue());
+                    if (path.hasSeqWildcard())
+                    {
+                        path = ftk::expandSeq(path, pathOptions);
+                    }
+                    open(path);
                     tl::timeline::CompareOptions options;
                     if (p.cmdLine.compare->hasValue())
                     {
@@ -912,11 +920,15 @@ namespace djv
                 {
                     audioFileName = p.cmdLine.audioFileName->getValue();
                 }
+
                 for (const auto& input : p.cmdLine.inputs->getList())
                 {
-                    open(
-                        ftk::Path(input),
-                        ftk::Path(audioFileName));
+                    ftk::Path path(input);
+                    if (path.hasSeqWildcard())
+                    {
+                        path = ftk::expandSeq(path, pathOptions);
+                    }
+                    open(path, ftk::Path(audioFileName));
 
                     if (auto player = p.player->get())
                     {
