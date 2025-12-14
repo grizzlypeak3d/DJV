@@ -519,22 +519,6 @@ namespace djv
         }
 #endif // TLRENDER_BMD
 
-        void App::tick()
-        {
-            ftk::App::tick();
-            FTK_P();
-            if (auto player = p.player->get())
-            {
-                player->tick();
-            }
-#if defined(TLRENDER_BMD)
-            if (p.bmdOutputDevice)
-            {
-                p.bmdOutputDevice->tick();
-            }
-#endif // TLRENDER_BMD
-        }
-
         void App::run()
         {
             FTK_P();

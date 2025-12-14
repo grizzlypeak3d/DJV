@@ -443,14 +443,18 @@ namespace djv
             event.accept = true;
         }
 
-        void MainWindow::_drop(const std::vector<std::string>& value)
+        void MainWindow::dropEvent(ftk::DragDropEvent& event)
         {
             FTK_P();
-            if (auto app = p.app.lock())
+            event.accept = true;
+            if (auto textData = std::dynamic_pointer_cast<ftk::DragDropTextData>(event.data))
             {
-                for (const auto& i : value)
+                if (auto app = p.app.lock())
                 {
-                    app->open(ftk::Path(i));
+                    for (const auto& i : textData->getText())
+                    {
+                        app->open(ftk::Path(i));
+                    }
                 }
             }
         }

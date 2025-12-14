@@ -59,9 +59,7 @@ namespace djv
             void setGeometry(const ftk::Box2I&) override;
             void keyPressEvent(ftk::KeyEvent&) override;
             void keyReleaseEvent(ftk::KeyEvent&) override;
-
-        protected:
-            void _drop(const std::vector<std::string>&) override;
+            void dropEvent(ftk::DragDropEvent&) override;
 
         private:
             void _settingsUpdate(const MouseSettings&);

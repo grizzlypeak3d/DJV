@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <tlDevice/BMDDevicesModel.h>
+#include <tlRender/Device/BMDDevicesModel.h>
 
 namespace ftk
 {

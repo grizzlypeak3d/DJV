@@ -125,8 +125,6 @@ namespace djv
             const std::shared_ptr<tl::bmd::OutputDevice>& getBMDOutputDevice() const;
 #endif // TLRENDER_BMD
 
-            void tick() override;
-
             void run() override;
 
         private:
