@@ -7,6 +7,9 @@ Features:
 * The tab key can now be assigned to shortcuts (e.g., Ctrl+Tab and
   Ctrl+Shit+Tab for changing the current file).
 * Add the "Extra 1" and "Extra 2" buttons to the mouse settings.
+* Add a frame shuttle scale to the mouse settings.
+* Changed the default mouse settings: left button = frame shuttle, middle
+  mouse button = pan
 * Library updates:
     - SDL2 release-2.32.10
 
