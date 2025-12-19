@@ -264,7 +264,7 @@ namespace djv
             "Frame Shuttle");
 
         MouseActionBinding::MouseActionBinding(
-            int button,
+            ftk::MouseButton button,
             ftk::KeyModifier modifier) :
             button(button),
             modifier(modifier)
@@ -447,7 +447,7 @@ namespace djv
             p.misc = ftk::Observable<MiscSettings>::create(misc);
 
             MouseSettings mouse;
-            settings->getT("/Mouse", mouse);
+            settings->getT("/Mouse.1", mouse);
             p.mouse = ftk::Observable<MouseSettings>::create(mouse);
 
             StyleSettings style;
@@ -516,7 +516,7 @@ namespace djv
             p.settings->setT("/ImageSeq", p.imageSeq->get());
             p.settings->setT("/Shortcuts", p.Shortcuts->get());
             p.settings->setT("/Misc", p.misc->get());
-            p.settings->setT("/Mouse", p.mouse->get());
+            p.settings->setT("/Mouse.1", p.mouse->get());
             p.settings->setT("/Style", p.style->get());
             p.settings->setT("/Timeline", p.timeline->get());
             p.settings->setT("/Window", p.window->get());
@@ -819,7 +819,7 @@ namespace djv
 
         void to_json(nlohmann::json& json, const MouseActionBinding& value)
         {
-            json["Button"] = value.button;
+            json["Button"] = to_string(value.button);
             json["Modifier"] = to_string(value.modifier);
         }
 
@@ -919,7 +919,7 @@ namespace djv
 
         void from_json(const nlohmann::json& json, MouseActionBinding& value)
         {
-            json.at("Button").get_to(value.button);
+            from_string(json.at("Button").get<std::string>(), value.button);
             from_string(json.at("Modifier").get<std::string>(), value.modifier);
         }
 

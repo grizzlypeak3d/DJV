@@ -642,7 +642,7 @@ namespace djv
 #if defined(__APPLE__)
             p.modifiers.push_back(ftk::KeyModifier::Super);
 #endif // __APPLE__
-            p.modifierLabels.push_back("None");
+            p.modifierLabels.push_back(ftk::to_string(ftk::KeyModifier::None));
             p.modifierLabels.push_back(ftk::to_string(ftk::KeyModifier::Shift));
             p.modifierLabels.push_back(ftk::to_string(ftk::KeyModifier::Control));
             p.modifierLabels.push_back(ftk::to_string(ftk::KeyModifier::Alt));
@@ -685,7 +685,7 @@ namespace djv
                         auto j = p.buttonComboBoxes.find(i.first);
                         if (j != p.buttonComboBoxes.end())
                         {
-                            j->second->setCurrentIndex(i.second.button);
+                            j->second->setCurrentIndex(static_cast<int>(i.second.button));
                         }
                         j = p.modifierComboBoxes.find(i.first);
                         if (j != p.modifierComboBoxes.end())
@@ -708,7 +708,7 @@ namespace djv
                     {
                         FTK_P();
                         auto settings = p.model->getMouse();
-                        settings.bindings[mouseAction].button = index;
+                        settings.bindings[mouseAction].button = static_cast<ftk::MouseButton>(index);
                         p.model->setMouse(settings);
                     });
                 p.modifierComboBoxes[mouseAction]->setIndexCallback(

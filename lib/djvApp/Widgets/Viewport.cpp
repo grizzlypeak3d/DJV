@@ -38,8 +38,10 @@ namespace djv
             tl::timeline::DisplayOptions displayOptions;
             ftk::Color4F colorPicker;
             tl::timeline::PlayerCacheInfo cacheInfo;
-            MouseActionBinding colorPickerBinding = MouseActionBinding(1);
-            MouseActionBinding frameShuttleBinding = MouseActionBinding(1, ftk::KeyModifier::Shift);
+            MouseActionBinding colorPickerBinding =
+                MouseActionBinding(ftk::MouseButton::Left);
+            MouseActionBinding frameShuttleBinding =
+                MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift);
 
             std::shared_ptr<ftk::Label> fileNameLabel;
             std::shared_ptr<ftk::Label> timeLabel;
@@ -238,11 +240,11 @@ namespace djv
                 {
                     auto i = value.bindings.find(MouseAction::PanView);
                     setPanBinding(
-                        i != value.bindings.end() ? i->second.button : 0,
+                        i != value.bindings.end() ? i->second.button : ftk::MouseButton::None,
                         i != value.bindings.end() ? i->second.modifier : ftk::KeyModifier::None);
                     i = value.bindings.find(MouseAction::CompareWipe);
                     setWipeBinding(
-                        i != value.bindings.end() ? i->second.button : 0,
+                        i != value.bindings.end() ? i->second.button : ftk::MouseButton::None,
                         i != value.bindings.end() ? i->second.modifier : ftk::KeyModifier::None);
                     i = value.bindings.find(MouseAction::ColorPicker);
                     _p->colorPickerBinding = i != value.bindings.end() ? i->second : MouseActionBinding();

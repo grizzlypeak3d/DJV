@@ -145,10 +145,10 @@ namespace djv
         {
             MouseActionBinding() = default;
             MouseActionBinding(
-                int button,
+                ftk::MouseButton,
                 ftk::KeyModifier modifier = ftk::KeyModifier::None);
 
-            int button = 0;
+            ftk::MouseButton button = ftk::MouseButton::None;
             ftk::KeyModifier modifier = ftk::KeyModifier::None;
 
             bool operator == (const MouseActionBinding&) const;
@@ -160,10 +160,22 @@ namespace djv
         {
             std::map<MouseAction, MouseActionBinding> bindings =
             {
-                { MouseAction::ColorPicker, MouseActionBinding(1) },
-                { MouseAction::PanView, MouseActionBinding(1, ftk::KeyModifier::Control) },
-                { MouseAction::FrameShuttle, MouseActionBinding(1, ftk::KeyModifier::Shift) },
-                { MouseAction::CompareWipe, MouseActionBinding(1, ftk::KeyModifier::Alt) }
+                {
+                    MouseAction::ColorPicker,
+                    MouseActionBinding(ftk::MouseButton::Left)
+                },
+                {
+                    MouseAction::PanView,
+                    MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Control)
+                },
+                {
+                    MouseAction::FrameShuttle,
+                    MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift)
+                },
+                {
+                    MouseAction::CompareWipe,
+                    MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Alt)
+                }
             };
 
             float wheelScale = 1.1F;
