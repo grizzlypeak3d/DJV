@@ -161,20 +161,20 @@ namespace djv
             std::map<MouseAction, MouseActionBinding> bindings =
             {
                 {
-                    MouseAction::ColorPicker,
-                    MouseActionBinding(ftk::MouseButton::Left)
-                },
-                {
                     MouseAction::PanView,
-                    MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Control)
-                },
-                {
-                    MouseAction::FrameShuttle,
-                    MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift)
+                    MouseActionBinding(ftk::MouseButton::Middle)
                 },
                 {
                     MouseAction::CompareWipe,
                     MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Alt)
+                },
+                {
+                    MouseAction::ColorPicker,
+                    MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Control)
+                },
+                {
+                    MouseAction::FrameShuttle,
+                    MouseActionBinding(ftk::MouseButton::Left)
                 }
             };
 
