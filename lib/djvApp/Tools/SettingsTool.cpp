@@ -630,19 +630,25 @@ namespace djv
 
             p.buttonLabels.push_back("None");
             p.buttonLabels.push_back("Left");
-            p.buttonLabels.push_back("Right");
             p.buttonLabels.push_back("Middle");
+            p.buttonLabels.push_back("Right");
+            p.buttonLabels.push_back("Extra 1");
+            p.buttonLabels.push_back("Extra 2");
 
             p.modifiers.push_back(ftk::KeyModifier::None);
             p.modifiers.push_back(ftk::KeyModifier::Shift);
             p.modifiers.push_back(ftk::KeyModifier::Control);
             p.modifiers.push_back(ftk::KeyModifier::Alt);
+#if defined(__APPLE__)
             p.modifiers.push_back(ftk::KeyModifier::Super);
+#endif // __APPLE__
             p.modifierLabels.push_back("None");
             p.modifierLabels.push_back(ftk::to_string(ftk::KeyModifier::Shift));
             p.modifierLabels.push_back(ftk::to_string(ftk::KeyModifier::Control));
             p.modifierLabels.push_back(ftk::to_string(ftk::KeyModifier::Alt));
+#if defined(__APPLE__)
             p.modifierLabels.push_back(ftk::to_string(ftk::KeyModifier::Super));
+#endif // __APPLE__
 
             for (const auto mouseAction : getMouseActionEnums())
             {
