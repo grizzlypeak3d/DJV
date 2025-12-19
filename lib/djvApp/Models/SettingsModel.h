@@ -179,6 +179,7 @@ namespace djv
             };
 
             float wheelScale = 1.1F;
+            float frameShuttleScale = 1.F;
 
             bool operator == (const MouseSettings&) const;
             bool operator != (const MouseSettings&) const;

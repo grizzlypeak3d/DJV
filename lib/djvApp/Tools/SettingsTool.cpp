@@ -604,6 +604,7 @@ namespace djv
             std::vector<ftk::KeyModifier> modifiers;
             std::vector<std::string> modifierLabels;
             std::shared_ptr<ftk::FloatEdit> wheelScaleEdit;
+            std::shared_ptr<ftk::FloatEdit> frameShuttleScaleEdit;
 
             std::map<MouseAction, std::shared_ptr<ftk::ComboBox> > buttonComboBoxes;
             std::map<MouseAction, std::shared_ptr<ftk::ComboBox> > modifierComboBoxes;
@@ -659,7 +660,10 @@ namespace djv
             }
 
             p.wheelScaleEdit = ftk::FloatEdit::create(context);
-            p.wheelScaleEdit->setRange(1.01F, 4.F);
+            p.wheelScaleEdit->setRange(.5F, 5.F);
+
+            p.frameShuttleScaleEdit = ftk::FloatEdit::create(context);
+            p.frameShuttleScaleEdit->setRange(.1F, 10.F);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -674,6 +678,7 @@ namespace djv
                 p.layout->addRow(ftk::Format("{0}:").arg(mouseActionLabels[static_cast<size_t>(mouseAction)]), hLayout);
             }
             p.layout->addRow("Wheel scale:", p.wheelScaleEdit);
+            p.layout->addRow("Frame shuttle scale:", p.frameShuttleScaleEdit);
 
             p.settingsObserver = ftk::Observer<MouseSettings>::create(
                 p.model->observeMouse(),
@@ -699,6 +704,7 @@ namespace djv
                         }
                     }
                     p.wheelScaleEdit->setValue(value.wheelScale);
+                    p.frameShuttleScaleEdit->setValue(value.frameShuttleScale);
                 });
 
             for (const auto mouseAction : getMouseActionEnums())
@@ -730,6 +736,15 @@ namespace djv
                     FTK_P();
                     auto settings = p.model->getMouse();
                     settings.wheelScale = value;
+                    p.model->setMouse(settings);
+                });
+
+            p.frameShuttleScaleEdit->setCallback(
+                [this](float value)
+                {
+                    FTK_P();
+                    auto settings = p.model->getMouse();
+                    settings.frameShuttleScale = value;
                     p.model->setMouse(settings);
                 });
         }

@@ -42,6 +42,7 @@ namespace djv
                 MouseActionBinding(ftk::MouseButton::Left);
             MouseActionBinding frameShuttleBinding =
                 MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift);
+            float frameShuttleScale = 1.F;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
             std::shared_ptr<ftk::Label> timeLabel;
@@ -238,6 +239,7 @@ namespace djv
                 app->getSettingsModel()->observeMouse(),
                 [this](const MouseSettings& value)
                 {
+                    FTK_P();
                     auto i = value.bindings.find(MouseAction::PanView);
                     setPanBinding(
                         i != value.bindings.end() ? i->second.button : ftk::MouseButton::None,
@@ -247,9 +249,10 @@ namespace djv
                         i != value.bindings.end() ? i->second.button : ftk::MouseButton::None,
                         i != value.bindings.end() ? i->second.modifier : ftk::KeyModifier::None);
                     i = value.bindings.find(MouseAction::ColorPicker);
-                    _p->colorPickerBinding = i != value.bindings.end() ? i->second : MouseActionBinding();
+                    p.colorPickerBinding = i != value.bindings.end() ? i->second : MouseActionBinding();
                     i = value.bindings.find(MouseAction::FrameShuttle);
-                    _p->frameShuttleBinding = i != value.bindings.end() ? i->second : MouseActionBinding();
+                    p.frameShuttleBinding = i != value.bindings.end() ? i->second : MouseActionBinding();
+                    p.frameShuttleScale = value.frameShuttleScale;
                 });
         }
 
@@ -339,7 +342,7 @@ namespace djv
                 if (auto player = getPlayer())
                 {
                     const OTIO_NS::RationalTime offset = OTIO_NS::RationalTime(
-                        (event.pos.x - _getMousePressPos().x) * .05F,
+                        (event.pos.x - _getMousePressPos().x) * .05F * p.frameShuttleScale,
                         p.mouse.shuttleStart.rate()).round();
                     const OTIO_NS::TimeRange& timeRange = player->getTimeRange();
                     OTIO_NS::RationalTime t = p.mouse.shuttleStart + offset;

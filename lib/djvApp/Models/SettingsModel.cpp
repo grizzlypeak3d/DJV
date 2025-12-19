@@ -286,7 +286,8 @@ namespace djv
         {
             return
                 bindings == other.bindings &&
-                wheelScale == other.wheelScale;
+                wheelScale == other.wheelScale &&
+                frameShuttleScale == other.frameShuttleScale;
         }
 
         bool MouseSettings::operator != (const MouseSettings& other) const
@@ -830,6 +831,7 @@ namespace djv
                 to_json(json["Bindings"][to_string(i.first)], i.second);
             }
             json["WheelScale"] = value.wheelScale;
+            json["FrameShuttleScale"] = value.frameShuttleScale;
         }
 
         void to_json(nlohmann::json& json, const StyleSettings& value)
@@ -932,6 +934,7 @@ namespace djv
                 from_json(i.value(), value.bindings[mouseAction]);
             }
             json.at("WheelScale").get_to(value.wheelScale);
+            json.at("FrameShuttleScale").get_to(value.frameShuttleScale);
         }
 
         void from_json(const nlohmann::json& json, ShortcutsSettings& value)
