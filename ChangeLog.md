@@ -1,16 +1,21 @@
 ## 3.3.0
 
 Features:
-* File sequences are shown in the built-in file browser.
+* The built-in file browser can now display image sequences as a single item
+  with frame range.
 * The command line now accepts file sequences like "render.#.exr".
 * The tab key can now be assigned to shortcuts (e.g., Ctrl+Tab and
   Ctrl+Shit+Tab for changing the current file).
+* Add the "Extra 1" and "Extra 2" buttons to the mouse settings.
 * Library updates:
     - SDL2 release-2.32.10
 
 Fixes:
-* Fix for compiling on Rocky 8.
 * Fix compare overlay and difference flipping the image.
+* Fix middle and right mouse buttons that were swapped in the settings.
+* Fix the mouse settings to only show the "Command" key on macOS.
+* Fix for the clipboard that was causing excessive CPU usage on Gnome.
+* Fix for compiling on Rocky 8.
 
 
 ## 3.2.1
