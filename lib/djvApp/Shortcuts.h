@@ -16,11 +16,13 @@ namespace djv
             Shortcut(
                 const std::string& name,
                 const std::string& text,
-                const ftk::KeyShortcut& = ftk::KeyShortcut());
+                const ftk::KeyShortcut& primary = ftk::KeyShortcut(),
+                const ftk::KeyShortcut& secondary = ftk::KeyShortcut());
 
-            std::string                   name;
-            std::string                   text;
-            std::vector<ftk::KeyShortcut> shortcuts;
+            std::string      name;
+            std::string      text;
+            ftk::KeyShortcut primary;
+            ftk::KeyShortcut secondary;
 
             bool operator == (const Shortcut&) const;
             bool operator != (const Shortcut&) const;

@@ -210,8 +210,8 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            void setShortcut(const Shortcut&);
-            void setCallback(const std::function<void(const Shortcut&)>&);
+            void setShortcut(const ftk::KeyShortcut&);
+            void setCallback(const std::function<void(const ftk::KeyShortcut&)>&);
             void setCollision(bool);
 
             void setGeometry(const ftk::Box2I&) override;
@@ -252,7 +252,7 @@ namespace djv
 
             void setShortcut(const Shortcut&);
             void setCallback(const std::function<void(const Shortcut&)>&);
-            void setCollision(bool);
+            void setCollision(bool, bool);
 
             void setGeometry(const ftk::Box2I&) override;
             void sizeHintEvent(const ftk::SizeHintEvent&) override;
