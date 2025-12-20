@@ -59,17 +59,21 @@ namespace djv
                     });
                 if (j != value.shortcuts.end())
                 {
-                    i.second->setShortcut(j->key);
-                    i.second->setShortcutModifiers(j->modifiers);
+                    i.second->setShortcuts(j->shortcuts);
                     const auto k = _tooltips.find(i.first);
                     if (k != _tooltips.end())
                     {
+                        std::vector<std::string> tmp;
+                        for (const auto& l : j->shortcuts)
+                        {
+                            tmp.push_back(ftk::getShortcutLabel(l.key, l.modifiers));
+                        }
                         i.second->setTooltip(ftk::Format(
                             "{0}\n"
                             "\n"
                             "Shortcut: {1}").
                             arg(k->second).
-                            arg(ftk::getShortcutLabel(j->key, j->modifiers)));
+                            arg(ftk::join(tmp, ", ")));
                     }
                 }
             }

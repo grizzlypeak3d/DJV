@@ -70,18 +70,19 @@ namespace djv
 
 #if defined(TLRENDER_BMD)
             p.deviceActiveIcon = ftk::Icon::create(context, "Devices");
+            p.deviceActiveIcon->setMarginRole(ftk::SizeRole::MarginInside);
             p.deviceActiveIcon->setTooltip("Output device");
 #endif // TLRENDER_BMD
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
-            p.layout->setSpacingRole(ftk::SizeRole::None);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.logLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
 #if defined(TLRENDER_BMD)
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.deviceActiveIcon->setParent(p.layout);
-            ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
+            //ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
 #endif // TLRENDER_BMD
 
             _deviceUpdate(false);
@@ -188,7 +189,7 @@ namespace djv
                 {
                 case ftk::LogType::Error:
                 {
-                    const std::string s = ftk::toString(i);
+                    const std::string s = ftk::getLabel(i, true);
                     p.logLabel->setText(s);
                     p.logLabel->setTooltip(s);
                     p.logTimer->start(

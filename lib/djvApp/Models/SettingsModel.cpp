@@ -111,67 +111,71 @@ namespace djv
                 Shortcut("Audio/VolumeDown", "Volume down", ftk::Key::Comma),
                 Shortcut("Audio/Mute", "Mute", ftk::Key::M),
 
-                Shortcut("Compare/Next", "Next", ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Shift)),
-                Shortcut("Compare/Prev", "Previous", ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Shift)),
-                Shortcut("Compare/A", "A", ftk::Key::A, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("Compare/B", "B", ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("Compare/Wipe", "Wipe", ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control)),
+                Shortcut("Compare/Next", "Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Shift))),
+                Shortcut("Compare/Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Shift))),
+                Shortcut("Compare/A", "A", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("Compare/B", "B", ftk::KeyShortcut(ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("Compare/Wipe", "Wipe", ftk::KeyShortcut(ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Compare/Overlay", "Overlay"),
                 Shortcut("Compare/Difference", "Difference"),
                 Shortcut("Compare/Horizontal", "Horizontal"),
                 Shortcut("Compare/Vertical", "Vertical"),
-                Shortcut("Compare/Tile", "Tile", ftk::Key::T, static_cast<int>(ftk::KeyModifier::Control)),
+                Shortcut("Compare/Tile", "Tile", ftk::KeyShortcut(ftk::Key::T, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Compare/Relative", "Relative"),
                 Shortcut("Compare/Absolute", "Absolute"),
 
-                Shortcut("File/Open", "Open", ftk::Key::O, static_cast<int>(ftk::commandKeyModifier)),
+                Shortcut("File/Open", "Open", ftk::KeyShortcut(ftk::Key::O, static_cast<int>(ftk::commandKeyModifier))),
                 Shortcut(
                     "File/OpenSeparateAudio",
                     "Open separate audio",
-                    ftk::Key::O,
-                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)),
-                Shortcut("File/Close", "Close", ftk::Key::E, static_cast<int>(ftk::commandKeyModifier)),
+                    ftk::KeyShortcut(
+                        ftk::Key::O,
+                        static_cast<int>(ftk::KeyModifier::Shift) |
+                        static_cast<int>(ftk::commandKeyModifier))),
+                Shortcut("File/Close", "Close", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier))),
                 Shortcut(
                     "File/CloseAll",
                     "Close all",
-                    ftk::Key::E,
-                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)),
+                    ftk::KeyShortcut(
+                        ftk::Key::E,
+                        static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier))),
                 Shortcut(
                     "File/Reload",
                     "Reload",
-                    ftk::Key::R,
-                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)),
-                Shortcut("File/Next", "Next", ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("File/Prev", "Previous", ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("File/NextLayer", "Next layer", ftk::Key::Equals, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("File/PrevLayer", "Previous layer", ftk::Key::Minus, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("File/Exit", "Exit", ftk::Key::Q, static_cast<int>(ftk::commandKeyModifier)),
+                    ftk::KeyShortcut(
+                        ftk::Key::R,
+                        static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier))),
+                Shortcut("File/Next", "Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("File/Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("File/NextLayer", "Next layer", ftk::KeyShortcut(ftk::Key::Equals, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("File/PrevLayer", "Previous layer", ftk::KeyShortcut(ftk::Key::Minus, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("File/Exit", "Exit", ftk::KeyShortcut(ftk::Key::Q, static_cast<int>(ftk::commandKeyModifier))),
 
                 Shortcut("Frame/Start", "Start", ftk::Key::Home),
                 Shortcut("Frame/End", "End", ftk::Key::End),
                 Shortcut("Frame/Prev", "Previous", ftk::Key::Left),
-                Shortcut("Frame/PrevX10", "Previous X10", ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Shift)),
-                Shortcut("Frame/PrevX100", "Previous X100", ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Control)),
+                Shortcut("Frame/PrevX10", "Previous X10", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Shift))),
+                Shortcut("Frame/PrevX100", "Previous X100", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Frame/Next", "Next", ftk::Key::Right),
-                Shortcut("Frame/NextX10", "Next X10", ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Shift)),
-                Shortcut("Frame/NextX100", "Next X100", ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("Frame/FocusCurrent", "Focus current", ftk::Key::F, static_cast<int>(ftk::KeyModifier::Control)),
+                Shortcut("Frame/NextX10", "Next X10", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Shift))),
+                Shortcut("Frame/NextX100", "Next X100", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("Frame/FocusCurrent", "Focus current", ftk::KeyShortcut(ftk::Key::F, static_cast<int>(ftk::KeyModifier::Control))),
 
                 Shortcut("Playback/Stop", "Stop", ftk::Key::K),
                 Shortcut("Playback/Forward", "Forward", ftk::Key::L),
                 Shortcut("Playback/Reverse", "Reverse", ftk::Key::J),
                 Shortcut("Playback/Toggle", "Toggle", ftk::Key::Space),
-                Shortcut("Playback/JumpBack1s", "Jump back 1s", ftk::Key::J, static_cast<int>(ftk::KeyModifier::Shift)),
-                Shortcut("Playback/JumpBack10s", "Jump back 10s", ftk::Key::J, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("Playback/JumpForward1s", "Jump forward 1s", ftk::Key::L, static_cast<int>(ftk::KeyModifier::Shift)),
-                Shortcut("Playback/JumpForward10s", "Jump forward 10s", ftk::Key::L, static_cast<int>(ftk::KeyModifier::Control)),
+                Shortcut("Playback/JumpBack1s", "Jump back 1s", ftk::KeyShortcut(ftk::Key::J, static_cast<int>(ftk::KeyModifier::Shift))),
+                Shortcut("Playback/JumpBack10s", "Jump back 10s", ftk::KeyShortcut(ftk::Key::J, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("Playback/JumpForward1s", "Jump forward 1s", ftk::KeyShortcut(ftk::Key::L, static_cast<int>(ftk::KeyModifier::Shift))),
+                Shortcut("Playback/JumpForward10s", "Jump forward 10s", ftk::KeyShortcut(ftk::Key::L, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Playback/Loop", "Loop"),
                 Shortcut("Playback/Once", "Once"),
                 Shortcut("Playback/PingPong", "Ping pong"),
                 Shortcut("Playback/SetInPoint", "Set in point", ftk::Key::I),
-                Shortcut("Playback/ResetInPoint", "Reset in point", ftk::Key::I, static_cast<int>(ftk::KeyModifier::Shift)),
+                Shortcut("Playback/ResetInPoint", "Reset in point", ftk::KeyShortcut(ftk::Key::I, static_cast<int>(ftk::KeyModifier::Shift))),
                 Shortcut("Playback/SetOutPoint", "Set out point", ftk::Key::O),
-                Shortcut("Playback/ResetOutPoint", "Reset out point", ftk::Key::O, static_cast<int>(ftk::KeyModifier::Shift)),
+                Shortcut("Playback/ResetOutPoint", "Reset out point", ftk::KeyShortcut(ftk::Key::O, static_cast<int>(ftk::KeyModifier::Shift))),
 
                 Shortcut("Timeline/FrameView", "Frame view"),
                 Shortcut("Timeline/Scroll", "Scroll"),
@@ -213,8 +217,8 @@ namespace djv
                 Shortcut("View/AlphaBlendNone", "Alpha blend none"),
                 Shortcut("View/AlphaBlendStraight", "Alpha blend straight"),
                 Shortcut("View/AlphaBlendPremultiplied", "Alpha blend premultiplied"),
-                Shortcut("View/Grid", "Grid", ftk::Key::G, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("View/HUD", "HUD", ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control)),
+                Shortcut("View/Grid", "Grid", ftk::KeyShortcut(ftk::Key::G, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("View/HUD", "HUD", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control))),
 
                 Shortcut("Window/FullScreen", "Full screen", ftk::Key::U),
                 Shortcut("Window/FloatOnTop", "Float on top"),
@@ -229,8 +233,8 @@ namespace djv
                 Shortcut("Window/BottomToolBar", "Bottom tool bar"),
                 Shortcut("Window/StatusToolBar", "Status tool bar"),
 
-                Shortcut("Color/OCIO", "Enable OCIO", ftk::Key::N, static_cast<int>(ftk::KeyModifier::Control)),
-                Shortcut("Color/LUT", "Enable LUT", ftk::Key::K, static_cast<int>(ftk::KeyModifier::Control))
+                Shortcut("Color/OCIO", "Enable OCIO", ftk::KeyShortcut(ftk::Key::N, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("Color/LUT", "Enable LUT", ftk::KeyShortcut(ftk::Key::K, static_cast<int>(ftk::KeyModifier::Control)))
             };
         }
 
@@ -983,20 +987,20 @@ namespace djv
             from_string(json.at("Thumbnails").get<std::string>(), value.thumbnails);
         }
 
-        void from_json(const nlohmann::json& json, WindowSettings& out)
+        void from_json(const nlohmann::json& json, WindowSettings& value)
         {
-            json.at("Size").get_to(out.size);
-            json.at("FileToolBar").get_to(out.fileToolBar);
-            json.at("CompareToolBar").get_to(out.compareToolBar);
-            json.at("WindowToolBar").get_to(out.windowToolBar);
-            json.at("ViewToolBar").get_to(out.viewToolBar);
-            json.at("ToolsToolBar").get_to(out.toolsToolBar);
-            json.at("TabBar").get_to(out.tabBar);
-            json.at("Timeline").get_to(out.timeline);
-            json.at("BottomToolBar").get_to(out.bottomToolBar);
-            json.at("StatusToolBar").get_to(out.statusToolBar);
-            json.at("Splitter").get_to(out.splitter);
-            json.at("Splitter2").get_to(out.splitter2);
+            json.at("Size").get_to(value.size);
+            json.at("FileToolBar").get_to(value.fileToolBar);
+            json.at("CompareToolBar").get_to(value.compareToolBar);
+            json.at("WindowToolBar").get_to(value.windowToolBar);
+            json.at("ViewToolBar").get_to(value.viewToolBar);
+            json.at("ToolsToolBar").get_to(value.toolsToolBar);
+            json.at("TabBar").get_to(value.tabBar);
+            json.at("Timeline").get_to(value.timeline);
+            json.at("BottomToolBar").get_to(value.bottomToolBar);
+            json.at("StatusToolBar").get_to(value.statusToolBar);
+            json.at("Splitter").get_to(value.splitter);
+            json.at("Splitter2").get_to(value.splitter2);
         }
     }
 }

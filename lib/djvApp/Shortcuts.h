@@ -3,26 +3,24 @@
 
 #pragma once
 
-#include <ftk/UI/Event.h>
+#include <ftk/UI/Action.h>
 
 namespace djv
 {
     namespace app
     {
-        //! Keyboard shortcut.
+        //! Keyboard shortcuts.
         struct Shortcut
         {
             Shortcut() = default;
             Shortcut(
                 const std::string& name,
                 const std::string& text,
-                ftk::Key = ftk::Key::Unknown,
-                int modifiers = 0);
+                const ftk::KeyShortcut& = ftk::KeyShortcut());
 
-            std::string     name;
-            std::string     text;
-            ftk::Key key       = ftk::Key::Unknown;
-            int             modifiers = 0;
+            std::string                   name;
+            std::string                   text;
+            std::vector<ftk::KeyShortcut> shortcuts;
 
             bool operator == (const Shortcut&) const;
             bool operator != (const Shortcut&) const;

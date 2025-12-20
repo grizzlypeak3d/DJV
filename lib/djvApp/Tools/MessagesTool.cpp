@@ -104,7 +104,7 @@ namespace djv
                         {
                         case ftk::LogType::Warning:
                         case ftk::LogType::Error:
-                            _p->messages.push_back(ftk::toString(i));
+                            _p->messages.push_back(ftk::getLabel(i, true));
                             break;
                         default: break;
                         }

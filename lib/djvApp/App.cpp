@@ -33,11 +33,11 @@
 #if defined(TLRENDER_USD)
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
-#include <tlRender/Core/FileLogSystem.h>
 
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/CmdLine.h>
+#include <ftk/Core/FileLogSystem.h>
 #include <ftk/Core/Format.h>
 
 #include <filesystem>
@@ -86,7 +86,7 @@ namespace djv
             std::filesystem::path settingsFile;
             CmdLine cmdLine;
 
-            std::shared_ptr<tl::file::FileLogSystem> fileLogSystem;
+            std::shared_ptr<ftk::FileLogSystem> fileLogSystem;
             std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<SettingsModel> settingsModel;
             std::shared_ptr<TimeUnitsModel> timeUnitsModel;
@@ -523,7 +523,7 @@ namespace djv
         {
             FTK_P();
 
-            p.fileLogSystem = tl::file::FileLogSystem::create(_context, p.logFile);
+            p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
 
             p.settings = ftk::Settings::create(
                 _context,

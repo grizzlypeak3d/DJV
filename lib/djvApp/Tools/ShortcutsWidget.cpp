@@ -206,8 +206,8 @@ namespace djv
                 if (hasKeyFocus())
                 {
                     event.accept = true;
-                    p.shortcut.key = event.key;
-                    p.shortcut.modifiers = event.modifiers;
+                    p.shortcut.shortcuts.clear();
+                    p.shortcut.shortcuts.push_back(ftk::KeyShortcut(event.key, event.modifiers));
                     if (p.callback)
                     {
                         p.callback(p.shortcut);
@@ -227,7 +227,14 @@ namespace djv
         void ShortcutEdit::_widgetUpdate()
         {
             FTK_P();
-            p.label->setText(ftk::getShortcutLabel(p.shortcut.key, p.shortcut.modifiers));
+            std::string text;
+            if (!p.shortcut.shortcuts.empty())
+            {
+                text = ftk::getShortcutLabel(
+                    p.shortcut.shortcuts.front().key,
+                    p.shortcut.shortcuts.front().modifiers);
+            }
+            p.label->setText(text);
         }
 
         struct ShortcutWidget::Private
@@ -262,7 +269,7 @@ namespace djv
                 [this]
                 {
                     FTK_P();
-                    p.shortcut.key = ftk::Key::Unknown;
+                    p.shortcut.shortcuts.clear();
                     p.edit->setShortcut(p.shortcut);
                     if (p.callback)
                     {
@@ -424,12 +431,15 @@ namespace djv
             }
 
             // Find collisions.
-            std::map<std::pair<ftk::Key, int>, std::vector<std::string> > collisions;
-            for (const auto& shortcut : settings.shortcuts)
+            std::map<std::string, int> collisions;
+            for (const auto& i : settings.shortcuts)
             {
-                if (shortcut.key != ftk::Key::Unknown)
+                for (const auto& j : i.shortcuts)
                 {
-                    collisions[std::make_pair(shortcut.key, shortcut.modifiers)].push_back(shortcut.name);
+                    if (j.key != ftk::Key::Unknown)
+                    {
+                        collisions[to_string(j)]++;
+                    }
                 }
             }
 
@@ -501,10 +511,13 @@ namespace djv
                     {
                         i->second->setShortcut(*j);
                         bool collision = false;
-                        const auto k = collisions.find(std::make_pair(j->key, j->modifiers));
-                        if (k != collisions.end())
+                        for (const auto& k : j->shortcuts)
                         {
-                            collision = k->second.size() > 1;
+                            const auto l = collisions.find(to_string(k));
+                            if (l != collisions.end())
+                            {
+                                collision = l->second > 1;
+                            }
                         }
                         i->second->setCollision(collision);
                     }

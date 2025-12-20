@@ -100,7 +100,7 @@ namespace djv
                 {
                     for (const auto& i : value)
                     {
-                        _p->messages.push_back(ftk::toString(i));
+                        _p->messages.push_back(ftk::getLabel(i));
                     }
                     while (_p->messages.size() > messagesMax)
                     {
