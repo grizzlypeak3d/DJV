@@ -72,7 +72,7 @@ namespace djv
             //! Open a file dialog.
             void openDialog();
 
-            //! Open a file and separate audio dialog.
+            //! Open a file and separate audio file dialog.
             void openSeparateAudioDialog();
 
             //! Get the settings.

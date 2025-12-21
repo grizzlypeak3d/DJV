@@ -48,7 +48,7 @@ namespace djv
 
             auto actions = fileActions->getActions();
             addAction(actions["Open"]);
-            addAction(actions["OpenSeparateAudio"]);
+            addAction(actions["OpenAudio"]);
             addAction(actions["Close"]);
             addAction(actions["CloseAll"]);
             addAction(actions["Reload"]);

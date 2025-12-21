@@ -15,7 +15,7 @@ namespace djv
             ToolBar::_init(context, ftk::Orientation::Horizontal, parent);
             auto tmp = actions;
             addAction(tmp["Open"]);
-            addAction(tmp["OpenSeparateAudio"]);
+            addAction(tmp["OpenAudio"]);
             addAction(tmp["Close"]);
             addAction(tmp["CloseAll"]);
             addAction(tmp["Reload"]);

@@ -35,9 +35,9 @@ namespace djv
                     }
                 });
 
-            _actions["OpenSeparateAudio"] = ftk::Action::create(
-                "Open With Separate Audio",
-                "FileOpenSeparateAudio",
+            _actions["OpenAudio"] = ftk::Action::create(
+                "Open With Audio",
+                "FileOpenAudio",
                 [appWeak]
                 {
                     if (auto app = appWeak.lock())
@@ -136,7 +136,7 @@ namespace djv
             _tooltips =
             {
                 { "Open", "Open a file." },
-                { "OpenSeparateAudio", "Open a file with separate audio." },
+                { "OpenAudio", "Open a file with a separate audio file." },
                 { "Close", "Close the current file." },
                 { "CloseAll", "Close all files." },
                 { "Reload", "Reload the current file." },
