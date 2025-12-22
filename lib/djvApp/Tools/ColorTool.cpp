@@ -32,6 +32,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::shared_ptr<ftk::ComboBox> configComboBox;
             std::shared_ptr<ftk::FileEdit> fileEdit;
+            std::shared_ptr<ftk::Label> nameLabel;
             std::shared_ptr<ftk::ComboBox> inputComboBox;
             std::shared_ptr<ftk::ComboBox> displayComboBox;
             std::shared_ptr<ftk::ComboBox> viewComboBox;
@@ -64,6 +65,9 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
 
             p.fileEdit = ftk::FileEdit::create(context);
+            p.fileEdit->setDisplay(ftk::FileEditDisplay::FileName);
+
+            p.nameLabel = ftk::Label::create(context);
 
             p.inputComboBox = ftk::ComboBox::create(context);
             p.inputComboBox->setHStretch(ftk::Stretch::Expanding);
@@ -85,6 +89,7 @@ namespace djv
             p.formLayout->addRow("Enabled:", p.enabledCheckBox);
             p.formLayout->addRow("Configuration:", p.configComboBox);
             p.formLayout->addRow("File name:", p.fileEdit);
+            p.formLayout->addRow("Name:", p.nameLabel);
             p.formLayout->addRow("Input:", p.inputComboBox);
             p.formLayout->addRow("Display:", p.displayComboBox);
             p.formLayout->addRow("View:", p.viewComboBox);
@@ -116,6 +121,7 @@ namespace djv
                     p.enabledCheckBox->setChecked(value.enabled);
                     p.configComboBox->setCurrentIndex(static_cast<int>(value.config));
                     p.fileEdit->setPath(ftk::Path(value.fileName));
+                    p.nameLabel->setText(value.name);
                     p.formLayout->setRowVisible(p.fileEdit, tl::timeline::OCIOConfig::File == value.config);
                     p.inputComboBox->setItems(value.inputs);
                     p.inputComboBox->setCurrentIndex(value.inputIndex);
@@ -220,6 +226,7 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
 
             p.fileEdit = ftk::FileEdit::create(context);
+            p.fileEdit->setDisplay(ftk::FileEditDisplay::FileName);
 
             p.orderComboBox = ftk::ComboBox::create(context, tl::timeline::getLUTOrderLabels());
             p.orderComboBox->setHStretch(ftk::Stretch::Expanding);

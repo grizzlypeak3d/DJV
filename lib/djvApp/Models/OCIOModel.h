@@ -22,6 +22,7 @@ namespace djv
             bool enabled = false;
             tl::timeline::OCIOConfig config = tl::timeline::OCIOConfig::First;
             std::string fileName;
+            std::string name;
             std::vector<std::string> inputs;
             size_t inputIndex = 0;
             std::vector<std::string> displays;

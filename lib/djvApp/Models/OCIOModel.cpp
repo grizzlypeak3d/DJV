@@ -67,7 +67,7 @@ namespace djv
 #endif // TLRENDER_OCIO
             p.options = ftk::Observable<tl::timeline::OCIOOptions>::create(options);
 
-            p.data = ftk::Observable<OCIOModelData>::create();
+            p.data = ftk::Observable<OCIOModelData>::create(_getData(options));
         }
 
         OCIOModel::OCIOModel() :
@@ -245,6 +245,7 @@ namespace djv
 #if defined(TLRENDER_OCIO)
             if (p.ocioConfig)
             {
+                out.name = p.ocioConfig->getName();
                 out.inputs.push_back("None");
                 for (int i = 0; i < p.ocioConfig->getNumColorSpaces(); ++i)
                 {
