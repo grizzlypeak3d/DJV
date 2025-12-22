@@ -246,6 +246,15 @@ namespace djv
             if (p.ocioConfig)
             {
                 out.name = p.ocioConfig->getName();
+                if (out.name.empty())
+                {
+                    const std::filesystem::path path = std::filesystem::u8path(options.fileName);
+                    out.name = path.filename().u8string();
+                    if ("config.ocio" == out.name)
+                    {
+                        out.name = path.parent_path().filename().u8string();
+                    }
+                }
                 out.inputs.push_back("None");
                 for (int i = 0; i < p.ocioConfig->getNumColorSpaces(); ++i)
                 {
