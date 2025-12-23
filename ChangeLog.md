@@ -10,6 +10,10 @@ Features:
 * Add a frame shuttle scale to the mouse settings.
 * Changed the default mouse settings: left button = frame shuttle, middle
   mouse button = pan
+* Add primary and secondary keyboard shortcuts.
+* Add a search box for keyboard shortcut settings.
+* Add the OCIO configuration name to the color tool.
+* Hide the path for the OCIO and LUT file names in the color tool.
 * Library updates:
     - SDL2 release-2.32.10
 
@@ -19,6 +23,7 @@ Fixes:
 * Fix the mouse settings to only show the "Command" key on macOS.
 * Fix for the clipboard that was causing excessive CPU usage on Gnome.
 * Fix for compiling on Rocky 8.
+* Fix for keyboard shortcuts in the secondary window.
 
 
 ## 3.2.1
