@@ -132,11 +132,11 @@ namespace djv
         {
             PanView,
             CompareWipe,
-            ColorPicker,
+            Pick,
             FrameShuttle,
 
             Count,
-            First = ColorPicker
+            First = Pick
         };
         FTK_ENUM(MouseAction);
 
@@ -169,7 +169,7 @@ namespace djv
                     MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Alt)
                 },
                 {
-                    MouseAction::ColorPicker,
+                    MouseAction::Pick,
                     MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Control)
                 },
                 {

@@ -38,11 +38,12 @@ namespace djv
             tl::timeline::DisplayOptions displayOptions;
             ftk::Color4F colorPicker;
             tl::timeline::PlayerCacheInfo cacheInfo;
-            MouseActionBinding colorPickerBinding =
+            MouseActionBinding pickBinding =
                 MouseActionBinding(ftk::MouseButton::Left);
             MouseActionBinding frameShuttleBinding =
                 MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift);
             float frameShuttleScale = 1.F;
+            std::shared_ptr<ftk::Observable<ftk::V2I> > pick;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
             std::shared_ptr<ftk::Label> timeLabel;
@@ -73,7 +74,7 @@ namespace djv
             {
                 None,
                 Shuttle,
-                ColorPicker
+                Picker
             };
             struct MouseData
             {
@@ -92,6 +93,8 @@ namespace djv
             FTK_P();
 
             p.app = app;
+
+            p.pick = ftk::Observable<ftk::V2I>::create();
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFontRole(ftk::FontRole::Mono);
@@ -248,8 +251,8 @@ namespace djv
                     setWipeBinding(
                         i != value.bindings.end() ? i->second.button : ftk::MouseButton::None,
                         i != value.bindings.end() ? i->second.modifier : ftk::KeyModifier::None);
-                    i = value.bindings.find(MouseAction::ColorPicker);
-                    p.colorPickerBinding = i != value.bindings.end() ? i->second : MouseActionBinding();
+                    i = value.bindings.find(MouseAction::Pick);
+                    p.pickBinding = i != value.bindings.end() ? i->second : MouseActionBinding();
                     i = value.bindings.find(MouseAction::FrameShuttle);
                     p.frameShuttleBinding = i != value.bindings.end() ? i->second : MouseActionBinding();
                     p.frameShuttleScale = value.frameShuttleScale;
@@ -271,6 +274,11 @@ namespace djv
             auto out = std::shared_ptr<Viewport>(new Viewport);
             out->_init(context, app, parent);
             return out;
+        }
+
+        std::shared_ptr<ftk::IObservable<ftk::V2I> > Viewport::observePick() const
+        {
+            return _p->pick;
         }
 
         void Viewport::setPlayer(const std::shared_ptr<tl::timeline::Player>& player)
@@ -357,9 +365,14 @@ namespace djv
                     player->seek(t);
                 }
                 break;
-            case Private::MouseMode::ColorPicker:
+            case Private::MouseMode::Picker:
                 if (auto app = p.app.lock())
                 {
+                    const ftk::Box2I& g = getGeometry();
+                    ftk::V2I pick = event.pos - g.min;
+                    pick.y = g.h() - 1 - pick.y;
+                    p.pick->setIfChanged(pick);
+
                     const ftk::Color4F color = getColorSample(event.pos);
                     app->getViewportModel()->setColorPicker(color);
                 }
@@ -372,10 +385,16 @@ namespace djv
         {
             tl::timelineui::Viewport::mousePressEvent(event);
             FTK_P();
-            if (p.colorPickerBinding.button == event.button &&
-                ftk::checkKeyModifier(p.colorPickerBinding.modifier, event.modifiers))
+            if (p.pickBinding.button == event.button &&
+                ftk::checkKeyModifier(p.pickBinding.modifier, event.modifiers))
             {
-                p.mouse.mode = Private::MouseMode::ColorPicker;
+                p.mouse.mode = Private::MouseMode::Picker;
+
+                const ftk::Box2I& g = getGeometry();
+                ftk::V2I pick = event.pos - g.min;
+                pick.y = g.h() - 1 - pick.y;
+                p.pick->setIfChanged(pick);
+
                 if (auto app = p.app.lock())
                 {
                     const ftk::Color4F color = getColorSample(event.pos);

@@ -45,6 +45,7 @@ set(HEADERS_TOOLS
     Tools/FilesTool.h
     Tools/IToolWidget.h
     Tools/InfoTool.h
+    Tools/MagnifyTool.h
     Tools/MessagesTool.h
     Tools/SettingsTool.h
     Tools/SystemLogTool.h
@@ -133,6 +134,7 @@ set(SOURCE_TOOLS
     Tools/FilesTool.cpp
     Tools/IToolWidget.cpp
     Tools/InfoTool.cpp
+    Tools/MagnifyTool.cpp
     Tools/MessagesTool.cpp
     Tools/SettingsTool.cpp
     Tools/ShortcutsWidget.cpp

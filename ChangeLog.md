@@ -14,6 +14,7 @@ Features:
 * Add a search box for keyboard shortcut settings.
 * Add the OCIO configuration name to the color tool.
 * Hide the path for the OCIO and LUT file names in the color tool.
+* Add a magnify tool.
 * Library updates:
     - SDL2 release-2.32.10
 

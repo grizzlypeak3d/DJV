@@ -32,6 +32,9 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Observe picking.
+            TL_API std::shared_ptr<ftk::IObservable<ftk::V2I> > observePick() const;
+
             void setPlayer(const std::shared_ptr<tl::timeline::Player>&) override;
 
             void setGeometry(const ftk::Box2I&) override;

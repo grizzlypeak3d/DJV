@@ -10,26 +10,29 @@ namespace djv
     namespace app
     {
         class App;
+        class MainWindow;
 
-        //! Information tool.
-        class InfoTool : public IToolWidget
+        //! Magnify tool.
+        class MagnifyTool : public IToolWidget
         {
-            FTK_NON_COPYABLE(InfoTool);
+            FTK_NON_COPYABLE(MagnifyTool);
 
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent);
 
-            InfoTool();
+            MagnifyTool();
 
         public:
-            virtual ~InfoTool();
+            virtual ~MagnifyTool();
 
-            static std::shared_ptr<InfoTool> create(
+            static std::shared_ptr<MagnifyTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:

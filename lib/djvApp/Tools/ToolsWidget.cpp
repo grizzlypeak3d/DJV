@@ -10,6 +10,7 @@
 #include <djvApp/Tools/ExportTool.h>
 #include <djvApp/Tools/FilesTool.h>
 #include <djvApp/Tools/InfoTool.h>
+#include <djvApp/Tools/MagnifyTool.h>
 #include <djvApp/Tools/MessagesTool.h>
 #include <djvApp/Tools/SettingsTool.h>
 #include <djvApp/Tools/SystemLogTool.h>
@@ -42,17 +43,18 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.toolWidgets[Tool::Audio] = AudioTool::create(context, app);
+            p.toolWidgets[Tool::Files] = FilesTool::create(context, app);
+            p.toolWidgets[Tool::Export] = ExportTool::create(context, app);
+            p.toolWidgets[Tool::View] = ViewTool::create(context, app, mainWindow);
             p.toolWidgets[Tool::Color] = ColorTool::create(context, app);
             p.toolWidgets[Tool::ColorPicker] = ColorPickerTool::create(context, app);
-            p.toolWidgets[Tool::Devices] = DevicesTool::create(context, app);
-            p.toolWidgets[Tool::Export] = ExportTool::create(context, app);
-            p.toolWidgets[Tool::Files] = FilesTool::create(context, app);
+            p.toolWidgets[Tool::Magnify] = MagnifyTool::create(context, app, mainWindow);
             p.toolWidgets[Tool::Info] = InfoTool::create(context, app);
-            p.toolWidgets[Tool::Messages] = MessagesTool::create(context, app);
+            p.toolWidgets[Tool::Audio] = AudioTool::create(context, app);
+            p.toolWidgets[Tool::Devices] = DevicesTool::create(context, app);
             p.toolWidgets[Tool::Settings] = SettingsTool::create(context, app);
+            p.toolWidgets[Tool::Messages] = MessagesTool::create(context, app);
             p.toolWidgets[Tool::SystemLog] = SystemLogTool::create(context, app);
-            p.toolWidgets[Tool::View] = ViewTool::create(context, app, mainWindow);
 
             p.layout = ftk::StackLayout::create(context, shared_from_this());
             for (const auto& widget : p.toolWidgets)

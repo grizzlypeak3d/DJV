@@ -1,0 +1,245 @@
+// SPDX-License-Identifier: BSD-3-Clause
+// Copyright Contributors to the DJV project.
+
+#include <djvApp/Tools/MagnifyTool.h>
+
+#include <djvApp/Models/ColorModel.h>
+#include <djvApp/Models/FilesModel.h>
+#include <djvApp/Models/ViewportModel.h>
+#include <djvApp/Widgets/Viewport.h>
+#include <djvApp/App.h>
+#include <djvApp/MainWindow.h>
+
+#include <tlRender/Timeline/Player.h>
+
+#include <ftk/UI/IntEditSlider.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/Settings.h>
+
+namespace djv
+{
+    namespace app
+    {
+        struct MagnifyTool::Private
+        {
+            std::shared_ptr<ftk::Settings> settings;
+            std::weak_ptr<MainWindow> mainWindow;
+
+            int level = 4;
+            ftk::V2I viewPos;
+            double viewZoom = 1.0;
+            ftk::V2I pick;
+            size_t videoDataSize = 0;
+            ftk::ImageOptions imageOptions;
+            tl::timeline::DisplayOptions displayOptions;
+
+            std::shared_ptr<tl::timelineui::Viewport> viewport;
+            std::shared_ptr<ftk::IntEditSlider> magnifySlider;
+
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::ListObserver<tl::timeline::VideoData> > videoDataObserver;
+            std::shared_ptr<ftk::Observer<ftk::V2I> > pickObserver;
+            std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosAndZoomObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > bgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
+        };
+
+        void MagnifyTool::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            IToolWidget::_init(
+                context,
+                app,
+                Tool::Magnify,
+                "djv::app::MagnifyTool",
+                parent);
+            FTK_P();
+
+            p.settings = app->getSettings();
+            p.mainWindow = mainWindow;
+
+            p.viewport = tl::timelineui::Viewport::create(context);
+
+            p.magnifySlider = ftk::IntEditSlider::create(context);
+            p.magnifySlider->setRange(1, 100);
+            p.settings->getT("/Magnify/Level", p.level);
+
+            auto layout = ftk::VerticalLayout::create(context);
+            layout->setSpacingRole(ftk::SizeRole::None);
+            p.viewport->setParent(layout);
+            auto hLayout = ftk::HorizontalLayout::create(context, layout);
+            hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.magnifySlider->setParent(hLayout);
+            _setWidget(layout);
+
+            p.magnifySlider->setCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    p.level = value;
+                    _widgetUpdate();
+                });
+
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+                app->observePlayer(),
+                [this](const std::shared_ptr<tl::timeline::Player>& value)
+                {
+                    FTK_P();
+                    p.viewport->setPlayer(value);
+                    if (value)
+                    {
+                        p.videoDataObserver = ftk::ListObserver<tl::timeline::VideoData>::create(
+                            value->observeCurrentVideo(),
+                            [this](const std::vector<tl::timeline::VideoData>& value)
+                            {
+                                _p->videoDataSize = value.size();
+                                _widgetUpdate();
+                            });
+                    }
+                    else
+                    {
+                        p.videoDataObserver.reset();
+                    }
+                    _widgetUpdate();
+                });
+
+            p.pickObserver = ftk::Observer<ftk::V2I>::create(
+                mainWindow->getViewport()->observePick(),
+                [this](const ftk::V2I& value)
+                {
+                    FTK_P();
+                    p.pick = value;
+                    _widgetUpdate();
+                });
+
+            p.viewPosAndZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
+                mainWindow->getViewport()->observeViewPosAndZoom(),
+                [this](const std::pair<ftk::V2I, double>& value)
+                {
+                    FTK_P();
+                    p.viewPos = value.first;
+                    p.viewZoom = value.second;
+                    _widgetUpdate();
+                });
+
+            p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
+                app->getFilesModel()->observeCompareOptions(),
+                [this](const tl::timeline::CompareOptions& value)
+                {
+                    FTK_P();
+                    p.viewport->setCompareOptions(value);
+                });
+
+            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
+                app->getColorModel()->observeOCIOOptions(),
+                [this](const tl::timeline::OCIOOptions& value)
+                {
+                    FTK_P();
+                    p.viewport->setOCIOOptions(value);
+                });
+
+            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
+                app->getColorModel()->observeLUTOptions(),
+                [this](const tl::timeline::LUTOptions& value)
+                {
+                    FTK_P();
+                    p.viewport->setLUTOptions(value);
+                });
+
+            p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
+                app->getViewportModel()->observeImageOptions(),
+                [this](const ftk::ImageOptions& value)
+                {
+                    FTK_P();
+                    p.imageOptions = value;
+                    _widgetUpdate();
+                });
+
+            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
+                app->getViewportModel()->observeDisplayOptions(),
+                [this](const tl::timeline::DisplayOptions& value)
+                {
+                    FTK_P();
+                    p.displayOptions = value;
+                    _widgetUpdate();
+                });
+
+            p.bgOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
+                app->getViewportModel()->observeBackgroundOptions(),
+                [this](const tl::timeline::BackgroundOptions& value)
+                {
+                    FTK_P();
+                    p.viewport->setBackgroundOptions(value);
+                });
+
+            p.fgOptionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
+                app->getViewportModel()->observeForegroundOptions(),
+                [this](const tl::timeline::ForegroundOptions& value)
+                {
+                    FTK_P();
+                    p.viewport->setForegroundOptions(value);
+                });
+
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
+                app->getViewportModel()->observeColorBuffer(),
+                [this](ftk::ImageType value)
+                {
+                    FTK_P();
+                    p.viewport->setColorBuffer(value);
+                });
+        }
+
+        MagnifyTool::MagnifyTool() :
+            _p(new Private)
+        {}
+
+        MagnifyTool::~MagnifyTool()
+        {
+            FTK_P();
+            p.settings->setT("/Magnify/Level", p.level);
+        }
+
+        std::shared_ptr<MagnifyTool> MagnifyTool::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<MagnifyTool>(new MagnifyTool);
+            out->_init(context, app, mainWindow, parent);
+            return out;
+        }
+
+        void MagnifyTool::_widgetUpdate()
+        {
+            FTK_P();
+            const ftk::Box2I& g = getGeometry();
+            const ftk::V2I magnifyPos =
+                (p.viewPos - p.pick) * p.level + (center(g) - g.min);
+            const double magnifyZoom = p.viewZoom * p.level;
+            p.viewport->setViewPosAndZoom(magnifyPos, magnifyZoom);
+
+            std::vector<ftk::ImageOptions> imageOptions;
+            std::vector<tl::timeline::DisplayOptions> displayOptions;
+            for (size_t i = 0; i < p.videoDataSize; ++i)
+            {
+                imageOptions.push_back(p.imageOptions);
+                displayOptions.push_back(p.displayOptions);
+            }
+            p.viewport->setImageOptions(imageOptions);
+            p.viewport->setDisplayOptions(displayOptions);
+
+            p.magnifySlider->setValue(p.level);
+        }
+    }
+}

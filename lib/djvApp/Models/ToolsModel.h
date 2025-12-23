@@ -24,6 +24,7 @@ namespace djv
             View,
             Color,
             ColorPicker,
+            Magnify,
             Info,
             Audio,
             Devices,
