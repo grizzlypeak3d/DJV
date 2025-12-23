@@ -15,9 +15,6 @@ namespace djv
         {
             std::shared_ptr<tl::timeline::Player> player;
 
-            std::map<tl::timeline::Playback, std::shared_ptr<ftk::Action> > playbackItems;
-            std::map<tl::timeline::Loop, std::shared_ptr<ftk::Action> > loopItems;
-
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::Playback> > playbackObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::Loop> > loopObserver;
@@ -237,14 +234,6 @@ namespace djv
                     }
                 });
 
-            p.playbackItems[tl::timeline::Playback::Stop] = _actions["Stop"];
-            p.playbackItems[tl::timeline::Playback::Forward] = _actions["Forward"];
-            p.playbackItems[tl::timeline::Playback::Reverse] = _actions["Reverse"];
-
-            p.loopItems[tl::timeline::Loop::Loop] = _actions["Loop"];
-            p.loopItems[tl::timeline::Loop::Once] = _actions["Once"];
-            p.loopItems[tl::timeline::Loop::PingPong] = _actions["PingPong"];
-
             _tooltips =
             {
                 { "Stop", "Stop playback." },
@@ -337,35 +326,27 @@ namespace djv
         void PlaybackActions::_playbackUpdate()
         {
             FTK_P();
-            std::map<tl::timeline::Playback, bool> values;
-            for (const auto& value : tl::timeline::getPlaybackEnums())
+            tl::timeline::Playback value = tl::timeline::Playback::Stop;
+            if (p.player)
             {
-                values[value] = false;
+                value = p.player->observePlayback()->get();
             }
-            values[p.player ?
-                p.player->observePlayback()->get() :
-                tl::timeline::Playback::Stop] = true;
-            for (auto i : values)
-            {
-                p.playbackItems[i.first]->setChecked(i.second);
-            }
+            _actions["Stop"]->setChecked(tl::timeline::Playback::Stop == value);
+            _actions["Forward"]->setChecked(tl::timeline::Playback::Forward == value);
+            _actions["Reverse"]->setChecked(tl::timeline::Playback::Reverse == value);
         }
 
         void PlaybackActions::_loopUpdate()
         {
             FTK_P();
-            std::map<tl::timeline::Loop, bool> values;
-            for (const auto& value : tl::timeline::getLoopEnums())
+            tl::timeline::Loop value = tl::timeline::Loop::Loop;
+            if (p.player)
             {
-                values[value] = false;
+                value = p.player->observeLoop()->get();
             }
-            values[p.player ?
-                p.player->observeLoop()->get() :
-                tl::timeline::Loop::Loop] = true;
-            for (auto i : values)
-            {
-                p.loopItems[i.first]->setChecked(i.second);
-            }
+            _actions["Loop"]->setChecked(tl::timeline::Loop::Loop == value);
+            _actions["Once"]->setChecked(tl::timeline::Loop::Once == value);
+            _actions["PingPong"]->setChecked(tl::timeline::Loop::PingPong == value);
         }
     }
 }
