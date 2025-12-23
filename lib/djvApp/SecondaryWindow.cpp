@@ -7,8 +7,11 @@
 #include <djvApp/Models/FilesModel.h>
 #include <djvApp/Models/ViewportModel.h>
 #include <djvApp/App.h>
+#include <djvApp/MainWindow.h>
 
 #include <tlRender/UI/Viewport.h>
+
+#include <ftk/UI/MenuBar.h>
 
 namespace djv
 {
@@ -16,6 +19,8 @@ namespace djv
     {
         struct SecondaryWindow::Private
         {
+            std::weak_ptr<App> app;
+
             std::shared_ptr<tl::timelineui::Viewport> viewport;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
@@ -35,6 +40,8 @@ namespace djv
         {
             Window::_init(context, app, "djv 2", ftk::Size2I(1920, 1080));
             FTK_P();
+
+            p.app = app;
 
             p.viewport = tl::timelineui::Viewport::create(context);
             p.viewport->setParent(shared_from_this());
@@ -129,6 +136,25 @@ namespace djv
             FTK_P();
             p.viewport->setViewPosAndZoom(pos, zoom);
             p.viewport->setFrameView(frame);
+        }
+
+        void SecondaryWindow::keyPressEvent(ftk::KeyEvent& event)
+        {
+            FTK_P();
+            if (auto app = p.app.lock())
+            {
+                auto menuBar = app->getMainWindow()->getMenuBar();
+                event.accept = menuBar->shortcut(event.key, event.modifiers);
+            }
+            if (!event.accept)
+            {
+                Window::keyPressEvent(event);
+            }
+        }
+
+        void SecondaryWindow::keyReleaseEvent(ftk::KeyEvent& event)
+        {
+            event.accept = true;
         }
     }
 }

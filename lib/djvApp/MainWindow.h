@@ -9,6 +9,11 @@
 
 #include <ftk/UI/Window.h>
 
+namespace ftk
+{
+    class MenuBar;
+}
+
 namespace tl
 {
     namespace timelineui
@@ -43,6 +48,9 @@ namespace djv
             static std::shared_ptr<MainWindow> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&);
+
+            //! Get the menu bar.
+            const std::shared_ptr<ftk::MenuBar> getMenuBar() const;
 
             //! Get the viewport.
             const std::shared_ptr<Viewport>& getViewport() const;

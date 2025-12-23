@@ -393,6 +393,11 @@ namespace djv
             return out;
         }
 
+        const std::shared_ptr<ftk::MenuBar> MainWindow::getMenuBar() const
+        {
+            return _p->menuBar;
+        }
+
         const std::shared_ptr<Viewport>& MainWindow::getViewport() const
         {
             return _p->viewport;

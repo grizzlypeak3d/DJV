@@ -51,6 +51,9 @@ namespace djv
                 double          zoom,
                 bool            frame);
 
+            void keyPressEvent(ftk::KeyEvent&) override;
+            void keyReleaseEvent(ftk::KeyEvent&) override;
+
         private:
             FTK_PRIVATE();
         };
