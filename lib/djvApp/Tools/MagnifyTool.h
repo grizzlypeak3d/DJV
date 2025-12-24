@@ -12,6 +12,25 @@ namespace djv
         class App;
         class MainWindow;
 
+        //! Magnification level.
+        enum class MagnifyLevel
+        {
+            _2X,
+            _4X,
+            _8X,
+            _16X,
+            _32X,
+            _64X,
+            _128X,
+
+            Count,
+            First = _2X
+        };
+        FTK_ENUM(MagnifyLevel);
+
+        //! Get a magnification level.
+        int getMagnifyLevel(MagnifyLevel);
+
         //! Magnify tool.
         class MagnifyTool : public IToolWidget
         {

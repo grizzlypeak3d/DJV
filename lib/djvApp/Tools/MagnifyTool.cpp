@@ -12,7 +12,7 @@
 
 #include <tlRender/Timeline/Player.h>
 
-#include <ftk/UI/IntEditSlider.h>
+#include <ftk/UI/ComboBox.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/Settings.h>
 
@@ -20,12 +20,31 @@ namespace djv
 {
     namespace app
     {
+        FTK_ENUM_IMPL(
+            MagnifyLevel,
+            "2X",
+            "4X",
+            "8X",
+            "16X",
+            "32X",
+            "64X",
+            "128X");
+
+        int getMagnifyLevel(MagnifyLevel value)
+        {
+            static const std::array<int, static_cast<size_t>(MagnifyLevel::Count)> data =
+            {
+                2, 4, 8, 16, 32, 64, 128
+            };
+            return data[static_cast<size_t>(value)];
+        }
+
         struct MagnifyTool::Private
         {
             std::shared_ptr<ftk::Settings> settings;
             std::weak_ptr<MainWindow> mainWindow;
 
-            int level = 4;
+            MagnifyLevel level = MagnifyLevel::_4X;
             ftk::V2I viewPos;
             double viewZoom = 1.0;
             ftk::V2I pick;
@@ -34,7 +53,7 @@ namespace djv
             tl::timeline::DisplayOptions displayOptions;
 
             std::shared_ptr<tl::timelineui::Viewport> viewport;
-            std::shared_ptr<ftk::IntEditSlider> magnifySlider;
+            std::shared_ptr<ftk::ComboBox> comboBox;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
             std::shared_ptr<ftk::ListObserver<tl::timeline::VideoData> > videoDataObserver;
@@ -65,13 +84,15 @@ namespace djv
             FTK_P();
 
             p.settings = app->getSettings();
+            std::string s;
+            p.settings->get("/Magnify/Level", s);
+            from_string(s, p.level);
+
             p.mainWindow = mainWindow;
 
             p.viewport = tl::timelineui::Viewport::create(context);
 
-            p.magnifySlider = ftk::IntEditSlider::create(context);
-            p.magnifySlider->setRange(1, 100);
-            p.settings->getT("/Magnify/Level", p.level);
+            p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
@@ -79,14 +100,14 @@ namespace djv
             auto hLayout = ftk::HorizontalLayout::create(context, layout);
             hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.magnifySlider->setParent(hLayout);
+            p.comboBox->setParent(hLayout);
             _setWidget(layout);
 
-            p.magnifySlider->setCallback(
+            p.comboBox->setIndexCallback(
                 [this](int value)
                 {
                     FTK_P();
-                    p.level = value;
+                    p.level = static_cast<MagnifyLevel>(value);
                     _widgetUpdate();
                 });
 
@@ -206,7 +227,7 @@ namespace djv
         MagnifyTool::~MagnifyTool()
         {
             FTK_P();
-            p.settings->setT("/Magnify/Level", p.level);
+            p.settings->set("/Magnify/Level", to_string(p.level));
         }
 
         std::shared_ptr<MagnifyTool> MagnifyTool::create(
@@ -224,9 +245,10 @@ namespace djv
         {
             FTK_P();
             const ftk::Box2I& g = getGeometry();
+            const int level = getMagnifyLevel(p.level);
             const ftk::V2I magnifyPos =
-                (p.viewPos - p.pick) * p.level + (center(g) - g.min);
-            const double magnifyZoom = p.viewZoom * p.level;
+                (p.viewPos - p.pick) * level + (center(g) - g.min);
+            const double magnifyZoom = p.viewZoom * level;
             p.viewport->setViewPosAndZoom(magnifyPos, magnifyZoom);
 
             std::vector<ftk::ImageOptions> imageOptions;
@@ -239,7 +261,7 @@ namespace djv
             p.viewport->setImageOptions(imageOptions);
             p.viewport->setDisplayOptions(displayOptions);
 
-            p.magnifySlider->setValue(p.level);
+            p.comboBox->setCurrentIndex(static_cast<int>(p.level));
         }
     }
 }
