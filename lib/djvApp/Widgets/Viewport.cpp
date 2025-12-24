@@ -89,7 +89,7 @@ namespace djv
             const std::shared_ptr<App>& app,
             const std::shared_ptr<IWidget>& parent)
         {
-            tl::timelineui::Viewport::_init(context, parent);
+            tl::ui::Viewport::_init(context, parent);
             FTK_P();
 
             p.app = app;
@@ -283,7 +283,7 @@ namespace djv
 
         void Viewport::setPlayer(const std::shared_ptr<tl::timeline::Player>& player)
         {
-            tl::timelineui::Viewport::setPlayer(player);
+            tl::ui::Viewport::setPlayer(player);
             FTK_P();
             if (player)
             {
@@ -328,21 +328,21 @@ namespace djv
 
         void Viewport::setGeometry(const ftk::Box2I& value)
         {
-            tl::timelineui::Viewport::setGeometry(value);
+            tl::ui::Viewport::setGeometry(value);
             FTK_P();
             p.hudLayout->setGeometry(value);
         }
 
         void Viewport::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
-            tl::timelineui::Viewport::sizeHintEvent(event);
+            tl::ui::Viewport::sizeHintEvent(event);
             FTK_P();
             setSizeHint(p.hudLayout->getSizeHint());
         }
 
         void Viewport::mouseMoveEvent(ftk::MouseMoveEvent& event)
         {
-            tl::timelineui::Viewport::mouseMoveEvent(event);
+            tl::ui::Viewport::mouseMoveEvent(event);
             FTK_P();
             switch (p.mouse.mode)
             {
@@ -383,7 +383,7 @@ namespace djv
 
         void Viewport::mousePressEvent(ftk::MouseClickEvent& event)
         {
-            tl::timelineui::Viewport::mousePressEvent(event);
+            tl::ui::Viewport::mousePressEvent(event);
             FTK_P();
             if (p.pickBinding.button == event.button &&
                 ftk::checkKeyModifier(p.pickBinding.modifier, event.modifiers))
@@ -415,7 +415,7 @@ namespace djv
 
         void Viewport::mouseReleaseEvent(ftk::MouseClickEvent& event)
         {
-            tl::timelineui::Viewport::mouseReleaseEvent(event);
+            tl::ui::Viewport::mouseReleaseEvent(event);
             FTK_P();
             p.mouse = Private::MouseData();
         }

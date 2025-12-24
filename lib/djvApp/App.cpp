@@ -438,7 +438,7 @@ namespace djv
                 }
             }
 
-            auto thumbnailSytem = _context->getSystem<tl::timelineui::ThumbnailSystem>();
+            auto thumbnailSytem = _context->getSystem<tl::ui::ThumbnailSystem>();
             thumbnailSytem->getCache()->clear();
 
             _filesUpdate(files);

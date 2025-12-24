@@ -25,7 +25,7 @@ FTK_MAIN()
     try
     {
         auto context = ftk::Context::create();
-        tl::timelineui::init(context);
+        tl::ui::init(context);
         tl::device::init(context);
         auto args = ftk::convert(argc, argv);
         auto app = djv::app::App::create(context, args);

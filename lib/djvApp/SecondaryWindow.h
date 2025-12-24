@@ -9,7 +9,7 @@
 
 namespace tl
 {
-    namespace timelineui
+    namespace ui
     {
         class Viewport;
     }
@@ -43,7 +43,7 @@ namespace djv
                 const std::shared_ptr<ftk::Window>& shared = nullptr);
 
             //! Get the viewport.
-            const std::shared_ptr<tl::timelineui::Viewport>& getViewport() const;
+            const std::shared_ptr<tl::ui::Viewport>& getViewport() const;
 
             //! Set the view.
             void setView(

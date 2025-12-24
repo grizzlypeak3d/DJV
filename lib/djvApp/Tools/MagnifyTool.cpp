@@ -52,7 +52,7 @@ namespace djv
             ftk::ImageOptions imageOptions;
             tl::timeline::DisplayOptions displayOptions;
 
-            std::shared_ptr<tl::timelineui::Viewport> viewport;
+            std::shared_ptr<tl::ui::Viewport> viewport;
             std::shared_ptr<ftk::ComboBox> comboBox;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
@@ -90,7 +90,7 @@ namespace djv
 
             p.mainWindow = mainWindow;
 
-            p.viewport = tl::timelineui::Viewport::create(context);
+            p.viewport = tl::ui::Viewport::create(context);
 
             p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
 

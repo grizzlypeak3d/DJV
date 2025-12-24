@@ -21,7 +21,7 @@ namespace djv
         {
             std::weak_ptr<App> app;
 
-            std::shared_ptr<tl::timelineui::Viewport> viewport;
+            std::shared_ptr<tl::ui::Viewport> viewport;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
@@ -43,7 +43,7 @@ namespace djv
 
             p.app = app;
 
-            p.viewport = tl::timelineui::Viewport::create(context);
+            p.viewport = tl::ui::Viewport::create(context);
             p.viewport->setParent(shared_from_this());
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
@@ -123,7 +123,7 @@ namespace djv
             return out;
         }
 
-        const std::shared_ptr<tl::timelineui::Viewport>& SecondaryWindow::getViewport() const
+        const std::shared_ptr<tl::ui::Viewport>& SecondaryWindow::getViewport() const
         {
             return _p->viewport;
         }

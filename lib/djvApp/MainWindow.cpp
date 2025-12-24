@@ -72,10 +72,10 @@ namespace djv
         {
             std::weak_ptr<App> app;
             std::shared_ptr<SettingsModel> settingsModel;
-            tl::timelineui::ItemOptions itemOptions;
+            tl::ui::ItemOptions itemOptions;
 
             std::shared_ptr<Viewport> viewport;
-            std::shared_ptr<tl::timelineui::TimelineWidget> timelineWidget;
+            std::shared_ptr<tl::ui::TimelineWidget> timelineWidget;
             std::shared_ptr<FileActions> fileActions;
             std::shared_ptr<CompareActions> compareActions;
             std::shared_ptr<PlaybackActions> playbackActions;
@@ -145,7 +145,7 @@ namespace djv
             p.viewport = Viewport::create(context, app);
 
             auto timeUnitsModel = app->getTimeUnitsModel();
-            p.timelineWidget = tl::timelineui::TimelineWidget::create(context, timeUnitsModel);
+            p.timelineWidget = tl::ui::TimelineWidget::create(context, timeUnitsModel);
 
             p.fileActions = FileActions::create(context, app);
             p.compareActions = CompareActions::create(context, app);
@@ -403,7 +403,7 @@ namespace djv
             return _p->viewport;
         }
 
-        const std::shared_ptr<tl::timelineui::TimelineWidget>& MainWindow::getTimelineWidget() const
+        const std::shared_ptr<tl::ui::TimelineWidget>& MainWindow::getTimelineWidget() const
         {
             return _p->timelineWidget;
         }

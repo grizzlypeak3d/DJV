@@ -39,8 +39,8 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::ToolButton> > buttons;
             std::shared_ptr<ShuttleWidget> playbackShuttle;
             std::shared_ptr<ShuttleWidget> frameShuttle;
-            std::shared_ptr<tl::timelineui::TimeEdit> currentTimeEdit;
-            std::shared_ptr<tl::timelineui::TimeLabel> durationLabel;
+            std::shared_ptr<tl::ui::TimeEdit> currentTimeEdit;
+            std::shared_ptr<tl::ui::TimeLabel> durationLabel;
             std::shared_ptr<ftk::DoubleEdit> speedEdit;
             std::shared_ptr<ftk::ToolButton> speedButton;
             std::shared_ptr<SpeedPopup> speedPopup;
@@ -99,10 +99,10 @@ namespace djv
             p.frameShuttle->setTooltip("Frame shuttle");
 
             auto timeUnitsModel = app->getTimeUnitsModel();
-            p.currentTimeEdit = tl::timelineui::TimeEdit::create(context, timeUnitsModel);
+            p.currentTimeEdit = tl::ui::TimeEdit::create(context, timeUnitsModel);
             p.currentTimeEdit->setTooltip("Current time");
 
-            p.durationLabel = tl::timelineui::TimeLabel::create(context, timeUnitsModel);
+            p.durationLabel = tl::ui::TimeLabel::create(context, timeUnitsModel);
             p.durationLabel->setFontRole(ftk::FontRole::Mono);
             p.durationLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.durationLabel->setTooltip("Duration of timeline or in/out range");

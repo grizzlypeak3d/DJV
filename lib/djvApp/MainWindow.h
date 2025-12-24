@@ -16,7 +16,7 @@ namespace ftk
 
 namespace tl
 {
-    namespace timelineui
+    namespace ui
     {
         class TimelineWidget;
     }
@@ -56,7 +56,7 @@ namespace djv
             const std::shared_ptr<Viewport>& getViewport() const;
 
             //! Get the timeline widget.
-            const std::shared_ptr<tl::timelineui::TimelineWidget>& getTimelineWidget() const;
+            const std::shared_ptr<tl::ui::TimelineWidget>& getTimelineWidget() const;
 
             //! Focus the current frame widget.
             void focusCurrentFrame();

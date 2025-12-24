@@ -12,7 +12,7 @@ namespace djv
         class App;
 
         //! Viewport.
-        class Viewport : public tl::timelineui::Viewport
+        class Viewport : public tl::ui::Viewport
         {
             FTK_NON_COPYABLE(Viewport);
 

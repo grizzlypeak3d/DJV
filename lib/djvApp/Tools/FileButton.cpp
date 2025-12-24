@@ -35,7 +35,7 @@ namespace djv
                 bool init = true;
                 float scale = 1.F;
                 int height = 40;
-                tl::timelineui::ThumbnailRequest request;
+                tl::ui::ThumbnailRequest request;
                 std::shared_ptr<ftk::Image> image;
             };
             ThumbnailData thumbnail;
@@ -125,7 +125,7 @@ namespace djv
                 p.thumbnail.init = false;
                 if (auto context = getContext())
                 {
-                    auto thumbnailSystem = context->getSystem<tl::timelineui::ThumbnailSystem>();
+                    auto thumbnailSystem = context->getSystem<tl::ui::ThumbnailSystem>();
                     p.thumbnail.request = thumbnailSystem->getThumbnail(
                         reinterpret_cast<intptr_t>(p.item.get()),
                         p.item->path,
