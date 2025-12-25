@@ -91,6 +91,7 @@ namespace djv
             p.mainWindow = mainWindow;
 
             p.viewport = tl::ui::Viewport::create(context);
+            p.viewport->setInputEnabled(false);
 
             p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
 
