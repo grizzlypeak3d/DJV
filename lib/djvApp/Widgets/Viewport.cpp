@@ -370,7 +370,6 @@ namespace djv
                 {
                     const ftk::Box2I& g = getGeometry();
                     ftk::V2I pick = event.pos - g.min;
-                    pick.y = g.h() - 1 - pick.y;
                     p.pick->setIfChanged(pick);
 
                     const ftk::Color4F color = getColorSample(event.pos);
@@ -392,7 +391,6 @@ namespace djv
 
                 const ftk::Box2I& g = getGeometry();
                 ftk::V2I pick = event.pos - g.min;
-                pick.y = g.h() - 1 - pick.y;
                 p.pick->setIfChanged(pick);
 
                 if (auto app = p.app.lock())
