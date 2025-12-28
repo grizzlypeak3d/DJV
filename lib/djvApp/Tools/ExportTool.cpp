@@ -456,7 +456,9 @@ namespace djv
                     p.exportData->imageOptions = app->getViewportModel()->getImageOptions();
                     p.exportData->displayOptions = app->getViewportModel()->getDisplayOptions();
                     p.exportData->colorBuffer = app->getViewportModel()->getColorBuffer();
-                    p.exportData->render = tl::timeline_gl::Render::create(context->getLogSystem());
+                    p.exportData->render = tl::timeline_gl::Render::create(
+                        context->getLogSystem(),
+                        context->getSystem<ftk::FontSystem>());
                     ftk::gl::OffscreenBufferOptions offscreenBufferOptions;
                     offscreenBufferOptions.color = p.exportData->colorBuffer;
                     p.exportData->buffer = ftk::gl::OffscreenBuffer::create(

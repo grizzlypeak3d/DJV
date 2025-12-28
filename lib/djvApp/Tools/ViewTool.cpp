@@ -665,6 +665,9 @@ namespace djv
             std::shared_ptr<ftk::IntEditSlider> sizeSlider;
             std::shared_ptr<ftk::IntEditSlider> lineWidthSlider;
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::ComboBox> labelsComboBox;
+            std::shared_ptr<ftk::ColorSwatch> textColorSwatch;
+            std::shared_ptr<ftk::ColorSwatch> overlayColorSwatch;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > optionsObserver;
@@ -691,6 +694,16 @@ namespace djv
             p.colorSwatch->setEditable(true);
             p.colorSwatch->setHAlign(ftk::HAlign::Left);
 
+            p.labelsComboBox = ftk::ComboBox::create(context, tl::timeline::getGridLabelsLabels());
+
+            p.textColorSwatch = ftk::ColorSwatch::create(context);
+            p.textColorSwatch->setEditable(true);
+            p.textColorSwatch->setHAlign(ftk::HAlign::Left);
+
+            p.overlayColorSwatch = ftk::ColorSwatch::create(context);
+            p.overlayColorSwatch->setEditable(true);
+            p.overlayColorSwatch->setHAlign(ftk::HAlign::Left);
+
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -698,6 +711,9 @@ namespace djv
             p.layout->addRow("Size:", p.sizeSlider);
             p.layout->addRow("Line width:", p.lineWidthSlider);
             p.layout->addRow("Color:", p.colorSwatch);
+            p.layout->addRow("Labels:", p.labelsComboBox);
+            p.layout->addRow("Text color:", p.textColorSwatch);
+            p.layout->addRow("Overlay color:", p.overlayColorSwatch);
 
             p.optionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
@@ -708,6 +724,9 @@ namespace djv
                     p.sizeSlider->setValue(value.grid.size);
                     p.lineWidthSlider->setValue(value.grid.lineWidth);
                     p.colorSwatch->setColor(value.grid.color);
+                    p.labelsComboBox->setCurrentIndex(static_cast<int>(value.grid.labels));
+                    p.textColorSwatch->setColor(value.grid.textColor);
+                    p.overlayColorSwatch->setColor(value.grid.overlayColor);
                 });
 
             auto appWeak = std::weak_ptr<App>(app);
@@ -751,6 +770,39 @@ namespace djv
                     {
                         auto options = app->getViewportModel()->getForegroundOptions();
                         options.grid.color = value;
+                        app->getViewportModel()->setForegroundOptions(options);
+                    }
+                });
+
+            p.labelsComboBox->setIndexCallback(
+                [appWeak](int value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getForegroundOptions();
+                        options.grid.labels = static_cast<tl::timeline::GridLabels>(value);
+                        app->getViewportModel()->setForegroundOptions(options);
+                    }
+                });
+
+            p.textColorSwatch->setColorCallback(
+                [appWeak](const ftk::Color4F& value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getForegroundOptions();
+                        options.grid.textColor = value;
+                        app->getViewportModel()->setForegroundOptions(options);
+                    }
+                });
+
+            p.overlayColorSwatch->setColorCallback(
+                [appWeak](const ftk::Color4F& value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getForegroundOptions();
+                        options.grid.overlayColor = value;
                         app->getViewportModel()->setForegroundOptions(options);
                     }
                 });
