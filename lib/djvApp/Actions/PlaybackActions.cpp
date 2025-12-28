@@ -14,6 +14,7 @@ namespace djv
         struct PlaybackActions::Private
         {
             std::shared_ptr<tl::timeline::Player> player;
+            tl::timeline::Playback toggle = tl::timeline::Playback::Forward;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::Playback> > playbackObserver;
@@ -27,210 +28,180 @@ namespace djv
             IActions::_init(context, app, "Playback");
             FTK_P();
 
-            auto appWeak = std::weak_ptr<App>(app);
             _actions["Stop"] = ftk::Action::create(
                 "Stop",
                 "PlaybackStop",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->stop();
-                        }
+                        p.player->stop();
                     }
                 });
 
             _actions["Forward"] = ftk::Action::create(
                 "Forward",
                 "PlaybackForward",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->forward();
-                        }
+                        p.player->forward();
                     }
                 });
 
             _actions["Reverse"] = ftk::Action::create(
                 "Reverse",
                 "PlaybackReverse",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->reverse();
-                        }
+                        p.player->reverse();
                     }
                 });
 
             _actions["Toggle"] = ftk::Action::create(
                 "Toggle Playback",
-                [this, appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
+                        const tl::timeline::Playback playback = p.player->getPlayback();
+                        if (tl::timeline::Playback::Stop == playback)
                         {
-                            const tl::timeline::Playback playback = player->observePlayback()->get();
-                            player->setPlayback(
-                                tl::timeline::Playback::Stop == playback ?
-                                _playbackPrev :
-                                tl::timeline::Playback::Stop);
-                            if (playback != tl::timeline::Playback::Stop)
-                            {
-                                _playbackPrev = playback;
-                            }
+                            p.player->setPlayback(p.toggle);
+                        }
+                        else
+                        {
+                            p.toggle = playback;
+                            p.player->stop();
                         }
                     }
                 });
 
             _actions["JumpBack1s"] = ftk::Action::create(
                 "Jump Back 1s",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->timeAction(tl::timeline::TimeAction::JumpBack1s);
-                        }
+                        p.player->timeAction(tl::timeline::TimeAction::JumpBack1s);
                     }
                 });
 
             _actions["JumpBack10s"] = ftk::Action::create(
                 "Jump Back 10s",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->timeAction(tl::timeline::TimeAction::JumpBack10s);
-                        }
+                        p.player->timeAction(tl::timeline::TimeAction::JumpBack10s);
                     }
                 });
 
             _actions["JumpForward1s"] = ftk::Action::create(
                 "Jump Forward 1s",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->timeAction(tl::timeline::TimeAction::JumpForward1s);
-                        }
+                        p.player->timeAction(tl::timeline::TimeAction::JumpForward1s);
                     }
                 });
 
             _actions["JumpForward10s"] = ftk::Action::create(
                 "Jump Forward 10s",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->timeAction(tl::timeline::TimeAction::JumpForward10s);
-                        }
+                        p.player->timeAction(tl::timeline::TimeAction::JumpForward10s);
                     }
                 });
 
             _actions["Loop"] = ftk::Action::create(
                 "Loop Playback",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->setLoop(tl::timeline::Loop::Loop);
-                        }
+                        p.player->setLoop(tl::timeline::Loop::Loop);
                     }
                 });
 
             _actions["Once"] = ftk::Action::create(
                 "Playback Once",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->setLoop(tl::timeline::Loop::Once);
-                        }
+                        p.player->setLoop(tl::timeline::Loop::Once);
                     }
                 });
 
             _actions["PingPong"] = ftk::Action::create(
                 "Ping-Pong Playback",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->setLoop(tl::timeline::Loop::PingPong);
-                        }
+                        p.player->setLoop(tl::timeline::Loop::PingPong);
                     }
                 });
 
             _actions["SetInPoint"] = ftk::Action::create(
                 "Set In Point",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->setInPoint();
-                        }
+                        p.player->setInPoint();
                     }
                 });
 
             _actions["ResetInPoint"] = ftk::Action::create(
                 "Reset In Point",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->resetInPoint();
-                        }
+                        p.player->resetInPoint();
                     }
                 });
 
             _actions["SetOutPoint"] = ftk::Action::create(
                 "Set Out Point",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->setOutPoint();
-                        }
+                        p.player->setOutPoint();
                     }
                 });
 
             _actions["ResetOutPoint"] = ftk::Action::create(
                 "Reset Out Point",
-                [appWeak]
+                [this]
                 {
-                    if (auto app = appWeak.lock())
+                    FTK_P();
+                    if (p.player)
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            player->resetOutPoint();
-                        }
+                        p.player->resetOutPoint();
                     }
                 });
 
@@ -254,8 +225,8 @@ namespace djv
             };
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
-            _playbackUpdate();
-            _loopUpdate();
+            _playbackUpdate(tl::timeline::Playback::Stop);
+            _loopUpdate(tl::timeline::Loop::Loop);
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
                 app->observePlayer(),
@@ -284,6 +255,7 @@ namespace djv
         void PlaybackActions::_setPlayer(const std::shared_ptr<tl::timeline::Player>& value)
         {
             FTK_P();
+
             p.playbackObserver.reset();
             p.loopObserver.reset();
 
@@ -293,16 +265,16 @@ namespace djv
             {
                 p.playbackObserver = ftk::Observer<tl::timeline::Playback>::create(
                     p.player->observePlayback(),
-                    [this](tl::timeline::Playback)
+                    [this](tl::timeline::Playback value)
                     {
-                        _playbackUpdate();
+                        _playbackUpdate(value);
                     });
 
                 p.loopObserver = ftk::Observer<tl::timeline::Loop>::create(
                     p.player->observeLoop(),
-                    [this](tl::timeline::Loop)
+                    [this](tl::timeline::Loop value)
                     {
-                        _loopUpdate();
+                        _loopUpdate(value);
                     });
             }
 
@@ -323,27 +295,17 @@ namespace djv
             _actions["ResetOutPoint"]->setEnabled(p.player.get());
         }
 
-        void PlaybackActions::_playbackUpdate()
+        void PlaybackActions::_playbackUpdate(tl::timeline::Playback value)
         {
             FTK_P();
-            tl::timeline::Playback value = tl::timeline::Playback::Stop;
-            if (p.player)
-            {
-                value = p.player->observePlayback()->get();
-            }
             _actions["Stop"]->setChecked(tl::timeline::Playback::Stop == value);
             _actions["Forward"]->setChecked(tl::timeline::Playback::Forward == value);
             _actions["Reverse"]->setChecked(tl::timeline::Playback::Reverse == value);
         }
 
-        void PlaybackActions::_loopUpdate()
+        void PlaybackActions::_loopUpdate(tl::timeline::Loop value)
         {
             FTK_P();
-            tl::timeline::Loop value = tl::timeline::Loop::Loop;
-            if (p.player)
-            {
-                value = p.player->observeLoop()->get();
-            }
             _actions["Loop"]->setChecked(tl::timeline::Loop::Loop == value);
             _actions["Once"]->setChecked(tl::timeline::Loop::Once == value);
             _actions["PingPong"]->setChecked(tl::timeline::Loop::PingPong == value);

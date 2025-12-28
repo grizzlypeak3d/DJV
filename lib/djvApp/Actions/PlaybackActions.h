@@ -30,10 +30,9 @@ namespace djv
 
         private:
             void _setPlayer(const std::shared_ptr<tl::timeline::Player>&);
-            void _playbackUpdate();
-            void _loopUpdate();
 
-            tl::timeline::Playback _playbackPrev = tl::timeline::Playback::Forward;
+            void _playbackUpdate(tl::timeline::Playback);
+            void _loopUpdate(tl::timeline::Loop);
 
             FTK_PRIVATE();
         };
