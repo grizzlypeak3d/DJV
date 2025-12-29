@@ -18,6 +18,9 @@ Features:
 * Add grid labels.
 * The playback speed can be increased and decreased by pressing forward or
   reverse multiple times.
+* Add status bar indicators to display whether color controls, the audio sync
+  offset, or the output device are enabled.
+* Remove text eliding from the tab bar and HUD file names.
 * Library updates:
     - SDL2 release-2.32.10
 
