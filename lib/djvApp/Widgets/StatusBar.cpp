@@ -3,7 +3,10 @@
 
 #include <djvApp/Widgets/StatusBar.h>
 
+#include <djvApp/Models/AudioModel.h>
+#include <djvApp/Models/ColorModel.h>
 #include <djvApp/Models/ToolsModel.h>
+#include <djvApp/Models/ViewportModel.h>
 #include <djvApp/App.h>
 
 #if defined(TLRENDER_BMD)
@@ -11,7 +14,6 @@
 #endif // TLRENDER_BMD
 
 #include <ftk/UI/Divider.h>
-#include <ftk/UI/Icon.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/Spacer.h>
@@ -28,10 +30,16 @@ namespace djv
         {
             std::weak_ptr<App> app;
 
+            bool ocioOptionsEnabled = false;
+            bool lutOptionsEnabled = false;
+            bool displayOptionsEnabled = false;
+
             std::shared_ptr<ftk::Label> logLabel;
             std::shared_ptr<ftk::Label> infoLabel;
+            std::shared_ptr<ftk::Label> colorControlsLabel;
+            std::shared_ptr<ftk::Label> audioSyncLabel;
 #if defined(TLRENDER_BMD)
-            std::shared_ptr<ftk::Icon> deviceActiveIcon;
+            std::shared_ptr<ftk::Label> outputDeviceLabel;
 #endif // TLRENDER_BMD
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
@@ -39,6 +47,10 @@ namespace djv
 
             std::shared_ptr<ftk::ListObserver<ftk::LogItem> > logObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
 #if defined(TLRENDER_BMD)
             std::shared_ptr<ftk::Observer<bool> > bmdActiveObserver;
 #endif // TLRENDER_BMD
@@ -62,16 +74,37 @@ namespace djv
             p.app = app;
 
             p.logLabel = ftk::Label::create(context);
-            p.logLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.logLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.logLabel->setHStretch(ftk::Stretch::Expanding);
+            p.logLabel->setTooltip(
+                "Display warning and error messages.\n"
+                "\n"
+                "Click to open messages tool.");
 
             p.infoLabel = ftk::Label::create(context);
-            p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.infoLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+
+            p.colorControlsLabel = ftk::Label::create(context, "CC");
+            p.colorControlsLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+            p.colorControlsLabel->setTooltip(
+                "This indicator shows whether color controls are enabled.\n"
+                "\n"
+                "Click to open color tool.");
+
+            p.audioSyncLabel = ftk::Label::create(context, "AO");
+            p.audioSyncLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+            p.audioSyncLabel->setTooltip(
+                "This indicator shows whether the audio sync offset is enabled.\n"
+                "\n"
+                "Click to open audio tool.");
 
 #if defined(TLRENDER_BMD)
-            p.deviceActiveIcon = ftk::Icon::create(context, "Devices");
-            p.deviceActiveIcon->setMarginRole(ftk::SizeRole::MarginInside);
-            p.deviceActiveIcon->setTooltip("Output device");
+            p.outputDeviceLabel = ftk::Label::create(context, "OD");
+            p.outputDeviceLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+            p.outputDeviceLabel->setTooltip(
+                "This indicator shows whether the output device is enabled.\n"
+                "\n"
+                "Click to open output device tool.");
 #endif // TLRENDER_BMD
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
@@ -79,13 +112,15 @@ namespace djv
             p.logLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
+            p.colorControlsLabel->setParent(p.layout);
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
+            p.audioSyncLabel->setParent(p.layout);
 #if defined(TLRENDER_BMD)
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
-            p.deviceActiveIcon->setParent(p.layout);
-            //ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
+            p.outputDeviceLabel->setParent(p.layout);
 #endif // TLRENDER_BMD
-
-            _deviceUpdate(false);
+            //ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
 
             p.logTimer = ftk::Timer::create(context);
 
@@ -105,12 +140,53 @@ namespace djv
                         player ? player->getIOInfo() : tl::io::Info());
                 });
 
+            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
+                app->getColorModel()->observeOCIOOptions(),
+                [this](const tl::timeline::OCIOOptions& value)
+                {
+                    _p->ocioOptionsEnabled = value.enabled;
+                    _colorControlsUpdate();
+                });
+
+            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
+                app->getColorModel()->observeLUTOptions(),
+                [this](const tl::timeline::LUTOptions& value)
+                {
+                    _p->lutOptionsEnabled = value.enabled;
+                    _colorControlsUpdate();
+                });
+
+            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
+                app->getViewportModel()->observeDisplayOptions(),
+                [this](const tl::timeline::DisplayOptions& value)
+                {
+                    _p->displayOptionsEnabled =
+                        value.color.enabled      ||
+                        value.levels.enabled     ||
+                        value.exrDisplay.enabled ||
+                        value.softClip.enabled;
+                    _colorControlsUpdate();
+                });
+
+            p.audioSyncOffsetObserver = ftk::Observer<double>::create(
+                app->getAudioModel()->observeSyncOffset(),
+                [this](double value)
+                {
+                    _p->audioSyncLabel->setBackgroundRole(
+                        value != 0.0 ?
+                        ftk::ColorRole::Checked :
+                        ftk::ColorRole::None);
+                });
+
 #if defined(TLRENDER_BMD)
             p.bmdActiveObserver = ftk::Observer<bool>::create(
                 app->getBMDOutputDevice()->observeActive(),
                 [this](bool value)
                 {
-                    _deviceUpdate(value);
+                    _p->outputDeviceLabel->setBackgroundRole(
+                        value ?
+                        ftk::ColorRole::Checked :
+                        ftk::ColorRole::None);
                 });
 #endif // TLRENDER_BMD
         }
@@ -163,8 +239,16 @@ namespace djv
             {
                 tool = Tool::Info;
             }
+            else if (ftk::contains(p.colorControlsLabel->getGeometry(), event.pos))
+            {
+                tool = Tool::Color;
+            }
+            else if (ftk::contains(p.audioSyncLabel->getGeometry(), event.pos))
+            {
+                tool = Tool::Audio;
+            }
 #if defined(TLRENDER_BMD)
-            else if (ftk::contains(p.deviceActiveIcon->getGeometry(), event.pos))
+            else if (ftk::contains(p.outputDeviceLabel->getGeometry(), event.pos))
             {
                 tool = Tool::Devices;
             }
@@ -187,17 +271,15 @@ namespace djv
             {
                 switch (i.type)
                 {
+                case ftk::LogType::Warning:
                 case ftk::LogType::Error:
                 {
-                    const std::string s = ftk::getLabel(i, true);
-                    p.logLabel->setText(s);
-                    p.logLabel->setTooltip(s);
+                    p.logLabel->setText(ftk::getLabel(i, true));
                     p.logTimer->start(
                         std::chrono::seconds(5),
                         [this]
                         {
                             _p->logLabel->setText(std::string());
-                            _p->logLabel->setTooltip(std::string());
                         });
                     break;
                 }
@@ -209,6 +291,13 @@ namespace djv
         void StatusBar::_infoUpdate(const ftk::Path& path, const tl::io::Info& info)
         {
             FTK_P();
+            static const std::string tooltipFormat =
+                "{0}\n"
+                "\n"
+                "Click to open information tool.";
+            static const std::string tooltipDefault =
+                "Display information about the current file.";
+
             std::vector<std::string> s;
             s.push_back(ftk::elide(path.getFileName()));
             if (!info.video.empty())
@@ -229,13 +318,13 @@ namespace djv
                     arg(info.audio.sampleRate / 1000)));
             }
             const std::string text = ftk::join(s, ", ");
-            p.infoLabel->setText(text);
+            p.infoLabel->setText(!text.empty() ? text : "-");
 
-            std::vector<std::string> t;
-            t.push_back(path.get());
+            s.clear();
+            s.push_back(path.get());
             if (!info.video.empty())
             {
-                t.push_back(std::string(
+                s.push_back(std::string(
                     ftk::Format("Video: {0}x{1}:{2} {3}").
                     arg(info.video[0].size.w).
                     arg(info.video[0].size.h).
@@ -244,23 +333,29 @@ namespace djv
             }
             if (info.audio.isValid())
             {
-                t.push_back(std::string(
+                s.push_back(std::string(
                     ftk::Format("Audio: {0} {1} {2} {3}kHz").
                     arg(info.audio.channelCount).
                     arg(1 == info.audio.channelCount ? "channel" : "channels").
                     arg(info.audio.dataType).
                     arg(info.audio.sampleRate / 1000)));
             }
-            const std::string tooltip = ftk::join(t, "\n");
-            p.infoLabel->setTooltip(tooltip);
+            const std::string tooltip = ftk::join(s, "\n");
+            p.infoLabel->setTooltip(ftk::Format(tooltipFormat).
+                arg(!tooltip.empty() ? tooltip : tooltipDefault));
         }
 
-        void StatusBar::_deviceUpdate(bool value)
+        void StatusBar::_colorControlsUpdate()
         {
             FTK_P();
-#if defined(TLRENDER_BMD)
-            p.deviceActiveIcon->setBackgroundRole(value ? ftk::ColorRole::Checked : ftk::ColorRole::None);
-#endif // TLRENDER_BMD  
+            const bool enabled =
+                p.ocioOptionsEnabled    ||
+                p.lutOptionsEnabled     ||
+                p.displayOptionsEnabled;
+            p.colorControlsLabel->setBackgroundRole(
+                enabled ?
+                ftk::ColorRole::Checked :
+                ftk::ColorRole::None);
         }
     }
 }
