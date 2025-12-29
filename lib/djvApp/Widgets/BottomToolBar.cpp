@@ -43,9 +43,9 @@ namespace djv
             std::shared_ptr<tl::ui::TimeEdit> currentTimeEdit;
             std::shared_ptr<tl::ui::TimeLabel> durationLabel;
             std::shared_ptr<ftk::DoubleEdit> speedEdit;
-            std::shared_ptr<ftk::Label> speedMultLabel;
             std::shared_ptr<ftk::ToolButton> speedButton;
             std::shared_ptr<SpeedPopup> speedPopup;
+            std::shared_ptr<ftk::Label> speedMultLabel;
             std::shared_ptr<ftk::ComboBox> timeUnitsComboBox;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<AudioPopup> audioPopup;
@@ -112,13 +112,15 @@ namespace djv
 
             p.speedEdit = ftk::DoubleEdit::create(context, p.speedModel);
             p.speedEdit->setTooltip("Current playback speed");
+
+            p.speedButton = ftk::ToolButton::create(context, "FPS");
+            p.speedButton->setIcon("MenuArrow");
+            p.speedButton->setTooltip("Playback speed");
+
             p.speedMultLabel = ftk::Label::create(context);
             p.speedMultLabel->setFontRole(ftk::FontRole::Mono);
             p.speedMultLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.speedMultLabel->setTooltip("Playback speed multiplier");
-            p.speedButton = ftk::ToolButton::create(context, "FPS");
-            p.speedButton->setIcon("MenuArrow");
-            p.speedButton->setTooltip("Playback speed");
 
             p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::timeline::getTimeUnitsLabels());
             p.timeUnitsComboBox->setTooltip("Time units");
@@ -148,8 +150,8 @@ namespace djv
             hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.speedEdit->setParent(hLayout);
-            p.speedMultLabel->setParent(hLayout);
             p.speedButton->setParent(hLayout);
+            p.speedMultLabel->setParent(hLayout);
             p.timeUnitsComboBox->setParent(p.layout);
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
             spacer->setHStretch(ftk::Stretch::Expanding);
@@ -364,11 +366,11 @@ namespace djv
             }
             else
             {
-                p.speedModel->setValue(0.0);
-                p.speedMultLabel->setText("1X");
-                p.speedMultLabel->setBackgroundRole(ftk::ColorRole::None);
                 p.currentTimeEdit->setValue(tl::time::invalidTime);
                 p.durationLabel->setValue(tl::time::invalidTime);
+                p.speedModel->setValue(0.0);
+                p.speedMultLabel->setText("1.0X");
+                p.speedMultLabel->setBackgroundRole(ftk::ColorRole::None);
             }
 
             p.playbackShuttle->setEnabled(p.player.get());
@@ -376,8 +378,8 @@ namespace djv
             p.currentTimeEdit->setEnabled(p.player.get());
             p.durationLabel->setEnabled(p.player.get());
             p.speedEdit->setEnabled(p.player.get());
-            p.speedMultLabel->setEnabled(p.player.get());
             p.speedButton->setEnabled(p.player.get());
+            p.speedMultLabel->setEnabled(p.player.get());
         }
 
         void BottomToolBar::_showSpeedPopup()
