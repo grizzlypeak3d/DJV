@@ -13,6 +13,9 @@ namespace djv
             const std::shared_ptr<IWidget>& parent)
         {
             ToolBar::_init(context, ftk::Orientation::Horizontal, parent);
+
+            setMarginRole(ftk::SizeRole::MarginInside);
+
             auto tmp = actions;
             addAction(tmp["Open"]);
             addAction(tmp["OpenAudio"]);

@@ -32,6 +32,8 @@ namespace djv
             ToolBar::_init(context, ftk::Orientation::Horizontal, parent);
             FTK_P();
 
+            setMarginRole(ftk::SizeRole::MarginInside);
+
             auto actions = viewActions->getActions();
             addAction(actions["Frame"]);
 

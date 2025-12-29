@@ -14,7 +14,6 @@ namespace djv
         struct PlaybackActions::Private
         {
             std::shared_ptr<tl::timeline::Player> player;
-            tl::timeline::Playback toggle = tl::timeline::Playback::Forward;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::Playback> > playbackObserver;
@@ -71,16 +70,7 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        const tl::timeline::Playback playback = p.player->getPlayback();
-                        if (tl::timeline::Playback::Stop == playback)
-                        {
-                            p.player->setPlayback(p.toggle);
-                        }
-                        else
-                        {
-                            p.toggle = playback;
-                            p.player->stop();
-                        }
+                        p.player->togglePlayback();
                     }
                 });
 

@@ -15,6 +15,9 @@ namespace djv
             const std::shared_ptr<IWidget>& parent)
         {
             ToolBar::_init(context, ftk::Orientation::Horizontal, parent);
+
+            setMarginRole(ftk::SizeRole::MarginInside);
+
             auto tools = getToolsInToolbar();
             auto tmp = actions;
             for (const auto tool : tools)

@@ -14,6 +14,8 @@ namespace djv
         {
             ToolBar::_init(context, ftk::Orientation::Horizontal, parent);
 
+            setMarginRole(ftk::SizeRole::MarginInside);
+
             auto tmp = actions;
             addAction(tmp["FullScreen"]);
             addAction(tmp["Secondary"]);
