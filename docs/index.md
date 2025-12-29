@@ -1,8 +1,8 @@
 # ![Main Window](assets/DJV_Icon_32.svg) DJV
 
 DJV is an open source application for media playback and review. DJV can
-playback high resolution image sequences in real time, with audio, A/B
-comparison, color management, and more.
+playback high resolution image sequences and movies in real time, with
+audio, A/B comparison, color management, and more.
 
 Features include:
 * Support for high resolution and high bit depth images
@@ -12,8 +12,6 @@ Features include:
 * Multi-track audio with variable speed and reverse playback
 * Experimental support for USD files
 * Available for Linux, macOS, and Windows
-
-[GitHub](https://github.com/grizzlypeak3d/DJV)
 
 <br>
 
@@ -35,7 +33,6 @@ Features include:
 10. [Settings](#settings)
 11. [Keyboard Shortcuts](#shortcuts)
 12. [Troubleshooting](#trouble_shoot)
-13. [Building from Source](#build)
 
 
 <br><br><a name="install"></a>
@@ -60,30 +57,23 @@ DJV folder to a convenient location.
 ### macOS
 
 Packages are distributed as macOS disk images. Open the disk image and copy
-DJV to the Applications folder.
+DJV to the "Applications" folder.
 
 
 <br><br><a name="main_window"></a>
 ## Main Window
 
 ![Main Window](assets/MainWindowAnnotated.svg)
-Main window components:
-1. Menu Bar
-2. Tool Bars
-3. Tab Bar - Switch between currently opened files
-4. Viewport
-5. Timeline
-6. Bottom Tool Bar
-7. Tool Widget
-8. Status Bar - Errors and information about the current file
+
+Main window:
+1. Tab Bar - Switch between currently opened files
+2. Viewport - View of the current file
+3. Timeline - Time scrubbing, thumbnails, and audio waveforms
+4. Playback - Playback and frame controls
+5. Tool - Current tool (e.g. color picker or magnifier)
+6. Status Bar - Warnings and errors, information about the current file, indicators
 
 Components can be toggled on and off from the **Window** menu.
-
-Splitters can be used to change the size of the components:
-![Main Window](assets/MainWindowSplitters.svg)
-
-Note that the vertical splitter is only shown when the timeline is not
-minimized.
 
 Full screen mode can be enabled from the **Window** menu.
 
@@ -98,31 +88,44 @@ The viewport shows a view of the current file. The view can be panned, zoomed,
 or "framed" so the image fills the view.
 
 Viewport controls:
-* Pan - **Ctrl** + mouse click and drag
+* Pan - Middle mouse button
 * Zoom - Mouse wheel or keyboard shortcuts **-** and **=**
 * Frame view - Keyboard shortcut **Backspace**
-* Wipe in compare mode - **Alt** + mouse click and drag
-* Color picker - Mouse click
-* Frame shuttle - Mouse click and drag
+* Wipe in compare mode - **Alt** + left mouse button
+* Color picker - **Ctrl** + left mouse button
+* Frame shuttle - Left mouse button
 
 The viewport controls can be customized in the **Settings** tool.
 
-The bit depth of the viewport can be set in the **View** tool with the buffer
-type option. The value **RGBA_U8** will use an 8-bit buffer which is useful for
-lower end GPUs. The values **RGBA_U16** and **RGBA_F32** will use 16-bit and
-floating point buffers respectively.
+The bit depth of the viewport can be set in the **View** tool with the color
+buffer option. The default option of **RGBA F32** is recommended to avoid
+clamping color values. The other opions may be used for extra performance
+but with possible color clamping.
 
 The background color of the viewport can be set in the **View** tool. An
 outline can also be drawn around the image to disinguish it from the
-background, usefull for images with transparency.
+background, which can be useful for images with transparency.
 
 ### Grid
 
-A grid can be enabled from the **View** tool.
+The grid can be enabled from the **View** tool.
 
-One example of using the grid is for examining individual pixels:
+Grid options:
+* Enabled: Toggle the grid on or off
+* Size: Number of pixels between grid lines
+* Line width: Width of the grid lines
+* Color: Color of the grid lines
+* Labels:
+    * None: No labels
+    * Pixels: Pixel positions
+    * Alphanumeric: Letters in the X direction and numbers in the Y direction (e.g., "B 12")
+* Text color: Label text color
+* Overlay color: Label background color
+
 ![View Pixel Grid](assets/ViewPixelGridAnnotated.svg)
-1. Set **Minify** and **Magnify** to **Nearest**
+
+The grid can be used to examine individual pixels with these settings:
+1. Set **Magnify** to **Nearest**
 2. Enable the grid
 3. Set the grid size to one
 
@@ -131,11 +134,12 @@ One example of using the grid is for examining individual pixels:
 Information can be overlaid on the viewport by enabling the HUD (heads up
 display). The HUD can be enabled from the **View** menu.
 
-![Viewport HUD](assets/ViewportHUDAnnotated.svg)
-HUD components:
+![Viewport HUD](assets/ViewHUDAnnotated.svg)
+
+HUD:
 1. Current file name
 2. Current frame
-3. Playback speed
+3. Real playback speed
 4. Number of frames dropped during playback
 5. Color picker
 6. Video cache percentage
@@ -147,14 +151,20 @@ HUD components:
 
 Supported file formats:
 * Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, SGI, TGA, BMP, TIFF
-* Movie codecs: MJPEG, MPEG-2
-* Audio codecs: FLAC, MP3, WAV
+* Default movie codecs: MJPEG, MPEG-2
+* Default audio codecs: FLAC, MP3, WAV
 * Timelines: OTIO, OTIOZ
 * Experimental: USD
 
 Files and folders can be opened from the **File** menu, by dragging and
 dropping onto the main window, or from the command line. Opening a folder will
 open all of the supported files in the folder (non-recursively).
+
+Image sequences can be opened from the command line by either specifying the
+first frame or using the "#" wildcard. For example:
+```
+djv render.#.exr
+```
 
 The native file browser is enabled by default on Windows and macOS. The
 built-in file browser can be enabled in the **Settings** tool.
@@ -175,7 +185,7 @@ changed, it is unloaded from the cache and the new file is loaded.
 ### Layers
 
 For files that contain multiple layers (i.e., OpenEXR), the current layer can
-be changed from the **File/Layers** menu, or the **Files** tool.
+be changed from the **File/Layers** menu or the **Files** tool.
 
 ### Files Tool
 
@@ -185,9 +195,10 @@ compare options.
 The **Files** tool can be shown from the **Tools** menu or the tool bar.
 
 ![Files Tool](assets/FilesToolAnnotated.svg)
-Files tool components:
-1. The current, or **A**, file
-2. The **B** file(s)
+
+Files tool:
+1. The current file (**A** file)
+2. The **B** files (multiple "B" files may be set for tile mode)
 3. The current layer of the file
 4. Compare mode
 5. Compare time
@@ -203,14 +214,14 @@ the file extensions to search for (e.g., ".wav .mp3"), or providing a specific
 file name.
 
 To explicitly add audio to an image sequence use the
-**File/Open With Separate Audio** menu.
+**File/Open With Audio** menu.
 
 ### USD
 
-There is experimental support for USD files. The USD file is rendered to an
-image sequence with the Hydra renderer.
+USD file support is currently experimental. When a USD file is opened it
+is rendered to an image sequence with the Hydra renderer.
 
-The camera used to render the scene, in order of priority:
+The camera used to render the scene will be chosen in this order:
 1. If the USD file is referenced from an OTIO file, the name of the clip
 2. The primary camera in the scene
 3. The first camera found in the scene
@@ -220,8 +231,9 @@ The camera used to render the scene, in order of priority:
 <br><br><a name="playback"></a>
 ## Playback and Frame Control
 
-Playback and frame controls on the bottom tool bar:
 ![Playback Controls](assets/PlaybackControlsAnnotated.svg)
+
+Playback and frame controls:
 1. Playback controls
 2. Playback shuttle - Click and drag to change playback speed
 3. Frame controls
@@ -229,7 +241,13 @@ Playback and frame controls on the bottom tool bar:
 5. Current frame
 6. Duration
 7. Current speed
-8. Time units (frames, seconds, timecode)
+8. Speed multiplier
+9. Time units (e.g., frames or timecode)
+
+The playback speed can be changed momentarily by clicking forward or reverse
+multiple times. The speed will accelerate 2X with each click, and can be
+slowed down by clicking the opposite playback direction. The speed "multiplier"
+is displayed with the other playback controls.
 
 In and out points can be set frome the **Playback** menu to limit playback to a
 section of the timeline.
@@ -246,7 +264,8 @@ track. To see all of the tracks in the timeline, toggle the minimized state
 available from the **Timeline** menu.
 
 ![Timeline](assets/TimelineAnnotated.svg)
-Timeline components:
+
+Timeline:
 1. Current frame
 2. In/out range (blue)
 3. Video cache display (green)
@@ -256,11 +275,11 @@ Timeline components:
 7. Audio track
 8. Audio clips
 
-Controls:
-* Change the current frame - Mouse click and drag
+Timeline controls:
+* Change the current frame - Left mouse button
 * Zoom - Mouse wheel or keyboard shortcuts **-** and **=**
 * Frame view - Keyboard shortcut **Backspace**
-* Pan - **Ctrl** + mouse click and drag
+* Pan - Middle mouse button
 
 The size of the timeline thumbnails can be set from the **Timeline** menu.
 Thumbnails can also be disabled to improve performance.
@@ -286,14 +305,14 @@ Multiple **B** files can be viewed with **Tile** mode.
 
 One example use for **Tile** mode is to simultaneously view multiple layers
 within a file. Open the file multiple times and set the current layer for
-each instance. Set one of the files as current, or the **A** file, and the
-rest as **B** files, and enable **Tile** compare mode.
+each instance. Then enable **Tile** compare mode and set the "B" files.
 
 ![Tile Mode](assets/FilesToolTileAnnotated.svg)
+
 Compare multiple layers:
-1. Set the current, or **A**, file and layer
-2. Set multiple **B** files and their layers
-3. Set the compare mode to **Tile**
+1. Set the compare mode to **Tile**
+2. Set the current file and layer
+3. Set multiple **B** files and their layers
 
 Files can be compared in relative or absolute time mode. In relative time mode
 the time of the **B** file will be offset to match the start of the **A** file.
@@ -310,13 +329,15 @@ levels.
 The **Color** tool can be shown from the **Tools** menu or the tool bar.
 
 ![Color Tool](assets/ColorToolAnnotated.svg)
+
 OpenColorIO options:
 1. Enable OpenColorIO
 2. OpenColorIO configuration
-3. Input color space
-4. Display color space
-5. View color space
-6. Look color space
+3. Configuration name
+4. Input color space
+5. Display color space
+6. View color space
+7. Look color space
 
 The OpenColorIO configuration can be set to a built-in configuration, the
 **OCIO** environment variable, or a file name.
@@ -334,7 +355,8 @@ sequence, a movie, or the current frame as a still image.
 The **Export** tool can be shown from the **Tools** menu or the tool bar.
 
 ![Export Tool](assets/ExportToolAnnotated.svg)
-Export components:
+
+Export:
 1. Output directory
 2. Render size
 3. File type
@@ -367,10 +389,13 @@ Keyboard shorcuts can be customized in the **Settings** tool.
 The **Settings** tool can be shown from the **Tools** menu or the tool bar.
 
 ![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.svg)
-Keyboard shortcuts components:
+
+Keyboard shortcuts:
 1. Keyboard shortcuts settings
-2. Shortcut with keyboard focus
-3. Conflicting shortcuts
+2. Seach shortcuts
+3. Shortcut with keyboard focus
+4. Secondary shortcut
+5. Conflicting shortcuts
 
 To set a shortcut, click the shortcut widget or use the tab key to give it
 keyboard focus, then type the new shortcut. The widget will turn red if the
@@ -389,110 +414,6 @@ for are any errors:
 djv -log
 ```
 
-Try resetting the settings:
-* Delete the ****DJV** folder in your **Documents** directory
+Reset the settings:
+* Delete the **DJV** folder in your **Documents** directory
 * Or pass the **-resetSettings** flag on the command line
-
-
-<br><br><a name="build"></a>
-## Building from Source
-
-A CMake "super build" script is provided to build DJV and all of the
-dependencies.
-
-### Building on Linux
-
-Dependencies:
-* CMake 3.31
-
-Install system packages (Debian based systems):
-```
-sudo apt-get install xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev
-```
-
-Install system packages (Rocky 9):
-```
-sudo dnf install libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel
-```
-
-Clone the repository:
-```
-git clone https://github.com/grizzlypeak3d/DJV.git
-```
-
-Run the super build script:
-```
-sh DJV/sbuild-linux.sh
-```
-
-Run the application:
-```
-build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg
-```
-
-### Building on macOS
-
-Dependencies:
-* Xcode
-* CMake 3.31
-
-Clone the repository:
-```
-git clone https://github.com/grizzlypeak3d/DJV.git
-```
-
-Run the super build script:
-```
-sh DJV/sbuild-macos.sh
-```
-
-Run the application:
-```
-build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg
-```
-
-The CMake variable `CMAKE_OSX_ARCHITECTURES` can be used to specify the build
-architecture:
-```
--DCMAKE_OSX_ARCHITECTURES=x86_64
-```
-```
--DCMAKE_OSX_ARCHITECTURES=arm64
-```
-
-These aliases are convenient for switching between architectures:
-```
-alias arm="env /usr/bin/arch -arm64 /bin/zsh --login"
-alias intel="env /usr/bin/arch -x86_64 /bin/zsh --login"
-```
-
-### Building on Windows
-
-Dependencies:
-* Visual Studio 2022
-* CMake 3.31
-* MSYS2 (https://www.msys2.org) for compiling FFmpeg.
-* Strawberry Perl (https://strawberryperl.com/) for compiling network support.
-* Python 3.11 for compiling USD.
-* NSIS (https://nsis.sourceforge.io/Main_Page) for packaging.
-
-Open the Visual Studio command console "x64 Native Tools Command Prompt for VS 2022".
-This can be found in the Start menu, in the "Visual Studio 2022" folder.
-
-Clone the repository:
-```
-git clone https://github.com/grizzlypeak3d/DJV.git
-```
-
-Run the super build script:
-```
-DJV\sbuild-win.bat
-```
-
-Run the application:
-```
-set PATH=%CD%\install-Release\bin;%PATH%
-```
-```
-build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg
-```
