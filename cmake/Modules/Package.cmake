@@ -5,7 +5,7 @@ endif()
 string(TOLOWER
     djv-${DJV_VERSION_FULL}-${SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}
     CPACK_PACKAGE_FILE_NAME)
-set(CPACK_PACKAGE_DESCRIPTION "DJV is an open source application for playback and review of image sequences.")
+set(CPACK_PACKAGE_DESCRIPTION "DJV is an open source application for media playback and review.")
 set(CPACK_RESOURCE_FILE_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.txt)
 set(CPACK_PACKAGE_EXECUTABLES djv "DJV ${DJV_VERSION_FULL}")
 set(CPACK_PACKAGE_VENDOR "Grizzly Peak 3D")

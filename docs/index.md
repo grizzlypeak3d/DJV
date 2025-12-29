@@ -1,8 +1,8 @@
 # ![Main Window](assets/DJV_Icon_32.svg) DJV
 
-DJV is an open source application for playback and review of image
-sequences. DJV can playback high resolution image sequences in real
-time, with audio, A/B comparison, and color management.
+DJV is an open source application for media playback and review. DJV can
+playback high resolution image sequences in real time, with audio, A/B
+comparison, color management, and more.
 
 Features include:
 * Support for high resolution and high bit depth images

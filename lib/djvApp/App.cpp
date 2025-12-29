@@ -291,7 +291,7 @@ namespace djv
                 context,
                 argv,
                 appName,
-                "Playback and review image sequences.",
+                "Media playback and review.",
                 { p.cmdLine.inputs },
                 {
                     p.cmdLine.audioFileName,

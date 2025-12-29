@@ -16,7 +16,7 @@ add_definitions(-DDJV_VERSION_FULL="${DJV_VERSION_FULL}")
 project(
     DJV
     VERSION ${DJV_VERSION_MAJOR}.${DJV_VERSION_MINOR}.${DJV_VERSION_PATCH}
-    DESCRIPTION "DJV is an open source application for playback and review of image sequences."
+    DESCRIPTION "DJV is an open source application for media playback and review."
     HOMEPAGE_URL "https://github.com/grizzlypeak3d/DJV"
     LANGUAGES CXX)
 

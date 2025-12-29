@@ -16,6 +16,8 @@ Features:
 * Hide the path for the OCIO and LUT file names in the color tool.
 * Add a magnify tool.
 * Add grid labels.
+* The playback speed can be increased and decreased by pressing forward or
+  reverse multiple times.
 * Library updates:
     - SDL2 release-2.32.10
 
