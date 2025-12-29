@@ -59,7 +59,7 @@ namespace djv
                     for (const auto& item : value)
                     {
                         p.tabBar->addTab(
-                            ftk::elide(item->path.getFileName()),
+                            item->path.getFileName(),
                             item->path.get());
                     }
                     p.tabBar->setCurrentTab(p.aIndex);

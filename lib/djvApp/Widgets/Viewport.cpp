@@ -436,7 +436,7 @@ namespace djv
         {
             FTK_P();
 
-            p.fileNameLabel->setText(ftk::elide(p.path.getFileName()));
+            p.fileNameLabel->setText(p.path.getFileName());
 
             std::string s;
             if (auto app = p.app.lock())
