@@ -29,7 +29,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > backgroundOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > bgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
         };
 
@@ -88,11 +89,18 @@ namespace djv
                     _p->viewport->setDisplayOptions({ value });
                 });
 
-            p.backgroundOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
+            p.bgOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
                 app->getViewportModel()->observeBackgroundOptions(),
                 [this](const tl::timeline::BackgroundOptions& value)
                 {
                     _p->viewport->setBackgroundOptions(value);
+                });
+
+            p.fgOptionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
+                app->getViewportModel()->observeForegroundOptions(),
+                [this](const tl::timeline::ForegroundOptions& value)
+                {
+                    _p->viewport->setForegroundOptions(value);
                 });
 
             p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
