@@ -115,6 +115,7 @@ namespace djv
                 Shortcut("Compare/Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Shift))),
                 Shortcut("Compare/A", "A", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Compare/B", "B", ftk::KeyShortcut(ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("Compare/ABToggle", "A/B Toggle", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Alt))),
                 Shortcut("Compare/Wipe", "Wipe", ftk::KeyShortcut(ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Compare/Overlay", "Overlay"),
                 Shortcut("Compare/Difference", "Difference"),

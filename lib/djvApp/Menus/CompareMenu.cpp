@@ -37,11 +37,15 @@ namespace djv
             addAction(actions["Next"]);
             addAction(actions["Prev"]);
             addDivider();
-            const auto compareLabels = tl::timeline::getCompareLabels();
-            for (const auto& label : compareLabels)
-            {
-                addAction(actions[label]);
-            }
+            addAction(actions["A"]);
+            addAction(actions["B"]);
+            addAction(actions["ABToggle"]);
+            addAction(actions["Wipe"]);
+            addAction(actions["Overlay"]);
+            addAction(actions["Difference"]);
+            addAction(actions["Horizontal"]);
+            addAction(actions["Vertical"]);
+            addAction(actions["Tile"]);
             addDivider();
             p.menus["Time"] = addSubMenu("Time");
             const auto timeLabels = tl::timeline::getCompareTimeLabels();

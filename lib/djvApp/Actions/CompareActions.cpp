@@ -151,6 +151,27 @@ namespace djv
                     }
                 });
 
+            _actions["ABToggle"] = ftk::Action::create(
+                "A/B Toggle",
+                [appWeak]
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getFilesModel()->getCompareOptions();
+                        switch (options.compare)
+                        {
+                        case tl::timeline::Compare::A:
+                            options.compare = tl::timeline::Compare::B;
+                            break;
+                        case tl::timeline::Compare::B:
+                        default:
+                            options.compare = tl::timeline::Compare::A;
+                            break;
+                        }
+                        app->getFilesModel()->setCompareOptions(options);
+                    }
+                });
+
             _actions["Relative"] = ftk::Action::create(
                 "Relative",
                 [appWeak]
