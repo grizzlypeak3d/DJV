@@ -71,7 +71,7 @@ Main window:
 3. Timeline - Time scrubbing, thumbnails, and audio waveforms
 4. Playback - Playback and frame controls
 5. Tool - Current tool (e.g. color picker or magnifier)
-6. Status Bar - Warnings and errors, information about the current file, and
+6. Status Bar - Warnings, errors, information about the current file, and
    status indicators
 
 Parts of the user interface can be toggled on and off from the **Window** menu.
