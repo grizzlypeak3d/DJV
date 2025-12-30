@@ -7,19 +7,12 @@
 
 #include <ftk/UI/Window.h>
 
-namespace tl
-{
-    namespace ui
-    {
-        class Viewport;
-    }
-}
-
 namespace djv
 {
     namespace app
     {
         class App;
+        class Viewport;
 
         //! Secondary window.
         class SecondaryWindow : public ftk::Window
@@ -43,7 +36,7 @@ namespace djv
                 const std::shared_ptr<ftk::Window>& shared = nullptr);
 
             //! Get the viewport.
-            const std::shared_ptr<tl::ui::Viewport>& getViewport() const;
+            const std::shared_ptr<Viewport>& getViewport() const;
 
             //! Set the view.
             void setView(
