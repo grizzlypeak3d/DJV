@@ -115,8 +115,8 @@ separate values for video, audio, and "read behind". The "read behind"
 value is the number of seconds that are read before the current frame. This
 is useful to ensure frames are cached when scrubbing.
 
-Only the current file is stored in the cache. When the current file is
-changed, it is unloaded from the cache and the new file is loaded.
+Only the current file is stored in the cache. When the current file is changed,
+it is cleared from the cache and the new file is loaded into the cache.
 
 ### Layers
 
@@ -133,9 +133,9 @@ The **Files** tool can be shown from the **Tools** menu or the tool bar.
 ![Files Tool](assets/FilesToolAnnotated.svg)
 
 Files tool:
-1. The current file (**A** file)
-2. The **B** files (multiple "B" files may be set for tile mode)
-3. The current layer of the file
+1. Current file (**A** file)
+2. **B** files (multiple "B" files may be set for tile mode)
+3. Current layer
 4. Compare mode
 5. Compare time
 6. Compare options
