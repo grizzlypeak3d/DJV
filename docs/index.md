@@ -23,8 +23,8 @@ Features include:
 
 1. [Download and Install](#install)
 2. [Main Window](#main_window)
+4. [Files](#files)
 3. [Viewport](#viewport)
-4. [Working with Files](#files)
 5. [Playback and Frame Control](#playback)
 6. [Timeline](#timeline)
 7. [A/B Comparison](#compare)
@@ -73,81 +73,16 @@ Main window:
 5. Tool - Current tool (e.g. color picker or magnifier)
 6. Status Bar - Warnings and errors, information about the current file, indicators
 
-Components can be toggled on and off from the **Window** menu.
+Parts of the user interface can be toggled on and off from the **Window** menu.
 
 Full screen mode can be enabled from the **Window** menu.
 
-A secondary window can be shown to mirror the viewport on a separate monitor.
+A secondary window can be used to mirror the viewport on a separate monitor.
 The secondary window can be shown from the **Window** menu.
 
 
-<br><br><a name="viewport"></a>
-## Viewport
-
-The viewport shows a view of the current file. The view can be panned, zoomed,
-or "framed" so the image fills the view.
-
-Viewport controls:
-* Pan - Middle mouse button
-* Zoom - Mouse wheel or keyboard shortcuts **-** and **=**
-* Frame view - Keyboard shortcut **Backspace**
-* Wipe in compare mode - **Alt** + left mouse button
-* Color picker - **Ctrl** + left mouse button
-* Frame shuttle - Left mouse button
-
-The viewport controls can be customized in the **Settings** tool.
-
-The bit depth of the viewport can be set in the **View** tool with the color
-buffer option. The default option of **RGBA F32** is recommended to avoid
-clamping color values. The other opions may be used for extra performance
-but with possible color clamping.
-
-The background color of the viewport can be set in the **View** tool. An
-outline can also be drawn around the image to disinguish it from the
-background, which can be useful for images with transparency.
-
-### Grid
-
-The grid can be enabled from the **View** tool.
-
-Grid options:
-* Enabled: Toggle the grid on or off
-* Size: Number of pixels between grid lines
-* Line width: Width of the grid lines
-* Color: Color of the grid lines
-* Labels:
-    * None: No labels
-    * Pixels: Pixel positions
-    * Alphanumeric: Letters in the X direction and numbers in the Y direction (e.g., "B 12")
-* Text color: Label text color
-* Overlay color: Label background color
-
-![View Pixel Grid](assets/ViewPixelGridAnnotated.svg)
-
-The grid can be used to examine individual pixels with these settings:
-1. Set **Magnify** to **Nearest**
-2. Enable the grid
-3. Set the grid size to one
-
-### HUD
-
-Information can be overlaid on the viewport by enabling the HUD (heads up
-display). The HUD can be enabled from the **View** menu.
-
-![Viewport HUD](assets/ViewHUDAnnotated.svg)
-
-HUD:
-1. Current file name
-2. Current frame
-3. Real playback speed
-4. Number of frames dropped during playback
-5. Color picker
-6. Video cache percentage
-7. Audio cache percentage
-
-
 <br><br><a name="files"></a>
-## Working with Files
+## Files
 
 Supported file formats:
 * Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, SGI, TGA, BMP, TIFF
@@ -226,6 +161,71 @@ The camera used to render the scene will be chosen in this order:
 2. The primary camera in the scene
 3. The first camera found in the scene
 4. A temporary camera is created that frames the scene
+
+
+<br><br><a name="viewport"></a>
+## Viewport
+
+The viewport shows a view of the current file. The view can be panned, zoomed,
+or "framed" so the image fills the view.
+
+Viewport controls:
+* Pan - Middle mouse button
+* Zoom - Mouse wheel or keyboard shortcuts **-** and **=**
+* Frame view - Keyboard shortcut **Backspace**
+* Wipe in compare mode - **Alt** + left mouse button
+* Color picker - **Ctrl** + left mouse button
+* Frame shuttle - Left mouse button
+
+The viewport controls can be customized in the **Settings** tool.
+
+The bit depth of the viewport can be set in the **View** tool with the color
+buffer option. The default option of **RGBA F32** is recommended to avoid
+clamping color values. The other opions may be used for extra performance
+but with possible color clamping.
+
+The background color of the viewport can be set in the **View** tool. An
+outline can also be drawn around the image to disinguish it from the
+background, which can be useful for images with transparency.
+
+### Grid
+
+The grid can be enabled from the **View** tool.
+
+Grid options:
+* Enabled: Toggle the grid on or off
+* Size: Number of pixels between grid lines
+* Line width: Width of the grid lines
+* Color: Color of the grid lines
+* Labels:
+    * None: No labels
+    * Pixels: Pixel positions
+    * Alphanumeric: Letters in the X direction and numbers in the Y direction (e.g., "B 12")
+* Text color: Label text color
+* Overlay color: Label background color
+
+![View Pixel Grid](assets/ViewPixelGridAnnotated.svg)
+
+The grid can be used to examine individual pixels with these settings:
+1. Set **Magnify** to **Nearest**
+2. Enable the grid
+3. Set the grid size to one
+
+### HUD
+
+Information can be overlaid on the viewport by enabling the HUD (heads up
+display). The HUD can be enabled from the **View** menu.
+
+![Viewport HUD](assets/ViewHUDAnnotated.svg)
+
+HUD:
+1. Current file name
+2. Current frame
+3. Real playback speed
+4. Number of frames dropped during playback
+5. Color picker
+6. Video cache percentage
+7. Audio cache percentage
 
 
 <br><br><a name="playback"></a>
