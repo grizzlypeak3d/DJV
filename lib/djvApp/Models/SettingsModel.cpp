@@ -266,7 +266,7 @@ namespace djv
             MouseAction,
             "Pan View",
             "Compare Wipe",
-            "Color Picker",
+            "Pick",
             "Frame Shuttle");
 
         MouseActionBinding::MouseActionBinding(
