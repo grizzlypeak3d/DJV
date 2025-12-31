@@ -5,18 +5,20 @@ if (WIN32)
     list(APPEND SOURCE win.rc)
 endif()
 
+set(DJV_BIN djv)
 set(INSTALL_DIR bin)
 if(APPLE AND DJV_MACOS_PACKAGE)
+    set(DJV_BIN DJV)
     # \bug Why do we need to use ".." to avoid installing into the
     # "Resources" directory in the bundle?
     set(INSTALL_DIR ../MacOS)
 endif()
 
-add_executable(djv WIN32 ${HEADER} ${SOURCE})
-target_link_libraries(djv djvApp)
-set_target_properties(djv PROPERTIES FOLDER bin)
+add_executable(${DJV_BIN} WIN32 ${HEADER} ${SOURCE})
+target_link_libraries(${DJV_BIN} djvApp)
+set_target_properties(${DJV_BIN} PROPERTIES FOLDER bin)
 
-install(TARGETS djv DESTINATION ${INSTALL_DIR})
+install(TARGETS ${DJV_BIN} DESTINATION ${INSTALL_DIR})
 
 if(WIN32)
     add_executable(djv. ${HEADER} ${SOURCE})

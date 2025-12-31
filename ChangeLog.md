@@ -1,3 +1,9 @@
+## 3.3.1
+
+Fixes:
+* macOS package fixes.
+
+
 ## 3.3.0
 
 Features:
