@@ -13,8 +13,10 @@
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/ComboBox.h>
+#include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/Settings.h>
+#include <ftk/Core/Format.h>
 
 namespace djv
 {
@@ -54,6 +56,7 @@ namespace djv
 
             std::shared_ptr<tl::ui::Viewport> viewport;
             std::shared_ptr<ftk::ComboBox> comboBox;
+            std::shared_ptr<ftk::Label> label;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
             std::shared_ptr<ftk::ListObserver<tl::timeline::VideoData> > videoDataObserver;
@@ -67,6 +70,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<MouseSettings> > settingsObserver;
         };
 
         void MagnifyTool::_init(
@@ -95,6 +99,8 @@ namespace djv
 
             p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
 
+            p.label = ftk::Label::create(context);
+
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
             p.viewport->setParent(layout);
@@ -102,6 +108,8 @@ namespace djv
             hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.comboBox->setParent(hLayout);
+            hLayout->addSpacer(ftk::Stretch::Expanding);
+            p.label->setParent(hLayout);
             _setWidget(layout);
 
             p.comboBox->setIndexCallback(
@@ -218,6 +226,27 @@ namespace djv
                 {
                     FTK_P();
                     p.viewport->setColorBuffer(value);
+                });
+
+            p.settingsObserver = ftk::Observer<MouseSettings>::create(
+                app->getSettingsModel()->observeMouse(),
+                [this](const MouseSettings& value)
+                {
+                    std::vector<std::string> s;
+                    auto i = value.bindings.find(MouseAction::Pick);
+                    if (i != value.bindings.end())
+                    {
+                        if (i->second.button != ftk::MouseButton::None)
+                        {
+                            if (i->second.modifier != ftk::KeyModifier::None)
+                            {
+                                s.push_back(ftk::to_string(i->second.modifier));
+                            }
+                            s.push_back(ftk::getLabel(i->second.button));
+                        }
+                    }
+                    _p->label->setText(ftk::Format("Mouse binding: {0} Click").
+                        arg(ftk::join(s, " + ")));
                 });
         }
 
