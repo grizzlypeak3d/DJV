@@ -623,19 +623,6 @@ namespace djv
 
             p.model = app->getSettingsModel();
 
-            std::vector<std::string> mouseActionLabels;
-            mouseActionLabels.push_back("Pan view");
-            mouseActionLabels.push_back("Compare wipe");
-            mouseActionLabels.push_back("Color picker");
-            mouseActionLabels.push_back("Frame shuttle");
-
-            p.buttonLabels.push_back("None");
-            p.buttonLabels.push_back("Left");
-            p.buttonLabels.push_back("Middle");
-            p.buttonLabels.push_back("Right");
-            p.buttonLabels.push_back("Extra 1");
-            p.buttonLabels.push_back("Extra 2");
-
             p.modifiers.push_back(ftk::KeyModifier::None);
             p.modifiers.push_back(ftk::KeyModifier::Shift);
             p.modifiers.push_back(ftk::KeyModifier::Control);
@@ -653,7 +640,9 @@ namespace djv
 
             for (const auto mouseAction : getMouseActionEnums())
             {
-                p.buttonComboBoxes[mouseAction] = ftk::ComboBox::create(context, p.buttonLabels);
+                p.buttonComboBoxes[mouseAction] = ftk::ComboBox::create(
+                    context,
+                    ftk::getMouseButtonLabels());
                 p.buttonComboBoxes[mouseAction]->setHStretch(ftk::Stretch::Expanding);
                 p.modifierComboBoxes[mouseAction] = ftk::ComboBox::create(context, p.modifierLabels);
                 p.modifierComboBoxes[mouseAction]->setHStretch(ftk::Stretch::Expanding);
@@ -675,7 +664,9 @@ namespace djv
                 hLayout->setHStretch(ftk::Stretch::Expanding);
                 p.buttonComboBoxes[mouseAction]->setParent(hLayout);
                 p.modifierComboBoxes[mouseAction]->setParent(hLayout);
-                p.layout->addRow(ftk::Format("{0}:").arg(mouseActionLabels[static_cast<size_t>(mouseAction)]), hLayout);
+                p.layout->addRow(ftk::Format("{0}:").
+                    arg(getMouseActionLabels()[static_cast<size_t>(mouseAction)]),
+                    hLayout);
             }
             p.layout->addRow("Wheel scale:", p.wheelScaleEdit);
             p.layout->addRow("Frame shuttle scale:", p.frameShuttleScaleEdit);
