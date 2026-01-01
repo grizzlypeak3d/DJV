@@ -3,6 +3,8 @@
 Features:
 * Add mouse binding labels to the color picker and magnifier tools.
 * Add status bar indicators for displaying when mirror is enabled.
+* Add the version number to the window title.
+* Add a command line flag to print the version.
 
 Fixes:
 * Fix for keyboard shortcuts search box.
