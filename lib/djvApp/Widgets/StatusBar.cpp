@@ -36,6 +36,8 @@ namespace djv
 
             std::shared_ptr<ftk::Label> logLabel;
             std::shared_ptr<ftk::Label> infoLabel;
+            std::shared_ptr<ftk::Label> mirrorHLabel;
+            std::shared_ptr<ftk::Label> mirrorVLabel;
             std::shared_ptr<ftk::Label> colorControlsLabel;
             std::shared_ptr<ftk::Label> audioSyncLabel;
 #if defined(TLRENDER_BMD)
@@ -84,17 +86,27 @@ namespace djv
             p.infoLabel = ftk::Label::create(context);
             p.infoLabel->setHMarginRole(ftk::SizeRole::MarginInside);
 
+            p.mirrorHLabel = ftk::Label::create(context, "H");
+            p.mirrorHLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+            p.mirrorHLabel->setTooltip(
+                "This indicator displays whether mirror horizontal is enabled.");
+
+            p.mirrorVLabel = ftk::Label::create(context, "V");
+            p.mirrorVLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+            p.mirrorVLabel->setTooltip(
+                "This indicator displays whether mirror vertical is enabled.");
+
             p.colorControlsLabel = ftk::Label::create(context, "CC");
             p.colorControlsLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.colorControlsLabel->setTooltip(
-                "This indicator shows whether color controls are enabled.\n"
+                "This indicator displays whether color controls are enabled.\n"
                 "\n"
                 "Click to open color tool.");
 
             p.audioSyncLabel = ftk::Label::create(context, "AO");
             p.audioSyncLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.audioSyncLabel->setTooltip(
-                "This indicator shows whether the audio sync offset is enabled.\n"
+                "This indicator displays whether the audio sync offset is enabled.\n"
                 "\n"
                 "Click to open audio tool.");
 
@@ -102,7 +114,7 @@ namespace djv
             p.outputDeviceLabel = ftk::Label::create(context, "OD");
             p.outputDeviceLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.outputDeviceLabel->setTooltip(
-                "This indicator shows whether the output device is enabled.\n"
+                "This indicator displays whether the output device is enabled.\n"
                 "\n"
                 "Click to open output device tool.");
 #endif // TLRENDER_BMD
@@ -113,11 +125,11 @@ namespace djv
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
+            p.mirrorHLabel->setParent(p.layout);
+            p.mirrorVLabel->setParent(p.layout);
             p.colorControlsLabel->setParent(p.layout);
-            ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.audioSyncLabel->setParent(p.layout);
 #if defined(TLRENDER_BMD)
-            ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.outputDeviceLabel->setParent(p.layout);
 #endif // TLRENDER_BMD
             //ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
@@ -160,6 +172,14 @@ namespace djv
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
+                    _p->mirrorHLabel->setBackgroundRole(
+                        value.mirror.x ?
+                        ftk::ColorRole::Checked :
+                        ftk::ColorRole::None);
+                    _p->mirrorVLabel->setBackgroundRole(
+                        value.mirror.y ?
+                        ftk::ColorRole::Checked :
+                        ftk::ColorRole::None);
                     _p->displayOptionsEnabled =
                         value.color.enabled      ||
                         value.levels.enabled     ||

@@ -1,3 +1,13 @@
+## 3.3.2
+
+Features:
+* Add mouse binding labels to the color picker and magnifier tools.
+* Add status bar indicators for displaying when mirror is enabled.
+
+Fixes:
+* Fix for keyboard shortcuts search box.
+
+
 ## 3.3.1
 
 Fixes:
