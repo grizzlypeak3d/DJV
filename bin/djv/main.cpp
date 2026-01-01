@@ -32,7 +32,14 @@ FTK_MAIN()
         r = app->getExit();
         if (0 == r)
         {
-            app->run();
+            if (app->hasPrintVersion())
+            {
+                std::cout << DJV_VERSION_FULL << std::endl;
+            }
+            else
+            {
+                app->run();
+            }
         }
     }
     catch(const std::exception& e)

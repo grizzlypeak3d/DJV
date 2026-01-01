@@ -58,6 +58,7 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/Splitter.h>
 #include <ftk/UI/ToolButton.h>
+#include <ftk/Core/Format.h>
 
 namespace djv_resource
 {
@@ -132,7 +133,11 @@ namespace djv
             const std::shared_ptr<App>& app)
         {
             const WindowSettings& settings = app->getSettingsModel()->getWindow();
-            Window::_init(context, app, "djv", settings.size);
+            Window::_init(
+                context,
+                app,
+                ftk::Format("{0} {1}").arg("djv").arg(DJV_VERSION_FULL),
+                settings.size);
             FTK_P();
 
             auto iconSystem = context->getSystem<ftk::IconSystem>();

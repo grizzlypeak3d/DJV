@@ -78,6 +78,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > logFileName;
             std::shared_ptr<ftk::CmdLineFlagOption> resetSettings;
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > settingsFileName;
+            std::shared_ptr<ftk::CmdLineFlagOption> version;
         };
 
         struct App::Private
@@ -286,6 +287,9 @@ namespace djv
                 "Settings file name.",
                 std::string(),
                 ftk::Format("{0}").arg(p.settingsFile.u8string()));
+            p.cmdLine.version = ftk::CmdLineFlagOption::create(
+                { "-version" },
+                "Print the version and exit.");
 
             ftk::App::_init(
                 context,
@@ -322,7 +326,8 @@ namespace djv
 #endif // TLRENDER_USD
                     p.cmdLine.logFileName,
                     p.cmdLine.resetSettings,
-                    p.cmdLine.settingsFileName
+                    p.cmdLine.settingsFileName,
+                    p.cmdLine.version
                 });
         }
 
@@ -518,6 +523,11 @@ namespace djv
             return _p->bmdOutputDevice;
         }
 #endif // TLRENDER_BMD
+
+        bool App::hasPrintVersion() const
+        {
+            return _p->cmdLine.version->found();
+        }
 
         void App::run()
         {

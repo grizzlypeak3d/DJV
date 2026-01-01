@@ -125,6 +125,9 @@ namespace djv
             const std::shared_ptr<tl::bmd::OutputDevice>& getBMDOutputDevice() const;
 #endif // TLRENDER_BMD
 
+            //! Print the version and exit.
+            bool hasPrintVersion() const;
+
             void run() override;
 
         private:

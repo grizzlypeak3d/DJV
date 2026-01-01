@@ -8,6 +8,7 @@
 #include <djvApp/MainWindow.h>
 
 #include <ftk/UI/MenuBar.h>
+#include <ftk/Core/Format.h>
 
 namespace djv
 {
@@ -27,7 +28,11 @@ namespace djv
             const std::shared_ptr<App>& app,
             const std::shared_ptr<ftk::Window>& shared)
         {
-            Window::_init(context, app, "djv 2", ftk::Size2I(1920, 1080));
+            Window::_init(
+                context,
+                app,
+                ftk::Format("{0} {1} - {2}").arg("djv").arg(DJV_VERSION_FULL).arg("Secondary"),
+                ftk::Size2I(1920, 1080));
             FTK_P();
 
             p.app = app;
