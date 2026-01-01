@@ -65,7 +65,6 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
 
             p.fileEdit = ftk::FileEdit::create(context);
-            p.fileEdit->setDisplay(ftk::FileEditDisplay::FileName);
 
             p.nameLabel = ftk::Label::create(context);
 
@@ -226,7 +225,6 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
 
             p.fileEdit = ftk::FileEdit::create(context);
-            p.fileEdit->setDisplay(ftk::FileEditDisplay::FileName);
 
             p.orderComboBox = ftk::ComboBox::create(context, tl::timeline::getLUTOrderLabels());
             p.orderComboBox->setHStretch(ftk::Stretch::Expanding);
