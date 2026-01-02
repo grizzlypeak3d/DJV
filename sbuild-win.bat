@@ -16,5 +16,5 @@ set TLRENDER_BMD_SDK=
 set FTK_API=GL_4_1
 set BUILD_SHARED_LIBS=OFF
 
-DJV\etc\Windows\windows-sbuild.bat %BUILD_TYPE%
-DJV\etc\Windows\windows-build.bat %BUILD_TYPE%
+call DJV\etc\Windows\windows-sbuild.bat %BUILD_TYPE%
+call DJV\etc\Windows\windows-build.bat %BUILD_TYPE%
