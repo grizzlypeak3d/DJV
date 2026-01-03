@@ -136,7 +136,7 @@ namespace djv
             Window::_init(
                 context,
                 app,
-                ftk::Format("{0} {1}").arg("djv").arg(DJV_VERSION_FULL),
+                ftk::Format("{0} {1}").arg("DJV").arg(DJV_VERSION_FULL),
                 settings.size);
             FTK_P();
 

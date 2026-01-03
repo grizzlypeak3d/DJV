@@ -31,7 +31,7 @@ namespace djv
             Window::_init(
                 context,
                 app,
-                ftk::Format("{0} {1} - {2}").arg("djv").arg(DJV_VERSION_FULL).arg("Secondary"),
+                ftk::Format("{0} {1} - {2}").arg("DJV").arg(DJV_VERSION_FULL).arg("Secondary"),
                 ftk::Size2I(1920, 1080));
             FTK_P();
 
