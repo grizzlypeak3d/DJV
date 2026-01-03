@@ -7,6 +7,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
 
@@ -15,11 +16,7 @@ namespace djv
     namespace app
     {
         struct AboutDialog::Private
-        {
-            std::shared_ptr<ftk::PushButton> licenseButton;
-            std::shared_ptr<ftk::PushButton> closeButton;
-            std::shared_ptr<ftk::VerticalLayout> layout;
-        };
+        {};
 
         void AboutDialog::_init(
             const std::shared_ptr<ftk::Context>& context,
@@ -32,48 +29,50 @@ namespace djv
                 parent);
             FTK_P();
 
-            auto titleLabel = ftk::Label::create(context, "About", p.layout);
-            titleLabel->setFontRole(ftk::FontRole::Title);
-            titleLabel->setMarginRole(ftk::SizeRole::Margin);
+            auto titleLabel = ftk::Label::create(context, "About");
+            //titleLabel->setFontRole(ftk::FontRole::Title);
+            titleLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
-            auto copyrightLabel = ftk::Label::create(
+            auto licensesButton = ftk::PushButton::create(context, "Licenses");
+            auto closeButton = ftk::PushButton::create(context, "Close");
+
+            auto layout = ftk::VerticalLayout::create(context, shared_from_this());
+            layout->setSpacingRole(ftk::SizeRole::None);
+            titleLabel->setParent(layout);
+            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
+
+            auto vLayout = ftk::VerticalLayout::create(context);
+            vLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            vLayout->setSpacingRole(ftk::SizeRole::Spacing);
+            ftk::Label::create(
                 context,
-                ftk::Format(
-                    "DJV\n"
-                    "Version {0}\n"
-                    "Copyright Contributors to the DJV project."
-                ).arg(DJV_VERSION_FULL));
+                ftk::Format("DJV {0}").arg(DJV_VERSION_FULL),
+                vLayout);
+            ftk::Label::create(
+                context,
+                ftk::Format("Copyright Contributors to the DJV project."),
+                vLayout);
+            licensesButton->setParent(vLayout);
+            auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Vertical, layout);
+            scrollWidget->setBorder(false);
+            scrollWidget->setWidget(vLayout);
 
-            p.licenseButton = ftk::PushButton::create(context, "License");
-            p.closeButton = ftk::PushButton::create(context, "Close");
-
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            p.layout->setSpacingRole(ftk::SizeRole::None);
-            titleLabel->setParent(p.layout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            auto vLayout = ftk::VerticalLayout::create(context, p.layout);
-            vLayout->setMarginRole(ftk::SizeRole::MarginDialog);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
-            copyrightLabel->setParent(vLayout);
-            auto vLayout2 = ftk::VerticalLayout::create(context, vLayout);
-            vLayout2->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.licenseButton->setParent(vLayout2);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
+            auto hLayout = ftk::HorizontalLayout::create(context, layout);
+            hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             hLayout->addSpacer(ftk::SizeRole::Spacing, ftk::Stretch::Expanding);
-            p.closeButton->setParent(hLayout);
+            closeButton->setParent(hLayout);
 
-            p.closeButton->setClickedCallback(
+            closeButton->setClickedCallback(
                 [this]
                 {
                     close();
                 });
 
-            p.licenseButton->setClickedCallback(
+            licensesButton->setClickedCallback(
                 [this]
                 {
-                    ftk::openURL("https://github.com/grizzlypeak3d/DJV/blob/main/LICENSE.txt");
+                    ftk::openURL("https://github.com/grizzlypeak3d/DJV/tree/main/etc/Legal");
                 });
         }
 
