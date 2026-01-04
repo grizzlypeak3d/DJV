@@ -32,7 +32,7 @@ namespace djv
                 context,
                 app,
                 ftk::Format("{0} {1} - {2}").arg("DJV").arg(DJV_VERSION_FULL).arg("Secondary"),
-                ftk::Size2I(1920, 1080));
+                ftk::Size2I(1280, 960));
             FTK_P();
 
             p.app = app;

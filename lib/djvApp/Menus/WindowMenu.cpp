@@ -30,7 +30,7 @@ namespace djv
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
             const std::vector<ftk::Size2I> sizes =
             {
-                ftk::Size2I(1280, 720),
+                ftk::Size2I(1280, 960),
                 ftk::Size2I(1920, 1080),
                 ftk::Size2I(3840, 2160)
             };

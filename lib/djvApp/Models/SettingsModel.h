@@ -244,7 +244,7 @@ namespace djv
         //! Window settings.
         struct WindowSettings
         {
-            ftk::Size2I size = ftk::Size2I(1920, 1080);
+            ftk::Size2I size = ftk::Size2I(1280, 960);
             bool fileToolBar = true;
             bool compareToolBar = true;
             bool windowToolBar = true;
