@@ -46,8 +46,8 @@ namespace djv
             //! Focus the current frame widget.
             void focusCurrentFrame();
 
+            ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
-            void sizeHintEvent(const ftk::SizeHintEvent&) override;
 
         private:
             void _playerUpdate(const std::shared_ptr<tl::timeline::Player>&);

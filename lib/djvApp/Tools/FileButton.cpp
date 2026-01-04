@@ -80,6 +80,29 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I FileButton::getSizeHint() const
+        {
+            FTK_P();
+            ftk::Size2I out;
+            ftk::Size2I thumbnailSize;
+            if (p.thumbnail.image)
+            {
+                const ftk::Size2I& size = p.thumbnail.image->getSize();
+                thumbnailSize = ftk::Size2I(size.w * p.thumbnail.image->getInfo().pixelAspectRatio, size.h);
+            }
+            out.w =
+                thumbnailSize.w +
+                p.size.spacing +
+                p.size.textSize.w + p.size.margin * 2 +
+                p.size.margin * 2 +
+                p.size.border * 4;
+            out.h =
+                std::max(p.size.fontMetrics.lineHeight, thumbnailSize.h) +
+                p.size.margin * 2 +
+                p.size.border * 4;
+            return out;
+        }
+
         void FileButton::tickEvent(
             bool parentsVisible,
             bool parentsEnabled,
@@ -132,25 +155,6 @@ namespace djv
                         p.thumbnail.height);
                 }
             }
-
-            ftk::Size2I thumbnailSize;
-            if (p.thumbnail.image)
-            {
-                const ftk::Size2I& size = p.thumbnail.image->getSize();
-                thumbnailSize = ftk::Size2I(size.w * p.thumbnail.image->getInfo().pixelAspectRatio, size.h);
-            }
-            ftk::Size2I sizeHint;
-            sizeHint.w =
-                thumbnailSize.w +
-                p.size.spacing +
-                p.size.textSize.w + p.size.margin * 2 +
-                p.size.margin * 2 +
-                p.size.border * 4;
-            sizeHint.h =
-                std::max(p.size.fontMetrics.lineHeight, thumbnailSize.h) +
-                p.size.margin * 2 +
-                p.size.border * 4;
-            setSizeHint(sizeHint);
         }
 
         void FileButton::clipEvent(const ftk::Box2I& clipRect, bool clipped)

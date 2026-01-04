@@ -326,18 +326,16 @@ namespace djv
             }
         }
 
+        ftk::Size2I Viewport::getSizeHint() const
+        {
+            return _p->hudLayout->getSizeHint();
+        }
+
         void Viewport::setGeometry(const ftk::Box2I& value)
         {
             tl::ui::Viewport::setGeometry(value);
             FTK_P();
             p.hudLayout->setGeometry(value);
-        }
-
-        void Viewport::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            tl::ui::Viewport::sizeHintEvent(event);
-            FTK_P();
-            setSizeHint(p.hudLayout->getSizeHint());
         }
 
         void Viewport::mouseMoveEvent(ftk::MouseMoveEvent& event)

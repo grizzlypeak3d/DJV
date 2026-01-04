@@ -228,15 +228,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I StatusBar::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void StatusBar::setGeometry(const ftk::Box2I & value)
         {
             IMouseWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void StatusBar::sizeHintEvent(const ftk::SizeHintEvent & event)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         void StatusBar::mousePressEvent(ftk::MouseClickEvent& event)

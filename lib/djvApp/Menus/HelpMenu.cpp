@@ -19,6 +19,7 @@ namespace djv
             auto actions = helpActions->getActions();
             addAction(actions["Documentation"]);
             addAction(actions["About"]);
+            addAction(actions["SysInfo"]);
         }
 
         HelpMenu::~HelpMenu()

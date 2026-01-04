@@ -91,15 +91,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I ToolsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void ToolsWidget::setGeometry(const ftk::Box2I & value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void ToolsWidget::sizeHintEvent(const ftk::SizeHintEvent & event)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
     }
 }

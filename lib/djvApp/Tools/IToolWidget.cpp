@@ -87,15 +87,15 @@ namespace djv
         IToolWidget::~IToolWidget()
         {}
 
+        ftk::Size2I IToolWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void IToolWidget::setGeometry(const ftk::Box2I & value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void IToolWidget::sizeHintEvent(const ftk::SizeHintEvent & event)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         void IToolWidget::_loadSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >& value)

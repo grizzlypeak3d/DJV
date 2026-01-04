@@ -54,15 +54,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I SetupStartWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void SetupStartWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void SetupStartWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct SetupDialog::Private

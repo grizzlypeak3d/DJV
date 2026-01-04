@@ -189,15 +189,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I OCIOWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void OCIOWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void OCIOWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct LUTWidget::Private
@@ -299,15 +299,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I LUTWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void LUTWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void LUTWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ColorWidget::Private
@@ -481,15 +481,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I ColorWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void ColorWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void ColorWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct LevelsWidget::Private
@@ -725,15 +725,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I LevelsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void LevelsWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void LevelsWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct EXRDisplayWidget::Private
@@ -865,15 +865,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I EXRDisplayWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void EXRDisplayWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void EXRDisplayWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct SoftClipWidget::Private
@@ -954,15 +954,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I SoftClipWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void SoftClipWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void SoftClipWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ColorTool::Private

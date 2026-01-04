@@ -46,6 +46,16 @@ namespace djv
                         mainWindow->showAboutDialog();
                     }
                 });
+
+            _actions["SysInfo"] = ftk::Action::create(
+                "System Information",
+                [mainWindowWeak]
+                {
+                    if (auto mainWindow = mainWindowWeak.lock())
+                    {
+                        mainWindow->showSysInfoDialog();
+                    }
+                });
         }
 
         HelpActions::HelpActions() :

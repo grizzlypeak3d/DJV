@@ -133,16 +133,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I StyleSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void StyleSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void StyleSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         void StyleSettingsWidget::_widgetUpdate(const StyleSettings& value)

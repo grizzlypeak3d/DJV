@@ -33,6 +33,7 @@ namespace djv
             void setActiveCallback(const std::function<void(bool)>&);
             void setCallback(const std::function<void(int)>&);
 
+            ftk::Size2I getSizeHint() const override;
             void sizeHintEvent(const ftk::SizeHintEvent&) override;
             void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
             void mouseEnterEvent(ftk::MouseEnterEvent&) override;

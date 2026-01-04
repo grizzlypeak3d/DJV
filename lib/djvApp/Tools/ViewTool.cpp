@@ -164,15 +164,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I ViewPosZoomWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void ViewPosZoomWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void ViewPosZoomWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ViewOptionsWidget::Private
@@ -349,15 +349,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I ViewOptionsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void ViewOptionsWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void ViewOptionsWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct BackgroundWidget::Private
@@ -516,15 +516,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I BackgroundWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void BackgroundWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void BackgroundWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         void BackgroundWidget::_optionsUpdate(const tl::timeline::BackgroundOptions& value)
@@ -640,15 +640,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I OutlineWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void OutlineWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void OutlineWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         void OutlineWidget::_optionsUpdate(const tl::timeline::ForegroundOptions& value)
@@ -825,15 +825,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I GridWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void GridWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void GridWidget::sizeHintEvent(const ftk::SizeHintEvent& value)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ViewTool::Private

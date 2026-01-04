@@ -123,15 +123,15 @@ namespace djv
             _p->cancelCallback = value;
         }
 
+        ftk::Size2I SeparateAudioWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void SeparateAudioWidget::setGeometry(const ftk::Box2I& value)
         {
             IMouseWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void SeparateAudioWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
     }
 }

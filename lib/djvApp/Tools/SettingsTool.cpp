@@ -148,16 +148,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I AdvancedSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void AdvancedSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void AdvancedSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct CacheSettingsWidget::Private
@@ -259,16 +258,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I CacheSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void CacheSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void CacheSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct FileBrowserSettingsWidget::Private
@@ -337,16 +335,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I FileBrowserSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void FileBrowserSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void FileBrowserSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ImageSeqSettingsWidget::Private
@@ -495,16 +492,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I ImageSeqSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void ImageSeqSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void ImageSeqSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct MiscSettingsWidget::Private
@@ -585,16 +581,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I MiscSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void MiscSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void MiscSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct MouseSettingsWidget::Private
@@ -757,16 +752,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I MouseSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void MouseSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void MouseSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct TimeSettingsWidget::Private
@@ -828,16 +822,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I TimeSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void TimeSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void TimeSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
 #if defined(TLRENDER_FFMPEG)
@@ -922,16 +915,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I FFmpegSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void FFmpegSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void FFmpegSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
 #endif // TLRENDER_FFMPEG
@@ -1092,16 +1084,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I USDSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void USDSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void USDSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 #endif // TLRENDER_USD
 

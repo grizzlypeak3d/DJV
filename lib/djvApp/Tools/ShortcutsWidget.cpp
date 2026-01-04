@@ -122,10 +122,18 @@ namespace djv
             return ftk::margin(getGeometry(), -_p->size.keyFocus);
         }
 
+        ftk::Size2I ShortcutEdit::getSizeHint() const
+        {
+            FTK_P();
+            ftk::Size2I out;
+            out.w = std::max(p.label->getSizeHint().w, p.size.minSize);
+            out.h = p.label->getSizeHint().h;
+            return out + p.size.keyFocus * 2;
+        }
+
         void ShortcutEdit::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             FTK_P();
-
             if (!p.size.displayScale.has_value() ||
                 (p.size.displayScale.has_value() && p.size.displayScale.value() != event.displayScale))
             {
@@ -135,11 +143,6 @@ namespace djv
                 p.size.keyFocus = event.style->getSizeRole(ftk::SizeRole::KeyFocus, event.displayScale);
                 p.draw.reset();
             }
-
-            ftk::Size2I sizeHint;
-            sizeHint.w = std::max(_p->label->getSizeHint().w, p.size.minSize);
-            sizeHint.h = _p->label->getSizeHint().h;
-            setSizeHint(sizeHint + p.size.keyFocus * 2);
         }
 
         void ShortcutEdit::drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event)
@@ -329,15 +332,15 @@ namespace djv
             _p->edit->setCollision(value);
         }
 
+        ftk::Size2I ShortcutWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void ShortcutWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void ShortcutWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         struct ShortcutsSettingsWidget::Private
@@ -430,16 +433,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I ShortcutsSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void ShortcutsSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void ShortcutsSettingsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            ISettingsWidget::sizeHintEvent(event);
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         void ShortcutsSettingsWidget::_widgetUpdate(const ShortcutsSettings& settings)

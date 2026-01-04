@@ -92,15 +92,15 @@ namespace djv
             return out;
         }
 
+        ftk::Size2I TabBar::getSizeHint() const
+        {
+            return _p->tabBar->getSizeHint();
+        }
+
         void TabBar::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->tabBar->setGeometry(value);
-        }
-
-        void TabBar::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            setSizeHint(_p->tabBar->getSizeHint());
         }
     }
 }

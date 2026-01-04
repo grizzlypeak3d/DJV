@@ -309,15 +309,15 @@ namespace djv
             }
         }
 
+        ftk::Size2I BottomToolBar::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
         void BottomToolBar::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
-        }
-
-        void BottomToolBar::sizeHintEvent(const ftk::SizeHintEvent& event)
-        {
-            setSizeHint(_p->layout->getSizeHint());
         }
 
         void BottomToolBar::_playerUpdate(const std::shared_ptr<tl::timeline::Player>& value)

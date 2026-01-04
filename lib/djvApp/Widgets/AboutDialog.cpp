@@ -20,7 +20,6 @@ namespace djv
 
         void AboutDialog::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
             const std::shared_ptr<IWidget>& parent)
         {
             IDialog::_init(
@@ -30,7 +29,6 @@ namespace djv
             FTK_P();
 
             auto titleLabel = ftk::Label::create(context, "About");
-            //titleLabel->setFontRole(ftk::FontRole::Title);
             titleLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
             auto licensesButton = ftk::PushButton::create(context, "Licenses");
@@ -85,11 +83,10 @@ namespace djv
 
         std::shared_ptr<AboutDialog> AboutDialog::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<AboutDialog>(new AboutDialog);
-            out->_init(context, app, parent);
+            out->_init(context, parent);
             return out;
         }
     }

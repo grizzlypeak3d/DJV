@@ -9,23 +9,27 @@ namespace djv
 {
     namespace app
     {
-        //! About dialog.
-        class AboutDialog : public ftk::IDialog
+        class MainWindow;
+
+        //! System information dialog.
+        class SysInfoDialog : public ftk::IDialog
         {
-            FTK_NON_COPYABLE(AboutDialog);
+            FTK_NON_COPYABLE(SysInfoDialog);
 
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent);
 
-            AboutDialog();
+            SysInfoDialog();
 
         public:
-            virtual ~AboutDialog();
+            virtual ~SysInfoDialog();
 
-            static std::shared_ptr<AboutDialog> create(
+            static std::shared_ptr<SysInfoDialog> create(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:

@@ -31,6 +31,7 @@ namespace djv
                 const std::shared_ptr<FilesModelItem>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            ftk::Size2I getSizeHint() const override;
             void tickEvent(
                 bool,
                 bool,

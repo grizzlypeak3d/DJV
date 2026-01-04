@@ -36,6 +36,7 @@
 #include <djvApp/Widgets/FileToolBar.h>
 #include <djvApp/Widgets/SetupDialog.h>
 #include <djvApp/Widgets/StatusBar.h>
+#include <djvApp/Widgets/SysInfoDialog.h>
 #include <djvApp/Widgets/TabBar.h>
 #include <djvApp/Widgets/ToolsToolBar.h>
 #include <djvApp/Widgets/ViewToolBar.h>
@@ -111,6 +112,7 @@ namespace djv
             std::shared_ptr<ToolsWidget> toolsWidget;
             std::shared_ptr<SetupDialog> setupDialog;
             std::shared_ptr<AboutDialog> aboutDialog;
+            std::shared_ptr<SysInfoDialog> sysInfoDialog;
             std::map<std::string, std::shared_ptr<ftk::Divider> > dividers;
             std::shared_ptr<ftk::Splitter> splitter;
             std::shared_ptr<ftk::Splitter> splitter2;
@@ -423,16 +425,30 @@ namespace djv
             FTK_P();
             if (auto context = getContext())
             {
-                if (auto app = p.app.lock())
-                {
-                    p.aboutDialog = AboutDialog::create(context, app);
-                    p.aboutDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
-                    p.aboutDialog->setCloseCallback(
-                        [this]
-                        {
-                            _p->aboutDialog.reset();
-                        });
-                }
+                p.aboutDialog = AboutDialog::create(context);
+                p.aboutDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
+                p.aboutDialog->setCloseCallback(
+                    [this]
+                    {
+                        _p->aboutDialog.reset();
+                    });
+            }
+        }
+
+        void MainWindow::showSysInfoDialog()
+        {
+            FTK_P();
+            if (auto context = getContext())
+            {
+                p.sysInfoDialog = SysInfoDialog::create(
+                    context,
+                    std::dynamic_pointer_cast<MainWindow>(shared_from_this()));
+                p.sysInfoDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
+                p.sysInfoDialog->setCloseCallback(
+                    [this]
+                    {
+                        _p->sysInfoDialog.reset();
+                    });
             }
         }
 

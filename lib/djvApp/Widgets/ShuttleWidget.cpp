@@ -65,10 +65,20 @@ namespace djv
             _p->callback = value;
         }
 
+        ftk::Size2I ShuttleWidget::getSizeHint() const
+        {
+            FTK_P();
+            ftk::Size2I out;
+            if (!p.iconImages.empty())
+            {
+                out = p.iconImages.front()->getSize();
+            }
+            return out;
+        }
+
         void ShuttleWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             FTK_P();
-
             if (event.displayScale != p.iconScale)
             {
                 p.iconScale = event.displayScale;
@@ -85,13 +95,6 @@ namespace djv
                         event.displayScale));
                 }
             }
-
-            ftk::Size2I sizeHint;
-            if (!p.iconImages.empty())
-            {
-                sizeHint = p.iconImages.front()->getSize();
-            }
-            setSizeHint(sizeHint);
         }
 
         void ShuttleWidget::drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event)

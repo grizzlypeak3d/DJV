@@ -35,8 +35,8 @@ namespace djv
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
-            void sizeHintEvent(const ftk::SizeHintEvent&) override;
 
         private:
             FTK_PRIVATE();
@@ -62,8 +62,8 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
-            void sizeHintEvent(const ftk::SizeHintEvent&) override;
 
         private:
             FTK_PRIVATE();
@@ -89,8 +89,8 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
-            void sizeHintEvent(const ftk::SizeHintEvent&) override;
 
         private:
             void _optionsUpdate(const tl::timeline::BackgroundOptions&);
@@ -118,8 +118,8 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
-            void sizeHintEvent(const ftk::SizeHintEvent&) override;
 
         private:
             void _optionsUpdate(const tl::timeline::ForegroundOptions&);
@@ -147,8 +147,8 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
-            void sizeHintEvent(const ftk::SizeHintEvent&) override;
 
         private:
             FTK_PRIVATE();
