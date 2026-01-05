@@ -10,7 +10,8 @@ Features:
 
 Fixes:
 * Fix for keyboard shortcuts search box.
-* Fix for Window title bar appearing off screen.
+* Fix for window title bar appearing off screen.
+* Fix for video levels.
 
 
 ## 3.3.1
