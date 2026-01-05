@@ -246,7 +246,9 @@ namespace djv
                 app->getViewportModel()->observeImageOptions(),
                 [this](const ftk::ImageOptions& value)
                 {
-                    _p->alphaBlendComboBox->setCurrentIndex(static_cast<int>(value.alphaBlend));
+                    FTK_P();
+                    p.videoLevelsComboBox->setCurrentIndex(static_cast<int>(value.videoLevels));
+                    p.alphaBlendComboBox->setCurrentIndex(static_cast<int>(value.alphaBlend));
                 });
 
             p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
@@ -256,7 +258,6 @@ namespace djv
                     FTK_P();
                     p.minifyComboBox->setCurrentIndex(static_cast<int>(value.imageFilters.minify));
                     p.magnifyComboBox->setCurrentIndex(static_cast<int>(value.imageFilters.magnify));
-                    p.videoLevelsComboBox->setCurrentIndex(static_cast<int>(value.videoLevels));
                 });
 
             p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
@@ -301,9 +302,9 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        auto options = app->getViewportModel()->getDisplayOptions();
-                        options.videoLevels = static_cast<ftk::VideoLevels>(value);
-                        app->getViewportModel()->setDisplayOptions(options);
+                        auto options = app->getViewportModel()->getImageOptions();
+                        options.videoLevels = static_cast<ftk::InputVideoLevels>(value);
+                        app->getViewportModel()->setImageOptions(options);
                     }
                 });
 

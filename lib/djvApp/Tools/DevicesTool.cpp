@@ -37,7 +37,6 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> displayModeComboBox;
             std::shared_ptr<ftk::ComboBox> pixelTypeComboBox;
             std::shared_ptr<ftk::CheckBox> _444SDIVideoOutputCheckBox;
-            std::shared_ptr<ftk::ComboBox> videoLevelsComboBox;
 
             std::shared_ptr<ftk::Observer<tl::bmd::DevicesModelData> > dataObserver;
 #endif // TLRENDER_BMD
@@ -68,9 +67,6 @@ namespace djv
 
             p._444SDIVideoOutputCheckBox = ftk::CheckBox::create(context);
 
-            p.videoLevelsComboBox = ftk::ComboBox::create(context, ftk::getVideoLevelsLabels());
-            p.videoLevelsComboBox->setHStretch(ftk::Stretch::Expanding);
-
             auto formLayout = ftk::FormLayout::create(context);
             formLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -79,7 +75,6 @@ namespace djv
             formLayout->addRow("Display mode:", p.displayModeComboBox);
             formLayout->addRow("Pixel type:", p.pixelTypeComboBox);
             formLayout->addRow("444 SDI:", p._444SDIVideoOutputCheckBox);
-            formLayout->addRow("Video levels:", p.videoLevelsComboBox);
 
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setBorder(false);
@@ -132,15 +127,6 @@ namespace djv
                     }
                 });
 
-            p.videoLevelsComboBox->setIndexCallback(
-                [appWeak](int value)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->getBMDDevicesModel()->setVideoLevels(static_cast<ftk::VideoLevels>(value));
-                    }
-                });
-
             p.dataObserver = ftk::Observer<tl::bmd::DevicesModelData>::create(
                 app->getBMDDevicesModel()->observeData(),
                 [this](const tl::bmd::DevicesModelData& value)
@@ -164,8 +150,6 @@ namespace djv
 
                     const auto i = value.boolOptions.find(tl::bmd::Option::_444SDIVideoOutput);
                     p._444SDIVideoOutputCheckBox->setChecked(i != value.boolOptions.end() ? i->second : false);
-
-                    p.videoLevelsComboBox->setCurrentIndex(static_cast<int>(value.videoLevels));
                 });
 #endif // TLRENDER_BMD
         }

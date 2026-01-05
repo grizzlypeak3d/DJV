@@ -111,7 +111,6 @@ namespace djv
 #if defined(TLRENDER_BMD)
             std::shared_ptr<BMDDevicesModel> bmdDevicesModel;
             std::shared_ptr<tl::bmd::OutputDevice> bmdOutputDevice;
-            ftk::VideoLevels bmdOutputVideoLevels = ftk::VideoLevels::LegalRange;
 #endif // TLRENDER_BMD
 
             std::shared_ptr<ftk::Observer<tl::timeline::PlayerCacheOptions> > cacheObserver;
@@ -797,9 +796,7 @@ namespace djv
                     config.boolOptions = value.boolOptions;
                     p.bmdOutputDevice->setConfig(config);
                     p.bmdOutputDevice->setEnabled(value.deviceEnabled);
-                    p.bmdOutputVideoLevels = value.videoLevels;
                     tl::timeline::DisplayOptions displayOptions = p.viewportModel->getDisplayOptions();
-                    displayOptions.videoLevels = p.bmdOutputVideoLevels;
                     p.bmdOutputDevice->setDisplayOptions({ displayOptions });
                     p.bmdOutputDevice->setHDR(value.hdrMode, value.hdrData);
                 });
@@ -848,9 +845,7 @@ namespace djv
                 p.viewportModel->observeDisplayOptions(),
                 [this](const tl::timeline::DisplayOptions& value)
                 {
-                    tl::timeline::DisplayOptions tmp = value;
-                    tmp.videoLevels = _p->bmdOutputVideoLevels;
-                    _p->bmdOutputDevice->setDisplayOptions({ tmp });
+                    _p->bmdOutputDevice->setDisplayOptions({ value });
                 });
 
             p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
