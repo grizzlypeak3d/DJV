@@ -4,8 +4,9 @@
 #include <djvApp/Tools/ColorPickerTool.h>
 
 #include <djvApp/Models/SettingsModel.h>
-#include <djvApp/Models/ViewportModel.h>
+#include <djvApp/Widgets/Viewport.h>
 #include <djvApp/App.h>
+#include <djvApp/MainWindow.h>
 
 #include <ftk/UI/ColorWidget.h>
 #include <ftk/UI/Label.h>
@@ -22,13 +23,14 @@ namespace djv
             std::shared_ptr<ftk::ColorWidget> colorWidget;
             std::shared_ptr<ftk::Label> label;
 
-            std::shared_ptr<ftk::Observer<ftk::Color4F> > colorPickerObserver;
+            std::shared_ptr<ftk::Observer<ftk::Color4F> > colorSampleObserver;
             std::shared_ptr<ftk::Observer<MouseSettings> > settingsObserver;
         };
 
         void ColorPickerTool::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             IToolWidget::_init(
@@ -55,8 +57,8 @@ namespace djv
             scrollWidget->setWidget(layout);
             _setWidget(scrollWidget);
 
-            p.colorPickerObserver = ftk::Observer<ftk::Color4F>::create(
-                app->getViewportModel()->observeColorPicker(),
+            p.colorSampleObserver = ftk::Observer<ftk::Color4F>::create(
+                mainWindow->getViewport()->observeColorSample(),
                 [this](const ftk::Color4F& value)
                 {
                     _p->colorWidget->setColor(value);
@@ -94,10 +96,11 @@ namespace djv
         std::shared_ptr<ColorPickerTool> ColorPickerTool::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ColorPickerTool>(new ColorPickerTool);
-            out->_init(context, app, parent);
+            out->_init(context, app, mainWindow, parent);
             return out;
         }
 

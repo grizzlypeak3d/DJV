@@ -35,6 +35,9 @@ namespace djv
             //! Observe picking.
             TL_API std::shared_ptr<ftk::IObservable<ftk::V2I> > observePick() const;
 
+            //! Observe the color sample.
+            TL_API std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColorSample() const;
+
             void setPlayer(const std::shared_ptr<tl::timeline::Player>&) override;
 
             ftk::Size2I getSizeHint() const override;

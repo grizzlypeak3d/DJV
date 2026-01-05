@@ -13,7 +13,6 @@ namespace djv
         {
             std::weak_ptr<ftk::Context> context;
             std::shared_ptr<ftk::Settings> settings;
-            std::shared_ptr<ftk::Observable<ftk::Color4F> > colorPicker;
             std::shared_ptr<ftk::Observable<ftk::ImageOptions> > imageOptions;
             std::shared_ptr<ftk::Observable<tl::timeline::DisplayOptions> > displayOptions;
             std::shared_ptr<ftk::Observable<tl::timeline::BackgroundOptions> > backgroundOptions;
@@ -30,8 +29,6 @@ namespace djv
 
             p.context = context;
             p.settings = settings;
-
-            p.colorPicker = ftk::Observable<ftk::Color4F>::create();
 
             ftk::ImageOptions imageOptions;
             p.settings->getT("/Viewport/Image", imageOptions);
@@ -89,21 +86,6 @@ namespace djv
             auto out = std::shared_ptr<ViewportModel>(new ViewportModel);
             out->_init(context, settings);
             return out;
-        }
-
-        const ftk::Color4F& ViewportModel::getColorPicker() const
-        {
-            return _p->colorPicker->get();
-        }
-
-        std::shared_ptr<ftk::IObservable<ftk::Color4F> > ViewportModel::observeColorPicker() const
-        {
-            return _p->colorPicker;
-        }
-
-        void ViewportModel::setColorPicker(const ftk::Color4F& value)
-        {
-            _p->colorPicker->setIfChanged(value);
         }
 
         const ftk::ImageOptions& ViewportModel::getImageOptions() const

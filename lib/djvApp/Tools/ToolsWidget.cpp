@@ -47,7 +47,7 @@ namespace djv
             p.toolWidgets[Tool::Export] = ExportTool::create(context, app);
             p.toolWidgets[Tool::View] = ViewTool::create(context, app, mainWindow);
             p.toolWidgets[Tool::Color] = ColorTool::create(context, app);
-            p.toolWidgets[Tool::ColorPicker] = ColorPickerTool::create(context, app);
+            p.toolWidgets[Tool::ColorPicker] = ColorPickerTool::create(context, app, mainWindow);
             p.toolWidgets[Tool::Magnify] = MagnifyTool::create(context, app, mainWindow);
             p.toolWidgets[Tool::Info] = InfoTool::create(context, app);
             p.toolWidgets[Tool::Audio] = AudioTool::create(context, app);

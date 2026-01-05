@@ -39,15 +39,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 
-            //! Get the color picker.
-            const ftk::Color4F& getColorPicker() const;
-
-            //! Observe the color picker.
-            std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColorPicker() const;
-
-            //! Set the color picker.
-            void setColorPicker(const ftk::Color4F&);
-
             //! Get the image options.
             const ftk::ImageOptions& getImageOptions() const;
 

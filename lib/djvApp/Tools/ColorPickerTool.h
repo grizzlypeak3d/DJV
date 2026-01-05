@@ -10,6 +10,7 @@ namespace djv
     namespace app
     {
         class App;
+        class MainWindow;
 
         //! Color picker tool.
         class ColorPickerTool : public IToolWidget
@@ -20,6 +21,7 @@ namespace djv
             void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent);
 
             ColorPickerTool();
@@ -30,6 +32,7 @@ namespace djv
             static std::shared_ptr<ColorPickerTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:

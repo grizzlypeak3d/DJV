@@ -36,7 +36,6 @@ namespace djv
             size_t videoDataSize = 0;
             ftk::ImageOptions imageOptions;
             tl::timeline::DisplayOptions displayOptions;
-            ftk::Color4F colorPicker;
             tl::timeline::PlayerCacheInfo cacheInfo;
             MouseActionBinding pickBinding =
                 MouseActionBinding(ftk::MouseButton::Left);
@@ -44,6 +43,7 @@ namespace djv
                 MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift);
             float frameShuttleScale = 1.F;
             std::shared_ptr<ftk::Observable<ftk::V2I> > pick;
+            std::shared_ptr<ftk::Observable<ftk::Color4F> > colorSample;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
             std::shared_ptr<ftk::Label> timeLabel;
@@ -60,7 +60,6 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::Color4F> > colorPickerObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > bgOptionsObserver;
@@ -95,6 +94,7 @@ namespace djv
             p.app = app;
 
             p.pick = ftk::Observable<ftk::V2I>::create();
+            p.colorSample = ftk::Observable<ftk::Color4F>::create();
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFontRole(ftk::FontRole::Mono);
@@ -175,14 +175,6 @@ namespace djv
                 [this](const tl::timeline::LUTOptions& value)
                 {
                    setLUTOptions(value);
-                });
-
-            p.colorPickerObserver = ftk::Observer<ftk::Color4F>::create(
-                app->getViewportModel()->observeColorPicker(),
-                [this](const ftk::Color4F& value)
-                {
-                    _p->colorPicker = value;
-                    _hudUpdate();
                 });
 
             p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
@@ -281,6 +273,11 @@ namespace djv
             return _p->pick;
         }
 
+        std::shared_ptr<ftk::IObservable<ftk::Color4F> > Viewport::observeColorSample() const
+        {
+            return _p->colorSample;
+        }
+
         void Viewport::setPlayer(const std::shared_ptr<tl::timeline::Player>& player)
         {
             tl::ui::Viewport::setPlayer(player);
@@ -368,10 +365,11 @@ namespace djv
                 {
                     const ftk::Box2I& g = getGeometry();
                     ftk::V2I pick = event.pos - g.min;
-                    p.pick->setIfChanged(pick);
-
-                    const ftk::Color4F color = getColorSample(event.pos);
-                    app->getViewportModel()->setColorPicker(color);
+                    if (p.pick->setIfChanged(pick))
+                    {
+                        p.colorSample->setIfChanged(getColorSample(pick));
+                        _hudUpdate();
+                    }
                 }
                 break;
             default: break;
@@ -386,15 +384,12 @@ namespace djv
                 ftk::checkKeyModifier(p.pickBinding.modifier, event.modifiers))
             {
                 p.mouse.mode = Private::MouseMode::Picker;
-
                 const ftk::Box2I& g = getGeometry();
                 ftk::V2I pick = event.pos - g.min;
-                p.pick->setIfChanged(pick);
-
-                if (auto app = p.app.lock())
+                if (p.pick->setIfChanged(pick))
                 {
-                    const ftk::Color4F color = getColorSample(event.pos);
-                    app->getViewportModel()->setColorPicker(color);
+                    p.colorSample->setIfChanged(getColorSample(pick));
+                    _hudUpdate();
                 }
             }
             else if (p.frameShuttleBinding.button == event.button &&
@@ -447,13 +442,14 @@ namespace djv
                 arg(p.fps, 2, 4).
                 arg(p.droppedFrames));
 
-            p.colorPickerSwatch->setColor(p.colorPicker);
+            const auto& colorSample = p.colorSample->get();
+            p.colorPickerSwatch->setColor(colorSample);
             p.colorPickerLabel->setText(
                 ftk::Format("Color: {0} {1} {2} {3}").
-                arg(p.colorPicker.r, 2).
-                arg(p.colorPicker.g, 2).
-                arg(p.colorPicker.b, 2).
-                arg(p.colorPicker.a, 2));
+                arg(colorSample.r, 2).
+                arg(colorSample.g, 2).
+                arg(colorSample.b, 2).
+                arg(colorSample.a, 2));
 
             p.cacheLabel->setText(
                 ftk::Format("Cache: {0}% V, {1}% A").
