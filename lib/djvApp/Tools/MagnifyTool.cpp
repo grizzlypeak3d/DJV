@@ -13,6 +13,7 @@
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/ComboBox.h>
+#include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/Settings.h>
@@ -50,18 +51,21 @@ namespace djv
             ftk::V2I viewPos;
             double viewZoom = 1.0;
             ftk::V2I pick;
+            ftk::V2I samplePos;
             size_t videoDataSize = 0;
             ftk::ImageOptions imageOptions;
             tl::timeline::DisplayOptions displayOptions;
 
             std::shared_ptr<tl::ui::Viewport> viewport;
             std::shared_ptr<ftk::ComboBox> comboBox;
-            std::shared_ptr<ftk::Label> label;
+            std::shared_ptr<ftk::Label> pixelLabel;
+            std::shared_ptr<ftk::Label> mouseLabel;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
             std::shared_ptr<ftk::ListObserver<tl::timeline::VideoData> > videoDataObserver;
-            std::shared_ptr<ftk::Observer<ftk::V2I> > pickObserver;
             std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosAndZoomObserver;
+            std::shared_ptr<ftk::Observer<ftk::V2I> > pickObserver;
+            std::shared_ptr<ftk::Observer<ftk::V2I> > samplePosObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
@@ -99,17 +103,20 @@ namespace djv
 
             p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
 
-            p.label = ftk::Label::create(context);
+            p.pixelLabel = ftk::Label::create(context);
+            p.pixelLabel->setFontRole(ftk::FontRole::Mono);
+
+            p.mouseLabel = ftk::Label::create(context);
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
             p.viewport->setParent(layout);
-            auto hLayout = ftk::HorizontalLayout::create(context, layout);
-            hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.comboBox->setParent(hLayout);
-            hLayout->addSpacer(ftk::Stretch::Expanding);
-            p.label->setParent(hLayout);
+            auto formLayout = ftk::FormLayout::create(context, layout);
+            formLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            formLayout->addRow("Magnify:", p.comboBox);
+            formLayout->addRow("Pixel:", p.pixelLabel);
+            formLayout->addRow("Mouse:", p.mouseLabel);
             _setWidget(layout);
 
             p.comboBox->setIndexCallback(
@@ -144,6 +151,16 @@ namespace djv
                     }
                 });
 
+            p.viewPosAndZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
+                mainWindow->getViewport()->observeViewPosAndZoom(),
+                [this](const std::pair<ftk::V2I, double>& value)
+                {
+                    FTK_P();
+                    p.viewPos = value.first;
+                    p.viewZoom = value.second;
+                    _widgetUpdate();
+                });
+
             p.pickObserver = ftk::Observer<ftk::V2I>::create(
                 mainWindow->getViewport()->observePick(),
                 [this](const ftk::V2I& value)
@@ -153,13 +170,12 @@ namespace djv
                     _widgetUpdate();
                 });
 
-            p.viewPosAndZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
-                mainWindow->getViewport()->observeViewPosAndZoom(),
-                [this](const std::pair<ftk::V2I, double>& value)
+            p.samplePosObserver = ftk::Observer<ftk::V2I>::create(
+                mainWindow->getViewport()->observeSamplePos(),
+                [this](const ftk::V2I& value)
                 {
                     FTK_P();
-                    p.viewPos = value.first;
-                    p.viewZoom = value.second;
+                    p.samplePos = value;
                     _widgetUpdate();
                 });
 
@@ -238,8 +254,8 @@ namespace djv
                             s.push_back(ftk::getLabel(i->second.button));
                         }
                     }
-                    _p->label->setText(ftk::Format("Mouse binding: {0} Click").
-                        arg(ftk::join(s, " + ")));
+                    _p->mouseLabel->setText(
+                        ftk::Format("{0} Click").arg(ftk::join(s, " + ")));
                 });
         }
 
@@ -270,11 +286,14 @@ namespace djv
             const ftk::Box2I& g = getGeometry();
             const int level = getMagnifyLevel(p.level);
             const ftk::V2I magnifyPos =
-                (p.viewPos - p.pick) * level + (center(g) - g.min);
+                (p.viewPos - p.samplePos) * level + (center(g) - g.min);
+
             const double magnifyZoom = p.viewZoom * level;
             p.viewport->setViewPosAndZoom(magnifyPos, magnifyZoom);
 
             p.comboBox->setCurrentIndex(static_cast<int>(p.level));
+
+            p.pixelLabel->setText(ftk::Format("{0}").arg(p.pick));
         }
 
         void MagnifyTool::_videoDataUpdate()

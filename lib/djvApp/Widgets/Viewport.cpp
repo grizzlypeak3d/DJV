@@ -43,6 +43,7 @@ namespace djv
                 MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift);
             float frameShuttleScale = 1.F;
             std::shared_ptr<ftk::Observable<ftk::V2I> > pick;
+            std::shared_ptr<ftk::Observable<ftk::V2I> > samplePos;
             std::shared_ptr<ftk::Observable<ftk::Color4F> > colorSample;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
@@ -94,6 +95,7 @@ namespace djv
             p.app = app;
 
             p.pick = ftk::Observable<ftk::V2I>::create();
+            p.samplePos = ftk::Observable<ftk::V2I>::create();
             p.colorSample = ftk::Observable<ftk::Color4F>::create();
 
             p.fileNameLabel = ftk::Label::create(context);
@@ -273,6 +275,11 @@ namespace djv
             return _p->pick;
         }
 
+        std::shared_ptr<ftk::IObservable<ftk::V2I> > Viewport::observeSamplePos() const
+        {
+            return _p->samplePos;
+        }
+
         std::shared_ptr<ftk::IObservable<ftk::Color4F> > Viewport::observeColorSample() const
         {
             return _p->colorSample;
@@ -364,10 +371,11 @@ namespace djv
                 if (auto app = p.app.lock())
                 {
                     const ftk::Box2I& g = getGeometry();
-                    ftk::V2I pick = event.pos - g.min;
-                    if (p.pick->setIfChanged(pick))
+                    const ftk::V2I pos = event.pos - g.min;
+                    if (p.samplePos->setIfChanged(pos))
                     {
-                        p.colorSample->setIfChanged(getColorSample(pick));
+                        p.colorSample->setIfChanged(getColorSample(pos));
+                        p.pick->setIfChanged((pos - getViewPos()) / getViewZoom());
                         _hudUpdate();
                     }
                 }
@@ -385,10 +393,11 @@ namespace djv
             {
                 p.mouse.mode = Private::MouseMode::Picker;
                 const ftk::Box2I& g = getGeometry();
-                ftk::V2I pick = event.pos - g.min;
-                if (p.pick->setIfChanged(pick))
+                const ftk::V2I pos = event.pos - g.min;
+                if (p.samplePos->setIfChanged(pos))
                 {
-                    p.colorSample->setIfChanged(getColorSample(pick));
+                    p.colorSample->setIfChanged(getColorSample(pos));
+                    p.pick->setIfChanged((pos - getViewPos()) / getViewZoom());
                     _hudUpdate();
                 }
             }
@@ -445,11 +454,12 @@ namespace djv
             const auto& colorSample = p.colorSample->get();
             p.colorPickerSwatch->setColor(colorSample);
             p.colorPickerLabel->setText(
-                ftk::Format("Color: {0} {1} {2} {3}").
+                ftk::Format("Color: {0} {1} {2} {3}, Pixel: {4}").
                 arg(colorSample.r, 2).
                 arg(colorSample.g, 2).
                 arg(colorSample.b, 2).
-                arg(colorSample.a, 2));
+                arg(colorSample.a, 2).
+                arg(p.pick->get()));
 
             p.cacheLabel->setText(
                 ftk::Format("Cache: {0}% V, {1}% A").

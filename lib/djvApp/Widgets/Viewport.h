@@ -35,6 +35,9 @@ namespace djv
             //! Observe picking.
             TL_API std::shared_ptr<ftk::IObservable<ftk::V2I> > observePick() const;
 
+            //! Observe the sample position.
+            TL_API std::shared_ptr<ftk::IObservable<ftk::V2I> > observeSamplePos() const;
+
             //! Observe the color sample.
             TL_API std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColorSample() const;
 

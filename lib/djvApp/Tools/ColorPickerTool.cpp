@@ -9,6 +9,7 @@
 #include <djvApp/MainWindow.h>
 
 #include <ftk/UI/ColorWidget.h>
+#include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
@@ -21,8 +22,10 @@ namespace djv
         struct ColorPickerTool::Private
         {
             std::shared_ptr<ftk::ColorWidget> colorWidget;
-            std::shared_ptr<ftk::Label> label;
+            std::shared_ptr<ftk::Label> pixelLabel;
+            std::shared_ptr<ftk::Label> mouseLabel;
 
+            std::shared_ptr<ftk::Observer<ftk::V2I> > pickObserver;
             std::shared_ptr<ftk::Observer<ftk::Color4F> > colorSampleObserver;
             std::shared_ptr<ftk::Observer<MouseSettings> > settingsObserver;
         };
@@ -44,18 +47,31 @@ namespace djv
             p.colorWidget = ftk::ColorWidget::create(context);
             p.colorWidget->setColor(ftk::Color4F(0.F, 0.F, 0.F));
 
-            p.label = ftk::Label::create(context);
+            p.pixelLabel = ftk::Label::create(context);
+            p.pixelLabel->setFontRole(ftk::FontRole::Mono);
+
+            p.mouseLabel = ftk::Label::create(context);
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setMarginRole(ftk::SizeRole::MarginSmall);
             layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.colorWidget->setParent(layout);
-            p.label->setParent(layout);
+            auto formLayout = ftk::FormLayout::create(context, layout);
+            formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            formLayout->addRow("Pixel:", p.pixelLabel);
+            formLayout->addRow("Mouse:", p.mouseLabel);
 
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setBorder(false);
             scrollWidget->setWidget(layout);
             _setWidget(scrollWidget);
+
+            p.pickObserver = ftk::Observer<ftk::V2I>::create(
+                mainWindow->getViewport()->observePick(),
+                [this](const ftk::V2I& value)
+                {
+                    _p->pixelLabel->setText(ftk::Format("{0}").arg(value));
+                });
 
             p.colorSampleObserver = ftk::Observer<ftk::Color4F>::create(
                 mainWindow->getViewport()->observeColorSample(),
@@ -81,8 +97,8 @@ namespace djv
                             s.push_back(ftk::getLabel(i->second.button));
                         }
                     }
-                    _p->label->setText(ftk::Format("Mouse binding: {0} Click").
-                        arg(ftk::join(s, " + ")));
+                    _p->mouseLabel->setText(
+                        ftk::Format("{0} Click").arg(ftk::join(s, " + ")));
                 });
         }
 
@@ -102,11 +118,6 @@ namespace djv
             auto out = std::shared_ptr<ColorPickerTool>(new ColorPickerTool);
             out->_init(context, app, mainWindow, parent);
             return out;
-        }
-
-        void ColorPickerTool::_widgetUpdate()
-        {
-            FTK_P();
         }
     }
 }
