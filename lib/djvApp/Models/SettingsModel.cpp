@@ -220,7 +220,7 @@ namespace djv
                 Shortcut("View/AlphaBlendStraight", "Straight alpha"),
                 Shortcut("View/AlphaBlendPremultiplied", "Pre-multiplied alpha"),
                 Shortcut("View/Grid", "Grid", ftk::KeyShortcut(ftk::Key::G, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("View/HUD", "HUD", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("View/HUD", "HUD / Information Display", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control))),
 
                 Shortcut("Window/FullScreen", "Full screen", ftk::Key::U),
                 Shortcut("Window/FloatOnTop", "Float on top"),
@@ -395,7 +395,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<ExportSettings> > exportSettings;
             std::shared_ptr<ftk::Observable<FileBrowserSettings> > fileBrowser;
             std::shared_ptr<ftk::Observable<ImageSeqSettings> > imageSeq;
-            std::shared_ptr<ftk::Observable<ShortcutsSettings> > Shortcuts;
+            std::shared_ptr<ftk::Observable<ShortcutsSettings> > shortcuts;
             std::shared_ptr<ftk::Observable<MiscSettings> > misc;
             std::shared_ptr<ftk::Observable<MouseSettings> > mouse;
             std::shared_ptr<ftk::Observable<StyleSettings> > style;
@@ -445,9 +445,9 @@ namespace djv
             settings->getT("/ImageSeq", imageSeq);
             p.imageSeq = ftk::Observable<ImageSeqSettings>::create(imageSeq);
 
-            ShortcutsSettings Shortcuts;
-            settings->getT("/Shortcuts", Shortcuts);
-            p.Shortcuts = ftk::Observable<ShortcutsSettings>::create(Shortcuts);
+            ShortcutsSettings shortcuts;
+            settings->getT("/Shortcuts.1", shortcuts);
+            p.shortcuts = ftk::Observable<ShortcutsSettings>::create(shortcuts);
 
             MiscSettings misc;
             settings->getT("/Misc", misc);
@@ -521,7 +521,7 @@ namespace djv
             p.settings->setT("/FileBrowser", fileBrowser);
 
             p.settings->setT("/ImageSeq", p.imageSeq->get());
-            p.settings->setT("/Shortcuts", p.Shortcuts->get());
+            p.settings->setT("/Shortcuts.1", p.shortcuts->get());
             p.settings->setT("/Misc", p.misc->get());
             p.settings->setT("/Mouse.1", p.mouse->get());
             p.settings->setT("/Style", p.style->get());
@@ -649,17 +649,17 @@ namespace djv
 
         const ShortcutsSettings& SettingsModel::getShortcuts() const
         {
-            return _p->Shortcuts->get();
+            return _p->shortcuts->get();
         }
 
         std::shared_ptr<ftk::IObservable<ShortcutsSettings> > SettingsModel::observeShortcuts() const
         {
-            return _p->Shortcuts;
+            return _p->shortcuts;
         }
 
         void SettingsModel::setShortcuts(const ShortcutsSettings& value)
         {
-            _p->Shortcuts->setIfChanged(value);
+            _p->shortcuts->setIfChanged(value);
         }
 
         const MiscSettings& SettingsModel::getMisc() const

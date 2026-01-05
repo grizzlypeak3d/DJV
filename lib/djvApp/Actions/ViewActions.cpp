@@ -169,7 +169,7 @@ namespace djv
                 });
 
             _actions["HUD"] = ftk::Action::create(
-                "HUD",
+                "HUD / Information Display",
                 [appWeak](bool value)
                 {
                     if (auto app = appWeak.lock())
@@ -185,7 +185,7 @@ namespace djv
                 { "ZoomIn", "Zoom the view in." },
                 { "ZoomOut", "Zoom the view out." },
                 { "Grid", "Toggle the grid." },
-                { "HUD", "Toggle the HUD (Heads Up Display)." }
+                { "HUD", "Toggle the HUD / information display." }
             };
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
