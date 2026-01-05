@@ -1,13 +1,16 @@
 ## 3.3.2
 
 Features:
-* Add mouse binding labels to the color picker and magnifier tools.
-* Add status bar indicators for displaying when mirror is enabled.
+* Add pixel and mouse binding labels to the color picker and magnifier tools.
+* Both the color picker and magnifier update when picking with the mouse.
+* Add status bar indicators for displaying when mirroring is enabled.
 * Add the version number to the window title.
 * Add a command line flag to print the version.
+* Add a dialog for displaying system information.
 
 Fixes:
 * Fix for keyboard shortcuts search box.
+* Fix for Window title bar appearing off screen.
 
 
 ## 3.3.1
