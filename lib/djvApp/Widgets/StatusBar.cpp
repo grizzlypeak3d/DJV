@@ -311,11 +311,11 @@ namespace djv
         void StatusBar::_infoUpdate(const ftk::Path& path, const tl::io::Info& info)
         {
             FTK_P();
-            static const std::string tooltipFormat =
+            const std::string tooltipFormat =
                 "{0}\n"
                 "\n"
                 "Click to open information tool.";
-            static const std::string tooltipDefault =
+            const std::string tooltipDefault =
                 "Display information about the current file.";
 
             std::vector<std::string> s;

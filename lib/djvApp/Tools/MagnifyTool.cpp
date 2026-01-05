@@ -35,7 +35,7 @@ namespace djv
 
         int getMagnifyLevel(MagnifyLevel value)
         {
-            static const std::array<int, static_cast<size_t>(MagnifyLevel::Count)> data =
+            const std::array<int, static_cast<size_t>(MagnifyLevel::Count)> data =
             {
                 2, 4, 8, 16, 32, 64, 128
             };
