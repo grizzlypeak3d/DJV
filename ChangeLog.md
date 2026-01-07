@@ -1,3 +1,9 @@
+## 3.3.3
+
+Fixes:
+* Fix flipped export.
+
+
 ## 3.3.2
 
 Features:
