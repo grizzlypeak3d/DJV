@@ -91,6 +91,13 @@ namespace djv
                 auto menuBar = app->getMainWindow()->getMenuBar();
                 event.accept = menuBar->shortcut(event.key, event.modifiers);
             }
+            if (!event.accept &&
+                ftk::Key::Escape == event.key &&
+                0 == event.modifiers)
+            {
+                event.accept = true;
+                close();
+            }
             if (!event.accept)
             {
                 Window::keyPressEvent(event);
