@@ -59,7 +59,6 @@ namespace djv
                 tl::timeline::DisplayOptions displayOptions;
                 ftk::ImageType colorBuffer = ftk::ImageType::RGBA_U8;
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
-                std::shared_ptr<ftk::gl::OffscreenBuffer> buffer2;
                 std::shared_ptr<tl::timeline::IRender> render;
                 GLenum glFormat = 0;
                 GLenum glType = 0;
@@ -464,9 +463,6 @@ namespace djv
                     p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
                         p.exportData->info.size,
                         offscreenBufferOptions);
-                    p.exportData->buffer2 = ftk::gl::OffscreenBuffer::create(
-                        p.exportData->info.size,
-                        offscreenBufferOptions);
 
                     // Create the progress dialog.
                     p.progressDialog = ftk::ProgressDialog::create(
@@ -536,29 +532,17 @@ namespace djv
                 auto video = p.player->getTimeline()->getVideo(t, ioOptions).future.get();
 
                 // Render the video.
-                {
-                    ftk::gl::OffscreenBufferBinding binding(p.exportData->buffer);
-                    p.exportData->render->begin(p.exportData->info.size);
-                    p.exportData->render->setOCIOOptions(p.exportData->ocioOptions);
-                    p.exportData->render->setLUTOptions(p.exportData->lutOptions);
-                    p.exportData->render->drawVideo(
-                        { video },
-                        { ftk::Box2I(0, 0, p.exportData->info.size.w, p.exportData->info.size.h) },
-                        { p.exportData->imageOptions },
-                        { p.exportData->displayOptions },
-                        tl::timeline::CompareOptions(),
-                        p.exportData->colorBuffer);
-                    p.exportData->render->end();
-                }
-
-                // Flip the image.
-                ftk::gl::OffscreenBufferBinding binding(p.exportData->buffer2);
+                ftk::gl::OffscreenBufferBinding binding(p.exportData->buffer);
                 p.exportData->render->begin(p.exportData->info.size);
-                p.exportData->render->setOCIOOptions(tl::timeline::OCIOOptions());
-                p.exportData->render->setLUTOptions(tl::timeline::LUTOptions());
-                p.exportData->render->drawTexture(
-                    p.exportData->buffer->getColorID(),
-                    ftk::Box2I(0, 0, p.exportData->info.size.w, p.exportData->info.size.h));
+                p.exportData->render->setOCIOOptions(p.exportData->ocioOptions);
+                p.exportData->render->setLUTOptions(p.exportData->lutOptions);
+                p.exportData->render->drawVideo(
+                    { video },
+                    { ftk::Box2I(0, 0, p.exportData->info.size.w, p.exportData->info.size.h) },
+                    { p.exportData->imageOptions },
+                    { p.exportData->displayOptions },
+                    tl::timeline::CompareOptions(),
+                    p.exportData->colorBuffer);
                 p.exportData->render->end();
 
                 // Write the output image.
