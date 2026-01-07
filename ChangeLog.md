@@ -1,5 +1,8 @@
 ## 3.3.3
 
+Features:
+* Add the escape key for closing the secondary window.
+
 Fixes:
 * Fix flipped export.
 
