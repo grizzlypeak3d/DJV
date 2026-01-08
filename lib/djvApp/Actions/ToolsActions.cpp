@@ -49,14 +49,14 @@ namespace djv
                 { "Export", "Toggle the export tool." },
                 { "View", "Toggle the view tool." },
                 { "Color", "Toggle the color controls tool." },
-                { "ColorPicker", "Toggle the color picker tool." },
+                { "Color Picker", "Toggle the color picker tool." },
                 { "Magnify", "Toggle the magnify tool." },
-                { "Info", "Toggle the information tool." },
+                { "Information", "Toggle the information tool." },
                 { "Audio", "Toggle the audio tool." },
                 { "Devices", "Toggle the devices tool." },
                 { "Settings", "Toggle the settings." },
                 { "Messages", "Toggle the messages." },
-                { "SysLog", "Toggle the system log." }
+                { "System Log", "Toggle the system log." }
             };
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
