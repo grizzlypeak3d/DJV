@@ -5,6 +5,7 @@ Features:
 
 Fixes:
 * Fix flipped export.
+* Fix tools tooltips.
 
 
 ## 3.3.2
