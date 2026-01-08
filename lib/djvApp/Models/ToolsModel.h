@@ -30,7 +30,7 @@ namespace djv
             Devices,
             Settings,
             Messages,
-            SystemLog,
+            SysLog,
 
             Count,
             First = None

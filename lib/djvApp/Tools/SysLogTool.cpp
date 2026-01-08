@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djvApp/Tools/SystemLogTool.h>
+#include <djvApp/Tools/SysLogTool.h>
 
 #include <djvApp/App.h>
 
@@ -25,7 +25,7 @@ namespace djv
             const int messagesMax = 100;
         }
 
-        struct SystemLogTool::Private
+        struct SysLogTool::Private
         {
             std::list<std::string> messages;
             std::shared_ptr<ftk::Label> label;
@@ -36,7 +36,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<ftk::LogItem> > logObserver;
         };
 
-        void SystemLogTool::_init(
+        void SysLogTool::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
             const std::shared_ptr<IWidget>& parent)
@@ -44,8 +44,8 @@ namespace djv
             IToolWidget::_init(
                 context,
                 app,
-                Tool::SystemLog,
-                "djv::app::SystemLogTool",
+                Tool::SysLog,
+                "djv::app::SysLogTool",
                 parent);
             FTK_P();
 
@@ -112,19 +112,19 @@ namespace djv
                 });
         }
 
-        SystemLogTool::SystemLogTool() :
+        SysLogTool::SysLogTool() :
             _p(new Private)
         {}
 
-        SystemLogTool::~SystemLogTool()
+        SysLogTool::~SysLogTool()
         {}
 
-        std::shared_ptr<SystemLogTool> SystemLogTool::create(
+        std::shared_ptr<SysLogTool> SysLogTool::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<SystemLogTool>(new SystemLogTool);
+            auto out = std::shared_ptr<SysLogTool>(new SysLogTool);
             out->_init(context, app, parent);
             return out;
         }

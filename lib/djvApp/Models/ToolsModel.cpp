@@ -85,7 +85,7 @@ namespace djv
             p.settings = settings;
 
             std::string s;
-            p.settings->get("/Tools/Tool", s);
+            p.settings->get("/Tools/Tool.1", s);
             Tool tool = Tool::None;
             from_string(s, tool);
             p.activeTool = ftk::Observable<Tool>::create(tool);
@@ -98,7 +98,7 @@ namespace djv
         ToolsModel::~ToolsModel()
         {
             FTK_P();
-            p.settings->set("/Tools/Tool", to_string(p.activeTool->get()));
+            p.settings->set("/Tools/Tool.1", to_string(p.activeTool->get()));
         }
 
         std::shared_ptr<ToolsModel> ToolsModel::create(const std::shared_ptr<ftk::Settings>& settings)

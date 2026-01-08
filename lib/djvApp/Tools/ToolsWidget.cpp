@@ -13,7 +13,7 @@
 #include <djvApp/Tools/MagnifyTool.h>
 #include <djvApp/Tools/MessagesTool.h>
 #include <djvApp/Tools/SettingsTool.h>
-#include <djvApp/Tools/SystemLogTool.h>
+#include <djvApp/Tools/SysLogTool.h>
 #include <djvApp/Tools/ViewTool.h>
 #include <djvApp/App.h>
 
@@ -54,7 +54,7 @@ namespace djv
             p.toolWidgets[Tool::Devices] = DevicesTool::create(context, app);
             p.toolWidgets[Tool::Settings] = SettingsTool::create(context, app);
             p.toolWidgets[Tool::Messages] = MessagesTool::create(context, app);
-            p.toolWidgets[Tool::SystemLog] = SystemLogTool::create(context, app);
+            p.toolWidgets[Tool::SysLog] = SysLogTool::create(context, app);
 
             p.layout = ftk::StackLayout::create(context, shared_from_this());
             for (const auto& widget : p.toolWidgets)

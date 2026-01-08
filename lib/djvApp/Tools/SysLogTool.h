@@ -15,9 +15,9 @@ namespace djv
         //! 
         //! \todo Add an option to automatically scroll to the bottom when
         //! new log items are received.
-        class SystemLogTool : public IToolWidget
+        class SysLogTool : public IToolWidget
         {
-            FTK_NON_COPYABLE(SystemLogTool);
+            FTK_NON_COPYABLE(SysLogTool);
 
         protected:
             void _init(
@@ -25,12 +25,12 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent);
 
-            SystemLogTool();
+            SysLogTool();
 
         public:
-            virtual ~SystemLogTool();
+            virtual ~SysLogTool();
 
-            static std::shared_ptr<SystemLogTool> create(
+            static std::shared_ptr<SysLogTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

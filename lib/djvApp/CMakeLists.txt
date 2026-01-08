@@ -48,7 +48,7 @@ set(HEADERS_TOOLS
     Tools/MagnifyTool.h
     Tools/MessagesTool.h
     Tools/SettingsTool.h
-    Tools/SystemLogTool.h
+    Tools/SysLogTool.h
     Tools/ToolsWidget.h
     Tools/ViewTool.h)
 set(HEADERS_PRIVATE_TOOLS
@@ -140,7 +140,7 @@ set(SOURCE_TOOLS
     Tools/SettingsTool.cpp
     Tools/ShortcutsWidget.cpp
     Tools/StyleWidget.cpp
-    Tools/SystemLogTool.cpp
+    Tools/SysLogTool.cpp
     Tools/ToolsWidget.cpp
     Tools/ViewTool.cpp)
 set(SOURCE_WIDGETS

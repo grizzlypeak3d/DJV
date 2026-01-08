@@ -56,7 +56,7 @@ namespace djv
                 { "Devices", "Toggle the devices tool." },
                 { "Settings", "Toggle the settings." },
                 { "Messages", "Toggle the messages." },
-                { "SystemLog", "Toggle the system log." }
+                { "SysLog", "Toggle the system log." }
             };
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
