@@ -112,7 +112,7 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::None);
             p.viewport->setParent(layout);
             auto formLayout = ftk::FormLayout::create(context, layout);
-            formLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            formLayout->setMarginRole(ftk::SizeRole::Margin);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             formLayout->addRow("Magnify:", p.comboBox);
             formLayout->addRow("Pixel:", p.pixelLabel);

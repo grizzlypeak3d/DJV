@@ -75,7 +75,7 @@ namespace djv
             p.syncOffsetSlider->setDefaultValue(0.0);
 
             auto formLayout = ftk::FormLayout::create(context);
-            formLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            formLayout->setMarginRole(ftk::SizeRole::Margin);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             formLayout->addRow("Device:", p.deviceComboBox);
             formLayout->addRow("Volume:", p.volumeSlider);

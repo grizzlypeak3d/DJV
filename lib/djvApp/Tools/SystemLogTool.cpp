@@ -51,7 +51,7 @@ namespace djv
 
             p.label = ftk::Label::create(context);
             p.label->setFontRole(ftk::FontRole::Mono);
-            p.label->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.label->setMarginRole(ftk::SizeRole::Margin);
             p.label->setVAlign(ftk::VAlign::Top);
 
             p.scrollWidget = ftk::ScrollWidget::create(context);

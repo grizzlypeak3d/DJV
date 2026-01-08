@@ -74,7 +74,6 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto label = ftk::Label::create(context, "Changes are applied to new files.", p.layout);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -297,7 +296,6 @@ namespace djv
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Native file dialog:", p.nfdCheckBox);
 
             p.settingsObserver = ftk::Observer<FileBrowserSettings>::create(

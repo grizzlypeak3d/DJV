@@ -22,6 +22,7 @@
 #include <ftk/UI/FileEdit.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEdit.h>
+#include <ftk/UI/Label.h>
 #include <ftk/UI/LineEdit.h>
 #include <ftk/UI/ProgressDialog.h>
 #include <ftk/UI/PushButton.h>
@@ -135,8 +136,7 @@ namespace djv
             p.exportButton = ftk::PushButton::create(context, "Export");
 
             p.layout = ftk::VerticalLayout::create(context);
-            p.layout->setMarginRole(ftk::SizeRole::MarginSmall);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.formLayout = ftk::FormLayout::create(context, p.layout);
             p.formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout->addRow("Directory:", p.dirEdit);
@@ -154,6 +154,10 @@ namespace djv
             p.formLayout->addRow("Extension:", p.movieExtComboBox);
             p.formLayout->addRow("Codec:", p.movieCodecComboBox);
             p.exportButton->setParent(p.layout);
+            auto label = ftk::Label::create(
+                context,
+                "Audio export is not currently supported.",
+                p.layout);
 
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setBorder(false);

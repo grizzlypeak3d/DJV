@@ -68,7 +68,7 @@ namespace djv
             p._444SDIVideoOutputCheckBox = ftk::CheckBox::create(context);
 
             auto formLayout = ftk::FormLayout::create(context);
-            formLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            formLayout->setMarginRole(ftk::SizeRole::Margin);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             formLayout->addRow("Enabled:", p.enabledCheckBox);
             formLayout->addRow("Device:", p.deviceComboBox);

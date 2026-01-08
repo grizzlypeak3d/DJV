@@ -93,14 +93,13 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::None);
 
             p.widgetLayout = ftk::GridLayout::create(context, layout);
-            p.widgetLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.widgetLayout->setMarginRole(ftk::SizeRole::Margin);
             p.widgetLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
             auto vLayout = ftk::VerticalLayout::create(context);
             vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.compareLayout = ftk::FormLayout::create(context, vLayout);
             p.compareLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.compareLayout->addRow("Mode:", p.compareComboBox);

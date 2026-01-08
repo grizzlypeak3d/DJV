@@ -45,7 +45,7 @@ namespace djv
             p.searchBox->setHStretch(ftk::Stretch::Expanding);
 
             p.layout = ftk::GridLayout::create(context);
-            p.layout->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setWidget(p.layout);
@@ -58,7 +58,6 @@ namespace djv
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
             auto hLayout = ftk::HorizontalLayout::create(context, layout);
             hLayout->setMarginRole(ftk::SizeRole::MarginInside);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.searchBox->setParent(hLayout);
             _setWidget(layout);
 

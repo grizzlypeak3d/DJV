@@ -53,8 +53,7 @@ namespace djv
             p.mouseLabel = ftk::Label::create(context);
 
             auto layout = ftk::VerticalLayout::create(context);
-            layout->setMarginRole(ftk::SizeRole::MarginSmall);
-            layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            layout->setMarginRole(ftk::SizeRole::Margin);
             p.colorWidget->setParent(layout);
             auto formLayout = ftk::FormLayout::create(context, layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
