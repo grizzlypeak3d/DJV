@@ -373,7 +373,12 @@ namespace djv
 
             p.audioComboBox = ftk::ComboBox::create(context, tl::timeline::getImageSeqAudioLabels());
             p.audioComboBox->setHStretch(ftk::Stretch::Expanding);
-            p.audioComboBox->setTooltip("How audio files are opened for image sequences.");
+            p.audioComboBox->setTooltip(
+                "Open audio files for image sequences.\n"
+                "\n"
+                "* None: Do not open audio files.\n"
+                "* Ext: Find audio files by extension.\n"
+                "* Filename: Specify the file name to open.");
 
             p.audioExtensionsEdit = ftk::LineEdit::create(context);
             p.audioExtensionsEdit->setHStretch(ftk::Stretch::Expanding);
@@ -387,7 +392,8 @@ namespace djv
             p.audioFileNameEdit->setTooltip("Audio file name to open.");
 
             p.maxDigitsEdit = ftk::IntEdit::create(context);
-            p.maxDigitsEdit->setTooltip("Maximum number of digits allowed in a frame number.");
+            p.maxDigitsEdit->setTooltip(
+                "Maximum number of digits allowed in a frame number.");
 
             p.defaultSpeedEdit = ftk::DoubleEdit::create(context);
             p.defaultSpeedEdit->setRange(1.0, 120.0);
@@ -398,8 +404,8 @@ namespace djv
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Audio:", p.audioComboBox);
-            p.layout->addRow("Audio extensions:", p.audioExtensionsEdit);
+            p.layout->addRow("Open audio files:", p.audioComboBox);
+            p.layout->addRow("Audio file extensions:", p.audioExtensionsEdit);
             p.layout->addRow("Audio file name:", p.audioFileNameEdit);
             p.layout->addRow("Maximum digits:", p.maxDigitsEdit);
             p.layout->addRow("Default speed (FPS):", p.defaultSpeedEdit);
@@ -863,8 +869,14 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            auto label = ftk::Label::create(context, "Changes are applied to new files.", p.layout);
+            auto label = ftk::Label::create(
+                context,
+                "FFmpeg plugin settings.",
+                p.layout);
+            label = ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                p.layout);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             formLayout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
@@ -977,8 +989,14 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            auto label = ftk::Label::create(context, "Changes are applied to new files.", p.layout);
+            auto label = ftk::Label::create(
+                context,
+                "Universal scene description (USD) plugin settings.",
+                p.layout);
+            label = ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                p.layout);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             formLayout->addRow("Render width:", p.renderWidthEdit);
