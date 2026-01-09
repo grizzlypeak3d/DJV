@@ -15,7 +15,7 @@ namespace djv
     namespace app
     {
         //! Time units model.
-        class TimeUnitsModel : public tl::timeline::TimeUnitsModel
+        class TimeUnitsModel : public tl::TimeUnitsModel
         {
             FTK_NON_COPYABLE(TimeUnitsModel);
 

@@ -48,10 +48,10 @@ namespace djv
             std::shared_ptr<ftk::Timer> logTimer;
 
             std::shared_ptr<ftk::ListObserver<ftk::LogItem> > logObserver;
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
 #if defined(TLRENDER_BMD)
             std::shared_ptr<ftk::Observer<bool> > bmdActiveObserver;
@@ -143,34 +143,34 @@ namespace djv
                     _logUpdate(value);
                 });
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& player)
+                [this](const std::shared_ptr<tl::Player>& player)
                 {
                     _infoUpdate(
                         player ? player->getPath() : ftk::Path(),
-                        player ? player->getIOInfo() : tl::io::Info());
+                        player ? player->getIOInfo() : tl::IOInfo());
                 });
 
-            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
+            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
-                [this](const tl::timeline::OCIOOptions& value)
+                [this](const tl::OCIOOptions& value)
                 {
                     _p->ocioOptionsEnabled = value.enabled;
                     _colorControlsUpdate();
                 });
 
-            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
+            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
-                [this](const tl::timeline::LUTOptions& value)
+                [this](const tl::LUTOptions& value)
                 {
                     _p->lutOptionsEnabled = value.enabled;
                     _colorControlsUpdate();
                 });
 
-            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _p->mirrorHLabel->setBackgroundRole(
                         value.mirror.x ?
@@ -308,7 +308,7 @@ namespace djv
             }
         }
 
-        void StatusBar::_infoUpdate(const ftk::Path& path, const tl::io::Info& info)
+        void StatusBar::_infoUpdate(const ftk::Path& path, const tl::IOInfo& info)
         {
             FTK_P();
             const std::string tooltipFormat =
@@ -334,7 +334,7 @@ namespace djv
                 s.push_back(std::string(
                     ftk::Format("audio: {0}ch {1} {2}kHz").
                     arg(info.audio.channelCount).
-                    arg(info.audio.dataType).
+                    arg(info.audio.type).
                     arg(info.audio.sampleRate / 1000)));
             }
             const std::string text = ftk::join(s, ", ");
@@ -357,7 +357,7 @@ namespace djv
                     ftk::Format("Audio: {0} {1} {2} {3}kHz").
                     arg(info.audio.channelCount).
                     arg(1 == info.audio.channelCount ? "channel" : "channels").
-                    arg(info.audio.dataType).
+                    arg(info.audio.type).
                     arg(info.audio.sampleRate / 1000)));
             }
             const std::string tooltip = ftk::join(s, "\n");

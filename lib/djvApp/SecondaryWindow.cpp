@@ -20,7 +20,7 @@ namespace djv
 
             std::shared_ptr<Viewport> viewport;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
         void SecondaryWindow::_init(
@@ -40,9 +40,9 @@ namespace djv
             p.viewport = Viewport::create(context, app);
             p.viewport->setParent(shared_from_this());
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& value)
+                [this](const std::shared_ptr<tl::Player>& value)
                 {
                     _p->viewport->setPlayer(value);
                 });

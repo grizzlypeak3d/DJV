@@ -94,7 +94,7 @@ namespace djv
             void reload();
 
             //! Observe the timeline player.
-            std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::timeline::Player> > > observePlayer() const;
+            std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > observePlayer() const;
 
             //! Get the color model.
             const std::shared_ptr<ColorModel>& getColorModel() const;
@@ -144,7 +144,7 @@ namespace djv
             std::filesystem::path _getSettingsPath(
                 const std::string& appName,
                 const std::filesystem::path& appDocsPath);
-            tl::io::Options _getIOOptions() const;
+            tl::IOOptions _getIOOptions() const;
 
             void _filesUpdate(const std::vector<std::shared_ptr<FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<FilesModelItem> >&);

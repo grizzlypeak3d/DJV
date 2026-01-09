@@ -119,10 +119,10 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> splitterLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<MouseSettings> > mouseSettingsObserver;
             std::shared_ptr<ftk::Observer<TimelineSettings> > timelineSettingsObserver;
@@ -286,9 +286,9 @@ namespace djv
                     });
             }
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& player)
+                [this](const std::shared_ptr<tl::Player>& player)
                 {
                     FTK_P();
                     p.viewport->setPlayer(player);
@@ -296,9 +296,9 @@ namespace djv
                 });
 
             auto appWeak = std::weak_ptr<App>(app);
-            p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
+            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 p.viewport->observeCompareOptions(),
-                [appWeak](const tl::timeline::CompareOptions& value)
+                [appWeak](const tl::CompareOptions& value)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -306,18 +306,18 @@ namespace djv
                     }
                 });
 
-            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
+            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
-                [this](const tl::timeline::OCIOOptions& value)
+                [this](const tl::OCIOOptions& value)
                 {
                     auto options = _p->timelineWidget->getDisplayOptions();
                     options.ocio = value;
                     _p->timelineWidget->setDisplayOptions(options);
                 });
 
-            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
+            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
-                [this](const tl::timeline::LUTOptions& value)
+                [this](const tl::LUTOptions& value)
                 {
                     auto options = _p->timelineWidget->getDisplayOptions();
                     options.lut = value;

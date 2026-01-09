@@ -16,13 +16,13 @@ namespace djv
         struct AudioModel::Private
         {
             std::shared_ptr<ftk::Settings> settings;
-            std::shared_ptr<ftk::ObservableList<tl::audio::DeviceID> > devices;
-            std::shared_ptr<ftk::Observable<tl::audio::DeviceID> > device;
+            std::shared_ptr<ftk::ObservableList<tl::AudioDeviceID> > devices;
+            std::shared_ptr<ftk::Observable<tl::AudioDeviceID> > device;
             std::shared_ptr<ftk::Observable<float> > volume;
             std::shared_ptr<ftk::Observable<bool> > mute;
             std::shared_ptr<ftk::ObservableList<bool> > channelMute;
             std::shared_ptr<ftk::Observable<double> > syncOffset;
-            std::shared_ptr<ftk::ListObserver<tl::audio::DeviceInfo> > devicesObserver;
+            std::shared_ptr<ftk::ListObserver<tl::AudioDeviceInfo> > devicesObserver;
         };
 
         void AudioModel::_init(
@@ -33,8 +33,8 @@ namespace djv
 
             p.settings = settings;
 
-            p.devices = ftk::ObservableList<tl::audio::DeviceID>::create();
-            p.device = ftk::Observable<tl::audio::DeviceID>::create();
+            p.devices = ftk::ObservableList<tl::AudioDeviceID>::create();
+            p.device = ftk::Observable<tl::AudioDeviceID>::create();
 
             float volume = 1.F;
             p.settings->get("/Audio/Volume", volume);
@@ -48,12 +48,12 @@ namespace djv
 
             p.syncOffset = ftk::Observable<double>::create(0.0);
 
-            auto audioSystem = context->getSystem<tl::audio::System>();
-            p.devicesObserver = ftk::ListObserver<tl::audio::DeviceInfo>::create(
+            auto audioSystem = context->getSystem<tl::AudioSystem>();
+            p.devicesObserver = ftk::ListObserver<tl::AudioDeviceInfo>::create(
                 audioSystem->observeDevices(),
-                [this](const std::vector<tl::audio::DeviceInfo>& devices)
+                [this](const std::vector<tl::AudioDeviceInfo>& devices)
                 {
-                    std::vector<tl::audio::DeviceID> ids;
+                    std::vector<tl::AudioDeviceID> ids;
                     for (const auto& device : devices)
                     {
                         ids.push_back(device.id);
@@ -82,27 +82,27 @@ namespace djv
             return out;
         }
 
-        const std::vector<tl::audio::DeviceID>& AudioModel::getDevices()
+        const std::vector<tl::AudioDeviceID>& AudioModel::getDevices()
         {
             return _p->devices->get();
         }
 
-        std::shared_ptr<ftk::IObservableList<tl::audio::DeviceID> > AudioModel::observeDevices() const
+        std::shared_ptr<ftk::IObservableList<tl::AudioDeviceID> > AudioModel::observeDevices() const
         {
             return _p->devices;
         }
 
-        const tl::audio::DeviceID& AudioModel::getDevice() const
+        const tl::AudioDeviceID& AudioModel::getDevice() const
         {
             return _p->device->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::audio::DeviceID> > AudioModel::observeDevice() const
+        std::shared_ptr<ftk::IObservable<tl::AudioDeviceID> > AudioModel::observeDevice() const
         {
             return _p->device;
         }
 
-        void AudioModel::setDevice(const tl::audio::DeviceID& value)
+        void AudioModel::setDevice(const tl::AudioDeviceID& value)
         {
             _p->device->setIfChanged(value);
         }

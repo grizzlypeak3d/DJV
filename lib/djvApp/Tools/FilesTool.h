@@ -39,7 +39,7 @@ namespace djv
             void _aUpdate(const std::shared_ptr<FilesModelItem>&);
             void _bUpdate(const std::vector<std::shared_ptr<FilesModelItem> >&);
             void _layersUpdate(const std::vector<int>&);
-            void _compareUpdate(const tl::timeline::CompareOptions&);
+            void _compareUpdate(const tl::CompareOptions&);
 
             FTK_PRIVATE();
         };

@@ -50,7 +50,7 @@ namespace djv
             void setGeometry(const ftk::Box2I&) override;
 
         private:
-            void _playerUpdate(const std::shared_ptr<tl::timeline::Player>&);
+            void _playerUpdate(const std::shared_ptr<tl::Player>&);
             void _showSpeedPopup();
             void _showAudioPopup();
 

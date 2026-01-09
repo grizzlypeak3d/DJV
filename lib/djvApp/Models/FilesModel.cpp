@@ -21,8 +21,8 @@ namespace djv
             std::shared_ptr<ftk::ObservableList<int> > bIndexes;
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > active;
             std::shared_ptr<ftk::ObservableList<int> > layers;
-            std::shared_ptr<ftk::Observable<tl::timeline::CompareOptions> > compareOptions;
-            std::shared_ptr<ftk::Observable<tl::timeline::CompareTime> > compareTime;
+            std::shared_ptr<ftk::Observable<tl::CompareOptions> > compareOptions;
+            std::shared_ptr<ftk::Observable<tl::CompareTime> > compareTime;
         };
 
         void FilesModel::_init(const std::shared_ptr<ftk::Settings>& settings)
@@ -38,14 +38,14 @@ namespace djv
             p.bIndexes = ftk::ObservableList<int>::create();
             p.active = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.layers = ftk::ObservableList<int>::create();
-            tl::timeline::CompareOptions compareOptions;
+            tl::CompareOptions compareOptions;
             p.settings->getT("/Files/CompareOptions", compareOptions);
-            p.compareOptions = ftk::Observable<tl::timeline::CompareOptions>::create(compareOptions);
+            p.compareOptions = ftk::Observable<tl::CompareOptions>::create(compareOptions);
             std::string s;
             p.settings->get("/Files/CompareTime", s);
-            tl::timeline::CompareTime compareTime = tl::timeline::CompareTime::First;
+            tl::CompareTime compareTime = tl::CompareTime::First;
             from_string(s, compareTime);
-            p.compareTime = ftk::Observable<tl::timeline::CompareTime>::create(compareTime);
+            p.compareTime = ftk::Observable<tl::CompareTime>::create(compareTime);
         }
 
         FilesModel::FilesModel() :
@@ -232,13 +232,13 @@ namespace djv
                     b.push_back(p.files->getItem(index));
                     switch (p.compareOptions->get().compare)
                     {
-                    case tl::timeline::Compare::A:
-                    case tl::timeline::Compare::B:
-                    case tl::timeline::Compare::Wipe:
-                    case tl::timeline::Compare::Overlay:
-                    case tl::timeline::Compare::Difference:
-                    case tl::timeline::Compare::Horizontal:
-                    case tl::timeline::Compare::Vertical:
+                    case tl::Compare::A:
+                    case tl::Compare::B:
+                    case tl::Compare::Wipe:
+                    case tl::Compare::Overlay:
+                    case tl::Compare::Difference:
+                    case tl::Compare::Horizontal:
+                    case tl::Compare::Vertical:
                         if (b.size() > 1)
                         {
                             removedIndex = _getIndex(b.front());
@@ -484,17 +484,17 @@ namespace djv
             }
         }
 
-        const tl::timeline::CompareOptions& FilesModel::getCompareOptions() const
+        const tl::CompareOptions& FilesModel::getCompareOptions() const
         {
             return _p->compareOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::CompareOptions> > FilesModel::observeCompareOptions() const
+        std::shared_ptr<ftk::IObservable<tl::CompareOptions> > FilesModel::observeCompareOptions() const
         {
             return _p->compareOptions;
         }
 
-        void FilesModel::setCompareOptions(const tl::timeline::CompareOptions& value)
+        void FilesModel::setCompareOptions(const tl::CompareOptions& value)
         {
             FTK_P();
             if (p.compareOptions->setIfChanged(value))
@@ -502,13 +502,13 @@ namespace djv
                 auto b = p.b->get();
                 switch (p.compareOptions->get().compare)
                 {
-                case tl::timeline::Compare::A:
-                case tl::timeline::Compare::B:
-                case tl::timeline::Compare::Wipe:
-                case tl::timeline::Compare::Overlay:
-                case tl::timeline::Compare::Difference:
-                case tl::timeline::Compare::Horizontal:
-                case tl::timeline::Compare::Vertical:
+                case tl::Compare::A:
+                case tl::Compare::B:
+                case tl::Compare::Wipe:
+                case tl::Compare::Overlay:
+                case tl::Compare::Difference:
+                case tl::Compare::Horizontal:
+                case tl::Compare::Vertical:
                 {
                     while (b.size() > 1)
                     {
@@ -520,13 +520,13 @@ namespace djv
                 }
                 switch (p.compareOptions->get().compare)
                 {
-                case tl::timeline::Compare::B:
-                case tl::timeline::Compare::Wipe:
-                case tl::timeline::Compare::Overlay:
-                case tl::timeline::Compare::Difference:
-                case tl::timeline::Compare::Horizontal:
-                case tl::timeline::Compare::Vertical:
-                case tl::timeline::Compare::Tile:
+                case tl::Compare::B:
+                case tl::Compare::Wipe:
+                case tl::Compare::Overlay:
+                case tl::Compare::Difference:
+                case tl::Compare::Horizontal:
+                case tl::Compare::Vertical:
+                case tl::Compare::Tile:
                 {
                     if (b.empty() && !p.files->isEmpty())
                     {
@@ -555,17 +555,17 @@ namespace djv
             }
         }
 
-        tl::timeline::CompareTime FilesModel::getCompareTime() const
+        tl::CompareTime FilesModel::getCompareTime() const
         {
             return _p->compareTime->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::CompareTime> > FilesModel::observeCompareTime() const
+        std::shared_ptr<ftk::IObservable<tl::CompareTime> > FilesModel::observeCompareTime() const
         {
             return _p->compareTime;
         }
 
-        void FilesModel::setCompareTime(tl::timeline::CompareTime value)
+        void FilesModel::setCompareTime(tl::CompareTime value)
         {
             FTK_P();
             p.compareTime->setIfChanged(value);
@@ -599,19 +599,19 @@ namespace djv
             }
             switch (p.compareOptions->get().compare)
             {
-            case tl::timeline::Compare::A:
+            case tl::Compare::A:
                 if (!p.b->isEmpty())
                 {
                     out.push_back(p.b->getItem(0));
                 }
                 break;
-            case tl::timeline::Compare::B:
-            case tl::timeline::Compare::Wipe:
-            case tl::timeline::Compare::Overlay:
-            case tl::timeline::Compare::Difference:
-            case tl::timeline::Compare::Horizontal:
-            case tl::timeline::Compare::Vertical:
-            case tl::timeline::Compare::Tile:
+            case tl::Compare::B:
+            case tl::Compare::Wipe:
+            case tl::Compare::Overlay:
+            case tl::Compare::Difference:
+            case tl::Compare::Horizontal:
+            case tl::Compare::Vertical:
+            case tl::Compare::Tile:
                 for (const auto& b : p.b->get())
                 {
                     out.push_back(b);

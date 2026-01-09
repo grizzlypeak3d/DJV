@@ -41,7 +41,7 @@ namespace djv
             //! Observe the color sample.
             TL_API std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColorSample() const;
 
-            void setPlayer(const std::shared_ptr<tl::timeline::Player>&) override;
+            void setPlayer(const std::shared_ptr<tl::Player>&) override;
 
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
@@ -50,7 +50,7 @@ namespace djv
             void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
         private:
-            void _videoDataUpdate();
+            void _videoUpdate();
             void _hudUpdate();
 
             FTK_PRIVATE();

@@ -391,7 +391,7 @@ namespace djv
             float defaultDisplayScale = 1.F;
 
             std::shared_ptr<ftk::Observable<AdvancedSettings> > advanced;
-            std::shared_ptr<ftk::Observable<tl::timeline::PlayerCacheOptions> > cache;
+            std::shared_ptr<ftk::Observable<tl::PlayerCacheOptions> > cache;
             std::shared_ptr<ftk::Observable<ExportSettings> > exportSettings;
             std::shared_ptr<ftk::Observable<FileBrowserSettings> > fileBrowser;
             std::shared_ptr<ftk::Observable<ImageSeqSettings> > imageSeq;
@@ -424,9 +424,9 @@ namespace djv
             settings->getT("/Advanced", advanced);
             p.advanced = ftk::Observable<AdvancedSettings>::create(advanced);
 
-            tl::timeline::PlayerCacheOptions cache;
+            tl::PlayerCacheOptions cache;
             settings->getT("/Cache", cache);
-            p.cache = ftk::Observable<tl::timeline::PlayerCacheOptions>::create(cache);
+            p.cache = ftk::Observable<tl::PlayerCacheOptions>::create(cache);
 
             ExportSettings exportSettings;
             settings->getT("/Export", exportSettings);
@@ -542,7 +542,7 @@ namespace djv
         {
             FTK_P();
             setAdvanced(AdvancedSettings());
-            setCache(tl::timeline::PlayerCacheOptions());
+            setCache(tl::PlayerCacheOptions());
             setExport(ExportSettings());
             setFileBrowser(FileBrowserSettings());
             setImageSeq(ImageSeqSettings());
@@ -579,17 +579,17 @@ namespace djv
             _p->advanced->setIfChanged(value);
         }
 
-        const tl::timeline::PlayerCacheOptions& SettingsModel::getCache() const
+        const tl::PlayerCacheOptions& SettingsModel::getCache() const
         {
             return _p->cache->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::PlayerCacheOptions> > SettingsModel::observeCache() const
+        std::shared_ptr<ftk::IObservable<tl::PlayerCacheOptions> > SettingsModel::observeCache() const
         {
             return _p->cache;
         }
 
-        void SettingsModel::setCache(const tl::timeline::PlayerCacheOptions& value)
+        void SettingsModel::setCache(const tl::PlayerCacheOptions& value)
         {
             _p->cache->setIfChanged(value);
         }
@@ -803,7 +803,7 @@ namespace djv
 
         void to_json(nlohmann::json& json, const ImageSeqSettings& value)
         {
-            json["Audio"] = tl::timeline::to_string(value.audio);
+            json["Audio"] = tl::to_string(value.audio);
             json["AudioExts"] = value.audioExts;
             json["AudioFileName"] = value.audioFileName;
             json["MaxDigits"] = value.maxDigits;
@@ -912,7 +912,7 @@ namespace djv
 
         void from_json(const nlohmann::json& json, ImageSeqSettings& value)
         {
-            tl::timeline::from_string(json.at("Audio").get<std::string>(), value.audio);
+            tl::from_string(json.at("Audio").get<std::string>(), value.audio);
             json.at("AudioExts").get_to(value.audioExts);
             json.at("AudioFileName").get_to(value.audioFileName);
             json.at("MaxDigits").get_to(value.maxDigits);

@@ -30,13 +30,13 @@ namespace djv
             std::weak_ptr<App> app;
             bool hud = false;
             ftk::Path path;
-            OTIO_NS::RationalTime currentTime = tl::time::invalidTime;
+            OTIO_NS::RationalTime currentTime = tl::invalidTime;
             double fps = 0.0;
             size_t droppedFrames = 0;
-            size_t videoDataSize = 0;
+            size_t videoFramesSize = 0;
             ftk::ImageOptions imageOptions;
-            tl::timeline::DisplayOptions displayOptions;
-            tl::timeline::PlayerCacheInfo cacheInfo;
+            tl::DisplayOptions displayOptions;
+            tl::PlayerCacheInfo cacheInfo;
             MouseActionBinding pickBinding =
                 MouseActionBinding(ftk::MouseButton::Left);
             MouseActionBinding frameShuttleBinding =
@@ -54,20 +54,20 @@ namespace djv
             std::shared_ptr<ftk::GridLayout> hudLayout;
 
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
-            std::shared_ptr<ftk::ListObserver<tl::timeline::VideoData> > videoDataObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::PlayerCacheInfo> > cacheObserver;
+            std::shared_ptr<ftk::ListObserver<tl::VideoFrame> > videoObserver;
+            std::shared_ptr<ftk::Observer<tl::PlayerCacheInfo> > cacheObserver;
             std::shared_ptr<ftk::Observer<double> > fpsObserver;
             std::shared_ptr<ftk::Observer<size_t> > droppedFramesObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<bool> > hudObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::TimeUnits> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<MouseSettings> > mouseSettingsObserver;
 
             enum class MouseMode
@@ -79,7 +79,7 @@ namespace djv
             struct MouseData
             {
                 MouseMode mode = MouseMode::None;
-                OTIO_NS::RationalTime shuttleStart = tl::time::invalidTime;
+                OTIO_NS::RationalTime shuttleStart = tl::invalidTime;
             };
             MouseData mouse;
         };
@@ -158,23 +158,23 @@ namespace djv
                     _hudUpdate();
                 });
 
-            p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
+            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 app->getFilesModel()->observeCompareOptions(),
-                [this](const tl::timeline::CompareOptions& value)
+                [this](const tl::CompareOptions& value)
                 {
                     setCompareOptions(value);
                 });
 
-            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
+            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
-                [this](const tl::timeline::OCIOOptions& value)
+                [this](const tl::OCIOOptions& value)
                 {
                    setOCIOOptions(value);
                 });
 
-            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
+            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
-                [this](const tl::timeline::LUTOptions& value)
+                [this](const tl::LUTOptions& value)
                 {
                    setLUTOptions(value);
                 });
@@ -184,27 +184,27 @@ namespace djv
                 [this](const ftk::ImageOptions& value)
                 {
                     _p->imageOptions = value;
-                    _videoDataUpdate();
+                    _videoUpdate();
                 });
 
-            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _p->displayOptions = value;
-                    _videoDataUpdate();
+                    _videoUpdate();
                 });
 
-            p.bgOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
+            p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
                 app->getViewportModel()->observeBackgroundOptions(),
-                [this](const tl::timeline::BackgroundOptions& value)
+                [this](const tl::BackgroundOptions& value)
                 {
                     setBackgroundOptions(value);
                 });
 
-            p.fgOptionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
+            p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
-                [this](const tl::timeline::ForegroundOptions& value)
+                [this](const tl::ForegroundOptions& value)
                 {
                     setForegroundOptions(value);
                 });
@@ -225,9 +225,9 @@ namespace djv
                     _hudUpdate();
                 });
 
-            p.timeUnitsObserver = ftk::Observer<tl::timeline::TimeUnits>::create(
+            p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
                 app->getTimeUnitsModel()->observeTimeUnits(),
-                [this](tl::timeline::TimeUnits value)
+                [this](tl::TimeUnits value)
                 {
                     _hudUpdate();
                 });
@@ -285,7 +285,7 @@ namespace djv
             return _p->colorSample;
         }
 
-        void Viewport::setPlayer(const std::shared_ptr<tl::timeline::Player>& player)
+        void Viewport::setPlayer(const std::shared_ptr<tl::Player>& player)
         {
             tl::ui::Viewport::setPlayer(player);
             FTK_P();
@@ -301,17 +301,17 @@ namespace djv
                         _hudUpdate();
                     });
 
-                p.videoDataObserver = ftk::ListObserver<tl::timeline::VideoData>::create(
+                p.videoObserver = ftk::ListObserver<tl::VideoFrame>::create(
                     player->observeCurrentVideo(),
-                    [this](const std::vector<tl::timeline::VideoData>& value)
+                    [this](const std::vector<tl::VideoFrame>& value)
                     {
-                        _p->videoDataSize = value.size();
-                        _videoDataUpdate();
+                        _p->videoFramesSize = value.size();
+                        _videoUpdate();
                     });
 
-                p.cacheObserver = ftk::Observer<tl::timeline::PlayerCacheInfo>::create(
+                p.cacheObserver = ftk::Observer<tl::PlayerCacheInfo>::create(
                     player->observeCacheInfo(),
-                    [this](const tl::timeline::PlayerCacheInfo& value)
+                    [this](const tl::PlayerCacheInfo& value)
                     {
                         _p->cacheInfo = value;
                         _hudUpdate();
@@ -320,12 +320,11 @@ namespace djv
             else
             {
                 p.path = ftk::Path();
-                p.currentTime = tl::time::invalidTime;
+                p.currentTime = tl::invalidTime;
                 p.currentTimeObserver.reset();
-                p.videoDataObserver.reset();
-                p.cacheInfo = tl::timeline::PlayerCacheInfo();
+                p.videoObserver.reset();
+                p.cacheInfo = tl::PlayerCacheInfo();
                 p.cacheObserver.reset();
-                p.videoDataObserver.reset();
                 _hudUpdate();
             }
         }
@@ -420,12 +419,12 @@ namespace djv
             p.mouse = Private::MouseData();
         }
 
-        void Viewport::_videoDataUpdate()
+        void Viewport::_videoUpdate()
         {
             FTK_P();
             std::vector<ftk::ImageOptions> imageOptions;
-            std::vector<tl::timeline::DisplayOptions> displayOptions;
-            for (size_t i = 0; i < p.videoDataSize; ++i)
+            std::vector<tl::DisplayOptions> displayOptions;
+            for (size_t i = 0; i < p.videoFramesSize; ++i)
             {
                 imageOptions.push_back(p.imageOptions);
                 displayOptions.push_back(p.displayOptions);

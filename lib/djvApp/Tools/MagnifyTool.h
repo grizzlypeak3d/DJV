@@ -56,7 +56,7 @@ namespace djv
 
         private:
             void _widgetUpdate();
-            void _videoDataUpdate();
+            void _videoUpdate();
 
             FTK_PRIVATE();
         };

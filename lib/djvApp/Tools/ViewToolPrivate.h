@@ -93,7 +93,7 @@ namespace djv
             void setGeometry(const ftk::Box2I&) override;
 
         private:
-            void _optionsUpdate(const tl::timeline::BackgroundOptions&);
+            void _optionsUpdate(const tl::BackgroundOptions&);
 
             FTK_PRIVATE();
         };
@@ -122,7 +122,7 @@ namespace djv
             void setGeometry(const ftk::Box2I&) override;
 
         private:
-            void _optionsUpdate(const tl::timeline::ForegroundOptions&);
+            void _optionsUpdate(const tl::ForegroundOptions&);
 
             FTK_PRIVATE();
         };

@@ -167,7 +167,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEdit> readBehindEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::PlayerCacheOptions> > settingsObserver;
+            std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > settingsObserver;
         };
 
         void CacheSettingsWidget::_init(
@@ -202,9 +202,9 @@ namespace djv
             p.layout->addRow("Audio cache (GB):", p.audioEdit);
             p.layout->addRow("Read behind (seconds):", p.readBehindEdit);
 
-            p.settingsObserver = ftk::Observer<tl::timeline::PlayerCacheOptions>::create(
+            p.settingsObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
                 p.model->observeCache(),
-                [this](const tl::timeline::PlayerCacheOptions& value)
+                [this](const tl::PlayerCacheOptions& value)
                 {
                     FTK_P();
                     p.videoEdit->setValue(value.videoGB);
@@ -216,7 +216,7 @@ namespace djv
                 [this](float value)
                 {
                     FTK_P();
-                    tl::timeline::PlayerCacheOptions settings = p.model->getCache();
+                    tl::PlayerCacheOptions settings = p.model->getCache();
                     settings.videoGB = value;
                     p.model->setCache(settings);
                 });
@@ -225,7 +225,7 @@ namespace djv
                 [this](float value)
                 {
                     FTK_P();
-                    tl::timeline::PlayerCacheOptions settings = p.model->getCache();
+                    tl::PlayerCacheOptions settings = p.model->getCache();
                     settings.audioGB = value;
                     p.model->setCache(settings);
                 });
@@ -234,7 +234,7 @@ namespace djv
                 [this](float value)
                 {
                     FTK_P();
-                    tl::timeline::PlayerCacheOptions settings = p.model->getCache();
+                    tl::PlayerCacheOptions settings = p.model->getCache();
                     settings.readBehind = value;
                     p.model->setCache(settings);
                 });
@@ -369,7 +369,7 @@ namespace djv
 
             p.model = app->getSettingsModel();
 
-            p.audioComboBox = ftk::ComboBox::create(context, tl::timeline::getImageSeqAudioLabels());
+            p.audioComboBox = ftk::ComboBox::create(context, tl::getImageSeqAudioLabels());
             p.audioComboBox->setHStretch(ftk::Stretch::Expanding);
             p.audioComboBox->setTooltip(
                 "Open audio files for image sequences.\n"
@@ -416,9 +416,9 @@ namespace djv
                     FTK_P();
                     p.audioComboBox->setCurrentIndex(static_cast<int>(value.audio));
                     p.audioExtensionsEdit->setText(ftk::join(value.audioExts, ' '));
-                    p.layout->setRowVisible(p.audioExtensionsEdit, tl::timeline::ImageSeqAudio::Ext == value.audio);
+                    p.layout->setRowVisible(p.audioExtensionsEdit, tl::ImageSeqAudio::Ext == value.audio);
                     p.audioFileNameEdit->setText(value.audioFileName);
-                    p.layout->setRowVisible(p.audioFileNameEdit, tl::timeline::ImageSeqAudio::FileName == value.audio);
+                    p.layout->setRowVisible(p.audioFileNameEdit, tl::ImageSeqAudio::FileName == value.audio);
                     p.maxDigitsEdit->setValue(value.maxDigits);
                     p.defaultSpeedEdit->setValue(value.io.defaultSpeed);
                     p.threadsEdit->setValue(value.io.threadCount);
@@ -429,7 +429,7 @@ namespace djv
                 {
                     FTK_P();
                     ImageSeqSettings settings = p.model->getImageSeq();
-                    settings.audio = static_cast<tl::timeline::ImageSeqAudio>(value);
+                    settings.audio = static_cast<tl::ImageSeqAudio>(value);
                     p.model->setImageSeq(settings);
                 });
 
@@ -774,7 +774,7 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> timeUnitsComboBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::TimeUnits> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
         };
 
         void TimeSettingsWidget::_init(
@@ -787,7 +787,7 @@ namespace djv
 
             p.timeUnitsModel = app->getTimeUnitsModel();
 
-            p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::timeline::getTimeUnitsLabels());
+            p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -797,12 +797,12 @@ namespace djv
             p.timeUnitsComboBox->setIndexCallback(
                 [this](int value)
                 {
-                    _p->timeUnitsModel->setTimeUnits(static_cast<tl::timeline::TimeUnits>(value));
+                    _p->timeUnitsModel->setTimeUnits(static_cast<tl::TimeUnits>(value));
                 });
 
-            p.timeUnitsObserver = ftk::Observer<tl::timeline::TimeUnits>::create(
+            p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
                 p.timeUnitsModel->observeTimeUnits(),
-                [this](tl::timeline::TimeUnits value)
+                [this](tl::TimeUnits value)
                 {
                     _p->timeUnitsComboBox->setCurrentIndex(static_cast<int>(value));
                 });

@@ -33,9 +33,9 @@ namespace djv
         struct BottomToolBar::Private
         {
             std::weak_ptr<App> app;
-            std::shared_ptr<tl::timeline::Player> player;
+            std::shared_ptr<tl::Player> player;
             std::shared_ptr<ftk::DoubleModel> speedModel;
-            OTIO_NS::RationalTime startTime = tl::time::invalidTime;
+            OTIO_NS::RationalTime startTime = tl::invalidTime;
 
             std::map<std::string, std::shared_ptr<ftk::ToolButton> > buttons;
             std::shared_ptr<ShuttleWidget> playbackShuttle;
@@ -52,8 +52,8 @@ namespace djv
             std::shared_ptr<ftk::ToolButton> muteButton;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::TimeUnits> > timeUnitsObserver;
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver;
             std::shared_ptr<ftk::Observer<double> > speedMultObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver2;
@@ -122,7 +122,7 @@ namespace djv
             p.speedMultLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.speedMultLabel->setTooltip("Playback speed multiplier");
 
-            p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::timeline::getTimeUnitsLabels());
+            p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
             p.timeUnitsComboBox->setTooltip("Time units");
 
             p.audioButton = ftk::ToolButton::create(context);
@@ -235,8 +235,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getTimeUnitsModel()->setTimeUnits(
-                            static_cast<tl::timeline::TimeUnits>(value));
+                        app->getTimeUnitsModel()->setTimeUnits(static_cast<tl::TimeUnits>(value));
                     }
                 });
 
@@ -254,16 +253,16 @@ namespace djv
                     }
                 });
 
-            p.timeUnitsObserver = ftk::Observer<tl::timeline::TimeUnits>::create(
+            p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
                 app->getTimeUnitsModel()->observeTimeUnits(),
-                [this](tl::timeline::TimeUnits value)
+                [this](tl::TimeUnits value)
                 {
                     _p->timeUnitsComboBox->setCurrentIndex(static_cast<int>(value));
                 });
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& value)
+                [this](const std::shared_ptr<tl::Player>& value)
                 {
                     _playerUpdate(value);
                 });
@@ -320,7 +319,7 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-        void BottomToolBar::_playerUpdate(const std::shared_ptr<tl::timeline::Player>& value)
+        void BottomToolBar::_playerUpdate(const std::shared_ptr<tl::Player>& value)
         {
             FTK_P();
 
@@ -366,8 +365,8 @@ namespace djv
             }
             else
             {
-                p.currentTimeEdit->setValue(tl::time::invalidTime);
-                p.durationLabel->setValue(tl::time::invalidTime);
+                p.currentTimeEdit->setValue(tl::invalidTime);
+                p.durationLabel->setValue(tl::invalidTime);
                 p.speedModel->setValue(0.0);
                 p.speedMultLabel->setText("1.0X");
                 p.speedMultLabel->setBackgroundRole(ftk::ColorRole::None);

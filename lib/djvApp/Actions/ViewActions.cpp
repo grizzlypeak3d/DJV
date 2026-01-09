@@ -17,8 +17,8 @@ namespace djv
         struct ViewActions::Private
         {
             std::shared_ptr<ftk::Observer<bool> > frameViewObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<bool> > hudObserver;
         };
 
@@ -197,9 +197,9 @@ namespace djv
                     _actions["Frame"]->setChecked(value);
                 });
 
-            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _actions["Red"]->setChecked(ftk::ChannelDisplay::Red == value.channels);
                     _actions["Green"]->setChecked(ftk::ChannelDisplay::Green == value.channels);
@@ -210,9 +210,9 @@ namespace djv
                     _actions["MirrorVertical"]->setChecked(value.mirror.y);
                 });
 
-            p.fgOptionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
+            p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
-                [this](const tl::timeline::ForegroundOptions& value)
+                [this](const tl::ForegroundOptions& value)
                 {
                     _actions["Grid"]->setChecked(value.grid.enabled);
                 });

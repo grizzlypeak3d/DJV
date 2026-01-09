@@ -29,10 +29,10 @@ namespace djv
                 const std::shared_ptr<App>&);
 
         private:
-            void _setPlayer(const std::shared_ptr<tl::timeline::Player>&);
+            void _setPlayer(const std::shared_ptr<tl::Player>&);
 
-            void _playbackUpdate(tl::timeline::Playback);
-            void _loopUpdate(tl::timeline::Loop);
+            void _playbackUpdate(tl::Playback);
+            void _loopUpdate(tl::Loop);
 
             FTK_PRIVATE();
         };

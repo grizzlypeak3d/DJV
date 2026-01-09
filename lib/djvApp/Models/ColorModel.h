@@ -38,22 +38,22 @@ namespace djv
                 const std::shared_ptr<ftk::Settings>&);
 
             //! Get the OpenColorIO options.
-            const tl::timeline::OCIOOptions& getOCIOOptions() const;
+            const tl::OCIOOptions& getOCIOOptions() const;
 
             //! Observe the OpenColorIO options.
-            std::shared_ptr<ftk::IObservable<tl::timeline::OCIOOptions> > observeOCIOOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > observeOCIOOptions() const;
 
             //! Set the OpenColorIO options.
-            void setOCIOOptions(const tl::timeline::OCIOOptions&);
+            void setOCIOOptions(const tl::OCIOOptions&);
 
             //! Get the LUT options.
-            const tl::timeline::LUTOptions& getLUTOptions() const;
+            const tl::LUTOptions& getLUTOptions() const;
 
             //! Observe the LUT options.
-            std::shared_ptr<ftk::IObservable<tl::timeline::LUTOptions> > observeLUTOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::LUTOptions> > observeLUTOptions() const;
 
             //! Set the LUT options.
-            void setLUTOptions(const tl::timeline::LUTOptions&);
+            void setLUTOptions(const tl::LUTOptions&);
 
         private:
             FTK_PRIVATE();

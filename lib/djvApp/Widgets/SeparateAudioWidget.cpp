@@ -5,7 +5,7 @@
 
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FileEdit.h>
-#include <ftk/UI/GroupBox.h>
+#include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
@@ -53,22 +53,17 @@ namespace djv
             auto label = ftk::Label::create(context, "Open Separate Audio", p.layout);
             label->setMarginRole(ftk::SizeRole::MarginSmall);
             label->setBackgroundRole(ftk::ColorRole::Button);
-            auto vLayout = ftk::VerticalLayout::create(context, p.layout);
-            vLayout->setVStretch(ftk::Stretch::Expanding);
-            vLayout->setMarginRole(ftk::SizeRole::MarginSmall);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            auto groupBox = ftk::GroupBox::create(context, "Video", vLayout);
-            p.videoFileEdit->setParent(groupBox);
-            groupBox = ftk::GroupBox::create(context, "Audio", vLayout);
-            p.audioFileEdit->setParent(groupBox);
-            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Vertical, vLayout);
-            spacer->setSpacingRole(ftk::SizeRole::None);
-            spacer->setVStretch(ftk::Stretch::Expanding);
+            auto formLayout = ftk::FormLayout::create(context, p.layout);
+            formLayout->setVStretch(ftk::Stretch::Expanding);
+            formLayout->setMarginRole(ftk::SizeRole::Margin);
+            formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            formLayout->addRow("Video:", p.videoFileEdit);
+            formLayout->addRow("Audio:", p.audioFileEdit);
             ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, hLayout);
+            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, hLayout);
             spacer->setSpacingRole(ftk::SizeRole::None);
             spacer->setHStretch(ftk::Stretch::Expanding);
             p.okButton->setParent(hLayout);

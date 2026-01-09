@@ -19,13 +19,13 @@ namespace djv
     {
         struct InfoTool::Private
         {
-            tl::io::Info info;
+            tl::IOInfo info;
             std::string search;
 
             std::shared_ptr<ftk::SearchBox> searchBox;
             std::shared_ptr<ftk::GridLayout> layout;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
         void InfoTool::_init(
@@ -61,11 +61,11 @@ namespace djv
             p.searchBox->setParent(hLayout);
             _setWidget(layout);
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& value)
+                [this](const std::shared_ptr<tl::Player>& value)
                 {
-                    _p->info = value ? value->getIOInfo() : tl::io::Info();
+                    _p->info = value ? value->getIOInfo() : tl::IOInfo();
                     _widgetUpdate();
                 });
 

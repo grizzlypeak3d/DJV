@@ -51,12 +51,12 @@ namespace djv
             std::shared_ptr<ftk::CmdLineListArg<std::string> > inputs;
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > audioFileName;
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > compareFileName;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::timeline::Compare> > compare;
+            std::shared_ptr<ftk::CmdLineValueOption<tl::Compare> > compare;
             std::shared_ptr<ftk::CmdLineValueOption<ftk::V2F> > wipeCenter;
             std::shared_ptr<ftk::CmdLineValueOption<float> > wipeRotation;
             std::shared_ptr<ftk::CmdLineValueOption<double> > speed;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::timeline::Playback> > playback;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::timeline::Loop> > loop;
+            std::shared_ptr<ftk::CmdLineValueOption<tl::Playback> > playback;
+            std::shared_ptr<ftk::CmdLineValueOption<tl::Loop> > loop;
             std::shared_ptr<ftk::CmdLineValueOption<OTIO_NS::RationalTime> > seek;
             std::shared_ptr<ftk::CmdLineValueOption<OTIO_NS::TimeRange> > inOutRange;
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > ocioFileName;
@@ -65,7 +65,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > ocioView;
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > ocioLook;
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > lutFileName;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::timeline::LUTOrder> > lutOrder;
+            std::shared_ptr<ftk::CmdLineValueOption<tl::LUTOrder> > lutOrder;
 #if defined(TLRENDER_USD)
             std::shared_ptr<ftk::CmdLineValueOption<int> > usdRenderWidth;
             std::shared_ptr<ftk::CmdLineValueOption<float> > usdComplexity;
@@ -95,8 +95,8 @@ namespace djv
             std::vector<std::shared_ptr<FilesModelItem> > files;
             std::vector<std::shared_ptr<FilesModelItem> > activeFiles;
             std::shared_ptr<RecentFilesModel> recentFilesModel;
-            std::vector<std::shared_ptr<tl::timeline::Timeline> > timelines;
-            std::shared_ptr<ftk::Observable<std::shared_ptr<tl::timeline::Player> > > player;
+            std::vector<std::shared_ptr<tl::Timeline> > timelines;
+            std::shared_ptr<ftk::Observable<std::shared_ptr<tl::Player> > > player;
             std::shared_ptr<ColorModel> colorModel;
             std::shared_ptr<ViewportModel> viewportModel;
             std::shared_ptr<AudioModel> audioModel;
@@ -113,14 +113,14 @@ namespace djv
             std::shared_ptr<tl::bmd::OutputDevice> bmdOutputDevice;
 #endif // TLRENDER_BMD
 
-            std::shared_ptr<ftk::Observer<tl::timeline::PlayerCacheOptions> > cacheObserver;
+            std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > activeObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareTime> > compareTimeObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
             std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosZoomObserver;
             std::shared_ptr<ftk::Observer<bool> > viewFramedObserver;
-            std::shared_ptr<ftk::Observer<tl::audio::DeviceID> > audioDeviceObserver;
+            std::shared_ptr<ftk::Observer<tl::AudioDeviceID> > audioDeviceObserver;
             std::shared_ptr<ftk::Observer<float> > volumeObserver;
             std::shared_ptr<ftk::Observer<bool> > muteObserver;
             std::shared_ptr<ftk::ListObserver<bool> > channelMuteObserver;
@@ -132,13 +132,13 @@ namespace djv
             std::shared_ptr<ftk::Observer<bool> > bmdActiveObserver;
             std::shared_ptr<ftk::Observer<ftk::Size2I> > bmdSizeObserver;
             std::shared_ptr<ftk::Observer<tl::bmd::FrameRate> > bmdFrameRateObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
 #endif // TLRENDER_BMD
         };
 
@@ -165,17 +165,17 @@ namespace djv
                 { "-compare", "-b" },
                 "Compare \"B\" file name.",
                 "Compare");
-            p.cmdLine.compare = ftk::CmdLineValueOption<tl::timeline::Compare>::create(
+            p.cmdLine.compare = ftk::CmdLineValueOption<tl::Compare>::create(
                 { "-compareMode", "-c" },
                 "Compare mode.",
                 "Compare",
-                std::optional<tl::timeline::Compare>(),
-                ftk::quotes(tl::timeline::getCompareLabels()));
+                std::optional<tl::Compare>(),
+                ftk::quotes(tl::getCompareLabels()));
             p.cmdLine.wipeCenter = ftk::CmdLineValueOption<ftk::V2F>::create(
                 { "-wipeCenter", "-wc" },
                 "Wipe center.",
                 "Compare",
-                tl::timeline::CompareOptions().wipeCenter);
+                tl::CompareOptions().wipeCenter);
             p.cmdLine.wipeRotation = ftk::CmdLineValueOption<float>::create(
                 { "-wipeRotation", "-wr" },
                 "Wipe rotation.",
@@ -185,18 +185,18 @@ namespace djv
                 { "-speed" },
                 "Playback speed.",
                 "Playback");
-            p.cmdLine.playback = ftk::CmdLineValueOption<tl::timeline::Playback>::create(
+            p.cmdLine.playback = ftk::CmdLineValueOption<tl::Playback>::create(
                 { "-playback", "-p" },
                 "Playback mode.",
                 "Playback",
-                std::optional<tl::timeline::Playback>(),
-                ftk::quotes(tl::timeline::getPlaybackLabels()));
-            p.cmdLine.loop = ftk::CmdLineValueOption<tl::timeline::Loop>::create(
+                std::optional<tl::Playback>(),
+                ftk::quotes(tl::getPlaybackLabels()));
+            p.cmdLine.loop = ftk::CmdLineValueOption<tl::Loop>::create(
                 { "-loop" },
                 "Loop mode.",
                 "Playback",
-                std::optional<tl::timeline::Loop>(),
-                ftk::quotes(tl::timeline::getLoopLabels()));
+                std::optional<tl::Loop>(),
+                ftk::quotes(tl::getLoopLabels()));
             p.cmdLine.seek = ftk::CmdLineValueOption<OTIO_NS::RationalTime>::create(
                 { "-seek" },
                 "Seek to the given time.",
@@ -229,12 +229,12 @@ namespace djv
                 { "-lut" },
                 "LUT file name.",
                 "Color");
-            p.cmdLine.lutOrder = ftk::CmdLineValueOption<tl::timeline::LUTOrder>::create(
+            p.cmdLine.lutOrder = ftk::CmdLineValueOption<tl::LUTOrder>::create(
                 { "-lutOrder" },
                 "LUT operation order.",
                 "Color",
-                std::optional<tl::timeline::LUTOrder>(),
-                ftk::quotes(tl::timeline::getLUTOrderLabels()));
+                std::optional<tl::LUTOrder>(),
+                ftk::quotes(tl::getLUTOrderLabels()));
 #if defined(TLRENDER_USD)
             p.cmdLine.usdRenderWidth = ftk::CmdLineValueOption<int>::create(
                 { "-usdRenderWidth" },
@@ -381,7 +381,7 @@ namespace djv
             FTK_P();
             ftk::PathOptions pathOptions;
             pathOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
-            for (const auto& i : tl::timeline::getPaths(_context, path, pathOptions))
+            for (const auto& i : tl::getPaths(_context, path, pathOptions))
             {
                 auto item = std::make_shared<FilesModelItem>();
                 item->path = i;
@@ -449,7 +449,7 @@ namespace djv
             _activeUpdate(activeFiles);
         }
 
-        std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::timeline::Player> > > App::observePlayer() const
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > App::observePlayer() const
         {
             return _p->player;
         }
@@ -619,7 +619,7 @@ namespace djv
 
             p.recentFilesModel = RecentFilesModel::create(_context, p.settings);
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
-            fileBrowserSystem->getModel()->setExts(tl::timeline::getExts(_context));
+            fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
             fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
 
             p.colorModel = ColorModel::create(_context, p.settings);
@@ -629,7 +629,7 @@ namespace djv
                 p.cmdLine.ocioView->hasValue() ||
                 p.cmdLine.ocioLook->hasValue())
             {
-                tl::timeline::OCIOOptions options = p.colorModel->getOCIOOptions();
+                tl::OCIOOptions options = p.colorModel->getOCIOOptions();
                 options.enabled = true;
                 if (p.cmdLine.ocioFileName->hasValue())
                 {
@@ -656,7 +656,7 @@ namespace djv
             if (p.cmdLine.lutFileName->hasValue() ||
                 p.cmdLine.lutOrder->hasValue())
             {
-                tl::timeline::LUTOptions options = p.colorModel->getLUTOptions();
+                tl::LUTOptions options = p.colorModel->getLUTOptions();
                 options.enabled = true;
                 if (p.cmdLine.lutFileName->hasValue())
                 {
@@ -689,11 +689,11 @@ namespace djv
         {
             FTK_P();
 
-            p.player = ftk::Observable<std::shared_ptr<tl::timeline::Player> >::create();
+            p.player = ftk::Observable<std::shared_ptr<tl::Player> >::create();
 
-            p.cacheObserver = ftk::Observer<tl::timeline::PlayerCacheOptions>::create(
+            p.cacheObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
                 p.settingsModel->observeCache(),
-                [this](const tl::timeline::PlayerCacheOptions& value)
+                [this](const tl::PlayerCacheOptions& value)
                 {
                     if (auto player = _p->player->get())
                     {
@@ -719,9 +719,9 @@ namespace djv
                 {
                     _layersUpdate(value);
                 });
-            p.compareTimeObserver = ftk::Observer<tl::timeline::CompareTime>::create(
+            p.compareTimeObserver = ftk::Observer<tl::CompareTime>::create(
                 p.filesModel->observeCompareTime(),
-                [this](tl::timeline::CompareTime value)
+                [this](tl::CompareTime value)
                 {
                     if (auto player = _p->player->get())
                     {
@@ -729,9 +729,9 @@ namespace djv
                     }
                 });
 
-            p.audioDeviceObserver = ftk::Observer<tl::audio::DeviceID>::create(
+            p.audioDeviceObserver = ftk::Observer<tl::AudioDeviceID>::create(
                 p.audioModel->observeDevice(),
-                [this](const tl::audio::DeviceID& value)
+                [this](const tl::AudioDeviceID& value)
                 {
                     if (auto player = _p->player->get())
                     {
@@ -796,7 +796,7 @@ namespace djv
                     config.boolOptions = value.boolOptions;
                     p.bmdOutputDevice->setConfig(config);
                     p.bmdOutputDevice->setEnabled(value.deviceEnabled);
-                    tl::timeline::DisplayOptions displayOptions = p.viewportModel->getDisplayOptions();
+                    tl::DisplayOptions displayOptions = p.viewportModel->getDisplayOptions();
                     p.bmdOutputDevice->setDisplayOptions({ displayOptions });
                     p.bmdOutputDevice->setHDR(value.hdrMode, value.hdrData);
                 });
@@ -823,15 +823,15 @@ namespace djv
                     //    std::endl;
                 });
 
-            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
+            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 p.colorModel->observeOCIOOptions(),
-                [this](const tl::timeline::OCIOOptions& value)
+                [this](const tl::OCIOOptions& value)
                 {
                     _p->bmdOutputDevice->setOCIOOptions(value);
                 });
-            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
+            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
                 p.colorModel->observeLUTOptions(),
-                [this](const tl::timeline::LUTOptions& value)
+                [this](const tl::LUTOptions& value)
                 {
                     _p->bmdOutputDevice->setLUTOptions(value);
                 });
@@ -841,30 +841,30 @@ namespace djv
                 {
                     _p->bmdOutputDevice->setImageOptions({ value });
                 });
-            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 p.viewportModel->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _p->bmdOutputDevice->setDisplayOptions({ value });
                 });
 
-            p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
+            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 p.filesModel->observeCompareOptions(),
-                [this](const tl::timeline::CompareOptions& value)
+                [this](const tl::CompareOptions& value)
                 {
                     _p->bmdOutputDevice->setCompareOptions(value);
                 });
 
-            p.bgOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
+            p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
                 p.viewportModel->observeBackgroundOptions(),
-                [this](const tl::timeline::BackgroundOptions& value)
+                [this](const tl::BackgroundOptions& value)
                 {
                     _p->bmdOutputDevice->setBackgroundOptions(value);
                 });
 
-            p.fgOptionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
+            p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
                 p.viewportModel->observeForegroundOptions(),
-                [this](const tl::timeline::ForegroundOptions& value)
+                [this](const tl::ForegroundOptions& value)
                 {
                     _p->bmdOutputDevice->setForegroundOptions(value);
                 });
@@ -887,7 +887,7 @@ namespace djv
                         path = ftk::expandSeq(path, pathOptions);
                     }
                     open(path);
-                    tl::timeline::CompareOptions options;
+                    tl::CompareOptions options;
                     if (p.cmdLine.compare->hasValue())
                     {
                         options.compare = p.cmdLine.compare->getValue();
@@ -1024,16 +1024,16 @@ namespace djv
                 str();
         }
 
-        tl::io::Options App::_getIOOptions() const
+        tl::IOOptions App::_getIOOptions() const
         {
             FTK_P();
-            tl::io::Options out;
-            out = tl::io::merge(out, tl::io::getOptions(p.settingsModel->getImageSeq().io));
+            tl::IOOptions out;
+            out = tl::merge(out, tl::getOptions(p.settingsModel->getImageSeq().io));
 #if defined(TLRENDER_FFMPEG)
-            out = tl::io::merge(out, tl::ffmpeg::getOptions(p.settingsModel->getFFmpeg()));
+            out = tl::merge(out, tl::ffmpeg::getOptions(p.settingsModel->getFFmpeg()));
 #endif // TLRENDER_FFMPEG
 #if defined(TLRENDER_USD)
-            out = tl::io::merge(out, tl::usd::getOptions(p.settingsModel->getUSD()));
+            out = tl::merge(out, tl::usd::getOptions(p.settingsModel->getUSD()));
 #endif // TLRENDER_USD
             return out;
         }
@@ -1042,7 +1042,7 @@ namespace djv
         {
             FTK_P();
 
-            std::vector<std::shared_ptr<tl::timeline::Timeline> > timelines(files.size());
+            std::vector<std::shared_ptr<tl::Timeline> > timelines(files.size());
             for (size_t i = 0; i < files.size(); ++i)
             {
                 const auto j = std::find(p.files.begin(), p.files.end(), files[i]);
@@ -1058,7 +1058,7 @@ namespace djv
                 {
                     try
                     {
-                        tl::timeline::Options options;
+                        tl::Options options;
                         const ImageSeqSettings imageSeq = p.settingsModel->getImageSeq();
                         options.imageSeqAudio = imageSeq.audio;
                         options.imageSeqAudioExts = imageSeq.audioExts;
@@ -1070,9 +1070,9 @@ namespace djv
                         options.ioOptions = _getIOOptions();
                         options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
                         auto otioTimeline = files[i]->audioPath.isEmpty() ?
-                            tl::timeline::create(_context, files[i]->path, options) :
-                            tl::timeline::create(_context, files[i]->path, files[i]->audioPath, options);
-                        timelines[i] = tl::timeline::Timeline::create(_context, otioTimeline, options);
+                            tl::create(_context, files[i]->path, options) :
+                            tl::create(_context, files[i]->path, files[i]->audioPath, options);
+                        timelines[i] = tl::Timeline::create(_context, otioTimeline, options);
                         for (const auto& video : timelines[i]->getIOInfo().video)
                         {
                             files[i]->videoLayers.push_back(video.name);
@@ -1103,7 +1103,7 @@ namespace djv
                 }
             }
 
-            std::shared_ptr<tl::timeline::Player> player;
+            std::shared_ptr<tl::Player> player;
             if (!activeFiles.empty())
             {
                 if (!p.activeFiles.empty() && activeFiles[0] == p.activeFiles[0])
@@ -1114,7 +1114,7 @@ namespace djv
                 {
                     if (auto player = p.player->get())
                     {
-                        player->setAudioDevice(tl::audio::DeviceID());
+                        player->setAudioDevice(tl::AudioDeviceID());
                     }
                     auto i = std::find(p.files.begin(), p.files.end(), activeFiles[0]);
                     if (i != p.files.end())
@@ -1123,14 +1123,14 @@ namespace djv
                         {
                             try
                             {
-                                tl::timeline::PlayerOptions playerOptions;
+                                tl::PlayerOptions playerOptions;
                                 playerOptions.audioDevice = p.audioModel->getDevice();
                                 playerOptions.cache = p.settingsModel->getCache();
                                 const AdvancedSettings advanced = p.settingsModel->getAdvanced();
                                 playerOptions.videoRequestMax = advanced.videoRequestMax;
                                 playerOptions.audioRequestMax = advanced.audioRequestMax;
                                 playerOptions.audioBufferFrameCount = advanced.audioBufferFrameCount;
-                                player = tl::timeline::Player::create(_context, timeline, playerOptions);
+                                player = tl::Player::create(_context, timeline, playerOptions);
                             }
                             catch (const std::exception& e)
                             {
@@ -1148,16 +1148,16 @@ namespace djv
                     player->setSpeed(speed);
                 }
                 const OTIO_NS::TimeRange inOutRange = activeFiles.front()->inOutRange;
-                if (!tl::time::compareExact(inOutRange, tl::time::invalidTimeRange))
+                if (!tl::compareExact(inOutRange, tl::invalidTimeRange))
                 {
                     player->setInOutRange(inOutRange);
                 }
                 const OTIO_NS::RationalTime currentTime = activeFiles.front()->currentTime;
-                if (!currentTime.strictly_equal(tl::time::invalidTime))
+                if (!currentTime.strictly_equal(tl::invalidTime))
                 {
                     player->seek(currentTime);
                 }
-                std::vector<std::shared_ptr<tl::timeline::Timeline> > compare;
+                std::vector<std::shared_ptr<tl::Timeline> > compare;
                 for (size_t i = 1; i < activeFiles.size(); ++i)
                 {
                     auto j = std::find(p.files.begin(), p.files.end(), activeFiles[i]);

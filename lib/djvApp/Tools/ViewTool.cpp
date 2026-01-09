@@ -187,7 +187,7 @@ namespace djv
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
         };
 
@@ -251,9 +251,9 @@ namespace djv
                     p.alphaBlendComboBox->setCurrentIndex(static_cast<int>(value.alphaBlend));
                 });
 
-            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     FTK_P();
                     p.minifyComboBox->setCurrentIndex(static_cast<int>(value.imageFilters.minify));
@@ -370,7 +370,7 @@ namespace djv
             std::pair< std::shared_ptr<ftk::ColorSwatch>, std::shared_ptr<ftk::ColorSwatch> > gradientSwatch;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > backgroundOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > backgroundOptionsObserver;
         };
 
         void BackgroundWidget::_init(
@@ -383,7 +383,7 @@ namespace djv
 
             p.typeComboBox = ftk::ComboBox::create(
                 context,
-                tl::timeline::getBackgroundLabels());
+                tl::getBackgroundLabels());
             p.typeComboBox->setHStretch(ftk::Stretch::Expanding);
 
             p.solidSwatch = ftk::ColorSwatch::create(context);
@@ -413,9 +413,9 @@ namespace djv
             p.layout->addRow("Color 1:", p.gradientSwatch.first);
             p.layout->addRow("Color 2:", p.gradientSwatch.second);
 
-            p.backgroundOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
+            p.backgroundOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
                 app->getViewportModel()->observeBackgroundOptions(),
-                [this](const tl::timeline::BackgroundOptions& value)
+                [this](const tl::BackgroundOptions& value)
                 {
                     _optionsUpdate(value);
                 });
@@ -427,7 +427,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getBackgroundOptions();
-                        options.type = static_cast<tl::timeline::Background>(value);
+                        options.type = static_cast<tl::Background>(value);
                         app->getViewportModel()->setBackgroundOptions(options);
                     }
                 });
@@ -528,7 +528,7 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-        void BackgroundWidget::_optionsUpdate(const tl::timeline::BackgroundOptions& value)
+        void BackgroundWidget::_optionsUpdate(const tl::BackgroundOptions& value)
         {
             FTK_P();
             p.typeComboBox->setCurrentIndex(static_cast<int>(value.type));
@@ -539,12 +539,12 @@ namespace djv
             p.gradientSwatch.first->setColor(value.gradientColor.first);
             p.gradientSwatch.second->setColor(value.gradientColor.second);
 
-            p.layout->setRowVisible(p.solidSwatch, value.type == tl::timeline::Background::Solid);
-            p.layout->setRowVisible(p.checkersSwatch.first, value.type == tl::timeline::Background::Checkers);
-            p.layout->setRowVisible(p.checkersSwatch.second, value.type == tl::timeline::Background::Checkers);
-            p.layout->setRowVisible(p.checkersSizeSlider, value.type == tl::timeline::Background::Checkers);
-            p.layout->setRowVisible(p.gradientSwatch.first, value.type == tl::timeline::Background::Gradient);
-            p.layout->setRowVisible(p.gradientSwatch.second, value.type == tl::timeline::Background::Gradient);
+            p.layout->setRowVisible(p.solidSwatch, value.type == tl::Background::Solid);
+            p.layout->setRowVisible(p.checkersSwatch.first, value.type == tl::Background::Checkers);
+            p.layout->setRowVisible(p.checkersSwatch.second, value.type == tl::Background::Checkers);
+            p.layout->setRowVisible(p.checkersSizeSlider, value.type == tl::Background::Checkers);
+            p.layout->setRowVisible(p.gradientSwatch.first, value.type == tl::Background::Gradient);
+            p.layout->setRowVisible(p.gradientSwatch.second, value.type == tl::Background::Gradient);
         }
 
         struct OutlineWidget::Private
@@ -554,7 +554,7 @@ namespace djv
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
         };
 
         void OutlineWidget::_init(
@@ -582,9 +582,9 @@ namespace djv
             p.layout->addRow("Width:", p.widthSlider);
             p.layout->addRow("Color:", p.colorSwatch);
 
-            p.optionsObservers = ftk::Observer<tl::timeline::ForegroundOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
-                [this](const tl::timeline::ForegroundOptions& value)
+                [this](const tl::ForegroundOptions& value)
                 {
                     _optionsUpdate(value);
                 });
@@ -652,7 +652,7 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-        void OutlineWidget::_optionsUpdate(const tl::timeline::ForegroundOptions& value)
+        void OutlineWidget::_optionsUpdate(const tl::ForegroundOptions& value)
         {
             FTK_P();
             p.enabledCheckBox->setChecked(value.outline.enabled);
@@ -671,7 +671,7 @@ namespace djv
             std::shared_ptr<ftk::ColorSwatch> overlayColorSwatch;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObserver;
         };
 
         void GridWidget::_init(
@@ -695,7 +695,7 @@ namespace djv
             p.colorSwatch->setEditable(true);
             p.colorSwatch->setHAlign(ftk::HAlign::Left);
 
-            p.labelsComboBox = ftk::ComboBox::create(context, tl::timeline::getGridLabelsLabels());
+            p.labelsComboBox = ftk::ComboBox::create(context, tl::getGridLabelsLabels());
 
             p.textColorSwatch = ftk::ColorSwatch::create(context);
             p.textColorSwatch->setEditable(true);
@@ -716,9 +716,9 @@ namespace djv
             p.layout->addRow("Text color:", p.textColorSwatch);
             p.layout->addRow("Overlay color:", p.overlayColorSwatch);
 
-            p.optionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
+            p.optionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
-                [this](const tl::timeline::ForegroundOptions& value)
+                [this](const tl::ForegroundOptions& value)
                 {
                     FTK_P();
                     p.enabledCheckBox->setChecked(value.grid.enabled);
@@ -781,7 +781,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getForegroundOptions();
-                        options.grid.labels = static_cast<tl::timeline::GridLabels>(value);
+                        options.grid.labels = static_cast<tl::GridLabels>(value);
                         app->getViewportModel()->setForegroundOptions(options);
                     }
                 });

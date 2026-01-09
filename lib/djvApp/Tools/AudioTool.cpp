@@ -23,8 +23,8 @@ namespace djv
     {
         struct AudioTool::Private
         {
-            std::vector<tl::audio::DeviceID> devices;
-            tl::audio::Info info;
+            std::vector<tl::AudioDeviceID> devices;
+            tl::AudioInfo info;
             std::vector<bool> channelMute;
 
             std::shared_ptr<ftk::ComboBox> deviceComboBox;
@@ -36,11 +36,11 @@ namespace djv
 
             std::shared_ptr<ftk::HorizontalLayout> channelMuteLayout;
 
-            std::shared_ptr<ftk::ListObserver<tl::audio::DeviceID> > devicesObserver;
-            std::shared_ptr<ftk::Observer<tl::audio::DeviceID> > deviceObserver;
+            std::shared_ptr<ftk::ListObserver<tl::AudioDeviceID> > devicesObserver;
+            std::shared_ptr<ftk::Observer<tl::AudioDeviceID> > deviceObserver;
             std::shared_ptr<ftk::Observer<float> > volumeObserver;
             std::shared_ptr<ftk::Observer<bool> > muteObserver;
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::ListObserver<bool> > channelMuteObserver;
             std::shared_ptr<ftk::Observer<double> > syncOffsetObserver;
         };
@@ -99,7 +99,7 @@ namespace djv
                         if (value >= 0 && value < _p->devices.size())
                         {
                             app->getAudioModel()->setDevice(
-                                0 == value ? tl::audio::DeviceID() : _p->devices[value]);
+                                0 == value ? tl::AudioDeviceID() : _p->devices[value]);
                         }
                     }
                 });
@@ -146,12 +146,12 @@ namespace djv
                     }
                 });
 
-            p.devicesObserver = ftk::ListObserver<tl::audio::DeviceID>::create(
+            p.devicesObserver = ftk::ListObserver<tl::AudioDeviceID>::create(
                 app->getAudioModel()->observeDevices(),
-                [this](const std::vector<tl::audio::DeviceID>& devices)
+                [this](const std::vector<tl::AudioDeviceID>& devices)
                 {
                     _p->devices.clear();
-                    _p->devices.push_back(tl::audio::DeviceID());
+                    _p->devices.push_back(tl::AudioDeviceID());
                     _p->devices.insert(_p->devices.end(), devices.begin(), devices.end());
                     std::vector<std::string> names;
                     names.push_back("Default");
@@ -162,9 +162,9 @@ namespace djv
                     _p->deviceComboBox->setItems(names);
                 });
 
-            p.deviceObserver = ftk::Observer<tl::audio::DeviceID>::create(
+            p.deviceObserver = ftk::Observer<tl::AudioDeviceID>::create(
                 app->getAudioModel()->observeDevice(),
-                [this](const tl::audio::DeviceID& value)
+                [this](const tl::AudioDeviceID& value)
                 {
                     int index = 0;
                     const auto i = std::find(_p->devices.begin(), _p->devices.end(), value);
@@ -189,11 +189,11 @@ namespace djv
                     _p->muteCheckBox->setChecked(value);
                 });
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& value)
+                [this](const std::shared_ptr<tl::Player>& value)
                 {
-                    _p->info = value ? value->getIOInfo().audio : tl::audio::Info();
+                    _p->info = value ? value->getIOInfo().audio : tl::AudioInfo();
                     _widgetUpdate();
                 });
 

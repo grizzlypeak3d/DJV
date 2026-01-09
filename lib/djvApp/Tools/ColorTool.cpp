@@ -40,8 +40,8 @@ namespace djv
             std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > optionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > optionsObserver2;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > optionsObserver2;
             std::shared_ptr<ftk::Observer<OCIOModelData> > dataObserver;
         };
 
@@ -59,7 +59,7 @@ namespace djv
 
             p.ocioModel = OCIOModel::create(context);
 
-            p.configComboBox = ftk::ComboBox::create(context, tl::timeline::getOCIOConfigLabels());
+            p.configComboBox = ftk::ComboBox::create(context, tl::getOCIOConfigLabels());
             p.configComboBox->setHStretch(ftk::Stretch::Expanding);
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -94,17 +94,17 @@ namespace djv
             p.formLayout->addRow("View:", p.viewComboBox);
             p.formLayout->addRow("Look:", p.lookComboBox);
 
-            p.optionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
+            p.optionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
-                [this](const tl::timeline::OCIOOptions& value)
+                [this](const tl::OCIOOptions& value)
                 {
                     _p->ocioModel->setOptions(value);
                 });
 
             auto appWeak = std::weak_ptr<App>(app);
-            p.optionsObserver2 = ftk::Observer<tl::timeline::OCIOOptions>::create(
+            p.optionsObserver2 = ftk::Observer<tl::OCIOOptions>::create(
                 p.ocioModel->observeOptions(),
-                [appWeak](const tl::timeline::OCIOOptions& value)
+                [appWeak](const tl::OCIOOptions& value)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -121,7 +121,7 @@ namespace djv
                     p.configComboBox->setCurrentIndex(static_cast<int>(value.config));
                     p.fileEdit->setPath(ftk::Path(value.fileName));
                     p.nameLabel->setText(value.name);
-                    p.formLayout->setRowVisible(p.fileEdit, tl::timeline::OCIOConfig::File == value.config);
+                    p.formLayout->setRowVisible(p.fileEdit, tl::OCIOConfig::File == value.config);
                     p.inputComboBox->setItems(value.inputs);
                     p.inputComboBox->setCurrentIndex(value.inputIndex);
                     p.displayComboBox->setItems(value.displays);
@@ -141,7 +141,7 @@ namespace djv
             p.configComboBox->setIndexCallback(
                 [this](int value)
                 {
-                    _p->ocioModel->setConfig(static_cast<tl::timeline::OCIOConfig>(value));
+                    _p->ocioModel->setConfig(static_cast<tl::OCIOConfig>(value));
                 });
 
             p.fileEdit->setCallback(
@@ -207,7 +207,7 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> orderComboBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > optionsObservers;
         };
 
         void LUTWidget::_init(
@@ -226,7 +226,7 @@ namespace djv
 
             p.fileEdit = ftk::FileEdit::create(context);
 
-            p.orderComboBox = ftk::ComboBox::create(context, tl::timeline::getLUTOrderLabels());
+            p.orderComboBox = ftk::ComboBox::create(context, tl::getLUTOrderLabels());
             p.orderComboBox->setHStretch(ftk::Stretch::Expanding);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
@@ -236,9 +236,9 @@ namespace djv
             p.layout->addRow("File name:", p.fileEdit);
             p.layout->addRow("Order:", p.orderComboBox);
 
-            p.optionsObservers = ftk::Observer<tl::timeline::LUTOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
-                [this](const tl::timeline::LUTOptions& value)
+                [this](const tl::LUTOptions& value)
                 {
                     _p->enabledCheckBox->setChecked(value.enabled);
                     _p->fileEdit->setPath(ftk::Path(value.fileName));
@@ -276,7 +276,7 @@ namespace djv
                     {
                         auto options = app->getColorModel()->getLUTOptions();
                         options.enabled = true;
-                        options.order = static_cast<tl::timeline::LUTOrder>(value);
+                        options.order = static_cast<tl::LUTOrder>(value);
                         app->getColorModel()->setLUTOptions(options);
                     }
                 });
@@ -317,7 +317,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> invertCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
         };
 
         void ColorWidget::_init(
@@ -358,9 +358,9 @@ namespace djv
             p.layout->addRow("Tint:", p.sliders["Tint"]);
             p.layout->addRow("Invert:", p.invertCheckBox);
 
-            p.optionsObservers = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _p->enabledCheckBox->setChecked(value.color.enabled);
                     _p->sliders["Add"]->setValue(value.color.add.x);
@@ -501,7 +501,7 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::FloatEdit> > rangeEdits;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
         };
 
         void LevelsWidget::_init(
@@ -575,9 +575,9 @@ namespace djv
             p.rangeEdits["OutMax"]->setParent(hLayout);
             p.layout->addRow("Out range:", hLayout);
 
-            p.optionsObservers = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _p->enabledCheckBox->setChecked(value.levels.enabled);
                     _p->sliders["InLow"]->setValue(value.levels.inLow);
@@ -742,7 +742,7 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
         };
 
         void EXRDisplayWidget::_init(
@@ -776,9 +776,9 @@ namespace djv
             p.layout->addRow("Knee low:", p.sliders["KneeLow"]);
             p.layout->addRow("Knee high:", p.sliders["KneeHigh"]);
 
-            p.optionsObservers = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _p->enabledCheckBox->setChecked(value.exrDisplay.enabled);
                     _p->sliders["Exposure"]->setValue(value.exrDisplay.exposure);
@@ -882,7 +882,7 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > optionsObservers;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
         };
 
         void SoftClipWidget::_init(
@@ -904,9 +904,9 @@ namespace djv
             p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Soft clip:", p.sliders["SoftClip"]);
 
-            p.optionsObservers = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _p->enabledCheckBox->setChecked(value.softClip.enabled);
                     _p->sliders["SoftClip"]->setValue(value.softClip.value);

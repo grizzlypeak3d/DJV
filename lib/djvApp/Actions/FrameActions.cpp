@@ -12,7 +12,7 @@ namespace djv
     {
         struct FrameActions::Private
         {
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
         void FrameActions::_init(
@@ -74,7 +74,7 @@ namespace djv
                     {
                         if (auto player = app->observePlayer()->get())
                         {
-                            player->timeAction(tl::timeline::TimeAction::FramePrevX10);
+                            player->timeAction(tl::TimeAction::FramePrevX10);
                         }
                     }
                 });
@@ -87,7 +87,7 @@ namespace djv
                     {
                         if (auto player = app->observePlayer()->get())
                         {
-                            player->timeAction(tl::timeline::TimeAction::FramePrevX100);
+                            player->timeAction(tl::TimeAction::FramePrevX100);
                         }
                     }
                 });
@@ -114,7 +114,7 @@ namespace djv
                     {
                         if (auto player = app->observePlayer()->get())
                         {
-                            player->timeAction(tl::timeline::TimeAction::FrameNextX10);
+                            player->timeAction(tl::TimeAction::FrameNextX10);
                         }
                     }
                 });
@@ -127,7 +127,7 @@ namespace djv
                     {
                         if (auto player = app->observePlayer()->get())
                         {
-                            player->timeAction(tl::timeline::TimeAction::FrameNextX100);
+                            player->timeAction(tl::TimeAction::FrameNextX100);
                         }
                     }
                 });
@@ -158,9 +158,9 @@ namespace djv
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& value)
+                [this](const std::shared_ptr<tl::Player>& value)
                 {
                     _actions["Start"]->setEnabled(value.get());
                     _actions["End"]->setEnabled(value.get());

@@ -39,19 +39,19 @@ namespace djv
                 const std::shared_ptr<ftk::Settings>&);
 
             //! Get the output devices.
-            const std::vector<tl::audio::DeviceID>& getDevices();
+            const std::vector<tl::AudioDeviceID>& getDevices();
 
             //! Observe the output devices.
-            std::shared_ptr<ftk::IObservableList<tl::audio::DeviceID> > observeDevices() const;
+            std::shared_ptr<ftk::IObservableList<tl::AudioDeviceID> > observeDevices() const;
 
             //! Get the output device.
-            const tl::audio::DeviceID& getDevice() const;
+            const tl::AudioDeviceID& getDevice() const;
 
             //! Observe the output device.
-            std::shared_ptr<ftk::IObservable<tl::audio::DeviceID> > observeDevice() const;
+            std::shared_ptr<ftk::IObservable<tl::AudioDeviceID> > observeDevice() const;
 
             //! Set the output device.
-            void setDevice(const tl::audio::DeviceID&);
+            void setDevice(const tl::AudioDeviceID&);
 
             //! Get the volume.
             float getVolume() const;

@@ -20,7 +20,7 @@ namespace djv
         struct OCIOModelData
         {
             bool enabled = false;
-            tl::timeline::OCIOConfig config = tl::timeline::OCIOConfig::First;
+            tl::OCIOConfig config = tl::OCIOConfig::First;
             std::string fileName;
             std::string name;
             std::vector<std::string> inputs;
@@ -53,10 +53,10 @@ namespace djv
             static std::shared_ptr<OCIOModel> create(const std::shared_ptr<ftk::Context>&);
 
             //! Observe the options.
-            std::shared_ptr<ftk::IObservable<tl::timeline::OCIOOptions> > observeOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > observeOptions() const;
 
             //! Set the options.
-            void setOptions(const tl::timeline::OCIOOptions&);
+            void setOptions(const tl::OCIOOptions&);
 
             //! Observe the model data.
             std::shared_ptr<ftk::IObservable<OCIOModelData> > observeData() const;
@@ -65,7 +65,7 @@ namespace djv
             void setEnabled(bool);
 
             //! Set the color configuration.
-            void setConfig(tl::timeline::OCIOConfig);
+            void setConfig(tl::OCIOConfig);
 
             //! Set the color configuration file.
             void setFileName(const std::string& fileName);
@@ -83,9 +83,9 @@ namespace djv
             void setLookIndex(size_t);
 
         private:
-            OCIOModelData _getData(const tl::timeline::OCIOOptions&) const;
+            OCIOModelData _getData(const tl::OCIOOptions&) const;
 
-            void _configUpdate(tl::timeline::OCIOOptions&);
+            void _configUpdate(tl::OCIOOptions&);
 
             FTK_PRIVATE();
         };

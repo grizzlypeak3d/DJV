@@ -52,27 +52,27 @@ namespace djv
             double viewZoom = 1.0;
             ftk::V2I pick;
             ftk::V2I samplePos;
-            size_t videoDataSize = 0;
+            size_t videoFramesSize = 0;
             ftk::ImageOptions imageOptions;
-            tl::timeline::DisplayOptions displayOptions;
+            tl::DisplayOptions displayOptions;
 
             std::shared_ptr<tl::ui::Viewport> viewport;
             std::shared_ptr<ftk::ComboBox> comboBox;
             std::shared_ptr<ftk::Label> pixelLabel;
             std::shared_ptr<ftk::Label> mouseLabel;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::ListObserver<tl::timeline::VideoData> > videoDataObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::ListObserver<tl::VideoFrame> > videoObserver;
             std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosAndZoomObserver;
             std::shared_ptr<ftk::Observer<ftk::V2I> > pickObserver;
             std::shared_ptr<ftk::Observer<ftk::V2I> > samplePosObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::LUTOptions> > lutOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::ForegroundOptions> > fgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<MouseSettings> > settingsObserver;
         };
@@ -127,27 +127,27 @@ namespace djv
                     _widgetUpdate();
                 });
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& value)
+                [this](const std::shared_ptr<tl::Player>& value)
                 {
                     FTK_P();
                     p.viewport->setPlayer(value);
                     if (value)
                     {
-                        p.videoDataObserver = ftk::ListObserver<tl::timeline::VideoData>::create(
+                        p.videoObserver = ftk::ListObserver<tl::VideoFrame>::create(
                             value->observeCurrentVideo(),
-                            [this](const std::vector<tl::timeline::VideoData>& value)
+                            [this](const std::vector<tl::VideoFrame>& value)
                             {
-                                _p->videoDataSize = value.size();
-                                _videoDataUpdate();
+                                _p->videoFramesSize = value.size();
+                                _videoUpdate();
                             });
                     }
                     else
                     {
-                        p.videoDataSize = 0;
-                        p.videoDataObserver.reset();
-                        _videoDataUpdate();
+                        p.videoFramesSize = 0;
+                        p.videoObserver.reset();
+                        _videoUpdate();
                     }
                 });
 
@@ -179,23 +179,23 @@ namespace djv
                     _widgetUpdate();
                 });
 
-            p.compareOptionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
+            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 app->getFilesModel()->observeCompareOptions(),
-                [this](const tl::timeline::CompareOptions& value)
+                [this](const tl::CompareOptions& value)
                 {
                     _p->viewport->setCompareOptions(value);
                 });
 
-            p.ocioOptionsObserver = ftk::Observer<tl::timeline::OCIOOptions>::create(
+            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 app->getColorModel()->observeOCIOOptions(),
-                [this](const tl::timeline::OCIOOptions& value)
+                [this](const tl::OCIOOptions& value)
                 {
                     _p->viewport->setOCIOOptions(value);
                 });
 
-            p.lutOptionsObserver = ftk::Observer<tl::timeline::LUTOptions>::create(
+            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
-                [this](const tl::timeline::LUTOptions& value)
+                [this](const tl::LUTOptions& value)
                 {
                     _p->viewport->setLUTOptions(value);
                 });
@@ -205,27 +205,27 @@ namespace djv
                 [this](const ftk::ImageOptions& value)
                 {
                     _p->imageOptions = value;
-                    _videoDataUpdate();
+                    _videoUpdate();
                 });
 
-            p.displayOptionsObserver = ftk::Observer<tl::timeline::DisplayOptions>::create(
+            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::timeline::DisplayOptions& value)
+                [this](const tl::DisplayOptions& value)
                 {
                     _p->displayOptions = value;
-                    _videoDataUpdate();
+                    _videoUpdate();
                 });
 
-            p.bgOptionsObserver = ftk::Observer<tl::timeline::BackgroundOptions>::create(
+            p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
                 app->getViewportModel()->observeBackgroundOptions(),
-                [this](const tl::timeline::BackgroundOptions& value)
+                [this](const tl::BackgroundOptions& value)
                 {
                     _p->viewport->setBackgroundOptions(value);
                 });
 
-            p.fgOptionsObserver = ftk::Observer<tl::timeline::ForegroundOptions>::create(
+            p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
-                [this](const tl::timeline::ForegroundOptions& value)
+                [this](const tl::ForegroundOptions& value)
                 {
                     _p->viewport->setForegroundOptions(value);
                 });
@@ -296,12 +296,12 @@ namespace djv
             p.pixelLabel->setText(ftk::Format("{0}").arg(p.pick));
         }
 
-        void MagnifyTool::_videoDataUpdate()
+        void MagnifyTool::_videoUpdate()
         {
             FTK_P();
             std::vector<ftk::ImageOptions> imageOptions;
-            std::vector<tl::timeline::DisplayOptions> displayOptions;
-            for (size_t i = 0; i < p.videoDataSize; ++i)
+            std::vector<tl::DisplayOptions> displayOptions;
+            for (size_t i = 0; i < p.videoFramesSize; ++i)
             {
                 imageOptions.push_back(p.imageOptions);
                 displayOptions.push_back(p.displayOptions);

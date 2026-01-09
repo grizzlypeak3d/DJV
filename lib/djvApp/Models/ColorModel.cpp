@@ -12,8 +12,8 @@ namespace djv
         struct ColorModel::Private
         {
             std::shared_ptr<ftk::Settings> settings;
-            std::shared_ptr<ftk::Observable<tl::timeline::OCIOOptions> > ocioOptions;
-            std::shared_ptr<ftk::Observable<tl::timeline::LUTOptions> > lutOptions;
+            std::shared_ptr<ftk::Observable<tl::OCIOOptions> > ocioOptions;
+            std::shared_ptr<ftk::Observable<tl::LUTOptions> > lutOptions;
         };
 
         void ColorModel::_init(
@@ -24,13 +24,13 @@ namespace djv
 
             p.settings = settings;
 
-            tl::timeline::OCIOOptions ocioOptions;
+            tl::OCIOOptions ocioOptions;
             p.settings->getT("/Color/OCIO", ocioOptions);
-            p.ocioOptions = ftk::Observable<tl::timeline::OCIOOptions>::create(ocioOptions);
+            p.ocioOptions = ftk::Observable<tl::OCIOOptions>::create(ocioOptions);
 
-            tl::timeline::LUTOptions lutOptions;
+            tl::LUTOptions lutOptions;
             p.settings->getT("/Color/LUT", lutOptions);
-            p.lutOptions = ftk::Observable<tl::timeline::LUTOptions>::create(lutOptions);
+            p.lutOptions = ftk::Observable<tl::LUTOptions>::create(lutOptions);
         }
 
         ColorModel::ColorModel() :
@@ -53,32 +53,32 @@ namespace djv
             return out;
         }
 
-        const tl::timeline::OCIOOptions& ColorModel::getOCIOOptions() const
+        const tl::OCIOOptions& ColorModel::getOCIOOptions() const
         {
             return _p->ocioOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::OCIOOptions> > ColorModel::observeOCIOOptions() const
+        std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > ColorModel::observeOCIOOptions() const
         {
             return _p->ocioOptions;
         }
 
-        void ColorModel::setOCIOOptions(const tl::timeline::OCIOOptions& value)
+        void ColorModel::setOCIOOptions(const tl::OCIOOptions& value)
         {
             _p->ocioOptions->setIfChanged(value);
         }
 
-        const tl::timeline::LUTOptions& ColorModel::getLUTOptions() const
+        const tl::LUTOptions& ColorModel::getLUTOptions() const
         {
             return _p->lutOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::LUTOptions> > ColorModel::observeLUTOptions() const
+        std::shared_ptr<ftk::IObservable<tl::LUTOptions> > ColorModel::observeLUTOptions() const
         {
             return _p->lutOptions;
         }
 
-        void ColorModel::setLUTOptions(const tl::timeline::LUTOptions& value)
+        void ColorModel::setLUTOptions(const tl::LUTOptions& value)
         {
             _p->lutOptions->setIfChanged(value);
         }

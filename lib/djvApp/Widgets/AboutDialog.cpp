@@ -40,7 +40,7 @@ namespace djv
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
             auto vLayout = ftk::VerticalLayout::create(context);
-            vLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            vLayout->setMarginRole(ftk::SizeRole::Margin);
             vLayout->setSpacingRole(ftk::SizeRole::Spacing);
             ftk::Label::create(
                 context,

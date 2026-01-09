@@ -48,7 +48,7 @@ namespace djv
             addAction(actions["Tile"]);
             addDivider();
             p.menus["Time"] = addSubMenu("Time");
-            const auto timeLabels = tl::timeline::getCompareTimeLabels();
+            const auto timeLabels = tl::getCompareTimeLabels();
             for (const auto& label : timeLabels)
             {
                 p.menus["Time"]->addAction(actions[label]);

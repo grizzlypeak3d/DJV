@@ -14,9 +14,9 @@ namespace djv
             std::weak_ptr<ftk::Context> context;
             std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<ftk::Observable<ftk::ImageOptions> > imageOptions;
-            std::shared_ptr<ftk::Observable<tl::timeline::DisplayOptions> > displayOptions;
-            std::shared_ptr<ftk::Observable<tl::timeline::BackgroundOptions> > backgroundOptions;
-            std::shared_ptr<ftk::Observable<tl::timeline::ForegroundOptions> > foregroundOptions;
+            std::shared_ptr<ftk::Observable<tl::DisplayOptions> > displayOptions;
+            std::shared_ptr<ftk::Observable<tl::BackgroundOptions> > backgroundOptions;
+            std::shared_ptr<ftk::Observable<tl::ForegroundOptions> > foregroundOptions;
             std::shared_ptr<ftk::Observable<ftk::ImageType> > colorBuffer;
             std::shared_ptr<ftk::Observable<bool> > hud;
         };
@@ -34,18 +34,18 @@ namespace djv
             p.settings->getT("/Viewport/Image", imageOptions);
             p.imageOptions = ftk::Observable<ftk::ImageOptions>::create(imageOptions);
 
-            tl::timeline::DisplayOptions displayOptions;
+            tl::DisplayOptions displayOptions;
             p.settings->getT("/Viewport/Display", displayOptions);
-            p.displayOptions = ftk::Observable<tl::timeline::DisplayOptions>::create(displayOptions);
+            p.displayOptions = ftk::Observable<tl::DisplayOptions>::create(displayOptions);
 
-            tl::timeline::BackgroundOptions backgroundOptions;
+            tl::BackgroundOptions backgroundOptions;
             p.settings->getT("/Viewport/Background", backgroundOptions);
-            p.backgroundOptions = ftk::Observable<tl::timeline::BackgroundOptions>::create(
+            p.backgroundOptions = ftk::Observable<tl::BackgroundOptions>::create(
                 backgroundOptions);
 
-            tl::timeline::ForegroundOptions foregroundOptions;
+            tl::ForegroundOptions foregroundOptions;
             p.settings->getT("/Viewport/Foreground", foregroundOptions);
-            p.foregroundOptions = ftk::Observable<tl::timeline::ForegroundOptions>::create(
+            p.foregroundOptions = ftk::Observable<tl::ForegroundOptions>::create(
                 foregroundOptions);
 
             ftk::ImageType colorBuffer =
@@ -103,48 +103,48 @@ namespace djv
             _p->imageOptions->setIfChanged(value);
         }
 
-        const tl::timeline::DisplayOptions& ViewportModel::getDisplayOptions() const
+        const tl::DisplayOptions& ViewportModel::getDisplayOptions() const
         {
             return _p->displayOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::DisplayOptions> > ViewportModel::observeDisplayOptions() const
+        std::shared_ptr<ftk::IObservable<tl::DisplayOptions> > ViewportModel::observeDisplayOptions() const
         {
             return _p->displayOptions;
         }
 
-        void ViewportModel::setDisplayOptions(const tl::timeline::DisplayOptions& value)
+        void ViewportModel::setDisplayOptions(const tl::DisplayOptions& value)
         {
             _p->displayOptions->setIfChanged(value);
         }
 
-        const tl::timeline::BackgroundOptions& ViewportModel::getBackgroundOptions() const
+        const tl::BackgroundOptions& ViewportModel::getBackgroundOptions() const
         {
             return _p->backgroundOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::BackgroundOptions> > ViewportModel::observeBackgroundOptions() const
+        std::shared_ptr<ftk::IObservable<tl::BackgroundOptions> > ViewportModel::observeBackgroundOptions() const
         {
             return _p->backgroundOptions;
         }
 
-        void ViewportModel::setBackgroundOptions(const tl::timeline::BackgroundOptions& value)
+        void ViewportModel::setBackgroundOptions(const tl::BackgroundOptions& value)
         {
             _p->settings->setT("/Viewport/Background", value);
             _p->backgroundOptions->setIfChanged(value);
         }
 
-        const tl::timeline::ForegroundOptions& ViewportModel::getForegroundOptions() const
+        const tl::ForegroundOptions& ViewportModel::getForegroundOptions() const
         {
             return _p->foregroundOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::ForegroundOptions> > ViewportModel::observeForegroundOptions() const
+        std::shared_ptr<ftk::IObservable<tl::ForegroundOptions> > ViewportModel::observeForegroundOptions() const
         {
             return _p->foregroundOptions;
         }
 
-        void ViewportModel::setForegroundOptions(const tl::timeline::ForegroundOptions& value)
+        void ViewportModel::setForegroundOptions(const tl::ForegroundOptions& value)
         {
             _p->settings->setT("/Viewport/Foreground", value);
             _p->foregroundOptions->setIfChanged(value);

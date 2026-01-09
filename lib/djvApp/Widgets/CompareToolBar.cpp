@@ -22,7 +22,7 @@ namespace djv
             setMarginRole(ftk::SizeRole::MarginInside);
 
             auto tmp = actions;
-            const auto labels = tl::timeline::getCompareLabels();
+            const auto labels = tl::getCompareLabels();
             for (size_t i = 0; i < labels.size(); ++i)
             {
                 addAction(tmp[labels[i]]);

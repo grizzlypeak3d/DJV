@@ -45,7 +45,7 @@ namespace djv
 #if defined(TLRENDER_OCIO)
             OCIO_NAMESPACE::ConstConfigRcPtr ocioConfig;
 #endif // TLRENDER_OCIO
-            std::shared_ptr<ftk::Observable<tl::timeline::OCIOOptions> > options;
+            std::shared_ptr<ftk::Observable<tl::OCIOOptions> > options;
             std::shared_ptr<ftk::Observable<OCIOModelData> > data;
         };
 
@@ -55,7 +55,7 @@ namespace djv
 
             p.context = context;
 
-            tl::timeline::OCIOOptions options;
+            tl::OCIOOptions options;
             _configUpdate(options);
 #if defined(TLRENDER_OCIO)
             if (p.ocioConfig)
@@ -65,7 +65,7 @@ namespace djv
                 options.view = p.ocioConfig->getDefaultView(display);
             }
 #endif // TLRENDER_OCIO
-            p.options = ftk::Observable<tl::timeline::OCIOOptions>::create(options);
+            p.options = ftk::Observable<tl::OCIOOptions>::create(options);
 
             p.data = ftk::Observable<OCIOModelData>::create(_getData(options));
         }
@@ -84,12 +84,12 @@ namespace djv
             return out;
         }
 
-        std::shared_ptr<ftk::IObservable<tl::timeline::OCIOOptions> > OCIOModel::observeOptions() const
+        std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > OCIOModel::observeOptions() const
         {
             return _p->options;
         }
 
-        void OCIOModel::setOptions(const tl::timeline::OCIOOptions& value)
+        void OCIOModel::setOptions(const tl::OCIOOptions& value)
         {
             FTK_P();
             const bool configChanged = value.config != p.options->get().config;
@@ -112,11 +112,11 @@ namespace djv
             p.data->setIfChanged(_getData(options));
         }
 
-        void OCIOModel::setConfig(tl::timeline::OCIOConfig value)
+        void OCIOModel::setConfig(tl::OCIOConfig value)
         {
             FTK_P();
             const bool changed = value != p.options->get().config;
-            tl::timeline::OCIOOptions options;
+            tl::OCIOOptions options;
             options.enabled = true;
             options.config = value;
             options.fileName = p.options->get().fileName;
@@ -235,7 +235,7 @@ namespace djv
             }
         }
 
-        OCIOModelData OCIOModel::_getData(const tl::timeline::OCIOOptions& options) const
+        OCIOModelData OCIOModel::_getData(const tl::OCIOOptions& options) const
         {
             FTK_P();
             OCIOModelData out;
@@ -304,7 +304,7 @@ namespace djv
             return out;
         }
 
-        void OCIOModel::_configUpdate(tl::timeline::OCIOOptions& options)
+        void OCIOModel::_configUpdate(tl::OCIOOptions& options)
         {
             FTK_P();
 #if defined(TLRENDER_OCIO)
@@ -313,13 +313,13 @@ namespace djv
                 p.ocioConfig.reset();
                 switch (options.config)
                 {
-                case tl::timeline::OCIOConfig::BuiltIn:
+                case tl::OCIOConfig::BuiltIn:
                     p.ocioConfig = OCIO::Config::CreateFromFile("ocio://default");
                     break;
-                case tl::timeline::OCIOConfig::EnvVar:
+                case tl::OCIOConfig::EnvVar:
                     p.ocioConfig = OCIO::Config::CreateFromEnv();
                     break;
-                case tl::timeline::OCIOConfig::File:
+                case tl::OCIOConfig::File:
                     p.ocioConfig = OCIO::Config::CreateFromFile(options.fileName.c_str());
                     break;
                 default: break;

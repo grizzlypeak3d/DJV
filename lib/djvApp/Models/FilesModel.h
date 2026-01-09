@@ -28,8 +28,8 @@ namespace djv
             size_t videoLayer = 0;
 
             double speed = -1.0;
-            OTIO_NS::RationalTime currentTime = tl::time::invalidTime;
-            OTIO_NS::TimeRange inOutRange = tl::time::invalidTimeRange;
+            OTIO_NS::RationalTime currentTime = tl::invalidTime;
+            OTIO_NS::TimeRange inOutRange = tl::invalidTimeRange;
         };
 
         //! Files model.
@@ -148,22 +148,22 @@ namespace djv
             void prevLayer();
 
             //! Get the compare options.
-            const tl::timeline::CompareOptions& getCompareOptions() const;
+            const tl::CompareOptions& getCompareOptions() const;
 
             //! Observe the compare options.
-            std::shared_ptr<ftk::IObservable<tl::timeline::CompareOptions> > observeCompareOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::CompareOptions> > observeCompareOptions() const;
 
             //! Set the compare options.
-            void setCompareOptions(const tl::timeline::CompareOptions&);
+            void setCompareOptions(const tl::CompareOptions&);
 
             //! Get the compare time mode.
-            tl::timeline::CompareTime getCompareTime() const;
+            tl::CompareTime getCompareTime() const;
 
             //! Observe the compare time mode.
-            std::shared_ptr<ftk::IObservable<tl::timeline::CompareTime> > observeCompareTime() const;
+            std::shared_ptr<ftk::IObservable<tl::CompareTime> > observeCompareTime() const;
 
             //! Set the compare time mode.
-            void setCompareTime(tl::timeline::CompareTime);
+            void setCompareTime(tl::CompareTime);
 
         private:
             int _getIndex(const std::shared_ptr<FilesModelItem>&) const;

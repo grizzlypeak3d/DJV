@@ -13,11 +13,11 @@ namespace djv
     {
         struct PlaybackActions::Private
         {
-            std::shared_ptr<tl::timeline::Player> player;
+            std::shared_ptr<tl::Player> player;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::timeline::Player> > > playerObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::Playback> > playbackObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::Loop> > loopObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<tl::Playback> > playbackObserver;
+            std::shared_ptr<ftk::Observer<tl::Loop> > loopObserver;
         };
 
         void PlaybackActions::_init(
@@ -81,7 +81,7 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        p.player->timeAction(tl::timeline::TimeAction::JumpBack1s);
+                        p.player->timeAction(tl::TimeAction::JumpBack1s);
                     }
                 });
 
@@ -92,7 +92,7 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        p.player->timeAction(tl::timeline::TimeAction::JumpBack10s);
+                        p.player->timeAction(tl::TimeAction::JumpBack10s);
                     }
                 });
 
@@ -103,7 +103,7 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        p.player->timeAction(tl::timeline::TimeAction::JumpForward1s);
+                        p.player->timeAction(tl::TimeAction::JumpForward1s);
                     }
                 });
 
@@ -114,7 +114,7 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        p.player->timeAction(tl::timeline::TimeAction::JumpForward10s);
+                        p.player->timeAction(tl::TimeAction::JumpForward10s);
                     }
                 });
 
@@ -125,7 +125,7 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        p.player->setLoop(tl::timeline::Loop::Loop);
+                        p.player->setLoop(tl::Loop::Loop);
                     }
                 });
 
@@ -136,7 +136,7 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        p.player->setLoop(tl::timeline::Loop::Once);
+                        p.player->setLoop(tl::Loop::Once);
                     }
                 });
 
@@ -147,7 +147,7 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        p.player->setLoop(tl::timeline::Loop::PingPong);
+                        p.player->setLoop(tl::Loop::PingPong);
                     }
                 });
 
@@ -215,12 +215,12 @@ namespace djv
             };
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
-            _playbackUpdate(tl::timeline::Playback::Stop);
-            _loopUpdate(tl::timeline::Loop::Loop);
+            _playbackUpdate(tl::Playback::Stop);
+            _loopUpdate(tl::Loop::Loop);
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::timeline::Player> >::create(
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
-                [this](const std::shared_ptr<tl::timeline::Player>& value)
+                [this](const std::shared_ptr<tl::Player>& value)
                 {
                     _setPlayer(value);
                 });
@@ -242,7 +242,7 @@ namespace djv
             return out;
         }
 
-        void PlaybackActions::_setPlayer(const std::shared_ptr<tl::timeline::Player>& value)
+        void PlaybackActions::_setPlayer(const std::shared_ptr<tl::Player>& value)
         {
             FTK_P();
 
@@ -253,16 +253,16 @@ namespace djv
 
             if (p.player)
             {
-                p.playbackObserver = ftk::Observer<tl::timeline::Playback>::create(
+                p.playbackObserver = ftk::Observer<tl::Playback>::create(
                     p.player->observePlayback(),
-                    [this](tl::timeline::Playback value)
+                    [this](tl::Playback value)
                     {
                         _playbackUpdate(value);
                     });
 
-                p.loopObserver = ftk::Observer<tl::timeline::Loop>::create(
+                p.loopObserver = ftk::Observer<tl::Loop>::create(
                     p.player->observeLoop(),
-                    [this](tl::timeline::Loop value)
+                    [this](tl::Loop value)
                     {
                         _loopUpdate(value);
                     });
@@ -285,20 +285,20 @@ namespace djv
             _actions["ResetOutPoint"]->setEnabled(p.player.get());
         }
 
-        void PlaybackActions::_playbackUpdate(tl::timeline::Playback value)
+        void PlaybackActions::_playbackUpdate(tl::Playback value)
         {
             FTK_P();
-            _actions["Stop"]->setChecked(tl::timeline::Playback::Stop == value);
-            _actions["Forward"]->setChecked(tl::timeline::Playback::Forward == value);
-            _actions["Reverse"]->setChecked(tl::timeline::Playback::Reverse == value);
+            _actions["Stop"]->setChecked(tl::Playback::Stop == value);
+            _actions["Forward"]->setChecked(tl::Playback::Forward == value);
+            _actions["Reverse"]->setChecked(tl::Playback::Reverse == value);
         }
 
-        void PlaybackActions::_loopUpdate(tl::timeline::Loop value)
+        void PlaybackActions::_loopUpdate(tl::Loop value)
         {
             FTK_P();
-            _actions["Loop"]->setChecked(tl::timeline::Loop::Loop == value);
-            _actions["Once"]->setChecked(tl::timeline::Loop::Once == value);
-            _actions["PingPong"]->setChecked(tl::timeline::Loop::PingPong == value);
+            _actions["Loop"]->setChecked(tl::Loop::Loop == value);
+            _actions["Once"]->setChecked(tl::Loop::Once == value);
+            _actions["PingPong"]->setChecked(tl::Loop::PingPong == value);
         }
     }
 }

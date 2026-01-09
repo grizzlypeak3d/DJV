@@ -45,8 +45,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > compareObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareTime> > compareTimeObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
         };
 
         void FilesTool::_init(
@@ -69,11 +69,11 @@ namespace djv
 
             p.compareComboBox = ftk::ComboBox::create(
                 context,
-                tl::timeline::getCompareLabels());
+                tl::getCompareLabels());
             p.compareComboBox->setHStretch(ftk::Stretch::Expanding);
             p.compareTimeComboBox = ftk::ComboBox::create(
                 context,
-                tl::timeline::getCompareTimeLabels());
+                tl::getCompareTimeLabels());
             p.compareTimeComboBox->setHStretch(ftk::Stretch::Expanding);
 
             p.wipeXSlider = ftk::FloatEditSlider::create(context);
@@ -143,7 +143,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = static_cast<tl::timeline::Compare>(value);
+                        options.compare = static_cast<tl::Compare>(value);
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -154,7 +154,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         app->getFilesModel()->setCompareTime(
-                            static_cast<tl::timeline::CompareTime>(value));
+                            static_cast<tl::CompareTime>(value));
                     }
                 });
 
@@ -230,16 +230,16 @@ namespace djv
                     _layersUpdate(value);
                 });
 
-            p.compareObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
+            p.compareObserver = ftk::Observer<tl::CompareOptions>::create(
                 app->getFilesModel()->observeCompareOptions(),
-                [this](const tl::timeline::CompareOptions& value)
+                [this](const tl::CompareOptions& value)
                 {
                     _compareUpdate(value);
                 });
 
-            p.compareTimeObserver = ftk::Observer<tl::timeline::CompareTime>::create(
+            p.compareTimeObserver = ftk::Observer<tl::CompareTime>::create(
                 app->getFilesModel()->observeCompareTime(),
-                [this](const tl::timeline::CompareTime& value)
+                [this](const tl::CompareTime& value)
                 {
                     _p->compareTimeComboBox->setCurrentIndex(static_cast<int>(value));
                 });
@@ -362,7 +362,7 @@ namespace djv
             }
         }
 
-        void FilesTool::_compareUpdate(const tl::timeline::CompareOptions& value)
+        void FilesTool::_compareUpdate(const tl::CompareOptions& value)
         {
             FTK_P();
             p.compareComboBox->setCurrentIndex(static_cast<int>(value.compare));
@@ -371,10 +371,10 @@ namespace djv
             p.wipeRotationSlider->setValue(value.wipeRotation);
             p.overlaySlider->setValue(value.overlay);
 
-            p.compareLayout->setRowVisible(p.wipeXSlider, value.compare == tl::timeline::Compare::Wipe);
-            p.compareLayout->setRowVisible(p.wipeYSlider, value.compare == tl::timeline::Compare::Wipe);
-            p.compareLayout->setRowVisible(p.wipeRotationSlider, value.compare == tl::timeline::Compare::Wipe);
-            p.compareLayout->setRowVisible(p.overlaySlider, value.compare == tl::timeline::Compare::Overlay);
+            p.compareLayout->setRowVisible(p.wipeXSlider, value.compare == tl::Compare::Wipe);
+            p.compareLayout->setRowVisible(p.wipeYSlider, value.compare == tl::Compare::Wipe);
+            p.compareLayout->setRowVisible(p.wipeRotationSlider, value.compare == tl::Compare::Wipe);
+            p.compareLayout->setRowVisible(p.overlaySlider, value.compare == tl::Compare::Overlay);
         }
     }
 }

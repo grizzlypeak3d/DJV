@@ -13,8 +13,8 @@ namespace djv
         struct CompareActions::Private
         {
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<FilesModelItem> > > filesObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareOptions> > optionsObserver;
-            std::shared_ptr<ftk::Observer<tl::timeline::CompareTime> > timeObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareTime> > timeObserver;
         };
 
         void CompareActions::_init(
@@ -55,7 +55,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::timeline::Compare::A;
+                        options.compare = tl::Compare::A;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -68,7 +68,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::timeline::Compare::B;
+                        options.compare = tl::Compare::B;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -81,7 +81,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::timeline::Compare::Wipe;
+                        options.compare = tl::Compare::Wipe;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -94,7 +94,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::timeline::Compare::Overlay;
+                        options.compare = tl::Compare::Overlay;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -107,7 +107,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::timeline::Compare::Difference;
+                        options.compare = tl::Compare::Difference;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -120,7 +120,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::timeline::Compare::Horizontal;
+                        options.compare = tl::Compare::Horizontal;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -133,7 +133,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::timeline::Compare::Vertical;
+                        options.compare = tl::Compare::Vertical;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -146,7 +146,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::timeline::Compare::Tile;
+                        options.compare = tl::Compare::Tile;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -160,13 +160,9 @@ namespace djv
                         auto options = app->getFilesModel()->getCompareOptions();
                         switch (options.compare)
                         {
-                        case tl::timeline::Compare::A:
-                            options.compare = tl::timeline::Compare::B;
-                            break;
-                        case tl::timeline::Compare::B:
-                        default:
-                            options.compare = tl::timeline::Compare::A;
-                            break;
+                        case tl::Compare::A: options.compare = tl::Compare::B; break;
+                        case tl::Compare::B:
+                        default: options.compare = tl::Compare::A; break;
                         }
                         app->getFilesModel()->setCompareOptions(options);
                     }
@@ -178,7 +174,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getFilesModel()->setCompareTime(tl::timeline::CompareTime::Relative);
+                        app->getFilesModel()->setCompareTime(tl::CompareTime::Relative);
                     }
                 });
 
@@ -188,7 +184,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getFilesModel()->setCompareTime(tl::timeline::CompareTime::Absolute);
+                        app->getFilesModel()->setCompareTime(tl::CompareTime::Absolute);
                     }
                 });
 
@@ -217,25 +213,25 @@ namespace djv
                     _actions["Prev"]->setEnabled(value.size() > 1);
                 });
 
-            p.optionsObserver = ftk::Observer<tl::timeline::CompareOptions>::create(
+            p.optionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 app->getFilesModel()->observeCompareOptions(),
-                [this](const tl::timeline::CompareOptions& value)
+                [this](const tl::CompareOptions& value)
                 {
                     FTK_P();
-                    const auto enums = tl::timeline::getCompareEnums();
-                    const auto labels = tl::timeline::getCompareLabels();
+                    const auto enums = tl::getCompareEnums();
+                    const auto labels = tl::getCompareLabels();
                     for (size_t i = 0; i < enums.size(); ++i)
                     {
                         _actions[labels[i]]->setChecked(enums[i] == value.compare);
                     }
                 });
 
-            p.timeObserver = ftk::Observer<tl::timeline::CompareTime>::create(
+            p.timeObserver = ftk::Observer<tl::CompareTime>::create(
                 app->getFilesModel()->observeCompareTime(),
-                [this](tl::timeline::CompareTime value)
+                [this](tl::CompareTime value)
                 {
-                    const auto enums = tl::timeline::getCompareTimeEnums();
-                    const auto labels = tl::timeline::getCompareTimeLabels();
+                    const auto enums = tl::getCompareTimeEnums();
+                    const auto labels = tl::getCompareTimeLabels();
                     for (size_t i = 0; i < enums.size(); ++i)
                     {
                         _actions[labels[i]]->setChecked(enums[i] == value);

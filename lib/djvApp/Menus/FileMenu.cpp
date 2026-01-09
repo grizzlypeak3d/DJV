@@ -42,7 +42,7 @@ namespace djv
 
             p.app = app;
 
-            p.exts = tl::timeline::getExts(context);
+            p.exts = tl::getExts(context);
 
             p.recentFilesModel = app->getRecentFilesModel();
 

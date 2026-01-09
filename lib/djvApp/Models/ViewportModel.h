@@ -49,31 +49,31 @@ namespace djv
             void setImageOptions(const ftk::ImageOptions&);
 
             //! Get the display options.
-            const tl::timeline::DisplayOptions& getDisplayOptions() const;
+            const tl::DisplayOptions& getDisplayOptions() const;
 
             //! Observe the display options.
-            std::shared_ptr<ftk::IObservable<tl::timeline::DisplayOptions> > observeDisplayOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::DisplayOptions> > observeDisplayOptions() const;
 
             //! Set the display options.
-            void setDisplayOptions(const tl::timeline::DisplayOptions&);
+            void setDisplayOptions(const tl::DisplayOptions&);
 
             //! Get the background options.
-            const tl::timeline::BackgroundOptions& getBackgroundOptions() const;
+            const tl::BackgroundOptions& getBackgroundOptions() const;
 
             //! Observe the background options.
-            std::shared_ptr<ftk::IObservable<tl::timeline::BackgroundOptions> > observeBackgroundOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::BackgroundOptions> > observeBackgroundOptions() const;
 
             //! Set the background options.
-            void setBackgroundOptions(const tl::timeline::BackgroundOptions&);
+            void setBackgroundOptions(const tl::BackgroundOptions&);
 
             //! Get the foreground options.
-            const tl::timeline::ForegroundOptions& getForegroundOptions() const;
+            const tl::ForegroundOptions& getForegroundOptions() const;
 
             //! Observe the foreground options.
-            std::shared_ptr<ftk::IObservable<tl::timeline::ForegroundOptions> > observeForegroundOptions() const;
+            std::shared_ptr<ftk::IObservable<tl::ForegroundOptions> > observeForegroundOptions() const;
 
             //! Set the foreground options.
-            void setForegroundOptions(const tl::timeline::ForegroundOptions&);
+            void setForegroundOptions(const tl::ForegroundOptions&);
 
             //! Get the color buffer type.
             ftk::ImageType getColorBuffer() const;

@@ -35,7 +35,7 @@ namespace djv
         struct AdvancedSettings
         {
             bool compat = true;
-            size_t audioBufferFrameCount = tl::timeline::PlayerOptions().audioBufferFrameCount;
+            size_t audioBufferFrameCount = tl::PlayerOptions().audioBufferFrameCount;
             size_t videoRequestMax = 16;
             size_t audioRequestMax = 16;
 
@@ -107,11 +107,11 @@ namespace djv
         //! Image sequence settings.
         struct ImageSeqSettings
         {
-            tl::timeline::ImageSeqAudio audio = tl::timeline::Options().imageSeqAudio;
-            std::vector<std::string> audioExts = tl::timeline::Options().imageSeqAudioExts;
-            std::string audioFileName = tl::timeline::Options().imageSeqAudioFileName;
+            tl::ImageSeqAudio audio = tl::Options().imageSeqAudio;
+            std::vector<std::string> audioExts = tl::Options().imageSeqAudioExts;
+            std::string audioFileName = tl::Options().imageSeqAudioFileName;
             size_t maxDigits = 9;
-            tl::io::SeqOptions io;
+            tl::SeqOptions io;
 
             bool operator == (const ImageSeqSettings&) const;
             bool operator != (const ImageSeqSettings&) const;
@@ -301,9 +301,9 @@ namespace djv
             //! \name Cache
             ///@{
 
-            const tl::timeline::PlayerCacheOptions& getCache() const;
-            std::shared_ptr<ftk::IObservable<tl::timeline::PlayerCacheOptions> > observeCache() const;
-            void setCache(const tl::timeline::PlayerCacheOptions&);
+            const tl::PlayerCacheOptions& getCache() const;
+            std::shared_ptr<ftk::IObservable<tl::PlayerCacheOptions> > observeCache() const;
+            void setCache(const tl::PlayerCacheOptions&);
 
             ///@}
 

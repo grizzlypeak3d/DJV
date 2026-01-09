@@ -78,7 +78,7 @@ namespace djv
 
             auto label = ftk::Label::create(context, p.text);
             label->setFontRole(ftk::FontRole::Mono);
-            label->setMarginRole(ftk::SizeRole::MarginSmall);
+            label->setMarginRole(ftk::SizeRole::Margin);
             auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Vertical, layout);
             scrollWidget->setBorder(false);
             scrollWidget->setWidget(label);
