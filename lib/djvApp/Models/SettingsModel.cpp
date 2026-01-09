@@ -478,7 +478,7 @@ namespace djv
 
 #if defined(TLRENDER_USD)
             tl::usd::Options usd;
-            settings->getT("/USD", usd);
+            settings->getT("/USD.1", usd);
             p.usd = ftk::Observable<tl::usd::Options>::create(usd);
 #endif // TLRENDER_USD
         }
@@ -532,7 +532,7 @@ namespace djv
             p.settings->setT("/FFmpeg", p.ffmpeg->get());
 #endif // TLRENDER_FFMPEG
 #if defined(TLRENDER_USD)
-            p.settings->setT("/USD", p.usd->get());
+            p.settings->setT("/USD.1", p.usd->get());
 #endif // TLRENDER_USD
 
             p.settings->save();

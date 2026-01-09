@@ -72,8 +72,8 @@ namespace djv
             std::shared_ptr<ftk::CmdLineValueOption<tl::usd::DrawMode> > usdDrawMode;
             std::shared_ptr<ftk::CmdLineValueOption<bool> > usdEnableLighting;
             std::shared_ptr<ftk::CmdLineValueOption<bool> > usdSRGB;
-            std::shared_ptr<ftk::CmdLineValueOption<int> > usdStageCache;
-            std::shared_ptr<ftk::CmdLineValueOption<int> > usdDiskCache;
+            std::shared_ptr<ftk::CmdLineValueOption<int> > usdStageCacheCount;
+            std::shared_ptr<ftk::CmdLineValueOption<int> > usdDiskCacheGB;
 #endif // TLRENDER_USD
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > logFileName;
             std::shared_ptr<ftk::CmdLineFlagOption> resetSettings;
@@ -262,12 +262,12 @@ namespace djv
                 "Enable sRGB color space.",
                 "USD",
                 true);
-            p.cmdLine.usdStageCache = ftk::CmdLineValueOption<int>::create(
+            p.cmdLine.usdStageCacheCount = ftk::CmdLineValueOption<int>::create(
                 { "-usdStageCache" },
-                "Stage cache size.",
+                "Number of USD stages to cache.",
                 "USD",
                 10);
-            p.cmdLine.usdDiskCache = ftk::CmdLineValueOption<int>::create(
+            p.cmdLine.usdDiskCacheGB = ftk::CmdLineValueOption<int>::create(
                 { "-usdDiskCache" },
                 "Disk cache size in gigabytes. A size of zero disables the cache.",
                 "USD",
@@ -320,8 +320,8 @@ namespace djv
                     p.cmdLine.usdDrawMode,
                     p.cmdLine.usdEnableLighting,
                     p.cmdLine.usdSRGB,
-                    p.cmdLine.usdStageCache,
-                    p.cmdLine.usdDiskCache,
+                    p.cmdLine.usdStageCacheCount,
+                    p.cmdLine.usdDiskCacheGB,
 #endif // TLRENDER_USD
                     p.cmdLine.logFileName,
                     p.cmdLine.resetSettings,
@@ -556,58 +556,58 @@ namespace djv
                 _context,
                 p.settings,
                 getDefaultDisplayScale());
-            if (getColorStyleCmdLineOption()->hasValue() ||
-                getDisplayScaleCmdLineOption()->hasValue())
+            if (getColorStyleCmdLineOption()->found() ||
+                getDisplayScaleCmdLineOption()->found())
             {
                 // Override settings with the command line.
                 auto style = p.settingsModel->getStyle();
-                if (getColorStyleCmdLineOption()->hasValue())
+                if (getColorStyleCmdLineOption()->found())
                 {
                     style.colorStyle = getColorStyleCmdLineOption()->getValue();
                 }
-                if (getDisplayScaleCmdLineOption()->hasValue())
+                if (getDisplayScaleCmdLineOption()->found())
                 {
                     style.displayScale = getDisplayScaleCmdLineOption()->getValue();
                 }
                 p.settingsModel->setStyle(style);
             }
 #if defined(TLRENDER_USD)
-            if (p.cmdLine.usdRenderWidth->hasValue() ||
-                p.cmdLine.usdComplexity->hasValue() ||
-                p.cmdLine.usdDrawMode->hasValue() ||
-                p.cmdLine.usdEnableLighting->hasValue() ||
-                p.cmdLine.usdSRGB->hasValue() ||
-                p.cmdLine.usdStageCache->hasValue() ||
-                p.cmdLine.usdDiskCache->hasValue())
+            if (p.cmdLine.usdRenderWidth->found() ||
+                p.cmdLine.usdComplexity->found() ||
+                p.cmdLine.usdDrawMode->found() ||
+                p.cmdLine.usdEnableLighting->found() ||
+                p.cmdLine.usdSRGB->found() ||
+                p.cmdLine.usdStageCacheCount->found() ||
+                p.cmdLine.usdDiskCacheGB->found())
             {
                 tl::usd::Options options = p.settingsModel->getUSD();
-                if (p.cmdLine.usdRenderWidth->hasValue())
+                if (p.cmdLine.usdRenderWidth->found())
                 {
                     options.renderWidth = p.cmdLine.usdRenderWidth->getValue();
                 }
-                if (p.cmdLine.usdComplexity->hasValue())
+                if (p.cmdLine.usdComplexity->found())
                 {
                     options.complexity = p.cmdLine.usdComplexity->getValue();
                 }
-                if (p.cmdLine.usdDrawMode->hasValue())
+                if (p.cmdLine.usdDrawMode->found())
                 {
                     options.drawMode = p.cmdLine.usdDrawMode->getValue();
                 }
-                if (p.cmdLine.usdEnableLighting->hasValue())
+                if (p.cmdLine.usdEnableLighting->found())
                 {
                     options.enableLighting = p.cmdLine.usdEnableLighting->getValue();
                 }
-                if (p.cmdLine.usdSRGB->hasValue())
+                if (p.cmdLine.usdSRGB->found())
                 {
-                    options.sRGB = p.cmdLine.usdSRGB->getValue();
+                        options.sRGB = p.cmdLine.usdSRGB->getValue();
                 }
-                if (p.cmdLine.usdStageCache->hasValue())
+                if (p.cmdLine.usdStageCacheCount->found())
                 {
-                    options.stageCache = std::max(0, p.cmdLine.usdStageCache->getValue());
+                    options.stageCacheCount = std::max(0, p.cmdLine.usdStageCacheCount->getValue());
                 }
-                if (p.cmdLine.usdDiskCache->hasValue())
+                if (p.cmdLine.usdDiskCacheGB->found())
                 {
-                    options.diskCache = std::max(0, p.cmdLine.usdDiskCache->getValue());
+                    options.diskCacheGB = std::max(0, p.cmdLine.usdDiskCacheGB->getValue());
                 }
                 p.settingsModel->setUSD(options);
             }
@@ -623,46 +623,46 @@ namespace djv
             fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
 
             p.colorModel = ColorModel::create(_context, p.settings);
-            if (p.cmdLine.ocioFileName->hasValue() ||
-                p.cmdLine.ocioInput->hasValue() ||
-                p.cmdLine.ocioDisplay->hasValue() ||
-                p.cmdLine.ocioView->hasValue() ||
-                p.cmdLine.ocioLook->hasValue())
+            if (p.cmdLine.ocioFileName->found() ||
+                p.cmdLine.ocioInput->found() ||
+                p.cmdLine.ocioDisplay->found() ||
+                p.cmdLine.ocioView->found() ||
+                p.cmdLine.ocioLook->found())
             {
                 tl::OCIOOptions options = p.colorModel->getOCIOOptions();
                 options.enabled = true;
-                if (p.cmdLine.ocioFileName->hasValue())
+                if (p.cmdLine.ocioFileName->found())
                 {
                     options.fileName = p.cmdLine.ocioFileName->getValue();
                 }
-                if (p.cmdLine.ocioInput->hasValue())
+                if (p.cmdLine.ocioInput->found())
                 {
                     options.input = p.cmdLine.ocioInput->getValue();
                 }
-                if (p.cmdLine.ocioDisplay->hasValue())
+                if (p.cmdLine.ocioDisplay->found())
                 {
                     options.display = p.cmdLine.ocioDisplay->getValue();
                 }
-                if (p.cmdLine.ocioView->hasValue())
+                if (p.cmdLine.ocioView->found())
                 {
                     options.view = p.cmdLine.ocioView->getValue();
                 }
-                if (p.cmdLine.ocioLook->hasValue())
+                if (p.cmdLine.ocioLook->found())
                 {
                     options.look = p.cmdLine.ocioLook->getValue();
                 }
                 p.colorModel->setOCIOOptions(options);
             }
-            if (p.cmdLine.lutFileName->hasValue() ||
-                p.cmdLine.lutOrder->hasValue())
+            if (p.cmdLine.lutFileName->found() ||
+                p.cmdLine.lutOrder->found())
             {
                 tl::LUTOptions options = p.colorModel->getLUTOptions();
                 options.enabled = true;
-                if (p.cmdLine.lutFileName->hasValue())
+                if (p.cmdLine.lutFileName->found())
                 {
                     options.fileName = p.cmdLine.lutFileName->getValue();
                 }
-                if (p.cmdLine.lutOrder->hasValue())
+                if (p.cmdLine.lutOrder->found())
                 {
                     options.order = p.cmdLine.lutOrder->getValue();
                 }
@@ -879,7 +879,7 @@ namespace djv
                 ftk::PathOptions pathOptions;
                 pathOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
 
-                if (p.cmdLine.compareFileName->hasValue())
+                if (p.cmdLine.compareFileName->found())
                 {
                     ftk::Path path(p.cmdLine.compareFileName->getValue());
                     if (path.hasSeqWildcard())
@@ -888,15 +888,15 @@ namespace djv
                     }
                     open(path);
                     tl::CompareOptions options;
-                    if (p.cmdLine.compare->hasValue())
+                    if (p.cmdLine.compare->found())
                     {
                         options.compare = p.cmdLine.compare->getValue();
                     }
-                    if (p.cmdLine.wipeCenter->hasValue())
+                    if (p.cmdLine.wipeCenter->found())
                     {
                         options.wipeCenter = p.cmdLine.wipeCenter->getValue();
                     }
-                    if (p.cmdLine.wipeRotation->hasValue())
+                    if (p.cmdLine.wipeRotation->found())
                     {
                         options.wipeRotation = p.cmdLine.wipeRotation->getValue();
                     }
@@ -905,7 +905,7 @@ namespace djv
                 }
 
                 std::string audioFileName;
-                if (p.cmdLine.audioFileName->hasValue())
+                if (p.cmdLine.audioFileName->found())
                 {
                     audioFileName = p.cmdLine.audioFileName->getValue();
                 }
@@ -921,25 +921,25 @@ namespace djv
 
                     if (auto player = p.player->get())
                     {
-                        if (p.cmdLine.speed->hasValue())
+                        if (p.cmdLine.speed->found())
                         {
                             player->setSpeed(p.cmdLine.speed->getValue());
                         }
-                        if (p.cmdLine.inOutRange->hasValue())
+                        if (p.cmdLine.inOutRange->found())
                         {
                             const OTIO_NS::TimeRange& inOutRange = p.cmdLine.inOutRange->getValue();
                             player->setInOutRange(inOutRange);
                             player->seek(inOutRange.start_time());
                         }
-                        if (p.cmdLine.seek->hasValue())
+                        if (p.cmdLine.seek->found())
                         {
                             player->seek(p.cmdLine.seek->getValue());
                         }
-                        if (p.cmdLine.loop->hasValue())
+                        if (p.cmdLine.loop->found())
                         {
                             player->setLoop(p.cmdLine.loop->getValue());
                         }
-                        if (p.cmdLine.playback->hasValue())
+                        if (p.cmdLine.playback->found())
                         {
                             player->setPlayback(p.cmdLine.playback->getValue());
                         }

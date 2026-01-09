@@ -1015,8 +1015,8 @@ namespace djv
                     p.drawModeComboBox->setCurrentIndex(static_cast<int>(value.drawMode));
                     p.lightingCheckBox->setChecked(value.enableLighting);
                     p.sRGBCheckBox->setChecked(value.sRGB);
-                    p.stageCacheEdit->setValue(value.stageCache);
-                    p.diskCacheEdit->setValue(value.diskCache);
+                    p.stageCacheEdit->setValue(value.stageCacheCount);
+                    p.diskCacheEdit->setValue(value.diskCacheGB);
                 });
 
             p.renderWidthEdit->setCallback(
@@ -1069,7 +1069,7 @@ namespace djv
                 {
                     FTK_P();
                     tl::usd::Options options = p.model->getUSD();
-                    options.stageCache = value;
+                    options.stageCacheCount = value;
                     p.model->setUSD(options);
                 });
 
@@ -1078,7 +1078,7 @@ namespace djv
                 {
                     FTK_P();
                     tl::usd::Options options = p.model->getUSD();
-                    options.diskCache = value;
+                    options.diskCacheGB = value;
                     p.model->setUSD(options);
                 });
         }
