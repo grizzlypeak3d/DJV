@@ -49,6 +49,7 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> timeUnitsComboBox;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<AudioPopup> audioPopup;
+            std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> muteButton;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
@@ -59,6 +60,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<double> > speedObserver2;
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
+            std::shared_ptr<ftk::Observer<float> > volumeObserver;
         };
 
         void BottomToolBar::_init(
@@ -128,6 +130,8 @@ namespace djv
             p.audioButton = ftk::ToolButton::create(context);
             p.audioButton->setIcon("Volume");
             p.audioButton->setTooltip("Audio volume");
+            p.audioLabel = ftk::Label::create(context);
+            p.audioLabel->setFontRole(ftk::FontRole::Mono);
             actions = audioActions->getActions();
             p.muteButton = ftk::ToolButton::create(context, actions["Mute"]);
 
@@ -158,6 +162,7 @@ namespace djv
             hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.audioButton->setParent(hLayout);
+            p.audioLabel->setParent(hLayout);
             p.muteButton->setParent(hLayout);
 
             p.playbackShuttle->setActiveCallback(
@@ -276,6 +281,14 @@ namespace djv
                     {
                         p.player->setSpeed(value);
                     }
+                });
+
+            p.volumeObserver = ftk::Observer<float>::create(
+                app->getAudioModel()->observeVolume(),
+                [this](float value)
+                {
+                    FTK_P();
+                    p.audioLabel->setText(ftk::Format("{0}%").arg(static_cast<int>(value * 100.F)));
                 });
         }
 
