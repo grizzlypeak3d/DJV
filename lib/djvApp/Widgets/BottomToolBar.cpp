@@ -9,10 +9,11 @@
 #include <djvApp/Models/AudioModel.h>
 #include <djvApp/Models/TimeUnitsModel.h>
 #include <djvApp/Widgets/AudioPopup.h>
-#include <djvApp/Widgets/ShuttleWidget.h>
 #include <djvApp/Widgets/SpeedPopup.h>
 #include <djvApp/App.h>
 
+#include <tlRender/UI/PlaybackLoopWidget.h>
+#include <tlRender/UI/ShuttleWidget.h>
 #include <tlRender/UI/TimeEdit.h>
 #include <tlRender/UI/TimeLabel.h>
 #include <tlRender/Timeline/Player.h>
@@ -38,8 +39,9 @@ namespace djv
             OTIO_NS::RationalTime startTime = tl::invalidTime;
 
             std::map<std::string, std::shared_ptr<ftk::ToolButton> > buttons;
-            std::shared_ptr<ShuttleWidget> playbackShuttle;
-            std::shared_ptr<ShuttleWidget> frameShuttle;
+            std::shared_ptr<tl::ui::PlaybackLoopWidget> loopWidget;
+            std::shared_ptr<tl::ui::ShuttleWidget> playbackShuttle;
+            std::shared_ptr<tl::ui::ShuttleWidget> frameShuttle;
             std::shared_ptr<tl::ui::TimeEdit> currentTimeEdit;
             std::shared_ptr<tl::ui::TimeLabel> durationLabel;
             std::shared_ptr<ftk::DoubleEdit> speedEdit;
@@ -58,6 +60,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<double> > speedObserver;
             std::shared_ptr<ftk::Observer<double> > speedMultObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver2;
+            std::shared_ptr<ftk::Observer<tl::Loop> > loopObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
             std::shared_ptr<ftk::Observer<float> > volumeObserver;
@@ -89,8 +92,11 @@ namespace djv
             p.buttons["Forward"] = ftk::ToolButton::create(context, actions["Forward"]);
             p.buttons["Reverse"] = ftk::ToolButton::create(context, actions["Reverse"]);
 
-            p.playbackShuttle = ShuttleWidget::create(context, "PlaybackShuttle");
-            p.playbackShuttle->setTooltip("Playback shuttle");
+            p.loopWidget = tl::ui::PlaybackLoopWidget::create(context);
+            p.loopWidget->setTooltip("Playback loop mode.");
+
+            p.playbackShuttle = tl::ui::ShuttleWidget::create(context, "PlaybackShuttle");
+            p.playbackShuttle->setTooltip("Playback shuttle. Click and drag to change playback speed.");
 
             actions = frameActions->getActions();
             p.buttons["Start"] = ftk::ToolButton::create(context, actions["Start"]);
@@ -100,36 +106,36 @@ namespace djv
             p.buttons["Next"] = ftk::ToolButton::create(context, actions["Next"]);
             p.buttons["Next"]->setRepeatClick(true);
 
-            p.frameShuttle = ShuttleWidget::create(context, "FrameShuttle");
-            p.frameShuttle->setTooltip("Frame shuttle");
+            p.frameShuttle = tl::ui::ShuttleWidget::create(context, "FrameShuttle");
+            p.frameShuttle->setTooltip("Frame shuttle. Click and drag to change the current frame.");
 
             auto timeUnitsModel = app->getTimeUnitsModel();
             p.currentTimeEdit = tl::ui::TimeEdit::create(context, timeUnitsModel);
-            p.currentTimeEdit->setTooltip("Current time");
+            p.currentTimeEdit->setTooltip("Current time.");
 
             p.durationLabel = tl::ui::TimeLabel::create(context, timeUnitsModel);
             p.durationLabel->setFontRole(ftk::FontRole::Mono);
             p.durationLabel->setMarginRole(ftk::SizeRole::MarginInside);
-            p.durationLabel->setTooltip("Duration of timeline or in/out range");
+            p.durationLabel->setTooltip("Duration of the timeline or the in/out range if set.");
 
             p.speedEdit = ftk::DoubleEdit::create(context, p.speedModel);
-            p.speedEdit->setTooltip("Current playback speed");
+            p.speedEdit->setTooltip("Current playback speed.");
 
             p.speedButton = ftk::ToolButton::create(context, "FPS");
             p.speedButton->setIcon("MenuArrow");
-            p.speedButton->setTooltip("Playback speed");
+            p.speedButton->setTooltip("Playback speed.");
 
             p.speedMultLabel = ftk::Label::create(context);
             p.speedMultLabel->setFontRole(ftk::FontRole::Mono);
             p.speedMultLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.speedMultLabel->setTooltip("Playback speed multiplier");
+            p.speedMultLabel->setTooltip("Playback speed multiplier.");
 
             p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
-            p.timeUnitsComboBox->setTooltip("Time units");
+            p.timeUnitsComboBox->setTooltip("Time units.");
 
             p.audioButton = ftk::ToolButton::create(context);
             p.audioButton->setIcon("Volume");
-            p.audioButton->setTooltip("Audio volume");
+            p.audioButton->setTooltip("Audio volume.");
             p.audioLabel = ftk::Label::create(context);
             p.audioLabel->setFontRole(ftk::FontRole::Mono);
             actions = audioActions->getActions();
@@ -143,7 +149,10 @@ namespace djv
             p.buttons["Reverse"]->setParent(hLayout);
             p.buttons["Stop"]->setParent(hLayout);
             p.buttons["Forward"]->setParent(hLayout);
+            p.loopWidget->setParent(hLayout);
             p.playbackShuttle->setParent(hLayout);
+            hLayout = ftk::HorizontalLayout::create(context, p.layout);
+            hLayout->setSpacingRole(ftk::SizeRole::None);
             p.buttons["Start"]->setParent(hLayout);
             p.buttons["Prev"]->setParent(hLayout);
             p.buttons["Next"]->setParent(hLayout);
@@ -164,6 +173,16 @@ namespace djv
             p.audioButton->setParent(hLayout);
             p.audioLabel->setParent(hLayout);
             p.muteButton->setParent(hLayout);
+
+            p.loopWidget->setCallback(
+                [this](tl::Loop value)
+                {
+                    FTK_P();
+                    if (p.player)
+                    {
+                        p.player->setLoop(value);
+                    }
+                });
 
             p.playbackShuttle->setActiveCallback(
                 [this](bool value)
@@ -336,11 +355,6 @@ namespace djv
         {
             FTK_P();
 
-            p.speedObserver.reset();
-            p.speedMultObserver.reset();
-            p.currentTimeObserver.reset();
-            p.inOutRangeObserver.reset();
-
             p.player = value;
 
             if (p.player)
@@ -362,6 +376,13 @@ namespace djv
                             ftk::ColorRole::None);
                     });
 
+                p.loopObserver = ftk::Observer<tl::Loop>::create(
+                    p.player->observeLoop(),
+                    [this](tl::Loop value)
+                    {
+                        _p->loopWidget->setLoop(value);
+                    });
+
                 p.currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
                     p.player->observeCurrentTime(),
                     [this](const OTIO_NS::RationalTime& value)
@@ -378,13 +399,21 @@ namespace djv
             }
             else
             {
+                p.loopWidget->setLoop(tl::Loop::Loop);
                 p.currentTimeEdit->setValue(tl::invalidTime);
                 p.durationLabel->setValue(tl::invalidTime);
                 p.speedModel->setValue(0.0);
                 p.speedMultLabel->setText("1.0X");
                 p.speedMultLabel->setBackgroundRole(ftk::ColorRole::None);
+
+                p.speedObserver.reset();
+                p.speedMultObserver.reset();
+                p.loopObserver.reset();
+                p.currentTimeObserver.reset();
+                p.inOutRangeObserver.reset();
             }
 
+            p.loopWidget->setEnabled(p.player.get());
             p.playbackShuttle->setEnabled(p.player.get());
             p.frameShuttle->setEnabled(p.player.get());
             p.currentTimeEdit->setEnabled(p.player.get());

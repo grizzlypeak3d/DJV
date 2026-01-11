@@ -120,6 +120,7 @@ namespace djv
 
             _actions["Loop"] = ftk::Action::create(
                 "Loop Playback",
+                "PlaybackLoop",
                 [this]
                 {
                     FTK_P();
@@ -131,6 +132,7 @@ namespace djv
 
             _actions["Once"] = ftk::Action::create(
                 "Playback Once",
+                "PlaybackOnce",
                 [this]
                 {
                     FTK_P();
@@ -142,6 +144,7 @@ namespace djv
 
             _actions["PingPong"] = ftk::Action::create(
                 "Ping-Pong Playback",
+                "PlaybackPingPong",
                 [this]
                 {
                     FTK_P();

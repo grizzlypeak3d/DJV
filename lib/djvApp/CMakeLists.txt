@@ -64,7 +64,6 @@ set(HEADERS_WIDGETS
     Widgets/FileToolBar.h
     Widgets/SeparateAudioDialog.h
     Widgets/SetupDialog.h
-    Widgets/ShuttleWidget.h
     Widgets/SpeedPopup.h
     Widgets/StatusBar.h
     Widgets/SysInfoDialog.h
@@ -152,7 +151,6 @@ set(SOURCE_WIDGETS
     Widgets/SeparateAudioDialog.cpp
     Widgets/SeparateAudioWidget.cpp
     Widgets/SetupDialog.cpp
-    Widgets/ShuttleWidget.cpp
     Widgets/SpeedPopup.cpp
     Widgets/StatusBar.cpp
     Widgets/SysInfoDialog.cpp
