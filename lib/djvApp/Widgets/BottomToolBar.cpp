@@ -44,14 +44,14 @@ namespace djv
             std::shared_ptr<tl::ui::ShuttleWidget> frameShuttle;
             std::shared_ptr<tl::ui::TimeEdit> currentTimeEdit;
             std::shared_ptr<tl::ui::TimeLabel> durationLabel;
+            std::shared_ptr<ftk::ComboBox> timeUnitsComboBox;
             std::shared_ptr<ftk::DoubleEdit> speedEdit;
             std::shared_ptr<ftk::ToolButton> speedButton;
             std::shared_ptr<SpeedPopup> speedPopup;
             std::shared_ptr<ftk::Label> speedMultLabel;
-            std::shared_ptr<ftk::ComboBox> timeUnitsComboBox;
+            std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<AudioPopup> audioPopup;
-            std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> muteButton;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
@@ -118,6 +118,9 @@ namespace djv
             p.durationLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.durationLabel->setTooltip("Duration of the timeline or the in/out range if set.");
 
+            p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
+            p.timeUnitsComboBox->setTooltip("Time units.");
+
             p.speedEdit = ftk::DoubleEdit::create(context, p.speedModel);
             p.speedEdit->setTooltip("Current playback speed.");
 
@@ -130,14 +133,12 @@ namespace djv
             p.speedMultLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.speedMultLabel->setTooltip("Playback speed multiplier.");
 
-            p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
-            p.timeUnitsComboBox->setTooltip("Time units.");
-
+            p.audioLabel = ftk::Label::create(context);
+            p.audioLabel->setFontRole(ftk::FontRole::Mono);
+            p.audioLabel->setTooltip("Audio volume.");
             p.audioButton = ftk::ToolButton::create(context);
             p.audioButton->setIcon("Volume");
             p.audioButton->setTooltip("Audio volume.");
-            p.audioLabel = ftk::Label::create(context);
-            p.audioLabel->setFontRole(ftk::FontRole::Mono);
             actions = audioActions->getActions();
             p.muteButton = ftk::ToolButton::create(context, actions["Mute"]);
 
@@ -160,18 +161,18 @@ namespace djv
             p.frameShuttle->setParent(hLayout);
             p.currentTimeEdit->setParent(p.layout);
             p.durationLabel->setParent(p.layout);
+            p.timeUnitsComboBox->setParent(p.layout);
             hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.speedEdit->setParent(hLayout);
             p.speedButton->setParent(hLayout);
             p.speedMultLabel->setParent(hLayout);
-            p.timeUnitsComboBox->setParent(p.layout);
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
             spacer->setHStretch(ftk::Stretch::Expanding);
             hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
-            p.audioButton->setParent(hLayout);
             p.audioLabel->setParent(hLayout);
+            p.audioButton->setParent(hLayout);
             p.muteButton->setParent(hLayout);
 
             p.loopWidget->setCallback(
@@ -247,12 +248,6 @@ namespace djv
                     }
                 });
 
-            p.speedButton->setPressedCallback(
-                [this]
-                {
-                    _showSpeedPopup();
-                });
-
             auto appWeak = std::weak_ptr<App>(app);
             p.timeUnitsComboBox->setIndexCallback(
                 [appWeak](int value)
@@ -261,6 +256,12 @@ namespace djv
                     {
                         app->getTimeUnitsModel()->setTimeUnits(static_cast<tl::TimeUnits>(value));
                     }
+                });
+
+            p.speedButton->setPressedCallback(
+                [this]
+                {
+                    _showSpeedPopup();
                 });
 
             p.audioButton->setPressedCallback(
@@ -307,7 +308,8 @@ namespace djv
                 [this](float value)
                 {
                     FTK_P();
-                    p.audioLabel->setText(ftk::Format("{0}%").arg(static_cast<int>(value * 100.F)));
+                    p.audioLabel->setText(ftk::Format("{0}%").
+                        arg(static_cast<int>(value * 100.F), 3));
                 });
         }
 
@@ -351,6 +353,11 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
+        std::string BottomToolBar::_getSpeedMultLabel(double value) const
+        {
+            return ftk::Format("{0}X").arg(value, 1, 4);
+        }
+
         void BottomToolBar::_playerUpdate(const std::shared_ptr<tl::Player>& value)
         {
             FTK_P();
@@ -370,7 +377,7 @@ namespace djv
                     p.player->observeSpeedMult(),
                     [this](double value)
                     {
-                        _p->speedMultLabel->setText(ftk::Format("{0}X").arg(value, 1));
+                        _p->speedMultLabel->setText(_getSpeedMultLabel(value));
                         _p->speedMultLabel->setBackgroundRole(value > 1.0 ?
                             ftk::ColorRole::Checked :
                             ftk::ColorRole::None);
@@ -403,7 +410,7 @@ namespace djv
                 p.currentTimeEdit->setValue(tl::invalidTime);
                 p.durationLabel->setValue(tl::invalidTime);
                 p.speedModel->setValue(0.0);
-                p.speedMultLabel->setText("1.0X");
+                p.speedMultLabel->setText(_getSpeedMultLabel(1.0));
                 p.speedMultLabel->setBackgroundRole(ftk::ColorRole::None);
 
                 p.speedObserver.reset();

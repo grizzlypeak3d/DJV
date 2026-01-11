@@ -447,8 +447,8 @@ namespace djv
             }
             p.timeLabel->setText(ftk::Format("Time: {0}, {1} FPS, {2} dropped").
                 arg(s).
-                arg(p.fps, 2, 4).
-                arg(p.droppedFrames));
+                arg(p.fps, 2, 5).
+                arg(static_cast<int>(p.droppedFrames), 3));
 
             const auto& colorSample = p.colorSample->get();
             p.colorPickerSwatch->setColor(colorSample);
@@ -462,8 +462,8 @@ namespace djv
 
             p.cacheLabel->setText(
                 ftk::Format("Cache: {0}% V, {1}% A").
-                arg(static_cast<int>(p.cacheInfo.videoPercentage)).
-                arg(static_cast<int>(p.cacheInfo.audioPercentage)));
+                arg(static_cast<int>(p.cacheInfo.videoPercentage), 3).
+                arg(static_cast<int>(p.cacheInfo.audioPercentage), 3));
 
             p.hudLayout->setVisible(p.hud);
         }
