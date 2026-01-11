@@ -1,3 +1,13 @@
+## 3.3.4
+
+Features:
+* Add a button for switching playback loop mode.
+
+Fixes:
+* Fix directory selection for exports.
+* Fix flipped export for images and image sequences.
+
+
 ## 3.3.3
 
 Features:
