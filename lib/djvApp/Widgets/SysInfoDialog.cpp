@@ -4,6 +4,8 @@
 #include <djvApp/Widgets/SysInfoDialog.h>
 #include <djvApp/MainWindow.h>
 
+#include <tlRender/Core/AudioSystem.h>
+
 #include <ftk/UI/ClipboardSystem.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/Label.h>
@@ -34,15 +36,38 @@ namespace djv
             FTK_P();
 
             std::vector<std::pair<std::string, std::string> > labels;
+            labels.push_back(std::make_pair("DJV version: ", DJV_VERSION_FULL));
+
+            labels.push_back(std::make_pair("", ""));
             const auto sysInfo = ftk::getSysInfo();
             labels.push_back(std::make_pair("System: ", sysInfo.name));
-            labels.push_back(std::make_pair("CPU Cores: ", ftk::Format("{0}").arg(sysInfo.cores)));
-            labels.push_back(std::make_pair("Memory: ", ftk::Format("{0}GB").arg(sysInfo.ramGB)));
+            labels.push_back(std::make_pair(
+                "CPU Cores: ",
+                ftk::Format("{0}").arg(sysInfo.cores)));
+            labels.push_back(std::make_pair(
+                "Memory: ",
+                ftk::Format("{0}GB").arg(sysInfo.ramGB)));
+
             labels.push_back(std::make_pair("", ""));
             const auto windowInfo = mainWindow->getWindowInfo();
             for (const auto& i : windowInfo)
             {
                 labels.push_back(std::make_pair(i.first + ": ", i.second));
+            }
+
+            if (auto audioSystem = context->getSystem<tl::AudioSystem>())
+            {
+                labels.push_back(std::make_pair("", ""));
+                labels.push_back(std::make_pair(
+                    "Audio driver: ",
+                    audioSystem->getCurrentDriver()));
+                const auto& devices = audioSystem->getDevices();
+                for (size_t i = 0; i < devices.size(); ++i)
+                {
+                    labels.push_back(std::make_pair(
+                        ftk::Format("Audio device {0}: ").arg(i),
+                        devices[i].id.name));
+                }
             }
 
             size_t sizeMax = 0;
