@@ -185,6 +185,13 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+
+                if (files.size() <= 1)
+                {
+                    auto compareOptions = p.compareOptions->get();
+                    compareOptions.compare = tl::Compare::A;
+                    p.compareOptions->setIfChanged(compareOptions);
+                }
             }
         }
 
@@ -500,7 +507,7 @@ namespace djv
             if (p.compareOptions->setIfChanged(value))
             {
                 auto b = p.b->get();
-                switch (p.compareOptions->get().compare)
+                switch (value.compare)
                 {
                 case tl::Compare::A:
                 case tl::Compare::B:
@@ -518,7 +525,7 @@ namespace djv
                 }
                 default: break;
                 }
-                switch (p.compareOptions->get().compare)
+                switch (value.compare)
                 {
                 case tl::Compare::B:
                 case tl::Compare::Wipe:
@@ -574,7 +581,7 @@ namespace djv
         int FilesModel::_getIndex(const std::shared_ptr<FilesModelItem>& item) const
         {
             FTK_P();
-            size_t index = p.files->indexOf(item);
+            const size_t index = p.files->indexOf(item);
             return index != ftk::ObservableListInvalidIndex ? index : -1;
         }
 
