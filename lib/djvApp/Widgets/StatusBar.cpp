@@ -323,19 +323,14 @@ namespace djv
             if (!info.video.empty())
             {
                 s.push_back(std::string(
-                    ftk::Format("video: {0}x{1}:{2} {3}").
-                    arg(info.video[0].size.w).
-                    arg(info.video[0].size.h).
-                    arg(info.video[0].getAspect(), 2).
-                    arg(info.video[0].type)));
+                    ftk::Format("video: {0}").
+                    arg(ftk::getLabel(info.video[0]))));
             }
             if (info.audio.isValid())
             {
                 s.push_back(std::string(
-                    ftk::Format("audio: {0}ch {1} {2}kHz").
-                    arg(info.audio.channelCount).
-                    arg(info.audio.type).
-                    arg(info.audio.sampleRate / 1000)));
+                    ftk::Format("audio: {0}").
+                    arg(tl::getLabel(info.audio, true))));
             }
             const std::string text = ftk::join(s, ", ");
             p.infoLabel->setText(!text.empty() ? text : "-");
@@ -345,20 +340,14 @@ namespace djv
             if (!info.video.empty())
             {
                 s.push_back(std::string(
-                    ftk::Format("Video: {0}x{1}:{2} {3}").
-                    arg(info.video[0].size.w).
-                    arg(info.video[0].size.h).
-                    arg(info.video[0].getAspect()).
-                    arg(info.video[0].type)));
+                    ftk::Format("Video: {0}").
+                    arg(ftk::getLabel(info.video[0]))));
             }
             if (info.audio.isValid())
             {
                 s.push_back(std::string(
-                    ftk::Format("Audio: {0} {1} {2} {3}kHz").
-                    arg(info.audio.channelCount).
-                    arg(1 == info.audio.channelCount ? "channel" : "channels").
-                    arg(info.audio.type).
-                    arg(info.audio.sampleRate / 1000)));
+                    ftk::Format("Audio: {0}").
+                    arg(tl::getLabel(info.audio))));
             }
             const std::string tooltip = ftk::join(s, "\n");
             p.infoLabel->setTooltip(ftk::Format(tooltipFormat).

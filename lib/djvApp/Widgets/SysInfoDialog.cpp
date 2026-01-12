@@ -64,9 +64,13 @@ namespace djv
                 const auto& devices = audioSystem->getDevices();
                 for (size_t i = 0; i < devices.size(); ++i)
                 {
+                    const auto& device = devices[i];
                     labels.push_back(std::make_pair(
                         ftk::Format("Audio device {0}: ").arg(i),
-                        devices[i].id.name));
+                        device.id.name));
+                    labels.push_back(std::make_pair(
+                        std::string(),
+                        tl::getLabel(device.info)));
                 }
             }
 
@@ -77,7 +81,7 @@ namespace djv
             }
             for (auto& i : labels)
             {
-                if (!i.first.empty())
+                if (!(i.first.empty() && i.second.empty()))
                 {
                     i.first.resize(sizeMax, ' ');
                 }
