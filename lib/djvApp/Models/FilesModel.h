@@ -21,15 +21,15 @@ namespace djv
         //! Files model item.
         struct FilesModelItem
         {
-            ftk::Path path;
-            ftk::Path audioPath;
+            ftk::Path                path;
+            ftk::Path                audioPath;
 
             std::vector<std::string> videoLayers;
-            size_t videoLayer = 0;
+            size_t                   videoLayer  = 0;
 
-            double speed = -1.0;
-            OTIO_NS::RationalTime currentTime = tl::invalidTime;
-            OTIO_NS::TimeRange inOutRange = tl::invalidTimeRange;
+            double                   speed       = -1.0;
+            OTIO_NS::RationalTime    currentTime = tl::invalidTime;
+            OTIO_NS::TimeRange       inOutRange  = tl::invalidTimeRange;
         };
 
         //! Files model.
