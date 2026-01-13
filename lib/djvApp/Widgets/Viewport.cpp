@@ -437,9 +437,11 @@ namespace djv
         {
             FTK_P();
 
-            p.fileNameLabel->setText(p.path.getFileName());
+            std::string s = p.path.getFileName();
+            p.fileNameLabel->setText(s);
+            p.fileNameLabel->setVisible(!s.empty());
 
-            std::string s;
+            s = std::string();
             if (auto app = p.app.lock())
             {
                 auto timeUnitsModel = app->getTimeUnitsModel();
