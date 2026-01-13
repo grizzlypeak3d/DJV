@@ -247,7 +247,7 @@ namespace djv
                     {
                         auto checkBox = ftk::CheckBox::create(
                             context,
-                            ftk::Format("{0}").arg(i),
+                            ftk::Format("{0}").arg(1 + i),
                             p.channelMuteLayout);
                         p.channelMuteCheckBoxes.push_back(checkBox);
                         p.channelMuteButtonGroup->addButton(checkBox);
