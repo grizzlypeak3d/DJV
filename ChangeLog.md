@@ -2,10 +2,13 @@
 
 Features:
 * Add a button for switching playback loop mode.
+* Switch compare mode to "A" if there is only a single file open.
 
 Fixes:
 * Fix directory selection for exports.
 * Fix flipped export for images and image sequences.
+* Fix for YUV->RGB conversion.
+* Fix for overlay compare mode.
 
 
 ## 3.3.3
