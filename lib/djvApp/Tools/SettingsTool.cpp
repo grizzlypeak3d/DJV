@@ -268,6 +268,7 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
+#if defined(FTK_NFD)
         struct FileBrowserSettingsWidget::Private
         {
             std::shared_ptr<SettingsModel> model;
@@ -290,9 +291,6 @@ namespace djv
 
             p.nfdCheckBox = ftk::CheckBox::create(context);
             p.nfdCheckBox->setHStretch(ftk::Stretch::Expanding);
-#if !defined(FTK_NFD)
-            p.nfdCheckBox->setEnabled(false);
-#endif // FTK_NFD
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -343,6 +341,7 @@ namespace djv
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
         }
+#endif // FTK_NFD
 
         struct ImageSeqSettingsWidget::Private
         {
@@ -1135,7 +1134,9 @@ namespace djv
 
             auto advancedWidget = AdvancedSettingsWidget::create(context, app);
             auto cacheWidget = CacheSettingsWidget::create(context, app);
+#if defined(FTK_NFD)
             auto fileBrowserWidget = FileBrowserSettingsWidget::create(context, app);
+#endif // FTK_NFD
             auto imageSeqWidget = ImageSeqSettingsWidget::create(context, app);
             auto miscWidget = MiscSettingsWidget::create(context, app);
             auto mouseWidget = MouseSettingsWidget::create(context, app);
@@ -1153,8 +1154,10 @@ namespace djv
             vLayout->setSpacingRole(ftk::SizeRole::None);
             p.bellows["Cache"] = ftk::Bellows::create(context, "Cache", vLayout);
             p.bellows["Cache"]->setWidget(cacheWidget);
+#if defined(FTK_NFD)
             p.bellows["FileBrowser"] = ftk::Bellows::create(context, "File Browser", vLayout);
             p.bellows["FileBrowser"]->setWidget(fileBrowserWidget);
+#endif // FTK_NFD
             p.bellows["ImageSeqs"] = ftk::Bellows::create(context, "Image Sequences", vLayout);
             p.bellows["ImageSeqs"]->setWidget(imageSeqWidget);
             p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
