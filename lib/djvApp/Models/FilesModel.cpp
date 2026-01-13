@@ -39,10 +39,12 @@ namespace djv
             p.active = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.layers = ftk::ObservableList<int>::create();
             tl::CompareOptions compareOptions;
-            p.settings->getT("/Files/CompareOptions", compareOptions);
+            p.settings->getT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
+            p.settings->getT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
+            p.settings->getT("/Files/Compare/Overlay", compareOptions.overlay);
             p.compareOptions = ftk::Observable<tl::CompareOptions>::create(compareOptions);
             std::string s;
-            p.settings->get("/Files/CompareTime", s);
+            p.settings->get("/Files/Compare/Time", s);
             tl::CompareTime compareTime = tl::CompareTime::First;
             from_string(s, compareTime);
             p.compareTime = ftk::Observable<tl::CompareTime>::create(compareTime);
@@ -55,8 +57,11 @@ namespace djv
         FilesModel::~FilesModel()
         {
             FTK_P();
-            p.settings->setT("/Files/CompareOptions", p.compareOptions->get());
-            p.settings->set("/Files/CompareTime", to_string(p.compareTime->get()));
+            auto compareOptions = p.compareOptions->get();
+            p.settings->setT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
+            p.settings->setT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
+            p.settings->setT("/Files/Compare/Overlay", compareOptions.overlay);
+            p.settings->set("/Files/Compare/Time", to_string(p.compareTime->get()));
         }
 
         std::shared_ptr<FilesModel> FilesModel::create(const std::shared_ptr<ftk::Settings>& settings)
