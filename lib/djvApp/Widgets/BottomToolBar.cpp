@@ -16,9 +16,9 @@
 #include <tlRender/UI/ShuttleWidget.h>
 #include <tlRender/UI/TimeEdit.h>
 #include <tlRender/UI/TimeLabel.h>
+#include <tlRender/UI/TimeUnitsWidget.h>
 #include <tlRender/Timeline/Player.h>
 
-#include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DoubleEdit.h>
 #include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/Label.h>
@@ -44,7 +44,7 @@ namespace djv
             std::shared_ptr<tl::ui::ShuttleWidget> frameShuttle;
             std::shared_ptr<tl::ui::TimeEdit> currentTimeEdit;
             std::shared_ptr<tl::ui::TimeLabel> durationLabel;
-            std::shared_ptr<ftk::ComboBox> timeUnitsComboBox;
+            std::shared_ptr<tl::ui::TimeUnitsWidget> timeUnitsWidget;
             std::shared_ptr<ftk::DoubleEdit> speedEdit;
             std::shared_ptr<ftk::ToolButton> speedButton;
             std::shared_ptr<SpeedPopup> speedPopup;
@@ -55,7 +55,6 @@ namespace djv
             std::shared_ptr<ftk::ToolButton> muteButton;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver;
             std::shared_ptr<ftk::Observer<double> > speedMultObserver;
@@ -118,15 +117,15 @@ namespace djv
             p.durationLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.durationLabel->setTooltip("Duration of the timeline or the in/out range if set.");
 
-            p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
-            p.timeUnitsComboBox->setTooltip("Time units.");
+            p.timeUnitsWidget = tl::ui::TimeUnitsWidget::create(context, timeUnitsModel);
+            p.timeUnitsWidget->setTooltip("Time units.");
 
             p.speedEdit = ftk::DoubleEdit::create(context, p.speedModel);
             p.speedEdit->setTooltip("Current playback speed.");
 
-            p.speedButton = ftk::ToolButton::create(context, "FPS");
+            p.speedButton = ftk::ToolButton::create(context);
             p.speedButton->setIcon("MenuArrow");
-            p.speedButton->setTooltip("Playback speed.");
+            p.speedButton->setTooltip("Common playback speeds.");
 
             p.speedMultLabel = ftk::Label::create(context);
             p.speedMultLabel->setFontRole(ftk::FontRole::Mono);
@@ -138,7 +137,7 @@ namespace djv
             p.audioLabel->setTooltip("Audio volume.");
             p.audioButton = ftk::ToolButton::create(context);
             p.audioButton->setIcon("Volume");
-            p.audioButton->setTooltip("Audio volume.");
+            p.audioButton->setTooltip("Audio controls.");
             actions = audioActions->getActions();
             p.muteButton = ftk::ToolButton::create(context, actions["Mute"]);
 
@@ -161,7 +160,7 @@ namespace djv
             p.frameShuttle->setParent(hLayout);
             p.currentTimeEdit->setParent(p.layout);
             p.durationLabel->setParent(p.layout);
-            p.timeUnitsComboBox->setParent(p.layout);
+            p.timeUnitsWidget->setParent(p.layout);
             hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.speedEdit->setParent(hLayout);
@@ -248,16 +247,6 @@ namespace djv
                     }
                 });
 
-            auto appWeak = std::weak_ptr<App>(app);
-            p.timeUnitsComboBox->setIndexCallback(
-                [appWeak](int value)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->getTimeUnitsModel()->setTimeUnits(static_cast<tl::TimeUnits>(value));
-                    }
-                });
-
             p.speedButton->setPressedCallback(
                 [this]
                 {
@@ -269,6 +258,8 @@ namespace djv
                 {
                     _showAudioPopup();
                 });
+
+            auto appWeak = std::weak_ptr<App>(app);
             p.muteButton->setCheckedCallback(
                 [appWeak](bool value)
                 {
@@ -276,13 +267,6 @@ namespace djv
                     {
                         app->getAudioModel()->setMute(value);
                     }
-                });
-
-            p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
-                app->getTimeUnitsModel()->observeTimeUnits(),
-                [this](tl::TimeUnits value)
-                {
-                    _p->timeUnitsComboBox->setCurrentIndex(static_cast<int>(value));
                 });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
