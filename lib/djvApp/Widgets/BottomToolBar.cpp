@@ -134,9 +134,11 @@ namespace djv
 
             p.audioLabel = ftk::Label::create(context);
             p.audioLabel->setFontRole(ftk::FontRole::Mono);
+            p.audioLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.audioLabel->setTooltip("Audio volume.");
             p.audioButton = ftk::ToolButton::create(context);
             p.audioButton->setIcon("Volume");
+            p.audioButton->setPopupIcon(true);
             p.audioButton->setTooltip("Audio controls.");
             actions = audioActions->getActions();
             p.muteButton = ftk::ToolButton::create(context, actions["Mute"]);

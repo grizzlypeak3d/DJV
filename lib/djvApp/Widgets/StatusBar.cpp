@@ -87,7 +87,7 @@ namespace djv
             p.infoLabel = ftk::Label::create(context);
             p.infoLabel->setHMarginRole(ftk::SizeRole::MarginInside);
 
-            p.channelDisplayLabel = ftk::Label::create(context, "IC");
+            p.channelDisplayLabel = ftk::Label::create(context, "C");
             p.channelDisplayLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.channelDisplayLabel->setTooltip(
                 "This displays whether channel display is enabled.");

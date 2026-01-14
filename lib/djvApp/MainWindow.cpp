@@ -243,7 +243,7 @@ namespace djv
             p.menuBar->setParent(p.layout);
             p.dividers["MenuBar"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::None);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.fileToolBar->setParent(hLayout);
             p.dividers["File"] = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             p.compareToolBar->setParent(hLayout);
