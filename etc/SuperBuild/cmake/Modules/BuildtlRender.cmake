@@ -1,7 +1,7 @@
 include(ExternalProject)
 
 set(TLRENDER_GIT_REPOSITORY "https://github.com/grizzlypeak3d/tlRender.git")
-set(TLRENDER_GIT_TAG "57d8d51603a93445e484e93cd03e1c23268147a0")
+set(TLRENDER_GIT_TAG "33ad4203dfc82fa9689825e8551e6dae285c72b8")
 
 set(TLRENDER_DEPS)
 set(TLRENDER_ARGS
