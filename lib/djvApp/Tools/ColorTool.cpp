@@ -20,6 +20,8 @@
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/StackLayout.h>
+#include <ftk/Core/Format.h>
+#include <ftk/Core/String.h>
 
 namespace djv
 {
@@ -52,10 +54,6 @@ namespace djv
         {
             ftk::IWidget::_init(context, "djv::app::OCIOWidget", parent);
             FTK_P();
-            
-#if !defined(TLRENDER_OCIO)
-            setEnabled(false);
-#endif // TLRENDER_OCIO
 
             p.ocioModel = OCIOModel::create(context);
 
@@ -217,14 +215,20 @@ namespace djv
         {
             ftk::IWidget::_init(context, "djv::app::LUTWidget", parent);
             FTK_P();
-            
-#if !defined(TLRENDER_OCIO)
-            setEnabled(false);
-#endif // TLRENDER_OCIO
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
 
             p.fileEdit = ftk::FileEdit::create(context);
+            std::vector<std::string> s;
+            const auto lutFormatNames = tl::getLUTFormatNames();
+            const auto lutFormatExts = tl::getLUTFormatExts();
+            for (size_t i = 0; i < lutFormatNames.size() && i < lutFormatExts.size(); ++i)
+            {
+                s.push_back(ftk::Format("* {0}: {1}").
+                    arg(lutFormatNames[i]).
+                    arg(lutFormatExts[i]));
+            }
+            p.fileEdit->setTooltip(ftk::Format("Supported LUT formats:\n{0}").arg(ftk::join(s, '\n')));
 
             p.orderComboBox = ftk::ComboBox::create(context, tl::getLUTOrderLabels());
             p.orderComboBox->setHStretch(ftk::Stretch::Expanding);
@@ -967,12 +971,6 @@ namespace djv
 
         struct ColorTool::Private
         {
-            std::shared_ptr<OCIOWidget> ocioWidget;
-            std::shared_ptr<LUTWidget> lutWidget;
-            std::shared_ptr<ColorWidget> colorWidget;
-            std::shared_ptr<LevelsWidget> levelsWidget;
-            std::shared_ptr<EXRDisplayWidget> exrDisplayWidget;
-            std::shared_ptr<SoftClipWidget> softClipWidget;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
         };
 
@@ -989,27 +987,31 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.ocioWidget = OCIOWidget::create(context, app);
-            p.lutWidget = LUTWidget::create(context, app);
-            p.colorWidget = ColorWidget::create(context, app);
-            p.levelsWidget = LevelsWidget::create(context, app);
-            p.exrDisplayWidget = EXRDisplayWidget::create(context, app);
-            p.softClipWidget = SoftClipWidget::create(context, app);
+#if defined(TLRENDER_OCIO)
+            auto ocioWidget = OCIOWidget::create(context, app);
+            auto lutWidget = LUTWidget::create(context, app);
+#endif // TLRENDER_OCIO
+            auto colorWidget = ColorWidget::create(context, app);
+            auto levelsWidget = LevelsWidget::create(context, app);
+            auto exrDisplayWidget = EXRDisplayWidget::create(context, app);
+            auto softClipWidget = SoftClipWidget::create(context, app);
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
+#if defined(TLRENDER_OCIO)
             p.bellows["OCIO"] = ftk::Bellows::create(context, "OCIO", layout);
-            p.bellows["OCIO"]->setWidget(p.ocioWidget);
+            p.bellows["OCIO"]->setWidget(ocioWidget);
             p.bellows["LUT"] = ftk::Bellows::create(context, "LUT", layout);
-            p.bellows["LUT"]->setWidget(p.lutWidget);
+            p.bellows["LUT"]->setWidget(lutWidget);
+#endif // TLRENDER_OCIO
             p.bellows["Color"] = ftk::Bellows::create(context, "Color", layout);
-            p.bellows["Color"]->setWidget(p.colorWidget);
+            p.bellows["Color"]->setWidget(colorWidget);
             p.bellows["Levels"] = ftk::Bellows::create(context, "Levels", layout);
-            p.bellows["Levels"]->setWidget(p.levelsWidget);
+            p.bellows["Levels"]->setWidget(levelsWidget);
             p.bellows["EXRDisplay"] = ftk::Bellows::create(context, "EXR Display", layout);
-            p.bellows["EXRDisplay"]->setWidget(p.exrDisplayWidget);
+            p.bellows["EXRDisplay"]->setWidget(exrDisplayWidget);
             p.bellows["SoftClip"] = ftk::Bellows::create(context, "Soft Clip", layout);
-            p.bellows["SoftClip"]->setWidget(p.softClipWidget);
+            p.bellows["SoftClip"]->setWidget(softClipWidget);
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setBorder(false);
             scrollWidget->setWidget(layout);
