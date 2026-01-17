@@ -31,6 +31,7 @@ namespace djv
             Settings,
             Messages,
             SysLog,
+            Diag,
 
             Count,
             First = None

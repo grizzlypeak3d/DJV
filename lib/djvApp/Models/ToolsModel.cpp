@@ -29,7 +29,8 @@ namespace djv
             "Devices",
             "Settings",
             "Messages",
-            "System Log");
+            "System Log",
+            "Diagnostics");
 
         std::string getIcon(Tool value)
         {

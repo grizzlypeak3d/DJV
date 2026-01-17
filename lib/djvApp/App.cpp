@@ -39,6 +39,7 @@
 #include <ftk/Core/CmdLine.h>
 #include <ftk/Core/FileLogSystem.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/Timer.h>
 
 #include <filesystem>
 
@@ -79,6 +80,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineFlagOption> resetSettings;
             std::shared_ptr<ftk::CmdLineValueOption<std::string> > settingsFileName;
             std::shared_ptr<ftk::CmdLineFlagOption> version;
+            std::shared_ptr<ftk::CmdLineValueOption<int> > debugLoop;
         };
 
         struct App::Private
@@ -140,6 +142,9 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
 #endif // TLRENDER_BMD
+
+            std::shared_ptr<ftk::Timer> debugTimer;
+            int debugInput = 0;
         };
 
         void App::_init(
@@ -289,6 +294,11 @@ namespace djv
             p.cmdLine.version = ftk::CmdLineFlagOption::create(
                 { "-version" },
                 "Print the version and exit.");
+            p.cmdLine.debugLoop = ftk::CmdLineValueOption<int>::create(
+                { "-debugLoop" },
+                "Load the command line inputs in a loop. This value is the number of seconds for each cycle.",
+                "Testing",
+                10);
 
             ftk::App::_init(
                 context,
@@ -326,7 +336,8 @@ namespace djv
                     p.cmdLine.logFileName,
                     p.cmdLine.resetSettings,
                     p.cmdLine.settingsFileName,
-                    p.cmdLine.version
+                    p.cmdLine.version,
+                    p.cmdLine.debugLoop
                 });
         }
 
@@ -544,6 +555,36 @@ namespace djv
             _observersInit();
             _inputFilesInit();
             _windowsInit();
+
+            if (p.cmdLine.debugLoop->found() &&
+                !p.cmdLine.inputs->getList().empty())
+            {
+                p.debugTimer = ftk::Timer::create(_context);
+                p.debugTimer->setRepeating(true);
+                p.debugTimer->start(
+                    std::chrono::seconds(p.cmdLine.debugLoop->getValue()),
+                    [this]
+                    {
+                        if (!_p->filesModel->getFiles().empty())
+                        {
+                            _p->filesModel->closeAll();
+                        }
+                        else
+                        {
+                            ftk::Path path(_p->cmdLine.inputs->getList()[_p->debugInput]);
+                            if (path.hasSeqWildcard())
+                            {
+                                path = ftk::expandSeq(path);
+                            }
+                            open(path);
+                            ++_p->debugInput;
+                            if (_p->debugInput >= _p->cmdLine.inputs->getList().size())
+                            {
+                                _p->debugInput = 0;
+                            }
+                        }
+                    });
+            }
 
             ftk::App::run();
         }

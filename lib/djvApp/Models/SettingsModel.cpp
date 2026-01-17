@@ -198,6 +198,7 @@ namespace djv
                 Shortcut("Tools/Settings", "Settings", ftk::Key::F10),
                 Shortcut("Tools/Messages", "Messages", ftk::Key::F11),
                 Shortcut("Tools/System Log", "System log", ftk::Key::F12),
+                Shortcut("Tools/Diagnostics", "Diagnostics"),
 
                 Shortcut("View/Frame", "Frame", ftk::Key::Backspace),
                 Shortcut("View/ZoomReset", "Zoom reset", ftk::Key::_0),

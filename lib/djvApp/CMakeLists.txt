@@ -40,6 +40,7 @@ set(HEADERS_TOOLS
     Tools/AudioTool.h
     Tools/ColorPickerTool.h
     Tools/ColorTool.h
+    Tools/DiagTool.h
     Tools/DevicesTool.h
     Tools/ExportTool.h
     Tools/FilesTool.h
@@ -128,6 +129,7 @@ set(SOURCE_TOOLS
     Tools/AudioTool.cpp
     Tools/ColorPickerTool.cpp
     Tools/ColorTool.cpp
+    Tools/DiagTool.cpp
     Tools/DevicesTool.cpp
     Tools/ExportTool.cpp
     Tools/FileButton.cpp

@@ -6,6 +6,7 @@
 #include <djvApp/Tools/AudioTool.h>
 #include <djvApp/Tools/ColorPickerTool.h>
 #include <djvApp/Tools/ColorTool.h>
+#include <djvApp/Tools/DiagTool.h>
 #include <djvApp/Tools/DevicesTool.h>
 #include <djvApp/Tools/ExportTool.h>
 #include <djvApp/Tools/FilesTool.h>
@@ -55,6 +56,7 @@ namespace djv
             p.toolWidgets[Tool::Settings] = SettingsTool::create(context, app);
             p.toolWidgets[Tool::Messages] = MessagesTool::create(context, app);
             p.toolWidgets[Tool::SysLog] = SysLogTool::create(context, app);
+            p.toolWidgets[Tool::Diag] = DiagTool::create(context, app);
 
             p.layout = ftk::StackLayout::create(context, shared_from_this());
             for (const auto& widget : p.toolWidgets)
