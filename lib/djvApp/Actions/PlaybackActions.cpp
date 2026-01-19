@@ -270,6 +270,10 @@ namespace djv
                         _loopUpdate(value);
                     });
             }
+            else
+            {
+                _playbackUpdate(tl::Playback::Stop);
+            }
 
             _actions["Stop"]->setEnabled(p.player.get());
             _actions["Forward"]->setEnabled(p.player.get());
