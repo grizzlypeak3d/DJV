@@ -215,9 +215,13 @@ namespace djv
             {
                 const ftk::Size2I& size = p.thumbnail.image->getSize();
                 const ftk::Size2I thumbnailSize(size.w * p.thumbnail.image->getInfo().pixelAspectRatio, size.h);
+                ftk::ImageOptions imageOptions;
+                imageOptions.cache = false;
                 event.render->drawImage(
                     p.thumbnail.image,
-                    ftk::Box2I(x, g3.y(), thumbnailSize.w, thumbnailSize.h));
+                    ftk::Box2I(x, g3.y(), thumbnailSize.w, thumbnailSize.h),
+                    ftk::Color4F(1.F, 1.F, 1.F),
+                    imageOptions);
                 x += thumbnailSize.w + p.size.spacing;
             }
 
