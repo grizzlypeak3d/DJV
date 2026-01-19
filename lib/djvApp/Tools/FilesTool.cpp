@@ -267,15 +267,12 @@ namespace djv
         void FilesTool::_filesUpdate(const std::vector<std::shared_ptr<FilesModelItem> >& value)
         {
             FTK_P();
+            p.aButtons.clear();
             p.aButtonGroup->clearButtons();
+            p.bButtons.clear();
             p.bButtonGroup->clearButtons();
             p.layerComboBoxes.clear();
-            auto children = p.widgetLayout->getChildren();
-            for (const auto& widget : children)
-            {
-                widget->setParent(nullptr);
-            }
-            children.clear();
+            p.widgetLayout->clear();
             auto appWeak = _app;
             if (auto app = appWeak.lock())
             {
