@@ -565,22 +565,27 @@ namespace djv
                     std::chrono::seconds(p.cmdLine.debugLoop->getValue()),
                     [this]
                     {
-                        if (!_p->filesModel->getFiles().empty())
+                        FTK_P();
+                        if (!p.filesModel->getFiles().empty())
                         {
-                            _p->filesModel->closeAll();
+                            p.filesModel->closeAll();
                         }
                         else
                         {
-                            ftk::Path path(_p->cmdLine.inputs->getList()[_p->debugInput]);
+                            ftk::Path path(p.cmdLine.inputs->getList()[p.debugInput]);
                             if (path.hasSeqWildcard())
                             {
                                 path = ftk::expandSeq(path);
                             }
                             open(path);
-                            ++_p->debugInput;
-                            if (_p->debugInput >= _p->cmdLine.inputs->getList().size())
+                            if (auto player = p.player->get())
                             {
-                                _p->debugInput = 0;
+                                player->forward();
+                            }
+                            ++p.debugInput;
+                            if (p.debugInput >= p.cmdLine.inputs->getList().size())
+                            {
+                                p.debugInput = 0;
                             }
                         }
                     });
