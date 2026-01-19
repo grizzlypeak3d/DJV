@@ -3,7 +3,8 @@
 
 #include <djvApp/Tools/DiagTool.h>
 
-#include <tlRender/Core/Audio.h>
+#include <tlRender/Timeline/Player.h>
+#include <tlRender/IO/Plugin.h>
 
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/GraphWidget.h>
@@ -38,6 +39,12 @@ namespace djv
                 parent);
             FTK_P();
 
+            p.labels["Players"] = ftk::Label::create(context);
+            p.graphs["Players"] = ftk::GraphWidget::create(context);
+            p.labels["Timelines"] = ftk::Label::create(context);
+            p.graphs["Timelines"] = ftk::GraphWidget::create(context);
+            p.labels["IO"] = ftk::Label::create(context);
+            p.graphs["IO"] = ftk::GraphWidget::create(context);
             p.labels["Images"] = ftk::Label::create(context);
             p.graphs["Images"] = ftk::GraphWidget::create(context);
             p.labels["ImagesSize"] = ftk::Label::create(context);
@@ -52,6 +59,24 @@ namespace djv
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
             auto vLayout = ftk::VerticalLayout::create(context, layout);
+            vLayout->setMarginRole(ftk::SizeRole::Margin);
+            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.labels["Players"]->setParent(vLayout);
+            p.graphs["Players"]->setParent(vLayout);
+            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
+            vLayout = ftk::VerticalLayout::create(context, layout);
+            vLayout->setMarginRole(ftk::SizeRole::Margin);
+            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.labels["Timelines"]->setParent(vLayout);
+            p.graphs["Timelines"]->setParent(vLayout);
+            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
+            vLayout = ftk::VerticalLayout::create(context, layout);
+            vLayout->setMarginRole(ftk::SizeRole::Margin);
+            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.labels["IO"]->setParent(vLayout);
+            p.graphs["IO"]->setParent(vLayout);
+            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
+            vLayout = ftk::VerticalLayout::create(context, layout);
             vLayout->setMarginRole(ftk::SizeRole::Margin);
             vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.labels["Images"]->setParent(vLayout);
@@ -94,7 +119,17 @@ namespace djv
                 [this]
                 {
                     FTK_P();
-                    size_t count = ftk::Image::getObjectCount();
+                    size_t count = tl::Player::getObjectCount();
+                    p.labels["Players"]->setText(ftk::Format("Player objects: {0}").arg(count));
+                    p.graphs["Players"]->addSample(count);
+                    count = tl::Timeline::getObjectCount();
+                    p.labels["Timelines"]->setText(ftk::Format("Timeline objects: {0}").arg(count));
+                    p.graphs["Timelines"]->addSample(count);
+                    count = tl::IIO::getObjectCount();
+                    p.labels["IO"]->setText(ftk::Format("I/O objects: {0}").arg(count));
+                    p.graphs["IO"]->addSample(count);
+
+                    count = ftk::Image::getObjectCount();
                     p.labels["Images"]->setText(ftk::Format("Image objects: {0}").arg(count));
                     p.graphs["Images"]->addSample(count);
                     count = ftk::Image::getTotalByteCount() / ftk::megabyte;
