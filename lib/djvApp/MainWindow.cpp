@@ -146,8 +146,6 @@ namespace djv
             iconSystem->add("DJV_Icon", djv_resource::DJV_Icon);
             setIcon(iconSystem->get("DJV_Icon", 1.0));
 
-            return;
-
             p.app = app;
             p.settingsModel = app->getSettingsModel();
 
