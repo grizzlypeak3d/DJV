@@ -27,8 +27,7 @@ namespace djv
     {
         struct ToolsWidget::Private
         {
-            std::map<Tool, std::shared_ptr<IToolWidget> > toolWidgets;
-            std::shared_ptr<ftk::StackLayout> layout;
+            std::shared_ptr<IToolWidget> toolWidget;
             std::shared_ptr<ftk::Observer<Tool> > activeObserver;
         };
 
@@ -44,33 +43,67 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.toolWidgets[Tool::Files] = FilesTool::create(context, app);
-            p.toolWidgets[Tool::Export] = ExportTool::create(context, app);
-            p.toolWidgets[Tool::View] = ViewTool::create(context, app, mainWindow);
-            p.toolWidgets[Tool::Color] = ColorTool::create(context, app);
-            p.toolWidgets[Tool::ColorPicker] = ColorPickerTool::create(context, app, mainWindow);
-            p.toolWidgets[Tool::Magnify] = MagnifyTool::create(context, app, mainWindow);
-            p.toolWidgets[Tool::Info] = InfoTool::create(context, app);
-            p.toolWidgets[Tool::Audio] = AudioTool::create(context, app);
-            p.toolWidgets[Tool::Devices] = DevicesTool::create(context, app);
-            p.toolWidgets[Tool::Settings] = SettingsTool::create(context, app);
-            p.toolWidgets[Tool::Messages] = MessagesTool::create(context, app);
-            p.toolWidgets[Tool::SysLog] = SysLogTool::create(context, app);
-            p.toolWidgets[Tool::Diag] = DiagTool::create(context, app);
-
-            p.layout = ftk::StackLayout::create(context, shared_from_this());
-            for (const auto& widget : p.toolWidgets)
-            {
-                widget.second->setParent(p.layout);
-            }
-
+            std::weak_ptr<App> appWeak(app);
+            std::weak_ptr<MainWindow> mainWindowWeak(mainWindow);
             p.activeObserver = ftk::Observer<Tool>::create(
                 app->getToolsModel()->observeActiveTool(),
-                [this](Tool value)
+                [this, appWeak, mainWindowWeak](Tool value)
                 {
                     FTK_P();
-                    auto i = p.toolWidgets.find(value);
-                    p.layout->setCurrentWidget(i != p.toolWidgets.end() ? i->second : nullptr);
+                    if (p.toolWidget)
+                    {
+                        p.toolWidget->setParent(nullptr);
+                        p.toolWidget.reset();
+                    }
+                    auto app = appWeak.lock();
+                    auto mainWindow = mainWindowWeak.lock();
+                    if (app && mainWindow)
+                    {
+                        auto context = app->getContext();
+                        switch (value)
+                        {
+                        case Tool::Files:
+                            p.toolWidget = FilesTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::Export:
+                            p.toolWidget = ExportTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::View:
+                            p.toolWidget = ViewTool::create(context, app, mainWindow, shared_from_this());
+                            break;
+                        case Tool::Color:
+                            p.toolWidget = ColorTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::ColorPicker:
+                            p.toolWidget = ColorPickerTool::create(context, app, mainWindow, shared_from_this());
+                            break;
+                        case Tool::Magnify:
+                            p.toolWidget = MagnifyTool::create(context, app, mainWindow, shared_from_this());
+                            break;
+                        case Tool::Info:
+                            p.toolWidget = InfoTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::Audio:
+                            p.toolWidget = AudioTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::Devices:
+                            p.toolWidget = DevicesTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::Settings:
+                            p.toolWidget = SettingsTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::Messages:
+                            p.toolWidget = MessagesTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::SysLog:
+                            p.toolWidget = SysLogTool::create(context, app, shared_from_this());
+                            break;
+                        case Tool::Diag:
+                            p.toolWidget = DiagTool::create(context, app, shared_from_this());
+                            break;
+                        default: break;
+                        }
+                    }
                     setVisible(value != Tool::None);
                 });
         }
@@ -95,13 +128,18 @@ namespace djv
 
         ftk::Size2I ToolsWidget::getSizeHint() const
         {
-            return _p->layout->getSizeHint();
+            FTK_P();
+            return p.toolWidget ? p.toolWidget->getSizeHint() : ftk::Size2I();
         }
 
         void ToolsWidget::setGeometry(const ftk::Box2I & value)
         {
             IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
+            FTK_P();
+            if (p.toolWidget)
+            {
+                p.toolWidget->setGeometry(value);
+            }
         }
     }
 }

@@ -55,6 +55,7 @@ namespace djv
             size_t videoFramesSize = 0;
             ftk::ImageOptions imageOptions;
             tl::DisplayOptions displayOptions;
+            bool sizeInit = true;
 
             std::shared_ptr<tl::ui::Viewport> viewport;
             std::shared_ptr<ftk::ComboBox> comboBox;
@@ -278,6 +279,17 @@ namespace djv
             auto out = std::shared_ptr<MagnifyTool>(new MagnifyTool);
             out->_init(context, app, mainWindow, parent);
             return out;
+        }
+
+        void MagnifyTool::setGeometry(const ftk::Box2I& value)
+        {
+            IToolWidget::setGeometry(value);
+            FTK_P();
+            if (p.sizeInit)
+            {
+                p.sizeInit = false;
+                _widgetUpdate();
+            }
         }
 
         void MagnifyTool::_widgetUpdate()

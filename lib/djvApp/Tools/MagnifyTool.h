@@ -54,6 +54,8 @@ namespace djv
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            void setGeometry(const ftk::Box2I&) override;
+
         private:
             void _widgetUpdate();
             void _videoUpdate();
