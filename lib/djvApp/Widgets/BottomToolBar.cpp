@@ -19,7 +19,6 @@
 #include <tlRender/UI/TimeUnitsWidget.h>
 #include <tlRender/Timeline/Player.h>
 
-#include <ftk/UI/DoubleEdit.h>
 #include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
@@ -45,10 +44,8 @@ namespace djv
             std::shared_ptr<tl::ui::TimeEdit> currentTimeEdit;
             std::shared_ptr<tl::ui::TimeLabel> durationLabel;
             std::shared_ptr<tl::ui::TimeUnitsWidget> timeUnitsWidget;
-            std::shared_ptr<ftk::DoubleEdit> speedEdit;
             std::shared_ptr<ftk::ToolButton> speedButton;
             std::shared_ptr<SpeedPopup> speedPopup;
-            std::shared_ptr<ftk::Label> speedMultLabel;
             std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<AudioPopup> audioPopup;
@@ -57,7 +54,7 @@ namespace djv
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver;
-            std::shared_ptr<ftk::Observer<double> > speedMultObserver;
+            std::shared_ptr<ftk::Observer<double> > actualSpeedObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver2;
             std::shared_ptr<ftk::Observer<tl::Loop> > loopObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
@@ -120,17 +117,9 @@ namespace djv
             p.timeUnitsWidget = tl::ui::TimeUnitsWidget::create(context, timeUnitsModel);
             p.timeUnitsWidget->setTooltip("Time units.");
 
-            p.speedEdit = ftk::DoubleEdit::create(context, p.speedModel);
-            p.speedEdit->setTooltip("Current playback speed.");
-
             p.speedButton = ftk::ToolButton::create(context);
-            p.speedButton->setIcon("MenuArrow");
-            p.speedButton->setTooltip("Common playback speeds.");
-
-            p.speedMultLabel = ftk::Label::create(context);
-            p.speedMultLabel->setFontRole(ftk::FontRole::Mono);
-            p.speedMultLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.speedMultLabel->setTooltip("Playback speed multiplier.");
+            p.speedButton->setPopupIcon("MenuArrow");
+            p.speedButton->setTooltip("Playback speed.");
 
             p.audioLabel = ftk::Label::create(context);
             p.audioLabel->setFontRole(ftk::FontRole::Mono);
@@ -163,11 +152,7 @@ namespace djv
             p.currentTimeEdit->setParent(p.layout);
             p.durationLabel->setParent(p.layout);
             p.timeUnitsWidget->setParent(p.layout);
-            hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
-            p.speedEdit->setParent(hLayout);
-            p.speedButton->setParent(hLayout);
-            p.speedMultLabel->setParent(hLayout);
+            p.speedButton->setParent(p.layout);
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
             spacer->setHStretch(ftk::Stretch::Expanding);
             hLayout = ftk::HorizontalLayout::create(context, p.layout);
@@ -339,11 +324,6 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-        std::string BottomToolBar::_getSpeedMultLabel(double value) const
-        {
-            return ftk::Format("{0}X").arg(value, 1, 4);
-        }
-
         void BottomToolBar::_playerUpdate(const std::shared_ptr<tl::Player>& value)
         {
             FTK_P();
@@ -359,14 +339,11 @@ namespace djv
                         _p->speedModel->setValue(value);
                     });
 
-                p.speedMultObserver = ftk::Observer<double>::create(
-                    p.player->observeSpeedMult(),
+                p.actualSpeedObserver = ftk::Observer<double>::create(
+                    p.player->observeActualSpeed(),
                     [this](double value)
                     {
-                        _p->speedMultLabel->setText(_getSpeedMultLabel(value));
-                        _p->speedMultLabel->setBackgroundRole(value > 1.0 ?
-                            ftk::ColorRole::Checked :
-                            ftk::ColorRole::None);
+                        _p->speedButton->setText(ftk::Format("{0}").arg(value));
                     });
 
                 p.loopObserver = ftk::Observer<tl::Loop>::create(
@@ -396,11 +373,10 @@ namespace djv
                 p.currentTimeEdit->setValue(tl::invalidTime);
                 p.durationLabel->setValue(tl::invalidTime);
                 p.speedModel->setValue(0.0);
-                p.speedMultLabel->setText(_getSpeedMultLabel(1.0));
-                p.speedMultLabel->setBackgroundRole(ftk::ColorRole::None);
+                p.speedButton->setText(ftk::Format("{0}").arg(0.0));
 
                 p.speedObserver.reset();
-                p.speedMultObserver.reset();
+                p.actualSpeedObserver.reset();
                 p.loopObserver.reset();
                 p.currentTimeObserver.reset();
                 p.inOutRangeObserver.reset();
@@ -411,9 +387,7 @@ namespace djv
             p.frameShuttle->setEnabled(p.player.get());
             p.currentTimeEdit->setEnabled(p.player.get());
             p.durationLabel->setEnabled(p.player.get());
-            p.speedEdit->setEnabled(p.player.get());
             p.speedButton->setEnabled(p.player.get());
-            p.speedMultLabel->setEnabled(p.player.get());
         }
 
         void BottomToolBar::_showSpeedPopup()
@@ -429,7 +403,7 @@ namespace djv
                         p.player ?
                         p.player->getDefaultSpeed() :
                         0.0;
-                    p.speedPopup = SpeedPopup::create(context, defaultSpeed);
+                    p.speedPopup = SpeedPopup::create(context, p.speedModel, defaultSpeed);
                     p.speedPopup->open(window, p.speedButton->getGeometry());
                     std::weak_ptr<BottomToolBar> weak(std::dynamic_pointer_cast<BottomToolBar>(shared_from_this()));
                     p.speedPopup->setCallback(

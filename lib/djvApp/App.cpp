@@ -50,37 +50,37 @@ namespace djv
         struct CmdLine
         {
             std::shared_ptr<ftk::CmdLineListArg<std::string> > inputs;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > audioFileName;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > compareFileName;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::Compare> > compare;
-            std::shared_ptr<ftk::CmdLineValueOption<ftk::V2F> > wipeCenter;
-            std::shared_ptr<ftk::CmdLineValueOption<float> > wipeRotation;
-            std::shared_ptr<ftk::CmdLineValueOption<double> > speed;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::Playback> > playback;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::Loop> > loop;
-            std::shared_ptr<ftk::CmdLineValueOption<OTIO_NS::RationalTime> > seek;
-            std::shared_ptr<ftk::CmdLineValueOption<OTIO_NS::TimeRange> > inOutRange;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > ocioFileName;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > ocioInput;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > ocioDisplay;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > ocioView;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > ocioLook;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > lutFileName;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::LUTOrder> > lutOrder;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > audioFileName;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > compareFileName;
+            std::shared_ptr<ftk::CmdLineOption<tl::Compare> > compare;
+            std::shared_ptr<ftk::CmdLineOption<ftk::V2F> > wipeCenter;
+            std::shared_ptr<ftk::CmdLineOption<float> > wipeRotation;
+            std::shared_ptr<ftk::CmdLineOption<double> > speed;
+            std::shared_ptr<ftk::CmdLineOption<tl::Playback> > playback;
+            std::shared_ptr<ftk::CmdLineOption<tl::Loop> > loop;
+            std::shared_ptr<ftk::CmdLineOption<OTIO_NS::RationalTime> > seek;
+            std::shared_ptr<ftk::CmdLineOption<OTIO_NS::TimeRange> > inOutRange;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > ocioFileName;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > ocioInput;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > ocioDisplay;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > ocioView;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > ocioLook;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > lutFileName;
+            std::shared_ptr<ftk::CmdLineOption<tl::LUTOrder> > lutOrder;
 #if defined(TLRENDER_USD)
-            std::shared_ptr<ftk::CmdLineValueOption<int> > usdRenderWidth;
-            std::shared_ptr<ftk::CmdLineValueOption<float> > usdComplexity;
-            std::shared_ptr<ftk::CmdLineValueOption<tl::usd::DrawMode> > usdDrawMode;
-            std::shared_ptr<ftk::CmdLineValueOption<bool> > usdEnableLighting;
-            std::shared_ptr<ftk::CmdLineValueOption<bool> > usdSRGB;
-            std::shared_ptr<ftk::CmdLineValueOption<int> > usdStageCacheCount;
-            std::shared_ptr<ftk::CmdLineValueOption<int> > usdDiskCacheGB;
+            std::shared_ptr<ftk::CmdLineOption<int> > usdRenderWidth;
+            std::shared_ptr<ftk::CmdLineOption<float> > usdComplexity;
+            std::shared_ptr<ftk::CmdLineOption<tl::usd::DrawMode> > usdDrawMode;
+            std::shared_ptr<ftk::CmdLineOption<bool> > usdEnableLighting;
+            std::shared_ptr<ftk::CmdLineOption<bool> > usdSRGB;
+            std::shared_ptr<ftk::CmdLineOption<int> > usdStageCacheCount;
+            std::shared_ptr<ftk::CmdLineOption<int> > usdDiskCacheGB;
 #endif // TLRENDER_USD
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > logFileName;
-            std::shared_ptr<ftk::CmdLineFlagOption> resetSettings;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > settingsFileName;
-            std::shared_ptr<ftk::CmdLineFlagOption> version;
-            std::shared_ptr<ftk::CmdLineValueOption<int> > debugLoop;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > logFileName;
+            std::shared_ptr<ftk::CmdLineFlag> resetSettings;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > settingsFileName;
+            std::shared_ptr<ftk::CmdLineFlag> version;
+            std::shared_ptr<ftk::CmdLineOption<int> > debugLoop;
         };
 
         struct App::Private
@@ -162,139 +162,139 @@ namespace djv
                 "input",
                 "One or more timelines, movies, image sequences, or directories.",
                 true);
-            p.cmdLine.audioFileName = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.audioFileName = ftk::CmdLineOption<std::string>::create(
                 { "-audio", "-a" },
                 "Audio file name.",
                 "Audio");
-            p.cmdLine.compareFileName = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.compareFileName = ftk::CmdLineOption<std::string>::create(
                 { "-compare", "-b" },
                 "Compare \"B\" file name.",
                 "Compare");
-            p.cmdLine.compare = ftk::CmdLineValueOption<tl::Compare>::create(
+            p.cmdLine.compare = ftk::CmdLineOption<tl::Compare>::create(
                 { "-compareMode", "-c" },
                 "Compare mode.",
                 "Compare",
                 std::optional<tl::Compare>(),
                 ftk::quotes(tl::getCompareLabels()));
-            p.cmdLine.wipeCenter = ftk::CmdLineValueOption<ftk::V2F>::create(
+            p.cmdLine.wipeCenter = ftk::CmdLineOption<ftk::V2F>::create(
                 { "-wipeCenter", "-wc" },
                 "Wipe center.",
                 "Compare",
                 tl::CompareOptions().wipeCenter);
-            p.cmdLine.wipeRotation = ftk::CmdLineValueOption<float>::create(
+            p.cmdLine.wipeRotation = ftk::CmdLineOption<float>::create(
                 { "-wipeRotation", "-wr" },
                 "Wipe rotation.",
                 "Compare",
                 0.F);
-            p.cmdLine.speed = ftk::CmdLineValueOption<double>::create(
+            p.cmdLine.speed = ftk::CmdLineOption<double>::create(
                 { "-speed" },
                 "Playback speed.",
                 "Playback");
-            p.cmdLine.playback = ftk::CmdLineValueOption<tl::Playback>::create(
+            p.cmdLine.playback = ftk::CmdLineOption<tl::Playback>::create(
                 { "-playback", "-p" },
                 "Playback mode.",
                 "Playback",
                 std::optional<tl::Playback>(),
                 ftk::quotes(tl::getPlaybackLabels()));
-            p.cmdLine.loop = ftk::CmdLineValueOption<tl::Loop>::create(
+            p.cmdLine.loop = ftk::CmdLineOption<tl::Loop>::create(
                 { "-loop" },
                 "Loop mode.",
                 "Playback",
                 std::optional<tl::Loop>(),
                 ftk::quotes(tl::getLoopLabels()));
-            p.cmdLine.seek = ftk::CmdLineValueOption<OTIO_NS::RationalTime>::create(
+            p.cmdLine.seek = ftk::CmdLineOption<OTIO_NS::RationalTime>::create(
                 { "-seek" },
                 "Seek to the given time.",
                 "Playback");
-            p.cmdLine.inOutRange = ftk::CmdLineValueOption<OTIO_NS::TimeRange>::create(
+            p.cmdLine.inOutRange = ftk::CmdLineOption<OTIO_NS::TimeRange>::create(
                 { "-inOutRange" },
                 "Set the in/out points range.",
                 "Playback");
-            p.cmdLine.ocioFileName = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.ocioFileName = ftk::CmdLineOption<std::string>::create(
                 { "-ocio" },
                 "OCIO configuration file name (e.g., config.ocio).",
                 "Color");
-            p.cmdLine.ocioInput = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.ocioInput = ftk::CmdLineOption<std::string>::create(
                 { "-ocioInput" },
                 "OCIO input name.",
                 "Color");
-            p.cmdLine.ocioDisplay = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.ocioDisplay = ftk::CmdLineOption<std::string>::create(
                 { "-ocioDisplay" },
                 "OCIO display name.",
                 "Color");
-            p.cmdLine.ocioView = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.ocioView = ftk::CmdLineOption<std::string>::create(
                 { "-ocioView" },
                 "OCIO view name.",
                 "Color");
-            p.cmdLine.ocioLook = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.ocioLook = ftk::CmdLineOption<std::string>::create(
                 { "-ocioLook" },
                 "OCIO look name.",
                 "Color");
-            p.cmdLine.lutFileName = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.lutFileName = ftk::CmdLineOption<std::string>::create(
                 { "-lut" },
                 "LUT file name.",
                 "Color");
-            p.cmdLine.lutOrder = ftk::CmdLineValueOption<tl::LUTOrder>::create(
+            p.cmdLine.lutOrder = ftk::CmdLineOption<tl::LUTOrder>::create(
                 { "-lutOrder" },
                 "LUT operation order.",
                 "Color",
                 std::optional<tl::LUTOrder>(),
                 ftk::quotes(tl::getLUTOrderLabels()));
 #if defined(TLRENDER_USD)
-            p.cmdLine.usdRenderWidth = ftk::CmdLineValueOption<int>::create(
+            p.cmdLine.usdRenderWidth = ftk::CmdLineOption<int>::create(
                 { "-usdRenderWidth" },
                 "Render width.",
                 "USD",
                 1920);
-            p.cmdLine.usdComplexity = ftk::CmdLineValueOption<float>::create(
+            p.cmdLine.usdComplexity = ftk::CmdLineOption<float>::create(
                 { "-usdComplexity" },
                 "Render complexity setting.",
                 "USD",
                 1.F);
-            p.cmdLine.usdDrawMode = ftk::CmdLineValueOption<tl::usd::DrawMode>::create(
+            p.cmdLine.usdDrawMode = ftk::CmdLineOption<tl::usd::DrawMode>::create(
                 { "-usdDrawMode" },
                 "Draw mode.",
                 "USD",
                 tl::usd::DrawMode::ShadedSmooth,
                 ftk::quotes(tl::usd::getDrawModeLabels()));
-            p.cmdLine.usdEnableLighting = ftk::CmdLineValueOption<bool>::create(
+            p.cmdLine.usdEnableLighting = ftk::CmdLineOption<bool>::create(
                 { "-usdEnableLighting" },
                 "Enable lighting.",
                 "USD",
                 true);
-            p.cmdLine.usdSRGB = ftk::CmdLineValueOption<bool>::create(
+            p.cmdLine.usdSRGB = ftk::CmdLineOption<bool>::create(
                 { "-usdSRGB" },
                 "Enable sRGB color space.",
                 "USD",
                 true);
-            p.cmdLine.usdStageCacheCount = ftk::CmdLineValueOption<int>::create(
+            p.cmdLine.usdStageCacheCount = ftk::CmdLineOption<int>::create(
                 { "-usdStageCache" },
                 "Number of USD stages to cache.",
                 "USD",
                 10);
-            p.cmdLine.usdDiskCacheGB = ftk::CmdLineValueOption<int>::create(
+            p.cmdLine.usdDiskCacheGB = ftk::CmdLineOption<int>::create(
                 { "-usdDiskCache" },
                 "Disk cache size in gigabytes. A size of zero disables the cache.",
                 "USD",
                 0);
 #endif // TLRENDER_USD
-            p.cmdLine.logFileName = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.logFileName = ftk::CmdLineOption<std::string>::create(
                 { "-logFile" },
                 "Log file name.",
                 std::string(),
                 ftk::Format("{0}").arg(p.logFile.u8string()));
-            p.cmdLine.resetSettings = ftk::CmdLineFlagOption::create(
+            p.cmdLine.resetSettings = ftk::CmdLineFlag::create(
                 { "-resetSettings" },
                 "Reset settings to defaults.");
-            p.cmdLine.settingsFileName = ftk::CmdLineValueOption<std::string>::create(
+            p.cmdLine.settingsFileName = ftk::CmdLineOption<std::string>::create(
                 { "-settingsFile" },
                 "Settings file name.",
                 std::string(),
                 ftk::Format("{0}").arg(p.settingsFile.u8string()));
-            p.cmdLine.version = ftk::CmdLineFlagOption::create(
+            p.cmdLine.version = ftk::CmdLineFlag::create(
                 { "-version" },
                 "Print the version and exit.");
-            p.cmdLine.debugLoop = ftk::CmdLineValueOption<int>::create(
+            p.cmdLine.debugLoop = ftk::CmdLineOption<int>::create(
                 { "-debugLoop" },
                 "Load the command line inputs in a loop. This value is the number of seconds for each cycle.",
                 "Testing",

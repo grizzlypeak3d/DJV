@@ -177,7 +177,7 @@ namespace djv
 
         struct ViewOptionsWidget::Private
         {
-            std::vector<ftk::ImageType> colorBuffers;
+            std::vector<ftk::gl::TextureType> colorBuffers;
 
             std::shared_ptr<ftk::ComboBox> minifyComboBox;
             std::shared_ptr<ftk::ComboBox> magnifyComboBox;
@@ -188,7 +188,7 @@ namespace djv
 
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
         };
 
         void ViewOptionsWidget::_init(
@@ -219,10 +219,10 @@ namespace djv
                 ftk::getAlphaBlendLabels());
             p.videoLevelsComboBox->setHStretch(ftk::Stretch::Expanding);
 
-            p.colorBuffers.push_back(ftk::ImageType::RGBA_U8);
+            p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_U8);
 #if defined(FTK_API_GL_4_1)
-            p.colorBuffers.push_back(ftk::ImageType::RGBA_F16);
-            p.colorBuffers.push_back(ftk::ImageType::RGBA_F32);
+            p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_F16);
+            p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_F32);
 #endif // FTK_API_GL_4_1
             std::vector<std::string> items;
             for (size_t i = 0; i < p.colorBuffers.size(); ++i)
@@ -260,9 +260,9 @@ namespace djv
                     p.magnifyComboBox->setCurrentIndex(static_cast<int>(value.imageFilters.magnify));
                 });
 
-            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
                 app->getViewportModel()->observeColorBuffer(),
-                [this](ftk::ImageType value)
+                [this](ftk::gl::TextureType value)
                 {
                     FTK_P();
                     int index = -1;
@@ -432,7 +432,7 @@ namespace djv
                     }
                 });
 
-            p.solidSwatch->setColorCallback(
+            p.solidSwatch->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())
@@ -443,7 +443,7 @@ namespace djv
                     }
                 });
 
-            p.checkersSwatch.first->setColorCallback(
+            p.checkersSwatch.first->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())
@@ -454,7 +454,7 @@ namespace djv
                     }
                 });
 
-            p.checkersSwatch.second->setColorCallback(
+            p.checkersSwatch.second->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())
@@ -477,7 +477,7 @@ namespace djv
                     }
                 });
 
-            p.gradientSwatch.first->setColorCallback(
+            p.gradientSwatch.first->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())
@@ -488,7 +488,7 @@ namespace djv
                     }
                 });
 
-            p.gradientSwatch.second->setColorCallback(
+            p.gradientSwatch.second->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())
@@ -612,7 +612,7 @@ namespace djv
                     }
                 });
 
-            p.colorSwatch->setColorCallback(
+            p.colorSwatch->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())
@@ -764,7 +764,7 @@ namespace djv
                     }
                 });
 
-            p.colorSwatch->setColorCallback(
+            p.colorSwatch->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())
@@ -786,7 +786,7 @@ namespace djv
                     }
                 });
 
-            p.textColorSwatch->setColorCallback(
+            p.textColorSwatch->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())
@@ -797,7 +797,7 @@ namespace djv
                     }
                 });
 
-            p.overlayColorSwatch->setColorCallback(
+            p.overlayColorSwatch->setCallback(
                 [appWeak](const ftk::Color4F& value)
                 {
                     if (auto app = appWeak.lock())

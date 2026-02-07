@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/IMenuPopup.h>
 
 namespace djv
@@ -17,6 +18,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<ftk::DoubleModel>&,
                 double defaultSpeed,
                 const std::shared_ptr<IWidget>& parent);
 
@@ -27,6 +29,7 @@ namespace djv
 
             static std::shared_ptr<SpeedPopup> create(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<ftk::DoubleModel>&,
                 double defaultSpeed,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 

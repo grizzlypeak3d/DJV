@@ -7,6 +7,7 @@
 #include <tlRender/Timeline/DisplayOptions.h>
 #include <tlRender/Timeline/ForegroundOptions.h>
 
+#include <ftk/GL/Texture.h>
 #include <ftk/Core/Observable.h>
 
 namespace ftk
@@ -76,13 +77,13 @@ namespace djv
             void setForegroundOptions(const tl::ForegroundOptions&);
 
             //! Get the color buffer type.
-            ftk::ImageType getColorBuffer() const;
+            ftk::gl::TextureType getColorBuffer() const;
 
             //! Observe the color buffer type.
-            std::shared_ptr<ftk::IObservable<ftk::ImageType> > observeColorBuffer() const;
+            std::shared_ptr<ftk::IObservable<ftk::gl::TextureType> > observeColorBuffer() const;
 
             //! Set the color buffer type.
-            void setColorBuffer(ftk::ImageType);
+            void setColorBuffer(ftk::gl::TextureType);
 
             //! Get whether the HUD is enabled.
             bool getHUD() const;

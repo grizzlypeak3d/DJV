@@ -58,7 +58,7 @@ namespace djv
                 tl::LUTOptions lutOptions;
                 ftk::ImageOptions imageOptions;
                 tl::DisplayOptions displayOptions;
-                ftk::ImageType colorBuffer = ftk::ImageType::RGBA_U8;
+                ftk::gl::TextureType colorBuffer = ftk::gl::TextureType::RGBA_U8;
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
                 std::shared_ptr<tl::IRender> render;
                 GLenum glFormat = 0;
@@ -463,10 +463,9 @@ namespace djv
                         context->getLogSystem(),
                         context->getSystem<ftk::FontSystem>());
                     ftk::gl::OffscreenBufferOptions offscreenBufferOptions;
-                    offscreenBufferOptions.color = p.exportData->colorBuffer;
                     p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
                         p.exportData->info.size,
-                        offscreenBufferOptions);
+                        ftk::gl::offscreenColorDefault);
 
                     // Create the progress dialog.
                     p.progressDialog = ftk::ProgressDialog::create(

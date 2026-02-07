@@ -11,6 +11,10 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
+#include <ftk/GL/Mesh.h>
+#include <ftk/GL/OffscreenBuffer.h>
+#include <ftk/GL/Shader.h>
+#include <ftk/GL/Texture.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
 #include <ftk/Core/Timer.h>
@@ -21,7 +25,6 @@ namespace djv
     {
         struct DiagTool::Private
         {
-            std::map<std::string, std::shared_ptr<ftk::Label> > labels;
             std::map<std::string, std::shared_ptr<ftk::GraphWidget> > graphs;
             std::shared_ptr<ftk::Timer> timer;
         };
@@ -39,72 +42,54 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.labels["Players"] = ftk::Label::create(context);
-            p.graphs["Players"] = ftk::GraphWidget::create(context);
-            p.labels["Timelines"] = ftk::Label::create(context);
-            p.graphs["Timelines"] = ftk::GraphWidget::create(context);
-            p.labels["IO"] = ftk::Label::create(context);
-            p.graphs["IO"] = ftk::GraphWidget::create(context);
-            p.labels["Images"] = ftk::Label::create(context);
-            p.graphs["Images"] = ftk::GraphWidget::create(context);
-            p.labels["ImagesSize"] = ftk::Label::create(context);
-            p.graphs["ImagesSize"] = ftk::GraphWidget::create(context);
-            p.labels["Audio"] = ftk::Label::create(context);
-            p.graphs["Audio"] = ftk::GraphWidget::create(context);
-            p.labels["AudioSize"] = ftk::Label::create(context);
-            p.graphs["AudioSize"] = ftk::GraphWidget::create(context);
-            p.labels["Widgets"] = ftk::Label::create(context);
-            p.graphs["Widgets"] = ftk::GraphWidget::create(context);
+            p.graphs["GLObjects"] = ftk::GraphWidget::create(
+                context,
+                "OpenGL Objects",
+                {
+                    { ftk::ColorRole::Cyan, "Meshes: {0}" },
+                    { ftk::ColorRole::Magenta, "Textures: {0}" },
+                    { ftk::ColorRole::Yellow, "Buffers: {0}" },
+                    { ftk::ColorRole::Red, "Shaders: {0}" }
+                });
+
+            p.graphs["GLMemory"] = ftk::GraphWidget::create(
+                context,
+                "OpenGL Memory",
+                {
+                    { ftk::ColorRole::Cyan, "Meshes: {0}MB" },
+                    { ftk::ColorRole::Magenta, "Textures: {0}MB" },
+                    { ftk::ColorRole::Yellow, "Buffers: {0}MB" }
+                });
+
+            p.graphs["Objects"] = ftk::GraphWidget::create(
+                context,
+                "Objects",
+                {
+                    { ftk::ColorRole::Cyan, "Players: {0}" },
+                    { ftk::ColorRole::Magenta, "Timelines: {0}" },
+                    { ftk::ColorRole::Yellow, "IO: {0}" },
+                    { ftk::ColorRole::Red, "Images: {0}" },
+                    { ftk::ColorRole::Green, "Audio: {0}" },
+                    { ftk::ColorRole::Blue, "Widgets: {0}" }
+                });
+
+            p.graphs["Memory"] = ftk::GraphWidget::create(
+                context,
+                "Memory",
+                {
+                    { ftk::ColorRole::Cyan, "Images: {0}MB" },
+                    { ftk::ColorRole::Magenta, "Audio: {0}MB" }
+                });
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
-            auto vLayout = ftk::VerticalLayout::create(context, layout);
-            vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.labels["Players"]->setParent(vLayout);
-            p.graphs["Players"]->setParent(vLayout);
+            p.graphs["GLObjects"]->setParent(layout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
-            vLayout = ftk::VerticalLayout::create(context, layout);
-            vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.labels["Timelines"]->setParent(vLayout);
-            p.graphs["Timelines"]->setParent(vLayout);
+            p.graphs["GLMemory"]->setParent(layout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
-            vLayout = ftk::VerticalLayout::create(context, layout);
-            vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.labels["IO"]->setParent(vLayout);
-            p.graphs["IO"]->setParent(vLayout);
+            p.graphs["Objects"]->setParent(layout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
-            vLayout = ftk::VerticalLayout::create(context, layout);
-            vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.labels["Images"]->setParent(vLayout);
-            p.graphs["Images"]->setParent(vLayout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
-            vLayout = ftk::VerticalLayout::create(context, layout);
-            vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.labels["ImagesSize"]->setParent(vLayout);
-            p.graphs["ImagesSize"]->setParent(vLayout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
-            vLayout = ftk::VerticalLayout::create(context, layout);
-            vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.labels["Audio"]->setParent(vLayout);
-            p.graphs["Audio"]->setParent(vLayout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
-            vLayout = ftk::VerticalLayout::create(context, layout);
-            vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.labels["AudioSize"]->setParent(vLayout);
-            p.graphs["AudioSize"]->setParent(vLayout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
-            vLayout = ftk::VerticalLayout::create(context, layout);
-            vLayout->setMarginRole(ftk::SizeRole::Margin);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.labels["Widgets"]->setParent(vLayout);
-            p.graphs["Widgets"]->setParent(vLayout);
+            p.graphs["Memory"]->setParent(layout);
 
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setWidget(layout);
@@ -119,33 +104,54 @@ namespace djv
                 [this]
                 {
                     FTK_P();
-                    size_t count = tl::Player::getObjectCount();
-                    p.labels["Players"]->setText(ftk::Format("Player objects: {0}").arg(count));
-                    p.graphs["Players"]->addSample(count);
-                    count = tl::Timeline::getObjectCount();
-                    p.labels["Timelines"]->setText(ftk::Format("Timeline objects: {0}").arg(count));
-                    p.graphs["Timelines"]->addSample(count);
-                    count = tl::IIO::getObjectCount();
-                    p.labels["IO"]->setText(ftk::Format("I/O objects: {0}").arg(count));
-                    p.graphs["IO"]->addSample(count);
+                    p.graphs["GLObjects"]->addSample(
+                        ftk::ColorRole::Cyan,
+                        ftk::gl::VBO::getObjectCount());
+                    p.graphs["GLObjects"]->addSample(
+                        ftk::ColorRole::Magenta,
+                        ftk::gl::Texture::getObjectCount());
+                    p.graphs["GLObjects"]->addSample(
+                        ftk::ColorRole::Yellow,
+                        ftk::gl::OffscreenBuffer::getObjectCount());
+                    p.graphs["GLObjects"]->addSample(
+                        ftk::ColorRole::Red,
+                        ftk::gl::Shader::getObjectCount());
 
-                    count = ftk::Image::getObjectCount();
-                    p.labels["Images"]->setText(ftk::Format("Image objects: {0}").arg(count));
-                    p.graphs["Images"]->addSample(count);
-                    count = ftk::Image::getTotalByteCount() / ftk::megabyte;
-                    p.labels["ImagesSize"]->setText(ftk::Format("Total images size: {0}MB").arg(count));
-                    p.graphs["ImagesSize"]->addSample(count);
+                    p.graphs["GLMemory"]->addSample(
+                        ftk::ColorRole::Cyan,
+                        ftk::gl::VBO::getTotalByteCount() / ftk::megabyte);
+                    p.graphs["GLMemory"]->addSample(
+                        ftk::ColorRole::Magenta,
+                        ftk::gl::Texture::getTotalByteCount() / ftk::megabyte);
+                    p.graphs["GLMemory"]->addSample(
+                        ftk::ColorRole::Yellow,
+                        ftk::gl::OffscreenBuffer::getTotalByteCount() / ftk::megabyte);
 
-                    count = tl::Audio::getObjectCount();
-                    p.labels["Audio"]->setText(ftk::Format("Audio objects: {0}").arg(count));
-                    p.graphs["Audio"]->addSample(count);
-                    count = tl::Audio::getTotalByteCount() / ftk::megabyte;
-                    p.labels["AudioSize"]->setText(ftk::Format("Total audio size: {0}MB").arg(count));
-                    p.graphs["AudioSize"]->addSample(count);
+                    p.graphs["Objects"]->addSample(
+                        ftk::ColorRole::Cyan,
+                        tl::Player::getObjectCount());
+                    p.graphs["Objects"]->addSample(
+                        ftk::ColorRole::Magenta,
+                        tl::Timeline::getObjectCount());
+                    p.graphs["Objects"]->addSample(
+                        ftk::ColorRole::Yellow,
+                        tl::IIO::getObjectCount());
+                    p.graphs["Objects"]->addSample(
+                        ftk::ColorRole::Red,
+                        ftk::Image::getObjectCount());
+                    p.graphs["Objects"]->addSample(
+                        ftk::ColorRole::Green,
+                        tl::Audio::getObjectCount());
+                    p.graphs["Objects"]->addSample(
+                        ftk::ColorRole::Blue,
+                        ftk::IWidget::getObjectCount());
 
-                    count = ftk::IWidget::getObjectCount();
-                    p.labels["Widgets"]->setText(ftk::Format("Widgets: {0}").arg(count));
-                    p.graphs["Widgets"]->addSample(count);
+                    p.graphs["Memory"]->addSample(
+                        ftk::ColorRole::Cyan,
+                        ftk::Image::getTotalByteCount() / ftk::megabyte);
+                    p.graphs["Memory"]->addSample(
+                        ftk::ColorRole::Yellow,
+                        tl::Audio::getTotalByteCount() / ftk::megabyte);
                 });
         }
 

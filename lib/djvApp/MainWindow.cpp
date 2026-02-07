@@ -123,7 +123,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<MouseSettings> > mouseSettingsObserver;
             std::shared_ptr<ftk::Observer<TimelineSettings> > timelineSettingsObserver;
             std::shared_ptr<ftk::Observer<bool> > timelineFrameViewObserver;
@@ -324,11 +324,13 @@ namespace djv
                     _p->timelineWidget->setDisplayOptions(options);
                 });
 
-            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
                 app->getViewportModel()->observeColorBuffer(),
-                [this](ftk::ImageType value)
+                [this](ftk::gl::TextureType value)
                 {
-                    setFrameBufferType(value);
+                    setFrameBufferType(ftk::gl::TextureType::RGBA_U8 == value ?
+                        ftk::WindowFrameBufferType::U8 :
+                        ftk::WindowFrameBufferType::F32);
                 });
 
             p.mouseSettingsObserver = ftk::Observer<MouseSettings>::create(

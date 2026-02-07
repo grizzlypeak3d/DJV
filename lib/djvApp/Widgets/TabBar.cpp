@@ -33,7 +33,7 @@ namespace djv
             p.tabBar->setTabsClosable(true);
 
             std::weak_ptr<App> appWeak(app);
-            p.tabBar->setCallback(
+            p.tabBar->setCurrentTabCallback(
                 [appWeak](int value)
                 {
                     if (auto app = appWeak.lock())
@@ -55,7 +55,7 @@ namespace djv
                 [this](const std::vector<std::shared_ptr<FilesModelItem> >& value)
                 {
                     FTK_P();
-                    p.tabBar->clearTabs();
+                    p.tabBar->clear();
                     for (const auto& item : value)
                     {
                         p.tabBar->addTab(
