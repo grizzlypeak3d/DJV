@@ -90,50 +90,50 @@ namespace djv
                     }
                 });
 
-            _actions["ThumbnailsNone"] = ftk::Action::create(
-                "No Thumbnails",
-                [appWeak]
+            _actions["Thumbnails"] = ftk::Action::create(
+                "Thumbnails",
+                [appWeak](bool value)
                 {
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
-                        settings.thumbnails = TimelineThumbnails::None;
+                        settings.thumbnails = value;
                         app->getSettingsModel()->setTimeline(settings);
                     }
                 });
 
-            _actions["ThumbnailsSmall"] = ftk::Action::create(
-                "Small Thumbnails",
+            _actions["ThumbnailSizeSmall"] = ftk::Action::create(
+                "Small",
                 [appWeak]
                 {
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
-                        settings.thumbnails = TimelineThumbnails::Small;
+                        settings.thumbnailSize = TimelineThumbnailSize::Small;
                         app->getSettingsModel()->setTimeline(settings);
                     }
                 });
 
-            _actions["ThumbnailsMedium"] = ftk::Action::create(
-                "Medium Thumbnails",
+            _actions["ThumbnailSizeMedium"] = ftk::Action::create(
+                "Medium",
                 [appWeak]
                 {
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
-                        settings.thumbnails = TimelineThumbnails::Medium;
+                        settings.thumbnailSize = TimelineThumbnailSize::Medium;
                         app->getSettingsModel()->setTimeline(settings);
                     }
                 });
 
-            _actions["ThumbnailsLarge"] = ftk::Action::create(
-                "Large Thumbnails",
+            _actions["ThumbnailSizeLarge"] = ftk::Action::create(
+                "Large",
                 [appWeak]
                 {
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
-                        settings.thumbnails = TimelineThumbnails::Large;
+                        settings.thumbnailSize = TimelineThumbnailSize::Large;
                         app->getSettingsModel()->setTimeline(settings);
                     }
                 });
@@ -146,9 +146,9 @@ namespace djv
                 { "AutoScroll", "Automatically scroll the timeline to the current frame." },
                 { "StopOnScrub", "Stop playback when scrubbing the timeline." },
                 { "Thumbnails", "Toggle timeline thumbnails." },
-                { "ThumbnailsSmall", "Small timeline thumbnails." },
-                { "ThumbnailsMedium", "Medium timeline thumbnails." },
-                { "ThumbnailsLarge", "Large timeline thumbnails." }
+                { "ThumbnailSizeSmall", "Small timeline thumbnails." },
+                { "ThumbnailSizeMedium", "Medium timeline thumbnails." },
+                { "ThumbnailSizeLarge", "Large timeline thumbnails." }
             };
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
@@ -162,10 +162,10 @@ namespace djv
                     _actions["ScrollBars"]->setChecked(value.scrollBars);
                     _actions["AutoScroll"]->setChecked(value.autoScroll);
                     _actions["StopOnScrub"]->setChecked(value.stopOnScrub);
-                    _actions["ThumbnailsNone"]->setChecked(TimelineThumbnails::None == value.thumbnails);
-                    _actions["ThumbnailsSmall"]->setChecked(TimelineThumbnails::Small == value.thumbnails);
-                    _actions["ThumbnailsMedium"]->setChecked(TimelineThumbnails::Medium == value.thumbnails);
-                    _actions["ThumbnailsLarge"]->setChecked(TimelineThumbnails::Large == value.thumbnails);
+                    _actions["Thumbnails"]->setChecked(value.thumbnails);
+                    _actions["ThumbnailSizeSmall"]->setChecked(TimelineThumbnailSize::Small == value.thumbnailSize);
+                    _actions["ThumbnailSizeMedium"]->setChecked(TimelineThumbnailSize::Medium == value.thumbnailSize);
+                    _actions["ThumbnailSizeLarge"]->setChecked(TimelineThumbnailSize::Large == value.thumbnailSize);
                 });
         }
 

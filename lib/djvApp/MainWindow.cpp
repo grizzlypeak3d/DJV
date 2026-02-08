@@ -506,9 +506,9 @@ namespace djv
             auto display = p.timelineWidget->getDisplayOptions();
 
             display.minimize = settings.minimize;
-            display.thumbnails = settings.thumbnails != TimelineThumbnails::None;
-            display.thumbnailHeight = getTimelineThumbnailsSize(settings.thumbnails);
-            display.waveformHeight = getTimelineWaveformSize(settings.thumbnails);
+            display.thumbnails = settings.thumbnails;
+            display.thumbnailHeight = getTimelineThumbnailSize(settings.thumbnailSize);
+            display.waveformHeight = getTimelineWaveformSize(settings.thumbnailSize);
             p.timelineWidget->setDisplayOptions(display);
 
             if (settings.minimize)

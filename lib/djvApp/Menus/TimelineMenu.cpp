@@ -31,10 +31,11 @@ namespace djv
             addAction(actions["AutoScroll"]);
             addAction(actions["StopOnScrub"]);
             addDivider();
-            addAction(actions["ThumbnailsNone"]);
-            addAction(actions["ThumbnailsSmall"]);
-            addAction(actions["ThumbnailsMedium"]);
-            addAction(actions["ThumbnailsLarge"]);
+            addAction(actions["Thumbnails"]);
+            auto thumbnailSizeMenu = addSubMenu("Thumbnail Size");
+            thumbnailSizeMenu->addAction(actions["ThumbnailSizeSmall"]);
+            thumbnailSizeMenu->addAction(actions["ThumbnailSizeMedium"]);
+            thumbnailSizeMenu->addAction(actions["ThumbnailSizeLarge"]);
         }
 
         TimelineMenu::TimelineMenu() :

@@ -209,23 +209,22 @@ namespace djv
         };
 
         //! Timeline thumbnails.
-        enum class TimelineThumbnails
+        enum class TimelineThumbnailSize
         {
-            None,
             Small,
             Medium,
             Large,
 
             Count,
-            First = None
+            First = Small
         };
-        FTK_ENUM(TimelineThumbnails);
+        FTK_ENUM(TimelineThumbnailSize);
 
         //! Get the timeline thumbnails size.
-        int getTimelineThumbnailsSize(TimelineThumbnails);
+        int getTimelineThumbnailSize(TimelineThumbnailSize);
 
         //! Get the timeline waveform size.
-        int getTimelineWaveformSize(TimelineThumbnails);
+        int getTimelineWaveformSize(TimelineThumbnailSize);
 
         //! Timeline settings.
         struct TimelineSettings
@@ -235,7 +234,8 @@ namespace djv
             bool scrollBars = true;
             bool autoScroll = true;
             bool stopOnScrub = false;
-            TimelineThumbnails thumbnails = TimelineThumbnails::Small;
+            bool thumbnails = true;
+            TimelineThumbnailSize thumbnailSize = TimelineThumbnailSize::Small;
 
             bool operator == (const TimelineSettings&) const;
             bool operator != (const TimelineSettings&) const;

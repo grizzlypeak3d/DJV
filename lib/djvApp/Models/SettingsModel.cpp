@@ -182,9 +182,9 @@ namespace djv
                 Shortcut("Timeline/Scroll", "Scroll"),
                 Shortcut("Timeline/StopOnScrub", "Stop on scrub"),
                 Shortcut("Timeline/Thumbnails", "Thumbnails"),
-                Shortcut("Timeline/ThumbnailsSmall", "Thumbnails small"),
-                Shortcut("Timeline/ThumbnailsMedium", "Thumbnails medium"),
-                Shortcut("Timeline/ThumbnailsLarge", "Thumbnails large"),
+                Shortcut("Timeline/ThumbnailSizeSmall", "Small thumbnails"),
+                Shortcut("Timeline/ThumbnailSizeMedium", "Medium thumbnails"),
+                Shortcut("Timeline/ThumbnailSizeLarge", "Large thumbnails"),
 
                 Shortcut("Tools/Files", "Files", ftk::Key::F1),
                 Shortcut("Tools/Export", "Export", ftk::Key::F2),
@@ -317,17 +317,15 @@ namespace djv
         }
 
         FTK_ENUM_IMPL(
-            TimelineThumbnails,
-            "None",
+            TimelineThumbnailSize,
             "Small",
             "Medium",
             "Large");
 
-        int getTimelineThumbnailsSize(TimelineThumbnails value)
+        int getTimelineThumbnailSize(TimelineThumbnailSize value)
         {
-            const std::array<int, static_cast<size_t>(TimelineThumbnails::Count)> data =
+            const std::array<int, static_cast<size_t>(TimelineThumbnailSize::Count)> data =
             {
-                0,
                 50,
                 100,
                 200
@@ -335,11 +333,10 @@ namespace djv
             return data[static_cast<size_t>(value)];
         }
 
-        int getTimelineWaveformSize(TimelineThumbnails value)
+        int getTimelineWaveformSize(TimelineThumbnailSize value)
         {
-            const std::array<int, static_cast<size_t>(TimelineThumbnails::Count)> data =
+            const std::array<int, static_cast<size_t>(TimelineThumbnailSize::Count)> data =
             {
-                0,
                 50 / 2,
                 100 / 2,
                 200 / 2
@@ -355,7 +352,8 @@ namespace djv
                 scrollBars == other.scrollBars &&
                 autoScroll == other.autoScroll &&
                 stopOnScrub == other.stopOnScrub &&
-                thumbnails == other.thumbnails;
+                thumbnails == other.thumbnails &&
+                thumbnailSize == other.thumbnailSize;
         }
 
         bool TimelineSettings::operator != (const TimelineSettings& other) const
@@ -447,7 +445,7 @@ namespace djv
             p.imageSeq = ftk::Observable<ImageSeqSettings>::create(imageSeq);
 
             ShortcutsSettings shortcuts;
-            settings->getT("/Shortcuts.1", shortcuts);
+            settings->getT("/Shortcuts.2", shortcuts);
             p.shortcuts = ftk::Observable<ShortcutsSettings>::create(shortcuts);
 
             MiscSettings misc;
@@ -522,7 +520,7 @@ namespace djv
             p.settings->setT("/FileBrowser", fileBrowser);
 
             p.settings->setT("/ImageSeq", p.imageSeq->get());
-            p.settings->setT("/Shortcuts.1", p.shortcuts->get());
+            p.settings->setT("/Shortcuts.2", p.shortcuts->get());
             p.settings->setT("/Misc", p.misc->get());
             p.settings->setT("/Mouse.1", p.mouse->get());
             p.settings->setT("/Style", p.style->get());
@@ -859,7 +857,8 @@ namespace djv
             json["ScrollBars"] = value.scrollBars;
             json["AutoScroll"] = value.autoScroll;
             json["StopOnScrub"] = value.stopOnScrub;
-            json["Thumbnails"] = to_string(value.thumbnails);
+            json["Thumbnails"] = value.thumbnails;
+            json["ThumbnailSize"] = to_string(value.thumbnailSize);
         }
 
         void to_json(nlohmann::json& json, const WindowSettings& in)
@@ -987,7 +986,8 @@ namespace djv
             json.at("ScrollBars").get_to(value.scrollBars);
             json.at("AutoScroll").get_to(value.autoScroll);
             json.at("StopOnScrub").get_to(value.stopOnScrub);
-            from_string(json.at("Thumbnails").get<std::string>(), value.thumbnails);
+            json.at("Thumbnails").get_to(value.thumbnails);
+            from_string(json.at("ThumbnailSize").get<std::string>(), value.thumbnailSize);
         }
 
         void from_json(const nlohmann::json& json, WindowSettings& value)
