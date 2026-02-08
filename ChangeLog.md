@@ -9,6 +9,7 @@ Fixes:
 * Fix flipped export for images and image sequences.
 * Fix for YUV->RGB conversion.
 * Fix for overlay compare mode.
+* Fix for timeline thumbnails shortcuts.
 
 
 ## 3.3.3
