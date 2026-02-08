@@ -343,7 +343,7 @@ namespace djv
                     p.player->observeActualSpeed(),
                     [this](double value)
                     {
-                        _p->speedButton->setText(ftk::Format("{0}").arg(value));
+                        _p->speedButton->setText(ftk::Format("{0}").arg(value, 2));
                     });
 
                 p.loopObserver = ftk::Observer<tl::Loop>::create(
@@ -373,7 +373,7 @@ namespace djv
                 p.currentTimeEdit->setValue(tl::invalidTime);
                 p.durationLabel->setValue(tl::invalidTime);
                 p.speedModel->setValue(0.0);
-                p.speedButton->setText(ftk::Format("{0}").arg(0.0));
+                p.speedButton->setText(ftk::Format("{0}").arg(0.0, 2));
 
                 p.speedObserver.reset();
                 p.actualSpeedObserver.reset();
