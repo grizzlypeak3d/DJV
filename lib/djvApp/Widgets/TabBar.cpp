@@ -30,10 +30,10 @@ namespace djv
             FTK_P();
 
             p.tabBar = ftk::TabBar::create(context, shared_from_this());
-            p.tabBar->setTabsClosable(true);
+            p.tabBar->setClosable(true);
 
             std::weak_ptr<App> appWeak(app);
-            p.tabBar->setCurrentTabCallback(
+            p.tabBar->setCallback(
                 [appWeak](int value)
                 {
                     if (auto app = appWeak.lock())
@@ -41,7 +41,7 @@ namespace djv
                         app->getFilesModel()->setA(value);
                     }
                 });
-            p.tabBar->setTabCloseCallback(
+            p.tabBar->setCloseCallback(
                 [appWeak](int value)
                 {
                     if (auto app = appWeak.lock())
@@ -62,7 +62,7 @@ namespace djv
                             item->path.getFileName(),
                             item->path.get());
                     }
-                    p.tabBar->setCurrentTab(p.aIndex);
+                    p.tabBar->setCurrent(p.aIndex);
                 });
 
             p.aIndexObserver = ftk::Observer<int>::create(
@@ -71,7 +71,7 @@ namespace djv
                 {
                     FTK_P();
                     p.aIndex = value;
-                    p.tabBar->setCurrentTab(value);
+                    p.tabBar->setCurrent(value);
                 });
         }
 
