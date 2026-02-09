@@ -243,11 +243,21 @@ namespace djv
                 p.channelMuteButtonGroup->clearButtons();
                 if (auto context = getContext())
                 {
+                    std::vector<std::string> text;
+                    for (size_t i = 0; i < p.info.channelCount; ++i)
+                    {
+                        text.push_back(ftk::Format("{0}").arg(1 + i));
+                    }
+                    if (p.info.channelCount >= 2)
+                    {
+                        text[0] = "L";
+                        text[1] = "R";
+                    }
                     for (size_t i = 0; i < p.info.channelCount; ++i)
                     {
                         auto checkBox = ftk::CheckBox::create(
                             context,
-                            ftk::Format("{0}").arg(1 + i),
+                            text[i],
                             p.channelMuteLayout);
                         p.channelMuteCheckBoxes.push_back(checkBox);
                         p.channelMuteButtonGroup->addButton(checkBox);
