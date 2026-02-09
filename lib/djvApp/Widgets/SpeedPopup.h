@@ -35,6 +35,9 @@ namespace djv
 
             void setCallback(const std::function<void(double)>&);
 
+            void open(
+                const std::shared_ptr<ftk::IWindow>&,
+                const ftk::Box2I& buttonGeometry) override;
         private:
             void _widgetUpdate();
 

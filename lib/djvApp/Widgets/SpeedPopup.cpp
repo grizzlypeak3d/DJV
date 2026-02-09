@@ -113,6 +113,14 @@ namespace djv
             _p->callback = value;
         }
 
+        void SpeedPopup::open(
+            const std::shared_ptr<ftk::IWindow>& window,
+            const ftk::Box2I& buttonGeometry)
+        {
+            IMenuPopup::open(window, buttonGeometry);
+            _p->speedEdit->takeKeyFocus();
+        }
+
         void SpeedPopup::_widgetUpdate()
         {
             FTK_P();
