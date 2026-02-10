@@ -225,7 +225,7 @@ namespace djv
                     p.model->setExport(options);
                 });
 
-            p.imageBaseEdit->setTextCallback(
+            p.imageBaseEdit->setCallback(
                 [this](const std::string& value)
                 {
                     FTK_P();
@@ -255,7 +255,7 @@ namespace djv
                     }
                 });
 
-            p.movieBaseEdit->setTextCallback(
+            p.movieBaseEdit->setCallback(
                 [this](const std::string& value)
                 {
                     FTK_P();

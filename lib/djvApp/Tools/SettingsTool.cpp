@@ -432,7 +432,7 @@ namespace djv
                     p.model->setImageSeq(settings);
                 });
 
-            p.audioExtensionsEdit->setTextCallback(
+            p.audioExtensionsEdit->setCallback(
                 [this](const std::string& value)
                 {
                     FTK_P();
@@ -441,7 +441,7 @@ namespace djv
                     p.model->setImageSeq(settings);
                 });
 
-            p.audioFileNameEdit->setTextCallback(
+            p.audioFileNameEdit->setCallback(
                 [this](const std::string& value)
                 {
                     FTK_P();
