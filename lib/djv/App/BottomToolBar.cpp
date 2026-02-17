@@ -5,9 +5,9 @@
 
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
-#include <djv/App/AudioPopup.h>
 #include <djv/App/FrameActions.h>
 #include <djv/App/PlaybackActions.h>
+#include <djv/UI/AudioPopup.h>
 #include <djv/UI/SpeedPopup.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/TimeUnitsModel.h>
@@ -48,7 +48,7 @@ namespace djv
             std::shared_ptr<ui::SpeedPopup> speedPopup;
             std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> audioButton;
-            std::shared_ptr<AudioPopup> audioPopup;
+            std::shared_ptr<ui::AudioPopup> audioPopup;
             std::shared_ptr<ftk::ToolButton> muteButton;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
@@ -393,76 +393,64 @@ namespace djv
         void BottomToolBar::_showSpeedPopup()
         {
             FTK_P();
-            auto context = getContext();
-            auto window = getWindow();
-            if (context && window)
+            if (!p.speedPopup)
             {
-                if (!p.speedPopup)
-                {
-                    const double defaultSpeed =
-                        p.player ?
-                        p.player->getDefaultSpeed() :
-                        0.0;
-                    p.speedPopup = ui::SpeedPopup::create(context, p.speedModel, defaultSpeed);
-                    p.speedPopup->open(window, p.speedButton->getGeometry());
-                    std::weak_ptr<BottomToolBar> weak(std::dynamic_pointer_cast<BottomToolBar>(shared_from_this()));
-                    p.speedPopup->setCallback(
-                        [weak](double value)
+                const double defaultSpeed =
+                    p.player ?
+                    p.player->getDefaultSpeed() :
+                    0.0;
+                p.speedPopup = ui::SpeedPopup::create(getContext(), p.speedModel, defaultSpeed);
+                p.speedPopup->open(getWindow(), p.speedButton->getGeometry());
+                std::weak_ptr<BottomToolBar> weak(std::dynamic_pointer_cast<BottomToolBar>(shared_from_this()));
+                p.speedPopup->setCallback(
+                    [weak](double value)
+                    {
+                        if (auto widget = weak.lock())
                         {
-                            if (auto widget = weak.lock())
+                            if (widget->_p->player)
                             {
-                                if (widget->_p->player)
-                                {
-                                    widget->_p->player->setSpeed(value);
-                                }
-                                widget->_p->speedPopup->close();
+                                widget->_p->player->setSpeed(value);
                             }
-                        });
-                    p.speedPopup->setCloseCallback(
-                        [weak]
+                            widget->_p->speedPopup->close();
+                        }
+                    });
+                p.speedPopup->setCloseCallback(
+                    [weak]
+                    {
+                        if (auto widget = weak.lock())
                         {
-                            if (auto widget = weak.lock())
-                            {
-                                widget->_p->speedPopup.reset();
-                            }
-                        });
-                }
-                else
-                {
-                    p.speedPopup->close();
-                    p.speedPopup.reset();
-                }
+                            widget->_p->speedPopup.reset();
+                        }
+                    });
+            }
+            else
+            {
+                p.speedPopup->close();
+                p.speedPopup.reset();
             }
         }
 
         void BottomToolBar::_showAudioPopup()
         {
             FTK_P();
-            auto context = getContext();
-            auto app = p.app.lock();
-            auto window = getWindow();
-
-            if (context && app && window)
+            if (!p.audioPopup)
             {
-                if (!p.audioPopup)
-                {
-                    p.audioPopup = AudioPopup::create(context, app);
-                    p.audioPopup->open(window, p.audioButton->getGeometry());
-                    std::weak_ptr<BottomToolBar> weak(std::dynamic_pointer_cast<BottomToolBar>(shared_from_this()));
-                    p.audioPopup->setCloseCallback(
-                        [weak]
+                p.audioPopup = ui::AudioPopup::create(getContext(), p.app.lock()->getAudioModel());
+                p.audioPopup->open(getWindow(), p.audioButton->getGeometry());
+                std::weak_ptr<BottomToolBar> weak(std::dynamic_pointer_cast<BottomToolBar>(shared_from_this()));
+                p.audioPopup->setCloseCallback(
+                    [weak]
+                    {
+                        if (auto widget = weak.lock())
                         {
-                            if (auto widget = weak.lock())
-                            {
-                                widget->_p->audioPopup.reset();
-                            }
-                        });
-                }
-                else
-                {
-                    p.audioPopup->close();
-                    p.audioPopup.reset();
-                }
+                            widget->_p->audioPopup.reset();
+                        }
+                    });
+            }
+            else
+            {
+                p.audioPopup->close();
+                p.audioPopup.reset();
             }
         }
     }

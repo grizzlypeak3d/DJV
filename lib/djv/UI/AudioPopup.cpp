@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/AudioPopup.h>
+#include <djv/UI/AudioPopup.h>
 
-#include <djv/App/App.h>
 #include <djv/Models/AudioModel.h>
 
 #include <ftk/UI/IntEditSlider.h>
@@ -11,7 +10,7 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
         struct AudioPopup::Private
         {
@@ -22,7 +21,7 @@ namespace djv
 
         void AudioPopup::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::AudioModel>& model,
             const std::shared_ptr<IWidget>& parent)
         {
             IWidgetPopup::_init(
@@ -43,18 +42,14 @@ namespace djv
             p.volumeSlider->setParent(layout);
             setWidget(layout);
 
-            auto appWeak = std::weak_ptr<App>(app);
             p.volumeSlider->setCallback(
-                [appWeak](int value)
+                [model](int value)
                 {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->getAudioModel()->setVolume(value / 100.F);
-                    }
+                    model->setVolume(value / 100.F);
                 });
 
             p.volumeObserver = ftk::Observer<float>::create(
-                app->getAudioModel()->observeVolume(),
+                model->observeVolume(),
                 [this](float value)
                 {
                     _p->volumeSlider->setValue(std::roundf(value * 100.F));
@@ -70,11 +65,11 @@ namespace djv
 
         std::shared_ptr<AudioPopup> AudioPopup::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::AudioModel>& model,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<AudioPopup>(new AudioPopup);
-            out->_init(context, app, parent);
+            out->_init(context, model, parent);
             return out;
         }
     }

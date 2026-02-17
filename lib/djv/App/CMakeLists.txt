@@ -2,7 +2,6 @@ set(HEADERS
     App.h
     AudioActions.h
     AudioMenu.h
-    AudioPopup.h
     AudioTool.h
     BottomToolBar.h
     ColorActions.h
@@ -61,7 +60,6 @@ set(SOURCE
     App.cpp
     AudioActions.cpp
     AudioMenu.cpp
-    AudioPopup.cpp
     AudioTool.cpp
     BottomToolBar.cpp
     ColorActions.cpp
@@ -115,7 +113,7 @@ set(SOURCE
     Viewport.cpp)
 
 add_library(djvApp ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
-target_link_libraries(djvApp djvUI djvModels)
+target_link_libraries(djvApp djvUI)
 set_target_properties(djvApp PROPERTIES FOLDER lib)
 set_target_properties(djvApp PROPERTIES PUBLIC_HEADER "${HEADERS}")
 

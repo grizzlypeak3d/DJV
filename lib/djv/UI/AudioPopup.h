@@ -7,10 +7,13 @@
 
 namespace djv
 {
-    namespace app
+    namespace models
     {
-        class App;
+        class AudioModel;
+    }
 
+    namespace ui
+    {
         //! Audio popup.
         class AudioPopup : public ftk::IWidgetPopup
         {
@@ -19,7 +22,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::AudioModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             AudioPopup();
@@ -29,7 +32,7 @@ namespace djv
 
             static std::shared_ptr<AudioPopup> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::AudioModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:
