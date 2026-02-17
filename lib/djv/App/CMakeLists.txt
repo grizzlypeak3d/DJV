@@ -50,7 +50,6 @@ set(HEADERS
     ViewTool.h
     Viewport.h)
 set(HEADERS_PRIVATE
-    ColorToolPrivate.h
     FilesToolPrivate.h
     ViewToolPrivate.h)
 

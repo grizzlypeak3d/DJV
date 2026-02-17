@@ -1,6 +1,7 @@
 set(HEADERS
     AboutDialog.h
     AudioPopup.h
+    ColorWidgets.h
     SeparateAudioDialog.h
     SettingsWidgets.h
     SetupDialog.h
@@ -11,6 +12,7 @@ set(HEADERS_PRIVATE)
 set(SOURCE
     AboutDialog.cpp
     AudioPopup.cpp
+    ColorWidgets.cpp
     SeparateAudioDialog.cpp
     SeparateAudioWidget.cpp
     SettingsWidgets.cpp
