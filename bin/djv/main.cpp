@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djvApp/App.h>
+#include <djv/App/App.h>
 
 #include <tlRender/UI/Init.h>
 #include <tlRender/Device/Init.h>

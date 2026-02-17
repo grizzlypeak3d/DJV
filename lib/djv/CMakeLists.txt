@@ -1,0 +1,5 @@
+add_subdirectory(App)
+add_subdirectory(Core)
+add_subdirectory(Models)
+add_subdirectory(Resource)
+add_subdirectory(UI)
