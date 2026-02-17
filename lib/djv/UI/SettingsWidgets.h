@@ -3,16 +3,15 @@
 
 #pragma once
 
-#include <djv/App/SettingsTool.h>
-
 #include <djv/Models/SettingsModel.h>
+#include <djv/Models/TimeUnitsModel.h>
+
+#include <ftk/UI/IWidget.h>
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
-        class App;
-
         //! Base class for settings widgets.
         class ISettingsWidget : public ftk::IWidget
         {
@@ -33,7 +32,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             AdvancedSettingsWidget();
@@ -43,7 +42,7 @@ namespace djv
 
             static std::shared_ptr<AdvancedSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -60,7 +59,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             CacheSettingsWidget();
@@ -70,7 +69,7 @@ namespace djv
 
             static std::shared_ptr<CacheSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -89,7 +88,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             FileBrowserSettingsWidget();
@@ -99,7 +98,7 @@ namespace djv
 
             static std::shared_ptr<FileBrowserSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -117,7 +116,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             ImageSeqSettingsWidget();
@@ -127,7 +126,7 @@ namespace djv
 
             static std::shared_ptr<ImageSeqSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -145,7 +144,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             MiscSettingsWidget();
@@ -155,7 +154,7 @@ namespace djv
 
             static std::shared_ptr<MiscSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -173,7 +172,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             MouseSettingsWidget();
@@ -183,7 +182,7 @@ namespace djv
 
             static std::shared_ptr<MouseSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -274,7 +273,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             ShortcutsSettingsWidget();
@@ -284,7 +283,7 @@ namespace djv
 
             static std::shared_ptr<ShortcutsSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -305,7 +304,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             StyleSettingsWidget();
@@ -315,7 +314,7 @@ namespace djv
 
             static std::shared_ptr<StyleSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -335,7 +334,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             TimeSettingsWidget();
@@ -345,7 +344,7 @@ namespace djv
 
             static std::shared_ptr<TimeSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -364,7 +363,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             FFmpegSettingsWidget();
@@ -374,7 +373,7 @@ namespace djv
 
             static std::shared_ptr<FFmpegSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -394,7 +393,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             USDSettingsWidget();
@@ -404,7 +403,7 @@ namespace djv
 
             static std::shared_ptr<USDSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;

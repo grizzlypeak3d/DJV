@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/SetupDialog.h>
+#include <djv/UI/SetupDialog.h>
 
-#include <djv/App/SettingsToolPrivate.h>
-#include <djv/App/App.h>
+#include <djv/UI/SettingsWidgets.h>
+#include <djv/Models/SettingsModel.h>
 
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/Divider.h>
@@ -16,7 +16,7 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
         struct SetupStartWidget::Private
         {
@@ -25,10 +25,9 @@ namespace djv
 
         void SetupStartWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            IWidget::_init(context, "djv::app::SetupStartWidget", parent);
+            IWidget::_init(context, "djv::ui::SetupStartWidget", parent);
             FTK_P();
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -46,11 +45,10 @@ namespace djv
 
         std::shared_ptr<SetupStartWidget> SetupStartWidget::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
             auto out = std::shared_ptr<SetupStartWidget>(new SetupStartWidget);
-            out->_init(context, app, parent);
+            out->_init(context, parent);
             return out;
         }
 
@@ -80,12 +78,13 @@ namespace djv
 
         void SetupDialog::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             IDialog::_init(
                 context,
-                "djv::app::SetupDialog",
+                "djv::ui::SetupDialog",
                 parent);
             FTK_P();
 
@@ -101,19 +100,19 @@ namespace djv
 
             p.stackLayout = ftk::StackLayout::create(context);
             p.stackLayout->setMarginRole(ftk::SizeRole::MarginDialog);
-            p.widgets.push_back(SetupStartWidget::create(context, app, p.stackLayout));
+            p.widgets.push_back(SetupStartWidget::create(context, p.stackLayout));
             auto vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
             vLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
             ftk::Label::create(context, "Configure the style:", vLayout);
-            p.widgets.push_back(StyleSettingsWidget::create(context, app, vLayout));
+            p.widgets.push_back(StyleSettingsWidget::create(context, settings, vLayout));
             vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
             vLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
             ftk::Label::create(context, "Configure the memory cache:", vLayout);
-            p.widgets.push_back(CacheSettingsWidget::create(context, app, vLayout));
+            p.widgets.push_back(CacheSettingsWidget::create(context, settings, vLayout));
             vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
             vLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
             ftk::Label::create(context, "Configure the time settings:", vLayout);
-            p.widgets.push_back(TimeSettingsWidget::create(context, app, vLayout));
+            p.widgets.push_back(TimeSettingsWidget::create(context, timeUnitsModel, vLayout));
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
@@ -170,11 +169,12 @@ namespace djv
 
         std::shared_ptr<SetupDialog> SetupDialog::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<SetupDialog>(new SetupDialog);
-            out->_init(context, app, parent);
+            out->_init(context, settings, timeUnitsModel, parent);
             return out;
         }
     }

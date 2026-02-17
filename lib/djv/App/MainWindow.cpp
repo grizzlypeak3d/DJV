@@ -275,8 +275,9 @@ namespace djv
             if (miscSettings.showSetup)
             {
                 miscSettings.showSetup = false;
-                app->getSettingsModel()->setMisc(miscSettings);
-                p.setupDialog = SetupDialog::create(context, app);
+                auto settingsModel = app->getSettingsModel();
+                settingsModel->setMisc(miscSettings);
+                p.setupDialog = SetupDialog::create(context, settingsModel, app->getTimeUnitsModel());
                 p.setupDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
                 p.setupDialog->setCloseCallback(
                     [this]

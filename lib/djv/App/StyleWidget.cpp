@@ -19,7 +19,7 @@ namespace djv
     {
         struct StyleSettingsWidget::Private
         {
-            std::shared_ptr<models::SettingsModel> model;
+            std::shared_ptr<models::SettingsModel> settings;
 
             const std::vector<float> displayScales = ftk::getDisplayScales();
 
@@ -34,13 +34,13 @@ namespace djv
 
         void StyleSettingsWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
             ISettingsWidget::_init(context, "djv::app::StyleSettingsWidget", parent);
             FTK_P();
 
-            p.model = app->getSettingsModel();
+            p.settings = settings;
 
             p.colorStyleComboBox = ftk::ComboBox::create(context, ftk::getColorStyleLabels());
             p.colorStyleComboBox->setHStretch(ftk::Stretch::Expanding);
@@ -70,7 +70,7 @@ namespace djv
             p.layout->addRow("Display scale:", p.displayScaleComboBox);
 
             p.settingsObserver = ftk::Observer<models::StyleSettings>::create(
-                app->getSettingsModel()->observeStyle(),
+                settings->observeStyle(),
                 [this](const models::StyleSettings& value)
                 {
                     _widgetUpdate(value);
@@ -80,39 +80,39 @@ namespace djv
                 [this](int value)
                 {
                     FTK_P();
-                    auto settings = p.model->getStyle();
+                    auto settings = p.settings->getStyle();
                     settings.colorStyle = static_cast<ftk::ColorStyle>(value);
-                    p.model->setStyle(settings);
+                    p.settings->setStyle(settings);
                 });
 
             p.brightnessSlider->setCallback(
                 [this](float value)
                 {
                     FTK_P();
-                    auto settings = p.model->getStyle();
+                    auto settings = p.settings->getStyle();
                     settings.colorControls.brightness = value;
-                    p.model->setStyle(settings);
+                    p.settings->setStyle(settings);
                 });
 
             p.contrastSlider->setCallback(
                 [this](float value)
                 {
                     FTK_P();
-                    auto settings = p.model->getStyle();
+                    auto settings = p.settings->getStyle();
                     settings.colorControls.contrast = value;
-                    p.model->setStyle(settings);
+                    p.settings->setStyle(settings);
                 });
 
             p.displayScaleComboBox->setIndexCallback(
                 [this](int value)
                 {
                     FTK_P();
-                    auto settings = p.model->getStyle();
+                    auto settings = p.settings->getStyle();
                     if (value >= 0 && value < p.displayScales.size())
                     {
                         settings.displayScale = p.displayScales[value];
                     }
-                    p.model->setStyle(settings);
+                    p.settings->setStyle(settings);
                 });
         }
 
@@ -125,11 +125,11 @@ namespace djv
 
         std::shared_ptr<StyleSettingsWidget> StyleSettingsWidget::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<StyleSettingsWidget>(new StyleSettingsWidget);
-            out->_init(context, app, parent);
+            out->_init(context, settings, parent);
             return out;
         }
 

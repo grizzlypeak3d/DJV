@@ -3,8 +3,6 @@
 
 #include <djv/App/SettingsToolPrivate.h>
 
-#include <djv/App/App.h>
-
 #include <ftk/UI/DrawUtil.h>
 #include <ftk/UI/GridLayout.h>
 #include <ftk/UI/Label.h>
@@ -345,7 +343,7 @@ namespace djv
 
         struct ShortcutsSettingsWidget::Private
         {
-            std::shared_ptr<models::SettingsModel> model;
+            std::shared_ptr<models::SettingsModel> settings;
             struct Group
             {
                 std::string name;
@@ -384,13 +382,13 @@ namespace djv
 
         void ShortcutsSettingsWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
             ISettingsWidget::_init(context, "djv::app::ShortcutsSettingsWidget", parent);
             FTK_P();
 
-            p.model = app->getSettingsModel();
+            p.settings = settings;
 
             p.searchBox = ftk::SearchBox::create(context);
             p.searchBox->setTooltip("Search the shortcuts");
@@ -409,7 +407,7 @@ namespace djv
                 });
 
             p.settingsObserver = ftk::Observer<models::ShortcutsSettings>::create(
-                p.model->observeShortcuts(),
+                settings->observeShortcuts(),
                 [this](const models::ShortcutsSettings& value)
                 {
                     _widgetUpdate(value);
@@ -425,11 +423,11 @@ namespace djv
 
         std::shared_ptr<ShortcutsSettingsWidget> ShortcutsSettingsWidget::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ShortcutsSettingsWidget>(new ShortcutsSettingsWidget);
-            out->_init(context, app, parent);
+            out->_init(context, settings, parent);
             return out;
         }
 
@@ -531,7 +529,7 @@ namespace djv
                                 [this, shortcut](const ftk::KeyShortcut& value)
                                 {
                                     FTK_P();
-                                    auto settings = p.model->getShortcuts();
+                                    auto settings = p.settings->getShortcuts();
                                     const auto i = std::find_if(
                                         settings.shortcuts.begin(),
                                         settings.shortcuts.end(),
@@ -542,7 +540,7 @@ namespace djv
                                     if (i != settings.shortcuts.end())
                                     {
                                         i->primary = value;
-                                        p.model->setShortcuts(settings);
+                                        p.settings->setShortcuts(settings);
                                     }
                                 });
 
@@ -555,7 +553,7 @@ namespace djv
                                 [this, shortcut](const ftk::KeyShortcut& value)
                                 {
                                     FTK_P();
-                                    auto settings = p.model->getShortcuts();
+                                    auto settings = p.settings->getShortcuts();
                                     const auto i = std::find_if(
                                         settings.shortcuts.begin(),
                                         settings.shortcuts.end(),
@@ -566,7 +564,7 @@ namespace djv
                                     if (i != settings.shortcuts.end())
                                     {
                                         i->secondary = value;
-                                        p.model->setShortcuts(settings);
+                                        p.settings->setShortcuts(settings);
                                     }
                                 });
 

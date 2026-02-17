@@ -32,7 +32,6 @@ set(HEADERS
     PlaybackMenu.h
     SecondaryWindow.h
     SettingsTool.h
-    SetupDialog.h
     StatusBar.h
     SysLogTool.h
     TabBar.h
@@ -52,7 +51,6 @@ set(HEADERS
 set(HEADERS_PRIVATE
     ColorToolPrivate.h
     FilesToolPrivate.h
-    SettingsToolPrivate.h
     ViewToolPrivate.h
     Viewport.h)
 
@@ -91,7 +89,6 @@ set(SOURCE
     PlaybackMenu.cpp
     SecondaryWindow.cpp
     SettingsTool.cpp
-    SetupDialog.cpp
     ShortcutsWidget.cpp
     StatusBar.cpp
     StyleWidget.cpp
