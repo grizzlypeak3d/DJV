@@ -2,17 +2,20 @@ set(HEADERS
     AboutDialog.h
     AudioPopup.h
     ColorWidgets.h
+    FileButton.h
     SeparateAudioDialog.h
     SettingsWidgets.h
     SetupDialog.h
     SpeedPopup.h
-    SysInfoDialog.h)
+    SysInfoDialog.h
+    ViewWidgets.h)
 set(HEADERS_PRIVATE)
 
 set(SOURCE
     AboutDialog.cpp
     AudioPopup.cpp
     ColorWidgets.cpp
+    FileButton.cpp
     SeparateAudioDialog.cpp
     SeparateAudioWidget.cpp
     SettingsWidgets.cpp
@@ -20,7 +23,8 @@ set(SOURCE
     ShortcutsWidget.cpp
     SpeedPopup.cpp
     StyleWidget.cpp
-    SysInfoDialog.cpp)
+    SysInfoDialog.cpp
+    ViewWidgets.cpp)
 
 add_library(djvUI ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 target_link_libraries(djvUI djvModels tlRender::tlUI)

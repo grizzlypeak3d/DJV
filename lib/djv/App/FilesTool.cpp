@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/FilesToolPrivate.h>
+#include <djv/App/FilesTool.h>
 
 #include <djv/App/App.h>
+#include <djv/UI/FileButton.h>
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ButtonGroup.h>
@@ -28,7 +29,7 @@ namespace djv
 
             std::shared_ptr<ftk::ButtonGroup> aButtonGroup;
             std::shared_ptr<ftk::ButtonGroup> bButtonGroup;
-            std::map<std::shared_ptr<models::FilesModelItem>, std::shared_ptr<FileButton> > aButtons;
+            std::map<std::shared_ptr<models::FilesModelItem>, std::shared_ptr<ui::FileButton> > aButtons;
             std::map<std::shared_ptr<models::FilesModelItem>, std::shared_ptr<ftk::ToolButton> > bButtons;
             std::vector<std::shared_ptr<ftk::ComboBox> > layerComboBoxes;
             std::shared_ptr<ftk::ComboBox> compareComboBox;
@@ -283,7 +284,7 @@ namespace djv
                     size_t row = 0;
                     for (const auto& item : value)
                     {
-                        auto aButton = FileButton::create(context, item);
+                        auto aButton = ui::FileButton::create(context, item);
                         aButton->setChecked(item == a);
                         aButton->setTooltip(item->path.get());
                         p.aButtons[item] = aButton;

@@ -49,9 +49,7 @@ set(HEADERS
     WindowToolBar.h
     ViewTool.h
     Viewport.h)
-set(HEADERS_PRIVATE
-    FilesToolPrivate.h
-    ViewToolPrivate.h)
+set(HEADERS_PRIVATE)
 
 set(SOURCE
     App.cpp
@@ -70,7 +68,6 @@ set(SOURCE
     DiagTool.cpp
     ExportTool.cpp
     FileActions.cpp
-    FileButton.cpp
     FileMenu.cpp
     FileToolBar.cpp
     FilesTool.cpp

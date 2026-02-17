@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/FilesToolPrivate.h>
+#include <djv/UI/FileButton.h>
 
 #include <tlRender/UI/ThumbnailSystem.h>
 
@@ -12,7 +12,7 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
         struct FileButton::Private
         {

@@ -5,13 +5,19 @@
 
 #include <djv/App/ViewTool.h>
 
+#include <tlRender/UI/Viewport.h>
 #include <tlRender/Timeline/BackgroundOptions.h>
 #include <tlRender/Timeline/DisplayOptions.h>
 #include <tlRender/Timeline/ForegroundOptions.h>
 
 namespace djv
 {
-    namespace app
+    namespace models
+    {
+        class ViewportModel;
+    }
+
+    namespace ui
     {
         class ViewPosZoomWidget : public ftk::IWidget
         {
@@ -20,8 +26,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
-                const std::shared_ptr<MainWindow>&,
+                const std::shared_ptr<tl::ui::Viewport>&,
                 const std::shared_ptr<IWidget>& parent);
 
             ViewPosZoomWidget();
@@ -31,8 +36,7 @@ namespace djv
 
             static std::shared_ptr<ViewPosZoomWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
-                const std::shared_ptr<MainWindow>&,
+                const std::shared_ptr<tl::ui::Viewport>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -49,7 +53,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             ViewOptionsWidget();
@@ -59,7 +63,7 @@ namespace djv
 
             static std::shared_ptr<ViewOptionsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -76,7 +80,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             BackgroundWidget();
@@ -86,7 +90,7 @@ namespace djv
 
             static std::shared_ptr<BackgroundWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -105,7 +109,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             OutlineWidget();
@@ -115,7 +119,7 @@ namespace djv
 
             static std::shared_ptr<OutlineWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -134,7 +138,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             GridWidget();
@@ -144,7 +148,7 @@ namespace djv
 
             static std::shared_ptr<GridWidget> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<App>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;

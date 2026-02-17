@@ -9,7 +9,7 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
         class FileButton : public ftk::IButton
         {
