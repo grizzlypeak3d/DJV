@@ -47,12 +47,12 @@ set(HEADERS
     WindowActions.h
     WindowMenu.h
     WindowToolBar.h
-    ViewTool.h)
+    ViewTool.h
+    Viewport.h)
 set(HEADERS_PRIVATE
     ColorToolPrivate.h
     FilesToolPrivate.h
-    ViewToolPrivate.h
-    Viewport.h)
+    ViewToolPrivate.h)
 
 set(SOURCE
     App.cpp
@@ -89,9 +89,7 @@ set(SOURCE
     PlaybackMenu.cpp
     SecondaryWindow.cpp
     SettingsTool.cpp
-    ShortcutsWidget.cpp
     StatusBar.cpp
-    StyleWidget.cpp
     SysLogTool.cpp
     TabBar.cpp
     TimelineActions.cpp

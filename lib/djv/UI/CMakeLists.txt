@@ -15,7 +15,9 @@ set(SOURCE
     SeparateAudioWidget.cpp
     SettingsWidgets.cpp
     SetupDialog.cpp
+    ShortcutsWidget.cpp
     SpeedPopup.cpp
+    StyleWidget.cpp
     SysInfoDialog.cpp)
 
 add_library(djvUI ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})

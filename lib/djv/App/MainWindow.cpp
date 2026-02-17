@@ -21,7 +21,6 @@
 #include <djv/App/HelpMenu.h>
 #include <djv/App/PlaybackActions.h>
 #include <djv/App/PlaybackMenu.h>
-#include <djv/App/SetupDialog.h>
 #include <djv/App/StatusBar.h>
 #include <djv/App/TabBar.h>
 #include <djv/App/TimelineActions.h>
@@ -38,6 +37,7 @@
 #include <djv/App/WindowMenu.h>
 #include <djv/App/WindowToolBar.h>
 #include <djv/UI/AboutDialog.h>
+#include <djv/UI/SetupDialog.h>
 #include <djv/UI/SysInfoDialog.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/TimeUnitsModel.h>
@@ -109,7 +109,7 @@ namespace djv
             std::shared_ptr<BottomToolBar> bottomToolBar;
             std::shared_ptr<StatusBar> statusBar;
             std::shared_ptr<ToolsWidget> toolsWidget;
-            std::shared_ptr<SetupDialog> setupDialog;
+            std::shared_ptr<ui::SetupDialog> setupDialog;
             std::shared_ptr<ui::AboutDialog> aboutDialog;
             std::shared_ptr<ui::SysInfoDialog> sysInfoDialog;
             std::map<std::string, std::shared_ptr<ftk::Divider> > dividers;
@@ -277,7 +277,10 @@ namespace djv
                 miscSettings.showSetup = false;
                 auto settingsModel = app->getSettingsModel();
                 settingsModel->setMisc(miscSettings);
-                p.setupDialog = SetupDialog::create(context, settingsModel, app->getTimeUnitsModel());
+                p.setupDialog = ui::SetupDialog::create(
+                    context,
+                    settingsModel,
+                    app->getTimeUnitsModel());
                 p.setupDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
                 p.setupDialog->setCloseCallback(
                     [this]

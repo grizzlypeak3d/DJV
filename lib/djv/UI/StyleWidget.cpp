@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/SettingsToolPrivate.h>
-
-#include <djv/App/App.h>
+#include <djv/UI/SettingsWidgets.h>
 
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/ColorSwatch.h>
@@ -15,7 +13,7 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
         struct StyleSettingsWidget::Private
         {
@@ -37,7 +35,7 @@ namespace djv
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
-            ISettingsWidget::_init(context, "djv::app::StyleSettingsWidget", parent);
+            ISettingsWidget::_init(context, "djv::ui::StyleSettingsWidget", parent);
             FTK_P();
 
             p.settings = settings;

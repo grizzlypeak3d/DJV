@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/SettingsToolPrivate.h>
+#include <djv/UI/SettingsWidgets.h>
 
 #include <ftk/UI/DrawUtil.h>
 #include <ftk/UI/GridLayout.h>
@@ -13,7 +13,7 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
         struct ShortcutEdit::Private
         {
@@ -47,7 +47,7 @@ namespace djv
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<IWidget>& parent)
         {
-            IMouseWidget::_init(context, "djv::app::ShortcutEdit", parent);
+            IMouseWidget::_init(context, "djv::ui::ShortcutEdit", parent);
             FTK_P();
             
             setHStretch(ftk::Stretch::Expanding);
@@ -256,7 +256,7 @@ namespace djv
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<IWidget>& parent)
         {
-            IWidget::_init(context, "djv::app::ShortcutWidget", parent);
+            IWidget::_init(context, "djv::ui::ShortcutWidget", parent);
             FTK_P();
 
             p.edit = ShortcutEdit::create(context);
@@ -385,7 +385,7 @@ namespace djv
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
-            ISettingsWidget::_init(context, "djv::app::ShortcutsSettingsWidget", parent);
+            ISettingsWidget::_init(context, "djv::ui::ShortcutsSettingsWidget", parent);
             FTK_P();
 
             p.settings = settings;
