@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: BSD-3-Clause
-// SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
 #include <djvApp/MainWindow.h>
@@ -328,9 +327,9 @@ namespace djv
                 app->getViewportModel()->observeColorBuffer(),
                 [this](ftk::gl::TextureType value)
                 {
-                    setFrameBufferType(ftk::gl::TextureType::RGBA_U8 == value ?
-                        ftk::WindowFrameBufferType::U8 :
-                        ftk::WindowFrameBufferType::F32);
+                    setBufferType(ftk::gl::TextureType::RGBA_U8 == value ?
+                        ftk::WindowBufferType::U8 :
+                        ftk::WindowBufferType::F32);
                 });
 
             p.mouseSettingsObserver = ftk::Observer<MouseSettings>::create(

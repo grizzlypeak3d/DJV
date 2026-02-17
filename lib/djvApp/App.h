@@ -11,6 +11,7 @@
 
 namespace ftk
 {
+    class DiagModel;
     class Settings;
 }
 
@@ -89,6 +90,9 @@ namespace djv
 
             //! Get the recent files model.
             const std::shared_ptr<RecentFilesModel>& getRecentFilesModel() const;
+
+            //! Get the diagnostics model.
+            const std::shared_ptr<ftk::DiagModel>& getDiagModel() const;
 
             //! Reload the active files.
             void reload();

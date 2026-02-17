@@ -506,6 +506,10 @@ namespace djv
                                     p.progressDialog->close();
                                 }
                             }
+                            else
+                            {
+                                p.progressDialog->close();
+                            }
                         });
                 }
                 catch (const std::exception& e)
