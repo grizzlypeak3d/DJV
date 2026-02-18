@@ -17,7 +17,6 @@ set(SOURCE
     ColorWidgets.cpp
     FileButton.cpp
     SeparateAudioDialog.cpp
-    SeparateAudioWidget.cpp
     SettingsWidgets.cpp
     SetupDialog.cpp
     ShortcutsWidget.cpp
