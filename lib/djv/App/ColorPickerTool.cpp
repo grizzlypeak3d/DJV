@@ -8,7 +8,7 @@
 #include <djv/App/Viewport.h>
 #include <djv/Models/SettingsModel.h>
 
-#include <ftk/UI/ColorWidget.h>
+#include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
@@ -21,7 +21,8 @@ namespace djv
     {
         struct ColorPickerTool::Private
         {
-            std::shared_ptr<ftk::ColorWidget> colorWidget;
+            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::Label> colorLabel;
             std::shared_ptr<ftk::Label> pixelLabel;
             std::shared_ptr<ftk::Label> mouseLabel;
 
@@ -44,8 +45,12 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.colorWidget = ftk::ColorWidget::create(context);
-            p.colorWidget->setColor(ftk::Color4F(0.F, 0.F, 0.F));
+            p.colorSwatch = ftk::ColorSwatch::create(context);
+            p.colorSwatch->setColor(ftk::Color4F(0.F, 0.F, 0.F));
+            p.colorSwatch->setSizeRole(ftk::SizeRole::SwatchLarge);
+
+            p.colorLabel = ftk::Label::create(context);
+            p.colorLabel->setFontRole(ftk::FontRole::Mono);
 
             p.pixelLabel = ftk::Label::create(context);
             p.pixelLabel->setFontRole(ftk::FontRole::Mono);
@@ -54,9 +59,10 @@ namespace djv
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setMarginRole(ftk::SizeRole::Margin);
-            p.colorWidget->setParent(layout);
+            p.colorSwatch->setParent(layout);
             auto formLayout = ftk::FormLayout::create(context, layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            formLayout->addRow("Color:", p.colorLabel);
             formLayout->addRow("Pixel:", p.pixelLabel);
             formLayout->addRow("Mouse:", p.mouseLabel);
 
@@ -76,7 +82,13 @@ namespace djv
                 mainWindow->getViewport()->observeColorSample(),
                 [this](const ftk::Color4F& value)
                 {
-                    _p->colorWidget->setColor(value);
+                    FTK_P();
+                    p.colorSwatch->setColor(value);
+                    p.colorLabel->setText(ftk::Format("{0} {1} {2} {3}").
+                        arg(value.r, 2).
+                        arg(value.g, 2).
+                        arg(value.b, 2).
+                        arg(value.a, 2));
                 });
 
             p.settingsObserver = ftk::Observer<models::MouseSettings>::create(
