@@ -10,6 +10,9 @@ Fixes:
 * Fix for YUV->RGB conversion.
 * Fix for overlay compare mode.
 * Fix for timeline thumbnails shortcuts.
+* Fix for window "Float On Top" option.
+* Fix for values being clamped to 0.0-1.0 in the color picker tool.
+* Fix for contrast control in the color tool.
 
 
 ## 3.3.3
