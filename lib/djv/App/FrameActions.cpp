@@ -26,7 +26,7 @@ namespace djv
             auto appWeak = std::weak_ptr<App>(app);
             _actions["Start"] = ftk::Action::create(
                 "Goto Start",
-                "TimeStart",
+                "FrameStart",
                 [appWeak]
                 {
                     if (auto app = appWeak.lock())
@@ -40,7 +40,7 @@ namespace djv
 
             _actions["End"] = ftk::Action::create(
                 "Goto End",
-                "TimeEnd",
+                "FrameEnd",
                 [appWeak]
                 {
                     if (auto app = appWeak.lock())
