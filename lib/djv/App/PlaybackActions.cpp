@@ -119,7 +119,7 @@ namespace djv
                 });
 
             _actions["Loop"] = ftk::Action::create(
-                "Loop Playback",
+                "Playback Loop",
                 "PlaybackLoop",
                 [this]
                 {
@@ -143,7 +143,7 @@ namespace djv
                 });
 
             _actions["PingPong"] = ftk::Action::create(
-                "Ping-Pong Playback",
+                "Playback Ping-Pong",
                 "PlaybackPingPong",
                 [this]
                 {
@@ -208,9 +208,9 @@ namespace djv
                 { "JumpBack10s", "Jump back 10 seconds." },
                 { "JumpForward1s", "Jump forward 1 second." },
                 { "JumpForward10s", "Jump forward 10 seconds." },
-                { "Loop", "Loop playback." },
-                { "Once", "Playback once and then stop" },
-                { "PingPong", "Ping pong playback." },
+                { "Loop", "Loop playback continuously." },
+                { "Once", "Playback once and stop" },
+                { "PingPong", "Playback forward and reverse continuously." },
                 { "SetInPoint", "Set the playback in point." },
                 { "ResetInPoint", "Reet the playback in point." },
                 { "SetOutPoint", "Set the playback out point." },

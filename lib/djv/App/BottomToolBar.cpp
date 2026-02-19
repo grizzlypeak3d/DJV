@@ -89,7 +89,6 @@ namespace djv
             p.buttons["Reverse"] = ftk::ToolButton::create(context, actions["Reverse"]);
 
             p.loopWidget = tl::ui::PlaybackLoopWidget::create(context);
-            p.loopWidget->setTooltip("Playback loop mode.");
 
             p.playbackShuttle = tl::ui::ShuttleWidget::create(context, "PlaybackShuttle");
             p.playbackShuttle->setTooltip("Playback shuttle. Click and drag to change playback speed.");
