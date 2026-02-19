@@ -200,10 +200,10 @@ namespace djv
                 Shortcut("Tools/System Log", "System log", ftk::Key::F12),
                 Shortcut("Tools/Diagnostics", "Diagnostics"),
 
-                Shortcut("View/Frame", "Frame", ftk::Key::Backspace),
-                Shortcut("View/ZoomReset", "Zoom reset", ftk::Key::_0),
-                Shortcut("View/ZoomIn", "Zoom in", ftk::Key::Equals),
-                Shortcut("View/ZoomOut", "Zoom out", ftk::Key::Minus),
+                Shortcut("View/Frame", "Frame"),
+                Shortcut("View/ZoomReset", "Zoom reset"),
+                Shortcut("View/ZoomIn", "Zoom in"),
+                Shortcut("View/ZoomOut", "Zoom out"),
                 Shortcut("View/Red", "Red channel", ftk::Key::R),
                 Shortcut("View/Green", "Green channel", ftk::Key::G),
                 Shortcut("View/Blue", "Blue channel", ftk::Key::B),
@@ -445,7 +445,7 @@ namespace djv
             p.imageSeq = ftk::Observable<ImageSeqSettings>::create(imageSeq);
 
             ShortcutsSettings shortcuts;
-            settings->getT("/Shortcuts.2", shortcuts);
+            settings->getT("/Shortcuts.3", shortcuts);
             p.shortcuts = ftk::Observable<ShortcutsSettings>::create(shortcuts);
 
             MiscSettings misc;
@@ -520,7 +520,7 @@ namespace djv
             p.settings->setT("/FileBrowser", fileBrowser);
 
             p.settings->setT("/ImageSeq", p.imageSeq->get());
-            p.settings->setT("/Shortcuts.2", p.shortcuts->get());
+            p.settings->setT("/Shortcuts.3", p.shortcuts->get());
             p.settings->setT("/Misc", p.misc->get());
             p.settings->setT("/Mouse.1", p.mouse->get());
             p.settings->setT("/Style", p.style->get());
