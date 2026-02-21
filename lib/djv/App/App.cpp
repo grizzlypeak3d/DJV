@@ -674,6 +674,9 @@ namespace djv
             p.recentFilesModel = models::RecentFilesModel::create(_context, p.settings);
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
+            ftk::FileBrowserOptions fileBrowserOptions;
+            fileBrowserOptions.dirList.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
+            fileBrowserSystem->getModel()->setOptions(fileBrowserOptions);
             fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
 
             p.diagModel = ftk::DiagModel::create(_context);
