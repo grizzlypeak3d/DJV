@@ -46,7 +46,7 @@ Dependencies:
 
 Install system packages:
 ```
-sudo apt-get install xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev
+sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev
 ```
 
 #### Rocky 9
