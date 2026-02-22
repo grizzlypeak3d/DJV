@@ -1,3 +1,13 @@
+## 3.3.5
+
+Features:
+* Add auto-scroll and text selection to the messages and system log tools.
+
+Fixes:
+* Mouse focus fixes for zooming the viewport and timeline.
+* Image sequences fix for built-in file browser.
+
+
 ## 3.3.4
 
 Features:
