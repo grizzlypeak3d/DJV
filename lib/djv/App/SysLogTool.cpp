@@ -9,6 +9,7 @@
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/IWindow.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/Settings.h>
 #include <ftk/UI/SysLogModel.h>
 #include <ftk/UI/TextEdit.h>
 #include <ftk/UI/ToolButton.h>
@@ -27,10 +28,13 @@ namespace djv
 
         struct SysLogTool::Private
         {
+            std::shared_ptr<ftk::Settings> settings;
+
             std::shared_ptr<ftk::TextEdit> textEdit;
             std::shared_ptr<ftk::ToolButton> copyButton;
             std::shared_ptr<ftk::CheckBox> autoScrollCheckBox;
             std::shared_ptr<ftk::VerticalLayout> layout;
+
             std::shared_ptr<ftk::ListObserver<std::string> > logObserver;
         };
 
@@ -47,6 +51,8 @@ namespace djv
                 parent);
             FTK_P();
 
+            p.settings = app->getSettings();
+
             p.textEdit = ftk::TextEdit::create(context);
             p.textEdit->setReadOnly(true);
             p.textEdit->setVStretch(ftk::Stretch::Expanding);
@@ -54,10 +60,14 @@ namespace djv
             p.copyButton = ftk::ToolButton::create(context, "Copy");
 
             p.autoScrollCheckBox = ftk::CheckBox::create(context, "Auto-scroll");
-            p.autoScrollCheckBox->setChecked(true);
+            bool autoScroll = true;
+            p.settings->get(
+                ftk::Format("/{0}/AutoScroll").arg(getLabel(models::Tool::SysLog)),
+                autoScroll);
+            p.autoScrollCheckBox->setChecked(autoScroll);
 
             p.layout = ftk::VerticalLayout::create(context);
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setMarginRole(ftk::SizeRole::MarginSmall);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.textEdit->setParent(p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
@@ -103,7 +113,12 @@ namespace djv
         {}
 
         SysLogTool::~SysLogTool()
-        {}
+        {
+            FTK_P();
+            p.settings->set(
+                ftk::Format("/{0}/AutoScroll").arg(getLabel(models::Tool::SysLog)),
+                p.autoScrollCheckBox->isChecked());
+        }
 
         std::shared_ptr<SysLogTool> SysLogTool::create(
             const std::shared_ptr<ftk::Context>& context,
