@@ -38,6 +38,7 @@
 #include <ftk/UI/DiagModel.h>
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/Settings.h>
+#include <ftk/UI/SysLogModel.h>
 #include <ftk/Core/CmdLine.h>
 #include <ftk/Core/FileLogSystem.h>
 #include <ftk/Core/Format.h>
@@ -94,6 +95,7 @@ namespace djv
             std::shared_ptr<ftk::FileLogSystem> fileLogSystem;
             std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<models::SettingsModel> settingsModel;
+            std::shared_ptr<ftk::SysLogModel> sysLogModel;
             std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
             std::shared_ptr<models::FilesModel> filesModel;
             std::vector<std::shared_ptr<models::FilesModelItem> > files;
@@ -368,6 +370,11 @@ namespace djv
         const std::shared_ptr<models::SettingsModel>& App::getSettingsModel() const
         {
             return _p->settingsModel;
+        }
+
+        const std::shared_ptr<ftk::SysLogModel>& App::getSysLogModel() const
+        {
+            return _p->sysLogModel;
         }
 
         const std::shared_ptr<models::TimeUnitsModel>& App::getTimeUnitsModel() const
@@ -666,6 +673,8 @@ namespace djv
                 p.settingsModel->setUSD(options);
             }
 #endif // TLRENDER_USD
+
+            p.sysLogModel = ftk::SysLogModel::create(_context);
 
             p.timeUnitsModel = models::TimeUnitsModel::create(_context, p.settings);
             

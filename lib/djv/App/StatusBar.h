@@ -43,7 +43,6 @@ namespace djv
             void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
         private:
-            void _logUpdate(const std::vector<ftk::LogItem>&);
             void _infoUpdate(const ftk::Path&, const tl::IOInfo&);
             void _colorControlsUpdate();
 

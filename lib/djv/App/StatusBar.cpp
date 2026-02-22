@@ -17,6 +17,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/Spacer.h>
+#include <ftk/UI/SysLogModel.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
@@ -34,7 +35,7 @@ namespace djv
             bool lutOptionsEnabled = false;
             bool displayOptionsEnabled = false;
 
-            std::shared_ptr<ftk::Label> logLabel;
+            std::shared_ptr<ftk::Label> messagesLabel;
             std::shared_ptr<ftk::Label> infoLabel;
             std::shared_ptr<ftk::Label> channelDisplayLabel;
             std::shared_ptr<ftk::Label> mirrorHLabel;
@@ -46,9 +47,9 @@ namespace djv
 #endif // TLRENDER_BMD
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
-            std::shared_ptr<ftk::Timer> logTimer;
+            std::shared_ptr<ftk::Timer> messagesTimer;
 
-            std::shared_ptr<ftk::ListObserver<ftk::LogItem> > logObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > messagesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
@@ -76,11 +77,11 @@ namespace djv
 
             p.app = app;
 
-            p.logLabel = ftk::Label::create(context);
-            p.logLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.logLabel->setHStretch(ftk::Stretch::Expanding);
-            p.logLabel->setTooltip(
-                "Display warning and error messages.\n"
+            p.messagesLabel = ftk::Label::create(context);
+            p.messagesLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+            p.messagesLabel->setHStretch(ftk::Stretch::Expanding);
+            p.messagesLabel->setTooltip(
+                "Display messages.\n"
                 "\n"
                 "Click to open messages tool.");
 
@@ -127,7 +128,7 @@ namespace djv
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
-            p.logLabel->setParent(p.layout);
+            p.messagesLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
@@ -141,13 +142,25 @@ namespace djv
 #endif // TLRENDER_BMD
             //ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
 
-            p.logTimer = ftk::Timer::create(context);
+            p.messagesTimer = ftk::Timer::create(context);
 
-            p.logObserver = ftk::ListObserver<ftk::LogItem>::create(
-                context->getLogSystem()->observeLogItems(),
-                [this](const std::vector<ftk::LogItem>& value)
+            p.messagesObserver = ftk::ListObserver<std::string>::create(
+                app->getSysLogModel()->observeMessages(),
+                [this](const std::vector<std::string>& value)
                 {
-                    _logUpdate(value);
+                    FTK_P();
+                    p.messagesLabel->setText(!value.empty() ? value.back() : std::string());
+                    p.messagesLabel->setTooltip(!value.empty() ? value.back() : std::string());
+                    if (!value.empty())
+                    {
+                        p.messagesTimer->start(
+                            std::chrono::seconds(5),
+                            [this]
+                            {
+                                _p->messagesLabel->setText(std::string());
+                                _p->messagesLabel->setTooltip(std::string());
+                            });
+                    }
                 });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
@@ -262,7 +275,7 @@ namespace djv
             FTK_P();
             event.accept = true;
             models::Tool tool = models::Tool::None;
-            if (ftk::contains(p.logLabel->getGeometry(), event.pos))
+            if (ftk::contains(p.messagesLabel->getGeometry(), event.pos))
             {
                 tool = models::Tool::Messages;
             }
@@ -291,30 +304,6 @@ namespace djv
                     auto toolsModel = app->getToolsModel();
                     const models::Tool active = toolsModel->getActiveTool();
                     toolsModel->setActiveTool(tool != active ? tool : models::Tool::None);
-                }
-            }
-        }
-
-        void StatusBar::_logUpdate(const std::vector<ftk::LogItem>& value)
-        {
-            FTK_P();
-            for (const auto& i : value)
-            {
-                switch (i.type)
-                {
-                case ftk::LogType::Warning:
-                case ftk::LogType::Error:
-                {
-                    p.logLabel->setText(ftk::getLabel(i, true));
-                    p.logTimer->start(
-                        std::chrono::seconds(5),
-                        [this]
-                        {
-                            _p->logLabel->setText(std::string());
-                        });
-                    break;
-                }
-                default: break;
                 }
             }
         }

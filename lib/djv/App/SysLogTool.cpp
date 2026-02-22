@@ -6,11 +6,11 @@
 #include <djv/App/App.h>
 
 #include <ftk/UI/ClipboardSystem.h>
-#include <ftk/UI/Divider.h>
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/IWindow.h>
-#include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
-#include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/SysLogModel.h>
+#include <ftk/UI/TextEdit.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
@@ -27,13 +27,11 @@ namespace djv
 
         struct SysLogTool::Private
         {
-            std::list<std::string> messages;
-            std::shared_ptr<ftk::Label> label;
-            std::shared_ptr<ftk::ScrollWidget> scrollWidget;
+            std::shared_ptr<ftk::TextEdit> textEdit;
             std::shared_ptr<ftk::ToolButton> copyButton;
-            std::shared_ptr<ftk::ToolButton> clearButton;
+            std::shared_ptr<ftk::CheckBox> autoScrollCheckBox;
             std::shared_ptr<ftk::VerticalLayout> layout;
-            std::shared_ptr<ftk::ListObserver<ftk::LogItem> > logObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > logObserver;
         };
 
         void SysLogTool::_init(
@@ -49,66 +47,54 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.label = ftk::Label::create(context);
-            p.label->setFontRole(ftk::FontRole::Mono);
-            p.label->setMarginRole(ftk::SizeRole::Margin);
-            p.label->setVAlign(ftk::VAlign::Top);
-
-            p.scrollWidget = ftk::ScrollWidget::create(context);
-            p.scrollWidget->setWidget(p.label);
-            p.scrollWidget->setBorder(false);
-            p.scrollWidget->setVStretch(ftk::Stretch::Expanding);
+            p.textEdit = ftk::TextEdit::create(context);
+            p.textEdit->setReadOnly(true);
+            p.textEdit->setVStretch(ftk::Stretch::Expanding);
 
             p.copyButton = ftk::ToolButton::create(context, "Copy");
 
-            p.clearButton = ftk::ToolButton::create(context, "Clear");
+            p.autoScrollCheckBox = ftk::CheckBox::create(context, "Auto-scroll");
+            p.autoScrollCheckBox->setChecked(true);
 
             p.layout = ftk::VerticalLayout::create(context);
-            p.layout->setSpacingRole(ftk::SizeRole::None);
-            p.scrollWidget->setParent(p.layout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.textEdit->setParent(p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setMarginRole(ftk::SizeRole::MarginInside);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.copyButton->setParent(hLayout);
-            p.clearButton->setParent(hLayout);
+            p.autoScrollCheckBox->setParent(hLayout);
             _setWidget(p.layout);
 
             p.copyButton->setClickedCallback(
                 [this]
                 {
-                    if (auto context = getContext())
-                    {
-                        const std::string text = ftk::join(
-                            { std::begin(_p->messages), std::end(_p->messages) },
-                            '\n');
-                        auto clipboardSystem = context->getSystem<ftk::ClipboardSystem>();
-                        clipboardSystem->setText(text);
-                    }
+                    FTK_P();
+                    auto context = getContext();
+                    auto clipboardSystem = context->getSystem<ftk::ClipboardSystem>();
+                    clipboardSystem->setText(ftk::join(p.textEdit->getText(), '\n'));
                 });
 
-            p.clearButton->setClickedCallback(
-                [this]
+            p.logObserver = ftk::ListObserver<std::string>::create(
+                app->getSysLogModel()->observeLog(),
+                [this](const std::vector<std::string>& value)
                 {
-                    _p->messages.clear();
-                    _p->label->setText(std::string());
-                });
-
-            p.logObserver = ftk::ListObserver<ftk::LogItem>::create(
-                context->getLogSystem()->observeLogItems(),
-                [this](const std::vector<ftk::LogItem>& value)
-                {
-                    for (const auto& i : value)
+                    FTK_P();
+                    const auto cursorPrev = p.textEdit->getModel()->getCursor();
+                    const auto selectionPrev = p.textEdit->getModel()->getSelection();
+                    p.textEdit->setText(value);
+                    if (p.autoScrollCheckBox->isChecked())
                     {
-                        _p->messages.push_back(ftk::getLabel(i));
+                        p.textEdit->getModel()->setCursor(
+                            ftk::TextEditPos(0, 0));
+                        p.textEdit->getModel()->setCursor(
+                            ftk::TextEditPos(value.size(), 0));
                     }
-                    while (_p->messages.size() > messagesMax)
+                    else
                     {
-                        _p->messages.pop_front();
+                        p.textEdit->getModel()->setCursor(cursorPrev);
+                        p.textEdit->getModel()->setSelection(selectionPrev);
                     }
-                    _p->label->setText(ftk::join(
-                        { std::begin(_p->messages), std::end(_p->messages) },
-                        '\n'));
                 });
         }
 

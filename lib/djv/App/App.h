@@ -13,6 +13,7 @@ namespace ftk
 {
     class DiagModel;
     class Settings;
+    class SysLogModel;
 }
 
 namespace tl
@@ -74,6 +75,9 @@ namespace djv
 
             //! Get the settings model.
             const std::shared_ptr<models::SettingsModel>& getSettingsModel() const;
+
+            //! Get the system log model.
+            const std::shared_ptr<ftk::SysLogModel>& getSysLogModel() const;
 
             //! Get the time units model.
             const std::shared_ptr<models::TimeUnitsModel>& getTimeUnitsModel() const;
