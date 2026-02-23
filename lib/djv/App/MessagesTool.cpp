@@ -9,6 +9,7 @@
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/IWindow.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/SysLogModel.h>
 #include <ftk/UI/TextEdit.h>
@@ -90,8 +91,9 @@ namespace djv
                 [this](const std::vector<std::string>& value)
                 {
                     FTK_P();
-                    const auto cursorPrev = p.textEdit->getModel()->getCursor();
-                    const auto selectionPrev = p.textEdit->getModel()->getSelection();
+                    const auto cursor = p.textEdit->getModel()->getCursor();
+                    const auto selection = p.textEdit->getModel()->getSelection();
+                    const ftk::V2I scrollPos = p.textEdit->getScrollWidget()->getScrollPos();
                     p.textEdit->setText(value);
                     if (p.autoScrollCheckBox->isChecked())
                     {
@@ -102,8 +104,9 @@ namespace djv
                     }
                     else
                     {
-                        p.textEdit->getModel()->setCursor(cursorPrev);
-                        p.textEdit->getModel()->setSelection(selectionPrev);
+                        p.textEdit->getModel()->setCursor(cursor);
+                        p.textEdit->getModel()->setSelection(selection);
+                        p.textEdit->getScrollWidget()->setScrollPos(scrollPos);
                     }
                 });
         }
