@@ -61,9 +61,9 @@ namespace djv
             p.posYReset = ftk::IntResetButton::create(context, p.posYEdit->getModel());
 
             p.zoomEdit = ftk::DoubleEdit::create(context);
-            p.zoomEdit->setRange(0.000001, 100000.0);
-            p.zoomEdit->setStep(1.0);
-            p.zoomEdit->setLargeStep(2.0);
+            p.zoomEdit->setRange(viewport->getZoomRange());
+            p.zoomEdit->setStep(0.1);
+            p.zoomEdit->setLargeStep(1.0);
             p.zoomEdit->setDefaultValue(1.0);
             p.zoomReset = ftk::DoubleResetButton::create(context, p.zoomEdit->getModel());
 
@@ -95,7 +95,7 @@ namespace djv
                         if (auto viewport = viewportWeak.lock())
                         {
                             const ftk::V2I& pos = viewport->getViewPos();
-                            const double zoom = viewport->getViewZoom();
+                            const double zoom = viewport->getZoom();
                             viewport->setViewPosAndZoom(ftk::V2I(value, pos.y), zoom);
                         }
                     }
@@ -109,7 +109,7 @@ namespace djv
                         if (auto viewport = viewportWeak.lock())
                         {
                             const ftk::V2I& pos = viewport->getViewPos();
-                            const double zoom = viewport->getViewZoom();
+                            const double zoom = viewport->getZoom();
                             viewport->setViewPosAndZoom(ftk::V2I(pos.x, value), zoom);
                         }
                     }
@@ -124,7 +124,7 @@ namespace djv
                         {
                             const ftk::Box2I& g = viewport->getGeometry();
                             const ftk::V2I focus(g.w() / 2, g.h() / 2);
-                            viewport->setViewZoom(value, focus);
+                            viewport->setZoom(value, focus);
                         }
                     }
                 });

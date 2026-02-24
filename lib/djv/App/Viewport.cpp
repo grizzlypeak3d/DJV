@@ -374,7 +374,7 @@ namespace djv
                     if (p.samplePos->setIfChanged(pos))
                     {
                         p.colorSample->setIfChanged(getColorSample(pos));
-                        p.pick->setIfChanged((pos - getViewPos()) / getViewZoom());
+                        p.pick->setIfChanged((pos - getViewPos()) / getZoom());
                         _hudUpdate();
                     }
                 }
@@ -396,7 +396,7 @@ namespace djv
                 if (p.samplePos->setIfChanged(pos))
                 {
                     p.colorSample->setIfChanged(getColorSample(pos));
-                    p.pick->setIfChanged((pos - getViewPos()) / getViewZoom());
+                    p.pick->setIfChanged((pos - getViewPos()) / getZoom());
                     _hudUpdate();
                 }
             }

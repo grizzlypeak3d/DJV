@@ -49,7 +49,7 @@ namespace djv
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
-                        mainWindow->getViewport()->viewZoomReset();
+                        mainWindow->getViewport()->resetZoom();
                     }
                 });
 
@@ -60,7 +60,7 @@ namespace djv
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
-                        mainWindow->getViewport()->viewZoomIn();
+                        mainWindow->getViewport()->zoomIn();
                     }
                 });
 
@@ -71,7 +71,7 @@ namespace djv
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
-                        mainWindow->getViewport()->viewZoomOut();
+                        mainWindow->getViewport()->zoomOut();
                     }
                 });
 

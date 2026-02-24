@@ -38,9 +38,10 @@ namespace djv
             addAction(actions["Frame"]);
 
             p.zoomEdit = ftk::DoubleEdit::create(context);
-            p.zoomEdit->setRange(0.0001, 1000.0);
+            auto viewport = mainWindow->getViewport();
+            p.zoomEdit->setRange(viewport->getZoomRange());
             p.zoomEdit->setStep(0.1);
-            p.zoomEdit->setLargeStep(0.5);
+            p.zoomEdit->setLargeStep(1.0);
             p.zoomEdit->setDefaultValue(1.0);
             p.zoomEdit->setPrecision(2);
             p.zoomEdit->setBorderRole(ftk::ColorRole::None);
@@ -60,13 +61,13 @@ namespace djv
                             auto viewport = mainWindow->getViewport();
                             const ftk::Box2I& g = viewport->getGeometry();
                             const ftk::V2I focus(g.w() / 2, g.h() / 2);
-                            mainWindow->getViewport()->setViewZoom(value, focus);
+                            mainWindow->getViewport()->setZoom(value, focus);
                         }
                     }
                 });
 
             p.posZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
-                mainWindow->getViewport()->observeViewPosAndZoom(),
+                viewport->observeViewPosAndZoom(),
                 [this](const std::pair<ftk::V2I, double>& value)
                 {
                     FTK_P();

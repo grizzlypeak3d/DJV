@@ -1056,7 +1056,7 @@ namespace djv
                 {
                     _viewUpdate(
                         _p->mainWindow->getViewport()->getViewPos(),
-                        _p->mainWindow->getViewport()->getViewZoom(),
+                        _p->mainWindow->getViewport()->getZoom(),
                         value);
                 });
             p.mainWindow->setCloseCallback(
