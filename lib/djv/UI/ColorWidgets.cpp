@@ -331,8 +331,11 @@ namespace djv
             p.sliders["Saturation"] = ftk::FloatEditSlider::create(context);
             p.sliders["Saturation"]->setRange(0.F, 4.F);
             p.sliders["Saturation"]->setDefaultValue(1.F);
-            p.sliders["Tint"] = ftk::FloatEditSlider::create(context);
-            p.sliders["Tint"]->setDefaultValue(1.F);
+            p.sliders["Hue"] = ftk::FloatEditSlider::create(context);
+            p.sliders["Hue"]->setRange(0.F, 360.F);
+            p.sliders["Hue"]->setStep(1.F);
+            p.sliders["Hue"]->setLargeStep(10.F);
+            p.sliders["Hue"]->setDefaultValue(0.F);
 
             p.invertCheckBox = ftk::CheckBox::create(context);
 
@@ -344,7 +347,7 @@ namespace djv
             p.layout->addRow("Brightness:", p.sliders["Brightness"]);
             p.layout->addRow("Contrast:", p.sliders["Contrast"]);
             p.layout->addRow("Saturation:", p.sliders["Saturation"]);
-            p.layout->addRow("Tint:", p.sliders["Tint"]);
+            p.layout->addRow("Hue:", p.sliders["Hue"]);
             p.layout->addRow("Invert:", p.invertCheckBox);
 
             p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
@@ -356,7 +359,7 @@ namespace djv
                     _p->sliders["Brightness"]->setValue(value.color.brightness.x);
                     _p->sliders["Contrast"]->setValue(value.color.contrast.x);
                     _p->sliders["Saturation"]->setValue(value.color.saturation.x);
-                    _p->sliders["Tint"]->setValue(value.color.tint);
+                    _p->sliders["Hue"]->setValue(value.color.hue * 360.F);
                     _p->invertCheckBox->setChecked(value.color.invert);
                 });
 
@@ -412,12 +415,12 @@ namespace djv
                     viewportModel->setDisplayOptions(options);
                 });
 
-            p.sliders["Tint"]->setCallback(
+            p.sliders["Hue"]->setCallback(
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
                     options.color.enabled = true;
-                    options.color.tint = value;
+                    options.color.hue = value / 360.F;
                     viewportModel->setDisplayOptions(options);
                 });
 
