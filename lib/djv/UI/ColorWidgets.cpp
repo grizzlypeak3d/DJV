@@ -333,8 +333,8 @@ namespace djv
             p.sliders["Saturation"]->setDefaultValue(1.F);
             p.sliders["Hue"] = ftk::FloatEditSlider::create(context);
             p.sliders["Hue"]->setRange(0.F, 360.F);
-            p.sliders["Hue"]->setStep(1.F);
-            p.sliders["Hue"]->setLargeStep(10.F);
+            p.sliders["Hue"]->setStep(10.F);
+            p.sliders["Hue"]->setLargeStep(60.F);
             p.sliders["Hue"]->setDefaultValue(0.F);
 
             p.invertCheckBox = ftk::CheckBox::create(context);
