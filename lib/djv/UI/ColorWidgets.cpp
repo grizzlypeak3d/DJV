@@ -14,6 +14,7 @@
 #include <ftk/UI/FloatEdit.h>
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
+#include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
@@ -303,6 +304,7 @@ namespace djv
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
+            std::shared_ptr<ftk::IntEditSlider> hueSlider;
             std::shared_ptr<ftk::CheckBox> invertCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
@@ -331,11 +333,11 @@ namespace djv
             p.sliders["Saturation"] = ftk::FloatEditSlider::create(context);
             p.sliders["Saturation"]->setRange(0.F, 4.F);
             p.sliders["Saturation"]->setDefaultValue(1.F);
-            p.sliders["Hue"] = ftk::FloatEditSlider::create(context);
-            p.sliders["Hue"]->setRange(0.F, 360.F);
-            p.sliders["Hue"]->setStep(10.F);
-            p.sliders["Hue"]->setLargeStep(60.F);
-            p.sliders["Hue"]->setDefaultValue(0.F);
+            p.hueSlider = ftk::IntEditSlider::create(context);
+            p.hueSlider->setRange(0, 360);
+            p.hueSlider->setStep(10);
+            p.hueSlider->setLargeStep(60);
+            p.hueSlider->setDefaultValue(0);
 
             p.invertCheckBox = ftk::CheckBox::create(context);
 
@@ -347,20 +349,21 @@ namespace djv
             p.layout->addRow("Brightness:", p.sliders["Brightness"]);
             p.layout->addRow("Contrast:", p.sliders["Contrast"]);
             p.layout->addRow("Saturation:", p.sliders["Saturation"]);
-            p.layout->addRow("Hue:", p.sliders["Hue"]);
+            p.layout->addRow("Hue:", p.hueSlider);
             p.layout->addRow("Invert:", p.invertCheckBox);
 
             p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
-                    _p->enabledCheckBox->setChecked(value.color.enabled);
-                    _p->sliders["Add"]->setValue(value.color.add.x);
-                    _p->sliders["Brightness"]->setValue(value.color.brightness.x);
-                    _p->sliders["Contrast"]->setValue(value.color.contrast.x);
-                    _p->sliders["Saturation"]->setValue(value.color.saturation.x);
-                    _p->sliders["Hue"]->setValue(value.color.hue * 360.F);
-                    _p->invertCheckBox->setChecked(value.color.invert);
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.color.enabled);
+                    p.sliders["Add"]->setValue(value.color.add.x);
+                    p.sliders["Brightness"]->setValue(value.color.brightness.x);
+                    p.sliders["Contrast"]->setValue(value.color.contrast.x);
+                    p.sliders["Saturation"]->setValue(value.color.saturation.x);
+                    p.hueSlider->setValue(value.color.hue * 360);
+                    p.invertCheckBox->setChecked(value.color.invert);
                 });
 
             p.enabledCheckBox->setCheckedCallback(
@@ -415,8 +418,8 @@ namespace djv
                     viewportModel->setDisplayOptions(options);
                 });
 
-            p.sliders["Hue"]->setCallback(
-                [viewportModel](float value)
+            p.hueSlider->setCallback(
+                [viewportModel](int value)
                 {
                     auto options = viewportModel->getDisplayOptions();
                     options.color.enabled = true;
