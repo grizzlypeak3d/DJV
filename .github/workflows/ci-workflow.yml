@@ -140,10 +140,11 @@ jobs:
     - name: Build and package DJV
       run: sh DJV/etc/Linux/linux-package.sh Release
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: DJV-Linux-Packages
         path: build-Release/DJV-*.tar.gz
+        archive: false
 
   macos-build:
     runs-on: macos-latest
@@ -250,10 +251,11 @@ jobs:
         export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
         sh DJV/etc/macOS/macos-package.sh Release
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: DJV-macOS-Packages
         path: build-Release/DJV-*.dmg
+        archive: false
 
   windows-build:
     runs-on: windows-latest
@@ -354,9 +356,10 @@ jobs:
       shell: cmd
       run: DJV\etc\Windows\windows-package.bat Release
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: DJV-Windows-Packages
         path: |
           build-Release\DJV-*.exe
           build-Release\DJV-*.zip
+        archive: false
