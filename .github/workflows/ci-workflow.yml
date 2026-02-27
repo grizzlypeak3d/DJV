@@ -362,4 +362,4 @@ jobs:
         path: |
           build-Release\DJV-*.exe
           build-Release\DJV-*.zip
-        archive: false
+        archive: true
