@@ -35,7 +35,6 @@
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
-#include <ftk/UI/DiagModel.h>
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/SysLogModel.h>
@@ -101,7 +100,6 @@ namespace djv
             std::vector<std::shared_ptr<models::FilesModelItem> > files;
             std::vector<std::shared_ptr<models::FilesModelItem> > activeFiles;
             std::shared_ptr<models::RecentFilesModel> recentFilesModel;
-            std::shared_ptr<ftk::DiagModel> diagModel;
             std::vector<std::shared_ptr<tl::Timeline> > timelines;
             std::shared_ptr<ftk::Observable<std::shared_ptr<tl::Player> > > player;
             std::shared_ptr<models::ColorModel> colorModel;
@@ -390,11 +388,6 @@ namespace djv
         const std::shared_ptr<models::RecentFilesModel>& App::getRecentFilesModel() const
         {
             return _p->recentFilesModel;
-        }
-
-        const std::shared_ptr<ftk::DiagModel>& App::getDiagModel() const
-        {
-            return _p->diagModel;
         }
 
         const std::shared_ptr<models::ColorModel>& App::getColorModel() const
@@ -687,23 +680,6 @@ namespace djv
             fileBrowserOptions.dirList.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
             fileBrowserSystem->getModel()->setOptions(fileBrowserOptions);
             fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
-
-            p.diagModel = ftk::DiagModel::create(_context);
-            p.diagModel->addSampler(
-                "tlRender Memory/Audio: {0}MB",
-                [] { return tl::Audio::getTotalByteCount() / ftk::megabyte; });
-            p.diagModel->addSampler(
-                "tlRender Objects/Audio: {0}",
-                [] { return tl::Audio::getObjectCount(); });
-            p.diagModel->addSampler(
-                "tlRender Objects/I/O: {0}",
-                [] { return tl::IIO::getObjectCount(); });
-            p.diagModel->addSampler(
-                "tlRender Objects/Players: {0}",
-                [] { return tl::Player::getObjectCount(); });
-            p.diagModel->addSampler(
-                "tlRender Objects/Timelines: {0}",
-                [] { return tl::Timeline::getObjectCount(); });
 
             p.colorModel = models::ColorModel::create(_context, p.settings);
             if (p.cmdLine.ocioFileName->found() ||

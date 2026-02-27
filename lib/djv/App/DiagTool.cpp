@@ -38,7 +38,7 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.diagWidget = ftk::DiagWidget::create(context, app->getDiagModel());
+            p.diagWidget = ftk::DiagWidget::create(context);
             p.diagWidget->setMarginRole(ftk::SizeRole::Margin);
 
             auto scrollWidget = ftk::ScrollWidget::create(context);
