@@ -45,11 +45,11 @@ namespace djv
 
             p.brightnessSlider = ftk::FloatEditSlider::create(context);
             p.brightnessSlider->setRange(.5F, 1.5F);
-            p.brightnessSlider->setDefaultValue(1.F);
+            p.brightnessSlider->setDefault(1.F);
 
             p.contrastSlider = ftk::FloatEditSlider::create(context);
             p.contrastSlider->setRange(.5F, 1.5F);
-            p.contrastSlider->setDefaultValue(1.F);
+            p.contrastSlider->setDefault(1.F);
 
             std::vector<std::string> labels;
             for (auto d : p.displayScales)

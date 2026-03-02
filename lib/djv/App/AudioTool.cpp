@@ -72,7 +72,7 @@ namespace djv
 
             p.syncOffsetSlider = ftk::DoubleEditSlider::create(context);
             p.syncOffsetSlider->setRange(-1.0, 1.0);
-            p.syncOffsetSlider->setDefaultValue(0.0);
+            p.syncOffsetSlider->setDefault(0.0);
 
             auto formLayout = ftk::FormLayout::create(context);
             formLayout->setMarginRole(ftk::SizeRole::Margin);

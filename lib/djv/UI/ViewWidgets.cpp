@@ -52,19 +52,19 @@ namespace djv
 
             p.posXEdit = ftk::IntEdit::create(context);
             p.posXEdit->setRange(-100000000, 100000000);
-            p.posXEdit->setDefaultValue(0.0);
+            p.posXEdit->setDefault(0.0);
             p.posXReset = ftk::IntResetButton::create(context, p.posXEdit->getModel());
 
             p.posYEdit = ftk::IntEdit::create(context);
             p.posYEdit->setRange(-100000000, 100000000);
-            p.posYEdit->setDefaultValue(0.0);
+            p.posYEdit->setDefault(0.0);
             p.posYReset = ftk::IntResetButton::create(context, p.posYEdit->getModel());
 
             p.zoomEdit = ftk::DoubleEdit::create(context);
             p.zoomEdit->setRange(viewport->getZoomRange());
             p.zoomEdit->setStep(0.1);
             p.zoomEdit->setLargeStep(1.0);
-            p.zoomEdit->setDefaultValue(1.0);
+            p.zoomEdit->setDefault(1.0);
             p.zoomReset = ftk::DoubleResetButton::create(context, p.zoomEdit->getModel());
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());

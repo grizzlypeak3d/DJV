@@ -42,7 +42,7 @@ namespace djv
             p.zoomEdit->setRange(viewport->getZoomRange());
             p.zoomEdit->setStep(0.1);
             p.zoomEdit->setLargeStep(1.0);
-            p.zoomEdit->setDefaultValue(1.0);
+            p.zoomEdit->setDefault(1.0);
             p.zoomEdit->setPrecision(2);
             p.zoomEdit->setBorderRole(ftk::ColorRole::None);
             p.zoomEdit->setTooltip("View zoom");

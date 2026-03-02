@@ -78,17 +78,17 @@ namespace djv
             p.compareTimeComboBox->setHStretch(ftk::Stretch::Expanding);
 
             p.wipeXSlider = ftk::FloatEditSlider::create(context);
-            p.wipeXSlider->setDefaultValue(.5F);
+            p.wipeXSlider->setDefault(.5F);
             p.wipeYSlider = ftk::FloatEditSlider::create(context);
-            p.wipeYSlider->setDefaultValue(.5F);
+            p.wipeYSlider->setDefault(.5F);
             p.wipeRotationSlider = ftk::FloatEditSlider::create(context);
             p.wipeRotationSlider->setRange(0.F, 360.F);
             p.wipeRotationSlider->setStep(1.F);
             p.wipeRotationSlider->setLargeStep(10.F);
-            p.wipeRotationSlider->setDefaultValue(0.F);
+            p.wipeRotationSlider->setDefault(0.F);
 
             p.overlaySlider = ftk::FloatEditSlider::create(context);
-            p.overlaySlider->setDefaultValue(.5F);
+            p.overlaySlider->setDefault(.5F);
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);

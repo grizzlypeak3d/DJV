@@ -13,7 +13,6 @@
 #include <djv/Models/TimeUnitsModel.h>
 
 #include <tlRender/UI/PlaybackLoopWidget.h>
-#include <tlRender/UI/ShuttleWidget.h>
 #include <tlRender/UI/TimeEdit.h>
 #include <tlRender/UI/TimeLabel.h>
 #include <tlRender/UI/TimeUnitsWidget.h>
@@ -22,6 +21,7 @@
 #include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ShuttleWidget.h>
 #include <ftk/UI/Spacer.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
@@ -39,8 +39,8 @@ namespace djv
 
             std::map<std::string, std::shared_ptr<ftk::ToolButton> > buttons;
             std::shared_ptr<tl::ui::PlaybackLoopWidget> loopWidget;
-            std::shared_ptr<tl::ui::ShuttleWidget> playbackShuttle;
-            std::shared_ptr<tl::ui::ShuttleWidget> frameShuttle;
+            std::shared_ptr<ftk::ShuttleWidget> playbackShuttle;
+            std::shared_ptr<ftk::ShuttleWidget> frameShuttle;
             std::shared_ptr<tl::ui::TimeEdit> currentTimeEdit;
             std::shared_ptr<tl::ui::TimeLabel> durationLabel;
             std::shared_ptr<tl::ui::TimeUnitsWidget> timeUnitsWidget;
@@ -78,7 +78,7 @@ namespace djv
 
             p.app = app;
 
-            p.speedModel = ftk::DoubleModel::create(context);
+            p.speedModel = ftk::DoubleModel::create();
             p.speedModel->setRange(ftk::RangeD(0.0, 1000000.0));
             p.speedModel->setStep(1.F);
             p.speedModel->setLargeStep(10.F);
@@ -90,7 +90,7 @@ namespace djv
 
             p.loopWidget = tl::ui::PlaybackLoopWidget::create(context);
 
-            p.playbackShuttle = tl::ui::ShuttleWidget::create(context, "PlaybackShuttle");
+            p.playbackShuttle = ftk::ShuttleWidget::create(context);
             p.playbackShuttle->setTooltip("Playback shuttle. Click and drag to change playback speed.");
 
             actions = frameActions->getActions();
@@ -101,7 +101,7 @@ namespace djv
             p.buttons["Next"] = ftk::ToolButton::create(context, actions["Next"]);
             p.buttons["Next"]->setRepeatClick(true);
 
-            p.frameShuttle = tl::ui::ShuttleWidget::create(context, "FrameShuttle");
+            p.frameShuttle = ftk::ShuttleWidget::create(context);
             p.frameShuttle->setTooltip("Frame shuttle. Click and drag to change the current frame.");
 
             auto timeUnitsModel = app->getTimeUnitsModel();

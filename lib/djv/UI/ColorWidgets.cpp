@@ -323,21 +323,21 @@ namespace djv
 
             p.sliders["Add"] = ftk::FloatEditSlider::create(context);
             p.sliders["Add"]->setRange(-1.F, 1.F);
-            p.sliders["Add"]->setDefaultValue(0.F);
+            p.sliders["Add"]->setDefault(0.F);
             p.sliders["Brightness"] = ftk::FloatEditSlider::create(context);
             p.sliders["Brightness"]->setRange(0.F, 4.F);
-            p.sliders["Brightness"]->setDefaultValue(1.F);
+            p.sliders["Brightness"]->setDefault(1.F);
             p.sliders["Contrast"] = ftk::FloatEditSlider::create(context);
             p.sliders["Contrast"]->setRange(0.F, 4.F);
-            p.sliders["Contrast"]->setDefaultValue(1.F);
+            p.sliders["Contrast"]->setDefault(1.F);
             p.sliders["Saturation"] = ftk::FloatEditSlider::create(context);
             p.sliders["Saturation"]->setRange(0.F, 4.F);
-            p.sliders["Saturation"]->setDefaultValue(1.F);
+            p.sliders["Saturation"]->setDefault(1.F);
             p.hueSlider = ftk::IntEditSlider::create(context);
             p.hueSlider->setRange(0, 360);
             p.hueSlider->setStep(10);
             p.hueSlider->setLargeStep(60);
-            p.hueSlider->setDefaultValue(0);
+            p.hueSlider->setDefault(0);
 
             p.invertCheckBox = ftk::CheckBox::create(context);
 
@@ -494,11 +494,11 @@ namespace djv
             p.settings->getT("/Color/Levels/InRange", range);
             p.sliders["InLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["InLow"]->setRange(range);
-            p.sliders["InLow"]->setDefaultValue(0.F);
+            p.sliders["InLow"]->setDefault(0.F);
 
             p.sliders["InHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["InHigh"]->setRange(range);
-            p.sliders["InHigh"]->setDefaultValue(1.F);
+            p.sliders["InHigh"]->setDefault(1.F);
 
             p.rangeEdits["InMin"] = ftk::FloatEdit::create(context);
             p.rangeEdits["InMin"]->setRange(-1000000.F, 1000000.F);
@@ -510,16 +510,16 @@ namespace djv
 
             p.sliders["Gamma"] = ftk::FloatEditSlider::create(context);
             p.sliders["Gamma"]->setRange(.1F, 4.F);
-            p.sliders["Gamma"]->setDefaultValue(1.F);
+            p.sliders["Gamma"]->setDefault(1.F);
 
             p.settings->getT("/Color/Levels/OutRange", range);
             p.sliders["OutLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["OutLow"]->setRange(range);
-            p.sliders["OutLow"]->setDefaultValue(0.F);
+            p.sliders["OutLow"]->setDefault(0.F);
 
             p.sliders["OutHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["OutHigh"]->setRange(range);
-            p.sliders["OutHigh"]->setDefaultValue(1.F);
+            p.sliders["OutHigh"]->setDefault(1.F);
 
             p.rangeEdits["OutMin"] = ftk::FloatEdit::create(context);
             p.rangeEdits["OutMin"]->setRange(-1000000.F, 1000000.F);
@@ -713,15 +713,15 @@ namespace djv
 
             p.sliders["Exposure"] = ftk::FloatEditSlider::create(context);
             p.sliders["Exposure"]->setRange(-10.F, 10.F);
-            p.sliders["Exposure"]->setDefaultValue(0.F);
+            p.sliders["Exposure"]->setDefault(0.F);
             p.sliders["Defog"] = ftk::FloatEditSlider::create(context);
-            p.sliders["Defog"]->setDefaultValue(0.F);
+            p.sliders["Defog"]->setDefault(0.F);
             p.sliders["KneeLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["KneeLow"]->setRange(-3.F, 3.F);
-            p.sliders["KneeLow"]->setDefaultValue(0.F);
+            p.sliders["KneeLow"]->setDefault(0.F);
             p.sliders["KneeHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["KneeHigh"]->setRange(3.5F, 7.5F);
-            p.sliders["KneeHigh"]->setDefaultValue(5.F);
+            p.sliders["KneeHigh"]->setDefault(5.F);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -836,7 +836,7 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
 
             p.sliders["SoftClip"] = ftk::FloatEditSlider::create(context);
-            p.sliders["SoftClip"]->setDefaultValue(0.F);
+            p.sliders["SoftClip"]->setDefault(0.F);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
