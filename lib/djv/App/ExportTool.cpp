@@ -13,9 +13,9 @@
 #include <tlRender/Timeline/IRender.h>
 #include <tlRender/Timeline/Util.h>
 #include <tlRender/IO/System.h>
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DialogSystem.h>
@@ -109,10 +109,10 @@ namespace djv
             p.imageExts.insert(p.imageExts.end(), exts.begin(), exts.end());
             exts = ioSystem->getExts(static_cast<int>(tl::FileType::Media));
             p.movieExts.insert(p.movieExts.end(), exts.begin(), exts.end());
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             auto ffmpegPlugin = ioSystem->getPlugin<tl::ffmpeg::WritePlugin>();
             p.movieCodecs = ffmpegPlugin->getCodecs();
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 
             p.dirEdit = ftk::FileEdit::create(context, ftk::FileBrowserMode::Dir);
 

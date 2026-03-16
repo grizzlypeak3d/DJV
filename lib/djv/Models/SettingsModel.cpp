@@ -400,9 +400,9 @@ namespace djv
             std::shared_ptr<ftk::Observable<StyleSettings> > style;
             std::shared_ptr<ftk::Observable<TimelineSettings> > timeline;
             std::shared_ptr<ftk::Observable<WindowSettings> > window;
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             std::shared_ptr<ftk::Observable<tl::ffmpeg::Options> > ffmpeg;
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_USD)
             std::shared_ptr<ftk::Observable<tl::usd::Options> > usd;
 #endif // TLRENDER_USD
@@ -469,11 +469,11 @@ namespace djv
             settings->getT("/Window", window);
             p.window = ftk::Observable<WindowSettings>::create(window);
 
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             tl::ffmpeg::Options ffmpeg;
             settings->getT("/FFmpeg", ffmpeg);
             p.ffmpeg = ftk::Observable<tl::ffmpeg::Options>::create(ffmpeg);
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 #if defined(TLRENDER_USD)
             tl::usd::Options usd;
@@ -527,9 +527,9 @@ namespace djv
             p.settings->setT("/Timeline", p.timeline->get());
             p.settings->setT("/Window", p.window->get());
 
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             p.settings->setT("/FFmpeg", p.ffmpeg->get());
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_USD)
             p.settings->setT("/USD.1", p.usd->get());
 #endif // TLRENDER_USD
@@ -555,9 +555,9 @@ namespace djv
             setStyle(style);
             setTimeline(TimelineSettings());
             setWindow(WindowSettings());
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             setFFmpeg(tl::ffmpeg::Options());
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_USD)
             setUSD(tl::usd::Options());
 #endif // TLRENDER_USD
@@ -736,7 +736,7 @@ namespace djv
             _p->window->setIfChanged(value);
         }
 
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
         const tl::ffmpeg::Options& SettingsModel::getFFmpeg() const
         {
             return _p->ffmpeg->get();
@@ -751,7 +751,7 @@ namespace djv
         {
             _p->ffmpeg->setIfChanged(value);
         }
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 #if defined(TLRENDER_USD)
         const tl::usd::Options& SettingsModel::getUSD() const

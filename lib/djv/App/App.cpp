@@ -28,9 +28,9 @@
 #endif // TLRENDER_BMD
 #include <tlRender/IO/Plugin.h>
 #include <tlRender/IO/System.h>
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_USD)
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
@@ -1088,9 +1088,9 @@ namespace djv
             FTK_P();
             tl::IOOptions out;
             out = tl::merge(out, tl::getOptions(p.settingsModel->getImageSeq().io));
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             out = tl::merge(out, tl::ffmpeg::getOptions(p.settingsModel->getFFmpeg()));
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_USD)
             out = tl::merge(out, tl::usd::getOptions(p.settingsModel->getUSD()));
 #endif // TLRENDER_USD

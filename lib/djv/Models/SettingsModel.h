@@ -8,9 +8,9 @@
 #include <tlRender/UI/IItem.h>
 #include <tlRender/Timeline/Player.h>
 #include <tlRender/IO/SeqIO.h>
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_USD)
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
@@ -388,7 +388,7 @@ namespace djv
 
             ///@}
 
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             //! \name FFmpeg
             ///@{
 
@@ -397,7 +397,7 @@ namespace djv
             void setFFmpeg(const tl::ffmpeg::Options&);
 
             ///@}
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 #if defined(TLRENDER_USD)
             //! \name USD

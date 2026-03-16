@@ -354,7 +354,7 @@ namespace djv
             FTK_PRIVATE();
         };
 
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
         //! FFmpeg settings widget.
         class FFmpegSettingsWidget : public ISettingsWidget
         {
@@ -382,7 +382,7 @@ namespace djv
         private:
             FTK_PRIVATE();
         };
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 #if defined(TLRENDER_USD)
         //! USD settings widget.

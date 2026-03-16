@@ -835,7 +835,7 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
         struct FFmpegSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
@@ -934,7 +934,7 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 #if defined(TLRENDER_USD)
         struct USDSettingsWidget::Private

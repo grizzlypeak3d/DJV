@@ -49,9 +49,9 @@ namespace djv
             auto shortcutsWidget = ui::ShortcutsSettingsWidget::create(context, settingsModel);
             auto styleWidget = ui::StyleSettingsWidget::create(context, settingsModel);
             auto timeWidget = ui::TimeSettingsWidget::create(context, app->getTimeUnitsModel());
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             auto ffmpegWidget = ui::FFmpegSettingsWidget::create(context, settingsModel);
-#endif // TLRENDER_FFMPEG
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_USD)
             auto usdWidget = ui::USDSettingsWidget::create(context, settingsModel);
 #endif // TLRENDER_USD
@@ -76,10 +76,10 @@ namespace djv
             p.bellows["Style"]->setWidget(styleWidget);
             p.bellows["Time"] = ftk::Bellows::create(context, "Time", vLayout);
             p.bellows["Time"]->setWidget(timeWidget);
-#if defined(TLRENDER_FFMPEG)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             p.bellows["FFmpeg"] = ftk::Bellows::create(context, "FFmpeg", vLayout);
             p.bellows["FFmpeg"]->setWidget(ffmpegWidget);
-#endif // TLRENDER_USD
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_USD)
             p.bellows["USD"] = ftk::Bellows::create(context, "USD", vLayout);
             p.bellows["USD"]->setWidget(usdWidget);
