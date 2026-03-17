@@ -3,6 +3,8 @@
 
 #include <djv/UI/SysInfoDialog.h>
 
+#include <tlRender/IO/System.h>
+
 #include <tlRender/Core/AudioSystem.h>
 
 #include <ftk/UI/ClipboardSystem.h>
@@ -11,7 +13,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
-#include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/TextEdit.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
 #include <ftk/Core/String.h>
@@ -22,7 +24,7 @@ namespace djv
     {
         struct SysInfoDialog::Private
         {
-            std::string text;
+            std::vector<std::string> text;
         };
 
         void SysInfoDialog::_init(
@@ -74,6 +76,35 @@ namespace djv
                         tl::getLabel(device.info)));
                 }
             }
+            
+            auto readSystem = context->getSystem<tl::ReadSystem>();
+            auto writeSystem = context->getSystem<tl::WriteSystem>();
+            if (readSystem || writeSystem)
+            {
+                labels.push_back(std::make_pair("", ""));
+                std::vector<std::string> plugins;
+                if (readSystem)
+                {
+                    for (const auto& plugin : readSystem->getPlugins())
+                    {
+                        plugins.push_back(plugin->getName());
+                    }
+                    labels.push_back(std::make_pair(
+                        "Read plugins: ",
+                        ftk::join(plugins, ", ")));
+                }
+                if (writeSystem)
+                {
+                    plugins.clear();
+                    for (const auto& plugin : writeSystem->getPlugins())
+                    {
+                        plugins.push_back(plugin->getName());
+                    }
+                    labels.push_back(std::make_pair(
+                        "Write plugins: ",
+                        ftk::join(plugins, ", ")));
+                }
+            }
 
             size_t sizeMax = 0;
             for (const auto& i : labels)
@@ -88,12 +119,10 @@ namespace djv
                 }
             }
 
-            std::vector<std::string> text;
             for (const auto& i : labels)
             {
-                text.push_back(i.first + i.second);
+                p.text.push_back(i.first + i.second);
             }
-            p.text = ftk::join(text, '\n');
 
             auto titleLabel = ftk::Label::create(context, "System Information");
             titleLabel->setMarginRole(ftk::SizeRole::MarginSmall);
@@ -103,15 +132,14 @@ namespace djv
 
             auto layout = ftk::VerticalLayout::create(context, shared_from_this());
             layout->setSpacingRole(ftk::SizeRole::None);
+            layout->setHStretch(ftk::Stretch::Expanding);
             titleLabel->setParent(layout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
-            auto label = ftk::Label::create(context, p.text);
-            label->setFontRole(ftk::FontRole::Mono);
-            label->setMarginRole(ftk::SizeRole::Margin);
-            auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Vertical, layout);
-            scrollWidget->setBorder(false);
-            scrollWidget->setWidget(label);
+            auto textEdit = ftk::TextEdit::create(context, layout);
+            textEdit->setReadOnly(true);
+            textEdit->setText(p.text);
+            textEdit->setMarginRole(ftk::SizeRole::Margin);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
             auto hLayout = ftk::HorizontalLayout::create(context, layout);
@@ -126,7 +154,7 @@ namespace djv
                     if (auto context = getContext())
                     {
                         auto clipboardSystem = context->getSystem<ftk::ClipboardSystem>();
-                        clipboardSystem->setText(_p->text);
+                        clipboardSystem->setText(ftk::join(_p->text, '\n'));
                     }
                 });
 
