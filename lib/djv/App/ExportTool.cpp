@@ -38,6 +38,24 @@ namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            const std::vector<std::string> imageExts =
+            {
+                ".exr",
+                ".png",
+                ".tif",
+                ".tiff"
+            };
+
+            const std::vector<std::string> movieExts =
+            {
+                ".mov",
+                ".mp4",
+                ".m4v"
+            };
+        }
+
         struct ExportTool::Private
         {
             std::weak_ptr<App> app;
@@ -104,11 +122,24 @@ namespace djv
 
             p.app = app;
             p.settings = app->getSettingsModel();
+
             auto ioSystem = context->getSystem<tl::WriteSystem>();
-            auto exts = ioSystem->getExts(static_cast<int>(tl::FileType::Seq));
-            p.imageExts.insert(p.imageExts.end(), exts.begin(), exts.end());
-            exts = ioSystem->getExts(static_cast<int>(tl::FileType::Media));
-            p.movieExts.insert(p.movieExts.end(), exts.begin(), exts.end());
+            for (const auto& ext : ioSystem->getExts(static_cast<int>(tl::FileType::Seq)))
+            {
+                if (std::find(imageExts.begin(), imageExts.end(), ext) != imageExts.end())
+                {
+                    p.imageExts.push_back(ext);
+                }
+            }
+
+            for (const auto& ext : ioSystem->getExts(static_cast<int>(tl::FileType::Media)))
+            {
+                if (std::find(movieExts.begin(), movieExts.end(), ext) != movieExts.end())
+                {
+                    p.movieExts.push_back(ext);
+                }
+            }
+
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             auto ffmpegPlugin = ioSystem->getPlugin<tl::ffmpeg::WritePlugin>();
             p.movieCodecs = ffmpegPlugin->getCodecs();
@@ -506,7 +537,7 @@ namespace djv
                                     p.progressDialog->close();
                                 }
                             }
-                            else
+                            else if (p.progressDialog)
                             {
                                 p.progressDialog->close();
                             }
