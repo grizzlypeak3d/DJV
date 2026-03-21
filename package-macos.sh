@@ -3,7 +3,6 @@
 set -x
 
 export JOBS=4
-export DJV_MACOS_PACKAGE=ON
 export TLRENDER_NET=OFF
 export TLRENDER_OCIO=ON
 export TLRENDER_JPEG=ON

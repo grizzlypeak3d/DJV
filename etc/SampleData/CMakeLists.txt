@@ -102,10 +102,8 @@ set(SAMPLE_DATA
     Counter.9.png
     Counter.otio)
 
-set(DEST etc/DJV/SampleData)
-if(DJV_MACOS_PACKAGE)
+set(DEST share/djv/SampleData)
+if(DJV_MACOS_PACKAGE OR DJV_WINDOWS_PACKAGE)
     set(DEST SampleData)
 endif()
-install(
-    FILES ${SAMPLE_DATA}
-    DESTINATION ${DEST})
+install(FILES ${SAMPLE_DATA} DESTINATION ${DEST})

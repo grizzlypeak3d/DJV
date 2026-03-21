@@ -130,7 +130,7 @@ if(WIN32)
 
     set(CPACK_NSIS_MUI_ICON ${PROJECT_SOURCE_DIR}/etc/Windows/DJV_Icon.ico)
     set(CPACK_NSIS_MUI_UNIICON ${PROJECT_SOURCE_DIR}/etc/Windows/DJV_Icon.ico)
-    set(CPACK_NSIS_INSTALLED_ICON_NAME etc/Icons/DJV_Icon.ico)
+    set(CPACK_NSIS_INSTALLED_ICON_NAME bin/djv.exe)
 
 elseif(APPLE AND DJV_MACOS_PACKAGE)
 
@@ -487,39 +487,3 @@ else()
         DESTINATION lib)
 
 endif()
-
-set(DEST etc/DJV/Legal)
-if(DJV_MACOS_PACKAGE)
-    set(DEST Legal)
-endif()
-install(
-    FILES
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_BlackmagicDesign.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_boost.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_CMake.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_CURL.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_expat.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_FFmpeg.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_feather-tk.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_libjpeg-turbo.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_libjpeg.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_libpng.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_Libssh2.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_libtiff.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_MaterialX.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_minizip-ng.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_nlohmann_json.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_OFL.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_oneTBB.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_OpenColorIO.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_OpenEXR.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_OpenImageIO.md
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_OpenSSL.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_OpenSubdiv.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_OpenTimelineIO.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_OpenUSD.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_pystring.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_tlRender.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_yaml-cpp.txt
-    ${CMAKE_INSTALL_PREFIX}/etc/tlRender/LICENSE_zlib.txt
-    DESTINATION ${DEST})

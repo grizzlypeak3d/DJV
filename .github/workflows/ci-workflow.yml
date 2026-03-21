@@ -8,7 +8,6 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -56,7 +55,6 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: OFF
       TLRENDER_JPEG: ON
@@ -103,7 +101,6 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -157,7 +154,6 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -210,7 +206,6 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_MACOS_PACKAGE: ON
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -272,7 +267,6 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -323,7 +317,6 @@ jobs:
 
     env:
       JOBS: 4
-      DJV_MACOS_PACKAGE: OFF
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON

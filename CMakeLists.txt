@@ -24,6 +24,7 @@ project(
 # Options
 
 set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
+set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
 
 #-------------------------------------------------------------------------------
 # Internal configuration
@@ -79,9 +80,6 @@ add_subdirectory(tests)
 add_subdirectory(bin)
 add_subdirectory(etc/Legal)
 add_subdirectory(etc/SampleData)
-if(WIN32)
-    add_subdirectory(etc/Windows)
-endif()
 
 #-------------------------------------------------------------------------------
 # Packaging
