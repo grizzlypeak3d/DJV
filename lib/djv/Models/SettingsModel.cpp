@@ -403,6 +403,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             std::shared_ptr<ftk::Observable<tl::ffmpeg::Options> > ffmpeg;
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_FFMPEG_PIPE)
+            std::shared_ptr<ftk::Observable<tl::ffmpeg_pipe::Options> > ffmpegPipe;
+#endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
             std::shared_ptr<ftk::Observable<tl::usd::Options> > usd;
 #endif // TLRENDER_USD
@@ -475,6 +478,12 @@ namespace djv
             p.ffmpeg = ftk::Observable<tl::ffmpeg::Options>::create(ffmpeg);
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#if defined(TLRENDER_FFMPEG_PIPE)
+            tl::ffmpeg_pipe::Options ffmpegPipe;
+            settings->getT("/FFmpegPipe", ffmpegPipe);
+            p.ffmpegPipe = ftk::Observable<tl::ffmpeg_pipe::Options>::create(ffmpegPipe);
+#endif // TLRENDER_FFMPEG_PIPE
+
 #if defined(TLRENDER_USD)
             tl::usd::Options usd;
             settings->getT("/USD.1", usd);
@@ -530,6 +539,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             p.settings->setT("/FFmpeg", p.ffmpeg->get());
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_FFMPEG_PIPE)
+            p.settings->setT("/FFmpegPipe", p.ffmpegPipe->get());
+#endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
             p.settings->setT("/USD.1", p.usd->get());
 #endif // TLRENDER_USD
@@ -558,6 +570,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             setFFmpeg(tl::ffmpeg::Options());
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_FFMPEG_PIPE)
+            setFFmpegPipe(tl::ffmpeg_pipe::Options());
+#endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
             setUSD(tl::usd::Options());
 #endif // TLRENDER_USD
@@ -752,6 +767,23 @@ namespace djv
             _p->ffmpeg->setIfChanged(value);
         }
 #endif // TLRENDER_FFMPEG_PLUGIN
+
+#if defined(TLRENDER_FFMPEG_PIPE)
+        const tl::ffmpeg_pipe::Options& SettingsModel::getFFmpegPipe() const
+        {
+            return _p->ffmpegPipe->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<tl::ffmpeg_pipe::Options> > SettingsModel::observeFFmpegPipe() const
+        {
+            return _p->ffmpegPipe;
+        }
+
+        void SettingsModel::setFFmpegPipe(const tl::ffmpeg_pipe::Options& value)
+        {
+            _p->ffmpegPipe->setIfChanged(value);
+        }
+#endif // TLRENDER_FFMPEG_PIPE
 
 #if defined(TLRENDER_USD)
         const tl::usd::Options& SettingsModel::getUSD() const

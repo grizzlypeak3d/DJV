@@ -31,6 +31,9 @@
 #if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_FFMPEG_PIPE)
+#include <tlRender/IO/FFmpegPipe.h>
+#endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
@@ -1091,6 +1094,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             out = tl::merge(out, tl::ffmpeg::getOptions(p.settingsModel->getFFmpeg()));
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_FFMPEG_PIPE)
+            out = tl::merge(out, tl::ffmpeg_pipe::Options(p.settingsModel->getFFmpegPipe()).getIOOptions());
+#endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
             out = tl::merge(out, tl::usd::getOptions(p.settingsModel->getUSD()));
 #endif // TLRENDER_USD

@@ -384,6 +384,36 @@ namespace djv
         };
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#if defined(TLRENDER_FFMPEG_PIPE)
+        //! FFmpeg pipe settings widget.
+        class FFmpegPipeSettingsWidget : public ISettingsWidget
+        {
+            FTK_NON_COPYABLE(FFmpegPipeSettingsWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            FFmpegPipeSettingsWidget();
+
+        public:
+            virtual ~FFmpegPipeSettingsWidget();
+
+            static std::shared_ptr<FFmpegPipeSettingsWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            ftk::Size2I getSizeHint() const override;
+            void setGeometry(const ftk::Box2I&) override;
+
+        private:
+            FTK_PRIVATE();
+        };
+#endif // TLRENDER_FFMPEG_PIPE
+
 #if defined(TLRENDER_USD)
         //! USD settings widget.
         class USDSettingsWidget : public ISettingsWidget

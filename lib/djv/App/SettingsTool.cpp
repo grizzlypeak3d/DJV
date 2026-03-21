@@ -52,6 +52,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             auto ffmpegWidget = ui::FFmpegSettingsWidget::create(context, settingsModel);
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_FFMPEG_PIPE)
+            auto ffmpegPipeWidget = ui::FFmpegPipeSettingsWidget::create(context, settingsModel);
+#endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
             auto usdWidget = ui::USDSettingsWidget::create(context, settingsModel);
 #endif // TLRENDER_USD
@@ -80,6 +83,10 @@ namespace djv
             p.bellows["FFmpeg"] = ftk::Bellows::create(context, "FFmpeg", vLayout);
             p.bellows["FFmpeg"]->setWidget(ffmpegWidget);
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_FFMPEG_PIPE)
+            p.bellows["FFmpegPipe"] = ftk::Bellows::create(context, "FFmpeg Pipe", vLayout);
+            p.bellows["FFmpegPipe"]->setWidget(ffmpegPipeWidget);
+#endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
             p.bellows["USD"] = ftk::Bellows::create(context, "USD", vLayout);
             p.bellows["USD"]->setWidget(usdWidget);
