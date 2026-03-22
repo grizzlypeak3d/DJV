@@ -39,7 +39,7 @@ namespace djv
             auto viewportModel = app->getViewportModel();
             auto colorWidget = ui::ColorWidget::create(context, viewportModel);
             auto levelsWidget = ui::LevelsWidget::create(context, app->getSettings(), viewportModel);
-            auto exrDisplayWidget = ui::EXRDisplayWidget::create(context, viewportModel);
+            auto exposureWidget = ui::ExposureWidget::create(context, viewportModel);
             auto softClipWidget = ui::SoftClipWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
@@ -54,8 +54,8 @@ namespace djv
             p.bellows["Color"]->setWidget(colorWidget);
             p.bellows["Levels"] = ftk::Bellows::create(context, "Levels", layout);
             p.bellows["Levels"]->setWidget(levelsWidget);
-            p.bellows["EXRDisplay"] = ftk::Bellows::create(context, "EXR Display", layout);
-            p.bellows["EXRDisplay"]->setWidget(exrDisplayWidget);
+            p.bellows["Exposure"] = ftk::Bellows::create(context, "Exposure", layout);
+            p.bellows["Exposure"]->setWidget(exposureWidget);
             p.bellows["SoftClip"] = ftk::Bellows::create(context, "Soft Clip", layout);
             p.bellows["SoftClip"]->setWidget(softClipWidget);
             auto scrollWidget = ftk::ScrollWidget::create(context);

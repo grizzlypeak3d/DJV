@@ -205,9 +205,9 @@ namespace djv
                         ftk::ColorRole::Checked :
                         ftk::ColorRole::None);
                     _p->displayOptionsEnabled =
-                        value.color.enabled      ||
-                        value.levels.enabled     ||
-                        value.exrDisplay.enabled ||
+                        value.color.enabled    ||
+                        value.levels.enabled   ||
+                        value.exposure.enabled ||
                         value.softClip.enabled;
                     _colorControlsUpdate();
                 });

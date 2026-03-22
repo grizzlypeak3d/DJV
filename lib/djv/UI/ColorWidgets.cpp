@@ -692,7 +692,7 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-        struct EXRDisplayWidget::Private
+        struct ExposureWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
@@ -701,12 +701,12 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
         };
 
-        void EXRDisplayWidget::_init(
+        void ExposureWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::ui::EXRDisplayWidget", parent);
+            ftk::IWidget::_init(context, "djv::ui::ExposureWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -714,14 +714,21 @@ namespace djv
             p.sliders["Exposure"] = ftk::FloatEditSlider::create(context);
             p.sliders["Exposure"]->setRange(-10.F, 10.F);
             p.sliders["Exposure"]->setDefault(0.F);
+
             p.sliders["Defog"] = ftk::FloatEditSlider::create(context);
             p.sliders["Defog"]->setDefault(0.F);
+
             p.sliders["KneeLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["KneeLow"]->setRange(-3.F, 3.F);
             p.sliders["KneeLow"]->setDefault(0.F);
+
             p.sliders["KneeHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["KneeHigh"]->setRange(3.5F, 7.5F);
             p.sliders["KneeHigh"]->setDefault(5.F);
+
+            p.sliders["Gamma"] = ftk::FloatEditSlider::create(context);
+            p.sliders["Gamma"]->setRange(.1F, 4.F);
+            p.sliders["Gamma"]->setDefault(1.F);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -731,23 +738,25 @@ namespace djv
             p.layout->addRow("Defog:", p.sliders["Defog"]);
             p.layout->addRow("Knee low:", p.sliders["KneeLow"]);
             p.layout->addRow("Knee high:", p.sliders["KneeHigh"]);
+            p.layout->addRow("Gamma:", p.sliders["Gamma"]);
 
             p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
-                    _p->enabledCheckBox->setChecked(value.exrDisplay.enabled);
-                    _p->sliders["Exposure"]->setValue(value.exrDisplay.exposure);
-                    _p->sliders["Defog"]->setValue(value.exrDisplay.defog);
-                    _p->sliders["KneeLow"]->setValue(value.exrDisplay.kneeLow);
-                    _p->sliders["KneeHigh"]->setValue(value.exrDisplay.kneeHigh);
+                    _p->enabledCheckBox->setChecked(value.exposure.enabled);
+                    _p->sliders["Exposure"]->setValue(value.exposure.exposure);
+                    _p->sliders["Defog"]->setValue(value.exposure.defog);
+                    _p->sliders["KneeLow"]->setValue(value.exposure.kneeLow);
+                    _p->sliders["KneeHigh"]->setValue(value.exposure.kneeHigh);
+                    _p->sliders["Gamma"]->setValue(value.exposure.gamma);
                 });
 
             p.enabledCheckBox->setCheckedCallback(
                 [viewportModel](bool value)
                 {
                     auto options = viewportModel->getDisplayOptions();
-                    options.exrDisplay.enabled = value;
+                    options.exposure.enabled = value;
                     viewportModel->setDisplayOptions(options);
                 });
 
@@ -755,8 +764,8 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
-                    options.exrDisplay.enabled = true;
-                    options.exrDisplay.exposure = value;
+                    options.exposure.enabled = true;
+                    options.exposure.exposure = value;
                     viewportModel->setDisplayOptions(options);
                 });
 
@@ -764,8 +773,8 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
-                    options.exrDisplay.enabled = true;
-                    options.exrDisplay.defog = value;
+                    options.exposure.enabled = true;
+                    options.exposure.defog = value;
                     viewportModel->setDisplayOptions(options);
                 });
 
@@ -773,8 +782,8 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
-                    options.exrDisplay.enabled = true;
-                    options.exrDisplay.kneeLow = value;
+                    options.exposure.enabled = true;
+                    options.exposure.kneeLow = value;
                     viewportModel->setDisplayOptions(options);
                 });
 
@@ -782,35 +791,44 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
-                    options.exrDisplay.enabled = true;
-                    options.exrDisplay.kneeHigh = value;
+                    options.exposure.enabled = true;
+                    options.exposure.kneeHigh = value;
+                    viewportModel->setDisplayOptions(options);
+                });
+
+            p.sliders["Gamma"]->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    options.exposure.enabled = true;
+                    options.exposure.gamma = value;
                     viewportModel->setDisplayOptions(options);
                 });
         }
 
-        EXRDisplayWidget::EXRDisplayWidget() :
+        ExposureWidget::ExposureWidget() :
             _p(new Private)
         {}
 
-        EXRDisplayWidget::~EXRDisplayWidget()
+        ExposureWidget::~ExposureWidget()
         {}
 
-        std::shared_ptr<EXRDisplayWidget> EXRDisplayWidget::create(
+        std::shared_ptr<ExposureWidget> ExposureWidget::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<EXRDisplayWidget>(new EXRDisplayWidget);
+            auto out = std::shared_ptr<ExposureWidget>(new ExposureWidget);
             out->_init(context, viewportModel, parent);
             return out;
         }
 
-        ftk::Size2I EXRDisplayWidget::getSizeHint() const
+        ftk::Size2I ExposureWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
         }
 
-        void EXRDisplayWidget::setGeometry(const ftk::Box2I& value)
+        void ExposureWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);

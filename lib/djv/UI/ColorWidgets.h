@@ -132,9 +132,9 @@ namespace djv
             FTK_PRIVATE();
         };
 
-        class EXRDisplayWidget : public ftk::IWidget
+        class ExposureWidget : public ftk::IWidget
         {
-            FTK_NON_COPYABLE(EXRDisplayWidget);
+            FTK_NON_COPYABLE(ExposureWidget);
 
         protected:
             void _init(
@@ -142,12 +142,12 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
-            EXRDisplayWidget();
+            ExposureWidget();
 
         public:
-            virtual ~EXRDisplayWidget();
+            virtual ~ExposureWidget();
 
-            static std::shared_ptr<EXRDisplayWidget> create(
+            static std::shared_ptr<ExposureWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
