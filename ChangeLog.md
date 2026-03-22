@@ -1,7 +1,10 @@
 ## 3.3.5
 
 Features:
+* Movies can now be opened using the ffmpeg command line utility.
 * Add auto-scroll and text selection to the messages and system log tools.
+* Library updates:
+    - USD v26.03
 
 Fixes:
 * Mouse focus fixes for zooming the viewport and timeline.
