@@ -14,6 +14,7 @@
 #endif // TLRENDER_BMD
 
 #include <ftk/UI/Divider.h>
+#include <ftk/UI/Icon.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/Spacer.h>
@@ -33,18 +34,13 @@ namespace djv
 
             bool ocioOptionsEnabled = false;
             bool lutOptionsEnabled = false;
-            bool displayOptionsEnabled = false;
+            bool colorOptionsEnabled = false;
+            bool audioOffsetEnabled = false;
+            bool outputDeviceEnabled = false;
 
             std::shared_ptr<ftk::Label> messagesLabel;
             std::shared_ptr<ftk::Label> infoLabel;
-            std::shared_ptr<ftk::Label> channelDisplayLabel;
-            std::shared_ptr<ftk::Label> mirrorHLabel;
-            std::shared_ptr<ftk::Label> mirrorVLabel;
-            std::shared_ptr<ftk::Label> colorControlsLabel;
-            std::shared_ptr<ftk::Label> audioSyncLabel;
-#if defined(TLRENDER_BMD)
-            std::shared_ptr<ftk::Label> outputDeviceLabel;
-#endif // TLRENDER_BMD
+            std::shared_ptr<ftk::Icon> indicatorIcon;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             std::shared_ptr<ftk::Timer> messagesTimer;
@@ -78,53 +74,20 @@ namespace djv
             p.app = app;
 
             p.messagesLabel = ftk::Label::create(context);
-            p.messagesLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+            p.messagesLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
             p.messagesLabel->setHStretch(ftk::Stretch::Expanding);
+            p.messagesLabel->setClipText(true);
             p.messagesLabel->setTooltip(
                 "Display messages.\n"
                 "\n"
                 "Click to open messages tool.");
 
             p.infoLabel = ftk::Label::create(context);
-            p.infoLabel->setHMarginRole(ftk::SizeRole::MarginInside);
+            p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.infoLabel->setClipText(true);
 
-            p.channelDisplayLabel = ftk::Label::create(context, "C");
-            p.channelDisplayLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.channelDisplayLabel->setTooltip(
-                "This displays whether channel display is enabled.");
-
-            p.mirrorHLabel = ftk::Label::create(context, "H");
-            p.mirrorHLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.mirrorHLabel->setTooltip(
-                "This displays whether mirror horizontal is enabled.");
-
-            p.mirrorVLabel = ftk::Label::create(context, "V");
-            p.mirrorVLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.mirrorVLabel->setTooltip(
-                "This displays whether mirror vertical is enabled.");
-
-            p.colorControlsLabel = ftk::Label::create(context, "CC");
-            p.colorControlsLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.colorControlsLabel->setTooltip(
-                "This displays whether color controls are enabled.\n"
-                "\n"
-                "Click to open color tool.");
-
-            p.audioSyncLabel = ftk::Label::create(context, "AO");
-            p.audioSyncLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.audioSyncLabel->setTooltip(
-                "This displays whether the audio sync offset is enabled.\n"
-                "\n"
-                "Click to open audio tool.");
-
-#if defined(TLRENDER_BMD)
-            p.outputDeviceLabel = ftk::Label::create(context, "OD");
-            p.outputDeviceLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.outputDeviceLabel->setTooltip(
-                "This displays whether the output device is enabled.\n"
-                "\n"
-                "Click to open output device tool.");
-#endif // TLRENDER_BMD
+            p.indicatorIcon = ftk::Icon::create(context);
+            p.indicatorIcon->setIcon("MenuChecked");
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
@@ -132,14 +95,7 @@ namespace djv
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
-            p.channelDisplayLabel->setParent(p.layout);
-            p.mirrorHLabel->setParent(p.layout);
-            p.mirrorVLabel->setParent(p.layout);
-            p.colorControlsLabel->setParent(p.layout);
-            p.audioSyncLabel->setParent(p.layout);
-#if defined(TLRENDER_BMD)
-            p.outputDeviceLabel->setParent(p.layout);
-#endif // TLRENDER_BMD
+            p.indicatorIcon->setParent(p.layout);
             //ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
 
             p.messagesTimer = ftk::Timer::create(context);
@@ -177,7 +133,7 @@ namespace djv
                 [this](const tl::OCIOOptions& value)
                 {
                     _p->ocioOptionsEnabled = value.enabled;
-                    _colorControlsUpdate();
+                    _indicatorUpdate();
                 });
 
             p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
@@ -185,41 +141,27 @@ namespace djv
                 [this](const tl::LUTOptions& value)
                 {
                     _p->lutOptionsEnabled = value.enabled;
-                    _colorControlsUpdate();
+                    _indicatorUpdate();
                 });
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
-                    _p->channelDisplayLabel->setBackgroundRole(
-                        value.channels != ftk::ChannelDisplay::Color ?
-                        ftk::ColorRole::Checked :
-                        ftk::ColorRole::None);
-                    _p->mirrorHLabel->setBackgroundRole(
-                        value.mirror.x ?
-                        ftk::ColorRole::Checked :
-                        ftk::ColorRole::None);
-                    _p->mirrorVLabel->setBackgroundRole(
-                        value.mirror.y ?
-                        ftk::ColorRole::Checked :
-                        ftk::ColorRole::None);
-                    _p->displayOptionsEnabled =
+                    _p->colorOptionsEnabled =
                         value.color.enabled    ||
                         value.levels.enabled   ||
                         value.exposure.enabled ||
                         value.softClip.enabled;
-                    _colorControlsUpdate();
+                    _indicatorUpdate();
                 });
 
             p.audioSyncOffsetObserver = ftk::Observer<double>::create(
                 app->getAudioModel()->observeSyncOffset(),
                 [this](double value)
                 {
-                    _p->audioSyncLabel->setBackgroundRole(
-                        value != 0.0 ?
-                        ftk::ColorRole::Checked :
-                        ftk::ColorRole::None);
+                    _p->audioOffsetEnabled = value != 0.0;
+                    _indicatorUpdate();
                 });
 
 #if defined(TLRENDER_BMD)
@@ -227,10 +169,8 @@ namespace djv
                 app->getBMDOutputDevice()->observeActive(),
                 [this](bool value)
                 {
-                    _p->outputDeviceLabel->setBackgroundRole(
-                        value ?
-                        ftk::ColorRole::Checked :
-                        ftk::ColorRole::None);
+                    _p->outputDeviceEnabled = value;
+                    _indicatorUpdate();
                 });
 #endif // TLRENDER_BMD
         }
@@ -283,20 +223,6 @@ namespace djv
             {
                 tool = models::Tool::Info;
             }
-            else if (ftk::contains(p.colorControlsLabel->getGeometry(), event.pos))
-            {
-                tool = models::Tool::Color;
-            }
-            else if (ftk::contains(p.audioSyncLabel->getGeometry(), event.pos))
-            {
-                tool = models::Tool::Audio;
-            }
-#if defined(TLRENDER_BMD)
-            else if (ftk::contains(p.outputDeviceLabel->getGeometry(), event.pos))
-            {
-                tool = models::Tool::Devices;
-            }
-#endif // TLRENDER_BMD
             if (tool != models::Tool::None)
             {
                 if (auto app = p.app.lock())
@@ -314,7 +240,7 @@ namespace djv
             const std::string tooltipFormat =
                 "{0}\n"
                 "\n"
-                "Click to open information tool.";
+                "Click to open the information tool.";
             const std::string tooltipDefault =
                 "Display information about the current file.";
 
@@ -332,8 +258,7 @@ namespace djv
                     ftk::Format("audio: {0}").
                     arg(tl::getLabel(info.audio, true))));
             }
-            const std::string text = ftk::join(s, ", ");
-            p.infoLabel->setText(!text.empty() ? text : "-");
+            p.infoLabel->setText(ftk::join(s, ", "));
 
             s.clear();
             s.push_back(path.get());
@@ -354,17 +279,33 @@ namespace djv
                 arg(!tooltip.empty() ? tooltip : tooltipDefault));
         }
 
-        void StatusBar::_colorControlsUpdate()
+        void StatusBar::_indicatorUpdate()
         {
             FTK_P();
             const bool enabled =
-                p.ocioOptionsEnabled    ||
-                p.lutOptionsEnabled     ||
-                p.displayOptionsEnabled;
-            p.colorControlsLabel->setBackgroundRole(
+                p.ocioOptionsEnabled  ||
+                p.lutOptionsEnabled   ||
+                p.colorOptionsEnabled ||
+                p.audioOffsetEnabled  ||
+                p.outputDeviceEnabled;
+            p.indicatorIcon->setBackgroundRole(
                 enabled ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            p.indicatorIcon->setTooltip(ftk::Format(
+                "This indicator shows options that can\n"
+                "affect the video, audio, or performance.\n"
+                "\n"
+                "OCIO enabled: {0}\n"
+                "LUT enabled: {1}\n"
+                "Color controls enabled: {2}\n"
+                "Audio offset enabled: {3}\n"
+                "Output device enabled: {4}").
+                arg(ftk::boolLabel(p.ocioOptionsEnabled)).
+                arg(ftk::boolLabel(p.lutOptionsEnabled)).
+                arg(ftk::boolLabel(p.colorOptionsEnabled)).
+                arg(ftk::boolLabel(p.audioOffsetEnabled)).
+                arg(ftk::boolLabel(p.outputDeviceEnabled)));
         }
     }
 }
