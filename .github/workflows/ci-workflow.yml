@@ -146,7 +146,7 @@ jobs:
     - uses: actions/upload-artifact@v7
       with:
         name: DJV-Linux-Packages
-        path: build-Release/DJV-*.tar.gz
+        path: build-Release/djv-*.tar.gz
         archive: false
 
   macos-build:
@@ -259,7 +259,7 @@ jobs:
     - uses: actions/upload-artifact@v7
       with:
         name: DJV-macOS-Packages
-        path: build-Release/DJV-*.dmg
+        path: build-Release/djv-*.dmg
         archive: false
 
   windows-build:
@@ -367,6 +367,6 @@ jobs:
       with:
         name: DJV-Windows-Packages
         path: |
-          build-Release\DJV-*.exe
-          build-Release\DJV-*.zip
+          build-Release\djv-*.exe
+          build-Release\djv-*.zip
         archive: true
