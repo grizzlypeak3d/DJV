@@ -4,6 +4,8 @@ Features:
 * Movies can now be opened using the ffmpeg command line utility.
 * Add auto-scroll and text selection to the messages and system log tools.
 * Library updates:
+    - FFmpeg 8.1
+    - SVT-AV1 v4.0.1
     - USD v26.03
 
 Fixes:
