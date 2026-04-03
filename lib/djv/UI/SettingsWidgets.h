@@ -218,6 +218,7 @@ namespace djv
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
             ftk::Box2I getChildrenClipRect() const override;
+            void styleEvent(const ftk::StyleEvent&) override;
             void sizeHintEvent(const ftk::SizeHintEvent&) override;
             void drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent&) override;
             void mouseEnterEvent(ftk::MouseEnterEvent&) override;

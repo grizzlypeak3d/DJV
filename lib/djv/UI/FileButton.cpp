@@ -20,7 +20,7 @@ namespace djv
 
             struct SizeData
             {
-                std::optional<float> displayScale;
+                bool init = true;
                 int margin = 0;
                 int spacing = 0;
                 int border = 0;
@@ -103,12 +103,23 @@ namespace djv
             return out;
         }
 
+        void FileButton::styleEvent(const ftk::StyleEvent& event)
+        {
+            IButton::styleEvent(event);
+            FTK_P();
+            if (event.hasChanges())
+            {
+                p.size.init = true;
+                p.draw.reset();
+            }
+        }
+
         void FileButton::tickEvent(
             bool parentsVisible,
             bool parentsEnabled,
             const ftk::TickEvent& event)
         {
-            IWidget::tickEvent(parentsVisible, parentsEnabled, event);
+            IButton::tickEvent(parentsVisible, parentsEnabled, event);
             FTK_P();
             if (p.thumbnail.request.future.valid() &&
                 p.thumbnail.request.future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
@@ -124,10 +135,9 @@ namespace djv
             IButton::sizeHintEvent(event);
             FTK_P();
 
-            if (!p.size.displayScale.has_value() ||
-                (p.size.displayScale.has_value() && p.size.displayScale.value() != event.displayScale))
+            if (p.size.init)
             {
-                p.size.displayScale = event.displayScale;
+                p.size.init = false;
                 p.size.margin = event.style->getSizeRole(ftk::SizeRole::MarginInside, event.displayScale);
                 p.size.spacing = event.style->getSizeRole(ftk::SizeRole::SpacingSmall, event.displayScale);
                 p.size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);

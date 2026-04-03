@@ -32,6 +32,7 @@ namespace djv
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
+            void styleEvent(const ftk::StyleEvent&) override;
             void tickEvent(
                 bool,
                 bool,

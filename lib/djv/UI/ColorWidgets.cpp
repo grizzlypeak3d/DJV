@@ -61,6 +61,8 @@ namespace djv
             p.configComboBox->setHStretch(ftk::Stretch::Expanding);
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
+            p.enabledCheckBox->setTooltip("Set whether OCIO is enabled.");
 
             p.fileEdit = ftk::FileEdit::create(context);
 
@@ -83,7 +85,6 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout = ftk::FormLayout::create(context, p.layout);
             p.formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.formLayout->addRow("Enabled:", p.enabledCheckBox);
             p.formLayout->addRow("Configuration:", p.configComboBox);
             p.formLayout->addRow("File name:", p.fileEdit);
             p.formLayout->addRow("Name:", p.nameLabel);
@@ -183,6 +184,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::CheckBox> OCIOWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         ftk::Size2I OCIOWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
@@ -213,6 +219,8 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
+            p.enabledCheckBox->setTooltip("Set whether the LUT is enabled.");
 
             p.fileEdit = ftk::FileEdit::create(context);
             std::vector<std::string> s;
@@ -232,7 +240,6 @@ namespace djv
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("File name:", p.fileEdit);
             p.layout->addRow("Order:", p.orderComboBox);
 
@@ -289,6 +296,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::CheckBox> LUTWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         ftk::Size2I LUTWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
@@ -320,6 +332,8 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
+            p.enabledCheckBox->setTooltip("Set whether color controls are enabled.");
 
             p.sliders["Add"] = ftk::FloatEditSlider::create(context);
             p.sliders["Add"]->setRange(-1.F, 1.F);
@@ -344,7 +358,6 @@ namespace djv
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Add:", p.sliders["Add"]);
             p.layout->addRow("Brightness:", p.sliders["Brightness"]);
             p.layout->addRow("Contrast:", p.sliders["Contrast"]);
@@ -454,6 +467,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::CheckBox> ColorWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         ftk::Size2I ColorWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
@@ -489,6 +507,8 @@ namespace djv
             p.settings = settings;
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
+            p.enabledCheckBox->setTooltip("Set whether levels are enabled.");
 
             ftk::RangeF range(0.F, 1.F);
             p.settings->getT("/Color/Levels/InRange", range);
@@ -532,7 +552,6 @@ namespace djv
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("In low:", p.sliders["InLow"]);
             p.layout->addRow("In high:", p.sliders["InHigh"]);
             auto hLayout = ftk::HorizontalLayout::create(context);
@@ -681,6 +700,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::CheckBox> LevelsWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         ftk::Size2I LevelsWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
@@ -710,6 +734,8 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
+            p.enabledCheckBox->setTooltip("Set whether exposure controls are enabled.");
 
             p.sliders["Exposure"] = ftk::FloatEditSlider::create(context);
             p.sliders["Exposure"]->setRange(-10.F, 10.F);
@@ -733,7 +759,6 @@ namespace djv
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Exposure:", p.sliders["Exposure"]);
             p.layout->addRow("Defog:", p.sliders["Defog"]);
             p.layout->addRow("Knee low:", p.sliders["KneeLow"]);
@@ -823,6 +848,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::CheckBox> ExposureWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         ftk::Size2I ExposureWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
@@ -852,6 +882,8 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
+            p.enabledCheckBox->setTooltip("Set whether soft clip is enabled.");
 
             p.sliders["SoftClip"] = ftk::FloatEditSlider::create(context);
             p.sliders["SoftClip"]->setDefault(0.F);
@@ -859,7 +891,6 @@ namespace djv
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Soft clip:", p.sliders["SoftClip"]);
 
             p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
@@ -903,6 +934,11 @@ namespace djv
             auto out = std::shared_ptr<SoftClipWidget>(new SoftClipWidget);
             out->_init(context, viewportModel, parent);
             return out;
+        }
+
+        std::shared_ptr<ftk::CheckBox> SoftClipWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
         }
 
         ftk::Size2I SoftClipWidget::getSizeHint() const

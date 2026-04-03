@@ -6,6 +6,7 @@
 #include <djv/App/App.h>
 #include <djv/UI/ColorWidgets.h>
 
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
 
@@ -47,17 +48,23 @@ namespace djv
 #if defined(TLRENDER_OCIO)
             p.bellows["OCIO"] = ftk::Bellows::create(context, "OCIO", layout);
             p.bellows["OCIO"]->setWidget(ocioWidget);
+            p.bellows["OCIO"]->setToolWidget(ocioWidget->getEnabledCheckBox());
             p.bellows["LUT"] = ftk::Bellows::create(context, "LUT", layout);
             p.bellows["LUT"]->setWidget(lutWidget);
+            p.bellows["LUT"]->setToolWidget(lutWidget->getEnabledCheckBox());
 #endif // TLRENDER_OCIO
             p.bellows["Color"] = ftk::Bellows::create(context, "Color", layout);
             p.bellows["Color"]->setWidget(colorWidget);
+            p.bellows["Color"]->setToolWidget(colorWidget->getEnabledCheckBox());
             p.bellows["Levels"] = ftk::Bellows::create(context, "Levels", layout);
             p.bellows["Levels"]->setWidget(levelsWidget);
+            p.bellows["Levels"]->setToolWidget(levelsWidget->getEnabledCheckBox());
             p.bellows["Exposure"] = ftk::Bellows::create(context, "Exposure", layout);
             p.bellows["Exposure"]->setWidget(exposureWidget);
+            p.bellows["Exposure"]->setToolWidget(exposureWidget->getEnabledCheckBox());
             p.bellows["SoftClip"] = ftk::Bellows::create(context, "Soft Clip", layout);
             p.bellows["SoftClip"]->setWidget(softClipWidget);
+            p.bellows["SoftClip"]->setToolWidget(softClipWidget->getEnabledCheckBox());
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setBorder(false);
             scrollWidget->setWidget(layout);

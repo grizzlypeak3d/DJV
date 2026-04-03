@@ -26,7 +26,7 @@ namespace djv
 
             struct SizeData
             {
-                std::optional<float> displayScale;
+                bool init = true;
                 int minSize = 0;
                 int border = 0;
                 int keyFocus = 0;
@@ -102,17 +102,14 @@ namespace djv
 
         void ShortcutEdit::setGeometry(const ftk::Box2I& value)
         {
-            bool changed = value != getGeometry();
+            if (value != getGeometry())
+            {
+                _p->draw.reset();
+            }
             IMouseWidget::setGeometry(value);
             FTK_P();
-
             const ftk::Box2I g = ftk::margin(value, -p.size.keyFocus);
             p.label->setGeometry(g);
-
-            if (changed)
-            {
-                p.draw.reset();
-            }
         }
 
         ftk::Box2I ShortcutEdit::getChildrenClipRect() const
@@ -129,13 +126,24 @@ namespace djv
             return out + p.size.keyFocus * 2;
         }
 
+        void ShortcutEdit::styleEvent(const ftk::StyleEvent& event)
+        {
+            IMouseWidget::styleEvent(event);
+            FTK_P();
+            if (event.hasChanges())
+            {
+                p.size.init = true;
+                p.draw.reset();
+            }
+        }
+
         void ShortcutEdit::sizeHintEvent(const ftk::SizeHintEvent& event)
         {
             FTK_P();
-            if (!p.size.displayScale.has_value() ||
-                (p.size.displayScale.has_value() && p.size.displayScale.value() != event.displayScale))
+            if (p.size.init)
             {
-                p.size.displayScale = event.displayScale;
+                p.size.init = false;
+                p.size = Private::SizeData();
                 p.size.minSize = event.style->getSizeRole(ftk::SizeRole::Icon, event.displayScale);
                 p.size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);
                 p.size.keyFocus = event.style->getSizeRole(ftk::SizeRole::KeyFocus, event.displayScale);
@@ -506,7 +514,7 @@ namespace djv
                         auto groupLabel = ftk::Label::create(context, ftk::toUpper(group.name), p.shortcutsLayout);
                         groupLabel->setMarginRole(ftk::SizeRole::MarginInside);
                         ftk::FontInfo fontInfo;
-                        fontInfo.family = ftk::getFont(ftk::Font::Bold);
+                        fontInfo.type = ftk::FontType::Bold;
                         groupLabel->setFontInfo(fontInfo);
                         p.groupLabels[group.name] = groupLabel;
                         p.shortcutsLayout->setGridPos(groupLabel, column, 0);

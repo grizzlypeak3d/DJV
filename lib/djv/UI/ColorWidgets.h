@@ -9,6 +9,7 @@
 
 namespace ftk
 {
+    class CheckBox;
     class Settings;
 }
 
@@ -42,6 +43,8 @@ namespace djv
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
 
@@ -69,6 +72,8 @@ namespace djv
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
 
@@ -95,6 +100,8 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
+
+            std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
@@ -125,6 +132,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
 
@@ -152,6 +161,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
 
@@ -178,6 +189,8 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
+
+            std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
