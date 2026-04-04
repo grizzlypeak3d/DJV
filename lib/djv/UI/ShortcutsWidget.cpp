@@ -512,10 +512,8 @@ namespace djv
                         ++column;
 
                         auto groupLabel = ftk::Label::create(context, ftk::toUpper(group.name), p.shortcutsLayout);
+                        groupLabel->setFontRole(ftk::FontRole::Title);
                         groupLabel->setMarginRole(ftk::SizeRole::MarginInside);
-                        ftk::FontInfo fontInfo;
-                        fontInfo.type = ftk::FontType::Bold;
-                        groupLabel->setFontInfo(fontInfo);
                         p.groupLabels[group.name] = groupLabel;
                         p.shortcutsLayout->setGridPos(groupLabel, column, 0);
                         ++column;
