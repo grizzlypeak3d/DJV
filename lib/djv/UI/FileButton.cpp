@@ -17,6 +17,7 @@ namespace djv
         struct FileButton::Private
         {
             std::shared_ptr<models::FilesModelItem> item;
+            tl::IOOptions ioOptions;
 
             struct SizeData
             {
@@ -50,6 +51,7 @@ namespace djv
         void FileButton::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::FilesModelItem>& item,
+            const tl::IOOptions& ioOptions,
             const std::shared_ptr<IWidget>& parent)
         {
             IButton::_init(context, "djv::app::FileButton", parent);
@@ -61,6 +63,7 @@ namespace djv
             setAcceptsKeyFocus(true);
             _buttonRole = ftk::ColorRole::None;
             p.item = item;
+            p.ioOptions = ioOptions;
         }
 
         FileButton::FileButton() :
@@ -73,10 +76,11 @@ namespace djv
         std::shared_ptr<FileButton> FileButton::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::FilesModelItem>& item,
+            const tl::IOOptions& ioOptions,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<FileButton>(new FileButton);
-            out->_init(context, item, parent);
+            out->_init(context, item, ioOptions, parent);
             return out;
         }
 
@@ -160,9 +164,10 @@ namespace djv
                 {
                     auto thumbnailSystem = context->getSystem<tl::ui::ThumbnailSystem>();
                     p.thumbnail.request = thumbnailSystem->getThumbnail(
-                        reinterpret_cast<intptr_t>(p.item.get()),
                         p.item->path,
-                        p.thumbnail.height);
+                        p.thumbnail.height,
+                        tl::invalidTime,
+                        p.ioOptions);
                 }
             }
         }

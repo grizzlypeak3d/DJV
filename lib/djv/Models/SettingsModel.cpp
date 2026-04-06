@@ -802,6 +802,23 @@ namespace djv
         }
 #endif // TLRENDER_USD
 
+        tl::IOOptions SettingsModel::getIOOptions() const
+        {
+            FTK_P();
+            tl::IOOptions out;
+            out = tl::merge(out, tl::getOptions(p.imageSeq->get().io));
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            out = tl::merge(out, tl::ffmpeg::getOptions(p.ffmpeg->get()));
+#endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_FFMPEG_PIPE)
+            out = tl::merge(out, p.ffmpegPipe->get().getIOOptions());
+#endif // TLRENDER_FFMPEG_PIPE
+#if defined(TLRENDER_USD)
+            out = tl::merge(out, tl::usd::getOptions(p.usd->get()));
+#endif // TLRENDER_USD
+            return out;
+        }
+
         void to_json(nlohmann::json& json, const AdvancedSettings& value)
         {
             json["Compat"] = value.compat;

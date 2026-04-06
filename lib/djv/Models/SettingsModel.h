@@ -424,6 +424,13 @@ namespace djv
             ///@}
 #endif // TLRENDER_USD
 
+            //! \name I/O Options
+            ///@{
+
+            tl::IOOptions getIOOptions() const;
+
+            ///@}
+
         private:
             FTK_PRIVATE();
         };

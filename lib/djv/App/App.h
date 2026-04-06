@@ -152,7 +152,6 @@ namespace djv
             std::filesystem::path _getSettingsPath(
                 const std::string& appName,
                 const std::filesystem::path& appDocsPath);
-            tl::IOOptions _getIOOptions() const;
 
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);

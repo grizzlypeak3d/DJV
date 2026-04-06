@@ -5,6 +5,8 @@
 
 #include <djv/App/FilesTool.h>
 
+#include <tlRender/IO/IO.h>
+
 #include <ftk/UI/IButton.h>
 
 namespace djv
@@ -19,6 +21,7 @@ namespace djv
             void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::FilesModelItem>&,
+                const tl::IOOptions&,
                 const std::shared_ptr<IWidget>& parent);
 
             FileButton();
@@ -29,6 +32,7 @@ namespace djv
             static std::shared_ptr<FileButton> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::FilesModelItem>&,
+                const tl::IOOptions&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;

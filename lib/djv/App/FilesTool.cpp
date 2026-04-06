@@ -5,6 +5,7 @@
 
 #include <djv/App/App.h>
 #include <djv/UI/FileButton.h>
+#include <djv/Models/SettingsModel.h>
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ButtonGroup.h>
@@ -284,7 +285,10 @@ namespace djv
                     size_t row = 0;
                     for (const auto& item : value)
                     {
-                        auto aButton = ui::FileButton::create(context, item);
+                        auto aButton = ui::FileButton::create(
+                            context,
+                            item,
+                            app->getSettingsModel()->getIOOptions());
                         aButton->setChecked(item == a);
                         aButton->setTooltip(item->path.get());
                         p.aButtons[item] = aButton;

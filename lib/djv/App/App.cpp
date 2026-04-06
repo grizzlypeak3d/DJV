@@ -497,7 +497,7 @@ namespace djv
             }
 
             auto thumbnailSytem = _context->getSystem<tl::ui::ThumbnailSystem>();
-            thumbnailSytem->getCache()->clear();
+            thumbnailSytem->clearCache();
 
             _filesUpdate(files);
             _activeUpdate(activeFiles);
@@ -1086,23 +1086,6 @@ namespace djv
                 str();
         }
 
-        tl::IOOptions App::_getIOOptions() const
-        {
-            FTK_P();
-            tl::IOOptions out;
-            out = tl::merge(out, tl::getOptions(p.settingsModel->getImageSeq().io));
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-            out = tl::merge(out, tl::ffmpeg::getOptions(p.settingsModel->getFFmpeg()));
-#endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_PIPE)
-            out = tl::merge(out, tl::ffmpeg_pipe::Options(p.settingsModel->getFFmpegPipe()).getIOOptions());
-#endif // TLRENDER_FFMPEG_PIPE
-#if defined(TLRENDER_USD)
-            out = tl::merge(out, tl::usd::getOptions(p.settingsModel->getUSD()));
-#endif // TLRENDER_USD
-            return out;
-        }
-
         void App::_filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& files)
         {
             FTK_P();
@@ -1132,7 +1115,7 @@ namespace djv
                         options.compat = advanced.compat;
                         options.videoRequestMax = advanced.videoRequestMax;
                         options.audioRequestMax = advanced.audioRequestMax;
-                        options.ioOptions = _getIOOptions();
+                        options.ioOptions = p.settingsModel->getIOOptions();
                         options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
                         auto otioTimeline = files[i]->audioPath.isEmpty() ?
                             tl::create(_context, files[i]->path, options) :
