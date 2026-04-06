@@ -296,7 +296,6 @@ namespace djv
                         bButton->setText("B");
                         const auto i = std::find(b.begin(), b.end(), item);
                         bButton->setChecked(i != b.end());
-                        bButton->setVAlign(ftk::VAlign::Center);
                         bButton->setTooltip("Set the B file(s).");
                         p.bButtons[item] = bButton;
                         p.bButtonGroup->addButton(bButton);
@@ -306,7 +305,6 @@ namespace djv
                         auto layerComboBox = ftk::ComboBox::create(context);
                         layerComboBox->setItems(item->videoLayers);
                         layerComboBox->setCurrentIndex(item->videoLayer);
-                        layerComboBox->setVAlign(ftk::VAlign::Center);
                         layerComboBox->setTooltip("Set the current layer.");
                         p.layerComboBoxes.push_back(layerComboBox);
                         layerComboBox->setParent(p.widgetLayout);

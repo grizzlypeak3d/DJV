@@ -138,8 +138,11 @@ namespace djv
 
             auto textEdit = ftk::TextEdit::create(context, layout);
             textEdit->setReadOnly(true);
-            textEdit->setText(p.text);
+            ftk::TextEditOptions textEditOptions;
+            textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
+            textEdit->setOptions(textEditOptions);
             textEdit->setMarginRole(ftk::SizeRole::Margin);
+            textEdit->setText(p.text);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
             auto hLayout = ftk::HorizontalLayout::create(context, layout);

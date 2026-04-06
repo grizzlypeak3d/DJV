@@ -32,9 +32,7 @@ namespace djv
             std::shared_ptr<ftk::Settings> settings;
 
             std::shared_ptr<ftk::TextEdit> textEdit;
-            std::shared_ptr<ftk::ToolButton> copyButton;
             std::shared_ptr<ftk::CheckBox> autoScrollCheckBox;
-            std::shared_ptr<ftk::VerticalLayout> layout;
 
             std::shared_ptr<ftk::ListObserver<std::string> > logObserver;
         };
@@ -56,9 +54,12 @@ namespace djv
 
             p.textEdit = ftk::TextEdit::create(context);
             p.textEdit->setReadOnly(true);
+            ftk::TextEditOptions textEditOptions;
+            textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
+            p.textEdit->setOptions(textEditOptions);
             p.textEdit->setVStretch(ftk::Stretch::Expanding);
 
-            p.copyButton = ftk::ToolButton::create(context, "Copy");
+            auto copyButton = ftk::ToolButton::create(context, "Copy");
 
             p.autoScrollCheckBox = ftk::CheckBox::create(context, "Auto-scroll");
             bool autoScroll = true;
@@ -67,17 +68,17 @@ namespace djv
                 autoScroll);
             p.autoScrollCheckBox->setChecked(autoScroll);
 
-            p.layout = ftk::VerticalLayout::create(context);
-            p.layout->setMarginRole(ftk::SizeRole::MarginSmall);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.textEdit->setParent(p.layout);
-            auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
+            auto layout = ftk::VerticalLayout::create(context);
+            layout->setMarginRole(ftk::SizeRole::MarginSmall);
+            layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.textEdit->setParent(layout);
+            auto hLayout = ftk::HorizontalLayout::create(context, layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.copyButton->setParent(hLayout);
+            copyButton->setParent(hLayout);
             p.autoScrollCheckBox->setParent(hLayout);
-            _setWidget(p.layout);
+            _setWidget(layout);
 
-            p.copyButton->setClickedCallback(
+            copyButton->setClickedCallback(
                 [this]
                 {
                     FTK_P();

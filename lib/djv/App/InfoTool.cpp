@@ -5,9 +5,10 @@
 
 #include <djv/App/App.h>
 
+#include <ftk/UI/ClipboardSystem.h>
 #include <ftk/UI/Divider.h>
-#include <ftk/UI/GridLayout.h>
-#include <ftk/UI/Label.h>
+#include <ftk/UI/TextEdit.h>
+#include <ftk/UI/ToolButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/SearchBox.h>
@@ -22,8 +23,8 @@ namespace djv
             tl::IOInfo info;
             std::string search;
 
+            std::shared_ptr<ftk::TextEdit> textEdit;
             std::shared_ptr<ftk::SearchBox> searchBox;
-            std::shared_ptr<ftk::GridLayout> layout;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
@@ -41,23 +42,25 @@ namespace djv
                 parent);
             FTK_P();
 
+            p.textEdit = ftk::TextEdit::create(context);
+            p.textEdit->setReadOnly(true);
+            ftk::TextEditOptions textEditOptions;
+            textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
+            p.textEdit->setOptions(textEditOptions);
+            p.textEdit->setVStretch(ftk::Stretch::Expanding);
+
+            auto copyButton = ftk::ToolButton::create(context, "Copy");
+
             p.searchBox = ftk::SearchBox::create(context);
             p.searchBox->setHStretch(ftk::Stretch::Expanding);
 
-            p.layout = ftk::GridLayout::create(context);
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            auto scrollWidget = ftk::ScrollWidget::create(context);
-            scrollWidget->setWidget(p.layout);
-            scrollWidget->setBorder(false);
-            scrollWidget->setVStretch(ftk::Stretch::Expanding);
-
             auto layout = ftk::VerticalLayout::create(context);
-            layout->setSpacingRole(ftk::SizeRole::None);
-            scrollWidget->setParent(layout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
+            layout->setMarginRole(ftk::SizeRole::MarginSmall);
+            layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.textEdit->setParent(layout);
             auto hLayout = ftk::HorizontalLayout::create(context, layout);
-            hLayout->setMarginRole(ftk::SizeRole::MarginInside);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            copyButton->setParent(hLayout);
             p.searchBox->setParent(hLayout);
             _setWidget(layout);
 
@@ -67,6 +70,15 @@ namespace djv
                 {
                     _p->info = value ? value->getIOInfo() : tl::IOInfo();
                     _widgetUpdate();
+                });
+
+            copyButton->setClickedCallback(
+                [this]
+                {
+                    FTK_P();
+                    auto context = getContext();
+                    auto clipboardSystem = context->getSystem<ftk::ClipboardSystem>();
+                    clipboardSystem->setText(ftk::join(p.textEdit->getText(), '\n'));
                 });
 
             p.searchBox->setCallback(
@@ -97,39 +109,37 @@ namespace djv
         void InfoTool::_widgetUpdate()
         {
             FTK_P();
-            auto children = p.layout->getChildren();
-            for (const auto& child : children)
+            std::vector<std::pair<std::string, std::string> > pairs;
+            size_t maxSize = 0;
+            for (const auto& tag : p.info.tags)
             {
-                child->setParent(nullptr);
-            }
-            if (auto context = getContext())
-            {
-                int row = 0;
-                for (const auto& tag : p.info.tags)
+                bool filter = false;
+                if (!p.search.empty() &&
+                    !ftk::contains(
+                        tag.first,
+                        p.search,
+                        ftk::CaseCompare::Insensitive) &&
+                    !ftk::contains(
+                        tag.second,
+                        p.search,
+                        ftk::CaseCompare::Insensitive))
                 {
-                    bool filter = false;
-                    if (!p.search.empty() &&
-                        !ftk::contains(
-                            tag.first,
-                            p.search,
-                            ftk::CaseCompare::Insensitive) &&
-                        !ftk::contains(
-                            tag.second,
-                            p.search,
-                            ftk::CaseCompare::Insensitive))
-                    {
-                        filter = true;
-                    }
-                    if (!filter)
-                    {
-                        auto label = ftk::Label::create(context, tag.first + ":", p.layout);
-                        p.layout->setGridPos(label, row, 0);
-                        label = ftk::Label::create(context, tag.second, p.layout);
-                        p.layout->setGridPos(label, row, 1);
-                        ++row;
-                    }
+                    filter = true;
+                }
+                if (!filter)
+                {
+                    const std::string first = tag.first + ": ";
+                    pairs.push_back(std::make_pair(first, tag.second));
+                    maxSize = std::max(maxSize, first.size());
                 }
             }
+            std::vector<std::string> text;
+            for (auto& i : pairs)
+            {
+                i.first.resize(maxSize, ' ');
+                text.emplace_back(i.first + i.second);
+            }
+            p.textEdit->setText(text);
         }
     }
 }

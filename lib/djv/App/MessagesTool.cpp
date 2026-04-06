@@ -56,6 +56,9 @@ namespace djv
 
             p.textEdit = ftk::TextEdit::create(context);
             p.textEdit->setReadOnly(true);
+            ftk::TextEditOptions textEditOptions;
+            textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
+            p.textEdit->setOptions(textEditOptions);
             p.textEdit->setVStretch(ftk::Stretch::Expanding);
 
             p.copyButton = ftk::ToolButton::create(context, "Copy");
