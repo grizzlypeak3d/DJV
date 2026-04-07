@@ -6,6 +6,7 @@
 #include <djv/Core/Shortcuts.h>
 
 #include <tlRender/UI/IItem.h>
+#include <tlRender/UI/ThumbnailSystem.h>
 #include <tlRender/Timeline/Player.h>
 #include <tlRender/IO/SeqIO.h>
 #if defined(TLRENDER_FFMPEG_PLUGIN)
@@ -307,6 +308,10 @@ namespace djv
             const tl::PlayerCacheOptions& getCache() const;
             std::shared_ptr<ftk::IObservable<tl::PlayerCacheOptions> > observeCache() const;
             void setCache(const tl::PlayerCacheOptions&);
+
+            const tl::ui::ThumbnailCacheOptions& getThumbnailCache() const;
+            std::shared_ptr<ftk::IObservable<tl::ui::ThumbnailCacheOptions> > observeThumbnailCache() const;
+            void setThumbnailCache(const tl::ui::ThumbnailCacheOptions&);
 
             ///@}
 

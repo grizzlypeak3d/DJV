@@ -165,9 +165,12 @@ namespace djv
             std::shared_ptr<ftk::FloatEdit> videoEdit;
             std::shared_ptr<ftk::FloatEdit> audioEdit;
             std::shared_ptr<ftk::FloatEdit> readBehindEdit;
+            std::shared_ptr<ftk::FloatEdit> thumbnailEdit;
+            std::shared_ptr<ftk::FloatEdit> waveformEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > settingsObserver;
+            std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
+            std::shared_ptr<ftk::Observer<tl::ui::ThumbnailCacheOptions> > thumbnailCacheObserver;
         };
 
         void CacheSettingsWidget::_init(
@@ -195,14 +198,41 @@ namespace djv
             p.readBehindEdit->setStep(0.1);
             p.readBehindEdit->setLargeStep(1.0);
 
+            p.thumbnailEdit = ftk::FloatEdit::create(context);
+            p.thumbnailEdit->setRange(0.F, 1024.F);
+            p.thumbnailEdit->setStep(1.0);
+            p.thumbnailEdit->setLargeStep(10.0);
+
+            p.waveformEdit = ftk::FloatEdit::create(context);
+            p.waveformEdit->setRange(0.F, 1024.F);
+            p.waveformEdit->setStep(1.0);
+            p.waveformEdit->setLargeStep(10.0);
+
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Video cache (GB):", p.videoEdit);
-            p.layout->addRow("Audio cache (GB):", p.audioEdit);
-            p.layout->addRow("Read behind (seconds):", p.readBehindEdit);
+            auto hLayout = ftk::HorizontalLayout::create(context);
+            p.videoEdit->setParent(hLayout);
+            ftk::Label::create(context, "GB", hLayout);
+            p.layout->addRow("Video cache:", hLayout);
+            hLayout = ftk::HorizontalLayout::create(context);
+            p.audioEdit->setParent(hLayout);
+            ftk::Label::create(context, "GB", hLayout);
+            p.layout->addRow("Audio cache:", hLayout);
+            hLayout = ftk::HorizontalLayout::create(context);
+            p.readBehindEdit->setParent(hLayout);
+            ftk::Label::create(context, "seconds", hLayout);
+            p.layout->addRow("Read behind:", hLayout);
+            hLayout = ftk::HorizontalLayout::create(context);
+            p.thumbnailEdit->setParent(hLayout);
+            ftk::Label::create(context, "MB", hLayout);
+            p.layout->addRow("Thumbnails:", hLayout);
+            hLayout = ftk::HorizontalLayout::create(context);
+            p.waveformEdit->setParent(hLayout);
+            ftk::Label::create(context, "MB", hLayout);
+            p.layout->addRow("Waveforms:", hLayout);
 
-            p.settingsObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
+            p.cacheObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
                 settings->observeCache(),
                 [this](const tl::PlayerCacheOptions& value)
                 {
@@ -210,6 +240,15 @@ namespace djv
                     p.videoEdit->setValue(value.videoGB);
                     p.audioEdit->setValue(value.audioGB);
                     p.readBehindEdit->setValue(value.readBehind);
+                });
+
+            p.thumbnailCacheObserver = ftk::Observer<tl::ui::ThumbnailCacheOptions>::create(
+                settings->observeThumbnailCache(),
+                [this](const tl::ui::ThumbnailCacheOptions& value)
+                {
+                    FTK_P();
+                    p.thumbnailEdit->setValue(value.thumbnailMB);
+                    p.waveformEdit->setValue(value.waveformMB);
                 });
 
             p.videoEdit->setCallback(
@@ -234,9 +273,27 @@ namespace djv
                 [this](float value)
                 {
                     FTK_P();
-                    tl::PlayerCacheOptions settings = p.settings->getCache();
-                    settings.readBehind = value;
-                    p.settings->setCache(settings);
+                    tl::PlayerCacheOptions options = p.settings->getCache();
+                    options.readBehind = value;
+                    p.settings->setCache(options);
+                });
+
+            p.thumbnailEdit->setCallback(
+                [this](float value)
+                {
+                    FTK_P();
+                    tl::ui::ThumbnailCacheOptions options = p.settings->getThumbnailCache();
+                    options.thumbnailMB = value;
+                    p.settings->setThumbnailCache(options);
+                });
+
+            p.waveformEdit->setCallback(
+                [this](float value)
+                {
+                    FTK_P();
+                    tl::ui::ThumbnailCacheOptions options = p.settings->getThumbnailCache();
+                    options.waveformMB = value;
+                    p.settings->setThumbnailCache(options);
                 });
         }
 

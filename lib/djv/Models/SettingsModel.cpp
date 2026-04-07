@@ -391,6 +391,7 @@ namespace djv
 
             std::shared_ptr<ftk::Observable<AdvancedSettings> > advanced;
             std::shared_ptr<ftk::Observable<tl::PlayerCacheOptions> > cache;
+            std::shared_ptr<ftk::Observable<tl::ui::ThumbnailCacheOptions> > thumbnailCache;
             std::shared_ptr<ftk::Observable<ExportSettings> > exportSettings;
             std::shared_ptr<ftk::Observable<FileBrowserSettings> > fileBrowser;
             std::shared_ptr<ftk::Observable<ImageSeqSettings> > imageSeq;
@@ -429,6 +430,11 @@ namespace djv
             tl::PlayerCacheOptions cache;
             settings->getT("/Cache", cache);
             p.cache = ftk::Observable<tl::PlayerCacheOptions>::create(cache);
+            tl::ui::ThumbnailCacheOptions thumbnailCache;
+            settings->getT("/ThumbnailCache", thumbnailCache);
+            p.thumbnailCache = ftk::Observable<tl::ui::ThumbnailCacheOptions>::create(thumbnailCache);
+            auto thumbnailSystem = context->getSystem<tl::ui::ThumbnailSystem>();
+            thumbnailSystem->setCacheOptions(thumbnailCache);
 
             ExportSettings exportSettings;
             settings->getT("/Export", exportSettings);
@@ -516,16 +522,15 @@ namespace djv
 
             p.settings->setT("/Advanced", p.advanced->get());
             p.settings->setT("/Cache", p.cache->get());
+            p.settings->setT("/ThumbnailCache", p.thumbnailCache->get());
             p.settings->setT("/Export", p.exportSettings->get());
 
             FileBrowserSettings fileBrowser = p.fileBrowser->get();
-            if (auto context = p.context.lock())
-            {
-                auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
-                fileBrowser.path = fileBrowserSystem->getModel()->getPath().u8string();
-                fileBrowser.options = fileBrowserSystem->getModel()->getOptions();
-                fileBrowser.ext = fileBrowserSystem->getModel()->getExt();
-            }
+            auto context = p.context.lock();
+            auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
+            fileBrowser.path = fileBrowserSystem->getModel()->getPath().u8string();
+            fileBrowser.options = fileBrowserSystem->getModel()->getOptions();
+            fileBrowser.ext = fileBrowserSystem->getModel()->getExt();
             p.settings->setT("/FileBrowser", fileBrowser);
 
             p.settings->setT("/ImageSeq", p.imageSeq->get());
@@ -554,6 +559,7 @@ namespace djv
             FTK_P();
             setAdvanced(AdvancedSettings());
             setCache(tl::PlayerCacheOptions());
+            setThumbnailCache(tl::ui::ThumbnailCacheOptions());
             setExport(ExportSettings());
             setFileBrowser(FileBrowserSettings());
             setImageSeq(ImageSeqSettings());
@@ -606,6 +612,27 @@ namespace djv
         void SettingsModel::setCache(const tl::PlayerCacheOptions& value)
         {
             _p->cache->setIfChanged(value);
+        }
+
+        const tl::ui::ThumbnailCacheOptions& SettingsModel::getThumbnailCache() const
+        {
+            return _p->thumbnailCache->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<tl::ui::ThumbnailCacheOptions> > SettingsModel::observeThumbnailCache() const
+        {
+            return _p->thumbnailCache;
+        }
+
+        void SettingsModel::setThumbnailCache(const tl::ui::ThumbnailCacheOptions& value)
+        {
+            FTK_P();
+            if (p.thumbnailCache->setIfChanged(value))
+            {
+                auto context = p.context.lock();
+                auto thumbnailSystem = context->getSystem<tl::ui::ThumbnailSystem>();
+                thumbnailSystem->setCacheOptions(value);
+            }
         }
 
         const ExportSettings& SettingsModel::getExport() const

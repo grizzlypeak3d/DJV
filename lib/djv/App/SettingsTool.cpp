@@ -69,8 +69,6 @@ namespace djv
 #endif // FTK_NFD
             p.bellows["ImageSeqs"] = ftk::Bellows::create(context, "Image Sequences", vLayout);
             p.bellows["ImageSeqs"]->setWidget(imageSeqWidget);
-            p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
-            p.bellows["Misc"]->setWidget(miscWidget);
             p.bellows["Mouse"] = ftk::Bellows::create(context, "Mouse", vLayout);
             p.bellows["Mouse"]->setWidget(mouseWidget);
             p.bellows["Shortcuts"] = ftk::Bellows::create(context, "Keyboard Shortcuts", vLayout);
@@ -93,6 +91,8 @@ namespace djv
 #endif // TLRENDER_USD
             p.bellows["Advanced"] = ftk::Bellows::create(context, "Advanced", vLayout);
             p.bellows["Advanced"]->setWidget(advancedWidget);
+            p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
+            p.bellows["Misc"]->setWidget(miscWidget);
 
             p.saveButton = ftk::PushButton::create(context, "Save");
             p.saveButton->setTooltip("Save the settings. Settings are also saved on exit.");
