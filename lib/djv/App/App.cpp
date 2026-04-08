@@ -211,7 +211,7 @@ namespace djv
                 std::optional<tl::Loop>(),
                 ftk::quotes(tl::getLoopLabels()));
             p.cmdLine.timeUnits = ftk::CmdLineOption<tl::TimeUnits>::create(
-                { "-timeUnits" },
+                { "-timeUnits", "-tu" },
                 "Set the time units.",
                 "Playback",
                 std::optional<tl::TimeUnits>(),
@@ -221,11 +221,11 @@ namespace djv
                 "Seek to the given time.",
                 "Playback");
             p.cmdLine.inPoint = ftk::CmdLineOption<std::string>::create(
-                { "-inPoint" },
+                { "-inPoint", "-in" },
                 "Set the in point.",
                 "Playback");
             p.cmdLine.outPoint = ftk::CmdLineOption<std::string>::create(
-                { "-outPoint" },
+                { "-outPoint", "-out" },
                 "Set the out point.",
                 "Playback");
             p.cmdLine.ocioFileName = ftk::CmdLineOption<std::string>::create(
