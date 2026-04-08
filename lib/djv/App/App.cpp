@@ -63,8 +63,10 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<double> > speed;
             std::shared_ptr<ftk::CmdLineOption<tl::Playback> > playback;
             std::shared_ptr<ftk::CmdLineOption<tl::Loop> > loop;
-            std::shared_ptr<ftk::CmdLineOption<OTIO_NS::RationalTime> > seek;
-            std::shared_ptr<ftk::CmdLineOption<OTIO_NS::TimeRange> > inOutRange;
+            std::shared_ptr<ftk::CmdLineOption<tl::TimeUnits> > timeUnits;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > seek;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > inPoint;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > outPoint;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioFileName;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioInput;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioDisplay;
@@ -208,13 +210,23 @@ namespace djv
                 "Playback",
                 std::optional<tl::Loop>(),
                 ftk::quotes(tl::getLoopLabels()));
-            p.cmdLine.seek = ftk::CmdLineOption<OTIO_NS::RationalTime>::create(
+            p.cmdLine.timeUnits = ftk::CmdLineOption<tl::TimeUnits>::create(
+                { "-timeUnits" },
+                "Set the time units.",
+                "Playback",
+                std::optional<tl::TimeUnits>(),
+                ftk::quotes(tl::getTimeUnitsLabels()));
+            p.cmdLine.seek = ftk::CmdLineOption<std::string>::create(
                 { "-seek" },
                 "Seek to the given time.",
                 "Playback");
-            p.cmdLine.inOutRange = ftk::CmdLineOption<OTIO_NS::TimeRange>::create(
-                { "-inOutRange" },
-                "Set the in/out points range.",
+            p.cmdLine.inPoint = ftk::CmdLineOption<std::string>::create(
+                { "-inPoint" },
+                "Set the in point.",
+                "Playback");
+            p.cmdLine.outPoint = ftk::CmdLineOption<std::string>::create(
+                { "-outPoint" },
+                "Set the out point.",
                 "Playback");
             p.cmdLine.ocioFileName = ftk::CmdLineOption<std::string>::create(
                 { "-ocio" },
@@ -321,8 +333,10 @@ namespace djv
                     p.cmdLine.speed,
                     p.cmdLine.playback,
                     p.cmdLine.loop,
+                    p.cmdLine.timeUnits,
                     p.cmdLine.seek,
-                    p.cmdLine.inOutRange,
+                    p.cmdLine.inPoint,
+                    p.cmdLine.outPoint,
                     p.cmdLine.ocioFileName,
                     p.cmdLine.ocioInput,
                     p.cmdLine.ocioDisplay,
@@ -1004,15 +1018,40 @@ namespace djv
                         {
                             player->setSpeed(p.cmdLine.speed->getValue());
                         }
-                        if (p.cmdLine.inOutRange->found())
+                        if (p.cmdLine.timeUnits->found())
                         {
-                            const OTIO_NS::TimeRange& inOutRange = p.cmdLine.inOutRange->getValue();
+                            p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
+                        }
+                        const double speed = player->getSpeed();
+                        const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
+                        if (p.cmdLine.inPoint->found())
+                        {
+                            const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                                tl::textToTime(
+                                    p.cmdLine.inPoint->getValue(),
+                                    speed,
+                                    timeUnits),
+                                player->getInOutRange().end_time_inclusive());
+                            player->setInOutRange(inOutRange);
+                            player->seek(inOutRange.start_time());
+                        }
+                        if (p.cmdLine.outPoint->found())
+                        {
+                            const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                                player->getInOutRange().start_time(),
+                                tl::textToTime(
+                                    p.cmdLine.outPoint->getValue(),
+                                    speed,
+                                    timeUnits));
                             player->setInOutRange(inOutRange);
                             player->seek(inOutRange.start_time());
                         }
                         if (p.cmdLine.seek->found())
                         {
-                            player->seek(p.cmdLine.seek->getValue());
+                            player->seek(tl::textToTime(
+                                p.cmdLine.seek->getValue(),
+                                speed,
+                                timeUnits));
                         }
                         if (p.cmdLine.loop->found())
                         {
