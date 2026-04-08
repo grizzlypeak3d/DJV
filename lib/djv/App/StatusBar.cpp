@@ -34,6 +34,8 @@ namespace djv
 
             bool ocioOptionsEnabled = false;
             bool lutOptionsEnabled = false;
+            bool channelsOptionsEnabled = false;
+            bool mirrorOptionsEnabled = false;
             bool colorOptionsEnabled = false;
             bool audioOffsetEnabled = false;
             bool outputDeviceEnabled = false;
@@ -152,7 +154,13 @@ namespace djv
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
-                    _p->colorOptionsEnabled =
+                    FTK_P();
+                    p.channelsOptionsEnabled =
+                        value.channels != ftk::ChannelDisplay::Color;
+                    p.mirrorOptionsEnabled =
+                        value.mirror.x ||
+                        value.mirror.y;
+                    p.colorOptionsEnabled =
                         value.color.enabled    ||
                         value.levels.enabled   ||
                         value.exposure.enabled ||
@@ -295,6 +303,8 @@ namespace djv
             const bool enabled =
                 p.ocioOptionsEnabled  ||
                 p.lutOptionsEnabled   ||
+                p.channelsOptionsEnabled ||
+                p.mirrorOptionsEnabled ||
                 p.colorOptionsEnabled ||
                 p.audioOffsetEnabled  ||
                 p.outputDeviceEnabled;
@@ -306,6 +316,8 @@ namespace djv
             {
                 p.indicatorPopup->setOCIO(p.ocioOptionsEnabled);
                 p.indicatorPopup->setLUT(p.lutOptionsEnabled);
+                p.indicatorPopup->setChannels(p.channelsOptionsEnabled);
+                p.indicatorPopup->setMirror(p.mirrorOptionsEnabled);
                 p.indicatorPopup->setColor(p.colorOptionsEnabled);
                 p.indicatorPopup->setAudioOffset(p.audioOffsetEnabled);
                 p.indicatorPopup->setOutputDevice(p.outputDeviceEnabled);

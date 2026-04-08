@@ -28,6 +28,8 @@ namespace djv
 
             p.icons["OCIO"] = ftk::Icon::create(context, "MenuChecked");
             p.icons["LUT"] = ftk::Icon::create(context, "MenuChecked");
+            p.icons["Channels"] = ftk::Icon::create(context, "MenuChecked");
+            p.icons["Mirror"] = ftk::Icon::create(context, "MenuChecked");
             p.icons["Color"] = ftk::Icon::create(context, "MenuChecked");
             p.icons["AudioOffset"] = ftk::Icon::create(context, "MenuChecked");
             p.icons["OutputDevice"] = ftk::Icon::create(context, "MenuChecked");
@@ -37,6 +39,8 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             layout->addRow("OCIO:", p.icons["OCIO"]);
             layout->addRow("LUT:", p.icons["LUT"]);
+            layout->addRow("Image channels:", p.icons["Channels"]);
+            layout->addRow("Mirror:", p.icons["Mirror"]);
             layout->addRow("Color controls:", p.icons["Color"]);
             layout->addRow("Audio offset:", p.icons["AudioOffset"]);
 #if defined(TLRENDER_BMD)
@@ -71,6 +75,20 @@ namespace djv
         void StatusIndicatorPopup::setLUT(bool value)
         {
             _p->icons["LUT"]->setBackgroundRole(value ?
+                ftk::ColorRole::Checked :
+                ftk::ColorRole::None);
+        }
+
+        void StatusIndicatorPopup::setChannels(bool value)
+        {
+            _p->icons["Channels"]->setBackgroundRole(value ?
+                ftk::ColorRole::Checked :
+                ftk::ColorRole::None);
+        }
+
+        void StatusIndicatorPopup::setMirror(bool value)
+        {
+            _p->icons["Mirror"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
         }
