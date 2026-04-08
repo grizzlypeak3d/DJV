@@ -3,11 +3,10 @@
 
 # ![DJV Icon](etc/Icons/DJV_Icon_32.png)&nbsp;DJV
 
-DJV is an open source application for media playback and review. DJV can
-playback high resolution image sequences and movies in real time, with
-audio, A/B comparison, color management, and more.
+DJV is a free, open source media player built for professional image review. Real-time, high bit-depth EXR playback, A/B comparison, OTIO color management and more. 
+Never compromise on your renders again.
 
-Features include:
+CORE FEATURES:
 * Support for high resolution and high bit depth images
 * A/B comparison with wipe, overlay, and difference modes
 * Timeline support with OpenTimelineIO
