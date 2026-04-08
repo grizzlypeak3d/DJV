@@ -99,12 +99,12 @@ namespace djv
             p.colorSample = ftk::Observable<ftk::Color4F>::create();
 
             p.fileNameLabel = ftk::Label::create(context);
-            p.fileNameLabel->setFontRole(ftk::FontRole::Mono);
+            p.fileNameLabel->setFont(ftk::FontType::Mono);
             p.fileNameLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.fileNameLabel->setBackgroundRole(ftk::ColorRole::Overlay);
 
             p.timeLabel = ftk::Label::create(context);
-            p.timeLabel->setFontRole(ftk::FontRole::Mono);
+            p.timeLabel->setFont(ftk::FontType::Mono);
             p.timeLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.timeLabel->setBackgroundRole(ftk::ColorRole::Overlay);
             p.timeLabel->setHAlign(ftk::HAlign::Right);
@@ -112,10 +112,10 @@ namespace djv
             p.colorPickerSwatch = ftk::ColorSwatch::create(context);
             p.colorPickerSwatch->setSizeRole(ftk::SizeRole::MarginLarge);
             p.colorPickerLabel = ftk::Label::create(context);
-            p.colorPickerLabel->setFontRole(ftk::FontRole::Mono);
+            p.colorPickerLabel->setFont(ftk::FontType::Mono);
 
             p.cacheLabel = ftk::Label::create(context);
-            p.cacheLabel->setFontRole(ftk::FontRole::Mono);
+            p.cacheLabel->setFont(ftk::FontType::Mono);
             p.cacheLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.cacheLabel->setBackgroundRole(ftk::ColorRole::Overlay);
             p.cacheLabel->setHAlign(ftk::HAlign::Right);

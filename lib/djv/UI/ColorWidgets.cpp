@@ -62,7 +62,7 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
-            p.enabledCheckBox->setTooltip("Set whether OCIO is enabled.");
+            p.enabledCheckBox->setTooltip("Toggle whether OCIO is enabled.");
 
             p.fileEdit = ftk::FileEdit::create(context);
 
@@ -220,7 +220,7 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
-            p.enabledCheckBox->setTooltip("Set whether the LUT is enabled.");
+            p.enabledCheckBox->setTooltip("Toggle whether the LUT is enabled.");
 
             p.fileEdit = ftk::FileEdit::create(context);
             std::vector<std::string> s;
@@ -333,7 +333,7 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
-            p.enabledCheckBox->setTooltip("Set whether color controls are enabled.");
+            p.enabledCheckBox->setTooltip("Toggle whether color controls are enabled.");
 
             p.sliders["Add"] = ftk::FloatEditSlider::create(context);
             p.sliders["Add"]->setRange(-1.F, 1.F);
@@ -508,7 +508,7 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
-            p.enabledCheckBox->setTooltip("Set whether levels are enabled.");
+            p.enabledCheckBox->setTooltip("Toggle whether levels are enabled.");
 
             ftk::RangeF range(0.F, 1.F);
             p.settings->getT("/Color/Levels/InRange", range);
@@ -735,7 +735,7 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
-            p.enabledCheckBox->setTooltip("Set whether exposure controls are enabled.");
+            p.enabledCheckBox->setTooltip("Toggle whether exposure controls are enabled.");
 
             p.sliders["Exposure"] = ftk::FloatEditSlider::create(context);
             p.sliders["Exposure"]->setRange(-10.F, 10.F);
@@ -883,7 +883,7 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Button);
-            p.enabledCheckBox->setTooltip("Set whether soft clip is enabled.");
+            p.enabledCheckBox->setTooltip("Toggle whether soft clip is enabled.");
 
             p.sliders["SoftClip"] = ftk::FloatEditSlider::create(context);
             p.sliders["SoftClip"]->setDefault(0.F);

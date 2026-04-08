@@ -45,6 +45,7 @@ namespace djv
         private:
             void _infoUpdate(const ftk::Path&, const tl::IOInfo&);
             void _indicatorUpdate();
+            void _showIndicatorPopup();
 
             FTK_PRIVATE();
         };

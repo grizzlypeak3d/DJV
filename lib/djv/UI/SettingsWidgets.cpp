@@ -212,22 +212,27 @@ namespace djv
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto hLayout = ftk::HorizontalLayout::create(context);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.videoEdit->setParent(hLayout);
             ftk::Label::create(context, "GB", hLayout);
             p.layout->addRow("Video cache:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.audioEdit->setParent(hLayout);
             ftk::Label::create(context, "GB", hLayout);
             p.layout->addRow("Audio cache:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.readBehindEdit->setParent(hLayout);
             ftk::Label::create(context, "seconds", hLayout);
             p.layout->addRow("Read behind:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.thumbnailEdit->setParent(hLayout);
             ftk::Label::create(context, "MB", hLayout);
             p.layout->addRow("Thumbnails:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.waveformEdit->setParent(hLayout);
             ftk::Label::create(context, "MB", hLayout);
             p.layout->addRow("Waveforms:", hLayout);
@@ -462,7 +467,11 @@ namespace djv
             p.layout->addRow("Audio file extensions:", p.audioExtensionsEdit);
             p.layout->addRow("Audio file name:", p.audioFileNameEdit);
             p.layout->addRow("Maximum digits:", p.maxDigitsEdit);
-            p.layout->addRow("Default speed (FPS):", p.defaultSpeedEdit);
+            auto hLayout = ftk::HorizontalLayout::create(context);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.defaultSpeedEdit->setParent(hLayout);
+            ftk::Label::create(context, "FPS", hLayout);
+            p.layout->addRow("Default speed:", hLayout);
             p.layout->addRow("I/O threads:", p.threadsEdit);
 
             p.settingsObserver = ftk::Observer<models::ImageSeqSettings>::create(
@@ -1156,7 +1165,11 @@ namespace djv
             formLayout->addRow("Enable lighting:", p.lightingCheckBox);
             formLayout->addRow("Enable sRGB color space:", p.sRGBCheckBox);
             formLayout->addRow("Stage cache size:", p.stageCacheEdit);
-            formLayout->addRow("Disk cache size (GB):", p.diskCacheEdit);
+            auto hLayout = ftk::HorizontalLayout::create(context);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.diskCacheEdit->setParent(hLayout);
+            ftk::Label::create(context, "GB", hLayout);
+            formLayout->addRow("Disk cache size:", hLayout);
 
             p.optionsObserver = ftk::Observer<tl::usd::Options>::create(
                 settings->observeUSD(),

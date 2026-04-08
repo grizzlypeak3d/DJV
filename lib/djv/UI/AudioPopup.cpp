@@ -26,7 +26,7 @@ namespace djv
         {
             IWidgetPopup::_init(
                 context,
-                "djv::app::AudioPopup",
+                "djv::ui::AudioPopup",
                 parent);
             FTK_P();
 

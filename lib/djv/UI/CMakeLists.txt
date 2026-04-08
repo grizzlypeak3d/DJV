@@ -7,6 +7,7 @@ set(HEADERS
     SettingsWidgets.h
     SetupDialog.h
     SpeedPopup.h
+    StatusIndicatorPopup.h
     SysInfoDialog.h
     ViewWidgets.h)
 set(HEADERS_PRIVATE)
@@ -21,6 +22,7 @@ set(SOURCE
     SetupDialog.cpp
     ShortcutsWidget.cpp
     SpeedPopup.cpp
+    StatusIndicatorPopup.cpp
     StyleWidget.cpp
     SysInfoDialog.cpp
     ViewWidgets.cpp)

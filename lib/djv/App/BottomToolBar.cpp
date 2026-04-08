@@ -109,7 +109,6 @@ namespace djv
             p.currentTimeEdit->setTooltip("Current time.");
 
             p.durationLabel = tl::ui::TimeLabel::create(context, timeUnitsModel);
-            p.durationLabel->setFontRole(ftk::FontRole::Mono);
             p.durationLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.durationLabel->setTooltip("Duration of the timeline or the in/out range if set.");
 
@@ -121,7 +120,7 @@ namespace djv
             p.speedButton->setTooltip("Playback speed.");
 
             p.audioLabel = ftk::Label::create(context);
-            p.audioLabel->setFontRole(ftk::FontRole::Mono);
+            p.audioLabel->setFont(ftk::FontType::Mono);
             p.audioLabel->setHMarginRole(ftk::SizeRole::MarginInside);
             p.audioLabel->setTooltip("Audio volume.");
             p.audioButton = ftk::ToolButton::create(context);

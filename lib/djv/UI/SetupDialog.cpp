@@ -91,7 +91,7 @@ namespace djv
             auto label = ftk::Label::create(
                 context,
                 ftk::Format("Setup").arg(DJV_VERSION_FULL));
-            label->setFontRole(ftk::FontRole::Title);
+            label->setFont(ftk::FontType::Bold);
             label->setMarginRole(ftk::SizeRole::Margin);
 
             p.nextButton = ftk::PushButton::create(context, "Next");

@@ -105,7 +105,7 @@ namespace djv
             p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
 
             p.pixelLabel = ftk::Label::create(context);
-            p.pixelLabel->setFontRole(ftk::FontRole::Mono);
+            p.pixelLabel->setFont(ftk::FontType::Mono);
 
             p.mouseLabel = ftk::Label::create(context);
 

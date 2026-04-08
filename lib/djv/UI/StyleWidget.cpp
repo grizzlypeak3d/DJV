@@ -5,6 +5,7 @@
 
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/ColorSwatch.h>
+#include <ftk/UI/FileEdit.h>
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/PushButton.h>
@@ -18,6 +19,7 @@ namespace djv
         struct StyleSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
+            std::vector<std::string> fonts;
 
             const std::vector<float> displayScales = ftk::getDisplayScales();
 
@@ -25,9 +27,12 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> brightnessSlider;
             std::shared_ptr<ftk::FloatEditSlider> contrastSlider;
             std::shared_ptr<ftk::ComboBox> displayScaleComboBox;
+            std::map<ftk::FontType, std::shared_ptr<ftk::ComboBox> > fontComboBoxes;
+            std::vector<std::shared_ptr<ftk::FileEdit> > customFontEdits;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<models::StyleSettings> > settingsObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > fontsObserver;
+            std::shared_ptr<ftk::Observer<models::StyleSettings> > styleObserver;
         };
 
         void StyleSettingsWidget::_init(
@@ -59,6 +64,16 @@ namespace djv
             p.displayScaleComboBox = ftk::ComboBox::create(context, labels);
             p.displayScaleComboBox->setHStretch(ftk::Stretch::Expanding);
 
+            const auto fontLabels = ftk::getFontTypeLabels();
+            for (const auto font : ftk::getFontTypeEnums())
+            {
+                p.fontComboBoxes[font] = ftk::ComboBox::create(context);
+            }
+            for (size_t i = 0; i < 4; ++i)
+            {
+                p.customFontEdits.push_back(ftk::FileEdit::create(context));
+            }
+
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -66,8 +81,30 @@ namespace djv
             p.layout->addRow("Brightness:", p.brightnessSlider);
             p.layout->addRow("Contrast:", p.contrastSlider);
             p.layout->addRow("Display scale:", p.displayScaleComboBox);
+            for (const auto font : ftk::getFontTypeEnums())
+            {
+                p.layout->addRow(ftk::Format("{0} font:").arg(
+                    fontLabels[static_cast<int>(font)]), p.fontComboBoxes[font]);
+            }
+            for (size_t i = 0; i < p.customFontEdits.size(); ++i)
+            {
+                p.layout->addRow("Custom font:", p.customFontEdits[i]);
+            }
 
-            p.settingsObserver = ftk::Observer<models::StyleSettings>::create(
+            auto fontSystem = context->getSystem<ftk::FontSystem>();
+            p.fontsObserver = ftk:: ListObserver<std::string>::create(
+                fontSystem->observeFonts(),
+                [this](const std::vector<std::string>& value)
+                {
+                    FTK_P();
+                    p.fonts = value;
+                    for (const auto font : ftk::getFontTypeEnums())
+                    {
+                        p.fontComboBoxes[font]->setItems(value);
+                    }
+                });
+
+            p.styleObserver = ftk::Observer<models::StyleSettings>::create(
                 settings->observeStyle(),
                 [this](const models::StyleSettings& value)
                 {
@@ -112,6 +149,31 @@ namespace djv
                     }
                     p.settings->setStyle(settings);
                 });
+
+            for (const auto font : ftk::getFontTypeEnums())
+            {
+                p.fontComboBoxes[font]->setIndexCallback(
+                    [this, font](int index)
+                    {
+                        FTK_P();
+                        auto settings = p.settings->getStyle();
+                        settings.fonts[font] = p.fonts[index];
+                        p.settings->setStyle(settings);
+                    });
+            }
+
+            for (int i = 0; i < p.customFontEdits.size(); ++i)
+            {
+                p.customFontEdits[i]->setCallback(
+                    [this, i](const ftk::Path& value)
+                    {
+                        FTK_P();
+                        auto settings = p.settings->getStyle();
+                        settings.customFonts.resize(i + 1);
+                        settings.customFonts[i] = value.get();
+                        p.settings->setStyle(settings);
+                    });
+            }
         }
 
         StyleSettingsWidget::StyleSettingsWidget() :
@@ -159,6 +221,18 @@ namespace djv
                 i != p.displayScales.end() ?
                 (i - p.displayScales.begin()) :
                 -1);
+
+            for (const auto i : value.fonts)
+            {
+                const auto j = std::find(p.fonts.begin(), p.fonts.end(), i.second);
+                p.fontComboBoxes[i.first]->setCurrentIndex(j != p.fonts.end() ? (j - p.fonts.begin()) : -1);
+            }
+            for (size_t i = 0; i < p.customFontEdits.size(); ++i)
+            {
+                p.customFontEdits[i]->setPath(i < value.customFonts.size() ?
+                    ftk::Path(value.customFonts[i]) :
+                    ftk::Path());
+            }
         }
     }
 }

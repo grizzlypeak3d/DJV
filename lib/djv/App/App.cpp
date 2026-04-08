@@ -829,7 +829,24 @@ namespace djv
                 p.settingsModel->observeStyle(),
                 [this](const models::StyleSettings& value)
                 {
-                    getStyle()->setColorControls(value.colorControls);
+                    auto fontSystem = getFontSystem();
+                    const auto& fonts = fontSystem->getFonts();
+                    for (const auto& font : value.customFonts)
+                    {
+                        if (!font.empty())
+                        {
+                            ftk::Path path(font);
+                            const std::string fontName = path.getBase() + path.getNum();
+                            const auto i = std::find(fonts.begin(), fonts.end(), fontName);
+                            if (i == fonts.end())
+                            {
+                                fontSystem->addFont(fontName, font);
+                            }
+                        }
+                    }
+                    auto style = getStyle();
+                    style->setColorControls(value.colorControls);
+                    style->setFonts(value.fonts);
                     setColorStyle(value.colorStyle);
                     setCustomColorRoles(value.customColorRoles);
                     setDisplayScale(value.displayScale);

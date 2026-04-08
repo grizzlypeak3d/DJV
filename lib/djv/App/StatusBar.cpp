@@ -4,6 +4,7 @@
 #include <djv/App/StatusBar.h>
 
 #include <djv/App/App.h>
+#include <djv/UI/StatusIndicatorPopup.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/ToolsModel.h>
@@ -14,11 +15,10 @@
 #endif // TLRENDER_BMD
 
 #include <ftk/UI/Divider.h>
-#include <ftk/UI/Icon.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
-#include <ftk/UI/Spacer.h>
 #include <ftk/UI/SysLogModel.h>
+#include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
@@ -40,7 +40,8 @@ namespace djv
 
             std::shared_ptr<ftk::Label> messagesLabel;
             std::shared_ptr<ftk::Label> infoLabel;
-            std::shared_ptr<ftk::Icon> indicatorIcon;
+            std::shared_ptr<ftk::ToolButton> indicatorButton;
+            std::shared_ptr<ui::StatusIndicatorPopup> indicatorPopup;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             std::shared_ptr<ftk::Timer> messagesTimer;
@@ -86,8 +87,12 @@ namespace djv
             p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
             p.infoLabel->setClipText(true);
 
-            p.indicatorIcon = ftk::Icon::create(context);
-            p.indicatorIcon->setIcon("MenuChecked");
+            p.indicatorButton = ftk::ToolButton::create(context);
+            p.indicatorButton->setIcon("MenuChecked");
+            p.indicatorButton->setPopupIcon(true);
+            p.indicatorButton->setTooltip(
+                "This indicator shows options that can affect video, audio, or performance.\n"
+                "Click to show more details.");
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
@@ -95,8 +100,7 @@ namespace djv
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
-            p.indicatorIcon->setParent(p.layout);
-            //ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
+            p.indicatorButton->setParent(p.layout);
 
             p.messagesTimer = ftk::Timer::create(context);
 
@@ -173,6 +177,12 @@ namespace djv
                     _indicatorUpdate();
                 });
 #endif // TLRENDER_BMD
+
+            p.indicatorButton->setPressedCallback(
+                [this]
+                {
+                    _showIndicatorPopup();
+                });
         }
 
         StatusBar::StatusBar() :
@@ -288,24 +298,43 @@ namespace djv
                 p.colorOptionsEnabled ||
                 p.audioOffsetEnabled  ||
                 p.outputDeviceEnabled;
-            p.indicatorIcon->setBackgroundRole(
+            p.indicatorButton->setBackgroundRole(
                 enabled ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
-            p.indicatorIcon->setTooltip(ftk::Format(
-                "This indicator shows options that can\n"
-                "affect the video, audio, or performance.\n"
-                "\n"
-                "OCIO enabled: {0}\n"
-                "LUT enabled: {1}\n"
-                "Color controls enabled: {2}\n"
-                "Audio offset enabled: {3}\n"
-                "Output device enabled: {4}").
-                arg(ftk::boolLabel(p.ocioOptionsEnabled)).
-                arg(ftk::boolLabel(p.lutOptionsEnabled)).
-                arg(ftk::boolLabel(p.colorOptionsEnabled)).
-                arg(ftk::boolLabel(p.audioOffsetEnabled)).
-                arg(ftk::boolLabel(p.outputDeviceEnabled)));
+            if (p.indicatorPopup)
+            {
+                p.indicatorPopup->setOCIO(p.ocioOptionsEnabled);
+                p.indicatorPopup->setLUT(p.lutOptionsEnabled);
+                p.indicatorPopup->setColor(p.colorOptionsEnabled);
+                p.indicatorPopup->setAudioOffset(p.audioOffsetEnabled);
+                p.indicatorPopup->setOutputDevice(p.outputDeviceEnabled);
+            }
+        }
+
+        void StatusBar::_showIndicatorPopup()
+        {
+            FTK_P();
+            if (!p.indicatorPopup)
+            {
+                p.indicatorPopup = ui::StatusIndicatorPopup::create(getContext());
+                _indicatorUpdate();
+                p.indicatorPopup->open(getWindow(), p.indicatorButton->getGeometry());
+                std::weak_ptr<StatusBar> weak(std::dynamic_pointer_cast<StatusBar>(shared_from_this()));
+                p.indicatorPopup->setCloseCallback(
+                    [weak]
+                    {
+                        if (auto widget = weak.lock())
+                        {
+                            widget->_p->indicatorPopup.reset();
+                        }
+                    });
+            }
+            else
+            {
+                p.indicatorPopup->close();
+                p.indicatorPopup.reset();
+            }
         }
     }
 }

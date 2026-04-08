@@ -302,13 +302,23 @@ namespace djv
             return !(*this == other);
         }
 
+        StyleSettings::StyleSettings()
+        {
+            for (const auto font : ftk::getFontTypeEnums())
+            {
+                fonts[font] = ftk::getDefaultFont(font);
+            }
+        }
+
         bool StyleSettings::operator == (const StyleSettings& other) const
         {
             return
                 displayScale == other.displayScale &&
                 colorControls == other.colorControls &&
                 colorStyle == other.colorStyle &&
-                customColorRoles == other.customColorRoles;
+                customColorRoles == other.customColorRoles &&
+                fonts == other.fonts &&
+                customFonts == other.customFonts;
         }
 
         bool StyleSettings::operator != (const StyleSettings& other) const
@@ -924,6 +934,11 @@ namespace djv
             {
                 json["CustomColorRoles"][ftk::getLabel(i.first)] = i.second;
             }
+            for (auto i : value.fonts)
+            {
+                json["Fonts"][ftk::getLabel(i.first)] = i.second;
+            }
+            json["CustomFonts"] = value.customFonts;
         }
 
         void to_json(nlohmann::json& json, const TimelineSettings& value)
@@ -1052,6 +1067,17 @@ namespace djv
                 ftk::ColorRole colorRole = ftk::ColorRole::None;
                 from_string(i.key(), colorRole);
                 i.value().get_to(value.customColorRoles[colorRole]);
+            }
+            for (auto i = json.at("Fonts").begin(); i != json.at("Fonts").end(); ++i)
+            {
+                ftk::FontType font = ftk::FontType::Regular;
+                from_string(i.key(), font);
+                i.value().get_to(value.fonts[font]);
+            }
+            value.customFonts.clear();
+            for (auto i = json.at("CustomFonts").begin(); i != json.at("CustomFonts").end(); ++i)
+            {
+                value.customFonts.push_back(*i);
             }
         }
 

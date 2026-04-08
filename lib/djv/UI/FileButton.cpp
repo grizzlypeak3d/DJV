@@ -145,7 +145,7 @@ namespace djv
                 p.size.margin = event.style->getSizeRole(ftk::SizeRole::MarginInside, event.displayScale);
                 p.size.spacing = event.style->getSizeRole(ftk::SizeRole::SpacingSmall, event.displayScale);
                 p.size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);
-                p.size.fontInfo = event.style->getFontRole(_fontRole, event.displayScale);
+                p.size.fontInfo = event.style->getFont(_font, event.displayScale);
                 p.size.fontMetrics = event.fontSystem->getMetrics(p.size.fontInfo);
                 p.size.textSize = event.fontSystem->getSize(_text, p.size.fontInfo);
                 p.draw.reset();

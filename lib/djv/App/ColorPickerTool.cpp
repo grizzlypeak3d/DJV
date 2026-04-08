@@ -50,10 +50,10 @@ namespace djv
             p.colorSwatch->setSizeRole(ftk::SizeRole::SwatchLarge);
 
             p.colorLabel = ftk::Label::create(context);
-            p.colorLabel->setFontRole(ftk::FontRole::Mono);
+            p.colorLabel->setFont(ftk::FontType::Mono);
 
             p.pixelLabel = ftk::Label::create(context);
-            p.pixelLabel->setFontRole(ftk::FontRole::Mono);
+            p.pixelLabel->setFont(ftk::FontType::Mono);
 
             p.mouseLabel = ftk::Label::create(context);
 
