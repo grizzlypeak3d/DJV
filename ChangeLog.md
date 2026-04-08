@@ -7,6 +7,7 @@ Features:
 * Move status bar indicators into a popup widget.
 * Library updates:
     - FFmpeg 8.1
+    - SVT-AV1 v4.0.1
     - USD v26.03
 
 Fixes:
