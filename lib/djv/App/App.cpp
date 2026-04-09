@@ -472,9 +472,10 @@ namespace djv
         void App::open(const ftk::Path& path, const ftk::Path& audioPath)
         {
             FTK_P();
-            ftk::PathOptions pathOptions;
-            pathOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
-            for (const auto& i : tl::getPaths(_context, path, pathOptions))
+            ftk::DirListOptions dirListOptions;
+            dirListOptions.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
+            dirListOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+            for (const auto& i : tl::getPaths(_context, path, dirListOptions))
             {
                 auto item = std::make_shared<models::FilesModelItem>();
                 item->path = i;
