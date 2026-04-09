@@ -318,7 +318,7 @@ namespace djv
                 colorStyle == other.colorStyle &&
                 customColorRoles == other.customColorRoles &&
                 fonts == other.fonts &&
-                customFonts == other.customFonts;
+                fontFiles == other.fontFiles;
         }
 
         bool StyleSettings::operator != (const StyleSettings& other) const
@@ -938,7 +938,7 @@ namespace djv
             {
                 json["Fonts"][ftk::getLabel(i.first)] = i.second;
             }
-            json["CustomFonts"] = value.customFonts;
+            json["FontFiles"] = value.fontFiles;
         }
 
         void to_json(nlohmann::json& json, const TimelineSettings& value)
@@ -1074,10 +1074,10 @@ namespace djv
                 from_string(i.key(), font);
                 i.value().get_to(value.fonts[font]);
             }
-            value.customFonts.clear();
-            for (auto i = json.at("CustomFonts").begin(); i != json.at("CustomFonts").end(); ++i)
+            value.fontFiles.clear();
+            for (auto i = json.at("FontFiles").begin(); i != json.at("FontFiles").end(); ++i)
             {
-                value.customFonts.push_back(*i);
+                value.fontFiles.push_back(*i);
             }
         }
 

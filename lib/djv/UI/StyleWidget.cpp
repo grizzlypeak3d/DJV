@@ -28,7 +28,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> contrastSlider;
             std::shared_ptr<ftk::ComboBox> displayScaleComboBox;
             std::map<ftk::FontType, std::shared_ptr<ftk::ComboBox> > fontComboBoxes;
-            std::vector<std::shared_ptr<ftk::FileEdit> > customFontEdits;
+            std::vector<std::shared_ptr<ftk::FileEdit> > fontFileEdits;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::ListObserver<std::string> > fontsObserver;
@@ -71,7 +71,7 @@ namespace djv
             }
             for (size_t i = 0; i < 4; ++i)
             {
-                p.customFontEdits.push_back(ftk::FileEdit::create(context));
+                p.fontFileEdits.push_back(ftk::FileEdit::create(context));
             }
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
@@ -86,9 +86,9 @@ namespace djv
                 p.layout->addRow(ftk::Format("{0} font:").arg(
                     fontLabels[static_cast<int>(font)]), p.fontComboBoxes[font]);
             }
-            for (size_t i = 0; i < p.customFontEdits.size(); ++i)
+            for (size_t i = 0; i < p.fontFileEdits.size(); ++i)
             {
-                p.layout->addRow("Custom font:", p.customFontEdits[i]);
+                p.layout->addRow("Font file:", p.fontFileEdits[i]);
             }
 
             auto fontSystem = context->getSystem<ftk::FontSystem>();
@@ -162,15 +162,15 @@ namespace djv
                     });
             }
 
-            for (int i = 0; i < p.customFontEdits.size(); ++i)
+            for (int i = 0; i < p.fontFileEdits.size(); ++i)
             {
-                p.customFontEdits[i]->setCallback(
+                p.fontFileEdits[i]->setCallback(
                     [this, i](const ftk::Path& value)
                     {
                         FTK_P();
                         auto settings = p.settings->getStyle();
-                        settings.customFonts.resize(i + 1);
-                        settings.customFonts[i] = value.get();
+                        settings.fontFiles.resize(i + 1);
+                        settings.fontFiles[i] = value.get();
                         p.settings->setStyle(settings);
                     });
             }
@@ -227,10 +227,10 @@ namespace djv
                 const auto j = std::find(p.fonts.begin(), p.fonts.end(), i.second);
                 p.fontComboBoxes[i.first]->setCurrentIndex(j != p.fonts.end() ? (j - p.fonts.begin()) : -1);
             }
-            for (size_t i = 0; i < p.customFontEdits.size(); ++i)
+            for (size_t i = 0; i < p.fontFileEdits.size(); ++i)
             {
-                p.customFontEdits[i]->setPath(i < value.customFonts.size() ?
-                    ftk::Path(value.customFonts[i]) :
+                p.fontFileEdits[i]->setPath(i < value.fontFiles.size() ?
+                    ftk::Path(value.fontFiles[i]) :
                     ftk::Path());
             }
         }

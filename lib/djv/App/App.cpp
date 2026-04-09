@@ -481,7 +481,7 @@ namespace djv
                 item->path = i;
                 item->audioPath = audioPath;
                 p.filesModel->add(item);
-                p.recentFilesModel->addRecent(path.get());
+                p.recentFilesModel->addRecent(std::filesystem::u8path(path.get()));
             }
         }
 
@@ -846,7 +846,7 @@ namespace djv
                 {
                     auto fontSystem = getFontSystem();
                     const auto& fonts = fontSystem->getFonts();
-                    for (const auto& font : value.customFonts)
+                    for (const auto& font : value.fontFiles)
                     {
                         if (!font.empty())
                         {
