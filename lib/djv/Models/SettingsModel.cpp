@@ -433,6 +433,29 @@ namespace djv
 #endif // TLRENDER_USD
         };
 
+        namespace
+        {
+            std::map<std::string, std::string> keys =
+            {
+                { "Advanced", "/Advanced" },
+                { "Cache", "/Cache" },
+                { "ThumbnailCache", "/ThumbnailCache" },
+                { "Export", "/Export" },
+                { "FileBrowser", "/FileBrowser" },
+                { "ImageSeq", "/ImageSeq" },
+                { "Shortcuts", "/Shortcuts.3" },
+                { "Misc", "/Misc.1" },
+                { "Mouse", "/Mouse.1" },
+                { "Playback", "/Playback.1" },
+                { "Style", "/Style.1" },
+                { "Timeline", "/Timeline" },
+                { "Window", "/Window" },
+                { "FFmpeg", "/FFmpeg" },
+                { "FFmpegPipe", "/FFmpegPipe" },
+                { "USD", "/USD.1" },
+            };
+        }
+
         void SettingsModel::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<ftk::Settings>& settings,
@@ -445,24 +468,24 @@ namespace djv
             p.defaultDisplayScale = defaultDisplayScale;
 
             AdvancedSettings advanced;
-            settings->getT("/Advanced", advanced);
+            settings->getT(keys["Advanced"], advanced);
             p.advanced = ftk::Observable<AdvancedSettings>::create(advanced);
 
             tl::PlayerCacheOptions cache;
-            settings->getT("/Cache", cache);
+            settings->getT(keys["Cache"], cache);
             p.cache = ftk::Observable<tl::PlayerCacheOptions>::create(cache);
             tl::ui::ThumbnailCacheOptions thumbnailCache;
-            settings->getT("/ThumbnailCache", thumbnailCache);
+            settings->getT(keys["ThumbnailCache"], thumbnailCache);
             p.thumbnailCache = ftk::Observable<tl::ui::ThumbnailCacheOptions>::create(thumbnailCache);
             auto thumbnailSystem = context->getSystem<tl::ui::ThumbnailSystem>();
             thumbnailSystem->setCacheOptions(thumbnailCache);
 
             ExportSettings exportSettings;
-            settings->getT("/Export", exportSettings);
+            settings->getT(keys["Export"], exportSettings);
             p.exportSettings = ftk::Observable<ExportSettings>::create(exportSettings);
 
             FileBrowserSettings fileBrowser;
-            settings->getT("/FileBrowser", fileBrowser);
+            settings->getT(keys["FileBrowser"], fileBrowser);
             p.fileBrowser = ftk::Observable<FileBrowserSettings>::create(fileBrowser);
             auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->setNativeFileDialog(fileBrowser.nativeFileDialog);
@@ -471,53 +494,53 @@ namespace djv
             fileBrowserSystem->getModel()->setExt(fileBrowser.ext);
 
             ImageSeqSettings imageSeq;
-            settings->getT("/ImageSeq", imageSeq);
+            settings->getT(keys["ImageSeq"], imageSeq);
             p.imageSeq = ftk::Observable<ImageSeqSettings>::create(imageSeq);
 
             ShortcutsSettings shortcuts;
-            settings->getT("/Shortcuts.3", shortcuts);
+            settings->getT(keys["Shortcuts"], shortcuts);
             p.shortcuts = ftk::Observable<ShortcutsSettings>::create(shortcuts);
 
             MiscSettings misc;
-            settings->getT("/Misc", misc);
+            settings->getT(keys["Misc"], misc);
             p.misc = ftk::Observable<MiscSettings>::create(misc);
 
             MouseSettings mouse;
-            settings->getT("/Mouse.1", mouse);
+            settings->getT(keys["Mouse"], mouse);
             p.mouse = ftk::Observable<MouseSettings>::create(mouse);
 
             PlaybackSettings playback;
-            settings->getT("/Playback.1", playback);
+            settings->getT(keys["Playback"], playback);
             p.playback = ftk::Observable<PlaybackSettings>::create(playback);
 
             StyleSettings style;
             style.displayScale = defaultDisplayScale;
-            settings->getT("/Style.1", style);
+            settings->getT(keys["Style"], style);
             p.style = ftk::Observable<StyleSettings>::create(style);
 
             TimelineSettings timeline;
-            settings->getT("/Timeline", timeline);
+            settings->getT(keys["Timeline"], timeline);
             p.timeline = ftk::Observable<TimelineSettings>::create(timeline);
 
             WindowSettings window;
-            settings->getT("/Window", window);
+            settings->getT(keys["Window"], window);
             p.window = ftk::Observable<WindowSettings>::create(window);
 
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             tl::ffmpeg::Options ffmpeg;
-            settings->getT("/FFmpeg", ffmpeg);
+            settings->getT(keys["FFmpeg"], ffmpeg);
             p.ffmpeg = ftk::Observable<tl::ffmpeg::Options>::create(ffmpeg);
 #endif // TLRENDER_FFMPEG_PLUGIN
 
 #if defined(TLRENDER_FFMPEG_PIPE)
             tl::ffmpeg_pipe::Options ffmpegPipe;
-            settings->getT("/FFmpegPipe", ffmpegPipe);
+            settings->getT(keys["FFmpegPipe"], ffmpegPipe);
             p.ffmpegPipe = ftk::Observable<tl::ffmpeg_pipe::Options>::create(ffmpegPipe);
 #endif // TLRENDER_FFMPEG_PIPE
 
 #if defined(TLRENDER_USD)
             tl::usd::Options usd;
-            settings->getT("/USD.1", usd);
+            settings->getT(keys["USD"], usd);
             p.usd = ftk::Observable<tl::usd::Options>::create(usd);
 #endif // TLRENDER_USD
         }
@@ -545,10 +568,10 @@ namespace djv
         {
             FTK_P();
 
-            p.settings->setT("/Advanced", p.advanced->get());
-            p.settings->setT("/Cache", p.cache->get());
-            p.settings->setT("/ThumbnailCache", p.thumbnailCache->get());
-            p.settings->setT("/Export", p.exportSettings->get());
+            p.settings->setT(keys["Advanced"], p.advanced->get());
+            p.settings->setT(keys["Cache"], p.cache->get());
+            p.settings->setT(keys["ThumbnailCache"], p.thumbnailCache->get());
+            p.settings->setT(keys["Export"], p.exportSettings->get());
 
             FileBrowserSettings fileBrowser = p.fileBrowser->get();
             auto context = p.context.lock();
@@ -556,25 +579,25 @@ namespace djv
             fileBrowser.path = fileBrowserSystem->getModel()->getPath().u8string();
             fileBrowser.options = fileBrowserSystem->getModel()->getOptions();
             fileBrowser.ext = fileBrowserSystem->getModel()->getExt();
-            p.settings->setT("/FileBrowser", fileBrowser);
+            p.settings->setT(keys["FileBrowser"], fileBrowser);
 
-            p.settings->setT("/ImageSeq", p.imageSeq->get());
-            p.settings->setT("/Shortcuts.3", p.shortcuts->get());
-            p.settings->setT("/Misc", p.misc->get());
-            p.settings->setT("/Mouse.1", p.mouse->get());
-            p.settings->setT("/Playback.1", p.playback->get());
-            p.settings->setT("/Style.1", p.style->get());
-            p.settings->setT("/Timeline", p.timeline->get());
-            p.settings->setT("/Window", p.window->get());
+            p.settings->setT(keys["ImageSeq"], p.imageSeq->get());
+            p.settings->setT(keys["Shortcuts"], p.shortcuts->get());
+            p.settings->setT(keys["Misc"], p.misc->get());
+            p.settings->setT(keys["Mouse"], p.mouse->get());
+            p.settings->setT(keys["Playback"], p.playback->get());
+            p.settings->setT(keys["Style"], p.style->get());
+            p.settings->setT(keys["Timeline"], p.timeline->get());
+            p.settings->setT(keys["Window"], p.window->get());
 
 #if defined(TLRENDER_FFMPEG_PLUGIN)
-            p.settings->setT("/FFmpeg", p.ffmpeg->get());
+            p.settings->setT(keys["FFmpeg"], p.ffmpeg->get());
 #endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_FFMPEG_PIPE)
-            p.settings->setT("/FFmpegPipe", p.ffmpegPipe->get());
+            p.settings->setT(keys["FFmpegPipe"], p.ffmpegPipe->get());
 #endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
-            p.settings->setT("/USD.1", p.usd->get());
+            p.settings->setT(keys["USD"], p.usd->get());
 #endif // TLRENDER_USD
 
             p.settings->save();
