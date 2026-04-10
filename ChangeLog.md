@@ -3,11 +3,12 @@
 Features:
 * Movies can be decoded using the ffmpeg command line utility.
 * Custom fonts can be added to support different languages.
+* Add a setting to start playback when opening files.
 * Add settings for the thumbnail cache.
 * Add text selection to the information, messages, and system log tools.
 * Add auto-scroll to the messages and system log tools.
 * Move status bar indicators into a popup widget.
-* Performance improvements for opening files and thumbnails.
+* Performance improvements for opening files and timeline thumbnails.
 * Library updates:
     - FFmpeg 8.1
     - SVT-AV1 v4.0.1
