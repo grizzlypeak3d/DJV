@@ -8,6 +8,7 @@
 
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
+#include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
@@ -40,40 +41,112 @@ namespace djv
             auto settingsModel = app->getSettingsModel();
             auto vLayout = ftk::VerticalLayout::create(context);
             vLayout->setSpacingRole(ftk::SizeRole::None);
+
             p.bellows["Cache"] = ftk::Bellows::create(context, "Cache", vLayout);
-            p.bellows["Cache"]->setWidget(ui::CacheSettingsWidget::create(context, settingsModel));
+            auto vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::CacheSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Cache"]->setWidget(vLayout2);
+
 #if defined(FTK_NFD)
             p.bellows["FileBrowser"] = ftk::Bellows::create(context, "File Browser", vLayout);
-            p.bellows["FileBrowser"]->setWidget(ui::FileBrowserSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::FileBrowserSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["FileBrowser"]->setWidget(vLayout2);
 #endif // FTK_NFD
+
             p.bellows["ImageSeqs"] = ftk::Bellows::create(context, "Image Sequences", vLayout);
-            p.bellows["ImageSeqs"]->setWidget(ui::ImageSeqSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::ImageSeqSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["ImageSeqs"]->setWidget(vLayout2);
+
             p.bellows["Mouse"] = ftk::Bellows::create(context, "Mouse", vLayout);
-            p.bellows["Mouse"]->setWidget(ui::MouseSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::MouseSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Mouse"]->setWidget(vLayout2);
+
             p.bellows["Playback"] = ftk::Bellows::create(context, "Playback", vLayout);
-            p.bellows["Playback"]->setWidget(ui::PlaybackSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::PlaybackSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Playback"]->setWidget(vLayout2);
+
             p.bellows["Shortcuts"] = ftk::Bellows::create(context, "Keyboard Shortcuts", vLayout);
-            p.bellows["Shortcuts"]->setWidget(ui::ShortcutsSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::ShortcutsSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Shortcuts"]->setWidget(vLayout2);
+
             p.bellows["Style"] = ftk::Bellows::create(context, "Style", vLayout);
-            p.bellows["Style"]->setWidget(ui::StyleSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::StyleSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Style"]->setWidget(vLayout2);
+
             p.bellows["Time"] = ftk::Bellows::create(context, "Time", vLayout);
-            p.bellows["Time"]->setWidget(ui::TimeSettingsWidget::create(context, app->getTimeUnitsModel()));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::TimeSettingsWidget::create(context, app->getTimeUnitsModel(), vLayout2);
+            p.bellows["Time"]->setWidget(vLayout2);
+
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             p.bellows["FFmpeg"] = ftk::Bellows::create(context, "FFmpeg", vLayout);
-            p.bellows["FFmpeg"]->setWidget(ui::FFmpegSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                vLayout2);
+            ui::FFmpegSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["FFmpeg"]->setWidget(vLayout2);
 #endif // TLRENDER_FFMPEG_PLUGIN
+
 #if defined(TLRENDER_FFMPEG_PIPE)
             p.bellows["FFmpegPipe"] = ftk::Bellows::create(context, "FFmpeg Pipe", vLayout);
-            p.bellows["FFmpegPipe"]->setWidget(ui::FFmpegPipeSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                vLayout2);
+            ui::FFmpegPipeSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["FFmpegPipe"]->setWidget(vLayout2);
 #endif // TLRENDER_FFMPEG_PIPE
+
 #if defined(TLRENDER_USD)
             p.bellows["USD"] = ftk::Bellows::create(context, "USD", vLayout);
-            p.bellows["USD"]->setWidget(ui::USDSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Label::create(
+                context,
+                "Universal scene description (USD) settings.",
+                vLayout2);
+            ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                vLayout2);
+            p.bellows["USD"]->setWidget(
+                ui::USDSettingsWidget::create(context, settingsModel));
 #endif // TLRENDER_USD
+
             p.bellows["Advanced"] = ftk::Bellows::create(context, "Advanced", vLayout);
-            p.bellows["Advanced"]->setWidget(ui::AdvancedSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                vLayout2);
+            ui::AdvancedSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Advanced"]->setWidget(vLayout2);
+
             p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
-            p.bellows["Misc"]->setWidget(ui::MiscSettingsWidget::create(context, settingsModel));
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::MiscSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Misc"]->setWidget(vLayout2);
 
             p.saveButton = ftk::PushButton::create(context, "Save");
             p.saveButton->setTooltip("Save the settings. Settings are also saved on exit.");

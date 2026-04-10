@@ -402,7 +402,6 @@ namespace djv
             p.searchBox->setTooltip("Search the shortcuts");
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::None);
             p.searchBox->setParent(p.layout);
             p.shortcutsLayout = ftk::GridLayout::create(context, p.layout);

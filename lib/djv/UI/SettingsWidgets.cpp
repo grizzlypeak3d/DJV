@@ -42,7 +42,7 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> audioBufferFramesEdit;
             std::shared_ptr<ftk::IntEdit> videoRequestsEdit;
             std::shared_ptr<ftk::IntEdit> audioRequestsEdit;
-            std::shared_ptr<ftk::VerticalLayout> layout;
+            std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<models::AdvancedSettings> > settingsObserver;
         };
@@ -72,15 +72,12 @@ namespace djv
             p.audioRequestsEdit = ftk::IntEdit::create(context);
             p.audioRequestsEdit->setRange(1, 64);
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            auto label = ftk::Label::create(context, "Changes are applied to new files.", p.layout);
-            auto formLayout = ftk::FormLayout::create(context, p.layout);
-            formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            formLayout->addRow("Compatibility:", p.compatCheckBox);
-            formLayout->addRow("Audio buffer frames:", p.audioBufferFramesEdit);
-            formLayout->addRow("Video requests:", p.videoRequestsEdit);
-            formLayout->addRow("Audio requests:", p.audioRequestsEdit);
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Compatibility:", p.compatCheckBox);
+            p.layout->addRow("Audio buffer frames:", p.audioBufferFramesEdit);
+            p.layout->addRow("Video requests:", p.videoRequestsEdit);
+            p.layout->addRow("Audio requests:", p.audioRequestsEdit);
 
             p.settingsObserver = ftk::Observer<models::AdvancedSettings>::create(
                 settings->observeAdvanced(),
@@ -209,7 +206,6 @@ namespace djv
             p.waveformEdit->setLargeStep(10.0);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -355,7 +351,7 @@ namespace djv
             p.nfdCheckBox->setHStretch(ftk::Stretch::Expanding);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Native file dialog:", p.nfdCheckBox);
 
             p.settingsObserver = ftk::Observer<models::FileBrowserSettings>::create(
@@ -461,7 +457,6 @@ namespace djv
             p.threadsEdit->setRange(1, 64);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Open audio files:", p.audioComboBox);
             p.layout->addRow("Audio file extensions:", p.audioExtensionsEdit);
@@ -600,7 +595,6 @@ namespace djv
             p.showSetupCheckBox->setHStretch(ftk::Stretch::Expanding);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enable tooltips:", p.tooltipsCheckBox);
             p.layout->addRow("Show setup dialog:", p.showSetupCheckBox);
@@ -718,7 +712,6 @@ namespace djv
             p.frameShuttleScaleEdit->setRange(.1F, 10.F);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             for (const auto mouseAction : models::getMouseActionEnums())
             {
@@ -853,7 +846,6 @@ namespace djv
             p.startPlaybackCheckBox = ftk::CheckBox::create(context);
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Start playback on open:", p.startPlaybackCheckBox);
 
@@ -926,7 +918,6 @@ namespace djv
             p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Time units:", p.timeUnitsComboBox);
 
@@ -980,7 +971,7 @@ namespace djv
 
             std::shared_ptr<ftk::CheckBox> yuvToRGBCheckBox;
             std::shared_ptr<ftk::IntEdit> threadsEdit;
-            std::shared_ptr<ftk::VerticalLayout> layout;
+            std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::ffmpeg::Options> > optionsObserver;
         };
@@ -1001,20 +992,10 @@ namespace djv
             p.threadsEdit = ftk::IntEdit::create(context);
             p.threadsEdit->setRange(0, 64);
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            auto label = ftk::Label::create(
-                context,
-                "FFmpeg plugin settings.",
-                p.layout);
-            label = ftk::Label::create(
-                context,
-                "Changes are applied to new files.",
-                p.layout);
-            auto formLayout = ftk::FormLayout::create(context, p.layout);
-            formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            formLayout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
-            formLayout->addRow("I/O threads:", p.threadsEdit);
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
+            p.layout->addRow("I/O threads:", p.threadsEdit);
 
             p.optionsObserver = ftk::Observer<tl::ffmpeg::Options>::create(
                 settings->observeFFmpeg(),
@@ -1080,7 +1061,7 @@ namespace djv
 
             std::shared_ptr<ftk::FileEdit> ffmpegEdit;
             std::shared_ptr<ftk::FileEdit> ffprobeEdit;
-            std::shared_ptr<ftk::VerticalLayout> layout;
+            std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::ffmpeg_pipe::Options> > optionsObserver;
         };
@@ -1099,20 +1080,10 @@ namespace djv
 
             p.ffprobeEdit = ftk::FileEdit::create(context);
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            auto label = ftk::Label::create(
-                context,
-                "FFmpeg pipe plugin settings.",
-                p.layout);
-            label = ftk::Label::create(
-                context,
-                "Changes are applied to new files.",
-                p.layout);
-            auto formLayout = ftk::FormLayout::create(context, p.layout);
-            formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            formLayout->addRow("ffmpeg:", p.ffmpegEdit);
-            formLayout->addRow("ffprobe:", p.ffprobeEdit);
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("ffmpeg location:", p.ffmpegEdit);
+            p.layout->addRow("ffprobe location:", p.ffprobeEdit);
 
             p.optionsObserver = ftk::Observer<tl::ffmpeg_pipe::Options>::create(
                 settings->observeFFmpegPipe(),
@@ -1183,7 +1154,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> sRGBCheckBox;
             std::shared_ptr<ftk::IntEdit> stageCacheEdit;
             std::shared_ptr<ftk::IntEdit> diskCacheEdit;
-            std::shared_ptr<ftk::VerticalLayout> layout;
+            std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::usd::Options> > optionsObserver;
         };
@@ -1218,29 +1189,19 @@ namespace djv
             p.diskCacheEdit = ftk::IntEdit::create(context);
             p.diskCacheEdit->setRange(0, 1024);
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            auto label = ftk::Label::create(
-                context,
-                "Universal scene description (USD) plugin settings.",
-                p.layout);
-            label = ftk::Label::create(
-                context,
-                "Changes are applied to new files.",
-                p.layout);
-            auto formLayout = ftk::FormLayout::create(context, p.layout);
-            formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            formLayout->addRow("Render width:", p.renderWidthEdit);
-            formLayout->addRow("Render complexity:", p.complexitySlider);
-            formLayout->addRow("Draw mode:", p.drawModeComboBox);
-            formLayout->addRow("Enable lighting:", p.lightingCheckBox);
-            formLayout->addRow("Enable sRGB color space:", p.sRGBCheckBox);
-            formLayout->addRow("Stage cache size:", p.stageCacheEdit);
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Render width:", p.renderWidthEdit);
+            p.layout->addRow("Render complexity:", p.complexitySlider);
+            p.layout->addRow("Draw mode:", p.drawModeComboBox);
+            p.layout->addRow("Enable lighting:", p.lightingCheckBox);
+            p.layout->addRow("Enable sRGB color space:", p.sRGBCheckBox);
+            p.layout->addRow("Stage cache size:", p.stageCacheEdit);
             auto hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.diskCacheEdit->setParent(hLayout);
             ftk::Label::create(context, "GB", hLayout);
-            formLayout->addRow("Disk cache size:", hLayout);
+            p.layout->addRow("Disk cache size:", hLayout);
 
             p.optionsObserver = ftk::Observer<tl::usd::Options>::create(
                 settings->observeUSD(),

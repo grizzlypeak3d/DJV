@@ -11,6 +11,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/StackLayout.h>
 #include <ftk/Core/Format.h>
 
@@ -30,7 +31,6 @@ namespace djv
             IWidget::_init(context, "djv::ui::SetupStartWidget", parent);
             FTK_P();
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             ftk::Label::create(context, ftk::Format("Welcome to DJV version {0}.").arg(DJV_VERSION_FULL), p.layout);
             ftk::Label::create(context, "Start by configuring some settings.", p.layout);
             ftk::Label::create(context, "Changes can also be made later in the settings tool.", p.layout);
@@ -69,7 +69,6 @@ namespace djv
             std::shared_ptr<ftk::PushButton> prevButton;
             std::shared_ptr<ftk::PushButton> closeButton;
             std::shared_ptr<ftk::StackLayout> stackLayout;
-            std::vector<std::shared_ptr<ftk::IWidget> > widgets;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
             std::shared_ptr<ftk::Observer<bool> > nextObserver;
@@ -99,26 +98,37 @@ namespace djv
             p.closeButton = ftk::PushButton::create(context, "Close");
 
             p.stackLayout = ftk::StackLayout::create(context);
-            p.stackLayout->setMarginRole(ftk::SizeRole::MarginDialog);
-            p.widgets.push_back(SetupStartWidget::create(context, p.stackLayout));
+            p.stackLayout->setFitAll(false);
+            p.stackLayout->setMarginRole(ftk::SizeRole::Margin);
+
+            SetupStartWidget::create(context, p.stackLayout);
+
             auto vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
-            ftk::Label::create(context, "Configure the style:", vLayout);
-            p.widgets.push_back(StyleSettingsWidget::create(context, settings, vLayout));
-            vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
             ftk::Label::create(context, "Configure the memory cache:", vLayout);
-            p.widgets.push_back(CacheSettingsWidget::create(context, settings, vLayout));
+            CacheSettingsWidget::create(context, settings, vLayout);
+
             vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
-            vLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
             ftk::Label::create(context, "Configure the time settings:", vLayout);
-            p.widgets.push_back(TimeSettingsWidget::create(context, timeUnitsModel, vLayout));
+            TimeSettingsWidget::create(context, timeUnitsModel, vLayout);
+
+            vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
+            ftk::Label::create(context, "Configure the style:", vLayout);
+            StyleSettingsWidget::create(context, settings, vLayout);
+
+#if defined(TLRENDER_FFMPEG_PIPE)
+            vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
+            ftk::Label::create(context, "Configure the FFmpeg command-line settings:", vLayout);
+            FFmpegPipeSettingsWidget::create(context, settings, vLayout);
+#endif // TLRENDER_FFMPEG_PIPE
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
+            p.layout->setHStretch(ftk::Stretch::Expanding);
             label->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            p.stackLayout->setParent(p.layout);
+            auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Both, p.layout);
+            scrollWidget->setBorder(false);
+            scrollWidget->setWidget(p.stackLayout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setMarginRole(ftk::SizeRole::Margin);

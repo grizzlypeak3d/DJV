@@ -492,7 +492,7 @@ namespace djv
 
             StyleSettings style;
             style.displayScale = defaultDisplayScale;
-            settings->getT("/Style", style);
+            settings->getT("/Style.1", style);
             p.style = ftk::Observable<StyleSettings>::create(style);
 
             TimelineSettings timeline;
@@ -563,7 +563,7 @@ namespace djv
             p.settings->setT("/Misc", p.misc->get());
             p.settings->setT("/Mouse.1", p.mouse->get());
             p.settings->setT("/Playback.1", p.playback->get());
-            p.settings->setT("/Style", p.style->get());
+            p.settings->setT("/Style.1", p.style->get());
             p.settings->setT("/Timeline", p.timeline->get());
             p.settings->setT("/Window", p.window->get());
 

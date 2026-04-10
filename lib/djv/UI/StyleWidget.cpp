@@ -75,7 +75,6 @@ namespace djv
             }
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Color style:", p.colorStyleComboBox);
             p.layout->addRow("Brightness:", p.brightnessSlider);
