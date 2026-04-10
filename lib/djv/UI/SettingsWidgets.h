@@ -192,6 +192,34 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! Playback settings widget.
+        class PlaybackSettingsWidget : public ISettingsWidget
+        {
+            FTK_NON_COPYABLE(PlaybackSettingsWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            PlaybackSettingsWidget();
+
+        public:
+            virtual ~PlaybackSettingsWidget();
+
+            static std::shared_ptr<PlaybackSettingsWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            ftk::Size2I getSizeHint() const override;
+            void setGeometry(const ftk::Box2I&) override;
+
+        private:
+            FTK_PRIVATE();
+        };
+
         //! Keyboard shortcut editor.
         class ShortcutEdit : public ftk::IMouseWidget
         {

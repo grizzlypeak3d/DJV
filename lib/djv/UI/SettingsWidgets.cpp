@@ -669,7 +669,6 @@ namespace djv
             std::vector<std::string> modifierLabels;
             std::shared_ptr<ftk::FloatEdit> wheelScaleEdit;
             std::shared_ptr<ftk::FloatEdit> frameShuttleScaleEdit;
-
             std::map<models::MouseAction, std::shared_ptr<ftk::ComboBox> > buttonComboBoxes;
             std::map<models::MouseAction, std::shared_ptr<ftk::ComboBox> > modifierComboBoxes;
             std::shared_ptr<ftk::FormLayout> layout;
@@ -827,6 +826,78 @@ namespace djv
         }
 
         void MouseSettingsWidget::setGeometry(const ftk::Box2I& value)
+        {
+            ISettingsWidget::setGeometry(value);
+            _p->layout->setGeometry(value);
+        }
+
+        struct PlaybackSettingsWidget::Private
+        {
+            std::shared_ptr<models::SettingsModel> settings;
+            std::shared_ptr<ftk::CheckBox> startPlaybackCheckBox;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<models::PlaybackSettings> > settingsObserver;
+        };
+
+        void PlaybackSettingsWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            ISettingsWidget::_init(context, "djv::ui::PlaybackSettingsWidget", parent);
+            FTK_P();
+
+            p.settings = settings;
+
+            p.startPlaybackCheckBox = ftk::CheckBox::create(context);
+
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Start playback on open:", p.startPlaybackCheckBox);
+
+            p.settingsObserver = ftk::Observer<models::PlaybackSettings>::create(
+                settings->observePlayback(),
+                [this](const models::PlaybackSettings& value)
+                {
+                    FTK_P();
+                    p.startPlaybackCheckBox->setChecked(value.startPlayback);
+                });
+
+            p.startPlaybackCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    auto settings = p.settings->getPlayback();
+                    settings.startPlayback = value;
+                    p.settings->setPlayback(settings);
+                });
+        }
+
+        PlaybackSettingsWidget::PlaybackSettingsWidget() :
+            _p(new Private)
+        {}
+
+        PlaybackSettingsWidget::~PlaybackSettingsWidget()
+        {}
+
+        std::shared_ptr<PlaybackSettingsWidget> PlaybackSettingsWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<PlaybackSettingsWidget>(new PlaybackSettingsWidget);
+            out->_init(context, settings, parent);
+            return out;
+        }
+
+        ftk::Size2I PlaybackSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
+        void PlaybackSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);

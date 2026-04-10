@@ -30,6 +30,8 @@ namespace djv
             double                   speed       = -1.0;
             OTIO_NS::RationalTime    currentTime = tl::invalidTime;
             OTIO_NS::TimeRange       inOutRange  = tl::invalidTimeRange;
+
+            bool                     newFile = true;
         };
 
         //! Files model.

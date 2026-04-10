@@ -38,61 +38,42 @@ namespace djv
             FTK_P();
 
             auto settingsModel = app->getSettingsModel();
-            auto advancedWidget = ui::AdvancedSettingsWidget::create(context, settingsModel);
-            auto cacheWidget = ui::CacheSettingsWidget::create(context, settingsModel);
-#if defined(FTK_NFD)
-            auto fileBrowserWidget = ui::FileBrowserSettingsWidget::create(context, settingsModel);
-#endif // FTK_NFD
-            auto imageSeqWidget = ui::ImageSeqSettingsWidget::create(context, settingsModel);
-            auto miscWidget = ui::MiscSettingsWidget::create(context, settingsModel);
-            auto mouseWidget = ui::MouseSettingsWidget::create(context, settingsModel);
-            auto shortcutsWidget = ui::ShortcutsSettingsWidget::create(context, settingsModel);
-            auto styleWidget = ui::StyleSettingsWidget::create(context, settingsModel);
-            auto timeWidget = ui::TimeSettingsWidget::create(context, app->getTimeUnitsModel());
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-            auto ffmpegWidget = ui::FFmpegSettingsWidget::create(context, settingsModel);
-#endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_PIPE)
-            auto ffmpegPipeWidget = ui::FFmpegPipeSettingsWidget::create(context, settingsModel);
-#endif // TLRENDER_FFMPEG_PIPE
-#if defined(TLRENDER_USD)
-            auto usdWidget = ui::USDSettingsWidget::create(context, settingsModel);
-#endif // TLRENDER_USD
-
             auto vLayout = ftk::VerticalLayout::create(context);
             vLayout->setSpacingRole(ftk::SizeRole::None);
             p.bellows["Cache"] = ftk::Bellows::create(context, "Cache", vLayout);
-            p.bellows["Cache"]->setWidget(cacheWidget);
+            p.bellows["Cache"]->setWidget(ui::CacheSettingsWidget::create(context, settingsModel));
 #if defined(FTK_NFD)
             p.bellows["FileBrowser"] = ftk::Bellows::create(context, "File Browser", vLayout);
-            p.bellows["FileBrowser"]->setWidget(fileBrowserWidget);
+            p.bellows["FileBrowser"]->setWidget(ui::FileBrowserSettingsWidget::create(context, settingsModel));
 #endif // FTK_NFD
             p.bellows["ImageSeqs"] = ftk::Bellows::create(context, "Image Sequences", vLayout);
-            p.bellows["ImageSeqs"]->setWidget(imageSeqWidget);
+            p.bellows["ImageSeqs"]->setWidget(ui::ImageSeqSettingsWidget::create(context, settingsModel));
             p.bellows["Mouse"] = ftk::Bellows::create(context, "Mouse", vLayout);
-            p.bellows["Mouse"]->setWidget(mouseWidget);
+            p.bellows["Mouse"]->setWidget(ui::MouseSettingsWidget::create(context, settingsModel));
+            p.bellows["Playback"] = ftk::Bellows::create(context, "Playback", vLayout);
+            p.bellows["Playback"]->setWidget(ui::PlaybackSettingsWidget::create(context, settingsModel));
             p.bellows["Shortcuts"] = ftk::Bellows::create(context, "Keyboard Shortcuts", vLayout);
-            p.bellows["Shortcuts"]->setWidget(shortcutsWidget);
+            p.bellows["Shortcuts"]->setWidget(ui::ShortcutsSettingsWidget::create(context, settingsModel));
             p.bellows["Style"] = ftk::Bellows::create(context, "Style", vLayout);
-            p.bellows["Style"]->setWidget(styleWidget);
+            p.bellows["Style"]->setWidget(ui::StyleSettingsWidget::create(context, settingsModel));
             p.bellows["Time"] = ftk::Bellows::create(context, "Time", vLayout);
-            p.bellows["Time"]->setWidget(timeWidget);
+            p.bellows["Time"]->setWidget(ui::TimeSettingsWidget::create(context, app->getTimeUnitsModel()));
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             p.bellows["FFmpeg"] = ftk::Bellows::create(context, "FFmpeg", vLayout);
-            p.bellows["FFmpeg"]->setWidget(ffmpegWidget);
+            p.bellows["FFmpeg"]->setWidget(ui::FFmpegSettingsWidget::create(context, settingsModel));
 #endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_FFMPEG_PIPE)
             p.bellows["FFmpegPipe"] = ftk::Bellows::create(context, "FFmpeg Pipe", vLayout);
-            p.bellows["FFmpegPipe"]->setWidget(ffmpegPipeWidget);
+            p.bellows["FFmpegPipe"]->setWidget(ui::FFmpegPipeSettingsWidget::create(context, settingsModel));
 #endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
             p.bellows["USD"] = ftk::Bellows::create(context, "USD", vLayout);
-            p.bellows["USD"]->setWidget(usdWidget);
+            p.bellows["USD"]->setWidget(ui::USDSettingsWidget::create(context, settingsModel));
 #endif // TLRENDER_USD
             p.bellows["Advanced"] = ftk::Bellows::create(context, "Advanced", vLayout);
-            p.bellows["Advanced"]->setWidget(advancedWidget);
+            p.bellows["Advanced"]->setWidget(ui::AdvancedSettingsWidget::create(context, settingsModel));
             p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
-            p.bellows["Misc"]->setWidget(miscWidget);
+            p.bellows["Misc"]->setWidget(ui::MiscSettingsWidget::create(context, settingsModel));
 
             p.saveButton = ftk::PushButton::create(context, "Save");
             p.saveButton->setTooltip("Save the settings. Settings are also saved on exit.");

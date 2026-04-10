@@ -302,6 +302,16 @@ namespace djv
             return !(*this == other);
         }
 
+        bool PlaybackSettings::operator == (const PlaybackSettings& other) const
+        {
+            return startPlayback == other.startPlayback;
+        }
+
+        bool PlaybackSettings::operator != (const PlaybackSettings& other) const
+        {
+            return !(*this == other);
+        }
+
         StyleSettings::StyleSettings()
         {
             for (const auto font : ftk::getFontTypeEnums())
@@ -408,6 +418,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<ShortcutsSettings> > shortcuts;
             std::shared_ptr<ftk::Observable<MiscSettings> > misc;
             std::shared_ptr<ftk::Observable<MouseSettings> > mouse;
+            std::shared_ptr<ftk::Observable<PlaybackSettings> > playback;
             std::shared_ptr<ftk::Observable<StyleSettings> > style;
             std::shared_ptr<ftk::Observable<TimelineSettings> > timeline;
             std::shared_ptr<ftk::Observable<WindowSettings> > window;
@@ -474,6 +485,10 @@ namespace djv
             MouseSettings mouse;
             settings->getT("/Mouse.1", mouse);
             p.mouse = ftk::Observable<MouseSettings>::create(mouse);
+
+            PlaybackSettings playback;
+            settings->getT("/Playback.1", playback);
+            p.playback = ftk::Observable<PlaybackSettings>::create(playback);
 
             StyleSettings style;
             style.displayScale = defaultDisplayScale;
@@ -547,6 +562,7 @@ namespace djv
             p.settings->setT("/Shortcuts.3", p.shortcuts->get());
             p.settings->setT("/Misc", p.misc->get());
             p.settings->setT("/Mouse.1", p.mouse->get());
+            p.settings->setT("/Playback.1", p.playback->get());
             p.settings->setT("/Style", p.style->get());
             p.settings->setT("/Timeline", p.timeline->get());
             p.settings->setT("/Window", p.window->get());
@@ -578,6 +594,7 @@ namespace djv
             miscSettings.showSetup = false;
             setMisc(miscSettings);
             setMouse(MouseSettings());
+            setPlayback(PlaybackSettings());
             StyleSettings style;
             style.displayScale = p.defaultDisplayScale;
             setStyle(style);
@@ -741,6 +758,21 @@ namespace djv
         void SettingsModel::setMouse(const MouseSettings& value)
         {
             _p->mouse->setIfChanged(value);
+        }
+
+        const PlaybackSettings& SettingsModel::getPlayback() const
+        {
+            return _p->playback->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<PlaybackSettings> > SettingsModel::observePlayback() const
+        {
+            return _p->playback;
+        }
+
+        void SettingsModel::setPlayback(const PlaybackSettings& value)
+        {
+            _p->playback->setIfChanged(value);
         }
 
         const StyleSettings& SettingsModel::getStyle() const
@@ -925,6 +957,11 @@ namespace djv
             json["FrameShuttleScale"] = value.frameShuttleScale;
         }
 
+        void to_json(nlohmann::json& json, const PlaybackSettings& value)
+        {
+            json["StartPlayback"] = value.startPlayback;
+        }
+
         void to_json(nlohmann::json& json, const StyleSettings& value)
         {
             json["DisplayScale"] = value.displayScale;
@@ -1032,6 +1069,11 @@ namespace djv
             }
             json.at("WheelScale").get_to(value.wheelScale);
             json.at("FrameShuttleScale").get_to(value.frameShuttleScale);
+        }
+
+        void from_json(const nlohmann::json& json, PlaybackSettings& value)
+        {
+            json.at("StartPlayback").get_to(value.startPlayback);
         }
 
         void from_json(const nlohmann::json& json, ShortcutsSettings& value)

@@ -189,6 +189,15 @@ namespace djv
             bool operator != (const MouseSettings&) const;
         };
 
+        //! Playback settings.
+        struct PlaybackSettings
+        {
+            bool startPlayback = false;
+
+            bool operator == (const PlaybackSettings&) const;
+            bool operator != (const PlaybackSettings&) const;
+        };
+
         //! Keyboard shortcuts settings.
         struct ShortcutsSettings
         {
@@ -364,6 +373,15 @@ namespace djv
 
             ///@}
 
+            //! \name Playback
+            ///@{
+
+            const PlaybackSettings& getPlayback() const;
+            std::shared_ptr<ftk::IObservable<PlaybackSettings> > observePlayback() const;
+            void setPlayback(const PlaybackSettings&);
+
+            ///@}
+
             //! \name Keyboard Shortcuts
             ///@{
 
@@ -454,6 +472,7 @@ namespace djv
         void to_json(nlohmann::json&, const MiscSettings&);
         void to_json(nlohmann::json&, const MouseActionBinding&);
         void to_json(nlohmann::json&, const MouseSettings&);
+        void to_json(nlohmann::json&, const PlaybackSettings&);
         void to_json(nlohmann::json&, const ShortcutsSettings&);
         void to_json(nlohmann::json&, const StyleSettings&);
         void to_json(nlohmann::json&, const TimelineSettings&);
@@ -466,6 +485,7 @@ namespace djv
         void from_json(const nlohmann::json&, MiscSettings&);
         void from_json(const nlohmann::json&, MouseActionBinding&);
         void from_json(const nlohmann::json&, MouseSettings&);
+        void from_json(const nlohmann::json&, PlaybackSettings&);
         void from_json(const nlohmann::json&, ShortcutsSettings&);
         void from_json(const nlohmann::json&, StyleSettings&);
         void from_json(const nlohmann::json&, TimelineSettings&);

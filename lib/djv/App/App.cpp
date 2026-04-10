@@ -1217,10 +1217,10 @@ namespace djv
                 }
                 else
                 {
-                    if (auto player = p.player->get())
-                    {
-                        player->setAudioDevice(tl::AudioDeviceID());
-                    }
+                    //if (auto player = p.player->get())
+                    //{
+                    //    player->setAudioDevice(tl::AudioDeviceID());
+                    //}
                     auto i = std::find(p.files.begin(), p.files.end(), activeFiles[0]);
                     if (i != p.files.end())
                     {
@@ -1274,6 +1274,16 @@ namespace djv
                 }
                 player->setCompare(compare);
                 player->setCompareTime(p.filesModel->getCompareTime());
+                if (p.settingsModel->getPlayback().startPlayback &&
+                    activeFiles.front()->newFile)
+                {
+                    player->forward();
+                }
+            }
+
+            for (auto& file : p.files)
+            {
+                file->newFile = false;
             }
 
             p.activeFiles = activeFiles;
