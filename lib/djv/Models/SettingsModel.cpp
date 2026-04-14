@@ -442,7 +442,7 @@ namespace djv
                 { "ThumbnailCache", "/ThumbnailCache" },
                 { "Export", "/Export" },
                 { "FileBrowser", "/FileBrowser" },
-                { "ImageSeq", "/ImageSeq" },
+                { "ImageSeq", "/ImageSeq.1" },
                 { "Shortcuts", "/Shortcuts.3" },
                 { "Misc", "/Misc.1" },
                 { "Mouse", "/Mouse.1" },
