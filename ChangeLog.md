@@ -16,7 +16,9 @@ Features:
 
 Fixes:
 * Mouse focus fixes for zooming the viewport and timeline.
-* Image sequence fixes.
+* Image sequence fix for the built-in file browser.
+* Image sequence fix for files in the same directory with similar names, e.g.,
+  "asteroid_V01" and "asteroid_V02".
 
 
 ## 3.3.4
