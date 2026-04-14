@@ -16,7 +16,7 @@ Features:
 
 Fixes:
 * Mouse focus fixes for zooming the viewport and timeline.
-* Image sequences fix for the built-in file browser.
+* Image sequence fixes.
 
 
 ## 3.3.4
