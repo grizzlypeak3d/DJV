@@ -67,6 +67,7 @@ namespace djv
 
         void StatusIndicatorPopup::setOCIO(bool value)
         {
+            _p->icons["OCIO"]->setEnabled(value);
             _p->icons["OCIO"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
@@ -74,6 +75,7 @@ namespace djv
 
         void StatusIndicatorPopup::setLUT(bool value)
         {
+            _p->icons["LUT"]->setEnabled(value);
             _p->icons["LUT"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
@@ -81,6 +83,7 @@ namespace djv
 
         void StatusIndicatorPopup::setChannels(bool value)
         {
+            _p->icons["Channels"]->setEnabled(value);
             _p->icons["Channels"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
@@ -88,6 +91,7 @@ namespace djv
 
         void StatusIndicatorPopup::setMirror(bool value)
         {
+            _p->icons["Mirror"]->setEnabled(value);
             _p->icons["Mirror"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
@@ -95,6 +99,7 @@ namespace djv
 
         void StatusIndicatorPopup::setColor(bool value)
         {
+            _p->icons["Color"]->setEnabled(value);
             _p->icons["Color"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
@@ -102,6 +107,7 @@ namespace djv
 
         void StatusIndicatorPopup::setAudioOffset(bool value)
         {
+            _p->icons["AudioOffset"]->setEnabled(value);
             _p->icons["AudioOffset"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
@@ -109,6 +115,7 @@ namespace djv
 
         void StatusIndicatorPopup::setOutputDevice(bool value)
         {
+            _p->icons["OutputDevice"]->setEnabled(value);
             _p->icons["OutputDevice"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
