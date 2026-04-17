@@ -124,17 +124,19 @@ if(WIN32)
             DESTINATION ".")
     endif()
     
-    install(
-        FILES ${INSTALL_DLLS}
-        DESTINATION bin)
+    install(FILES ${INSTALL_DLLS} DESTINATION bin)
 
     set(CPACK_NSIS_MUI_ICON ${PROJECT_SOURCE_DIR}/etc/Windows/DJV_Icon.ico)
     set(CPACK_NSIS_MUI_UNIICON ${PROJECT_SOURCE_DIR}/etc/Windows/DJV_Icon.ico)
     set(CPACK_NSIS_INSTALLED_ICON_NAME bin/djv.exe)
 
-elseif(APPLE AND DJV_MACOS_PACKAGE)
+elseif(APPLE)
 
-    set(CPACK_GENERATOR Bundle)
+    if(DJV_MACOS_PACKAGE)
+        set(CPACK_GENERATOR Bundle)
+    else()
+        set(CPACK_GENERATOR ZIP)
+    endif()
 
     set(INSTALL_DYLIBS)
     
@@ -287,40 +289,55 @@ elseif(APPLE AND DJV_MACOS_PACKAGE)
             ${CMAKE_INSTALL_PREFIX}/lib/libusd_work.dylib)
         list(APPEND INSTALL_DYLIBS ${MATERIALX_DYLIBS} ${TBB_DYLIBS} ${OSD_DYLIBS} ${USD_DYLIBS})
 
+        if(DJV_MACOS_PACKAGE)
+            # \bug Why do we need to use ".." to avoid installing into the
+            # "Resources" directory in the bundle?
+            install(
+                DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/usd
+                DESTINATION ../Frameworks)
+            install(
+                DIRECTORY ${CMAKE_INSTALL_PREFIX}/plugin/usd
+                DESTINATION ../PlugIns)
+        else()
+            install(
+                DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/usd
+                DESTINATION lib)
+            install(
+                DIRECTORY ${CMAKE_INSTALL_PREFIX}/plugin
+                DESTINATION ".")
+        endif()
+    endif()
+
+    if(DJV_MACOS_PACKAGE)
         # \bug Why do we need to use ".." to avoid installing into the
         # "Resources" directory in the bundle?
-        install(
-            DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/usd
-            DESTINATION ../Frameworks)
-        install(
-            DIRECTORY ${CMAKE_INSTALL_PREFIX}/plugin/usd
-            DESTINATION ../PlugIns)
+        install(FILES ${INSTALL_DYLIBS} DESTINATION ../Frameworks)
+    else()
+        install(FILES ${INSTALL_DYLIBS} DESTINATION lib)
     endif()
 
-    # \bug Why do we need to use ".." to avoid installing into the
-    # "Resources" directory in the bundle?
-    install(FILES ${INSTALL_DYLIBS} DESTINATION ../Frameworks)
+    if(DJV_MACOS_PACKAGE)
+        set(CPACK_BUNDLE_NAME DJV)
+        set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns)
+        configure_file(
+            ${PROJECT_SOURCE_DIR}/etc/macOS/Info.plist.in
+            ${PROJECT_BINARY_DIR}/Info.plist)
+        set(CPACK_BUNDLE_PLIST ${PROJECT_BINARY_DIR}/Info.plist)
+        install(FILES ${PROJECT_BINARY_DIR}/Info.plist DESTINATION "..")
+        install(FILES ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns DESTINATION ".")
 
-    set(CPACK_BUNDLE_NAME DJV)
-    configure_file(
-        ${PROJECT_SOURCE_DIR}/etc/macOS/Info.plist.in
-        ${PROJECT_BINARY_DIR}/Info.plist)
-    set(CPACK_BUNDLE_PLIST ${PROJECT_BINARY_DIR}/Info.plist)
-    set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns)
-    install(FILES ${PROJECT_BINARY_DIR}/Info.plist DESTINATION "..")
-    install(FILES ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns DESTINATION ".")
-
-    set(PRE_BUILD_SCRIPTS "${PROJECT_SOURCE_DIR}/cmake/Modules/usdPluginsSymlink.cmake")
-    set(POST_BUILD_SCRIPTS)
-    set(DJV_MACOS_TEAM_ID $ENV{DJV_MACOS_TEAM_ID})
-    if(DJV_MACOS_TEAM_ID)
-        list(APPEND PRE_BUILD_SCRIPTS
-            "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSAppSign.cmake")
-        list(APPEND POST_BUILD_SCRIPTS
-            "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSPackageSign.cmake")
+        set(PRE_BUILD_SCRIPTS "${PROJECT_SOURCE_DIR}/cmake/Modules/usdPluginsSymlink.cmake")
+        set(POST_BUILD_SCRIPTS)
+        set(DJV_MACOS_TEAM_ID $ENV{DJV_MACOS_TEAM_ID})
+        if(DJV_MACOS_TEAM_ID)
+            list(APPEND PRE_BUILD_SCRIPTS
+                "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSAppSign.cmake")
+            list(APPEND POST_BUILD_SCRIPTS
+                "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSPackageSign.cmake")
+        endif()
+        set(CPACK_PRE_BUILD_SCRIPTS ${PRE_BUILD_SCRIPTS})
+        set(CPACK_POST_BUILD_SCRIPTS ${POST_BUILD_SCRIPTS})
     endif()
-    set(CPACK_PRE_BUILD_SCRIPTS ${PRE_BUILD_SCRIPTS})
-    set(CPACK_POST_BUILD_SCRIPTS ${POST_BUILD_SCRIPTS})
 
 else()
 
@@ -482,8 +499,6 @@ else()
             DESTINATION ".")
     endif()
     
-    install(
-        FILES ${INSTALL_LIBS}
-        DESTINATION lib)
+    install(FILES ${INSTALL_LIBS} DESTINATION lib)
 
 endif()
