@@ -38,7 +38,7 @@ install(
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
-    PUBLIC_HEADER DESTINATION include/djvUI)
+    PUBLIC_HEADER DESTINATION include/djv/UI)
 install(
     EXPORT djvUITargets
     FILE djvUITargets.cmake

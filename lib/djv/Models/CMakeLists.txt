@@ -38,7 +38,7 @@ install(
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
-    PUBLIC_HEADER DESTINATION include/djvModels)
+    PUBLIC_HEADER DESTINATION include/djv/Models)
 install(
     EXPORT djvModelsTargets
     FILE djvModelsTargets.cmake

@@ -114,7 +114,7 @@ install(
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
-    PUBLIC_HEADER DESTINATION include/djvApp)
+    PUBLIC_HEADER DESTINATION include/djv/App)
 install(
     EXPORT djvAppTargets
     FILE djvAppTargets.cmake
