@@ -318,11 +318,11 @@ elseif(APPLE)
 
     if(DJV_MACOS_PACKAGE)
         set(CPACK_BUNDLE_NAME DJV)
-        set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns)
         configure_file(
             ${PROJECT_SOURCE_DIR}/etc/macOS/Info.plist.in
             ${PROJECT_BINARY_DIR}/Info.plist)
         set(CPACK_BUNDLE_PLIST ${PROJECT_BINARY_DIR}/Info.plist)
+        set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns)
         install(FILES ${PROJECT_BINARY_DIR}/Info.plist DESTINATION "..")
         install(FILES ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns DESTINATION ".")
 
