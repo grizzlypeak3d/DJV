@@ -34,7 +34,13 @@ set_target_properties(djvUI PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 install(
     TARGETS djvUI
+    EXPORT djvUITargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
     PUBLIC_HEADER DESTINATION include/djvUI)
+install(
+    EXPORT djvUITargets
+    FILE djvUITargets.cmake
+    DESTINATION "lib/cmake/djv"
+    NAMESPACE djv::)

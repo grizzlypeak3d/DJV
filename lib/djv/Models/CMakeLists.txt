@@ -34,7 +34,13 @@ set_target_properties(djvModels PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 install(
     TARGETS djvModels
+    EXPORT djvModelsTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
     PUBLIC_HEADER DESTINATION include/djvModels)
+install(
+    EXPORT djvModelsTargets
+    FILE djvModelsTargets.cmake
+    DESTINATION "lib/cmake/djv"
+    NAMESPACE djv::)

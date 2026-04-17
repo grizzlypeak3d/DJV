@@ -110,7 +110,14 @@ set_target_properties(djvApp PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 install(
     TARGETS djvApp
+    EXPORT djvAppTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
     PUBLIC_HEADER DESTINATION include/djvApp)
+install(
+    EXPORT djvAppTargets
+    FILE djvAppTargets.cmake
+    DESTINATION "lib/cmake/djv"
+    NAMESPACE djv::)
+

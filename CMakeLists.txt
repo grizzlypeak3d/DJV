@@ -81,6 +81,17 @@ add_subdirectory(bin)
 add_subdirectory(etc/Legal)
 add_subdirectory(etc/SampleData)
 
+include(CMakePackageConfigHelpers)
+set(INCLUDE_INSTALL_DIR include/djv)
+configure_package_config_file(
+    djvConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/djvConfig.cmake
+    INSTALL_DESTINATION lib/cmake/djv
+    PATH_VARS INCLUDE_INSTALL_DIR)
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/djvConfig.cmake
+    DESTINATION lib/cmake/djv)
+
 #-------------------------------------------------------------------------------
 # Packaging
 

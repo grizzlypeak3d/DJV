@@ -12,7 +12,13 @@ set_target_properties(djvCore PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 install(
     TARGETS djvCore
+    EXPORT djvCoreTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
     PUBLIC_HEADER DESTINATION include/djv/Core)
+install(
+    EXPORT djvCoreTargets
+    FILE djvCoreTargets.cmake
+    DESTINATION "lib/cmake/djv"
+    NAMESPACE djv::)

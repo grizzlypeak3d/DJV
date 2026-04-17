@@ -1,0 +1,17 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_package(tlRender REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/djvResourceTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/djvCoreTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/djvModelsTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/djvUITargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/djvAppTargets.cmake")
+
+# \todo Is this the correct way to add the include directory?
+include_directories("@PACKAGE_INCLUDE_INSTALL_DIR@")
+
+check_required_components(djv)
+
