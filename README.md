@@ -79,7 +79,7 @@ git clone https://github.com/grizzlypeak3d/DJV.git
 
 Run the super build script:
 ```
-sh DJV/sbuild-linux.sh
+sh DJV/sbuild-linux.sh DJV
 ```
 
 Run the application:
@@ -101,7 +101,7 @@ git clone https://github.com/grizzlypeak3d/DJV.git
 
 Run the super build script:
 ```
-sh DJV/sbuild-macos.sh
+sh DJV/sbuild-macos.sh DJV
 ```
 
 Run the application:
@@ -136,7 +136,7 @@ git clone https://github.com/grizzlypeak3d/DJV.git
 
 Run the super build script:
 ```
-DJV\sbuild-win.bat
+DJV\sbuild-win.bat DJV
 ```
 
 Run the application:

@@ -2,6 +2,8 @@
 
 set -x
 
+SOURCE_DIR=$1
+
 export JOBS=4
 export TLRENDER_NET=OFF
 export TLRENDER_OCIO=ON
@@ -20,5 +22,5 @@ export TLRENDER_BMD=OFF
 export TLRENDER_BMD_SDK=
 export FTK_API=GL_4_1
 
-sh DJV/etc/Linux/linux-sbuild.sh Release
-sh DJV/etc/Linux/linux-package.sh Release
+sh $SOURCE_DIR/etc/Linux/linux-sbuild.sh Release
+sh $SOURCE_DIR/etc/Linux/linux-package.sh Release

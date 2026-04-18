@@ -2,10 +2,11 @@
 
 set -x
 
-BUILD_TYPE=$1
+SOURCE_DIR=$1
+BUILD_TYPE=$2
 
 cmake \
-    -S DJV \
+    -S $SOURCE_DIR \
     -B build-$BUILD_TYPE \
     -DDJV_MACOS_PACKAGE=OFF \
     -DDJV_MACOS_TEAM_ID=$DJV_MACOS_TEAM_ID \

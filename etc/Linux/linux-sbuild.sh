@@ -2,10 +2,11 @@
 
 set -x
 
-BUILD_TYPE=$1
+SOURCE_DIR=$1
+BUILD_TYPE=$2
 
 cmake \
-    -S DJV/etc/SuperBuild \
+    -S $SOURCE_DIR/etc/SuperBuild \
     -B sbuild-$BUILD_TYPE \
     -DTLRENDER_NET=$TLRENDER_NET \
     -DTLRENDER_OCIO=$TLRENDER_OCIO \

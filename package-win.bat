@@ -1,3 +1,5 @@
+set SOURCE_DIR=%1
+
 set JOBS=4
 set TLRENDER_NET=OFF
 set TLRENDER_OCIO=ON
@@ -16,5 +18,5 @@ set TLRENDER_BMD=OFF
 set TLRENDER_BMD_SDK=
 set FTK_API=GL_4_1
 
-call DJV\etc\Windows\windows-sbuild.bat Release
-call DJV\etc\Windows\windows-package.bat Release
+call %SOURCE_DIR%\etc\Windows\windows-sbuild.bat Release
+call %SOURCE_DIR%\etc\Windows\windows-package.bat Release

@@ -29,6 +29,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: djv
         submodules: recursive
     - uses: actions/setup-python@v5
       with:
@@ -36,23 +37,20 @@ jobs:
 
     - name: Setup environment
       run: |
-        cd ..
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
         echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
-        sh DJV/etc/Linux/linux-setup-gha.sh
+        sh djv/etc/Linux/linux-setup-gha.sh
 
     - name: Super Build
       run: |
-        cd ..
-        sh DJV/etc/Linux/linux-sbuild.sh Debug
+        sh djv/etc/Linux/linux-sbuild.sh djv Debug
 
     - name: Build DJV
       run: |
-        cd ..
-        sh DJV/etc/Linux/linux-build.sh Debug
+        sh djv/etc/Linux/linux-build.sh djv Debug
 
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
   linux-gles2-build:
@@ -80,6 +78,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: djv
         submodules: recursive
     - uses: actions/setup-python@v5
       with:
@@ -87,24 +86,21 @@ jobs:
 
     - name: Setup environment
       run: |
-        cd ..
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
         echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
         python --version
-        sh DJV/etc/Linux/linux-setup-gha.sh
+        sh djv/etc/Linux/linux-setup-gha.sh
 
     - name: Super Build
       run: |
-        cd ..
-        sh DJV/etc/Linux/linux-sbuild.sh Debug
+        sh djv/etc/Linux/linux-sbuild.sh djv Debug
 
     - name: Build DJV
       run: |
-        cd ..
-        sh DJV/etc/Linux/linux-build.sh Debug
+        sh djv/etc/Linux/linux-build.sh djv Debug
 
   linux-package:
     runs-on: ubuntu-22.04
@@ -132,6 +128,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: djv
         submodules: recursive
     - uses: actions/setup-python@v5
       with:
@@ -139,29 +136,26 @@ jobs:
 
     - name: Setup environment
       run: |
-        cd ..
         echo "$PWD/install-Release/bin" >> $GITHUB_PATH
         echo "LD_LIBRARY_PATH=$PWD/install-Release/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Release/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
         python --version
-        sh DJV/etc/Linux/linux-setup-gha.sh
+        sh djv/etc/Linux/linux-setup-gha.sh
 
     - name: Super Build
       run: |
-        cd ..
-        sh DJV/etc/Linux/linux-sbuild.sh Release
+        sh djv/etc/Linux/linux-sbuild.sh djv Release
 
     - name: Build and package DJV
       run: |
-        cd ..
-        sh DJV/etc/Linux/linux-package.sh Release
+        sh djv/etc/Linux/linux-package.sh djv Release
 
     - uses: actions/upload-artifact@v7
       with:
         name: DJV-Linux-Packages
-        path: ../build-Release/djv-*.tar.gz
+        path: build-Release/djv-*.tar.gz
         archive: false
 
   macos-build:
@@ -192,6 +186,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: djv
         submodules: recursive
     - uses: actions/setup-python@v5
       with:
@@ -200,7 +195,6 @@ jobs:
     # \bug DYLD_LIBRARY_PATH is not being set here?
     - name: Setup environment
       run: |
-        cd ..
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
         echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
@@ -209,15 +203,13 @@ jobs:
 
     - name: Super Build
       run: |
-        cd ..
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
-        sh DJV/etc/macOS/macos-sbuild.sh Debug
+        sh djv/etc/macOS/macos-sbuild.sh djv Debug
 
     - name: Build DJV
       run: |
-        cd ..
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
-        sh DJV/etc/macOS/macos-build.sh Debug
+        sh djv/etc/macOS/macos-build.sh djv Debug
 
   macos-package:
     runs-on: macos-latest
@@ -247,6 +239,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: djv
         submodules: recursive
     - uses: actions/setup-python@v5
       with:
@@ -255,7 +248,6 @@ jobs:
     # \bug DYLD_LIBRARY_PATH is not being set here?
     - name: Setup environment
       run: |
-        cd ..
         echo "$PWD/install-Release/bin" >> $GITHUB_PATH
         echo "DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Release/lib:$PYTHONPATH" >> $GITHUB_ENV
@@ -264,23 +256,21 @@ jobs:
 
     - name: Super Build
       run: |
-        cd ..
         export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
-        sh DJV/etc/macOS/macos-sbuild.sh Release
+        sh djv/etc/macOS/macos-sbuild.sh djv Release
 
     # \bug Sometimes the CI runs out of disk space when building the macOS
     # package, so free some up by removing the super build directory.
     - name: Package
       run: |
-        cd ..
         rm -rf sbuild-Release
         export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
-        sh DJV/etc/macOS/macos-package.sh Release
+        sh djv/etc/macOS/macos-package.sh djv Release
 
     - uses: actions/upload-artifact@v7
       with:
         name: DJV-macOS-Packages
-        path: ../build-Release/djv-*.dmg
+        path: build-Release/djv-*.dmg
         archive: false
 
   windows-build:
@@ -309,6 +299,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: djv
         submodules: recursive
     - uses: actions/setup-python@v5
       with:
@@ -319,7 +310,6 @@ jobs:
     - name: Setup environment
       shell: cmd
       run: |
-        cd ..
         echo %CD%\install-Debug\bin>> %GITHUB_PATH%
         echo %CD%\install-Debug\lib>> %GITHUB_PATH%
         echo CTEST_OUTPUT_ON_FAILURE=1 >> %GITHUB_ENV%
@@ -329,14 +319,12 @@ jobs:
     - name: Super Build
       shell: cmd
       run: |
-        cd ..
-        DJV\etc\Windows\windows-sbuild.bat Debug
+        djv\etc\Windows\windows-sbuild.bat djv Debug
 
     - name: Build DJV
       shell: cmd
       run: |
-        cd ..
-        DJV\etc\Windows\windows-build.bat Debug
+        djv\etc\Windows\windows-build.bat djv Debug
 
   windows-package:
     runs-on: windows-latest
@@ -364,6 +352,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: djv
         submodules: recursive
     - uses: actions/setup-python@v5
       with:
@@ -374,7 +363,6 @@ jobs:
     - name: Setup environment
       shell: cmd
       run: |
-        cd ..
         echo %CD%\install-Release\bin>> %GITHUB_PATH%
         echo %CD%\install-Release\lib>> %GITHUB_PATH%
         echo CTEST_OUTPUT_ON_FAILURE=1 >> %GITHUB_ENV%
@@ -385,19 +373,17 @@ jobs:
     - name: Super Build
       shell: cmd
       run: |
-        cd ..
-        DJV\etc\Windows\windows-sbuild.bat Release
+        djv\etc\Windows\windows-sbuild.bat djv Release
 
     - name: Build and package DJV
       shell: cmd
       run: |
-        cd ..
-        DJV\etc\Windows\windows-package.bat Release
+        djv\etc\Windows\windows-package.bat djv Release
 
     - uses: actions/upload-artifact@v7
       with:
         name: DJV-Windows-Packages
         path: |
-          ..\build-Release\djv-*.exe
-          ..\build-Release\djv-*.zip
+          build-Release\djv-*.exe
+          build-Release\djv-*.zip
         archive: true

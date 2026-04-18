@@ -1,4 +1,5 @@
-set BUILD_TYPE=%1
+set SOURCE_DIR=%1
+set BUILD_TYPE=%2
 IF "%BUILD_TYPE%"=="" set BUILD_TYPE=Release
 
 set JOBS=4
@@ -20,5 +21,5 @@ set TLRENDER_BMD_SDK=
 set FTK_API=GL_4_1
 set BUILD_SHARED_LIBS=OFF
 
-call DJV\etc\Windows\windows-sbuild.bat %BUILD_TYPE%
-call DJV\etc\Windows\windows-build.bat %BUILD_TYPE%
+call %SOURCE_DIR%\etc\Windows\windows-sbuild.bat %SOURCE_DIR% %BUILD_TYPE%
+call %SOURCE_DIR%\etc\Windows\windows-build.bat %SOURCE_DIR% %BUILD_TYPE%

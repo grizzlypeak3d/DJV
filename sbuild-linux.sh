@@ -2,9 +2,10 @@
 
 set -x
 
+SOURCE_DIR=$1
 BUILD_TYPE=Release
-if [ "$#" -eq 1 ]; then
-    BUILD_TYPE=$1
+if [ "$#" -eq 2 ]; then
+    BUILD_TYPE=$2
 fi
 
 export JOBS=4
@@ -26,5 +27,5 @@ export TLRENDER_BMD_SDK=
 export FTK_API=GL_4_1
 export BUILD_SHARED_LIBS=OFF
 
-sh DJV/etc/Linux/linux-sbuild.sh $BUILD_TYPE
-sh DJV/etc/Linux/linux-build.sh $BUILD_TYPE
+sh $SOURCE_DIR/etc/Linux/linux-sbuild.sh $SOURCE_DIR $BUILD_TYPE
+sh $SOURCE_DIR/etc/Linux/linux-build.sh $SOURCE_DIR $BUILD_TYPE

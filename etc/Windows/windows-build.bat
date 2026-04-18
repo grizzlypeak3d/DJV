@@ -1,7 +1,8 @@
-set BUILD_TYPE=%1
+set SOURCE_DIR=%1
+set BUILD_TYPE=%2
 
 cmake ^
-    -S DJV ^
+    -S %SOURCE_DIR% ^
     -B build-%BUILD_TYPE% ^
     -DDJV_WINDOWS_PACKAGE=OFF ^
     -DTLRENDER_NET=%TLRENDER_NET% ^
