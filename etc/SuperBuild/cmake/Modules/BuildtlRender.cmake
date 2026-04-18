@@ -1,7 +1,7 @@
 include(ExternalProject)
 
 set(TLRENDER_GIT_REPOSITORY "https://github.com/grizzlypeak3d/tlRender.git")
-set(TLRENDER_GIT_TAG "d22f2c82e9f745de0120faa3e0be6686f7d9ba11")
+set(TLRENDER_GIT_TAG "977ff38d552e0311c8ef8f2bba7b52ef664adad8")
 
 set(TLRENDER_DEPS)
 set(TLRENDER_ARGS
@@ -28,8 +28,8 @@ set(TLRENDER_ARGS
     ${DJV_EXTERNAL_ARGS})
 
 ExternalProject_Add(
-    tl-sbuild
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tl-sbuild
+    tl-sb
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tl-sb
     DEPENDS ${TLRENDER_DEPS}
     GIT_REPOSITORY ${TLRENDER_GIT_REPOSITORY}
     GIT_TAG ${TLRENDER_GIT_TAG}
@@ -39,9 +39,9 @@ ExternalProject_Add(
     CMAKE_ARGS ${TLRENDER_ARGS})
 
 ExternalProject_Add(
-    tlRender
+    tl
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/tl
-    DEPENDS tl-sbuild
+    DEPENDS tl-sb
     GIT_REPOSITORY ${TLRENDER_GIT_REPOSITORY}
     GIT_TAG ${TLRENDER_GIT_TAG}
     LIST_SEPARATOR |
