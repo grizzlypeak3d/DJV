@@ -2,7 +2,7 @@ set(HEADERS
     AboutDialog.h
     AudioPopup.h
     ColorWidgets.h
-    FileButton.h
+    FileThumbnail.h
     SeparateAudioDialog.h
     SettingsWidgets.h
     SetupDialog.h
@@ -16,7 +16,7 @@ set(SOURCE
     AboutDialog.cpp
     AudioPopup.cpp
     ColorWidgets.cpp
-    FileButton.cpp
+    FileThumbnail.cpp
     SeparateAudioDialog.cpp
     SettingsWidgets.cpp
     SetupDialog.cpp

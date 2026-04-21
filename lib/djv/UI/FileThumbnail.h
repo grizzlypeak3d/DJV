@@ -7,15 +7,15 @@
 
 #include <tlRender/IO/IO.h>
 
-#include <ftk/UI/IButton.h>
+#include <ftk/UI/IWidget.h>
 
 namespace djv
 {
     namespace ui
     {
-        class FileButton : public ftk::IButton
+        class FileThumbnail : public ftk::IWidget
         {
-            FTK_NON_COPYABLE(FileButton);
+            FTK_NON_COPYABLE(FileThumbnail);
 
         protected:
             void _init(
@@ -24,19 +24,18 @@ namespace djv
                 const tl::IOOptions&,
                 const std::shared_ptr<IWidget>& parent);
 
-            FileButton();
+            FileThumbnail();
 
         public:
-            virtual ~FileButton();
+            virtual ~FileThumbnail();
 
-            static std::shared_ptr<FileButton> create(
+            static std::shared_ptr<FileThumbnail> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::FilesModelItem>&,
                 const tl::IOOptions&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
-            void styleEvent(const ftk::StyleEvent&) override;
             void tickEvent(
                 bool,
                 bool,
@@ -44,8 +43,6 @@ namespace djv
             void sizeHintEvent(const ftk::SizeHintEvent&) override;
             void clipEvent(const ftk::Box2I&, bool) override;
             void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
-            void keyPressEvent(ftk::KeyEvent&) override;
-            void keyReleaseEvent(ftk::KeyEvent&) override;
 
         private:
             FTK_PRIVATE();

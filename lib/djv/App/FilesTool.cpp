@@ -4,11 +4,12 @@
 #include <djv/App/FilesTool.h>
 
 #include <djv/App/App.h>
-#include <djv/UI/FileButton.h>
+#include <djv/UI/FileThumbnail.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ButtonGroup.h>
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
@@ -24,15 +25,26 @@ namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            struct FileWidget
+            {
+                std::shared_ptr<models::FilesModelItem> item;
+                std::shared_ptr<ui::FileThumbnail> thumbnail;
+                std::shared_ptr<ftk::Label> label;
+                std::shared_ptr<ftk::CheckBox> aButton;
+                std::shared_ptr<ftk::CheckBox> bButton;
+                std::shared_ptr<ftk::ComboBox> layerComboBox;
+            };
+        }
+
         struct FilesTool::Private
         {
             std::shared_ptr<ftk::Settings> settings;
 
             std::shared_ptr<ftk::ButtonGroup> aButtonGroup;
             std::shared_ptr<ftk::ButtonGroup> bButtonGroup;
-            std::map<std::shared_ptr<models::FilesModelItem>, std::shared_ptr<ui::FileButton> > aButtons;
-            std::map<std::shared_ptr<models::FilesModelItem>, std::shared_ptr<ftk::ToolButton> > bButtons;
-            std::vector<std::shared_ptr<ftk::ComboBox> > layerComboBoxes;
+            std::vector<FileWidget> widgets;
             std::shared_ptr<ftk::ComboBox> compareComboBox;
             std::shared_ptr<ftk::ComboBox> compareTimeComboBox;
             std::shared_ptr<ftk::FloatEditSlider> wipeXSlider;
@@ -96,7 +108,7 @@ namespace djv
 
             p.widgetLayout = ftk::GridLayout::create(context, layout);
             p.widgetLayout->setMarginRole(ftk::SizeRole::Margin);
-            p.widgetLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
+            p.widgetLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
@@ -269,11 +281,9 @@ namespace djv
         void FilesTool::_filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
         {
             FTK_P();
-            p.aButtons.clear();
+            p.widgets.clear();
             p.aButtonGroup->clearButtons();
-            p.bButtons.clear();
             p.bButtonGroup->clearButtons();
-            p.layerComboBoxes.clear();
             p.widgetLayout->clear();
             auto appWeak = _app;
             if (auto app = appWeak.lock())
@@ -285,36 +295,48 @@ namespace djv
                     size_t row = 0;
                     for (const auto& item : value)
                     {
-                        auto aButton = ui::FileButton::create(
+                        FileWidget widget;
+                        widget.item = item;
+
+                        widget.thumbnail = ui::FileThumbnail::create(
                             context,
                             item,
-                            app->getSettingsModel()->getIOOptions());
-                        aButton->setChecked(item == a);
-                        aButton->setTooltip(item->path.get());
-                        p.aButtons[item] = aButton;
-                        p.aButtonGroup->addButton(aButton);
-                        aButton->setParent(p.widgetLayout);
-                        p.widgetLayout->setGridPos(aButton, row, 0);
+                            app->getSettingsModel()->getIOOptions(),
+                            p.widgetLayout);
+                        p.widgetLayout->setGridPos(widget.thumbnail, row, 0);
 
-                        auto bButton = ftk::ToolButton::create(context);
-                        bButton->setText("B");
+                        widget.label = ftk::Label::create(
+                            context,
+                            ftk::elide(item->path.getFileName()),
+                            p.widgetLayout);
+                        widget.label->setHStretch(ftk::Stretch::Expanding);
+                        widget.label->setVAlign(ftk::VAlign::Center);
+                        widget.label->setTooltip(item->path.get());
+                        p.widgetLayout->setGridPos(widget.label, row, 1);
+
+                        widget.aButton = ftk::CheckBox::create(context, "A", p.widgetLayout);
+                        widget.aButton->setChecked(item == a);
+                        widget.aButton->setVAlign(ftk::VAlign::Center);
+                        widget.aButton->setTooltip("Set the A file.");
+                        p.aButtonGroup->addButton(widget.aButton);
+                        p.widgetLayout->setGridPos(widget.aButton, row, 2);
+
+                        widget.bButton = ftk::CheckBox::create(context, "B", p.widgetLayout);
                         const auto i = std::find(b.begin(), b.end(), item);
-                        bButton->setChecked(i != b.end());
-                        bButton->setTooltip("Set the B file(s).");
-                        p.bButtons[item] = bButton;
-                        p.bButtonGroup->addButton(bButton);
-                        bButton->setParent(p.widgetLayout);
-                        p.widgetLayout->setGridPos(bButton, row, 1);
+                        widget.bButton->setChecked(i != b.end());
+                        widget.bButton->setVAlign(ftk::VAlign::Center);
+                        widget.bButton->setTooltip("Set the B file(s).");
+                        p.bButtonGroup->addButton(widget.bButton);
+                        p.widgetLayout->setGridPos(widget.bButton, row, 3);
 
-                        auto layerComboBox = ftk::ComboBox::create(context);
-                        layerComboBox->setItems(item->videoLayers);
-                        layerComboBox->setCurrentIndex(item->videoLayer);
-                        layerComboBox->setTooltip("Set the current layer.");
-                        p.layerComboBoxes.push_back(layerComboBox);
-                        layerComboBox->setParent(p.widgetLayout);
-                        p.widgetLayout->setGridPos(layerComboBox, row, 2);
+                        widget.layerComboBox = ftk::ComboBox::create(context, p.widgetLayout);
+                        widget.layerComboBox->setItems(item->videoLayers);
+                        widget.layerComboBox->setCurrentIndex(item->videoLayer);
+                        widget.layerComboBox->setVAlign(ftk::VAlign::Center);
+                        widget.layerComboBox->setTooltip("Set the current layer.");
+                        p.widgetLayout->setGridPos(widget.layerComboBox, row, 4);
 
-                        layerComboBox->setIndexCallback(
+                        widget.layerComboBox->setIndexCallback(
                             [appWeak, item](int value)
                             {
                                 if (auto app = appWeak.lock())
@@ -323,6 +345,7 @@ namespace djv
                                 }
                             });
 
+                        p.widgets.push_back(widget);
                         ++row;
                     }
                     if (value.empty())
@@ -337,28 +360,28 @@ namespace djv
         void FilesTool::_aUpdate(const std::shared_ptr<models::FilesModelItem>& value)
         {
             FTK_P();
-            for (const auto& button : p.aButtons)
+            for (const auto& i : p.widgets)
             {
-                button.second->setChecked(button.first == value);
+                i.aButton->setChecked(i.item == value);
             }
         }
 
         void FilesTool::_bUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
         {
             FTK_P();
-            for (const auto& button : p.bButtons)
+            for (const auto& i : p.widgets)
             {
-                const auto i = std::find(value.begin(), value.end(), button.first);
-                button.second->setChecked(i != value.end());
+                const auto j = std::find(value.begin(), value.end(), i.item);
+                i.bButton->setChecked(j != value.end());
             }
         }
 
         void FilesTool::_layersUpdate(const std::vector<int>& value)
         {
             FTK_P();
-            for (size_t i = 0; i < value.size() && i < p.layerComboBoxes.size(); ++i)
+            for (size_t i = 0; i < value.size() && i < p.widgets.size(); ++i)
             {
-                p.layerComboBoxes[i]->setCurrentIndex(value[i]);
+                p.widgets[i].layerComboBox->setCurrentIndex(value[i]);
             }
         }
 
