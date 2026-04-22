@@ -41,7 +41,6 @@ namespace djv
                 bool,
                 const ftk::TickEvent&) override;
             void sizeHintEvent(const ftk::SizeHintEvent&) override;
-            void clipEvent(const ftk::Box2I&, bool) override;
             void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
 
         private:

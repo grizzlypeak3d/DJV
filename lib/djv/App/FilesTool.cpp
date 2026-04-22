@@ -9,7 +9,6 @@
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ButtonGroup.h>
-#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
@@ -18,6 +17,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/Spacer.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/ToolButton.h>
 
@@ -32,8 +32,8 @@ namespace djv
                 std::shared_ptr<models::FilesModelItem> item;
                 std::shared_ptr<ui::FileThumbnail> thumbnail;
                 std::shared_ptr<ftk::Label> label;
-                std::shared_ptr<ftk::CheckBox> aButton;
-                std::shared_ptr<ftk::CheckBox> bButton;
+                std::shared_ptr<ftk::ToolButton> aButton;
+                std::shared_ptr<ftk::ToolButton> bButton;
                 std::shared_ptr<ftk::ComboBox> layerComboBox;
             };
         }
@@ -107,8 +107,8 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::None);
 
             p.widgetLayout = ftk::GridLayout::create(context, layout);
-            p.widgetLayout->setMarginRole(ftk::SizeRole::Margin);
-            p.widgetLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.widgetLayout->setSpacingRole(ftk::SizeRole::None);
+            p.widgetLayout->setRowBackgroundRole(ftk::ColorRole::Button);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
@@ -309,19 +309,20 @@ namespace djv
                             context,
                             ftk::elide(item->path.getFileName()),
                             p.widgetLayout);
+                        widget.label->setMarginRole(ftk::SizeRole::MarginSmall);
                         widget.label->setHStretch(ftk::Stretch::Expanding);
                         widget.label->setVAlign(ftk::VAlign::Center);
                         widget.label->setTooltip(item->path.get());
                         p.widgetLayout->setGridPos(widget.label, row, 1);
 
-                        widget.aButton = ftk::CheckBox::create(context, "A", p.widgetLayout);
+                        widget.aButton = ftk::ToolButton::create(context, "A", p.widgetLayout);
                         widget.aButton->setChecked(item == a);
                         widget.aButton->setVAlign(ftk::VAlign::Center);
                         widget.aButton->setTooltip("Set the A file.");
                         p.aButtonGroup->addButton(widget.aButton);
                         p.widgetLayout->setGridPos(widget.aButton, row, 2);
 
-                        widget.bButton = ftk::CheckBox::create(context, "B", p.widgetLayout);
+                        widget.bButton = ftk::ToolButton::create(context, "B", p.widgetLayout);
                         const auto i = std::find(b.begin(), b.end(), item);
                         widget.bButton->setChecked(i != b.end());
                         widget.bButton->setVAlign(ftk::VAlign::Center);
@@ -346,11 +347,19 @@ namespace djv
                             });
 
                         p.widgets.push_back(widget);
+
+                        if (0 == row)
+                        {
+                            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.widgetLayout);
+                            spacer->setSpacingRole(ftk::SizeRole::SpacingTool);
+                            p.widgetLayout->setGridPos(spacer, 0, 5);
+                        }
                         ++row;
                     }
                     if (value.empty())
                     {
                         auto label = ftk::Label::create(context, "No files open", p.widgetLayout);
+                        label->setMarginRole(ftk::SizeRole::Margin);
                         p.widgetLayout->setGridPos(label, 0, 0);
                     }
                 }

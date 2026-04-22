@@ -126,17 +126,6 @@ namespace djv
             }
         }
 
-        void FileThumbnail::clipEvent(const ftk::Box2I& clipRect, bool clipped)
-        {
-            IWidget::clipEvent(clipRect, clipped);
-            FTK_P();
-            if (clipped)
-            {
-                p.thumbnail.init = true;
-                p.thumbnail.image.reset();
-            }
-        }
-
         void FileThumbnail::drawEvent(
             const ftk::Box2I& drawRect,
             const ftk::DrawEvent& event)
