@@ -1054,8 +1054,8 @@ namespace djv
         }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_PIPE)
-        struct FFmpegPipeSettingsWidget::Private
+#if defined(TLRENDER_FFMPEG_CMD)
+        struct FFmpegCmdSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
 
@@ -1063,15 +1063,15 @@ namespace djv
             std::shared_ptr<ftk::FileEdit> ffprobeEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<tl::ffmpeg_pipe::Options> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ffmpeg_cmd::Options> > optionsObserver;
         };
 
-        void FFmpegPipeSettingsWidget::_init(
+        void FFmpegCmdSettingsWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
-            ISettingsWidget::_init(context, "djv::ui::FFmpegPipeSettingsWidget", parent);
+            ISettingsWidget::_init(context, "djv::ui::FFmpegCmdSettingsWidget", parent);
             FTK_P();
 
             p.settings = settings;
@@ -1085,9 +1085,9 @@ namespace djv
             p.layout->addRow("ffmpeg location:", p.ffmpegEdit);
             p.layout->addRow("ffprobe location:", p.ffprobeEdit);
 
-            p.optionsObserver = ftk::Observer<tl::ffmpeg_pipe::Options>::create(
-                settings->observeFFmpegPipe(),
-                [this](const tl::ffmpeg_pipe::Options& value)
+            p.optionsObserver = ftk::Observer<tl::ffmpeg_cmd::Options>::create(
+                settings->observeFFmpegCmd(),
+                [this](const tl::ffmpeg_cmd::Options& value)
                 {
                     FTK_P();
                     p.ffmpegEdit->setPath(ftk::Path(value.ffmpegPath));
@@ -1098,49 +1098,49 @@ namespace djv
                 [this](const ftk::Path& value)
                 {
                     FTK_P();
-                    tl::ffmpeg_pipe::Options options = p.settings->getFFmpegPipe();
+                    tl::ffmpeg_cmd::Options options = p.settings->getFFmpegCmd();
                     options.ffmpegPath = value.get();
-                    p.settings->setFFmpegPipe(options);
+                    p.settings->setFFmpegCmd(options);
                 });
 
             p.ffprobeEdit->setCallback(
                 [this](const ftk::Path& value)
                 {
                     FTK_P();
-                    tl::ffmpeg_pipe::Options options = p.settings->getFFmpegPipe();
+                    tl::ffmpeg_cmd::Options options = p.settings->getFFmpegCmd();
                     options.ffprobePath = value.get();
-                    p.settings->setFFmpegPipe(options);
+                    p.settings->setFFmpegCmd(options);
                 });
         }
 
-        FFmpegPipeSettingsWidget::FFmpegPipeSettingsWidget() :
+        FFmpegCmdSettingsWidget::FFmpegCmdSettingsWidget() :
             _p(new Private)
         {}
 
-        FFmpegPipeSettingsWidget::~FFmpegPipeSettingsWidget()
+        FFmpegCmdSettingsWidget::~FFmpegCmdSettingsWidget()
         {}
 
-        std::shared_ptr<FFmpegPipeSettingsWidget> FFmpegPipeSettingsWidget::create(
+        std::shared_ptr<FFmpegCmdSettingsWidget> FFmpegCmdSettingsWidget::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<FFmpegPipeSettingsWidget>(new FFmpegPipeSettingsWidget);
+            auto out = std::shared_ptr<FFmpegCmdSettingsWidget>(new FFmpegCmdSettingsWidget);
             out->_init(context, settings, parent);
             return out;
         }
 
-        ftk::Size2I FFmpegPipeSettingsWidget::getSizeHint() const
+        ftk::Size2I FFmpegCmdSettingsWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
         }
 
-        void FFmpegPipeSettingsWidget::setGeometry(const ftk::Box2I& value)
+        void FFmpegCmdSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
         }
-#endif // TLRENDER_FFMPEG_PIPE
+#endif // TLRENDER_FFMPEG_CMD
 
 #if defined(TLRENDER_USD)
         struct USDSettingsWidget::Private

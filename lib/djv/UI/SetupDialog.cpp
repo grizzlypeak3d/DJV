@@ -115,11 +115,11 @@ namespace djv
             ftk::Label::create(context, "Configure the style:", vLayout);
             StyleSettingsWidget::create(context, settings, vLayout);
 
-#if defined(TLRENDER_FFMPEG_PIPE)
+#if defined(TLRENDER_FFMPEG_CMD)
             vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
-            ftk::Label::create(context, "Configure the FFmpeg command-line settings:", vLayout);
-            FFmpegPipeSettingsWidget::create(context, settings, vLayout);
-#endif // TLRENDER_FFMPEG_PIPE
+            ftk::Label::create(context, "Configure the FFmpeg command settings:", vLayout);
+            FFmpegCmdSettingsWidget::create(context, settings, vLayout);
+#endif // TLRENDER_FFMPEG_CMD
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);

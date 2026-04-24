@@ -12,9 +12,9 @@
 #if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_PIPE)
-#include <tlRender/IO/FFmpegPipe.h>
-#endif // TLRENDER_FFMPEG_PIPE
+#if defined(TLRENDER_FFMPEG_CMD)
+#include <tlRender/IO/FFmpegCmd.h>
+#endif // TLRENDER_FFMPEG_CMD
 #if defined(TLRENDER_USD)
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
@@ -429,16 +429,16 @@ namespace djv
             ///@}
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_PIPE)
-            //! \name FFmpeg Pipe
+#if defined(TLRENDER_FFMPEG_CMD)
+            //! \name FFmpeg Command
             ///@{
 
-            const tl::ffmpeg_pipe::Options& getFFmpegPipe() const;
-            std::shared_ptr<ftk::IObservable<tl::ffmpeg_pipe::Options> > observeFFmpegPipe() const;
-            void setFFmpegPipe(const tl::ffmpeg_pipe::Options&);
+            const tl::ffmpeg_cmd::Options& getFFmpegCmd() const;
+            std::shared_ptr<ftk::IObservable<tl::ffmpeg_cmd::Options> > observeFFmpegCmd() const;
+            void setFFmpegCmd(const tl::ffmpeg_cmd::Options&);
 
             ///@}
-#endif // TLRENDER_FFMPEG_PIPE
+#endif // TLRENDER_FFMPEG_CMD
 
 #if defined(TLRENDER_USD)
             //! \name USD

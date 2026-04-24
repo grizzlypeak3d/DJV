@@ -425,9 +425,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             std::shared_ptr<ftk::Observable<tl::ffmpeg::Options> > ffmpeg;
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_PIPE)
-            std::shared_ptr<ftk::Observable<tl::ffmpeg_pipe::Options> > ffmpegPipe;
-#endif // TLRENDER_FFMPEG_PIPE
+#if defined(TLRENDER_FFMPEG_CMD)
+            std::shared_ptr<ftk::Observable<tl::ffmpeg_cmd::Options> > ffmpegCmd;
+#endif // TLRENDER_FFMPEG_CMD
 #if defined(TLRENDER_USD)
             std::shared_ptr<ftk::Observable<tl::usd::Options> > usd;
 #endif // TLRENDER_USD
@@ -451,7 +451,7 @@ namespace djv
                 { "Timeline", "/Timeline" },
                 { "Window", "/Window" },
                 { "FFmpeg", "/FFmpeg" },
-                { "FFmpegPipe", "/FFmpegPipe" },
+                { "FFmpegCmd", "/FFmpegCmd" },
                 { "USD", "/USD.1" },
             };
         }
@@ -532,11 +532,11 @@ namespace djv
             p.ffmpeg = ftk::Observable<tl::ffmpeg::Options>::create(ffmpeg);
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_PIPE)
-            tl::ffmpeg_pipe::Options ffmpegPipe;
-            settings->getT(keys["FFmpegPipe"], ffmpegPipe);
-            p.ffmpegPipe = ftk::Observable<tl::ffmpeg_pipe::Options>::create(ffmpegPipe);
-#endif // TLRENDER_FFMPEG_PIPE
+#if defined(TLRENDER_FFMPEG_CMD)
+            tl::ffmpeg_cmd::Options ffmpegCmd;
+            settings->getT(keys["FFmpegCmd"], ffmpegCmd);
+            p.ffmpegCmd = ftk::Observable<tl::ffmpeg_cmd::Options>::create(ffmpegCmd);
+#endif // TLRENDER_FFMPEG_CMD
 
 #if defined(TLRENDER_USD)
             tl::usd::Options usd;
@@ -593,9 +593,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             p.settings->setT(keys["FFmpeg"], p.ffmpeg->get());
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_PIPE)
-            p.settings->setT(keys["FFmpegPipe"], p.ffmpegPipe->get());
-#endif // TLRENDER_FFMPEG_PIPE
+#if defined(TLRENDER_FFMPEG_CMD)
+            p.settings->setT(keys["FFmpegCmd"], p.ffmpegCmd->get());
+#endif // TLRENDER_FFMPEG_CMD
 #if defined(TLRENDER_USD)
             p.settings->setT(keys["USD"], p.usd->get());
 #endif // TLRENDER_USD
@@ -626,9 +626,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             setFFmpeg(tl::ffmpeg::Options());
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_PIPE)
-            setFFmpegPipe(tl::ffmpeg_pipe::Options());
-#endif // TLRENDER_FFMPEG_PIPE
+#if defined(TLRENDER_FFMPEG_CMD)
+            setFFmpegCmd(tl::ffmpeg_cmd::Options());
+#endif // TLRENDER_FFMPEG_CMD
 #if defined(TLRENDER_USD)
             setUSD(tl::usd::Options());
 #endif // TLRENDER_USD
@@ -860,22 +860,22 @@ namespace djv
         }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_PIPE)
-        const tl::ffmpeg_pipe::Options& SettingsModel::getFFmpegPipe() const
+#if defined(TLRENDER_FFMPEG_CMD)
+        const tl::ffmpeg_cmd::Options& SettingsModel::getFFmpegCmd() const
         {
-            return _p->ffmpegPipe->get();
+            return _p->ffmpegCmd->get();
         }
 
-        std::shared_ptr<ftk::IObservable<tl::ffmpeg_pipe::Options> > SettingsModel::observeFFmpegPipe() const
+        std::shared_ptr<ftk::IObservable<tl::ffmpeg_cmd::Options> > SettingsModel::observeFFmpegCmd() const
         {
-            return _p->ffmpegPipe;
+            return _p->ffmpegCmd;
         }
 
-        void SettingsModel::setFFmpegPipe(const tl::ffmpeg_pipe::Options& value)
+        void SettingsModel::setFFmpegCmd(const tl::ffmpeg_cmd::Options& value)
         {
-            _p->ffmpegPipe->setIfChanged(value);
+            _p->ffmpegCmd->setIfChanged(value);
         }
-#endif // TLRENDER_FFMPEG_PIPE
+#endif // TLRENDER_FFMPEG_CMD
 
 #if defined(TLRENDER_USD)
         const tl::usd::Options& SettingsModel::getUSD() const
@@ -902,9 +902,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             out = tl::merge(out, tl::ffmpeg::getOptions(p.ffmpeg->get()));
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_PIPE)
-            out = tl::merge(out, p.ffmpegPipe->get().getIOOptions());
-#endif // TLRENDER_FFMPEG_PIPE
+#if defined(TLRENDER_FFMPEG_CMD)
+            out = tl::merge(out, p.ffmpegCmd->get().getIOOptions());
+#endif // TLRENDER_FFMPEG_CMD
 #if defined(TLRENDER_USD)
             out = tl::merge(out, tl::usd::getOptions(p.usd->get()));
 #endif // TLRENDER_USD

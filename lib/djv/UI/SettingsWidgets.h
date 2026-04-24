@@ -413,11 +413,11 @@ namespace djv
         };
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_PIPE)
-        //! FFmpeg pipe settings widget.
-        class FFmpegPipeSettingsWidget : public ISettingsWidget
+#if defined(TLRENDER_FFMPEG_CMD)
+        //! FFmpeg command settings widget.
+        class FFmpegCmdSettingsWidget : public ISettingsWidget
         {
-            FTK_NON_COPYABLE(FFmpegPipeSettingsWidget);
+            FTK_NON_COPYABLE(FFmpegCmdSettingsWidget);
 
         protected:
             void _init(
@@ -425,12 +425,12 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
-            FFmpegPipeSettingsWidget();
+            FFmpegCmdSettingsWidget();
 
         public:
-            virtual ~FFmpegPipeSettingsWidget();
+            virtual ~FFmpegCmdSettingsWidget();
 
-            static std::shared_ptr<FFmpegPipeSettingsWidget> create(
+            static std::shared_ptr<FFmpegCmdSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -441,7 +441,7 @@ namespace djv
         private:
             FTK_PRIVATE();
         };
-#endif // TLRENDER_FFMPEG_PIPE
+#endif // TLRENDER_FFMPEG_CMD
 
 #if defined(TLRENDER_USD)
         //! USD settings widget.

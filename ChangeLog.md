@@ -1,7 +1,7 @@
 ## 3.4.0
 
 Changes:
-* Movies can now be decoded using the ffmpeg command line utility.
+* Movies can now be decoded using the ffmpeg command line application.
 * Custom fonts can be added to support different languages.
 * Add a setting to start playback when opening files.
 * Add settings for the thumbnail cache.

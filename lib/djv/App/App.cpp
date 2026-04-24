@@ -31,9 +31,6 @@
 #if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_PIPE)
-#include <tlRender/IO/FFmpegPipe.h>
-#endif // TLRENDER_FFMPEG_PIPE
 #if defined(TLRENDER_USD)
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
