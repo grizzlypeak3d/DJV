@@ -111,8 +111,13 @@ namespace djv
                 [this](const std::vector<std::string>& value)
                 {
                     FTK_P();
-                    p.messagesLabel->setText(!value.empty() ? value.back() : std::string());
-                    p.messagesLabel->setTooltip(!value.empty() ? value.back() : std::string());
+                    std::string text;
+                    if (!value.empty())
+                    {
+                        text = value.back();
+                    }
+                    p.messagesLabel->setText(text);
+                    p.messagesLabel->setTooltip(text);
                     if (!value.empty())
                     {
                         p.messagesTimer->start(

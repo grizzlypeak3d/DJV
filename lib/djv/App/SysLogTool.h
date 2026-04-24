@@ -12,9 +12,6 @@ namespace djv
         class App;
 
         //! System log tool.
-        //! 
-        //! \todo Add an option to automatically scroll to the bottom when
-        //! new log items are received.
         class SysLogTool : public IToolWidget
         {
             FTK_NON_COPYABLE(SysLogTool);

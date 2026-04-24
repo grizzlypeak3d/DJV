@@ -22,16 +22,13 @@ namespace djv
 {
     namespace app
     {
-        namespace
-        {
-            const int messagesMax = 100;
-        }
-
         struct SysLogTool::Private
         {
             std::shared_ptr<ftk::Settings> settings;
 
             std::shared_ptr<ftk::TextEdit> textEdit;
+            std::shared_ptr<ftk::ToolButton> copyButton;
+            std::shared_ptr<ftk::ToolButton> clearButton;
             std::shared_ptr<ftk::CheckBox> autoScrollCheckBox;
 
             std::shared_ptr<ftk::ListObserver<std::string> > logObserver;
@@ -59,7 +56,9 @@ namespace djv
             p.textEdit->setOptions(textEditOptions);
             p.textEdit->setVStretch(ftk::Stretch::Expanding);
 
-            auto copyButton = ftk::ToolButton::create(context, "Copy");
+            p.copyButton = ftk::ToolButton::create(context, "Copy");
+
+            p.clearButton = ftk::ToolButton::create(context, "Clear");
 
             p.autoScrollCheckBox = ftk::CheckBox::create(context, "Auto-scroll");
             bool autoScroll = true;
@@ -74,11 +73,12 @@ namespace djv
             p.textEdit->setParent(layout);
             auto hLayout = ftk::HorizontalLayout::create(context, layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            copyButton->setParent(hLayout);
+            p.copyButton->setParent(hLayout);
+            p.clearButton->setParent(hLayout);
             p.autoScrollCheckBox->setParent(hLayout);
             _setWidget(layout);
 
-            copyButton->setClickedCallback(
+            p.copyButton->setClickedCallback(
                 [this]
                 {
                     FTK_P();
@@ -87,24 +87,36 @@ namespace djv
                     clipboardSystem->setText(ftk::join(p.textEdit->getText(), '\n'));
                 });
 
+            std::weak_ptr<App> appWeak(app);
+            p.clearButton->setClickedCallback(
+                [appWeak]
+                {
+                    appWeak.lock()->getSysLogModel()->clearLog();
+                });
+
             p.logObserver = ftk::ListObserver<std::string>::create(
                 app->getSysLogModel()->observeLog(),
                 [this](const std::vector<std::string>& value)
                 {
                     FTK_P();
+
+                    // Save text edit state.
                     const auto cursor = p.textEdit->getModel()->getCursor();
                     const auto selection = p.textEdit->getModel()->getSelection();
                     const ftk::V2I scrollPos = p.textEdit->getScrollWidget()->getScrollPos();
+
+                    // Update the text.
                     p.textEdit->setText(value);
+
                     if (p.autoScrollCheckBox->isChecked())
                     {
-                        p.textEdit->getModel()->setCursor(
-                            ftk::TextEditPos(0, 0));
-                        p.textEdit->getModel()->setCursor(
-                            ftk::TextEditPos(value.size(), 0));
+                        // Auto-scroll.
+                        p.textEdit->getModel()->setCursor(ftk::TextEditPos(0, 0));
+                        p.textEdit->getModel()->setCursor(ftk::TextEditPos(value.size(), 0));
                     }
                     else
                     {
+                        // Restore text edit state.
                         p.textEdit->getModel()->setCursor(cursor);
                         p.textEdit->getModel()->setSelection(selection);
                         p.textEdit->getScrollWidget()->setScrollPos(scrollPos);
