@@ -27,7 +27,7 @@ namespace djv
             double defaultSpeed,
             const std::shared_ptr<IWidget>& parent)
         {
-            IMenuPopup::_init(
+            IWidgetPopup::_init(
                 context,
                 "djv::ui::SpeedPopup",
                 parent);
@@ -115,9 +115,10 @@ namespace djv
 
         void SpeedPopup::open(
             const std::shared_ptr<ftk::IWindow>& window,
-            const ftk::Box2I& buttonGeometry)
+            const ftk::Box2I& buttonGeometry,
+            const std::optional<ftk::Box2I>& widgetGeometry)
         {
-            IMenuPopup::open(window, buttonGeometry);
+            IWidgetPopup::open(window, buttonGeometry, widgetGeometry);
             _p->speedEdit->takeKeyFocus();
         }
 

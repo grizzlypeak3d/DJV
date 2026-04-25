@@ -94,7 +94,7 @@ namespace djv
             p.indicatorButton->setPopupIcon(true);
             p.indicatorButton->setTooltip(
                 "This indicator shows options that can affect video, audio, or performance.\n"
-                "Click to show more details.");
+                "Click to show which options are enabled.");
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);

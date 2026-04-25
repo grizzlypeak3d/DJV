@@ -4,14 +4,14 @@
 #pragma once
 
 #include <ftk/UI/DoubleModel.h>
-#include <ftk/UI/IMenuPopup.h>
+#include <ftk/UI/IWidgetPopup.h>
 
 namespace djv
 {
     namespace ui
     {
         //! Speed popup.
-        class SpeedPopup : public ftk::IMenuPopup
+        class SpeedPopup : public ftk::IWidgetPopup
         {
             FTK_NON_COPYABLE(SpeedPopup);
 
@@ -37,7 +37,9 @@ namespace djv
 
             void open(
                 const std::shared_ptr<ftk::IWindow>&,
-                const ftk::Box2I& buttonGeometry) override;
+                const ftk::Box2I& buttonGeometry,
+                const std::optional<ftk::Box2I>& widgetGeometry = std::optional<ftk::Box2I>()) override;
+
         private:
             void _widgetUpdate();
 

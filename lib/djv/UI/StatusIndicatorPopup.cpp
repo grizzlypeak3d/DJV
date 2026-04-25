@@ -3,9 +3,9 @@
 
 #include <djv/UI/StatusIndicatorPopup.h>
 
-#include <ftk/UI/FormLayout.h>
-#include <ftk/UI/Label.h>
+#include <ftk/UI/GridLayout.h>
 #include <ftk/UI/Icon.h>
+#include <ftk/UI/Label.h>
 
 namespace djv
 {
@@ -14,6 +14,7 @@ namespace djv
         struct StatusIndicatorPopup::Private
         {
             std::map<std::string, std::shared_ptr<ftk::Icon> > icons;
+            std::map<std::string, std::shared_ptr<ftk::Label> > labels;
         };
 
         void StatusIndicatorPopup::_init(
@@ -26,27 +27,33 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.icons["OCIO"] = ftk::Icon::create(context, "MenuChecked");
-            p.icons["LUT"] = ftk::Icon::create(context, "MenuChecked");
-            p.icons["Channels"] = ftk::Icon::create(context, "MenuChecked");
-            p.icons["Mirror"] = ftk::Icon::create(context, "MenuChecked");
-            p.icons["Color"] = ftk::Icon::create(context, "MenuChecked");
-            p.icons["AudioOffset"] = ftk::Icon::create(context, "MenuChecked");
-            p.icons["OutputDevice"] = ftk::Icon::create(context, "MenuChecked");
-
-            auto layout = ftk::FormLayout::create(context);
+            auto layout = ftk::GridLayout::create(context);
             layout->setMarginRole(ftk::SizeRole::MarginSmall);
             layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            layout->addRow("OCIO:", p.icons["OCIO"]);
-            layout->addRow("LUT:", p.icons["LUT"]);
-            layout->addRow("Image channels:", p.icons["Channels"]);
-            layout->addRow("Mirror:", p.icons["Mirror"]);
-            layout->addRow("Color controls:", p.icons["Color"]);
-            layout->addRow("Audio offset:", p.icons["AudioOffset"]);
-#if defined(TLRENDER_BMD)
-            layout->addRow("Output device:", p.icons["OutputDevice"]);
-#endif // TLRENDER_BMD
             setWidget(layout);
+
+            const std::vector<std::pair<std::string, std::string> > labels =
+            {
+                { "OCIO", "OCIO" },
+                { "LUT", "LUT" },
+                { "Channels", "Image channels" },
+                { "Mirror", "Mirror" },
+                { "Color", "Color controls" },
+                { "AudioOffset", "Audio offset" },
+#if defined(TLRENDER_BMD)
+                { "OutputDevice", "Output device" }
+#endif // TLRENDER_BMD
+            };
+
+            int row = 0;
+            for (const auto& i : labels)
+            {
+                p.icons[i.first] = ftk::Icon::create(context, "MenuChecked", layout);
+                p.labels[i.first] = ftk::Label::create(context, i.second, layout);
+                layout->setGridPos(p.icons[i.first], row, 0);
+                layout->setGridPos(p.labels[i.first], row, 1);
+                ++row;
+            }
         }
 
         StatusIndicatorPopup::StatusIndicatorPopup() :
@@ -71,6 +78,7 @@ namespace djv
             _p->icons["OCIO"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            _p->labels["OCIO"]->setEnabled(value);
         }
 
         void StatusIndicatorPopup::setLUT(bool value)
@@ -79,6 +87,7 @@ namespace djv
             _p->icons["LUT"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            _p->labels["LUT"]->setEnabled(value);
         }
 
         void StatusIndicatorPopup::setChannels(bool value)
@@ -87,6 +96,7 @@ namespace djv
             _p->icons["Channels"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            _p->labels["Channels"]->setEnabled(value);
         }
 
         void StatusIndicatorPopup::setMirror(bool value)
@@ -95,6 +105,7 @@ namespace djv
             _p->icons["Mirror"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            _p->labels["Mirror"]->setEnabled(value);
         }
 
         void StatusIndicatorPopup::setColor(bool value)
@@ -103,6 +114,7 @@ namespace djv
             _p->icons["Color"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            _p->labels["Color"]->setEnabled(value);
         }
 
         void StatusIndicatorPopup::setAudioOffset(bool value)
@@ -111,14 +123,18 @@ namespace djv
             _p->icons["AudioOffset"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            _p->labels["AudioOffset"]->setEnabled(value);
         }
 
         void StatusIndicatorPopup::setOutputDevice(bool value)
         {
+#if defined(TLRENDER_BMD)
             _p->icons["OutputDevice"]->setEnabled(value);
             _p->icons["OutputDevice"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            _p->labels["OutputDevice"]->setEnabled(value);
+#endif // TLRENDER_BMD
         }
     }
 }
