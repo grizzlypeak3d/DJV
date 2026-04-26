@@ -67,7 +67,7 @@ DJV to the "Applications" folder.
 <br><br><a name="main_window"></a>
 ## Main Window
 
-![Main Window](assets/MainWindowAnnotated.png)
+![Main Window](assets/MainWindowAnnotated.svg)
 
 Main window:
 1. Tab Bar - Switch between currently opened files
@@ -149,7 +149,7 @@ compare options.
 
 The **Files** tool can be shown from the **Tools** menu or the tool bar.
 
-![Files Tool](assets/FilesToolAnnotated.png)
+![Files Tool](assets/FilesToolAnnotated.svg)
 
 Files tool:
 1. Current file (**A** file)
@@ -223,7 +223,7 @@ Grid options:
 * Text color: Label text color
 * Overlay color: Label background color
 
-![View Pixel Grid](assets/ViewPixelGridAnnotated.png)
+![View Pixel Grid](assets/ViewPixelGridAnnotated.svg)
 
 The grid can be used to examine individual pixels with these settings:
 1. Set **Magnify** to **Nearest**
@@ -235,7 +235,7 @@ The grid can be used to examine individual pixels with these settings:
 Information can be overlaid on the viewport by enabling the HUD (heads up
 display). The HUD can be enabled from the **View** menu.
 
-![Viewport HUD](assets/ViewHUDAnnotated.png)
+![Viewport HUD](assets/ViewHUDAnnotated.svg)
 
 HUD:
 1. Current file name
@@ -250,7 +250,7 @@ HUD:
 <br><br><a name="playback"></a>
 ## Playback and Frame Control
 
-![Playback Controls](assets/PlaybackControlsAnnotated.png)
+![Playback Controls](assets/PlaybackControlsAnnotated.svg)
 
 Playback and frame controls:
 1. Playback controls
@@ -282,7 +282,7 @@ By default the timeline is minimized, showing only the first video and audio
 track. To see all of the tracks in the timeline, toggle the minimized state
 available from the **Timeline** menu.
 
-![Timeline](assets/TimelineAnnotated.png)
+![Timeline](assets/TimelineAnnotated.svg)
 
 Timeline:
 1. Current frame
@@ -326,7 +326,7 @@ One example use for **Tile** mode is to simultaneously view multiple layers
 within a file. Open the file multiple times and set the current layer for
 each instance. Then enable **Tile** compare mode and set the "B" files.
 
-![Tile Mode](assets/FilesToolTileAnnotated.png)
+![Tile Mode](assets/FilesToolTileAnnotated.svg)
 
 Compare multiple layers:
 1. Set the compare mode to **Tile**
@@ -347,7 +347,7 @@ levels.
 
 The **Color** tool can be shown from the **Tools** menu or the tool bar.
 
-![Color Tool](assets/ColorToolAnnotated.png)
+![Color Tool](assets/ColorToolAnnotated.svg)
 
 OpenColorIO options:
 1. Enable OpenColorIO
@@ -373,7 +373,7 @@ sequence, a movie, or the current frame as a still image.
 
 The **Export** tool can be shown from the **Tools** menu or the tool bar.
 
-![Export Tool](assets/ExportToolAnnotated.png)
+![Export Tool](assets/ExportToolAnnotated.svg)
 
 Export:
 1. Output directory
@@ -405,7 +405,7 @@ which can cause file names to be displayed incorrectly. To support
 additional languages such as Chinese, Japanese, and Korean, add
 custom fonts in the **Settings** tool, in the **Style** section.
 
-![Custom Fonts](assets/CustomFontsAnnotated.png)
+![Custom Fonts](assets/CustomFontsAnnotated.svg)
 
 custom fonts:
 1. Add custom fonts
@@ -420,7 +420,7 @@ Keyboard shorcuts can be customized in the **Settings** tool.
 
 The **Settings** tool can be shown from the **Tools** menu or the tool bar.
 
-![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.png)
+![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.svg)
 
 Keyboard shortcuts:
 1. Keyboard shortcuts settings
