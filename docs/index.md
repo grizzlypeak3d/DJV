@@ -31,7 +31,7 @@ Features include:
 8. [Color](#color)
 9. [Exporting Files](#export)
 10. [Settings](#settings)
-12. [Troubleshooting](#trouble_shoot)
+11. [Troubleshooting](#trouble_shoot)
 
 
 <br><br><a name="install"></a>
@@ -404,11 +404,10 @@ Settings are stored as a JSON file in the directory **Documents/DJV**.
 ![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.svg)
 
 Keyboard shortcuts:
-1. Keyboard shortcuts settings
-2. Seach shortcuts
-3. Shortcut with keyboard focus
-4. Secondary shortcut
-5. Conflicting shortcuts
+1. Seach shortcuts
+2. Shortcut with keyboard focus
+3. Secondary shortcut
+4. Conflicting shortcuts
 
 To set a shortcut, click the shortcut widget or use the tab key to give it
 keyboard focus, then type the new shortcut. The widget will turn red if the
@@ -423,10 +422,10 @@ custom fonts in the **Settings** tool, in the **Style** section.
 
 ![Custom Fonts](assets/CustomFontsAnnotated.svg)
 
-custom fonts:
+Custom fonts:
 1. Add custom fonts
 2. Set custom fonts
-3. File names using the custom fonts
+3. File names using custom fonts
 
 
 <br><br><a name="trouble_shoot"></a>
