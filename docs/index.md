@@ -41,8 +41,8 @@ Features include:
 [Downloads](https://github.com/grizzlypeak3d/DJV/releases/)
 
 **NOTE**: Download packages only include a minimal set of video and audio
-codecs. To enable full support, either compile from source or replace the
-FFmpeg shared libraries.
+codecs. Additional codecs can be supported by using an external FFmpeg command
+line application or building from source.
 
 ### Linux
 
@@ -51,8 +51,12 @@ DJV folder to a convenient location.
 
 ### Windows
 
-Packages are distributed as ZIP archives. Uncompress the archive and move the
-DJV folder to a convenient location.
+Packages are distributed as NSIS installers or ZIP archives.
+
+Double-click the NSIS .exe file to start the install.
+
+For ZIP archives, uncompress the archive and move the DJV folder to a
+convenient location.
 
 ### macOS
 
@@ -63,7 +67,7 @@ DJV to the "Applications" folder.
 <br><br><a name="main_window"></a>
 ## Main Window
 
-![Main Window](assets/MainWindowAnnotated.svg)
+![Main Window](assets/MainWindowAnnotated.png)
 
 Main window:
 1. Tab Bar - Switch between currently opened files
@@ -71,30 +75,36 @@ Main window:
 3. Timeline - Time scrubbing, thumbnails, and audio waveforms
 4. Playback - Playback and frame controls
 5. Tool - Current tool (e.g. color picker or magnifier)
-6. Status Bar - Warnings, errors, information about the current file, and
+6. Status Bar - Warnings and errors, information about the current file, and
    status indicators
 
-Parts of the user interface can be toggled on and off from the **Window** menu.
+Components of the user interface can be toggled on and off from the **Window** menu.
 
-Full screen mode can be enabled from the **Window** menu.
+Full screen mode can be enabled from the **Window** menu or **Window** tool bar.
 
 A secondary window can be used to mirror the viewport on a separate monitor.
-The secondary window can be shown from the **Window** menu.
+The secondary window can be shown from the **Window** menu or **Window** tool bar.
 
 
 <br><br><a name="files"></a>
 ## Files
 
-Supported file formats:
+Default supported file formats:
 * Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, SGI, TGA, BMP, TIFF
 * Default movie codecs: MJPEG, MPEG-2
 * Default audio codecs: FLAC, MP3, WAV
 * Timelines: OTIO, OTIOZ
 * Experimental: USD
 
-Files and folders can be opened from the **File** menu, by dragging and
-dropping onto the main window, or from the command line. Opening a folder will
-open all of the supported files in the folder (non-recursively).
+Additional formats may be supported depending on how DJV was built, or if
+using an external FFmpeg command.
+
+Files and folders can be opened:
+* From the **File** menu or **File** tool bar
+* By dragging and dropping onto the main window
+* From from the command line
+
+Opening a folder will open all of the supported files in the folder (non-recursively).
 
 Image sequences can be opened from the command line by either specifying the
 first frame or using the "#" wildcard. For example:
@@ -108,6 +118,15 @@ built-in file browser can be enabled in the **Settings** tool.
 The current file can be changed from the **File/Current** menu, the
 **Tab Bar**, or the **Files** tool.
 
+### FFmpeg command
+
+An external FFmpeg command can be used to support additional file formats
+and codecs. The FFmpeg command is run as a sub-process and the decoded
+video and audio are sent to DJV for display.
+
+The location of the **ffmpeg** and **fprobe** commands can be configured in
+the **Settings** tool.
+
 ### Memory Cache
 
 The memory cache can be configured in the **Settings** tool. There are
@@ -115,7 +134,7 @@ separate values for video, audio, and "read behind". The "read behind"
 value is the number of seconds that are read before the current frame. This
 is useful to ensure frames are cached when scrubbing.
 
-Only the current file is stored in the cache. When the current file is changed,
+Only the current file is stored in the cache. When the current file is changed
 it is cleared from the cache and the new file is loaded into the cache.
 
 ### Layers
@@ -130,7 +149,7 @@ compare options.
 
 The **Files** tool can be shown from the **Tools** menu or the tool bar.
 
-![Files Tool](assets/FilesToolAnnotated.svg)
+![Files Tool](assets/FilesToolAnnotated.png)
 
 Files tool:
 1. Current file (**A** file)
@@ -142,15 +161,14 @@ Files tool:
 
 ### Image Sequences and Audio
 
-Audio can be added to image sequences either automatically or explicitly.
+Audio can be added to image sequences either automatically or manually.
 
 To automatically add audio to image sequences, open the **Image Sequences**
 section in the **Settings Tool**. Audio files can be found by either specifying
 the file extensions to search for (e.g., ".wav .mp3"), or providing a specific
 file name.
 
-To explicitly add audio to an image sequence use the
-**File/Open With Audio** menu.
+To manually add audio to an image sequence use the **File/Open With Audio** menu.
 
 ### USD
 
@@ -170,7 +188,7 @@ The camera used to render the scene will be chosen in this order:
 The viewport shows a view of the current file. The view can be panned, zoomed,
 or "framed" so the image fills the view.
 
-Viewport controls:
+Default viewport controls:
 * Pan - Middle mouse button
 * Zoom - Mouse wheel or keyboard shortcuts **-** and **=**
 * Frame view - Keyboard shortcut **Backspace**
@@ -183,7 +201,7 @@ The viewport controls can be customized in the **Settings** tool.
 The bit depth of the viewport can be set in the **View** tool with the color
 buffer option. The default option of **RGBA F32** is recommended to avoid
 clamping color values. The other opions may be used for extra performance
-but with possible color clamping.
+with the drawback that colors will be clamped.
 
 The background color of the viewport can be set in the **View** tool. An
 outline can also be drawn around the image to disinguish it from the
@@ -205,7 +223,7 @@ Grid options:
 * Text color: Label text color
 * Overlay color: Label background color
 
-![View Pixel Grid](assets/ViewPixelGridAnnotated.svg)
+![View Pixel Grid](assets/ViewPixelGridAnnotated.png)
 
 The grid can be used to examine individual pixels with these settings:
 1. Set **Magnify** to **Nearest**
@@ -217,7 +235,7 @@ The grid can be used to examine individual pixels with these settings:
 Information can be overlaid on the viewport by enabling the HUD (heads up
 display). The HUD can be enabled from the **View** menu.
 
-![Viewport HUD](assets/ViewHUDAnnotated.svg)
+![Viewport HUD](assets/ViewHUDAnnotated.png)
 
 HUD:
 1. Current file name
@@ -232,7 +250,7 @@ HUD:
 <br><br><a name="playback"></a>
 ## Playback and Frame Control
 
-![Playback Controls](assets/PlaybackControlsAnnotated.svg)
+![Playback Controls](assets/PlaybackControlsAnnotated.png)
 
 Playback and frame controls:
 1. Playback controls
@@ -264,7 +282,7 @@ By default the timeline is minimized, showing only the first video and audio
 track. To see all of the tracks in the timeline, toggle the minimized state
 available from the **Timeline** menu.
 
-![Timeline](assets/TimelineAnnotated.svg)
+![Timeline](assets/TimelineAnnotated.png)
 
 Timeline:
 1. Current frame
@@ -276,7 +294,7 @@ Timeline:
 7. Audio track
 8. Audio clips
 
-Timeline controls:
+Default timeline controls:
 * Change the current frame - Left mouse button
 * Zoom - Mouse wheel or keyboard shortcuts **-** and **=**
 * Frame view - Keyboard shortcut **Backspace**
@@ -308,7 +326,7 @@ One example use for **Tile** mode is to simultaneously view multiple layers
 within a file. Open the file multiple times and set the current layer for
 each instance. Then enable **Tile** compare mode and set the "B" files.
 
-![Tile Mode](assets/FilesToolTileAnnotated.svg)
+![Tile Mode](assets/FilesToolTileAnnotated.png)
 
 Compare multiple layers:
 1. Set the compare mode to **Tile**
@@ -329,7 +347,7 @@ levels.
 
 The **Color** tool can be shown from the **Tools** menu or the tool bar.
 
-![Color Tool](assets/ColorToolAnnotated.svg)
+![Color Tool](assets/ColorToolAnnotated.png)
 
 OpenColorIO options:
 1. Enable OpenColorIO
@@ -355,7 +373,7 @@ sequence, a movie, or the current frame as a still image.
 
 The **Export** tool can be shown from the **Tools** menu or the tool bar.
 
-![Export Tool](assets/ExportToolAnnotated.svg)
+![Export Tool](assets/ExportToolAnnotated.png)
 
 Export:
 1. Output directory
@@ -378,8 +396,21 @@ Note that audio export is not yet supported.
 <br><br><a name="settings"></a>
 ## Settings
 
-Settings are stored as a JSON file in the **DJV** folder in your **Documents**
-directory.
+Settings are stored as a JSON file in the directory **Documents/DJV**.
+
+### Language Support
+
+The default fonts included with DJV do not support all languages,
+which can cause file names to be displayed incorrectly. To support
+additional languages such as Chinese, Japanese, and Korean, add
+custom fonts in the **Settings** tool, in the **Style** section.
+
+![Custom Fonts](assets/CustomFontsAnnotated.png)
+
+custom fonts:
+1. Add custom fonts
+2. Set custom fonts
+3. File names using the custom fonts
 
 
 <br><br><a name="shortcuts"></a>
@@ -389,7 +420,7 @@ Keyboard shorcuts can be customized in the **Settings** tool.
 
 The **Settings** tool can be shown from the **Tools** menu or the tool bar.
 
-![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.svg)
+![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.png)
 
 Keyboard shortcuts:
 1. Keyboard shortcuts settings
@@ -406,15 +437,14 @@ shortcut conflicts with another one.
 <br><br><a name="trouble_shoot"></a>
 ## Troubleshooting
 
-Check the log file located in the **DJV** folder in your **Documents**
-directory.
+Check the log file located in the directory **Documents/DJV**.
 
 If the application fails to start, try running from the command line to check
-for are any errors:
+for any errors:
 ```
 djv -log
 ```
 
-Reset the settings:
-* Delete the **DJV** folder in your **Documents** directory
+Try resetting the settings:
+* Delete the directory **Documents/DJV**
 * Or pass the **-resetSettings** flag on the command line

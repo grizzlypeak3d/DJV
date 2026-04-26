@@ -31,14 +31,33 @@ Example of two images being compared with a horizontal layout:
 
 ## Downloads
 
-**NOTE**: Download packages only include a minimal set of video codecs. To
-enable full support for video codecs, either compile from source or replace
-the FFmpeg shared library files.
+https://github.com/grizzlypeak3d/DJV/releases
+
+**NOTE**: Download packages only include a minimal set of video and audio
+codecs. Additional codecs can be supported by using an external FFmpeg command
+line application or building from source.
 
 
-## Building on Linux
+## Building
 
-Dependencies:
+A CMake "super build" is provided to build DJV and the main dependencies. The
+super build can be invoked with the shell or batch scripts as described below.
+
+The scripts contain a number of options that can be edited to configure the
+build, for example:
+
+* Increase the number of jobs used for the build:
+    * JOBS=16
+* Enable full codec support:
+    * TLRENDER_FFMPEG_MINIMAL=OFF
+    * TLRENDER_FFMPEG_PLUGIN=ON
+    * TLRENDER_FFMPEG_CMD=OFF
+* Enable USD (Universal Scene Description) support:
+    * TLRENDER_USD=ON
+
+### Building on Linux
+
+Requirements:
 * CMake 3.31
 
 #### Debian
@@ -88,9 +107,9 @@ build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg
 ```
 
 
-## Building on macOS
+### Building on macOS
 
-Dependencies:
+Requirements:
 * Xcode
 * CMake 3.31
 
@@ -116,9 +135,9 @@ alias intel="env /usr/bin/arch -x86_64 /bin/zsh --login"
 ```
 
 
-## Building on Windows
+### Building on Windows
 
-Dependencies:
+Requirements:
 * Visual Studio 2022
 * CMake 3.31
 * MSYS2 (https://www.msys2.org) for compiling FFmpeg.
