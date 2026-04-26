@@ -35,13 +35,13 @@ https://github.com/grizzlypeak3d/DJV/releases
 
 **NOTE**: Download packages only include a minimal set of video and audio
 codecs. Additional codecs can be supported by using an external FFmpeg command
-line application or building from source.
+or building from source.
 
 
 ## Building
 
 A CMake "super build" is provided to build DJV and the main dependencies. The
-super build can be invoked with the shell or batch scripts as described below.
+super build can be invoked with cripts as described below.
 
 The scripts contain a number of options that can be edited to configure the
 build, for example:

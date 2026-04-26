@@ -42,7 +42,7 @@ Features include:
 
 **NOTE**: Download packages only include a minimal set of video and audio
 codecs. Additional codecs can be supported by using an external FFmpeg command
-line application or building from source.
+or building from source.
 
 ### Linux
 
