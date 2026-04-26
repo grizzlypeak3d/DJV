@@ -31,7 +31,6 @@ Features include:
 8. [Color](#color)
 9. [Exporting Files](#export)
 10. [Settings](#settings)
-11. [Keyboard Shortcuts](#shortcuts)
 12. [Troubleshooting](#trouble_shoot)
 
 
@@ -396,7 +395,24 @@ Note that audio export is not yet supported.
 <br><br><a name="settings"></a>
 ## Settings
 
+The **Settings** tool can be shown from the **Tools** menu or the tool bar.
+
 Settings are stored as a JSON file in the directory **Documents/DJV**.
+
+### Keyboard Shortcuts
+
+![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.svg)
+
+Keyboard shortcuts:
+1. Keyboard shortcuts settings
+2. Seach shortcuts
+3. Shortcut with keyboard focus
+4. Secondary shortcut
+5. Conflicting shortcuts
+
+To set a shortcut, click the shortcut widget or use the tab key to give it
+keyboard focus, then type the new shortcut. The widget will turn red if the
+shortcut conflicts with another one.
 
 ### Language Support
 
@@ -411,27 +427,6 @@ custom fonts:
 1. Add custom fonts
 2. Set custom fonts
 3. File names using the custom fonts
-
-
-<br><br><a name="shortcuts"></a>
-## Keyboard Shortcuts
-
-Keyboard shorcuts can be customized in the **Settings** tool.
-
-The **Settings** tool can be shown from the **Tools** menu or the tool bar.
-
-![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.svg)
-
-Keyboard shortcuts:
-1. Keyboard shortcuts settings
-2. Seach shortcuts
-3. Shortcut with keyboard focus
-4. Secondary shortcut
-5. Conflicting shortcuts
-
-To set a shortcut, click the shortcut widget or use the tab key to give it
-keyboard focus, then type the new shortcut. The widget will turn red if the
-shortcut conflicts with another one.
 
 
 <br><br><a name="trouble_shoot"></a>
