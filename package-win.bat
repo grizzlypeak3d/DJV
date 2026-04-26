@@ -14,8 +14,6 @@ set TLRENDER_FFMPEG_CMD=ON
 set TLRENDER_NASM=OFF
 set TLRENDER_OIIO=ON
 set TLRENDER_USD=OFF
-set TLRENDER_BMD=OFF
-set TLRENDER_BMD_SDK=
 set FTK_API=GL_4_1
 
 call %SOURCE_DIR%\etc\Windows\windows-sbuild.bat Release

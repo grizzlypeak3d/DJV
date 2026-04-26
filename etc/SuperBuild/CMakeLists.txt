@@ -29,8 +29,6 @@ set(TLRENDER_NASM ${TLRENDER_NASM_DEFAULT} CACHE BOOL "Build NASM")
 set(TLRENDER_OIIO ON CACHE BOOL "Build OpenImageIO")
 set(TLRENDER_USD OFF CACHE BOOL "Build USD")
 set(TLRENDER_USD_PYTHON python3 CACHE STRING "Python executable for building USD")
-set(TLRENDER_BMD OFF CACHE BOOL "Enable support for Blackmagic Design devices")
-set(TLRENDER_BMD_SDK "" CACHE PATH "Full path to the Blackmagic Design SDK")
 
 #-------------------------------------------------------------------------------
 # Internal configuration
