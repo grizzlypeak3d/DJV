@@ -126,6 +126,12 @@ video and audio to DJV for display.
 The paths to the **ffmpeg** and **ffprobe** commands are set in the
 **Settings** tool.
 
+![FFmpeg Command](assets/FFmpegCommandAnnotated.svg)
+
+1. ffmpeg command location (click to show full path)
+2. ffprobe command location (click to show full path)
+3. Click to show file browser
+
 ### Memory cache
 
 DJV caches frames in memory for smooth playback and scrubbing. The cache is
