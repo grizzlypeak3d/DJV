@@ -1,3 +1,10 @@
+## 3.4.1
+
+Fixes:
+* Build fixes.
+
+
+Changes:
 ## 3.4.0
 
 Changes:
