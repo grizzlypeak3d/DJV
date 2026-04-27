@@ -1,7 +1,7 @@
 # ![Main Window](assets/DJV_Icon_32.svg) DJV
 
 DJV is an open source application for media playback and review. DJV can
-playback high resolution image sequences and movies in real time, with
+play back high resolution image sequences and movies in real time, with
 audio, A/B comparison, color management, and more.
 
 Features include:
@@ -23,8 +23,8 @@ Features include:
 
 1. [Download and Install](#install)
 2. [Main Window](#main_window)
-4. [Files](#files)
-3. [Viewport](#viewport)
+3. [Files](#files)
+4. [Viewport](#viewport)
 5. [Playback and Frame Control](#playback)
 6. [Timeline](#timeline)
 7. [A/B Comparison](#compare)
@@ -40,8 +40,8 @@ Features include:
 [Downloads](https://github.com/grizzlypeak3d/DJV/releases/)
 
 **NOTE**: Download packages only include a minimal set of video and audio
-codecs. Additional codecs can be supported by using an external FFmpeg command
-or building from source.
+codecs. Additional codecs can be supported by using an external FFmpeg
+command or building from source.
 
 ### Linux
 
@@ -95,13 +95,13 @@ Default supported file formats:
 * Timelines: OTIO, OTIOZ
 * Experimental: USD
 
-Additional formats may be supported depending on how DJV was built, or if
+Additional formats may be supported depending on how DJV was built, or by
 using an external FFmpeg command.
 
 Files and folders can be opened:
 * From the **File** menu or **File** tool bar
 * By dragging and dropping onto the main window
-* From from the command line
+* From the command line
 
 Opening a folder will open all of the supported files in the folder (non-recursively).
 
@@ -123,7 +123,7 @@ An external FFmpeg command can be used to support additional file formats
 and codecs. The FFmpeg command is run as a sub-process and the decoded
 video and audio are sent to DJV for display.
 
-The location of the **ffmpeg** and **fprobe** commands can be configured in
+The location of the **ffmpeg** and **ffprobe** commands can be configured in
 the **Settings** tool.
 
 ### Memory Cache
@@ -163,7 +163,7 @@ Files tool:
 Audio can be added to image sequences either automatically or manually.
 
 To automatically add audio to image sequences, open the **Image Sequences**
-section in the **Settings Tool**. Audio files can be found by either specifying
+section in the **Settings** tool. Audio files can be found by either specifying
 the file extensions to search for (e.g., ".wav .mp3"), or providing a specific
 file name.
 
@@ -199,11 +199,11 @@ The viewport controls can be customized in the **Settings** tool.
 
 The bit depth of the viewport can be set in the **View** tool with the color
 buffer option. The default option of **RGBA F32** is recommended to avoid
-clamping color values. The other opions may be used for extra performance
+clamping color values. The other options may be used for extra performance,
 with the drawback that colors will be clamped.
 
 The background color of the viewport can be set in the **View** tool. An
-outline can also be drawn around the image to disinguish it from the
+outline can also be drawn around the image to distinguish it from the
 background, which can be useful for images with transparency.
 
 ### Grid
@@ -253,21 +253,20 @@ HUD:
 
 Playback and frame controls:
 1. Playback controls
-2. Playback shuttle - Click and drag to change playback speed
-3. Frame controls
-4. Frame shuttle - Click and drag to change the current frame
-5. Current frame
-6. Duration
-7. Current speed
-8. Speed multiplier
-9. Time units (e.g., frames or timecode)
+2. Playback loop mode
+3. Playback shuttle - Click and drag to change playback speed
+4. Frame controls
+5. Frame shuttle - Click and drag to change the current frame
+6. Current frame
+7. Duration
+8. Time units (e.g., frames or timecode)
+9. Current speed
 
 The playback speed can be changed momentarily by clicking forward or reverse
-multiple times. The speed will accelerate 2X with each click, and can be
-slowed down by clicking the opposite playback direction. The speed "multiplier"
-is displayed with the other playback controls.
+multiple times. Each click doubles the speed, and the speed can be slowed
+down by clicking the opposite playback direction.
 
-In and out points can be set frome the **Playback** menu to limit playback to a
+In and out points can be set from the **Playback** menu to limit playback to a
 section of the timeline.
 
 The number of dropped frames during playback can be viewed in the HUD, which is
@@ -279,7 +278,7 @@ available from the **View** menu.
 
 By default the timeline is minimized, showing only the first video and audio
 track. To see all of the tracks in the timeline, toggle the minimized state
-available from the **Timeline** menu.
+from the **Timeline** menu.
 
 ![Timeline](assets/TimelineAnnotated.svg)
 
@@ -404,7 +403,7 @@ Settings are stored as a JSON file in the directory **Documents/DJV**.
 ![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.svg)
 
 Keyboard shortcuts:
-1. Seach shortcuts
+1. Search shortcuts
 2. Shortcut with keyboard focus
 3. Secondary shortcut
 4. Conflicting shortcuts
