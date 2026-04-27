@@ -33,9 +33,10 @@ Example of two images being compared with a horizontal layout:
 
 https://github.com/grizzlypeak3d/DJV/releases
 
-**NOTE**: Download packages only include a minimal set of video and audio
-codecs. Additional codecs can be supported by using an external FFmpeg command
-or building from source.
+**Note:** Download packages include only a minimal set of video and audio
+codecs. To support additional codecs, point DJV at an external FFmpeg
+command (see [documentation](https://grizzlypeak3d.github.io/DJV/index.html#files))
+or build from source.
 
 
 ## Building

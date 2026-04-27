@@ -5,12 +5,12 @@ play back high resolution image sequences and movies in real time, with
 audio, A/B comparison, color management, and more.
 
 Features include:
-* Support for high resolution and high bit depth images
-* A/B comparison with wipe, overlay, and difference modes
-* Timeline support with OpenTimelineIO
-* Color management with OpenColorIO
-* Multi-track audio with variable speed and reverse playback
-* Experimental support for USD files
+* High-resolution and high bit-depth image support
+* A/B comparison with wipe, overlay, difference, and tile modes
+* Timeline support via OpenTimelineIO
+* Color management via OpenColorIO
+* Multi-track audio with variable-speed and reverse playback
+* Experimental USD support
 * Available for Linux, macOS, and Windows
 
 <br>
@@ -39,9 +39,9 @@ Features include:
 
 [Downloads](https://github.com/grizzlypeak3d/DJV/releases/)
 
-**NOTE**: Download packages only include a minimal set of video and audio
-codecs. Additional codecs can be supported by using an external FFmpeg
-command or building from source.
+**Note:** Download packages include only a minimal set of video and audio
+codecs. To support additional codecs, point DJV at an external FFmpeg
+command (see below) or build from source.
 
 ### Linux
 
@@ -50,17 +50,14 @@ DJV folder to a convenient location.
 
 ### Windows
 
-Packages are distributed as NSIS installers or ZIP archives.
-
-Double-click the NSIS .exe file to start the install.
-
-For ZIP archives, uncompress the archive and move the DJV folder to a
-convenient location.
+Packages are distributed as NSIS installers or ZIP archives. Double-click
+the NSIS `.exe` file to start the installer, or, for ZIP archives,
+uncompress the archive and move the DJV folder to a convenient location.
 
 ### macOS
 
-Packages are distributed as macOS disk images. Open the disk image and copy
-DJV to the "Applications" folder.
+Packages are distributed as macOS disk images. Open the disk image and
+copy DJV to the **Applications** folder.
 
 
 <br><br><a name="main_window"></a>
@@ -68,42 +65,45 @@ DJV to the "Applications" folder.
 
 ![Main Window](assets/MainWindowAnnotated.svg)
 
-Main window:
 1. Tab Bar - Switch between currently opened files
 2. Viewport - View of the current file
 3. Timeline - Time scrubbing, thumbnails, and audio waveforms
 4. Playback - Playback and frame controls
-5. Tool - Current tool (e.g. color picker or magnifier)
+5. Tool - The currently active tool (for example, color picker or magnifier)
 6. Status Bar - Warnings and errors, information about the current file, and
    status indicators
 
-Components of the user interface can be toggled on and off from the **Window** menu.
+Most parts of the interface can be shown or hidden from the **Window** menu.
 
 Full screen mode can be enabled from the **Window** menu or **Window** tool bar.
 
-A secondary window can be used to mirror the viewport on a separate monitor.
-The secondary window can be shown from the **Window** menu or **Window** tool bar.
+A secondary window can be used to mirror the viewport on a separate monitor —
+useful for client review on a calibrated display. The secondary window can be
+shown from the **Window** menu or **Window** tool bar.
 
 
 <br><br><a name="files"></a>
 ## Files
 
-Default supported file formats:
+DJV ships with support for the following formats:
 * Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, SGI, TGA, BMP, TIFF
-* Default movie codecs: MJPEG, MPEG-2
-* Default audio codecs: FLAC, MP3, WAV
+* Movie codecs: MJPEG, MPEG-2
+* Audio codecs: FLAC, MP3, WAV
 * Timelines: OTIO, OTIOZ
 * Experimental: USD
 
-Additional formats may be supported depending on how DJV was built, or by
-using an external FFmpeg command.
+More formats may be available depending on how DJV was built, or by using an
+external FFmpeg command.
 
-Files and folders can be opened:
+### Opening files
+
+You can open files and folders in three ways:
+
 * From the **File** menu or **File** tool bar
 * By dragging and dropping onto the main window
 * From the command line
 
-Opening a folder will open all of the supported files in the folder (non-recursively).
+Opening a folder opens every supported file in that folder (non-recursively).
 
 Image sequences can be opened from the command line by either specifying the
 first frame or using the "#" wildcard. For example:
@@ -111,139 +111,141 @@ first frame or using the "#" wildcard. For example:
 djv render.#.exr
 ```
 
-The native file browser is enabled by default on Windows and macOS. The
-built-in file browser can be enabled in the **Settings** tool.
+The native file browser is enabled by default on Windows and macOS. To use
+DJV's built-in file browser instead, change the option in the **Settings** tool.
 
-The current file can be changed from the **File/Current** menu, the
-**Tab Bar**, or the **Files** tool.
+To switch between open files, use the **File/Current** menu, the **Tab Bar**,
+or the **Files** tool.
 
 ### FFmpeg command
 
-An external FFmpeg command can be used to support additional file formats
-and codecs. The FFmpeg command is run as a sub-process and the decoded
-video and audio are sent to DJV for display.
+To support additional formats and codecs, you can configure DJV to use an
+external FFmpeg command. FFmpeg runs as a sub-process and streams decoded
+video and audio to DJV for display.
 
-The location of the **ffmpeg** and **ffprobe** commands can be configured in
-the **Settings** tool.
+The paths to the **ffmpeg** and **ffprobe** commands are set in the
+**Settings** tool.
 
-### Memory Cache
+### Memory cache
 
-The memory cache can be configured in the **Settings** tool. There are
-separate values for video, audio, and "read behind". The "read behind"
-value is the number of seconds that are read before the current frame. This
-is useful to ensure frames are cached when scrubbing.
+DJV caches frames in memory for smooth playback and scrubbing. The cache is
+configured in the **Settings** tool, with separate values for video, audio,
+and *read-behind*. Read-behind is the number of seconds cached *before* the
+current frame, which keeps scrubbing responsive when moving backward.
 
-Only the current file is stored in the cache. When the current file is changed
-it is cleared from the cache and the new file is loaded into the cache.
+Only the current file is cached. Switching files clears the cache and
+reloads it for the new file.
 
 ### Layers
 
-For files that contain multiple layers (i.e., OpenEXR), the current layer can
-be changed from the **File/Layers** menu or the **Files** tool.
+For files with multiple layers (such as multi-part OpenEXR), the active
+layer can be changed from the **File/Layers** menu or from the **Files** tool.
 
-### Files Tool
+### Files tool
 
-The **Files** tool can be used to set the current file, the current layers, and
-compare options.
-
-The **Files** tool can be shown from the **Tools** menu or the tool bar.
+The **Files** tool is the central place for managing open files: it sets the
+current file, picks active layers, and configures comparison. Open it from
+the **Tools** menu or the tool bar.
 
 ![Files Tool](assets/FilesToolAnnotated.svg)
 
-Files tool:
-1. Current file (**A** file)
-2. **B** files (multiple "B" files may be set for tile mode)
+1. **Current file** (the **A** file)
+2. **B files** (multiple **B** files can be set in tile mode)
 3. Current layer
 4. Compare mode
 5. Compare time
 6. Compare options
 
-### Image Sequences and Audio
+### Image sequences with audio
 
-Audio can be added to image sequences either automatically or manually.
+Audio can be paired with an image sequence either automatically or manually.
 
-To automatically add audio to image sequences, open the **Image Sequences**
-section in the **Settings** tool. Audio files can be found by either specifying
-the file extensions to search for (e.g., ".wav .mp3"), or providing a specific
-file name.
+To pair audio automatically, open the **Image Sequences** section in the
+**Settings** tool. You can either list the file extensions DJV should look
+for (for example, `.wav .mp3`), or provide a specific file name to match.
 
-To manually add audio to an image sequence use the **File/Open With Audio** menu.
+To pair audio manually, use **File/Open With Audio**.
 
 ### USD
 
-USD file support is currently experimental. When a USD file is opened it
-is rendered to an image sequence with the Hydra renderer.
+USD support is currently experimental. When a USD file is opened, DJV
+renders it to an image sequence using the Hydra renderer.
 
-The camera used to render the scene will be chosen in this order:
-1. If the USD file is referenced from an OTIO file, the name of the clip
+DJV picks the rendering camera in this order:
+
+1. The clip name, if the USD file is referenced from an OTIO file
 2. The primary camera in the scene
 3. The first camera found in the scene
-4. A temporary camera is created that frames the scene
+4. A temporary camera generated to frame the scene
 
 
 <br><br><a name="viewport"></a>
 ## Viewport
 
-The viewport shows a view of the current file. The view can be panned, zoomed,
-or "framed" so the image fills the view.
+The viewport displays the current file. You can pan, zoom, or *frame* the
+view so the image fills the available space.
 
 Default viewport controls:
-* Pan - Middle mouse button
-* Zoom - Mouse wheel or keyboard shortcuts **-** and **=**
-* Frame view - Keyboard shortcut **Backspace**
-* Wipe in compare mode - **Alt** + left mouse button
-* Color picker - **Ctrl** + left mouse button
-* Frame shuttle - Left mouse button
+* **Pan** — Middle mouse button
+* **Zoom** — Mouse wheel, or the **-** and **=** keys
+* **Frame view** (fit image to viewport) — **Backspace**
+* **Wipe** (in compare mode) — **Alt** + left mouse button
+* **Color picker** — **Ctrl** + left mouse button
+* **Frame shuttle** (scrub frames by dragging) — Left mouse button
 
-The viewport controls can be customized in the **Settings** tool.
+Viewport controls can be remapped in the **Settings** tool.
 
-The bit depth of the viewport can be set in the **View** tool with the color
-buffer option. The default option of **RGBA F32** is recommended to avoid
-clamping color values. The other options may be used for extra performance,
-with the drawback that colors will be clamped.
+### Color buffer
 
-The background color of the viewport can be set in the **View** tool. An
-outline can also be drawn around the image to distinguish it from the
-background, which can be useful for images with transparency.
+The viewport's bit depth is set in the **View** tool with the **Color buffer**
+option. The default, **RGBA F32**, is recommended because it preserves the
+full range of color values without clamping. Lower bit-depth options can be
+faster, but they will clamp colors — choose them only when performance is
+more important than precision.
+
+### Background
+
+The viewport background color is set in the **View** tool. You can also
+draw an outline around the image, which makes images with transparent
+regions easier to distinguish from the background.
 
 ### Grid
 
-The grid can be enabled from the **View** tool.
+The grid is enabled and configured from the **View** tool.
 
 Grid options:
-* Enabled: Toggle the grid on or off
-* Size: Number of pixels between grid lines
-* Line width: Width of the grid lines
-* Color: Color of the grid lines
-* Labels:
-    * None: No labels
-    * Pixels: Pixel positions
-    * Alphanumeric: Letters in the X direction and numbers in the Y direction (e.g., "B 12")
-* Text color: Label text color
-* Overlay color: Label background color
+* **Enabled** — Toggle the grid on or off
+* **Size** — Pixels between grid lines
+* **Line width** — Thickness of the grid lines
+* **Color** — Color of the grid lines
+* **Labels** — How cells are labeled:
+    * **None** — No labels
+    * **Pixels** — Pixel positions
+    * **Alphanumeric** — Letters along X, numbers along Y (e.g., "B 12")
+* **Text color** — Label text color
+* **Overlay color** — Label background color
 
 ![View Pixel Grid](assets/ViewPixelGridAnnotated.svg)
 
-The grid can be used to examine individual pixels with these settings:
+The grid can also help you inspect individual pixels. To do so:
 1. Set **Magnify** to **Nearest**
 2. Enable the grid
-3. Set the grid size to one
+3. Set the grid size to `1`
 
 ### HUD
 
-Information can be overlaid on the viewport by enabling the HUD (heads up
-display). The HUD can be enabled from the **View** menu.
+The heads-up display (HUD) overlays useful information on top of the
+viewport. Enable it from the **View** menu.
 
 ![Viewport HUD](assets/ViewHUDAnnotated.svg)
 
-HUD:
 1. Current file name
 2. Current frame
-3. Real playback speed
+3. Actual playback speed (the rate DJV is achieving, which may differ from the requested rate)
 4. Number of frames dropped during playback
 5. Color picker
-6. Video cache percentage
-7. Audio cache percentage
+6. Video cache fill (%)
+7. Audio cache fill (%)
 
 
 <br><br><a name="playback"></a>
@@ -251,103 +253,121 @@ HUD:
 
 ![Playback Controls](assets/PlaybackControlsAnnotated.svg)
 
-Playback and frame controls:
-1. Playback controls
+1. Playback controls (forward/reverse/stop)
 2. Playback loop mode
-3. Playback shuttle - Click and drag to change playback speed
-4. Frame controls
-5. Frame shuttle - Click and drag to change the current frame
+3. Playback shuttle - Click and drag to vary playback speed
+4. Frame controls (step, jump to start/end)
+5. Frame shuttle - Click and drag to scrub the current frame
 6. Current frame
 7. Duration
 8. Time units (e.g., frames or timecode)
 9. Current speed
 
-The playback speed can be changed momentarily by clicking forward or reverse
-multiple times. Each click doubles the speed, and the speed can be slowed
-down by clicking the opposite playback direction.
+### Speed multiplier
 
-In and out points can be set from the **Playback** menu to limit playback to a
-section of the timeline.
+You can temporarily speed up playback by clicking the forward (or reverse)
+button repeatedly: each click doubles the playback speed. Clicking the
+opposite direction slows it back down.
 
-The number of dropped frames during playback can be viewed in the HUD, which is
-available from the **View** menu.
+### In and out points
+
+To limit playback to a section of the timeline, set in and out points from
+the **Playback** menu.
+
+### Dropped frames
+
+If playback isn't keeping up, the HUD (under the **View** menu) shows the
+number of dropped frames in real time.
 
 
 <br><br><a name="timeline"></a>
 ## Timeline
 
-By default the timeline is minimized, showing only the first video and audio
-track. To see all of the tracks in the timeline, toggle the minimized state
-from the **Timeline** menu.
+By default, the timeline is minimized and shows only the first video and
+audio track. To see every track, toggle the minimized state from the
+**Timeline** menu.
 
 ![Timeline](assets/TimelineAnnotated.svg)
 
-Timeline:
 1. Current frame
 2. In/out range (blue)
-3. Video cache display (green)
-4. Audio cache display (purple)
+3. Video cache (green)
+4. Audio cache (purple)
 5. Video track
 6. Video clips
 7. Audio track
 8. Audio clips
 
 Default timeline controls:
-* Change the current frame - Left mouse button
-* Zoom - Mouse wheel or keyboard shortcuts **-** and **=**
-* Frame view - Keyboard shortcut **Backspace**
-* Pan - Middle mouse button
+* **Change current frame** — Left mouse button
+* **Zoom** — Mouse wheel, or the **-** and **=** keys
+* **Frame view** — **Backspace**
+* **Pan** — Middle mouse button
 
-The size of the timeline thumbnails can be set from the **Timeline** menu.
-Thumbnails can also be disabled to improve performance.
+The size of the timeline thumbnails is set from the **Timeline** menu, and
+thumbnails can be turned off entirely to improve performance.
 
 
 <br><br><a name="compare"></a>
 ## A/B Comparison
 
-To compare files, open both files and set the **B** file from either the
-**Compare/B** menu or **Files** tool. The **A** file is the current file.
+A/B comparison lets you view two files (or layers) at once — useful for
+checking revisions, matching color between shots, or spotting differences
+between renders.
 
-Compare modes:
-* A - Show only the **A** file
-* B - Show only the **B** file
-* Wipe - Wipe between the **A** and **B** files
-* Overlay - Show the **B** file over the **A** file
-* Difference - Show the difference between the **A** and **B** files
-* Horizontal - Show the **A** and **B** files side by side
-* Vertical - Show the **A** and **B** files over and under
-* Tile - Show the **A** and **B** files as tiles
+### Setting up a comparison
 
-Multiple **B** files can be viewed with **Tile** mode.
+1. Open the files in DJV.
+2. The current file is the **A** file. Set the **B** file from the
+   **Compare/B** menu or the **Files** tool.
+3. Pick a compare mode (see below).
 
-One example use for **Tile** mode is to simultaneously view multiple layers
-within a file. Open the file multiple times and set the current layer for
-each instance. Then enable **Tile** compare mode and set the "B" files.
+### Compare modes
+
+| Mode | What it shows |
+|---|---|
+| **A** | Only the **A** file |
+| **B** | Only the **B** file |
+| **Wipe** | A wipe between **A** and **B** (drag with **Alt** + left mouse button) |
+| **Overlay** | **B** layered on top of **A** |
+| **Difference** | The pixel difference between **A** and **B** |
+| **Horizontal** | **A** and **B** side by side |
+| **Vertical** | **A** above **B** |
+| **Tile** | **A** and **B** as tiles (supports multiple **B** files) |
+
+### Compare time
+
+Files can be compared in either *relative* or *absolute* time:
+
+* **Relative** — The **B** file is offset so its start aligns with the
+  start of **A**.
+* **Absolute** — **A** and **B** play at the same timeline time.
+
+### Comparing multiple layers (tile mode example)
+
+Tile mode supports multiple **B** files, which makes it handy for viewing
+several layers of a single file at once. Open the file multiple times and
+set a different active layer for each instance, then enable **Tile**
+compare mode and add the other instances as **B** files.
 
 ![Tile Mode](assets/FilesToolTileAnnotated.svg)
 
-Compare multiple layers:
 1. Set the compare mode to **Tile**
-2. Set the current file and layer
-3. Set multiple **B** files and their layers
-
-Files can be compared in relative or absolute time mode. In relative time mode
-the time of the **B** file will be offset to match the start of the **A** file.
-In absolute time mode the **A** and **B** times will be the same.
+2. Set the current file and its layer
+3. Add the **B** files and pick a layer for each
 
 
 <br><br><a name="color"></a>
 ## Color
 
-The **Color** tool can be used to set OpenColorIO options, specify a
-LUT (Look-Up Table), or apply other controls like brightness, contrast, and
-levels.
+The **Color** tool covers everything color-related: OpenColorIO settings,
+LUTs (look-up tables), and basic adjustments such as brightness, contrast,
+and levels.
 
-The **Color** tool can be shown from the **Tools** menu or the tool bar.
+Open it from the **Tools** menu or the tool bar.
 
 ![Color Tool](assets/ColorToolAnnotated.svg)
 
-OpenColorIO options:
 1. Enable OpenColorIO
 2. OpenColorIO configuration
 3. Configuration name
@@ -357,23 +377,22 @@ OpenColorIO options:
 7. Look color space
 
 The OpenColorIO configuration can be set to a built-in configuration, the
-**OCIO** environment variable, or a file name.
+**OCIO** environment variable, or a specific file path.
 
-A LUT file can also be applied either before or after the OpenColorIO pass, by
-setting the LUT **Order** option to **PreColorConfig** or **PostColorConfig**.
+A LUT can be applied either before or after the OpenColorIO pass — set the
+LUT **Order** option to **PreColorConfig** or **PostColorConfig** as needed.
 
 
 <br><br><a name="export"></a>
 ## Exporting Files
 
-The **Export** tool can be used to export the current file as an image
-sequence, a movie, or the current frame as a still image.
+The **Export** tool writes out the current file as an image sequence, a
+movie, or a single still image.
 
-The **Export** tool can be shown from the **Tools** menu or the tool bar.
+Open it from the **Tools** menu or the tool bar.
 
 ![Export Tool](assets/ExportToolAnnotated.svg)
 
-Export:
 1. Output directory
 2. Render size
 3. File type
@@ -382,46 +401,44 @@ Export:
 6. Movie codec
 7. Export button
 
-To export an image sequence set the file type to **Sequence**. To export the
-current frame set the file type to **Image**.
+To export an image sequence, set **File type** to **Sequence**. To export
+just the current frame, set it to **Image**.
 
-The current layer, playback speed, in/out range, and color settings will be
-exported.
+Exports respect the current layer, playback speed, in/out range, and color
+settings.
 
-Note that audio export is not yet supported.
+> **Note:** Audio export is not yet supported.
 
 
 <br><br><a name="settings"></a>
 ## Settings
 
-The **Settings** tool can be shown from the **Tools** menu or the tool bar.
+Open the **Settings** tool from the **Tools** menu or the tool bar.
 
-Settings are stored as a JSON file in the directory **Documents/DJV**.
+Settings are stored as a JSON file in the **Documents/DJV** directory.
 
 ### Keyboard Shortcuts
 
 ![Keyboard Shortcuts](assets/KeyboardShortcutsAnnotated.svg)
 
-Keyboard shortcuts:
 1. Search shortcuts
 2. Shortcut with keyboard focus
 3. Secondary shortcut
 4. Conflicting shortcuts
 
-To set a shortcut, click the shortcut widget or use the tab key to give it
-keyboard focus, then type the new shortcut. The widget will turn red if the
-shortcut conflicts with another one.
+To set a shortcut, click its widget (or tab to it) and press the new key
+combination. The widget turns red if the chosen combination conflicts with
+an existing shortcut.
 
 ### Language Support
 
-The default fonts included with DJV do not support all languages,
-which can cause file names to be displayed incorrectly. To support
-additional languages such as Chinese, Japanese, and Korean, add
-custom fonts in the **Settings** tool, in the **Style** section.
+The default fonts shipped with DJV don't cover every language, which can
+cause file names in some scripts to display incorrectly. To support
+additional languages — Chinese, Japanese, and Korean, for example — add
+custom fonts in the **Style** section of the **Settings** tool.
 
 ![Custom Fonts](assets/CustomFontsAnnotated.svg)
 
-Custom fonts:
 1. Add custom fonts
 2. Set custom fonts
 3. File names using custom fonts
@@ -430,14 +447,14 @@ Custom fonts:
 <br><br><a name="trouble_shoot"></a>
 ## Troubleshooting
 
-Check the log file located in the directory **Documents/DJV**.
+If something isn't working, the log file in the **Documents/DJV** directory
+is the first place to look.
 
-If the application fails to start, try running from the command line to check
-for any errors:
+If DJV fails to start, run it from the command line to see startup errors:
 ```
 djv -log
 ```
 
-Try resetting the settings:
+If the application is misbehaving, try resetting the settings:
 * Delete the directory **Documents/DJV**
 * Or pass the **-resetSettings** flag on the command line
