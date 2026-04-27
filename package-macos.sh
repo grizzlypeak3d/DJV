@@ -22,5 +22,5 @@ export FTK_API=GL_4_1
 export CMAKE_OSX_DEPLOYMENT_TARGET=10.15
 export CMAKE_OSX_ARCHITECTURES=arm64
 
-sh $SOURCE_DIR/etc/macOS/macos-sbuild.sh Release
-sh $SOURCE_DIR/etc/macOS/macos-package.sh Release
+sh $SOURCE_DIR/etc/macOS/macos-sbuild.sh $SOURCE_DIR Release
+sh $SOURCE_DIR/etc/macOS/macos-package.sh $SOURCE_DIR Release
