@@ -1,6 +1,12 @@
 ## 3.4.1
 
 Fixes:
+* Fix for FFmpeg command on macOS.
+
+
+## 3.4.1
+
+Fixes:
 * Build fixes.
 
 
