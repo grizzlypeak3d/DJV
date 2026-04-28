@@ -1,4 +1,4 @@
-## 3.4.1
+## 3.4.2
 
 Fixes:
 * Fix for FFmpeg command on macOS.
