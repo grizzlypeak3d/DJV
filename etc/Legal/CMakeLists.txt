@@ -1,4 +1,5 @@
 set(LEGAL
+    LICENSE_aom.txt
     LICENSE_BlackmagicDesign.txt
     LICENSE_boost.txt
     LICENSE_CMake.txt
@@ -31,6 +32,7 @@ set(LEGAL
     LICENSE_pystring.txt
     LICENSE_SDL2.txt
     LICENSE_subprocess.txt
+    LICENSE_svt-av1.txt
     LICENSE_tlRender.txt
     LICENSE_yaml-cpp.txt
     LICENSE_zlib.txt)
