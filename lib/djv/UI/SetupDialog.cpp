@@ -101,6 +101,7 @@ namespace djv
                 ftk::Format("Setup").arg(appInfoModel->getVersion()));
             label->setFontSize(14);
             label->setMarginRole(ftk::SizeRole::Margin);
+            label->setBackgroundRole(ftk::ColorRole::Button);
 
             p.nextButton = ftk::PushButton::create(context, "Next");
             p.prevButton = ftk::PushButton::create(context, "Previous");
