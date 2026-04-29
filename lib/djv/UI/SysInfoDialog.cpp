@@ -3,8 +3,9 @@
 
 #include <djv/UI/SysInfoDialog.h>
 
-#include <tlRender/IO/System.h>
+#include <djv/Models/AppInfoModel.h>
 
+#include <tlRender/IO/System.h>
 #include <tlRender/Core/AudioSystem.h>
 
 #include <ftk/UI/ClipboardSystem.h>
@@ -29,6 +30,7 @@ namespace djv
 
         void SysInfoDialog::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<ftk::IWindow>& window,
             const std::shared_ptr<IWidget>& parent)
         {
@@ -39,7 +41,9 @@ namespace djv
             FTK_P();
 
             std::vector<std::pair<std::string, std::string> > labels;
-            labels.push_back(std::make_pair("DJV version: ", DJV_VERSION_FULL));
+            labels.push_back(std::make_pair(
+                appInfoModel->getFullName() + " version: ",
+                appInfoModel->getVersion()));
 
             labels.push_back(std::make_pair("", ""));
             const auto sysInfo = ftk::getSysInfo();
@@ -177,11 +181,12 @@ namespace djv
 
         std::shared_ptr<SysInfoDialog> SysInfoDialog::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<ftk::IWindow>& window,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<SysInfoDialog>(new SysInfoDialog);
-            out->_init(context, window, parent);
+            out->_init(context, appInfoModel, window, parent);
             return out;
         }
     }

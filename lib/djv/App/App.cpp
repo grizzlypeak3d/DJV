@@ -7,6 +7,7 @@
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/Viewport.h>
 #include <djv/UI/SeparateAudioDialog.h>
+#include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
@@ -93,6 +94,7 @@ namespace djv
             std::filesystem::path settingsFile;
             CmdLine cmdLine;
 
+            std::shared_ptr<models::AppInfoModel> appInfoModel;
             std::shared_ptr<ftk::FileLogSystem> fileLogSystem;
             std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<models::SettingsModel> settingsModel;
@@ -154,14 +156,14 @@ namespace djv
 
         void App::_init(
             const std::shared_ptr<ftk::Context>& context,
-            std::vector<std::string>& argv)
+            std::vector<std::string>& argv,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel)
         {
             FTK_P();
 
-            const std::string appName = "djv";
-            const std::filesystem::path appDocsPath = _appDocsPath();
-            p.logFile = _getLogFilePath(appName, appDocsPath);
-            p.settingsFile = _getSettingsPath(appName, appDocsPath);
+            p.appInfoModel = appInfoModel ? appInfoModel : models::AppInfoModel::create();
+            p.logFile = _getLogFilePath();
+            p.settingsFile = _getSettingsPath();
 
             p.cmdLine.inputs = ftk::CmdLineListArg<std::string>::create(
                 "input",
@@ -318,7 +320,7 @@ namespace djv
             ftk::App::_init(
                 context,
                 argv,
-                appName,
+                p.appInfoModel->getShortName(),
                 "Media playback and review.",
                 { p.cmdLine.inputs },
                 {
@@ -367,11 +369,17 @@ namespace djv
 
         std::shared_ptr<App> App::create(
             const std::shared_ptr<ftk::Context>& context,
-            std::vector<std::string>& argv)
+            std::vector<std::string>& argv,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel)
         {
             auto out = std::shared_ptr<App>(new App);
-            out->_init(context, argv);
+            out->_init(context, argv, appInfoModel);
             return out;
+        }
+
+        const std::shared_ptr<models::AppInfoModel>& App::getAppInfoModel() const
+        {
+            return _p->appInfoModel;
         }
 
         const std::shared_ptr<ftk::Settings>& App::getSettings() const
@@ -1107,12 +1115,13 @@ namespace djv
 
         std::filesystem::path App::_appDocsPath()
         {
+            FTK_P();
             const std::filesystem::path documentsPath = ftk::getUserPath(ftk::UserPath::Documents);
             if (!std::filesystem::exists(documentsPath))
             {
                 std::filesystem::create_directory(documentsPath);
             }
-            const std::filesystem::path out = documentsPath / "DJV";
+            const std::filesystem::path out = documentsPath / p.appInfoModel->getFullName();
             if (!std::filesystem::exists(out))
             {
                 std::filesystem::create_directory(out);
@@ -1120,23 +1129,21 @@ namespace djv
             return out;
         }
 
-        std::filesystem::path App::_getLogFilePath(
-            const std::string& appName,
-            const std::filesystem::path& appDocsPath)
+        std::filesystem::path App::_getLogFilePath()
         {
-            return appDocsPath / ftk::Format("{0}.{1}.log").
-                arg(appName).
-                arg(DJV_VERSION_MAJOR).
+            FTK_P();
+            return _appDocsPath() / ftk::Format("{0}.{1}.log").
+                arg(p.appInfoModel->getShortName()).
+                arg(p.appInfoModel->getVersionMajor()).
                 str();
         }
 
-        std::filesystem::path App::_getSettingsPath(
-            const std::string& appName,
-            const std::filesystem::path& appDocsPath)
+        std::filesystem::path App::_getSettingsPath()
         {
-            return appDocsPath / ftk::Format("{0}.{1}.json").
-                arg(appName).
-                arg(DJV_VERSION_MAJOR).
+            FTK_P();
+            return _appDocsPath() / ftk::Format("{0}.{1}.json").
+                arg(p.appInfoModel->getShortName()).
+                arg(p.appInfoModel->getVersionMajor()).
                 str();
         }
 

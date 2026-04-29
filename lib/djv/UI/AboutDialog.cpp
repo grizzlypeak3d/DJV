@@ -3,6 +3,8 @@
 
 #include <djv/UI/AboutDialog.h>
 
+#include <djv/Models/AppInfoModel.h>
+
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
@@ -21,6 +23,7 @@ namespace djv
 
         void AboutDialog::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<IWidget>& parent)
         {
             IDialog::_init(
@@ -32,7 +35,7 @@ namespace djv
             auto titleLabel = ftk::Label::create(context, "About");
             titleLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
-            auto licensesButton = ftk::PushButton::create(context, "Licenses");
+            auto licensesButton = ftk::PushButton::create(context, "Additional Licenses");
             auto closeButton = ftk::PushButton::create(context, "Close");
 
             auto layout = ftk::VerticalLayout::create(context, shared_from_this());
@@ -45,11 +48,13 @@ namespace djv
             vLayout->setSpacingRole(ftk::SizeRole::Spacing);
             ftk::Label::create(
                 context,
-                ftk::Format("DJV {0}").arg(DJV_VERSION_FULL),
+                ftk::Format("{0} {1}").
+                    arg(appInfoModel->getFullName()).
+                    arg(appInfoModel->getVersion()),
                 vLayout);
             ftk::Label::create(
                 context,
-                ftk::Format("Copyright Contributors to the DJV project."),
+                appInfoModel->getLicense(),
                 vLayout);
             licensesButton->setParent(vLayout);
             auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Vertical, layout);
@@ -68,10 +73,11 @@ namespace djv
                     close();
                 });
 
+            const std::string url = appInfoModel->getLicensesURL();
             licensesButton->setClickedCallback(
-                [this]
+                [url]
                 {
-                    ftk::openURL("https://github.com/grizzlypeak3d/DJV/tree/main/etc/Legal");
+                    ftk::openURL(url);
                 });
         }
 
@@ -84,10 +90,11 @@ namespace djv
 
         std::shared_ptr<AboutDialog> AboutDialog::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<AboutDialog>(new AboutDialog);
-            out->_init(context, parent);
+            out->_init(context, appInfoModel, parent);
             return out;
         }
     }

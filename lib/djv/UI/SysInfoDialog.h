@@ -7,6 +7,11 @@
 
 namespace djv
 {
+    namespace models
+    {
+        class AppInfoModel;
+    }
+
     namespace ui
     {
         //! System information dialog.
@@ -17,6 +22,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<ftk::IWindow>&,
                 const std::shared_ptr<IWidget>& parent);
 
@@ -27,6 +33,7 @@ namespace djv
 
             static std::shared_ptr<SysInfoDialog> create(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<ftk::IWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 

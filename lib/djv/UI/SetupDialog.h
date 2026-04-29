@@ -9,6 +9,7 @@ namespace djv
 {
     namespace models
     {
+        class AppInfoModel;
         class SettingsModel;
         class TimeUnitsModel;
     }
@@ -23,6 +24,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<ftk::IWidget>& parent);
 
             SetupStartWidget();
@@ -32,6 +34,7 @@ namespace djv
 
             static std::shared_ptr<SetupStartWidget> create(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<ftk::IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
@@ -48,6 +51,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<IWidget>& parent);
@@ -59,6 +63,7 @@ namespace djv
 
             static std::shared_ptr<SetupDialog> create(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

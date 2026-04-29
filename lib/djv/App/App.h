@@ -31,6 +31,7 @@ namespace djv
     {
         struct FilesModelItem;
 
+        class AppInfoModel;
         class AudioModel;
         class ColorModel;
         class FilesModel;
@@ -44,7 +45,7 @@ namespace djv
 #endif // TLRENDER_BMD
     }
 
-    //! DJV application
+    //! DJV Application
     namespace app
     {
         class MainWindow;
@@ -57,7 +58,8 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                std::vector<std::string>&);
+                std::vector<std::string>&,
+                const std::shared_ptr<models::AppInfoModel>&);
 
             App();
 
@@ -67,7 +69,11 @@ namespace djv
             //! Create a new application.
             static std::shared_ptr<App> create(
                 const std::shared_ptr<ftk::Context>&,
-                std::vector<std::string>&);
+                std::vector<std::string>&,
+                const std::shared_ptr<models::AppInfoModel>& = nullptr);
+
+            //! Get the application information model.
+            const std::shared_ptr<models::AppInfoModel>& getAppInfoModel() const;
 
             //! Get the settings.
             const std::shared_ptr<ftk::Settings>& getSettings() const;
@@ -146,12 +152,8 @@ namespace djv
             void _windowsInit();
 
             std::filesystem::path _appDocsPath();
-            std::filesystem::path _getLogFilePath(
-                const std::string& appName,
-                const std::filesystem::path& appDocsPath);
-            std::filesystem::path _getSettingsPath(
-                const std::string& appName,
-                const std::filesystem::path& appDocsPath);
+            std::filesystem::path _getLogFilePath();
+            std::filesystem::path _getSettingsPath();
 
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);

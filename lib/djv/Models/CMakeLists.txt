@@ -1,4 +1,5 @@
 set(HEADERS
+    AppInfoModel.h
     AudioModel.h
     ColorModel.h
     FilesModel.h
@@ -14,6 +15,7 @@ endif()
 set(HEADERS_PRIVATE)
 
 set(SOURCE
+    AppInfoModel.cpp
     AudioModel.cpp
     ColorModel.cpp
     FilesModel.cpp

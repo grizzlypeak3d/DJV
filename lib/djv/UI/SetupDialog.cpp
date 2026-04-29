@@ -4,6 +4,7 @@
 #include <djv/UI/SetupDialog.h>
 
 #include <djv/UI/SettingsWidgets.h>
+#include <djv/Models/AppInfoModel.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <ftk/UI/ComboBox.h>
@@ -26,12 +27,18 @@ namespace djv
 
         void SetupStartWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
             IWidget::_init(context, "djv::ui::SetupStartWidget", parent);
             FTK_P();
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            ftk::Label::create(context, ftk::Format("Welcome to DJV version {0}.").arg(DJV_VERSION_FULL), p.layout);
+            ftk::Label::create(
+                context,
+                ftk::Format("Welcome to {0} version {1}.").
+                    arg(appInfoModel->getFullName()).
+                    arg(appInfoModel->getVersion()),
+                p.layout);
             ftk::Label::create(context, "Start by configuring some settings.", p.layout);
             ftk::Label::create(context, "Changes can also be made later in the settings tool.", p.layout);
         }
@@ -45,10 +52,11 @@ namespace djv
 
         std::shared_ptr<SetupStartWidget> SetupStartWidget::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
             auto out = std::shared_ptr<SetupStartWidget>(new SetupStartWidget);
-            out->_init(context, parent);
+            out->_init(context, appInfoModel, parent);
             return out;
         }
 
@@ -77,6 +85,7 @@ namespace djv
 
         void SetupDialog::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent)
@@ -89,7 +98,7 @@ namespace djv
 
             auto label = ftk::Label::create(
                 context,
-                ftk::Format("Setup").arg(DJV_VERSION_FULL));
+                ftk::Format("Setup").arg(appInfoModel->getVersion()));
             label->setFont(ftk::FontType::Bold);
             label->setMarginRole(ftk::SizeRole::Margin);
 
@@ -101,7 +110,7 @@ namespace djv
             p.stackLayout->setFitAll(false);
             p.stackLayout->setMarginRole(ftk::SizeRole::Margin);
 
-            SetupStartWidget::create(context, p.stackLayout);
+            SetupStartWidget::create(context, appInfoModel, p.stackLayout);
 
             auto vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
             ftk::Label::create(context, "Configure the memory cache:", vLayout);
@@ -179,12 +188,13 @@ namespace djv
 
         std::shared_ptr<SetupDialog> SetupDialog::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<SetupDialog>(new SetupDialog);
-            out->_init(context, settings, timeUnitsModel, parent);
+            out->_init(context, appInfoModel, settings, timeUnitsModel, parent);
             return out;
         }
     }

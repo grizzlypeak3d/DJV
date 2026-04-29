@@ -6,6 +6,7 @@
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/Viewport.h>
+#include <djv/Models/AppInfoModel.h>
 
 #include <ftk/UI/MenuBar.h>
 #include <ftk/Core/Format.h>
@@ -31,7 +32,10 @@ namespace djv
             Window::_init(
                 context,
                 app,
-                ftk::Format("{0} {1} - {2}").arg("DJV").arg(DJV_VERSION_FULL).arg("Secondary"),
+                ftk::Format("{0} {1} {2}").
+                    arg(app->getAppInfoModel()->getFullName()).
+                    arg(app->getAppInfoModel()->getVersion()).
+                    arg("Secondary"),
                 ftk::Size2I(1280, 960));
             FTK_P();
 

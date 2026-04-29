@@ -39,6 +39,7 @@
 #include <djv/UI/AboutDialog.h>
 #include <djv/UI/SetupDialog.h>
 #include <djv/UI/SysInfoDialog.h>
+#include <djv/Models/AppInfoModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ViewportModel.h>
@@ -137,7 +138,9 @@ namespace djv
             Window::_init(
                 context,
                 app,
-                ftk::Format("{0} {1}").arg("DJV").arg(DJV_VERSION_FULL),
+                ftk::Format("{0} {1}").
+                    arg(app->getAppInfoModel()->getFullName()).
+                    arg(app->getAppInfoModel()->getVersion()),
                 settings.size);
             FTK_P();
 
@@ -279,6 +282,7 @@ namespace djv
                 settingsModel->setMisc(miscSettings);
                 p.setupDialog = ui::SetupDialog::create(
                     context,
+                    app->getAppInfoModel(),
                     settingsModel,
                     app->getTimeUnitsModel());
                 p.setupDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
@@ -428,33 +432,30 @@ namespace djv
         void MainWindow::showAboutDialog()
         {
             FTK_P();
-            if (auto context = getContext())
-            {
-                p.aboutDialog = ui::AboutDialog::create(context);
-                p.aboutDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
-                p.aboutDialog->setCloseCallback(
-                    [this]
-                    {
-                        _p->aboutDialog.reset();
-                    });
-            }
+            p.aboutDialog = ui::AboutDialog::create(
+                getContext(),
+                p.app.lock()->getAppInfoModel());
+            p.aboutDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
+            p.aboutDialog->setCloseCallback(
+                [this]
+                {
+                    _p->aboutDialog.reset();
+                });
         }
 
         void MainWindow::showSysInfoDialog()
         {
             FTK_P();
-            if (auto context = getContext())
-            {
-                p.sysInfoDialog = ui::SysInfoDialog::create(
-                    context,
-                    std::dynamic_pointer_cast<MainWindow>(shared_from_this()));
-                p.sysInfoDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
-                p.sysInfoDialog->setCloseCallback(
-                    [this]
-                    {
-                        _p->sysInfoDialog.reset();
-                    });
-            }
+            p.sysInfoDialog = ui::SysInfoDialog::create(
+                getContext(),
+                p.app.lock()->getAppInfoModel(),
+                std::dynamic_pointer_cast<MainWindow>(shared_from_this()));
+            p.sysInfoDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
+            p.sysInfoDialog->setCloseCallback(
+                [this]
+                {
+                    _p->sysInfoDialog.reset();
+                });
         }
 
         void MainWindow::setGeometry(const ftk::Box2I& value)
