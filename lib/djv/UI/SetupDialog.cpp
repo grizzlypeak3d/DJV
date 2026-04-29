@@ -35,7 +35,7 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             ftk::Label::create(
                 context,
-                ftk::Format("Welcome to {0} version {1}.").
+                ftk::Format("Welcome to {0} {1}.").
                     arg(appInfoModel->getFullName()).
                     arg(appInfoModel->getVersion()),
                 p.layout);
@@ -99,7 +99,7 @@ namespace djv
             auto label = ftk::Label::create(
                 context,
                 ftk::Format("Setup").arg(appInfoModel->getVersion()));
-            label->setFont(ftk::FontType::Bold);
+            label->setFontSize(14);
             label->setMarginRole(ftk::SizeRole::Margin);
 
             p.nextButton = ftk::PushButton::create(context, "Next");

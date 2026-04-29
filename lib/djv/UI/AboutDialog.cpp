@@ -33,7 +33,8 @@ namespace djv
             FTK_P();
 
             auto titleLabel = ftk::Label::create(context, "About");
-            titleLabel->setMarginRole(ftk::SizeRole::MarginSmall);
+            titleLabel->setFontSize(14);
+            titleLabel->setMarginRole(ftk::SizeRole::Margin);
 
             auto licensesButton = ftk::PushButton::create(context, "Additional Licenses");
             auto closeButton = ftk::PushButton::create(context, "Close");

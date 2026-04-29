@@ -129,7 +129,8 @@ namespace djv
             }
 
             auto titleLabel = ftk::Label::create(context, "System Information");
-            titleLabel->setMarginRole(ftk::SizeRole::MarginSmall);
+            titleLabel->setFontSize(14);
+            titleLabel->setMarginRole(ftk::SizeRole::Margin);
 
             auto copyButton = ftk::PushButton::create(context, "Copy");
             auto closeButton = ftk::PushButton::create(context, "Close");

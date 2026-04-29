@@ -49,8 +49,9 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
-            auto label = ftk::Label::create(context, "Open Separate Audio", p.layout);
-            label->setMarginRole(ftk::SizeRole::MarginSmall);
+            auto label = ftk::Label::create(context, "Open With Audio", p.layout);
+            label->setFontSize(14);
+            label->setMarginRole(ftk::SizeRole::Margin);
             label->setBackgroundRole(ftk::ColorRole::Button);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setVStretch(ftk::Stretch::Expanding);

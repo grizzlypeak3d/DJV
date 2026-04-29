@@ -74,7 +74,7 @@ namespace djv
                 "INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\n"
                 "CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\n"
                 "ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\n"
-                "POSSIBILITY OF SUCH DAMAGE.\n";
+                "POSSIBILITY OF SUCH DAMAGE.";
         }
 
         std::string AppInfoModel::getLicensesURL() const
