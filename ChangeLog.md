@@ -1,7 +1,7 @@
 ## 3.4.3
 
 Changes:
-* Add the aom library for AV1 decoding support.
+* Add the aom library for AV1 decoding support (macOS and Linux).
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
