@@ -141,6 +141,7 @@ alias intel="env /usr/bin/arch -x86_64 /bin/zsh --login"
 Requirements:
 * Visual Studio 2022
 * CMake 3.31
+* NASM (https://www.nasm.us) for compiling FFmpeg and libjpeg-turbo.
 * MSYS2 (https://www.msys2.org) for compiling FFmpeg.
 * Strawberry Perl (https://strawberryperl.com/) for compiling network support.
 * Python 3.11 for compiling USD.
