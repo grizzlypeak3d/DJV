@@ -3,6 +3,8 @@
 Changes:
 * Add an option for custom aspect ratios
 * Add the aom library for AV1 decoding support (macOS and Linux).
+* Enable the standard FFmpeg plugin codec set by default, including common
+  MP4 files with H.264 video and AAC audio.
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
