@@ -68,6 +68,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 
 #-------------------------------------------------------------------------------
+# Testing
+
+include(CTest)
+
+#-------------------------------------------------------------------------------
 # Dependencies
 
 find_package(tlRender REQUIRED)
@@ -76,6 +81,9 @@ find_package(tlRender REQUIRED)
 # Sub-directories
 
 add_subdirectory(lib/djv)
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 add_subdirectory(bin)
 add_subdirectory(etc/Legal)
 add_subdirectory(etc/SampleData)

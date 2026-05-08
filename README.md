@@ -33,10 +33,12 @@ Example of two images being compared with a horizontal layout:
 
 https://github.com/grizzlypeak3d/DJV/releases
 
-**Note:** Download packages include only a minimal set of video and audio
-codecs. To support additional codecs, point DJV at an external FFmpeg
-command (see [documentation](https://grizzlypeak3d.github.io/DJV/index.html#files))
-or build from source.
+**Note:** DJV uses FFmpeg for movie and audio playback. The default source and
+package build enables the FFmpeg plugin with the standard open source codec
+set, including common MP4 files with H.264 video and AAC audio. Builds that
+use a minimal FFmpeg configuration may support fewer codecs; those builds can
+enable the FFmpeg command plugin and point DJV at an external FFmpeg command
+(see [documentation](https://grizzlypeak3d.github.io/DJV/index.html#files)).
 
 
 ## Building

@@ -30,6 +30,7 @@
                 <string>flac</string>
                 <string>m4a</string>
                 <string>m4v</string>
+                <string>mkv</string>
                 <string>mov</string>
                 <string>mp3</string>
                 <string>mp4</string>
