@@ -408,7 +408,7 @@ namespace djv
                 index = 0;
             }
             p.b->clear();
-            if (index >= 0 && index <= p.files->getSize())
+            if (index >= 0 && index < p.files->getSize())
             {
                 p.b->pushBack(p.files->getItem(index));
             }
@@ -434,7 +434,7 @@ namespace djv
                 index = static_cast<int>(p.files->getSize()) - 1;
             }
             p.b->clear();
-            if (index >= 0 && index <= p.files->getSize())
+            if (index >= 0 && index < p.files->getSize())
             {
                 p.b->pushBack(p.files->getItem(index));
             }
@@ -550,8 +550,8 @@ namespace djv
                             {
                                 index = p.files->getSize() - 1;
                             }
+                            b.push_back(p.files->getItem(index));
                         }
-                        b.push_back(p.files->getItem(index));
                     }
                     break;
                 }
