@@ -3,6 +3,9 @@ Debug
 Release
 RelWithDebInfo
 docs/doxygen
+tests/_media_compat
+__pycache__
+*.pyc
 *~
 .git
 .vscode

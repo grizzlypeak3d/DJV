@@ -90,13 +90,20 @@ shown from the **Window** menu or **Window** tool bar.
 
 DJV ships with support for the following formats:
 * Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, SGI, TGA, BMP, TIFF
-* Movie codecs: common FFmpeg-supported codecs including H.264, MJPEG, MPEG-2
-* Audio codecs: common FFmpeg-supported codecs including AAC, FLAC, MP3, WAV
+* Movies: common FFmpeg-supported containers and codecs including MP4 H.264/AAC,
+  MOV H.264/AAC, MOV ProRes/PCM, MXF DNxHR/PCM, MKV H.264/AAC, and WebM
+  VP9/Opus
+* Audio: common FFmpeg-supported codecs including AAC, FLAC, MP3, Opus, WAV,
+  and AIFF
 * Timelines: OTIO, OTIOZ
 * Experimental: USD
 
 More formats may be available depending on how DJV was built, or by using an
-external FFmpeg command.
+external FFmpeg command. Build-dependent codecs such as HEVC or AV1 may be
+available when they are included in the FFmpeg build.
+
+The synthetic FFmpeg smoke-test matrix is documented in
+[Media compatibility](media-compatibility.html).
 
 ### Opening files
 
