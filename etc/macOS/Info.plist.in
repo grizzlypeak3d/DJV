@@ -25,12 +25,18 @@
         <dict>
             <key>CFBundleTypeExtensions</key>
             <array>
+                <string>aac</string>
                 <string>aiff</string>
+                <string>flac</string>
+                <string>m4a</string>
                 <string>m4v</string>
                 <string>mov</string>
                 <string>mp3</string>
                 <string>mp4</string>
+                <string>mxf</string>
+                <string>opus</string>
                 <string>wav</string>
+                <string>webm</string>
                 <string>y4m</string>
             </array>
         </dict>
