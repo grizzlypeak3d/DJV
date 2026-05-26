@@ -76,7 +76,6 @@ find_package(tlRender REQUIRED)
 # Sub-directories
 
 add_subdirectory(lib/djv)
-add_subdirectory(tests)
 add_subdirectory(bin)
 add_subdirectory(etc/Legal)
 add_subdirectory(etc/SampleData)
