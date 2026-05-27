@@ -195,9 +195,12 @@ namespace djv
             if (auto app = p.app.lock())
             {
                 auto a = app->getFilesModel()->getA();
-                for (size_t i = 0; i < p.layersActions.size(); ++i)
+                if (a)
                 {
-                    p.menus["Layers"]->setChecked(p.layersActions[i], i == a->videoLayer);
+                    for (size_t i = 0; i < p.layersActions.size(); ++i)
+                    {
+                        p.menus["Layers"]->setChecked(p.layersActions[i], i == a->videoLayer);
+                    }
                 }
             }
         }
