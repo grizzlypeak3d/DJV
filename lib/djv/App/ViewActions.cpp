@@ -161,7 +161,7 @@ namespace djv
 
             _actions["AspectRatio_0"] = ftk::Action::create(
                 "Default",
-                [appWeak](bool value)
+                [appWeak]
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -175,7 +175,7 @@ namespace djv
             {
                 _actions[ftk::Format("AspectRatio_{0}").arg(i)] = ftk::Action::create(
                     ftk::Format("{0}").arg(aspectRatioOptions.aspectRatios[i], 2),
-                    [appWeak, i](bool value)
+                    [appWeak, i]
                     {
                         if (auto app = appWeak.lock())
                         {
@@ -248,7 +248,9 @@ namespace djv
                     for (size_t i = 1; i < value.aspectRatios.size(); ++i)
                     {
                         auto& action = _actions[ftk::Format("AspectRatio_{0}").arg(i)];
-                        action->setText(ftk::Format("{0}").arg(value.aspectRatios[i], 2));
+                        action->setText(ftk::Format("Custom {0}: {1}").
+                            arg(i).
+                            arg(value.aspectRatios[i], 2));
                         action->setChecked(i == value.index);
                     }
                 });
