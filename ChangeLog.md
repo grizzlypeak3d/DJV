@@ -1,11 +1,14 @@
 ## 3.4.3
 
 Changes:
+* Add an option for custom aspect ratios
 * Add the aom library for AV1 decoding support (macOS and Linux).
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
 
+* Library updates:
+    - subprocess
 
 ## 3.4.2
 
