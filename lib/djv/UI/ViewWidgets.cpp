@@ -13,6 +13,7 @@
 #include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DoubleEdit.h>
+#include <ftk/UI/FloatEdit.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/GroupBox.h>
 #include <ftk/UI/IntEdit.h>
@@ -21,6 +22,7 @@
 #include <ftk/UI/LineEdit.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
+#include <ftk/Core/Format.h>
 
 #include <sstream>
 
@@ -340,7 +342,99 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-        struct BackgroundWidget::Private
+        struct ViewAspectRatioWidget::Private
+        {
+            std::map<std::string, std::shared_ptr<ftk::FloatEdit> > aspectRatioEdits;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
+        };
+
+        void ViewAspectRatioWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IWidget::_init(context, "djv::app::ViewAspectRatioWidget", parent);
+            FTK_P();
+
+            const models::AspectRatioOptions aspectRatioOptions;
+            for (size_t i = 1; i < aspectRatioOptions.aspectRatios.size(); ++i)
+            {
+                auto edit = ftk::FloatEdit::create(context);
+                edit->setPrecision(2);
+                edit->setRange(0.1F, 4.F);
+                edit->setStep(.1F);
+                edit->setLargeStep(1.F);
+                p.aspectRatioEdits[ftk::Format("AspectRatio_{0}").arg(i)] = edit;
+            }
+
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            for (size_t i = 1; i < aspectRatioOptions.aspectRatios.size(); ++i)
+            {
+                p.layout->addRow(
+                    ftk::Format("Custom {0}:").arg(i),
+                    p.aspectRatioEdits[ftk::Format("AspectRatio_{0}").arg(i)]);
+            }
+
+            p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
+                viewportModel->observeAspectRatioOptions(),
+                [this](const models::AspectRatioOptions& value)
+                {
+                    FTK_P();
+                    for (size_t i = 1; i < value.aspectRatios.size(); ++i)
+                    {
+                        auto& edit = p.aspectRatioEdits[ftk::Format("AspectRatio_{0}").arg(i)];
+                        edit->setValue(value.aspectRatios[i]);
+                    }
+                });
+
+            for (size_t i = 1; i < aspectRatioOptions.aspectRatios.size(); ++i)
+            {
+                p.aspectRatioEdits[ftk::Format("AspectRatio_{0}").arg(i)]->setCallback(
+                    [viewportModel, i](float value)
+                    {
+                        auto options = viewportModel->getAspectRatioOptions();
+                        if (options.index >= 0 && options.index < options.aspectRatios.size())
+                        {
+                            options.aspectRatios[i] = value;
+                        }
+                        viewportModel->setAspectRatioOptions(options);
+                    });
+            }
+        }
+
+        ViewAspectRatioWidget::ViewAspectRatioWidget() :
+            _p(new Private)
+        {}
+
+        ViewAspectRatioWidget::~ViewAspectRatioWidget()
+        {}
+
+        std::shared_ptr<ViewAspectRatioWidget> ViewAspectRatioWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewAspectRatioWidget>(new ViewAspectRatioWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        ftk::Size2I ViewAspectRatioWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
+        void ViewAspectRatioWidget::setGeometry(const ftk::Box2I& value)
+        {
+            IWidget::setGeometry(value);
+            _p->layout->setGeometry(value);
+        }
+
+        struct ViewBackgroundWidget::Private
         {
             std::shared_ptr<ftk::ComboBox> typeComboBox;
             std::shared_ptr<ftk::ColorSwatch> solidSwatch;
@@ -352,12 +446,12 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > backgroundOptionsObserver;
         };
 
-        void BackgroundWidget::_init(
+        void ViewBackgroundWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::BackgroundWidget", parent);
+            ftk::IWidget::_init(context, "djv::app::ViewBackgroundWidget", parent);
             FTK_P();
 
             p.typeComboBox = ftk::ComboBox::create(
@@ -457,35 +551,35 @@ namespace djv
                 });
         }
 
-        BackgroundWidget::BackgroundWidget() :
+        ViewBackgroundWidget::ViewBackgroundWidget() :
             _p(new Private)
         {}
 
-        BackgroundWidget::~BackgroundWidget()
+        ViewBackgroundWidget::~ViewBackgroundWidget()
         {}
 
-        std::shared_ptr<BackgroundWidget> BackgroundWidget::create(
+        std::shared_ptr<ViewBackgroundWidget> ViewBackgroundWidget::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<BackgroundWidget>(new BackgroundWidget);
+            auto out = std::shared_ptr<ViewBackgroundWidget>(new ViewBackgroundWidget);
             out->_init(context, viewportModel, parent);
             return out;
         }
 
-        ftk::Size2I BackgroundWidget::getSizeHint() const
+        ftk::Size2I ViewBackgroundWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
         }
 
-        void BackgroundWidget::setGeometry(const ftk::Box2I& value)
+        void ViewBackgroundWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
         }
 
-        void BackgroundWidget::_optionsUpdate(const tl::BackgroundOptions& value)
+        void ViewBackgroundWidget::_optionsUpdate(const tl::BackgroundOptions& value)
         {
             FTK_P();
             p.typeComboBox->setCurrentIndex(static_cast<int>(value.type));
@@ -504,7 +598,7 @@ namespace djv
             p.layout->setRowVisible(p.gradientSwatch.second, value.type == tl::Background::Gradient);
         }
 
-        struct OutlineWidget::Private
+        struct ViewOutlineWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::shared_ptr<ftk::IntEditSlider> widthSlider;
@@ -514,12 +608,12 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
         };
 
-        void OutlineWidget::_init(
+        void ViewOutlineWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::OutlineWidget", parent);
+            ftk::IWidget::_init(context, "djv::app::ViewOutlineWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -571,35 +665,35 @@ namespace djv
                 });
         }
 
-        OutlineWidget::OutlineWidget() :
+        ViewOutlineWidget::ViewOutlineWidget() :
             _p(new Private)
         {}
 
-        OutlineWidget::~OutlineWidget()
+        ViewOutlineWidget::~ViewOutlineWidget()
         {}
 
-        std::shared_ptr<OutlineWidget> OutlineWidget::create(
+        std::shared_ptr<ViewOutlineWidget> ViewOutlineWidget::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<OutlineWidget>(new OutlineWidget);
+            auto out = std::shared_ptr<ViewOutlineWidget>(new ViewOutlineWidget);
             out->_init(context, viewportModel, parent);
             return out;
         }
 
-        ftk::Size2I OutlineWidget::getSizeHint() const
+        ftk::Size2I ViewOutlineWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
         }
 
-        void OutlineWidget::setGeometry(const ftk::Box2I& value)
+        void ViewOutlineWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
         }
 
-        void OutlineWidget::_optionsUpdate(const tl::ForegroundOptions& value)
+        void ViewOutlineWidget::_optionsUpdate(const tl::ForegroundOptions& value)
         {
             FTK_P();
             p.enabledCheckBox->setChecked(value.outline.enabled);
@@ -607,7 +701,7 @@ namespace djv
             p.colorSwatch->setColor(value.outline.color);
         }
 
-        struct GridWidget::Private
+        struct ViewGridWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::shared_ptr<ftk::IntEditSlider> sizeSlider;
@@ -621,12 +715,12 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObserver;
         };
 
-        void GridWidget::_init(
+        void ViewGridWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::GridWidget", parent);
+            ftk::IWidget::_init(context, "djv::app::ViewGridWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -734,29 +828,29 @@ namespace djv
                 });
         }
 
-        GridWidget::GridWidget() :
+        ViewGridWidget::ViewGridWidget() :
             _p(new Private)
         {}
 
-        GridWidget::~GridWidget()
+        ViewGridWidget::~ViewGridWidget()
         {}
 
-        std::shared_ptr<GridWidget> GridWidget::create(
+        std::shared_ptr<ViewGridWidget> ViewGridWidget::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<GridWidget>(new GridWidget);
+            auto out = std::shared_ptr<ViewGridWidget>(new ViewGridWidget);
             out->_init(context, viewportModel, parent);
             return out;
         }
 
-        ftk::Size2I GridWidget::getSizeHint() const
+        ftk::Size2I ViewGridWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
         }
 
-        void GridWidget::setGeometry(const ftk::Box2I& value)
+        void ViewGridWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);

@@ -189,7 +189,7 @@ namespace djv
             p.frameMenu = FrameMenu::create(context, p.frameActions);
             p.timelineMenu = TimelineMenu::create(context, p.timelineActions);
             p.audioMenu = AudioMenu::create(context, p.audioActions);
-            p.viewMenu = ViewMenu::create(context, p.viewActions);
+            p.viewMenu = ViewMenu::create(context, app, p.viewActions);
             p.windowMenu = WindowMenu::create(
                 context,
                 std::dynamic_pointer_cast<MainWindow>(shared_from_this()),

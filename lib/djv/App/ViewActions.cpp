@@ -8,6 +8,8 @@
 #include <djv/App/Viewport.h>
 #include <djv/Models/ViewportModel.h>
 
+#include <ftk/Core/Format.h>
+
 #include <sstream>
 
 namespace djv
@@ -18,6 +20,7 @@ namespace djv
         {
             std::shared_ptr<ftk::Observer<bool> > frameViewObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<bool> > hudObserver;
         };
@@ -156,6 +159,33 @@ namespace djv
                     }
                 });
 
+            _actions["AspectRatio_0"] = ftk::Action::create(
+                "Default",
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getAspectRatioOptions();
+                        options.index = 0;
+                        app->getViewportModel()->setAspectRatioOptions(options);
+                    }
+                });
+            const models::AspectRatioOptions aspectRatioOptions;
+            for (size_t i = 1; i < aspectRatioOptions.aspectRatios.size(); ++i)
+            {
+                _actions[ftk::Format("AspectRatio_{0}").arg(i)] = ftk::Action::create(
+                    ftk::Format("{0}").arg(aspectRatioOptions.aspectRatios[i], 2),
+                    [appWeak, i](bool value)
+                    {
+                        if (auto app = appWeak.lock())
+                        {
+                            auto options = app->getViewportModel()->getAspectRatioOptions();
+                            options.index = i;
+                            app->getViewportModel()->setAspectRatioOptions(options);
+                        }
+                    });
+            }
+
             _actions["Grid"] = ftk::Action::create(
                 "Grid",
                 [appWeak](bool value)
@@ -208,6 +238,19 @@ namespace djv
 
                     _actions["MirrorHorizontal"]->setChecked(value.mirror.x);
                     _actions["MirrorVertical"]->setChecked(value.mirror.y);
+                });
+
+            p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
+                app->getViewportModel()->observeAspectRatioOptions(),
+                [this](const models::AspectRatioOptions& value)
+                {
+                    _actions["AspectRatio_0"]->setChecked(0 == value.index);
+                    for (size_t i = 1; i < value.aspectRatios.size(); ++i)
+                    {
+                        auto& action = _actions[ftk::Format("AspectRatio_{0}").arg(i)];
+                        action->setText(ftk::Format("{0}").arg(value.aspectRatios[i], 2));
+                        action->setChecked(i == value.index);
+                    }
                 });
 
             p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(

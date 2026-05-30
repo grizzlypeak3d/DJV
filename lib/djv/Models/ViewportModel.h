@@ -20,6 +20,22 @@ namespace djv
 {
     namespace models
     {
+        //! Aspect ratio options.
+        struct AspectRatioOptions
+        {
+            int                  index        = 0;
+            std::array<float, 4> aspectRatios =
+            {
+                0.F,
+                1.77F,
+                1.85F,
+                2.39F
+            };
+
+            bool operator == (const AspectRatioOptions&) const;
+            bool operator != (const AspectRatioOptions&) const;
+        };
+
         //! Viewport model.
         class ViewportModel : public std::enable_shared_from_this<ViewportModel>
         {
@@ -40,62 +56,79 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 
-            //! Get the image options.
+            //! \name Image Options
+            ///@{
+
             const ftk::ImageOptions& getImageOptions() const;
-
-            //! Observe the image options.
             std::shared_ptr<ftk::IObservable<ftk::ImageOptions> > observeImageOptions() const;
-
-            //! Set the image options.
             void setImageOptions(const ftk::ImageOptions&);
 
-            //! Get the display options.
+            ///@}
+
+            //! \name Display Options
+            ///@{
+
             const tl::DisplayOptions& getDisplayOptions() const;
-
-            //! Observe the display options.
             std::shared_ptr<ftk::IObservable<tl::DisplayOptions> > observeDisplayOptions() const;
-
-            //! Set the display options.
             void setDisplayOptions(const tl::DisplayOptions&);
 
-            //! Get the background options.
+            ///@}
+
+            //! \name Aspect Ratio
+            ///@{
+
+            const AspectRatioOptions& getAspectRatioOptions() const;
+            std::shared_ptr<ftk::IObservable<AspectRatioOptions> > observeAspectRatioOptions() const;
+            void setAspectRatioOptions(const AspectRatioOptions&);
+            ///@}
+
+            //! \name Background Options
+            ///@{
+
             const tl::BackgroundOptions& getBackgroundOptions() const;
-
-            //! Observe the background options.
             std::shared_ptr<ftk::IObservable<tl::BackgroundOptions> > observeBackgroundOptions() const;
-
-            //! Set the background options.
             void setBackgroundOptions(const tl::BackgroundOptions&);
 
-            //! Get the foreground options.
+            ///@}
+
+            //! \name Foreground Options
+            ///@{
+
             const tl::ForegroundOptions& getForegroundOptions() const;
-
-            //! Observe the foreground options.
             std::shared_ptr<ftk::IObservable<tl::ForegroundOptions> > observeForegroundOptions() const;
-
-            //! Set the foreground options.
             void setForegroundOptions(const tl::ForegroundOptions&);
 
-            //! Get the color buffer type.
+            ///@}
+
+            //! \name Color Buffer
+            ///@{
+
             ftk::gl::TextureType getColorBuffer() const;
-
-            //! Observe the color buffer type.
             std::shared_ptr<ftk::IObservable<ftk::gl::TextureType> > observeColorBuffer() const;
-
-            //! Set the color buffer type.
             void setColorBuffer(ftk::gl::TextureType);
 
-            //! Get whether the HUD is enabled.
+            ///@}
+
+            //! \name HUD
+            ///@{
+
             bool getHUD() const;
-
-            //! Observe whether the HUD is enabled.
             std::shared_ptr<ftk::IObservable<bool> > observeHUD() const;
-
-            //! Set whether the HUD is enabled.
             void setHUD(bool);
+
+            ///@}
 
         private:
             FTK_PRIVATE();
         };
+
+        //! \name Serialize
+        ///@{
+
+        void to_json(nlohmann::json&, const AspectRatioOptions&);
+
+        void from_json(const nlohmann::json&, AspectRatioOptions&);
+
+        ///@}
     }
 }

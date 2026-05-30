@@ -38,6 +38,7 @@ namespace djv
                 { "LUT", "LUT" },
                 { "Channels", "Image channels" },
                 { "Mirror", "Mirror" },
+                { "AspectRatio", "Aspect ratio" },
                 { "Color", "Color controls" },
                 { "AudioOffset", "Audio offset" },
 #if defined(TLRENDER_BMD)
@@ -106,6 +107,15 @@ namespace djv
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
             _p->labels["Mirror"]->setEnabled(value);
+        }
+
+        void StatusIndicatorPopup::setAspectRatio(bool value)
+        {
+            _p->icons["AspectRatio"]->setEnabled(value);
+            _p->icons["AspectRatio"]->setBackgroundRole(value ?
+                ftk::ColorRole::Checked :
+                ftk::ColorRole::None);
+            _p->labels["AspectRatio"]->setEnabled(value);
         }
 
         void StatusIndicatorPopup::setColor(bool value)

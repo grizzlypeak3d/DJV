@@ -36,6 +36,7 @@ namespace djv
             bool lutOptionsEnabled = false;
             bool channelsOptionsEnabled = false;
             bool mirrorOptionsEnabled = false;
+            bool aspectRatioOptionsEnabled = false;
             bool colorOptionsEnabled = false;
             bool audioOffsetEnabled = false;
             bool outputDeviceEnabled = false;
@@ -53,6 +54,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
 #if defined(TLRENDER_BMD)
             std::shared_ptr<ftk::Observer<bool> > bmdActiveObserver;
@@ -170,6 +172,15 @@ namespace djv
                         value.levels.enabled   ||
                         value.exposure.enabled ||
                         value.softClip.enabled;
+                    _indicatorUpdate();
+                });
+
+            p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
+                app->getViewportModel()->observeAspectRatioOptions(),
+                [this](const models::AspectRatioOptions& value)
+                {
+                    FTK_P();
+                    p.aspectRatioOptionsEnabled = value.index != 0;
                     _indicatorUpdate();
                 });
 
@@ -306,12 +317,13 @@ namespace djv
         {
             FTK_P();
             const bool enabled =
-                p.ocioOptionsEnabled  ||
-                p.lutOptionsEnabled   ||
-                p.channelsOptionsEnabled ||
-                p.mirrorOptionsEnabled ||
-                p.colorOptionsEnabled ||
-                p.audioOffsetEnabled  ||
+                p.ocioOptionsEnabled        ||
+                p.lutOptionsEnabled         ||
+                p.channelsOptionsEnabled    ||
+                p.mirrorOptionsEnabled      ||
+                p.aspectRatioOptionsEnabled ||
+                p.colorOptionsEnabled       ||
+                p.audioOffsetEnabled        ||
                 p.outputDeviceEnabled;
             p.indicatorButton->setBackgroundRole(
                 enabled ?
@@ -323,6 +335,7 @@ namespace djv
                 p.indicatorPopup->setLUT(p.lutOptionsEnabled);
                 p.indicatorPopup->setChannels(p.channelsOptionsEnabled);
                 p.indicatorPopup->setMirror(p.mirrorOptionsEnabled);
+                p.indicatorPopup->setAspectRatio(p.aspectRatioOptionsEnabled);
                 p.indicatorPopup->setColor(p.colorOptionsEnabled);
                 p.indicatorPopup->setAudioOffset(p.audioOffsetEnabled);
                 p.indicatorPopup->setOutputDevice(p.outputDeviceEnabled);

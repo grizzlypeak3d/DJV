@@ -32,6 +32,7 @@ namespace djv
             void setLUT(bool);
             void setChannels(bool);
             void setMirror(bool);
+            void setAspectRatio(bool);
             void setColor(bool);
             void setAudioOffset(bool);
             void setOutputDevice(bool);

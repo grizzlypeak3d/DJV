@@ -18,11 +18,12 @@ namespace djv
     {
         struct ViewTool::Private
         {
-            std::shared_ptr<ui::ViewPosZoomWidget> viewPosZoomWidget;
-            std::shared_ptr<ui::ViewOptionsWidget> viewOptionsWidget;
-            std::shared_ptr<ui::BackgroundWidget> backgroundWidget;
-            std::shared_ptr<ui::OutlineWidget> outlineWidget;
-            std::shared_ptr<ui::GridWidget> gridWidget;
+            std::shared_ptr<ui::ViewPosZoomWidget> posZoomWidget;
+            std::shared_ptr<ui::ViewOptionsWidget> optionsWidget;
+            std::shared_ptr<ui::ViewAspectRatioWidget> aspectRatioWidget;
+            std::shared_ptr<ui::ViewBackgroundWidget> backgroundWidget;
+            std::shared_ptr<ui::ViewOutlineWidget> outlineWidget;
+            std::shared_ptr<ui::ViewGridWidget> gridWidget;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
         };
 
@@ -40,19 +41,22 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.viewPosZoomWidget = ui::ViewPosZoomWidget::create(context, mainWindow->getViewport());
+            p.posZoomWidget = ui::ViewPosZoomWidget::create(context, mainWindow->getViewport());
             auto viewportModel = app->getViewportModel();
-            p.viewOptionsWidget = ui::ViewOptionsWidget::create(context, viewportModel);
-            p.backgroundWidget = ui::BackgroundWidget::create(context, viewportModel);
-            p.outlineWidget = ui::OutlineWidget::create(context, viewportModel);
-            p.gridWidget = ui::GridWidget::create(context, viewportModel);
+            p.optionsWidget = ui::ViewOptionsWidget::create(context, viewportModel);
+            p.aspectRatioWidget = ui::ViewAspectRatioWidget::create(context, viewportModel);
+            p.backgroundWidget = ui::ViewBackgroundWidget::create(context, viewportModel);
+            p.outlineWidget = ui::ViewOutlineWidget::create(context, viewportModel);
+            p.gridWidget = ui::ViewGridWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
             p.bellows["PosZoom"] = ftk::Bellows::create(context, "Position and Zoom", layout);
-            p.bellows["PosZoom"]->setWidget(p.viewPosZoomWidget);
+            p.bellows["PosZoom"]->setWidget(p.posZoomWidget);
             p.bellows["Options"] = ftk::Bellows::create(context, "Options", layout);
-            p.bellows["Options"]->setWidget(p.viewOptionsWidget);
+            p.bellows["Options"]->setWidget(p.optionsWidget);
+            p.bellows["AspectRatio"] = ftk::Bellows::create(context, "Aspect Ratio", layout);
+            p.bellows["AspectRatio"]->setWidget(p.aspectRatioWidget);
             p.bellows["Background"] = ftk::Bellows::create(context, "Background", layout);
             p.bellows["Background"]->setWidget(p.backgroundWidget);
             p.bellows["Outline"] = ftk::Bellows::create(context, "Outline", layout);

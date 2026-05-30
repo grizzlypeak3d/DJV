@@ -36,6 +36,7 @@ namespace djv
             size_t videoFramesSize = 0;
             ftk::ImageOptions imageOptions;
             tl::DisplayOptions displayOptions;
+            models::AspectRatioOptions aspectRatioOptions;
             tl::PlayerCacheInfo cacheInfo;
             models::MouseActionBinding pickBinding =
                 models::MouseActionBinding(ftk::MouseButton::Left);
@@ -63,6 +64,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
@@ -192,6 +194,14 @@ namespace djv
                 [this](const tl::DisplayOptions& value)
                 {
                     _p->displayOptions = value;
+                    _videoUpdate();
+                });
+
+            p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
+                app->getViewportModel()->observeAspectRatioOptions(),
+                [this](const models::AspectRatioOptions& value)
+                {
+                    _p->aspectRatioOptions = value;
                     _videoUpdate();
                 });
 
@@ -422,15 +432,21 @@ namespace djv
         void Viewport::_videoUpdate()
         {
             FTK_P();
-            std::vector<ftk::ImageOptions> imageOptions;
-            std::vector<tl::DisplayOptions> displayOptions;
+            std::vector<ftk::ImageOptions> imageOptionsList;
+            std::vector<tl::DisplayOptions> displayOptionsList;
             for (size_t i = 0; i < p.videoFramesSize; ++i)
             {
-                imageOptions.push_back(p.imageOptions);
-                displayOptions.push_back(p.displayOptions);
+                imageOptionsList.push_back(p.imageOptions);
+                tl::DisplayOptions displayOptions;
+                displayOptions.aspectRatio =
+                    p.aspectRatioOptions.index >= 0 &&
+                    p.aspectRatioOptions.index < p.aspectRatioOptions.aspectRatios.size() ?
+                    p.aspectRatioOptions.aspectRatios[p.aspectRatioOptions.index] :
+                    0.F;
+                displayOptionsList.push_back(displayOptions);
             }
-            setImageOptions(imageOptions);
-            setDisplayOptions(displayOptions);
+            setImageOptions(imageOptionsList);
+            setDisplayOptions(displayOptionsList);
         }
 
         void Viewport::_hudUpdate()

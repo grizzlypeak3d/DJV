@@ -10,12 +10,25 @@ namespace djv
 {
     namespace models
     {
+        bool AspectRatioOptions::operator == (const AspectRatioOptions& other) const
+        {
+            return
+                index == other.index &&
+                aspectRatios == other.aspectRatios;
+        }
+
+        bool AspectRatioOptions::operator != (const AspectRatioOptions& other) const
+        {
+            return !(*this == other);
+        }
+
         struct ViewportModel::Private
         {
             std::weak_ptr<ftk::Context> context;
             std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<ftk::Observable<ftk::ImageOptions> > imageOptions;
             std::shared_ptr<ftk::Observable<tl::DisplayOptions> > displayOptions;
+            std::shared_ptr<ftk::Observable<AspectRatioOptions> > aspectRatioOptions;
             std::shared_ptr<ftk::Observable<tl::BackgroundOptions> > backgroundOptions;
             std::shared_ptr<ftk::Observable<tl::ForegroundOptions> > foregroundOptions;
             std::shared_ptr<ftk::Observable<ftk::gl::TextureType> > colorBuffer;
@@ -38,6 +51,10 @@ namespace djv
             tl::DisplayOptions displayOptions;
             p.settings->getT("/Viewport/Display", displayOptions);
             p.displayOptions = ftk::Observable<tl::DisplayOptions>::create(displayOptions);
+
+            AspectRatioOptions aspectRatioOptions;
+            p.settings->getT("/Viewport/AspectRatio", aspectRatioOptions);
+            p.aspectRatioOptions = ftk::Observable<AspectRatioOptions>::create(aspectRatioOptions);
 
             tl::BackgroundOptions backgroundOptions;
             p.settings->getT("/Viewport/Background", backgroundOptions);
@@ -69,6 +86,7 @@ namespace djv
             FTK_P();
             p.settings->setT("/Viewport/Image", p.imageOptions->get());
             p.settings->setT("/Viewport/Display", p.displayOptions->get());
+            p.settings->setT("/Viewport/AspectRatio", p.aspectRatioOptions->get());
             p.settings->setT("/Viewport/Background", p.backgroundOptions->get());
             p.settings->setT("/Viewport/Foreground", p.foregroundOptions->get());
             p.settings->set("/Viewport/ColorBuffer", ftk::gl::to_string(p.colorBuffer->get()));
@@ -112,6 +130,21 @@ namespace djv
         void ViewportModel::setDisplayOptions(const tl::DisplayOptions& value)
         {
             _p->displayOptions->setIfChanged(value);
+        }
+
+        const AspectRatioOptions& ViewportModel::getAspectRatioOptions() const
+        {
+            return _p->aspectRatioOptions->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<AspectRatioOptions> > ViewportModel::observeAspectRatioOptions() const
+        {
+            return _p->aspectRatioOptions;
+        }
+
+        void ViewportModel::setAspectRatioOptions(const AspectRatioOptions& value)
+        {
+            _p->aspectRatioOptions->setIfChanged(value);
         }
 
         const tl::BackgroundOptions& ViewportModel::getBackgroundOptions() const
@@ -174,6 +207,18 @@ namespace djv
         void ViewportModel::setHUD(bool value)
         {
             _p->hud->setIfChanged(value);
+        }
+
+        void to_json(nlohmann::json& json, const AspectRatioOptions& in)
+        {
+            json["Index"] = in.index;
+            json["AspectRatios"] = in.aspectRatios;
+        }
+
+        void from_json(const nlohmann::json& json, AspectRatioOptions& out)
+        {
+            json.at("Index").get_to(out.index);
+            json.at("AspectRatios").get_to(out.aspectRatios);
         }
     }
 }

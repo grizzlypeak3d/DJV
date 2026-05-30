@@ -92,15 +92,12 @@ namespace djv
                     _layersUpdate(value);
                 });
 
-            if (p.recentFilesModel)
-            {
-                p.recentObserver = ftk::ListObserver<std::filesystem::path>::create(
-                    p.recentFilesModel->observeRecent(),
-                    [this](const std::vector<std::filesystem::path>& value)
-                    {
-                        _recentUpdate(value);
-                    });
-            }
+            p.recentObserver = ftk::ListObserver<std::filesystem::path>::create(
+                p.recentFilesModel->observeRecent(),
+                [this](const std::vector<std::filesystem::path>& value)
+                {
+                    _recentUpdate(value);
+                });
         }
 
         FileMenu::FileMenu() :
@@ -209,27 +206,24 @@ namespace djv
         {
             FTK_P();
             p.menus["Recent"]->clear();
-            if (!value.empty())
+            for (auto i = value.rbegin(); i != value.rend(); ++i)
             {
-                for (auto i = value.rbegin(); i != value.rend(); ++i)
-                {
-                    const auto path = *i;
-                    auto weak = std::weak_ptr<FileMenu>(std::dynamic_pointer_cast<FileMenu>(shared_from_this()));
-                    auto action = ftk::Action::create(
-                        path.u8string(),
-                        [weak, path]
+                const auto path = *i;
+                auto weak = std::weak_ptr<FileMenu>(std::dynamic_pointer_cast<FileMenu>(shared_from_this()));
+                auto action = ftk::Action::create(
+                    path.u8string(),
+                    [weak, path]
+                    {
+                        if (auto widget = weak.lock())
                         {
-                            if (auto widget = weak.lock())
+                            if (auto app = widget->_p->app.lock())
                             {
-                                if (auto app = widget->_p->app.lock())
-                                {
-                                    app->open(ftk::Path(path.u8string()));
-                                }
-                                widget->close();
+                                app->open(ftk::Path(path.u8string()));
                             }
-                        });
-                    p.menus["Recent"]->addAction(action);
-                }
+                            widget->close();
+                        }
+                    });
+                p.menus["Recent"]->addAction(action);
             }
         }
     }
