@@ -437,7 +437,7 @@ namespace djv
             for (size_t i = 0; i < p.videoFramesSize; ++i)
             {
                 imageOptionsList.push_back(p.imageOptions);
-                tl::DisplayOptions displayOptions;
+                tl::DisplayOptions displayOptions = p.displayOptions;
                 displayOptions.aspectRatio =
                     p.aspectRatioOptions.index >= 0 &&
                     p.aspectRatioOptions.index < p.aspectRatioOptions.aspectRatios.size() ?
