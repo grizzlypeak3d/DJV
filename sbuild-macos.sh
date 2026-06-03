@@ -29,4 +29,3 @@ export CMAKE_OSX_DEPLOYMENT_TARGET=10.15
 export CMAKE_OSX_ARCHITECTURES=arm64
 
 sh $SOURCE_DIR/etc/macOS/macos-sbuild.sh $SOURCE_DIR $BUILD_TYPE
-sh $SOURCE_DIR/etc/macOS/macos-build.sh $SOURCE_DIR $BUILD_TYPE

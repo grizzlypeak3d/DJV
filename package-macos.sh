@@ -24,4 +24,4 @@ export CMAKE_OSX_DEPLOYMENT_TARGET=10.15
 export CMAKE_OSX_ARCHITECTURES=arm64
 
 sh $SOURCE_DIR/etc/macOS/macos-sbuild.sh $SOURCE_DIR Release
-sh $SOURCE_DIR/etc/macOS/macos-package.sh $SOURCE_DIR Release
+cmake --build build-Release --config Release --target package

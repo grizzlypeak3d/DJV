@@ -18,4 +18,4 @@ set TLRENDER_USD=OFF
 set FTK_API=GL_4_1
 
 call %SOURCE_DIR%\etc\Windows\windows-sbuild.bat %SOURCE_DIR% Release
-call %SOURCE_DIR%\etc\Windows\windows-package.bat %SOURCE_DIR% Release
+cmake --build build-Release --config Release --target package

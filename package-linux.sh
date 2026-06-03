@@ -22,4 +22,4 @@ export TLRENDER_USD=OFF
 export FTK_API=GL_4_1
 
 sh $SOURCE_DIR/etc/Linux/linux-sbuild.sh $SOURCE_DIR Release
-sh $SOURCE_DIR/etc/Linux/linux-package.sh $SOURCE_DIR Release
+cmake --build build-Release --config Release --target package
