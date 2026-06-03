@@ -43,13 +43,9 @@ jobs:
         python --version
         sh djv/etc/Linux/linux-setup-gha.sh
 
-    - name: Super Build
+    - name: Build
       run: |
         sh djv/etc/Linux/linux-sbuild.sh djv Debug
-
-    - name: Build DJV
-      run: |
-        sh djv/etc/Linux/linux-build.sh djv Debug
 
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
   linux-gles2-build:
@@ -92,13 +88,9 @@ jobs:
         python --version
         sh djv/etc/Linux/linux-setup-gha.sh
 
-    - name: Super Build
+    - name: Build
       run: |
         sh djv/etc/Linux/linux-sbuild.sh djv Debug
-
-    - name: Build DJV
-      run: |
-        sh djv/etc/Linux/linux-build.sh djv Debug
 
   linux-package:
     runs-on: ubuntu-22.04
@@ -141,13 +133,13 @@ jobs:
         python --version
         sh djv/etc/Linux/linux-setup-gha.sh
 
-    - name: Super Build
+    - name: Build
       run: |
         sh djv/etc/Linux/linux-sbuild.sh djv Release
 
-    - name: Build and package DJV
+    - name: Package
       run: |
-        sh djv/etc/Linux/linux-package.sh djv Release
+        cmake --build build-Release --config Release --target package
 
     - uses: actions/upload-artifact@v7
       with:
@@ -197,15 +189,10 @@ jobs:
         cmake --version
         python --version
 
-    - name: Super Build
+    - name: Build
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
         sh djv/etc/macOS/macos-sbuild.sh djv Debug
-
-    - name: Build DJV
-      run: |
-        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
-        sh djv/etc/macOS/macos-build.sh djv Debug
 
   macos-package:
     runs-on: macos-latest
@@ -249,18 +236,14 @@ jobs:
         cmake --version
         python --version
 
-    - name: Super Build
+    - name: Build
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
         sh djv/etc/macOS/macos-sbuild.sh djv Release
 
-    # \bug Sometimes the CI runs out of disk space when building the macOS
-    # package, so free some up by removing the super build directory.
     - name: Package
       run: |
-        rm -rf sbuild-Release
-        export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
-        sh djv/etc/macOS/macos-package.sh djv Release
+        cmake --build build-Release --config Release --target package
 
     - uses: actions/upload-artifact@v7
       with:
@@ -310,15 +293,10 @@ jobs:
         cmake --version
         python --version
         
-    - name: Super Build
+    - name: Build
       shell: cmd
       run: |
         djv\etc\Windows\windows-sbuild.bat djv Debug
-
-    - name: Build DJV
-      shell: cmd
-      run: |
-        djv\etc\Windows\windows-build.bat djv Debug
 
   windows-package:
     runs-on: windows-latest
@@ -363,15 +341,15 @@ jobs:
         python --version
         winget install NSIS.NSIS --accept-package-agreements --accept-source-agreements --disable-interactivity
 
-    - name: Super Build
+    - name: Build
       shell: cmd
       run: |
         djv\etc\Windows\windows-sbuild.bat djv Release
 
-    - name: Build and package DJV
+    - name: Package
       shell: cmd
       run: |
-        djv\etc\Windows\windows-package.bat djv Release
+        cmake --build build-Release --config Release --target package
 
     - uses: actions/upload-artifact@v7
       with:
