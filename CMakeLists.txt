@@ -68,12 +68,24 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 
 #-------------------------------------------------------------------------------
-# Dependencies
+# Git submodules
 
-find_package(tlRender REQUIRED)
+find_package(Git REQUIRED)
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/tlRender/CMakeLists.txt")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        RESULT_VARIABLE GIT_SUBMODULE_RESULT)
+    if(NOT GIT_SUBMODULE_RESULT EQUAL 0)
+        message(FATAL_ERROR "git submodule update failed with ${GIT_SUBMODULE_RESULT}")
+    endif()
+endif()
 
 #-------------------------------------------------------------------------------
 # Sub-directories
+
+add_subdirectory(deps/tlRender)
+add_library(tl::tlCore ALIAS tlCore)
 
 add_subdirectory(lib/djv)
 add_subdirectory(bin)

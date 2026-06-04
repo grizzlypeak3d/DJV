@@ -2,7 +2,7 @@ set SOURCE_DIR=%1
 set BUILD_TYPE=%2
 
 cmake ^
-    -S %SOURCE_DIR%\etc\SuperBuild ^
+    -S %SOURCE_DIR%\deps\tlRender\etc\SuperBuild ^
     -B sbuild-%BUILD_TYPE% ^
     -DTLRENDER_NET=%TLRENDER_NET% ^
     -DTLRENDER_OCIO=%TLRENDER_OCIO% ^
