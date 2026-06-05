@@ -29,7 +29,7 @@ set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
 #-------------------------------------------------------------------------------
 # Internal configuration
 
-list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
@@ -85,7 +85,12 @@ endif()
 # Sub-directories
 
 add_subdirectory(deps/tlRender)
-add_library(tl::tlCore ALIAS tlCore)
+add_library(tlRender::tlCore ALIAS tlCore)
+add_library(tlRender::tlGL ALIAS tlGL)
+add_library(tlRender::tlIO ALIAS tlIO)
+add_library(tlRender::tlDevice ALIAS tlDevice)
+add_library(tlRender::tlTimeline ALIAS tlTimeline)
+add_library(tlRender::tlUI ALIAS tlUI)
 
 add_subdirectory(lib/djv)
 add_subdirectory(bin)
