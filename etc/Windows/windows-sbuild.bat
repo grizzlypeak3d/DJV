@@ -1,6 +1,8 @@
 set SOURCE_DIR=%1
 set BUILD_TYPE=%2
 
+git -C %SOURCE_DIR% submodule update --init --recursive
+
 cmake ^
     -S %SOURCE_DIR%\deps\tlRender\etc\SuperBuild ^
     -B sbuild-%BUILD_TYPE% ^
