@@ -20,4 +20,4 @@ set TLRENDER_USD=OFF
 set FTK_API=GL_4_1
 set BUILD_SHARED_LIBS=OFF
 
-call %SOURCE_DIR%\etc\Windows\windows-sbuild.bat %SOURCE_DIR% %BUILD_TYPE%
+call %SOURCE_DIR%\etc\Windows\sbuild.bat %SOURCE_DIR% %BUILD_TYPE%

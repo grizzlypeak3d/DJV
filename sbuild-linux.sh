@@ -26,4 +26,4 @@ export TLRENDER_USD=OFF
 export FTK_API=GL_4_1
 export BUILD_SHARED_LIBS=OFF
 
-sh $SOURCE_DIR/etc/Linux/linux-sbuild.sh $SOURCE_DIR $BUILD_TYPE
+sh $SOURCE_DIR/etc/Linux/sbuild.sh $SOURCE_DIR $BUILD_TYPE

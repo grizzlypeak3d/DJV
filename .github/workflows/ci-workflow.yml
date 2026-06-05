@@ -41,11 +41,11 @@ jobs:
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
-        sh djv/etc/Linux/linux-setup-gha.sh
+        sh djv/etc/Linux/setup-gha.sh
 
     - name: Build
       run: |
-        sh djv/etc/Linux/linux-sbuild.sh djv Debug
+        sh djv/etc/Linux/sbuild.sh djv Debug
 
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
   linux-gles2-build:
@@ -86,11 +86,11 @@ jobs:
         cmake --version
         python --version
         python --version
-        sh djv/etc/Linux/linux-setup-gha.sh
+        sh djv/etc/Linux/setup-gha.sh
 
     - name: Build
       run: |
-        sh djv/etc/Linux/linux-sbuild.sh djv Debug
+        sh djv/etc/Linux/sbuild.sh djv Debug
 
   linux-package:
     runs-on: ubuntu-22.04
@@ -131,11 +131,11 @@ jobs:
         cmake --version
         python --version
         python --version
-        sh djv/etc/Linux/linux-setup-gha.sh
+        sh djv/etc/Linux/setup-gha.sh
 
     - name: Build
       run: |
-        sh djv/etc/Linux/linux-sbuild.sh djv Release
+        sh djv/etc/Linux/sbuild.sh djv Release
 
     - name: Package
       run: |
@@ -192,7 +192,7 @@ jobs:
     - name: Build
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
-        sh djv/etc/macOS/macos-sbuild.sh djv Debug
+        sh djv/etc/macOS/sbuild.sh djv Debug
 
   macos-package:
     runs-on: macos-latest
@@ -239,7 +239,7 @@ jobs:
     - name: Build
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
-        sh djv/etc/macOS/macos-sbuild.sh djv Release
+        sh djv/etc/macOS/sbuild.sh djv Release
 
     - name: Package
       run: |
@@ -296,7 +296,7 @@ jobs:
     - name: Build
       shell: cmd
       run: |
-        djv\etc\Windows\windows-sbuild.bat djv Debug
+        djv\etc\Windows\sbuild.bat djv Debug
 
   windows-package:
     runs-on: windows-latest
@@ -344,7 +344,7 @@ jobs:
     - name: Build
       shell: cmd
       run: |
-        djv\etc\Windows\windows-sbuild.bat djv Release
+        djv\etc\Windows\sbuild.bat djv Release
 
     - name: Package
       shell: cmd

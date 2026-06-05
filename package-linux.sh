@@ -21,5 +21,5 @@ export TLRENDER_OIIO=ON
 export TLRENDER_USD=OFF
 export FTK_API=GL_4_1
 
-sh $SOURCE_DIR/etc/Linux/linux-sbuild.sh $SOURCE_DIR Release
+sh $SOURCE_DIR/etc/Linux/sbuild.sh $SOURCE_DIR Release
 cmake --build build-Release --config Release --target package
