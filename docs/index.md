@@ -39,9 +39,12 @@ Features include:
 
 [Downloads](https://github.com/grizzlypeak3d/DJV/releases/)
 
-**Note:** Download packages include only a minimal set of video and audio
-codecs. To support additional codecs, point DJV at an external FFmpeg
-command (see below) or build from source.
+**Note:** DJV uses FFmpeg for movie and audio playback. The default source and
+package build enables the FFmpeg plugin with the standard open source codec
+set, including common MP4 files with H.264 video and AAC audio. Builds that
+use a minimal FFmpeg configuration may support fewer codecs; those builds can
+enable the FFmpeg command plugin and point DJV at an external FFmpeg command
+(see below).
 
 ### Linux
 
@@ -87,13 +90,20 @@ shown from the **Window** menu or **Window** tool bar.
 
 DJV ships with support for the following formats:
 * Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, SGI, TGA, BMP, TIFF
-* Movie codecs: MJPEG, MPEG-2
-* Audio codecs: FLAC, MP3, WAV
+* Movies: common FFmpeg-supported containers and codecs including MP4 H.264/AAC,
+  MOV H.264/AAC, MOV ProRes/PCM, MXF DNxHR/PCM, MKV H.264/AAC, and WebM
+  VP9/Opus
+* Audio: common FFmpeg-supported codecs including AAC, FLAC, MP3, Opus, WAV,
+  and AIFF
 * Timelines: OTIO, OTIOZ
 * Experimental: USD
 
 More formats may be available depending on how DJV was built, or by using an
-external FFmpeg command.
+external FFmpeg command. Build-dependent codecs such as HEVC or AV1 may be
+available when they are included in the FFmpeg build.
+
+The synthetic FFmpeg smoke-test matrix is documented in
+[Media compatibility](media-compatibility.html).
 
 ### Opening files
 
@@ -119,9 +129,9 @@ or the **Files** tool.
 
 ### FFmpeg command
 
-To support additional formats and codecs, you can configure DJV to use an
-external FFmpeg command. FFmpeg runs as a sub-process and streams decoded
-video and audio to DJV for display.
+If DJV is built with the FFmpeg command plugin, you can configure DJV to use
+an external FFmpeg command for additional formats and codecs. FFmpeg runs as a
+sub-process and streams decoded video and audio to DJV for display.
 
 The paths to the **ffmpeg** and **ffprobe** commands are set in the
 **Settings** tool.
