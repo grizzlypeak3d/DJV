@@ -1178,10 +1178,11 @@ namespace djv
                         options.audioRequestMax = advanced.audioRequestMax;
                         options.ioOptions = p.settingsModel->getIOOptions();
                         options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
-                        auto otioTimeline = files[i]->audioPath.isEmpty() ?
-                            tl::create(_context, files[i]->path, options) :
-                            tl::create(_context, files[i]->path, files[i]->audioPath, options);
-                        timelines[i] = tl::Timeline::create(_context, otioTimeline, options);
+                        timelines[i] = tl::Timeline::create(
+                            _context,
+                            files[i]->path,
+                            files[i]->audioPath,
+                            options);
                         for (const auto& video : timelines[i]->getIOInfo().video)
                         {
                             files[i]->videoLayers.push_back(video.name);
