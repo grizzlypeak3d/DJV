@@ -26,7 +26,8 @@ FTK_MAIN()
         auto context = ftk::Context::create();
         tl::ui::init(context);
         tl::device::init(context);
-        auto app = djv::app::App::create(context, ftk::convert(argc, argv));
+        auto args = ftk::convert(argc, argv);
+        auto app = djv::app::App::create(context, args);
         if (app->hasCmdLineHelp())
             return 0;
         if (app->hasPrintVersion())
