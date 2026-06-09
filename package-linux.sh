@@ -19,6 +19,7 @@ export TLRENDER_FFMPEG_CMD=ON
 export TLRENDER_NASM=ON
 export TLRENDER_OIIO=ON
 export TLRENDER_USD=OFF
+export TLRENDER_PYTHON=OFF
 export FTK_API=GL_4_1
 
 sh $SOURCE_DIR/etc/Linux/sbuild.sh $SOURCE_DIR Release
