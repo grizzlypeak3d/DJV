@@ -213,15 +213,12 @@ namespace djv
             FTK_P();
             switch (event.key)
             {
-            case ftk::Key::Unknown: break;
-            case ftk::Key::Escape:
-                event.accept = true;
-                releaseKeyFocus();
+            case ftk::Key::Unknown:
+            case ftk::Key::Return:
+            case ftk::Key::CapsLock:
+            case ftk::Key::ScrollLock:
+            case ftk::Key::NumLock:
                 break;
-            case ftk::Key::Return: break;
-            case ftk::Key::CapsLock: break;
-            case ftk::Key::ScrollLock: break;
-            case ftk::Key::NumLock: break;
             default:
                 if (hasKeyFocus())
                 {
