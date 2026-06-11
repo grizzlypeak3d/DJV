@@ -4,6 +4,7 @@
 #pragma once
 
 #include <djv/App/ViewTool.h>
+#include <djv/Models/ViewportModel.h>
 
 #include <tlRender/UI/Viewport.h>
 #include <tlRender/Timeline/BackgroundOptions.h>
@@ -12,11 +13,6 @@
 
 namespace djv
 {
-    namespace models
-    {
-        class ViewportModel;
-    }
-
     namespace ui
     {
         //! View position and zoom widget.
@@ -75,6 +71,38 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! Aspect ratio widget.
+        class AspectRatioWidget : public ftk::IWidget
+        {
+            FTK_NON_COPYABLE(AspectRatioWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            AspectRatioWidget();
+
+        public:
+            virtual ~AspectRatioWidget();
+
+            static std::shared_ptr<AspectRatioWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            const tl::AspectRatioOptions& getValue() const;
+            void setValue(const tl::AspectRatioOptions&);
+            void setCallback(const std::function<void(const tl::AspectRatioOptions&)>&);
+
+            ftk::Size2I getSizeHint() const override;
+            void setGeometry(const ftk::Box2I&) override;
+
+        private:
+            void _widgetUpdate();
+
+            FTK_PRIVATE();
+        };
+
         //! View aspect ratio widget.
         class ViewAspectRatioWidget : public ftk::IWidget
         {
@@ -100,6 +128,8 @@ namespace djv
             void setGeometry(const ftk::Box2I&) override;
 
         private:
+            void _widgetUpdate(const models::AspectRatioOptions&);
+
             FTK_PRIVATE();
         };
 

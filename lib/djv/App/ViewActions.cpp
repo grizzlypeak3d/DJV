@@ -171,10 +171,10 @@ namespace djv
                     }
                 });
             const models::AspectRatioOptions aspectRatioOptions;
-            for (size_t i = 1; i < aspectRatioOptions.aspectRatios.size(); ++i)
+            for (size_t i = 1; i < aspectRatioOptions.options.size(); ++i)
             {
                 _actions[ftk::Format("AspectRatio_{0}").arg(i)] = ftk::Action::create(
-                    ftk::Format("{0}").arg(aspectRatioOptions.aspectRatios[i], 2),
+                    "",
                     [appWeak, i]
                     {
                         if (auto app = appWeak.lock())
@@ -245,12 +245,10 @@ namespace djv
                 [this](const models::AspectRatioOptions& value)
                 {
                     _actions["AspectRatio_0"]->setChecked(0 == value.index);
-                    for (size_t i = 1; i < value.aspectRatios.size(); ++i)
+                    for (size_t i = 1; i < value.options.size(); ++i)
                     {
                         auto& action = _actions[ftk::Format("AspectRatio_{0}").arg(i)];
-                        action->setText(ftk::Format("Custom {0}: {1}").
-                            arg(i).
-                            arg(value.aspectRatios[i], 2));
+                        action->setText(getLabel(value.options[i]));
                         action->setChecked(i == value.index);
                     }
                 });

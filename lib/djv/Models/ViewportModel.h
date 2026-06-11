@@ -23,13 +23,20 @@ namespace djv
         //! Aspect ratio options.
         struct AspectRatioOptions
         {
-            int                  index        = 0;
-            std::array<float, 4> aspectRatios =
+            int index = 0;
+
+            std::vector<tl::AspectRatioOptions> options =
             {
-                0.F,
-                1.77F,
-                1.85F,
-                2.39F
+                tl::AspectRatioOptions(),
+                tl::AspectRatioOptions(
+                    tl::AspectRatio(16.F, 9.F),
+                    tl::AspectRatioType::Display),
+                tl::AspectRatioOptions(
+                    tl::AspectRatio(1.85F),
+                    tl::AspectRatioType::Display),
+                tl::AspectRatioOptions(
+                    tl::AspectRatio(2.39F),
+                    tl::AspectRatioType::Display)
             };
 
             bool operator == (const AspectRatioOptions&) const;

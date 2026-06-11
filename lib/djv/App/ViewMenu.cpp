@@ -42,7 +42,7 @@ namespace djv
             addDivider();
             p.aspectRatioMenu = addSubMenu("Aspect Ratio");
             const models::AspectRatioOptions aspectRatioOptions;
-            for (size_t i = 0; i < aspectRatioOptions.aspectRatios.size(); ++i)
+            for (size_t i = 0; i < aspectRatioOptions.options.size(); ++i)
             {
                 p.aspectRatioMenu->addAction(actions[ftk::Format("AspectRatio_{0}").arg(i)]);
             }

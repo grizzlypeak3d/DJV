@@ -14,7 +14,7 @@ namespace djv
         {
             return
                 index == other.index &&
-                aspectRatios == other.aspectRatios;
+                options == other.options;
         }
 
         bool AspectRatioOptions::operator != (const AspectRatioOptions& other) const
@@ -53,7 +53,7 @@ namespace djv
             p.displayOptions = ftk::Observable<tl::DisplayOptions>::create(displayOptions);
 
             AspectRatioOptions aspectRatioOptions;
-            p.settings->getT("/Viewport/AspectRatio", aspectRatioOptions);
+            p.settings->getT("/Viewport/AspectRatio.1", aspectRatioOptions);
             p.aspectRatioOptions = ftk::Observable<AspectRatioOptions>::create(aspectRatioOptions);
 
             tl::BackgroundOptions backgroundOptions;
@@ -86,7 +86,7 @@ namespace djv
             FTK_P();
             p.settings->setT("/Viewport/Image", p.imageOptions->get());
             p.settings->setT("/Viewport/Display", p.displayOptions->get());
-            p.settings->setT("/Viewport/AspectRatio", p.aspectRatioOptions->get());
+            p.settings->setT("/Viewport/AspectRatio.1", p.aspectRatioOptions->get());
             p.settings->setT("/Viewport/Background", p.backgroundOptions->get());
             p.settings->setT("/Viewport/Foreground", p.foregroundOptions->get());
             p.settings->set("/Viewport/ColorBuffer", ftk::gl::to_string(p.colorBuffer->get()));
@@ -212,13 +212,13 @@ namespace djv
         void to_json(nlohmann::json& json, const AspectRatioOptions& in)
         {
             json["Index"] = in.index;
-            json["AspectRatios"] = in.aspectRatios;
+            json["Options"] = in.options;
         }
 
         void from_json(const nlohmann::json& json, AspectRatioOptions& out)
         {
             json.at("Index").get_to(out.index);
-            json.at("AspectRatios").get_to(out.aspectRatios);
+            json.at("Options").get_to(out.options);
         }
     }
 }

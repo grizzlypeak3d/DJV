@@ -9,17 +9,21 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/Bellows.h>
+#include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DoubleEdit.h>
 #include <ftk/UI/FloatEdit.h>
 #include <ftk/UI/FormLayout.h>
+#include <ftk/UI/GridLayout.h>
 #include <ftk/UI/GroupBox.h>
 #include <ftk/UI/IntEdit.h>
 #include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/LineEdit.h>
+#include <ftk/UI/LineEditModel.h>
+#include <ftk/UI/RadioButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/Core/Format.h>
@@ -342,12 +346,131 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
+        struct AspectRatioWidget::Private
+        {
+            tl::AspectRatioOptions value;
+            std::shared_ptr<ftk::LineEdit> edit;
+            std::shared_ptr<ftk::ComboBox> typeComboBox;
+            std::shared_ptr<ftk::HorizontalLayout> layout;
+            std::function<void(const tl::AspectRatioOptions&)> callback;
+        };
+
+        void AspectRatioWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IWidget::_init(context, "djv::app::AspectRatioWidget", parent);
+            FTK_P();
+
+            p.edit = ftk::LineEdit::create(context);
+            p.edit->setFormat("0.00:0");
+            p.edit->getModel()->setRegex("[0-9\\.\\:]*");
+
+            p.typeComboBox = ftk::ComboBox::create(context, tl::getAspectRatioTypeLabels());
+
+            p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.edit->setParent(p.layout);
+            p.typeComboBox->setParent(p.layout);
+
+            _widgetUpdate();
+
+            p.edit->setCallback(
+                [this](const std::string value)
+                {
+                    FTK_P();
+                    const auto split = ftk::split(value, ':');
+                    if (1 == split.size())
+                    {
+                        p.value.value.num = std::atof(split[0].c_str());
+                        p.value.value.den = 1.F;
+                    }
+                    else if (2 == split.size())
+                    {
+                        p.value.value.num = std::atof(split[0].c_str());
+                        p.value.value.den = std::atof(split[1].c_str());
+                    }
+                    _widgetUpdate();
+                    if (p.callback)
+                    {
+                        p.callback(p.value);
+                    }
+                });
+
+            p.typeComboBox->setIndexCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    p.value.type = static_cast<tl::AspectRatioType>(value);
+                    if (p.callback)
+                    {
+                        p.callback(p.value);
+                    }
+                });
+        }
+
+        AspectRatioWidget::AspectRatioWidget() :
+            _p(new Private)
+        {}
+
+        AspectRatioWidget::~AspectRatioWidget()
+        {}
+
+        std::shared_ptr<AspectRatioWidget> AspectRatioWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<AspectRatioWidget>(new AspectRatioWidget);
+            out->_init(context, parent);
+            return out;
+        }
+
+        const tl::AspectRatioOptions& AspectRatioWidget::getValue() const
+        {
+            return _p->value;
+        }
+
+        void AspectRatioWidget::setValue(const tl::AspectRatioOptions& value)
+        {
+            FTK_P();
+            if (value == p.value)
+                return;
+            p.value = value;
+            _widgetUpdate();
+        }
+
+        void AspectRatioWidget::setCallback(const std::function<void(const tl::AspectRatioOptions&)>& value)
+        {
+            _p->callback = value;
+        }
+
+        ftk::Size2I AspectRatioWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
+        void AspectRatioWidget::setGeometry(const ftk::Box2I& value)
+        {
+            IWidget::setGeometry(value);
+            _p->layout->setGeometry(value);
+        }
+
+        void AspectRatioWidget::_widgetUpdate()
+        {
+            FTK_P();
+            p.edit->setText(tl::getLabel(p.value.value));
+            p.typeComboBox->setCurrentIndex(static_cast<int>(p.value.type));
+        }
+
         struct ViewAspectRatioWidget::Private
         {
-            std::map<std::string, std::shared_ptr<ftk::FloatEdit> > aspectRatioEdits;
-            std::shared_ptr<ftk::FormLayout> layout;
+            std::shared_ptr<models::ViewportModel> viewportModel;
+            std::shared_ptr<ftk::ButtonGroup> buttonGroup;
+            std::vector<std::shared_ptr<ftk::RadioButton> > buttons;
+            std::vector<std::shared_ptr<AspectRatioWidget> > widgets;
+            std::shared_ptr<ftk::GridLayout> layout;
 
-            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
+            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > optionsObserver;
         };
 
         void ViewAspectRatioWidget::_init(
@@ -358,52 +481,32 @@ namespace djv
             ftk::IWidget::_init(context, "djv::app::ViewAspectRatioWidget", parent);
             FTK_P();
 
-            const models::AspectRatioOptions aspectRatioOptions;
-            for (size_t i = 1; i < aspectRatioOptions.aspectRatios.size(); ++i)
-            {
-                auto edit = ftk::FloatEdit::create(context);
-                edit->setPrecision(2);
-                edit->setRange(0.1F, 4.F);
-                edit->setStep(.1F);
-                edit->setLargeStep(1.F);
-                p.aspectRatioEdits[ftk::Format("AspectRatio_{0}").arg(i)] = edit;
-            }
+            p.viewportModel = viewportModel;
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.buttonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Radio);
+
+            p.layout = ftk::GridLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            for (size_t i = 1; i < aspectRatioOptions.aspectRatios.size(); ++i)
-            {
-                p.layout->addRow(
-                    ftk::Format("Custom {0}:").arg(i),
-                    p.aspectRatioEdits[ftk::Format("AspectRatio_{0}").arg(i)]);
-            }
 
-            p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
+            p.optionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
                 viewportModel->observeAspectRatioOptions(),
                 [this](const models::AspectRatioOptions& value)
                 {
+                    _widgetUpdate(value);
+                });
+            
+            p.buttonGroup->setCheckedCallback(
+                [this](int index, bool value)
+                {
                     FTK_P();
-                    for (size_t i = 1; i < value.aspectRatios.size(); ++i)
+                    if (value)
                     {
-                        auto& edit = p.aspectRatioEdits[ftk::Format("AspectRatio_{0}").arg(i)];
-                        edit->setValue(value.aspectRatios[i]);
+                        auto options = p.viewportModel->getAspectRatioOptions();
+                        options.index = index;
+                        p.viewportModel->setAspectRatioOptions(options);
                     }
                 });
-
-            for (size_t i = 1; i < aspectRatioOptions.aspectRatios.size(); ++i)
-            {
-                p.aspectRatioEdits[ftk::Format("AspectRatio_{0}").arg(i)]->setCallback(
-                    [viewportModel, i](float value)
-                    {
-                        auto options = viewportModel->getAspectRatioOptions();
-                        if (options.index >= 0 && options.index < options.aspectRatios.size())
-                        {
-                            options.aspectRatios[i] = value;
-                        }
-                        viewportModel->setAspectRatioOptions(options);
-                    });
-            }
         }
 
         ViewAspectRatioWidget::ViewAspectRatioWidget() :
@@ -432,6 +535,56 @@ namespace djv
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
+        }
+
+        void ViewAspectRatioWidget::_widgetUpdate(const models::AspectRatioOptions& value)
+        {
+            FTK_P();
+            if (value.options.size() != p.buttons.size())
+            {
+                p.buttonGroup->clearButtons();
+                p.buttons.clear();
+                p.widgets.clear();
+                p.layout->clear();
+                auto context = getContext();
+                for (int i = 0; i < value.options.size(); ++i)
+                {
+                    auto button = ftk::RadioButton::create(context, p.layout);
+                    button->setText(0 == i ?
+                        "Default" :
+                        ftk::Format("Custom {0}").arg(i).str());
+                    p.layout->setGridPos(button, i, 0);
+                    p.buttonGroup->addButton(button);
+                    p.buttons.push_back(button);
+
+                    if (0 == i)
+                    {
+                        p.widgets.push_back(nullptr);
+                    }
+                    else
+                    {
+                        auto widget = AspectRatioWidget::create(context, p.layout);
+                        p.layout->setGridPos(widget, i, 1);
+                        p.widgets.push_back(widget);
+                        widget->setCallback(
+                            [this, i](const tl::AspectRatioOptions& value)
+                            {
+                                FTK_P();
+                                auto options = p.viewportModel->getAspectRatioOptions();
+                                if (options.index >= 0 && options.index < options.options.size())
+                                {
+                                    options.options[i] = value;
+                                }
+                                p.viewportModel->setAspectRatioOptions(options);
+                            });
+                    }
+                }
+            }
+            p.buttonGroup->setChecked(value.index);
+            for (int i = 1; i < value.options.size(); ++i)
+            {
+                p.widgets[i]->setValue(value.options[i]);
+            }
         }
 
         struct ViewBackgroundWidget::Private

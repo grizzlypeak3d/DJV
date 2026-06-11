@@ -440,9 +440,9 @@ namespace djv
                 tl::DisplayOptions displayOptions = p.displayOptions;
                 displayOptions.aspectRatio =
                     p.aspectRatioOptions.index >= 0 &&
-                    p.aspectRatioOptions.index < p.aspectRatioOptions.aspectRatios.size() ?
-                    p.aspectRatioOptions.aspectRatios[p.aspectRatioOptions.index] :
-                    0.F;
+                    p.aspectRatioOptions.index < p.aspectRatioOptions.options.size() ?
+                    p.aspectRatioOptions.options[p.aspectRatioOptions.index] :
+                    tl::AspectRatioOptions();
                 displayOptionsList.push_back(displayOptions);
             }
             setImageOptions(imageOptionsList);
