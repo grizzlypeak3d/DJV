@@ -1,6 +1,7 @@
 ## 3.4.3
 
 Changes:
+* Allow the "Escape" key to be used for keyboard shortcus
 * Add an option for custom aspect ratios
 * Add the aom library for AV1 decoding support (macOS and Linux).
 
