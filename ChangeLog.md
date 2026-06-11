@@ -9,6 +9,7 @@ Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
 
 * Library updates:
+    - OpenImageIO v3.1.14.0
     - subprocess
 
 ## 3.4.2
