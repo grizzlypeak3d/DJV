@@ -1,0 +1,8 @@
+# Optional — only needed if you want to preview the site locally before pushing.
+# Lives at: docs/Gemfile
+# Then run:  bundle install  &&  bundle exec jekyll serve
+# This matches the GitHub Pages build (it bundles jekyll-remote-theme for you).
+
+source "https://rubygems.org"
+
+gem "github-pages", group: :jekyll_plugins
