@@ -26,3 +26,33 @@ The OpenColorIO configuration can be set to a built-in configuration, the
 
 A LUT can be applied either before or after the OpenColorIO pass — set the LUT
 **Order** option to **PreColorConfig** or **PostColorConfig** as needed.
+
+## LUTs
+
+Supported LUT formats:
+* flame: .3dl
+* lustre: .3dl
+* ColorCorrection: .cc
+* ColorCorrectionCollection: .ccc
+* ColorDecisionList: .cdl
+* Academy/ASC Common LUT Format: .clf
+* Color Transform Format: .ctf
+* cinespace: .csp
+* Discreet 1D LUT: .lut
+* houdini: .lut
+* International Color Consortium profile: .icc
+* Image Color Matching profile: .icm
+* ICC profile: .pf
+* iridas_cube: .cube
+* iridas_itx: .itx
+* iridas_look: .look
+* pandora_mga: .mga
+* pandora_m3d: .m3d
+* resolve_cube: .cube
+* spi1d: .spi1d
+* spi3d: .spi3d
+* spimtx: .spimtx
+* truelight: .cub
+* nukevf: .vf
+
+Different formats may be available depending on how DJV was built.

@@ -14,8 +14,8 @@ DJV ships with support for the following formats:
 - Timelines: OTIO, OTIOZ
 - Experimental: USD
 
-More formats may be available depending on how DJV was built, or by using an
-external FFmpeg command.
+Different formats may be available depending on how DJV was built, or by using
+an external FFmpeg command.
 
 ## Opening files
 
