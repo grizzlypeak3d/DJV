@@ -62,7 +62,7 @@ namespace djv
                 backgroundOptions);
 
             tl::ForegroundOptions foregroundOptions;
-            p.settings->getT("/Viewport/Foreground", foregroundOptions);
+            p.settings->getT("/Viewport/Foreground.1", foregroundOptions);
             p.foregroundOptions = ftk::Observable<tl::ForegroundOptions>::create(
                 foregroundOptions);
 
@@ -88,7 +88,7 @@ namespace djv
             p.settings->setT("/Viewport/Display", p.displayOptions->get());
             p.settings->setT("/Viewport/AspectRatio.1", p.aspectRatioOptions->get());
             p.settings->setT("/Viewport/Background", p.backgroundOptions->get());
-            p.settings->setT("/Viewport/Foreground", p.foregroundOptions->get());
+            p.settings->setT("/Viewport/Foreground.1", p.foregroundOptions->get());
             p.settings->set("/Viewport/ColorBuffer", ftk::gl::to_string(p.colorBuffer->get()));
             p.settings->set("/Viewport/HUD/Enabled", p.hud->get());
         }

@@ -857,7 +857,9 @@ namespace djv
         struct ViewGridWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
-            std::shared_ptr<ftk::IntEditSlider> sizeSlider;
+            std::shared_ptr<ftk::ComboBox> cellModeComboBox;
+            std::shared_ptr<ftk::IntEditSlider> cellWidthSlider;
+            std::shared_ptr<ftk::IntEditSlider> cellHeightSlider;
             std::shared_ptr<ftk::IntEditSlider> lineWidthSlider;
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::ComboBox> labelsComboBox;
@@ -879,8 +881,13 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
 
-            p.sizeSlider = ftk::IntEditSlider::create(context);
-            p.sizeSlider->setRange(1, 1000);
+            p.cellModeComboBox = ftk::ComboBox::create(context, tl::getGridCellModeLabels());
+
+            p.cellWidthSlider = ftk::IntEditSlider::create(context);
+            p.cellWidthSlider->setRange(1, 1000);
+
+            p.cellHeightSlider = ftk::IntEditSlider::create(context);
+            p.cellHeightSlider->setRange(1, 1000);
 
             p.lineWidthSlider = ftk::IntEditSlider::create(context);
             p.lineWidthSlider->setRange(1, 10);
@@ -903,7 +910,9 @@ namespace djv
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enabled:", p.enabledCheckBox);
-            p.layout->addRow("Size:", p.sizeSlider);
+            p.layout->addRow("Cell mode:", p.cellModeComboBox);
+            p.layout->addRow("Cell width:", p.cellWidthSlider);
+            p.layout->addRow("Cell height:", p.cellHeightSlider);
             p.layout->addRow("Line width:", p.lineWidthSlider);
             p.layout->addRow("Color:", p.colorSwatch);
             p.layout->addRow("Labels:", p.labelsComboBox);
@@ -916,7 +925,9 @@ namespace djv
                 {
                     FTK_P();
                     p.enabledCheckBox->setChecked(value.grid.enabled);
-                    p.sizeSlider->setValue(value.grid.size);
+                    p.cellModeComboBox->setCurrentIndex(static_cast<int>(value.grid.cellMode));
+                    p.cellWidthSlider->setValue(value.grid.cellSize.w);
+                    p.cellHeightSlider->setValue(value.grid.cellSize.h);
                     p.lineWidthSlider->setValue(value.grid.lineWidth);
                     p.colorSwatch->setColor(value.grid.color);
                     p.labelsComboBox->setCurrentIndex(static_cast<int>(value.grid.labels));
@@ -932,11 +943,27 @@ namespace djv
                     viewportModel->setForegroundOptions(options);
                 });
 
-            p.sizeSlider->setCallback(
+            p.cellModeComboBox->setIndexCallback(
                 [viewportModel](int value)
                 {
                     auto options = viewportModel->getForegroundOptions();
-                    options.grid.size = value;
+                    options.grid.cellMode = static_cast<tl::GridCellMode>(value);
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.cellWidthSlider->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.grid.cellSize.w = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.cellHeightSlider->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.grid.cellSize.h = value;
                     viewportModel->setForegroundOptions(options);
                 });
 
