@@ -163,6 +163,34 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! View grid widget.
+        class ViewGridWidget : public ftk::IWidget
+        {
+            FTK_NON_COPYABLE(ViewGridWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            ViewGridWidget();
+
+        public:
+            virtual ~ViewGridWidget();
+
+            static std::shared_ptr<ViewGridWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            ftk::Size2I getSizeHint() const override;
+            void setGeometry(const ftk::Box2I&) override;
+
+        private:
+            FTK_PRIVATE();
+        };
+
         //! View outline widget.
         class ViewOutlineWidget : public ftk::IWidget
         {
@@ -188,15 +216,13 @@ namespace djv
             void setGeometry(const ftk::Box2I&) override;
 
         private:
-            void _optionsUpdate(const tl::ForegroundOptions&);
-
             FTK_PRIVATE();
         };
 
-        //! View grid widget.
-        class ViewGridWidget : public ftk::IWidget
+        //! View center marker widget.
+        class ViewCenterMarkerWidget : public ftk::IWidget
         {
-            FTK_NON_COPYABLE(ViewGridWidget);
+            FTK_NON_COPYABLE(ViewCenterMarkerWidget);
 
         protected:
             void _init(
@@ -204,12 +230,12 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
-            ViewGridWidget();
+            ViewCenterMarkerWidget();
 
         public:
-            virtual ~ViewGridWidget();
+            virtual ~ViewCenterMarkerWidget();
 
-            static std::shared_ptr<ViewGridWidget> create(
+            static std::shared_ptr<ViewCenterMarkerWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

@@ -22,8 +22,9 @@ namespace djv
             std::shared_ptr<ui::ViewOptionsWidget> optionsWidget;
             std::shared_ptr<ui::ViewAspectRatioWidget> aspectRatioWidget;
             std::shared_ptr<ui::ViewBackgroundWidget> backgroundWidget;
-            std::shared_ptr<ui::ViewOutlineWidget> outlineWidget;
             std::shared_ptr<ui::ViewGridWidget> gridWidget;
+            std::shared_ptr<ui::ViewOutlineWidget> outlineWidget;
+            std::shared_ptr<ui::ViewCenterMarkerWidget> centerMarkerWidget;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
         };
 
@@ -46,8 +47,9 @@ namespace djv
             p.optionsWidget = ui::ViewOptionsWidget::create(context, viewportModel);
             p.aspectRatioWidget = ui::ViewAspectRatioWidget::create(context, viewportModel);
             p.backgroundWidget = ui::ViewBackgroundWidget::create(context, viewportModel);
-            p.outlineWidget = ui::ViewOutlineWidget::create(context, viewportModel);
             p.gridWidget = ui::ViewGridWidget::create(context, viewportModel);
+            p.outlineWidget = ui::ViewOutlineWidget::create(context, viewportModel);
+            p.centerMarkerWidget = ui::ViewCenterMarkerWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
@@ -59,10 +61,12 @@ namespace djv
             p.bellows["AspectRatio"]->setWidget(p.aspectRatioWidget);
             p.bellows["Background"] = ftk::Bellows::create(context, "Background", layout);
             p.bellows["Background"]->setWidget(p.backgroundWidget);
-            p.bellows["Outline"] = ftk::Bellows::create(context, "Outline", layout);
-            p.bellows["Outline"]->setWidget(p.outlineWidget);
             p.bellows["Grid"] = ftk::Bellows::create(context, "Grid", layout);
             p.bellows["Grid"]->setWidget(p.gridWidget);
+            p.bellows["Outline"] = ftk::Bellows::create(context, "Outline", layout);
+            p.bellows["Outline"]->setWidget(p.outlineWidget);
+            p.bellows["CenterMarker"] = ftk::Bellows::create(context, "Center Marker", layout);
+            p.bellows["CenterMarker"]->setWidget(p.centerMarkerWidget);
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setBorder(false);
             scrollWidget->setWidget(layout);

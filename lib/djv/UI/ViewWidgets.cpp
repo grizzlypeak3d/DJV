@@ -751,109 +751,6 @@ namespace djv
             p.layout->setRowVisible(p.gradientSwatch.second, value.type == tl::Background::Gradient);
         }
 
-        struct ViewOutlineWidget::Private
-        {
-            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
-            std::shared_ptr<ftk::IntEditSlider> widthSlider;
-            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
-            std::shared_ptr<ftk::FormLayout> layout;
-
-            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
-        };
-
-        void ViewOutlineWidget::_init(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::ViewportModel>& viewportModel,
-            const std::shared_ptr<ftk::IWidget>& parent)
-        {
-            ftk::IWidget::_init(context, "djv::app::ViewOutlineWidget", parent);
-            FTK_P();
-
-            p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
-
-            p.widthSlider = ftk::IntEditSlider::create(context);
-            p.widthSlider->setRange(1, 100);
-
-            p.colorSwatch = ftk::ColorSwatch::create(context);
-            p.colorSwatch->setEditable(true);
-            p.colorSwatch->setHAlign(ftk::HAlign::Left);
-
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
-            p.layout->addRow("Width:", p.widthSlider);
-            p.layout->addRow("Color:", p.colorSwatch);
-
-            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
-                viewportModel->observeForegroundOptions(),
-                [this](const tl::ForegroundOptions& value)
-                {
-                    _optionsUpdate(value);
-                });
-
-            p.enabledCheckBox->setCheckedCallback(
-                [viewportModel](bool value)
-                {
-                    auto options = viewportModel->getForegroundOptions();
-                    options.outline.enabled = value;
-                    viewportModel->setForegroundOptions(options);
-                });
-
-            p.widthSlider->setCallback(
-                [viewportModel](int value)
-                {
-                    auto options = viewportModel->getForegroundOptions();
-                    options.outline.width = value;
-                    viewportModel->setForegroundOptions(options);
-                });
-
-            p.colorSwatch->setCallback(
-                [viewportModel](const ftk::Color4F& value)
-                {
-                    auto options = viewportModel->getForegroundOptions();
-                    options.outline.color = value;
-                    viewportModel->setForegroundOptions(options);
-                });
-        }
-
-        ViewOutlineWidget::ViewOutlineWidget() :
-            _p(new Private)
-        {}
-
-        ViewOutlineWidget::~ViewOutlineWidget()
-        {}
-
-        std::shared_ptr<ViewOutlineWidget> ViewOutlineWidget::create(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::ViewportModel>& viewportModel,
-            const std::shared_ptr<IWidget>& parent)
-        {
-            auto out = std::shared_ptr<ViewOutlineWidget>(new ViewOutlineWidget);
-            out->_init(context, viewportModel, parent);
-            return out;
-        }
-
-        ftk::Size2I ViewOutlineWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewOutlineWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
-        void ViewOutlineWidget::_optionsUpdate(const tl::ForegroundOptions& value)
-        {
-            FTK_P();
-            p.enabledCheckBox->setChecked(value.outline.enabled);
-            p.widthSlider->setValue(value.outline.width);
-            p.colorSwatch->setColor(value.outline.color);
-        }
-
         struct ViewGridWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -1053,6 +950,216 @@ namespace djv
         }
 
         void ViewGridWidget::setGeometry(const ftk::Box2I& value)
+        {
+            IWidget::setGeometry(value);
+            _p->layout->setGeometry(value);
+        }
+
+        struct ViewOutlineWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::shared_ptr<ftk::IntEditSlider> widthSlider;
+            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
+        };
+
+        void ViewOutlineWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IWidget::_init(context, "djv::app::ViewOutlineWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+
+            p.widthSlider = ftk::IntEditSlider::create(context);
+            p.widthSlider->setRange(1, 100);
+
+            p.colorSwatch = ftk::ColorSwatch::create(context);
+            p.colorSwatch->setEditable(true);
+            p.colorSwatch->setHAlign(ftk::HAlign::Left);
+
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Enabled:", p.enabledCheckBox);
+            p.layout->addRow("Line width:", p.widthSlider);
+            p.layout->addRow("Color:", p.colorSwatch);
+
+            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
+                viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions& value)
+                {
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.outline.enabled);
+                    p.widthSlider->setValue(value.outline.width);
+                    p.colorSwatch->setColor(value.outline.color);
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.outline.enabled = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.widthSlider->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.outline.width = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.colorSwatch->setCallback(
+                [viewportModel](const ftk::Color4F& value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.outline.color = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+        }
+
+        ViewOutlineWidget::ViewOutlineWidget() :
+            _p(new Private)
+        {}
+
+        ViewOutlineWidget::~ViewOutlineWidget()
+        {}
+
+        std::shared_ptr<ViewOutlineWidget> ViewOutlineWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewOutlineWidget>(new ViewOutlineWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        ftk::Size2I ViewOutlineWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
+        void ViewOutlineWidget::setGeometry(const ftk::Box2I& value)
+        {
+            IWidget::setGeometry(value);
+            _p->layout->setGeometry(value);
+        }
+
+        struct ViewCenterMarkerWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::shared_ptr<ftk::IntEdit> sizeEdit;
+            std::shared_ptr<ftk::IntEdit> widthEdit;
+            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
+        };
+
+        void ViewCenterMarkerWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IWidget::_init(context, "djv::app::ViewCenterMarkerWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+
+            p.sizeEdit = ftk::IntEdit::create(context);
+            p.sizeEdit->setRange(10, 100);
+
+            p.widthEdit = ftk::IntEdit::create(context);
+            p.widthEdit->setRange(1, 10);
+
+            p.colorSwatch = ftk::ColorSwatch::create(context);
+            p.colorSwatch->setEditable(true);
+            p.colorSwatch->setHAlign(ftk::HAlign::Left);
+
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Enabled:", p.enabledCheckBox);
+            p.layout->addRow("Size:", p.sizeEdit);
+            p.layout->addRow("Line width:", p.widthEdit);
+            p.layout->addRow("Color:", p.colorSwatch);
+
+            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
+                viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions& value)
+                {
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.centerMarker.enabled);
+                    p.sizeEdit->setValue(value.centerMarker.size);
+                    p.widthEdit->setValue(value.centerMarker.width);
+                    p.colorSwatch->setColor(value.centerMarker.color);
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.centerMarker.enabled = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.sizeEdit->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.centerMarker.size = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.widthEdit->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.centerMarker.width = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.colorSwatch->setCallback(
+                [viewportModel](const ftk::Color4F& value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.centerMarker.color = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+        }
+
+        ViewCenterMarkerWidget::ViewCenterMarkerWidget() :
+            _p(new Private)
+        {}
+
+        ViewCenterMarkerWidget::~ViewCenterMarkerWidget()
+        {}
+
+        std::shared_ptr<ViewCenterMarkerWidget> ViewCenterMarkerWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewCenterMarkerWidget>(new ViewCenterMarkerWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        ftk::Size2I ViewCenterMarkerWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
+        void ViewCenterMarkerWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
