@@ -198,6 +198,30 @@ namespace djv
                     }
                 });
 
+            _actions["Outline"] = ftk::Action::create(
+                "Outline",
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getForegroundOptions();
+                        options.outline.enabled = value;
+                        app->getViewportModel()->setForegroundOptions(options);
+                    }
+                });
+
+            _actions["CenterMarker"] = ftk::Action::create(
+                "Center Marker",
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getForegroundOptions();
+                        options.centerMarker.enabled = value;
+                        app->getViewportModel()->setForegroundOptions(options);
+                    }
+                });
+
             _actions["HUD"] = ftk::Action::create(
                 "HUD / Information Display",
                 [appWeak](bool value)
@@ -215,6 +239,8 @@ namespace djv
                 { "ZoomIn", "Zoom the view in." },
                 { "ZoomOut", "Zoom the view out." },
                 { "Grid", "Toggle the grid." },
+                { "Outline", "Toggle the outline." },
+                { "CenterMarker", "Toggle the center marker." },
                 { "HUD", "Toggle the HUD / information display." }
             };
 
@@ -258,6 +284,8 @@ namespace djv
                 [this](const tl::ForegroundOptions& value)
                 {
                     _actions["Grid"]->setChecked(value.grid.enabled);
+                    _actions["Outline"]->setChecked(value.outline.enabled);
+                    _actions["CenterMarker"]->setChecked(value.centerMarker.enabled);
                 });
 
             p.hudObserver = ftk::Observer<bool>::create(

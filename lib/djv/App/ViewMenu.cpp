@@ -48,6 +48,8 @@ namespace djv
             }
             addDivider();
             addAction(actions["Grid"]);
+            addAction(actions["Outline"]);
+            addAction(actions["CenterMarker"]);
             addAction(actions["HUD"]);
         }
 

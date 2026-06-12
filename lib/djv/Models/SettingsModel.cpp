@@ -225,6 +225,8 @@ namespace djv
                 Shortcut("View/AlphaBlendStraight", "Straight alpha"),
                 Shortcut("View/AlphaBlendPremultiplied", "Pre-multiplied alpha"),
                 Shortcut("View/Grid", "Grid", ftk::KeyShortcut(ftk::Key::G, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("View/Outline", "Outline"),
+                Shortcut("View/CenterMarker", "Center marker"),
                 Shortcut("View/HUD", "HUD / Information Display", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control))),
 
                 Shortcut("Window/FullScreen", "Full screen", ftk::Key::U),
