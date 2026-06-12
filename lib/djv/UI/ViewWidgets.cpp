@@ -858,9 +858,11 @@ namespace djv
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::shared_ptr<ftk::ComboBox> cellModeComboBox;
-            std::shared_ptr<ftk::IntEditSlider> cellWidthSlider;
-            std::shared_ptr<ftk::IntEditSlider> cellHeightSlider;
-            std::shared_ptr<ftk::IntEditSlider> lineWidthSlider;
+            std::shared_ptr<ftk::IntEditSlider> cellSizeSlider;
+            std::shared_ptr<ftk::IntEdit> cellCountXEdit;
+            std::shared_ptr<ftk::IntEdit> cellCountYEdit;
+            std::shared_ptr<ftk::HorizontalLayout> cellCountLayout;
+            std::shared_ptr<ftk::IntEdit> lineWidthEdit;
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::ComboBox> labelsComboBox;
             std::shared_ptr<ftk::ColorSwatch> textColorSwatch;
@@ -883,14 +885,17 @@ namespace djv
 
             p.cellModeComboBox = ftk::ComboBox::create(context, tl::getGridCellModeLabels());
 
-            p.cellWidthSlider = ftk::IntEditSlider::create(context);
-            p.cellWidthSlider->setRange(1, 1000);
+            p.cellSizeSlider = ftk::IntEditSlider::create(context);
+            p.cellSizeSlider->setRange(1, 1000);
 
-            p.cellHeightSlider = ftk::IntEditSlider::create(context);
-            p.cellHeightSlider->setRange(1, 1000);
+            p.cellCountXEdit = ftk::IntEdit::create(context);
+            p.cellCountXEdit->setRange(1, 100);
 
-            p.lineWidthSlider = ftk::IntEditSlider::create(context);
-            p.lineWidthSlider->setRange(1, 10);
+            p.cellCountYEdit = ftk::IntEdit::create(context);
+            p.cellCountYEdit->setRange(1, 100);
+
+            p.lineWidthEdit = ftk::IntEdit::create(context);
+            p.lineWidthEdit->setRange(1, 10);
 
             p.colorSwatch = ftk::ColorSwatch::create(context);
             p.colorSwatch->setEditable(true);
@@ -911,9 +916,13 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Cell mode:", p.cellModeComboBox);
-            p.layout->addRow("Cell width:", p.cellWidthSlider);
-            p.layout->addRow("Cell height:", p.cellHeightSlider);
-            p.layout->addRow("Line width:", p.lineWidthSlider);
+            p.layout->addRow("Cell size:", p.cellSizeSlider);
+            p.cellCountLayout = ftk::HorizontalLayout::create(context);
+            p.cellCountLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.cellCountXEdit->setParent(p.cellCountLayout);
+            p.cellCountYEdit->setParent(p.cellCountLayout);
+            p.layout->addRow("Cell count:", p.cellCountLayout);
+            p.layout->addRow("Line width:", p.lineWidthEdit);
             p.layout->addRow("Color:", p.colorSwatch);
             p.layout->addRow("Labels:", p.labelsComboBox);
             p.layout->addRow("Text color:", p.textColorSwatch);
@@ -926,9 +935,14 @@ namespace djv
                     FTK_P();
                     p.enabledCheckBox->setChecked(value.grid.enabled);
                     p.cellModeComboBox->setCurrentIndex(static_cast<int>(value.grid.cellMode));
-                    p.cellWidthSlider->setValue(value.grid.cellSize.w);
-                    p.cellHeightSlider->setValue(value.grid.cellSize.h);
-                    p.lineWidthSlider->setValue(value.grid.lineWidth);
+                    p.cellSizeSlider->setValue(value.grid.cellSize);
+                    p.layout->setRowVisible(p.cellSizeSlider,
+                        tl::GridCellMode::CellSize == value.grid.cellMode);
+                    p.cellCountXEdit->setValue(value.grid.cellCount.x);
+                    p.cellCountYEdit->setValue(value.grid.cellCount.y);
+                    p.layout->setRowVisible(p.cellCountLayout,
+                        tl::GridCellMode::CellCount == value.grid.cellMode);
+                    p.lineWidthEdit->setValue(value.grid.lineWidth);
                     p.colorSwatch->setColor(value.grid.color);
                     p.labelsComboBox->setCurrentIndex(static_cast<int>(value.grid.labels));
                     p.textColorSwatch->setColor(value.grid.textColor);
@@ -951,23 +965,31 @@ namespace djv
                     viewportModel->setForegroundOptions(options);
                 });
 
-            p.cellWidthSlider->setCallback(
+            p.cellSizeSlider->setCallback(
                 [viewportModel](int value)
                 {
                     auto options = viewportModel->getForegroundOptions();
-                    options.grid.cellSize.w = value;
+                    options.grid.cellSize = value;
                     viewportModel->setForegroundOptions(options);
                 });
 
-            p.cellHeightSlider->setCallback(
+            p.cellCountXEdit->setCallback(
                 [viewportModel](int value)
                 {
                     auto options = viewportModel->getForegroundOptions();
-                    options.grid.cellSize.h = value;
+                    options.grid.cellCount.x = value;
                     viewportModel->setForegroundOptions(options);
                 });
 
-            p.lineWidthSlider->setCallback(
+            p.cellCountYEdit->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.grid.cellCount.y = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.lineWidthEdit->setCallback(
                 [viewportModel](int value)
                 {
                     auto options = viewportModel->getForegroundOptions();
