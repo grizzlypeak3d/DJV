@@ -58,6 +58,15 @@ namespace djv
             //! Get the timeline widget.
             const std::shared_ptr<tl::ui::TimelineWidget>& getTimelineWidget() const;
 
+            //! Get whether presentation mode is enabled.
+            bool hasPresentMode() const;
+
+            //! Observe whether presentation mode is enabled.
+            std::shared_ptr<ftk::IObservable<bool> > observePresentMode() const;
+
+            //! Set whether presentation mode is enabled.
+            void setPresentMode(bool);
+
             //! Focus the current frame widget.
             void focusCurrentFrame();
 
@@ -75,7 +84,7 @@ namespace djv
         private:
             void _settingsUpdate(const models::MouseSettings&);
             void _settingsUpdate(const models::TimelineSettings&);
-            void _settingsUpdate(const models::WindowSettings&);
+            void _windowUpdate();
 
             FTK_PRIVATE();
         };

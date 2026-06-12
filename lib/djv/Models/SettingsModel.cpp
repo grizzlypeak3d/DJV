@@ -230,6 +230,7 @@ namespace djv
                 Shortcut("View/HUD", "HUD / Information Display", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control))),
 
                 Shortcut("Window/FullScreen", "Full screen", ftk::Key::U),
+                Shortcut("Window/PresentMode", "Presentation mode", ftk::KeyShortcut(ftk::Key::P, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Window/FloatOnTop", "Float on top"),
                 Shortcut("Window/Secondary", "Secondary", ftk::Key::Y),
                 Shortcut("Window/FileToolBar", "File tool bar"),

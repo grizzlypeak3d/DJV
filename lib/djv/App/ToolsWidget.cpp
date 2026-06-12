@@ -55,56 +55,53 @@ namespace djv
                         p.toolWidget->setParent(nullptr);
                         p.toolWidget.reset();
                     }
+
+                    auto context = getContext();
                     auto app = appWeak.lock();
                     auto mainWindow = mainWindowWeak.lock();
-                    if (app && mainWindow)
+                    switch (value)
                     {
-                        auto context = app->getContext();
-                        switch (value)
-                        {
-                        case models::Tool::Files:
-                            p.toolWidget = FilesTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::Export:
-                            p.toolWidget = ExportTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::View:
-                            p.toolWidget = ViewTool::create(context, app, mainWindow, shared_from_this());
-                            break;
-                        case models::Tool::Color:
-                            p.toolWidget = ColorTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::ColorPicker:
-                            p.toolWidget = ColorPickerTool::create(context, app, mainWindow, shared_from_this());
-                            break;
-                        case models::Tool::Magnify:
-                            p.toolWidget = MagnifyTool::create(context, app, mainWindow, shared_from_this());
-                            break;
-                        case models::Tool::Info:
-                            p.toolWidget = InfoTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::Audio:
-                            p.toolWidget = AudioTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::Devices:
-                            p.toolWidget = DevicesTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::Settings:
-                            p.toolWidget = SettingsTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::Messages:
-                            p.toolWidget = MessagesTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::SysLog:
-                            p.toolWidget = SysLogTool::create(context, app, shared_from_this());
-                            break;
-                        case models::Tool::Diag:
-                            p.toolWidget = DiagTool::create(context, app, shared_from_this());
-                            break;
-                        default: break;
-                        }
+                    case models::Tool::Files:
+                        p.toolWidget = FilesTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::Export:
+                        p.toolWidget = ExportTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::View:
+                        p.toolWidget = ViewTool::create(context, app, mainWindow, shared_from_this());
+                        break;
+                    case models::Tool::Color:
+                        p.toolWidget = ColorTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::ColorPicker:
+                        p.toolWidget = ColorPickerTool::create(context, app, mainWindow, shared_from_this());
+                        break;
+                    case models::Tool::Magnify:
+                        p.toolWidget = MagnifyTool::create(context, app, mainWindow, shared_from_this());
+                        break;
+                    case models::Tool::Info:
+                        p.toolWidget = InfoTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::Audio:
+                        p.toolWidget = AudioTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::Devices:
+                        p.toolWidget = DevicesTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::Settings:
+                        p.toolWidget = SettingsTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::Messages:
+                        p.toolWidget = MessagesTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::SysLog:
+                        p.toolWidget = SysLogTool::create(context, app, shared_from_this());
+                        break;
+                    case models::Tool::Diag:
+                        p.toolWidget = DiagTool::create(context, app, shared_from_this());
+                        break;
+                    default: break;
                     }
-                    setVisible(value != models::Tool::None);
                 });
         }
 

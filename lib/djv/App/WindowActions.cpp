@@ -13,6 +13,7 @@ namespace djv
         struct WindowActions::Private
         {
             std::shared_ptr<ftk::Observer<bool> > fullScreenObserver;
+            std::shared_ptr<ftk::Observer<bool> > presentModeObserver;
             std::shared_ptr<ftk::Observer<bool> > floatOnTopObserver;
             std::shared_ptr<ftk::Observer<bool> > secondaryObserver;
             std::shared_ptr<ftk::Observer<models::WindowSettings> > settingsObserver;
@@ -35,6 +36,16 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         app->getMainWindow()->setFullScreen(value);
+                    }
+                });
+
+            _actions["PresentMode"] = ftk::Action::create(
+                "Presentation",
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getMainWindow()->setPresentMode(value);
                     }
                 });
 
@@ -170,6 +181,7 @@ namespace djv
             _tooltips =
             {
                 { "FullScreen", "Toggle the window full screen." },
+                { "PresentMode", "Toggle presentation mode." },
                 { "Secondary", "Toggle the secondary window." }
             };
 
@@ -180,6 +192,13 @@ namespace djv
                 [this](bool value)
                 {
                     _actions["FullScreen"]->setChecked(value);
+                });
+
+            p.presentModeObserver = ftk::Observer<bool>::create(
+                mainWindow->observePresentMode(),
+                [this](bool value)
+                {
+                    _actions["PresentMode"]->setChecked(value);
                 });
 
             p.floatOnTopObserver = ftk::Observer<bool>::create(

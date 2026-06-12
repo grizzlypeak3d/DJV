@@ -42,6 +42,7 @@
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/TimeUnitsModel.h>
+#include <djv/Models/ToolsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/UI/TimelineWidget.h>
@@ -74,7 +75,7 @@ namespace djv
         {
             std::weak_ptr<App> app;
             std::shared_ptr<models::SettingsModel> settingsModel;
-            tl::ui::ItemOptions itemOptions;
+            std::shared_ptr<ftk::Observable<bool> > presentMode;
 
             std::shared_ptr<Viewport> viewport;
             std::shared_ptr<tl::ui::TimelineWidget> timelineWidget;
@@ -124,6 +125,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<models::Tool> > activeToolObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
             std::shared_ptr<ftk::Observer<models::TimelineSettings> > timelineSettingsObserver;
             std::shared_ptr<ftk::Observer<bool> > timelineFrameViewObserver;
@@ -150,6 +152,7 @@ namespace djv
 
             p.app = app;
             p.settingsModel = app->getSettingsModel();
+            p.presentMode = ftk::Observable<bool>::create(false);
 
             p.viewport = Viewport::create(context, app);
 
@@ -302,15 +305,12 @@ namespace djv
                     p.timelineWidget->setPlayer(player);
                 });
 
-            auto appWeak = std::weak_ptr<App>(app);
             p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 p.viewport->observeCompareOptions(),
-                [appWeak](const tl::CompareOptions& value)
+                [this](const tl::CompareOptions& value)
                 {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->getFilesModel()->setCompareOptions(value);
-                    }
+                    auto app = _p->app.lock();
+                    app->getFilesModel()->setCompareOptions(value);
                 });
 
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
@@ -340,6 +340,13 @@ namespace djv
                         ftk::WindowBufferType::F32);
                 });
 
+            p.activeToolObserver = ftk::Observer<models::Tool>::create(
+                app->getToolsModel()->observeActiveTool(),
+                [this](models::Tool)
+                {
+                    _windowUpdate();
+                });
+
             p.mouseSettingsObserver = ftk::Observer<models::MouseSettings>::create(
                 p.settingsModel->observeMouse(),
                 [this](const models::MouseSettings& value)
@@ -356,21 +363,19 @@ namespace djv
 
             p.timelineFrameViewObserver = ftk::Observer<bool>::create(
                 p.timelineWidget->observeFrameView(),
-                [appWeak](bool value)
+                [this](bool value)
                 {
-                    if (auto app = appWeak.lock())
-                    {
-                        auto settings = app->getSettingsModel()->getTimeline();
-                        settings.frameView = value;
-                        app->getSettingsModel()->setTimeline(settings);
-                    }
+                    auto app = _p->app.lock();
+                    auto settings = app->getSettingsModel()->getTimeline();
+                    settings.frameView = value;
+                    app->getSettingsModel()->setTimeline(settings);
                 });
 
             p.windowSettingsObserver = ftk::Observer<models::WindowSettings>::create(
                 p.settingsModel->observeWindow(),
-                [this](const models::WindowSettings& value)
+                [this](const models::WindowSettings&)
                 {
-                    _settingsUpdate(value);
+                    _windowUpdate();
                 });
         }
 
@@ -424,6 +429,25 @@ namespace djv
             return _p->timelineWidget;
         }
 
+        bool MainWindow::hasPresentMode() const
+        {
+            return _p->presentMode->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<bool> > MainWindow::observePresentMode() const
+        {
+            return _p->presentMode;
+        }
+
+        void MainWindow::setPresentMode(bool value)
+        {
+            FTK_P();
+            if (p.presentMode->setIfChanged(value))
+            {
+                _windowUpdate();
+            }
+        }
+
         void MainWindow::focusCurrentFrame()
         {
             _p->bottomToolBar->focusCurrentFrame();
@@ -467,7 +491,17 @@ namespace djv
         void MainWindow::keyPressEvent(ftk::KeyEvent& event)
         {
             FTK_P();
-            event.accept = p.menuBar->shortcut(event.key, event.modifiers);
+            if (0 == event.modifiers &&
+                ftk::Key::Escape == event.key &&
+                p.presentMode->get())
+            {
+                event.accept = true;
+                setPresentMode(false);
+            }
+            else
+            {
+                event.accept = p.menuBar->shortcut(event.key, event.modifiers);
+            }
         }
 
         void MainWindow::keyReleaseEvent(ftk::KeyEvent& event)
@@ -535,40 +569,51 @@ namespace djv
             }
         }
 
-        void MainWindow::_settingsUpdate(const models::WindowSettings& settings)
+        void MainWindow::_windowUpdate()
         {
             FTK_P();
 
-            p.fileToolBar->setVisible(settings.fileToolBar);
-            p.dividers["File"]->setVisible(settings.fileToolBar);
+            auto app = p.app.lock();
+            auto settings = p.settingsModel->getWindow();
+            const bool presentMode = p.presentMode->get();
 
-            p.compareToolBar->setVisible(settings.compareToolBar);
-            p.dividers["Compare"]->setVisible(settings.compareToolBar);
+            p.menuBar->setVisible(!presentMode);
+            p.dividers["MenuBar"]->setVisible(!presentMode);
 
-            p.windowToolBar->setVisible(settings.windowToolBar);
-            p.dividers["Window"]->setVisible(settings.windowToolBar);
+            p.fileToolBar->setVisible(settings.fileToolBar && !presentMode);
+            p.dividers["File"]->setVisible(settings.fileToolBar && !presentMode);
 
-            p.viewToolBar->setVisible(settings.viewToolBar);
-            p.dividers["View"]->setVisible(settings.viewToolBar);
+            p.compareToolBar->setVisible(settings.compareToolBar && !presentMode);
+            p.dividers["Compare"]->setVisible(settings.compareToolBar && !presentMode);
 
-            p.toolsToolBar->setVisible(settings.toolsToolBar);
+            p.windowToolBar->setVisible(settings.windowToolBar && !presentMode);
+            p.dividers["Window"]->setVisible(settings.windowToolBar && !presentMode);
+
+            p.viewToolBar->setVisible(settings.viewToolBar && !presentMode);
+            p.dividers["View"]->setVisible(settings.viewToolBar && !presentMode);
+
+            p.toolsToolBar->setVisible(settings.toolsToolBar && !presentMode);
 
             p.dividers["ToolBars"]->setVisible(
-                settings.fileToolBar ||
+                (settings.fileToolBar ||
                 settings.compareToolBar ||
                 settings.windowToolBar ||
                 settings.viewToolBar ||
-                settings.toolsToolBar);
+                settings.toolsToolBar) && !presentMode);
 
-            p.tabBar->setVisible(settings.tabBar);
+            p.tabBar->setVisible(settings.tabBar && !presentMode);
 
-            p.timelineWidget->setVisible(settings.timeline);
+            p.toolsWidget->setVisible(
+                app->getToolsModel()->getActiveTool() != models::Tool::None &&
+                !presentMode);
 
-            p.bottomToolBar->setVisible(settings.bottomToolBar);
-            p.dividers["Bottom"]->setVisible(settings.bottomToolBar);
+            p.timelineWidget->setVisible(settings.timeline && !presentMode);
 
-            p.statusBar->setVisible(settings.statusToolBar);
-            p.dividers["Status"]->setVisible(settings.statusToolBar);
+            p.bottomToolBar->setVisible(settings.bottomToolBar && !presentMode);
+            p.dividers["Bottom"]->setVisible(settings.bottomToolBar && !presentMode);
+
+            p.statusBar->setVisible(settings.statusToolBar && !presentMode);
+            p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
 
             p.splitter->setSplit(settings.splitter);
             p.splitter2->setSplit(settings.splitter2);

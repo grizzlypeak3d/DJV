@@ -51,6 +51,7 @@ namespace djv
             addDivider();
             auto actions = windowActions->getActions();
             addAction(actions["FullScreen"]);
+            addAction(actions["PresentMode"]);
             addAction(actions["FloatOnTop"]);
             addDivider();
             addAction(actions["Secondary"]);
