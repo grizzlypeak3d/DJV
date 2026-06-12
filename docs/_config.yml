@@ -1,3 +1,6 @@
+# DJV documentation — Just the Docs configuration
+# Lives at: docs/_config.yml
+
 title: DJV
 description: >-
   Free, open-source high bit-depth image sequence player for
@@ -6,21 +9,13 @@ description: >-
 url: https://grizzlypeak3d.github.io
 baseurl: /DJV
 
-# Use Just the Docs as a remote theme. This is the supported route on
-# GitHub Pages (the plain `theme:` key won't work for this theme there).
-# To pin a version for stability, append a tag, e.g.
-#   remote_theme: just-the-docs/just-the-docs@v0.10.1
-# Releases: https://github.com/just-the-docs/just-the-docs/releases
-remote_theme: just-the-docs/just-the-docs
-
-plugins:
-  - jekyll-remote-theme
+theme: just-the-docs
 
 search_enabled: true
 search:
   heading_level: 2
 
-color_scheme: dark
+color_scheme: light
 
 # Link shown top-right on every page.
 aux_links:

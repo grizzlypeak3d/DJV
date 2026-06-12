@@ -6,8 +6,8 @@ nav_order: 5
 
 # Viewport
 
-The viewport displays the current file. You can pan, zoom, or *frame* the view so
-the image fills the available space.
+The viewport displays the current file. You can pan, zoom, or *frame* the view
+so the image fills the available space.
 
 Default viewport controls:
 
@@ -22,26 +22,31 @@ Viewport controls can be remapped in the **Settings** tool.
 
 ## Color buffer
 
-The viewport's bit depth is set in the **View** tool with the **Color buffer**
-option. The default, **RGBA F32**, is recommended because it preserves the full
-range of color values without clamping. Lower bit-depth options can be faster,
-but they will clamp colors — choose them only when performance is more important
-than precision.
+The viewport's bit depth can be configured, though rhe default, **RGBA F32**,
+is recommended because it preserves the full range of color values without
+clamping. Lower bit-depth options can be faster, but they can clamp colors —
+choose them only when performance is more important than precision.
+
+Locations: **View** tool
 
 ## Background
 
-The viewport background color is set in the **View** tool. You can also draw an
-outline around the image, which makes images with transparent regions easier to
-distinguish from the background.
+The viewport background color can be customized.
+
+Locations: **View** tool
 
 ## Grid
 
-The grid is enabled and configured from the **View** tool.
+A grid overlay can be shown to identify areas in the viewport.
+
+Locations: **View** tool
 
 Grid options:
 
 - **Enabled** — Toggle the grid on or off
-- **Size** — Pixels between grid lines
+- **Cell mode** - Grid cell modes
+- **Cell size** — Cell size in pixels
+- **Cell count** - Number of cells
 - **Line width** — Thickness of the grid lines
 - **Color** — Color of the grid lines
 - **Labels** — How cells are labeled:
@@ -59,10 +64,18 @@ The grid can also help you inspect individual pixels. To do so:
 2. Enable the grid
 3. Set the grid size to `1`
 
+## Outline
+
+An outline can be draw around the image to make transparent regions easier to
+distinguish from the background.
+
+Locations: **View** tool
+
 ## HUD
 
 The heads-up display (HUD) overlays useful information on top of the viewport.
-Enable it from the **View** menu.
+
+Locations: **View** menu
 
 ![Viewport HUD]({{ '/assets/ViewHUDAnnotated.svg' | relative_url }})
 

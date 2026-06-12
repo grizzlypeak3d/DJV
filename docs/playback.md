@@ -26,10 +26,13 @@ direction slows it back down.
 
 ## In and out points
 
-To limit playback to a section of the timeline, set in and out points from the
-**Playback** menu.
+In and out points can be set to limit playback to a section of the timeline.
+
+Locations: **Playback** menu, **Playback** controls
 
 ## Dropped frames
 
-If playback isn't keeping up, the HUD (under the **View** menu) shows the number
-of dropped frames in real time.
+If playback isn't keeping up, the HUD shows the number of dropped frames in
+real time.
+
+Locations: **View** menu

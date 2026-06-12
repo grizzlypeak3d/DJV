@@ -7,3 +7,7 @@ docs/doxygen
 .git
 .vscode
 .DS_Store
+docs/_site/
+docs/.jekyll-cache/
+docs/.bundle/
+docs/vendor/

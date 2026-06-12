@@ -6,7 +6,7 @@ nav_order: 11
 
 # Settings
 
-Open the **Settings** tool from the **Tools** menu or the tool bar.
+Locations: **Tools** menu, **Tools** toolbar
 
 Settings are stored as a JSON file in the **Documents/DJV** directory.
 

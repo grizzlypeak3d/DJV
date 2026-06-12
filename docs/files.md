@@ -70,11 +70,17 @@ for the new file.
 For files with multiple layers (such as multi-part OpenEXR), the active layer
 can be changed from the **File/Layers** menu or from the **Files** tool.
 
+* Locations: **File** menu, **Files** tool
+* Next layer shortcut: <kbd>Ctrl+Equals</kbd>
+* Previous layer shortcut: <kbd>Ctrl+Minus</kbd>
+
 ## Files tool
 
 The **Files** tool is the central place for managing open files: it sets the
-current file, picks active layers, and configures comparison. Open it from the
-**Tools** menu or the tool bar.
+current file, picks active layers, and configures comparison.
+
+* Locations: **Tools** menu, **Tools** toolbar
+* Shortcut: <kbd>F1</kbd>
 
 ![Files tool]({{ '/assets/FilesToolAnnotated.svg' | relative_url }})
 
@@ -93,7 +99,7 @@ To pair audio automatically, open the **Image Sequences** section in the
 **Settings** tool. You can either list the file extensions DJV should look for
 (for example, `.wav .mp3`), or provide a specific file name to match.
 
-To pair audio manually, use **File/Open With Audio**.
+To pair audio manually, use the menu **File/Open With Audio**.
 
 ## USD
 

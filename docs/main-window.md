@@ -15,10 +15,29 @@ nav_order: 3
 5. Tool — the currently active tool (for example, color picker or magnifier)
 6. Status bar — warnings and errors, information about the current file, and status indicators
 
-Most parts of the interface can be shown or hidden from the **Window** menu.
+Different parts of the interface can be shown or hidden from the **Window** menu.
 
-Full screen mode can be enabled from the **Window** menu or **Window** tool bar.
+## Full screen
+
+Toggle full screen mode.
+
+Locations: **Window** menu, **Window** toolbar
+
+Shortcut: <kbd>U</kbd>
+
+## Presentation mode
+
+Presentation mode hides the user interface to show only the viewport.
+
+Locations: **Window** menu, **Window** toolbar
+
+Shortcut: <kbd>Ctrl+P</kbd>
+
+## Secondary window
 
 A secondary window can be used to mirror the viewport on a separate monitor —
-useful for client review on a calibrated display. The secondary window can be
-shown from the **Window** menu or **Window** tool bar.
+useful for client review on a calibrated display.
+
+Locations: **Window** menu, **Window** toolbar
+
+Shortcut: <kbd>Y</kbd>

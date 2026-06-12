@@ -1,8 +1,14 @@
-# Optional — only needed if you want to preview the site locally before pushing.
+# DJV documentation — local build / preview dependencies
 # Lives at: docs/Gemfile
-# Then run:  bundle install  &&  bundle exec jekyll serve
-# This matches the GitHub Pages build (it bundles jekyll-remote-theme for you).
+#   Setup:    bundle install
+#   Preview:  bundle exec jekyll serve --livereload   ->  http://localhost:4000/DJV/
 
 source "https://rubygems.org"
 
-gem "github-pages", group: :jekyll_plugins
+gem "jekyll", "~> 4.3"
+gem "just-the-docs"   # version is pinned by Gemfile.lock; bump with `bundle update`
+
+# Ruby 3.0+/3.4+ dropped these from the standard library; Jekyll's local
+# server and a couple of dependencies still expect them.
+gem "webrick", "~> 1.8"
+gem "csv"
