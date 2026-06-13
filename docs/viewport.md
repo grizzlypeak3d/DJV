@@ -18,16 +18,71 @@ Default viewport controls:
 - **Color picker** — **Ctrl** + left mouse button
 - **Frame shuttle** (scrub frames by dragging) — Left mouse button
 
-Viewport controls can be remapped in the **Settings** tool.
+Viewport controls can be remapped in the **Mouse** section of the **Settings**
+tool.
 
-## Color buffer
+## Framing and zoom
 
-The viewport's bit depth can be configured, though rhe default, **RGBA F32**,
-is recommended because it preserves the full range of color values without
-clamping. Lower bit-depth options can be faster, but they can clamp colors —
-choose them only when performance is more important than precision.
+The view can be framed (fit to the viewport), reset to 1:1, or zoomed in and
+out from the **View** menu and the zoom control on the **View** tool bar.
+
+Locations: **View** menu, **View** tool bar, **View** tool
+
+## Color channels
+
+Individual color channels can be isolated to inspect them.
+
+Locations: **View** menu
+
+Shortcuts:
+
+- **Red** — <kbd>R</kbd>
+- **Green** — <kbd>G</kbd>
+- **Blue** — <kbd>B</kbd>
+- **Alpha** — <kbd>A</kbd>
+
+## Mirror
+
+The image can be mirrored horizontally or vertically.
+
+Locations: **View** menu
+
+Shortcuts:
+
+- **Mirror horizontal** — <kbd>H</kbd>
+- **Mirror vertical** — <kbd>V</kbd>
+
+## Position and zoom
+
+The **Position and Zoom** section of the **View** tool shows the exact view
+position and zoom level, and lets you set them numerically.
 
 Locations: **View** tool
+
+## Options
+
+The **Options** section of the **View** tool controls how the image is sampled
+and displayed:
+
+- **Minify** — Filter used when the image is scaled down (**Nearest** or
+  **Linear**).
+- **Magnify** — Filter used when the image is scaled up. Use **Nearest** to see
+  individual pixels without smoothing.
+- **Video levels** — How video levels are interpreted: from the file, full
+  range, or legal range.
+- **Alpha blend** — How the alpha channel is blended: none, straight, or
+  pre-multiplied.
+- **Color buffer** — The viewport's bit depth. The default, **RGBA F32**, is
+  recommended because it preserves the full range of color values without
+  clamping. Lower bit-depth options can be faster, but they can clamp colors —
+  choose them only when performance is more important than precision.
+
+## Aspect ratio
+
+The pixel aspect ratio can be left at the file's default or overridden. Up to
+three custom aspect ratios can be defined.
+
+Locations: **View** menu, **View** tool
 
 ## Background
 
@@ -39,7 +94,9 @@ Locations: **View** tool
 
 A grid overlay can be shown to identify areas in the viewport.
 
-Locations: **View** tool
+Locations: **View** menu, **View** tool
+
+Shortcut: <kbd>Ctrl+G</kbd>
 
 Grid options:
 
@@ -66,16 +123,25 @@ The grid can also help you inspect individual pixels. To do so:
 
 ## Outline
 
-An outline can be draw around the image to make transparent regions easier to
+An outline can be drawn around the image to make transparent regions easier to
 distinguish from the background.
 
 Locations: **View** tool
+
+## Center marker
+
+A marker can be shown at the center of the viewport to help with alignment and
+framing. Its size, line width, and color can be customized.
+
+Locations: **View** menu, **View** tool
 
 ## HUD
 
 The heads-up display (HUD) overlays useful information on top of the viewport.
 
 Locations: **View** menu
+
+Shortcut: <kbd>Ctrl+H</kbd>
 
 ![Viewport HUD]({{ '/assets/ViewHUDAnnotated.svg' | relative_url }})
 

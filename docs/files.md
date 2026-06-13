@@ -27,6 +27,15 @@ You can open files and folders in three ways:
 
 Opening a folder opens every supported file in that folder (non-recursively).
 
+Shortcuts:
+
+* Open: <kbd>Ctrl+O</kbd>
+* Open with audio: <kbd>Ctrl+Shift+O</kbd>
+* Reload: <kbd>Ctrl+R</kbd>
+* Close: <kbd>Ctrl+E</kbd>
+* Close all: <kbd>Ctrl+Shift+E</kbd>
+
+
 Image sequences can be opened from the command line by either specifying the
 first frame or using the "#" wildcard. For example:
 
@@ -37,8 +46,36 @@ djv render.#.exr
 The native file browser is enabled by default on Windows and macOS. To use DJV's
 built-in file browser instead, change the option in the **Settings** tool.
 
+### The built-in file browser
+
+The built-in file browser has a panel on the left for navigation and a file list
+on the right:
+
+- **Drives** — Mounted drives and volumes.
+- **Shortcuts** — Common locations such as the home, Desktop, Documents, and
+  Downloads folders.
+- **Recent** — Recently visited directories.
+
+Above the file list are buttons to go up a directory, navigate back and forward,
+reload, and edit the current path, along with a row of *path buttons* for quickly
+jumping to any parent directory. Below the list, a search box filters by name, an
+extension menu filters by file type, and the sort menu and direction button order
+the results.
+
+Image sequences are shown as a single item with their frame range, so a
+multi-thousand-frame render appears as one entry rather than thousands.
+
+## Switching files
+
 To switch between open files, use the **File/Current** menu, the **Tab Bar**, or
 the **Files** tool.
+
+Locations: **File** menu, **Tab Bar**, **Files** tool
+
+Shortcuts:
+
+* Next file: <kbd>Ctrl+Page Down</kbd>
+* Previous file: <kbd>Ctrl+Page Up</kbd>
 
 ## FFmpeg command
 
@@ -70,17 +107,21 @@ for the new file.
 For files with multiple layers (such as multi-part OpenEXR), the active layer
 can be changed from the **File/Layers** menu or from the **Files** tool.
 
-* Locations: **File** menu, **Files** tool
-* Next layer shortcut: <kbd>Ctrl+Equals</kbd>
-* Previous layer shortcut: <kbd>Ctrl+Minus</kbd>
+Locations: **File** menu, **Files** tool
+
+Shortcuts:
+
+* Next layer: <kbd>Ctrl+Equals</kbd>
+* Previous layer: <kbd>Ctrl+Minus</kbd>
 
 ## Files tool
 
 The **Files** tool is the central place for managing open files: it sets the
 current file, picks active layers, and configures comparison.
 
-* Locations: **Tools** menu, **Tools** toolbar
-* Shortcut: <kbd>F1</kbd>
+Locations: **Tools** menu, **Tools** toolbar
+
+Shortcut: <kbd>F1</kbd>
 
 ![Files tool]({{ '/assets/FilesToolAnnotated.svg' | relative_url }})
 

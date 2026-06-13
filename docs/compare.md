@@ -16,21 +16,30 @@ revisions, matching color between shots, or spotting differences between renders
    menu or the **Files** tool.
 3. Pick a compare mode (see below).
 
+Locations: **Compare** menu, **Compare** tool bar, **Files** tool
+
+Shortcuts:
+
+* Next B file: <kbd>Shift+Page Down</kbd>
+* Previous B file: <kbd>Shift+Page Up</kbd>
+
 {: .note }
 Drag with **Alt** + left mouse button to move the wipe between **A** and **B**.
 
 ## Compare modes
 
-| Mode           | What it shows                                                          |
-| -------------- | --------------------------------------------------------------------- |
-| **A**          | Only the **A** file                                                   |
-| **B**          | Only the **B** file                                                   |
-| **Wipe**       | A wipe between **A** and **B** (drag with **Alt** + left mouse button) |
-| **Overlay**    | **B** layered on top of **A**                                         |
-| **Difference** | The pixel difference between **A** and **B**                          |
-| **Horizontal** | **A** and **B** side by side                                          |
-| **Vertical**   | **A** above **B**                                                     |
-| **Tile**       | **A** and **B** as tiles (supports multiple **B** files)              |
+| Mode           | What it shows                                                          | Shortcut          |
+| -------------- | --------------------------------------------------------------------- | ----------------- |
+| **A**          | Only the **A** file                                                    | <kbd>Ctrl+A</kbd> |
+| **B**          | Only the **B** file                                                    | <kbd>Ctrl+B</kbd> |
+| **Wipe**       | A wipe between **A** and **B** (drag with **Alt** + left mouse button) | <kbd>Ctrl+W</kbd> |
+| **Overlay**    | **B** layered on top of **A**                                          |                   |
+| **Difference** | The pixel difference between **A** and **B**                           |                   |
+| **Horizontal** | **A** and **B** side by side                                           |                   |
+| **Vertical**   | **A** above **B**                                                      |                   |
+| **Tile**       | **A** and **B** as tiles (supports multiple **B** files)               | <kbd>Ctrl+T</kbd> |
+
+Use <kbd>Alt+A</kbd> to toggle between the **A** and **B** modes.
 
 ## Compare time
 
