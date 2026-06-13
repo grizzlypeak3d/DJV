@@ -572,51 +572,52 @@ namespace djv
         void MainWindow::_windowUpdate()
         {
             FTK_P();
+            if (auto app = p.app.lock())
+            {
+                auto settings = p.settingsModel->getWindow();
+                const bool presentMode = p.presentMode->get();
 
-            auto app = p.app.lock();
-            auto settings = p.settingsModel->getWindow();
-            const bool presentMode = p.presentMode->get();
+                p.menuBar->setVisible(!presentMode);
+                p.dividers["MenuBar"]->setVisible(!presentMode);
 
-            p.menuBar->setVisible(!presentMode);
-            p.dividers["MenuBar"]->setVisible(!presentMode);
+                p.fileToolBar->setVisible(settings.fileToolBar && !presentMode);
+                p.dividers["File"]->setVisible(settings.fileToolBar && !presentMode);
 
-            p.fileToolBar->setVisible(settings.fileToolBar && !presentMode);
-            p.dividers["File"]->setVisible(settings.fileToolBar && !presentMode);
+                p.compareToolBar->setVisible(settings.compareToolBar && !presentMode);
+                p.dividers["Compare"]->setVisible(settings.compareToolBar && !presentMode);
 
-            p.compareToolBar->setVisible(settings.compareToolBar && !presentMode);
-            p.dividers["Compare"]->setVisible(settings.compareToolBar && !presentMode);
+                p.windowToolBar->setVisible(settings.windowToolBar && !presentMode);
+                p.dividers["Window"]->setVisible(settings.windowToolBar && !presentMode);
 
-            p.windowToolBar->setVisible(settings.windowToolBar && !presentMode);
-            p.dividers["Window"]->setVisible(settings.windowToolBar && !presentMode);
+                p.viewToolBar->setVisible(settings.viewToolBar && !presentMode);
+                p.dividers["View"]->setVisible(settings.viewToolBar && !presentMode);
 
-            p.viewToolBar->setVisible(settings.viewToolBar && !presentMode);
-            p.dividers["View"]->setVisible(settings.viewToolBar && !presentMode);
+                p.toolsToolBar->setVisible(settings.toolsToolBar && !presentMode);
 
-            p.toolsToolBar->setVisible(settings.toolsToolBar && !presentMode);
+                p.dividers["ToolBars"]->setVisible(
+                    (settings.fileToolBar ||
+                    settings.compareToolBar ||
+                    settings.windowToolBar ||
+                    settings.viewToolBar ||
+                    settings.toolsToolBar) && !presentMode);
 
-            p.dividers["ToolBars"]->setVisible(
-                (settings.fileToolBar ||
-                settings.compareToolBar ||
-                settings.windowToolBar ||
-                settings.viewToolBar ||
-                settings.toolsToolBar) && !presentMode);
+                p.tabBar->setVisible(settings.tabBar && !presentMode);
 
-            p.tabBar->setVisible(settings.tabBar && !presentMode);
+                p.toolsWidget->setVisible(
+                    app->getToolsModel()->getActiveTool() != models::Tool::None &&
+                    !presentMode);
 
-            p.toolsWidget->setVisible(
-                app->getToolsModel()->getActiveTool() != models::Tool::None &&
-                !presentMode);
+                p.timelineWidget->setVisible(settings.timeline && !presentMode);
 
-            p.timelineWidget->setVisible(settings.timeline && !presentMode);
+                p.bottomToolBar->setVisible(settings.bottomToolBar && !presentMode);
+                p.dividers["Bottom"]->setVisible(settings.bottomToolBar && !presentMode);
 
-            p.bottomToolBar->setVisible(settings.bottomToolBar && !presentMode);
-            p.dividers["Bottom"]->setVisible(settings.bottomToolBar && !presentMode);
+                p.statusBar->setVisible(settings.statusToolBar && !presentMode);
+                p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
 
-            p.statusBar->setVisible(settings.statusToolBar && !presentMode);
-            p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
-
-            p.splitter->setSplit(settings.splitter);
-            p.splitter2->setSplit(settings.splitter2);
+                p.splitter->setSplit(settings.splitter);
+                p.splitter2->setSplit(settings.splitter2);
+            }
         }
     }
 }
