@@ -454,7 +454,7 @@ namespace djv
                 { "Misc", "/Misc.1" },
                 { "Mouse", "/Mouse.1" },
                 { "Playback", "/Playback.1" },
-                { "Style", "/Style.1" },
+                { "Style", "/Style.2" },
                 { "Timeline", "/Timeline" },
                 { "Window", "/Window" },
                 { "FFmpeg", "/FFmpeg" },
