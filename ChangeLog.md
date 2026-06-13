@@ -1,10 +1,11 @@
 ## 3.4.3
 
 Changes:
-* Add an option for custom aspect ratios
-* Add more grid options
+* Add an option for custom aspect ratios.
+* Add more grid options.
 * Add the aom library for AV1 decoding support (macOS and Linux).
-* Allow the "Escape" key to be used for keyboard shortcuts
+* Allow the "Escape" key to be used for keyboard shortcuts.
+* Style updates.
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
