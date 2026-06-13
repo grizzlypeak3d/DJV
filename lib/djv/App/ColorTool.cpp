@@ -44,7 +44,7 @@ namespace djv
             auto softClipWidget = ui::SoftClipWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
-            layout->setSpacingRole(ftk::SizeRole::None);
+            layout->setSpacingRole(ftk::SizeRole::Border);
 #if defined(TLRENDER_OCIO)
             p.bellows["OCIO"] = ftk::Bellows::create(context, "OCIO", layout);
             p.bellows["OCIO"]->setWidget(ocioWidget);

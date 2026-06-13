@@ -15,8 +15,8 @@ Features include:
 
 - High-resolution and high bit-depth image support
 - A/B comparison with wipe, overlay, difference, and tile modes
-- Timeline support via OpenTimelineIO
-- Color management via OpenColorIO
+- Timeline support with OpenTimelineIO
+- Color management with OpenColorIO
 - Multi-track audio with variable-speed and reverse playback
 - Experimental USD support
 - Available for Linux, macOS, and Windows

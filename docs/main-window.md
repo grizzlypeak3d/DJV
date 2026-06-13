@@ -8,12 +8,14 @@ nav_order: 3
 
 ![Main window]({{ '/assets/MainWindowAnnotated.svg' | relative_url }})
 
+1. Menu bar
+2. Tool bars
 1. Tab bar — switch between currently opened files
 2. Viewport — view of the current file
 3. Timeline — time scrubbing, thumbnails, and audio waveforms
 4. Playback — playback and frame controls
 5. Tool — the currently active tool (for example, color picker or magnifier)
-6. Status bar — warnings and errors, information about the current file, and status indicators
+6. Status bar — warnings, errors, information, and status indicators
 
 Different parts of the interface can be shown or hidden from the **Window** menu.
 

@@ -52,7 +52,7 @@ namespace djv
             p.centerMarkerWidget = ui::ViewCenterMarkerWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
-            layout->setSpacingRole(ftk::SizeRole::None);
+            layout->setSpacingRole(ftk::SizeRole::Border);
             p.bellows["PosZoom"] = ftk::Bellows::create(context, "Position and Zoom", layout);
             p.bellows["PosZoom"]->setWidget(p.posZoomWidget);
             p.bellows["Options"] = ftk::Bellows::create(context, "Options", layout);

@@ -40,7 +40,7 @@ namespace djv
 
             auto settingsModel = app->getSettingsModel();
             auto vLayout = ftk::VerticalLayout::create(context);
-            vLayout->setSpacingRole(ftk::SizeRole::None);
+            vLayout->setSpacingRole(ftk::SizeRole::Border);
 
             p.bellows["Cache"] = ftk::Bellows::create(context, "Cache", vLayout);
             auto vLayout2 = ftk::VerticalLayout::create(context, vLayout);
