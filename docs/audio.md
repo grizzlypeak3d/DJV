@@ -17,9 +17,9 @@ Volume and mute are available from the **Audio** menu, the **Bottom** tool bar
 
 Shortcuts:
 
-- Volume up — <kbd>Period</kbd>
-- Volume down — <kbd>Comma</kbd>
-- Mute — <kbd>M</kbd>
+* Volume up — <kbd>Period</kbd>
+* Volume down — <kbd>Comma</kbd>
+* Mute — <kbd>M</kbd>
 
 ## Audio tool
 

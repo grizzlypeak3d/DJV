@@ -27,10 +27,10 @@ Locations: **Playback** menu, **Playback** controls
 
 Shortcuts:
 
-- Forward — <kbd>L</kbd>
-- Reverse — <kbd>J</kbd>
-- Stop — <kbd>K</kbd>
-- Toggle playback — <kbd>Space</kbd>
+* Forward — <kbd>L</kbd>
+* Reverse — <kbd>J</kbd>
+* Stop — <kbd>K</kbd>
+* Toggle playback — <kbd>Space</kbd>
 
 ## Speed multiplier
 
@@ -47,11 +47,11 @@ Locations: **Frame** menu, frame controls
 
 Shortcuts:
 
-- Start / End — <kbd>Home</kbd> / <kbd>End</kbd>
-- Previous / Next frame — <kbd>Left</kbd> / <kbd>Right</kbd>
-- Previous / Next ×10 — <kbd>Shift+Left</kbd> / <kbd>Shift+Right</kbd>
-- Previous / Next ×100 — <kbd>Ctrl+Left</kbd> / <kbd>Ctrl+Right</kbd>
-- Focus current frame (scroll the timeline to the playhead) — <kbd>Ctrl+F</kbd>
+* Start / End — <kbd>Home</kbd> / <kbd>End</kbd>
+* Previous / Next frame — <kbd>Left</kbd> / <kbd>Right</kbd>
+* Previous / Next ×10 — <kbd>Shift+Left</kbd> / <kbd>Shift+Right</kbd>
+* Previous / Next ×100 — <kbd>Ctrl+Left</kbd> / <kbd>Ctrl+Right</kbd>
+* Focus current frame (scroll the timeline to the playhead) — <kbd>Ctrl+F</kbd>
 
 ## Loop modes
 
@@ -70,10 +70,10 @@ Locations: **Playback** menu
 
 Shortcuts:
 
-- Jump back 1s — <kbd>Shift+J</kbd>
-- Jump back 10s — <kbd>Ctrl+J</kbd>
-- Jump forward 1s — <kbd>Shift+L</kbd>
-- Jump forward 10s — <kbd>Ctrl+L</kbd>
+* Jump back 1s — <kbd>Shift+J</kbd>
+* Jump back 10s — <kbd>Ctrl+J</kbd>
+* Jump forward 1s — <kbd>Shift+L</kbd>
+* Jump forward 10s — <kbd>Ctrl+L</kbd>
 
 ## In and out points
 
@@ -83,10 +83,10 @@ Locations: **Playback** menu, **Playback** controls
 
 Shortcuts:
 
-- Set in point — <kbd>I</kbd>
-- Reset in point — <kbd>Shift+I</kbd>
-- Set out point — <kbd>O</kbd>
-- Reset out point — <kbd>Shift+O</kbd>
+* Set in point — <kbd>I</kbd>
+* Reset in point — <kbd>Shift+I</kbd>
+* Set out point — <kbd>O</kbd>
+* Reset out point — <kbd>Shift+O</kbd>
 
 ## Dropped frames
 

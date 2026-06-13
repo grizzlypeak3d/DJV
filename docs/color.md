@@ -40,14 +40,16 @@ The OpenColorIO configuration can be set to a built-in configuration, the
 
 Shortcuts:
 
-* Toggled enabled: <kbd>Ctrl+N</kbd>
-
+* Toggle OCIO: <kbd>Ctrl+N</kbd>
 
 ## LUT
 
 A LUT can be applied either before or after the OpenColorIO pass — set the LUT
-**Order** option to **PreColorConfig** or **PostColorConfig** as needed. The LUT
-can be toggled with <kbd>Ctrl+K</kbd>.
+**Order** option to **PreColorConfig** or **PostColorConfig** as needed.
+
+Shortcuts:
+
+* Toggle LUT: <kbd>Ctrl+K</kbd>
 
 ### Supported LUT formats
 

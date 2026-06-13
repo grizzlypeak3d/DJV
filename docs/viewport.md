@@ -36,10 +36,10 @@ Locations: **View** menu
 
 Shortcuts:
 
-- **Red** — <kbd>R</kbd>
-- **Green** — <kbd>G</kbd>
-- **Blue** — <kbd>B</kbd>
-- **Alpha** — <kbd>A</kbd>
+* **Red** — <kbd>R</kbd>
+* **Green** — <kbd>G</kbd>
+* **Blue** — <kbd>B</kbd>
+* **Alpha** — <kbd>A</kbd>
 
 ## Mirror
 
@@ -49,8 +49,8 @@ Locations: **View** menu
 
 Shortcuts:
 
-- **Mirror horizontal** — <kbd>H</kbd>
-- **Mirror vertical** — <kbd>V</kbd>
+* **Mirror horizontal** — <kbd>H</kbd>
+* **Mirror vertical** — <kbd>V</kbd>
 
 ## Position and zoom
 

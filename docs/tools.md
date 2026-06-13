@@ -98,6 +98,7 @@ useful when reporting a problem (see
 Locations: **Tools** menu, **Tools** toolbar
 
 Shortcuts:
+
 * Messages: <kbd>F11</kbd>
 * System Log: <kbd>F12</kbd>
 
