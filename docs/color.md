@@ -25,7 +25,7 @@ the adjustment isn't forgotten about.
 
 ## OpenColorIO (OCIO)
 
-![Color tool]({{ '/assets/ColorToolAnnotated.svg' | relative_url }})
+![Color tool]({{ '/assets/color-ocio.svg' | relative_url }})
 
 1. Enable OpenColorIO
 2. OpenColorIO configuration

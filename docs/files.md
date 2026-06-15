@@ -86,7 +86,7 @@ and audio to DJV for display.
 The paths to the **ffmpeg** and **ffprobe** commands are set in the **Settings**
 tool.
 
-![FFmpeg command]({{ '/assets/FFmpegCommandAnnotated.svg' | relative_url }})
+![FFmpeg command]({{ '/assets/ffmpeg-command.svg' | relative_url }})
 
 1. ffmpeg command location (click to show full path)
 2. ffprobe command location (click to show full path)
@@ -123,7 +123,7 @@ Locations: **Tools** menu, **Tools** toolbar
 
 Shortcut: <kbd>F1</kbd>
 
-![Files tool]({{ '/assets/FilesToolAnnotated.svg' | relative_url }})
+![Files tool]({{ '/assets/files-tool.svg' | relative_url }})
 
 * Current file (the **A** file)
 * **B** files (multiple **B** files can be set in tile mode)

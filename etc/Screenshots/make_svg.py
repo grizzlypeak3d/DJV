@@ -508,10 +508,13 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
     callouts_dir = args.callouts or out_dir
     callouts_dir.mkdir(parents=True, exist_ok=True)
-    cap = "".join(s[:1].upper() + s[1:] for s in shot.replace("_", "-").split("-"))
-    svg_path = out_dir / f"{cap}Annotated.svg"
+    # The output is named after the shot id, which is already lowercase and
+    # hyphenated (URL-friendly): main-window -> main-window.svg, and the
+    # companion captions list -> main-window.callouts.md.
+    svg_path = out_dir / f"{shot}.svg"
     svg_path.write_text(svg)
-    (callouts_dir / f"{shot}.callouts.md").write_text(build_markdown(annotate) + "\n")
+    (callouts_dir / f"{shot}.callouts.md").write_text(
+        build_markdown(annotate) + "\n")
 
     for mid in missing:
         print(f"warning: no box for annotated id '{mid}' (hidden or untagged?)",

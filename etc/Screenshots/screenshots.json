@@ -40,40 +40,34 @@
       ]
     },
     {
-      "id": "info-tool",
-      "window": { "w": 1280, "h": 800 },
+      "id": "ffmpeg-command",
+      "window": { "w": 1280, "h": 500 },
+      "crop": "MainWindow.Tools",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
-        { "tool": "Information" }
+        { "tool": "Settings", "expand": ["FFmpeg Command"] }
       ],
       "annotate": []
     },
     {
-      "id": "ab-tile",
+      "id": "view-pixel-grid",
       "window": { "w": 1280, "h": 800 },
       "setup": [
-        { "open": "etc/SampleData/Cubes.0001.exr" },
-        { "open": "etc/SampleData/Cubes.0001.exr" },
-        { "open": "etc/SampleData/Cubes.0001.exr" },
-        { "open": "etc/SampleData/Cubes.0001.exr" },
-        { "layer": "Combined", "file": 0 },
-        { "layer": "DiffCol",  "file": 1 },
-        { "layer": "GlossDir", "file": 2 },
-        { "layer": "Normal",   "file": 3 },
-        { "tool": "Files", "expand": ["Compare"] },
-        { "compare": "Tile" },
-        { "a": 0 },
-        { "b": 1 },
-        { "b": 2 },
-        { "b": 3 }
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "View", "expand": ["Options", "Grid"] }
       ],
-      "annotate": [
-        { "id": "Files.CurrentLayer",   "caption": "Current layer" },
-        { "id": "Files.CurrentFile",    "caption": "Current file" },
-        { "id": "Files.BFile",          "caption": "B files" },
-        { "id": "Files.CompareMode",    "caption": "Compare mode" }
-      ]
+      "annotate": []
+    },
+    {
+      "id": "view-hud",
+      "window": { "w": 1280, "h": 800 },
+      "crop": "MainWindow.Viewport",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 }
+      ],
+      "annotate": []
     },
     {
       "id": "playback-controls",
@@ -106,6 +100,124 @@
         { "id": "Playback.TimeUnits",           "caption": "Time units" },
         { "id": "Playback.Speed",               "caption": "Speed" }
       ]
+    },
+    {
+      "id": "compare-tile",
+      "window": { "w": 1280, "h": 800 },
+      "setup": [
+        { "open": "etc/SampleData/Cubes.0001.exr" },
+        { "open": "etc/SampleData/Cubes.0001.exr" },
+        { "open": "etc/SampleData/Cubes.0001.exr" },
+        { "open": "etc/SampleData/Cubes.0001.exr" },
+        { "layer": "Combined", "file": 0 },
+        { "layer": "DiffCol",  "file": 1 },
+        { "layer": "GlossDir", "file": 2 },
+        { "layer": "Normal",   "file": 3 },
+        { "tool": "Files", "expand": ["Compare"] },
+        { "compare": "Tile" },
+        { "a": 0 },
+        { "b": 1 },
+        { "b": 2 },
+        { "b": 3 }
+      ],
+      "annotate": [
+        { "id": "Files.CurrentLayer",   "caption": "Current layer" },
+        { "id": "Files.CurrentFile",    "caption": "Current file" },
+        { "id": "Files.BFile",          "caption": "B files" },
+        { "id": "Files.CompareMode",    "caption": "Compare mode" }
+      ]
+    },
+    {
+      "id": "color-ocio",
+      "window": { "w": 1280, "h": 800 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Color", "expand": ["OCIO"] }
+      ],
+      "annotate": []
+    },
+    {
+      "id": "tools",
+      "window": { "w": 1280, "h": 800 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Information" }
+      ],
+      "annotate": [
+        { "id": "MainWindow.ToolsToolBar",  "caption": "Tools tool bar" },
+        { "id": "MainWindow.Tools",         "caption": "Tool" }
+      ]
+    },
+    {
+      "id": "info-tool",
+      "window": { "w": 1280, "h": 500 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Information" }
+      ],
+      "annotate": [
+        { "id": "Info.Copy",    "caption": "Copy" },
+        { "id": "Info.Search",  "caption": "Search" }
+      ]
+    },
+    {
+      "id": "color-picker-tool",
+      "window": { "w": 1280, "h": 500 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Color Picker" }
+      ],
+      "annotate": []
+    },
+    {
+      "id": "magnify-tool",
+      "window": { "w": 1280, "h": 500 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Magnify" }
+      ],
+      "annotate": []
+    },
+    {
+      "id": "export-tool",
+      "window": { "w": 1280, "h": 800 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Export" }
+      ],
+      "annotate": []
+    },
+    {
+      "id": "keyboard-shortcuts",
+      "window": { "w": 1280, "h": 800 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Settings", "expand": ["Keyboard Shortcuts"] }
+      ],
+      "annotate": []
+    },
+    {
+      "id": "custom-fonts",
+      "window": { "w": 1280, "h": 800 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Settings", "expand": ["Style"] }
+      ],
+      "annotate": []
     }
   ]
 }

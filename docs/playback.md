@@ -6,9 +6,9 @@ nav_order: 6
 
 # Playback and frame control
 
-![Playback controls]({{ '/assets/PlaybackControlsAnnotated.svg' | relative_url }})
+![Playback controls]({{ '/assets/playback-controls.svg' | relative_url }})
 
-![Playback controls 2]({{ '/assets/PlaybackControls2Annotated.svg' | relative_url }})
+![Playback controls 2]({{ '/assets/playback-controls2.svg' | relative_url }})
 
 * Playback shuttle — click and drag to vary playback speed
 * Frame shuttle — click and drag to scrub the current frame

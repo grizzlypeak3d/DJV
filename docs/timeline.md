@@ -10,7 +10,7 @@ By default, the timeline is minimized and shows only the first video and audio
 track. To see every track, toggle the minimized state from the **Timeline**
 menu.
 
-![Timeline]({{ '/assets/TimelineAnnotated.svg' | relative_url }})
+![Timeline]({{ '/assets/timeline.svg' | relative_url }})
 
 1. Current frame
 2. In/out range (blue)

@@ -113,7 +113,7 @@ Grid options:
 - **Text color** — Label text color
 - **Overlay color** — Label background color
 
-![View pixel grid]({{ '/assets/ViewPixelGridAnnotated.svg' | relative_url }})
+![View pixel grid]({{ '/assets/view-pixel-grid.svg' | relative_url }})
 
 The grid can also help you inspect individual pixels. To do so:
 
@@ -143,7 +143,7 @@ Locations: **View** menu
 
 Shortcut: <kbd>Ctrl+H</kbd>
 
-![Viewport HUD]({{ '/assets/ViewHUDAnnotated.svg' | relative_url }})
+![Viewport HUD]({{ '/assets/view-hud.svg' | relative_url }})
 
 1. Current file name
 2. Current frame

@@ -4,6 +4,7 @@
 #include <djv/App/InfoTool.h>
 
 #include <djv/App/App.h>
+#include <djv/App/Capture.h>
 
 #include <ftk/UI/ClipboardSystem.h>
 #include <ftk/UI/Divider.h>
@@ -50,9 +51,11 @@ namespace djv
             p.textEdit->setVStretch(ftk::Stretch::Expanding);
 
             auto copyButton = ftk::ToolButton::create(context, "Copy");
+            setDocTag(copyButton, "Info.Copy");
 
             p.searchBox = ftk::SearchBox::create(context);
             p.searchBox->setHStretch(ftk::Stretch::Expanding);
+            setDocTag(p.searchBox, "Info.Search");
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setMarginRole(ftk::SizeRole::MarginSmall);

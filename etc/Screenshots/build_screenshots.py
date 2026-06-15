@@ -69,11 +69,15 @@ def main():
         ids = [i for i in ids if i in args.only]
 
     failures = []
+    # Redirect settings to a throwaway file so a local run never reads or
+    # overwrites the user's real settings. -resetSettings still guarantees each
+    # shot starts from defaults regardless of what a prior shot wrote here.
+    settings_file = shots_dir / "capture-settings.json"
     for shot_id in ids:
-        # -resetSettings keeps window size / state deterministic across runs.
         cmd = [
             djv,
             "-resetSettings",
+            "-settingsFile", str(settings_file),
             "-captureManifest", str(manifest),
             "-captureShot", shot_id,
             "-captureOutput", str(shots_dir),

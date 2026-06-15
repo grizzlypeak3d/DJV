@@ -11,7 +11,7 @@ a single still image.
 
 Open it from the **Tools** menu or the tool bar.
 
-![Export tool]({{ '/assets/ExportToolAnnotated.svg' | relative_url }})
+![Export tool]({{ '/assets/export-tool.svg' | relative_url }})
 
 1. Output directory
 2. Render size — the resolution of the export. **Default** uses the source

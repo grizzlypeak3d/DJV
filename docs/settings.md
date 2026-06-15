@@ -48,7 +48,7 @@ shuttle.
 
 ## Keyboard shortcuts
 
-![Keyboard shortcuts]({{ '/assets/KeyboardShortcutsAnnotated.svg' | relative_url }})
+![Keyboard shortcuts]({{ '/assets/keyboard-shortcuts.svg' | relative_url }})
 
 1. Search shortcuts
 2. Shortcut with keyboard focus
@@ -71,7 +71,7 @@ file names in some scripts to display incorrectly. To support additional
 languages — Chinese, Japanese, and Korean, for example — add custom fonts in the
 **Style** section of the **Settings** tool.
 
-![Custom fonts]({{ '/assets/CustomFontsAnnotated.svg' | relative_url }})
+![Custom fonts]({{ '/assets/custom-fonts.svg' | relative_url }})
 
 1. Add custom fonts
 2. Set custom fonts

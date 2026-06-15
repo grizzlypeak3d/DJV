@@ -6,7 +6,7 @@ nav_order: 3
 
 # Main window
 
-![Main window]({{ '/assets/MainWindowAnnotated.svg' | relative_url }})
+![Main window]({{ '/assets/main-window.svg' | relative_url }})
 
 * Tab bar — switch between currently opened files
 * Timeline — time scrubbing, thumbnails, and audio waveforms

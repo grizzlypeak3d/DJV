@@ -55,7 +55,7 @@ layers of a single file at once. Open the file multiple times and set a differen
 active layer for each instance, then enable **Tile** compare mode and add the
 other instances as **B** files.
 
-![Tile mode]({{ '/assets/AbTileAnnotated.svg' | relative_url }})
+![Tile mode]({{ '/assets/compare-tile.svg' | relative_url }})
 
 1. Set the compare mode to **Tile**
 2. Set the current file and its layer

@@ -595,6 +595,11 @@ namespace djv
 
             p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
 
+            if (p.cmdLine.settingsFileName->found())
+            {
+                p.settingsFile = std::filesystem::u8path(
+                    p.cmdLine.settingsFileName->getValue());
+            }
             p.settings = ftk::Settings::create(
                 _context,
                 p.settingsFile,
