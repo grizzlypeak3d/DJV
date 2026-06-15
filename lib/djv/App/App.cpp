@@ -3,6 +3,7 @@
 
 #include <djv/App/App.h>
 
+#include <djv/App/Capture.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/Viewport.h>
@@ -86,6 +87,9 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > settingsFileName;
             std::shared_ptr<ftk::CmdLineFlag> version;
             std::shared_ptr<ftk::CmdLineOption<int> > debugLoop;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > captureManifest;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > captureShot;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > captureOutput;
         };
 
         struct App::Private
@@ -316,6 +320,18 @@ namespace djv
                 "Load the command line inputs in a loop. This value is the number of seconds for each cycle.",
                 "Testing",
                 10);
+            p.cmdLine.captureManifest = ftk::CmdLineOption<std::string>::create(
+                { "-captureManifest" },
+                "Screenshot manifest (JSON).",
+                "Capture");
+            p.cmdLine.captureShot = ftk::CmdLineOption<std::string>::create(
+                { "-captureShot" },
+                "Id of the single shot to capture.",
+                "Capture");
+            p.cmdLine.captureOutput = ftk::CmdLineOption<std::string>::create(
+                { "-captureOutput" },
+                "Output directory for PNG + JSON.", "Capture",
+                std::string("."));
 
             ftk::App::_init(
                 context,
@@ -356,7 +372,10 @@ namespace djv
                     p.cmdLine.resetSettings,
                     p.cmdLine.settingsFileName,
                     p.cmdLine.version,
-                    p.cmdLine.debugLoop
+                    p.cmdLine.debugLoop,
+                    p.cmdLine.captureManifest,
+                    p.cmdLine.captureShot,
+                    p.cmdLine.captureOutput
                 });
         }
 
@@ -585,6 +604,15 @@ namespace djv
             _devicesInit();
             _observersInit();
             _inputFilesInit();
+            
+            // Suppress first-run UI so it can't cover capture screenshots.
+            if (p.cmdLine.captureShot->found())
+            {
+                auto misc = getSettingsModel()->getMisc();
+                misc.showSetup = false;
+                getSettingsModel()->setMisc(misc);
+            }
+
             _windowsInit();
 
             if (p.cmdLine.debugLoop->found() &&
@@ -620,6 +648,27 @@ namespace djv
                             }
                         }
                     });
+            }
+
+            if (p.cmdLine.captureShot->found())
+            {
+                auto capture = Capture::create(
+                    _context, std::dynamic_pointer_cast<App>(shared_from_this()),
+                    p.cmdLine.captureManifest->getValue(),
+                    p.cmdLine.captureShot->getValue(),
+                    p.cmdLine.captureOutput->getValue());
+                if (!capture->begin())
+                {
+                    throw std::runtime_error(ftk::Format(
+                        "Cannot set up capture: {0}").arg(p.cmdLine.captureShot->getValue()));
+                }
+                ftk::App::run();
+                if (!capture->succeeded())
+                {
+                    throw std::runtime_error(ftk::Format(
+                        "Cannot capture shot: {0}").arg(p.cmdLine.captureShot->getValue()));
+                }
+                return;
             }
 
             ftk::App::run();

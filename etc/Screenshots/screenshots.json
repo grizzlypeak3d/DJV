@@ -1,0 +1,111 @@
+{
+  "shots": [
+    {
+      "id": "main-window",
+      "window": { "w": 1280, "h": 800 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "tool": "Color Picker" }
+      ],
+      "annotate": [
+        { "id": "MainWindow.MenuBar",       "caption": "Menu bar" },
+        { "id": "MainWindow.ToolBar",       "caption": "Tool bars" },
+        { "id": "MainWindow.TabBar",        "caption": "Tab bar" },
+        { "id": "MainWindow.Viewport",      "caption": "Viewport" },
+        { "id": "MainWindow.Timeline",      "caption": "Timeline" },
+        { "id": "MainWindow.BottomToolBar", "caption": "Bottom tool bar" },
+        { "id": "MainWindow.Tools",         "caption": "Tools" },
+        { "id": "MainWindow.StatusBar",     "caption": "Status bar" }
+      ]
+    },
+    {
+      "id": "files-tool",
+      "window": { "w": 1280, "h": 800 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/Counter.otio" },
+        { "open": "etc/SampleData/Charlie.jpg" },
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "tool": "Files", "expand": ["Compare"] },
+        { "a": "BART" },
+        { "b": "Charlie" }
+      ],
+      "annotate": [
+        { "id": "Files.CurrentFile",    "caption": "Current file" },
+        { "id": "Files.BFile",          "caption": "B file" },
+        { "id": "Files.CurrentLayer",   "caption": "Current layer" },
+        { "id": "Files.CompareMode",    "caption": "Compare mode" },
+        { "id": "Files.CompareTime",    "caption": "Compare time" },
+        { "id": "Files.CompareOptions", "caption": "Compare options" }
+      ]
+    },
+    {
+      "id": "info-tool",
+      "window": { "w": 1280, "h": 800 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 },
+        { "tool": "Information" }
+      ],
+      "annotate": []
+    },
+    {
+      "id": "ab-tile",
+      "window": { "w": 1280, "h": 800 },
+      "setup": [
+        { "open": "etc/SampleData/Cubes.0001.exr" },
+        { "open": "etc/SampleData/Cubes.0001.exr" },
+        { "open": "etc/SampleData/Cubes.0001.exr" },
+        { "open": "etc/SampleData/Cubes.0001.exr" },
+        { "layer": "Combined", "file": 0 },
+        { "layer": "DiffCol",  "file": 1 },
+        { "layer": "GlossDir", "file": 2 },
+        { "layer": "Normal",   "file": 3 },
+        { "tool": "Files", "expand": ["Compare"] },
+        { "compare": "Tile" },
+        { "a": 0 },
+        { "b": 1 },
+        { "b": 2 },
+        { "b": 3 }
+      ],
+      "annotate": [
+        { "id": "Files.CurrentLayer",   "caption": "Current layer" },
+        { "id": "Files.CurrentFile",    "caption": "Current file" },
+        { "id": "Files.BFile",          "caption": "B files" },
+        { "id": "Files.CompareMode",    "caption": "Compare mode" }
+      ]
+    },
+    {
+      "id": "playback-controls",
+      "window": { "w": 1280, "h": 800 },
+      "layout": "horizontal",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 }
+      ],
+      "annotate": [
+        { "id": "Playback.Controls",    "caption": "Playback and frame controls" }
+      ]
+    },
+    {
+      "id": "playback-controls2",
+      "window": { "w": 1280, "h": 800 },
+      "crop": "Playback.Controls",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 12 }
+      ],
+      "annotate": [
+        { "id": "Playback.PlaybackControls",    "caption": "Playback controls" },
+        { "id": "Playback.Loop",                "caption": "Playback loop" },
+        { "id": "Playback.PlaybackShuttle",     "caption": "Playback shuttle" },
+        { "id": "Playback.FrameControls",       "caption": "Frame controls" },
+        { "id": "Playback.FrameShuttle",        "caption": "Frame shuttle" },
+        { "id": "Playback.CurrentFrame",        "caption": "Current frame" },
+        { "id": "Playback.Duration",            "caption": "Duration" },
+        { "id": "Playback.TimeUnits",           "caption": "Time units" },
+        { "id": "Playback.Speed",               "caption": "Speed" }
+      ]
+    }
+  ]
+}

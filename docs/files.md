@@ -125,12 +125,8 @@ Shortcut: <kbd>F1</kbd>
 
 ![Files tool]({{ '/assets/FilesToolAnnotated.svg' | relative_url }})
 
-1. **Current file** (the **A** file)
-2. **B files** (multiple **B** files can be set in tile mode)
-3. Current layer
-4. Compare mode
-5. Compare time
-6. Compare options
+* Current file (the **A** file)
+* **B** files (multiple **B** files can be set in tile mode)
 
 ## Image sequences with audio
 

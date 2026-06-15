@@ -8,15 +8,11 @@ nav_order: 6
 
 ![Playback controls]({{ '/assets/PlaybackControlsAnnotated.svg' | relative_url }})
 
-1. Playback controls (forward / reverse / stop)
-2. Playback loop mode
-3. Playback shuttle — click and drag to vary playback speed
-4. Frame controls (step, jump to start / end)
-5. Frame shuttle — click and drag to scrub the current frame
-6. Current frame
-7. Duration
-8. Time units (e.g., frames or timecode)
-9. Current speed
+![Playback controls 2]({{ '/assets/PlaybackControls2Annotated.svg' | relative_url }})
+
+* Playback shuttle — click and drag to vary playback speed
+* Frame shuttle — click and drag to scrub the current frame
+* Time units (e.g., frames or timecode)
 
 ## Playback controls
 

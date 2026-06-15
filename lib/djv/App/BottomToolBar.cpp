@@ -5,6 +5,7 @@
 
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
+#include <djv/App/Capture.h>
 #include <djv/App/FrameActions.h>
 #include <djv/App/PlaybackActions.h>
 #include <djv/UI/AudioPopup.h>
@@ -89,9 +90,11 @@ namespace djv
             p.buttons["Reverse"] = ftk::ToolButton::create(context, actions["Reverse"]);
 
             p.loopWidget = tl::ui::PlaybackLoopWidget::create(context);
+            setDocTag(p.loopWidget, "Playback.Loop");
 
             p.playbackShuttle = ftk::ShuttleWidget::create(context);
             p.playbackShuttle->setTooltip("Playback shuttle. Click and drag to change playback speed.");
+            setDocTag(p.playbackShuttle, "Playback.PlaybackShuttle");
 
             actions = frameActions->getActions();
             p.buttons["Start"] = ftk::ToolButton::create(context, actions["Start"]);
@@ -103,21 +106,26 @@ namespace djv
 
             p.frameShuttle = ftk::ShuttleWidget::create(context);
             p.frameShuttle->setTooltip("Frame shuttle. Click and drag to change the current frame.");
+            setDocTag(p.frameShuttle, "Playback.FrameShuttle");
 
             auto timeUnitsModel = app->getTimeUnitsModel();
             p.currentTimeEdit = tl::ui::TimeEdit::create(context, timeUnitsModel);
             p.currentTimeEdit->setTooltip("Current time.");
+            setDocTag(p.currentTimeEdit, "Playback.CurrentFrame");
 
             p.durationLabel = tl::ui::TimeLabel::create(context, timeUnitsModel);
             p.durationLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.durationLabel->setTooltip("Duration of the timeline or the in/out range if set.");
+            setDocTag(p.durationLabel, "Playback.Duration");
 
             p.timeUnitsWidget = tl::ui::TimeUnitsWidget::create(context, timeUnitsModel);
             p.timeUnitsWidget->setTooltip("Time units.");
+            setDocTag(p.timeUnitsWidget, "Playback.TimeUnits");
 
             p.speedButton = ftk::ToolButton::create(context);
             p.speedButton->setPopupIcon("MenuArrow");
             p.speedButton->setTooltip("Playback speed.");
+            setDocTag(p.speedButton, "Playback.Speed");
 
             p.audioLabel = ftk::Label::create(context);
             p.audioLabel->setFont(ftk::FontType::Mono);
@@ -132,32 +140,37 @@ namespace djv
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::MarginInside);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->setSpacingRole(ftk::SizeRole::None);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::None);
-            p.buttons["Reverse"]->setParent(hLayout);
-            p.buttons["Stop"]->setParent(hLayout);
-            p.buttons["Forward"]->setParent(hLayout);
-            p.loopWidget->setParent(hLayout);
-            p.playbackShuttle->setParent(hLayout);
-            hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::None);
-            p.buttons["Start"]->setParent(hLayout);
-            p.buttons["Prev"]->setParent(hLayout);
-            p.buttons["Next"]->setParent(hLayout);
-            p.buttons["End"]->setParent(hLayout);
-            p.frameShuttle->setParent(hLayout);
-            p.currentTimeEdit->setParent(p.layout);
-            p.durationLabel->setParent(p.layout);
-            p.timeUnitsWidget->setParent(p.layout);
-            p.speedButton->setParent(p.layout);
+            hLayout->setSpacingRole(ftk::SizeRole::MarginInside);
+            setDocTag(hLayout, "Playback.Controls");
+            auto hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
+            hLayout2->setSpacingRole(ftk::SizeRole::None);
+            setDocTag(hLayout2, "Playback.PlaybackControls");
+            p.buttons["Reverse"]->setParent(hLayout2);
+            p.buttons["Stop"]->setParent(hLayout2);
+            p.buttons["Forward"]->setParent(hLayout2);
+            p.loopWidget->setParent(hLayout2);
+            p.playbackShuttle->setParent(hLayout2);
+            hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
+            hLayout2->setSpacingRole(ftk::SizeRole::None);
+            setDocTag(hLayout2, "Playback.FrameControls");
+            p.buttons["Start"]->setParent(hLayout2);
+            p.buttons["Prev"]->setParent(hLayout2);
+            p.buttons["Next"]->setParent(hLayout2);
+            p.buttons["End"]->setParent(hLayout2);
+            p.frameShuttle->setParent(hLayout2);
+            p.currentTimeEdit->setParent(hLayout);
+            p.durationLabel->setParent(hLayout);
+            p.timeUnitsWidget->setParent(hLayout);
+            p.speedButton->setParent(hLayout);
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
             spacer->setHStretch(ftk::Stretch::Expanding);
-            hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
-            p.audioLabel->setParent(hLayout);
-            p.audioButton->setParent(hLayout);
-            p.muteButton->setParent(hLayout);
+            hLayout2 = ftk::HorizontalLayout::create(context, p.layout);
+            hLayout2->setSpacingRole(ftk::SizeRole::SpacingTool);
+            p.audioLabel->setParent(hLayout2);
+            p.audioButton->setParent(hLayout2);
+            p.muteButton->setParent(hLayout2);
 
             p.loopWidget->setCallback(
                 [this](tl::Loop value)

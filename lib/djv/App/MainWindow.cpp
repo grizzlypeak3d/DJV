@@ -7,6 +7,7 @@
 #include <djv/App/AudioActions.h>
 #include <djv/App/AudioMenu.h>
 #include <djv/App/BottomToolBar.h>
+#include <djv/App/Capture.h>
 #include <djv/App/ColorActions.h>
 #include <djv/App/ColorMenu.h>
 #include <djv/App/CompareActions.h>
@@ -155,9 +156,11 @@ namespace djv
             p.presentMode = ftk::Observable<bool>::create(false);
 
             p.viewport = Viewport::create(context, app);
+            setDocTag(p.viewport, "MainWindow.Viewport");
 
             auto timeUnitsModel = app->getTimeUnitsModel();
             p.timelineWidget = tl::ui::TimelineWidget::create(context, timeUnitsModel);
+            setDocTag(p.timelineWidget, "MainWindow.Timeline");
 
             p.fileActions = FileActions::create(context, app);
             p.compareActions = CompareActions::create(context, app);
@@ -201,6 +204,7 @@ namespace djv
             p.toolsMenu = ToolsMenu::create(context, p.toolsActions);
             p.helpMenu = HelpMenu::create(context, p.helpActions);
             p.menuBar = ftk::MenuBar::create(context);
+            setDocTag(p.menuBar, "MainWindow.MenuBar");
             p.menuBar->addMenu("File", p.fileMenu);
             p.menuBar->addMenu("Compare", p.compareMenu);
             p.menuBar->addMenu("Playback", p.playbackMenu);
@@ -229,19 +233,26 @@ namespace djv
             p.toolsToolBar = ToolsToolBar::create(
                 context,
                 p.toolsActions->getActions());
+
             p.tabBar = TabBar::create(context, app);
+            setDocTag(p.tabBar, "MainWindow.TabBar");
+
             p.bottomToolBar = BottomToolBar::create(
                 context,
                 app,
                 p.playbackActions,
                 p.frameActions,
                 p.audioActions);
+            setDocTag(p.bottomToolBar, "MainWindow.BottomToolBar");
+
             p.statusBar = StatusBar::create(context, app);
+            setDocTag(p.statusBar, "MainWindow.StatusBar");
 
             p.toolsWidget = ToolsWidget::create(
                 context,
                 app,
                 std::dynamic_pointer_cast<MainWindow>(shared_from_this()));
+            setDocTag(p.toolsWidget, "MainWindow.Tools");
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
@@ -249,6 +260,7 @@ namespace djv
             p.dividers["MenuBar"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            setDocTag(hLayout, "MainWindow.ToolBar");
             p.fileToolBar->setParent(hLayout);
             p.dividers["File"] = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             p.compareToolBar->setParent(hLayout);
