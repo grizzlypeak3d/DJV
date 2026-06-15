@@ -295,6 +295,23 @@ namespace djv
             return _p->colorSample;
         }
 
+        void Viewport::pick(const ftk::V2I& imagePos)
+        {
+            FTK_P();
+            // Image pixel -> widget-local position, inverting the pick math used
+            // by the mouse handlers (image = (widget - viewPos) / zoom). Then
+            // sample exactly as a pick mouse action would.
+            const auto viewPos = getViewPos();
+            const double zoom = getZoom();
+            const ftk::V2I pos(
+                static_cast<int>(viewPos.x + imagePos.x * zoom),
+                static_cast<int>(viewPos.y + imagePos.y * zoom));
+            p.samplePos->setIfChanged(pos);
+            p.colorSample->setIfChanged(getColorSample(pos));
+            p.pick->setIfChanged(imagePos);
+            _hudUpdate();
+        }
+
         void Viewport::setPlayer(const std::shared_ptr<tl::Player>& player)
         {
             tl::ui::Viewport::setPlayer(player);

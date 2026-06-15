@@ -86,13 +86,17 @@ namespace djv
                 context,
                 tl::getCompareLabels());
             p.compareComboBox->setHStretch(ftk::Stretch::Expanding);
+            ui::setScreenshotTag(p.compareComboBox, "Files.CompareMode");
+
             p.compareTimeComboBox = ftk::ComboBox::create(
                 context,
                 tl::getCompareTimeLabels());
             p.compareTimeComboBox->setHStretch(ftk::Stretch::Expanding);
+            ui::setScreenshotTag(p.compareTimeComboBox, "Files.CompareTime");
 
             p.wipeXSlider = ftk::FloatEditSlider::create(context);
             p.wipeXSlider->setDefault(.5F);
+            ui::setScreenshotTag(p.wipeXSlider, "Files.CompareOptions");
             p.wipeYSlider = ftk::FloatEditSlider::create(context);
             p.wipeYSlider->setDefault(.5F);
             p.wipeRotationSlider = ftk::FloatEditSlider::create(context);

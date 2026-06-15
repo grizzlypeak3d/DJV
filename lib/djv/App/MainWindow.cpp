@@ -220,19 +220,28 @@ namespace djv
             p.fileToolBar = FileToolBar::create(
                 context,
                 p.fileActions->getActions());
+            ui::setScreenshotTag(p.fileToolBar, "MainWindow.FileToolBar");
+
             p.compareToolBar = CompareToolBar::create(
                 context,
                 p.compareActions->getActions());
+            ui::setScreenshotTag(p.compareToolBar, "MainWindow.CompareToolBar");
+
             p.viewToolBar = ViewToolBar::create(
                 context,
                 std::dynamic_pointer_cast<MainWindow>(shared_from_this()),
                 p.viewActions);
+            ui::setScreenshotTag(p.viewToolBar, "MainWindow.ViewToolBar");
+
             p.windowToolBar = WindowToolBar::create(
                 context,
                 p.windowActions->getActions());
+            ui::setScreenshotTag(p.windowToolBar, "MainWindow.WindowToolBar");
+
             p.toolsToolBar = ToolsToolBar::create(
                 context,
                 p.toolsActions->getActions());
+            ui::setScreenshotTag(p.toolsToolBar, "MainWindow.ToolsToolBar");
 
             p.tabBar = TabBar::create(context, app);
             ui::setScreenshotTag(p.tabBar, "MainWindow.TabBar");

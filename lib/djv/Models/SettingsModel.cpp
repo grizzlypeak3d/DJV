@@ -496,7 +496,10 @@ namespace djv
             p.fileBrowser = ftk::Observable<FileBrowserSettings>::create(fileBrowser);
             auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->setNativeFileDialog(fileBrowser.nativeFileDialog);
-            fileBrowserSystem->getModel()->setPath(fileBrowser.path);
+            if (std::filesystem::exists(fileBrowser.path))
+            {
+                fileBrowserSystem->getModel()->setPath(fileBrowser.path);
+            }
             fileBrowserSystem->getModel()->setOptions(fileBrowser.options);
             fileBrowserSystem->getModel()->setExt(fileBrowser.ext);
 

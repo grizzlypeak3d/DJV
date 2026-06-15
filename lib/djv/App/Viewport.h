@@ -41,6 +41,10 @@ namespace djv
             //! Observe the color sample.
             TL_API std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColorSample() const;
 
+            //! Sample the image at the given image pixel, as the pick mouse
+            //! action would. Used by the documentation screenshot capture.
+            void pick(const ftk::V2I& imagePos);
+
             void setPlayer(const std::shared_ptr<tl::Player>&) override;
 
             ftk::Size2I getSizeHint() const override;

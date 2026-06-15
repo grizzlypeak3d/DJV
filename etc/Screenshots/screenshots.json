@@ -5,7 +5,8 @@
       "window": { "w": 1280, "h": 800 },
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "tool": "Color Picker" }
+        { "tool": "Color Picker" },
+        { "pick": [160, 90] }
       ],
       "annotate": [
         { "id": "MainWindow.MenuBar",       "caption": "Menu bar" },
@@ -28,7 +29,8 @@
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "tool": "Files", "expand": ["Compare"] },
         { "a": "BART" },
-        { "b": "Charlie" }
+        { "b": "Charlie" },
+        { "compare": "Wipe" }
       ],
       "annotate": [
         { "id": "Files.CurrentFile",    "caption": "Current file" },
@@ -50,12 +52,22 @@
       "annotate": []
     },
     {
+      "id": "file-browser",
+      "window": { "w": 1280, "h": 800 },
+      "setup": [
+        { "nativeFileBrowser": true },
+        { "fileBrowser": true }
+      ],
+      "annotate": []
+    },
+    {
       "id": "view-pixel-grid",
       "window": { "w": 1280, "h": 800 },
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 12 },
-        { "tool": "View", "expand": ["Options", "Grid"] }
+        { "tool": "View", "expand": ["Options", "Grid"] },
+        { "view": { "grid": true } }
       ],
       "annotate": []
     },
@@ -65,7 +77,9 @@
       "crop": "MainWindow.Viewport",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 }
+        { "frame": 12 },
+        { "view": { "hud": true } },
+        { "pick": [160, 90] }
       ],
       "annotate": []
     },
@@ -134,6 +148,7 @@
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 12 },
+        { "ocio": "Built In" },
         { "tool": "Color", "expand": ["OCIO"] }
       ],
       "annotate": []
@@ -148,7 +163,7 @@
       ],
       "annotate": [
         { "id": "MainWindow.ToolsToolBar",  "caption": "Tools tool bar" },
-        { "id": "MainWindow.Tools",         "caption": "Tool" }
+        { "id": "MainWindow.Tools",         "caption": "Information tool" }
       ]
     },
     {
@@ -172,7 +187,8 @@
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 12 },
-        { "tool": "Color Picker" }
+        { "tool": "Color Picker" },
+        { "pick": [160, 90] }
       ],
       "annotate": []
     },
@@ -183,7 +199,8 @@
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 12 },
-        { "tool": "Magnify" }
+        { "tool": "Magnify" },
+        { "pick": [160, 90] }
       ],
       "annotate": []
     },

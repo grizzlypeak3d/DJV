@@ -65,6 +65,8 @@ the results.
 Image sequences are shown as a single item with their frame range, so a
 multi-thousand-frame render appears as one entry rather than thousands.
 
+![File browser]({{ '/assets/file-browser.svg' | relative_url }})
+
 ## Switching files
 
 To switch between open files, use the **File/Current** menu, the **Tab Bar**, or

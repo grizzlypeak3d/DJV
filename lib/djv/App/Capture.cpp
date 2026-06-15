@@ -4,10 +4,16 @@
 #include <djv/App/Capture.h>
 
 #include <djv/App/App.h>
+#include <djv/App/MainWindow.h>
+#include <djv/App/Viewport.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/ToolsModel.h>
+#include <djv/Models/ColorModel.h>
+#include <djv/Models/SettingsModel.h>
+#include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/App.h>
+#include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/IWindow.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
@@ -78,6 +84,8 @@ namespace djv
             int ticks = 0;
             int settleLeft = settleTicks;
             int reloadGrace = reloadGraceTicks;
+            std::vector<nlohmann::json> lateSteps;  // applied after first settle
+            bool lateApplied = false;
             bool done = false;
             bool success = false;
         };
@@ -232,7 +240,21 @@ namespace djv
                 break;
             case Phase::Settle:
                 if (--p.settleLeft <= 0)
-                    p.phase = Phase::Done; // captured below this switch
+                {
+                    if (!p.lateSteps.empty() && !p.lateApplied)
+                    {
+                        // Viewport is now sized and fit; apply deferred picks
+                        // and settle once more so the sample/HUD render.
+                        p.lateApplied = true;
+                        for (const auto& step : p.lateSteps)
+                            _applyStep(step);
+                        p.settleLeft = settleTicks;
+                    }
+                    else
+                    {
+                        p.phase = Phase::Done; // captured below this switch
+                    }
+                }
                 break;
             default:
                 break;
@@ -286,10 +308,19 @@ namespace djv
 
         void Capture::_applyRest(const nlohmann::json& setup)
         {
+            FTK_P();
             for (const auto& step : setup)
             {
                 if (step.contains("open"))
                     continue;
+                if (step.contains("pick"))
+                {
+                    // A pick samples the rendered image, so it must wait until
+                    // the viewport is sized and fit-zoomed. Defer to after the
+                    // first settle (see _onTick).
+                    p.lateSteps.push_back(step);
+                    continue;
+                }
                 _applyStep(step);
             }
         }
@@ -410,7 +441,70 @@ namespace djv
                         note(p.shotId, "no matching layer for the target file");
                 }
             }
-            // TODO: "pick", "color", "dialog" verbs.
+            else if (step.contains("view"))
+            {
+                // Viewport overlays for the "Viewport" docs: grid and/or HUD.
+                // e.g. { "view": { "grid": true, "hud": true } }
+                const auto& v = step.at("view");
+                auto vp = app->getViewportModel();
+                if (v.contains("grid"))
+                {
+                    auto fg = vp->getForegroundOptions();
+                    fg.grid.enabled = v.at("grid").get<bool>();
+                    vp->setForegroundOptions(fg);
+                }
+                if (v.contains("hud"))
+                {
+                    vp->setHUD(v.at("hud").get<bool>());
+                }
+            }
+            else if (step.contains("ocio"))
+            {
+                // Enable OCIO with a config file for the Color tool screenshot.
+                // The Color tool loads the config and fills in its input /
+                // display / view lists when it opens. e.g.
+                // { "ocio": "etc/SampleData/config.ocio" }
+                auto options = app->getColorModel()->getOCIOOptions();
+                options.enabled = true;
+                options.config = tl::OCIOConfig::File;
+                options.fileName = step.at("ocio").get<std::string>();
+                app->getColorModel()->setOCIOOptions(options);
+            }
+            else if (step.contains("fileBrowser"))
+            {
+                // Open the in-app file browser dialog. Force the non-native
+                // dialog so it renders inside our window and can be captured
+                // (the native OS dialog is a separate, uncapturable window).
+                if (auto context = p.context.lock())
+                {
+                    auto fbs = context->getSystem<ftk::FileBrowserSystem>();
+                    fbs->setNativeFileDialog(false);
+                }
+                app->openDialog();
+            }
+            else if (step.contains("nativeFileBrowser"))
+            {
+                // Toggle the "native file dialog" setting -- for its own
+                // Settings screenshot, or to prepare the file-browser shot.
+                auto sm = app->getSettingsModel();
+                auto fb = sm->getFileBrowser();
+                fb.nativeFileDialog = step.at("nativeFileBrowser").get<bool>();
+                sm->setFileBrowser(fb);
+            }
+            else if (step.contains("pick"))
+            {
+                // Sample the image at the given pixel for the Color Picker and
+                // Magnify tools. Deferred by _applyRest until after the viewport
+                // settles, so the zoom and rendered pixel are final.
+                // e.g. { "pick": [160, 90] }
+                const auto& v = step.at("pick");
+                if (v.is_array() && v.size() >= 2)
+                {
+                    const ftk::V2I imagePos(v[0].get<int>(), v[1].get<int>());
+                    if (auto mw = app->getMainWindow())
+                        mw->getViewport()->pick(imagePos);
+                }
+            }
         }
 
         int Capture::_fileIndex(const nlohmann::json& value) const
@@ -456,6 +550,25 @@ namespace djv
                 note(p.shotId, "screenshot returned no image (offscreen buffer not ready)");
                 return false;
             }
+
+            // ftk blends with straight (non-premultiplied) alpha, so a
+            // semi-transparent overlay -- e.g. a dialog's dimming scrim -- leaves
+            // that region of the RGBA buffer with alpha < 1, even though its RGB
+            // is the correct darkened result. A window capture is logically
+            // opaque; left as-is those pixels let the white docs page show
+            // through and the dimming reads as light/inverted. Force the image
+            // fully opaque before writing (the RGB already matches the screen).
+            if (uint8_t* data = image->getData())
+            {
+                const ftk::Size2I size = image->getSize();
+                const size_t bytes = image->getByteCount();
+                if (bytes == static_cast<size_t>(size.w) * size.h * 4)
+                {
+                    for (size_t i = 3; i < bytes; i += 4)
+                        data[i] = 255;
+                }
+            }
+
             auto io = context->getSystem<ftk::ImageIO>();
             auto writer = io->write(path, image->getInfo());
             if (!writer)
