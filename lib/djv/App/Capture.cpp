@@ -53,7 +53,7 @@ namespace djv
             {
                 if (!widget)
                     return;
-                if (widget->hasProperty(screenshotKey) && widget->isVisible(true))
+                if (widget->hasProperty(ui::detail::screenshotKey) && widget->isVisible(true))
                     out.push_back(widget);
                 for (const auto& child : widget->getChildren())
                     collect(child, out);
@@ -483,7 +483,7 @@ namespace djv
             {
                 const ftk::Box2I g = w->getGeometry();
                 widgets.push_back({
-                    { "id", w->getProperty(screenshotKey) },
+                    { "id", w->getProperty(ui::detail::screenshotKey) },
                     { "box", { g.x(), g.y(), g.w(), g.h() } } });
             }
 

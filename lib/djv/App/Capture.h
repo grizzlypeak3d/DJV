@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/UI/ScreenshotTag.h>
+
 #include <ftk/UI/IWidget.h>
 
 #include <nlohmann/json.hpp>
@@ -21,21 +23,6 @@ namespace djv
     namespace app
     {
         class App;
-
-        const std::string screenshotKey = "Screenshot";
-
-        //! Tag a widget so the capture system can find it and emit its
-        //! bounding box. The tag is a stable, semantic id, e.g.
-        //! "MainWindow.Viewport".
-        inline void setDocTag(
-            const std::shared_ptr<ftk::IWidget>& widget,
-            const std::string& id)
-        {
-            if (widget)
-            {
-                widget->setProperty(screenshotKey, id);
-            }
-        }
 
         //! Automated screenshot capture for the documentation.
         //!

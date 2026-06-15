@@ -4,7 +4,7 @@
 #include <djv/App/FilesTool.h>
 
 #include <djv/App/App.h>
-#include <djv/App/Capture.h>
+#include <djv/UI/ScreenshotTag.h>
 #include <djv/UI/FileThumbnail.h>
 #include <djv/Models/SettingsModel.h>
 
@@ -86,16 +86,13 @@ namespace djv
                 context,
                 tl::getCompareLabels());
             p.compareComboBox->setHStretch(ftk::Stretch::Expanding);
-            setDocTag(p.compareComboBox, "Files.CompareMode");
             p.compareTimeComboBox = ftk::ComboBox::create(
                 context,
                 tl::getCompareTimeLabels());
             p.compareTimeComboBox->setHStretch(ftk::Stretch::Expanding);
-            setDocTag(p.compareTimeComboBox, "Files.CompareTime");
 
             p.wipeXSlider = ftk::FloatEditSlider::create(context);
             p.wipeXSlider->setDefault(.5F);
-            setDocTag(p.wipeXSlider, "Files.CompareOptions");
             p.wipeYSlider = ftk::FloatEditSlider::create(context);
             p.wipeYSlider->setDefault(.5F);
             p.wipeRotationSlider = ftk::FloatEditSlider::create(context);
@@ -111,7 +108,7 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::None);
 
             p.widgetLayout = ftk::GridLayout::create(context, layout);
-            p.widgetLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
+            p.widgetLayout->setSpacingRole(ftk::SizeRole::None);
             p.widgetLayout->setRowBackgroundRole(ftk::ColorRole::Button);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
@@ -354,7 +351,7 @@ namespace djv
 
                         if (0 == row)
                         {
-                            setDocTag(widget.layerComboBox, "Files.CurrentLayer");
+                            ui::setScreenshotTag(widget.layerComboBox, "Files.CurrentLayer");
 
                             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.widgetLayout);
                             spacer->setSpacingRole(ftk::SizeRole::SpacingTool);
@@ -378,7 +375,7 @@ namespace djv
             for (const auto& i : p.widgets)
             {
                 i.aButton->setChecked(i.item == value);
-                setDocTag(i.aButton, i.item == value ? "Files.CurrentFile" : "");
+                ui::setScreenshotTag(i.aButton, i.item == value ? "Files.CurrentFile" : "");
             }
         }
 
@@ -389,7 +386,7 @@ namespace djv
             {
                 const auto j = std::find(value.begin(), value.end(), i.item);
                 i.bButton->setChecked(j != value.end());
-                setDocTag(i.bButton, j != value.end() ? "Files.BFile" : "");
+                ui::setScreenshotTag(i.bButton, j != value.end() ? "Files.BFile" : "");
             }
         }
 
