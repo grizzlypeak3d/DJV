@@ -6,7 +6,6 @@ set(HEADERS
     SeparateAudioDialog.h
     SettingsWidgets.h
     SetupDialog.h
-    ScreenshotTag.h
     SpeedPopup.h
     StatusIndicatorPopup.h
     SysInfoDialog.h

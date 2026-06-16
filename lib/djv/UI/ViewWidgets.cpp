@@ -3,9 +3,6 @@
 
 #include <djv/UI/ViewWidgets.h>
 
-#include <djv/App/App.h>
-#include <djv/App/MainWindow.h>
-#include <djv/App/Viewport.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/Bellows.h>
@@ -25,6 +22,7 @@
 #include <ftk/UI/LineEditModel.h>
 #include <ftk/UI/RadioButton.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/Core/Format.h>
 
@@ -209,6 +207,7 @@ namespace djv
                 context,
                 ftk::getImageFilterLabels());
             p.magnifyComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.magnifyComboBox, "Viewport.Options.Magnify");
 
             p.videoLevelsComboBox = ftk::ComboBox::create(
                 context,
@@ -779,11 +778,13 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.enabledCheckBox, "Viewport.Grid.Enabled");
 
             p.cellModeComboBox = ftk::ComboBox::create(context, tl::getGridCellModeLabels());
 
             p.cellSizeSlider = ftk::IntEditSlider::create(context);
             p.cellSizeSlider->setRange(1, 1000);
+            ftk::setScreenshotTag(p.cellSizeSlider, "Viewport.Grid.CellSize");
 
             p.cellCountXEdit = ftk::IntEdit::create(context);
             p.cellCountXEdit->setRange(1, 100);
@@ -799,6 +800,7 @@ namespace djv
             p.colorSwatch->setHAlign(ftk::HAlign::Left);
 
             p.labelsComboBox = ftk::ComboBox::create(context, tl::getGridLabelsLabels());
+            ftk::setScreenshotTag(p.labelsComboBox, "Viewport.Grid.Labels");
 
             p.textColorSwatch = ftk::ColorSwatch::create(context);
             p.textColorSwatch->setEditable(true);

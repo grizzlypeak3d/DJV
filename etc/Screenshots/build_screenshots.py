@@ -110,6 +110,11 @@ def main():
         layout = by_id.get(shot_id, {}).get("layout")
         if layout:
             gen += ["--layout", layout]
+        # A shot can keep the full crop region instead of fitting the crop down
+        # to the annotated widget rects (e.g. the timeline, where the empty tail
+        # below the tracks is wanted). Defaults to fitting.
+        if not by_id.get(shot_id, {}).get("cropFit", True):
+            gen += ["--no-crop-fit"]
         if subprocess.run(gen).returncode != 0:
             failures.append(shot_id)
 

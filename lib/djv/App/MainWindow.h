@@ -58,6 +58,11 @@ namespace djv
             //! Get the timeline widget.
             const std::shared_ptr<tl::ui::TimelineWidget>& getTimelineWidget() const;
 
+            //! Set the two splitter positions (0-1). The settings store these
+            //! but only apply them at construction, so this moves the widgets
+            //! directly -- used by the documentation screenshot capture.
+            void setSplitters(float splitter, float splitter2);
+
             //! Get whether presentation mode is enabled.
             bool hasPresentMode() const;
 

@@ -98,28 +98,16 @@ Locations: **View** menu, **View** tool
 
 Shortcut: <kbd>Ctrl+G</kbd>
 
-Grid options:
-
-- **Enabled** — Toggle the grid on or off
-- **Cell mode** - Grid cell modes
-- **Cell size** — Cell size in pixels
-- **Cell count** - Number of cells
-- **Line width** — Thickness of the grid lines
-- **Color** — Color of the grid lines
-- **Labels** — How cells are labeled:
-  - **None** — No labels
-  - **Pixels** — Pixel positions
-  - **Alphanumeric** — Letters along X, numbers along Y (e.g., "B 12")
-- **Text color** — Label text color
-- **Overlay color** — Label background color
-
 ![View pixel grid]({{ '/assets/view-pixel-grid.svg' | relative_url }})
+
+![View pixel grid]({{ '/assets/view-pixel-grid2.svg' | relative_url }})
 
 The grid can also help you inspect individual pixels. To do so:
 
-1. Set **Magnify** to **Nearest**
-2. Enable the grid
-3. Set the grid size to `1`
+* Set **Magnify** to **Nearest**
+* Enable the grid
+* Set the grid size to `1`
+* Set the grid labels
 
 ## Outline
 
@@ -145,10 +133,5 @@ Shortcut: <kbd>Ctrl+H</kbd>
 
 ![Viewport HUD]({{ '/assets/view-hud.svg' | relative_url }})
 
-1. Current file name
-2. Current frame
-3. Actual playback speed (the rate DJV is achieving, which may differ from the requested rate)
-4. Number of frames dropped during playback
-5. Color picker
-6. Video cache fill (%)
-7. Audio cache fill (%)
+* **Time** - Current frame, actual playback speed (the rate DJV is achieving, which may differ from the requested rate), number of frames dropped during playback.
+* **Cache** - Video (**V**) and audio (**A**) cache fill (%)

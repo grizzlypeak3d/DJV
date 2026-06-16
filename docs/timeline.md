@@ -12,14 +12,9 @@ menu.
 
 ![Timeline]({{ '/assets/timeline.svg' | relative_url }})
 
-1. Current frame
-2. In/out range (blue)
-3. Video cache (green)
-4. Audio cache (purple)
-5. Video track
-6. Video clips
-7. Audio track
-8. Audio clips
+The current frame is the red vertical line. The in/out range is represented by
+the blue line at the top of the timeline. The cache is represented by the green
+and puple lines.
 
 Default timeline controls:
 

@@ -8,7 +8,6 @@
 #include <djv/App/FrameActions.h>
 #include <djv/App/PlaybackActions.h>
 #include <djv/UI/AudioPopup.h>
-#include <djv/UI/ScreenshotTag.h>
 #include <djv/UI/SpeedPopup.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/TimeUnitsModel.h>
@@ -22,6 +21,7 @@
 #include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ShuttleWidget.h>
 #include <ftk/UI/Spacer.h>
 #include <ftk/UI/ToolButton.h>
@@ -90,11 +90,11 @@ namespace djv
             p.buttons["Reverse"] = ftk::ToolButton::create(context, actions["Reverse"]);
 
             p.loopWidget = tl::ui::PlaybackLoopWidget::create(context);
-            ui::setScreenshotTag(p.loopWidget, "Playback.Loop");
+            ftk::setScreenshotTag(p.loopWidget, "Playback.Loop");
 
             p.playbackShuttle = ftk::ShuttleWidget::create(context);
             p.playbackShuttle->setTooltip("Playback shuttle. Click and drag to change playback speed.");
-            ui::setScreenshotTag(p.playbackShuttle, "Playback.PlaybackShuttle");
+            ftk::setScreenshotTag(p.playbackShuttle, "Playback.PlaybackShuttle");
 
             actions = frameActions->getActions();
             p.buttons["Start"] = ftk::ToolButton::create(context, actions["Start"]);
@@ -106,26 +106,26 @@ namespace djv
 
             p.frameShuttle = ftk::ShuttleWidget::create(context);
             p.frameShuttle->setTooltip("Frame shuttle. Click and drag to change the current frame.");
-            ui::setScreenshotTag(p.frameShuttle, "Playback.FrameShuttle");
+            ftk::setScreenshotTag(p.frameShuttle, "Playback.FrameShuttle");
 
             auto timeUnitsModel = app->getTimeUnitsModel();
             p.currentTimeEdit = tl::ui::TimeEdit::create(context, timeUnitsModel);
             p.currentTimeEdit->setTooltip("Current time.");
-            ui::setScreenshotTag(p.currentTimeEdit, "Playback.CurrentFrame");
+            ftk::setScreenshotTag(p.currentTimeEdit, "Playback.CurrentFrame");
 
             p.durationLabel = tl::ui::TimeLabel::create(context, timeUnitsModel);
             p.durationLabel->setMarginRole(ftk::SizeRole::MarginInside);
             p.durationLabel->setTooltip("Duration of the timeline or the in/out range if set.");
-            ui::setScreenshotTag(p.durationLabel, "Playback.Duration");
+            ftk::setScreenshotTag(p.durationLabel, "Playback.Duration");
 
             p.timeUnitsWidget = tl::ui::TimeUnitsWidget::create(context, timeUnitsModel);
             p.timeUnitsWidget->setTooltip("Time units.");
-            ui::setScreenshotTag(p.timeUnitsWidget, "Playback.TimeUnits");
+            ftk::setScreenshotTag(p.timeUnitsWidget, "Playback.TimeUnits");
 
             p.speedButton = ftk::ToolButton::create(context);
             p.speedButton->setPopupIcon("MenuArrow");
             p.speedButton->setTooltip("Playback speed.");
-            ui::setScreenshotTag(p.speedButton, "Playback.Speed");
+            ftk::setScreenshotTag(p.speedButton, "Playback.Speed");
 
             p.audioLabel = ftk::Label::create(context);
             p.audioLabel->setFont(ftk::FontType::Mono);
@@ -143,10 +143,10 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::None);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::MarginInside);
-            ui::setScreenshotTag(hLayout, "Playback.Controls");
+            ftk::setScreenshotTag(hLayout, "Playback.Controls");
             auto hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
             hLayout2->setSpacingRole(ftk::SizeRole::None);
-            ui::setScreenshotTag(hLayout2, "Playback.PlaybackControls");
+            ftk::setScreenshotTag(hLayout2, "Playback.PlaybackControls");
             p.buttons["Reverse"]->setParent(hLayout2);
             p.buttons["Stop"]->setParent(hLayout2);
             p.buttons["Forward"]->setParent(hLayout2);
@@ -154,7 +154,7 @@ namespace djv
             p.playbackShuttle->setParent(hLayout2);
             hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
             hLayout2->setSpacingRole(ftk::SizeRole::None);
-            ui::setScreenshotTag(hLayout2, "Playback.FrameControls");
+            ftk::setScreenshotTag(hLayout2, "Playback.FrameControls");
             p.buttons["Start"]->setParent(hLayout2);
             p.buttons["Prev"]->setParent(hLayout2);
             p.buttons["Next"]->setParent(hLayout2);

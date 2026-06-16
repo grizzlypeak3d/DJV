@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <djv/UI/ScreenshotTag.h>
-
 #include <ftk/UI/IWidget.h>
 
 #include <nlohmann/json.hpp>

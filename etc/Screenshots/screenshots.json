@@ -2,9 +2,10 @@
   "shots": [
     {
       "id": "main-window",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600 },
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 88 },
         { "tool": "Color Picker" },
         { "pick": [160, 90] }
       ],
@@ -21,10 +22,10 @@
     },
     {
       "id": "files-tool",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
-        { "open": "etc/SampleData/Counter.otio" },
+        { "open": "etc/SampleData/Cubes.0001.exr" },
         { "open": "etc/SampleData/Charlie.jpg" },
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "tool": "Files", "expand": ["Compare"] },
@@ -43,53 +44,89 @@
     },
     {
       "id": "ffmpeg-command",
-      "window": { "w": 1280, "h": 500 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
       "crop": "MainWindow.Tools",
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "tool": "Settings", "expand": ["FFmpeg Command"] }
+        { "tool": "Settings", "expand": ["FFmpegCmd"] }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "FFmpegCmd.FFmpegEdit", "caption": "ffmpeg" },
+        { "id": "FFmpegCmd.FFprobeEdit", "caption": "ffprobe" }
+      ]
     },
     {
       "id": "file-browser",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600 },
       "setup": [
         { "nativeFileBrowser": true },
-        { "fileBrowser": true }
+        { "fileBrowser": {
+          "path": "etc/SampleData",
+          "bellows": { "Drives": false }
+        } }
       ],
       "annotate": []
     },
     {
       "id": "view-pixel-grid",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
-        { "tool": "View", "expand": ["Options", "Grid"] },
-        { "view": { "grid": true } }
+        { "frame": 88 },
+        { "tool": "View", "expand": ["Options"] },
+        { "view": {
+          "grid": { "enabled": true, "cellSize": 1, "labels": "Pixels" },
+          "magnify": "nearest"
+        } },
+        { "zoom": 200 }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "Viewport.Options.Magnify", "caption": "Magnify filter" }
+      ]
+    },
+    {
+      "id": "view-pixel-grid2",
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 88 },
+        { "tool": "View", "expand": ["Grid"] },
+        { "view": {
+          "grid": { "enabled": true, "cellSize": 1, "labels": "Pixels" },
+          "magnify": "nearest"
+        } },
+        { "zoom": 200 }
+      ],
+      "annotate": [
+        { "id": "Viewport.Grid.Enabled", "caption": "Enable grid" },
+        { "id": "Viewport.Grid.CellSize", "caption": "Grid cell size" },
+        { "id": "Viewport.Grid.Labels", "caption": "Grid labels" }
+      ]
     },
     {
       "id": "view-hud",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600 },
+      "layout": "horizontal",
       "crop": "MainWindow.Viewport",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
+        { "frame": 88 },
         { "view": { "hud": true } },
         { "pick": [160, 90] }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "Viewport.HUD.FileName", "caption": "File name" },
+        { "id": "Viewport.HUD.Time", "caption": "Time" },
+        { "id": "Viewport.HUD.ColorPicker", "caption": "Color picker" },
+        { "id": "Viewport.HUD.Cache", "caption": "Cache" }
+      ]
     },
     {
       "id": "playback-controls",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600 },
       "layout": "horizontal",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 }
+        { "frame": 88 }
       ],
       "annotate": [
         { "id": "Playback.Controls",    "caption": "Playback and frame controls" }
@@ -97,11 +134,11 @@
     },
     {
       "id": "playback-controls2",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600 },
       "crop": "Playback.Controls",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 }
+        { "frame": 88 }
       ],
       "annotate": [
         { "id": "Playback.PlaybackControls",    "caption": "Playback controls" },
@@ -116,8 +153,28 @@
       ]
     },
     {
+      "id": "timeline",
+      "settle": 3,
+      "window": { "w": 900, "h": 600, "splitter": 0.4 },
+      "crop": "MainWindow.Timeline",
+      "cropFit": false,
+      "setup": [
+        { "open": "etc/SampleData/MultipleClips.otio" },
+        { "frame": 30 },
+        { "inOut": [10, 50] },
+        { "timeline": { "minimize": false, "thumbnailSize": "Large" } }
+      ],
+      "annotate": [
+        { "id": "Timeline.VideoTrack",  "caption": "Video track" },
+        { "id": "Timeline.AudioTrack",  "caption": "Audio track" },
+        { "id": "Timeline.VideoClip",  "caption": "Video clips" },
+        { "id": "Timeline.AudioClip",  "caption": "Audio clips" },
+        { "id": "Timeline.Gap",  "caption": "Gaps" }
+      ]
+    },
+    {
       "id": "compare-tile",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.5  },
       "setup": [
         { "open": "etc/SampleData/Cubes.0001.exr" },
         { "open": "etc/SampleData/Cubes.0001.exr" },
@@ -143,11 +200,11 @@
     },
     {
       "id": "color-ocio",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
+        { "frame": 88 },
         { "ocio": "Built In" },
         { "tool": "Color", "expand": ["OCIO"] }
       ],
@@ -155,10 +212,10 @@
     },
     {
       "id": "tools",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
+        { "frame": 88 },
         { "tool": "Information" }
       ],
       "annotate": [
@@ -168,11 +225,11 @@
     },
     {
       "id": "info-tool",
-      "window": { "w": 1280, "h": 500 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
       "crop": "MainWindow.Tools",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
+        { "frame": 88 },
         { "tool": "Information" }
       ],
       "annotate": [
@@ -182,11 +239,11 @@
     },
     {
       "id": "color-picker-tool",
-      "window": { "w": 1280, "h": 500 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
       "crop": "MainWindow.Tools",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
+        { "frame": 88 },
         { "tool": "Color Picker" },
         { "pick": [160, 90] }
       ],
@@ -194,11 +251,11 @@
     },
     {
       "id": "magnify-tool",
-      "window": { "w": 1280, "h": 500 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
       "crop": "MainWindow.Tools",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
+        { "frame": 88 },
         { "tool": "Magnify" },
         { "pick": [160, 90] }
       ],
@@ -206,32 +263,32 @@
     },
     {
       "id": "export-tool",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
+        { "frame": 88 },
         { "tool": "Export" }
       ],
       "annotate": []
     },
     {
       "id": "keyboard-shortcuts",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
-        { "tool": "Settings", "expand": ["Keyboard Shortcuts"] }
+        { "frame": 88 },
+        { "tool": "Settings", "expand": ["Shortcuts"] }
       ],
       "annotate": []
     },
     {
       "id": "custom-fonts",
-      "window": { "w": 1280, "h": 800 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 12 },
+        { "open": "etc/SampleData/大平原.jpg" },
+        { "frame": 88 },
         { "tool": "Settings", "expand": ["Style"] }
       ],
       "annotate": []

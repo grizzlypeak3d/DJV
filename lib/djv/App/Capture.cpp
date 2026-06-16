@@ -15,6 +15,7 @@
 #include <ftk/UI/App.h>
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/IWindow.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
@@ -59,7 +60,7 @@ namespace djv
             {
                 if (!widget)
                     return;
-                if (widget->hasProperty(ui::detail::screenshotKey) && widget->isVisible(true))
+                if (ftk::hasScreenshotTag(widget) && widget->isVisible(true))
                     out.push_back(widget);
                 for (const auto& child : widget->getChildren())
                     collect(child, out);
@@ -83,6 +84,7 @@ namespace djv
             Phase phase = Phase::WaitReady;
             int ticks = 0;
             int settleLeft = settleTicks;
+            int settleTicksShot = settleTicks; // per-shot, from the "settle" field
             int reloadGrace = reloadGraceTicks;
             std::vector<nlohmann::json> lateSteps;  // applied after first settle
             bool lateApplied = false;
@@ -160,6 +162,19 @@ namespace djv
                 return false;
             }
 
+            // A shot may widen the settle window (in seconds) to let slow async
+            // work finish before the capture -- e.g. timeline thumbnails, which
+            // stream in after the media is ready. Defaults to settleTicks.
+            const double settleSeconds = p.shot.value("settle", 0.0);
+            if (settleSeconds > 0.0)
+            {
+                int ticks = static_cast<int>(
+                    settleSeconds * 1000.0 / tickInterval.count());
+                if (ticks < settleTicks)
+                    ticks = settleTicks;
+                p.settleTicksShot = ticks;
+            }
+
             if (app->getWindows().empty())
             {
                 note(p.shotId, "no window was created");
@@ -178,6 +193,24 @@ namespace djv
                     window->setSize(ftk::Size2I(w.at("w").get<int>(), w.at("h").get<int>()));
                 if (w.contains("scale"))
                     app->setDisplayScale(w.at("scale").get<float>());
+                if (w.contains("splitter") || w.contains("splitter2"))
+                {
+                    // The splitter positions (0-1) live in the window settings
+                    // but are only applied to the widgets at construction, so
+                    // set them on the window directly. The vertical "splitter"
+                    // sizes the timeline (lower = taller); the horizontal
+                    // "splitter2" sizes the tools panel. The ratio persists
+                    // through the minimize reparent, so applying it here holds.
+                    auto settingsModel = app->getSettingsModel();
+                    auto win = settingsModel->getWindow();
+                    if (w.contains("splitter"))
+                        win.splitter = w.at("splitter").get<float>();
+                    if (w.contains("splitter2"))
+                        win.splitter2 = w.at("splitter2").get<float>();
+                    settingsModel->setWindow(win); // keep the settings consistent
+                    if (auto mw = app->getMainWindow())
+                        mw->setSplitters(win.splitter, win.splitter2);
+                }
             }
             window->show();
 
@@ -208,7 +241,7 @@ namespace djv
             if (p.done)
                 return;
             ++p.ticks;
-            if (p.ticks > timeoutTicks)
+            if (p.ticks > timeoutTicks + (p.settleTicksShot - settleTicks))
             {
                 note(p.shotId, "timed out waiting for the shot to become ready");
                 _finish(false);
@@ -235,7 +268,7 @@ namespace djv
                 else if (!p.expectMedia || _ready())
                 {
                     p.phase = Phase::Settle;
-                    p.settleLeft = settleTicks;
+                    p.settleLeft = p.settleTicksShot;
                 }
                 break;
             case Phase::Settle:
@@ -248,7 +281,7 @@ namespace djv
                         p.lateApplied = true;
                         for (const auto& step : p.lateSteps)
                             _applyStep(step);
-                        p.settleLeft = settleTicks;
+                        p.settleLeft = p.settleTicksShot;
                     }
                     else
                     {
@@ -313,11 +346,13 @@ namespace djv
             {
                 if (step.contains("open"))
                     continue;
-                if (step.contains("pick"))
+                if (step.contains("pick") || step.contains("zoom"))
                 {
-                    // A pick samples the rendered image, so it must wait until
-                    // the viewport is sized and fit-zoomed. Defer to after the
-                    // first settle (see _onTick).
+                    // A pick samples the rendered image and a zoom needs the
+                    // viewport's laid-out geometry, so both must wait until the
+                    // viewport is sized and fit-zoomed. Defer to after the first
+                    // settle (see _onTick). Manifest order is preserved, so a
+                    // zoom listed before a pick is applied first.
                     p.lateSteps.push_back(step);
                     continue;
                 }
@@ -364,6 +399,29 @@ namespace djv
                         start.rate()));
                 }
             }
+            else if (step.contains("inOut"))
+            {
+                // Set the playback in/out range (the blue range on the timeline)
+                // from a pair of 0-based frame numbers, relative to the timeline
+                // start like the "frame" verb. The out frame is inclusive, the
+                // same convention as Set Out Point. e.g. { "inOut": [10, 50] }
+                if (auto player = app->observePlayer()->get())
+                {
+                    const auto& io = step.at("inOut");
+                    if (io.is_array() && io.size() >= 2)
+                    {
+                        const auto start = player->getTimeRange().start_time();
+                        const double rate = start.rate();
+                        const OTIO_NS::RationalTime inT(
+                            start.value() + io[0].get<double>(), rate);
+                        const OTIO_NS::RationalTime outT(
+                            start.value() + io[1].get<double>(), rate);
+                        player->setInOutRange(
+                            OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                                inT, outT));
+                    }
+                }
+            }
             else if (step.contains("a"))
             {
                 // Set the "A" (current) file by open-order index or path.
@@ -381,29 +439,14 @@ namespace djv
             else if (step.contains("compare"))
             {
                 // Set the A/B comparison mode by its label, e.g. "Tile",
-                // "Wipe", "Overlay", "Difference". The B files themselves are
-                // set with the "b" verb.
+                // "Wipe", "Overlay", "Difference" (case-insensitive). The B
+                // files themselves are set with the "b" verb.
                 const std::string name = step.at("compare").get<std::string>();
-                const auto labels = tl::getCompareLabels();
-                int index = -1;
-                for (size_t i = 0; i < labels.size(); ++i)
-                {
-                    if (labels[i] == name)
-                    {
-                        index = static_cast<int>(i);
-                        break;
-                    }
-                }
-                if (index >= 0)
-                {
-                    auto options = app->getFilesModel()->getCompareOptions();
-                    options.compare = static_cast<tl::Compare>(index);
+                auto options = app->getFilesModel()->getCompareOptions();
+                if (from_string(name, options.compare))
                     app->getFilesModel()->setCompareOptions(options);
-                }
                 else
-                {
                     note(p.shotId, "unknown compare mode '" + name + "'");
-                }
             }
             else if (step.contains("layer"))
             {
@@ -443,20 +486,98 @@ namespace djv
             }
             else if (step.contains("view"))
             {
-                // Viewport overlays for the "Viewport" docs: grid and/or HUD.
-                // e.g. { "view": { "grid": true, "hud": true } }
+                // Viewport overlays/filters for the "Viewport" docs: grid,
+                // HUD, and the magnify/minify image filters.
+                // e.g. { "view": { "grid": true, "hud": true,
+                //                  "magnify": "linear" } }
                 const auto& v = step.at("view");
                 auto vp = app->getViewportModel();
                 if (v.contains("grid"))
                 {
+                    // Either { "grid": true } or an object that also sets the
+                    // cell size, e.g. { "grid": { "enabled": true,
+                    // "cellSize": 1 } } for a 1x1 (per-pixel) grid. Giving a
+                    // cellSize switches the grid to cell-size mode.
                     auto fg = vp->getForegroundOptions();
-                    fg.grid.enabled = v.at("grid").get<bool>();
+                    const auto& gv = v.at("grid");
+                    if (gv.is_boolean())
+                    {
+                        fg.grid.enabled = gv.get<bool>();
+                    }
+                    else if (gv.is_object())
+                    {
+                        if (gv.contains("enabled"))
+                            fg.grid.enabled = gv.at("enabled").get<bool>();
+                        if (gv.contains("cellSize"))
+                        {
+                            fg.grid.cellMode = tl::GridCellMode::CellSize;
+                            fg.grid.cellSize = gv.at("cellSize").get<int>();
+                        }
+                        if (gv.contains("labels"))
+                        {
+                            // The grid-labels mode, parsed case-insensitively
+                            // from the same names shown in the View > Grid
+                            // "Labels" menu via the enum's from_string.
+                            const std::string s =
+                                gv.at("labels").get<std::string>();
+                            if (!from_string(s, fg.grid.labels))
+                                note(p.shotId,
+                                    "unrecognized grid labels '" + s + "'");
+                        }
+                    }
                     vp->setForegroundOptions(fg);
                 }
                 if (v.contains("hud"))
                 {
                     vp->setHUD(v.at("hud").get<bool>());
                 }
+                if (v.contains("magnify") || v.contains("minify"))
+                {
+                    // The viewport's magnify/minify filters live in the display
+                    // options (this is what the View tool reads and writes), not
+                    // the image options -- both structs have an imageFilters
+                    // field, but only the display one drives the render.
+                    // "linear" or "nearest" (case-insensitive) via from_string.
+                    auto display = vp->getDisplayOptions();
+                    if (v.contains("magnify"))
+                    {
+                        const std::string s = v.at("magnify").get<std::string>();
+                        if (!from_string(s, display.imageFilters.magnify))
+                            note(p.shotId,
+                                "unrecognized magnify filter '" + s + "'");
+                    }
+                    if (v.contains("minify"))
+                    {
+                        const std::string s = v.at("minify").get<std::string>();
+                        if (!from_string(s, display.imageFilters.minify))
+                            note(p.shotId,
+                                "unrecognized minify filter '" + s + "'");
+                    }
+                    vp->setDisplayOptions(display);
+                }
+            }
+            else if (step.contains("timeline"))
+            {
+                // Timeline settings, which live in the settings model and drive
+                // the timeline widget through its observer (same path as the
+                // Timeline menu). e.g. { "timeline": { "minimize": false,
+                // "thumbnailSize": "Large" } } -- minimize=false expands the
+                // timeline to show all of its parts; a larger thumbnailSize
+                // makes it taller.
+                const auto& v = step.at("timeline");
+                auto settingsModel = app->getSettingsModel();
+                auto settings = settingsModel->getTimeline();
+                if (v.contains("minimize"))
+                    settings.minimize = v.at("minimize").get<bool>();
+                if (v.contains("thumbnailSize"))
+                {
+                    const std::string s =
+                        v.at("thumbnailSize").get<std::string>();
+                    if (!from_string(s, settings.thumbnailSize))
+                        note(p.shotId,
+                            "unrecognized timeline thumbnailSize '" + s + "'");
+                }
+                settingsModel->setTimeline(settings);
             }
             else if (step.contains("ocio"))
             {
@@ -475,10 +596,47 @@ namespace djv
                 // Open the in-app file browser dialog. Force the non-native
                 // dialog so it renders inside our window and can be captured
                 // (the native OS dialog is a separate, uncapturable window).
+                //
+                // Accepts either { "fileBrowser": true } or an object that
+                // configures the dialog before opening:
+                //   { "fileBrowser": {
+                //       "path": "/abs/or/cwd-relative/dir",
+                //       "bellows": { "Drives": false }   // sidebar sections
+                //   } }
+                // These mirror the file-browser settings (path + options),
+                // applied straight to the model since the live settings only
+                // re-push them at startup.
                 if (auto context = p.context.lock())
                 {
                     auto fbs = context->getSystem<ftk::FileBrowserSystem>();
                     fbs->setNativeFileDialog(false);
+
+                    const auto& v = step.at("fileBrowser");
+                    if (v.is_object())
+                    {
+                        auto model = fbs->getModel();
+                        if (v.contains("path"))
+                        {
+                            const auto path = std::filesystem::u8path(
+                                v.at("path").get<std::string>());
+                            if (std::filesystem::exists(path))
+                                model->setPath(path);
+                            else
+                                note(p.shotId, "fileBrowser path does not exist: " +
+                                    path.u8string());
+                        }
+                        if (v.contains("bellows") && v.at("bellows").is_object())
+                        {
+                            // Open/close named sidebar sections: Drives,
+                            // Shortcuts, Recent, Settings. Unlisted ones keep
+                            // their defaults.
+                            auto options = model->getOptions();
+                            const auto& b = v.at("bellows");
+                            for (auto it = b.begin(); it != b.end(); ++it)
+                                options.bellows[it.key()] = it.value().get<bool>();
+                            model->setOptions(options);
+                        }
+                    }
                 }
                 app->openDialog();
             }
@@ -490,6 +648,46 @@ namespace djv
                 auto fb = sm->getFileBrowser();
                 fb.nativeFileDialog = step.at("nativeFileBrowser").get<bool>();
                 sm->setFileBrowser(fb);
+            }
+            else if (step.contains("zoom"))
+            {
+                // Set the viewport zoom (turning off auto-frame so it sticks),
+                // e.g. to make a fine grid visible. Deferred by _applyRest until
+                // the viewport is laid out. Forms:
+                //   { "zoom": 16 }                      centered on the view
+                //   { "zoom": { "value": 16 } }         same
+                //   { "zoom": { "value": 16, "center": [cx, cy] } }
+                //       center image pixel (cx, cy) in the viewport
+                if (auto mw = app->getMainWindow())
+                {
+                    auto viewport = mw->getViewport();
+                    viewport->setFrameView(false); // else auto-fit overrides it
+                    const auto& v = step.at("zoom");
+                    double value = 1.0;
+                    if (v.is_number())
+                        value = v.get<double>();
+                    else if (v.is_object())
+                        value = v.value("value", 1.0);
+                    const ftk::Box2I g = viewport->getGeometry();
+                    if (v.is_object() && v.contains("center") &&
+                        v.at("center").is_array() && v.at("center").size() >= 2)
+                    {
+                        const auto& c = v.at("center");
+                        const double cx = c[0].get<double>();
+                        const double cy = c[1].get<double>();
+                        // Place image pixel (cx, cy) at the viewport center:
+                        // viewPos = center - imagePixel * zoom.
+                        const ftk::V2I pos(
+                            g.w() / 2 - static_cast<int>(cx * value),
+                            g.h() / 2 - static_cast<int>(cy * value));
+                        viewport->setViewPosAndZoom(pos, value);
+                    }
+                    else
+                    {
+                        const ftk::V2I focus(g.w() / 2, g.h() / 2);
+                        viewport->setZoom(value, focus);
+                    }
+                }
             }
             else if (step.contains("pick"))
             {
@@ -596,7 +794,7 @@ namespace djv
             {
                 const ftk::Box2I g = w->getGeometry();
                 widgets.push_back({
-                    { "id", w->getProperty(ui::detail::screenshotKey) },
+                    { "id", ftk::getScreenshotTag(w) },
                     { "box", { g.x(), g.y(), g.w(), g.h() } } });
             }
 

@@ -24,6 +24,7 @@
 #include <ftk/UI/LineEdit.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/Core/Format.h>
 
@@ -1077,8 +1078,10 @@ namespace djv
             p.settings = settings;
 
             p.ffmpegEdit = ftk::FileEdit::create(context);
+            ftk::setScreenshotTag(p.ffmpegEdit, "FFmpegCmd.FFmpegEdit");
 
             p.ffprobeEdit = ftk::FileEdit::create(context);
+            ftk::setScreenshotTag(p.ffprobeEdit, "FFmpegCmd.FFprobeEdit");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);

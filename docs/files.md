@@ -90,9 +90,7 @@ tool.
 
 ![FFmpeg command]({{ '/assets/ffmpeg-command.svg' | relative_url }})
 
-1. ffmpeg command location (click to show full path)
-2. ffprobe command location (click to show full path)
-3. Click to show file browser
+* **ffmpeg**, **ffprobe** - set the command location (click to show full path or click folder icon to open browser)
 
 ## Memory cache
 

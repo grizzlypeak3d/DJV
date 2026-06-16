@@ -58,6 +58,8 @@ CROP_FIT_PAD = 16 # px kept below the lowest content widget when fitting a crop
 PILL_DROP = 0.85  # vertical pill offset (x pill height) so leaders stay diagonal
 H_ASPECT = 2.5    # crop wider than this (w/h) auto-uses the horizontal layout
 H_STANDOFF = 1.0  # horizontal-mode leader gap from the image, x pill height
+H_DIAG = 1.6      # horizontal-mode per-row pill stagger (x pill height) so
+                  # stacked pills get diagonal, not overlapping vertical, leaders
 
 
 def load_sidecar(path):
@@ -227,6 +229,16 @@ def layout_horizontal(entries, iw, ih, chip_h):
     bottom.sort(key=lambda e: e["tcx"])
     top_rows, bot_rows = _pack_band(top), _pack_band(bottom)
 
+    # Stagger stacked pills horizontally (toward the image interior) so their
+    # leaders read as diagonals instead of overlapping vertical lines -- e.g.
+    # track labels that share a left-edge x. Row 0 stays centred over its target
+    # (vertical); each higher row, which only exists because its x collided with
+    # a lower one, leans a little further.
+    diag_dx = H_DIAG * chip_h
+    for e in entries:
+        if e["row"] > 0:
+            e["chip_x"] += (1 if e["tcx"] < iw / 2 else -1) * e["row"] * diag_dx
+
     pitch = chip_h + GAP
     # Stand the bands off the image by ~a pill height (not the bare EDGE_GAP,
     # which the column-fit would shrink to a few px), so leaders have length.
@@ -256,6 +268,15 @@ def layout_horizontal(entries, iw, ih, chip_h):
     return ox, image_y, cw, ch
 
 
+def _clamp_box(b, iw, ih):
+    """Clamp a scaled (x, y, w, h) box to the image rect so a widget whose rect
+    overflows the captured frame keeps its dots and leaders on the screenshot."""
+    x, y, w, h = b
+    x0, y0 = max(0.0, x), max(0.0, y)
+    x1, y1 = min(float(iw), x + w), min(float(ih), y + h)
+    return (x0, y0, max(0.0, x1 - x0), max(0.0, y1 - y0))
+
+
 def build_svg(img_bytes, mime, iw, ih, boxes, annotate, scale, gutter, font,
               target_font, page_width, outline, bg, dpr=1, layout=None):
     entries, missing = [], []
@@ -265,6 +286,10 @@ def build_svg(img_bytes, mime, iw, ih, boxes, annotate, scale, gutter, font,
             missing.append(item["id"])
             continue
         targets = [tuple(v * scale for v in b) for b in blist]
+        # Keep dots/leaders on the screenshot: a widget whose rect runs past the
+        # captured frame (e.g. a docked panel taller than the window) would
+        # otherwise anchor off the edge.
+        targets = [_clamp_box(t, iw, ih) for t in targets]
         x0 = min(t[0] for t in targets)
         y0 = min(t[1] for t in targets)
         x1 = max(t[0] + t[2] for t in targets)
