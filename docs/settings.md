@@ -50,29 +50,20 @@ shuttle.
 
 ![Keyboard shortcuts]({{ '/assets/keyboard-shortcuts.svg' | relative_url }})
 
-1. Search shortcuts
-2. Shortcut with keyboard focus
-3. Secondary shortcut
-4. Conflicting shortcuts
-
 To set a shortcut, click its widget (or tab to it) and press the new key
 combination. The widget turns red if the chosen combination conflicts with an
 existing shortcut. Each action can have a primary and a secondary shortcut, and
 the search box helps find an action by name.
 
 {: .note }
-On macOS, shortcuts shown elsewhere in this documentation with **Ctrl** use the
-**Command** key instead.
+On macOS some shortcuts use the **Command** key instead of **Ctrl**.
 
-## Language support
+## Font support
 
-The default fonts shipped with DJV don't cover every language, which can cause
-file names in some scripts to display incorrectly. To support additional
-languages — Chinese, Japanese, and Korean, for example — add custom fonts in the
-**Style** section of the **Settings** tool.
+Custom fonts can be added in the **Style** section of the **Settings** tool.
+
+To use custom fonts, first add the font files and then select them for use.
+
+DJV includes **NotoSansCJKsc-Regular** for basic CJK rendering.
 
 ![Custom fonts]({{ '/assets/custom-fonts.svg' | relative_url }})
-
-1. Add custom fonts
-2. Set custom fonts
-3. File names using custom fonts

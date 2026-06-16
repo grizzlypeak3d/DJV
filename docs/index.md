@@ -21,7 +21,7 @@ Features include:
 - Experimental USD support
 - Available for Linux, macOS, and Windows
 
-![Main window]({{ '/assets/djv_screenshot1.png' | relative_url }})
+![Main window]({{ '/assets/index.svg' | relative_url }})
 
 Use the navigation on the left to browse the documentation, or the search box at
 the top to jump straight to a topic.

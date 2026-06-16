@@ -10,6 +10,7 @@ namespace djv
     namespace app
     {
         class App;
+        class IToolWidget;
         class MainWindow;
 
         //! Tools widget.
@@ -35,6 +36,9 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
+
+            //! Get the active tool widget, or null if no tool is active.
+            const std::shared_ptr<IToolWidget>& getToolWidget() const;
 
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;

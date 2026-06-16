@@ -29,7 +29,7 @@ Locations: **Tools** menu, **Tools** toolbar
 
 Shortcut: <kbd>F8</kbd>
 
-The tool has the following options:
+![Audio tool]({{ '/assets/audio-tool.svg' | relative_url }})
 
 - **Device** — The audio output device. **Default** uses the system default
   device.

@@ -98,6 +98,9 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
+        void IToolWidget::scrollTo(const std::string&)
+        {}
+
         void IToolWidget::_loadSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >& value)
         {
             FTK_P();

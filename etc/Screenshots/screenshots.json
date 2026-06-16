@@ -1,6 +1,15 @@
 {
   "shots": [
     {
+      "id": "index",
+      "window": { "w": 900, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 88 }
+      ],
+      "annotate": []
+    },
+    {
       "id": "main-window",
       "window": { "w": 900, "h": 600 },
       "setup": [
@@ -44,7 +53,7 @@
     },
     {
       "id": "ffmpeg-command",
-      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
         { "tool": "Settings", "expand": ["FFmpegCmd"] }
@@ -203,12 +212,107 @@
       "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 88 },
-        { "ocio": "Built In" },
+        { "ocio": { "config": "Built In", "input": "ACES2065-1",
+          "display": "sRGB - Display",
+          "view": "ACES 2.0 - SDR 100 nits (Rec.709)" } },
         { "tool": "Color", "expand": ["OCIO"] }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "Color.OCIO.Enabled",   "caption": "Enable" },
+        { "id": "Color.OCIO.Config",    "caption": "Configuration" },
+        { "id": "Color.OCIO.Name",      "caption": "Configuration name" },
+        { "id": "Color.OCIO.Input",     "caption": "Input color space" },
+        { "id": "Color.OCIO.Display",   "caption": "Display color space" },
+        { "id": "Color.OCIO.View",      "caption": "View color space" },
+        { "id": "Color.OCIO.Look",      "caption": "Look color space" }
+      ]
+    },
+    {
+      "id": "color-lut",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "layout": "columns",
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "Color", "expand": ["LUT"] }
+      ],
+      "annotate": [
+        { "id": "Color.LUT.Enabled",    "caption": "Enable" },
+        { "id": "Color.LUT.File",       "caption": "File" },
+        { "id": "Color.LUT.Order",      "caption": "Order" }
+      ]
+    },
+    {
+      "id": "color-controls",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "Color", "expand": ["Color"] }
+      ],
+      "annotate": [
+        { "id": "Color.Controls.Add",          "caption": "Add" },
+        { "id": "Color.Controls.Brightness",   "caption": "Brightness" },
+        { "id": "Color.Controls.Contrast",     "caption": "Contrast" },
+        { "id": "Color.Controls.Saturation",   "caption": "Saturation" },
+        { "id": "Color.Controls.Hue",          "caption": "Hue" },
+        { "id": "Color.Controls.Invert",       "caption": "Invert" }
+      ]
+    },
+    {
+      "id": "color-levels",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "Color", "expand": ["Levels"] }
+      ],
+      "annotate": [
+        { "id": "Color.Levels.Enabled", "caption": "Enable" },
+        { "id": "Color.Levels.In",      "caption": "In low/high" },
+        { "id": "Color.Levels.Gamma",   "caption": "Gamma" },
+        { "id": "Color.Levels.Out",     "caption": "Out low/high" }
+      ]
+    },
+    {
+      "id": "color-exposure",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "Color", "expand": ["Exposure"] }
+      ],
+      "annotate": [
+        { "id": "Color.Exposure.Enabled",   "caption": "Enable" },
+        { "id": "Color.Exposure.Exposure",  "caption": "Exposure" },
+        { "id": "Color.Exposure.Defog",     "caption": "Defog" },
+        { "id": "Color.Exposure.KneeLow",   "caption": "Knee low" },
+        { "id": "Color.Exposure.KneeHigh",  "caption": "Knee high" }
+      ]
+    },
+    {
+      "id": "color-soft-clip",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "Color", "expand": ["SoftClip"] }
+      ],
+      "annotate": [
+        { "id": "Color.SoftClip.Enabled", "caption": "Enable" },
+        { "id": "Color.SoftClip.Value",   "caption": "Soft clip" }
+      ]
+    },
+    {
+      "id": "audio-tool",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/MultipleClips.otio" },
+        { "tool": "Audio" }
+      ],
+      "annotate": [
+        { "id": "Audio.Device",         "caption": "Device" },
+        { "id": "Audio.Volume",         "caption": "Volume" },
+        { "id": "Audio.Mute",           "caption": "Mute" },
+        { "id": "Audio.ChannelMute",    "caption": "Channel mute" },
+        { "id": "Audio.SyncOffset",     "caption": "Sync offset" }
+      ]
     },
     {
       "id": "tools",
@@ -247,7 +351,11 @@
         { "tool": "Color Picker" },
         { "pick": [160, 90] }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "ColorPicker.Color",    "caption": "Picked color" },
+        { "id": "ColorPicker.Pixel",    "caption": "Pixel location" },
+        { "id": "ColorPicker.Mouse",    "caption": "Mouse binding" }
+      ]
     },
     {
       "id": "magnify-tool",
@@ -259,7 +367,11 @@
         { "tool": "Magnify" },
         { "pick": [160, 90] }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "Magnify.Magnify",  "caption": "Magnification" },
+        { "id": "Magnify.Pixel",    "caption": "Pixel location" },
+        { "id": "Magnify.Mouse",    "caption": "Mouse binding" }
+      ]
     },
     {
       "id": "export-tool",
@@ -270,28 +382,44 @@
         { "frame": 88 },
         { "tool": "Export" }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "Export.Dir",  "caption": "Output directory" },
+        { "id": "Export.RenderSize",  "caption": "Render size" },
+        { "id": "Export.FileType",  "caption": "File type" },
+        { "id": "Export.ImageBaseName",  "caption": "Base output name" },
+        { "id": "Export.ImageZeroPad",  "caption": "Sequence zero padding" },
+        { "id": "Export.ImageExt",  "caption": "Output file extension" },
+        { "id": "Export.Export",  "caption": "Export button" }
+      ]
     },
     {
       "id": "keyboard-shortcuts",
       "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
+      "cropFit": false,
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 88 },
         { "tool": "Settings", "expand": ["Shortcuts"] }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "ShortcutsSettings.Search", "caption": "Search" },
+        { "id": "ShortcutsSettings.Secondary", "caption": "Secondary shortcut" },
+        { "id": "ShortcutsSettings.Primary", "caption": "Primary shortcut" }
+      ]
     },
     {
       "id": "custom-fonts",
       "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "setup": [
         { "open": "etc/SampleData/大平原.jpg" },
-        { "frame": 88 },
+        { "view": { "hud": true } },
         { "tool": "Settings", "expand": ["Style"] }
       ],
-      "annotate": []
+      "annotate": [
+        { "id": "StyleSettings.Font", "caption": "Select font" },
+        { "id": "StyleSettings.FontFile", "caption": "Font file" }
+      ]
     }
   ]
 }

@@ -34,6 +34,11 @@ namespace djv
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
 
+            //! Scroll to the named section. Tools that lay their content out in
+            //! scrollable sections (e.g. bellows) override this; the default
+            //! does nothing.
+            virtual void scrollTo(const std::string& section);
+
         protected:
             void _loadSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >&);
             void _saveSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >&);

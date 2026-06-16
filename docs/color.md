@@ -25,31 +25,25 @@ the adjustment isn't forgotten about.
 
 ## OpenColorIO (OCIO)
 
-![Color tool]({{ '/assets/color-ocio.svg' | relative_url }})
-
-1. Enable OpenColorIO
-2. OpenColorIO configuration
-3. Configuration name
-4. Input color space
-5. Display color space
-6. View color space
-7. Look color space
+![OpenColorIO]({{ '/assets/color-ocio.svg' | relative_url }})
 
 The OpenColorIO configuration can be set to a built-in configuration, the
 **OCIO** environment variable, or a specific file path.
 
 Shortcuts:
 
-* Toggle OCIO: <kbd>Ctrl+N</kbd>
+* Toggle OCIO enabled: <kbd>Ctrl+N</kbd>
 
 ## LUT
+
+![LUT]({{ '/assets/color-lut.svg' | relative_url }})
 
 A LUT can be applied either before or after the OpenColorIO pass — set the LUT
 **Order** option to **PreColorConfig** or **PostColorConfig** as needed.
 
 Shortcuts:
 
-* Toggle LUT: <kbd>Ctrl+K</kbd>
+* Toggle LUT enabled: <kbd>Ctrl+K</kbd>
 
 ### Supported LUT formats
 
@@ -84,6 +78,8 @@ Different formats may be available depending on how DJV was built.
 
 ## Color
 
+![Color controls]({{ '/assets/color-controls.svg' | relative_url }})
+
 Basic color adjustments:
 
 - **Add** — Add a constant value to each channel.
@@ -95,6 +91,8 @@ Basic color adjustments:
 
 ## Levels
 
+![OpenColorIO]({{ '/assets/color-levels.svg' | relative_url }})
+
 Levels remap the input tonal range to an output range, similar to the levels
 control in an image editor:
 
@@ -103,6 +101,8 @@ control in an image editor:
 - **Out low** / **Out high** — The black and white points of the output.
 
 ## Exposure
+
+![OpenColorIO]({{ '/assets/color-exposure.svg' | relative_url }})
 
 Exposure controls mimic film response and are useful for high-dynamic-range
 images:
@@ -114,6 +114,8 @@ images:
 - **Gamma** — A final gamma adjustment.
 
 ## Soft clip
+
+![OpenColorIO]({{ '/assets/color-soft-clip.svg' | relative_url }})
 
 **Soft clip** gently rolls off values approaching white instead of clipping them
 hard, which helps preserve detail in bright highlights.

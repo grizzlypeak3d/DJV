@@ -14,7 +14,7 @@ menu.
 
 The current frame is the red vertical line. The in/out range is represented by
 the blue line at the top of the timeline. The cache is represented by the green
-and puple lines.
+and purple lines.
 
 Default timeline controls:
 

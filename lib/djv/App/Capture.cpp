@@ -4,6 +4,7 @@
 #include <djv/App/Capture.h>
 
 #include <djv/App/App.h>
+#include <djv/App/IToolWidget.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/Viewport.h>
 #include <djv/Models/FilesModel.h>
@@ -384,10 +385,37 @@ namespace djv
                         for (const auto& name : expand)
                             bellows[name.get<std::string>()] = true;
                     app->getSettings()->set(key, bellows);
+
+                    // Bring the expanded section into view once the tool is laid
+                    // out: a bellows low in the list (e.g. Keyboard Shortcuts)
+                    // would otherwise expand below the panel's visible area. The
+                    // section is the last expanded one; tools without scrollable
+                    // sections inherit IToolWidget's no-op scrollTo. Deferred to
+                    // the late phase so the bellows geometry is valid.
+                    std::string section;
+                    if (expand.is_string())
+                        section = expand.get<std::string>();
+                    else if (expand.is_array() && !expand.empty())
+                        section = expand.back().get<std::string>();
+                    if (!section.empty())
+                        p.lateSteps.push_back({ { "scrollTool", section } });
                 }
                 models::Tool tool = models::Tool::None;
                 from_string(toolStr, tool);
                 app->getToolsModel()->setActiveTool(tool);
+            }
+            else if (step.contains("scrollTool"))
+            {
+                // Deferred: scroll the active tool to a section (see the tool
+                // verb above). Runs after the tool is laid out so scrollTo can
+                // resolve the section's geometry.
+                const std::string section =
+                    step.at("scrollTool").get<std::string>();
+                if (auto mainWindow = app->getMainWindow())
+                {
+                    if (auto tool = mainWindow->getToolWidget())
+                        tool->scrollTo(section);
+                }
             }
             else if (step.contains("frame"))
             {
@@ -581,14 +609,41 @@ namespace djv
             }
             else if (step.contains("ocio"))
             {
-                // Enable OCIO with a config file for the Color tool screenshot.
-                // The Color tool loads the config and fills in its input /
-                // display / view lists when it opens. e.g.
-                // { "ocio": "etc/SampleData/config.ocio" }
+                // Enable OCIO for the Color tool screenshot. Two forms:
+                //   { "ocio": "etc/SampleData/config.ocio" }   // config file
+                //   { "ocio": { "config": "Built In",          // or "Environment Variable" / "File"
+                //               "fileName": "...",             // for File
+                //               "input":   "ACES2065-1",
+                //               "display": "sRGB - Display",
+                //               "view":    "ACES 2.0 - SDR 100 nits (Rec.709)",
+                //               "look":    "..." } }
+                // The string form selects a config file; the object form sets
+                // the config mode plus the color-space selections shown in the
+                // tool. With a built-in config the spaces are available
+                // immediately, so the selections take effect on load.
                 auto options = app->getColorModel()->getOCIOOptions();
                 options.enabled = true;
-                options.config = tl::OCIOConfig::File;
-                options.fileName = step.at("ocio").get<std::string>();
+                const auto& ocio = step.at("ocio");
+                if (ocio.is_string())
+                {
+                    options.config = tl::OCIOConfig::File;
+                    options.fileName = ocio.get<std::string>();
+                }
+                else if (ocio.is_object())
+                {
+                    if (ocio.contains("config"))
+                        from_string(ocio.at("config").get<std::string>(), options.config);
+                    if (ocio.contains("fileName"))
+                        options.fileName = ocio.at("fileName").get<std::string>();
+                    if (ocio.contains("input"))
+                        options.input = ocio.at("input").get<std::string>();
+                    if (ocio.contains("display"))
+                        options.display = ocio.at("display").get<std::string>();
+                    if (ocio.contains("view"))
+                        options.view = ocio.at("view").get<std::string>();
+                    if (ocio.contains("look"))
+                        options.look = ocio.at("look").get<std::string>();
+                }
                 app->getColorModel()->setOCIOOptions(options);
             }
             else if (step.contains("fileBrowser"))

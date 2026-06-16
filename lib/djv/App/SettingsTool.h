@@ -25,10 +25,14 @@ namespace djv
         public:
             virtual ~SettingsTool();
 
+            //! Create a new tool.
             static std::shared_ptr<SettingsTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
+
+            //! Scroll to the given section.
+            void scrollTo(const std::string&);
 
         private:
             FTK_PRIVATE();

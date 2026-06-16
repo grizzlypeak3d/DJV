@@ -123,6 +123,11 @@ namespace djv
             return out;
         }
 
+        const std::shared_ptr<IToolWidget>& ToolsWidget::getToolWidget() const
+        {
+            return _p->toolWidget;
+        }
+
         ftk::Size2I ToolsWidget::getSizeHint() const
         {
             FTK_P();

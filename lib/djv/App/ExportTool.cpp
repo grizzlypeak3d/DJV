@@ -27,6 +27,7 @@
 #include <ftk/UI/ProgressDialog.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/GL/GL.h>
 #include <ftk/GL/OffscreenBuffer.h>
@@ -146,25 +147,32 @@ namespace djv
 #endif // TLRENDER_FFMPEG_PLUGIN
 
             p.dirEdit = ftk::FileEdit::create(context, ftk::FileBrowserMode::Dir);
+            ftk::setScreenshotTag(p.dirEdit, "Export.Dir");
 
             p.renderSizeComboBox = ftk::ComboBox::create(context, models::getExportRenderSizeLabels());
+            ftk::setScreenshotTag(p.renderSizeComboBox, "Export.RenderSize");
             p.renderWidthEdit = ftk::IntEdit::create(context);
             p.renderWidthEdit->setRange(1, 16384);
             p.renderHeightEdit = ftk::IntEdit::create(context);
             p.renderHeightEdit->setRange(1, 16384);
 
             p.fileTypeComboBox = ftk::ComboBox::create(context, models::getExportFileTypeLabels());
+            ftk::setScreenshotTag(p.fileTypeComboBox, "Export.FileType");
 
             p.imageBaseEdit = ftk::LineEdit::create(context);
+            ftk::setScreenshotTag(p.imageBaseEdit, "Export.ImageBaseName");
             p.imageZeroPadEdit = ftk::IntEdit::create(context);
             p.imageZeroPadEdit->setRange(0, 16);
+            ftk::setScreenshotTag(p.imageZeroPadEdit, "Export.ImageZeroPad");
             p.imageExtComboBox = ftk::ComboBox::create(context, p.imageExts);
+            ftk::setScreenshotTag(p.imageExtComboBox, "Export.ImageExt");
 
             p.movieBaseEdit = ftk::LineEdit::create(context);
             p.movieExtComboBox = ftk::ComboBox::create(context, p.movieExts);
             p.movieCodecComboBox = ftk::ComboBox::create(context, p.movieCodecs);
 
             p.exportButton = ftk::PushButton::create(context, "Export");
+            ftk::setScreenshotTag(p.exportButton, "Export.Export");
 
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setMarginRole(ftk::SizeRole::Margin);

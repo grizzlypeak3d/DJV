@@ -13,18 +13,12 @@ Open it from the **Tools** menu or the tool bar.
 
 ![Export tool]({{ '/assets/export-tool.svg' | relative_url }})
 
-1. Output directory
-2. Render size — the resolution of the export. **Default** uses the source
-   resolution; a custom size can also be set.
-3. File type
-4. Base file name
-5. File extension
-6. Movie codec
-7. Export button
+* Render size — The resolution of the export. **Default** uses the source
+  resolution; a custom size can also be set.
 
 ## File types
 
-Set **File type** to choose what is written:
+Set **File type** to choose what is exported:
 
 - **Image** — Just the current frame, as a single still image.
 - **Sequence** — The in/out range as a numbered image sequence. Set **Zero

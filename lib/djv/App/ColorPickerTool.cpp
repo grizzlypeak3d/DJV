@@ -12,6 +12,7 @@
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/Core/Format.h>
 
@@ -51,11 +52,14 @@ namespace djv
 
             p.colorLabel = ftk::Label::create(context);
             p.colorLabel->setFont(ftk::FontType::Mono);
+            ftk::setScreenshotTag(p.colorLabel, "ColorPicker.Color");
 
             p.pixelLabel = ftk::Label::create(context);
             p.pixelLabel->setFont(ftk::FontType::Mono);
+            ftk::setScreenshotTag(p.pixelLabel, "ColorPicker.Pixel");
 
             p.mouseLabel = ftk::Label::create(context);
+            ftk::setScreenshotTag(p.mouseLabel, "ColorPicker.Mouse");
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setMarginRole(ftk::SizeRole::Margin);

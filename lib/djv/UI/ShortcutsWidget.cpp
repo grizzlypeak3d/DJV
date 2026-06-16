@@ -7,6 +7,7 @@
 #include <ftk/UI/GridLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/SearchBox.h>
 #include <ftk/UI/Spacer.h>
 #include <ftk/UI/ToolButton.h>
@@ -397,6 +398,7 @@ namespace djv
 
             p.searchBox = ftk::SearchBox::create(context);
             p.searchBox->setTooltip("Search the shortcuts");
+            ftk::setScreenshotTag(p.searchBox, "ShortcutsSettings.Search");
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
@@ -514,8 +516,10 @@ namespace djv
                         p.shortcutsLayout->setGridPos(groupLabel, column, 0);
                         ++column;
 
-                        for (const auto& shortcut : group.shortcuts)
+                        for (int j = 0; j < group.shortcuts.size(); ++j)
                         {
+                            const auto& shortcut = group.shortcuts[j];
+
                             auto label = ftk::Label::create(context, shortcut.text + ":", p.shortcutsLayout);
                             label->setMarginRole(ftk::SizeRole::MarginInside);
                             label->setHStretch(ftk::Stretch::Expanding);
@@ -545,6 +549,10 @@ namespace djv
                                         p.settings->setShortcuts(settings);
                                     }
                                 });
+                            if (0 == i && 0 == j)
+                            {
+                                ftk::setScreenshotTag(primaryWidget, "ShortcutsSettings.Primary");
+                            }
 
                             auto secondaryWidget = ShortcutWidget::create(context, p.shortcutsLayout);
                             secondaryWidget->setShortcut(shortcut.secondary);
@@ -569,6 +577,10 @@ namespace djv
                                         p.settings->setShortcuts(settings);
                                     }
                                 });
+                            if (0 == i && 0 == j)
+                            {
+                                ftk::setScreenshotTag(secondaryWidget, "ShortcutsSettings.Secondary");
+                            }
 
                             ++column;
                         }

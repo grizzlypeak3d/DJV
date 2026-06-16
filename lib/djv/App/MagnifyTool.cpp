@@ -16,6 +16,7 @@
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Format.h>
 
@@ -103,11 +104,14 @@ namespace djv
             p.viewport->setInputEnabled(false);
 
             p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
+            ftk::setScreenshotTag(p.comboBox, "Magnify.Magnify");
 
             p.pixelLabel = ftk::Label::create(context);
             p.pixelLabel->setFont(ftk::FontType::Mono);
+            ftk::setScreenshotTag(p.pixelLabel, "Magnify.Pixel");
 
             p.mouseLabel = ftk::Label::create(context);
+            ftk::setScreenshotTag(p.mouseLabel, "Magnify.Mouse");
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);

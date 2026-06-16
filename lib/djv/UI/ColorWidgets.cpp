@@ -17,6 +17,7 @@
 #include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/StackLayout.h>
@@ -57,28 +58,35 @@ namespace djv
 
             p.ocioModel = models::OCIOModel::create(context);
 
-            p.configComboBox = ftk::ComboBox::create(context, tl::getOCIOConfigLabels());
-            p.configComboBox->setHStretch(ftk::Stretch::Expanding);
-
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether OCIO is enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "Color.OCIO.Enabled");
+
+            p.configComboBox = ftk::ComboBox::create(context, tl::getOCIOConfigLabels());
+            p.configComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.configComboBox, "Color.OCIO.Config");
 
             p.fileEdit = ftk::FileEdit::create(context);
 
             p.nameLabel = ftk::Label::create(context);
+            ftk::setScreenshotTag(p.nameLabel, "Color.OCIO.Name");
 
             p.inputComboBox = ftk::ComboBox::create(context);
             p.inputComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.inputComboBox, "Color.OCIO.Input");
 
             p.displayComboBox = ftk::ComboBox::create(context);
             p.displayComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.displayComboBox, "Color.OCIO.Display");
 
             p.viewComboBox = ftk::ComboBox::create(context);
             p.viewComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.viewComboBox, "Color.OCIO.View");
 
             p.lookComboBox = ftk::ComboBox::create(context);
             p.lookComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.lookComboBox, "Color.OCIO.Look");
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -221,6 +229,7 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether the LUT is enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "Color.LUT.Enabled");
 
             p.fileEdit = ftk::FileEdit::create(context);
             std::vector<std::string> s;
@@ -233,9 +242,11 @@ namespace djv
                     arg(lutFormatExts[i]));
             }
             p.fileEdit->setTooltip(ftk::Format("Supported LUT formats:\n{0}").arg(ftk::join(s, '\n')));
+            ftk::setScreenshotTag(p.fileEdit, "Color.LUT.File");
 
             p.orderComboBox = ftk::ComboBox::create(context, tl::getLUTOrderLabels());
             p.orderComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.orderComboBox, "Color.LUT.Order");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -338,22 +349,32 @@ namespace djv
             p.sliders["Add"] = ftk::FloatEditSlider::create(context);
             p.sliders["Add"]->setRange(-1.F, 1.F);
             p.sliders["Add"]->setDefault(0.F);
+            ftk::setScreenshotTag(p.sliders["Add"], "Color.Controls.Add");
+
             p.sliders["Brightness"] = ftk::FloatEditSlider::create(context);
             p.sliders["Brightness"]->setRange(0.F, 4.F);
             p.sliders["Brightness"]->setDefault(1.F);
+            ftk::setScreenshotTag(p.sliders["Brightness"], "Color.Controls.Brightness");
+
             p.sliders["Contrast"] = ftk::FloatEditSlider::create(context);
             p.sliders["Contrast"]->setRange(0.F, 4.F);
             p.sliders["Contrast"]->setDefault(1.F);
+            ftk::setScreenshotTag(p.sliders["Contrast"], "Color.Controls.Contrast");
+
             p.sliders["Saturation"] = ftk::FloatEditSlider::create(context);
             p.sliders["Saturation"]->setRange(0.F, 4.F);
             p.sliders["Saturation"]->setDefault(1.F);
+            ftk::setScreenshotTag(p.sliders["Saturation"], "Color.Controls.Saturation");
+
             p.hueSlider = ftk::IntEditSlider::create(context);
             p.hueSlider->setRange(0, 360);
             p.hueSlider->setStep(10);
             p.hueSlider->setLargeStep(60);
             p.hueSlider->setDefault(0);
+            ftk::setScreenshotTag(p.hueSlider, "Color.Controls.Hue");
 
             p.invertCheckBox = ftk::CheckBox::create(context);
+            ftk::setScreenshotTag(p.invertCheckBox, "Color.Controls.Invert");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -509,16 +530,19 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether levels are enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "Color.Levels.Enabled");
 
             ftk::RangeF range(0.F, 1.F);
             p.settings->getT("/Color/Levels/InRange", range);
             p.sliders["InLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["InLow"]->setRange(range);
             p.sliders["InLow"]->setDefault(0.F);
+            ftk::setScreenshotTag(p.sliders["InLow"], "Color.Levels.In");
 
             p.sliders["InHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["InHigh"]->setRange(range);
             p.sliders["InHigh"]->setDefault(1.F);
+            ftk::setScreenshotTag(p.sliders["InHigh"], "Color.Levels.In");
 
             p.rangeEdits["InMin"] = ftk::FloatEdit::create(context);
             p.rangeEdits["InMin"]->setRange(-1000000.F, 1000000.F);
@@ -531,15 +555,18 @@ namespace djv
             p.sliders["Gamma"] = ftk::FloatEditSlider::create(context);
             p.sliders["Gamma"]->setRange(.1F, 4.F);
             p.sliders["Gamma"]->setDefault(1.F);
+            ftk::setScreenshotTag(p.sliders["Gamma"], "Color.Levels.Gamma");
 
             p.settings->getT("/Color/Levels/OutRange", range);
             p.sliders["OutLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["OutLow"]->setRange(range);
             p.sliders["OutLow"]->setDefault(0.F);
+            ftk::setScreenshotTag(p.sliders["OutLow"], "Color.Levels.Out");
 
             p.sliders["OutHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["OutHigh"]->setRange(range);
             p.sliders["OutHigh"]->setDefault(1.F);
+            ftk::setScreenshotTag(p.sliders["OutHigh"], "Color.Levels.Out");
 
             p.rangeEdits["OutMin"] = ftk::FloatEdit::create(context);
             p.rangeEdits["OutMin"]->setRange(-1000000.F, 1000000.F);
@@ -736,25 +763,31 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether exposure controls are enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "Color.Exposure.Enabled");
 
             p.sliders["Exposure"] = ftk::FloatEditSlider::create(context);
             p.sliders["Exposure"]->setRange(-10.F, 10.F);
             p.sliders["Exposure"]->setDefault(0.F);
+            ftk::setScreenshotTag(p.sliders["Exposure"], "Color.Exposure.Exposure");
 
             p.sliders["Defog"] = ftk::FloatEditSlider::create(context);
             p.sliders["Defog"]->setDefault(0.F);
+            ftk::setScreenshotTag(p.sliders["Defog"], "Color.Exposure.Defog");
 
             p.sliders["KneeLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["KneeLow"]->setRange(-3.F, 3.F);
             p.sliders["KneeLow"]->setDefault(0.F);
+            ftk::setScreenshotTag(p.sliders["KneeLow"], "Color.Exposure.KneeLow");
 
             p.sliders["KneeHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["KneeHigh"]->setRange(3.5F, 7.5F);
             p.sliders["KneeHigh"]->setDefault(5.F);
+            ftk::setScreenshotTag(p.sliders["KneeHigh"], "Color.Exposure.KneeHigh");
 
             p.sliders["Gamma"] = ftk::FloatEditSlider::create(context);
             p.sliders["Gamma"]->setRange(.1F, 4.F);
             p.sliders["Gamma"]->setDefault(1.F);
+            ftk::setScreenshotTag(p.sliders["Gamma"], "Color.Exposure.Gamma");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -884,9 +917,11 @@ namespace djv
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether soft clip is enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "Color.SoftClip.Enabled");
 
             p.sliders["SoftClip"] = ftk::FloatEditSlider::create(context);
             p.sliders["SoftClip"]->setDefault(0.F);
+            ftk::setScreenshotTag(p.sliders["SoftClip"], "Color.SoftClip.Value");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);

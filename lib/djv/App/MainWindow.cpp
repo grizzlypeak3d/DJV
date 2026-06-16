@@ -450,6 +450,11 @@ namespace djv
             return _p->timelineWidget;
         }
 
+        const std::shared_ptr<IToolWidget>& MainWindow::getToolWidget() const
+        {
+            return _p->toolsWidget->getToolWidget();
+        }
+
         void MainWindow::setSplitters(float splitter, float splitter2)
         {
             FTK_P();

@@ -10,6 +10,7 @@
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/Core/Format.h>
 
 namespace djv
@@ -64,14 +65,24 @@ namespace djv
             p.displayScaleComboBox = ftk::ComboBox::create(context, labels);
             p.displayScaleComboBox->setHStretch(ftk::Stretch::Expanding);
 
-            const auto fontLabels = ftk::getFontTypeLabels();
-            for (const auto font : ftk::getFontTypeEnums())
+            const auto fontEnums = ftk::getFontTypeEnums();
+            for (size_t i = 0; i < fontEnums.size(); ++i)
             {
-                p.fontComboBoxes[font] = ftk::ComboBox::create(context);
+                auto comboBox = ftk::ComboBox::create(context);
+                if (0 == i)
+                {
+                    setScreenshotTag(comboBox, "StyleSettings.Font");
+                }
+                p.fontComboBoxes[fontEnums[i]] = comboBox;
             }
             for (size_t i = 0; i < 4; ++i)
             {
-                p.fontFileEdits.push_back(ftk::FileEdit::create(context));
+                auto fontFileEdit = ftk::FileEdit::create(context);
+                if (0 == i)
+                {
+                    setScreenshotTag(fontFileEdit, "StyleSettings.FontFile");
+                }
+                p.fontFileEdits.push_back(fontFileEdit);
             }
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
@@ -80,7 +91,8 @@ namespace djv
             p.layout->addRow("Brightness:", p.brightnessSlider);
             p.layout->addRow("Contrast:", p.contrastSlider);
             p.layout->addRow("Display scale:", p.displayScaleComboBox);
-            for (const auto font : ftk::getFontTypeEnums())
+            const auto fontLabels = ftk::getFontTypeLabels();
+            for (const auto font : fontEnums)
             {
                 p.layout->addRow(ftk::Format("{0} font:").arg(
                     fontLabels[static_cast<int>(font)]), p.fontComboBoxes[font]);
@@ -149,7 +161,7 @@ namespace djv
                     p.settings->setStyle(settings);
                 });
 
-            for (const auto font : ftk::getFontTypeEnums())
+            for (const auto font : fontEnums)
             {
                 p.fontComboBoxes[font]->setIndexCallback(
                     [this, font](int index)

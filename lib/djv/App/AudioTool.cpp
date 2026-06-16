@@ -14,6 +14,7 @@
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/Core/Format.h>
 
@@ -60,19 +61,25 @@ namespace djv
 
             p.deviceComboBox = ftk::ComboBox::create(context);
             p.deviceComboBox->setTooltip("Audio output device");
+            ftk::setScreenshotTag(p.deviceComboBox, "Audio.Device");
 
             p.volumeSlider = ftk::IntEditSlider::create(context);
             p.volumeSlider->setRange(0, 100);
             p.volumeSlider->setStep(1);
             p.volumeSlider->setLargeStep(10);
+            ftk::setScreenshotTag(p.volumeSlider, "Audio.Volume");
 
             p.muteCheckBox = ftk::CheckBox::create(context);
+            ftk::setScreenshotTag(p.muteCheckBox, "Audio.Mute");
 
-            p.channelMuteButtonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Toggle);
+            p.channelMuteButtonGroup = ftk::ButtonGroup::create(
+                context,
+                ftk::ButtonGroupType::Toggle);
 
             p.syncOffsetSlider = ftk::DoubleEditSlider::create(context);
             p.syncOffsetSlider->setRange(-1.0, 1.0);
             p.syncOffsetSlider->setDefault(0.0);
+            ftk::setScreenshotTag(p.syncOffsetSlider, "Audio.SyncOffset");
 
             auto formLayout = ftk::FormLayout::create(context);
             formLayout->setMarginRole(ftk::SizeRole::Margin);
@@ -82,6 +89,7 @@ namespace djv
             formLayout->addRow("Mute:", p.muteCheckBox);
             p.channelMuteLayout = ftk::HorizontalLayout::create(context);
             p.channelMuteLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
+            ftk::setScreenshotTag(p.channelMuteLayout, "Audio.ChannelMute");
             formLayout->addRow("Channel mute:", p.channelMuteLayout);
             formLayout->addRow("Sync offset (seconds):", p.syncOffsetSlider);
 

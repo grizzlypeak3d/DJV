@@ -19,10 +19,11 @@ namespace djv
     {
         struct SettingsTool::Private
         {
-            std::shared_ptr<ftk::VerticalLayout> layout;
             std::shared_ptr<ftk::PushButton> saveButton;
             std::shared_ptr<ftk::PushButton> resetButton;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
+            std::shared_ptr<ftk::VerticalLayout> layout;
+            std::shared_ptr<ftk::ScrollWidget> scrollWidget;
         };
 
         void SettingsTool::_init(
@@ -156,10 +157,10 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setSpacingRole(ftk::SizeRole::None);
-            auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Both, p.layout);
-            scrollWidget->setWidget(vLayout);
-            scrollWidget->setBorder(false);
-            scrollWidget->setVStretch(ftk::Stretch::Expanding);
+            p.scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Both, p.layout);
+            p.scrollWidget->setWidget(vLayout);
+            p.scrollWidget->setBorder(false);
+            p.scrollWidget->setVStretch(ftk::Stretch::Expanding);
             ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
@@ -224,6 +225,25 @@ namespace djv
             auto out = std::shared_ptr<SettingsTool>(new SettingsTool);
             out->_init(context, app, parent);
             return out;
+        }
+
+        void SettingsTool::scrollTo(const std::string& value)
+        {
+            FTK_P();
+            auto i = p.bellows.find(value);
+            if (i != p.bellows.end())
+            {
+                // scrollTo() expects the box in the scrolled content's
+                // coordinate space, but getGeometry() is in window space;
+                // translate by the content widget's origin (cf.
+                // ftk::ComboBoxMenu::_scrollToCurrent).
+                ftk::Box2I g = i->second->getGeometry();
+                if (const auto& widget = p.scrollWidget->getWidget())
+                {
+                    g = ftk::move(g, -widget->getGeometry().min);
+                }
+                p.scrollWidget->scrollTo(g);
+            }
         }
     }
 }

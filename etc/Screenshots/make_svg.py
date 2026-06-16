@@ -168,7 +168,7 @@ def assign_columns(items, w):
 
 def layout_column(entries, top, bottom):
     """Assign each entry a non-overlapping vertical position near its target."""
-    entries.sort(key=lambda e: e["desired"])
+    entries.sort(key=lambda e: e["box"][1] + e["box"][3] / 2)
     for e in entries:
         e["top"] = e["desired"] - e["h"] / 2
     if entries and entries[0]["top"] < top:

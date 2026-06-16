@@ -112,7 +112,7 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::None);
 
             p.widgetLayout = ftk::GridLayout::create(context, layout);
-            p.widgetLayout->setSpacingRole(ftk::SizeRole::None);
+            p.widgetLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.widgetLayout->setRowBackgroundRole(ftk::ColorRole::Button);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
