@@ -6,6 +6,7 @@ Changes:
 * Add the aom library for AV1 decoding support (macOS and Linux).
 * Allow the "Escape" key to be used for keyboard shortcuts.
 * Style updates.
+* Added NotoSansCJKsc-Regular for basic CJK rendering.
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.

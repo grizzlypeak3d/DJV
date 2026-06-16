@@ -473,7 +473,7 @@ namespace djv
 
             std::string s = p.path.getFileName();
             p.fileNameLabel->setText(!s.empty() ? s : "(No file)");
-            ftk::setScreenshotTag(p.fileNameLabel, "Viewport.HUD.FileName");
+            ftk::setScreenshotTag(p.fileNameLabel, "View.HUD.FileName");
 
             s = std::string();
             if (auto app = p.app.lock())
@@ -485,7 +485,7 @@ namespace djv
                 arg(s).
                 arg(p.fps, 2, 5).
                 arg(static_cast<int>(p.droppedFrames), 3));
-            ftk::setScreenshotTag(p.timeLabel, "Viewport.HUD.Time");
+            ftk::setScreenshotTag(p.timeLabel, "View.HUD.Time");
 
             const auto& colorSample = p.colorSample->get();
             p.colorPickerSwatch->setColor(colorSample);
@@ -496,13 +496,13 @@ namespace djv
                 arg(colorSample.b, 2).
                 arg(colorSample.a, 2).
                 arg(p.pick->get()));
-            ftk::setScreenshotTag(p.colorPickerLabel, "Viewport.HUD.ColorPicker");
+            ftk::setScreenshotTag(p.colorPickerLabel, "View.HUD.ColorPicker");
 
             p.cacheLabel->setText(
                 ftk::Format("Cache: {0}% V, {1}% A").
                 arg(static_cast<int>(p.cacheInfo.videoPercentage), 3).
                 arg(static_cast<int>(p.cacheInfo.audioPercentage), 3));
-            ftk::setScreenshotTag(p.cacheLabel, "Viewport.HUD.Cache");
+            ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");
 
             p.hudLayout->setVisible(p.hud);
         }

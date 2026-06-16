@@ -78,16 +78,19 @@ namespace djv
             hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.posXEdit->setParent(hLayout);
             p.posXReset->setParent(hLayout);
+            ftk::setScreenshotTag(hLayout, "View.Pos");
             p.layout->addRow("X:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.posYEdit->setParent(hLayout);
             p.posYReset->setParent(hLayout);
+            ftk::setScreenshotTag(hLayout, "View.Pos");
             p.layout->addRow("Y:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.zoomEdit->setParent(hLayout);
             p.zoomReset->setParent(hLayout);
+            ftk::setScreenshotTag(hLayout, "View.Zoom");
             p.layout->addRow("Zoom:", hLayout);
 
             std::weak_ptr<tl::ui::Viewport> viewportWeak(viewport);
@@ -202,22 +205,25 @@ namespace djv
                 context,
                 ftk::getImageFilterLabels());
             p.minifyComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.minifyComboBox, "View.Options.Minify");
 
             p.magnifyComboBox = ftk::ComboBox::create(
                 context,
                 ftk::getImageFilterLabels());
             p.magnifyComboBox->setHStretch(ftk::Stretch::Expanding);
-            ftk::setScreenshotTag(p.magnifyComboBox, "Viewport.Options.Magnify");
+            ftk::setScreenshotTag(p.magnifyComboBox, "View.Options.Magnify");
 
             p.videoLevelsComboBox = ftk::ComboBox::create(
                 context,
                 ftk::getInputVideoLevelsLabels());
             p.videoLevelsComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.videoLevelsComboBox, "View.Options.VideoLevels");
 
             p.alphaBlendComboBox = ftk::ComboBox::create(
                 context,
                 ftk::getAlphaBlendLabels());
-            p.videoLevelsComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.alphaBlendComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.alphaBlendComboBox, "View.Options.AlphaBlend");
 
             p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_U8);
 #if defined(FTK_API_GL_4_1)
@@ -232,6 +238,8 @@ namespace djv
                 items.push_back(ss.str());
             }
             p.colorBufferComboBox = ftk::ComboBox::create(context, items);
+            p.colorBufferComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.colorBufferComboBox, "View.Options.ColorBuffer");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -366,6 +374,7 @@ namespace djv
             p.edit->getModel()->setRegex("[0-9\\.\\:]*");
 
             p.typeComboBox = ftk::ComboBox::create(context, tl::getAspectRatioTypeLabels());
+            p.typeComboBox->setHStretch(ftk::Stretch::Expanding);
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -552,6 +561,9 @@ namespace djv
                     button->setText(0 == i ?
                         "Default" :
                         ftk::Format("Custom {0}").arg(i).str());
+                    ftk::setScreenshotTag(button, 0 == i ?
+                        "View.AspectRatio.Default" :
+                        "View.AspectRatio.Custom");
                     p.layout->setGridPos(button, i, 0);
                     p.buttonGroup->addButton(button);
                     p.buttons.push_back(button);
@@ -563,6 +575,7 @@ namespace djv
                     else
                     {
                         auto widget = AspectRatioWidget::create(context, p.layout);
+                        widget->setHStretch(ftk::Stretch::Expanding);
                         p.layout->setGridPos(widget, i, 1);
                         p.widgets.push_back(widget);
                         widget->setCallback(
@@ -610,10 +623,12 @@ namespace djv
                 context,
                 tl::getBackgroundLabels());
             p.typeComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.typeComboBox, "View.Background.Type");
 
             p.solidSwatch = ftk::ColorSwatch::create(context);
             p.solidSwatch->setEditable(true);
             p.solidSwatch->setHAlign(ftk::HAlign::Left);
+            ftk::setScreenshotTag(p.solidSwatch, "View.Background.Color");
 
             p.checkersSwatch.first = ftk::ColorSwatch::create(context);
             p.checkersSwatch.first->setEditable(true);
@@ -778,13 +793,13 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
-            ftk::setScreenshotTag(p.enabledCheckBox, "Viewport.Grid.Enabled");
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.Grid.Enabled");
 
             p.cellModeComboBox = ftk::ComboBox::create(context, tl::getGridCellModeLabels());
 
             p.cellSizeSlider = ftk::IntEditSlider::create(context);
             p.cellSizeSlider->setRange(1, 1000);
-            ftk::setScreenshotTag(p.cellSizeSlider, "Viewport.Grid.CellSize");
+            ftk::setScreenshotTag(p.cellSizeSlider, "View.Grid.CellSize");
 
             p.cellCountXEdit = ftk::IntEdit::create(context);
             p.cellCountXEdit->setRange(1, 100);
@@ -800,7 +815,7 @@ namespace djv
             p.colorSwatch->setHAlign(ftk::HAlign::Left);
 
             p.labelsComboBox = ftk::ComboBox::create(context, tl::getGridLabelsLabels());
-            ftk::setScreenshotTag(p.labelsComboBox, "Viewport.Grid.Labels");
+            ftk::setScreenshotTag(p.labelsComboBox, "View.Grid.Labels");
 
             p.textColorSwatch = ftk::ColorSwatch::create(context);
             p.textColorSwatch->setEditable(true);
@@ -977,13 +992,16 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.Outline.Enabled");
 
             p.widthSlider = ftk::IntEditSlider::create(context);
             p.widthSlider->setRange(1, 100);
+            ftk::setScreenshotTag(p.widthSlider, "View.Outline.LineWidth");
 
             p.colorSwatch = ftk::ColorSwatch::create(context);
             p.colorSwatch->setEditable(true);
             p.colorSwatch->setHAlign(ftk::HAlign::Left);
+            ftk::setScreenshotTag(p.colorSwatch, "View.Outline.Color");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -1076,16 +1094,20 @@ namespace djv
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
             p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.CenterMarker.Enabled");
 
             p.sizeEdit = ftk::IntEdit::create(context);
             p.sizeEdit->setRange(10, 100);
+            ftk::setScreenshotTag(p.sizeEdit, "View.CenterMarker.Size");
 
             p.widthEdit = ftk::IntEdit::create(context);
             p.widthEdit->setRange(1, 10);
+            ftk::setScreenshotTag(p.widthEdit, "View.CenterMarker.LineWidth");
 
             p.colorSwatch = ftk::ColorSwatch::create(context);
             p.colorSwatch->setEditable(true);
             p.colorSwatch->setHAlign(ftk::HAlign::Left);
+            ftk::setScreenshotTag(p.colorSwatch, "View.CenterMarker.Color");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);

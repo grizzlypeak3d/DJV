@@ -76,6 +76,57 @@
       "annotate": []
     },
     {
+      "id": "view-pos-zoom",
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "View", "expand": ["PosZoom"] }
+      ],
+      "annotate": [
+        { "id": "View.Pos", "caption": "Position" },
+        { "id": "View.Zoom", "caption": "Zoom" }
+      ]
+    },
+    {
+      "id": "view-options",
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "View", "expand": ["Options"] }
+      ],
+      "annotate": [
+        { "id": "View.Options.Minify", "caption": "Minify" },
+        { "id": "View.Options.Magnify", "caption": "Magnify" },
+        { "id": "View.Options.VideoLevels", "caption": "Video levels" },
+        { "id": "View.Options.AlphaBlend", "caption": "Alpha blend" },
+        { "id": "View.Options.ColorBuffer", "caption": "Color buffer" }
+      ]
+    },
+    {
+      "id": "view-aspect-ratio",
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "View", "expand": ["AspectRatio"] }
+      ],
+      "annotate": [
+        { "id": "View.AspectRatio.Default", "caption": "Default aspect ratio" },
+        { "id": "View.AspectRatio.Custom", "caption": "Custom aspect ratios" }
+      ]
+    },
+    {
+      "id": "view-background",
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "View", "expand": ["Background"] }
+      ],
+      "annotate": [
+        { "id": "View.Background.Type", "caption": "Background type" },
+        { "id": "View.Background.Color", "caption": "Color" }
+      ]
+    },
+    {
       "id": "view-pixel-grid",
       "window": { "w": 900, "h": 600, "splitter2": 0.6 },
       "setup": [
@@ -89,7 +140,7 @@
         { "zoom": 200 }
       ],
       "annotate": [
-        { "id": "Viewport.Options.Magnify", "caption": "Magnify filter" }
+        { "id": "View.Options.Magnify", "caption": "Magnify filter" }
       ]
     },
     {
@@ -106,9 +157,36 @@
         { "zoom": 200 }
       ],
       "annotate": [
-        { "id": "Viewport.Grid.Enabled", "caption": "Enable grid" },
-        { "id": "Viewport.Grid.CellSize", "caption": "Grid cell size" },
-        { "id": "Viewport.Grid.Labels", "caption": "Grid labels" }
+        { "id": "View.Grid.Enabled", "caption": "Enable grid" },
+        { "id": "View.Grid.CellSize", "caption": "Grid cell size" },
+        { "id": "View.Grid.Labels", "caption": "Grid labels" }
+      ]
+    },
+    {
+      "id": "view-outline",
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "View", "expand": ["Outline"] }
+      ],
+      "annotate": [
+        { "id": "View.Outline.Enabled", "caption": "Enable" },
+        { "id": "View.Outline.LineWidth", "caption": "Line width" },
+        { "id": "View.Outline.Color", "caption": "Color" }
+      ]
+    },
+    {
+      "id": "view-center-marker",
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "View", "expand": ["CenterMarker"] }
+      ],
+      "annotate": [
+        { "id": "View.CenterMarker.Enabled", "caption": "Enable" },
+        { "id": "View.CenterMarker.Size", "caption": "Size" },
+        { "id": "View.CenterMarker.LineWidth", "caption": "Line width" },
+        { "id": "View.CenterMarker.Color", "caption": "Color" }
       ]
     },
     {
@@ -123,10 +201,10 @@
         { "pick": [160, 90] }
       ],
       "annotate": [
-        { "id": "Viewport.HUD.FileName", "caption": "File name" },
-        { "id": "Viewport.HUD.Time", "caption": "Time" },
-        { "id": "Viewport.HUD.ColorPicker", "caption": "Color picker" },
-        { "id": "Viewport.HUD.Cache", "caption": "Cache" }
+        { "id": "View.HUD.FileName", "caption": "File name" },
+        { "id": "View.HUD.Time", "caption": "Time" },
+        { "id": "View.HUD.ColorPicker", "caption": "Color picker" },
+        { "id": "View.HUD.Cache", "caption": "Cache" }
       ]
     },
     {
@@ -393,19 +471,33 @@
       ]
     },
     {
+      "id": "mouse-settings",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "Settings", "expand": ["Mouse"] }
+      ],
+      "annotate": [
+        { "id": "Mouse.PanView", "caption": "Pan view" },
+        { "id": "Mouse.CompareWipe", "caption": "Compare wipe" },
+        { "id": "Mouse.Pick", "caption": "Pick" },
+        { "id": "Mouse.FrameShuttle", "caption": "Frame shuttle" },
+        { "id": "Mouse.WheelScale", "caption": "Mouse wheel scale" },
+        { "id": "Mouse.FrameShuttleScale", "caption": "Frame shuttle scale" }
+      ]
+    },
+    {
       "id": "keyboard-shortcuts",
       "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "cropFit": false,
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 88 },
         { "tool": "Settings", "expand": ["Shortcuts"] }
       ],
       "annotate": [
-        { "id": "ShortcutsSettings.Search", "caption": "Search" },
-        { "id": "ShortcutsSettings.Secondary", "caption": "Secondary shortcut" },
-        { "id": "ShortcutsSettings.Primary", "caption": "Primary shortcut" }
+        { "id": "Shortcuts.Search", "caption": "Search" },
+        { "id": "Shortcuts.Secondary", "caption": "Secondary shortcut" },
+        { "id": "Shortcuts.Primary", "caption": "Primary shortcut" }
       ]
     },
     {
@@ -417,8 +509,8 @@
         { "tool": "Settings", "expand": ["Style"] }
       ],
       "annotate": [
-        { "id": "StyleSettings.Font", "caption": "Select font" },
-        { "id": "StyleSettings.FontFile", "caption": "Font file" }
+        { "id": "Style.Font", "caption": "Select font" },
+        { "id": "Style.FontFile", "caption": "Font file" }
       ]
     }
   ]

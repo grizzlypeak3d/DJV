@@ -33,27 +33,19 @@ Use the button at the bottom of the tool to save the settings manually.
 
 ## Mouse
 
-The **Mouse** section maps mouse buttons (and optional modifier keys) to viewport
-actions. The defaults are:
+![Keyboard shortcuts]({{ '/assets/mouse-settings.svg' | relative_url }})
 
-| Action        | Default binding              |
-| ------------- | ---------------------------- |
-| Pan view      | Middle mouse button          |
-| Compare wipe  | **Alt** + left mouse button  |
-| Pick (color picker / magnify) | **Ctrl** + left mouse button |
-| Frame shuttle | Left mouse button            |
-
-The section also has scaling options for the mouse-wheel zoom and the frame
-shuttle.
+The **Mouse** section maps mouse buttons (and optional modifier keys) to
+different actions.
 
 ## Keyboard shortcuts
 
 ![Keyboard shortcuts]({{ '/assets/keyboard-shortcuts.svg' | relative_url }})
 
-To set a shortcut, click its widget (or tab to it) and press the new key
-combination. The widget turns red if the chosen combination conflicts with an
-existing shortcut. Each action can have a primary and a secondary shortcut, and
-the search box helps find an action by name.
+To set a shortcut, click its widget and press the new key combination. The
+widget turns red if the chosen combination conflicts with an existing shortcut.
+Each action can have a primary and a secondary shortcut, and the search box
+helps find an action by name.
 
 {: .note }
 On macOS some shortcuts use the **Command** key instead of **Ctrl**.

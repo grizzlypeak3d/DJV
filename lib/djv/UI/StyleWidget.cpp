@@ -71,7 +71,7 @@ namespace djv
                 auto comboBox = ftk::ComboBox::create(context);
                 if (0 == i)
                 {
-                    setScreenshotTag(comboBox, "StyleSettings.Font");
+                    setScreenshotTag(comboBox, "Style.Font");
                 }
                 p.fontComboBoxes[fontEnums[i]] = comboBox;
             }
@@ -80,7 +80,7 @@ namespace djv
                 auto fontFileEdit = ftk::FileEdit::create(context);
                 if (0 == i)
                 {
-                    setScreenshotTag(fontFileEdit, "StyleSettings.FontFile");
+                    setScreenshotTag(fontFileEdit, "Style.FontFile");
                 }
                 p.fontFileEdits.push_back(fontFileEdit);
             }

@@ -398,7 +398,7 @@ namespace djv
 
             p.searchBox = ftk::SearchBox::create(context);
             p.searchBox->setTooltip("Search the shortcuts");
-            ftk::setScreenshotTag(p.searchBox, "ShortcutsSettings.Search");
+            ftk::setScreenshotTag(p.searchBox, "Shortcuts.Search");
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
@@ -551,7 +551,7 @@ namespace djv
                                 });
                             if (0 == i && 0 == j)
                             {
-                                ftk::setScreenshotTag(primaryWidget, "ShortcutsSettings.Primary");
+                                ftk::setScreenshotTag(primaryWidget, "Shortcuts.Primary");
                             }
 
                             auto secondaryWidget = ShortcutWidget::create(context, p.shortcutsLayout);
@@ -579,7 +579,7 @@ namespace djv
                                 });
                             if (0 == i && 0 == j)
                             {
-                                ftk::setScreenshotTag(secondaryWidget, "ShortcutsSettings.Secondary");
+                                ftk::setScreenshotTag(secondaryWidget, "Shortcuts.Secondary");
                             }
 
                             ++column;
