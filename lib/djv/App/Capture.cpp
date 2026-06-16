@@ -49,12 +49,6 @@ namespace djv
                 std::cerr << "djv capture [" << shot << "]: " << msg << std::endl;
             }
 
-            bool startsWith(const std::string& s, const std::string& prefix)
-            {
-                return s.size() >= prefix.size() &&
-                    0 == s.compare(0, prefix.size(), prefix);
-            }
-
             void collect(
                 const std::shared_ptr<ftk::IWidget>& widget,
                 std::vector<std::shared_ptr<ftk::IWidget> >& out)
@@ -866,6 +860,15 @@ namespace djv
                 { "widgets", widgets } };
             if (p.shot.contains("annotate"))
                 out["annotate"] = p.shot.at("annotate");
+            // Per-shot make_svg options pass straight through to the sidecar so
+            // the SVG step is driven entirely by the sidecar -- build_screenshots
+            // no longer needs to re-parse the manifest to forward them.
+            if (p.shot.contains("crop"))
+                out["crop"] = p.shot.at("crop");
+            if (p.shot.contains("layout"))
+                out["layout"] = p.shot.at("layout");
+            if (p.shot.contains("cropFit"))
+                out["cropFit"] = p.shot.at("cropFit");
 
             std::ofstream f(path);
             f << out.dump(2) << std::endl;

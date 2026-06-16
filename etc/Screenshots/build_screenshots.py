@@ -63,7 +63,6 @@ def main():
     shots_dir.mkdir(parents=True, exist_ok=True)
 
     data = json.loads(manifest.read_text())
-    by_id = {s["id"]: s for s in data["shots"]}
     ids = [s["id"] for s in data["shots"]]
     if args.only:
         ids = [i for i in ids if i in args.only]
@@ -94,6 +93,9 @@ def main():
             print(f"  ! no sidecar produced for {shot_id}", file=sys.stderr)
             continue
 
+        # crop / layout / cropFit travel in the sidecar (written by the capture
+        # straight from the manifest), so make_svg picks them up on its own --
+        # no need to re-parse the manifest and forward them here.
         gen = [
             sys.executable, str(HERE / "make_svg.py"), str(sidecar),
             "--out", str(assets),
@@ -104,17 +106,6 @@ def main():
             "--target-font", str(args.target_font),
             "--bg", "transparent"
         ]
-        crop = by_id.get(shot_id, {}).get("crop")
-        if crop:
-            gen += ["--crop", crop]
-        layout = by_id.get(shot_id, {}).get("layout")
-        if layout:
-            gen += ["--layout", layout]
-        # A shot can keep the full crop region instead of fitting the crop down
-        # to the annotated widget rects (e.g. the timeline, where the empty tail
-        # below the tracks is wanted). Defaults to fitting.
-        if not by_id.get(shot_id, {}).get("cropFit", True):
-            gen += ["--no-crop-fit"]
         if subprocess.run(gen).returncode != 0:
             failures.append(shot_id)
 

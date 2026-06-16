@@ -42,10 +42,8 @@ FORMATS = {
 
 # Layout constants (in user units).
 PAD = 22          # canvas padding top/bottom for the label stacks
-PAD_V = 7         # vertical padding inside a label
 GAP = 18          # gap between stacked labels
 EDGE_GAP = 10     # gap between a gutter's leader end and the image edge
-TEXT_GAP = 10     # gap between the leader end and the caption text
 OUTER_PAD = 16    # gap between the caption and the outer canvas edge
 DOT = 7.0         # leader attach-dot radius
 LEADER_W = 3.2    # leader line width
@@ -86,8 +84,11 @@ def load_sidecar(path):
     # coordinates are in device pixels; dpr lets us recover the logical (CSS)
     # size so a 2x capture renders crisp at the same on-page size as a 1x one.
     dpr = data.get("dpr", 1) or 1
+    # crop / layout / cropFit are per-shot make_svg options the capture copies
+    # straight from the manifest into the sidecar, so the SVG step is driven by
+    # the sidecar alone. CLI flags still override them (see main).
     return (data["shot"], png, boxes, annotate, data.get("crop"), dpr,
-            data.get("layout"))
+            data.get("layout"), data.get("cropFit", True))
 
 
 def encode_image(png, max_width, fmt, crop=None):
@@ -471,8 +472,9 @@ def main():
     ap.add_argument("--crop-margin", type=int, default=0,
                     help="px of margin to keep around the crop region")
     ap.add_argument("--no-crop-fit", dest="crop_fit", action="store_false",
-                    help="keep the full crop height instead of trimming the "
-                         "empty tail below the content")
+                    help="force-keep the full crop height (overrides the "
+                         "sidecar's cropFit) instead of trimming the empty "
+                         "tail below the content")
     ap.add_argument("--layout", choices=["auto", "columns", "horizontal"],
                     default="auto", help="callout placement: side columns, "
                     "above/below (for wide toolbars), or auto by aspect")
@@ -483,11 +485,13 @@ def main():
                          "with a chip behind each label")
     args = ap.parse_args()
 
-    shot, png, boxes, annotate, crop_id, dpr, shot_layout = load_sidecar(
-        args.sidecar)
+    shot, png, boxes, annotate, crop_id, dpr, shot_layout, shot_crop_fit = \
+        load_sidecar(args.sidecar)
     crop_id = args.crop or crop_id   # explicit --crop overrides the sidecar
     # An explicit per-shot "layout" wins; else the CLI default ("auto").
     layout = shot_layout or args.layout
+    # The sidecar's cropFit is the default; --no-crop-fit can only force it off.
+    crop_fit = args.crop_fit and shot_crop_fit
     crop = None
     if crop_id:
         if crop_id in boxes:
@@ -495,7 +499,7 @@ def main():
             m = args.crop_margin
             left, top = cx - m, cy - m
             right, bottom = cx + cw + m, cy + ch + m
-            if args.crop_fit:
+            if crop_fit:
                 # Trim a panel's empty tail: pull the bottom up to the lowest
                 # annotated widget. Docked panels stretch taller than their
                 # content, leaving dead space below; this removes it (and grows
