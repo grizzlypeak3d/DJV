@@ -8,6 +8,7 @@ description: >-
 
 url: https://grizzlypeak3d.github.io
 baseurl: /DJV
+logo: "/assets/DJV_Icon_32.svg"
 
 theme: just-the-docs
 
