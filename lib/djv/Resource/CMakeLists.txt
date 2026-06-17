@@ -12,7 +12,9 @@ foreach(RESOURCE ${RESOURCES})
 endforeach()
 
 add_library(djvResource ${HEADERS} ${SOURCE})
-target_link_libraries(djvResource)
+
+target_link_libraries(djvResource ZLIB::ZLIB)
+
 set_target_properties(djvResource PROPERTIES FOLDER lib)
 set_target_properties(djvResource PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
