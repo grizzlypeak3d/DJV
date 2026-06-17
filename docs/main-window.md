@@ -26,7 +26,8 @@ Shortcut: <kbd>U</kbd>
 
 ## Presentation mode
 
-Presentation mode hides the user interface to show only the viewport.
+Presentation mode enables fullscreen and hides the user interface and HUD to
+show only the view.
 
 Locations: **Window** menu, **Window** toolbar
 

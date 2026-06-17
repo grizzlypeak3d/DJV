@@ -483,6 +483,12 @@ namespace djv
             FTK_P();
             if (p.presentMode->setIfChanged(value))
             {
+                if (value)
+                {
+                    auto app = p.app.lock();
+                    app->getViewportModel()->setHUD(false);
+                }
+                setFullScreen(value);
                 _windowUpdate();
             }
         }
