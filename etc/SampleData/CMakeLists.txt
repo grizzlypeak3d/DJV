@@ -90,6 +90,7 @@ set(SAMPLE_DATA
     BART_2021-02-07.0088.jpg
     BART_2021-02-07.0089.jpg
     BART_2021-02-07.wav
+    Charlie.jpg
     Counter.0.png
     Counter.1.png
     Counter.2.png
@@ -100,7 +101,7 @@ set(SAMPLE_DATA
     Counter.7.png
     Counter.8.png
     Counter.9.png
-    Counter.otio)
+    MultipleClips.otio)
 
 set(DEST share/djv/SampleData)
 if(DJV_MACOS_PACKAGE OR DJV_WINDOWS_PACKAGE)
