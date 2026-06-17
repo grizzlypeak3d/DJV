@@ -9,17 +9,17 @@ git -C $SOURCE_DIR submodule update --init --recursive
 
 cmake \
     -S $SOURCE_DIR/deps/tlRender/deps/ftk/etc/SuperBuild \
-    -B sbuild-ftk-$BUILD_TYPE \
+    -B ftk-$BUILD_TYPE \
     -Dftk_PYTHON=$TLRENDER_PYTHON \
     -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
     -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE \
     -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE
-cmake --build sbuild-ftk-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
+cmake --build ftk-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
 
 cmake \
     -S $SOURCE_DIR/deps/tlRender/etc/SuperBuild \
-    -B sbuild-$BUILD_TYPE \
+    -B tl-$BUILD_TYPE \
     -DTLRENDER_NET=$TLRENDER_NET \
     -DTLRENDER_OCIO=$TLRENDER_OCIO \
     -DTLRENDER_JPEG=$TLRENDER_JPEG \
@@ -40,7 +40,7 @@ cmake \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
     -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE \
     -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE
-cmake --build sbuild-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
+cmake --build tl-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
 
 cmake \
     -S $SOURCE_DIR \
