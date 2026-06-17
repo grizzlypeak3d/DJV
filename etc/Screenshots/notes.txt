@@ -1,0 +1,5 @@
+Example for building the screenshots:
+% python3 etc/Screenshots/build_screenshots.py etc/Screenshots/screenshots.json --djv ../build-Debug/bin/djv/djv
+
+Example for running a local server to preview the docs:
+% cd docs && bundle exec jekyll serve --livereload
