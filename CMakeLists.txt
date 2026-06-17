@@ -68,6 +68,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 
 #-------------------------------------------------------------------------------
+# Dependencies
+
+find_package(ZLIB REQUIRED)
+
+#-------------------------------------------------------------------------------
 # Git submodules
 
 find_package(Git REQUIRED)
