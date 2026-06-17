@@ -1,3 +1,6 @@
+Configuration:
+* TLRENDER_FFMPEG_CMD=ON
+
 Example for building the screenshots:
 % python3 etc/Screenshots/build_screenshots.py etc/Screenshots/screenshots.json --djv ../build-Debug/bin/djv/djv
 
