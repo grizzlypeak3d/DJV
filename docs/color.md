@@ -91,7 +91,7 @@ Basic color adjustments:
 
 ## Levels
 
-![OpenColorIO]({{ '/assets/color-levels.svg' | relative_url }})
+![Levels]({{ '/assets/color-levels.svg' | relative_url }})
 
 Levels remap the input tonal range to an output range, similar to the levels
 control in an image editor:
@@ -102,7 +102,7 @@ control in an image editor:
 
 ## Exposure
 
-![OpenColorIO]({{ '/assets/color-exposure.svg' | relative_url }})
+![Exposure]({{ '/assets/color-exposure.svg' | relative_url }})
 
 Exposure controls mimic film response and are useful for high-dynamic-range
 images:
@@ -115,7 +115,7 @@ images:
 
 ## Soft clip
 
-![OpenColorIO]({{ '/assets/color-soft-clip.svg' | relative_url }})
+![Soft clip]({{ '/assets/color-soft-clip.svg' | relative_url }})
 
 **Soft clip** gently rolls off values approaching white instead of clipping them
 hard, which helps preserve detail in bright highlights.

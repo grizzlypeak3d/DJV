@@ -8,6 +8,8 @@ nav_order: 13
 
 Locations: **Tools** menu, **Tools** toolbar
 
+Shortcut: <kbd>F10</kbd>
+
 Settings are stored as a JSON file in the **Documents/DJV** directory.
 
 The **Settings** tool is divided into collapsible sections:
@@ -24,16 +26,20 @@ The **Settings** tool is divided into collapsible sections:
 - **Keyboard Shortcuts** — All keyboard shortcuts (see below).
 - **Style** — Interface scale and custom fonts (see below).
 - **Time** — Default time units (frames or timecode).
-- **FFmpeg** / **FFmpeg Command** — Built-in FFmpeg options, and the external
-  FFmpeg command (see [Files]({{ '/files' | relative_url }})).
+- **FFmpeg** — Built-in FFmpeg decoding options.
+- **FFmpeg Command** — The external FFmpeg command for additional formats and
+  codecs (see [Files]({{ '/files' | relative_url }})).
 - **USD** — Options for the experimental USD renderer.
-- **Advanced** / **Miscellaneous** — Less common options.
+- **Advanced** — Timeline compatibility workarounds and I/O tuning (audio
+  buffer frames, video and audio request counts).
+- **Miscellaneous** — Less common options, such as whether the setup dialog is
+  shown at startup.
 
 Use the button at the bottom of the tool to save the settings manually.
 
 ## Mouse
 
-![Keyboard shortcuts]({{ '/assets/mouse-settings.svg' | relative_url }})
+![Mouse settings]({{ '/assets/mouse-settings.svg' | relative_url }})
 
 The **Mouse** section maps mouse buttons (and optional modifier keys) to
 different actions.

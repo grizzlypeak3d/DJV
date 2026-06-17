@@ -9,7 +9,9 @@ nav_order: 12
 The **Export** tool writes out the current file as an image sequence, a movie, or
 a single still image.
 
-Open it from the **Tools** menu or the tool bar.
+Locations: **Tools** menu, **Tools** toolbar
+
+Shortcut: <kbd>F2</kbd>
 
 ![Export tool]({{ '/assets/export-tool.svg' | relative_url }})
 

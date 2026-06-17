@@ -59,7 +59,7 @@ Pick a pixel with **Ctrl** + left mouse button (the binding can be changed in
 the **Mouse** section of the **Settings** tool). The tool shows a color swatch,
 the sampled RGBA values, the pixel position, and the current mouse binding.
 
-![Information tool]({{ '/assets/color-picker-tool.svg' | relative_url }})
+![Color picker tool]({{ '/assets/color-picker-tool.svg' | relative_url }})
 
 ## Magnify
 
@@ -73,7 +73,7 @@ Shortcut: <kbd>F6</kbd>
 Pick a pixel with **Ctrl** + left mouse button. The magnification level can be
 set from **2X** up to **128X**.
 
-![Information tool]({{ '/assets/magnify-tool.svg' | relative_url }})
+![Magnify tool]({{ '/assets/magnify-tool.svg' | relative_url }})
 
 {: .tip }
 To inspect exact pixel boundaries, combine the magnifier with the grid: set
