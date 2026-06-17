@@ -3,6 +3,8 @@
 
 #include <djv/Models/AppInfoModel.h>
 
+#include <djv/Core/Version.h>
+
 namespace djv
 {
     namespace models

@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/App/App.h>
+#include <djv/Core/Version.h>
 
 #include <tlRender/UI/Init.h>
 #include <tlRender/Device/Init.h>
