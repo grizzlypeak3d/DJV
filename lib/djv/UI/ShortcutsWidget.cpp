@@ -375,6 +375,7 @@ namespace djv
             std::vector<Group> groups;
 
             std::shared_ptr<ftk::SearchBox> searchBox;
+            std::map<std::string, std::string> searchText;
             std::map<std::string, std::shared_ptr<ftk::Spacer> > groupSpacers;
             std::map<std::string, std::shared_ptr<ftk::Label> > groupLabels;
             std::map<std::string, std::shared_ptr<ftk::Label> > labels;
@@ -488,7 +489,7 @@ namespace djv
             {
                 p.groups = groups;
 
-                // Delete the old widgets.
+                p.searchText.clear();
                 p.groupSpacers.clear();
                 p.groupLabels.clear();
                 p.primaryWidgets.clear();
@@ -519,6 +520,7 @@ namespace djv
                         for (int j = 0; j < group.shortcuts.size(); ++j)
                         {
                             const auto& shortcut = group.shortcuts[j];
+                            p.searchText[shortcut.name] = group.name + " " + shortcut.text;
 
                             auto label = ftk::Label::create(context, shortcut.text + ":", p.shortcutsLayout);
                             label->setMarginRole(ftk::SizeRole::MarginInside);
@@ -641,14 +643,22 @@ namespace djv
             FTK_P();
 
             std::map<std::string, bool> visible;
-            for (const auto& i : p.primaryWidgets)
+            for (const auto& i : p.searchText)
             {
                 const bool v =
                     !value.empty() ?
-                    ftk::contains(i.first, value, ftk::CaseCompare::Insensitive) :
+                    ftk::contains(i.second, value, ftk::CaseCompare::Insensitive) :
                     true;
                 visible[i.first] = v;
-                i.second->setVisible(v);
+            }
+
+            for (const auto& i : p.primaryWidgets)
+            {
+                const auto j = visible.find(i.first);
+                if (j != visible.end())
+                {
+                    i.second->setVisible(j->second);
+                }
             }
 
             for (const auto& i : p.secondaryWidgets)
