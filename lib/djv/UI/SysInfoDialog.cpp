@@ -5,8 +5,8 @@
 
 #include <djv/Models/AppInfoModel.h>
 
+#include <tlRender/Timeline/AudioSystem.h>
 #include <tlRender/IO/System.h>
-#include <tlRender/Core/AudioSystem.h>
 
 #include <ftk/UI/ClipboardSystem.h>
 #include <ftk/UI/Divider.h>

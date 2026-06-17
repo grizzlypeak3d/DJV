@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include <tlRender/Timeline/AudioSystem.h>
 #include <tlRender/Timeline/CompareOptions.h>
-#include <tlRender/Core/AudioSystem.h>
 
 #include <ftk/Core/ObservableList.h>
 #include <ftk/Core/Observable.h>
