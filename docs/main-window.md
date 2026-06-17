@@ -35,7 +35,7 @@ Shortcut: <kbd>Ctrl+P</kbd>
 
 ## Secondary window
 
-A secondary window can be used to mirror the viewport on a separate monitor —
+A secondary window can be used to mirror the view on a separate monitor —
 useful for client review on a calibrated display.
 
 Locations: **Window** menu, **Window** toolbar

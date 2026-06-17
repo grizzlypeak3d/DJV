@@ -1,29 +1,29 @@
 ---
-title: Viewport
+title: View
 layout: default
 nav_order: 5
 ---
 
-# Viewport
+# View
 
-The viewport displays the current file. You can pan, zoom, or *frame* the view
+The view displays the current file. You can pan, zoom, or *frame* the view
 so the image fills the available space.
 
-Default viewport controls:
+Default view controls:
 
 - **Pan** — Middle mouse button
 - **Zoom** — Mouse wheel, or the **-** and **=** keys
-- **Frame view** (fit image to viewport) — **Backspace**
+- **Frame view** (fit image to view) — **Backspace**
 - **Wipe** (in compare mode) — **Alt** + left mouse button
 - **Color picker** — **Ctrl** + left mouse button
 - **Frame shuttle** (scrub frames by dragging) — Left mouse button
 
-Viewport controls can be remapped in the **Mouse** section of the **Settings**
+View controls can be remapped in the **Mouse** section of the **Settings**
 tool.
 
 ## Framing and zoom
 
-The view can be framed (fit to the viewport), reset to 1:1, or zoomed in and
+The view can be framed (fit to the view), reset to 1:1, or zoomed in and
 out from the **View** menu and the zoom control on the **View** tool bar.
 
 Locations: **View** menu, **View** tool bar, **View** tool
@@ -73,7 +73,7 @@ Locations: **View** tool
   range, or legal range.
 * **Alpha blend** — How the alpha channel is blended: none, straight, or
   pre-multiplied.
-* **Color buffer** — The viewport's bit depth. The default, **RGBA F32**, is
+* **Color buffer** — The view's bit depth. The default, **RGBA F32**, is
   recommended because it preserves the full range of color values without
   clamping. Lower bit-depth options can be faster, but they can clamp colors —
   choose them only when performance is more important than precision.
@@ -89,7 +89,7 @@ Locations: **View** menu, **View** tool
 
 ## Background
 
-The viewport background color can be customized.
+The view background color can be customized.
 
 Locations: **View** tool
 
@@ -97,7 +97,7 @@ Locations: **View** tool
 
 ## Grid
 
-A grid overlay can be shown to identify areas in the viewport.
+A grid overlay can be shown to identify areas in the view.
 
 Locations: **View** menu, **View** tool
 
@@ -125,7 +125,7 @@ Locations: **View** tool
 
 ## Center marker
 
-A marker can be shown at the center of the viewport to help with alignment and
+A marker can be shown at the center of the view to help with alignment and
 framing. Its size, line width, and color can be customized.
 
 Locations: **View** menu, **View** tool
@@ -134,7 +134,7 @@ Locations: **View** menu, **View** tool
 
 ## HUD
 
-The heads-up display (HUD) overlays useful information on top of the viewport.
+The heads-up display (HUD) overlays useful information on top of the view.
 
 Locations: **View** menu
 

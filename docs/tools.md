@@ -11,20 +11,20 @@ right side of the main window, and only one tool is shown at a time. Tools can
 be opened from the **Tools** menu or the **Tools** tool bar, and each has a
 default keyboard shortcut.
 
-| Tool             | Shortcut      | Purpose                                              |
+| Tool             | Shortcut      | Purpose                                             |
 | ---------------- | ------------- | --------------------------------------------------- |
-| **Files**        | <kbd>F1</kbd>  | Manage open files, layers, and comparison           |
-| **Export**       | <kbd>F2</kbd>  | Write out images, image sequences, and movies       |
-| **View**         | <kbd>F3</kbd>  | Viewport options — grid, background, outline, and more |
-| **Color**        | <kbd>F4</kbd>  | OpenColorIO, LUTs, and color adjustments            |
-| **Color Picker** | <kbd>F5</kbd>  | Sample pixel color values                           |
-| **Magnify**      | <kbd>F6</kbd>  | Magnify a region of the viewport                    |
-| **Information**  | <kbd>F7</kbd>  | View file metadata                                  |
-| **Audio**        | <kbd>F8</kbd>  | Audio output, volume, and sync                      |
-| **Devices**      | <kbd>F9</kbd>  | Output to a video device                            |
-| **Settings**     | <kbd>F10</kbd> | Application settings                                |
-| **Messages**     | <kbd>F11</kbd> | Application messages                                |
-| **System Log**   | <kbd>F12</kbd> | Low-level system log                                |
+| **Files**        | <kbd>F1</kbd>  | Manage open files, layers, and comparison          |
+| **Export**       | <kbd>F2</kbd>  | Write out images, image sequences, and movies      |
+| **View**         | <kbd>F3</kbd>  | View options — grid, background, outline, and more |
+| **Color**        | <kbd>F4</kbd>  | OpenColorIO, LUTs, and color adjustments           |
+| **Color Picker** | <kbd>F5</kbd>  | Sample pixel color values                          |
+| **Magnify**      | <kbd>F6</kbd>  | Magnify a region of the view                       |
+| **Information**  | <kbd>F7</kbd>  | View file metadata                                 |
+| **Audio**        | <kbd>F8</kbd>  | Audio output, volume, and sync                     |
+| **Devices**      | <kbd>F9</kbd>  | Output to a video device                           |
+| **Settings**     | <kbd>F10</kbd> | Application settings                               |
+| **Messages**     | <kbd>F11</kbd> | Application messages                               |
+| **System Log**   | <kbd>F12</kbd> | Low-level system log                               |
 
 The **Files**, **View**, **Color**, **Export**, **Audio**, and **Settings**
 tools each have their own page. The remaining tools are described below.
@@ -49,7 +49,7 @@ button to copy the information to the clipboard.
 
 ## Color picker
 
-The **Color picker** tool samples the color of a pixel in the viewport.
+The **Color picker** tool samples the color of a pixel in the view.
 
 Locations: **Tools** menu, **Tools** toolbar
 
@@ -78,11 +78,11 @@ set from **2X** up to **128X**.
 {: .tip }
 To inspect exact pixel boundaries, combine the magnifier with the grid: set
 **Magnify** to **Nearest** in the **View** tool, enable the grid, and set the
-grid size to `1` (see [Viewport]({{ '/viewport' | relative_url }})).
+grid size to `1` (see [View]({{ '/view' | relative_url }})).
 
 ## Devices
 
-The **Devices** tool sends the viewport to an external video output device, such
+The **Devices** tool sends the view to an external video output device, such
 as a Blackmagic Design card — useful for review on a broadcast monitor.
 
 Locations: **Tools** menu, **Tools** toolbar
