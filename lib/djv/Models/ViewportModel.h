@@ -81,7 +81,7 @@ namespace djv
 
             ///@}
 
-            //! \name Aspect Ratio
+            //! \name Aspect Ratio Options
             ///@{
 
             const AspectRatioOptions& getAspectRatioOptions() const;

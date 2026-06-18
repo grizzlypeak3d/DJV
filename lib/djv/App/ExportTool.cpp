@@ -373,7 +373,9 @@ namespace djv
             i = std::find(p.movieCodecs.begin(), p.movieCodecs.end(), settings.movieCodec);
             p.movieCodecComboBox->setCurrentIndex(i != p.movieCodecs.end() ? (i - p.movieCodecs.begin()) : -1);
 
-            p.formLayout->setRowVisible(p.customSizeLayout, models::ExportRenderSize::Custom == settings.renderSize);
+            p.formLayout->setRowVisible(
+                p.customSizeLayout,
+                models::ExportRenderSize::Custom == settings.renderSize);
             p.formLayout->setRowVisible(
                 p.imageBaseEdit,
                 models::ExportFileType::Image == settings.fileType ||
@@ -423,10 +425,13 @@ namespace djv
                     p.exportData->frame = p.exportData->range.start_time().value();
 
                     // Get the render size.
+                    const auto& displayOptions = app->getViewportModel()->getDisplayOptions();
                     switch (options.renderSize)
                     {
                     case models::ExportRenderSize::Default:
-                        p.exportData->info.size = ioInfo.video.front().size;
+                        p.exportData->info.size = getRenderSize(
+                            ioInfo.video.front(),
+                            displayOptions.aspectRatio);
                         break;
                     case models::ExportRenderSize::Custom:
                         p.exportData->info.size = options.customSize;

@@ -299,7 +299,7 @@ namespace djv
         void MagnifyTool::_widgetUpdate()
         {
             FTK_P();
-            const ftk::Box2I& g = getGeometry();
+            const ftk::Box2I& g = p.viewport->getGeometry();
             const int level = getMagnifyLevel(p.level);
             const ftk::V2I magnifyPos =
                 (p.viewPos - p.samplePos) * level + (center(g) - g.min);

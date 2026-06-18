@@ -48,6 +48,7 @@ namespace djv
 
             p.colorSwatch = ftk::ColorSwatch::create(context);
             p.colorSwatch->setColor(ftk::Color4F(0.F, 0.F, 0.F));
+            p.colorSwatch->setBorder(false);
             p.colorSwatch->setSizeRole(ftk::SizeRole::SwatchLarge);
 
             p.colorLabel = ftk::Label::create(context);
@@ -62,9 +63,10 @@ namespace djv
             ftk::setScreenshotTag(p.mouseLabel, "ColorPicker.Mouse");
 
             auto layout = ftk::VerticalLayout::create(context);
-            layout->setMarginRole(ftk::SizeRole::Margin);
+            layout->setSpacingRole(ftk::SizeRole::None);
             p.colorSwatch->setParent(layout);
             auto formLayout = ftk::FormLayout::create(context, layout);
+            formLayout->setMarginRole(ftk::SizeRole::Margin);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             formLayout->addRow("Color:", p.colorLabel);
             formLayout->addRow("Pixel:", p.pixelLabel);

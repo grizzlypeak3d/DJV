@@ -129,7 +129,15 @@ namespace djv
 
         void ViewportModel::setDisplayOptions(const tl::DisplayOptions& value)
         {
-            _p->displayOptions->setIfChanged(value);
+            FTK_P();
+            const auto& aspectRatioOptions = p.aspectRatioOptions->get();
+            tl::DisplayOptions tmp = value;
+            tmp.aspectRatio =
+                aspectRatioOptions.index >= 0 &&
+                aspectRatioOptions.index < aspectRatioOptions.options.size() ?
+                aspectRatioOptions.options[aspectRatioOptions.index] :
+                tl::AspectRatioOptions();
+            p.displayOptions->setIfChanged(tmp);
         }
 
         const AspectRatioOptions& ViewportModel::getAspectRatioOptions() const
@@ -144,7 +152,16 @@ namespace djv
 
         void ViewportModel::setAspectRatioOptions(const AspectRatioOptions& value)
         {
-            _p->aspectRatioOptions->setIfChanged(value);
+            FTK_P();
+            if (p.aspectRatioOptions->setIfChanged(value))
+            {
+                auto displayOptions = p.displayOptions->get();
+                displayOptions.aspectRatio =
+                    value.index >= 0 && value.index < value.options.size() ?
+                    value.options[value.index] :
+                    tl::AspectRatioOptions();
+                p.displayOptions->setIfChanged(displayOptions);
+            }
         }
 
         const tl::BackgroundOptions& ViewportModel::getBackgroundOptions() const
