@@ -149,6 +149,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
@@ -998,7 +999,28 @@ namespace djv
                 p.viewportModel->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
-                    _p->bmdOutputDevice->setDisplayOptions({ value });
+                    FTK_P();
+                    auto options = value;
+                    const auto aspectRatioOptions = p.viewportModel->getAspectRatioOptions();
+                    if (aspectRatioOptions.index >= 0 &&
+                        aspectRatioOptions.index < aspectRatioOptions.options.size())
+                    {
+                        options.aspectRatio = aspectRatioOptions.options[aspectRatioOptions.index];
+                    }
+                    p.bmdOutputDevice->setDisplayOptions({ options });
+                });
+            p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
+                p.viewportModel->observeAspectRatioOptions(),
+                [this](const models::AspectRatioOptions& value)
+                {
+                    FTK_P();
+                    auto options = p.viewportModel->getDisplayOptions();
+                    if (value.index >= 0 &&
+                        value.index < value.options.size())
+                    {
+                        options.aspectRatio = value.options[value.index];
+                    }
+                    p.bmdOutputDevice->setDisplayOptions({ options });
                 });
 
             p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
