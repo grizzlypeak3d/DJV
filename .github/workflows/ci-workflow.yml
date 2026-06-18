@@ -255,7 +255,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      JOBS: 4
+      JOBS: 2
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
@@ -302,7 +302,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      JOBS: 4
+      JOBS: 2
       TLRENDER_NET: OFF
       TLRENDER_OCIO: ON
       TLRENDER_JPEG: ON
