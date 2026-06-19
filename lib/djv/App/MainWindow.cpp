@@ -659,9 +659,6 @@ namespace djv
 
                 p.statusBar->setVisible(settings.statusToolBar && !presentMode);
                 p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
-
-                p.splitter->setSplit(settings.splitter);
-                p.splitter2->setSplit(settings.splitter2);
             }
         }
     }
