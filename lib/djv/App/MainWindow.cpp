@@ -77,6 +77,7 @@ namespace djv
             std::weak_ptr<App> app;
             std::shared_ptr<models::SettingsModel> settingsModel;
             std::shared_ptr<ftk::Observable<bool> > presentMode;
+            bool shown = false;
 
             std::shared_ptr<Viewport> viewport;
             std::shared_ptr<tl::ui::TimelineWidget> timelineWidget;
@@ -407,23 +408,21 @@ namespace djv
         MainWindow::~MainWindow()
         {
             FTK_P();
+
             _makeCurrent();
             p.viewport->setParent(nullptr);
+            p.viewport.reset();
             p.timelineWidget->setParent(nullptr);
+            p.timelineWidget.reset();
 
-            models::WindowSettings settings = p.settingsModel->getWindow();
-            settings.size = getGeometry().size();
-#if defined(__APPLE__)
-            //! \bug The window size needs to be scaled on macOS?
-            const float displayScale = getDisplayScale();
-            if (displayScale > 0.F)
+            if (p.shown)
             {
-                settings.size = settings.size / displayScale;
+                models::WindowSettings settings = p.settingsModel->getWindow();
+                settings.size = getSize();
+                settings.splitter = p.splitter->getSplit();
+                settings.splitter2 = p.splitter2->getSplit();
+                p.settingsModel->setWindow(settings);
             }
-#endif // __APPLE__
-            settings.splitter = p.splitter->getSplit();
-            settings.splitter2 = p.splitter2->getSplit();
-            p.settingsModel->setWindow(settings);
         }
 
         std::shared_ptr<MainWindow> MainWindow::create(
@@ -517,7 +516,7 @@ namespace djv
             FTK_P();
             p.sysInfoDialog = ui::SysInfoDialog::create(
                 getContext(),
-                p.app.lock()->getAppInfoModel(),
+                p.app.lock()->getSysInfo(),
                 std::dynamic_pointer_cast<MainWindow>(shared_from_this()));
             p.sysInfoDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
             p.sysInfoDialog->setCloseCallback(
@@ -530,7 +529,9 @@ namespace djv
         void MainWindow::setGeometry(const ftk::Box2I& value)
         {
             Window::setGeometry(value);
-            _p->layout->setGeometry(value);
+            FTK_P();
+            p.shown = true;
+            p.layout->setGeometry(value);
         }
 
         void MainWindow::keyPressEvent(ftk::KeyEvent& event)

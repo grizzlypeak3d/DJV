@@ -2,7 +2,6 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/App/App.h>
-#include <djv/Core/Version.h>
 
 #include <tlRender/UI/Init.h>
 #include <tlRender/Device/Init.h>
@@ -31,11 +30,6 @@ FTK_MAIN()
         auto app = djv::app::App::create(context, args);
         if (app->hasCmdLineHelp())
             return 0;
-        if (app->hasPrintVersion())
-        {
-            std::cout << DJV_VERSION_FULL << std::endl;
-            return 0;
-        }
         app->run();
     }
     catch(const std::exception& e)

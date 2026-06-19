@@ -19,6 +19,7 @@
 #if defined(TLRENDER_BMD)
 #include <djv/Models/BMDDevicesModel.h>
 #endif // TLRENDER_BMD
+#include <djv/Core/Version.h>
 
 #include <tlRender/UI/ThumbnailSystem.h>
 #include <tlRender/Timeline/ColorOptions.h>
@@ -43,7 +44,9 @@
 #include <ftk/Core/CmdLine.h>
 #include <ftk/Core/FileLogSystem.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/OS.h>
 #include <ftk/Core/Timer.h>
+#include <djv/Core/Version.h>
 
 #include <filesystem>
 
@@ -86,6 +89,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineFlag> resetSettings;
             std::shared_ptr<ftk::CmdLineOption<std::string> > settingsFileName;
             std::shared_ptr<ftk::CmdLineFlag> version;
+            std::shared_ptr<ftk::CmdLineFlag> sysInfo;
             std::shared_ptr<ftk::CmdLineOption<int> > debugLoop;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureManifest;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureShot;
@@ -315,6 +319,9 @@ namespace djv
             p.cmdLine.version = ftk::CmdLineFlag::create(
                 { "-version" },
                 "Print the version and exit.");
+            p.cmdLine.sysInfo = ftk::CmdLineFlag::create(
+                { "-sysInfo" },
+                "Print the system information and exit.");
             p.cmdLine.debugLoop = ftk::CmdLineOption<int>::create(
                 { "-debugLoop" },
                 "Load the command line inputs in a loop. This value is the number of seconds for each cycle.",
@@ -372,6 +379,7 @@ namespace djv
                     p.cmdLine.resetSettings,
                     p.cmdLine.settingsFileName,
                     p.cmdLine.version,
+                    p.cmdLine.sysInfo,
                     p.cmdLine.debugLoop,
                     p.cmdLine.captureManifest,
                     p.cmdLine.captureShot,
@@ -584,9 +592,99 @@ namespace djv
             }
         }
 
-        bool App::hasPrintVersion() const
+        std::vector<std::string> App::getSysInfo() const
         {
-            return _p->cmdLine.version->found();
+            FTK_P();
+
+            std::vector<std::pair<std::string, std::string> > labels;
+            labels.push_back(std::make_pair(
+                p.appInfoModel->getFullName() + " version: ",
+                p.appInfoModel->getVersion()));
+
+            labels.push_back(std::make_pair("", ""));
+            const auto sysInfo = ftk::getSysInfo();
+            labels.push_back(std::make_pair("System: ", sysInfo.name));
+            labels.push_back(std::make_pair(
+                "CPU Cores: ",
+                ftk::Format("{0}").arg(sysInfo.cores)));
+            labels.push_back(std::make_pair(
+                "Memory: ",
+                ftk::Format("{0}GB").arg(sysInfo.ramGB)));
+
+            labels.push_back(std::make_pair("", ""));
+            const auto windowInfo = p.mainWindow->getWindowInfo();
+            for (const auto& i : windowInfo)
+            {
+                labels.push_back(std::make_pair(i.first + ": ", i.second));
+            }
+
+            if (auto audioSystem = _context->getSystem<tl::AudioSystem>())
+            {
+                labels.push_back(std::make_pair("", ""));
+                labels.push_back(std::make_pair(
+                    "Audio driver: ",
+                    audioSystem->getCurrentDriver()));
+                const auto& devices = audioSystem->getDevices();
+                for (size_t i = 0; i < devices.size(); ++i)
+                {
+                    const auto& device = devices[i];
+                    labels.push_back(std::make_pair(
+                        ftk::Format("Audio device {0}: ").arg(i),
+                        device.id.name));
+                    labels.push_back(std::make_pair(
+                        std::string(),
+                        tl::getLabel(device.info)));
+                }
+            }
+            
+            auto readSystem = _context->getSystem<tl::ReadSystem>();
+            auto writeSystem = _context->getSystem<tl::WriteSystem>();
+            if (readSystem || writeSystem)
+            {
+                const auto& ioOptions = p.settingsModel->getIOOptions();
+                if (readSystem)
+                {
+                    labels.push_back(std::make_pair("", ""));
+                    labels.push_back(std::make_pair("Read plugins:", ""));
+                    for (const auto& plugin : readSystem->getPlugins())
+                    {
+                        labels.push_back(std::make_pair(
+                            plugin->getPluginName() + ": ",
+                            plugin->getPluginInfo(ioOptions)));
+                    }
+                }
+                if (writeSystem)
+                {
+                    labels.push_back(std::make_pair("", ""));
+                    labels.push_back(std::make_pair("Write plugins:", ""));
+                    for (const auto& plugin : writeSystem->getPlugins())
+                    {
+                        labels.push_back(std::make_pair(
+                            plugin->getPluginName() + ": ",
+                            plugin->getPluginInfo(ioOptions)));
+                    }
+                }
+            }
+
+            size_t sizeMax = 0;
+            for (const auto& i : labels)
+            {
+                sizeMax = std::max(sizeMax, i.first.size());
+            }
+            for (auto& i : labels)
+            {
+                if (!(i.first.empty() && i.second.empty()))
+                {
+                    i.first.resize(sizeMax, ' ');
+                }
+            }
+
+            std::vector<std::string> out;
+            for (const auto& i : labels)
+            {
+                out.push_back(i.first + i.second);
+            }
+            return out;
         }
 
         void App::run()
@@ -619,6 +717,17 @@ namespace djv
             }
 
             _windowsInit();
+
+            if (p.cmdLine.version->found())
+            {
+                std::cout << DJV_VERSION_FULL << std::endl;
+                return;
+            }
+            else if (p.cmdLine.sysInfo->found())
+            {
+                std::cout << ftk::join(getSysInfo(), '\n') << std::endl;
+                return;
+            }
 
             if (p.cmdLine.debugLoop->found() &&
                 !p.cmdLine.inputs->getList().empty())

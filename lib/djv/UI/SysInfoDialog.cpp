@@ -5,9 +5,6 @@
 
 #include <djv/Models/AppInfoModel.h>
 
-#include <tlRender/Timeline/AudioSystem.h>
-#include <tlRender/IO/System.h>
-
 #include <ftk/UI/ClipboardSystem.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/IWindow.h>
@@ -15,8 +12,7 @@
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/TextEdit.h>
-#include <ftk/Core/Format.h>
-#include <ftk/Core/OS.h>
+
 #include <ftk/Core/String.h>
 
 namespace djv
@@ -30,8 +26,7 @@ namespace djv
 
         void SysInfoDialog::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
-            const std::shared_ptr<ftk::IWindow>& window,
+            const std::vector<std::string>& text,
             const std::shared_ptr<IWidget>& parent)
         {
             IDialog::_init(
@@ -39,94 +34,8 @@ namespace djv
                 "djv::ui::SysInfoDialog",
                 parent);
             FTK_P();
-
-            std::vector<std::pair<std::string, std::string> > labels;
-            labels.push_back(std::make_pair(
-                appInfoModel->getFullName() + " version: ",
-                appInfoModel->getVersion()));
-
-            labels.push_back(std::make_pair("", ""));
-            const auto sysInfo = ftk::getSysInfo();
-            labels.push_back(std::make_pair("System: ", sysInfo.name));
-            labels.push_back(std::make_pair(
-                "CPU Cores: ",
-                ftk::Format("{0}").arg(sysInfo.cores)));
-            labels.push_back(std::make_pair(
-                "Memory: ",
-                ftk::Format("{0}GB").arg(sysInfo.ramGB)));
-
-            labels.push_back(std::make_pair("", ""));
-            const auto windowInfo = window->getWindowInfo();
-            for (const auto& i : windowInfo)
-            {
-                labels.push_back(std::make_pair(i.first + ": ", i.second));
-            }
-
-            if (auto audioSystem = context->getSystem<tl::AudioSystem>())
-            {
-                labels.push_back(std::make_pair("", ""));
-                labels.push_back(std::make_pair(
-                    "Audio driver: ",
-                    audioSystem->getCurrentDriver()));
-                const auto& devices = audioSystem->getDevices();
-                for (size_t i = 0; i < devices.size(); ++i)
-                {
-                    const auto& device = devices[i];
-                    labels.push_back(std::make_pair(
-                        ftk::Format("Audio device {0}: ").arg(i),
-                        device.id.name));
-                    labels.push_back(std::make_pair(
-                        std::string(),
-                        tl::getLabel(device.info)));
-                }
-            }
             
-            auto readSystem = context->getSystem<tl::ReadSystem>();
-            auto writeSystem = context->getSystem<tl::WriteSystem>();
-            if (readSystem || writeSystem)
-            {
-                labels.push_back(std::make_pair("", ""));
-                std::vector<std::string> plugins;
-                if (readSystem)
-                {
-                    for (const auto& plugin : readSystem->getPlugins())
-                    {
-                        plugins.push_back(plugin->getName());
-                    }
-                    labels.push_back(std::make_pair(
-                        "Read plugins: ",
-                        ftk::join(plugins, ", ")));
-                }
-                if (writeSystem)
-                {
-                    plugins.clear();
-                    for (const auto& plugin : writeSystem->getPlugins())
-                    {
-                        plugins.push_back(plugin->getName());
-                    }
-                    labels.push_back(std::make_pair(
-                        "Write plugins: ",
-                        ftk::join(plugins, ", ")));
-                }
-            }
-
-            size_t sizeMax = 0;
-            for (const auto& i : labels)
-            {
-                sizeMax = std::max(sizeMax, i.first.size());
-            }
-            for (auto& i : labels)
-            {
-                if (!(i.first.empty() && i.second.empty()))
-                {
-                    i.first.resize(sizeMax, ' ');
-                }
-            }
-
-            for (const auto& i : labels)
-            {
-                p.text.push_back(i.first + i.second);
-            }
+            p.text = text;
 
             auto titleLabel = ftk::Label::create(context, "System Information");
             titleLabel->setFontSize(14);
@@ -138,7 +47,7 @@ namespace djv
 
             auto layout = ftk::VerticalLayout::create(context, shared_from_this());
             layout->setSpacingRole(ftk::SizeRole::None);
-            layout->setHStretch(ftk::Stretch::Expanding);
+            layout->setStretch(ftk::Stretch::Expanding, ftk::Stretch::Expanding);
             titleLabel->setParent(layout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
@@ -148,6 +57,7 @@ namespace djv
             textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
             textEdit->setOptions(textEditOptions);
             textEdit->setMarginRole(ftk::SizeRole::Margin);
+            textEdit->setVStretch(ftk::Stretch::Expanding);
             textEdit->setText(p.text);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
@@ -183,12 +93,11 @@ namespace djv
 
         std::shared_ptr<SysInfoDialog> SysInfoDialog::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
-            const std::shared_ptr<ftk::IWindow>& window,
+            const std::vector<std::string>& text,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<SysInfoDialog>(new SysInfoDialog);
-            out->_init(context, appInfoModel, window, parent);
+            out->_init(context, text, parent);
             return out;
         }
     }

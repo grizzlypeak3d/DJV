@@ -25,9 +25,17 @@ namespace djv
 
             //! Create a new model.
             static std::shared_ptr<AppInfoModel> create();
-            
+
+            //! \name Name
+            ///@{
+
             virtual std::string getFullName() const;
             virtual std::string getShortName() const;
+            
+            ///@}
+
+            //! \name Version
+            ///@{
 
             virtual int getVersionMajor() const;
             virtual int getVersionMinor() const;
@@ -35,8 +43,15 @@ namespace djv
             virtual std::string getVersionDev() const;
             virtual std::string getVersion() const;
 
+            ///@}
+
+            //! \name Licens
+            ///@{
+
             virtual std::string getLicense() const;
             virtual std::string getLicensesURL() const;
+
+            ///@}
         };
     }
 }

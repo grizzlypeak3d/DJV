@@ -5,6 +5,9 @@
 
 #include <djv/Core/Version.h>
 
+#include <ftk/Core/Format.h>
+#include <ftk/Core/String.h>
+
 namespace djv
 {
     namespace models

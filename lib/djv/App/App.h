@@ -139,8 +139,8 @@ namespace djv
             //! Set whether the secondary window is active.
             void setSecondaryWindow(bool);
 
-            //! Print the version and exit.
-            bool hasPrintVersion() const;
+            //! Get system information.
+            std::vector<std::string> getSysInfo() const;
 
             void run() override;
 
