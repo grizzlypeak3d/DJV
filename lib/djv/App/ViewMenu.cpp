@@ -31,6 +31,7 @@ namespace djv
             addAction(actions["ZoomReset"]);
             addAction(actions["ZoomIn"]);
             addAction(actions["ZoomOut"]);
+            addAction(actions["Center"]);
             addDivider();
             addAction(actions["Red"]);
             addAction(actions["Green"]);

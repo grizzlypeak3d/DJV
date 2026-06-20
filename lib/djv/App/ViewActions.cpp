@@ -78,6 +78,16 @@ namespace djv
                     }
                 });
 
+            _actions["Center"] = ftk::Action::create(
+                "Center",
+                [mainWindowWeak]
+                {
+                    if (auto mainWindow = mainWindowWeak.lock())
+                    {
+                        mainWindow->getViewport()->center();
+                    }
+                });
+
             auto appWeak = std::weak_ptr<App>(app);
             _actions["Red"] = ftk::Action::create(
                 "Red Channel",
@@ -234,10 +244,11 @@ namespace djv
 
             _tooltips =
             {
-                { "Frame",  "Frame the view to fit the window." },
+                { "Frame",  "Frame the view to fit the image." },
                 { "ZoomReset", "Reset the view zoom to 1:1." },
                 { "ZoomIn", "Zoom the view in." },
                 { "ZoomOut", "Zoom the view out." },
+                { "Center", "Center the view." },
                 { "Grid", "Toggle the grid." },
                 { "Outline", "Toggle the outline." },
                 { "CenterMarker", "Toggle the center marker." },
