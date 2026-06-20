@@ -5,7 +5,7 @@ Changes:
 * Add a center marker option.
 * Add more grid options.
 * Add the NotoSansCJKsc-Regular font for basic CJK text rendering.
-* Add generic OpenEXR attributes to the information.
+* Add more OpenEXR attributes to the information.
 * Add the aom library for AV1 decoding support (macOS and Linux).
 * Allow the "Escape" key to be used for keyboard shortcuts.
 * Add image I/O library versions to the system information.
