@@ -9,6 +9,7 @@
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ButtonGroup.h>
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
@@ -52,6 +53,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> wipeYSlider;
             std::shared_ptr<ftk::FloatEditSlider> wipeRotationSlider;
             std::shared_ptr<ftk::FloatEditSlider> overlaySlider;
+            std::shared_ptr<ftk::CheckBox> fitToACheckBox;
             std::shared_ptr<ftk::FormLayout> compareLayout;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::GridLayout> widgetLayout;
@@ -108,6 +110,9 @@ namespace djv
             p.overlaySlider = ftk::FloatEditSlider::create(context);
             p.overlaySlider->setDefault(.5F);
 
+            p.fitToACheckBox = ftk::CheckBox::create(context);
+            p.fitToACheckBox->setHStretch(ftk::Stretch::Expanding);
+
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
 
@@ -127,6 +132,7 @@ namespace djv
             p.compareLayout->addRow("Y:", p.wipeYSlider);
             p.compareLayout->addRow("Rotation:", p.wipeRotationSlider);
             p.compareLayout->addRow("Amount:", p.overlaySlider);
+            p.compareLayout->addRow("Fit to A:", p.fitToACheckBox);
             p.bellows["Compare"] = ftk::Bellows::create(context, "Compare", layout);
             p.bellows["Compare"]->setWidget(vLayout);
 
@@ -217,6 +223,17 @@ namespace djv
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
                         options.overlay = value;
+                        app->getFilesModel()->setCompareOptions(options);
+                    }
+                });
+
+            p.fitToACheckBox->setCheckedCallback(
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getFilesModel()->getCompareOptions();
+                        options.fitToA = value;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -411,6 +428,7 @@ namespace djv
             p.wipeYSlider->setValue(value.wipeCenter.y);
             p.wipeRotationSlider->setValue(value.wipeRotation);
             p.overlaySlider->setValue(value.overlay);
+            p.fitToACheckBox->setChecked(value.fitToA);
 
             p.compareLayout->setRowVisible(p.wipeXSlider, value.compare == tl::Compare::Wipe);
             p.compareLayout->setRowVisible(p.wipeYSlider, value.compare == tl::Compare::Wipe);

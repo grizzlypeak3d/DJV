@@ -21,6 +21,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<bool> > frameViewObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<bool> > hudObserver;
         };
@@ -196,6 +197,18 @@ namespace djv
                     });
             }
 
+            _actions["Outline"] = ftk::Action::create(
+                "Outline",
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getBackgroundOptions();
+                        options.outline.enabled = value;
+                        app->getViewportModel()->setBackgroundOptions(options);
+                    }
+                });
+
             _actions["Grid"] = ftk::Action::create(
                 "Grid",
                 [appWeak](bool value)
@@ -204,18 +217,6 @@ namespace djv
                     {
                         auto options = app->getViewportModel()->getForegroundOptions();
                         options.grid.enabled = value;
-                        app->getViewportModel()->setForegroundOptions(options);
-                    }
-                });
-
-            _actions["Outline"] = ftk::Action::create(
-                "Outline",
-                [appWeak](bool value)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        auto options = app->getViewportModel()->getForegroundOptions();
-                        options.outline.enabled = value;
                         app->getViewportModel()->setForegroundOptions(options);
                     }
                 });
@@ -249,8 +250,8 @@ namespace djv
                 { "ZoomIn", "Zoom the view in." },
                 { "ZoomOut", "Zoom the view out." },
                 { "Center", "Center the view." },
-                { "Grid", "Toggle the grid." },
                 { "Outline", "Toggle the outline." },
+                { "Grid", "Toggle the grid." },
                 { "CenterMarker", "Toggle the center marker." },
                 { "HUD", "Toggle the HUD / information display." }
             };
@@ -290,12 +291,18 @@ namespace djv
                     }
                 });
 
+            p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
+                app->getViewportModel()->observeBackgroundOptions(),
+                [this](const tl::BackgroundOptions& value)
+                {
+                    _actions["Outline"]->setChecked(value.outline.enabled);
+                });
+
             p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
                 app->getViewportModel()->observeForegroundOptions(),
                 [this](const tl::ForegroundOptions& value)
                 {
                     _actions["Grid"]->setChecked(value.grid.enabled);
-                    _actions["Outline"]->setChecked(value.outline.enabled);
                     _actions["CenterMarker"]->setChecked(value.centerMarker.enabled);
                 });
 

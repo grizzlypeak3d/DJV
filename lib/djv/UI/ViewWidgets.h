@@ -163,34 +163,6 @@ namespace djv
             FTK_PRIVATE();
         };
 
-        //! View grid widget.
-        class ViewGridWidget : public ftk::IWidget
-        {
-            FTK_NON_COPYABLE(ViewGridWidget);
-
-        protected:
-            void _init(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::ViewportModel>&,
-                const std::shared_ptr<IWidget>& parent);
-
-            ViewGridWidget();
-
-        public:
-            virtual ~ViewGridWidget();
-
-            static std::shared_ptr<ViewGridWidget> create(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::ViewportModel>&,
-                const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
-        private:
-            FTK_PRIVATE();
-        };
-
         //! View outline widget.
         class ViewOutlineWidget : public ftk::IWidget
         {
@@ -208,6 +180,34 @@ namespace djv
             virtual ~ViewOutlineWidget();
 
             static std::shared_ptr<ViewOutlineWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            ftk::Size2I getSizeHint() const override;
+            void setGeometry(const ftk::Box2I&) override;
+
+        private:
+            FTK_PRIVATE();
+        };
+
+        //! View grid widget.
+        class ViewGridWidget : public ftk::IWidget
+        {
+            FTK_NON_COPYABLE(ViewGridWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            ViewGridWidget();
+
+        public:
+            virtual ~ViewGridWidget();
+
+            static std::shared_ptr<ViewGridWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

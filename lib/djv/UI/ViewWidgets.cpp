@@ -765,6 +765,107 @@ namespace djv
             p.layout->setRowVisible(p.gradientSwatch.second, value.type == tl::Background::Gradient);
         }
 
+        struct ViewOutlineWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::shared_ptr<ftk::IntEditSlider> lineWidthSlider;
+            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > optionsObservers;
+        };
+
+        void ViewOutlineWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IWidget::_init(context, "djv::app::ViewOutlineWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.Outline.Enabled");
+
+            p.lineWidthSlider = ftk::IntEditSlider::create(context);
+            p.lineWidthSlider->setRange(1, 100);
+            ftk::setScreenshotTag(p.lineWidthSlider, "View.Outline.LineWidth");
+
+            p.colorSwatch = ftk::ColorSwatch::create(context);
+            p.colorSwatch->setEditable(true);
+            p.colorSwatch->setHAlign(ftk::HAlign::Left);
+            ftk::setScreenshotTag(p.colorSwatch, "View.Outline.Color");
+
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Enabled:", p.enabledCheckBox);
+            p.layout->addRow("Line width:", p.lineWidthSlider);
+            p.layout->addRow("Color:", p.colorSwatch);
+
+            p.optionsObservers = ftk::Observer<tl::BackgroundOptions>::create(
+                viewportModel->observeBackgroundOptions(),
+                [this](const tl::BackgroundOptions& value)
+                {
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.outline.enabled);
+                    p.lineWidthSlider->setValue(value.outline.width);
+                    p.colorSwatch->setColor(value.outline.color);
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getBackgroundOptions();
+                    options.outline.enabled = value;
+                    viewportModel->setBackgroundOptions(options);
+                });
+
+            p.lineWidthSlider->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getBackgroundOptions();
+                    options.outline.width = value;
+                    viewportModel->setBackgroundOptions(options);
+                });
+
+            p.colorSwatch->setCallback(
+                [viewportModel](const ftk::Color4F& value)
+                {
+                    auto options = viewportModel->getBackgroundOptions();
+                    options.outline.color = value;
+                    viewportModel->setBackgroundOptions(options);
+                });
+        }
+
+        ViewOutlineWidget::ViewOutlineWidget() :
+            _p(new Private)
+        {}
+
+        ViewOutlineWidget::~ViewOutlineWidget()
+        {}
+
+        std::shared_ptr<ViewOutlineWidget> ViewOutlineWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewOutlineWidget>(new ViewOutlineWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        ftk::Size2I ViewOutlineWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
+        void ViewOutlineWidget::setGeometry(const ftk::Box2I& value)
+        {
+            IWidget::setGeometry(value);
+            _p->layout->setGeometry(value);
+        }
+
         struct ViewGridWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -773,7 +874,7 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> cellCountXEdit;
             std::shared_ptr<ftk::IntEdit> cellCountYEdit;
             std::shared_ptr<ftk::HorizontalLayout> cellCountLayout;
-            std::shared_ptr<ftk::IntEdit> lineWidthEdit;
+            std::shared_ptr<ftk::IntEditSlider> lineWidthEdit;
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::ComboBox> labelsComboBox;
             std::shared_ptr<ftk::ColorSwatch> textColorSwatch;
@@ -807,7 +908,7 @@ namespace djv
             p.cellCountYEdit = ftk::IntEdit::create(context);
             p.cellCountYEdit->setRange(1, 100);
 
-            p.lineWidthEdit = ftk::IntEdit::create(context);
+            p.lineWidthEdit = ftk::IntEditSlider::create(context);
             p.lineWidthEdit->setRange(1, 10);
 
             p.colorSwatch = ftk::ColorSwatch::create(context);
@@ -972,112 +1073,11 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-        struct ViewOutlineWidget::Private
-        {
-            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
-            std::shared_ptr<ftk::IntEditSlider> widthSlider;
-            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
-            std::shared_ptr<ftk::FormLayout> layout;
-
-            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
-        };
-
-        void ViewOutlineWidget::_init(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::ViewportModel>& viewportModel,
-            const std::shared_ptr<ftk::IWidget>& parent)
-        {
-            ftk::IWidget::_init(context, "djv::app::ViewOutlineWidget", parent);
-            FTK_P();
-
-            p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
-            ftk::setScreenshotTag(p.enabledCheckBox, "View.Outline.Enabled");
-
-            p.widthSlider = ftk::IntEditSlider::create(context);
-            p.widthSlider->setRange(1, 100);
-            ftk::setScreenshotTag(p.widthSlider, "View.Outline.LineWidth");
-
-            p.colorSwatch = ftk::ColorSwatch::create(context);
-            p.colorSwatch->setEditable(true);
-            p.colorSwatch->setHAlign(ftk::HAlign::Left);
-            ftk::setScreenshotTag(p.colorSwatch, "View.Outline.Color");
-
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
-            p.layout->addRow("Line width:", p.widthSlider);
-            p.layout->addRow("Color:", p.colorSwatch);
-
-            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
-                viewportModel->observeForegroundOptions(),
-                [this](const tl::ForegroundOptions& value)
-                {
-                    FTK_P();
-                    p.enabledCheckBox->setChecked(value.outline.enabled);
-                    p.widthSlider->setValue(value.outline.width);
-                    p.colorSwatch->setColor(value.outline.color);
-                });
-
-            p.enabledCheckBox->setCheckedCallback(
-                [viewportModel](bool value)
-                {
-                    auto options = viewportModel->getForegroundOptions();
-                    options.outline.enabled = value;
-                    viewportModel->setForegroundOptions(options);
-                });
-
-            p.widthSlider->setCallback(
-                [viewportModel](int value)
-                {
-                    auto options = viewportModel->getForegroundOptions();
-                    options.outline.width = value;
-                    viewportModel->setForegroundOptions(options);
-                });
-
-            p.colorSwatch->setCallback(
-                [viewportModel](const ftk::Color4F& value)
-                {
-                    auto options = viewportModel->getForegroundOptions();
-                    options.outline.color = value;
-                    viewportModel->setForegroundOptions(options);
-                });
-        }
-
-        ViewOutlineWidget::ViewOutlineWidget() :
-            _p(new Private)
-        {}
-
-        ViewOutlineWidget::~ViewOutlineWidget()
-        {}
-
-        std::shared_ptr<ViewOutlineWidget> ViewOutlineWidget::create(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::ViewportModel>& viewportModel,
-            const std::shared_ptr<IWidget>& parent)
-        {
-            auto out = std::shared_ptr<ViewOutlineWidget>(new ViewOutlineWidget);
-            out->_init(context, viewportModel, parent);
-            return out;
-        }
-
-        ftk::Size2I ViewOutlineWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewOutlineWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct ViewCenterMarkerWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
-            std::shared_ptr<ftk::IntEdit> sizeEdit;
-            std::shared_ptr<ftk::IntEdit> widthEdit;
+            std::shared_ptr<ftk::IntEditSlider> sizeEdit;
+            std::shared_ptr<ftk::IntEditSlider> lineWidthEdit;
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::FormLayout> layout;
 
@@ -1096,13 +1096,13 @@ namespace djv
             p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.enabledCheckBox, "View.CenterMarker.Enabled");
 
-            p.sizeEdit = ftk::IntEdit::create(context);
+            p.sizeEdit = ftk::IntEditSlider::create(context);
             p.sizeEdit->setRange(10, 100);
             ftk::setScreenshotTag(p.sizeEdit, "View.CenterMarker.Size");
 
-            p.widthEdit = ftk::IntEdit::create(context);
-            p.widthEdit->setRange(1, 10);
-            ftk::setScreenshotTag(p.widthEdit, "View.CenterMarker.LineWidth");
+            p.lineWidthEdit = ftk::IntEditSlider::create(context);
+            p.lineWidthEdit->setRange(1, 10);
+            ftk::setScreenshotTag(p.lineWidthEdit, "View.CenterMarker.LineWidth");
 
             p.colorSwatch = ftk::ColorSwatch::create(context);
             p.colorSwatch->setEditable(true);
@@ -1114,7 +1114,7 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Size:", p.sizeEdit);
-            p.layout->addRow("Line width:", p.widthEdit);
+            p.layout->addRow("Line width:", p.lineWidthEdit);
             p.layout->addRow("Color:", p.colorSwatch);
 
             p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
@@ -1124,7 +1124,7 @@ namespace djv
                     FTK_P();
                     p.enabledCheckBox->setChecked(value.centerMarker.enabled);
                     p.sizeEdit->setValue(value.centerMarker.size);
-                    p.widthEdit->setValue(value.centerMarker.width);
+                    p.lineWidthEdit->setValue(value.centerMarker.width);
                     p.colorSwatch->setColor(value.centerMarker.color);
                 });
 
@@ -1144,7 +1144,7 @@ namespace djv
                     viewportModel->setForegroundOptions(options);
                 });
 
-            p.widthEdit->setCallback(
+            p.lineWidthEdit->setCallback(
                 [viewportModel](int value)
                 {
                     auto options = viewportModel->getForegroundOptions();
