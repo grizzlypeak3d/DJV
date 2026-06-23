@@ -42,6 +42,7 @@ namespace djv
             p.settings->getT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
             p.settings->getT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
             p.settings->getT("/Files/Compare/Overlay", compareOptions.overlay);
+            p.settings->getT("/Files/Compare/FitToA", compareOptions.fitToA);
             p.compareOptions = ftk::Observable<tl::CompareOptions>::create(compareOptions);
             std::string s;
             p.settings->get("/Files/Compare/Time", s);
@@ -61,6 +62,7 @@ namespace djv
             p.settings->setT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
             p.settings->setT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
             p.settings->setT("/Files/Compare/Overlay", compareOptions.overlay);
+            p.settings->setT("/Files/Compare/FitToA", compareOptions.fitToA);
             p.settings->set("/Files/Compare/Time", to_string(p.compareTime->get()));
         }
 
@@ -236,7 +238,6 @@ namespace djv
             if (index >= 0 && index < p.files->getSize())
             {
                 auto b = p.b->get();
-                int removedIndex = -1;
                 const auto bIndexes = _getBIndexes();
                 const auto i = std::find(bIndexes.begin(), bIndexes.end(), index);
                 if (value && i == bIndexes.end())
@@ -253,7 +254,6 @@ namespace djv
                     case tl::Compare::Vertical:
                         if (b.size() > 1)
                         {
-                            removedIndex = _getIndex(b.front());
                             b.erase(b.begin());
                         }
                         break;
@@ -453,12 +453,15 @@ namespace djv
         {
             FTK_P();
             const int index = _getIndex(item);
-            if (index != -1 &&
-                layer < p.files->getItem(index)->videoLayers.size() &&
-                layer != p.files->getItem(index)->videoLayer)
+            if (index != -1 && layer >= 0)
             {
-                p.files->getItem(index)->videoLayer = layer;
-                p.layers->setIfChanged(_getLayers());
+                const auto& file = p.files->getItem(index);
+                if (static_cast<size_t>(layer) < file->videoLayers.size() &&
+                    static_cast<size_t>(layer) != file->videoLayer)
+                {
+                    file->videoLayer = layer;
+                    p.layers->setIfChanged(_getLayers());
+                }
             }
         }
 
@@ -540,7 +543,7 @@ namespace djv
                 case tl::Compare::Vertical:
                 case tl::Compare::Tile:
                 {
-                    if (b.empty() && !p.files->isEmpty())
+                    if (b.empty() && p.files->getSize() > 1)
                     {
                         int index = _getIndex(p.a->get());
                         if (index != -1)
