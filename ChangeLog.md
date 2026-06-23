@@ -6,6 +6,7 @@ Changes:
 * Add more grid and HUD options.
 * Add the NotoSansCJKsc-Regular font for basic CJK text rendering.
 * Add more OpenEXR attributes.
+* Add JPEG to export options.
 * Add the aom library for AV1 decoding support (macOS and Linux).
 * Allow the "Escape" key to be used for keyboard shortcuts.
 * Add image I/O library versions to the system information.

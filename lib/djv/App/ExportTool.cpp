@@ -46,7 +46,9 @@ namespace djv
                 ".exr",
                 ".png",
                 ".tif",
-                ".tiff"
+                ".tiff",
+                ".jpg",
+                ".jpeg"
             };
 
             const std::vector<std::string> movieExts =
