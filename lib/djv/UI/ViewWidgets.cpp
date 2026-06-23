@@ -1188,5 +1188,105 @@ namespace djv
             IWidget::setGeometry(value);
             _p->layout->setGeometry(value);
         }
+
+        struct ViewHUDWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::map<models::HUDItem, std::shared_ptr<ftk::ComboBox> > posComboBoxes;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
+        };
+
+        void ViewHUDWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IWidget::_init(context, "djv::app::ViewHUDWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.HUD.Enabled");
+
+            const auto enums = models::getHUDItemEnums();
+            for (const auto i : enums)
+            {
+                p.posComboBoxes[i] = ftk::ComboBox::create(context, models::getHUDPosLabels());
+                p.posComboBoxes[i]->setHStretch(ftk::Stretch::Expanding);
+            }
+            ftk::setScreenshotTag(p.posComboBoxes[models::HUDItem::FileName], "View.HUD.FileName");
+
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Enabled:", p.enabledCheckBox);
+            for (const auto i : enums)
+            {
+                p.layout->addRow(
+                    ftk::toSentenceCase(models::getLabel(i)) + ":",
+                    p.posComboBoxes[i]);
+            }
+
+            p.hudOptionsObserver = ftk::Observer<models::HUDOptions>::create(
+                viewportModel->observeHUDOptions(),
+                [this](const models::HUDOptions& value)
+                {
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.enabled);
+                    auto tmp = value;
+                    for (const auto i : models::getHUDItemEnums())
+                    {
+                        p.posComboBoxes[i]->setCurrentIndex(static_cast<int>(tmp.items[i]));
+                    }
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getHUDOptions();
+                    options.enabled = value;
+                    viewportModel->setHUDOptions(options);
+                });
+
+            for (const auto i : enums)
+            {
+                p.posComboBoxes[i]->setIndexCallback(
+                    [viewportModel, i](int value)
+                    {
+                        auto options = viewportModel->getHUDOptions();
+                        options.items[i] = static_cast<models::HUDPos>(value);
+                        viewportModel->setHUDOptions(options);
+                    });
+            }
+        }
+
+        ViewHUDWidget::ViewHUDWidget() :
+            _p(new Private)
+        {}
+
+        ViewHUDWidget::~ViewHUDWidget()
+        {}
+
+        std::shared_ptr<ViewHUDWidget> ViewHUDWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewHUDWidget>(new ViewHUDWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        ftk::Size2I ViewHUDWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
+        void ViewHUDWidget::setGeometry(const ftk::Box2I& value)
+        {
+            IWidget::setGeometry(value);
+            _p->layout->setGeometry(value);
+        }
     }
 }

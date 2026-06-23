@@ -43,6 +43,44 @@ namespace djv
             bool operator != (const AspectRatioOptions&) const;
         };
 
+        //! HUD items.
+        enum class HUDItem
+        {
+            FileName,
+            Cache,
+            Time,
+            ViewZoom,
+            ColorPicker,
+
+            Count,
+            First = FileName
+        };
+        TL_ENUM(HUDItem);
+
+        //! HUD positions.
+        enum class HUDPos
+        {
+            None,
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight,
+
+            Count,
+            First = None
+        };
+        TL_ENUM(HUDPos);
+
+        //! HUD options.
+        struct HUDOptions
+        {
+            bool enabled = false;
+            std::map<HUDItem, HUDPos> items;
+
+            bool operator == (const HUDOptions&) const;
+            bool operator != (const HUDOptions&) const;
+        };
+
         //! Viewport model.
         class ViewportModel : public std::enable_shared_from_this<ViewportModel>
         {
@@ -119,9 +157,9 @@ namespace djv
             //! \name HUD
             ///@{
 
-            bool getHUD() const;
-            std::shared_ptr<ftk::IObservable<bool> > observeHUD() const;
-            void setHUD(bool);
+            const HUDOptions& getHUDOptions() const;
+            std::shared_ptr<ftk::IObservable<HUDOptions> > observeHUDOptions() const;
+            void setHUDOptions(const HUDOptions&);
 
             ///@}
 
@@ -133,8 +171,10 @@ namespace djv
         ///@{
 
         void to_json(nlohmann::json&, const AspectRatioOptions&);
+        void to_json(nlohmann::json&, const HUDOptions&);
 
         void from_json(const nlohmann::json&, AspectRatioOptions&);
+        void from_json(const nlohmann::json&, HUDOptions&);
 
         ///@}
     }

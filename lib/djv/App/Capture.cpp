@@ -551,7 +551,7 @@ namespace djv
                 }
                 if (v.contains("hud"))
                 {
-                    vp->setHUD(v.at("hud").get<bool>());
+                    vp->setHUDOptions(v.at("hud").get<models::HUDOptions>());
                 }
                 if (v.contains("magnify") || v.contains("minify"))
                 {

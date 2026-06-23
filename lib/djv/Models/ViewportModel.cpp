@@ -5,11 +5,28 @@
 
 #include <ftk/UI/Settings.h>
 #include <ftk/GL/OffscreenBuffer.h>
+#include <ftk/Core/String.h>
 
 namespace djv
 {
     namespace models
     {
+        TL_ENUM_IMPL(
+            HUDItem,
+            "File Name",
+            "Cache",
+            "Time",
+            "View Zoom",
+            "Color Picker");
+
+        TL_ENUM_IMPL(
+            HUDPos,
+            "None",
+            "Top Left",
+            "Top Right",
+            "Bottom Left",
+            "Bottom Right");
+
         bool AspectRatioOptions::operator == (const AspectRatioOptions& other) const
         {
             return
@@ -18,6 +35,18 @@ namespace djv
         }
 
         bool AspectRatioOptions::operator != (const AspectRatioOptions& other) const
+        {
+            return !(*this == other);
+        }
+
+        bool HUDOptions::operator == (const HUDOptions& other) const
+        {
+            return
+                enabled == other.enabled &&
+                items == other.items;
+        }
+
+        bool HUDOptions::operator != (const HUDOptions& other) const
         {
             return !(*this == other);
         }
@@ -32,7 +61,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<tl::BackgroundOptions> > backgroundOptions;
             std::shared_ptr<ftk::Observable<tl::ForegroundOptions> > foregroundOptions;
             std::shared_ptr<ftk::Observable<ftk::gl::TextureType> > colorBuffer;
-            std::shared_ptr<ftk::Observable<bool> > hud;
+            std::shared_ptr<ftk::Observable<HUDOptions> > hudOptions;
         };
 
         void ViewportModel::_init(
@@ -72,9 +101,13 @@ namespace djv
             ftk::gl::from_string(s, colorBuffer);
             p.colorBuffer = ftk::Observable<ftk::gl::TextureType>::create(colorBuffer);
 
-            bool hud = false;
-            p.settings->get("/Viewport/HUD/Enabled", hud);
-            p.hud = ftk::Observable<bool>::create(hud);
+            HUDOptions hudOptions;
+            hudOptions.items[HUDItem::FileName] = HUDPos::TopLeft;
+            hudOptions.items[HUDItem::Cache] = HUDPos::BottomRight;
+            hudOptions.items[HUDItem::Time] = HUDPos::TopRight;
+            hudOptions.items[HUDItem::ColorPicker] = HUDPos::BottomLeft;
+            p.settings->getT("/Viewport/HUD.1", hudOptions);
+            p.hudOptions = ftk::Observable<HUDOptions>::create(hudOptions);
         }
 
         ViewportModel::ViewportModel() :
@@ -90,7 +123,7 @@ namespace djv
             p.settings->setT("/Viewport/Background", p.backgroundOptions->get());
             p.settings->setT("/Viewport/Foreground.1", p.foregroundOptions->get());
             p.settings->set("/Viewport/ColorBuffer", ftk::gl::to_string(p.colorBuffer->get()));
-            p.settings->set("/Viewport/HUD/Enabled", p.hud->get());
+            p.settings->setT("/Viewport/HUD.1", p.hudOptions->get());
         }
 
         std::shared_ptr<ViewportModel> ViewportModel::create(
@@ -211,19 +244,19 @@ namespace djv
             _p->colorBuffer->setIfChanged(value);
         }
 
-        bool ViewportModel::getHUD() const
+        const HUDOptions& ViewportModel::getHUDOptions() const
         {
-            return _p->hud->get();
+            return _p->hudOptions->get();
         }
 
-        std::shared_ptr<ftk::IObservable<bool> > ViewportModel::observeHUD() const
+        std::shared_ptr<ftk::IObservable<HUDOptions> > ViewportModel::observeHUDOptions() const
         {
-            return _p->hud;
+            return _p->hudOptions;
         }
 
-        void ViewportModel::setHUD(bool value)
+        void ViewportModel::setHUDOptions(const HUDOptions& value)
         {
-            _p->hud->setIfChanged(value);
+            _p->hudOptions->setIfChanged(value);
         }
 
         void to_json(nlohmann::json& json, const AspectRatioOptions& in)
@@ -232,10 +265,22 @@ namespace djv
             json["Options"] = in.options;
         }
 
+        void to_json(nlohmann::json& json, const HUDOptions& in)
+        {
+            json["Enabled"] = in.enabled;
+            json["Items"] = in.items;
+        }
+
         void from_json(const nlohmann::json& json, AspectRatioOptions& out)
         {
             json.at("Index").get_to(out.index);
             json.at("Options").get_to(out.options);
+        }
+
+        void from_json(const nlohmann::json& json, HUDOptions& out)
+        {
+            json.at("Enabled").get_to(out.enabled);
+            json.at("Items").get_to(out.items);
         }
     }
 }

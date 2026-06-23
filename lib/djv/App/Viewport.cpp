@@ -29,7 +29,7 @@ namespace djv
         struct Viewport::Private
         {
             std::weak_ptr<App> app;
-            bool hud = false;
+            models::HUDOptions hudOptions;
             ftk::Path path;
             OTIO_NS::RationalTime currentTime = tl::invalidTime;
             double fps = 0.0;
@@ -38,6 +38,7 @@ namespace djv
             ftk::ImageOptions imageOptions;
             tl::DisplayOptions displayOptions;
             tl::PlayerCacheInfo cacheInfo;
+            double viewZoom = 0.0;
             models::MouseActionBinding pickBinding =
                 models::MouseActionBinding(ftk::MouseButton::Left);
             models::MouseActionBinding frameShuttleBinding =
@@ -48,11 +49,14 @@ namespace djv
             std::shared_ptr<ftk::Observable<ftk::Color4F> > colorSample;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
+            std::shared_ptr<ftk::Label> cacheLabel;
             std::shared_ptr<ftk::Label> timeLabel;
+            std::shared_ptr<ftk::Label> viewZoomLabel;
             std::shared_ptr<ftk::ColorSwatch> colorPickerSwatch;
             std::shared_ptr<ftk::Label> colorPickerLabel;
-            std::shared_ptr<ftk::Label> cacheLabel;
+            std::map<models::HUDItem, std::shared_ptr<ftk::IWidget> > hudWidgets;
             std::shared_ptr<ftk::GridLayout> hudLayout;
+            std::map<models::HUDPos, std::shared_ptr<ftk::VerticalLayout> > hudLayouts;
 
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
             std::shared_ptr<ftk::ListObserver<tl::VideoFrame> > videoObserver;
@@ -67,7 +71,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
-            std::shared_ptr<ftk::Observer<bool> > hudObserver;
+            std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
+            std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
 
@@ -101,47 +106,52 @@ namespace djv
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFont(ftk::FontType::Mono);
-            p.fileNameLabel->setMarginRole(ftk::SizeRole::MarginInside);
-            p.fileNameLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+
+            p.cacheLabel = ftk::Label::create(context);
+            p.cacheLabel->setFont(ftk::FontType::Mono);
 
             p.timeLabel = ftk::Label::create(context);
             p.timeLabel->setFont(ftk::FontType::Mono);
-            p.timeLabel->setMarginRole(ftk::SizeRole::MarginInside);
-            p.timeLabel->setBackgroundRole(ftk::ColorRole::Overlay);
-            p.timeLabel->setHAlign(ftk::HAlign::Right);
+
+            p.viewZoomLabel = ftk::Label::create(context);
+            p.viewZoomLabel->setFont(ftk::FontType::Mono);
 
             p.colorPickerSwatch = ftk::ColorSwatch::create(context);
             p.colorPickerSwatch->setSizeRole(ftk::SizeRole::MarginLarge);
             p.colorPickerLabel = ftk::Label::create(context);
             p.colorPickerLabel->setFont(ftk::FontType::Mono);
+            auto colorPickerLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
+            colorPickerLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.colorPickerSwatch->setParent(colorPickerLayout);
+            p.colorPickerLabel->setParent(colorPickerLayout);
 
-            p.cacheLabel = ftk::Label::create(context);
-            p.cacheLabel->setFont(ftk::FontType::Mono);
-            p.cacheLabel->setMarginRole(ftk::SizeRole::MarginInside);
-            p.cacheLabel->setBackgroundRole(ftk::ColorRole::Overlay);
-            p.cacheLabel->setHAlign(ftk::HAlign::Right);
+            p.hudWidgets[models::HUDItem::FileName] = p.fileNameLabel;
+            p.hudWidgets[models::HUDItem::Cache] = p.cacheLabel;
+            p.hudWidgets[models::HUDItem::Time] = p.timeLabel;
+            p.hudWidgets[models::HUDItem::ViewZoom] = p.viewZoomLabel;
+            p.hudWidgets[models::HUDItem::ColorPicker] = colorPickerLayout;
 
             p.hudLayout = ftk::GridLayout::create(context, shared_from_this());
             p.hudLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             p.hudLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.fileNameLabel->setParent(p.hudLayout);
-            p.hudLayout->setGridPos(p.fileNameLabel, 0, 0);
-            p.timeLabel->setParent(p.hudLayout);
-            p.hudLayout->setGridPos(p.timeLabel, 0, 2);
-
+            for (const auto i : models::getHUDPosEnums())
+            {
+                p.hudLayouts[i] = ftk::VerticalLayout::create(context, p.hudLayout);
+                p.hudLayouts[i]->setMarginRole(ftk::SizeRole::MarginSmall);
+                p.hudLayouts[i]->setSpacingRole(ftk::SizeRole::SpacingSmall);
+                p.hudLayouts[i]->setBackgroundRole(ftk::ColorRole::Overlay);
+            }
+            p.hudLayouts[models::HUDPos::TopLeft]->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
+            p.hudLayouts[models::HUDPos::TopRight]->setAlign(ftk::HAlign::Right, ftk::VAlign::Top);
+            p.hudLayouts[models::HUDPos::BottomLeft]->setAlign(ftk::HAlign::Left, ftk::VAlign::Bottom);
+            p.hudLayouts[models::HUDPos::BottomRight]->setAlign(ftk::HAlign::Right, ftk::VAlign::Bottom);
+            p.hudLayout->setGridPos(p.hudLayouts[models::HUDPos::TopLeft], 0, 0);
+            p.hudLayout->setGridPos(p.hudLayouts[models::HUDPos::TopRight], 0, 2);
+            p.hudLayout->setGridPos(p.hudLayouts[models::HUDPos::BottomLeft], 2, 0);
+            p.hudLayout->setGridPos(p.hudLayouts[models::HUDPos::BottomRight], 2, 2);
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Vertical, p.hudLayout);
             spacer->setStretch(ftk::Stretch::Expanding);
             p.hudLayout->setGridPos(spacer, 1, 1);
-
-            auto hLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
-            p.hudLayout->setGridPos(hLayout, 2, 0);
-            hLayout->setMarginRole(ftk::SizeRole::MarginInside);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            hLayout->setBackgroundRole(ftk::ColorRole::Overlay);
-            p.colorPickerSwatch->setParent(hLayout);
-            p.colorPickerLabel->setParent(hLayout);
-            p.cacheLabel->setParent(p.hudLayout);
-            p.hudLayout->setGridPos(p.cacheLabel, 2, 2);
 
             p.fpsObserver = ftk::Observer<double>::create(
                 observeFPS(),
@@ -218,12 +228,21 @@ namespace djv
                     _hudUpdate();
                 });
 
-            p.hudObserver = ftk::Observer<bool>::create(
-                app->getViewportModel()->observeHUD(),
-                [this](bool value)
+            p.viewZoomObserver = ftk::Observer<double>::create(
+                observeZoom(),
+                [this](double value)
                 {
-                    _p->hud = value;
+                    _p->viewZoom = value;
                     _hudUpdate();
+                });
+
+            p.hudOptionsObserver = ftk::Observer<models::HUDOptions>::create(
+                app->getViewportModel()->observeHUDOptions(),
+                [this](const models::HUDOptions& value)
+                {
+                    _p->hudOptions = value;
+                    _hudUpdate();
+                    _hudLayout();
                 });
 
             p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
@@ -467,9 +486,13 @@ namespace djv
             }
             p.timeLabel->setText(ftk::Format("Time: {0}, {1} FPS, {2} dropped").
                 arg(s).
-                arg(p.fps, 2, 5).
+                arg(p.fps, 2, 6).
                 arg(static_cast<int>(p.droppedFrames), 3));
             ftk::setScreenshotTag(p.timeLabel, "View.HUD.Time");
+
+            p.viewZoomLabel->setText(ftk::Format("Zoom: {0}").
+                arg(p.viewZoom, 2, 6));
+            ftk::setScreenshotTag(p.timeLabel, "View.HUD.ViewZoom");
 
             const auto& colorSample = p.colorSample->get();
             p.colorPickerSwatch->setColor(colorSample);
@@ -488,7 +511,24 @@ namespace djv
                 arg(static_cast<int>(p.cacheInfo.audioPercentage), 3));
             ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");
 
-            p.hudLayout->setVisible(p.hud);
+            p.hudLayout->setVisible(p.hudOptions.enabled);
+        }
+
+        void Viewport::_hudLayout()
+        {
+            FTK_P();
+            auto app = p.app.lock();
+            const auto options = app->getViewportModel()->getHUDOptions();
+            for (const auto& i : options.items)
+            {
+                p.hudWidgets[i.first]->setParent(i.second != models::HUDPos::None ?
+                    p.hudLayouts[i.second] :
+                    nullptr);
+            }
+            for (const auto& i : p.hudLayouts)
+            {
+                i.second->setVisible(i.second->getChildren().size() > 0);
+            }
         }
     }
 }

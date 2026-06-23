@@ -485,7 +485,9 @@ namespace djv
                 if (value)
                 {
                     auto app = p.app.lock();
-                    app->getViewportModel()->setHUD(false);
+                    auto options = app->getViewportModel()->getHUDOptions();
+                    options.enabled = false;
+                    app->getViewportModel()->setHUDOptions(options);
                 }
                 setFullScreen(value);
                 _windowUpdate();

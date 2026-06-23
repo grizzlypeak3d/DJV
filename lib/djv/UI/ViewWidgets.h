@@ -246,5 +246,33 @@ namespace djv
         private:
             FTK_PRIVATE();
         };
+
+        //! View HUD widget.
+        class ViewHUDWidget : public ftk::IWidget
+        {
+            FTK_NON_COPYABLE(ViewHUDWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            ViewHUDWidget();
+
+        public:
+            virtual ~ViewHUDWidget();
+
+            static std::shared_ptr<ViewHUDWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            ftk::Size2I getSizeHint() const override;
+            void setGeometry(const ftk::Box2I&) override;
+
+        private:
+            FTK_PRIVATE();
+        };
     }
 }

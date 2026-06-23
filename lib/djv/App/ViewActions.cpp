@@ -23,7 +23,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
-            std::shared_ptr<ftk::Observer<bool> > hudObserver;
+            std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
         };
 
         void ViewActions::_init(
@@ -239,7 +239,9 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getViewportModel()->setHUD(value);
+                        auto options = app->getViewportModel()->getHUDOptions();
+                        options.enabled = value;
+                        app->getViewportModel()->setHUDOptions(options);
                     }
                 });
 
@@ -306,11 +308,11 @@ namespace djv
                     _actions["CenterMarker"]->setChecked(value.centerMarker.enabled);
                 });
 
-            p.hudObserver = ftk::Observer<bool>::create(
-                app->getViewportModel()->observeHUD(),
-                [this](bool value)
+            p.hudOptionsObserver = ftk::Observer<models::HUDOptions>::create(
+                app->getViewportModel()->observeHUDOptions(),
+                [this](const models::HUDOptions& value)
                 {
-                    _actions["HUD"]->setChecked(value);
+                    _actions["HUD"]->setChecked(value.enabled);
                 });
         }
 

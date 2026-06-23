@@ -59,7 +59,7 @@ namespace djv
             Count,
             First = Default
         };
-        FTK_ENUM(ExportRenderSize);
+        TL_ENUM(ExportRenderSize);
 
         //! Get an export render size.
         ftk::Size2I getSize(ExportRenderSize);

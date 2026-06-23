@@ -1,11 +1,11 @@
-## 3.4.3
+## 3.5.0
 
 Changes:
 * Add an option for custom aspect ratios.
 * Add a center marker option.
-* Add more grid options.
+* Add more grid and HUD options.
 * Add the NotoSansCJKsc-Regular font for basic CJK text rendering.
-* Add more OpenEXR attributes to the information.
+* Add more OpenEXR attributes.
 * Add the aom library for AV1 decoding support (macOS and Linux).
 * Allow the "Escape" key to be used for keyboard shortcuts.
 * Add image I/O library versions to the system information.
@@ -13,6 +13,7 @@ Changes:
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
+* Fixes for the grid and outline in compare mode.
 
 * Library updates:
     - OpenImageIO v3.1.14.0

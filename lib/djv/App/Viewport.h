@@ -56,6 +56,7 @@ namespace djv
         private:
             void _videoUpdate();
             void _hudUpdate();
+            void _hudLayout();
 
             FTK_PRIVATE();
         };
