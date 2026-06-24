@@ -12,6 +12,7 @@
 
 #include <tlRender/Timeline/Player.h>
 
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
@@ -49,6 +50,7 @@ namespace djv
             std::weak_ptr<MainWindow> mainWindow;
 
             MagnifyLevel level = MagnifyLevel::_4X;
+            bool viewPosAndZoom = true;
             ftk::V2I viewPos;
             double viewZoom = 1.0;
             ftk::V2I pick;
@@ -61,6 +63,7 @@ namespace djv
             std::shared_ptr<tl::ui::Viewport> viewport;
             std::shared_ptr<ftk::ComboBox> comboBox;
             std::shared_ptr<ftk::Label> pixelLabel;
+            std::shared_ptr<ftk::CheckBox> viewPosAndZoomCheckBox;
             std::shared_ptr<ftk::Label> mouseLabel;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
@@ -96,6 +99,7 @@ namespace djv
             std::string s;
             p.settings->get("/Magnify/Level", s);
             from_string(s, p.level);
+            p.settings->get("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
 
             p.mainWindow = mainWindow;
 
@@ -103,11 +107,17 @@ namespace djv
             p.viewport->setInputEnabled(false);
 
             p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
+            p.comboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.comboBox, "Magnify.Magnify");
 
             p.pixelLabel = ftk::Label::create(context);
             p.pixelLabel->setFont(ftk::FontType::Mono);
             ftk::setScreenshotTag(p.pixelLabel, "Magnify.Pixel");
+
+            p.viewPosAndZoomCheckBox = ftk::CheckBox::create(context);
+            p.viewPosAndZoomCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.viewPosAndZoomCheckBox->setTooltip("Track the view position and zoom.");
+            ftk::setScreenshotTag(p.comboBox, "Magnify.ViewPosAndZoom");
 
             p.mouseLabel = ftk::Label::create(context);
             ftk::setScreenshotTag(p.mouseLabel, "Magnify.Mouse");
@@ -120,6 +130,7 @@ namespace djv
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             formLayout->addRow("Magnify:", p.comboBox);
             formLayout->addRow("Pixel:", p.pixelLabel);
+            formLayout->addRow("Track view:", p.viewPosAndZoomCheckBox);
             formLayout->addRow("Mouse:", p.mouseLabel);
             _setWidget(layout);
 
@@ -129,6 +140,17 @@ namespace djv
                     FTK_P();
                     p.level = static_cast<MagnifyLevel>(value);
                     _widgetUpdate();
+                });
+
+            p.viewPosAndZoomCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    p.viewPosAndZoom = value;
+                    if (value)
+                    {
+                        _widgetUpdate();
+                    }
                 });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
@@ -162,7 +184,10 @@ namespace djv
                     FTK_P();
                     p.viewPos = value.first;
                     p.viewZoom = value.second;
-                    _widgetUpdate();
+                    if (p.viewPosAndZoom)
+                    {
+                        _widgetUpdate();
+                    }
                 });
 
             p.pickObserver = ftk::Observer<ftk::V2I>::create(
@@ -264,6 +289,7 @@ namespace djv
         {
             FTK_P();
             p.settings->set("/Magnify/Level", to_string(p.level));
+            p.settings->set("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
         }
 
         std::shared_ptr<MagnifyTool> MagnifyTool::create(
@@ -293,13 +319,23 @@ namespace djv
             FTK_P();
             const ftk::Box2I& g = p.viewport->getGeometry();
             const int level = getMagnifyLevel(p.level);
-            const ftk::V2I magnifyPos =
-                (p.viewPos - p.samplePos) * level + (center(g) - g.min);
-
-            const double magnifyZoom = p.viewZoom * level;
+            ftk::V2I magnifyPos;
+            double magnifyZoom = 1.0;
+            if (p.viewPosAndZoom)
+            {
+                magnifyPos = (p.viewPos - p.samplePos) * level + (center(g) - g.min);
+                magnifyZoom = p.viewZoom * level;
+            }
+            else
+            {
+                magnifyPos = (p.viewPos - p.samplePos) / p.viewZoom * level + (center(g) - g.min);
+                magnifyZoom = level;
+            }
             p.viewport->setViewPosAndZoom(magnifyPos, magnifyZoom);
 
             p.comboBox->setCurrentIndex(static_cast<int>(p.level));
+
+            p.viewPosAndZoomCheckBox->setChecked(p.viewPosAndZoom);
 
             p.pixelLabel->setText(ftk::Format("{0}").arg(p.pick));
         }
