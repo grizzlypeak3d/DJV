@@ -4,6 +4,7 @@ Changes:
 * Add an option for custom aspect ratios.
 * Add a center marker option.
 * Add more grid and HUD options.
+* Add an option for whether the magnify tool tracks the view.
 * Add the NotoSansCJKsc-Regular font for basic CJK text rendering.
 * Add more OpenEXR attributes.
 * Add JPEG to export options.
