@@ -988,6 +988,7 @@ namespace djv
             std::shared_ptr<models::SettingsModel> settings;
 
             std::shared_ptr<ftk::CheckBox> yuvToRGBCheckBox;
+            std::shared_ptr<ftk::CheckBox> hwAccelCheckBox;
             std::shared_ptr<ftk::IntEdit> threadsEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
@@ -1006,13 +1007,27 @@ namespace djv
 
             p.yuvToRGBCheckBox = ftk::CheckBox::create(context);
             p.yuvToRGBCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.yuvToRGBCheckBox->setTooltip(
+                "Convert YUV to RGB on the CPU when reading. When disabled, YUV "
+                "frames are kept and converted on the GPU.");
+
+            p.hwAccelCheckBox = ftk::CheckBox::create(context);
+            p.hwAccelCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.hwAccelCheckBox->setTooltip(
+                "Use the GPU to decode video when possible. Falls back to software "
+                "decoding automatically when hardware decoding is unavailable for a "
+                "file. Takes effect the next time a file is opened.");
 
             p.threadsEdit = ftk::IntEdit::create(context);
             p.threadsEdit->setRange(0, 64);
+            p.threadsEdit->setTooltip(
+                "Number of threads used for decoding. Set to 0 to choose the thread "
+                "count automatically.");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
+            p.layout->addRow("Hardware decoding:", p.hwAccelCheckBox);
             p.layout->addRow("I/O threads:", p.threadsEdit);
 
             p.optionsObserver = ftk::Observer<tl::ffmpeg::Options>::create(
@@ -1021,6 +1036,7 @@ namespace djv
                 {
                     FTK_P();
                     p.yuvToRGBCheckBox->setChecked(value.yuvToRgb);
+                    p.hwAccelCheckBox->setChecked(value.hwAccel);
                     p.threadsEdit->setValue(value.threadCount);
                 });
 
@@ -1030,6 +1046,15 @@ namespace djv
                     FTK_P();
                     tl::ffmpeg::Options options = p.settings->getFFmpeg();
                     options.yuvToRgb = value;
+                    p.settings->setFFmpeg(options);
+                });
+
+            p.hwAccelCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    tl::ffmpeg::Options options = p.settings->getFFmpeg();
+                    options.hwAccel = value;
                     p.settings->setFFmpeg(options);
                 });
 
