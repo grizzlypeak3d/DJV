@@ -52,6 +52,19 @@
       ]
     },
     {
+      "id": "ffmpeg-plugin",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "tool": "Settings", "expand": ["FFmpeg"] }
+      ],
+      "annotate": [
+        { "id": "FFmpeg.YUVtoRGB", "caption": "Software YUV conversion" },
+        { "id": "FFmpeg.HardwareDecoding", "caption": "Hardware decoding" },
+        { "id": "FFmpeg.Threads", "caption": "Threads" }
+      ]
+    },
+    {
       "id": "ffmpeg-command",
       "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
@@ -59,8 +72,8 @@
         { "tool": "Settings", "expand": ["FFmpegCmd"] }
       ],
       "annotate": [
-        { "id": "FFmpegCmd.FFmpegEdit", "caption": "ffmpeg" },
-        { "id": "FFmpegCmd.FFprobeEdit", "caption": "ffprobe" }
+        { "id": "FFmpegCmd.FFmpeg", "caption": "ffmpeg" },
+        { "id": "FFmpegCmd.FFprobe", "caption": "ffprobe" }
       ]
     },
     {
@@ -134,7 +147,7 @@
         { "frame": 88 },
         { "tool": "View", "expand": ["Options"] },
         { "view": {
-          "grid": { "enabled": true, "cellSize": 1, "labels": "Pixels" },
+          "grid": { "enabled": true, "cellMode": "Cell Size", "cellSize": 1, "labels": "Pixels" },
           "magnify": "nearest"
         } },
         { "zoom": 200 }
@@ -151,13 +164,14 @@
         { "frame": 88 },
         { "tool": "View", "expand": ["Grid"] },
         { "view": {
-          "grid": { "enabled": true, "cellSize": 1, "labels": "Pixels" },
+          "grid": { "enabled": true, "cellMode": "Cell Size", "cellSize": 1, "labels": "Pixels" },
           "magnify": "nearest"
         } },
         { "zoom": 200 }
       ],
       "annotate": [
         { "id": "View.Grid.Enabled", "caption": "Enable grid" },
+        { "id": "View.Grid.CellMode", "caption": "Grid cell mode" },
         { "id": "View.Grid.CellSize", "caption": "Grid cell size" },
         { "id": "View.Grid.Labels", "caption": "Grid labels" }
       ]

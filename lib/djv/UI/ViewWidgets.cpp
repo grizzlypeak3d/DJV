@@ -897,6 +897,7 @@ namespace djv
             ftk::setScreenshotTag(p.enabledCheckBox, "View.Grid.Enabled");
 
             p.cellModeComboBox = ftk::ComboBox::create(context, tl::getGridCellModeLabels());
+            ftk::setScreenshotTag(p.cellModeComboBox, "View.Grid.CellMode");
 
             p.cellSizeSlider = ftk::IntEditSlider::create(context);
             p.cellSizeSlider->setRange(1, 1000);

@@ -535,6 +535,18 @@ namespace djv
                             fg.grid.cellMode = tl::GridCellMode::CellSize;
                             fg.grid.cellSize = gv.at("cellSize").get<int>();
                         }
+                        if (gv.contains("cellMode"))
+                        {
+                            // The grid cell mode, "Cell Size" or "Cell Count"
+                            // (case-insensitive), parsed from the enum labels via
+                            // from_string. Set explicitly when you want cell-count
+                            // mode, or to override the mode implied by "cellSize".
+                            const std::string s =
+                                gv.at("cellMode").get<std::string>();
+                            if (!from_string(s, fg.grid.cellMode))
+                                note(p.shotId,
+                                    "unrecognized grid cell mode '" + s + "'");
+                        }
                         if (gv.contains("labels"))
                         {
                             // The grid-labels mode, parsed case-insensitively
@@ -551,7 +563,42 @@ namespace djv
                 }
                 if (v.contains("hud"))
                 {
-                    vp->setHUDOptions(v.at("hud").get<models::HUDOptions>());
+                    // Either { "hud": true } to enable/disable the HUD while
+                    // keeping the current per-item corner layout, or an object
+                    // that also sets item positions, e.g.
+                    //   { "hud": { "enabled": true,
+                    //              "items": { "File Name": "Top Left" } } }
+                    // Item and position names are parsed case-insensitively from
+                    // their enum labels via from_string, as in the View > HUD menu.
+                    auto hud = vp->getHUDOptions();
+                    const auto& hv = v.at("hud");
+                    if (hv.is_boolean())
+                    {
+                        hud.enabled = hv.get<bool>();
+                    }
+                    else if (hv.is_object())
+                    {
+                        if (hv.contains("enabled"))
+                            hud.enabled = hv.at("enabled").get<bool>();
+                        if (hv.contains("items"))
+                        {
+                            for (const auto& [key, value] : hv.at("items").items())
+                            {
+                                models::HUDItem item = models::HUDItem::First;
+                                models::HUDPos pos = models::HUDPos::First;
+                                if (!from_string(key, item))
+                                    note(p.shotId,
+                                        "unrecognized HUD item '" + key + "'");
+                                else if (!from_string(value.get<std::string>(), pos))
+                                    note(p.shotId,
+                                        "unrecognized HUD position '" +
+                                        value.get<std::string>() + "'");
+                                else
+                                    hud.items[item] = pos;
+                            }
+                        }
+                    }
+                    vp->setHUDOptions(hud);
                 }
                 if (v.contains("magnify") || v.contains("minify"))
                 {

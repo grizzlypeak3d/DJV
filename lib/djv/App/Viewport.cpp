@@ -492,7 +492,7 @@ namespace djv
 
             p.viewZoomLabel->setText(ftk::Format("Zoom: {0}").
                 arg(p.viewZoom, 2, 6));
-            ftk::setScreenshotTag(p.timeLabel, "View.HUD.ViewZoom");
+            ftk::setScreenshotTag(p.viewZoomLabel, "View.HUD.ViewZoom");
 
             const auto& colorSample = p.colorSample->get();
             p.colorPickerSwatch->setColor(colorSample);

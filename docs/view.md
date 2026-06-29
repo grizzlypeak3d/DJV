@@ -111,6 +111,7 @@ The grid can also help you inspect individual pixels. To do so:
 
 * Set **Magnify** to **Nearest**
 * Enable the grid
+* Set the grid cell mode to `Cell Size`
 * Set the grid size to `1`
 * Set the grid labels
 

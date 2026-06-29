@@ -129,8 +129,8 @@ namespace djv
                 context,
                 "Changes are applied to new files.",
                 vLayout2);
-            p.bellows["USD"]->setWidget(
-                ui::USDSettingsWidget::create(context, settingsModel));
+            ui::USDSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["USD"]->setWidget(vLayout2);
 #endif // TLRENDER_USD
 
             p.bellows["Advanced"] = ftk::Bellows::create(context, "Advanced", vLayout);

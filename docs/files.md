@@ -79,6 +79,27 @@ Shortcuts:
 * Next file: <kbd>Ctrl+Page Down</kbd>
 * Previous file: <kbd>Ctrl+Page Up</kbd>
 
+## FFmpeg plugin
+
+The FFmpeg plugin provides support for movie and audio files. Only a limited
+set of codecs is enabled in the open source packages, to enable additional
+codecs use the FFmpeg command described below, or build from source.
+
+![FFmpeg plugin]({{ '/assets/ffmpeg-plugin.svg' | relative_url }})
+
+Changes take effect on newly opened files; reload (<kbd>Ctrl+R</kbd>) to apply
+them to the current file.
+
+* **Software YUV conversion** - Convert YUV to RGB on the CPU instead of on the
+  GPU. Off by default: the decoded YUV frame is uploaded directly and converted
+  in the display shader, which is faster and avoids an extra frame copy. Enable
+  this to perform the conversion in software before display.
+* **Hardware decoding** - Decode video on the GPU (VideoToolbox on macOS,
+  Direct3D 11 on Windows) when the file is compatible. Off by default. Files
+  that are not compatible will automatically fall back to software decoding.
+* **Threads** - The number of threads used for decoding. The default, `0`, lets
+  FFmpeg choose automatically based on the system.
+
 ## FFmpeg command
 
 To support additional formats and codecs, you can configure DJV to use an
@@ -90,7 +111,11 @@ tool.
 
 ![FFmpeg command]({{ '/assets/ffmpeg-command.svg' | relative_url }})
 
-* **ffmpeg**, **ffprobe** - set the command location (click to show full path or click folder icon to open browser)
+Changes take effect on newly opened files; reload (<kbd>Ctrl+R</kbd>) to apply
+them to the current file.
+
+* **ffmpeg**, **ffprobe** - set the command location (click to show full path or
+click folder icon to open browser)
 
 ## Memory cache
 

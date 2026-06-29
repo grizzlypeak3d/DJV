@@ -1010,6 +1010,7 @@ namespace djv
             p.yuvToRGBCheckBox->setTooltip(
                 "Convert YUV to RGB on the CPU when reading. When disabled, YUV "
                 "frames are kept and converted on the GPU.");
+            ftk::setScreenshotTag(p.yuvToRGBCheckBox, "FFmpeg.YUVtoRGB");
 
             p.hwAccelCheckBox = ftk::CheckBox::create(context);
             p.hwAccelCheckBox->setHStretch(ftk::Stretch::Expanding);
@@ -1017,12 +1018,14 @@ namespace djv
                 "Use the GPU to decode video when possible. Falls back to software "
                 "decoding automatically when hardware decoding is unavailable for a "
                 "file. Takes effect the next time a file is opened.");
+            ftk::setScreenshotTag(p.hwAccelCheckBox, "FFmpeg.HardwareDecoding");
 
             p.threadsEdit = ftk::IntEdit::create(context);
             p.threadsEdit->setRange(0, 64);
             p.threadsEdit->setTooltip(
                 "Number of threads used for decoding. Set to 0 to choose the thread "
                 "count automatically.");
+            ftk::setScreenshotTag(p.threadsEdit, "FFmpeg.Threads");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -1120,10 +1123,10 @@ namespace djv
             p.settings = settings;
 
             p.ffmpegEdit = ftk::FileEdit::create(context);
-            ftk::setScreenshotTag(p.ffmpegEdit, "FFmpegCmd.FFmpegEdit");
+            ftk::setScreenshotTag(p.ffmpegEdit, "FFmpegCmd.FFmpeg");
 
             p.ffprobeEdit = ftk::FileEdit::create(context);
-            ftk::setScreenshotTag(p.ffprobeEdit, "FFmpegCmd.FFprobeEdit");
+            ftk::setScreenshotTag(p.ffprobeEdit, "FFmpegCmd.FFprobe");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
