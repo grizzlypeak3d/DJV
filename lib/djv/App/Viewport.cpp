@@ -496,13 +496,15 @@ namespace djv
 
             const auto& colorSample = p.colorSample->get();
             p.colorPickerSwatch->setColor(colorSample);
+            const auto& pick = p.pick->get();
             p.colorPickerLabel->setText(
-                ftk::Format("Color: {0} {1} {2} {3}, Pixel: {4}").
+                ftk::Format("Color: {0} {1} {2} {3}, Pixel: {4} {5}").
                 arg(colorSample.r, 2).
                 arg(colorSample.g, 2).
                 arg(colorSample.b, 2).
                 arg(colorSample.a, 2).
-                arg(p.pick->get()));
+                arg(pick.x, 4).
+                arg(pick.y, 4));
             ftk::setScreenshotTag(p.colorPickerLabel, "View.HUD.ColorPicker");
 
             p.cacheLabel->setText(
