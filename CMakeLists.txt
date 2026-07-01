@@ -45,7 +45,7 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter")
 endif()
 
 if(APPLE)
