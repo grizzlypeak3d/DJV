@@ -233,7 +233,7 @@ namespace djv
                 (i - p.displayScales.begin()) :
                 -1);
 
-            for (const auto i : value.fonts)
+            for (const auto& i : value.fonts)
             {
                 const auto j = std::find(p.fonts.begin(), p.fonts.end(), i.second);
                 p.fontComboBoxes[i.first]->setCurrentIndex(j != p.fonts.end() ? (j - p.fonts.begin()) : -1);

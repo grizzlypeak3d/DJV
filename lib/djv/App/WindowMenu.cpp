@@ -34,7 +34,7 @@ namespace djv
                 ftk::Size2I(1920, 1080),
                 ftk::Size2I(3840, 2160)
             };
-            for (const auto size : sizes)
+            for (const auto& size : sizes)
             {
                 auto action = ftk::Action::create(
                     ftk::Format("{0}x{1}").arg(size.w).arg(size.h),

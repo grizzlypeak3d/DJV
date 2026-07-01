@@ -963,7 +963,7 @@ namespace djv
 
         void to_json(nlohmann::json& json, const ShortcutsSettings& value)
         {
-            for (const auto shortcut : value.shortcuts)
+            for (const auto& shortcut : value.shortcuts)
             {
                 json["Shortcuts"].push_back(shortcut);
             }
