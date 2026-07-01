@@ -511,7 +511,8 @@ namespace djv
                     ftk::gl::OffscreenBufferOptions offscreenBufferOptions;
                     p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
                         p.exportData->info.size,
-                        ftk::gl::offscreenColorDefault);
+                        p.exportData->colorBuffer,
+                        offscreenBufferOptions);
 
                     // Create the progress dialog.
                     p.progressDialog = ftk::ProgressDialog::create(
