@@ -154,7 +154,7 @@ namespace djv
                 {
                     FTK_P();
                     auto settings = p.settings->getStyle();
-                    if (value >= 0 && value < p.displayScales.size())
+                    if (value >= 0 && value < static_cast<int>(p.displayScales.size()))
                     {
                         settings.displayScale = p.displayScales[value];
                     }
@@ -173,7 +173,7 @@ namespace djv
                     });
             }
 
-            for (int i = 0; i < p.fontFileEdits.size(); ++i)
+            for (int i = 0; i < static_cast<int>(p.fontFileEdits.size()); ++i)
             {
                 p.fontFileEdits[i]->setCallback(
                     [this, i](const ftk::Path& value)

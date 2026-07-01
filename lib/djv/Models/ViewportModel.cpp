@@ -190,7 +190,7 @@ namespace djv
             {
                 auto displayOptions = p.displayOptions->get();
                 displayOptions.aspectRatio =
-                    value.index >= 0 && value.index < value.options.size() ?
+                    value.index >= 0 && value.index < static_cast<int>(value.options.size()) ?
                     value.options[value.index] :
                     tl::AspectRatioOptions();
                 p.displayOptions->setIfChanged(displayOptions);

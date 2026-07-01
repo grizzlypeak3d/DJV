@@ -180,7 +180,7 @@ namespace djv
         void FileMenu::_aIndexUpdate(int value)
         {
             FTK_P();
-            for (int i = 0; i < p.currentActions.size(); ++i)
+            for (int i = 0; i < static_cast<int>(p.currentActions.size()); ++i)
             {
                 p.menus["Current"]->setChecked(p.currentActions[i], i == value);
             }

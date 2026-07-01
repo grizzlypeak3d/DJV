@@ -500,7 +500,7 @@ namespace djv
                 if (auto context = getContext())
                 {
                     int column = 0;
-                    for (int i = 0; i < p.groups.size(); ++i)
+                    for (int i = 0; i < static_cast<int>(p.groups.size()); ++i)
                     {
                         const auto& group = p.groups[i];
 
@@ -517,7 +517,7 @@ namespace djv
                         p.shortcutsLayout->setGridPos(groupLabel, column, 0);
                         ++column;
 
-                        for (int j = 0; j < group.shortcuts.size(); ++j)
+                        for (int j = 0; j < static_cast<int>(group.shortcuts.size()); ++j)
                         {
                             const auto& shortcut = group.shortcuts[j];
                             p.searchText[shortcut.name] = group.name + " " + shortcut.text;

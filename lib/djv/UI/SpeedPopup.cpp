@@ -79,7 +79,7 @@ namespace djv
                 {
                     if (auto widget = weak.lock())
                     {
-                        if (value && index >= 0 && index < widget->_p->speeds.size())
+                        if (value && index >= 0 && index < static_cast<int>(widget->_p->speeds.size()))
                         {
                             if (widget->_p->callback)
                             {

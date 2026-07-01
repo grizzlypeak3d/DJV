@@ -318,7 +318,7 @@ namespace djv
                 [this, viewportModel](int value)
                 {
                     FTK_P();
-                    if (value >= 0 && value < p.colorBuffers.size())
+                    if (value >= 0 && value < static_cast<int>(p.colorBuffers.size()))
                     {
                         viewportModel->setColorBuffer(p.colorBuffers[value]);
                     }
@@ -555,7 +555,7 @@ namespace djv
                 p.widgets.clear();
                 p.layout->clear();
                 auto context = getContext();
-                for (int i = 0; i < value.options.size(); ++i)
+                for (int i = 0; i < static_cast<int>(value.options.size()); ++i)
                 {
                     auto button = ftk::RadioButton::create(context, p.layout);
                     button->setText(0 == i ?
@@ -583,7 +583,7 @@ namespace djv
                             {
                                 FTK_P();
                                 auto options = p.viewportModel->getAspectRatioOptions();
-                                if (options.index >= 0 && options.index < options.options.size())
+                                if (options.index >= 0 && options.index < static_cast<int>(options.options.size()))
                                 {
                                     options.options[i] = value;
                                 }
@@ -593,7 +593,7 @@ namespace djv
                 }
             }
             p.buttonGroup->setChecked(value.index);
-            for (int i = 1; i < value.options.size(); ++i)
+            for (int i = 1; i < static_cast<int>(value.options.size()); ++i)
             {
                 p.widgets[i]->setValue(value.options[i]);
             }

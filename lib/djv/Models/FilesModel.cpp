@@ -159,7 +159,7 @@ namespace djv
         {
             FTK_P();
             auto files = p.files->get();
-            if (index >= 0 && index < files.size())
+            if (index >= 0 && index < static_cast<int>(files.size()))
             {
                 const int aPrevIndex = _getIndex(p.a->get());
 
@@ -222,7 +222,7 @@ namespace djv
         {
             FTK_P();
             const int prevIndex = _getIndex(p.a->get());
-            if (index >= 0 && index < p.files->getSize() && index != prevIndex)
+            if (index >= 0 && index < static_cast<int>(p.files->getSize()) && index != prevIndex)
             {
                 p.a->setIfChanged(p.files->getItem(index));
                 p.aIndex->setIfChanged(_getIndex(p.a->get()));
@@ -235,7 +235,7 @@ namespace djv
         void FilesModel::setB(int index, bool value)
         {
             FTK_P();
-            if (index >= 0 && index < p.files->getSize())
+            if (index >= 0 && index < static_cast<int>(p.files->getSize()))
             {
                 auto b = p.b->get();
                 const auto bIndexes = _getBIndexes();
@@ -275,7 +275,7 @@ namespace djv
         void FilesModel::toggleB(int index)
         {
             FTK_P();
-            if (index >= 0 && index < p.files->getSize())
+            if (index >= 0 && index < static_cast<int>(p.files->getSize()))
             {
                 const auto& item = p.files->getItem(index);
                 setB(index, p.b->indexOf(item) == ftk::ObservableListInvalidIndex);
@@ -408,7 +408,7 @@ namespace djv
                 index = 0;
             }
             p.b->clear();
-            if (index >= 0 && index < p.files->getSize())
+            if (index >= 0 && index < static_cast<int>(p.files->getSize()))
             {
                 p.b->pushBack(p.files->getItem(index));
             }
@@ -434,7 +434,7 @@ namespace djv
                 index = static_cast<int>(p.files->getSize()) - 1;
             }
             p.b->clear();
-            if (index >= 0 && index < p.files->getSize())
+            if (index >= 0 && index < static_cast<int>(p.files->getSize()))
             {
                 p.b->pushBack(p.files->getItem(index));
             }

@@ -104,7 +104,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        if (value >= 0 && value < _p->devices.size())
+                        if (value >= 0 && value < static_cast<int>(_p->devices.size()))
                         {
                             app->getAudioModel()->setDevice(
                                 0 == value ? tl::AudioDeviceID() : _p->devices[value]);

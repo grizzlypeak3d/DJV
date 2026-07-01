@@ -786,7 +786,7 @@ namespace djv
                     [this, mouseAction](int index)
                     {
                         FTK_P();
-                        if (index >= 0 && index < p.modifiers.size())
+                        if (index >= 0 && index < static_cast<int>(p.modifiers.size()))
                         {
                             auto settings = p.settings->getMouse();
                             settings.bindings[mouseAction].modifier = p.modifiers[index];

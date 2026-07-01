@@ -128,7 +128,7 @@ namespace djv
         void CompareMenu::_bUpdate(const std::vector<int>& value)
         {
             FTK_P();
-            for (int i = 0; i < p.bActions.size(); ++i)
+            for (int i = 0; i < static_cast<int>(p.bActions.size()); ++i)
             {
                 const auto j = std::find(value.begin(), value.end(), i);
                 p.menus["B"]->setChecked(
