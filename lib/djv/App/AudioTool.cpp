@@ -241,7 +241,7 @@ namespace djv
         void AudioTool::_widgetUpdate()
         {
             FTK_P();
-            if (p.channelMuteCheckBoxes.size() != p.info.channelCount)
+            if (static_cast<int>(p.channelMuteCheckBoxes.size()) != p.info.channelCount)
             {
                 for (const auto& checkBox : p.channelMuteCheckBoxes)
                 {
@@ -252,7 +252,7 @@ namespace djv
                 if (auto context = getContext())
                 {
                     std::vector<std::string> text;
-                    for (size_t i = 0; i < p.info.channelCount; ++i)
+                    for (int i = 0; i < p.info.channelCount; ++i)
                     {
                         text.push_back(ftk::Format("{0}").arg(1 + i));
                     }
@@ -261,7 +261,7 @@ namespace djv
                         text[0] = "L";
                         text[1] = "R";
                     }
-                    for (size_t i = 0; i < p.info.channelCount; ++i)
+                    for (int i = 0; i < p.info.channelCount; ++i)
                     {
                         auto checkBox = ftk::CheckBox::create(
                             context,

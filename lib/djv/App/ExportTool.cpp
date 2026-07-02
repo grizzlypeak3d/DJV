@@ -288,7 +288,7 @@ namespace djv
                 [this](int value)
                 {
                     FTK_P();
-                    if (value >= 0 && value < p.imageExts.size())
+                    if (value >= 0 && value < static_cast<int>(p.imageExts.size()))
                     {
                         auto options = p.settings->getExport();
                         options.imageExt = p.imageExts[value];
@@ -309,7 +309,7 @@ namespace djv
                 [this](int value)
                 {
                     FTK_P();
-                    if (value >= 0 && value < p.movieExts.size())
+                    if (value >= 0 && value < static_cast<int>(p.movieExts.size()))
                     {
                         auto options = p.settings->getExport();
                         options.movieExt = p.movieExts[value];
@@ -321,7 +321,7 @@ namespace djv
                 [this](int value)
                 {
                     FTK_P();
-                    if (value >= 0 && value < p.movieCodecs.size())
+                    if (value >= 0 && value < static_cast<int>(p.movieCodecs.size()))
                     {
                         auto options = p.settings->getExport();
                         options.movieCodec = p.movieCodecs[value];

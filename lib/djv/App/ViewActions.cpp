@@ -289,7 +289,7 @@ namespace djv
                     {
                         auto& action = _actions[ftk::Format("AspectRatio_{0}").arg(i)];
                         action->setText(getLabel(value.options[i]));
-                        action->setChecked(i == value.index);
+                        action->setChecked(static_cast<int>(i) == value.index);
                     }
                 });
 
