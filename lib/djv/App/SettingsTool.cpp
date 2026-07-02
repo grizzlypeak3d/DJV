@@ -174,7 +174,7 @@ namespace djv
 
             std::weak_ptr<App> appWeak(app);
             p.saveButton->setClickedCallback(
-                [this, appWeak]
+                [appWeak]
                 {
                     if (auto app = appWeak.lock())
                     {

@@ -136,7 +136,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         std::vector<bool> channelMute = _p->channelMute;
-                        if (index >= channelMute.size())
+                        if (index >= static_cast<int>(channelMute.size()))
                         {
                             channelMute.resize(index + 1);
                         }

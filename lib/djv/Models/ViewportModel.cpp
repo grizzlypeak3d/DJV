@@ -167,7 +167,7 @@ namespace djv
             tl::DisplayOptions tmp = value;
             tmp.aspectRatio =
                 aspectRatioOptions.index >= 0 &&
-                aspectRatioOptions.index < aspectRatioOptions.options.size() ?
+                aspectRatioOptions.index < static_cast<int>(aspectRatioOptions.options.size()) ?
                 aspectRatioOptions.options[aspectRatioOptions.index] :
                 tl::AspectRatioOptions();
             p.displayOptions->setIfChanged(tmp);

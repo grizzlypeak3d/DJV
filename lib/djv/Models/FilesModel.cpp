@@ -331,7 +331,7 @@ namespace djv
             {
                 const int prevIndex = _getIndex(p.a->get());
                 int index = prevIndex + 1;
-                if (index >= p.files->getSize())
+                if (index >= static_cast<int>(p.files->getSize()))
                 {
                     index = 0;
                 }
@@ -403,7 +403,7 @@ namespace djv
                 index = bIndexes[bIndexes.size() - 1];
                 ++index;
             }
-            if (index >= p.files->getSize())
+            if (index >= static_cast<int>(p.files->getSize()))
             {
                 index = 0;
             }
@@ -473,7 +473,7 @@ namespace djv
             {
                 auto item = p.files->getItem(index);
                 int layer = item->videoLayer + 1;
-                if (layer >= item->videoLayers.size())
+                if (layer >= static_cast<int>(item->videoLayers.size()))
                 {
                     layer = 0;
                 }

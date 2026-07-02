@@ -71,7 +71,7 @@ namespace djv
 
             auto appWeak = std::weak_ptr<App>(app);
             p.closeButton->setClickedCallback(
-                [appWeak, tool]
+                [appWeak]
                 {
                     if (auto app = appWeak.lock())
                     {

@@ -756,7 +756,7 @@ namespace djv
                                 player->forward();
                             }
                             ++p.debugInput;
-                            if (p.debugInput >= p.cmdLine.inputs->getList().size())
+                            if (p.debugInput >= static_cast<int>(p.cmdLine.inputs->getList().size()))
                             {
                                 p.debugInput = 0;
                             }
