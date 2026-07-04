@@ -359,7 +359,7 @@ namespace djv
                 {
                     setBufferType(ftk::gl::TextureType::RGBA_U8 == value ?
                         ftk::WindowBufferType::U8 :
-                        ftk::WindowBufferType::F32);
+                        ftk::WindowBufferType::F16);
                 });
 
             p.activeToolObserver = ftk::Observer<models::Tool>::create(
