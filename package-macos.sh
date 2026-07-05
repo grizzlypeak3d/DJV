@@ -2,7 +2,8 @@
 
 set -x
 
-SOURCE_DIR=$1
+SOURCE_DIR=${1:-DJV}
+BUILD_TYPE=${2:-Release}
 
 export JOBS=4
 export TLRENDER_NET=OFF
@@ -24,5 +25,5 @@ export FTK_API=GL_4_1
 export CMAKE_OSX_DEPLOYMENT_TARGET=10.15
 export CMAKE_OSX_ARCHITECTURES=arm64
 
-sh $SOURCE_DIR/etc/macOS/sbuild.sh $SOURCE_DIR Release
-cmake --build build-Release --config Release --target package
+sh $SOURCE_DIR/etc/macOS/sbuild.sh $SOURCE_DIR $BUILD_TYPE
+cmake --build build-$BUILD_TYPE --config $BUILD_TYPE --target package

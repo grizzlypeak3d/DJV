@@ -2,11 +2,8 @@
 
 set -x
 
-SOURCE_DIR=$1
-BUILD_TYPE=Release
-if [ "$#" -eq 2 ]; then
-    BUILD_TYPE=$2
-fi
+SOURCE_DIR=${1:-DJV}
+BUILD_TYPE=${2:-Release}
 
 export JOBS=4
 export TLRENDER_NET=OFF

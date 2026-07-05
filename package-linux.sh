@@ -2,7 +2,8 @@
 
 set -x
 
-SOURCE_DIR=$1
+SOURCE_DIR=${1:-DJV}
+BUILD_TYPE=${2:-Release}
 
 export JOBS=4
 export TLRENDER_NET=OFF
@@ -22,5 +23,5 @@ export TLRENDER_USD=OFF
 export TLRENDER_PYTHON=OFF
 export FTK_API=GL_4_1
 
-sh $SOURCE_DIR/etc/Linux/sbuild.sh $SOURCE_DIR Release
-cmake --build build-Release --config Release --target package
+sh $SOURCE_DIR/etc/Linux/sbuild.sh $SOURCE_DIR $BUILD_TYPE
+cmake --build build-$BUILD_TYPE --config $BUILD_TYPE --target package
