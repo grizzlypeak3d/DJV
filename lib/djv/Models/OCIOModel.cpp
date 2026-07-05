@@ -160,7 +160,7 @@ namespace djv
         {
             FTK_P();
             auto data = p.data->get();
-            if (value >= 0 && value < data.inputs.size())
+            if (value < data.inputs.size())
             {
                 auto options = p.options->get();
                 options.enabled = true;
@@ -186,7 +186,7 @@ namespace djv
         {
             FTK_P();
             auto data = p.data->get();
-            if (value >= 0 && value < data.displays.size())
+            if (value < data.displays.size())
             {
                 auto options = p.options->get();
                 options.enabled = true;
@@ -208,7 +208,7 @@ namespace djv
         {
             FTK_P();
             auto data = p.data->get();
-            if (value >= 0 && value < data.views.size())
+            if (value < data.views.size())
             {
                 auto options = p.options->get();
                 options.enabled = true;
@@ -226,7 +226,7 @@ namespace djv
         {
             FTK_P();
             const auto& looks = p.data->get().looks;
-            if (value >= 0 && value < looks.size())
+            if (value < looks.size())
             {
                 auto options = p.options->get();
                 options.enabled = true;
