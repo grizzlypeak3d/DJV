@@ -6,6 +6,7 @@ SOURCE_DIR=${1:-DJV}
 BUILD_TYPE=${2:-Release}
 
 export JOBS=4
+export DJV_TESTS=OFF
 export TLRENDER_NET=OFF
 export TLRENDER_OCIO=ON
 export TLRENDER_JPEG=ON

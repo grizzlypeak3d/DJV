@@ -26,7 +26,7 @@ project(
 
 set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
 set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
-set(DJV_TESTS ON CACHE BOOL "Build tests")
+set(DJV_TESTS OFF CACHE BOOL "Build tests")
 set(DJV_SANITIZE "" CACHE STRING "Enable sanitizers (comma-separated, e.g. address,undefined)")
 
 #-------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
 endif()
 
-if(TLRENDER_TESTS)
+if(DJV_TESTS)
     set(CTEST_OUTPUT_ON_FAILURE ON)
     enable_testing()
 endif()
@@ -95,6 +95,11 @@ endif()
 
 #-------------------------------------------------------------------------------
 # Sub-directories
+
+# Match the embedded dependencies' test building to this project's, so a normal
+# application build does not compile their test suites.
+set(ftk_TESTS ${DJV_TESTS})
+set(TLRENDER_TESTS ${DJV_TESTS})
 
 add_subdirectory(deps/tlRender)
 add_library(tlRender::tlCore ALIAS tlCore)

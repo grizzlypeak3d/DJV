@@ -49,6 +49,7 @@ cmake --build tl-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
 cmake \
     -S $SOURCE_DIR \
     -B build-$BUILD_TYPE \
+    -DDJV_TESTS=$DJV_TESTS \
     -DDJV_MACOS_PACKAGE=OFF \
     -DDJV_MACOS_TEAM_ID=$DJV_MACOS_TEAM_ID \
     -DTLRENDER_NET=$TLRENDER_NET \
@@ -72,3 +73,7 @@ cmake \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=$CMAKE_OSX_DEPLOYMENT_TARGET \
     -DCMAKE_OSX_ARCHITECTURES=$CMAKE_OSX_ARCHITECTURES
 cmake --build build-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
+
+if [ "$DJV_TESTS" = "ON" ]; then
+    (cd build-$BUILD_TYPE && ctest --output-on-failure -C $BUILD_TYPE)
+fi

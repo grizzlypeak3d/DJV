@@ -45,6 +45,7 @@ cmake --build tl-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
 cmake \
     -S $SOURCE_DIR \
     -B build-$BUILD_TYPE \
+    -DDJV_TESTS=$DJV_TESTS \
     -DTLRENDER_NET=$TLRENDER_NET \
     -DTLRENDER_OCIO=$TLRENDER_OCIO \
     -DTLRENDER_EXR=$TLRENDER_EXR \
@@ -64,3 +65,7 @@ cmake \
     -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE \
     -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE
 cmake --build build-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
+
+if [ "$DJV_TESTS" = "ON" ]; then
+    (cd build-$BUILD_TYPE && ctest --output-on-failure -C $BUILD_TYPE)
+fi
