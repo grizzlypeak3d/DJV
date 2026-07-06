@@ -1,42 +1,41 @@
 #!/bin/sh
 
-# Build feather-tk with sanitizers and run its test suite.
+# Build the whole DJV stack (DJV + tlRender + feather-tk, all from source) with
+# sanitizers and run the test suites.
 #
 # Prerequisites:
-#   Run a normal super-build first so the dependencies are installed, e.g.
+#   Run a normal super-build first so the deps are installed, e.g.
 #       sh sbuild-macos.sh DJV Release
-#   This script reuses those installed deps and only rebuilds feather-tk itself
-#   with instrumentation.
+#   This reuses those deps (install-Release) and rebuilds only our code with
+#   instrumentation, so it is faster than a full rebuild.
 #
 # Usage:
-#   sh sanitize.sh <SOURCE_DIR> [PREFIX] [SANITIZERS]
-#     SOURCE_DIR   DJV source root
+#   sh sanitize.sh [SOURCE_DIR] [PREFIX] [SANITIZERS]
+#     SOURCE_DIR   DJV source root    (default: DJV)
 #     PREFIX       Deps install dir   (default: $PWD/install-Release)
 #     SANITIZERS   Sanitizer list     (default: address,undefined)
 
 set -x
 
-SOURCE_DIR=$1
+SOURCE_DIR=${1:-DJV}
 PREFIX=${2:-$PWD/install-Release}
 SANITIZERS=${3:-address,undefined}
-
-FTK_SRC="$SOURCE_DIR/deps/tlRender/deps/ftk"
-BUILD_DIR="sanitize-build"
+BUILD_DIR=sanitize-build
 JOBS=${JOBS:-4}
 
-if [ -z "$SOURCE_DIR" ]; then
-    echo "Usage: sh sanitize.sh <SOURCE_DIR> [PREFIX] [SANITIZERS]"
-    exit 1
-fi
-
-# Configure feather-tk with the sanitizer flags. RelWithDebInfo keeps symbols
-# so reports show file:line; examples are skipped to keep the build quick.
+# Configure the whole stack with the sanitizer. DJV_SANITIZE propagates to the
+# tlRender and ftk subdirectories via CMAKE_CXX_FLAGS. RelWithDebInfo keeps
+# symbols so reports show file:line; examples/programs are skipped to keep the
+# build quicker (the tests are what we run).
 cmake \
-    -S "$FTK_SRC" \
+    -S "$SOURCE_DIR" \
     -B "$BUILD_DIR" \
-    -Dftk_SANITIZE="$SANITIZERS" \
+    -DDJV_SANITIZE="$SANITIZERS" \
     -Dftk_TESTS=ON \
     -Dftk_EXAMPLES=OFF \
+    -DTLRENDER_TESTS=ON \
+    -DTLRENDER_EXAMPLES=OFF \
+    -DTLRENDER_PROGRAMS=OFF \
     -DBUILD_SHARED_LIBS=OFF \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DCMAKE_PREFIX_PATH="$PREFIX" \
@@ -44,18 +43,18 @@ cmake \
 
 cmake --build "$BUILD_DIR" -j "$JOBS" || exit 1
 
-# Run the tests under the sanitizers.
+# Run the test suites under the sanitizers.
 #   halt_on_error=0  -> report every finding rather than stopping at the first
-#   detect_leaks     -> LeakSanitizer is Linux-only; off on macOS so it doesn't
-#                       error out. Run on Linux to also catch leaks.
+#   detect_leaks     -> LeakSanitizer is Linux-only; off on macOS
 #   print_stacktrace -> give UndefinedBehaviorSanitizer a stack per report
+# DJV enables testing at the top level, so ctest from the build root runs every
+# registered test (DJV + tlRender + feather-tk).
 LEAKS=0
 if [ "$(uname)" = "Linux" ]; then
     LEAKS=1
 fi
 
-cd "$BUILD_DIR" || exit 1
-UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=0" \
-ASAN_OPTIONS="halt_on_error=0:detect_leaks=$LEAKS" \
-ctest --output-on-failure
-cd - >/dev/null 2>&1
+( cd "$BUILD_DIR" && \
+  UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1" \
+  ASAN_OPTIONS="halt_on_error=1:detect_leaks=$LEAKS:detect_container_overflow=0" \
+  ctest --output-on-failure )
