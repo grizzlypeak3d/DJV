@@ -4,6 +4,6 @@ add_subdirectory(Models)
 add_subdirectory(Resource)
 add_subdirectory(UI)
 
-if(TLRENDER_TESTS)
+if(DJV_TESTS)
     add_subdirectory(ModelsTest)
 endif()
