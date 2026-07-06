@@ -1,11 +1,19 @@
 set(HEADERS
     AudioModelTest.h
+    FilesModelTest.h
     ModelsTestUtil.h
-    TimeUnitsModelTest.h)
+    RecentFilesModelTest.h
+    TimeUnitsModelTest.h
+    ToolsModelTest.h
+    ViewportModelTest.h)
 
 set(SOURCE
     AudioModelTest.cpp
-    TimeUnitsModelTest.cpp)
+    FilesModelTest.cpp
+    RecentFilesModelTest.cpp
+    TimeUnitsModelTest.cpp
+    ToolsModelTest.cpp
+    ViewportModelTest.cpp)
 
 add_library(djvModelsTest ${SOURCE} ${HEADERS})
 

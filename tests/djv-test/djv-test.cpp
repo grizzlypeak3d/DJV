@@ -4,7 +4,11 @@
 #include "djv-test.h"
 
 #include <djv/ModelsTest/AudioModelTest.h>
+#include <djv/ModelsTest/FilesModelTest.h>
+#include <djv/ModelsTest/RecentFilesModelTest.h>
 #include <djv/ModelsTest/TimeUnitsModelTest.h>
+#include <djv/ModelsTest/ToolsModelTest.h>
+#include <djv/ModelsTest/ViewportModelTest.h>
 
 #include <tlRender/Timeline/Init.h>
 
@@ -50,7 +54,11 @@ namespace djv
 
             // Models tests.
             p.tests.push_back(models_tests::AudioModelTest::create(context));
+            p.tests.push_back(models_tests::FilesModelTest::create(context));
+            p.tests.push_back(models_tests::RecentFilesModelTest::create(context));
             p.tests.push_back(models_tests::TimeUnitsModelTest::create(context));
+            p.tests.push_back(models_tests::ToolsModelTest::create(context));
+            p.tests.push_back(models_tests::ViewportModelTest::create(context));
         }
 
         App::App() :
