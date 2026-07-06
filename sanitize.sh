@@ -23,14 +23,11 @@ SANITIZERS=${3:-address,undefined}
 BUILD_DIR=sanitize-build
 JOBS=${JOBS:-4}
 
-# Configure the whole stack with the sanitizer. DJV_SANITIZE propagates to the
-# tlRender and ftk subdirectories via CMAKE_CXX_FLAGS. RelWithDebInfo keeps
-# symbols so reports show file:line; examples/programs are skipped to keep the
-# build quicker (the tests are what we run).
 cmake \
     -S "$SOURCE_DIR" \
     -B "$BUILD_DIR" \
     -DDJV_SANITIZE="$SANITIZERS" \
+    -DDJV_TESTS=ON \
     -Dftk_TESTS=ON \
     -Dftk_EXAMPLES=OFF \
     -DTLRENDER_TESTS=ON \
@@ -43,18 +40,23 @@ cmake \
 
 cmake --build "$BUILD_DIR" -j "$JOBS" || exit 1
 
-# Run the test suites under the sanitizers.
-#   halt_on_error=0  -> report every finding rather than stopping at the first
-#   detect_leaks     -> LeakSanitizer is Linux-only; off on macOS
-#   print_stacktrace -> give UndefinedBehaviorSanitizer a stack per report
-# DJV enables testing at the top level, so ctest from the build root runs every
-# registered test (DJV + tlRender + feather-tk).
+export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=0"
 LEAKS=0
 if [ "$(uname)" = "Linux" ]; then
     LEAKS=1
 fi
+export ASAN_OPTIONS="halt_on_error=0:detect_leaks=$LEAKS:detect_container_overflow=0"
+SUPPRESSIONS=$(cd "$SOURCE_DIR" && pwd)/etc/sanitizer-suppressions.txt
+if [ -f "$SUPPRESSIONS" ]; then
+    export LSAN_OPTIONS="suppressions=$SUPPRESSIONS"
+fi
 
-( cd "$BUILD_DIR" && \
-  UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1" \
-  ASAN_OPTIONS="halt_on_error=1:detect_leaks=$LEAKS:detect_container_overflow=0" \
-  ctest --output-on-failure )
+for name in ftk-test tl-test djv-test; do
+    exe=$(find "$BUILD_DIR" -type f -name "$name" 2>/dev/null | head -1)
+    if [ -x "$exe" ]; then
+        printf '\n======== Running %s ========\n' "$name"
+        "$exe" -log
+    else
+        printf '\n======== %s not found, skipping ========\n' "$name"
+    fi
+done

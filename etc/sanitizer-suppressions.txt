@@ -1,0 +1,7 @@
+# Sanitizer leak suppressions for occasional local runs (sanitize.sh).
+
+# SDL2 makes one-time internal allocations (subsystem / global state) that it
+# does not free before exit. LeakSanitizer reports these on every run.
+leak:SDL_calloc
+leak:SDL_malloc
+leak:SDL_realloc
