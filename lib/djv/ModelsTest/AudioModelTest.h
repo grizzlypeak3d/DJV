@@ -9,13 +9,14 @@ namespace djv
 {
     namespace models_tests
     {
-        class TimeUnitsModelTest : public ftk::test::ITest
+        class AudioModelTest : public ftk::test::ITest
         {
         protected:
-            TimeUnitsModelTest(const std::shared_ptr<ftk::Context>&);
+            AudioModelTest(const std::shared_ptr<ftk::Context>&);
 
         public:
-            static std::shared_ptr<TimeUnitsModelTest> create(const std::shared_ptr<ftk::Context>&);
+            static std::shared_ptr<AudioModelTest> create(
+                const std::shared_ptr<ftk::Context>&);
 
             void run() override;
 

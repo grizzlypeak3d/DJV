@@ -1,7 +1,10 @@
 set(HEADERS
+    AudioModelTest.h
+    ModelsTestUtil.h
     TimeUnitsModelTest.h)
 
 set(SOURCE
+    AudioModelTest.cpp
     TimeUnitsModelTest.cpp)
 
 add_library(djvModelsTest ${SOURCE} ${HEADERS})

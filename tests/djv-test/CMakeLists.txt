@@ -1,4 +1,4 @@
-add_executable(djv-test main.cpp)
+add_executable(djv-test djv-test.h djv-test.cpp)
 
 target_include_directories(djv-test
     PUBLIC
@@ -7,8 +7,11 @@ target_include_directories(djv-test
         $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(djv-test
-    djvModelsTest)
+    djvModelsTest
+    tlUI)
 
 set_target_properties(djv-test PROPERTIES FOLDER tests)
 
-add_test(djv-test ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/djv-test${CMAKE_EXECUTABLE_SUFFIX})
+add_test(
+    NAME djv-test
+    COMMAND djv-test -log)
