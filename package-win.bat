@@ -17,7 +17,12 @@ set TLRENDER_NASM=OFF
 set TLRENDER_OIIO=ON
 set TLRENDER_USD=OFF
 set TLRENDER_PYTHON=OFF
+set TLRENDER_PROGRAMS=OFF
+set TLRENDER_EXAMPLES=OFF
+set TLRENDER_TESTS=OFF
 set FTK_API=GL_4_1
+set FTK_EXAMPLES=OFF
+set FTK_TESTS=OFF
 
 call %SOURCE_DIR%\etc\Windows\sbuild.bat %SOURCE_DIR% Release
 cmake --build build-Release --config Release --target package

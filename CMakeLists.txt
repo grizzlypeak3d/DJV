@@ -26,6 +26,8 @@ project(
 
 set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
 set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
+set(DJV_PROGRAMS ON CACHE BOOL "Build programs")
+set(DJV_EXAMPLES OFF CACHE BOOL "Build examples")
 set(DJV_TESTS OFF CACHE BOOL "Build tests")
 set(DJV_SANITIZE "" CACHE STRING "Enable sanitizers (comma-separated, e.g. address,undefined)")
 
@@ -95,11 +97,6 @@ endif()
 
 #-------------------------------------------------------------------------------
 # Sub-directories
-
-# Match the embedded dependencies' test building to this project's, so a normal
-# application build does not compile their test suites.
-set(ftk_TESTS ${DJV_TESTS})
-set(TLRENDER_TESTS ${DJV_TESTS})
 
 add_subdirectory(deps/tlRender)
 add_library(tlRender::tlCore ALIAS tlCore)
