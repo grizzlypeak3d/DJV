@@ -5,3 +5,11 @@
 leak:SDL_calloc
 leak:SDL_malloc
 leak:SDL_realloc
+
+# OpenImageIO caches per-thread error strings and other internal state that is
+# not released before exit.
+leak:OpenImageIO
+
+# OpenTimelineIO registers its serializable types in a global registry at
+# startup that lives for the lifetime of the process.
+leak:opentimelineio
