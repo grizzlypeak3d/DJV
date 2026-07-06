@@ -54,6 +54,11 @@ jobs:
       run: |
         sh djv/etc/Linux/sbuild.sh djv Debug
 
+    - name: Run tests
+      run: |
+        cd build-Debug
+        xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
+
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
   linux-gles2-build:
     runs-on: ubuntu-latest
@@ -106,6 +111,11 @@ jobs:
     - name: Build
       run: |
         sh djv/etc/Linux/sbuild.sh djv Debug
+
+    - name: Run tests
+      run: |
+        cd build-Debug
+        xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
 
   linux-package:
     runs-on: ubuntu-22.04
