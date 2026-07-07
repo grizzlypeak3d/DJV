@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # Build the whole DJV stack (DJV + tlRender + feather-tk, all from source) with
-# sanitizers and run the test suites.
+# sanitizers, run the test suites, and generate the documentation screenshots
+# (which drives the application UI through many states for extra coverage).
 #
 # Prerequisites:
 #   Run a normal super-build first so the deps are installed, e.g.
@@ -60,3 +61,20 @@ for name in ftk-test tl-test djv-test; do
         printf '\n======== %s not found, skipping ========\n' "$name"
     fi
 done
+
+# Exercise the application UI by generating the documentation screenshots under
+# the sanitizer. Each shot is a separate djv process that sets up a distinct UI
+# state (files, tools, compare modes, ...), renders offscreen, and exits, so
+# LeakSanitizer gets a clean check across many configurations. This needs a GL
+# context, so run it on a workstation with a display.
+djv=$(find "$BUILD_DIR" -type f -name djv -perm -u+x 2>/dev/null | head -1)
+manifest="$SOURCE_DIR/etc/Screenshots/screenshots.json"
+driver="$SOURCE_DIR/etc/Screenshots/build_screenshots.py"
+if [ -x "$djv" ] && [ -f "$driver" ]; then
+    printf '\n======== Running documentation screenshots ========\n'
+    shots=$(mktemp -d)
+    python3 "$driver" "$manifest" --djv "$djv" --shots-dir "$shots"
+    rm -rf "$shots"
+else
+    printf '\n======== djv or screenshot driver not found, skipping ========\n'
+fi
