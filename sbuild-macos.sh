@@ -1,5 +1,6 @@
 #!/bin/sh
 
+set -e
 set -x
 
 SOURCE_DIR=${1:-DJV}

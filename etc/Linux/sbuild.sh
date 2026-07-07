@@ -70,7 +70,3 @@ cmake \
     -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE \
     -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE
 cmake --build build-$BUILD_TYPE -j $JOBS --config $BUILD_TYPE
-
-if [ "$DJV_TESTS" = "ON" ]; then
-    (cd build-$BUILD_TYPE && ctest --output-on-failure -C $BUILD_TYPE)
-fi

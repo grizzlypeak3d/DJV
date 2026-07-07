@@ -1,5 +1,6 @@
 #!/bin/sh
 
+set -e
 set -x
 
 SOURCE_DIR=${1:-DJV}
@@ -28,6 +29,7 @@ export TLRENDER_TESTS=OFF
 export FTK_API=GL_4_1
 export FTK_EXAMPLES=OFF
 export FTK_TESTS=OFF
+export BUILD_SHARED_LIBS=OFF
 
 sh $SOURCE_DIR/etc/Linux/sbuild.sh $SOURCE_DIR $BUILD_TYPE
 cmake --build build-$BUILD_TYPE --config $BUILD_TYPE --target package

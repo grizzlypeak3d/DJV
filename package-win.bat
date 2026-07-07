@@ -23,6 +23,7 @@ set TLRENDER_TESTS=OFF
 set FTK_API=GL_4_1
 set FTK_EXAMPLES=OFF
 set FTK_TESTS=OFF
+set BUILD_SHARED_LIBS=OFF
 
 call %SOURCE_DIR%\etc\Windows\sbuild.bat %SOURCE_DIR% Release
 cmake --build build-Release --config Release --target package
