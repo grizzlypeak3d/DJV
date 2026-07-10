@@ -45,7 +45,7 @@ namespace djv
 
             ///@}
 
-            //! \name Licens
+            //! \name License
             ///@{
 
             virtual std::string getLicense() const;

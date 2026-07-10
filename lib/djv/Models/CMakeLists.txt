@@ -33,7 +33,14 @@ if(TLRENDER_BMD)
 endif()
 
 add_library(djvModels ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+
+target_include_directories(djvModels
+    PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib>
+        $<INSTALL_INTERFACE:include>)
+
 target_link_libraries(djvModels djvResource tlRender::tlTimeline tlRender::tlDevice)
+
 set_target_properties(djvModels PROPERTIES FOLDER lib)
 set_target_properties(djvModels PROPERTIES PUBLIC_HEADER "${HEADERS}")
 

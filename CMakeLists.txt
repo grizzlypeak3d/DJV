@@ -27,7 +27,6 @@ project(
 set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
 set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
 set(DJV_PROGRAMS ON CACHE BOOL "Build programs")
-set(DJV_EXAMPLES OFF CACHE BOOL "Build examples")
 set(DJV_TESTS OFF CACHE BOOL "Build tests")
 set(DJV_SANITIZE "" CACHE STRING "Enable sanitizers (comma-separated, e.g. address,undefined)")
 
@@ -74,8 +73,6 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-include_directories(${CMAKE_SOURCE_DIR}/lib)
-
 #-------------------------------------------------------------------------------
 # Dependencies
 
@@ -107,7 +104,9 @@ add_library(tlRender::tlTimeline ALIAS tlTimeline)
 add_library(tlRender::tlUI ALIAS tlUI)
 
 add_subdirectory(lib/djv)
-add_subdirectory(bin)
+if(DJV_PROGRAMS)
+    add_subdirectory(bin)
+endif()
 if(DJV_TESTS)
     add_subdirectory(tests)
 endif()
