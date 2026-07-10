@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <djv/Core/Shortcuts.h>
+#include <djv/Models/Shortcuts.h>
 
 #include <tlRender/UI/IItem.h>
 #include <tlRender/UI/ThumbnailSystem.h>

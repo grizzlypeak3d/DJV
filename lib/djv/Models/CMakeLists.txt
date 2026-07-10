@@ -6,8 +6,10 @@ set(HEADERS
     OCIOModel.h
     RecentFilesModel.h
     SettingsModel.h
+    Shortcuts.h
     TimeUnitsModel.h
     ToolsModel.h
+    Version.h
     ViewportModel.h)
 if(TLRENDER_BMD)
     list(APPEND HEADERS BMDDevicesModel.h)
@@ -22,6 +24,7 @@ set(SOURCE
     OCIOModel.cpp
     RecentFilesModel.cpp
     SettingsModel.cpp
+    Shortcuts.cpp
     TimeUnitsModel.cpp
     ToolsModel.cpp
     ViewportModel.cpp)
@@ -30,7 +33,7 @@ if(TLRENDER_BMD)
 endif()
 
 add_library(djvModels ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
-target_link_libraries(djvModels djvCore tlRender::tlTimeline tlRender::tlDevice)
+target_link_libraries(djvModels djvResource tlRender::tlTimeline tlRender::tlDevice)
 set_target_properties(djvModels PROPERTIES FOLDER lib)
 set_target_properties(djvModels PROPERTIES PUBLIC_HEADER "${HEADERS}")
 

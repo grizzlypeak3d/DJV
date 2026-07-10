@@ -16,7 +16,6 @@ cmake --build ftk-%BUILD_TYPE% -j %JOBS% --config %BUILD_TYPE%
 cmake ^
     -S %SOURCE_DIR%\deps\tlRender\etc\SuperBuild ^
     -B tl-%BUILD_TYPE% ^
-    -DDJV_TESTS=%DJV_TESTS% ^
     -DTLRENDER_NET=%TLRENDER_NET% ^
     -DTLRENDER_OCIO=%TLRENDER_OCIO% ^
     -DTLRENDER_JPEG=%TLRENDER_JPEG% ^
@@ -42,7 +41,7 @@ cmake --build tl-%BUILD_TYPE% -j %JOBS% --config %BUILD_TYPE%
 cmake ^
     -S %SOURCE_DIR% ^
     -B build-%BUILD_TYPE% ^
-    -DDJV_WINDOWS_PACKAGE=OFF ^
+    -DDJV_TESTS=%DJV_TESTS% ^
     -DTLRENDER_NET=%TLRENDER_NET% ^
     -DTLRENDER_OCIO=%TLRENDER_OCIO% ^
     -DTLRENDER_EXR=%TLRENDER_EXR% ^

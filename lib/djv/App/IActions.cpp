@@ -53,7 +53,7 @@ namespace djv
                 const auto j = std::find_if(
                     value.shortcuts.begin(),
                     value.shortcuts.end(),
-                    [name](const Shortcut& value)
+                    [name](const models::Shortcut& value)
                     {
                         return name == value.name;
                     });

@@ -3,7 +3,7 @@
 
 #include <djv/Models/AppInfoModel.h>
 
-#include <djv/Core/Version.h>
+#include <djv/Models/Version.h>
 
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>

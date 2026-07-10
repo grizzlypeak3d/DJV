@@ -15,11 +15,11 @@
 #include <djv/Models/RecentFilesModel.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ToolsModel.h>
+#include <djv/Models/Version.h>
 #include <djv/Models/ViewportModel.h>
 #if defined(TLRENDER_BMD)
 #include <djv/Models/BMDDevicesModel.h>
 #endif // TLRENDER_BMD
-#include <djv/Core/Version.h>
 
 #include <tlRender/UI/ThumbnailSystem.h>
 #include <tlRender/Timeline/ColorOptions.h>
@@ -46,7 +46,6 @@
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
 #include <ftk/Core/Timer.h>
-#include <djv/Core/Version.h>
 
 #include <filesystem>
 

@@ -353,7 +353,7 @@ namespace djv
             struct Group
             {
                 std::string name;
-                std::vector<Shortcut> shortcuts;
+                std::vector<models::Shortcut> shortcuts;
 
                 bool operator == (const Group& other) const
                 {
@@ -541,7 +541,7 @@ namespace djv
                                     const auto i = std::find_if(
                                         settings.shortcuts.begin(),
                                         settings.shortcuts.end(),
-                                        [shortcut](const Shortcut& other)
+                                        [shortcut](const models::Shortcut& other)
                                         {
                                             return shortcut.name == other.name;
                                         });
@@ -569,7 +569,7 @@ namespace djv
                                     const auto i = std::find_if(
                                         settings.shortcuts.begin(),
                                         settings.shortcuts.end(),
-                                        [shortcut](const Shortcut& other)
+                                        [shortcut](const models::Shortcut& other)
                                         {
                                             return shortcut.name == other.name;
                                         });
@@ -599,7 +599,7 @@ namespace djv
                     auto j = std::find_if(
                         settings.shortcuts.begin(),
                         settings.shortcuts.end(),
-                        [shortcut](const Shortcut& value)
+                        [shortcut](const models::Shortcut& value)
                         {
                             return shortcut.name == value.name;
                         });
@@ -619,7 +619,7 @@ namespace djv
                     j = std::find_if(
                         settings.shortcuts.begin(),
                         settings.shortcuts.end(),
-                        [shortcut](const Shortcut& value)
+                        [shortcut](const models::Shortcut& value)
                         {
                             return shortcut.name == value.name;
                         });

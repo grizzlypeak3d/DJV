@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.31)
 cmake_policy(SET CMP0048 NEW)
 cmake_policy(SET CMP0091 NEW)
 
-file(READ "lib/djv/Core/Version.h" VERSION_H)
+file(READ "lib/djv/Models/Version.h" VERSION_H)
 string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${VERSION_H})
 set(DJV_VERSION_MAJOR ${CMAKE_MATCH_1})
 string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${VERSION_H})
