@@ -42,23 +42,23 @@ namespace djv
 
             // Observe the active tool. With ObserverAction::Trigger (the default)
             // the callback fires immediately with the current value.
-            models::Tool tool = models::Tool::Files;
-            auto observer = ftk::Observer<models::Tool>::create(
+            std::string tool = "Files";
+            auto observer = ftk::Observer<std::string>::create(
                 model->observeActiveTool(),
-                [&tool](const models::Tool& value) { tool = value; });
+                [&tool](const std::string& value) { tool = value; });
 
             // The default (with empty settings) is None.
-            FTK_ASSERT(models::Tool::None == model->getActiveTool());
-            FTK_ASSERT(models::Tool::None == tool);
+            FTK_ASSERT(model->getActiveTool().empty());
+            FTK_ASSERT(tool.empty());
 
             // Set the active tool; the observer should see each change.
-            model->setActiveTool(models::Tool::Files);
-            FTK_ASSERT(models::Tool::Files == model->getActiveTool());
-            FTK_ASSERT(models::Tool::Files == tool);
+            model->setActiveTool("Files");
+            FTK_ASSERT("Files" == model->getActiveTool());
+            FTK_ASSERT("Files" == tool);
 
-            model->setActiveTool(models::Tool::Color);
-            FTK_ASSERT(models::Tool::Color == model->getActiveTool());
-            FTK_ASSERT(models::Tool::Color == tool);
+            model->setActiveTool("Color");
+            FTK_ASSERT("Color" == model->getActiveTool());
+            FTK_ASSERT("Color" == tool);
         }
 
         void ToolsModelTest::_persistence()
@@ -75,14 +75,14 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, true);
                 auto model = models::ToolsModel::create(settings);
-                model->setActiveTool(models::Tool::Files);
+                model->setActiveTool("Files");
             }
 
             // Recreate from the same file (reset=false loads it) and verify.
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::ToolsModel::create(settings);
-                FTK_ASSERT(models::Tool::Files == model->getActiveTool());
+                FTK_ASSERT("Files" == model->getActiveTool());
             }
 
             std::filesystem::remove(path);

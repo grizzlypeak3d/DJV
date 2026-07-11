@@ -4,7 +4,6 @@
 #include <djv/App/App.h>
 
 #include <tlRender/UI/Init.h>
-#include <tlRender/Device/Init.h>
 
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Error.h>
@@ -25,7 +24,6 @@ FTK_MAIN()
     {
         auto context = ftk::Context::create();
         tl::ui::init(context);
-        tl::device::init(context);
         auto args = ftk::convert(argc, argv);
         auto app = djv::app::App::create(context, args);
         if (app->hasCmdLineHelp())
