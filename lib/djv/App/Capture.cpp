@@ -394,9 +394,7 @@ namespace djv
                     if (!section.empty())
                         p.lateSteps.push_back({ { "scrollTool", section } });
                 }
-                models::Tool tool = models::Tool::None;
-                from_string(toolStr, tool);
-                app->getToolsModel()->setActiveTool(tool);
+                app->getToolsModel()->setActiveTool(toolStr);
             }
             else if (step.contains("scrollTool"))
             {

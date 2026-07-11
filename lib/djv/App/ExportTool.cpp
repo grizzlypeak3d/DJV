@@ -61,7 +61,6 @@ namespace djv
 
         struct ExportTool::Private
         {
-            std::weak_ptr<App> app;
             std::shared_ptr<tl::Player> player;
             std::shared_ptr<models::SettingsModel> settings;
             std::vector<std::string> imageExts;
@@ -113,17 +112,19 @@ namespace djv
         void ExportTool::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             IToolWidget::_init(
                 context,
                 app,
-                models::Tool::Export,
+                mainWindow,
+                "Export",
+                "Export",
                 "djv::app::ExportTool",
                 parent);
             FTK_P();
 
-            p.app = app;
             p.settings = app->getSettingsModel();
 
             auto ioSystem = context->getSystem<tl::WriteSystem>();
@@ -349,10 +350,11 @@ namespace djv
         std::shared_ptr<ExportTool> ExportTool::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ExportTool>(new ExportTool);
-            out->_init(context, app, parent);
+            out->_init(context, app, mainWindow, parent);
             return out;
         }
 
@@ -398,10 +400,9 @@ namespace djv
         void ExportTool::_export()
         {
             FTK_P();
-            auto context = getContext();
-            auto app = p.app.lock();
-            if (app && context && p.player)
+            if (p.player)
             {
+                auto context = getContext();
                 try
                 {
                     const tl::IOInfo ioInfo = p.player->getIOInfo();
@@ -427,6 +428,7 @@ namespace djv
                     p.exportData->frame = p.exportData->range.start_time().value();
 
                     // Get the render size.
+                    auto app = _app.lock();
                     const auto& displayOptions = app->getViewportModel()->getDisplayOptions();
                     switch (options.renderSize)
                     {

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/SettingsModel.h>
+
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/App.h>
@@ -13,16 +15,6 @@ namespace ftk
 {
     class Settings;
     class SysLogModel;
-}
-
-namespace tl
-{
-#if defined(TLRENDER_BMD)
-    namespace bmd
-    {
-        class OutputDevice;
-    }
-#endif // TLRENDER_BMD
 }
 
 namespace djv
@@ -36,19 +28,16 @@ namespace djv
         class ColorModel;
         class FilesModel;
         class RecentFilesModel;
-        class SettingsModel;
         class TimeUnitsModel;
         class ToolsModel;
         class ViewportModel;
-#if defined(TLRENDER_BMD)
-        class BMDDevicesModel;
-#endif // TLRENDER_BMD
     }
 
     //! DJV Application
     namespace app
     {
         class MainWindow;
+        class ToolWidgetFactory;
 
         //! Application.
         class App : public ftk::App
@@ -105,14 +94,6 @@ namespace djv
             //! Get the tools model.
             const std::shared_ptr<models::ToolsModel>& getToolsModel() const;
 
-#if defined(TLRENDER_BMD)
-            //! Get the BMD devices model.
-            const std::shared_ptr<models::BMDDevicesModel>& getBMDDevicesModel() const;
-
-            //! Get the BMD output device.
-            const std::shared_ptr<tl::bmd::OutputDevice>& getBMDOutputDevice() const;
-#endif // TLRENDER_BMD
-
             //! Open a file.
             void open(
                 const ftk::Path& path,
@@ -130,6 +111,9 @@ namespace djv
             //! Observe the timeline player.
             std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > observePlayer() const;
 
+            //! Get the tool widget factory.
+            const std::shared_ptr<ToolWidgetFactory>& getToolWidgetFactory() const;
+
             //! Get the main window.
             const std::shared_ptr<MainWindow>& getMainWindow() const;
 
@@ -144,12 +128,16 @@ namespace djv
 
             void run() override;
 
+        protected:
+            void _setAudioDeviceMute(bool);
+            
+            models::ShortcutsSettings _shortcutsSettings;
+
         private:
             void _modelsInit();
-            void _devicesInit();
             void _observersInit();
             void _inputFilesInit();
-            void _windowsInit();
+            void _uiInit();
 
             std::filesystem::path _appDocsPath();
             std::filesystem::path _getLogFilePath();

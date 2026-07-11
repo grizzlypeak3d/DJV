@@ -6,13 +6,15 @@
 #include <djv/App/App.h>
 #include <djv/Models/ToolsModel.h>
 
+#include <ftk/Core/Format.h>
+
 namespace djv
 {
     namespace app
     {
         struct ToolsActions::Private
         {
-            std::shared_ptr<ftk::Observer<models::Tool> > activeObserver;
+            std::shared_ptr<ftk::Observer<std::string> > activeObserver;
         };
 
         void ToolsActions::_init(
@@ -23,54 +25,33 @@ namespace djv
             FTK_P();
 
             auto appWeak = std::weak_ptr<App>(app);
-            const auto enums = models::getToolEnums();
-            const auto labels = models::getToolLabels();
-            for (size_t i = 1; i < enums.size(); ++i)
+            for (const auto& tool : app->getToolsModel()->getTools())
             {
-                const auto tool = enums[i];
                 auto action = ftk::Action::create(
-                    to_string(tool),
-                    getIcon(tool),
+                    tool.name,
+                    tool.icon,
                     [appWeak, tool](bool value)
                     {
                         if (auto app = appWeak.lock())
                         {
                             auto toolsModel = app->getToolsModel();
-                            const models::Tool active = toolsModel->getActiveTool();
-                            toolsModel->setActiveTool(tool != active ? tool : models::Tool::None);
+                            const auto active = toolsModel->getActiveTool();
+                            toolsModel->setActiveTool(tool.name != active ? tool.name : std::string());
                         }
                     });
-                _actions[labels[i]] = action;
+                _actions[tool.name] = action;
+                _tooltips[tool.name] = ftk::Format("Toggle the {0} tool.").arg(tool.name);
             }
-
-            _tooltips =
-            {
-                { "Files", "Toggle the files tool." },
-                { "Export", "Toggle the export tool." },
-                { "View", "Toggle the view tool." },
-                { "Color", "Toggle the color controls tool." },
-                { "Color Picker", "Toggle the color picker tool." },
-                { "Magnify", "Toggle the magnify tool." },
-                { "Information", "Toggle the information tool." },
-                { "Audio", "Toggle the audio tool." },
-                { "Devices", "Toggle the devices tool." },
-                { "Settings", "Toggle the settings." },
-                { "Messages", "Toggle the messages." },
-                { "System Log", "Toggle the system log." },
-                { "Diagnostics", "Toggle the diagnostics." }
-            };
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
-            p.activeObserver = ftk::Observer<models::Tool>::create(
+            p.activeObserver = ftk::Observer<std::string>::create(
                 app->getToolsModel()->observeActiveTool(),
-                [this](models::Tool value)
+                [this](const std::string& value)
                 {
-                    const auto enums = models::getToolEnums();
-                    const auto labels = models::getToolLabels();
-                    for (size_t i = 1; i < enums.size(); ++i)
+                    for (auto i : _actions)
                     {
-                        _actions[labels[i]]->setChecked(enums[i] == value);
+                        i.second->setChecked(i.first == value);
                     }
                 });
         }

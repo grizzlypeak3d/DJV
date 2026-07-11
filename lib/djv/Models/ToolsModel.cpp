@@ -15,68 +15,11 @@ namespace djv
 {
     namespace models
     {
-        FTK_ENUM_IMPL(
-            Tool,
-            "None",
-            "Files",
-            "Export",
-            "View",
-            "Color",
-            "Color Picker",
-            "Magnify",
-            "Information",
-            "Audio",
-            "Devices",
-            "Settings",
-            "Messages",
-            "System Log",
-            "Diagnostics");
-
-        std::string getIcon(Tool value)
-        {
-            const std::array<std::string, static_cast<size_t>(Tool::Count)> data =
-            {
-                "",
-                "Files",
-                "Export",
-                "View",
-                "ColorControls",
-                "ColorPicker",
-                "Magnify",
-                "Info",
-                "Audio",
-                "Devices",
-                "Settings",
-                "Messages",
-                ""
-            };
-            return data[static_cast<size_t>(value)];
-        }
-
-        std::vector<Tool> getToolsInToolbar()
-        {
-            const std::vector<Tool> out
-            {
-                Tool::Files,
-                Tool::Export,
-                Tool::View,
-                Tool::Color,
-                Tool::ColorPicker,
-                Tool::Magnify,
-                Tool::Info,
-                Tool::Audio,
-                Tool::Devices,
-                Tool::Settings,
-                Tool::Messages
-            };
-            return out;
-        }
-
         struct ToolsModel::Private
         {
             std::shared_ptr<ftk::Settings> settings;
-
-            std::shared_ptr<ftk::Observable<Tool> > activeTool;
+            std::vector<ToolInfo> tools;
+            std::shared_ptr<ftk::Observable<std::string> > activeTool;
         };
 
         void ToolsModel::_init(const std::shared_ptr<ftk::Settings>& settings)
@@ -85,11 +28,22 @@ namespace djv
 
             p.settings = settings;
 
+            p.tools.push_back({ "Files", "Files", "A", true });
+            p.tools.push_back({ "Export", "Export", "B", true });
+            p.tools.push_back({ "View", "View", "C", true });
+            p.tools.push_back({ "Color", "ColorControls", "D", true });
+            p.tools.push_back({ "Color Picker", "ColorPicker", "E", true });
+            p.tools.push_back({ "Magnify", "Magnify", "F", true });
+            p.tools.push_back({ "Information", "Info", "G", true });
+            p.tools.push_back({ "Audio", "Audio", "H", true });
+            p.tools.push_back({ "Settings", "Settings", "W", true });
+            p.tools.push_back({ "Messages", "Messages", "X" });
+            p.tools.push_back({ "System Log", std::string(), "Y" });
+            p.tools.push_back({ "Diagnostics", std::string(), "Z" });
+
             std::string s;
-            p.settings->get("/Tools/Tool.1", s);
-            Tool tool = Tool::None;
-            from_string(s, tool);
-            p.activeTool = ftk::Observable<Tool>::create(tool);
+            p.settings->get("/Tools/Tool.2", s);
+            p.activeTool = ftk::Observable<std::string>::create(s);
         }
 
         ToolsModel::ToolsModel() :
@@ -99,7 +53,7 @@ namespace djv
         ToolsModel::~ToolsModel()
         {
             FTK_P();
-            p.settings->set("/Tools/Tool.1", to_string(p.activeTool->get()));
+            p.settings->set("/Tools/Tool.2", p.activeTool->get());
         }
 
         std::shared_ptr<ToolsModel> ToolsModel::create(const std::shared_ptr<ftk::Settings>& settings)
@@ -109,17 +63,27 @@ namespace djv
             return out;
         }
 
-        Tool ToolsModel::getActiveTool() const
+        const std::vector<ToolInfo>& ToolsModel::getTools() const
+        {
+            return _p->tools;
+        }
+        
+        void ToolsModel::addTool(const ToolInfo& value)
+        {
+            _p->tools.push_back(value);
+        }
+
+        const std::string& ToolsModel::getActiveTool() const
         {
             return _p->activeTool->get();
         }
 
-        std::shared_ptr<ftk::Observable<Tool> > ToolsModel::observeActiveTool() const
+        std::shared_ptr<ftk::Observable<std::string> > ToolsModel::observeActiveTool() const
         {
             return _p->activeTool;
         }
 
-        void ToolsModel::setActiveTool(Tool value)
+        void ToolsModel::setActiveTool(const std::string& value)
         {
             _p->activeTool->setIfChanged(value);
         }

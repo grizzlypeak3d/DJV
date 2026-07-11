@@ -458,16 +458,34 @@ namespace djv
             for (const auto& shortcut : settings.shortcuts)
             {
                 const auto s = ftk::split(shortcut.name, '/');
-                if ((!s.empty() && !groups.empty() && s.front() != groups.back().name) ||
-                    (!s.empty() && groups.empty()))
+                if (!s.empty())
                 {
-                    Private::Group group;
-                    group.name = s.front();
-                    groups.push_back(group);
-                }
-                if (s.size() > 1 && !groups.empty())
-                {
-                    groups.back().shortcuts.push_back(shortcut);
+                    const auto& name = s.front();
+                    auto i = std::find_if(
+                        groups.begin(),
+                        groups.end(),
+                        [name](const Private::Group& value)
+                        {
+                            return name == value.name;
+                        });
+                    if ((!groups.empty() && i == groups.end()) ||
+                        groups.empty())
+                    {
+                        Private::Group group;
+                        group.name = name;
+                        groups.push_back(group);
+                    }
+                    i = std::find_if(
+                        groups.begin(),
+                        groups.end(),
+                        [name](const Private::Group& value)
+                        {
+                            return name == value.name;
+                        });
+                    if (i != groups.end())
+                    {
+                        i->shortcuts.push_back(shortcut);
+                    }
                 }
             }
 

@@ -1,6 +1,5 @@
 set(LEGAL
     LICENSE_aom.txt
-    LICENSE_BlackmagicDesign.txt
     LICENSE_boost.txt
     LICENSE_CMake.txt
     LICENSE_CURL.txt

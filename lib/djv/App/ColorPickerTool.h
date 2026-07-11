@@ -9,9 +9,6 @@ namespace djv
 {
     namespace app
     {
-        class App;
-        class MainWindow;
-
         //! Color picker tool.
         class ColorPickerTool : public IToolWidget
         {

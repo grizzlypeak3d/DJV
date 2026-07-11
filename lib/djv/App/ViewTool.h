@@ -9,12 +9,7 @@ namespace djv
 {
     namespace app
     {
-        class App;
-        class MainWindow;
-
         //! View tool.
-        //!
-        //! \todo Add a background grid.
         class ViewTool : public IToolWidget
         {
             FTK_NON_COPYABLE(ViewTool);

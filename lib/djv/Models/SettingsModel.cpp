@@ -194,7 +194,6 @@ namespace djv
                 Shortcut("Tools/Magnify", "Magnify", ftk::Key::F6),
                 Shortcut("Tools/Information", "Information", ftk::Key::F7),
                 Shortcut("Tools/Audio", "Audio", ftk::Key::F8),
-                Shortcut("Tools/Devices", "Devices", ftk::Key::F9),
                 Shortcut("Tools/Settings", "Settings", ftk::Key::F10),
                 Shortcut("Tools/Messages", "Messages", ftk::Key::F11),
                 Shortcut("Tools/System Log", "System log", ftk::Key::F12),
@@ -415,7 +414,8 @@ namespace djv
         {
             std::weak_ptr<ftk::Context> context;
             std::shared_ptr<ftk::Settings> settings;
-            float defaultDisplayScale = 1.F;
+            ShortcutsSettings shortcutsDefault;
+            float displayScaleDefault = 1.F;
 
             std::shared_ptr<ftk::Observable<AdvancedSettings> > advanced;
             std::shared_ptr<ftk::Observable<tl::PlayerCacheOptions> > cache;
@@ -467,13 +467,15 @@ namespace djv
         void SettingsModel::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<ftk::Settings>& settings,
-            float defaultDisplayScale)
+            const ShortcutsSettings& shortcutsDefault,
+            float displayScaleDefault)
         {
             FTK_P();
 
             p.context = context;
             p.settings = settings;
-            p.defaultDisplayScale = defaultDisplayScale;
+            p.shortcutsDefault = shortcutsDefault;
+            p.displayScaleDefault = displayScaleDefault;
 
             AdvancedSettings advanced;
             settings->getT(keys["Advanced"], advanced);
@@ -508,7 +510,7 @@ namespace djv
             settings->getT(keys["ImageSeq"], imageSeq);
             p.imageSeq = ftk::Observable<ImageSeqSettings>::create(imageSeq);
 
-            ShortcutsSettings shortcuts;
+            ShortcutsSettings shortcuts = shortcutsDefault;
             settings->getT(keys["Shortcuts"], shortcuts);
             p.shortcuts = ftk::Observable<ShortcutsSettings>::create(shortcuts);
 
@@ -525,7 +527,7 @@ namespace djv
             p.playback = ftk::Observable<PlaybackSettings>::create(playback);
 
             StyleSettings style;
-            style.displayScale = defaultDisplayScale;
+            style.displayScale = displayScaleDefault;
             settings->getT(keys["Style"], style);
             p.style = ftk::Observable<StyleSettings>::create(style);
 
@@ -568,10 +570,11 @@ namespace djv
         std::shared_ptr<SettingsModel> SettingsModel::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<ftk::Settings>& settings,
-            float defaultDisplayScale)
+            const ShortcutsSettings& shortcuts,
+            float displayScaleDefault)
         {
             auto out = std::shared_ptr<SettingsModel>(new SettingsModel);
-            out->_init(context, settings, defaultDisplayScale);
+            out->_init(context, settings, shortcuts, displayScaleDefault);
             return out;
         }
 
@@ -623,14 +626,14 @@ namespace djv
             setExport(ExportSettings());
             setFileBrowser(FileBrowserSettings());
             setImageSeq(ImageSeqSettings());
-            setShortcuts(ShortcutsSettings());
+            setShortcuts(p.shortcutsDefault);
             MiscSettings miscSettings;
             miscSettings.showSetup = false;
             setMisc(miscSettings);
             setMouse(MouseSettings());
             setPlayback(PlaybackSettings());
             StyleSettings style;
-            style.displayScale = p.defaultDisplayScale;
+            style.displayScale = p.displayScaleDefault;
             setStyle(style);
             setTimeline(TimelineSettings());
             setWindow(WindowSettings());

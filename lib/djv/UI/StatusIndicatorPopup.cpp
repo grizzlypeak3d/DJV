@@ -41,9 +41,7 @@ namespace djv
                 { "AspectRatio", "Aspect ratio" },
                 { "Color", "Color controls" },
                 { "AudioOffset", "Audio offset" },
-#if defined(TLRENDER_BMD)
                 { "OutputDevice", "Output device" }
-#endif // TLRENDER_BMD
             };
 
             int row = 0;
@@ -138,13 +136,11 @@ namespace djv
 
         void StatusIndicatorPopup::setOutputDevice(bool value)
         {
-#if defined(TLRENDER_BMD)
             _p->icons["OutputDevice"]->setEnabled(value);
             _p->icons["OutputDevice"]->setBackgroundRole(value ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
             _p->labels["OutputDevice"]->setEnabled(value);
-#endif // TLRENDER_BMD
         }
     }
 }

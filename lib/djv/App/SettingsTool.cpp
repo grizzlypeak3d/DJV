@@ -29,12 +29,15 @@ namespace djv
         void SettingsTool::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             IToolWidget::_init(
                 context,
                 app,
-                models::Tool::Settings,
+                mainWindow,
+                "Settings",
+                "Settings",
                 "djv::app::SettingsTool",
                 parent);
             FTK_P();
@@ -220,10 +223,11 @@ namespace djv
         std::shared_ptr<SettingsTool> SettingsTool::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<SettingsTool>(new SettingsTool);
-            out->_init(context, app, parent);
+            out->_init(context, app, mainWindow, parent);
             return out;
         }
 

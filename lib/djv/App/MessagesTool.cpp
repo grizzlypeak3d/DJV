@@ -38,12 +38,15 @@ namespace djv
         void MessagesTool::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             IToolWidget::_init(
                 context,
                 app,
-                models::Tool::Messages,
+                mainWindow,
+                "Messages",
+                "Messages",
                 "djv::app::MessagesTool",
                 parent);
             FTK_P();
@@ -64,7 +67,7 @@ namespace djv
             p.autoScrollCheckBox = ftk::CheckBox::create(context, "Auto-scroll");
             bool autoScroll = true;
             p.settings->get(
-                ftk::Format("/{0}/AutoScroll").arg(getLabel(models::Tool::Messages)),
+                ftk::Format("/{0}/AutoScroll").arg(getToolName()),
                 autoScroll);
             p.autoScrollCheckBox->setChecked(autoScroll);
 
@@ -133,17 +136,18 @@ namespace djv
         {
             FTK_P();
             p.settings->set(
-                ftk::Format("/{0}/AutoScroll").arg(getLabel(models::Tool::Messages)),
+                ftk::Format("/{0}/AutoScroll").arg(getToolName()),
                 p.autoScrollCheckBox->isChecked());
         }
 
         std::shared_ptr<MessagesTool> MessagesTool::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<MessagesTool>(new MessagesTool);
-            out->_init(context, app, parent);
+            out->_init(context, app, mainWindow, parent);
             return out;
         }
     }

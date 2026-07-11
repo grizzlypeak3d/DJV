@@ -15,34 +15,14 @@ namespace djv
 {
     namespace models
     {
-        //! Tools.
-        enum class Tool
+        //! Tool information.
+        struct ToolInfo
         {
-            None,
-            Files,
-            Export,
-            View,
-            Color,
-            ColorPicker,
-            Magnify,
-            Info,
-            Audio,
-            Devices,
-            Settings,
-            Messages,
-            SysLog,
-            Diag,
-
-            Count,
-            First = None
+            std::string name;
+            std::string icon;
+            std::string sort;
+            bool        toolBar = false;
         };
-        FTK_ENUM(Tool);
-
-        //! Get the tool icon.
-        std::string getIcon(Tool);
-
-        //! Get the tools shown in the toolbar.
-        std::vector<Tool> getToolsInToolbar();
 
         //! Tools model.
         class ToolsModel : public std::enable_shared_from_this<ToolsModel>
@@ -61,14 +41,20 @@ namespace djv
             static std::shared_ptr<ToolsModel> create(
                 const std::shared_ptr<ftk::Settings>&);
 
+            //! Get the tools.
+            const std::vector<ToolInfo>& getTools() const;
+            
+            //! Add a tool.
+            void addTool(const ToolInfo&);
+
             //! Get the active tool.
-            Tool getActiveTool() const;
+            const std::string& getActiveTool() const;
 
             //! Observe the active tool.
-            std::shared_ptr<ftk::Observable<Tool> > observeActiveTool() const;
+            std::shared_ptr<ftk::Observable<std::string> > observeActiveTool() const;
 
             //! Set the active tool.
-            void setActiveTool(Tool);
+            void setActiveTool(const std::string&);
 
         private:
             FTK_PRIVATE();

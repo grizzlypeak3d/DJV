@@ -9,6 +9,7 @@ namespace djv
 {
     namespace app
     {
+        class App;
         class ToolsActions;
 
         //! Tools menu.
@@ -19,6 +20,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<App>&,
                 const std::shared_ptr<ToolsActions>&,
                 const std::shared_ptr<IWidget>& parent);
 
@@ -29,6 +31,7 @@ namespace djv
 
             static std::shared_ptr<ToolsMenu> create(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<App>&,
                 const std::shared_ptr<ToolsActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
         };

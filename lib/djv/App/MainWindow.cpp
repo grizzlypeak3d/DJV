@@ -46,9 +46,6 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/UI/TimelineWidget.h>
-#if defined(TLRENDER_BMD)
-#include <tlRender/Device/BMDOutputDevice.h>
-#endif // TLRENDER_BMD
 #include <tlRender/GL/Render.h>
 
 #include <ftk/UI/ButtonGroup.h>
@@ -127,7 +124,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
-            std::shared_ptr<ftk::Observer<models::Tool> > activeToolObserver;
+            std::shared_ptr<ftk::Observer<std::string> > activeToolObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
             std::shared_ptr<ftk::Observer<models::TimelineSettings> > timelineSettingsObserver;
             std::shared_ptr<ftk::Observer<bool> > timelineFrameViewObserver;
@@ -202,7 +199,7 @@ namespace djv
                 std::dynamic_pointer_cast<MainWindow>(shared_from_this()),
                 p.windowActions);
             p.colorMenu = ColorMenu::create(context, p.colorActions);
-            p.toolsMenu = ToolsMenu::create(context, p.toolsActions);
+            p.toolsMenu = ToolsMenu::create(context, app, p.toolsActions);
             p.helpMenu = HelpMenu::create(context, p.helpActions);
             p.menuBar = ftk::MenuBar::create(context);
             ftk::setScreenshotTag(p.menuBar, "MainWindow.MenuBar");
@@ -241,6 +238,7 @@ namespace djv
 
             p.toolsToolBar = ToolsToolBar::create(
                 context,
+                app,
                 p.toolsActions->getActions());
             ftk::setScreenshotTag(p.toolsToolBar, "MainWindow.ToolsToolBar");
 
@@ -362,9 +360,9 @@ namespace djv
                         ftk::WindowBufferType::F16);
                 });
 
-            p.activeToolObserver = ftk::Observer<models::Tool>::create(
+            p.activeToolObserver = ftk::Observer<std::string>::create(
                 app->getToolsModel()->observeActiveTool(),
-                [this](models::Tool)
+                [this](const std::string&)
                 {
                     _windowUpdate();
                 });
@@ -652,7 +650,7 @@ namespace djv
                 p.tabBar->setVisible(settings.tabBar && !presentMode);
 
                 p.toolsWidget->setVisible(
-                    app->getToolsModel()->getActiveTool() != models::Tool::None &&
+                    !app->getToolsModel()->getActiveTool().empty() &&
                     !presentMode);
 
                 p.timelineWidget->setVisible(settings.timeline && !presentMode);

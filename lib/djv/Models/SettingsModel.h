@@ -287,7 +287,8 @@ namespace djv
             void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&,
-                float defaultDisplayScale);
+                const ShortcutsSettings&,
+                float displayScaleDefault);
 
             SettingsModel();
 
@@ -298,7 +299,8 @@ namespace djv
             static std::shared_ptr<SettingsModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&,
-                float defaultDisplayScale);
+                const ShortcutsSettings&,
+                float displayScaleDefault);
 
             //! Save the settings. Settings are also saved on exit.
             void save();

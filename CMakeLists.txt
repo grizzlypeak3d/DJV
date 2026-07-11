@@ -99,7 +99,6 @@ add_subdirectory(deps/tlRender)
 add_library(tlRender::tlCore ALIAS tlCore)
 add_library(tlRender::tlGL ALIAS tlGL)
 add_library(tlRender::tlIO ALIAS tlIO)
-add_library(tlRender::tlDevice ALIAS tlDevice)
 add_library(tlRender::tlTimeline ALIAS tlTimeline)
 add_library(tlRender::tlUI ALIAS tlUI)
 

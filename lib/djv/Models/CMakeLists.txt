@@ -11,9 +11,6 @@ set(HEADERS
     ToolsModel.h
     Version.h
     ViewportModel.h)
-if(TLRENDER_BMD)
-    list(APPEND HEADERS BMDDevicesModel.h)
-endif()
 set(HEADERS_PRIVATE)
 
 set(SOURCE
@@ -28,9 +25,6 @@ set(SOURCE
     TimeUnitsModel.cpp
     ToolsModel.cpp
     ViewportModel.cpp)
-if(TLRENDER_BMD)
-    list(APPEND SOURCE BMDDevicesModel.cpp)
-endif()
 
 add_library(djvModels ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 
@@ -39,7 +33,7 @@ target_include_directories(djvModels
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib>
         $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(djvModels djvResource tlRender::tlTimeline tlRender::tlDevice)
+target_link_libraries(djvModels djvResource tlRender::tlTimeline)
 
 set_target_properties(djvModels PROPERTIES FOLDER lib)
 set_target_properties(djvModels PROPERTIES PUBLIC_HEADER "${HEADERS}")

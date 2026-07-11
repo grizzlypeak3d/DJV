@@ -9,8 +9,6 @@ namespace djv
 {
     namespace app
     {
-        class App;
-
         //! Audio tool.
         class AudioTool : public IToolWidget
         {
@@ -20,6 +18,7 @@ namespace djv
             void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent);
 
             AudioTool();
@@ -30,6 +29,7 @@ namespace djv
             static std::shared_ptr<AudioTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:

@@ -3,6 +3,7 @@
 
 #include <djv/App/ToolsToolBar.h>
 
+#include <djv/App/App.h>
 #include <djv/Models/ToolsModel.h>
 
 namespace djv
@@ -11,6 +12,7 @@ namespace djv
     {
         void ToolsToolBar::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
             const std::map<std::string, std::shared_ptr<ftk::Action> >& actions,
             const std::shared_ptr<IWidget>& parent)
         {
@@ -18,11 +20,22 @@ namespace djv
 
             setMarginRole(ftk::SizeRole::MarginInside);
 
-            auto tools = models::getToolsInToolbar();
-            auto tmp = actions;
-            for (const auto tool : tools)
+            std::map<std::string, std::vector<models::ToolInfo> > tools;
+            for (const auto& tool : app->getToolsModel()->getTools())
             {
-                addAction(tmp[getLabel(tool)]);
+                tools[tool.sort].push_back(tool);
+            }
+            
+            auto tmp = actions;
+            for (const auto& i : tools)
+            {
+                for (const auto& j : i.second)
+                {
+                    if (j.toolBar)
+                    {
+                        addAction(tmp[j.name]);
+                    }
+                }
             }
         }
 
@@ -31,11 +44,12 @@ namespace djv
 
         std::shared_ptr<ToolsToolBar> ToolsToolBar::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
             const std::map<std::string, std::shared_ptr<ftk::Action> >& actions,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ToolsToolBar>(new ToolsToolBar);
-            out->_init(context, actions, parent);
+            out->_init(context, app, actions, parent);
             return out;
         }
     }

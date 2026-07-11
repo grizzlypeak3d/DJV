@@ -13,7 +13,6 @@ set(HEADERS
     CompareMenu.h
     CompareToolBar.h
     DiagTool.h
-    DevicesTool.h
     ExportTool.h
     FileActions.h
     FileMenu.h
@@ -66,7 +65,6 @@ set(SOURCE
     CompareActions.cpp
     CompareMenu.cpp
     CompareToolBar.cpp
-    DevicesTool.cpp
     DiagTool.cpp
     ExportTool.cpp
     FileActions.cpp

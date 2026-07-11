@@ -3,9 +3,21 @@
 
 #include <djv/App/App.h>
 
+#include <djv/App/AudioTool.h>
 #include <djv/App/Capture.h>
+#include <djv/App/ColorPickerTool.h>
+#include <djv/App/ColorTool.h>
+#include <djv/App/DiagTool.h>
+#include <djv/App/ExportTool.h>
+#include <djv/App/FilesTool.h>
+#include <djv/App/InfoTool.h>
+#include <djv/App/MagnifyTool.h>
 #include <djv/App/MainWindow.h>
+#include <djv/App/MessagesTool.h>
 #include <djv/App/SecondaryWindow.h>
+#include <djv/App/SettingsTool.h>
+#include <djv/App/SysLogTool.h>
+#include <djv/App/ViewTool.h>
 #include <djv/App/Viewport.h>
 #include <djv/UI/SeparateAudioDialog.h>
 #include <djv/Models/AppInfoModel.h>
@@ -17,18 +29,11 @@
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/Version.h>
 #include <djv/Models/ViewportModel.h>
-#if defined(TLRENDER_BMD)
-#include <djv/Models/BMDDevicesModel.h>
-#endif // TLRENDER_BMD
 
 #include <tlRender/UI/ThumbnailSystem.h>
 #include <tlRender/Timeline/ColorOptions.h>
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/Util.h>
-#if defined(TLRENDER_BMD)
-#include <tlRender/Device/BMDDevicesModel.h>
-#include <tlRender/Device/BMDOutputDevice.h>
-#endif // TLRENDER_BMD
 #include <tlRender/IO/Plugin.h>
 #include <tlRender/IO/System.h>
 #if defined(TLRENDER_FFMPEG_PLUGIN)
@@ -116,18 +121,14 @@ namespace djv
             std::shared_ptr<models::ColorModel> colorModel;
             std::shared_ptr<models::ViewportModel> viewportModel;
             std::shared_ptr<models::AudioModel> audioModel;
+            bool audioDeviceMute = false;
             std::shared_ptr<models::ToolsModel> toolsModel;
 
             std::shared_ptr<ftk::Observable<bool> > secondaryWindowActive;
+            std::shared_ptr<ToolWidgetFactory> toolWidgetFactory;
             std::shared_ptr<MainWindow> mainWindow;
             std::shared_ptr<SecondaryWindow> secondaryWindow;
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
-
-            bool bmdDeviceActive = false;
-#if defined(TLRENDER_BMD)
-            std::shared_ptr<models::BMDDevicesModel> bmdDevicesModel;
-            std::shared_ptr<tl::bmd::OutputDevice> bmdOutputDevice;
-#endif // TLRENDER_BMD
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
@@ -143,19 +144,6 @@ namespace djv
             std::shared_ptr<ftk::Observer<double> > syncOffsetObserver;
             std::shared_ptr<ftk::Observer<models::StyleSettings> > styleSettingsObserver;
             std::shared_ptr<ftk::Observer<models::MiscSettings> > miscSettingsObserver;
-#if defined(TLRENDER_BMD)
-            std::shared_ptr<ftk::Observer<tl::bmd::DevicesModelData> > bmdDevicesObserver;
-            std::shared_ptr<ftk::Observer<bool> > bmdActiveObserver;
-            std::shared_ptr<ftk::Observer<ftk::Size2I> > bmdSizeObserver;
-            std::shared_ptr<ftk::Observer<tl::bmd::FrameRate> > bmdFrameRateObserver;
-            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
-#endif // TLRENDER_BMD
 
             std::shared_ptr<ftk::Timer> debugTimer;
             int debugInput = 0;
@@ -384,6 +372,34 @@ namespace djv
                     p.cmdLine.captureShot,
                     p.cmdLine.captureOutput
                 });
+            if (hasCmdLineHelp())
+                return;
+
+            p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
+
+            if (p.cmdLine.settingsFileName->found())
+            {
+                p.settingsFile = std::filesystem::u8path(
+                    p.cmdLine.settingsFileName->getValue());
+            }
+            p.settings = ftk::Settings::create(
+                _context,
+                p.settingsFile,
+                p.cmdLine.resetSettings->found());
+
+            _modelsInit();
+            _observersInit();
+            _inputFilesInit();
+            
+            // Suppress first-run UI so it can't cover capture screenshots.
+            if (p.cmdLine.captureShot->found())
+            {
+                auto misc = getSettingsModel()->getMisc();
+                misc.showSetup = false;
+                getSettingsModel()->setMisc(misc);
+            }
+
+            _uiInit();
         }
 
         App::App() :
@@ -457,18 +473,6 @@ namespace djv
         {
             return _p->toolsModel;
         }
-
-#if defined(TLRENDER_BMD)
-        const std::shared_ptr<models::BMDDevicesModel>& App::getBMDDevicesModel() const
-        {
-            return _p->bmdDevicesModel;
-        }
-
-        const std::shared_ptr<tl::bmd::OutputDevice>& App::getBMDOutputDevice() const
-        {
-            return _p->bmdOutputDevice;
-        }
-#endif // TLRENDER_BMD
 
         void App::openDialog()
         {
@@ -552,6 +556,11 @@ namespace djv
         std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > App::observePlayer() const
         {
             return _p->player;
+        }
+
+        const std::shared_ptr<ToolWidgetFactory>& App::getToolWidgetFactory() const
+        {
+            return _p->toolWidgetFactory;
         }
 
         const std::shared_ptr<MainWindow>& App::getMainWindow() const
@@ -690,33 +699,6 @@ namespace djv
         {
             FTK_P();
 
-            p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
-
-            if (p.cmdLine.settingsFileName->found())
-            {
-                p.settingsFile = std::filesystem::u8path(
-                    p.cmdLine.settingsFileName->getValue());
-            }
-            p.settings = ftk::Settings::create(
-                _context,
-                p.settingsFile,
-                p.cmdLine.resetSettings->found());
-
-            _modelsInit();
-            _devicesInit();
-            _observersInit();
-            _inputFilesInit();
-            
-            // Suppress first-run UI so it can't cover capture screenshots.
-            if (p.cmdLine.captureShot->found())
-            {
-                auto misc = getSettingsModel()->getMisc();
-                misc.showSetup = false;
-                getSettingsModel()->setMisc(misc);
-            }
-
-            _windowsInit();
-
             if (p.cmdLine.version->found())
             {
                 std::cout << DJV_VERSION_FULL << std::endl;
@@ -727,6 +709,39 @@ namespace djv
                 std::cout << ftk::join(getSysInfo(), '\n') << std::endl;
                 return;
             }
+
+            p.mainWindow = MainWindow::create(
+                _context,
+                std::dynamic_pointer_cast<App>(shared_from_this()));
+            p.mainWindow->setCloseCallback(
+                [this]
+                {
+                    FTK_P();
+                    if (p.secondaryWindow)
+                    {
+                        p.secondaryWindow->close();
+                        p.secondaryWindow.reset();
+                    }
+                });
+
+            p.viewPosZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
+                p.mainWindow->getViewport()->observeViewPosAndZoom(),
+                [this](const std::pair<ftk::V2I, double>& value)
+                {
+                    _viewUpdate(
+                        value.first,
+                        value.second,
+                        _p->mainWindow->getViewport()->hasFrameView());
+                });
+            p.viewFramedObserver = ftk::Observer<bool>::create(
+                p.mainWindow->getViewport()->observeFramed(),
+                [this](bool value)
+                {
+                    _viewUpdate(
+                        _p->mainWindow->getViewport()->getViewPos(),
+                        _p->mainWindow->getViewport()->getZoom(),
+                        value);
+                });
 
             if (p.cmdLine.debugLoop->found() &&
                 !p.cmdLine.inputs->getList().empty())
@@ -787,6 +802,15 @@ namespace djv
             ftk::App::run();
         }
 
+        void App::_setAudioDeviceMute(bool value)
+        {
+            FTK_P();
+            if (value == p.audioDeviceMute)
+                return;
+            p.audioDeviceMute = value;
+            _audioUpdate();
+        }
+
         void App::_modelsInit()
         {
             FTK_P();
@@ -794,6 +818,7 @@ namespace djv
             p.settingsModel = models::SettingsModel::create(
                 _context,
                 p.settings,
+                _shortcutsSettings,
                 getDefaultDisplayScale());
             if (getColorStyleCmdLineOption()->found() ||
                 getDisplayScaleCmdLineOption()->found())
@@ -920,15 +945,6 @@ namespace djv
             p.toolsModel = models::ToolsModel::create(p.settings);
         }
 
-        void App::_devicesInit()
-        {
-            FTK_P();
-#if defined(TLRENDER_BMD)
-            p.bmdOutputDevice = tl::bmd::OutputDevice::create(_context);
-            p.bmdDevicesModel = models::BMDDevicesModel::create(_context, p.settings);
-#endif // TLRENDER_BMD
-        }
-
         void App::_observersInit()
         {
             FTK_P();
@@ -1040,96 +1056,6 @@ namespace djv
                 {
                     setTooltipsEnabled(value.tooltipsEnabled);
                 });
-
-#if defined(TLRENDER_BMD)
-            p.bmdDevicesObserver = ftk::Observer<tl::bmd::DevicesModelData>::create(
-                p.bmdDevicesModel->observeData(),
-                [this](const tl::bmd::DevicesModelData& value)
-                {
-                    FTK_P();
-                    tl::bmd::DeviceConfig config;
-                    config.deviceIndex = value.deviceIndex - 1;
-                    config.displayModeIndex = value.displayModeIndex - 1;
-                    config.pixelType = value.pixelTypeIndex >= 0 &&
-                        value.pixelTypeIndex < value.pixelTypes.size() ?
-                        value.pixelTypes[value.pixelTypeIndex] :
-                        tl::bmd::PixelType::None;
-                    config.boolOptions = value.boolOptions;
-                    p.bmdOutputDevice->setConfig(config);
-                    p.bmdOutputDevice->setEnabled(value.deviceEnabled);
-                    tl::DisplayOptions displayOptions = p.viewportModel->getDisplayOptions();
-                    p.bmdOutputDevice->setDisplayOptions({ displayOptions });
-                    p.bmdOutputDevice->setHDR(value.hdrMode, value.hdrData);
-                });
-            p.bmdActiveObserver = ftk::Observer<bool>::create(
-                p.bmdOutputDevice->observeActive(),
-                [this](bool value)
-                {
-                    _p->bmdDeviceActive = value;
-                    _audioUpdate();
-                });
-            p.bmdSizeObserver = ftk::Observer<ftk::Size2I>::create(
-                p.bmdOutputDevice->observeSize(),
-                [this](const ftk::Size2I& value)
-                {
-                    //std::cout << "output device size: " << value << std::endl;
-                });
-            p.bmdFrameRateObserver = ftk::Observer<tl::bmd::FrameRate>::create(
-                p.bmdOutputDevice->observeFrameRate(),
-                [this](const tl::bmd::FrameRate& value)
-                {
-                    //std::cout << "output device frame rate: " <<
-                    //    value.num << "/" <<
-                    //    value.den <<
-                    //    std::endl;
-                });
-
-            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                p.colorModel->observeOCIOOptions(),
-                [this](const tl::OCIOOptions& value)
-                {
-                    _p->bmdOutputDevice->setOCIOOptions(value);
-                });
-            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
-                p.colorModel->observeLUTOptions(),
-                [this](const tl::LUTOptions& value)
-                {
-                    _p->bmdOutputDevice->setLUTOptions(value);
-                });
-            p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
-                p.viewportModel->observeImageOptions(),
-                [this](const ftk::ImageOptions& value)
-                {
-                    _p->bmdOutputDevice->setImageOptions({ value });
-                });
-            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
-                p.viewportModel->observeDisplayOptions(),
-                [this](const tl::DisplayOptions& value)
-                {
-                    _p->bmdOutputDevice->setDisplayOptions({ value });
-                });
-
-            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
-                p.filesModel->observeCompareOptions(),
-                [this](const tl::CompareOptions& value)
-                {
-                    _p->bmdOutputDevice->setCompareOptions(value);
-                });
-
-            p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
-                p.viewportModel->observeBackgroundOptions(),
-                [this](const tl::BackgroundOptions& value)
-                {
-                    _p->bmdOutputDevice->setBackgroundOptions(value);
-                });
-
-            p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
-                p.viewportModel->observeForegroundOptions(),
-                [this](const tl::ForegroundOptions& value)
-                {
-                    _p->bmdOutputDevice->setForegroundOptions(value);
-                });
-#endif // TLRENDER_BMD
         }
 
         void App::_inputFilesInit()
@@ -1234,44 +1160,25 @@ namespace djv
             }
         }
 
-        void App::_windowsInit()
+        void App::_uiInit()
         {
             FTK_P();
 
             p.secondaryWindowActive = ftk::Observable<bool>::create(false);
 
-            p.mainWindow = MainWindow::create(
-                _context,
-                std::dynamic_pointer_cast<App>(shared_from_this()));
-
-            p.viewPosZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
-                p.mainWindow->getViewport()->observeViewPosAndZoom(),
-                [this](const std::pair<ftk::V2I, double>& value)
-                {
-                    _viewUpdate(
-                        value.first,
-                        value.second,
-                        _p->mainWindow->getViewport()->hasFrameView());
-                });
-            p.viewFramedObserver = ftk::Observer<bool>::create(
-                p.mainWindow->getViewport()->observeFramed(),
-                [this](bool value)
-                {
-                    _viewUpdate(
-                        _p->mainWindow->getViewport()->getViewPos(),
-                        _p->mainWindow->getViewport()->getZoom(),
-                        value);
-                });
-            p.mainWindow->setCloseCallback(
-                [this]
-                {
-                    FTK_P();
-                    if (p.secondaryWindow)
-                    {
-                        p.secondaryWindow->close();
-                        p.secondaryWindow.reset();
-                    }
-                });
+            p.toolWidgetFactory = ToolWidgetFactory::create();
+            p.toolWidgetFactory->addTool("Audio", &AudioTool::create);
+            p.toolWidgetFactory->addTool("Color Picker", &ColorPickerTool::create);
+            p.toolWidgetFactory->addTool("Color", &ColorTool::create);
+            p.toolWidgetFactory->addTool("Diagnostics", &DiagTool::create);
+            p.toolWidgetFactory->addTool("Export", &ExportTool::create);
+            p.toolWidgetFactory->addTool("Files", &FilesTool::create);
+            p.toolWidgetFactory->addTool("Information", &InfoTool::create);
+            p.toolWidgetFactory->addTool("Magnify", &MagnifyTool::create);
+            p.toolWidgetFactory->addTool("Messages", &MessagesTool::create);
+            p.toolWidgetFactory->addTool("Settings", &SettingsTool::create);
+            p.toolWidgetFactory->addTool("System Log", &SysLogTool::create);
+            p.toolWidgetFactory->addTool("View", &ViewTool::create);
         }
 
 
@@ -1455,9 +1362,6 @@ namespace djv
 
             p.activeFiles = activeFiles;
             p.player->setIfChanged(player);
-#if defined(TLRENDER_BMD)
-            p.bmdOutputDevice->setPlayer(player);
-#endif // TLRENDER_BMD
 
             _layersUpdate(p.filesModel->observeLayers()->get());
             _audioUpdate();
@@ -1505,37 +1409,18 @@ namespace djv
                 }
                 p.secondaryWindow->setView(pos * scale, zoom * scale, frame);
             }
-#if defined(TLRENDER_BMD)
-            scale = 1.F;
-            const ftk::Size2I& bmdSize = p.bmdOutputDevice->getSize();
-            if (g.isValid() && bmdSize.isValid())
-            {
-                scale = bmdSize.w / static_cast<float>(g.w());
-            }
-            p.bmdOutputDevice->setView(pos * scale, zoom * scale, frame);
-#endif // TLRENDER_BMD
         }
 
         void App::_audioUpdate()
         {
             FTK_P();
-            const float volume = p.audioModel->getVolume();
-            const bool mute = p.audioModel->isMuted();
-            const std::vector<bool> channelMute = p.audioModel->getChannelMute();
-            const double audioOffset = p.audioModel->getSyncOffset();
             if (auto player = p.player->get())
             {
-                player->setVolume(volume);
-                player->setMute(mute || p.bmdDeviceActive);
-                player->setChannelMute(channelMute);
-                player->setAudioOffset(audioOffset);
+                player->setVolume(p.audioModel->getVolume());
+                player->setMute(p.audioModel->isMuted() || p.audioDeviceMute);
+                player->setChannelMute(p.audioModel->getChannelMute());
+                player->setAudioOffset(p.audioModel->getSyncOffset());
             }
-#if defined(TLRENDER_BMD)
-            p.bmdOutputDevice->setVolume(volume);
-            p.bmdOutputDevice->setMute(mute);
-            p.bmdOutputDevice->setChannelMute(channelMute);
-            p.bmdOutputDevice->setAudioOffset(audioOffset);
-#endif // TLRENDER_BMD
         }
     }
 }

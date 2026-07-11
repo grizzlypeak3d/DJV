@@ -38,7 +38,9 @@ namespace djv
             IToolWidget::_init(
                 context,
                 app,
-                models::Tool::View,
+                mainWindow,
+                "View",
+                "View",
                 "djv::app::ViewTool",
                 parent);
             FTK_P();

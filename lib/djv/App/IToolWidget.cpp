@@ -20,8 +20,7 @@ namespace djv
         struct IToolWidget::Private
         {
             std::shared_ptr<ftk::Settings> settings;
-
-            models::Tool tool = models::Tool::None;
+            std::string name;
             
             std::shared_ptr<ftk::Icon> icon;
             std::shared_ptr<ftk::Label> label;
@@ -33,7 +32,9 @@ namespace djv
         void IToolWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
-            models::Tool tool,
+            const std::shared_ptr<MainWindow>& mainWindow,
+            const std::string& name,
+            const std::string& icon,
             const std::string& objectName,
             const std::shared_ptr<IWidget>& parent)
         {
@@ -41,15 +42,15 @@ namespace djv
             FTK_P();
 
             _app = app;
+            _mainWindow = mainWindow;
 
             p.settings = app->getSettings();
+            p.name = name;
 
-            p.tool = tool;
-
-            p.icon = ftk::Icon::create(context, getIcon(tool));
+            p.icon = ftk::Icon::create(context, icon);
             p.icon->setMarginRole(ftk::SizeRole::MarginSmall);
 
-            p.label = ftk::Label::create(context, to_string(tool));
+            p.label = ftk::Label::create(context, name);
             p.label->setMarginRole(ftk::SizeRole::MarginSmall);
             p.label->setHStretch(ftk::Stretch::Expanding);
 
@@ -75,7 +76,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getToolsModel()->setActiveTool(models::Tool::None);
+                        app->getToolsModel()->setActiveTool(std::string());
                     }
                 });
         }
@@ -85,6 +86,14 @@ namespace djv
         {}
 
         IToolWidget::~IToolWidget()
+        {}
+
+        const std::string& IToolWidget::getToolName() const
+        {
+            return _p->name;
+        }
+
+        void IToolWidget::scrollTo(const std::string&)
         {}
 
         ftk::Size2I IToolWidget::getSizeHint() const
@@ -98,14 +107,11 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
-        void IToolWidget::scrollTo(const std::string&)
-        {}
-
         void IToolWidget::_loadSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >& value)
         {
             FTK_P();
             nlohmann::json json;
-            p.settings->get(ftk::Format("/{0}/Bellows").arg(getLabel(p.tool)), json);
+            p.settings->get(ftk::Format("/{0}/Bellows").arg(p.name), json);
             for (auto i = json.begin(); i != json.end(); ++i)
             {
                 auto j = value.find(i.key());
@@ -124,7 +130,7 @@ namespace djv
             {
                 json[i.first] = i.second->isOpen();
             }
-            p.settings->set(ftk::Format("/{0}/Bellows").arg(getLabel(p.tool)), json);
+            p.settings->set(ftk::Format("/{0}/Bellows").arg(p.name), json);
         }
 
         void IToolWidget::_setWidget(const std::shared_ptr<ftk::IWidget>& value)
@@ -132,6 +138,47 @@ namespace djv
             value->setHStretch(ftk::Stretch::Expanding);
             value->setVStretch(ftk::Stretch::Expanding);
             value->setParent(_p->toolLayout);
+        }
+
+        struct ToolWidgetFactory::Private
+        {
+            std::map<std::string, ToolWidgetFnc> fncs;
+        };
+
+        ToolWidgetFactory::ToolWidgetFactory() :
+            _p(new Private)
+        {}
+
+        ToolWidgetFactory::~ToolWidgetFactory()
+        {}
+
+        std::shared_ptr<ToolWidgetFactory> ToolWidgetFactory::create()
+        {
+            return std::shared_ptr<ToolWidgetFactory>(new ToolWidgetFactory);
+        }
+
+        void ToolWidgetFactory::addTool(
+            const std::string& name,
+            const ToolWidgetFnc& fnc)
+        {
+            _p->fncs[name] = fnc;
+        }
+
+        std::shared_ptr<IToolWidget> ToolWidgetFactory::createTool(
+            const std::string& name,
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            FTK_P();
+            std::shared_ptr<IToolWidget> out;
+            const auto i = p.fncs.find(name);
+            if (i != p.fncs.end())
+            {
+                out = i->second(context, app, mainWindow, parent);
+            }
+            return out;
         }
     }
 }

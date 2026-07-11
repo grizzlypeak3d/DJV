@@ -13,16 +13,24 @@ namespace djv
     {
         void ToolsMenu::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
             const std::shared_ptr<ToolsActions>& toolsActions,
             const std::shared_ptr<IWidget>& parent)
         {
             Menu::_init(context, parent);
 
-            const auto labels = models::getToolLabels();
             auto actions = toolsActions->getActions();
-            for (size_t i = 1; i < labels.size(); ++i)
+            std::map<std::string, std::vector<std::string> > tools;
+            for (const auto& tool : app->getToolsModel()->getTools())
             {
-                addAction(actions[labels[i]]);
+                tools[tool.sort].push_back(tool.name);
+            }
+            for (const auto& i : tools)
+            {
+                for (const auto& j : i.second)
+                {
+                    addAction(actions[j]);
+                }
             }
         }
 
@@ -31,11 +39,12 @@ namespace djv
 
         std::shared_ptr<ToolsMenu> ToolsMenu::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
             const std::shared_ptr<ToolsActions>& toolsActions,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ToolsMenu>(new ToolsMenu);
-            out->_init(context, toolsActions, parent);
+            out->_init(context, app, toolsActions, parent);
             return out;
         }
     }

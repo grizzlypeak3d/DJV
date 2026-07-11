@@ -10,10 +10,6 @@
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/ViewportModel.h>
 
-#if defined(TLRENDER_BMD)
-#include <tlRender/Device/BMDOutputDevice.h>
-#endif // TLRENDER_BMD
-
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
@@ -39,7 +35,6 @@ namespace djv
             bool aspectRatioOptionsEnabled = false;
             bool colorOptionsEnabled = false;
             bool audioOffsetEnabled = false;
-            bool outputDeviceEnabled = false;
 
             std::shared_ptr<ftk::Label> messagesLabel;
             std::shared_ptr<ftk::Label> infoLabel;
@@ -56,9 +51,6 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
-#if defined(TLRENDER_BMD)
-            std::shared_ptr<ftk::Observer<bool> > bmdActiveObserver;
-#endif // TLRENDER_BMD
         };
 
         void StatusBar::_init(
@@ -192,16 +184,6 @@ namespace djv
                     _indicatorUpdate();
                 });
 
-#if defined(TLRENDER_BMD)
-            p.bmdActiveObserver = ftk::Observer<bool>::create(
-                app->getBMDOutputDevice()->observeActive(),
-                [this](bool value)
-                {
-                    _p->outputDeviceEnabled = value;
-                    _indicatorUpdate();
-                });
-#endif // TLRENDER_BMD
-
             p.indicatorButton->setPressedCallback(
                 [this]
                 {
@@ -248,22 +230,22 @@ namespace djv
             IMouseWidget::mouseReleaseEvent(event);
             FTK_P();
             event.accept = true;
-            models::Tool tool = models::Tool::None;
+            std::string tool;
             if (ftk::contains(p.messagesLabel->getGeometry(), event.pos))
             {
-                tool = models::Tool::Messages;
+                tool = "Messages";
             }
             else if (ftk::contains(p.infoLabel->getGeometry(), event.pos))
             {
-                tool = models::Tool::Info;
+                tool = "Infofrmation";
             }
-            if (tool != models::Tool::None)
+            if (!tool.empty())
             {
                 if (auto app = p.app.lock())
                 {
                     auto toolsModel = app->getToolsModel();
-                    const models::Tool active = toolsModel->getActiveTool();
-                    toolsModel->setActiveTool(tool != active ? tool : models::Tool::None);
+                    const auto active = toolsModel->getActiveTool();
+                    toolsModel->setActiveTool(tool != active ? tool : std::string());
                 }
             }
         }
@@ -323,8 +305,7 @@ namespace djv
                 p.mirrorOptionsEnabled      ||
                 p.aspectRatioOptionsEnabled ||
                 p.colorOptionsEnabled       ||
-                p.audioOffsetEnabled        ||
-                p.outputDeviceEnabled;
+                p.audioOffsetEnabled;
             p.indicatorButton->setBackgroundRole(
                 enabled ?
                 ftk::ColorRole::Checked :
@@ -338,7 +319,6 @@ namespace djv
                 p.indicatorPopup->setAspectRatio(p.aspectRatioOptionsEnabled);
                 p.indicatorPopup->setColor(p.colorOptionsEnabled);
                 p.indicatorPopup->setAudioOffset(p.audioOffsetEnabled);
-                p.indicatorPopup->setOutputDevice(p.outputDeviceEnabled);
             }
         }
 

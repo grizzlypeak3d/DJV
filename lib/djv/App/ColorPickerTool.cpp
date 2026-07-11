@@ -41,7 +41,9 @@ namespace djv
             IToolWidget::_init(
                 context,
                 app,
-                models::Tool::ColorPicker,
+                mainWindow,
+                "Color Picker",
+                "ColorPicker",
                 "djv::app::ColorPickerTool",
                 parent);
             FTK_P();

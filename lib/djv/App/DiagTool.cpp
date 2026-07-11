@@ -28,12 +28,15 @@ namespace djv
         void DiagTool::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             IToolWidget::_init(
                 context,
                 app,
-                models::Tool::Diag,
+                mainWindow,
+                "Diagnostics",
+                std::string(),
                 "djv::app::DiagTool",
                 parent);
             FTK_P();
@@ -58,10 +61,11 @@ namespace djv
         std::shared_ptr<DiagTool> DiagTool::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
+            const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<DiagTool>(new DiagTool);
-            out->_init(context, app, parent);
+            out->_init(context, app, mainWindow, parent);
             return out;
         }
     }

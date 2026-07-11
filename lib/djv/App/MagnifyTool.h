@@ -9,9 +9,6 @@ namespace djv
 {
     namespace app
     {
-        class App;
-        class MainWindow;
-
         //! Magnification level.
         enum class MagnifyLevel
         {

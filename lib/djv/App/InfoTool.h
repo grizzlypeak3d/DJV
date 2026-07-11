@@ -9,8 +9,6 @@ namespace djv
 {
     namespace app
     {
-        class App;
-
         //! Information tool.
         class InfoTool : public IToolWidget
         {
@@ -20,6 +18,7 @@ namespace djv
             void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent);
 
             InfoTool();
@@ -30,6 +29,7 @@ namespace djv
             static std::shared_ptr<InfoTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
+                const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:

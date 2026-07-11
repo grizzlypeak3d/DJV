@@ -47,7 +47,6 @@ namespace djv
         struct MagnifyTool::Private
         {
             std::shared_ptr<ftk::Settings> settings;
-            std::weak_ptr<MainWindow> mainWindow;
 
             MagnifyLevel level = MagnifyLevel::_4X;
             bool viewPosAndZoom = true;
@@ -90,7 +89,9 @@ namespace djv
             IToolWidget::_init(
                 context,
                 app,
-                models::Tool::Magnify,
+                mainWindow,
+                "Magnify",
+                "Magnify",
                 "djv::app::MagnifyTool",
                 parent);
             FTK_P();
@@ -100,8 +101,6 @@ namespace djv
             p.settings->get("/Magnify/Level", s);
             from_string(s, p.level);
             p.settings->get("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
-
-            p.mainWindow = mainWindow;
 
             p.viewport = tl::ui::Viewport::create(context);
             p.viewport->setInputEnabled(false);
