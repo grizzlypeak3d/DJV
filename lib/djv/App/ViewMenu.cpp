@@ -28,6 +28,7 @@ namespace djv
 
             auto actions = viewActions->getActions();
             addAction(actions["Frame"]);
+            addAction(actions["TimelineRelativeZoom"]);
             addAction(actions["ZoomReset"]);
             addAction(actions["ZoomIn"]);
             addAction(actions["ZoomOut"]);

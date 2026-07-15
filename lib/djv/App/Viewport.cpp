@@ -4,6 +4,7 @@
 #include <djv/App/Viewport.h>
 
 #include <djv/App/App.h>
+#include <djv/App/RelativeView.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
@@ -20,12 +21,31 @@
 #include <ftk/UI/Spacer.h>
 #include <ftk/Core/Format.h>
 
+#include <algorithm>
+#include <cctype>
 #include <regex>
 
 namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            bool isTimelinePath(const ftk::Path& path)
+            {
+                std::string ext = path.getExt();
+                std::transform(
+                    ext.begin(),
+                    ext.end(),
+                    ext.begin(),
+                    [](unsigned char value)
+                    {
+                        return static_cast<char>(std::tolower(value));
+                    });
+                return ext == ".otio" || ext == ".otioz";
+            }
+        }
+
         struct Viewport::Private
         {
             std::weak_ptr<App> app;
@@ -47,6 +67,9 @@ namespace djv
             std::shared_ptr<ftk::Observable<ftk::V2I> > pick;
             std::shared_ptr<ftk::Observable<ftk::V2I> > samplePos;
             std::shared_ptr<ftk::Observable<ftk::Color4F> > colorSample;
+            std::shared_ptr<ftk::Observable<bool> > timelinePlayer;
+            bool timelineRelativeZoom = false;
+            ftk::Size2I renderSize;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
             std::shared_ptr<ftk::Label> cacheLabel;
@@ -75,6 +98,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
+            std::shared_ptr<ftk::Observer<models::TimelineSettings> > timelineSettingsObserver;
 
             enum class MouseMode
             {
@@ -103,6 +127,7 @@ namespace djv
             p.pick = ftk::Observable<ftk::V2I>::create();
             p.samplePos = ftk::Observable<ftk::V2I>::create();
             p.colorSample = ftk::Observable<ftk::Color4F>::create();
+            p.timelinePlayer = ftk::Observable<bool>::create(false);
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFont(ftk::FontType::Mono);
@@ -271,6 +296,13 @@ namespace djv
                     p.frameShuttleBinding = i != value.bindings.end() ? i->second : models::MouseActionBinding();
                     p.frameShuttleScale = value.frameShuttleScale;
                 });
+
+            p.timelineSettingsObserver = ftk::Observer<models::TimelineSettings>::create(
+                app->getSettingsModel()->observeTimeline(),
+                [this](const models::TimelineSettings& value)
+                {
+                    _p->timelineRelativeZoom = value.relativeZoom;
+                });
         }
 
         Viewport::Viewport() :
@@ -305,6 +337,16 @@ namespace djv
             return _p->colorSample;
         }
 
+        bool Viewport::isTimelinePlayer() const
+        {
+            return _p->timelinePlayer->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<bool> > Viewport::observeTimelinePlayer() const
+        {
+            return _p->timelinePlayer;
+        }
+
         void Viewport::pick(const ftk::V2I& imagePos)
         {
             FTK_P();
@@ -326,6 +368,8 @@ namespace djv
         {
             tl::ui::Viewport::setPlayer(player);
             FTK_P();
+            p.renderSize = ftk::Size2I();
+            p.timelinePlayer->setIfChanged(player && isTimelinePath(player->getPath()));
             if (player)
             {
                 p.path = player->getPath();
@@ -343,6 +387,17 @@ namespace djv
                     [this](const std::vector<tl::VideoFrame>& value)
                     {
                         _p->videoFramesSize = value.size();
+                        const ftk::Size2I renderSize = tl::getRenderSize(
+                            getCompareOptions().compare,
+                            value);
+                        if (renderSize.w > 0 && renderSize.h > 0)
+                        {
+                            const ftk::Size2I viewportSize = getGeometry().size();
+                            _relativeZoomUpdate(
+                                viewportSize,
+                                viewportSize,
+                                renderSize);
+                        }
                         _videoUpdate();
                     });
 
@@ -373,7 +428,17 @@ namespace djv
 
         void Viewport::setGeometry(const ftk::Box2I& value)
         {
+            const ftk::Size2I previousViewportSize = getGeometry().size();
             tl::ui::Viewport::setGeometry(value);
+            const ftk::Size2I currentViewportSize = value.size();
+            if (previousViewportSize != currentViewportSize &&
+                _p->renderSize.w > 0 && _p->renderSize.h > 0)
+            {
+                _relativeZoomUpdate(
+                    previousViewportSize,
+                    currentViewportSize,
+                    _p->renderSize);
+            }
             FTK_P();
             p.hudLayout->setGeometry(value);
         }
@@ -454,6 +519,34 @@ namespace djv
             tl::ui::Viewport::mouseReleaseEvent(event);
             FTK_P();
             p.mouse = Private::MouseData();
+        }
+
+        void Viewport::_relativeZoomUpdate(
+            const ftk::Size2I& previousViewportSize,
+            const ftk::Size2I& currentViewportSize,
+            const ftk::Size2I& renderSize)
+        {
+            FTK_P();
+            if (p.timelineRelativeZoom &&
+                p.timelinePlayer->get() &&
+                !hasFrameView() &&
+                p.renderSize.w > 0 && p.renderSize.h > 0)
+            {
+                RelativeView view;
+                if (getRelativeView(
+                    previousViewportSize,
+                    currentViewportSize,
+                    p.renderSize,
+                    renderSize,
+                    getViewPos(),
+                    getZoom(),
+                    getZoomRange(),
+                    view))
+                {
+                    setViewPosAndZoom(view.pos, view.zoom);
+                }
+            }
+            p.renderSize = renderSize;
         }
 
         void Viewport::_videoUpdate()

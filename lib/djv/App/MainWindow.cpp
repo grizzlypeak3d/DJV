@@ -63,6 +63,7 @@
 namespace djv_resource
 {
     extern std::vector<uint8_t> DJV_Icon;
+    extern std::vector<uint8_t> ViewTimelineRelativeZoom;
 }
 
 namespace djv
@@ -147,6 +148,9 @@ namespace djv
 
             auto iconSystem = context->getSystem<ftk::IconSystem>();
             iconSystem->add("DJV_Icon", djv_resource::DJV_Icon);
+            iconSystem->add(
+                "ViewTimelineRelativeZoom",
+                djv_resource::ViewTimelineRelativeZoom);
             setIcon(iconSystem->get("DJV_Icon", 1.0));
 
             p.app = app;

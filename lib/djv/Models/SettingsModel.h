@@ -248,6 +248,7 @@ namespace djv
         {
             bool minimize = true;
             bool frameView = true;
+            bool relativeZoom = false;
             bool scrollBars = true;
             bool autoScroll = true;
             bool stopOnScrub = false;

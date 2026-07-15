@@ -6,6 +6,7 @@
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/Viewport.h>
+#include <djv/Models/SettingsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/Core/Format.h>
@@ -19,6 +20,8 @@ namespace djv
         struct ViewActions::Private
         {
             std::shared_ptr<ftk::Observer<bool> > frameViewObserver;
+            std::shared_ptr<ftk::Observer<bool> > timelinePlayerObserver;
+            std::shared_ptr<ftk::Observer<models::TimelineSettings> > timelineSettingsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
@@ -35,6 +38,7 @@ namespace djv
             FTK_P();
 
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
+            auto appWeak = std::weak_ptr<App>(app);
             _actions["Frame"] = ftk::Action::create(
                 "Frame",
                 "ViewFrame",
@@ -43,6 +47,19 @@ namespace djv
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
                         mainWindow->getViewport()->setFrameView(value);
+                    }
+                });
+
+            _actions["TimelineRelativeZoom"] = ftk::Action::create(
+                "Timeline Relative Zoom",
+                "ViewTimelineRelativeZoom",
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settings = app->getSettingsModel()->getTimeline();
+                        settings.relativeZoom = value;
+                        app->getSettingsModel()->setTimeline(settings);
                     }
                 });
 
@@ -89,7 +106,6 @@ namespace djv
                     }
                 });
 
-            auto appWeak = std::weak_ptr<App>(app);
             _actions["Red"] = ftk::Action::create(
                 "Red Channel",
                 [appWeak](bool value)
@@ -248,6 +264,7 @@ namespace djv
             _tooltips =
             {
                 { "Frame",  "Frame the view to fit the image." },
+                { "TimelineRelativeZoom", "Preserve zoom and center relative to each clip when an OTIO timeline changes resolution." },
                 { "ZoomReset", "Reset the view zoom to 1:1." },
                 { "ZoomIn", "Zoom the view in." },
                 { "ZoomOut", "Zoom the view out." },
@@ -265,6 +282,20 @@ namespace djv
                 [this](bool value)
                 {
                     _actions["Frame"]->setChecked(value);
+                });
+
+            p.timelinePlayerObserver = ftk::Observer<bool>::create(
+                mainWindow->getViewport()->observeTimelinePlayer(),
+                [this](bool value)
+                {
+                    _actions["TimelineRelativeZoom"]->setEnabled(value);
+                });
+
+            p.timelineSettingsObserver = ftk::Observer<models::TimelineSettings>::create(
+                app->getSettingsModel()->observeTimeline(),
+                [this](const models::TimelineSettings& value)
+                {
+                    _actions["TimelineRelativeZoom"]->setChecked(value.relativeZoom);
                 });
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(

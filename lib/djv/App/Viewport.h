@@ -45,6 +45,12 @@ namespace djv
             //! action would. Used by the documentation screenshot capture.
             void pick(const ftk::V2I& imagePos);
 
+            //! Get whether the current player contains an editorial timeline.
+            bool isTimelinePlayer() const;
+
+            //! Observe whether the current player contains an editorial timeline.
+            std::shared_ptr<ftk::IObservable<bool> > observeTimelinePlayer() const;
+
             void setPlayer(const std::shared_ptr<tl::Player>&) override;
 
             ftk::Size2I getSizeHint() const override;
@@ -54,6 +60,10 @@ namespace djv
             void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
         private:
+            void _relativeZoomUpdate(
+                const ftk::Size2I&,
+                const ftk::Size2I&,
+                const ftk::Size2I&);
             void _videoUpdate();
             void _hudUpdate();
             void _hudLayout();

@@ -376,6 +376,7 @@ namespace djv
             return
                 minimize == other.minimize &&
                 frameView == other.frameView &&
+                relativeZoom == other.relativeZoom &&
                 scrollBars == other.scrollBars &&
                 autoScroll == other.autoScroll &&
                 stopOnScrub == other.stopOnScrub &&
@@ -1019,6 +1020,7 @@ namespace djv
         {
             json["Minimize"] = value.minimize;
             json["FrameView"] = value.frameView;
+            json["RelativeZoom"] = value.relativeZoom;
             json["ScrollBars"] = value.scrollBars;
             json["AutoScroll"] = value.autoScroll;
             json["StopOnScrub"] = value.stopOnScrub;
@@ -1164,6 +1166,11 @@ namespace djv
         {
             json.at("Minimize").get_to(value.minimize);
             json.at("FrameView").get_to(value.frameView);
+            const auto relativeZoom = json.find("RelativeZoom");
+            if (relativeZoom != json.end())
+            {
+                relativeZoom->get_to(value.relativeZoom);
+            }
             json.at("ScrollBars").get_to(value.scrollBars);
             json.at("AutoScroll").get_to(value.autoScroll);
             json.at("StopOnScrub").get_to(value.stopOnScrub);

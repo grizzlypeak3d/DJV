@@ -1,7 +1,8 @@
 set(HEADERS)
 set(SOURCE)
 set(RESOURCES
-    etc/Icons/DJV_Icon.svg)
+    etc/Icons/DJV_Icon.svg
+    etc/Icons/ViewTimelineRelativeZoom.svg)
 foreach(RESOURCE ${RESOURCES})
     get_filename_component(RESOURCE_BASE ${RESOURCE} NAME_WE)
     add_custom_command(

@@ -28,6 +28,19 @@ out from the **View** menu and the zoom control on the **View** tool bar.
 
 Locations: **View** menu, **View** tool bar, **View** tool
 
+### Relative timeline zoom
+
+OpenTimelineIO timelines can contain clips with different image resolutions.
+Enable **Timeline Relative Zoom** to preserve the apparent zoom and normalized
+view center when playback moves between those clips. This keeps clips with the
+same aspect ratio at the same displayed size while still allowing manual zoom
+and pan adjustments.
+
+The option is available only for OTIO and OTIOZ timelines. Regular media files
+keep the standard view behavior.
+
+Locations: **View** menu, **View** tool bar
+
 ## Color channels
 
 Individual color channels can be isolated to inspect them.

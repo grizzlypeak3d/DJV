@@ -36,6 +36,7 @@ namespace djv
 
             auto actions = viewActions->getActions();
             addAction(actions["Frame"]);
+            addAction(actions["TimelineRelativeZoom"]);
 
             p.zoomEdit = ftk::DoubleEdit::create(context);
             auto viewport = mainWindow->getViewport();
