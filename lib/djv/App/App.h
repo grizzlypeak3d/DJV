@@ -37,6 +37,7 @@ namespace djv
     namespace app
     {
         class MainWindow;
+        class StatusBar;
         class ToolWidgetFactory;
 
         //! Application.
@@ -114,6 +115,9 @@ namespace djv
             //! Get the tool widget factory.
             const std::shared_ptr<ToolWidgetFactory>& getToolWidgetFactory() const;
 
+            //! Create the status bar.
+            virtual std::shared_ptr<StatusBar> createStatusBar();
+
             //! Get the main window.
             const std::shared_ptr<MainWindow>& getMainWindow() const;
 
@@ -129,16 +133,19 @@ namespace djv
             void run() override;
 
         protected:
+            virtual void _modelsInit();
+            virtual void _observersInit();
+            virtual void _inputFilesInit();
+            virtual void _uiInit();
+            virtual void _mainWindowInit();
+
             void _setAudioDeviceMute(bool);
+
+            virtual void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);
             
             models::ShortcutsSettings _shortcutsSettings;
 
         private:
-            void _modelsInit();
-            void _observersInit();
-            void _inputFilesInit();
-            void _uiInit();
-
             std::filesystem::path _appDocsPath();
             std::filesystem::path _getLogFilePath();
             std::filesystem::path _getSettingsPath();
@@ -146,7 +153,6 @@ namespace djv
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _layersUpdate(const std::vector<int>&);
-            void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);
             void _audioUpdate();
 
             FTK_PRIVATE();

@@ -17,6 +17,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
+                const std::vector<std::pair<std::string, std::string> >&,
                 const std::shared_ptr<IWidget>& parent);
 
             StatusIndicatorPopup();
@@ -26,16 +27,10 @@ namespace djv
 
             static std::shared_ptr<StatusIndicatorPopup> create(
                 const std::shared_ptr<ftk::Context>&,
+                const std::vector<std::pair<std::string, std::string> >&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            void setOCIO(bool);
-            void setLUT(bool);
-            void setChannels(bool);
-            void setMirror(bool);
-            void setAspectRatio(bool);
-            void setColor(bool);
-            void setAudioOffset(bool);
-            void setOutputDevice(bool);
+            void setIndicators(const std::map<std::string, bool>&);
 
         private:
             FTK_PRIVATE();

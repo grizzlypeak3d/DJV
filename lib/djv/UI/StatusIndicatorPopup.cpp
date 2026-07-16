@@ -19,6 +19,7 @@ namespace djv
 
         void StatusIndicatorPopup::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::vector<std::pair<std::string, std::string> >& indicators,
             const std::shared_ptr<IWidget>& parent)
         {
             IWidgetPopup::_init(
@@ -32,20 +33,8 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             setWidget(layout);
 
-            const std::vector<std::pair<std::string, std::string> > labels =
-            {
-                { "OCIO", "OCIO" },
-                { "LUT", "LUT" },
-                { "Channels", "Image channels" },
-                { "Mirror", "Mirror" },
-                { "AspectRatio", "Aspect ratio" },
-                { "Color", "Color controls" },
-                { "AudioOffset", "Audio offset" },
-                { "OutputDevice", "Output device" }
-            };
-
             int row = 0;
-            for (const auto& i : labels)
+            for (const auto& i : indicators)
             {
                 p.icons[i.first] = ftk::Icon::create(context, "MenuChecked", layout);
                 p.labels[i.first] = ftk::Label::create(context, i.second, layout);
@@ -64,83 +53,33 @@ namespace djv
 
         std::shared_ptr<StatusIndicatorPopup> StatusIndicatorPopup::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::vector<std::pair<std::string, std::string> >& indicators,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<StatusIndicatorPopup>(new StatusIndicatorPopup);
-            out->_init(context, parent);
+            out->_init(context, indicators, parent);
             return out;
         }
 
-        void StatusIndicatorPopup::setOCIO(bool value)
+        void StatusIndicatorPopup::setIndicators(const std::map<std::string, bool>& values)
         {
-            _p->icons["OCIO"]->setEnabled(value);
-            _p->icons["OCIO"]->setBackgroundRole(value ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            _p->labels["OCIO"]->setEnabled(value);
-        }
-
-        void StatusIndicatorPopup::setLUT(bool value)
-        {
-            _p->icons["LUT"]->setEnabled(value);
-            _p->icons["LUT"]->setBackgroundRole(value ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            _p->labels["LUT"]->setEnabled(value);
-        }
-
-        void StatusIndicatorPopup::setChannels(bool value)
-        {
-            _p->icons["Channels"]->setEnabled(value);
-            _p->icons["Channels"]->setBackgroundRole(value ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            _p->labels["Channels"]->setEnabled(value);
-        }
-
-        void StatusIndicatorPopup::setMirror(bool value)
-        {
-            _p->icons["Mirror"]->setEnabled(value);
-            _p->icons["Mirror"]->setBackgroundRole(value ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            _p->labels["Mirror"]->setEnabled(value);
-        }
-
-        void StatusIndicatorPopup::setAspectRatio(bool value)
-        {
-            _p->icons["AspectRatio"]->setEnabled(value);
-            _p->icons["AspectRatio"]->setBackgroundRole(value ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            _p->labels["AspectRatio"]->setEnabled(value);
-        }
-
-        void StatusIndicatorPopup::setColor(bool value)
-        {
-            _p->icons["Color"]->setEnabled(value);
-            _p->icons["Color"]->setBackgroundRole(value ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            _p->labels["Color"]->setEnabled(value);
-        }
-
-        void StatusIndicatorPopup::setAudioOffset(bool value)
-        {
-            _p->icons["AudioOffset"]->setEnabled(value);
-            _p->icons["AudioOffset"]->setBackgroundRole(value ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            _p->labels["AudioOffset"]->setEnabled(value);
-        }
-
-        void StatusIndicatorPopup::setOutputDevice(bool value)
-        {
-            _p->icons["OutputDevice"]->setEnabled(value);
-            _p->icons["OutputDevice"]->setBackgroundRole(value ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            _p->labels["OutputDevice"]->setEnabled(value);
+            FTK_P();
+            for (const auto& i : values)
+            {
+                const auto j = p.icons.find(i.first);
+                if (j != p.icons.end())
+                {
+                    j->second->setEnabled(i.second);
+                    j->second->setBackgroundRole(i.second ?
+                        ftk::ColorRole::Checked :
+                        ftk::ColorRole::None);
+                }
+                const auto k = p.labels.find(i.first);
+                if (k != p.labels.end())
+                {
+                    k->second->setEnabled(i.second);
+                }
+            }
         }
     }
 }

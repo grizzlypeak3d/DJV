@@ -250,6 +250,61 @@ namespace djv
             }
         }
 
+        bool StatusBar::_hasIndicator() const
+        {
+            FTK_P();
+            return
+                p.ocioOptionsEnabled        ||
+                p.lutOptionsEnabled         ||
+                p.channelsOptionsEnabled    ||
+                p.mirrorOptionsEnabled      ||
+                p.aspectRatioOptionsEnabled ||
+                p.colorOptionsEnabled       ||
+                p.audioOffsetEnabled;
+        }
+
+        std::vector<std::pair<std::string, std::string> > StatusBar::_getIndicators() const
+        {
+            return
+            {
+                { "OCIO", "OCIO" },
+                { "LUT", "LUT" },
+                { "Channels", "Image channels" },
+                { "Mirror", "Mirror" },
+                { "AspectRatio", "Aspect ratio" },
+                { "Color", "Color controls" },
+                { "AudioOffset", "Audio offset" }
+            };
+        }
+        
+        std::map<std::string, bool> StatusBar::_getIndicatorValues() const
+        {
+            FTK_P();
+            return
+            {
+                { "OCIO", p.ocioOptionsEnabled },
+                { "LUT", p.lutOptionsEnabled },
+                { "Channels", p.channelsOptionsEnabled },
+                { "Mirror", p.mirrorOptionsEnabled },
+                { "AspectRatio", p.aspectRatioOptionsEnabled },
+                { "Color", p.colorOptionsEnabled },
+                { "AudioOffset", p.audioOffsetEnabled }
+            };
+        }
+
+        void StatusBar::_indicatorUpdate()
+        {
+            FTK_P();
+            p.indicatorButton->setBackgroundRole(
+                _hasIndicator() ?
+                ftk::ColorRole::Checked :
+                ftk::ColorRole::None);
+            if (p.indicatorPopup)
+            {
+                p.indicatorPopup->setIndicators(_getIndicatorValues());
+            }
+        }
+
         void StatusBar::_infoUpdate(const ftk::Path& path, const tl::IOInfo& info)
         {
             FTK_P();
@@ -295,39 +350,14 @@ namespace djv
                 arg(!tooltip.empty() ? tooltip : tooltipDefault));
         }
 
-        void StatusBar::_indicatorUpdate()
-        {
-            FTK_P();
-            const bool enabled =
-                p.ocioOptionsEnabled        ||
-                p.lutOptionsEnabled         ||
-                p.channelsOptionsEnabled    ||
-                p.mirrorOptionsEnabled      ||
-                p.aspectRatioOptionsEnabled ||
-                p.colorOptionsEnabled       ||
-                p.audioOffsetEnabled;
-            p.indicatorButton->setBackgroundRole(
-                enabled ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            if (p.indicatorPopup)
-            {
-                p.indicatorPopup->setOCIO(p.ocioOptionsEnabled);
-                p.indicatorPopup->setLUT(p.lutOptionsEnabled);
-                p.indicatorPopup->setChannels(p.channelsOptionsEnabled);
-                p.indicatorPopup->setMirror(p.mirrorOptionsEnabled);
-                p.indicatorPopup->setAspectRatio(p.aspectRatioOptionsEnabled);
-                p.indicatorPopup->setColor(p.colorOptionsEnabled);
-                p.indicatorPopup->setAudioOffset(p.audioOffsetEnabled);
-            }
-        }
-
         void StatusBar::_showIndicatorPopup()
         {
             FTK_P();
             if (!p.indicatorPopup)
             {
-                p.indicatorPopup = ui::StatusIndicatorPopup::create(getContext());
+                p.indicatorPopup = ui::StatusIndicatorPopup::create(
+                    getContext(),
+                    _getIndicators());
                 _indicatorUpdate();
                 p.indicatorPopup->open(getWindow(), p.indicatorButton->getGeometry());
                 std::weak_ptr<StatusBar> weak(std::dynamic_pointer_cast<StatusBar>(shared_from_this()));

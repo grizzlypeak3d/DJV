@@ -16,6 +16,7 @@
 #include <djv/App/MessagesTool.h>
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/SettingsTool.h>
+#include <djv/App/StatusBar.h>
 #include <djv/App/SysLogTool.h>
 #include <djv/App/ViewTool.h>
 #include <djv/App/Viewport.h>
@@ -372,34 +373,6 @@ namespace djv
                     p.cmdLine.captureShot,
                     p.cmdLine.captureOutput
                 });
-            if (hasCmdLineHelp())
-                return;
-
-            p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
-
-            if (p.cmdLine.settingsFileName->found())
-            {
-                p.settingsFile = std::filesystem::u8path(
-                    p.cmdLine.settingsFileName->getValue());
-            }
-            p.settings = ftk::Settings::create(
-                _context,
-                p.settingsFile,
-                p.cmdLine.resetSettings->found());
-
-            _modelsInit();
-            _observersInit();
-            _inputFilesInit();
-            
-            // Suppress first-run UI so it can't cover capture screenshots.
-            if (p.cmdLine.captureShot->found())
-            {
-                auto misc = getSettingsModel()->getMisc();
-                misc.showSetup = false;
-                getSettingsModel()->setMisc(misc);
-            }
-
-            _uiInit();
         }
 
         App::App() :
@@ -563,6 +536,13 @@ namespace djv
             return _p->toolWidgetFactory;
         }
 
+        std::shared_ptr<StatusBar> App::createStatusBar()
+        {
+            return StatusBar::create(
+                _context,
+                std::dynamic_pointer_cast<App>(shared_from_this()));
+        }
+
         const std::shared_ptr<MainWindow>& App::getMainWindow() const
         {
             return _p->mainWindow;
@@ -699,6 +679,32 @@ namespace djv
         {
             FTK_P();
 
+            p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
+
+            if (p.cmdLine.settingsFileName->found())
+            {
+                p.settingsFile = std::filesystem::u8path(
+                    p.cmdLine.settingsFileName->getValue());
+            }
+            p.settings = ftk::Settings::create(
+                _context,
+                p.settingsFile,
+                p.cmdLine.resetSettings->found());
+
+            _modelsInit();
+            _observersInit();
+            _inputFilesInit();
+            
+            // Suppress first-run UI so it can't cover capture screenshots.
+            if (p.cmdLine.captureShot->found())
+            {
+                auto misc = getSettingsModel()->getMisc();
+                misc.showSetup = false;
+                getSettingsModel()->setMisc(misc);
+            }
+
+            _uiInit();
+
             if (p.cmdLine.version->found())
             {
                 std::cout << DJV_VERSION_FULL << std::endl;
@@ -709,39 +715,8 @@ namespace djv
                 std::cout << ftk::join(getSysInfo(), '\n') << std::endl;
                 return;
             }
-
-            p.mainWindow = MainWindow::create(
-                _context,
-                std::dynamic_pointer_cast<App>(shared_from_this()));
-            p.mainWindow->setCloseCallback(
-                [this]
-                {
-                    FTK_P();
-                    if (p.secondaryWindow)
-                    {
-                        p.secondaryWindow->close();
-                        p.secondaryWindow.reset();
-                    }
-                });
-
-            p.viewPosZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
-                p.mainWindow->getViewport()->observeViewPosAndZoom(),
-                [this](const std::pair<ftk::V2I, double>& value)
-                {
-                    _viewUpdate(
-                        value.first,
-                        value.second,
-                        _p->mainWindow->getViewport()->hasFrameView());
-                });
-            p.viewFramedObserver = ftk::Observer<bool>::create(
-                p.mainWindow->getViewport()->observeFramed(),
-                [this](bool value)
-                {
-                    _viewUpdate(
-                        _p->mainWindow->getViewport()->getViewPos(),
-                        _p->mainWindow->getViewport()->getZoom(),
-                        value);
-                });
+            
+            _mainWindowInit();
 
             if (p.cmdLine.debugLoop->found() &&
                 !p.cmdLine.inputs->getList().empty())
@@ -800,15 +775,6 @@ namespace djv
             }
 
             ftk::App::run();
-        }
-
-        void App::_setAudioDeviceMute(bool value)
-        {
-            FTK_P();
-            if (value == p.audioDeviceMute)
-                return;
-            p.audioDeviceMute = value;
-            _audioUpdate();
         }
 
         void App::_modelsInit()
@@ -1181,6 +1147,51 @@ namespace djv
             p.toolWidgetFactory->addTool("View", &ViewTool::create);
         }
 
+        void App::_mainWindowInit()
+        {
+            FTK_P();
+            p.mainWindow = MainWindow::create(
+                _context,
+                std::dynamic_pointer_cast<App>(shared_from_this()));
+            p.mainWindow->setCloseCallback(
+                [this]
+                {
+                    FTK_P();
+                    if (p.secondaryWindow)
+                    {
+                        p.secondaryWindow->close();
+                        p.secondaryWindow.reset();
+                    }
+                });
+
+            p.viewPosZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
+                p.mainWindow->getViewport()->observeViewPosAndZoom(),
+                [this](const std::pair<ftk::V2I, double>& value)
+                {
+                    _viewUpdate(
+                        value.first,
+                        value.second,
+                        _p->mainWindow->getViewport()->hasFrameView());
+                });
+            p.viewFramedObserver = ftk::Observer<bool>::create(
+                p.mainWindow->getViewport()->observeFramed(),
+                [this](bool value)
+                {
+                    _viewUpdate(
+                        _p->mainWindow->getViewport()->getViewPos(),
+                        _p->mainWindow->getViewport()->getZoom(),
+                        value);
+                });
+        }
+
+        void App::_setAudioDeviceMute(bool value)
+        {
+            FTK_P();
+            if (value == p.audioDeviceMute)
+                return;
+            p.audioDeviceMute = value;
+            _audioUpdate();
+        }
 
         std::filesystem::path App::_appDocsPath()
         {

@@ -42,9 +42,14 @@ namespace djv
             void mousePressEvent(ftk::MouseClickEvent&) override;
             void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
+        protected:
+            virtual bool _hasIndicator() const;
+            virtual std::vector<std::pair<std::string, std::string> > _getIndicators() const;
+            virtual std::map<std::string, bool> _getIndicatorValues() const;
+            void _indicatorUpdate();
+            
         private:
             void _infoUpdate(const ftk::Path&, const tl::IOInfo&);
-            void _indicatorUpdate();
             void _showIndicatorPopup();
 
             FTK_PRIVATE();
