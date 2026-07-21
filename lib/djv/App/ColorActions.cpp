@@ -5,6 +5,7 @@
 
 #include <djv/App/App.h>
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/ViewportModel.h>
 
 namespace djv
 {
@@ -35,6 +36,7 @@ namespace djv
                         app->getColorModel()->setOCIOOptions(options);
                     }
                 });
+
             _actions["LUT"] = ftk::Action::create(
                 "Enable LUT",
                 [appWeak](bool value)

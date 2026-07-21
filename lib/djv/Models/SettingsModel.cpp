@@ -208,6 +208,7 @@ namespace djv
                 Shortcut("View/Green", "Green channel", ftk::Key::G),
                 Shortcut("View/Blue", "Blue channel", ftk::Key::B),
                 Shortcut("View/Alpha", "Alpha channel", ftk::Key::A),
+                Shortcut("View/Negative", "Negative", ftk::KeyShortcut(ftk::Key::I, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("View/MirrorHorizontal", "Mirror horizontal", ftk::Key::H),
                 Shortcut("View/MirrorVertical", "Mirror vertical", ftk::Key::V),
                 Shortcut("View/AspectRatio_0", "Default aspect ratio"),

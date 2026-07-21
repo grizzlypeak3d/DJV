@@ -328,7 +328,6 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
             std::shared_ptr<ftk::IntEditSlider> hueSlider;
-            std::shared_ptr<ftk::CheckBox> invertCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
@@ -373,9 +372,6 @@ namespace djv
             p.hueSlider->setDefault(0);
             ftk::setScreenshotTag(p.hueSlider, "Color.Controls.Hue");
 
-            p.invertCheckBox = ftk::CheckBox::create(context);
-            ftk::setScreenshotTag(p.invertCheckBox, "Color.Controls.Invert");
-
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -384,7 +380,6 @@ namespace djv
             p.layout->addRow("Contrast:", p.sliders["Contrast"]);
             p.layout->addRow("Saturation:", p.sliders["Saturation"]);
             p.layout->addRow("Hue:", p.hueSlider);
-            p.layout->addRow("Invert:", p.invertCheckBox);
 
             p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
@@ -397,7 +392,6 @@ namespace djv
                     p.sliders["Contrast"]->setValue(value.color.contrast.x);
                     p.sliders["Saturation"]->setValue(value.color.saturation.x);
                     p.hueSlider->setValue(value.color.hue * 360);
-                    p.invertCheckBox->setChecked(value.color.invert);
                 });
 
             p.enabledCheckBox->setCheckedCallback(
@@ -458,15 +452,6 @@ namespace djv
                     auto options = viewportModel->getDisplayOptions();
                     options.color.enabled = true;
                     options.color.hue = value / 360.F;
-                    viewportModel->setDisplayOptions(options);
-                });
-
-            p.invertCheckBox->setCheckedCallback(
-                [viewportModel](bool value)
-                {
-                    auto options = viewportModel->getDisplayOptions();
-                    options.color.enabled = true;
-                    options.color.invert = value;
                     viewportModel->setDisplayOptions(options);
                 });
         }

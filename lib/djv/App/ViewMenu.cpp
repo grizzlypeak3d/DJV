@@ -38,6 +38,8 @@ namespace djv
             addAction(actions["Blue"]);
             addAction(actions["Alpha"]);
             addDivider();
+            addAction(actions["Negative"]);
+            addDivider();
             addAction(actions["MirrorHorizontal"]);
             addAction(actions["MirrorVertical"]);
             addDivider();

@@ -1,14 +1,15 @@
 ## 3.5.0
 
 Changes:
-* Add an option for custom aspect ratios.
+* Add an image negative option.
+* Add custom aspect ratios.
 * Add a center marker option.
 * Add more grid and HUD options.
 * Add an option for whether the magnify tool tracks the view.
 * Add the NotoSansCJKsc-Regular font for basic CJK text rendering.
 * Add more OpenEXR attributes.
-* Add JPEG to export options.
-* Add FFmpeg option to enable hardware decoding for compatible files.
+* Add the JPEG file format to export options.
+* Add a FFmpeg option to enable hardware decoding for compatible files.
 * Add the aom library for AV1 decoding support (macOS and Linux).
 * Allow the "Escape" key to be used for keyboard shortcuts.
 * Add image I/O library versions to the system information.

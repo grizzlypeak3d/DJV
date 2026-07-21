@@ -146,6 +146,18 @@ namespace djv
                     }
                 });
 
+            _actions["Negative"] = ftk::Action::create(
+                "Negative",
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getDisplayOptions();
+                        options.negative = value;
+                        app->getViewportModel()->setDisplayOptions(options);
+                    }
+                });
+
             _actions["MirrorHorizontal"] = ftk::Action::create(
                 "Mirror Horizontal",
                 [appWeak](bool value)
@@ -275,6 +287,8 @@ namespace djv
                     _actions["Green"]->setChecked(ftk::ChannelDisplay::Green == value.channels);
                     _actions["Blue"]->setChecked(ftk::ChannelDisplay::Blue == value.channels);
                     _actions["Alpha"]->setChecked(ftk::ChannelDisplay::Alpha == value.channels);
+
+                    _actions["Negative"]->setChecked(value.negative);
 
                     _actions["MirrorHorizontal"]->setChecked(value.mirror.x);
                     _actions["MirrorVertical"]->setChecked(value.mirror.y);

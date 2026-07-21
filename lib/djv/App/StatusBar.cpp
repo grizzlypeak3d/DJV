@@ -28,12 +28,13 @@ namespace djv
         {
             std::weak_ptr<App> app;
 
-            bool ocioOptionsEnabled = false;
-            bool lutOptionsEnabled = false;
-            bool channelsOptionsEnabled = false;
-            bool mirrorOptionsEnabled = false;
-            bool aspectRatioOptionsEnabled = false;
-            bool colorOptionsEnabled = false;
+            bool channelsEnabled = false;
+            bool negativeEnabled = false;
+            bool mirrorEnabled = false;
+            bool aspectRatioEnabled = false;
+            bool ocioEnabled = false;
+            bool lutEnabled = false;
+            bool colorEnabled = false;
             bool audioOffsetEnabled = false;
 
             std::shared_ptr<ftk::Label> messagesLabel;
@@ -46,10 +47,10 @@ namespace djv
 
             std::shared_ptr<ftk::ListObserver<std::string> > messagesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
-            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
         };
 
@@ -133,33 +134,18 @@ namespace djv
                         player ? player->getIOInfo() : tl::IOInfo());
                 });
 
-            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeOCIOOptions(),
-                [this](const tl::OCIOOptions& value)
-                {
-                    _p->ocioOptionsEnabled = value.enabled;
-                    _indicatorUpdate();
-                });
-
-            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
-                app->getColorModel()->observeLUTOptions(),
-                [this](const tl::LUTOptions& value)
-                {
-                    _p->lutOptionsEnabled = value.enabled;
-                    _indicatorUpdate();
-                });
-
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 app->getViewportModel()->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
                     FTK_P();
-                    p.channelsOptionsEnabled =
+                    p.channelsEnabled =
                         value.channels != ftk::ChannelDisplay::Color;
-                    p.mirrorOptionsEnabled =
+                    p.negativeEnabled = value.negative;
+                    p.mirrorEnabled =
                         value.mirror.x ||
                         value.mirror.y;
-                    p.colorOptionsEnabled =
+                    p.colorEnabled =
                         value.color.enabled    ||
                         value.levels.enabled   ||
                         value.exposure.enabled ||
@@ -172,7 +158,23 @@ namespace djv
                 [this](const models::AspectRatioOptions& value)
                 {
                     FTK_P();
-                    p.aspectRatioOptionsEnabled = value.index != 0;
+                    p.aspectRatioEnabled = value.index != 0;
+                    _indicatorUpdate();
+                });
+
+            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
+                app->getColorModel()->observeOCIOOptions(),
+                [this](const tl::OCIOOptions& value)
+                {
+                    _p->ocioEnabled = value.enabled;
+                    _indicatorUpdate();
+                });
+
+            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
+                app->getColorModel()->observeLUTOptions(),
+                [this](const tl::LUTOptions& value)
+                {
+                    _p->lutEnabled = value.enabled;
                     _indicatorUpdate();
                 });
 
@@ -254,12 +256,13 @@ namespace djv
         {
             FTK_P();
             return
-                p.ocioOptionsEnabled        ||
-                p.lutOptionsEnabled         ||
-                p.channelsOptionsEnabled    ||
-                p.mirrorOptionsEnabled      ||
-                p.aspectRatioOptionsEnabled ||
-                p.colorOptionsEnabled       ||
+                p.channelsEnabled    ||
+                p.negativeEnabled    ||
+                p.mirrorEnabled      ||
+                p.aspectRatioEnabled ||
+                p.ocioEnabled        ||
+                p.lutEnabled         ||
+                p.colorEnabled       ||
                 p.audioOffsetEnabled;
         }
 
@@ -267,11 +270,12 @@ namespace djv
         {
             return
             {
-                { "OCIO", "OCIO" },
-                { "LUT", "LUT" },
                 { "Channels", "Image channels" },
+                { "Negative", "Negative" },
                 { "Mirror", "Mirror" },
                 { "AspectRatio", "Aspect ratio" },
+                { "OCIO", "OCIO" },
+                { "LUT", "LUT" },
                 { "Color", "Color controls" },
                 { "AudioOffset", "Audio offset" }
             };
@@ -282,12 +286,13 @@ namespace djv
             FTK_P();
             return
             {
-                { "OCIO", p.ocioOptionsEnabled },
-                { "LUT", p.lutOptionsEnabled },
-                { "Channels", p.channelsOptionsEnabled },
-                { "Mirror", p.mirrorOptionsEnabled },
-                { "AspectRatio", p.aspectRatioOptionsEnabled },
-                { "Color", p.colorOptionsEnabled },
+                { "Channels", p.channelsEnabled },
+                { "Negative", p.negativeEnabled },
+                { "Mirror", p.mirrorEnabled },
+                { "AspectRatio", p.aspectRatioEnabled },
+                { "OCIO", p.ocioEnabled },
+                { "LUT", p.lutEnabled },
+                { "Color", p.colorEnabled },
                 { "AudioOffset", p.audioOffsetEnabled }
             };
         }
