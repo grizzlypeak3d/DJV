@@ -2,6 +2,7 @@
 
 Changes:
 * Add audio export.
+* Add a waveform height option.
 * Add an image negative option.
 * Add custom aspect ratios.
 * Add a center marker option.
@@ -19,6 +20,7 @@ Changes:
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
 * Fixes for the grid and outline in compare mode.
+* Fixes to prevent cache usage exceeding 100%
 
 * Library updates:
     - OpenImageIO v3.1.14.0
