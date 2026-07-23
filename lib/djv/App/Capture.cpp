@@ -422,7 +422,9 @@ namespace djv
                     if (!section.empty())
                         p.lateSteps.push_back({ { "scrollTool", section } });
                 }
-                app->getToolsModel()->setActiveTool(toolStr);
+                app->getCommandsModel()->exec(
+                    ftk::Format("Tools/{0}").arg(toolStr),
+                    { { "value", true } });
             }
             else if (step.contains("tab"))
             {
@@ -500,14 +502,14 @@ namespace djv
             else if (step.contains("compare"))
             {
                 // Set the A/B comparison mode by its label, e.g. "Tile",
-                // "Wipe", "Overlay", "Difference" (case-insensitive). The B
-                // files themselves are set with the "b" verb.
+                // "Wipe", "Overlay", "Difference". The B files themselves are
+                // set with the "b" verb.
                 const std::string name = step.at("compare").get<std::string>();
-                auto options = app->getFilesModel()->getCompareOptions();
-                if (from_string(name, options.compare))
-                    app->getFilesModel()->setCompareOptions(options);
-                else
+                if (!app->getCommandsModel()->exec(
+                    ftk::Format("Compare/{0}").arg(name)))
+                {
                     note(p.shotId, "unknown compare mode '" + name + "'");
+                }
             }
             else if (step.contains("layer"))
             {

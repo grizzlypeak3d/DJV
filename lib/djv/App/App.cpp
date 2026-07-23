@@ -97,6 +97,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineFlag> version;
             std::shared_ptr<ftk::CmdLineFlag> sysInfo;
             std::shared_ptr<ftk::CmdLineFlag> listCommands;
+            std::shared_ptr<ftk::CmdLineListOption<std::string> > command;
             std::shared_ptr<ftk::CmdLineOption<int> > debugLoop;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureManifest;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureShot;
@@ -151,6 +152,9 @@ namespace djv
 
             std::shared_ptr<ftk::Timer> debugTimer;
             int debugInput = 0;
+
+            std::shared_ptr<ftk::Timer> commandTimer;
+            int commandTicks = 0;
         };
 
         void App::_init(
@@ -316,6 +320,14 @@ namespace djv
             p.cmdLine.listCommands = ftk::CmdLineFlag::create(
                 { "-listCommands" },
                 "Print the list of commands and exit.");
+            p.cmdLine.command = ftk::CmdLineListOption<std::string>::create(
+                { "-command" },
+                "Execute a command after startup. The command name may be "
+                "followed by JSON arguments; e.g., \"Playback/Forward\" or "
+                "\"Playback/Seek { \\\"frame\\\": 100 }\". This option may be "
+                "repeated to execute multiple commands in order. Use "
+                "-listCommands to see the available commands.",
+                "Commands");
             p.cmdLine.debugLoop = ftk::CmdLineOption<int>::create(
                 { "-debugLoop" },
                 "Load the command line inputs in a loop. This value is the number of seconds for each cycle.",
@@ -375,6 +387,7 @@ namespace djv
                     p.cmdLine.version,
                     p.cmdLine.sysInfo,
                     p.cmdLine.listCommands,
+                    p.cmdLine.command,
                     p.cmdLine.debugLoop,
                     p.cmdLine.captureManifest,
                     p.cmdLine.captureShot,
@@ -737,6 +750,63 @@ namespace djv
                     std::cout << command.name << " - " << command.doc << std::endl;
                 }
                 return;
+            }
+
+            if (p.cmdLine.command->found())
+            {
+                // Wait for the command line inputs to be opened before
+                // executing the command.
+                p.commandTimer = ftk::Timer::create(_context);
+                p.commandTimer->setRepeating(true);
+                p.commandTimer->start(
+                    std::chrono::milliseconds(100),
+                    [this]
+                    {
+                        FTK_P();
+                        ++p.commandTicks;
+                        const bool timeout = p.commandTicks > 100;
+                        if (p.cmdLine.inputs->getList().empty() ||
+                            p.player->get() ||
+                            timeout)
+                        {
+                            p.commandTimer->stop();
+                            for (const std::string& value : p.cmdLine.command->getList())
+                            {
+                                // Split the command name from the optional JSON
+                                // arguments at the first '{', so that command
+                                // names may contain spaces (e.g.,
+                                // "Tools/Color Picker").
+                                const size_t i = value.find_first_of('{');
+                                std::string name = value.substr(0, i);
+                                const size_t end = name.find_last_not_of(" \t");
+                                name = name.substr(
+                                    0,
+                                    end != std::string::npos ? (end + 1) : 0);
+                                nlohmann::json args;
+                                bool argsOK = true;
+                                if (i != std::string::npos)
+                                {
+                                    try
+                                    {
+                                        args = nlohmann::json::parse(value.substr(i));
+                                    }
+                                    catch (const std::exception& e)
+                                    {
+                                        argsOK = false;
+                                        _context->getLogSystem()->print(
+                                            "djv::app::App",
+                                            ftk::Format("Cannot parse command arguments: {0}").
+                                            arg(e.what()),
+                                            ftk::LogType::Error);
+                                    }
+                                }
+                                if (argsOK)
+                                {
+                                    p.commandsModel->exec(name, args);
+                                }
+                            }
+                        }
+                    });
             }
 
             if (p.cmdLine.debugLoop->found() &&
