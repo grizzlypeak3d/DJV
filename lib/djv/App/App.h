@@ -99,6 +99,12 @@ namespace djv
             //! Get the commands model.
             const std::shared_ptr<models::CommandsModel>& getCommandsModel() const;
 
+            //! Get whether the setup dialog should be hidden. The setup
+            //! dialog is hidden by the "-hideSetup" command line flag, by
+            //! automation (the "-command" and "-listCommands" flags), and
+            //! during screenshot capture.
+            bool getHideSetup() const;
+
             //! Open a file.
             void open(
                 const ftk::Path& path,

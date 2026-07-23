@@ -267,7 +267,7 @@ namespace djv
             p.menuBar->setParent(p.layout);
             p.dividers["MenuBar"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            hLayout->setSpacingRole(ftk::SizeRole::Spacing);
             ftk::setScreenshotTag(hLayout, "MainWindow.ToolBar");
             p.fileToolBar->setParent(hLayout);
             p.dividers["File"] = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
@@ -298,7 +298,7 @@ namespace djv
             p.statusBar->setParent(p.layout);
 
             auto miscSettings = app->getSettingsModel()->getMisc();
-            if (miscSettings.showSetup)
+            if (miscSettings.showSetup && !app->getHideSetup())
             {
                 miscSettings.showSetup = false;
                 auto settingsModel = app->getSettingsModel();
@@ -592,7 +592,7 @@ namespace djv
             display.minimize = settings.minimize;
             display.thumbnails = settings.thumbnails;
             display.thumbnailHeight = getTimelineThumbnailSize(settings.thumbnailSize);
-            display.waveformHeight = getTimelineWaveformSize(settings.thumbnailSize);
+            display.waveformHeight = getTimelineWaveformSize(settings.waveformSize);
             p.timelineWidget->setDisplayOptions(display);
 
             if (settings.minimize)

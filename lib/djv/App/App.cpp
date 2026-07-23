@@ -94,6 +94,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > logFileName;
             std::shared_ptr<ftk::CmdLineFlag> resetSettings;
             std::shared_ptr<ftk::CmdLineOption<std::string> > settingsFileName;
+            std::shared_ptr<ftk::CmdLineFlag> hideSetup;
             std::shared_ptr<ftk::CmdLineFlag> version;
             std::shared_ptr<ftk::CmdLineFlag> sysInfo;
             std::shared_ptr<ftk::CmdLineFlag> listCommands;
@@ -311,6 +312,9 @@ namespace djv
                 "Settings file name.",
                 std::string(),
                 ftk::Format("{0}").arg(p.settingsFile.u8string()));
+            p.cmdLine.hideSetup = ftk::CmdLineFlag::create(
+                { "-hideSetup" },
+                "Hide the setup dialog that is shown on the first run.");
             p.cmdLine.version = ftk::CmdLineFlag::create(
                 { "-version" },
                 "Print the version and exit.");
@@ -384,6 +388,7 @@ namespace djv
                     p.cmdLine.logFileName,
                     p.cmdLine.resetSettings,
                     p.cmdLine.settingsFileName,
+                    p.cmdLine.hideSetup,
                     p.cmdLine.version,
                     p.cmdLine.sysInfo,
                     p.cmdLine.listCommands,
@@ -470,6 +475,15 @@ namespace djv
         const std::shared_ptr<models::CommandsModel>& App::getCommandsModel() const
         {
             return _p->commandsModel;
+        }
+
+        bool App::getHideSetup() const
+        {
+            return
+                _p->cmdLine.hideSetup->found() ||
+                _p->cmdLine.listCommands->found() ||
+                _p->cmdLine.command->found() ||
+                _p->cmdLine.captureShot->found();
         }
 
         void App::openDialog()
@@ -720,14 +734,6 @@ namespace djv
             _observersInit();
             _inputFilesInit();
             
-            // Suppress first-run UI so it can't cover capture screenshots.
-            if (p.cmdLine.captureShot->found())
-            {
-                auto misc = getSettingsModel()->getMisc();
-                misc.showSetup = false;
-                getSettingsModel()->setMisc(misc);
-            }
-
             _uiInit();
 
             if (p.cmdLine.version->found())

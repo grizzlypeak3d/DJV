@@ -36,6 +36,10 @@ namespace djv
             thumbnailSizeMenu->addAction(actions["ThumbnailSizeSmall"]);
             thumbnailSizeMenu->addAction(actions["ThumbnailSizeMedium"]);
             thumbnailSizeMenu->addAction(actions["ThumbnailSizeLarge"]);
+            auto waveformSizeMenu = addSubMenu("Waveform Size");
+            waveformSizeMenu->addAction(actions["WaveformSizeSmall"]);
+            waveformSizeMenu->addAction(actions["WaveformSizeMedium"]);
+            waveformSizeMenu->addAction(actions["WaveformSizeLarge"]);
         }
 
         TimelineMenu::TimelineMenu() :

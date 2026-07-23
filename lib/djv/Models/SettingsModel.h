@@ -258,6 +258,7 @@ namespace djv
             bool stopOnScrub = false;
             bool thumbnails = true;
             TimelineThumbnailSize thumbnailSize = TimelineThumbnailSize::Small;
+            TimelineThumbnailSize waveformSize = TimelineThumbnailSize::Small;
 
             bool operator == (const TimelineSettings&) const;
             bool operator != (const TimelineSettings&) const;

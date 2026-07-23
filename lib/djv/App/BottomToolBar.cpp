@@ -50,7 +50,6 @@ namespace djv
             std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<ui::AudioPopup> audioPopup;
-            std::shared_ptr<ftk::ToolButton> muteButton;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
@@ -61,6 +60,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
             std::shared_ptr<ftk::Observer<float> > volumeObserver;
+            std::shared_ptr<ftk::Observer<bool> > muteObserver;
         };
 
         void BottomToolBar::_init(
@@ -135,8 +135,6 @@ namespace djv
             p.audioButton->setIcon("Volume");
             p.audioButton->setPopupIcon(true);
             p.audioButton->setTooltip("Audio controls.");
-            actions = audioActions->getActions();
-            p.muteButton = ftk::ToolButton::create(context, actions["Mute"]);
 
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::MarginInside);
@@ -170,7 +168,6 @@ namespace djv
             hLayout2->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.audioLabel->setParent(hLayout2);
             p.audioButton->setParent(hLayout2);
-            p.muteButton->setParent(hLayout2);
 
             p.loopWidget->setCallback(
                 [this](tl::Loop value)
@@ -257,16 +254,6 @@ namespace djv
                     _showAudioPopup();
                 });
 
-            auto appWeak = std::weak_ptr<App>(app);
-            p.muteButton->setCheckedCallback(
-                [appWeak](bool value)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->getAudioModel()->setMute(value);
-                    }
-                });
-
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& value)
@@ -292,6 +279,14 @@ namespace djv
                     FTK_P();
                     p.audioLabel->setText(ftk::Format("{0}%").
                         arg(static_cast<int>(value * 100.F), 3));
+                });
+
+            p.muteObserver = ftk::Observer<bool>::create(
+                app->getAudioModel()->observeMute(),
+                [this](bool value)
+                {
+                    FTK_P();
+                    p.audioButton->setIcon(value ? "Mute" : "Volume");
                 });
         }
 

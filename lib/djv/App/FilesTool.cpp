@@ -120,8 +120,10 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::None);
 
             p.widgetLayout = ftk::GridLayout::create(context, layout);
-            p.widgetLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
-            p.widgetLayout->setRowBackgroundRole(ftk::ColorRole::Button);
+            p.widgetLayout->setSpacingRole(
+                ftk::SizeRole::SpacingSmall,
+                ftk::SizeRole::None);
+            p.widgetLayout->setRowBackgroundRole(ftk::ColorRole::Header);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
@@ -333,7 +335,7 @@ namespace djv
 
                         widget.label = ftk::Label::create(
                             context,
-                            ftk::elide(item->path.getFileName()),
+                            ftk::elide(item->path.getFileName(), 24),
                             p.widgetLayout);
                         widget.label->setMarginRole(ftk::SizeRole::MarginSmall);
                         widget.label->setHStretch(ftk::Stretch::Expanding);

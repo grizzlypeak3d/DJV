@@ -154,6 +154,45 @@ namespace djv
                     }
                 });
 
+            _addCommand(
+                "WaveformSizeSmall",
+                "Small timeline audio waveforms.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settings = app->getSettingsModel()->getTimeline();
+                        settings.waveformSize = models::TimelineThumbnailSize::Small;
+                        app->getSettingsModel()->setTimeline(settings);
+                    }
+                });
+
+            _addCommand(
+                "WaveformSizeMedium",
+                "Medium timeline audio waveforms.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settings = app->getSettingsModel()->getTimeline();
+                        settings.waveformSize = models::TimelineThumbnailSize::Medium;
+                        app->getSettingsModel()->setTimeline(settings);
+                    }
+                });
+
+            _addCommand(
+                "WaveformSizeLarge",
+                "Large timeline audio waveforms.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settings = app->getSettingsModel()->getTimeline();
+                        settings.waveformSize = models::TimelineThumbnailSize::Large;
+                        app->getSettingsModel()->setTimeline(settings);
+                    }
+                });
+
             // Create the actions.
             _actions["Minimize"] = ftk::Action::create(
                 "Minimize",
@@ -182,6 +221,15 @@ namespace djv
             _actions["ThumbnailSizeLarge"] = ftk::Action::create(
                 "Large",
                 _command("ThumbnailSizeLarge"));
+            _actions["WaveformSizeSmall"] = ftk::Action::create(
+                "Small",
+                _command("WaveformSizeSmall"));
+            _actions["WaveformSizeMedium"] = ftk::Action::create(
+                "Medium",
+                _command("WaveformSizeMedium"));
+            _actions["WaveformSizeLarge"] = ftk::Action::create(
+                "Large",
+                _command("WaveformSizeLarge"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
@@ -198,6 +246,9 @@ namespace djv
                     _actions["ThumbnailSizeSmall"]->setChecked(models::TimelineThumbnailSize::Small == value.thumbnailSize);
                     _actions["ThumbnailSizeMedium"]->setChecked(models::TimelineThumbnailSize::Medium == value.thumbnailSize);
                     _actions["ThumbnailSizeLarge"]->setChecked(models::TimelineThumbnailSize::Large == value.thumbnailSize);
+                    _actions["WaveformSizeSmall"]->setChecked(models::TimelineThumbnailSize::Small == value.waveformSize);
+                    _actions["WaveformSizeMedium"]->setChecked(models::TimelineThumbnailSize::Medium == value.waveformSize);
+                    _actions["WaveformSizeLarge"]->setChecked(models::TimelineThumbnailSize::Large == value.waveformSize);
                 });
         }
 

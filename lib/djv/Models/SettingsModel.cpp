@@ -385,7 +385,8 @@ namespace djv
                 autoScroll == other.autoScroll &&
                 stopOnScrub == other.stopOnScrub &&
                 thumbnails == other.thumbnails &&
-                thumbnailSize == other.thumbnailSize;
+                thumbnailSize == other.thumbnailSize &&
+                waveformSize == other.waveformSize;
         }
 
         bool TimelineSettings::operator != (const TimelineSettings& other) const
@@ -1033,6 +1034,7 @@ namespace djv
             json["StopOnScrub"] = value.stopOnScrub;
             json["Thumbnails"] = value.thumbnails;
             json["ThumbnailSize"] = to_string(value.thumbnailSize);
+            json["WaveformSize"] = to_string(value.waveformSize);
         }
 
         void to_json(nlohmann::json& json, const WindowSettings& in)
@@ -1182,6 +1184,7 @@ namespace djv
             json.at("StopOnScrub").get_to(value.stopOnScrub);
             json.at("Thumbnails").get_to(value.thumbnails);
             from_string(json.at("ThumbnailSize").get<std::string>(), value.thumbnailSize);
+            from_string(json.at("WaveformSize").get<std::string>(), value.waveformSize);
         }
 
         void from_json(const nlohmann::json& json, WindowSettings& value)

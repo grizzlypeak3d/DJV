@@ -7,6 +7,7 @@
 
 #include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ToolButton.h>
 
 namespace djv
 {
@@ -14,8 +15,10 @@ namespace djv
     {
         struct AudioPopup::Private
         {
+            std::shared_ptr<ftk::ToolButton> muteButton;
             std::shared_ptr<ftk::IntEditSlider> volumeSlider;
 
+            std::shared_ptr<ftk::Observer<bool> > muteObserver;
             std::shared_ptr<ftk::Observer<float> > volumeObserver;
         };
 
@@ -30,22 +33,41 @@ namespace djv
                 parent);
             FTK_P();
 
+            p.muteButton = ftk::ToolButton::create(context);
+            p.muteButton->setIcon("Mute");
+            p.muteButton->setCheckable(true);
+            p.muteButton->setTooltip("Mute the audio");
+
             p.volumeSlider = ftk::IntEditSlider::create(context);
             p.volumeSlider->setRange(0, 100);
             p.volumeSlider->setStep(1);
             p.volumeSlider->setLargeStep(10);
             p.volumeSlider->setTooltip("Audio volume");
 
-            auto layout = ftk::VerticalLayout::create(context);
+            auto layout = ftk::HorizontalLayout::create(context);
             layout->setMarginRole(ftk::SizeRole::MarginSmall);
             layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.volumeSlider->setParent(layout);
+            p.muteButton->setParent(layout);
             setWidget(layout);
+
+            p.muteButton->setCheckedCallback(
+                [model](bool value)
+                {
+                    model->setMute(value);
+                });
 
             p.volumeSlider->setCallback(
                 [model](int value)
                 {
                     model->setVolume(value / 100.F);
+                });
+
+            p.muteObserver = ftk::Observer<bool>::create(
+                model->observeMute(),
+                [this](bool value)
+                {
+                    _p->muteButton->setChecked(value);
                 });
 
             p.volumeObserver = ftk::Observer<float>::create(
