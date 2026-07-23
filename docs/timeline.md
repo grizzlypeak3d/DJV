@@ -23,6 +23,7 @@ Default timeline controls:
 - **Frame view** — **Backspace**
 - **Pan** — Middle mouse button
 
-The size of the timeline thumbnails and the height of the audio waveforms are
-set independently from the **Timeline** menu, and thumbnails can be turned off
-entirely to improve performance.
+The video thumbnails and audio waveforms can be toggled and sized independently
+from the **Timeline** menu. Turning them off saves vertical space and improves
+performance; with both off, the timeline is a compact strip with just the
+current frame, in/out range, and cache.

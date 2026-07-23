@@ -103,7 +103,7 @@ namespace djv
 
             _addCheckCommand(
                 "Thumbnails",
-                "Toggle timeline thumbnails.",
+                "Toggle the timeline video thumbnails.",
                 [appWeak](const nlohmann::json& args)
                 {
                     const bool value = args.at("value").get<bool>();
@@ -111,6 +111,20 @@ namespace djv
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
                         settings.thumbnails = value;
+                        app->getSettingsModel()->setTimeline(settings);
+                    }
+                });
+
+            _addCheckCommand(
+                "Waveforms",
+                "Toggle the timeline audio waveforms.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settings = app->getSettingsModel()->getTimeline();
+                        settings.waveforms = value;
                         app->getSettingsModel()->setTimeline(settings);
                     }
                 });
@@ -210,8 +224,11 @@ namespace djv
                 "Stop Playback When Scrubbing",
                 _checkCommand("StopOnScrub"));
             _actions["Thumbnails"] = ftk::Action::create(
-                "Thumbnails",
+                "Video Thumbnails",
                 _checkCommand("Thumbnails"));
+            _actions["Waveforms"] = ftk::Action::create(
+                "Audio Waveforms",
+                _checkCommand("Waveforms"));
             _actions["ThumbnailSizeSmall"] = ftk::Action::create(
                 "Small",
                 _command("ThumbnailSizeSmall"));
@@ -243,6 +260,7 @@ namespace djv
                     _actions["AutoScroll"]->setChecked(value.autoScroll);
                     _actions["StopOnScrub"]->setChecked(value.stopOnScrub);
                     _actions["Thumbnails"]->setChecked(value.thumbnails);
+                    _actions["Waveforms"]->setChecked(value.waveforms);
                     _actions["ThumbnailSizeSmall"]->setChecked(models::TimelineThumbnailSize::Small == value.thumbnailSize);
                     _actions["ThumbnailSizeMedium"]->setChecked(models::TimelineThumbnailSize::Medium == value.thumbnailSize);
                     _actions["ThumbnailSizeLarge"]->setChecked(models::TimelineThumbnailSize::Large == value.thumbnailSize);

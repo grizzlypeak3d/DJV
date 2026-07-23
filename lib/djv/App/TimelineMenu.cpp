@@ -32,6 +32,7 @@ namespace djv
             addAction(actions["StopOnScrub"]);
             addDivider();
             addAction(actions["Thumbnails"]);
+            addAction(actions["Waveforms"]);
             auto thumbnailSizeMenu = addSubMenu("Thumbnail Size");
             thumbnailSizeMenu->addAction(actions["ThumbnailSizeSmall"]);
             thumbnailSizeMenu->addAction(actions["ThumbnailSizeMedium"]);

@@ -182,13 +182,19 @@ namespace djv
                 Shortcut("Playback/SetOutPoint", "Set out point", ftk::Key::O),
                 Shortcut("Playback/ResetOutPoint", "Reset out point", ftk::KeyShortcut(ftk::Key::O, static_cast<int>(ftk::KeyModifier::Shift))),
 
+                Shortcut("Timeline/Minimize", "Minimize"),
                 Shortcut("Timeline/FrameView", "Frame view"),
-                Shortcut("Timeline/Scroll", "Scroll"),
+                Shortcut("Timeline/ScrollBars", "Scroll bars"),
+                Shortcut("Timeline/AutoScroll", "Auto scroll"),
                 Shortcut("Timeline/StopOnScrub", "Stop on scrub"),
-                Shortcut("Timeline/Thumbnails", "Thumbnails"),
+                Shortcut("Timeline/Thumbnails", "Video thumbnails"),
                 Shortcut("Timeline/ThumbnailSizeSmall", "Small thumbnails"),
                 Shortcut("Timeline/ThumbnailSizeMedium", "Medium thumbnails"),
                 Shortcut("Timeline/ThumbnailSizeLarge", "Large thumbnails"),
+                Shortcut("Timeline/Waveforms", "Audio waveforms"),
+                Shortcut("Timeline/WaveformSizeSmall", "Small waveforms"),
+                Shortcut("Timeline/WaveformSizeMedium", "Medium waveforms"),
+                Shortcut("Timeline/WaveformSizeLarge", "Large waveforms"),
 
                 Shortcut("Tools/Files", "Files", ftk::Key::F1),
                 Shortcut("Tools/Export", "Export", ftk::Key::F2),
@@ -386,6 +392,7 @@ namespace djv
                 stopOnScrub == other.stopOnScrub &&
                 thumbnails == other.thumbnails &&
                 thumbnailSize == other.thumbnailSize &&
+                waveforms == other.waveforms &&
                 waveformSize == other.waveformSize;
         }
 
@@ -1035,6 +1042,7 @@ namespace djv
             json["Thumbnails"] = value.thumbnails;
             json["ThumbnailSize"] = to_string(value.thumbnailSize);
             json["WaveformSize"] = to_string(value.waveformSize);
+            json["Waveforms"] = value.waveforms;
         }
 
         void to_json(nlohmann::json& json, const WindowSettings& in)
@@ -1185,6 +1193,7 @@ namespace djv
             json.at("Thumbnails").get_to(value.thumbnails);
             from_string(json.at("ThumbnailSize").get<std::string>(), value.thumbnailSize);
             from_string(json.at("WaveformSize").get<std::string>(), value.waveformSize);
+            json.at("Waveforms").get_to(value.waveforms);
         }
 
         void from_json(const nlohmann::json& json, WindowSettings& value)

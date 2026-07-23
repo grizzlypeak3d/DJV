@@ -592,6 +592,7 @@ namespace djv
             display.minimize = settings.minimize;
             display.thumbnails = settings.thumbnails;
             display.thumbnailHeight = getTimelineThumbnailSize(settings.thumbnailSize);
+            display.waveforms = settings.waveforms;
             display.waveformHeight = getTimelineWaveformSize(settings.waveformSize);
             p.timelineWidget->setDisplayOptions(display);
 
