@@ -29,11 +29,14 @@ namespace djv
 
             p.mainWindow = mainWindow;
 
+            // Register the commands.
             auto appWeak = std::weak_ptr<App>(app);
-            _actions["Minimize"] = ftk::Action::create(
+            _addCheckCommand(
                 "Minimize",
-                [appWeak](bool value)
+                "Minimize the timeline.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
@@ -42,10 +45,12 @@ namespace djv
                     }
                 });
 
-            _actions["FrameView"] = ftk::Action::create(
-                "Frame View",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "FrameView",
+                "Frame the timeline view.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
@@ -54,10 +59,12 @@ namespace djv
                     }
                 });
 
-            _actions["ScrollBars"] = ftk::Action::create(
-                "Scroll Bars",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "ScrollBars",
+                "Toggle the scroll bars.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
@@ -66,10 +73,12 @@ namespace djv
                     }
                 });
 
-            _actions["AutoScroll"] = ftk::Action::create(
-                "Auto Scroll",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "AutoScroll",
+                "Automatically scroll the timeline to the current frame.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
@@ -78,10 +87,12 @@ namespace djv
                     }
                 });
 
-            _actions["StopOnScrub"] = ftk::Action::create(
-                "Stop Playback When Scrubbing",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "StopOnScrub",
+                "Stop playback when scrubbing the timeline.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
@@ -90,10 +101,12 @@ namespace djv
                     }
                 });
 
-            _actions["Thumbnails"] = ftk::Action::create(
+            _addCheckCommand(
                 "Thumbnails",
-                [appWeak](bool value)
+                "Toggle timeline thumbnails.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
@@ -102,9 +115,10 @@ namespace djv
                     }
                 });
 
-            _actions["ThumbnailSizeSmall"] = ftk::Action::create(
-                "Small",
-                [appWeak]
+            _addCommand(
+                "ThumbnailSizeSmall",
+                "Small timeline thumbnails.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -114,9 +128,10 @@ namespace djv
                     }
                 });
 
-            _actions["ThumbnailSizeMedium"] = ftk::Action::create(
-                "Medium",
-                [appWeak]
+            _addCommand(
+                "ThumbnailSizeMedium",
+                "Medium timeline thumbnails.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -126,9 +141,10 @@ namespace djv
                     }
                 });
 
-            _actions["ThumbnailSizeLarge"] = ftk::Action::create(
-                "Large",
-                [appWeak]
+            _addCommand(
+                "ThumbnailSizeLarge",
+                "Large timeline thumbnails.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -138,18 +154,34 @@ namespace djv
                     }
                 });
 
-            _tooltips =
-            {
-                { "Minimize", "Minimize the timeline." },
-                { "FrameView", "Frame the timeline view." },
-                { "ScrollBars", "Toggle the scroll bars." },
-                { "AutoScroll", "Automatically scroll the timeline to the current frame." },
-                { "StopOnScrub", "Stop playback when scrubbing the timeline." },
-                { "Thumbnails", "Toggle timeline thumbnails." },
-                { "ThumbnailSizeSmall", "Small timeline thumbnails." },
-                { "ThumbnailSizeMedium", "Medium timeline thumbnails." },
-                { "ThumbnailSizeLarge", "Large timeline thumbnails." }
-            };
+            // Create the actions.
+            _actions["Minimize"] = ftk::Action::create(
+                "Minimize",
+                _checkCommand("Minimize"));
+            _actions["FrameView"] = ftk::Action::create(
+                "Frame View",
+                _checkCommand("FrameView"));
+            _actions["ScrollBars"] = ftk::Action::create(
+                "Scroll Bars",
+                _checkCommand("ScrollBars"));
+            _actions["AutoScroll"] = ftk::Action::create(
+                "Auto Scroll",
+                _checkCommand("AutoScroll"));
+            _actions["StopOnScrub"] = ftk::Action::create(
+                "Stop Playback When Scrubbing",
+                _checkCommand("StopOnScrub"));
+            _actions["Thumbnails"] = ftk::Action::create(
+                "Thumbnails",
+                _checkCommand("Thumbnails"));
+            _actions["ThumbnailSizeSmall"] = ftk::Action::create(
+                "Small",
+                _command("ThumbnailSizeSmall"));
+            _actions["ThumbnailSizeMedium"] = ftk::Action::create(
+                "Medium",
+                _command("ThumbnailSizeMedium"));
+            _actions["ThumbnailSizeLarge"] = ftk::Action::create(
+                "Large",
+                _command("ThumbnailSizeLarge"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

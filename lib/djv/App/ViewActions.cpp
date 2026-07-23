@@ -35,21 +35,25 @@ namespace djv
             FTK_P();
 
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
-            _actions["Frame"] = ftk::Action::create(
+            auto appWeak = std::weak_ptr<App>(app);
+
+            // Register the commands.
+            _addCheckCommand(
                 "Frame",
-                "ViewFrame",
-                [mainWindowWeak](bool value)
+                "Frame the view to fit the image.",
+                [mainWindowWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
                         mainWindow->getViewport()->setFrameView(value);
                     }
                 });
 
-            _actions["ZoomReset"] = ftk::Action::create(
-                "Zoom Reset",
-                "ViewZoomReset",
-                [mainWindowWeak]
+            _addCommand(
+                "ZoomReset",
+                "Reset the view zoom to 1:1.",
+                [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
@@ -57,10 +61,10 @@ namespace djv
                     }
                 });
 
-            _actions["ZoomIn"] = ftk::Action::create(
-                "Zoom In",
-                "ViewZoomIn",
-                [mainWindowWeak]
+            _addCommand(
+                "ZoomIn",
+                "Zoom the view in.",
+                [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
@@ -68,10 +72,10 @@ namespace djv
                     }
                 });
 
-            _actions["ZoomOut"] = ftk::Action::create(
-                "Zoom Out",
-                "ViewZoomOut",
-                [mainWindowWeak]
+            _addCommand(
+                "ZoomOut",
+                "Zoom the view out.",
+                [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
@@ -79,9 +83,10 @@ namespace djv
                     }
                 });
 
-            _actions["Center"] = ftk::Action::create(
+            _addCommand(
                 "Center",
-                [mainWindowWeak]
+                "Center the view.",
+                [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
@@ -89,11 +94,12 @@ namespace djv
                     }
                 });
 
-            auto appWeak = std::weak_ptr<App>(app);
-            _actions["Red"] = ftk::Action::create(
-                "Red Channel",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "Red",
+                "Show the red channel.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getDisplayOptions();
@@ -104,10 +110,12 @@ namespace djv
                     }
                 });
 
-            _actions["Green"] = ftk::Action::create(
-                "Green Channel",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "Green",
+                "Show the green channel.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getDisplayOptions();
@@ -118,10 +126,12 @@ namespace djv
                     }
                 });
 
-            _actions["Blue"] = ftk::Action::create(
-                "Blue Channel",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "Blue",
+                "Show the blue channel.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getDisplayOptions();
@@ -132,10 +142,12 @@ namespace djv
                     }
                 });
 
-            _actions["Alpha"] = ftk::Action::create(
-                "Alpha Channel",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "Alpha",
+                "Show the alpha channel.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getDisplayOptions();
@@ -146,10 +158,12 @@ namespace djv
                     }
                 });
 
-            _actions["Negative"] = ftk::Action::create(
+            _addCheckCommand(
                 "Negative",
-                [appWeak](bool value)
+                "Show the image as a negative.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getDisplayOptions();
@@ -158,10 +172,12 @@ namespace djv
                     }
                 });
 
-            _actions["MirrorHorizontal"] = ftk::Action::create(
-                "Mirror Horizontal",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "MirrorHorizontal",
+                "Mirror the image horizontally.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getDisplayOptions();
@@ -170,10 +186,12 @@ namespace djv
                     }
                 });
 
-            _actions["MirrorVertical"] = ftk::Action::create(
-                "Mirror Vertical",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "MirrorVertical",
+                "Mirror the image vertically.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getDisplayOptions();
@@ -182,9 +200,10 @@ namespace djv
                     }
                 });
 
-            _actions["AspectRatio_0"] = ftk::Action::create(
-                "Default",
-                [appWeak]
+            _addCommand(
+                "AspectRatio_0",
+                "Set the aspect ratio to the default.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -193,26 +212,13 @@ namespace djv
                         app->getViewportModel()->setAspectRatioOptions(options);
                     }
                 });
-            const models::AspectRatioOptions aspectRatioOptions;
-            for (size_t i = 1; i < aspectRatioOptions.options.size(); ++i)
-            {
-                _actions[ftk::Format("AspectRatio_{0}").arg(i)] = ftk::Action::create(
-                    "",
-                    [appWeak, i]
-                    {
-                        if (auto app = appWeak.lock())
-                        {
-                            auto options = app->getViewportModel()->getAspectRatioOptions();
-                            options.index = i;
-                            app->getViewportModel()->setAspectRatioOptions(options);
-                        }
-                    });
-            }
 
-            _actions["Outline"] = ftk::Action::create(
+            _addCheckCommand(
                 "Outline",
-                [appWeak](bool value)
+                "Toggle the outline.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getBackgroundOptions();
@@ -221,10 +227,12 @@ namespace djv
                     }
                 });
 
-            _actions["Grid"] = ftk::Action::create(
+            _addCheckCommand(
                 "Grid",
-                [appWeak](bool value)
+                "Toggle the grid.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getForegroundOptions();
@@ -233,10 +241,12 @@ namespace djv
                     }
                 });
 
-            _actions["CenterMarker"] = ftk::Action::create(
-                "Center Marker",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "CenterMarker",
+                "Toggle the center marker.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getForegroundOptions();
@@ -245,10 +255,12 @@ namespace djv
                     }
                 });
 
-            _actions["HUD"] = ftk::Action::create(
-                "HUD / Information Display",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "HUD",
+                "Toggle the HUD / information display.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getViewportModel()->getHUDOptions();
@@ -257,18 +269,83 @@ namespace djv
                     }
                 });
 
-            _tooltips =
+            const models::AspectRatioOptions aspectRatioOptions;
+            for (size_t i = 1; i < aspectRatioOptions.options.size(); ++i)
             {
-                { "Frame",  "Frame the view to fit the image." },
-                { "ZoomReset", "Reset the view zoom to 1:1." },
-                { "ZoomIn", "Zoom the view in." },
-                { "ZoomOut", "Zoom the view out." },
-                { "Center", "Center the view." },
-                { "Outline", "Toggle the outline." },
-                { "Grid", "Toggle the grid." },
-                { "CenterMarker", "Toggle the center marker." },
-                { "HUD", "Toggle the HUD / information display." }
-            };
+                _addCommand(
+                    ftk::Format("AspectRatio_{0}").arg(i),
+                    ftk::Format("Set the aspect ratio to {0}.").
+                        arg(getLabel(aspectRatioOptions.options[i])),
+                    [appWeak, i](const nlohmann::json&)
+                    {
+                        if (auto app = appWeak.lock())
+                        {
+                            auto options = app->getViewportModel()->getAspectRatioOptions();
+                            options.index = i;
+                            app->getViewportModel()->setAspectRatioOptions(options);
+                        }
+                    });
+                _actions[ftk::Format("AspectRatio_{0}").arg(i)] = ftk::Action::create(
+                    "",
+                    _command(ftk::Format("AspectRatio_{0}").arg(i)));
+            }
+
+            // Create the actions.
+            _actions["Frame"] = ftk::Action::create(
+                "Frame",
+                "ViewFrame",
+                _checkCommand("Frame"));
+            _actions["ZoomReset"] = ftk::Action::create(
+                "Zoom Reset",
+                "ViewZoomReset",
+                _command("ZoomReset"));
+            _actions["ZoomIn"] = ftk::Action::create(
+                "Zoom In",
+                "ViewZoomIn",
+                _command("ZoomIn"));
+            _actions["ZoomOut"] = ftk::Action::create(
+                "Zoom Out",
+                "ViewZoomOut",
+                _command("ZoomOut"));
+            _actions["Center"] = ftk::Action::create(
+                "Center",
+                _command("Center"));
+            _actions["Red"] = ftk::Action::create(
+                "Red Channel",
+                _checkCommand("Red"));
+            _actions["Green"] = ftk::Action::create(
+                "Green Channel",
+                _checkCommand("Green"));
+            _actions["Blue"] = ftk::Action::create(
+                "Blue Channel",
+                _checkCommand("Blue"));
+            _actions["Alpha"] = ftk::Action::create(
+                "Alpha Channel",
+                _checkCommand("Alpha"));
+            _actions["Negative"] = ftk::Action::create(
+                "Negative",
+                _checkCommand("Negative"));
+            _actions["MirrorHorizontal"] = ftk::Action::create(
+                "Mirror Horizontal",
+                _checkCommand("MirrorHorizontal"));
+            _actions["MirrorVertical"] = ftk::Action::create(
+                "Mirror Vertical",
+                _checkCommand("MirrorVertical"));
+            _actions["AspectRatio_0"] = ftk::Action::create(
+                "Default",
+                _command("AspectRatio_0"));
+            _actions["Outline"] = ftk::Action::create(
+                "Outline",
+                _checkCommand("Outline"));
+            _actions["Grid"] = ftk::Action::create(
+                "Grid",
+                _checkCommand("Grid"));
+            _actions["CenterMarker"] = ftk::Action::create(
+                "Center Marker",
+                _checkCommand("CenterMarker"));
+            _actions["HUD"] = ftk::Action::create(
+                "HUD / Information Display",
+                _checkCommand("HUD"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

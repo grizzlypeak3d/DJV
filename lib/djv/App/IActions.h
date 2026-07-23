@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/Models/CommandsModel.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <ftk/UI/Action.h>
@@ -32,6 +33,32 @@ namespace djv
             const std::map<std::string, std::shared_ptr<ftk::Action> >& getActions() const;
 
         protected:
+            //! Register a command named "<group>/<name>" with the commands
+            //! model. The documentation is also used as the action tooltip.
+            //! Commands are removed when the action group is destroyed.
+            void _addCommand(
+                const std::string& name,
+                const std::string& doc,
+                const models::CommandFunc&);
+
+            //! Register a command like _addCommand() that receives a checked
+            //! state as { "value": <bool> }. An example of the arguments is
+            //! appended to the command documentation.
+            void _addCheckCommand(
+                const std::string& name,
+                const std::string& doc,
+                const models::CommandFunc&);
+
+            //! Get a callback that executes the command named
+            //! "<group>/<name>", suitable for use as an action callback.
+            std::function<void(void)> _command(const std::string& name);
+
+            //! Get a callback that executes the command named
+            //! "<group>/<name>" with the checked state as
+            //! { "value": <bool> }, suitable for use as a checkable action
+            //! callback.
+            std::function<void(bool)> _checkCommand(const std::string& name);
+
             void _shortcutsUpdate(const models::ShortcutsSettings&);
 
             std::string _name;

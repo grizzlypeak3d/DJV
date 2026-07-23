@@ -7,6 +7,7 @@
 #include <djv/App/IToolWidget.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/Viewport.h>
+#include <djv/Models/CommandsModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/ColorModel.h>
@@ -461,13 +462,9 @@ namespace djv
             }
             else if (step.contains("frame"))
             {
-                if (auto player = app->observePlayer()->get())
-                {
-                    const auto start = player->getTimeRange().start_time();
-                    player->seek(OTIO_NS::RationalTime(
-                        start.value() + step.at("frame").get<double>(),
-                        start.rate()));
-                }
+                app->getCommandsModel()->exec(
+                    "Playback/Seek",
+                    { { "frame", step.at("frame").get<double>() } });
             }
             else if (step.contains("inOut"))
             {
@@ -475,21 +472,15 @@ namespace djv
                 // from a pair of 0-based frame numbers, relative to the timeline
                 // start like the "frame" verb. The out frame is inclusive, the
                 // same convention as Set Out Point. e.g. { "inOut": [10, 50] }
-                if (auto player = app->observePlayer()->get())
+                const auto& io = step.at("inOut");
+                if (io.is_array() && io.size() >= 2)
                 {
-                    const auto& io = step.at("inOut");
-                    if (io.is_array() && io.size() >= 2)
-                    {
-                        const auto start = player->getTimeRange().start_time();
-                        const double rate = start.rate();
-                        const OTIO_NS::RationalTime inT(
-                            start.value() + io[0].get<double>(), rate);
-                        const OTIO_NS::RationalTime outT(
-                            start.value() + io[1].get<double>(), rate);
-                        player->setInOutRange(
-                            OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                inT, outT));
-                    }
+                    app->getCommandsModel()->exec(
+                        "Playback/InOutRange",
+                        {
+                            { "in", io[0].get<double>() },
+                            { "out", io[1].get<double>() }
+                        });
                 }
             }
             else if (step.contains("a"))

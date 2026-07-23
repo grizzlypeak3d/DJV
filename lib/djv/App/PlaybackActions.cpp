@@ -27,10 +27,11 @@ namespace djv
             IActions::_init(context, app, "Playback");
             FTK_P();
 
-            _actions["Stop"] = ftk::Action::create(
+            // Register the commands.
+            _addCommand(
                 "Stop",
-                "PlaybackStop",
-                [this]
+                "Stop playback.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -39,10 +40,10 @@ namespace djv
                     }
                 });
 
-            _actions["Forward"] = ftk::Action::create(
+            _addCommand(
                 "Forward",
-                "PlaybackForward",
-                [this]
+                "Start forward playback.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -51,10 +52,10 @@ namespace djv
                     }
                 });
 
-            _actions["Reverse"] = ftk::Action::create(
+            _addCommand(
                 "Reverse",
-                "PlaybackReverse",
-                [this]
+                "Start reverse playback.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -63,9 +64,10 @@ namespace djv
                     }
                 });
 
-            _actions["Toggle"] = ftk::Action::create(
-                "Toggle Playback",
-                [this]
+            _addCommand(
+                "Toggle",
+                "Toggle playback.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -74,9 +76,10 @@ namespace djv
                     }
                 });
 
-            _actions["JumpBack1s"] = ftk::Action::create(
-                "Jump Back 1s",
-                [this]
+            _addCommand(
+                "JumpBack1s",
+                "Jump back 1 second.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -85,9 +88,10 @@ namespace djv
                     }
                 });
 
-            _actions["JumpBack10s"] = ftk::Action::create(
-                "Jump Back 10s",
-                [this]
+            _addCommand(
+                "JumpBack10s",
+                "Jump back 10 seconds.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -96,9 +100,10 @@ namespace djv
                     }
                 });
 
-            _actions["JumpForward1s"] = ftk::Action::create(
-                "Jump Forward 1s",
-                [this]
+            _addCommand(
+                "JumpForward1s",
+                "Jump forward 1 second.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -107,9 +112,10 @@ namespace djv
                     }
                 });
 
-            _actions["JumpForward10s"] = ftk::Action::create(
-                "Jump Forward 10s",
-                [this]
+            _addCommand(
+                "JumpForward10s",
+                "Jump forward 10 seconds.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -118,10 +124,10 @@ namespace djv
                     }
                 });
 
-            _actions["Loop"] = ftk::Action::create(
-                "Playback Loop",
-                "PlaybackLoop",
-                [this]
+            _addCommand(
+                "Loop",
+                "Loop playback continuously.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -130,10 +136,10 @@ namespace djv
                     }
                 });
 
-            _actions["Once"] = ftk::Action::create(
-                "Playback Once",
-                "PlaybackOnce",
-                [this]
+            _addCommand(
+                "Once",
+                "Playback once and stop.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -142,10 +148,10 @@ namespace djv
                     }
                 });
 
-            _actions["PingPong"] = ftk::Action::create(
-                "Playback Ping-Pong",
-                "PlaybackPingPong",
-                [this]
+            _addCommand(
+                "PingPong",
+                "Playback forward and reverse continuously.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -154,9 +160,10 @@ namespace djv
                     }
                 });
 
-            _actions["SetInPoint"] = ftk::Action::create(
-                "Set In Point",
-                [this]
+            _addCommand(
+                "SetInPoint",
+                "Set the playback in point to the current frame.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -165,9 +172,10 @@ namespace djv
                     }
                 });
 
-            _actions["ResetInPoint"] = ftk::Action::create(
-                "Reset In Point",
-                [this]
+            _addCommand(
+                "ResetInPoint",
+                "Reset the playback in point.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -176,9 +184,10 @@ namespace djv
                     }
                 });
 
-            _actions["SetOutPoint"] = ftk::Action::create(
-                "Set Out Point",
-                [this]
+            _addCommand(
+                "SetOutPoint",
+                "Set the playback out point to the current frame.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -187,9 +196,10 @@ namespace djv
                     }
                 });
 
-            _actions["ResetOutPoint"] = ftk::Action::create(
-                "Reset Out Point",
-                [this]
+            _addCommand(
+                "ResetOutPoint",
+                "Reset the playback out point.",
+                [this](const nlohmann::json&)
                 {
                     FTK_P();
                     if (p.player)
@@ -198,24 +208,97 @@ namespace djv
                     }
                 });
 
-            _tooltips =
-            {
-                { "Stop", "Stop playback." },
-                { "Forward", "Start forward playback." },
-                { "Reverse", "Start reverse playback." },
-                { "Toggle", "Toggle playback." },
-                { "JumpBack1s", "Jump back 1 second." },
-                { "JumpBack10s", "Jump back 10 seconds." },
-                { "JumpForward1s", "Jump forward 1 second." },
-                { "JumpForward10s", "Jump forward 10 seconds." },
-                { "Loop", "Loop playback continuously." },
-                { "Once", "Playback once and stop" },
-                { "PingPong", "Playback forward and reverse continuously." },
-                { "SetInPoint", "Set the playback in point." },
-                { "ResetInPoint", "Reet the playback in point." },
-                { "SetOutPoint", "Set the playback out point." },
-                { "ResetOutPoint", "Reet the playback out point." }
-            };
+            // Commands without menu actions, for scripting and automation.
+            _addCommand(
+                "Seek",
+                "Seek to a frame, relative to the timeline start; "
+                "e.g., { \"frame\": 100 }.",
+                [this](const nlohmann::json& args)
+                {
+                    FTK_P();
+                    if (p.player)
+                    {
+                        const auto start = p.player->getTimeRange().start_time();
+                        p.player->seek(OTIO_NS::RationalTime(
+                            start.value() + args.at("frame").get<double>(),
+                            start.rate()));
+                    }
+                });
+
+            _addCommand(
+                "InOutRange",
+                "Set the playback in/out range from inclusive frames relative "
+                "to the timeline start; e.g., { \"in\": 10, \"out\": 50 }.",
+                [this](const nlohmann::json& args)
+                {
+                    FTK_P();
+                    if (p.player)
+                    {
+                        const auto start = p.player->getTimeRange().start_time();
+                        const double rate = start.rate();
+                        p.player->setInOutRange(
+                            OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                                OTIO_NS::RationalTime(
+                                    start.value() + args.at("in").get<double>(),
+                                    rate),
+                                OTIO_NS::RationalTime(
+                                    start.value() + args.at("out").get<double>(),
+                                    rate)));
+                    }
+                });
+
+            // Create the actions.
+            _actions["Stop"] = ftk::Action::create(
+                "Stop",
+                "PlaybackStop",
+                _command("Stop"));
+            _actions["Forward"] = ftk::Action::create(
+                "Forward",
+                "PlaybackForward",
+                _command("Forward"));
+            _actions["Reverse"] = ftk::Action::create(
+                "Reverse",
+                "PlaybackReverse",
+                _command("Reverse"));
+            _actions["Toggle"] = ftk::Action::create(
+                "Toggle Playback",
+                _command("Toggle"));
+            _actions["JumpBack1s"] = ftk::Action::create(
+                "Jump Back 1s",
+                _command("JumpBack1s"));
+            _actions["JumpBack10s"] = ftk::Action::create(
+                "Jump Back 10s",
+                _command("JumpBack10s"));
+            _actions["JumpForward1s"] = ftk::Action::create(
+                "Jump Forward 1s",
+                _command("JumpForward1s"));
+            _actions["JumpForward10s"] = ftk::Action::create(
+                "Jump Forward 10s",
+                _command("JumpForward10s"));
+            _actions["Loop"] = ftk::Action::create(
+                "Playback Loop",
+                "PlaybackLoop",
+                _command("Loop"));
+            _actions["Once"] = ftk::Action::create(
+                "Playback Once",
+                "PlaybackOnce",
+                _command("Once"));
+            _actions["PingPong"] = ftk::Action::create(
+                "Playback Ping-Pong",
+                "PlaybackPingPong",
+                _command("PingPong"));
+            _actions["SetInPoint"] = ftk::Action::create(
+                "Set In Point",
+                _command("SetInPoint"));
+            _actions["ResetInPoint"] = ftk::Action::create(
+                "Reset In Point",
+                _command("ResetInPoint"));
+            _actions["SetOutPoint"] = ftk::Action::create(
+                "Set Out Point",
+                _command("SetOutPoint"));
+            _actions["ResetOutPoint"] = ftk::Action::create(
+                "Reset Out Point",
+                _command("ResetOutPoint"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
             _playbackUpdate(tl::Playback::Stop);

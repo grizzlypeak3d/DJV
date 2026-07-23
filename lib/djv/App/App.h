@@ -26,6 +26,7 @@ namespace djv
         class AppInfoModel;
         class AudioModel;
         class ColorModel;
+        class CommandsModel;
         class FilesModel;
         class RecentFilesModel;
         class TimeUnitsModel;
@@ -94,6 +95,9 @@ namespace djv
 
             //! Get the tools model.
             const std::shared_ptr<models::ToolsModel>& getToolsModel() const;
+
+            //! Get the commands model.
+            const std::shared_ptr<models::CommandsModel>& getCommandsModel() const;
 
             //! Open a file.
             void open(

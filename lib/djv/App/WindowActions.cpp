@@ -28,52 +28,62 @@ namespace djv
             FTK_P();
 
             auto appWeak = std::weak_ptr<App>(app);
-            _actions["FullScreen"] = ftk::Action::create(
-                "Full Screen",
-                "WindowFullScreen",
-                [appWeak](bool value)
+
+            // Register the commands.
+            _addCheckCommand(
+                "FullScreen",
+                "Toggle the window full screen.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         app->getMainWindow()->setFullScreen(value);
                     }
                 });
 
-            _actions["PresentMode"] = ftk::Action::create(
-                "Presentation",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "PresentMode",
+                "Toggle presentation mode.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         app->getMainWindow()->setPresentMode(value);
                     }
                 });
 
-            _actions["FloatOnTop"] = ftk::Action::create(
-                "Float On Top",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "FloatOnTop",
+                "Toggle the window floating on top.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         app->getMainWindow()->setFloatOnTop(value);
                     }
                 });
 
-            _actions["Secondary"] = ftk::Action::create(
+            _addCheckCommand(
                 "Secondary",
-                "WindowSecondary",
-                [appWeak](bool value)
+                "Toggle the secondary window.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         app->setSecondaryWindow(value);
                     }
                 });
 
-            _actions["FileToolBar"] = ftk::Action::create(
-                "File Tool Bar",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "FileToolBar",
+                "Toggle the file tool bar.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -82,10 +92,12 @@ namespace djv
                     }
                 });
 
-            _actions["CompareToolBar"] = ftk::Action::create(
-                "Compare Tool Bar",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "CompareToolBar",
+                "Toggle the compare tool bar.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -94,10 +106,12 @@ namespace djv
                     }
                 });
 
-            _actions["WindowToolBar"] = ftk::Action::create(
-                "Window Tool Bar",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "WindowToolBar",
+                "Toggle the window tool bar.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -106,10 +120,12 @@ namespace djv
                     }
                 });
 
-            _actions["ViewToolBar"] = ftk::Action::create(
-                "View Tool Bar",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "ViewToolBar",
+                "Toggle the view tool bar.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -118,10 +134,12 @@ namespace djv
                     }
                 });
 
-            _actions["ToolsToolBar"] = ftk::Action::create(
-                "Tools Tool Bar",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "ToolsToolBar",
+                "Toggle the tools tool bar.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -130,10 +148,12 @@ namespace djv
                     }
                 });
 
-            _actions["TabBar"] = ftk::Action::create(
-                "Tab Bar",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "TabBar",
+                "Toggle the tab bar.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -142,10 +162,12 @@ namespace djv
                     }
                 });
 
-            _actions["Timeline"] = ftk::Action::create(
+            _addCheckCommand(
                 "Timeline",
-                [appWeak](bool value)
+                "Toggle the timeline.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -154,10 +176,12 @@ namespace djv
                     }
                 });
 
-            _actions["BottomToolBar"] = ftk::Action::create(
-                "Bottom Tool Bar",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "BottomToolBar",
+                "Toggle the bottom tool bar.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -166,10 +190,12 @@ namespace djv
                     }
                 });
 
-            _actions["StatusToolBar"] = ftk::Action::create(
-                "Status Tool Bar",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "StatusToolBar",
+                "Toggle the status tool bar.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getSettingsModel()->getWindow();
@@ -178,12 +204,48 @@ namespace djv
                     }
                 });
 
-            _tooltips =
-            {
-                { "FullScreen", "Toggle the window full screen." },
-                { "PresentMode", "Toggle presentation mode." },
-                { "Secondary", "Toggle the secondary window." }
-            };
+            // Create the actions.
+            _actions["FullScreen"] = ftk::Action::create(
+                "Full Screen",
+                "WindowFullScreen",
+                _checkCommand("FullScreen"));
+            _actions["PresentMode"] = ftk::Action::create(
+                "Presentation",
+                _checkCommand("PresentMode"));
+            _actions["FloatOnTop"] = ftk::Action::create(
+                "Float On Top",
+                _checkCommand("FloatOnTop"));
+            _actions["Secondary"] = ftk::Action::create(
+                "Secondary",
+                "WindowSecondary",
+                _checkCommand("Secondary"));
+            _actions["FileToolBar"] = ftk::Action::create(
+                "File Tool Bar",
+                _checkCommand("FileToolBar"));
+            _actions["CompareToolBar"] = ftk::Action::create(
+                "Compare Tool Bar",
+                _checkCommand("CompareToolBar"));
+            _actions["WindowToolBar"] = ftk::Action::create(
+                "Window Tool Bar",
+                _checkCommand("WindowToolBar"));
+            _actions["ViewToolBar"] = ftk::Action::create(
+                "View Tool Bar",
+                _checkCommand("ViewToolBar"));
+            _actions["ToolsToolBar"] = ftk::Action::create(
+                "Tools Tool Bar",
+                _checkCommand("ToolsToolBar"));
+            _actions["TabBar"] = ftk::Action::create(
+                "Tab Bar",
+                _checkCommand("TabBar"));
+            _actions["Timeline"] = ftk::Action::create(
+                "Timeline",
+                _checkCommand("Timeline"));
+            _actions["BottomToolBar"] = ftk::Action::create(
+                "Bottom Tool Bar",
+                _checkCommand("BottomToolBar"));
+            _actions["StatusToolBar"] = ftk::Action::create(
+                "Status Tool Bar",
+                _checkCommand("StatusToolBar"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

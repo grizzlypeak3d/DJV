@@ -27,6 +27,7 @@
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/RecentFilesModel.h>
 #include <djv/Models/TimeUnitsModel.h>
+#include <djv/Models/CommandsModel.h>
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/Version.h>
 #include <djv/Models/ViewportModel.h>
@@ -95,6 +96,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > settingsFileName;
             std::shared_ptr<ftk::CmdLineFlag> version;
             std::shared_ptr<ftk::CmdLineFlag> sysInfo;
+            std::shared_ptr<ftk::CmdLineFlag> listCommands;
             std::shared_ptr<ftk::CmdLineOption<int> > debugLoop;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureManifest;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureShot;
@@ -124,6 +126,7 @@ namespace djv
             std::shared_ptr<models::AudioModel> audioModel;
             bool audioDeviceMute = false;
             std::shared_ptr<models::ToolsModel> toolsModel;
+            std::shared_ptr<models::CommandsModel> commandsModel;
 
             std::shared_ptr<ftk::Observable<bool> > secondaryWindowActive;
             std::shared_ptr<ToolWidgetFactory> toolWidgetFactory;
@@ -310,6 +313,9 @@ namespace djv
             p.cmdLine.sysInfo = ftk::CmdLineFlag::create(
                 { "-sysInfo" },
                 "Print the system information and exit.");
+            p.cmdLine.listCommands = ftk::CmdLineFlag::create(
+                { "-listCommands" },
+                "Print the list of commands and exit.");
             p.cmdLine.debugLoop = ftk::CmdLineOption<int>::create(
                 { "-debugLoop" },
                 "Load the command line inputs in a loop. This value is the number of seconds for each cycle.",
@@ -368,6 +374,7 @@ namespace djv
                     p.cmdLine.settingsFileName,
                     p.cmdLine.version,
                     p.cmdLine.sysInfo,
+                    p.cmdLine.listCommands,
                     p.cmdLine.debugLoop,
                     p.cmdLine.captureManifest,
                     p.cmdLine.captureShot,
@@ -445,6 +452,11 @@ namespace djv
         const std::shared_ptr<models::ToolsModel>& App::getToolsModel() const
         {
             return _p->toolsModel;
+        }
+
+        const std::shared_ptr<models::CommandsModel>& App::getCommandsModel() const
+        {
+            return _p->commandsModel;
         }
 
         void App::openDialog()
@@ -718,6 +730,15 @@ namespace djv
             
             _mainWindowInit();
 
+            if (p.cmdLine.listCommands->found())
+            {
+                for (const auto& command : p.commandsModel->getCommands())
+                {
+                    std::cout << command.name << " - " << command.doc << std::endl;
+                }
+                return;
+            }
+
             if (p.cmdLine.debugLoop->found() &&
                 !p.cmdLine.inputs->getList().empty())
             {
@@ -909,6 +930,8 @@ namespace djv
             p.audioModel = models::AudioModel::create(_context, p.settings);
 
             p.toolsModel = models::ToolsModel::create(p.settings);
+
+            p.commandsModel = models::CommandsModel::create(_context);
         }
 
         void App::_observersInit()

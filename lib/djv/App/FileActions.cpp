@@ -23,11 +23,12 @@ namespace djv
             IActions::_init(context, app, "File");
             FTK_P();
 
+            // Register the commands.
             auto appWeak = std::weak_ptr<App>(app);
-            _actions["Open"] = ftk::Action::create(
+            _addCommand(
                 "Open",
-                "FileOpen",
-                [appWeak]
+                "Open a file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -35,10 +36,10 @@ namespace djv
                     }
                 });
 
-            _actions["OpenAudio"] = ftk::Action::create(
-                "Open With Audio",
-                "FileOpenAudio",
-                [appWeak]
+            _addCommand(
+                "OpenAudio",
+                "Open a file with a separate audio file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -46,10 +47,10 @@ namespace djv
                     }
                 });
 
-            _actions["Close"] = ftk::Action::create(
+            _addCommand(
                 "Close",
-                "FileClose",
-                [appWeak]
+                "Close the current file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -57,10 +58,10 @@ namespace djv
                     }
                 });
 
-            _actions["CloseAll"] = ftk::Action::create(
-                "Close All",
-                "FileCloseAll",
-                [appWeak]
+            _addCommand(
+                "CloseAll",
+                "Close all files.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -68,10 +69,10 @@ namespace djv
                     }
                 });
 
-            _actions["Reload"] = ftk::Action::create(
+            _addCommand(
                 "Reload",
-                "FileReload",
-                [appWeak]
+                "Reload the current file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -79,10 +80,10 @@ namespace djv
                     }
                 });
 
-            _actions["Next"] = ftk::Action::create(
+            _addCommand(
                 "Next",
-                "Next",
-                [appWeak]
+                "Change to the next file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -90,10 +91,10 @@ namespace djv
                     }
                 });
 
-            _actions["Prev"] = ftk::Action::create(
-                "Previous",
+            _addCommand(
                 "Prev",
-                [appWeak]
+                "Change to the previous file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -101,10 +102,10 @@ namespace djv
                     }
                 });
 
-            _actions["NextLayer"] = ftk::Action::create(
-                "Next Layer",
-                "Next",
-                [appWeak]
+            _addCommand(
+                "NextLayer",
+                "Change to the next layer.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -112,10 +113,10 @@ namespace djv
                     }
                 });
 
-            _actions["PrevLayer"] = ftk::Action::create(
-                "Previous Layer",
-                "Prev",
-                [appWeak]
+            _addCommand(
+                "PrevLayer",
+                "Change to the previous layer.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -123,9 +124,10 @@ namespace djv
                     }
                 });
 
-            _actions["Exit"] = ftk::Action::create(
+            _addCommand(
                 "Exit",
-                [appWeak]
+                "Exit the application.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -133,19 +135,46 @@ namespace djv
                     }
                 });
 
-            _tooltips =
-            {
-                { "Open", "Open a file." },
-                { "OpenAudio", "Open a file with a separate audio file." },
-                { "Close", "Close the current file." },
-                { "CloseAll", "Close all files." },
-                { "Reload", "Reload the current file." },
-                { "Next", "Change to the next file." },
-                { "Prev", "Change to the previous file." },
-                { "NextLayer", "Change to the next layer." },
-                { "PrevLayer", "Change to the previous layer." },
-                { "Exit", "Exit the application." }
-            };
+            // Create the actions.
+            _actions["Open"] = ftk::Action::create(
+                "Open",
+                "FileOpen",
+                _command("Open"));
+            _actions["OpenAudio"] = ftk::Action::create(
+                "Open With Audio",
+                "FileOpenAudio",
+                _command("OpenAudio"));
+            _actions["Close"] = ftk::Action::create(
+                "Close",
+                "FileClose",
+                _command("Close"));
+            _actions["CloseAll"] = ftk::Action::create(
+                "Close All",
+                "FileCloseAll",
+                _command("CloseAll"));
+            _actions["Reload"] = ftk::Action::create(
+                "Reload",
+                "FileReload",
+                _command("Reload"));
+            _actions["Next"] = ftk::Action::create(
+                "Next",
+                "Next",
+                _command("Next"));
+            _actions["Prev"] = ftk::Action::create(
+                "Previous",
+                "Prev",
+                _command("Prev"));
+            _actions["NextLayer"] = ftk::Action::create(
+                "Next Layer",
+                "Next",
+                _command("NextLayer"));
+            _actions["PrevLayer"] = ftk::Action::create(
+                "Previous Layer",
+                "Prev",
+                _command("PrevLayer"));
+            _actions["Exit"] = ftk::Action::create(
+                "Exit",
+                _command("Exit"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

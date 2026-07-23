@@ -2,6 +2,7 @@ set(HEADERS
     AppInfoModel.h
     AudioModel.h
     ColorModel.h
+    CommandsModel.h
     FilesModel.h
     OCIOModel.h
     RecentFilesModel.h
@@ -17,6 +18,7 @@ set(SOURCE
     AppInfoModel.cpp
     AudioModel.cpp
     ColorModel.cpp
+    CommandsModel.cpp
     FilesModel.cpp
     OCIOModel.cpp
     RecentFilesModel.cpp

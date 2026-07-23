@@ -24,9 +24,13 @@ namespace djv
             IActions::_init(context, app, "Help");
             FTK_P();
 
-            _actions["Documentation"] = ftk::Action::create(
+            std::weak_ptr<MainWindow> mainWindowWeak(mainWindow);
+
+            // Register the commands.
+            _addCommand(
                 "Documentation",
-                []
+                "Open the documentation in a web browser.",
+                [](const nlohmann::json&)
                 {
                     try
                     {
@@ -36,10 +40,10 @@ namespace djv
                     {}
                 });
 
-            std::weak_ptr<MainWindow> mainWindowWeak(mainWindow);
-            _actions["About"] = ftk::Action::create(
+            _addCommand(
                 "About",
-                [mainWindowWeak]
+                "Show the about dialog.",
+                [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
@@ -47,15 +51,27 @@ namespace djv
                     }
                 });
 
-            _actions["SysInfo"] = ftk::Action::create(
-                "System Information",
-                [mainWindowWeak]
+            _addCommand(
+                "SysInfo",
+                "Show the system information dialog.",
+                [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
                         mainWindow->showSysInfoDialog();
                     }
                 });
+
+            // Create the actions.
+            _actions["Documentation"] = ftk::Action::create(
+                "Documentation",
+                _command("Documentation"));
+            _actions["About"] = ftk::Action::create(
+                "About",
+                _command("About"));
+            _actions["SysInfo"] = ftk::Action::create(
+                "System Information",
+                _command("SysInfo"));
         }
 
         HelpActions::HelpActions() :

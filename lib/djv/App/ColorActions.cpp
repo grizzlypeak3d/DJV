@@ -25,10 +25,14 @@ namespace djv
             FTK_P();
 
             auto appWeak = std::weak_ptr<App>(app);
-            _actions["OCIO"] = ftk::Action::create(
-                "Enable OCIO",
-                [appWeak](bool value)
+
+            // Register the commands.
+            _addCheckCommand(
+                "OCIO",
+                "Toggle whether OCIO is enabled.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getColorModel()->getOCIOOptions();
@@ -37,10 +41,12 @@ namespace djv
                     }
                 });
 
-            _actions["LUT"] = ftk::Action::create(
-                "Enable LUT",
-                [appWeak](bool value)
+            _addCheckCommand(
+                "LUT",
+                "Toggle whether the LUT is enabled.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getColorModel()->getLUTOptions();
@@ -49,11 +55,13 @@ namespace djv
                     }
                 });
 
-            _tooltips =
-            {
-                { "OCIO", "Toggle whether OCIO is enabled." },
-                { "LUT", "Toggle whether the LUT is enabled." }
-            };
+            // Create the actions.
+            _actions["OCIO"] = ftk::Action::create(
+                "Enable OCIO",
+                _checkCommand("OCIO"));
+            _actions["LUT"] = ftk::Action::create(
+                "Enable LUT",
+                _checkCommand("LUT"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

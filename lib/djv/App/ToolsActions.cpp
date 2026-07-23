@@ -27,20 +27,32 @@ namespace djv
             auto appWeak = std::weak_ptr<App>(app);
             for (const auto& tool : app->getToolsModel()->getTools())
             {
-                auto action = ftk::Action::create(
+                // Register the command.
+                _addCheckCommand(
                     tool.name,
-                    tool.icon,
-                    [appWeak, tool](bool value)
+                    ftk::Format("Toggle the {0} tool.").arg(tool.name),
+                    [appWeak, tool](const nlohmann::json& args)
                     {
+                        const bool value = args.at("value").get<bool>();
                         if (auto app = appWeak.lock())
                         {
                             auto toolsModel = app->getToolsModel();
-                            const auto active = toolsModel->getActiveTool();
-                            toolsModel->setActiveTool(tool.name != active ? tool.name : std::string());
+                            if (value)
+                            {
+                                toolsModel->setActiveTool(tool.name);
+                            }
+                            else if (toolsModel->getActiveTool() == tool.name)
+                            {
+                                toolsModel->setActiveTool(std::string());
+                            }
                         }
                     });
-                _actions[tool.name] = action;
-                _tooltips[tool.name] = ftk::Format("Toggle the {0} tool.").arg(tool.name);
+
+                // Create the action.
+                _actions[tool.name] = ftk::Action::create(
+                    tool.name,
+                    tool.icon,
+                    _checkCommand(tool.name));
             }
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());

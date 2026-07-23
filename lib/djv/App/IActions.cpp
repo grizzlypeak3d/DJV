@@ -13,6 +13,9 @@ namespace djv
     {
         struct IActions::Private
         {
+            std::shared_ptr<models::CommandsModel> commandsModel;
+            std::vector<std::string> commands;
+
             std::shared_ptr<ftk::Observer<models::ShortcutsSettings> > shortcutsSettingsObserver;
         };
 
@@ -24,6 +27,8 @@ namespace djv
             FTK_P();
 
             _name = name;
+
+            p.commandsModel = app->getCommandsModel();
 
             p.shortcutsSettingsObserver = ftk::Observer<models::ShortcutsSettings>::create(
                 app->getSettingsModel()->observeShortcuts(),
@@ -38,7 +43,74 @@ namespace djv
         {}
 
         IActions::~IActions()
-        {}
+        {
+            FTK_P();
+            if (p.commandsModel)
+            {
+                for (const auto& command : p.commands)
+                {
+                    p.commandsModel->remove(command);
+                }
+            }
+        }
+
+        void IActions::_addCommand(
+            const std::string& name,
+            const std::string& doc,
+            const models::CommandFunc& func)
+        {
+            FTK_P();
+            const std::string commandName = ftk::Format("{0}/{1}").arg(_name).arg(name);
+            p.commandsModel->add(commandName, doc, func);
+            p.commands.push_back(commandName);
+            _tooltips[name] = doc;
+        }
+
+        void IActions::_addCheckCommand(
+            const std::string& name,
+            const std::string& doc,
+            const models::CommandFunc& func)
+        {
+            FTK_P();
+            const std::string commandName = ftk::Format("{0}/{1}").arg(_name).arg(name);
+            std::string commandDoc = doc;
+            if (!commandDoc.empty() && '.' == commandDoc.back())
+            {
+                commandDoc.pop_back();
+            }
+            commandDoc += "; e.g., { \"value\": true }.";
+            p.commandsModel->add(commandName, commandDoc, func);
+            p.commands.push_back(commandName);
+            _tooltips[name] = doc;
+        }
+
+        std::function<void(void)> IActions::_command(const std::string& name)
+        {
+            FTK_P();
+            const std::string commandName = ftk::Format("{0}/{1}").arg(_name).arg(name);
+            std::weak_ptr<models::CommandsModel> weak = p.commandsModel;
+            return [weak, commandName]
+            {
+                if (auto commandsModel = weak.lock())
+                {
+                    commandsModel->exec(commandName);
+                }
+            };
+        }
+
+        std::function<void(bool)> IActions::_checkCommand(const std::string& name)
+        {
+            FTK_P();
+            const std::string commandName = ftk::Format("{0}/{1}").arg(_name).arg(name);
+            std::weak_ptr<models::CommandsModel> weak = p.commandsModel;
+            return [weak, commandName](bool value)
+            {
+                if (auto commandsModel = weak.lock())
+                {
+                    commandsModel->exec(commandName, { { "value", value } });
+                }
+            };
+        }
 
         const std::map<std::string, std::shared_ptr<ftk::Action> >& IActions::getActions() const
         {

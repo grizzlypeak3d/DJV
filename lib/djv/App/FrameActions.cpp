@@ -23,11 +23,12 @@ namespace djv
             IActions::_init(context, app, "Frame");
             FTK_P();
 
+            // Register the commands.
             auto appWeak = std::weak_ptr<App>(app);
-            _actions["Start"] = ftk::Action::create(
-                "Goto Start",
-                "FrameStart",
-                [appWeak]
+            _addCommand(
+                "Start",
+                "Go to the start frame.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -38,10 +39,10 @@ namespace djv
                     }
                 });
 
-            _actions["End"] = ftk::Action::create(
-                "Goto End",
-                "FrameEnd",
-                [appWeak]
+            _addCommand(
+                "End",
+                "Go to the end frame.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -52,10 +53,10 @@ namespace djv
                     }
                 });
 
-            _actions["Prev"] = ftk::Action::create(
-                "Previous Frame",
-                "FramePrev",
-                [appWeak]
+            _addCommand(
+                "Prev",
+                "Go to the previous frame.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -66,9 +67,10 @@ namespace djv
                     }
                 });
 
-            _actions["PrevX10"] = ftk::Action::create(
-                "Previous Frame X10",
-                [appWeak]
+            _addCommand(
+                "PrevX10",
+                "Go to the previous frame X10.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -79,9 +81,10 @@ namespace djv
                     }
                 });
 
-            _actions["PrevX100"] = ftk::Action::create(
-                "Previous Frame X100",
-                [appWeak]
+            _addCommand(
+                "PrevX100",
+                "Go to the previous frame X100.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -92,10 +95,10 @@ namespace djv
                     }
                 });
 
-            _actions["Next"] = ftk::Action::create(
-                "Next Frame",
-                "FrameNext",
-                [appWeak]
+            _addCommand(
+                "Next",
+                "Go to the next frame.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -106,9 +109,10 @@ namespace djv
                     }
                 });
 
-            _actions["NextX10"] = ftk::Action::create(
-                "Next Frame X10",
-                [appWeak]
+            _addCommand(
+                "NextX10",
+                "Go to the next frame X10.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -119,9 +123,10 @@ namespace djv
                     }
                 });
 
-            _actions["NextX100"] = ftk::Action::create(
-                "Next Frame X100",
-                [appWeak]
+            _addCommand(
+                "NextX100",
+                "Go to the next frame X100.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -133,9 +138,10 @@ namespace djv
                 });
 
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
-            _actions["FocusCurrent"] = ftk::Action::create(
-                "Focus Current Frame",
-                [mainWindowWeak]
+            _addCommand(
+                "FocusCurrent",
+                "Set the keyboard focus to the current frame editor.",
+                [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
@@ -143,18 +149,38 @@ namespace djv
                     }
                 });
 
-            _tooltips =
-            {
-                { "Start", "Go to the start frame." },
-                { "End", "Go to the end frame." },
-                { "Prev", "Go to the previous frame." },
-                { "PrevX10", "Go to the previous frame X10." },
-                { "PrevX100", "Go to the previous frame X100." },
-                { "Next", "Go to the next frame." },
-                { "NextX10", "Go to the next frame X10." },
-                { "NextX100", "Go to the next frame X100." },
-                { "FocusCurrent", "Set the keyboard focus to the current frame editor." }
-            };
+            // Create the actions.
+            _actions["Start"] = ftk::Action::create(
+                "Goto Start",
+                "FrameStart",
+                _command("Start"));
+            _actions["End"] = ftk::Action::create(
+                "Goto End",
+                "FrameEnd",
+                _command("End"));
+            _actions["Prev"] = ftk::Action::create(
+                "Previous Frame",
+                "FramePrev",
+                _command("Prev"));
+            _actions["PrevX10"] = ftk::Action::create(
+                "Previous Frame X10",
+                _command("PrevX10"));
+            _actions["PrevX100"] = ftk::Action::create(
+                "Previous Frame X100",
+                _command("PrevX100"));
+            _actions["Next"] = ftk::Action::create(
+                "Next Frame",
+                "FrameNext",
+                _command("Next"));
+            _actions["NextX10"] = ftk::Action::create(
+                "Next Frame X10",
+                _command("NextX10"));
+            _actions["NextX100"] = ftk::Action::create(
+                "Next Frame X100",
+                _command("NextX100"));
+            _actions["FocusCurrent"] = ftk::Action::create(
+                "Focus Current Frame",
+                _command("FocusCurrent"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

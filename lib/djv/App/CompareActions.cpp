@@ -25,10 +25,12 @@ namespace djv
             FTK_P();
 
             auto appWeak = std::weak_ptr<App>(app);
-            _actions["Next"] = ftk::Action::create(
+
+            // Register the commands.
+            _addCommand(
                 "Next",
-                "Next",
-                [appWeak]
+                "Go to the next B file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -36,10 +38,10 @@ namespace djv
                     }
                 });
 
-            _actions["Prev"] = ftk::Action::create(
-                "Previous",
+            _addCommand(
                 "Prev",
-                [appWeak]
+                "Go to the previous B file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -47,10 +49,10 @@ namespace djv
                     }
                 });
 
-            _actions["A"] = ftk::Action::create(
+            _addCommand(
                 "A",
-                "CompareA",
-                [appWeak]
+                "Show the A file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -60,10 +62,10 @@ namespace djv
                     }
                 });
 
-            _actions["B"] = ftk::Action::create(
+            _addCommand(
                 "B",
-                "CompareB",
-                [appWeak]
+                "Show the B file.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -73,10 +75,10 @@ namespace djv
                     }
                 });
 
-            _actions["Wipe"] = ftk::Action::create(
+            _addCommand(
                 "Wipe",
-                "CompareWipe",
-                [appWeak]
+                "Wipe between the A and B files.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -86,10 +88,10 @@ namespace djv
                     }
                 });
 
-            _actions["Overlay"] = ftk::Action::create(
+            _addCommand(
                 "Overlay",
-                "CompareOverlay",
-                [appWeak]
+                "Overlay the A and B files.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -99,10 +101,10 @@ namespace djv
                     }
                 });
 
-            _actions["Difference"] = ftk::Action::create(
+            _addCommand(
                 "Difference",
-                "CompareDifference",
-                [appWeak]
+                "Show the difference between the A and B files.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -112,10 +114,10 @@ namespace djv
                     }
                 });
 
-            _actions["Horizontal"] = ftk::Action::create(
+            _addCommand(
                 "Horizontal",
-                "CompareHorizontal",
-                [appWeak]
+                "Show the A and B files side by side.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -125,10 +127,10 @@ namespace djv
                     }
                 });
 
-            _actions["Vertical"] = ftk::Action::create(
+            _addCommand(
                 "Vertical",
-                "CompareVertical",
-                [appWeak]
+                "Show the A and B files over and under.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -138,10 +140,10 @@ namespace djv
                     }
                 });
 
-            _actions["Tile"] = ftk::Action::create(
+            _addCommand(
                 "Tile",
-                "CompareTile",
-                [appWeak]
+                "Show the A and B files tiled.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -151,9 +153,10 @@ namespace djv
                     }
                 });
 
-            _actions["ABToggle"] = ftk::Action::create(
-                "A/B Toggle",
-                [appWeak]
+            _addCommand(
+                "ABToggle",
+                "Toggle between the A and B files.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -168,9 +171,10 @@ namespace djv
                     }
                 });
 
-            _actions["Relative"] = ftk::Action::create(
+            _addCommand(
                 "Relative",
-                [appWeak]
+                "Compare files using relative time.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -178,9 +182,10 @@ namespace djv
                     }
                 });
 
-            _actions["Absolute"] = ftk::Action::create(
+            _addCommand(
                 "Absolute",
-                [appWeak]
+                "Compare files using absolute time.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -188,19 +193,56 @@ namespace djv
                     }
                 });
 
-            _tooltips =
-            {
-                { "Next", "Go to the next B file." },
-                { "Prev", "Go to the previous B file." },
-                { "A", "Show the A file." },
-                { "B", "Show the B file." },
-                { "Wipe", "Wipe between the A and B files." },
-                { "Overlay", "Overlay the A and B files." },
-                { "Difference", "Show the difference between the A and B files." },
-                { "Horizontal", "Show the A and B files side by side." },
-                { "Vertical", "Show the A and B files over and under." },
-                { "Tile", "Show the A and B files tiled." },
-            };
+            // Create the actions.
+            _actions["Next"] = ftk::Action::create(
+                "Next",
+                "Next",
+                _command("Next"));
+            _actions["Prev"] = ftk::Action::create(
+                "Previous",
+                "Prev",
+                _command("Prev"));
+            _actions["A"] = ftk::Action::create(
+                "A",
+                "CompareA",
+                _command("A"));
+            _actions["B"] = ftk::Action::create(
+                "B",
+                "CompareB",
+                _command("B"));
+            _actions["Wipe"] = ftk::Action::create(
+                "Wipe",
+                "CompareWipe",
+                _command("Wipe"));
+            _actions["Overlay"] = ftk::Action::create(
+                "Overlay",
+                "CompareOverlay",
+                _command("Overlay"));
+            _actions["Difference"] = ftk::Action::create(
+                "Difference",
+                "CompareDifference",
+                _command("Difference"));
+            _actions["Horizontal"] = ftk::Action::create(
+                "Horizontal",
+                "CompareHorizontal",
+                _command("Horizontal"));
+            _actions["Vertical"] = ftk::Action::create(
+                "Vertical",
+                "CompareVertical",
+                _command("Vertical"));
+            _actions["Tile"] = ftk::Action::create(
+                "Tile",
+                "CompareTile",
+                _command("Tile"));
+            _actions["ABToggle"] = ftk::Action::create(
+                "A/B Toggle",
+                _command("ABToggle"));
+            _actions["Relative"] = ftk::Action::create(
+                "Relative",
+                _command("Relative"));
+            _actions["Absolute"] = ftk::Action::create(
+                "Absolute",
+                _command("Absolute"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

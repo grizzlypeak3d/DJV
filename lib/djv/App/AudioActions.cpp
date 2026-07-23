@@ -24,9 +24,12 @@ namespace djv
             FTK_P();
 
             auto appWeak = std::weak_ptr<App>(app);
-            _actions["VolumeUp"] = ftk::Action::create(
-                "Volume Up",
-                [appWeak]
+
+            // Register the commands.
+            _addCommand(
+                "VolumeUp",
+                "Increase the audio volume.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -34,9 +37,10 @@ namespace djv
                     }
                 });
 
-            _actions["VolumeDown"] = ftk::Action::create(
-                "Volume Down",
-                [appWeak]
+            _addCommand(
+                "VolumeDown",
+                "Decrease the audio volume.",
+                [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -44,23 +48,29 @@ namespace djv
                     }
                 });
 
-            _actions["Mute"] = ftk::Action::create(
+            _addCheckCommand(
                 "Mute",
-                "Mute",
-                [appWeak](bool value)
+                "Toggle the audio mute.",
+                [appWeak](const nlohmann::json& args)
                 {
+                    const bool value = args.at("value").get<bool>();
                     if (auto app = appWeak.lock())
                     {
                         app->getAudioModel()->setMute(value);
                     }
                 });
 
-            _tooltips =
-            {
-                { "VolumeUp", "Increase the audio volume." },
-                { "VolumeDown", "Decrease the audio volume." },
-                { "Mute", "Toggle the autio mute." },
-            };
+            // Create the actions.
+            _actions["VolumeUp"] = ftk::Action::create(
+                "Volume Up",
+                _command("VolumeUp"));
+            _actions["VolumeDown"] = ftk::Action::create(
+                "Volume Down",
+                _command("VolumeDown"));
+            _actions["Mute"] = ftk::Action::create(
+                "Mute",
+                "Mute",
+                _checkCommand("Mute"));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
