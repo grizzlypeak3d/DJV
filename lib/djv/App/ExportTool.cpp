@@ -28,6 +28,7 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/TabBar.h>
 #include <ftk/UI/TabWidget.h>
 #include <ftk/GL/GL.h>
 #include <ftk/GL/OffscreenBuffer.h>
@@ -135,7 +136,9 @@ namespace djv
             p.renderHeightEdit->setParent(p.customSizeLayout);
             p.formLayout->addRow("Custom size:", p.customSizeLayout);
             p.tabWidget = ftk::TabWidget::create(context, p.layout);
-            ftk::setScreenshotTag(p.tabWidget, "Export.Tabs");
+            // Tag the tab bar rather than the whole tab widget so that
+            // screenshot annotations point at the tabs.
+            ftk::setScreenshotTag(p.tabWidget->getTabBar(), "Export.Tabs");
             p.tabWidget->addTab("Image", p.imageWidget);
             p.tabWidget->addTab("Sequence", p.seqWidget);
             p.tabWidget->addTab("Movie", p.movieWidget);
