@@ -17,6 +17,10 @@ DJV ships with support for the following formats:
 Different formats may be available depending on how DJV was built, or by using
 an external FFmpeg command.
 
+{: .note }
+These are the formats DJV reads. For the formats DJV writes, see
+[Exporting files]({{ '/export' | relative_url }}).
+
 ## Opening files
 
 You can open files and folders in three ways:

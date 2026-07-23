@@ -34,6 +34,10 @@ You can temporarily speed up playback by clicking the forward (or reverse)
 button repeatedly: each click doubles the playback speed. Clicking the opposite
 direction slows it back down.
 
+For continuous control, click and drag the playback shuttle: dragging in the
+playback direction speeds up, dragging the opposite way slows down, and
+releasing returns to normal speed.
+
 ## Frame navigation
 
 Step through frames or jump to the start or end from the **Frame** menu and the

@@ -12,8 +12,9 @@ image sequence (see [Files]({{ '/files' | relative_url }})).
 
 ## Volume and mute
 
-Volume and mute are available from the **Audio** menu, the **Bottom** tool bar
-(the speaker control next to the playback controls), and the **Audio** tool.
+Volume and mute are available from the **Audio** menu, the speaker control in
+the **Bottom** tool bar (click to show the volume slider and mute button), and
+the **Audio** tool. The speaker icon changes to show when the audio is muted.
 
 Shortcuts:
 

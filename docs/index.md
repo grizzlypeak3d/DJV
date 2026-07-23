@@ -18,6 +18,8 @@ Features include:
 - Timeline support with OpenTimelineIO
 - Color management with OpenColorIO
 - Multi-track audio with variable-speed and reverse playback
+- Export images, image sequences, and movies with audio
+- Command line automation
 - Experimental USD support
 - Available for Linux, macOS, and Windows
 
