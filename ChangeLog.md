@@ -1,6 +1,7 @@
 ## 3.5.0
 
 Changes:
+* Add audio export.
 * Add an image negative option.
 * Add custom aspect ratios.
 * Add a center marker option.
