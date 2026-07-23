@@ -4,9 +4,9 @@
 #include <djv/App/ExportTool.h>
 
 #include <djv/App/App.h>
+#include <djv/App/ExportWidgets.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
-#include <djv/Models/SettingsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/GL/Render.h>
@@ -17,55 +17,34 @@
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#include <tlRender/Core/Audio.h>
+
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/FileEdit.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEdit.h>
-#include <ftk/UI/Label.h>
-#include <ftk/UI/LineEdit.h>
 #include <ftk/UI/ProgressDialog.h>
-#include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/TabWidget.h>
 #include <ftk/GL/GL.h>
 #include <ftk/GL/OffscreenBuffer.h>
 #include <ftk/GL/Util.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Timer.h>
 
+#include <cstring>
+
 namespace djv
 {
     namespace app
     {
-        namespace
-        {
-            const std::vector<std::string> imageExts =
-            {
-                ".exr",
-                ".png",
-                ".tif",
-                ".tiff",
-                ".jpg",
-                ".jpeg"
-            };
-
-            const std::vector<std::string> movieExts =
-            {
-                ".mov",
-                ".mp4",
-                ".m4v"
-            };
-        }
-
         struct ExportTool::Private
         {
             std::shared_ptr<tl::Player> player;
             std::shared_ptr<models::SettingsModel> settings;
-            std::vector<std::string> imageExts;
-            std::vector<std::string> movieExts;
-            std::vector<std::string> movieCodecs;
 
             struct ExportData
             {
@@ -74,6 +53,11 @@ namespace djv
                 ftk::Path path;
                 ftk::ImageInfo info;
                 std::shared_ptr<tl::IWrite> writer;
+                bool hasAudio = false;
+                double audioStartSeconds = 0.0;
+                double audioDurationSeconds = 0.0;
+                double audioSeconds = 0.0;
+                int64_t audioSamples = 0;
                 tl::OCIOOptions ocioOptions;
                 tl::LUTOptions lutOptions;
                 ftk::ImageOptions imageOptions;
@@ -90,14 +74,10 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> renderSizeComboBox;
             std::shared_ptr<ftk::IntEdit> renderWidthEdit;
             std::shared_ptr<ftk::IntEdit> renderHeightEdit;
-            std::shared_ptr<ftk::ComboBox> fileTypeComboBox;
-            std::shared_ptr<ftk::LineEdit> imageBaseEdit;
-            std::shared_ptr<ftk::IntEdit> imageZeroPadEdit;
-            std::shared_ptr<ftk::ComboBox> imageExtComboBox;
-            std::shared_ptr<ftk::LineEdit> movieBaseEdit;
-            std::shared_ptr<ftk::ComboBox> movieExtComboBox;
-            std::shared_ptr<ftk::ComboBox> movieCodecComboBox;
-            std::shared_ptr<ftk::PushButton> exportButton;
+            std::shared_ptr<ImageExportWidget> imageWidget;
+            std::shared_ptr<SeqExportWidget> seqWidget;
+            std::shared_ptr<MovieExportWidget> movieWidget;
+            std::shared_ptr<ftk::TabWidget> tabWidget;
             std::shared_ptr<ftk::HorizontalLayout> customSizeLayout;
             std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
@@ -127,28 +107,6 @@ namespace djv
 
             p.settings = app->getSettingsModel();
 
-            auto ioSystem = context->getSystem<tl::WriteSystem>();
-            for (const auto& ext : ioSystem->getExts(static_cast<int>(tl::FileType::Seq)))
-            {
-                if (std::find(imageExts.begin(), imageExts.end(), ext) != imageExts.end())
-                {
-                    p.imageExts.push_back(ext);
-                }
-            }
-
-            for (const auto& ext : ioSystem->getExts(static_cast<int>(tl::FileType::Media)))
-            {
-                if (std::find(movieExts.begin(), movieExts.end(), ext) != movieExts.end())
-                {
-                    p.movieExts.push_back(ext);
-                }
-            }
-
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-            auto ffmpegPlugin = ioSystem->getPlugin<tl::ffmpeg::WritePlugin>();
-            p.movieCodecs = ffmpegPlugin->getCodecs();
-#endif // TLRENDER_FFMPEG_PLUGIN
-
             p.dirEdit = ftk::FileEdit::create(context, ftk::FileBrowserMode::Dir);
             ftk::setScreenshotTag(p.dirEdit, "Export.Dir");
 
@@ -159,27 +117,15 @@ namespace djv
             p.renderHeightEdit = ftk::IntEdit::create(context);
             p.renderHeightEdit->setRange(1, 16384);
 
-            p.fileTypeComboBox = ftk::ComboBox::create(context, models::getExportFileTypeLabels());
-            ftk::setScreenshotTag(p.fileTypeComboBox, "Export.FileType");
-
-            p.imageBaseEdit = ftk::LineEdit::create(context);
-            ftk::setScreenshotTag(p.imageBaseEdit, "Export.ImageBaseName");
-            p.imageZeroPadEdit = ftk::IntEdit::create(context);
-            p.imageZeroPadEdit->setRange(0, 16);
-            ftk::setScreenshotTag(p.imageZeroPadEdit, "Export.ImageZeroPad");
-            p.imageExtComboBox = ftk::ComboBox::create(context, p.imageExts);
-            ftk::setScreenshotTag(p.imageExtComboBox, "Export.ImageExt");
-
-            p.movieBaseEdit = ftk::LineEdit::create(context);
-            p.movieExtComboBox = ftk::ComboBox::create(context, p.movieExts);
-            p.movieCodecComboBox = ftk::ComboBox::create(context, p.movieCodecs);
-
-            p.exportButton = ftk::PushButton::create(context, "Export");
-            ftk::setScreenshotTag(p.exportButton, "Export.Export");
+            p.imageWidget = ImageExportWidget::create(context, app);
+            p.seqWidget = SeqExportWidget::create(context, app);
+            p.movieWidget = MovieExportWidget::create(context, app);
 
             p.layout = ftk::VerticalLayout::create(context);
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.formLayout = ftk::FormLayout::create(context, p.layout);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            auto vLayout = ftk::VerticalLayout::create(context, p.layout);
+            vLayout->setMarginRole(ftk::SizeRole::Margin);
+            p.formLayout = ftk::FormLayout::create(context, vLayout);
             p.formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout->addRow("Directory:", p.dirEdit);
             p.formLayout->addRow("Render size:", p.renderSizeComboBox);
@@ -188,18 +134,11 @@ namespace djv
             p.renderWidthEdit->setParent(p.customSizeLayout);
             p.renderHeightEdit->setParent(p.customSizeLayout);
             p.formLayout->addRow("Custom size:", p.customSizeLayout);
-            p.formLayout->addRow("File type:", p.fileTypeComboBox);
-            p.formLayout->addRow("Base name:", p.imageBaseEdit);
-            p.formLayout->addRow("Zero padding:", p.imageZeroPadEdit);
-            p.formLayout->addRow("Extension:", p.imageExtComboBox);
-            p.formLayout->addRow("Base name:", p.movieBaseEdit);
-            p.formLayout->addRow("Extension:", p.movieExtComboBox);
-            p.formLayout->addRow("Codec:", p.movieCodecComboBox);
-            p.exportButton->setParent(p.layout);
-            auto label = ftk::Label::create(
-                context,
-                "Audio export is not currently supported.",
-                p.layout);
+            p.tabWidget = ftk::TabWidget::create(context, p.layout);
+            ftk::setScreenshotTag(p.tabWidget, "Export.Tabs");
+            p.tabWidget->addTab("Image", p.imageWidget);
+            p.tabWidget->addTab("Sequence", p.seqWidget);
+            p.tabWidget->addTab("Movie", p.movieWidget);
 
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setBorder(false);
@@ -212,7 +151,6 @@ namespace djv
                 {
                     FTK_P();
                     p.player = value;
-                    p.exportButton->setEnabled(value.get());
                 });
 
             p.settingsObserver = ftk::Observer<models::ExportSettings>::create(
@@ -258,7 +196,7 @@ namespace djv
                     p.settings->setExport(options);
                 });
 
-            p.fileTypeComboBox->setIndexCallback(
+            p.tabWidget->setCallback(
                 [this](int value)
                 {
                     FTK_P();
@@ -267,73 +205,22 @@ namespace djv
                     p.settings->setExport(options);
                 });
 
-            p.imageBaseEdit->setCallback(
-                [this](const std::string& value)
-                {
-                    FTK_P();
-                    auto options = p.settings->getExport();
-                    options.imageBase = value;
-                    p.settings->setExport(options);
-                });
-
-            p.imageZeroPadEdit->setCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    auto options = p.settings->getExport();
-                    options.imageZeroPad = value;
-                    p.settings->setExport(options);
-                });
-
-            p.imageExtComboBox->setIndexCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    if (value >= 0 && value < static_cast<int>(p.imageExts.size()))
-                    {
-                        auto options = p.settings->getExport();
-                        options.imageExt = p.imageExts[value];
-                        p.settings->setExport(options);
-                    }
-                });
-
-            p.movieBaseEdit->setCallback(
-                [this](const std::string& value)
-                {
-                    FTK_P();
-                    auto options = p.settings->getExport();
-                    options.movieBase = value;
-                    p.settings->setExport(options);
-                });
-
-            p.movieExtComboBox->setIndexCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    if (value >= 0 && value < static_cast<int>(p.movieExts.size()))
-                    {
-                        auto options = p.settings->getExport();
-                        options.movieExt = p.movieExts[value];
-                        p.settings->setExport(options);
-                    }
-                });
-
-            p.movieCodecComboBox->setIndexCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    if (value >= 0 && value < static_cast<int>(p.movieCodecs.size()))
-                    {
-                        auto options = p.settings->getExport();
-                        options.movieCodec = p.movieCodecs[value];
-                        p.settings->setExport(options);
-                    }
-                });
-
-            p.exportButton->setClickedCallback(
+            p.imageWidget->setExportCallback(
                 [this]
                 {
-                    _export();
+                    _export(models::ExportFileType::Image);
+                });
+
+            p.seqWidget->setExportCallback(
+                [this]
+                {
+                    _export(models::ExportFileType::Seq);
+                });
+
+            p.movieWidget->setExportCallback(
+                [this]
+                {
+                    _export(models::ExportFileType::Movie);
                 });
 
             p.progressTimer = ftk::Timer::create(context);
@@ -365,39 +252,13 @@ namespace djv
             p.renderSizeComboBox->setCurrentIndex(static_cast<int>(settings.renderSize));
             p.renderWidthEdit->setValue(settings.customSize.w);
             p.renderHeightEdit->setValue(settings.customSize.h);
-            p.fileTypeComboBox->setCurrentIndex(static_cast<int>(settings.fileType));
-            
-            p.imageBaseEdit->setText(settings.imageBase);
-            auto i = std::find(p.imageExts.begin(), p.imageExts.end(), settings.imageExt);
-            p.imageExtComboBox->setCurrentIndex(i != p.imageExts.end() ? (i - p.imageExts.begin()) : -1);
-
-            p.movieBaseEdit->setText(settings.movieBase);
-            i = std::find(p.movieExts.begin(), p.movieExts.end(), settings.movieExt);
-            p.movieExtComboBox->setCurrentIndex(i != p.movieExts.end() ? (i - p.movieExts.begin()) : -1);
-            i = std::find(p.movieCodecs.begin(), p.movieCodecs.end(), settings.movieCodec);
-            p.movieCodecComboBox->setCurrentIndex(i != p.movieCodecs.end() ? (i - p.movieCodecs.begin()) : -1);
-
             p.formLayout->setRowVisible(
                 p.customSizeLayout,
                 models::ExportRenderSize::Custom == settings.renderSize);
-            p.formLayout->setRowVisible(
-                p.imageBaseEdit,
-                models::ExportFileType::Image == settings.fileType ||
-                models::ExportFileType::Seq == settings.fileType);
-            p.formLayout->setRowVisible(
-                p.imageZeroPadEdit,
-                models::ExportFileType::Image == settings.fileType ||
-                models::ExportFileType::Seq == settings.fileType);
-            p.formLayout->setRowVisible(
-                p.imageExtComboBox,
-                models::ExportFileType::Image == settings.fileType ||
-                models::ExportFileType::Seq == settings.fileType);
-            p.formLayout->setRowVisible(p.movieBaseEdit, models::ExportFileType::Movie == settings.fileType);
-            p.formLayout->setRowVisible(p.movieExtComboBox, models::ExportFileType::Movie == settings.fileType);
-            p.formLayout->setRowVisible(p.movieCodecComboBox, models::ExportFileType::Movie == settings.fileType);
+            p.tabWidget->setCurrent(static_cast<int>(settings.fileType));
         }
 
-        void ExportTool::_export()
+        void ExportTool::_export(models::ExportFileType fileType)
         {
             FTK_P();
             if (p.player)
@@ -414,7 +275,7 @@ namespace djv
 
                     // Get the time range.
                     const auto options = p.settings->getExport();
-                    switch (options.fileType)
+                    switch (fileType)
                     {
                     case models::ExportFileType::Image:
                         p.exportData->range = OTIO_NS::TimeRange(
@@ -446,28 +307,10 @@ namespace djv
                     }
 
                     // Get the export path.
-                    std::string fileName;
-                    switch (options.fileType)
-                    {
-                    case models::ExportFileType::Image:
-                    case models::ExportFileType::Seq:
-                    {
-                        std::stringstream ss;
-                        ss << options.imageBase;
-                        ss << std::setfill('0') << std::setw(options.imageZeroPad) << p.exportData->range.start_time().value();
-                        ss << options.imageExt;
-                        fileName = ss.str();
-                        break;
-                    }
-                    case models::ExportFileType::Movie:
-                    {
-                        std::stringstream ss;
-                        ss << options.movieBase << options.movieExt;
-                        fileName = ss.str();
-                        break;
-                    }
-                    default: break;
-                    }
+                    const std::string fileName = getExportFileName(
+                        options,
+                        fileType,
+                        p.exportData->range.start_time().value());
                     p.exportData->path = ftk::Path(options.dir, fileName);
 
                     // Get the writer.
@@ -497,8 +340,29 @@ namespace djv
                     outputInfo.videoTime = OTIO_NS::TimeRange(
                         OTIO_NS::RationalTime(0.0, speed),
                         p.exportData->range.duration().rescaled_to(speed));
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+                    if (models::ExportFileType::Movie == fileType &&
+                        ioInfo.audio.isValid() &&
+                        std::dynamic_pointer_cast<tl::ffmpeg::WritePlugin>(plugin))
+                    {
+                        p.exportData->hasAudio = true;
+                        outputInfo.audio = ioInfo.audio;
+                        outputInfo.audioTime = OTIO_NS::TimeRange(
+                            OTIO_NS::RationalTime(0.0, ioInfo.audio.sampleRate),
+                            p.exportData->range.duration().rescaled_to(ioInfo.audio.sampleRate));
+                        p.exportData->audioStartSeconds =
+                            p.exportData->range.start_time().rescaled_to(1.0).value();
+                        p.exportData->audioDurationSeconds =
+                            p.exportData->range.duration().rescaled_to(1.0).value();
+                    }
+#endif // TLRENDER_FFMPEG_PLUGIN
                     tl::IOOptions ioOptions;
                     ioOptions["FFmpeg/Codec"] = options.movieCodec;
+                    if (!options.movieAudioCodec.empty() &&
+                        options.movieAudioCodec != "Auto")
+                    {
+                        ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
+                    }
                     p.exportData->writer = plugin->write(p.exportData->path, outputInfo, ioOptions);
 
                     // Create the renderer.
@@ -623,6 +487,15 @@ namespace djv
 
                 ++p.exportData->frame;
 
+                // Write the audio.
+                _exportAudio();
+
+                // Finish writing after the last frame.
+                if (p.exportData->frame > p.exportData->range.end_time_inclusive().value())
+                {
+                    p.exportData->writer->finish();
+                }
+
                 out = true;
             }
             catch (const std::exception& e)
@@ -640,6 +513,65 @@ namespace djv
                 }
             }
             return out;
+        }
+
+        void ExportTool::_exportAudio()
+        {
+            FTK_P();
+            if (!p.exportData->hasAudio)
+                return;
+
+            const int64_t start = p.exportData->range.start_time().value();
+            const double speed = p.player->getSpeed();
+            const double videoSeconds = OTIO_NS::RationalTime(
+                p.exportData->frame - start,
+                speed).rescaled_to(1.0).value();
+            while (p.exportData->audioSeconds <
+                std::min(videoSeconds, p.exportData->audioDurationSeconds))
+            {
+                // Get one second of audio from the timeline and mix the
+                // layers together.
+                auto frame = p.player->getTimeline()->getAudio(
+                    p.exportData->audioStartSeconds + p.exportData->audioSeconds).future.get();
+                std::vector<std::shared_ptr<tl::Audio> > layers;
+                for (const auto& layer : frame.layers)
+                {
+                    if (layer.audio)
+                    {
+                        layers.push_back(layer.audio);
+                    }
+                }
+                auto audio = tl::mixAudio(layers, 1.F);
+                if (audio && audio->isValid())
+                {
+                    // Trim the final chunk to the in/out range.
+                    const double remaining =
+                        p.exportData->audioDurationSeconds - p.exportData->audioSeconds;
+                    if (remaining < 1.0)
+                    {
+                        const size_t sampleCount = std::min(
+                            audio->getSampleCount(),
+                            static_cast<size_t>(
+                                remaining * audio->getInfo().sampleRate + .5));
+                        auto tmp = tl::Audio::create(audio->getInfo(), sampleCount);
+                        std::memcpy(
+                            tmp->getData(),
+                            audio->getData(),
+                            tmp->getByteCount());
+                        audio = tmp;
+                    }
+                    const OTIO_NS::TimeRange timeRange(
+                        OTIO_NS::RationalTime(
+                            p.exportData->audioSamples,
+                            audio->getInfo().sampleRate),
+                        OTIO_NS::RationalTime(
+                            audio->getSampleCount(),
+                            audio->getInfo().sampleRate));
+                    p.exportData->writer->writeAudio(timeRange, audio);
+                    p.exportData->audioSamples += audio->getSampleCount();
+                }
+                p.exportData->audioSeconds += 1.0;
+            }
         }
     }
 }

@@ -88,9 +88,14 @@ namespace djv
             size_t imageZeroPad = 0;
             std::string imageExt = ".tif";
 
+            std::string seqBase = "render.";
+            size_t seqZeroPad = 4;
+            std::string seqExt = ".tif";
+
             std::string movieBase = "render";
             std::string movieExt = ".mov";
             std::string movieCodec = "mjpeg";
+            std::string movieAudioCodec = "Auto";
 
             bool operator == (const ExportSettings&) const;
             bool operator != (const ExportSettings&) const;

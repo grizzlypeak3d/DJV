@@ -472,16 +472,57 @@
       "setup": [
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 88 },
-        { "tool": "Export" }
+        { "tool": "Export" },
+        { "tab": "Image" }
       ],
       "annotate": [
         { "id": "Export.Dir",  "caption": "Output directory" },
         { "id": "Export.RenderSize",  "caption": "Render size" },
-        { "id": "Export.FileType",  "caption": "File type" },
+        { "id": "Export.Tabs",  "caption": "Image, sequence, and movie export" },
         { "id": "Export.ImageBaseName",  "caption": "Base output name" },
-        { "id": "Export.ImageZeroPad",  "caption": "Sequence zero padding" },
+        { "id": "Export.ImageZeroPad",  "caption": "Zero padding" },
         { "id": "Export.ImageExt",  "caption": "Output file extension" },
-        { "id": "Export.Export",  "caption": "Export button" }
+        { "id": "Export.ImageFile",  "caption": "Output file preview" },
+        { "id": "Export.ImageExport",  "caption": "Export button" }
+      ]
+    },
+    {
+      "id": "export-tool-seq",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 88 },
+        { "tool": "Export" },
+        { "tab": "Sequence" }
+      ],
+      "annotate": [
+        { "id": "Export.SeqBaseName",  "caption": "Base output name" },
+        { "id": "Export.SeqZeroPad",  "caption": "Zero padding" },
+        { "id": "Export.SeqExt",  "caption": "Output file extension" },
+        { "id": "Export.SeqFile",  "caption": "Output files preview" },
+        { "id": "Export.SeqRange",  "caption": "Frame range" },
+        { "id": "Export.SeqExport",  "caption": "Export button" }
+      ]
+    },
+    {
+      "id": "export-tool-movie",
+      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 88 },
+        { "tool": "Export" },
+        { "tab": "Movie" }
+      ],
+      "annotate": [
+        { "id": "Export.MovieBaseName",  "caption": "Base output name" },
+        { "id": "Export.MovieExt",  "caption": "Output file extension" },
+        { "id": "Export.MovieCodec",  "caption": "Video codec" },
+        { "id": "Export.MovieAudioCodec",  "caption": "Audio codec" },
+        { "id": "Export.MovieFile",  "caption": "Output file preview" },
+        { "id": "Export.MovieRange",  "caption": "Frame range" },
+        { "id": "Export.MovieExport",  "caption": "Export button" }
       ]
     },
     {

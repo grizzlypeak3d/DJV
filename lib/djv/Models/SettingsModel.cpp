@@ -64,9 +64,13 @@ namespace djv
                 imageBase == other.imageBase &&
                 imageZeroPad == other.imageZeroPad &&
                 imageExt == other.imageExt &&
+                seqBase == other.seqBase &&
+                seqZeroPad == other.seqZeroPad &&
+                seqExt == other.seqExt &&
                 movieBase == other.movieBase &&
                 movieExt == other.movieExt &&
-                movieCodec == other.movieCodec;
+                movieCodec == other.movieCodec &&
+                movieAudioCodec == other.movieAudioCodec;
         }
 
         bool ExportSettings::operator != (const ExportSettings& other) const
@@ -946,6 +950,10 @@ namespace djv
             json["MovieBase"] = value.movieBase;
             json["MovieExt"] = value.movieExt;
             json["MovieCodec"] = value.movieCodec;
+            json["MovieAudioCodec"] = value.movieAudioCodec;
+            json["SeqBase"] = value.seqBase;
+            json["SeqZeroPad"] = value.seqZeroPad;
+            json["SeqExt"] = value.seqExt;
         }
 
         void to_json(nlohmann::json& json, const FileBrowserSettings& value)
@@ -1066,6 +1074,10 @@ namespace djv
             json.at("MovieBase").get_to(value.movieBase);
             json.at("MovieExt").get_to(value.movieExt);
             json.at("MovieCodec").get_to(value.movieCodec);
+            json.at("MovieAudioCodec").get_to(value.movieAudioCodec);
+            json.at("SeqBase").get_to(value.seqBase);
+            json.at("SeqZeroPad").get_to(value.seqZeroPad);
+            json.at("SeqExt").get_to(value.seqExt);
         }
 
         void from_json(const nlohmann::json& json, FileBrowserSettings& value)

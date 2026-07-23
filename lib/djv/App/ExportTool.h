@@ -5,13 +5,10 @@
 
 #include <djv/App/IToolWidget.h>
 
+#include <djv/Models/SettingsModel.h>
+
 namespace djv
 {
-    namespace models
-    {
-        struct ExportSettings;
-    }
-
     namespace app
     {
         //! Export tool.
@@ -39,8 +36,9 @@ namespace djv
 
         private:
             void _widgetUpdate(const models::ExportSettings&);
-            void _export();
+            void _export(models::ExportFileType);
             bool _exportFrame();
+            void _exportAudio();
 
             FTK_PRIVATE();
         };

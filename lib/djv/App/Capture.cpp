@@ -18,6 +18,7 @@
 #include <ftk/UI/IWindow.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/Settings.h>
+#include <ftk/UI/TabWidget.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Image.h>
@@ -59,6 +60,24 @@ namespace djv
                     out.push_back(widget);
                 for (const auto& child : widget->getChildren())
                     collect(child, out);
+            }
+
+            std::shared_ptr<ftk::TabWidget> findTabWidget(
+                const std::shared_ptr<ftk::IWidget>& widget,
+                const std::string& tab)
+            {
+                if (auto tabWidget = std::dynamic_pointer_cast<ftk::TabWidget>(widget))
+                {
+                    const auto& tabs = tabWidget->getTabs();
+                    if (std::find(tabs.begin(), tabs.end(), tab) != tabs.end())
+                        return tabWidget;
+                }
+                for (const auto& child : widget->getChildren())
+                {
+                    if (auto found = findTabWidget(child, tab))
+                        return found;
+                }
+                return nullptr;
             }
 
             enum class Phase { WaitReady, ApplyRest, Reload, Settle, Done };
@@ -351,6 +370,14 @@ namespace djv
                     p.lateSteps.push_back(step);
                     continue;
                 }
+                if (step.contains("tab"))
+                {
+                    // A tab selection searches the widget tree, so it must wait
+                    // until the tool from a preceding step has been created and
+                    // laid out. Defer to after the first settle (see _onTick).
+                    p.lateSteps.push_back(step);
+                    continue;
+                }
                 _applyStep(step);
             }
         }
@@ -395,6 +422,29 @@ namespace djv
                         p.lateSteps.push_back({ { "scrollTool", section } });
                 }
                 app->getToolsModel()->setActiveTool(toolStr);
+            }
+            else if (step.contains("tab"))
+            {
+                // Select a tab by name, e.g. { "tab": "Movie" }. Searches the
+                // main window for a tab widget containing the given tab name.
+                // Deferred to the late phase so the tool from a preceding step
+                // has been created (see _applyRest).
+                const std::string name = step.at("tab").get<std::string>();
+                std::shared_ptr<ftk::TabWidget> tabWidget;
+                if (auto mainWindow = app->getMainWindow())
+                {
+                    tabWidget = findTabWidget(mainWindow, name);
+                }
+                if (tabWidget)
+                {
+                    const auto& tabs = tabWidget->getTabs();
+                    const auto i = std::find(tabs.begin(), tabs.end(), name);
+                    tabWidget->setCurrent(i - tabs.begin());
+                }
+                else
+                {
+                    note(p.shotId, ftk::Format("tab not found: \"{0}\"").arg(name));
+                }
             }
             else if (step.contains("scrollTool"))
             {

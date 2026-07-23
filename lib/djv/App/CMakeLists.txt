@@ -14,6 +14,7 @@ set(HEADERS
     CompareToolBar.h
     DiagTool.h
     ExportTool.h
+    ExportWidgets.h
     FileActions.h
     FileMenu.h
     FileToolBar.h
@@ -67,6 +68,7 @@ set(SOURCE
     CompareToolBar.cpp
     DiagTool.cpp
     ExportTool.cpp
+    ExportWidgets.cpp
     FileActions.cpp
     FileMenu.cpp
     FileToolBar.cpp
