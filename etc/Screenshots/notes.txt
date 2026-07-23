@@ -1,6 +1,9 @@
 Configuration:
 * TLRENDER_FFMPEG_CMD=ON
 
+Requirements:
+* Pillow for make_svg.py: python3 -m pip install Pillow
+
 Example for building the screenshots:
 % python3 etc/Screenshots/build_screenshots.py etc/Screenshots/screenshots.json --djv ../build-Debug/bin/djv/djv
 
