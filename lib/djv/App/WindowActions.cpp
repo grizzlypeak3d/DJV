@@ -247,6 +247,21 @@ namespace djv
                 "Status Tool Bar",
                 _checkCommand("StatusToolBar"));
 
+            // Register the shortcuts.
+            _addShortcut("FullScreen", "Full screen", ftk::Key::U);
+            _addShortcut("PresentMode", "Presentation mode", ftk::KeyShortcut(ftk::Key::P, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("FloatOnTop", "Float on top");
+            _addShortcut("Secondary", "Secondary", ftk::Key::Y);
+            _addShortcut("FileToolBar", "File tool bar");
+            _addShortcut("CompareToolBar", "Compare tool bar");
+            _addShortcut("WindowToolBar", "Window tool bar");
+            _addShortcut("ViewToolBar", "View tool bar");
+            _addShortcut("ToolsToolBar", "Tools tool bar");
+            _addShortcut("TabBar", "Tab bar");
+            _addShortcut("Timeline", "Timeline");
+            _addShortcut("BottomToolBar", "Bottom tool bar");
+            _addShortcut("StatusToolBar", "Status tool bar");
+
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
             p.fullScreenObserver = ftk::Observer<bool>::create(

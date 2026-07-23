@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <ftk/UI/Action.h>
 #include <ftk/UI/Event.h>
 #include <ftk/Core/Observable.h>
 
@@ -18,10 +19,11 @@ namespace djv
         //! Tool information.
         struct ToolInfo
         {
-            std::string name;
-            std::string icon;
-            std::string sort;
-            bool        toolBar = false;
+            std::string      name;
+            std::string      icon;
+            std::string      sort;
+            bool             toolBar = false;
+            ftk::KeyShortcut shortcut;
         };
 
         //! Tools model.

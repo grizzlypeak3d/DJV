@@ -881,7 +881,6 @@ namespace djv
             p.settingsModel = models::SettingsModel::create(
                 _context,
                 p.settings,
-                _shortcutsSettings,
                 getDefaultDisplayScale());
             if (getColorStyleCmdLineOption()->found() ||
                 getDisplayScaleCmdLineOption()->found())

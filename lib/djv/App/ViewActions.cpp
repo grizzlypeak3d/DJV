@@ -288,6 +288,11 @@ namespace djv
                 _actions[ftk::Format("AspectRatio_{0}").arg(i)] = ftk::Action::create(
                     "",
                     _command(ftk::Format("AspectRatio_{0}").arg(i)));
+
+                // Register the shortcut.
+                _addShortcut(
+                    ftk::Format("AspectRatio_{0}").arg(i),
+                    ftk::Format("Custom aspect ratio {0}").arg(i));
             }
 
             // Create the actions.
@@ -346,6 +351,25 @@ namespace djv
             _actions["HUD"] = ftk::Action::create(
                 "HUD / Information Display",
                 _checkCommand("HUD"));
+
+            // Register the shortcuts.
+            _addShortcut("Frame", "Frame", ftk::Key::Backspace);
+            _addShortcut("ZoomReset", "Zoom reset", ftk::Key::_0);
+            _addShortcut("ZoomIn", "Zoom in", ftk::Key::Equals);
+            _addShortcut("ZoomOut", "Zoom out", ftk::Key::Minus);
+            _addShortcut("Center", "Center", ftk::Key::Backslash);
+            _addShortcut("Red", "Red channel", ftk::Key::R);
+            _addShortcut("Green", "Green channel", ftk::Key::G);
+            _addShortcut("Blue", "Blue channel", ftk::Key::B);
+            _addShortcut("Alpha", "Alpha channel", ftk::Key::A);
+            _addShortcut("Negative", "Negative", ftk::KeyShortcut(ftk::Key::I, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("MirrorHorizontal", "Mirror horizontal", ftk::Key::H);
+            _addShortcut("MirrorVertical", "Mirror vertical", ftk::Key::V);
+            _addShortcut("AspectRatio_0", "Default aspect ratio");
+            _addShortcut("Grid", "Grid", ftk::KeyShortcut(ftk::Key::G, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Outline", "Outline");
+            _addShortcut("CenterMarker", "Center marker");
+            _addShortcut("HUD", "HUD / Information Display", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control)));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

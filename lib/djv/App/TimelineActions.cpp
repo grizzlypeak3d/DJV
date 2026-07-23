@@ -248,6 +248,21 @@ namespace djv
                 "Large",
                 _command("WaveformSizeLarge"));
 
+            // Register the shortcuts.
+            _addShortcut("Minimize", "Minimize");
+            _addShortcut("FrameView", "Frame view");
+            _addShortcut("ScrollBars", "Scroll bars");
+            _addShortcut("AutoScroll", "Auto scroll");
+            _addShortcut("StopOnScrub", "Stop on scrub");
+            _addShortcut("Thumbnails", "Video thumbnails");
+            _addShortcut("ThumbnailSizeSmall", "Small thumbnails");
+            _addShortcut("ThumbnailSizeMedium", "Medium thumbnails");
+            _addShortcut("ThumbnailSizeLarge", "Large thumbnails");
+            _addShortcut("Waveforms", "Audio waveforms");
+            _addShortcut("WaveformSizeSmall", "Small waveforms");
+            _addShortcut("WaveformSizeMedium", "Medium waveforms");
+            _addShortcut("WaveformSizeLarge", "Large waveforms");
+
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
             p.settingsObserver = ftk::Observer<models::TimelineSettings>::create(

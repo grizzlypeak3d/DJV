@@ -453,7 +453,8 @@ namespace djv
         {
             FTK_P();
 
-            // Create groups of shortcuts.
+            // Create groups of shortcuts. The groups are sorted by name
+            // after they are created.
             std::vector<Private::Group> groups;
             for (const auto& shortcut : settings.shortcuts)
             {
@@ -488,6 +489,13 @@ namespace djv
                     }
                 }
             }
+            std::sort(
+                groups.begin(),
+                groups.end(),
+                [](const Private::Group& a, const Private::Group& b)
+                {
+                    return a.name < b.name;
+                });
 
             // Find collisions.
             std::map<std::string, int> collisions;

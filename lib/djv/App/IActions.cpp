@@ -13,6 +13,7 @@ namespace djv
     {
         struct IActions::Private
         {
+            std::shared_ptr<models::SettingsModel> settingsModel;
             std::shared_ptr<models::CommandsModel> commandsModel;
             std::vector<std::string> commands;
 
@@ -28,6 +29,7 @@ namespace djv
 
             _name = name;
 
+            p.settingsModel = app->getSettingsModel();
             p.commandsModel = app->getCommandsModel();
 
             p.shortcutsSettingsObserver = ftk::Observer<models::ShortcutsSettings>::create(
@@ -96,6 +98,23 @@ namespace djv
                     commandsModel->exec(commandName);
                 }
             };
+        }
+
+        void IActions::_addShortcut(
+            const std::string& name,
+            const std::string& label,
+            const ftk::KeyShortcut& primary,
+            const ftk::KeyShortcut& secondary)
+        {
+            FTK_P();
+            p.settingsModel->addShortcuts(
+            {
+                models::Shortcut(
+                    ftk::Format("{0}/{1}").arg(_name).arg(name),
+                    label,
+                    primary,
+                    secondary)
+            });
         }
 
         std::function<void(bool)> IActions::_checkCommand(const std::string& name)

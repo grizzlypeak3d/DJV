@@ -59,6 +59,15 @@ namespace djv
             //! callback.
             std::function<void(bool)> _checkCommand(const std::string& name);
 
+            //! Register a keyboard shortcut named "<group>/<name>" with the
+            //! settings model. Any saved key binding overrides the given
+            //! default.
+            void _addShortcut(
+                const std::string& name,
+                const std::string& label,
+                const ftk::KeyShortcut& primary = ftk::KeyShortcut(),
+                const ftk::KeyShortcut& secondary = ftk::KeyShortcut());
+
             void _shortcutsUpdate(const models::ShortcutsSettings&);
 
             std::string _name;

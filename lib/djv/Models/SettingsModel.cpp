@@ -108,156 +108,7 @@ namespace djv
         }
 
         ShortcutsSettings::ShortcutsSettings()
-        {
-            shortcuts =
-            {
-                Shortcut("Audio/VolumeUp", "Volume up", ftk::Key::Period),
-                Shortcut("Audio/VolumeDown", "Volume down", ftk::Key::Comma),
-                Shortcut("Audio/Mute", "Mute", ftk::Key::M),
-
-                Shortcut("Compare/Next", "Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Shift))),
-                Shortcut("Compare/Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Shift))),
-                Shortcut("Compare/A", "A", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Compare/B", "B", ftk::KeyShortcut(ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Compare/ABToggle", "A/B Toggle", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Alt))),
-                Shortcut("Compare/Wipe", "Wipe", ftk::KeyShortcut(ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Compare/Overlay", "Overlay"),
-                Shortcut("Compare/Difference", "Difference"),
-                Shortcut("Compare/Horizontal", "Horizontal"),
-                Shortcut("Compare/Vertical", "Vertical"),
-                Shortcut("Compare/Tile", "Tile", ftk::KeyShortcut(ftk::Key::T, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Compare/Relative", "Relative"),
-                Shortcut("Compare/Absolute", "Absolute"),
-
-                Shortcut("File/Open", "Open", ftk::KeyShortcut(ftk::Key::O, static_cast<int>(ftk::commandKeyModifier))),
-                Shortcut(
-                    "File/OpenAudio",
-                    "Open with audio",
-                    ftk::KeyShortcut(
-                        ftk::Key::O,
-                        static_cast<int>(ftk::KeyModifier::Shift) |
-                        static_cast<int>(ftk::commandKeyModifier))),
-                Shortcut("File/Close", "Close", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier))),
-                Shortcut(
-                    "File/CloseAll",
-                    "Close all",
-                    ftk::KeyShortcut(
-                        ftk::Key::E,
-                        static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier))),
-                Shortcut(
-                    "File/Reload",
-                    "Reload",
-                    ftk::KeyShortcut(
-                        ftk::Key::R,
-                        static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier))),
-                Shortcut("File/Next", "Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("File/Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("File/NextLayer", "Next layer", ftk::KeyShortcut(ftk::Key::Equals, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("File/PrevLayer", "Previous layer", ftk::KeyShortcut(ftk::Key::Minus, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("File/Exit", "Exit", ftk::KeyShortcut(ftk::Key::Q, static_cast<int>(ftk::commandKeyModifier))),
-
-                Shortcut("Frame/Start", "Start", ftk::Key::Home),
-                Shortcut("Frame/End", "End", ftk::Key::End),
-                Shortcut("Frame/Prev", "Previous", ftk::Key::Left),
-                Shortcut("Frame/PrevX10", "Previous X10", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Shift))),
-                Shortcut("Frame/PrevX100", "Previous X100", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Frame/Next", "Next", ftk::Key::Right),
-                Shortcut("Frame/NextX10", "Next X10", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Shift))),
-                Shortcut("Frame/NextX100", "Next X100", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Frame/FocusCurrent", "Focus current", ftk::KeyShortcut(ftk::Key::F, static_cast<int>(ftk::KeyModifier::Control))),
-
-                Shortcut("Playback/Stop", "Stop", ftk::Key::K),
-                Shortcut("Playback/Forward", "Forward", ftk::Key::L),
-                Shortcut("Playback/Reverse", "Reverse", ftk::Key::J),
-                Shortcut("Playback/Toggle", "Toggle", ftk::Key::Space),
-                Shortcut("Playback/JumpBack1s", "Jump back 1s", ftk::KeyShortcut(ftk::Key::J, static_cast<int>(ftk::KeyModifier::Shift))),
-                Shortcut("Playback/JumpBack10s", "Jump back 10s", ftk::KeyShortcut(ftk::Key::J, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Playback/JumpForward1s", "Jump forward 1s", ftk::KeyShortcut(ftk::Key::L, static_cast<int>(ftk::KeyModifier::Shift))),
-                Shortcut("Playback/JumpForward10s", "Jump forward 10s", ftk::KeyShortcut(ftk::Key::L, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Playback/Loop", "Loop"),
-                Shortcut("Playback/Once", "Once"),
-                Shortcut("Playback/PingPong", "Ping pong"),
-                Shortcut("Playback/SetInPoint", "Set in point", ftk::Key::I),
-                Shortcut("Playback/ResetInPoint", "Reset in point", ftk::KeyShortcut(ftk::Key::I, static_cast<int>(ftk::KeyModifier::Shift))),
-                Shortcut("Playback/SetOutPoint", "Set out point", ftk::Key::O),
-                Shortcut("Playback/ResetOutPoint", "Reset out point", ftk::KeyShortcut(ftk::Key::O, static_cast<int>(ftk::KeyModifier::Shift))),
-
-                Shortcut("Timeline/Minimize", "Minimize"),
-                Shortcut("Timeline/FrameView", "Frame view"),
-                Shortcut("Timeline/ScrollBars", "Scroll bars"),
-                Shortcut("Timeline/AutoScroll", "Auto scroll"),
-                Shortcut("Timeline/StopOnScrub", "Stop on scrub"),
-                Shortcut("Timeline/Thumbnails", "Video thumbnails"),
-                Shortcut("Timeline/ThumbnailSizeSmall", "Small thumbnails"),
-                Shortcut("Timeline/ThumbnailSizeMedium", "Medium thumbnails"),
-                Shortcut("Timeline/ThumbnailSizeLarge", "Large thumbnails"),
-                Shortcut("Timeline/Waveforms", "Audio waveforms"),
-                Shortcut("Timeline/WaveformSizeSmall", "Small waveforms"),
-                Shortcut("Timeline/WaveformSizeMedium", "Medium waveforms"),
-                Shortcut("Timeline/WaveformSizeLarge", "Large waveforms"),
-
-                Shortcut("Tools/Files", "Files", ftk::Key::F1),
-                Shortcut("Tools/Export", "Export", ftk::Key::F2),
-                Shortcut("Tools/View", "View", ftk::Key::F3),
-                Shortcut("Tools/Color", "Color", ftk::Key::F4),
-                Shortcut("Tools/Color Picker", "Color picker", ftk::Key::F5),
-                Shortcut("Tools/Magnify", "Magnify", ftk::Key::F6),
-                Shortcut("Tools/Information", "Information", ftk::Key::F7),
-                Shortcut("Tools/Audio", "Audio", ftk::Key::F8),
-                Shortcut("Tools/Settings", "Settings", ftk::Key::F10),
-                Shortcut("Tools/Messages", "Messages", ftk::Key::F11),
-                Shortcut("Tools/System Log", "System log", ftk::Key::F12),
-                Shortcut("Tools/Diagnostics", "Diagnostics"),
-
-                Shortcut("View/Frame", "Frame", ftk::Key::Backspace),
-                Shortcut("View/ZoomReset", "Zoom reset", ftk::Key::_0),
-                Shortcut("View/ZoomIn", "Zoom in", ftk::Key::Equals),
-                Shortcut("View/ZoomOut", "Zoom out", ftk::Key::Minus),
-                Shortcut("View/Center", "Center", ftk::Key::Backslash),
-                Shortcut("View/Red", "Red channel", ftk::Key::R),
-                Shortcut("View/Green", "Green channel", ftk::Key::G),
-                Shortcut("View/Blue", "Blue channel", ftk::Key::B),
-                Shortcut("View/Alpha", "Alpha channel", ftk::Key::A),
-                Shortcut("View/Negative", "Negative", ftk::KeyShortcut(ftk::Key::I, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("View/MirrorHorizontal", "Mirror horizontal", ftk::Key::H),
-                Shortcut("View/MirrorVertical", "Mirror vertical", ftk::Key::V),
-                Shortcut("View/AspectRatio_0", "Default aspect ratio"),
-                Shortcut("View/AspectRatio_1", "Custom aspect ratio 1"),
-                Shortcut("View/AspectRatio_2", "Custom aspect ratio 2"),
-                Shortcut("View/AspectRatio_3", "Custom aspect ratio 3"),
-                Shortcut("View/MinifyNearest", "Minify nearest"),
-                Shortcut("View/MinifyLinear", "Minify linear"),
-                Shortcut("View/MagnifyNearest", "Magnify nearest"),
-                Shortcut("View/MagnifyLinear", "Magnify linear"),
-                Shortcut("View/FromFile", "File video range"),
-                Shortcut("View/FullRange", "Full video range"),
-                Shortcut("View/LegalRange", "Legal video range"),
-                Shortcut("View/AlphaBlendNone", "No alpha blending"),
-                Shortcut("View/AlphaBlendStraight", "Straight alpha"),
-                Shortcut("View/AlphaBlendPremultiplied", "Pre-multiplied alpha"),
-                Shortcut("View/Grid", "Grid", ftk::KeyShortcut(ftk::Key::G, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("View/Outline", "Outline"),
-                Shortcut("View/CenterMarker", "Center marker"),
-                Shortcut("View/HUD", "HUD / Information Display", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control))),
-
-                Shortcut("Window/FullScreen", "Full screen", ftk::Key::U),
-                Shortcut("Window/PresentMode", "Presentation mode", ftk::KeyShortcut(ftk::Key::P, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Window/FloatOnTop", "Float on top"),
-                Shortcut("Window/Secondary", "Secondary", ftk::Key::Y),
-                Shortcut("Window/FileToolBar", "File tool bar"),
-                Shortcut("Window/CompareToolBar", "Compare tool bar"),
-                Shortcut("Window/WindowToolBar", "Window tool bar"),
-                Shortcut("Window/ViewToolBar", "View tool bar"),
-                Shortcut("Window/ToolsToolBar", "Tools tool bar"),
-                Shortcut("Window/TabBar", "Tab bar"),
-                Shortcut("Window/Timeline", "Timeline"),
-                Shortcut("Window/BottomToolBar", "Bottom tool bar"),
-                Shortcut("Window/StatusToolBar", "Status tool bar"),
-
-                Shortcut("Color/OCIO", "Enable OCIO", ftk::KeyShortcut(ftk::Key::N, static_cast<int>(ftk::KeyModifier::Control))),
-                Shortcut("Color/LUT", "Enable LUT", ftk::KeyShortcut(ftk::Key::K, static_cast<int>(ftk::KeyModifier::Control)))
-            };
-        }
+        {}
 
         bool ShortcutsSettings::operator == (const ShortcutsSettings& other) const
         {
@@ -427,6 +278,7 @@ namespace djv
         {
             std::weak_ptr<ftk::Context> context;
             std::shared_ptr<ftk::Settings> settings;
+            std::map<std::string, Shortcut> savedShortcuts;
             ShortcutsSettings shortcutsDefault;
             float displayScaleDefault = 1.F;
 
@@ -480,14 +332,12 @@ namespace djv
         void SettingsModel::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<ftk::Settings>& settings,
-            const ShortcutsSettings& shortcutsDefault,
             float displayScaleDefault)
         {
             FTK_P();
 
             p.context = context;
             p.settings = settings;
-            p.shortcutsDefault = shortcutsDefault;
             p.displayScaleDefault = displayScaleDefault;
 
             AdvancedSettings advanced;
@@ -523,9 +373,15 @@ namespace djv
             settings->getT(keys["ImageSeq"], imageSeq);
             p.imageSeq = ftk::Observable<ImageSeqSettings>::create(imageSeq);
 
-            ShortcutsSettings shortcuts = shortcutsDefault;
-            settings->getT(keys["Shortcuts"], shortcuts);
-            p.shortcuts = ftk::Observable<ShortcutsSettings>::create(shortcuts);
+            // The saved keyboard shortcuts are applied as the shortcuts are
+            // registered with addShortcuts().
+            ShortcutsSettings shortcutsSaved;
+            settings->getT(keys["Shortcuts"], shortcutsSaved);
+            for (const auto& shortcut : shortcutsSaved.shortcuts)
+            {
+                p.savedShortcuts[shortcut.name] = shortcut;
+            }
+            p.shortcuts = ftk::Observable<ShortcutsSettings>::create(ShortcutsSettings());
 
             MiscSettings misc;
             settings->getT(keys["Misc"], misc);
@@ -583,11 +439,10 @@ namespace djv
         std::shared_ptr<SettingsModel> SettingsModel::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<ftk::Settings>& settings,
-            const ShortcutsSettings& shortcuts,
             float displayScaleDefault)
         {
             auto out = std::shared_ptr<SettingsModel>(new SettingsModel);
-            out->_init(context, settings, shortcuts, displayScaleDefault);
+            out->_init(context, settings, displayScaleDefault);
             return out;
         }
 
@@ -609,7 +464,25 @@ namespace djv
             p.settings->setT(keys["FileBrowser"], fileBrowser);
 
             p.settings->setT(keys["ImageSeq"], p.imageSeq->get());
-            p.settings->setT(keys["Shortcuts"], p.shortcuts->get());
+
+            // Preserve saved shortcuts that were not registered, for example
+            // shortcuts for features that are only sometimes available.
+            ShortcutsSettings shortcuts = p.shortcuts->get();
+            for (const auto& i : p.savedShortcuts)
+            {
+                const auto j = std::find_if(
+                    shortcuts.shortcuts.begin(),
+                    shortcuts.shortcuts.end(),
+                    [i](const Shortcut& value)
+                    {
+                        return i.first == value.name;
+                    });
+                if (j == shortcuts.shortcuts.end())
+                {
+                    shortcuts.shortcuts.push_back(i.second);
+                }
+            }
+            p.settings->setT(keys["Shortcuts"], shortcuts);
             p.settings->setT(keys["Misc"], p.misc->get());
             p.settings->setT(keys["Mouse"], p.mouse->get());
             p.settings->setT(keys["Playback"], p.playback->get());
@@ -778,6 +651,27 @@ namespace djv
         void SettingsModel::setShortcuts(const ShortcutsSettings& value)
         {
             _p->shortcuts->setIfChanged(value);
+        }
+
+        void SettingsModel::addShortcuts(const std::vector<Shortcut>& value)
+        {
+            FTK_P();
+            ShortcutsSettings shortcuts = p.shortcuts->get();
+            for (Shortcut shortcut : value)
+            {
+                // Keep the declared defaults for reset().
+                p.shortcutsDefault.shortcuts.push_back(shortcut);
+
+                // Apply any saved key bindings.
+                const auto i = p.savedShortcuts.find(shortcut.name);
+                if (i != p.savedShortcuts.end())
+                {
+                    shortcut.primary = i->second.primary;
+                    shortcut.secondary = i->second.secondary;
+                }
+                shortcuts.shortcuts.push_back(shortcut);
+            }
+            p.shortcuts->setIfChanged(shortcuts);
         }
 
         const MiscSettings& SettingsModel::getMisc() const

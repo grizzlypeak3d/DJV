@@ -244,6 +244,21 @@ namespace djv
                 "Absolute",
                 _command("Absolute"));
 
+            // Register the shortcuts.
+            _addShortcut("Next", "Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Shift)));
+            _addShortcut("Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Shift)));
+            _addShortcut("A", "A", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("B", "B", ftk::KeyShortcut(ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("ABToggle", "A/B Toggle", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Alt)));
+            _addShortcut("Wipe", "Wipe", ftk::KeyShortcut(ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Overlay", "Overlay");
+            _addShortcut("Difference", "Difference");
+            _addShortcut("Horizontal", "Horizontal");
+            _addShortcut("Vertical", "Vertical");
+            _addShortcut("Tile", "Tile", ftk::KeyShortcut(ftk::Key::T, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Relative", "Relative");
+            _addShortcut("Absolute", "Absolute");
+
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
             p.filesObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(

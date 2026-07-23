@@ -182,6 +182,17 @@ namespace djv
                 "Focus Current Frame",
                 _command("FocusCurrent"));
 
+            // Register the shortcuts.
+            _addShortcut("Start", "Start", ftk::Key::Home);
+            _addShortcut("End", "End", ftk::Key::End);
+            _addShortcut("Prev", "Previous", ftk::Key::Left);
+            _addShortcut("PrevX10", "Previous X10", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Shift)));
+            _addShortcut("PrevX100", "Previous X100", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Next", "Next", ftk::Key::Right);
+            _addShortcut("NextX10", "Next X10", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Shift)));
+            _addShortcut("NextX100", "Next X100", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("FocusCurrent", "Focus current", ftk::KeyShortcut(ftk::Key::F, static_cast<int>(ftk::KeyModifier::Control)));
+
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(

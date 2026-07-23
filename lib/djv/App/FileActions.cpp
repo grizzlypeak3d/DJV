@@ -176,6 +176,34 @@ namespace djv
                 "Exit",
                 _command("Exit"));
 
+            // Register the shortcuts.
+            _addShortcut("Open", "Open", ftk::KeyShortcut(ftk::Key::O, static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut(
+                "OpenAudio",
+                "Open with audio",
+                ftk::KeyShortcut(
+                    ftk::Key::O,
+                    static_cast<int>(ftk::KeyModifier::Shift) |
+                    static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("Close", "Close", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut(
+                "CloseAll",
+                "Close all",
+                ftk::KeyShortcut(
+                    ftk::Key::E,
+                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut(
+                "Reload",
+                "Reload",
+                ftk::KeyShortcut(
+                    ftk::Key::R,
+                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("Next", "Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("NextLayer", "Next layer", ftk::KeyShortcut(ftk::Key::Equals, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("PrevLayer", "Previous layer", ftk::KeyShortcut(ftk::Key::Minus, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Exit", "Exit", ftk::KeyShortcut(ftk::Key::Q, static_cast<int>(ftk::commandKeyModifier)));
+
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
             p.filesObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(

@@ -294,7 +294,6 @@ namespace djv
             void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&,
-                const ShortcutsSettings&,
                 float displayScaleDefault);
 
             SettingsModel();
@@ -306,7 +305,6 @@ namespace djv
             static std::shared_ptr<SettingsModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&,
-                const ShortcutsSettings&,
                 float displayScaleDefault);
 
             //! Save the settings. Settings are also saved on exit.
@@ -397,6 +395,10 @@ namespace djv
             const ShortcutsSettings& getShortcuts() const;
             std::shared_ptr<ftk::IObservable<ShortcutsSettings> > observeShortcuts() const;
             void setShortcuts(const ShortcutsSettings&);
+
+            //! Add keyboard shortcuts. Any saved key bindings are applied to
+            //! the added shortcuts.
+            void addShortcuts(const std::vector<Shortcut>&);
 
             ///@}
 

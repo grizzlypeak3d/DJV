@@ -152,8 +152,6 @@ namespace djv
             void _setAudioDeviceMute(bool);
 
             virtual void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);
-            
-            models::ShortcutsSettings _shortcutsSettings;
 
         private:
             std::filesystem::path _appDocsPath();

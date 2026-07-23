@@ -53,6 +53,9 @@ namespace djv
                     tool.name,
                     tool.icon,
                     _checkCommand(tool.name));
+
+                // Register the shortcut.
+                _addShortcut(tool.name, tool.name, tool.shortcut);
             }
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());

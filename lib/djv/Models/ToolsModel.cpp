@@ -28,17 +28,17 @@ namespace djv
 
             p.settings = settings;
 
-            p.tools.push_back({ "Files", "Files", "A", true });
-            p.tools.push_back({ "Export", "Export", "B", true });
-            p.tools.push_back({ "View", "View", "C", true });
-            p.tools.push_back({ "Color", "ColorControls", "D", true });
-            p.tools.push_back({ "Color Picker", "ColorPicker", "E", true });
-            p.tools.push_back({ "Magnify", "Magnify", "F", true });
-            p.tools.push_back({ "Information", "Info", "G", true });
-            p.tools.push_back({ "Audio", "Audio", "H", true });
-            p.tools.push_back({ "Settings", "Settings", "W", true });
-            p.tools.push_back({ "Messages", "Messages", "X" });
-            p.tools.push_back({ "System Log", std::string(), "Y" });
+            p.tools.push_back({ "Files", "Files", "A", true, ftk::Key::F1 });
+            p.tools.push_back({ "Export", "Export", "B", true, ftk::Key::F2 });
+            p.tools.push_back({ "View", "View", "C", true, ftk::Key::F3 });
+            p.tools.push_back({ "Color", "ColorControls", "D", true, ftk::Key::F4 });
+            p.tools.push_back({ "Color Picker", "ColorPicker", "E", true, ftk::Key::F5 });
+            p.tools.push_back({ "Magnify", "Magnify", "F", true, ftk::Key::F6 });
+            p.tools.push_back({ "Information", "Info", "G", true, ftk::Key::F7 });
+            p.tools.push_back({ "Audio", "Audio", "H", true, ftk::Key::F8 });
+            p.tools.push_back({ "Settings", "Settings", "W", true, ftk::Key::F10 });
+            p.tools.push_back({ "Messages", "Messages", "X", false, ftk::Key::F11 });
+            p.tools.push_back({ "System Log", std::string(), "Y", false, ftk::Key::F12 });
             p.tools.push_back({ "Diagnostics", std::string(), "Z" });
 
             std::string s;

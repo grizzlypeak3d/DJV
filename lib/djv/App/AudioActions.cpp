@@ -72,6 +72,11 @@ namespace djv
                 "Mute",
                 _checkCommand("Mute"));
 
+            // Register the shortcuts.
+            _addShortcut("VolumeUp", "Volume up", ftk::Key::Period);
+            _addShortcut("VolumeDown", "Volume down", ftk::Key::Comma);
+            _addShortcut("Mute", "Mute", ftk::Key::M);
+
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
             p.volumeObserver = ftk::Observer<float>::create(
