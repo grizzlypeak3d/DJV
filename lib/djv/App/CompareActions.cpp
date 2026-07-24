@@ -116,7 +116,7 @@ namespace djv
 
             _addCommand(
                 "Horizontal",
-                "Show the A and B files side by side.",
+                "Show the A and B files in a horizontal layout.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
@@ -129,7 +129,7 @@ namespace djv
 
             _addCommand(
                 "Vertical",
-                "Show the A and B files over and under.",
+                "Show the A and B files in a vertical layout.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
@@ -142,7 +142,7 @@ namespace djv
 
             _addCommand(
                 "Tile",
-                "Show the A and B files tiled.",
+                "Show the A and B files in a tiled layout.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
