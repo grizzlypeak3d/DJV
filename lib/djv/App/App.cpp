@@ -631,6 +631,10 @@ namespace djv
             labels.push_back(std::make_pair("", ""));
             const auto sysInfo = ftk::getSysInfo();
             labels.push_back(std::make_pair("System: ", sysInfo.name));
+            if (!sysInfo.cpu.empty())
+            {
+                labels.push_back(std::make_pair("CPU: ", sysInfo.cpu));
+            }
             labels.push_back(std::make_pair(
                 "CPU Cores: ",
                 ftk::Format("{0}").arg(sysInfo.cores)));
