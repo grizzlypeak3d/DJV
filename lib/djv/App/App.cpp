@@ -1350,11 +1350,9 @@ namespace djv
                         options.imageSeqAudio = imageSeq.audio;
                         options.imageSeqAudioExts = imageSeq.audioExts;
                         options.imageSeqAudioFileName = imageSeq.audioFileName;
-                        options.spatial = p.settingsModel->getOTIO().spatial;
-                        const models::AdvancedSettings advanced = p.settingsModel->getAdvanced();
-                        options.compat = advanced.compat;
-                        options.videoRequestMax = advanced.videoRequestMax;
-                        options.audioRequestMax = advanced.audioRequestMax;
+                        const models::OTIOSettings otio = p.settingsModel->getOTIO();
+                        options.spatial = otio.spatial;
+                        options.compat = otio.compat;
                         options.ioOptions = p.settingsModel->getIOOptions();
                         options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
                         timelines[i] = tl::Timeline::create(
@@ -1415,10 +1413,8 @@ namespace djv
                                 tl::PlayerOptions playerOptions;
                                 playerOptions.audioDevice = p.audioModel->getDevice();
                                 playerOptions.cache = p.settingsModel->getCache();
-                                const models::AdvancedSettings advanced = p.settingsModel->getAdvanced();
-                                playerOptions.videoRequestMax = advanced.videoRequestMax;
-                                playerOptions.audioRequestMax = advanced.audioRequestMax;
-                                playerOptions.audioBufferFrameCount = advanced.audioBufferFrameCount;
+                                playerOptions.audioBufferFrameCount =
+                                    p.settingsModel->getAudio().bufferFrameCount;
                                 player = tl::Player::create(_context, timeline, playerOptions);
                             }
                             catch (const std::exception& e)

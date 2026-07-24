@@ -21,10 +21,14 @@ The **Settings** tool is divided into collapsible sections:
 - **Image Sequences** — How audio is paired with image sequences (see
   [Files]({{ '/files' | relative_url }})).
 - **OTIO** — How the spatial coordinates in OTIO files are used to size and
-  position images (see [Files]({{ '/files' | relative_url }})).
+  position images, and whether to enable workarounds for timelines that do not
+  conform exactly to specification (see
+  [Files]({{ '/files' | relative_url }})).
 - **Mouse** — Mouse button bindings and scaling (see below).
 - **Playback** — Options such as whether playback starts automatically when a
   file is opened.
+- **Audio** — The size of the buffer the audio device is given. Increase this
+  if the audio breaks up during playback.
 - **Keyboard Shortcuts** — All keyboard shortcuts (see below).
 - **Style** — Interface scale and custom fonts (see below).
 - **Time** — Default time units (frames or timecode).
@@ -32,8 +36,6 @@ The **Settings** tool is divided into collapsible sections:
 - **FFmpeg Command** — The external FFmpeg command for additional formats and
   codecs (see [Files]({{ '/files' | relative_url }})).
 - **USD** — Options for the experimental USD renderer.
-- **Advanced** — Timeline compatibility workarounds and I/O tuning (audio
-  buffer frames, video and audio request counts).
 - **Miscellaneous** — Less common options, such as whether the setup dialog is
   shown at startup.
 

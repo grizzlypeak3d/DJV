@@ -35,122 +35,80 @@ namespace djv
         ISettingsWidget::~ISettingsWidget()
         {}
 
-        struct AdvancedSettingsWidget::Private
+        struct AudioSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
 
-            std::shared_ptr<ftk::CheckBox> compatCheckBox;
-            std::shared_ptr<ftk::IntEdit> audioBufferFramesEdit;
-            std::shared_ptr<ftk::IntEdit> videoRequestsEdit;
-            std::shared_ptr<ftk::IntEdit> audioRequestsEdit;
+            std::shared_ptr<ftk::IntEdit> bufferFramesEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::Observer<models::AdvancedSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<models::AudioSettings> > settingsObserver;
         };
 
-        void AdvancedSettingsWidget::_init(
+        void AudioSettingsWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
-            ISettingsWidget::_init(context, "djv::ui::AdvancedSettingsWidget", parent);
+            ISettingsWidget::_init(context, "djv::ui::AudioSettingsWidget", parent);
             FTK_P();
 
             p.settings = settings;
 
-            p.compatCheckBox = ftk::CheckBox::create(context);
-            p.compatCheckBox->setHStretch(ftk::Stretch::Expanding);
-            p.compatCheckBox->setTooltip("Enable workarounds for timelines that may not conform exactly to specification.");
-
-            p.audioBufferFramesEdit = ftk::IntEdit::create(context);
-            p.audioBufferFramesEdit->setRange(1, 1000000);
-            p.audioBufferFramesEdit->setStep(256);
-            p.audioBufferFramesEdit->setLargeStep(1024);
-
-            p.videoRequestsEdit = ftk::IntEdit::create(context);
-            p.videoRequestsEdit->setRange(1, 64);
-
-            p.audioRequestsEdit = ftk::IntEdit::create(context);
-            p.audioRequestsEdit->setRange(1, 64);
+            p.bufferFramesEdit = ftk::IntEdit::create(context);
+            p.bufferFramesEdit->setRange(1, 1000000);
+            p.bufferFramesEdit->setStep(256);
+            p.bufferFramesEdit->setLargeStep(1024);
+            p.bufferFramesEdit->setTooltip(
+                "The size of the buffer the audio device is given.\n"
+                "\n"
+                "Increase this if the audio breaks up or crackles during\n"
+                "playback. Smaller values reduce the audio latency.");
 
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Compatibility:", p.compatCheckBox);
-            p.layout->addRow("Audio buffer frames:", p.audioBufferFramesEdit);
-            p.layout->addRow("Video requests:", p.videoRequestsEdit);
-            p.layout->addRow("Audio requests:", p.audioRequestsEdit);
+            p.layout->addRow("Buffer frames:", p.bufferFramesEdit);
 
-            p.settingsObserver = ftk::Observer<models::AdvancedSettings>::create(
-                settings->observeAdvanced(),
-                [this](const models::AdvancedSettings& value)
+            p.settingsObserver = ftk::Observer<models::AudioSettings>::create(
+                settings->observeAudio(),
+                [this](const models::AudioSettings& value)
                 {
-                    FTK_P();
-                    p.compatCheckBox->setChecked(value.compat);
-                    p.audioBufferFramesEdit->setValue(value.audioBufferFrameCount);
-                    p.videoRequestsEdit->setValue(value.videoRequestMax);
-                    p.audioRequestsEdit->setValue(value.audioRequestMax);
+                    _p->bufferFramesEdit->setValue(value.bufferFrameCount);
                 });
 
-            p.compatCheckBox->setCheckedCallback(
-                [this](bool value)
-                {
-                    FTK_P();
-                    auto settings = p.settings->getAdvanced();
-                    settings.compat = value;
-                    p.settings->setAdvanced(settings);
-                });
-
-            p.audioBufferFramesEdit->setCallback(
+            p.bufferFramesEdit->setCallback(
                 [this](int value)
                 {
                     FTK_P();
-                    auto settings = p.settings->getAdvanced();
-                    settings.audioBufferFrameCount = value;
-                    p.settings->setAdvanced(settings);
-                });
-
-            p.videoRequestsEdit->setCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    auto settings = p.settings->getAdvanced();
-                    settings.videoRequestMax = value;
-                    p.settings->setAdvanced(settings);
-                });
-
-            p.audioRequestsEdit->setCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    auto settings = p.settings->getAdvanced();
-                    settings.audioRequestMax = value;
-                    p.settings->setAdvanced(settings);
+                    models::AudioSettings settings = p.settings->getAudio();
+                    settings.bufferFrameCount = value;
+                    p.settings->setAudio(settings);
                 });
         }
 
-        AdvancedSettingsWidget::AdvancedSettingsWidget() :
+        AudioSettingsWidget::AudioSettingsWidget() :
             _p(new Private)
         {}
 
-        AdvancedSettingsWidget::~AdvancedSettingsWidget()
+        AudioSettingsWidget::~AudioSettingsWidget()
         {}
 
-        std::shared_ptr<AdvancedSettingsWidget> AdvancedSettingsWidget::create(
+        std::shared_ptr<AudioSettingsWidget> AudioSettingsWidget::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<AdvancedSettingsWidget>(new AdvancedSettingsWidget);
+            auto out = std::shared_ptr<AudioSettingsWidget>(new AudioSettingsWidget);
             out->_init(context, settings, parent);
             return out;
         }
 
-        ftk::Size2I AdvancedSettingsWidget::getSizeHint() const
+        ftk::Size2I AudioSettingsWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();
         }
 
-        void AdvancedSettingsWidget::setGeometry(const ftk::Box2I& value)
+        void AudioSettingsWidget::setGeometry(const ftk::Box2I& value)
         {
             ISettingsWidget::setGeometry(value);
             _p->layout->setGeometry(value);
@@ -407,6 +365,7 @@ namespace djv
             std::shared_ptr<models::SettingsModel> settings;
 
             std::shared_ptr<ftk::ComboBox> spatialComboBox;
+            std::shared_ptr<ftk::CheckBox> compatCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<models::OTIOSettings> > settingsObserver;
@@ -435,16 +394,25 @@ namespace djv
                 "  without them at the size of the first clip. Use this to\n"
                 "  play clips of differing resolutions at the same size.");
 
+            p.compatCheckBox = ftk::CheckBox::create(context);
+            p.compatCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.compatCheckBox->setTooltip(
+                "Enable workarounds for timelines that may not conform exactly\n"
+                "to specification.");
+
             p.layout = ftk::FormLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Spatial coordinates:", p.spatialComboBox);
+            p.layout->addRow("Compatibility:", p.compatCheckBox);
 
             p.settingsObserver = ftk::Observer<models::OTIOSettings>::create(
                 settings->observeOTIO(),
                 [this](const models::OTIOSettings& value)
                 {
-                    _p->spatialComboBox->setCurrentIndex(
+                    FTK_P();
+                    p.spatialComboBox->setCurrentIndex(
                         static_cast<int>(value.spatial));
+                    p.compatCheckBox->setChecked(value.compat);
                 });
 
             p.spatialComboBox->setIndexCallback(
@@ -453,6 +421,15 @@ namespace djv
                     FTK_P();
                     models::OTIOSettings settings = p.settings->getOTIO();
                     settings.spatial = static_cast<tl::Spatial>(value);
+                    p.settings->setOTIO(settings);
+                });
+
+            p.compatCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    models::OTIOSettings settings = p.settings->getOTIO();
+                    settings.compat = value;
                     p.settings->setOTIO(settings);
                 });
         }

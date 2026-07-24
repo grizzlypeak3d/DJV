@@ -13,16 +13,12 @@ namespace djv
 {
     namespace models
     {
-        bool AdvancedSettings::operator == (const AdvancedSettings& other) const
+        bool AudioSettings::operator == (const AudioSettings& other) const
         {
-            return
-                compat == other.compat &&
-                audioBufferFrameCount == other.audioBufferFrameCount &&
-                videoRequestMax == other.videoRequestMax &&
-                audioRequestMax == other.audioRequestMax;
+            return bufferFrameCount == other.bufferFrameCount;
         }
 
-        bool AdvancedSettings::operator != (const AdvancedSettings& other) const
+        bool AudioSettings::operator != (const AudioSettings& other) const
         {
             return !(*this == other);
         }
@@ -109,7 +105,9 @@ namespace djv
 
         bool OTIOSettings::operator == (const OTIOSettings& other) const
         {
-            return spatial == other.spatial;
+            return
+                spatial == other.spatial &&
+                compat == other.compat;
         }
 
         bool OTIOSettings::operator != (const OTIOSettings& other) const
@@ -292,7 +290,7 @@ namespace djv
             ShortcutsSettings shortcutsDefault;
             float displayScaleDefault = 1.F;
 
-            std::shared_ptr<ftk::Observable<AdvancedSettings> > advanced;
+            std::shared_ptr<ftk::Observable<AudioSettings> > audio;
             std::shared_ptr<ftk::Observable<tl::PlayerCacheOptions> > cache;
             std::shared_ptr<ftk::Observable<tl::ui::ThumbnailCacheOptions> > thumbnailCache;
             std::shared_ptr<ftk::Observable<ExportSettings> > exportSettings;
@@ -321,13 +319,13 @@ namespace djv
         {
             std::map<std::string, std::string> keys =
             {
-                { "Advanced", "/Advanced" },
+                { "Audio", "/Audio.1" },
                 { "Cache", "/Cache" },
                 { "ThumbnailCache", "/ThumbnailCache" },
                 { "Export", "/Export" },
                 { "FileBrowser", "/FileBrowser" },
                 { "ImageSeq", "/ImageSeq.1" },
-                { "OTIO", "/OTIO.1" },
+                { "OTIO", "/OTIO.2" },
                 { "Shortcuts", "/Shortcuts.3" },
                 { "Misc", "/Misc.1" },
                 { "Mouse", "/Mouse.1" },
@@ -352,9 +350,9 @@ namespace djv
             p.settings = settings;
             p.displayScaleDefault = displayScaleDefault;
 
-            AdvancedSettings advanced;
-            settings->getT(keys["Advanced"], advanced);
-            p.advanced = ftk::Observable<AdvancedSettings>::create(advanced);
+            AudioSettings audio;
+            settings->getT(keys["Audio"], audio);
+            p.audio = ftk::Observable<AudioSettings>::create(audio);
 
             tl::PlayerCacheOptions cache;
             settings->getT(keys["Cache"], cache);
@@ -466,7 +464,7 @@ namespace djv
         {
             FTK_P();
 
-            p.settings->setT(keys["Advanced"], p.advanced->get());
+            p.settings->setT(keys["Audio"], p.audio->get());
             p.settings->setT(keys["Cache"], p.cache->get());
             p.settings->setT(keys["ThumbnailCache"], p.thumbnailCache->get());
             p.settings->setT(keys["Export"], p.exportSettings->get());
@@ -524,7 +522,7 @@ namespace djv
         void SettingsModel::reset()
         {
             FTK_P();
-            setAdvanced(AdvancedSettings());
+            setAudio(AudioSettings());
             setCache(tl::PlayerCacheOptions());
             setThumbnailCache(tl::ui::ThumbnailCacheOptions());
             setExport(ExportSettings());
@@ -553,19 +551,19 @@ namespace djv
 #endif // TLRENDER_USD
         }
 
-        const AdvancedSettings& SettingsModel::getAdvanced() const
+        const AudioSettings& SettingsModel::getAudio() const
         {
-            return _p->advanced->get();
+            return _p->audio->get();
         }
 
-        std::shared_ptr<ftk::IObservable<AdvancedSettings> > SettingsModel::observeAdvanced() const
+        std::shared_ptr<ftk::IObservable<AudioSettings> > SettingsModel::observeAudio() const
         {
-            return _p->advanced;
+            return _p->audio;
         }
 
-        void SettingsModel::setAdvanced(const AdvancedSettings& value)
+        void SettingsModel::setAudio(const AudioSettings& value)
         {
-            _p->advanced->setIfChanged(value);
+            _p->audio->setIfChanged(value);
         }
 
         const tl::PlayerCacheOptions& SettingsModel::getCache() const
@@ -866,12 +864,9 @@ namespace djv
             return out;
         }
 
-        void to_json(nlohmann::json& json, const AdvancedSettings& value)
+        void to_json(nlohmann::json& json, const AudioSettings& value)
         {
-            json["Compat"] = value.compat;
-            json["AudioBufferFrameCount"] = value.audioBufferFrameCount;
-            json["VideoRequestMax"] = value.videoRequestMax;
-            json["AudioRequestMax"] = value.audioRequestMax;
+            json["BufferFrameCount"] = value.bufferFrameCount;
         }
 
         void to_json(nlohmann::json& json, const ExportSettings& value)
@@ -912,6 +907,7 @@ namespace djv
         void to_json(nlohmann::json& json, const OTIOSettings& value)
         {
             json["Spatial"] = tl::to_string(value.spatial);
+            json["Compat"] = value.compat;
         }
 
         void to_json(nlohmann::json& json, const ShortcutsSettings& value)
@@ -997,12 +993,9 @@ namespace djv
             };
         }
 
-        void from_json(const nlohmann::json& json, AdvancedSettings& value)
+        void from_json(const nlohmann::json& json, AudioSettings& value)
         {
-            json.at("Compat").get_to(value.compat);
-            json.at("AudioBufferFrameCount").get_to(value.audioBufferFrameCount);
-            json.at("VideoRequestMax").get_to(value.videoRequestMax);
-            json.at("AudioRequestMax").get_to(value.audioRequestMax);
+            json.at("BufferFrameCount").get_to(value.bufferFrameCount);
         }
 
         void from_json(const nlohmann::json& json, ExportSettings& value)
@@ -1043,6 +1036,7 @@ namespace djv
         void from_json(const nlohmann::json& json, OTIOSettings& value)
         {
             tl::from_string(json.at("Spatial").get<std::string>(), value.spatial);
+            json.at("Compat").get_to(value.compat);
         }
 
         void from_json(const nlohmann::json& json, MiscSettings& value)

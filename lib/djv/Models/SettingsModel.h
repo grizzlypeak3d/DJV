@@ -35,16 +35,16 @@ namespace djv
 {
     namespace models
     {
-        //! Advanced settings.
-        struct AdvancedSettings
+        //! Audio settings.
+        struct AudioSettings
         {
-            bool compat = true;
-            size_t audioBufferFrameCount = tl::PlayerOptions().audioBufferFrameCount;
-            size_t videoRequestMax = 16;
-            size_t audioRequestMax = 16;
+            //! The size of the buffer the audio device is given. Larger
+            //! buffers are less likely to underrun and produce glitches;
+            //! smaller ones reduce latency.
+            size_t bufferFrameCount = tl::PlayerOptions().audioBufferFrameCount;
 
-            bool operator == (const AdvancedSettings&) const;
-            bool operator != (const AdvancedSettings&) const;
+            bool operator == (const AudioSettings&) const;
+            bool operator != (const AudioSettings&) const;
         };
 
         //! Export render size.
@@ -130,6 +130,7 @@ namespace djv
         struct OTIOSettings
         {
             tl::Spatial spatial = tl::Options().spatial;
+            bool compat = tl::Options().compat;
 
             bool operator == (const OTIOSettings&) const;
             bool operator != (const OTIOSettings&) const;
@@ -322,12 +323,12 @@ namespace djv
             //! Reset to default values.
             void reset();
 
-            //! \name Advanced
+            //! \name Audio
             ///@{
 
-            const AdvancedSettings& getAdvanced() const;
-            std::shared_ptr<ftk::IObservable<AdvancedSettings> > observeAdvanced() const;
-            void setAdvanced(const AdvancedSettings&);
+            const AudioSettings& getAudio() const;
+            std::shared_ptr<ftk::IObservable<AudioSettings> > observeAudio() const;
+            void setAudio(const AudioSettings&);
 
             ///@}
 
@@ -494,7 +495,7 @@ namespace djv
         //! \name Serialize
         ///@{
 
-        void to_json(nlohmann::json&, const AdvancedSettings&);
+        void to_json(nlohmann::json&, const AudioSettings&);
         void to_json(nlohmann::json&, const ExportSettings&);
         void to_json(nlohmann::json&, const FileBrowserSettings&);
         void to_json(nlohmann::json&, const ImageSeqSettings&);
@@ -508,7 +509,7 @@ namespace djv
         void to_json(nlohmann::json&, const TimelineSettings&);
         void to_json(nlohmann::json&, const WindowSettings&);
 
-        void from_json(const nlohmann::json&, AdvancedSettings&);
+        void from_json(const nlohmann::json&, AudioSettings&);
         void from_json(const nlohmann::json&, ExportSettings&);
         void from_json(const nlohmann::json&, FileBrowserSettings&);
         void from_json(const nlohmann::json&, ImageSeqSettings&);

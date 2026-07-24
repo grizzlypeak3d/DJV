@@ -69,6 +69,10 @@ namespace djv
             p.bellows["OTIO"] = ftk::Bellows::create(context, "OTIO", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
             vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                vLayout2);
             ui::OTIOSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["OTIO"]->setWidget(vLayout2);
 
@@ -83,6 +87,16 @@ namespace djv
             vLayout2->setMarginRole(ftk::SizeRole::Margin);
             ui::PlaybackSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["Playback"]->setWidget(vLayout2);
+
+            p.bellows["Audio"] = ftk::Bellows::create(context, "Audio", vLayout);
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                vLayout2);
+            ui::AudioSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Audio"]->setWidget(vLayout2);
 
             p.bellows["Shortcuts"] = ftk::Bellows::create(context, "Keyboard Shortcuts", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
@@ -141,16 +155,6 @@ namespace djv
             ui::USDSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["USD"]->setWidget(vLayout2);
 #endif // TLRENDER_USD
-
-            p.bellows["Advanced"] = ftk::Bellows::create(context, "Advanced", vLayout);
-            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
-            vLayout2->setMarginRole(ftk::SizeRole::Margin);
-            ftk::Label::create(
-                context,
-                "Changes are applied to new files.",
-                vLayout2);
-            ui::AdvancedSettingsWidget::create(context, settingsModel, vLayout2);
-            p.bellows["Advanced"]->setWidget(vLayout2);
 
             p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);

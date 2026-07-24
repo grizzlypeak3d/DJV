@@ -24,10 +24,10 @@ namespace djv
             virtual ~ISettingsWidget();
         };
 
-        //! Advanced settings widget.
-        class AdvancedSettingsWidget : public ISettingsWidget
+        //! Audio settings widget.
+        class AudioSettingsWidget : public ISettingsWidget
         {
-            FTK_NON_COPYABLE(AdvancedSettingsWidget);
+            FTK_NON_COPYABLE(AudioSettingsWidget);
 
         protected:
             void _init(
@@ -35,12 +35,12 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
-            AdvancedSettingsWidget();
+            AudioSettingsWidget();
 
         public:
-            virtual ~AdvancedSettingsWidget();
+            virtual ~AudioSettingsWidget();
 
-            static std::shared_ptr<AdvancedSettingsWidget> create(
+            static std::shared_ptr<AudioSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
