@@ -107,6 +107,16 @@ namespace djv
             return !(*this == other);
         }
 
+        bool OTIOSettings::operator == (const OTIOSettings& other) const
+        {
+            return spatial == other.spatial;
+        }
+
+        bool OTIOSettings::operator != (const OTIOSettings& other) const
+        {
+            return !(*this == other);
+        }
+
         ShortcutsSettings::ShortcutsSettings()
         {}
 
@@ -288,6 +298,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<ExportSettings> > exportSettings;
             std::shared_ptr<ftk::Observable<FileBrowserSettings> > fileBrowser;
             std::shared_ptr<ftk::Observable<ImageSeqSettings> > imageSeq;
+            std::shared_ptr<ftk::Observable<OTIOSettings> > otio;
             std::shared_ptr<ftk::Observable<ShortcutsSettings> > shortcuts;
             std::shared_ptr<ftk::Observable<MiscSettings> > misc;
             std::shared_ptr<ftk::Observable<MouseSettings> > mouse;
@@ -316,6 +327,7 @@ namespace djv
                 { "Export", "/Export" },
                 { "FileBrowser", "/FileBrowser" },
                 { "ImageSeq", "/ImageSeq.1" },
+                { "OTIO", "/OTIO.1" },
                 { "Shortcuts", "/Shortcuts.3" },
                 { "Misc", "/Misc.1" },
                 { "Mouse", "/Mouse.1" },
@@ -372,6 +384,10 @@ namespace djv
             ImageSeqSettings imageSeq;
             settings->getT(keys["ImageSeq"], imageSeq);
             p.imageSeq = ftk::Observable<ImageSeqSettings>::create(imageSeq);
+
+            OTIOSettings otio;
+            settings->getT(keys["OTIO"], otio);
+            p.otio = ftk::Observable<OTIOSettings>::create(otio);
 
             // The saved keyboard shortcuts are applied as the shortcuts are
             // registered with addShortcuts().
@@ -465,6 +481,8 @@ namespace djv
 
             p.settings->setT(keys["ImageSeq"], p.imageSeq->get());
 
+            p.settings->setT(keys["OTIO"], p.otio->get());
+
             // Preserve saved shortcuts that were not registered, for example
             // shortcuts for features that are only sometimes available.
             ShortcutsSettings shortcuts = p.shortcuts->get();
@@ -512,6 +530,7 @@ namespace djv
             setExport(ExportSettings());
             setFileBrowser(FileBrowserSettings());
             setImageSeq(ImageSeqSettings());
+            setOTIO(OTIOSettings());
             setShortcuts(p.shortcutsDefault);
             MiscSettings miscSettings;
             miscSettings.showSetup = false;
@@ -636,6 +655,21 @@ namespace djv
         void SettingsModel::setImageSeq(const ImageSeqSettings& value)
         {
             _p->imageSeq->setIfChanged(value);
+        }
+
+        const OTIOSettings& SettingsModel::getOTIO() const
+        {
+            return _p->otio->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<OTIOSettings> > SettingsModel::observeOTIO() const
+        {
+            return _p->otio;
+        }
+
+        void SettingsModel::setOTIO(const OTIOSettings& value)
+        {
+            _p->otio->setIfChanged(value);
         }
 
         const ShortcutsSettings& SettingsModel::getShortcuts() const
@@ -875,6 +909,11 @@ namespace djv
             json["IO"] = value.io;
         }
 
+        void to_json(nlohmann::json& json, const OTIOSettings& value)
+        {
+            json["Spatial"] = tl::to_string(value.spatial);
+        }
+
         void to_json(nlohmann::json& json, const ShortcutsSettings& value)
         {
             for (const auto& shortcut : value.shortcuts)
@@ -999,6 +1038,11 @@ namespace djv
             json.at("AudioFileName").get_to(value.audioFileName);
             json.at("MaxDigits").get_to(value.maxDigits);
             json.at("IO").get_to(value.io);
+        }
+
+        void from_json(const nlohmann::json& json, OTIOSettings& value)
+        {
+            tl::from_string(json.at("Spatial").get<std::string>(), value.spatial);
         }
 
         void from_json(const nlohmann::json& json, MiscSettings& value)

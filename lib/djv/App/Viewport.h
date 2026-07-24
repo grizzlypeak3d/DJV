@@ -54,6 +54,9 @@ namespace djv
             void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
         private:
+            bool _getSourceBox(ftk::Box2I&, ftk::Size2I&) const;
+            ftk::V2I _toSourcePixel(const ftk::V2I&) const;
+            ftk::V2I _fromSourcePixel(const ftk::V2I&) const;
             void _videoUpdate();
             void _hudUpdate();
             void _hudLayout();

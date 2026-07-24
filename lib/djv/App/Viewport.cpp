@@ -305,17 +305,98 @@ namespace djv
             return _p->colorSample;
         }
 
+        bool Viewport::_getSourceBox(ftk::Box2I& box, ftk::Size2I& size) const
+        {
+            // With OTIO spatial coordinates the render space is the timeline
+            // canvas rather than the media, so the box the image is drawn into
+            // is needed to relate the two. Returns false without spatial
+            // coordinates, where render space is already the image.
+            if (auto player = getPlayer())
+            {
+                const auto& videoFrame = player->getCurrentVideo();
+                if (!videoFrame.empty() && videoFrame.front().canvasSize.isValid())
+                {
+                    const auto& displayOptions = getDisplayOptions();
+                    const tl::AspectRatioOptions aspectRatio =
+                        !displayOptions.empty() ?
+                        displayOptions.front().aspectRatio :
+                        tl::AspectRatioOptions();
+                    for (const auto& layer : videoFrame.front().layers)
+                    {
+                        const auto& image = layer.image ? layer.image : layer.imageB;
+                        const auto& bounds = layer.image ? layer.bounds : layer.boundsB;
+                        if (image && bounds.has_value())
+                        {
+                            // The image is fitted into its canvas box, so use
+                            // the same box the renderer draws into.
+                            box = tl::getBox(
+                                ftk::Box2I(
+                                    ftk::V2I(
+                                        std::lround(bounds.value().min.x),
+                                        std::lround(bounds.value().min.y)),
+                                    ftk::V2I(
+                                        std::lround(bounds.value().max.x),
+                                        std::lround(bounds.value().max.y))),
+                                image->getInfo(),
+                                aspectRatio);
+                            size = image->getInfo().size;
+                            return box.w() > 0 && box.h() > 0 && size.isValid();
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        ftk::V2I Viewport::_toSourcePixel(const ftk::V2I& renderPos) const
+        {
+            ftk::Box2I box;
+            ftk::Size2I size;
+            ftk::V2I out = renderPos;
+            if (_getSourceBox(box, size))
+            {
+                out = ftk::V2I(
+                    std::lround(
+                        (renderPos.x - box.min.x) /
+                        static_cast<double>(box.w()) * size.w),
+                    std::lround(
+                        (renderPos.y - box.min.y) /
+                        static_cast<double>(box.h()) * size.h));
+            }
+            return out;
+        }
+
+        ftk::V2I Viewport::_fromSourcePixel(const ftk::V2I& sourcePos) const
+        {
+            ftk::Box2I box;
+            ftk::Size2I size;
+            ftk::V2I out = sourcePos;
+            if (_getSourceBox(box, size))
+            {
+                out = ftk::V2I(
+                    std::lround(
+                        box.min.x + sourcePos.x /
+                        static_cast<double>(size.w) * box.w()),
+                    std::lround(
+                        box.min.y + sourcePos.y /
+                        static_cast<double>(size.h) * box.h()));
+            }
+            return out;
+        }
+
         void Viewport::pick(const ftk::V2I& imagePos)
         {
             FTK_P();
             // Image pixel -> widget-local position, inverting the pick math used
             // by the mouse handlers (image = (widget - viewPos) / zoom). Then
-            // sample exactly as a pick mouse action would.
+            // sample exactly as a pick mouse action would. The incoming
+            // position is a source pixel, so it goes through the canvas first.
+            const ftk::V2I renderPos = _fromSourcePixel(imagePos);
             const auto viewPos = getViewPos();
             const double zoom = getZoom();
             const ftk::V2I pos(
-                static_cast<int>(viewPos.x + imagePos.x * zoom),
-                static_cast<int>(viewPos.y + imagePos.y * zoom));
+                static_cast<int>(viewPos.x + renderPos.x * zoom),
+                static_cast<int>(viewPos.y + renderPos.y * zoom));
             p.samplePos->setIfChanged(pos);
             p.colorSample->setIfChanged(getColorSample(pos));
             p.pick->setIfChanged(imagePos);
@@ -411,7 +492,7 @@ namespace djv
                     if (p.samplePos->setIfChanged(pos))
                     {
                         p.colorSample->setIfChanged(getColorSample(pos));
-                        p.pick->setIfChanged((pos - getViewPos()) / getZoom());
+                        p.pick->setIfChanged(_toSourcePixel((pos - getViewPos()) / getZoom()));
                         _hudUpdate();
                     }
                 }
@@ -433,7 +514,7 @@ namespace djv
                 if (p.samplePos->setIfChanged(pos))
                 {
                     p.colorSample->setIfChanged(getColorSample(pos));
-                    p.pick->setIfChanged((pos - getViewPos()) / getZoom());
+                    p.pick->setIfChanged(_toSourcePixel((pos - getViewPos()) / getZoom()));
                     _hudUpdate();
                 }
             }

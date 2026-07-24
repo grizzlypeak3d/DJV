@@ -109,6 +109,34 @@ namespace djv
 #endif // FTK_NFD
 
         //! Image sequence settings widget.
+        //! OTIO settings widget.
+        class OTIOSettingsWidget : public ISettingsWidget
+        {
+            FTK_NON_COPYABLE(OTIOSettingsWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            OTIOSettingsWidget();
+
+        public:
+            virtual ~OTIOSettingsWidget();
+
+            static std::shared_ptr<OTIOSettingsWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            ftk::Size2I getSizeHint() const override;
+            void setGeometry(const ftk::Box2I&) override;
+
+        private:
+            FTK_PRIVATE();
+        };
+
         class ImageSeqSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(ImageSeqSettingsWidget);

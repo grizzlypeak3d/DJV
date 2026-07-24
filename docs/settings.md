@@ -20,6 +20,8 @@ The **Settings** tool is divided into collapsible sections:
   whether hidden files are shown.
 - **Image Sequences** — How audio is paired with image sequences (see
   [Files]({{ '/files' | relative_url }})).
+- **OTIO** — How the spatial coordinates in OTIO files are used to size and
+  position images (see [Files]({{ '/files' | relative_url }})).
 - **Mouse** — Mouse button bindings and scaling (see below).
 - **Playback** — Options such as whether playback starts automatically when a
   file is opened.

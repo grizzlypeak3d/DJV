@@ -402,6 +402,89 @@ namespace djv
         }
 #endif // FTK_NFD
 
+        struct OTIOSettingsWidget::Private
+        {
+            std::shared_ptr<models::SettingsModel> settings;
+
+            std::shared_ptr<ftk::ComboBox> spatialComboBox;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<models::OTIOSettings> > settingsObserver;
+        };
+
+        void OTIOSettingsWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            ISettingsWidget::_init(context, "djv::ui::OTIOSettingsWidget", parent);
+            FTK_P();
+
+            p.settings = settings;
+
+            p.spatialComboBox = ftk::ComboBox::create(context, tl::getSpatialLabels());
+            p.spatialComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.spatialComboBox->setTooltip(
+                "Use the spatial coordinates in OTIO files to position and\n"
+                "size the images.\n"
+                "\n"
+                "* None: Ignore the spatial coordinates.\n"
+                "* Coordinates: Use the spatial coordinates where clips\n"
+                "  provide them.\n"
+                "* Normalize: Use the spatial coordinates, and display clips\n"
+                "  without them at the size of the first clip. Use this to\n"
+                "  play clips of differing resolutions at the same size.");
+
+            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Spatial coordinates:", p.spatialComboBox);
+
+            p.settingsObserver = ftk::Observer<models::OTIOSettings>::create(
+                settings->observeOTIO(),
+                [this](const models::OTIOSettings& value)
+                {
+                    _p->spatialComboBox->setCurrentIndex(
+                        static_cast<int>(value.spatial));
+                });
+
+            p.spatialComboBox->setIndexCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    models::OTIOSettings settings = p.settings->getOTIO();
+                    settings.spatial = static_cast<tl::Spatial>(value);
+                    p.settings->setOTIO(settings);
+                });
+        }
+
+        OTIOSettingsWidget::OTIOSettingsWidget() :
+            _p(new Private)
+        {}
+
+        OTIOSettingsWidget::~OTIOSettingsWidget()
+        {}
+
+        std::shared_ptr<OTIOSettingsWidget> OTIOSettingsWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<OTIOSettingsWidget>(new OTIOSettingsWidget);
+            out->_init(context, settings, parent);
+            return out;
+        }
+
+        ftk::Size2I OTIOSettingsWidget::getSizeHint() const
+        {
+            return _p->layout->getSizeHint();
+        }
+
+        void OTIOSettingsWidget::setGeometry(const ftk::Box2I& value)
+        {
+            ISettingsWidget::setGeometry(value);
+            _p->layout->setGeometry(value);
+        }
+
         struct ImageSeqSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;

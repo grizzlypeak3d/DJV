@@ -66,6 +66,12 @@ namespace djv
             ui::ImageSeqSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["ImageSeqs"]->setWidget(vLayout2);
 
+            p.bellows["OTIO"] = ftk::Bellows::create(context, "OTIO", vLayout);
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::OTIOSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["OTIO"]->setWidget(vLayout2);
+
             p.bellows["Mouse"] = ftk::Bellows::create(context, "Mouse", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
             vLayout2->setMarginRole(ftk::SizeRole::Margin);

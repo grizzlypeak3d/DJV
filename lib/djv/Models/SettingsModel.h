@@ -126,6 +126,15 @@ namespace djv
             bool operator != (const ImageSeqSettings&) const;
         };
 
+        //! OTIO settings.
+        struct OTIOSettings
+        {
+            tl::Spatial spatial = tl::Options().spatial;
+
+            bool operator == (const OTIOSettings&) const;
+            bool operator != (const OTIOSettings&) const;
+        };
+
         //! Miscellaneous settings.
         struct MiscSettings
         {
@@ -362,6 +371,15 @@ namespace djv
 
             ///@}
 
+            //! \name OTIO
+            ///@{
+
+            const OTIOSettings& getOTIO() const;
+            std::shared_ptr<ftk::IObservable<OTIOSettings> > observeOTIO() const;
+            void setOTIO(const OTIOSettings&);
+
+            ///@}
+
             //! \name Miscellaneous
             ///@{
 
@@ -480,6 +498,7 @@ namespace djv
         void to_json(nlohmann::json&, const ExportSettings&);
         void to_json(nlohmann::json&, const FileBrowserSettings&);
         void to_json(nlohmann::json&, const ImageSeqSettings&);
+        void to_json(nlohmann::json&, const OTIOSettings&);
         void to_json(nlohmann::json&, const MiscSettings&);
         void to_json(nlohmann::json&, const MouseActionBinding&);
         void to_json(nlohmann::json&, const MouseSettings&);
@@ -493,6 +512,7 @@ namespace djv
         void from_json(const nlohmann::json&, ExportSettings&);
         void from_json(const nlohmann::json&, FileBrowserSettings&);
         void from_json(const nlohmann::json&, ImageSeqSettings&);
+        void from_json(const nlohmann::json&, OTIOSettings&);
         void from_json(const nlohmann::json&, MiscSettings&);
         void from_json(const nlohmann::json&, MouseActionBinding&);
         void from_json(const nlohmann::json&, MouseSettings&);

@@ -1,6 +1,7 @@
 ## 3.5.0
 
 Changes:
+* Add support for OTIO spatial coordinates.
 * Add audio export.
 * Add a waveform height option.
 * Add an image negative option.
@@ -20,7 +21,7 @@ Changes:
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
 * Fixes for the grid and outline in compare mode.
-* Fixes to prevent cache usage exceeding 100%
+* Fixes to prevent cache usage exceeding 100%.
 
 * Library updates:
     - OpenImageIO v3.1.14.0

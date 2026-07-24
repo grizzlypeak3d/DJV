@@ -1350,6 +1350,7 @@ namespace djv
                         options.imageSeqAudio = imageSeq.audio;
                         options.imageSeqAudioExts = imageSeq.audioExts;
                         options.imageSeqAudioFileName = imageSeq.audioFileName;
+                        options.spatial = p.settingsModel->getOTIO().spatial;
                         const models::AdvancedSettings advanced = p.settingsModel->getAdvanced();
                         options.compat = advanced.compat;
                         options.videoRequestMax = advanced.videoRequestMax;

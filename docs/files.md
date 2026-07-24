@@ -167,6 +167,52 @@ To pair audio automatically, open the **Image Sequences** section in the
 
 To pair audio manually, use the menu **File/Open With Audio**.
 
+## OTIO spatial coordinates
+
+OTIO files can give each clip a bounding box, called the
+[spatial coordinates](https://opentimelineio.readthedocs.io/en/stable/tutorials/spatial-coordinates.html){:target="_blank"},
+that describes the area the image occupies on a canvas shared by the whole
+timeline. DJV uses these boxes to size and position the images.
+
+The most common use is playing back clips that were rendered at different
+resolutions. Give the clips the same box and they are all displayed at the same
+size, so the view no longer jumps between them when playback moves from one clip
+to the next. This also keeps the zoom and pan steady across a cut, which is
+useful for checking continuity between shots.
+
+The coordinates are unit-less, so boxes of `0, 0, 1920, 1080` and `0, 0, 16, 9`
+describe the same area. DJV works out the size in pixels from the first clip
+that has coordinates, together with the resolution the timeline is working at.
+The Y axis points up, unlike image coordinates, so a clip with a larger Y value
+is displayed higher.
+
+{: .note }
+Clips are not required to have spatial coordinates. In a timeline where only
+some clips have them, the clips without them fill the canvas, and so are
+displayed at the same size as the clips that do.
+
+Clips can also be given different boxes to place them side by side, or to
+position a smaller image within a larger frame.
+
+The **OTIO** section in the **Settings** tool controls how the coordinates are
+used:
+
+- **None** — Ignore the spatial coordinates. Clips are sized from their own
+  resolution.
+- **Coordinates** — Use the spatial coordinates where clips provide them. This
+  is the default.
+- **Normalize** — Use the spatial coordinates, and display clips that do not
+  have them at the size of the first clip. Use this to play clips of differing
+  resolutions at the same size when the timeline was not authored with spatial
+  coordinates.
+
+{: .note }
+The color picker and magnifier report positions in the original image, not the
+canvas, so the pixel coordinates always refer to the media itself.
+
+The authored coordinates are shown in the **Information** tool, along with the
+canvas DJV derived from them.
+
 ## USD
 
 USD support is currently experimental. When a USD file is opened, DJV renders it
