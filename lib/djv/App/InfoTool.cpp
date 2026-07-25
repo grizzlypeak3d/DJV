@@ -27,7 +27,10 @@ namespace djv
             std::shared_ptr<ftk::TextEdit> textEdit;
             std::shared_ptr<ftk::SearchBox> searchBox;
 
+            std::shared_ptr<tl::Player> player;
+
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
         };
 
         void InfoTool::_init(
@@ -74,8 +77,29 @@ namespace djv
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& value)
                 {
-                    _p->info = value ? value->getIOInfo() : tl::IOInfo();
-                    _widgetUpdate();
+                    FTK_P();
+                    p.player = value;
+                    p.mediaReferenceKeyObserver.reset();
+                    if (value)
+                    {
+                        // The information describes the media reference being
+                        // read, so it is refreshed when the key changes. The
+                        // observer also reports the current key, which covers
+                        // the new player.
+                        p.mediaReferenceKeyObserver = ftk::Observer<std::string>::create(
+                            value->observeMediaReferenceKey(),
+                            [this](const std::string&)
+                            {
+                                FTK_P();
+                                p.info = p.player->getIOInfo();
+                                _widgetUpdate();
+                            });
+                    }
+                    else
+                    {
+                        p.info = tl::IOInfo();
+                        _widgetUpdate();
+                    }
                 });
 
             copyButton->setClickedCallback(

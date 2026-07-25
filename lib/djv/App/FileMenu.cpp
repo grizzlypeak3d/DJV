@@ -7,6 +7,7 @@
 #include <djv/App/FileActions.h>
 #include <djv/Models/RecentFilesModel.h>
 
+#include <tlRender/Timeline/Player.h>
 #include <tlRender/Timeline/Util.h>
 #include <tlRender/IO/System.h>
 
@@ -22,13 +23,20 @@ namespace djv
 
             std::vector<std::shared_ptr<ftk::Action> > currentActions;
             std::vector<std::shared_ptr<ftk::Action> > layersActions;
+            std::vector<std::shared_ptr<ftk::Action> > mediaReferencesActions;
+            // The keys the media reference actions set, in the same order.
+            // The first is empty, for leaving the clips as authored.
+            std::vector<std::string> mediaReferenceKeys;
             std::map<std::string, std::shared_ptr<ftk::Menu> > menus;
+            std::shared_ptr<tl::Player> player;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::Observer<int> > aIndexObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
             std::shared_ptr<ftk::ListObserver<std::filesystem::path> > recentObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
         };
 
         void FileMenu::_init(
@@ -62,6 +70,9 @@ namespace djv
             addAction(actions["NextLayer"]);
             addAction(actions["PrevLayer"]);
             addDivider();
+            p.menus["MediaReferences"] = addSubMenu("Media References");
+            addAction(actions["NextMediaReference"]);
+            addDivider();
             addAction(actions["Exit"]);
 
             p.filesObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
@@ -90,6 +101,13 @@ namespace djv
                 [this](const std::vector<int>& value)
                 {
                     _layersUpdate(value);
+                });
+
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
+                app->observePlayer(),
+                [this](const std::shared_ptr<tl::Player>& value)
+                {
+                    _setPlayer(value);
                 });
 
             p.recentObserver = ftk::ListObserver<std::filesystem::path>::create(
@@ -199,6 +217,74 @@ namespace djv
                         p.menus["Layers"]->setChecked(p.layersActions[i], i == a->videoLayer);
                     }
                 }
+            }
+        }
+
+        void FileMenu::_setPlayer(const std::shared_ptr<tl::Player>& value)
+        {
+            FTK_P();
+            p.player = value;
+
+            // The list of keys is rebuilt first, so that the observer below
+            // has actions to check when it reports the current key.
+            p.mediaReferenceKeyObserver.reset();
+            _mediaReferencesUpdate();
+            if (p.player)
+            {
+                p.mediaReferenceKeyObserver = ftk::Observer<std::string>::create(
+                    p.player->observeMediaReferenceKey(),
+                    [this](const std::string& value)
+                    {
+                        _mediaReferenceKeyUpdate(value);
+                    });
+            }
+        }
+
+        void FileMenu::_mediaReferencesUpdate()
+        {
+            FTK_P();
+            p.menus["MediaReferences"]->clear();
+            p.mediaReferencesActions.clear();
+            p.mediaReferenceKeys.clear();
+            if (p.player)
+            {
+                // The keys a timeline uses are not observable, so the list is
+                // rebuilt when the player changes.
+                std::vector<std::string> keys = { std::string() };
+                for (const auto& key : p.player->getMediaReferenceKeys())
+                {
+                    keys.push_back(key);
+                }
+                for (const auto& key : keys)
+                {
+                    // The empty key leaves each clip on the media reference it
+                    // was authored with, which is where a timeline starts.
+                    auto action = ftk::Action::create(
+                        !key.empty() ? key : "As Authored",
+                        [this, key]
+                        {
+                            close();
+                            if (_p->player)
+                            {
+                                _p->player->setMediaReferenceKey(key);
+                            }
+                        });
+                    p.menus["MediaReferences"]->addAction(action);
+                    p.mediaReferencesActions.push_back(action);
+                    p.mediaReferenceKeys.push_back(key);
+                }
+                _mediaReferenceKeyUpdate(p.player->getMediaReferenceKey());
+            }
+        }
+
+        void FileMenu::_mediaReferenceKeyUpdate(const std::string& value)
+        {
+            FTK_P();
+            for (size_t i = 0; i < p.mediaReferencesActions.size(); ++i)
+            {
+                p.menus["MediaReferences"]->setChecked(
+                    p.mediaReferencesActions[i],
+                    p.mediaReferenceKeys[i] == value);
             }
         }
 

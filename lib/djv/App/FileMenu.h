@@ -9,6 +9,11 @@
 
 #include <filesystem>
 
+namespace tl
+{
+    class Player;
+}
+
 namespace djv
 {
     namespace app
@@ -47,6 +52,9 @@ namespace djv
             void _aIndexUpdate(int);
             void _layersUpdate(const std::vector<int>&);
             void _recentUpdate(const std::vector<std::filesystem::path>&);
+            void _setPlayer(const std::shared_ptr<tl::Player>&);
+            void _mediaReferencesUpdate();
+            void _mediaReferenceKeyUpdate(const std::string&);
 
             FTK_PRIVATE();
         };

@@ -45,8 +45,11 @@ namespace djv
 
             std::shared_ptr<ftk::Timer> messagesTimer;
 
+            std::shared_ptr<tl::Player> player;
+
             std::shared_ptr<ftk::ListObserver<std::string> > messagesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
@@ -129,9 +132,29 @@ namespace djv
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& player)
                 {
-                    _infoUpdate(
-                        player ? player->getPath() : ftk::Path(),
-                        player ? player->getIOInfo() : tl::IOInfo());
+                    FTK_P();
+                    p.player = player;
+                    p.mediaReferenceKeyObserver.reset();
+                    if (player)
+                    {
+                        // The information describes the media reference being
+                        // read, so it is refreshed when the key changes. The
+                        // observer also reports the current key, which covers
+                        // the new player.
+                        p.mediaReferenceKeyObserver = ftk::Observer<std::string>::create(
+                            player->observeMediaReferenceKey(),
+                            [this](const std::string&)
+                            {
+                                FTK_P();
+                                _infoUpdate(
+                                    p.player->getPath(),
+                                    p.player->getIOInfo());
+                            });
+                    }
+                    else
+                    {
+                        _infoUpdate(ftk::Path(), tl::IOInfo());
+                    }
                 });
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(

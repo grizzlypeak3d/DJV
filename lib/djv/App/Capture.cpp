@@ -30,6 +30,7 @@
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/Player.h>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -545,6 +546,27 @@ namespace djv
                         model->setLayer(item, li);
                     else
                         note(p.shotId, "no matching layer for the target file");
+                }
+            }
+            else if (step.contains("mediaReference"))
+            {
+                // Set the media reference key, for clips that carry more than
+                // one media reference (for example a proxy and a full
+                // resolution version of the same media). An empty key leaves
+                // each clip on the media reference it was authored with.
+                const std::string key = step.at("mediaReference").get<std::string>();
+                if (auto player = app->observePlayer()->get())
+                {
+                    const auto keys = player->getMediaReferenceKeys();
+                    if (key.empty() ||
+                        std::find(keys.begin(), keys.end(), key) != keys.end())
+                    {
+                        player->setMediaReferenceKey(key);
+                    }
+                    else
+                    {
+                        note(p.shotId, "no matching media reference key");
+                    }
                 }
             }
             else if (step.contains("view"))

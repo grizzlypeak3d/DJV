@@ -6,6 +6,10 @@
 #include <djv/App/App.h>
 #include <djv/Models/FilesModel.h>
 
+#include <tlRender/Timeline/Player.h>
+
+#include <algorithm>
+
 namespace djv
 {
     namespace app
@@ -14,6 +18,7 @@ namespace djv
         {
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
         void FileActions::_init(
@@ -103,6 +108,35 @@ namespace djv
                 });
 
             _addCommand(
+                "NextMediaReference",
+                "Change to the next media reference.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        if (auto player = app->observePlayer()->get())
+                        {
+                            // Cycle through the keys used by the timeline,
+                            // starting from the one in use. An unset key, which
+                            // leaves the clips as they were authored, is not
+                            // part of the cycle; it can be chosen from the menu.
+                            const auto keys = player->getMediaReferenceKeys();
+                            if (!keys.empty())
+                            {
+                                const auto i = std::find(
+                                    keys.begin(),
+                                    keys.end(),
+                                    player->getMediaReferenceKey());
+                                const size_t next = i != keys.end() ?
+                                    ((i - keys.begin()) + 1) % keys.size() :
+                                    0;
+                                player->setMediaReferenceKey(keys[next]);
+                            }
+                        }
+                    }
+                });
+
+            _addCommand(
                 "NextLayer",
                 "Change to the next layer.",
                 [appWeak](const nlohmann::json&)
@@ -164,6 +198,10 @@ namespace djv
                 "Previous",
                 "Prev",
                 _command("Prev"));
+            _actions["NextMediaReference"] = ftk::Action::create(
+                "Next Media Reference",
+                "Next",
+                _command("NextMediaReference"));
             _actions["NextLayer"] = ftk::Action::create(
                 "Next Layer",
                 "Next",
@@ -200,6 +238,10 @@ namespace djv
                     static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("Next", "Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut(
+                "NextMediaReference",
+                "Next media reference",
+                ftk::KeyShortcut(ftk::Key::M, static_cast<int>(ftk::KeyModifier::Shift)));
             _addShortcut("NextLayer", "Next layer", ftk::KeyShortcut(ftk::Key::Equals, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("PrevLayer", "Previous layer", ftk::KeyShortcut(ftk::Key::Minus, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("Exit", "Exit", ftk::KeyShortcut(ftk::Key::Q, static_cast<int>(ftk::commandKeyModifier)));
@@ -224,6 +266,16 @@ namespace djv
                 {
                     _actions["NextLayer"]->setEnabled(value ? value->videoLayers.size() > 1 : false);
                     _actions["PrevLayer"]->setEnabled(value ? value->videoLayers.size() > 1 : false);
+                });
+
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
+                app->observePlayer(),
+                [this](const std::shared_ptr<tl::Player>& value)
+                {
+                    // There is nothing to cycle through unless the timeline
+                    // uses more than one media reference key.
+                    _actions["NextMediaReference"]->setEnabled(
+                        value ? value->getMediaReferenceKeys().size() > 1 : false);
                 });
         }
 
