@@ -5,7 +5,7 @@
 
 #include <djv/Models/Shortcuts.h>
 
-#include <tlRender/UI/IItem.h>
+#include <tlRender/UI/ItemOptions.h>
 #include <tlRender/UI/ThumbnailSystem.h>
 #include <tlRender/Timeline/Player.h>
 #include <tlRender/IO/SeqIO.h>
