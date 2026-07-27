@@ -542,7 +542,7 @@ namespace djv
                     p.layout->setRowVisible(p.audioFileNameEdit, tl::ImageSeqAudio::FileName == value.audio);
                     p.maxDigitsEdit->setValue(value.maxDigits);
                     p.defaultSpeedEdit->setValue(value.io.defaultSpeed);
-                    p.threadsEdit->setValue(value.io.threadCount);
+                    p.threadsEdit->setValue(value.readThreadCount);
                 });
 
             p.audioComboBox->setIndexCallback(
@@ -595,7 +595,7 @@ namespace djv
                 {
                     FTK_P();
                     models::ImageSeqSettings settings = p.settings->getImageSeq();
-                    settings.io.threadCount = value;
+                    settings.readThreadCount = value;
                     p.settings->setImageSeq(settings);
                 });
         }

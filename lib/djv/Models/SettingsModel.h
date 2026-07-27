@@ -9,6 +9,7 @@
 #include <tlRender/UI/ThumbnailSystem.h>
 #include <tlRender/Timeline/Player.h>
 #include <tlRender/IO/SeqIO.h>
+#include <tlRender/Timeline/TimelineOptions.h>
 #if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
@@ -120,6 +121,12 @@ namespace djv
             std::vector<std::string> audioExts = tl::Options().imageSeqAudioExts;
             std::string audioFileName = tl::Options().imageSeqAudioFileName;
             size_t maxDigits = 9;
+
+            //! How many frames are decoded at once. This is a timeline
+            //! setting rather than a per format one: the timeline is what
+            //! decodes sequences.
+            size_t readThreadCount = tl::getDefaultReadThreadCount();
+
             tl::SeqOptions io;
 
             bool operator == (const ImageSeqSettings&) const;

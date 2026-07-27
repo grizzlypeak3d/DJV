@@ -95,6 +95,7 @@ namespace djv
                 audioExts == other.audioExts &&
                 audioFileName == other.audioFileName &&
                 maxDigits == other.maxDigits &&
+                readThreadCount == other.readThreadCount &&
                 io == other.io;
         }
 
@@ -901,6 +902,7 @@ namespace djv
             json["AudioExts"] = value.audioExts;
             json["AudioFileName"] = value.audioFileName;
             json["MaxDigits"] = value.maxDigits;
+            json["ReadThreadCount"] = value.readThreadCount;
             json["IO"] = value.io;
         }
 
@@ -1030,6 +1032,7 @@ namespace djv
             json.at("AudioExts").get_to(value.audioExts);
             json.at("AudioFileName").get_to(value.audioFileName);
             json.at("MaxDigits").get_to(value.maxDigits);
+            json.at("ReadThreadCount").get_to(value.readThreadCount);
             json.at("IO").get_to(value.io);
         }
 

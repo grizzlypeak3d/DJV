@@ -1359,6 +1359,7 @@ namespace djv
                         options.compat = otio.compat;
                         options.ioOptions = p.settingsModel->getIOOptions();
                         options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
+                        options.readThreadCount = imageSeq.readThreadCount;
                         timelines[i] = tl::Timeline::create(
                             _context,
                             files[i]->path,
