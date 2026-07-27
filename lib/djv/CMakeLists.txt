@@ -4,5 +4,6 @@ add_subdirectory(Resource)
 add_subdirectory(UI)
 
 if(DJV_TESTS)
+    add_subdirectory(AppTest)
     add_subdirectory(ModelsTest)
 endif()

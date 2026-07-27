@@ -20,6 +20,7 @@
 #include <djv/App/SysLogTool.h>
 #include <djv/App/ViewTool.h>
 #include <djv/App/Viewport.h>
+#include <djv/App/WindowsOpenBroker.h>
 #include <djv/UI/SeparateAudioDialog.h>
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
@@ -54,8 +55,18 @@
 #include <ftk/Core/OS.h>
 #include <ftk/Core/Timer.h>
 
+#include <cstdlib>
+#include <deque>
 #include <filesystem>
+#include <mutex>
 #include <optional>
+
+#if defined(_WIN32)
+#    if !defined(NOMINMAX)
+#        define NOMINMAX
+#    endif
+#    include <windows.h>
+#endif // _WIN32
 
 namespace djv
 {
@@ -138,6 +149,110 @@ namespace djv
                 }
                 return out;
             }
+
+            bool hasNonForwardableOptions(const CmdLine& value)
+            {
+                return
+                    value.audioFileName->found() ||
+                    value.compareFileName->found() ||
+                    value.compare->found() ||
+                    value.wipeCenter->found() ||
+                    value.wipeRotation->found() ||
+                    value.speed->found() ||
+                    value.playback->found() ||
+                    value.loop->found() ||
+                    value.timeUnits->found() ||
+                    value.seek->found() ||
+                    value.inPoint->found() ||
+                    value.outPoint->found() ||
+                    value.ocioFileName->found() ||
+                    value.ocioInput->found() ||
+                    value.ocioDisplay->found() ||
+                    value.ocioView->found() ||
+                    value.ocioLook->found() ||
+                    value.lutFileName->found() ||
+                    value.lutOrder->found() ||
+#if defined(TLRENDER_USD)
+                    value.usdRenderWidth->found() ||
+                    value.usdComplexity->found() ||
+                    value.usdDrawMode->found() ||
+                    value.usdEnableLighting->found() ||
+                    value.usdSRGB->found() ||
+                    value.usdStageCacheCount->found() ||
+                    value.usdDiskCacheGB->found() ||
+#endif // TLRENDER_USD
+                    value.logFileName->found() ||
+                    value.resetSettings->found() ||
+                    value.settingsFileName->found() ||
+                    value.version->found() ||
+                    value.sysInfo->found() ||
+                    value.listCommands->found() ||
+                    value.command->found() ||
+                    value.debugLoop->found() ||
+                    value.captureManifest->found() ||
+                    value.captureShot->found() ||
+                    value.captureOutput->found();
+            }
+
+            WindowsOpenBrokerOptions getWindowsOpenBrokerOptions()
+            {
+                WindowsOpenBrokerOptions out;
+                if (const char* value = std::getenv("DJV_SINGLE_INSTANCE_ID"))
+                {
+                    if (*value)
+                    {
+                        out.applicationId = value;
+                    }
+                }
+                return out;
+            }
+
+#if defined(_WIN32)
+            struct ActivationWindowData
+            {
+                DWORD processId = 0;
+                HWND window = nullptr;
+            };
+
+            BOOL CALLBACK findActivationWindow(HWND window, LPARAM value)
+            {
+                auto data = reinterpret_cast<ActivationWindowData*>(value);
+                DWORD processId = 0;
+                GetWindowThreadProcessId(window, &processId);
+                if (processId == data->processId &&
+                    IsWindowVisible(window) &&
+                    nullptr == GetWindow(window, GW_OWNER))
+                {
+                    data->window = window;
+                    return FALSE;
+                }
+                return TRUE;
+            }
+
+            void requestCurrentProcessWindowAttention()
+            {
+                ActivationWindowData data;
+                data.processId = GetCurrentProcessId();
+                EnumWindows(findActivationWindow, reinterpret_cast<LPARAM>(&data));
+                if (!data.window)
+                {
+                    return;
+                }
+                if (IsIconic(data.window))
+                {
+                    ShowWindow(data.window, SW_RESTORE);
+                }
+                if (!SetForegroundWindow(data.window))
+                {
+                    FLASHWINFO flash = {};
+                    flash.cbSize = sizeof(flash);
+                    flash.hwnd = data.window;
+                    flash.dwFlags = FLASHW_TRAY | FLASHW_TIMERNOFG;
+                    flash.uCount = 3;
+                    FlashWindowEx(&flash);
+                }
+            }
+#endif // _WIN32
         }
 
         struct App::Private
@@ -170,6 +285,11 @@ namespace djv
             std::shared_ptr<MainWindow> mainWindow;
             std::shared_ptr<SecondaryWindow> secondaryWindow;
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
+
+            std::unique_ptr<WindowsOpenBroker> windowsOpenBroker;
+            std::mutex windowsOpenMutex;
+            std::deque<std::vector<std::string> > windowsOpenQueue;
+            std::shared_ptr<ftk::Timer> windowsOpenTimer;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
@@ -455,7 +575,17 @@ namespace djv
         {}
 
         App::~App()
-        {}
+        {
+            FTK_P();
+            if (p.windowsOpenTimer)
+            {
+                p.windowsOpenTimer->stop();
+            }
+            if (p.windowsOpenBroker)
+            {
+                p.windowsOpenBroker->stop();
+            }
+        }
 
         std::shared_ptr<App> App::create(
             const std::shared_ptr<ftk::Context>& context,
@@ -836,6 +966,67 @@ namespace djv
         {
             FTK_P();
 
+#if defined(_WIN32)
+            const WindowsOpenBrokerOptions brokerOptions =
+                getWindowsOpenBrokerOptions();
+            p.windowsOpenBroker.reset(new WindowsOpenBroker(brokerOptions));
+            const auto brokerStart = p.windowsOpenBroker->start(
+                [this](
+                    const std::vector<std::string>& paths,
+                    std::string& message)
+                {
+                    FTK_P();
+                    std::lock_guard<std::mutex> lock(p.windowsOpenMutex);
+                    if (p.windowsOpenQueue.size() >= 16)
+                    {
+                        message = "The DJV open-request queue is full.";
+                        return false;
+                    }
+                    p.windowsOpenQueue.push_back(paths);
+                    return true;
+                });
+            if (WindowsOpenBrokerStartStatus::AlreadyRunning == brokerStart.status)
+            {
+                const bool canForward =
+                    !p.cmdLine.inputs->getList().empty() &&
+                    !hasNonForwardableOptions(p.cmdLine) &&
+                    !getColorStyleCmdLineOption()->found() &&
+                    !getDisplayScaleCmdLineOption()->found();
+                if (canForward)
+                {
+                    const auto forwarded = WindowsOpenBroker::forward(
+                        p.cmdLine.inputs->getList(),
+                        std::filesystem::current_path().u8string(),
+                        brokerOptions);
+                    if (WindowsOpenForwardStatus::Forwarded == forwarded.status ||
+                        WindowsOpenForwardStatus::DeliveryUnknown == forwarded.status)
+                    {
+                        if (WindowsOpenForwardStatus::DeliveryUnknown == forwarded.status)
+                        {
+                            std::cerr <<
+                                "WARNING: The existing DJV instance may have received "
+                                "the files, but its acknowledgement was lost. "
+                                "The request will not be repeated." << std::endl;
+                        }
+                        p.windowsOpenBroker.reset();
+                        return;
+                    }
+                    std::cerr <<
+                        "WARNING: Cannot forward files to the existing DJV "
+                        "instance; opening an independent window: " <<
+                        forwarded.error << std::endl;
+                }
+                p.windowsOpenBroker.reset();
+            }
+            else if (WindowsOpenBrokerStartStatus::Started != brokerStart.status)
+            {
+                std::cerr <<
+                    "WARNING: Secure single-instance file opening is unavailable: " <<
+                    brokerStart.error << std::endl;
+                p.windowsOpenBroker.reset();
+            }
+#endif // _WIN32
+
             p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
 
             if (p.cmdLine.settingsFileName->found())
@@ -866,6 +1057,18 @@ namespace djv
             }
             
             _mainWindowInit();
+
+            if (p.windowsOpenBroker && p.windowsOpenBroker->isRunning())
+            {
+                p.windowsOpenTimer = ftk::Timer::create(_context);
+                p.windowsOpenTimer->setRepeating(true);
+                p.windowsOpenTimer->start(
+                    std::chrono::milliseconds(50),
+                    [this]
+                    {
+                        _windowsOpenPoll();
+                    });
+            }
 
             if (p.cmdLine.listCommands->found())
             {
@@ -990,6 +1193,29 @@ namespace djv
             }
 
             ftk::App::run();
+        }
+
+        void App::_windowsOpenPoll()
+        {
+            FTK_P();
+            std::vector<std::string> paths;
+            {
+                std::lock_guard<std::mutex> lock(p.windowsOpenMutex);
+                if (p.windowsOpenQueue.empty())
+                {
+                    return;
+                }
+                paths = std::move(p.windowsOpenQueue.front());
+                p.windowsOpenQueue.pop_front();
+            }
+
+            for (const auto& path : paths)
+            {
+                open(ftk::Path(path));
+            }
+#if defined(_WIN32)
+            requestCurrentProcessWindowAttention();
+#endif // _WIN32
         }
 
         void App::_modelsInit()

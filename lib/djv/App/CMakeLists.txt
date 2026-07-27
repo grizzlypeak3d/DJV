@@ -49,7 +49,8 @@ set(HEADERS
     WindowMenu.h
     WindowToolBar.h
     ViewTool.h
-    Viewport.h)
+    Viewport.h
+    WindowsOpenBroker.h)
 set(HEADERS_PRIVATE)
 
 set(SOURCE
@@ -103,7 +104,8 @@ set(SOURCE
     WindowMenu.cpp
     WindowToolBar.cpp
     ViewTool.cpp
-    Viewport.cpp)
+    Viewport.cpp
+    WindowsOpenBroker.cpp)
 
 add_library(djvApp ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 target_link_libraries(djvApp djvUI)
