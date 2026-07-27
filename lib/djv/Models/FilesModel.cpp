@@ -148,6 +148,22 @@ namespace djv
             p.layers->setIfChanged(_getLayers());
         }
 
+        void FilesModel::setPath(
+            const std::shared_ptr<FilesModelItem>& item,
+            const ftk::Path& path)
+        {
+            FTK_P();
+            const auto i = std::find(
+                p.files->get().begin(),
+                p.files->get().end(),
+                item);
+            if (i != p.files->get().end() && item->path.get() != path.get())
+            {
+                item->path = path;
+                p.files->setAlways(p.files->get());
+            }
+        }
+
         void FilesModel::close()
         {
             FTK_P();

@@ -3,8 +3,10 @@ set(HEADERS
     AudioModel.h
     ColorModel.h
     CommandsModel.h
+    FileFilter.h
     FilesModel.h
     OCIOModel.h
+    PlaylistModel.h
     RecentFilesModel.h
     SettingsModel.h
     Shortcuts.h
@@ -19,8 +21,10 @@ set(SOURCE
     AudioModel.cpp
     ColorModel.cpp
     CommandsModel.cpp
+    FileFilter.cpp
     FilesModel.cpp
     OCIOModel.cpp
+    PlaylistModel.cpp
     RecentFilesModel.cpp
     SettingsModel.cpp
     Shortcuts.cpp

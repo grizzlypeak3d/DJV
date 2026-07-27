@@ -14,6 +14,7 @@
 #include <djv/App/MagnifyTool.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/MessagesTool.h>
+#include <djv/App/PlaylistTool.h>
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/SettingsTool.h>
 #include <djv/App/StatusBar.h>
@@ -21,10 +22,13 @@
 #include <djv/App/ViewTool.h>
 #include <djv/App/Viewport.h>
 #include <djv/UI/SeparateAudioDialog.h>
+#include <djv/UI/OpenFolderFilterDialog.h>
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/FileFilter.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/PlaylistModel.h>
 #include <djv/Models/RecentFilesModel.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/CommandsModel.h>
@@ -54,6 +58,7 @@
 #include <ftk/Core/OS.h>
 #include <ftk/Core/Timer.h>
 
+#include <chrono>
 #include <filesystem>
 #include <optional>
 
@@ -153,6 +158,7 @@ namespace djv
             std::shared_ptr<ftk::SysLogModel> sysLogModel;
             std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
             std::shared_ptr<models::FilesModel> filesModel;
+            std::shared_ptr<models::PlaylistModel> playlistModel;
             std::vector<std::shared_ptr<models::FilesModelItem> > files;
             std::vector<std::shared_ptr<models::FilesModelItem> > activeFiles;
             std::shared_ptr<models::RecentFilesModel> recentFilesModel;
@@ -170,6 +176,7 @@ namespace djv
             std::shared_ptr<MainWindow> mainWindow;
             std::shared_ptr<SecondaryWindow> secondaryWindow;
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
+            std::shared_ptr<ui::OpenFolderFilterDialog> playlistFolderDialog;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
@@ -497,6 +504,11 @@ namespace djv
             return _p->filesModel;
         }
 
+        const std::shared_ptr<models::PlaylistModel>& App::getPlaylistModel() const
+        {
+            return _p->playlistModel;
+        }
+
         const std::shared_ptr<models::RecentFilesModel>& App::getRecentFilesModel() const
         {
             return _p->recentFilesModel;
@@ -564,6 +576,313 @@ namespace djv
                 {
                     _p->separateAudioDialog.reset();
                 });
+        }
+
+        void App::openMediaAsPlaylistDialog()
+        {
+            FTK_P();
+            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+            fileBrowserSystem->open(
+                p.mainWindow,
+                [this](const ftk::Path& value)
+                {
+                    createPlaylistFromMedia(value);
+                },
+                "Create OTIO Playlist");
+        }
+
+        void App::openPlaylistMediaDialog()
+        {
+            FTK_P();
+            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+            fileBrowserSystem->open(
+                p.mainWindow,
+                [this](const ftk::Path& value)
+                {
+                    addPlaylistMedia({ value });
+                },
+                "Add Media to OTIO Playlist");
+        }
+
+        void App::openPlaylistFolderDialog(bool createPlaylist)
+        {
+            FTK_P();
+            p.playlistFolderDialog =
+                ui::OpenFolderFilterDialog::create(_context);
+            p.playlistFolderDialog->setFilterPresets(
+                models::getDefaultFileFilterPresets());
+            p.playlistFolderDialog->setCallback(
+                [this, createPlaylist](
+                    const ftk::Path& folder,
+                    const std::string& filter)
+                {
+                    FTK_P();
+                    models::FileScanOptions options;
+                    auto extensions = tl::getExts(_context);
+                    extensions.erase(
+                        std::remove_if(
+                            extensions.begin(),
+                            extensions.end(),
+                            [](const std::string& value)
+                            {
+                                const std::string extension =
+                                    ftk::toLower(value);
+                                return
+                                    ".otio" == extension ||
+                                    ".otioz" == extension;
+                            }),
+                        extensions.end());
+                    const auto result = models::scanFiles(
+                        folder,
+                        filter,
+                        extensions,
+                        options);
+                    if (p.playlistFolderDialog)
+                    {
+                        p.playlistFolderDialog->close();
+                        p.playlistFolderDialog.reset();
+                    }
+                    if (!result.error.empty())
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            result.error,
+                            ftk::LogType::Error);
+                        return;
+                    }
+                    if (result.paths.empty())
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            "No matching media was found in the selected folder.",
+                            ftk::LogType::Warning);
+                        return;
+                    }
+                    if (result.truncated)
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            "The playlist folder import reached its safety limit; only the bounded result set was imported.",
+                            ftk::LogType::Warning);
+                    }
+                    if (createPlaylist)
+                    {
+                        createPlaylistFromMedia(result.paths.front());
+                        addPlaylistMedia(std::vector<ftk::Path>(
+                            result.paths.begin() + 1,
+                            result.paths.end()));
+                    }
+                    else
+                    {
+                        addPlaylistMedia(result.paths);
+                    }
+                });
+            p.playlistFolderDialog->setCloseCallback(
+                [this]
+                {
+                    _p->playlistFolderDialog.reset();
+                });
+            p.playlistFolderDialog->open(p.mainWindow);
+        }
+
+        void App::createPlaylistFromMedia(const ftk::Path& path)
+        {
+            FTK_P();
+            try
+            {
+                const std::filesystem::path scratchDirectory =
+                    std::filesystem::temp_directory_path() /
+                    "djv" /
+                    "playlists";
+                std::filesystem::create_directories(scratchDirectory);
+                const auto stamp = std::chrono::high_resolution_clock::now().
+                    time_since_epoch().count();
+                const ftk::Path scratchPath(
+                    (scratchDirectory /
+                        ftk::Format("Untitled-Playlist-{0}.otio").
+                        arg(stamp).
+                        str()).
+                    u8string());
+                std::string error;
+                if (!p.playlistModel->createFromMedia(
+                    _context,
+                    path,
+                    path,
+                    scratchPath,
+                    _getTimelineOptions(true),
+                    &error))
+                {
+                    throw std::runtime_error(error);
+                }
+                auto item = std::make_shared<models::FilesModelItem>();
+                item->path = scratchPath;
+                item->playlistDirty = true;
+                item->playlistScratch = true;
+                p.filesModel->add(item);
+                p.toolsModel->setActiveTool("OTIO Playlist");
+            }
+            catch (const std::exception& e)
+            {
+                _context->log(
+                    "djv::app::App",
+                    e.what(),
+                    ftk::LogType::Error);
+            }
+        }
+
+        void App::addPlaylistMedia(const std::vector<ftk::Path>& paths)
+        {
+            FTK_P();
+            bool changed = false;
+            for (const auto& path : paths)
+            {
+                std::string error;
+                if (p.playlistModel->addMedia(
+                    _context,
+                    path,
+                    path,
+                    _getTimelineOptions(true),
+                    &error))
+                {
+                    changed = true;
+                }
+                else if (!error.empty())
+                {
+                    _context->log(
+                        "djv::app::App",
+                        error,
+                        ftk::LogType::Error);
+                }
+            }
+            if (changed)
+            {
+                if (auto item = p.filesModel->getA())
+                {
+                    item->playlistDirty = true;
+                }
+                _refreshPlaylistTimeline();
+            }
+        }
+
+        void App::movePlaylistMedia(size_t from, size_t to)
+        {
+            FTK_P();
+            std::string error;
+            if (p.playlistModel->move(from, to, &error))
+            {
+                if (auto item = p.filesModel->getA())
+                {
+                    item->playlistDirty = true;
+                }
+                _refreshPlaylistTimeline();
+            }
+            else if (!error.empty())
+            {
+                _context->log(
+                    "djv::app::App",
+                    error,
+                    ftk::LogType::Error);
+            }
+        }
+
+        void App::removePlaylistMedia(size_t index)
+        {
+            FTK_P();
+            std::string error;
+            if (p.playlistModel->remove(index, &error))
+            {
+                if (auto item = p.filesModel->getA())
+                {
+                    item->playlistDirty = true;
+                }
+                _refreshPlaylistTimeline();
+            }
+            else if (!error.empty())
+            {
+                _context->log(
+                    "djv::app::App",
+                    error,
+                    ftk::LogType::Error);
+            }
+        }
+
+        void App::savePlaylist()
+        {
+            FTK_P();
+            if (!p.playlistModel->isAvailable())
+            {
+                return;
+            }
+            if (p.playlistModel->isScratch() ||
+                !p.playlistModel->isEditable())
+            {
+                savePlaylistAsDialog();
+                return;
+            }
+            std::string error;
+            if (p.playlistModel->save(p.playlistModel->getPath(), &error))
+            {
+                if (auto item = p.filesModel->getA())
+                {
+                    item->playlistDirty = false;
+                    item->playlistScratch = false;
+                }
+                _refreshPlaylistTimeline();
+            }
+            else if (!error.empty())
+            {
+                _context->log(
+                    "djv::app::App",
+                    error,
+                    ftk::LogType::Error);
+            }
+        }
+
+        void App::savePlaylistAsDialog()
+        {
+            FTK_P();
+            if (!p.playlistModel->isAvailable())
+            {
+                return;
+            }
+            const std::filesystem::path initialPath =
+                p.playlistModel->isScratch() ?
+                _appDocsPath() / "playlist.otio" :
+                std::filesystem::u8path(
+                    p.playlistModel->getPath().get());
+            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+            fileBrowserSystem->open(
+                p.mainWindow,
+                [this](const ftk::Path& value)
+                {
+                    FTK_P();
+                    std::string error;
+                    if (p.playlistModel->save(value, &error))
+                    {
+                        if (auto item = p.filesModel->getA())
+                        {
+                            item->playlistDirty = false;
+                            item->playlistScratch = false;
+                            p.filesModel->setPath(
+                                item,
+                                p.playlistModel->getPath());
+                        }
+                        p.recentFilesModel->addRecent(
+                            std::filesystem::u8path(
+                                p.playlistModel->getPath().get()));
+                        _refreshPlaylistTimeline();
+                    }
+                    else if (!error.empty())
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            error,
+                            ftk::LogType::Error);
+                    }
+                },
+                "Save OTIO Playlist As",
+                initialPath,
+                ftk::FileBrowserMode::Save);
         }
 
         void App::open(
@@ -1062,6 +1381,7 @@ namespace djv
             p.timeUnitsModel = models::TimeUnitsModel::create(_context, p.settings);
             
             p.filesModel = models::FilesModel::create(p.settings);
+            p.playlistModel = models::PlaylistModel::create();
 
             p.recentFilesModel = models::RecentFilesModel::create(_context, p.settings);
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
@@ -1411,6 +1731,7 @@ namespace djv
             p.toolWidgetFactory->addTool("Information", &InfoTool::create);
             p.toolWidgetFactory->addTool("Magnify", &MagnifyTool::create);
             p.toolWidgetFactory->addTool("Messages", &MessagesTool::create);
+            p.toolWidgetFactory->addTool("OTIO Playlist", &PlaylistTool::create);
             p.toolWidgetFactory->addTool("Settings", &SettingsTool::create);
             p.toolWidgetFactory->addTool("System Log", &SysLogTool::create);
             p.toolWidgetFactory->addTool("View", &ViewTool::create);
@@ -1516,18 +1837,7 @@ namespace djv
                 {
                     try
                     {
-                        tl::Options options;
-                        const models::ImageSeqSettings imageSeq = p.settingsModel->getImageSeq();
-                        options.imageSeqAudio = imageSeq.audio;
-                        options.imageSeqAudioExts = imageSeq.audioExts;
-                        options.imageSeqAudioFileName = imageSeq.audioFileName;
-                        const models::OTIOSettings otio = p.settingsModel->getOTIO();
-                        options.spatial = otio.spatial;
-                        options.compat = otio.compat;
-                        options.ioOptions = p.settingsModel->getIOOptions();
-                        options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
-                        options.readThreadCount = imageSeq.readThreadCount;
-
+                        tl::Options options = _getTimelineOptions();
                         // A range that was asked for is used as it is. One
                         // that was not is looked for on disk, so that
                         // reopening picks up frames rendered since.
@@ -1715,6 +2025,109 @@ namespace djv
 
             _layersUpdate(p.filesModel->observeLayers()->get());
             _audioUpdate();
+
+            bool playlistSet = false;
+            if (!activeFiles.empty())
+            {
+                const std::string extension =
+                    ftk::toLower(activeFiles.front()->path.getExt());
+                if (".otio" == extension || ".otioz" == extension)
+                {
+                    const auto i = std::find(
+                        p.files.begin(),
+                        p.files.end(),
+                        activeFiles.front());
+                    if (i != p.files.end())
+                    {
+                        const auto& timeline =
+                            p.timelines[i - p.files.begin()];
+                        if (timeline)
+                        {
+                            p.playlistModel->setTimeline(
+                                timeline->getTimeline(),
+                                activeFiles.front()->path,
+                                activeFiles.front()->playlistDirty,
+                                activeFiles.front()->playlistScratch);
+                            playlistSet = true;
+                        }
+                    }
+                }
+            }
+            if (!playlistSet)
+            {
+                p.playlistModel->clear();
+            }
+        }
+
+        tl::Options App::_getTimelineOptions(bool singleImages) const
+        {
+            FTK_P();
+            tl::Options options;
+            const models::ImageSeqSettings imageSeq =
+                p.settingsModel->getImageSeq();
+            options.imageSeqAudio =
+                singleImages ? tl::ImageSeqAudio::None : imageSeq.audio;
+            options.imageSeqAudioExts = imageSeq.audioExts;
+            options.imageSeqAudioFileName = imageSeq.audioFileName;
+            const models::OTIOSettings otio = p.settingsModel->getOTIO();
+            options.spatial = otio.spatial;
+            options.compat = otio.compat;
+            options.ioOptions = p.settingsModel->getIOOptions();
+            options.pathOptions.seqMaxDigits =
+                singleImages ? 0 : imageSeq.maxDigits;
+            options.readThreadCount = imageSeq.readThreadCount;
+            return options;
+        }
+
+        void App::_refreshPlaylistTimeline()
+        {
+            FTK_P();
+            if (!p.playlistModel->isAvailable() || p.activeFiles.empty())
+            {
+                return;
+            }
+            const auto item = p.activeFiles.front();
+            const auto i = std::find(p.files.begin(), p.files.end(), item);
+            if (i == p.files.end())
+            {
+                return;
+            }
+            try
+            {
+                const size_t index = i - p.files.begin();
+                p.timelines[index] = tl::Timeline::create(
+                    _context,
+                    p.playlistModel->getTimeline(),
+                    _getTimelineOptions(true));
+                item->videoLayers.clear();
+                for (const auto& video :
+                    p.timelines[index]->getIOInfo().video)
+                {
+                    item->videoLayers.push_back(video.name);
+                }
+                item->playlistDirty = p.playlistModel->isDirty();
+                item->playlistScratch = p.playlistModel->isScratch();
+
+                if (auto player = p.player->get())
+                {
+                    item->speed = player->getSpeed();
+                    item->currentTime = player->getCurrentTime();
+                    item->inOutRange = player->getInOutRange();
+                }
+                const auto activeFiles = p.activeFiles;
+                p.activeFiles.clear();
+                _activeUpdate(activeFiles);
+                auto thumbnailSystem =
+                    _context->getSystem<tl::ui::ThumbnailSystem>();
+                thumbnailSystem->clearCache();
+            }
+            catch (const std::exception& e)
+            {
+                _context->log(
+                    "djv::app::App",
+                    e.what(),
+                    ftk::LogType::Error);
+            }
         }
 
         void App::_layersUpdate(const std::vector<int>& value)
