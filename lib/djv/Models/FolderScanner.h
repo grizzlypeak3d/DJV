@@ -8,6 +8,7 @@
 #include <ftk/Core/Path.h>
 
 #include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -117,6 +118,10 @@ namespace djv
             size_t visitedEntries = 0;
             size_t visitedFiles = 0;
             size_t suppressedWarnings = 0;
+
+            //! Deterministic signature of matching file paths and metadata.
+            //! A zero value means the scan did not produce a complete result.
+            uint64_t contentSignature = 0;
         };
 
         //! Scan a directory synchronously. The caller may run this function on

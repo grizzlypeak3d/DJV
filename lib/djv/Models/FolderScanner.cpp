@@ -7,6 +7,7 @@
 #include <atomic>
 #include <cctype>
 #include <climits>
+#include <cstdint>
 #include <cstring>
 #include <cwctype>
 #include <mutex>
@@ -27,6 +28,45 @@ namespace djv
     {
         namespace
         {
+            constexpr uint64_t contentSignatureOffset = 14695981039346656037ULL;
+            constexpr uint64_t contentSignaturePrime = 1099511628211ULL;
+
+            void appendSignatureBytes(
+                uint64_t& signature,
+                const void* data,
+                size_t size)
+            {
+                const auto* bytes = static_cast<const unsigned char*>(data);
+                for (size_t i = 0; i < size; ++i)
+                {
+                    signature ^= bytes[i];
+                    signature *= contentSignaturePrime;
+                }
+            }
+
+            void appendSignatureString(
+                uint64_t& signature,
+                const std::string& value)
+            {
+                const uint64_t size = static_cast<uint64_t>(value.size());
+                appendSignatureBytes(signature, &size, sizeof(size));
+                appendSignatureBytes(signature, value.data(), value.size());
+            }
+
+            void appendFileSignature(
+                uint64_t& signature,
+                const std::string& path,
+                uint64_t size,
+                int64_t lastWriteTime)
+            {
+                appendSignatureString(signature, path);
+                appendSignatureBytes(signature, &size, sizeof(size));
+                appendSignatureBytes(
+                    signature,
+                    &lastWriteTime,
+                    sizeof(lastWriteTime));
+            }
+
 #if defined(_WIN32)
             class WinHandle
             {
@@ -509,6 +549,7 @@ namespace djv
                 const FolderScanCancellationToken& cancellation)
             {
                 FolderScanResult out;
+                uint64_t contentSignature = contentSignatureOffset;
                 CancellationBinding cancellationBinding(cancellation);
                 if (cancellation.isCancellationRequested())
                 {
@@ -623,6 +664,8 @@ namespace djv
                     {
                         std::wstring name;
                         DWORD attributes = 0;
+                        uint64_t size = 0;
+                        int64_t lastWriteTime = 0;
                     };
                     std::vector<Entry> entries;
                     std::vector<unsigned char> buffer(64 * 1024);
@@ -680,7 +723,15 @@ namespace djv
                                     stop = true;
                                     break;
                                 }
-                                entries.push_back({ name, info->FileAttributes });
+                                entries.push_back(
+                                    {
+                                        name,
+                                        info->FileAttributes,
+                                        static_cast<uint64_t>(
+                                            info->EndOfFile.QuadPart),
+                                        static_cast<int64_t>(
+                                            info->LastWriteTime.QuadPart)
+                                    });
                                 ++out.visitedEntries;
                             }
                             if (!info->NextEntryOffset || stop)
@@ -834,6 +885,11 @@ namespace djv
                             {
                                 continue;
                             }
+                            appendFileSignature(
+                                contentSignature,
+                                value,
+                                entry.size,
+                                entry.lastWriteTime);
                             out.paths.push_back(path);
                         }
                     }
@@ -864,6 +920,10 @@ namespace djv
                         options.maxWarnings);
                     out.paths.clear();
                 }
+                if (FolderScanStatus::Completed == out.status)
+                {
+                    out.contentSignature = contentSignature;
+                }
                 return out;
             }
         }
@@ -879,6 +939,7 @@ namespace djv
             return scanFolderWindows(root, filter, options, cancellation);
 #else
             FolderScanResult out;
+            uint64_t contentSignature = contentSignatureOffset;
             if (cancellation.isCancellationRequested())
             {
                 out.status = FolderScanStatus::Cancelled;
@@ -1121,6 +1182,45 @@ namespace djv
                         {
                             continue;
                         }
+                        error.clear();
+                        uint64_t fileSize = static_cast<uint64_t>(
+                            std::filesystem::file_size(entry, error));
+                        if (error)
+                        {
+                            addWarning(
+                                out,
+                                warningCode(error),
+                                entry,
+                                error,
+                                "Cannot read file size",
+                                options.maxWarnings);
+                            fileSize = 0;
+                            error.clear();
+                        }
+                        const auto lastWriteTimeValue =
+                            std::filesystem::last_write_time(entry, error);
+                        int64_t lastWriteTime = 0;
+                        if (error)
+                        {
+                            addWarning(
+                                out,
+                                warningCode(error),
+                                entry,
+                                error,
+                                "Cannot read file modification time",
+                                options.maxWarnings);
+                            error.clear();
+                        }
+                        else
+                        {
+                            lastWriteTime = static_cast<int64_t>(
+                                lastWriteTimeValue.time_since_epoch().count());
+                        }
+                        appendFileSignature(
+                            contentSignature,
+                            value,
+                            fileSize,
+                            lastWriteTime);
                         out.paths.push_back(path);
                     }
                 }
@@ -1161,6 +1261,10 @@ namespace djv
                     "Folder scan result limit reached; use a narrower filter",
                     options.maxWarnings);
                 out.paths.clear();
+            }
+            if (FolderScanStatus::Completed == out.status)
+            {
+                out.contentSignature = contentSignature;
             }
             return out;
 #endif

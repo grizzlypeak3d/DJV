@@ -135,6 +135,10 @@ namespace djv
                 DJV_FOLDER_SCAN_REQUIRE(secondResult.isSuccess());
                 DJV_FOLDER_SCAN_REQUIRE(1 == firstResult.scanResult.paths.size());
                 DJV_FOLDER_SCAN_REQUIRE(1 == secondResult.scanResult.paths.size());
+                DJV_FOLDER_SCAN_REQUIRE(
+                    0 != firstResult.scanResult.contentSignature);
+                DJV_FOLDER_SCAN_REQUIRE(
+                    0 != secondResult.scanResult.contentSignature);
                 DJV_FOLDER_SCAN_REQUIRE(!service.getState(first.id));
                 DJV_FOLDER_SCAN_REQUIRE(!service.getState(second.id));
             }

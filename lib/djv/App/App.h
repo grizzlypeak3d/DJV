@@ -217,10 +217,15 @@ namespace djv
                 bool createPlaylist,
                 bool recursive,
                 bool collapseSequences,
-                const ftk::Path& outputPath = ftk::Path());
+                const ftk::Path& outputPath = ftk::Path(),
+                bool watch = false);
+            bool _queuePlaylistFolderScan();
             void _folderScanPoll();
             void _finishPlaylistFolderScan(
                 const FolderScanServiceResult&);
+            bool _replaceWatchedPlaylist(
+                const std::vector<ftk::Path>&);
+            void _stopPlaylistFolderWatch(const std::string&);
             bool _savePlaylistTo(const ftk::Path&);
 
             FTK_PRIVATE();

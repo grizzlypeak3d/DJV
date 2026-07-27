@@ -280,6 +280,8 @@ namespace djv
                 const auto result = models::scanFolder(root, *filter, options);
                 require(models::FolderScanStatus::Completed == result.status,
                     "Folder scan did not complete");
+                require(0 != result.contentSignature,
+                    "Completed scan has no content signature");
                 require(3 == result.paths.size(), "Unexpected scan result count");
                 require(result.paths[0].get() < result.paths[1].get() &&
                     result.paths[1].get() < result.paths[2].get(),
@@ -317,6 +319,22 @@ namespace djv
 
                 const auto result2 = models::scanFolder(root, *filter, options);
                 require(result.paths == result2.paths, "Repeated scan order differs");
+                require(result.contentSignature == result2.contentSignature,
+                    "Repeated scan content signature differs");
+
+                // The collapsed sequence path stays the same, but changing a
+                // frame must still invalidate the folder signature.
+                {
+                    std::ofstream stream(
+                        root / "shot010" / "plate.0002.exr",
+                        std::ios::binary | std::ios::app);
+                    stream << "changed";
+                }
+                const auto changed = models::scanFolder(root, *filter, options);
+                require(result.paths == changed.paths,
+                    "Sequence metadata change unexpectedly changed scan paths");
+                require(result.contentSignature != changed.contentSignature,
+                    "Sequence frame metadata change was not detected");
             }
 
             void cancellationAndLimits()
@@ -332,6 +350,8 @@ namespace djv
                 require(models::FolderScanStatus::Cancelled == cancelled.status,
                     "Pre-cancelled scan did not cancel");
                 require(cancelled.paths.empty(), "Cancelled scan returned paths");
+                require(0 == cancelled.contentSignature,
+                    "Cancelled scan returned a content signature");
 
                 models::FolderScanOptions options;
                 options.maxCandidates = 0;
@@ -339,6 +359,8 @@ namespace djv
                 require(models::FolderScanStatus::CandidateLimitReached == limited.status,
                     "Candidate limit was not enforced");
                 require(limited.paths.empty(), "Candidate-limited scan exposed partial results");
+                require(0 == limited.contentSignature,
+                    "Candidate-limited scan returned a content signature");
                 require(!limited.warnings.empty() &&
                     models::FolderScanWarningCode::CandidateLimitReached ==
                         limited.warnings.back().code,
@@ -385,6 +407,8 @@ namespace djv
                     "Result limit was not enforced");
                 require(resultLimited.paths.empty(),
                     "Result-limited scan exposed partial results");
+                require(0 == resultLimited.contentSignature,
+                    "Result-limited scan returned a content signature");
             }
 
             void warningsAndInvalidRoot()

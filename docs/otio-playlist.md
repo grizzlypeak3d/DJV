@@ -29,7 +29,27 @@ djv -playlistFolder . -playlistFilter "ext:^(mov|mp4)$ -dir:(cache|proxy)"
 
 The generated playlist opens in DJV immediately. Add
 `-playlistOutput review.otio` to save it, `-playlistTopLevel` to scan only the
-folder root, or `-playlistFrames` to keep numbered image frames separate.
+folder root, or `-playlistFrames` to keep numbered image frames separate. Add
+`-playlistWatch` to keep rescanning the folder while DJV is open:
+
+```console
+djv -playlistFolder . -playlistWatch -playlistOutput review.otio
+```
+
+Watch mode performs a bounded background rescan about every two seconds. It
+rebuilds the same playlist tab only when a matching file path, size, or
+modification time changes. Changes to individual frames are detected even when
+an image sequence is collapsed to one playlist item. A saved playlist,
+including one selected with `-playlistOutput`, is rewritten after each
+successful refresh.
+
+The watched playlist is not replaced while another playlist is active; the
+pending change is applied after the watched playlist becomes active again.
+Closing the watched playlist stops its watcher. If the folder temporarily has
+no matching media, DJV keeps the last playable playlist and continues watching
+for media to return. Watch mode owns playlist membership, so manual edits may
+be replaced after the next folder change.
+
 Normal playback options can be combined with the playlist options:
 
 ```console
@@ -41,11 +61,12 @@ the playlist root and forwards additional options:
 
 ```bat
 set "DJV_EXE=C:\path\to\djv.exe"
-C:\path\to\DJV\etc\Windows\djv-playlist-folder.bat -playlistOutput review.otio
+C:\path\to\DJV\etc\Windows\djv-playlist-folder.bat -playlistWatch -playlistOutput review.otio
 ```
 
-This is a fresh, dynamic construction at launch, not a persistent filesystem
-watcher: rerun the command to include later folder changes.
+Without `-playlistWatch`, the command performs one fresh scan at launch.
+The watcher lives inside DJV and stops when DJV exits; the batch file does not
+leave a separate background process running.
 
 ## Supported editable subset
 
@@ -71,5 +92,5 @@ The model exposes the reason so the UI can communicate the editing boundary.
 serialization, image-sequence handling, read-only complex timelines, and
 filtered folder selection. `djvFileFilterTest` and
 `djvFolderScanServiceTest` cover bounded parsing, root confinement,
-deterministic traversal, sequence collapsing, cancellation, queue saturation,
-and atomic limit failures.
+deterministic traversal, metadata change detection before sequence collapsing,
+cancellation, queue saturation, and atomic limit failures.
