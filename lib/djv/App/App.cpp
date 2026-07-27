@@ -59,6 +59,7 @@
 #include <ftk/Core/OS.h>
 #include <ftk/Core/Timer.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
@@ -152,6 +153,19 @@ namespace djv
                 }
                 return out;
             }
+
+            void deduplicateFolderScanExtensions(
+                std::vector<std::string>& values)
+            {
+                for (auto& value : values)
+                {
+                    value = ftk::toLower(value);
+                }
+                std::sort(values.begin(), values.end());
+                values.erase(
+                    std::unique(values.begin(), values.end()),
+                    values.end());
+            }
         }
 
         struct App::Private
@@ -201,6 +215,8 @@ namespace djv
             uint64_t folderScanWatchSignature = 0;
             std::chrono::steady_clock::time_point folderScanWatchNext;
             std::weak_ptr<models::FilesModelItem> folderScanWatchItem;
+            std::vector<ftk::Path> folderScanPendingPaths;
+            uint64_t folderScanPendingSignature = 0;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
@@ -2163,6 +2179,10 @@ namespace djv
                             ".otioz" == extension;
                     }),
                 options.fileExtensions.end());
+            deduplicateFolderScanExtensions(
+                options.sequenceExtensions);
+            deduplicateFolderScanExtensions(
+                options.fileExtensions);
             options.maxCandidates = 250000;
             options.maxDirectoryEntries = 100000;
             options.maxDirectories = 50000;
@@ -2185,6 +2205,8 @@ namespace djv
             p.folderScanWatchPlaylistCreated = false;
             p.folderScanWatchSignature = 0;
             p.folderScanWatchItem.reset();
+            p.folderScanPendingPaths.clear();
+            p.folderScanPendingSignature = 0;
             if (!_queuePlaylistFolderScan())
             {
                 p.folderScanWatch = false;
@@ -2243,6 +2265,11 @@ namespace djv
             FTK_P();
             if (!p.folderScanRequest)
             {
+                if (!p.folderScanPendingPaths.empty())
+                {
+                    _applyPendingPlaylistFolderScan();
+                    return;
+                }
                 if (!p.folderScanWatch)
                 {
                     return;
@@ -2304,7 +2331,9 @@ namespace djv
                     std::chrono::steady_clock::now() +
                     std::chrono::seconds(2);
             }
-            else if (p.folderScanTimer)
+            else if (
+                p.folderScanPendingPaths.empty() &&
+                p.folderScanTimer)
             {
                 p.folderScanTimer->stop();
             }
@@ -2438,26 +2467,23 @@ namespace djv
                     createPlaylistFromMedia(
                         result.scanResult.paths.front());
                     const auto item = p.filesModel->getA();
-                    if (!p.playlistModel->isAvailable() ||
-                        !item ||
-                        item == previousItem)
+                    if (!item || item == previousItem)
                     {
                         return;
                     }
-                    if (result.scanResult.paths.size() > 1)
-                    {
-                        addPlaylistMedia(std::vector<ftk::Path>(
-                            result.scanResult.paths.begin() + 1,
-                            result.scanResult.paths.end()));
-                    }
-                    applied =
-                        p.playlistModel->getItems().size() ==
-                        result.scanResult.paths.size();
+                    p.folderScanWatchItem = item;
+                    p.folderScanPendingPaths =
+                        result.scanResult.paths;
+                    p.folderScanPendingSignature =
+                        result.scanResult.contentSignature;
                     if (p.folderScanWatch)
                     {
-                        p.folderScanWatchItem = item;
                         p.folderScanWatchPlaylistCreated = true;
                     }
+                    // FilesModel loads and activates the new scratch timeline
+                    // asynchronously. Finish population and saving only after
+                    // that exact item is the active PlaylistModel.
+                    return;
                 }
                 else
                 {
@@ -2482,6 +2508,73 @@ namespace djv
                 p.playlistFolderDialog->close();
                 p.playlistFolderDialog.reset();
             }
+        }
+
+        bool App::_applyPendingPlaylistFolderScan()
+        {
+            FTK_P();
+            if (p.folderScanPendingPaths.empty())
+            {
+                return true;
+            }
+            const auto item = p.folderScanWatchItem.lock();
+            if (!item ||
+                p.files.end() ==
+                    std::find(p.files.begin(), p.files.end(), item))
+            {
+                p.folderScanPendingPaths.clear();
+                p.folderScanPendingSignature = 0;
+                _stopPlaylistFolderWatch(
+                    "Folder playlist initialization stopped because its "
+                    "playlist was closed.");
+                return false;
+            }
+            if (p.filesModel->getA() != item ||
+                !p.playlistModel->isAvailable())
+            {
+                return false;
+            }
+
+            const bool applied = _replaceWatchedPlaylist(
+                p.folderScanPendingPaths);
+            if (!applied)
+            {
+                p.folderScanPendingPaths.clear();
+                p.folderScanPendingSignature = 0;
+                if (p.folderScanWatch)
+                {
+                    p.folderScanWatchNext =
+                        std::chrono::steady_clock::now() +
+                        std::chrono::seconds(2);
+                }
+                else if (p.folderScanTimer)
+                {
+                    p.folderScanTimer->stop();
+                }
+                return false;
+            }
+            p.folderScanPendingPaths.clear();
+            if (p.folderScanWatch)
+            {
+                p.folderScanWatchSignature =
+                    p.folderScanPendingSignature;
+                p.folderScanWatchHasSignature = true;
+                p.folderScanWatchNext =
+                    std::chrono::steady_clock::now() +
+                    std::chrono::seconds(2);
+            }
+            p.folderScanPendingSignature = 0;
+            if (p.playlistFolderDialog)
+            {
+                p.playlistFolderDialog->close();
+                p.playlistFolderDialog.reset();
+            }
+            if (!p.folderScanWatch &&
+                p.folderScanTimer)
+            {
+                p.folderScanTimer->stop();
+            }
+            return true;
         }
 
         bool App::_replaceWatchedPlaylist(
@@ -2562,6 +2655,8 @@ namespace djv
             p.folderScanWatchHasSignature = false;
             p.folderScanWatchPlaylistCreated = false;
             p.folderScanWatchItem.reset();
+            p.folderScanPendingPaths.clear();
+            p.folderScanPendingSignature = 0;
             if (p.folderScanTimer)
             {
                 p.folderScanTimer->stop();

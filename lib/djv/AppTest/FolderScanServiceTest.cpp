@@ -299,6 +299,23 @@ namespace djv
                 DJV_FOLDER_SCAN_REQUIRE(
                     app::FolderScanServiceError::InvalidRequest == unboundedResult.error);
 
+                models::FolderScanOptions runtimeExtensions;
+                for (size_t i = 0; i < 512; ++i)
+                {
+                    runtimeExtensions.fileExtensions.push_back(
+                        ".runtime" + std::to_string(i));
+                }
+                const auto runtimeExtensionsResult = waitFor(
+                    service.request(root.path(), filter, runtimeExtensions));
+                DJV_FOLDER_SCAN_REQUIRE(runtimeExtensionsResult.isSuccess());
+
+                runtimeExtensions.fileExtensions.resize(4097, ".overflow");
+                const auto excessiveExtensionsResult = waitFor(
+                    service.request(root.path(), filter, runtimeExtensions));
+                DJV_FOLDER_SCAN_REQUIRE(
+                    app::FolderScanServiceError::InvalidRequest ==
+                        excessiveExtensionsResult.error);
+
                 models::FolderScanOptions resultLimit;
                 resultLimit.maxResults = 2;
                 const auto limited = waitFor(

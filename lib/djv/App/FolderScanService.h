@@ -114,7 +114,7 @@ namespace djv
             size_t maxResultsPerRequest = 5000;
             size_t maxDepthPerRequest = 128;
             size_t maxWarningsPerRequest = 1000;
-            size_t maxExtensionsPerRequest = 256;
+            size_t maxExtensionsPerRequest = 4096;
             size_t maxExtensionLength = 32;
             size_t maxSequenceDigits = 18;
 

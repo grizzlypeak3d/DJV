@@ -223,6 +223,7 @@ namespace djv
             void _folderScanPoll();
             void _finishPlaylistFolderScan(
                 const FolderScanServiceResult&);
+            bool _applyPendingPlaylistFolderScan();
             bool _replaceWatchedPlaylist(
                 const std::vector<ftk::Path>&);
             void _stopPlaylistFolderWatch(const std::string&);
