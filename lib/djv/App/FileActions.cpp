@@ -18,6 +18,7 @@ namespace djv
         {
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > metadataObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
@@ -266,6 +267,23 @@ namespace djv
                 {
                     _actions["NextLayer"]->setEnabled(value ? value->videoLayers.size() > 1 : false);
                     _actions["PrevLayer"]->setEnabled(value ? value->videoLayers.size() > 1 : false);
+                });
+
+            p.metadataObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                app->getFilesModel()->observeMetadata(),
+                [this, appWeak](const std::shared_ptr<models::FilesModelItem>& value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        const auto& current = app->getFilesModel()->getA();
+                        if (value == current)
+                        {
+                            const bool enabled =
+                                current && current->videoLayers.size() > 1;
+                            _actions["NextLayer"]->setEnabled(enabled);
+                            _actions["PrevLayer"]->setEnabled(enabled);
+                        }
+                    }
                 });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(

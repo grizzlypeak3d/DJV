@@ -37,6 +37,7 @@ set(HEADERS
     SysLogTool.h
     TabBar.h
     TimelineActions.h
+    TimelineLoadService.h
     TimelineMenu.h
     ToolsActions.h
     ToolsMenu.h
@@ -91,6 +92,7 @@ set(SOURCE
     SysLogTool.cpp
     TabBar.cpp
     TimelineActions.cpp
+    TimelineLoadService.cpp
     TimelineMenu.cpp
     ToolsActions.cpp
     ToolsMenu.cpp

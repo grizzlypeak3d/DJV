@@ -173,6 +173,8 @@ namespace djv
             // carried over as they are, since both are in timeline time.
             void _reload(bool restructured);
             void _reloadUpdate(const std::shared_ptr<models::FilesModelItem>&);
+            void _timelineLoadsPoll();
+            void _applyInputOptions();
             void _layersUpdate(const std::vector<int>&);
             void _audioUpdate();
 

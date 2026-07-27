@@ -15,6 +15,7 @@ namespace djv
             std::shared_ptr<ftk::Settings> settings;
 
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > files;
+            std::shared_ptr<ftk::Observable<std::shared_ptr<FilesModelItem> > > metadata;
             std::shared_ptr<ftk::Observable<std::shared_ptr<FilesModelItem> > > a;
             std::shared_ptr<ftk::Observable<int> > aIndex;
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > b;
@@ -33,6 +34,7 @@ namespace djv
             p.settings = settings;
 
             p.files = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
+            p.metadata = ftk::Observable<std::shared_ptr<FilesModelItem> >::create();
             p.a = ftk::Observable<std::shared_ptr<FilesModelItem> >::create();
             p.reload = ftk::Observable<std::shared_ptr<FilesModelItem> >::create();
             p.aIndex = ftk::Observable<int>::create();
@@ -83,6 +85,34 @@ namespace djv
         std::shared_ptr<ftk::IObservableList<std::shared_ptr<FilesModelItem> > > FilesModel::observeFiles() const
         {
             return _p->files;
+        }
+
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > >
+            FilesModel::observeMetadata() const
+        {
+            return _p->metadata;
+        }
+
+        void FilesModel::touchMetadata(
+            const std::shared_ptr<FilesModelItem>& value)
+        {
+            FTK_P();
+            const int index = _getIndex(value);
+            if (-1 != index)
+            {
+                if (value->videoLayers.empty())
+                {
+                    value->videoLayer = 0;
+                }
+                else
+                {
+                    value->videoLayer = (std::min)(
+                        value->videoLayer,
+                        value->videoLayers.size() - 1);
+                }
+                p.layers->setIfChanged(_getLayers());
+            }
+            p.metadata->setAlways(value);
         }
 
         const std::shared_ptr<FilesModelItem>& FilesModel::getA() const
@@ -164,6 +194,7 @@ namespace djv
             if (index >= 0 && index < static_cast<int>(files.size()))
             {
                 const int aPrevIndex = _getIndex(p.a->get());
+                const auto removed = files[index];
 
                 files.erase(files.begin() + index);
                 p.files->setIfChanged(files);
@@ -195,6 +226,11 @@ namespace djv
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
 
+                if (p.metadata->get() == removed)
+                {
+                    p.metadata->setIfChanged(nullptr);
+                }
+
                 if (files.size() <= 1)
                 {
                     auto compareOptions = p.compareOptions->get();
@@ -218,6 +254,7 @@ namespace djv
 
             p.active->setIfChanged(_getActive());
             p.layers->setIfChanged(_getLayers());
+            p.metadata->setIfChanged(nullptr);
         }
 
         void FilesModel::setA(int index)
