@@ -39,6 +39,8 @@ namespace djv
     //! DJV Application
     namespace app
     {
+        struct FolderScanServiceResult;
+
         class MainWindow;
         class StatusBar;
         class ToolWidgetFactory;
@@ -209,6 +211,17 @@ namespace djv
             void _audioUpdate();
             tl::Options _getTimelineOptions(bool singleImages = false) const;
             void _refreshPlaylistTimeline();
+            void _startPlaylistFolderScan(
+                const ftk::Path&,
+                const std::string& filter,
+                bool createPlaylist,
+                bool recursive,
+                bool collapseSequences,
+                const ftk::Path& outputPath = ftk::Path());
+            void _folderScanPoll();
+            void _finishPlaylistFolderScan(
+                const FolderScanServiceResult&);
+            bool _savePlaylistTo(const ftk::Path&);
 
             FTK_PRIVATE();
         };

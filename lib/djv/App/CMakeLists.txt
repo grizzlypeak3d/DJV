@@ -19,6 +19,7 @@ set(HEADERS
     FileMenu.h
     FileToolBar.h
     FilesTool.h
+    FolderScanService.h
     FrameActions.h
     FrameMenu.h
     HelpActions.h
@@ -74,6 +75,7 @@ set(SOURCE
     FileMenu.cpp
     FileToolBar.cpp
     FilesTool.cpp
+    FolderScanService.cpp
     FrameActions.cpp
     FrameMenu.cpp
     HelpActions.cpp

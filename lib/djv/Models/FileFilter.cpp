@@ -3,12 +3,12 @@
 
 #include <djv/Models/FileFilter.h>
 
-#include <ftk/Core/String.h>
-
 #include <algorithm>
-#include <filesystem>
+#include <cctype>
+#include <locale>
 #include <regex>
-#include <set>
+#include <stdexcept>
+#include <utility>
 
 namespace djv
 {
@@ -16,26 +16,186 @@ namespace djv
     {
         namespace
         {
-            bool regexSearch(const std::string& text, const std::string& pattern)
+            std::string toLowerASCII(const std::string& value)
             {
-                try
-                {
-                    return std::regex_search(
-                        text,
-                        std::regex(pattern, std::regex_constants::icase));
-                }
-                catch (const std::regex_error&)
-                {
-                    return ftk::contains(text, pattern, ftk::CaseCompare::Insensitive);
-                }
+                std::string out = value;
+                std::transform(
+                    out.begin(),
+                    out.end(),
+                    out.begin(),
+                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                return out;
             }
 
-            std::string getFilterText(const ftk::Path& path, FileFilterTarget target)
+            bool isSpace(char value)
+            {
+                return 0 != std::isspace(static_cast<unsigned char>(value));
+            }
+
+            std::optional<FileFilterTarget> parseTarget(const std::string& value)
+            {
+                const std::string target = toLowerASCII(value);
+                if ("path" == target)
+                {
+                    return FileFilterTarget::Path;
+                }
+                if ("name" == target || "file" == target)
+                {
+                    return FileFilterTarget::Name;
+                }
+                if ("ext" == target || "extension" == target)
+                {
+                    return FileFilterTarget::Extension;
+                }
+                if ("dir" == target || "folder" == target)
+                {
+                    return FileFilterTarget::Directory;
+                }
+                return std::nullopt;
+            }
+
+            std::optional<std::string> validateRegexSafety(const std::string& pattern)
+            {
+                bool escaped = false;
+                bool characterClass = false;
+                size_t unboundedQuantifiers = 0;
+                size_t quantifiers = 0;
+                size_t alternations = 0;
+                for (size_t i = 0; i < pattern.size(); ++i)
+                {
+                    const char value = pattern[i];
+                    if (escaped)
+                    {
+                        if (value >= '1' && value <= '9')
+                        {
+                            return "Backreferences are not supported";
+                        }
+                        escaped = false;
+                        continue;
+                    }
+                    if ('\\' == value)
+                    {
+                        escaped = true;
+                        continue;
+                    }
+                    if (characterClass)
+                    {
+                        characterClass = ']' != value;
+                        continue;
+                    }
+                    if ('[' == value)
+                    {
+                        characterClass = true;
+                        continue;
+                    }
+                    if ('(' == value && i + 1 < pattern.size() && '?' == pattern[i + 1])
+                    {
+                        return "Lookaround and special groups are not supported";
+                    }
+                    if ('|' == value && ++alternations > 16)
+                    {
+                        return "Too many alternatives";
+                    }
+                    if (')' == value && i + 1 < pattern.size())
+                    {
+                        const char next = pattern[i + 1];
+                        if ('*' == next || '+' == next || '?' == next || '{' == next)
+                        {
+                            return "Quantified groups are not supported";
+                        }
+                    }
+                    if ('*' == value || '+' == value)
+                    {
+                        if (++quantifiers > 16)
+                        {
+                            return "Too many quantifiers";
+                        }
+                        ++unboundedQuantifiers;
+                        if (unboundedQuantifiers > 2)
+                        {
+                            return "Too many unbounded quantifiers";
+                        }
+                        if (i > 0 &&
+                            ('*' == pattern[i - 1] || '+' == pattern[i - 1] ||
+                                '?' == pattern[i - 1] || '}' == pattern[i - 1]))
+                        {
+                            return "Nested quantifiers are not supported";
+                        }
+                    }
+                    if ('?' == value)
+                    {
+                        if (++quantifiers > 16)
+                        {
+                            return "Too many quantifiers";
+                        }
+                        if (i > 0 &&
+                            ('*' == pattern[i - 1] || '+' == pattern[i - 1] ||
+                                '?' == pattern[i - 1] || '}' == pattern[i - 1]))
+                        {
+                            return "Nested quantifiers are not supported";
+                        }
+                    }
+                    if ('{' == value)
+                    {
+                        if (++quantifiers > 16)
+                        {
+                            return "Too many quantifiers";
+                        }
+                        const size_t close = pattern.find('}', i + 1);
+                        if (std::string::npos == close)
+                        {
+                            continue;
+                        }
+                        const std::string repetition = pattern.substr(i + 1, close - i - 1);
+                        const size_t comma = repetition.find(',');
+                        const std::string maximum = std::string::npos == comma ?
+                            repetition : repetition.substr(comma + 1);
+                        if (std::string::npos != comma && maximum.empty())
+                        {
+                            ++unboundedQuantifiers;
+                            if (unboundedQuantifiers > 2)
+                            {
+                                return "Too many unbounded quantifiers";
+                            }
+                        }
+                        else if (!maximum.empty())
+                        {
+                            try
+                            {
+                                if (std::stoull(maximum) > CompiledFileFilter::maxCandidateLength)
+                                {
+                                    return "Repetition exceeds the candidate length limit";
+                                }
+                            }
+                            catch (const std::out_of_range&)
+                            {
+                                return "Repetition exceeds the candidate length limit";
+                            }
+                            catch (const std::invalid_argument&)
+                            {
+                                // std::regex reports malformed repetitions precisely.
+                            }
+                        }
+                    }
+                }
+                return std::nullopt;
+            }
+
+            std::string getText(const ftk::Path& path, FileFilterTarget target)
             {
                 switch (target)
                 {
                 case FileFilterTarget::Name:
                     return path.getFileName();
+                case FileFilterTarget::Extension:
+                {
+                    std::string out = path.getExt();
+                    if (!out.empty() && '.' == out.front())
+                    {
+                        out.erase(out.begin());
+                    }
+                    return out;
+                }
                 case FileFilterTarget::Directory:
                     return path.getDir();
                 case FileFilterTarget::Path:
@@ -43,86 +203,94 @@ namespace djv
                     return path.get();
                 }
             }
-        }
 
-        std::vector<std::string> getDefaultFileFilterPresets()
-        {
-            return
+            bool matchDirectoryComponents(
+                const std::string& value,
+                const std::regex& regex)
             {
-                "name:(exr|dpx|mov|mp4)$",
-                "-dir:(cache|tmp|temp)",
-                "-name:(proxy|thumb|thumbnail)",
-                "dir:(shot010|shot020)",
-                "name:beauty -name:proxy"
-            };
-        }
-
-        std::vector<FileFilterTerm> parseFileFilter(const std::string& text)
-        {
-            std::vector<FileFilterTerm> out;
-            for (auto token : ftk::split(text, { ' ', '\t' }))
-            {
-                if (token.empty())
-                    continue;
-
-                FileFilterTerm term;
-                if ('-' == token.front() || '!' == token.front())
+                size_t begin = 0;
+                while (begin < value.size())
                 {
-                    term.include = false;
-                    token.erase(token.begin());
-                }
-                else if ('+' == token.front())
-                {
-                    token.erase(token.begin());
-                }
-                if (token.empty())
-                    continue;
-
-                const size_t colon = token.find(':');
-                if (colon != std::string::npos)
-                {
-                    const std::string key = ftk::toLower(token.substr(0, colon));
-                    if ("name" == key || "file" == key)
+                    while (begin < value.size() &&
+                        ('/' == value[begin] || '\\' == value[begin]))
                     {
-                        term.target = FileFilterTarget::Name;
-                        token = token.substr(colon + 1);
+                        ++begin;
                     }
-                    else if ("dir" == key || "folder" == key)
+                    size_t end = begin;
+                    while (end < value.size() &&
+                        '/' != value[end] && '\\' != value[end])
                     {
-                        term.target = FileFilterTarget::Directory;
-                        token = token.substr(colon + 1);
+                        ++end;
                     }
-                    else if ("path" == key)
+                    if (end > begin && std::regex_search(
+                        value.begin() + begin,
+                        value.begin() + end,
+                        regex))
                     {
-                        term.target = FileFilterTarget::Path;
-                        token = token.substr(colon + 1);
+                        return true;
                     }
+                    begin = end;
                 }
-                if (!token.empty())
-                {
-                    term.pattern = token;
-                    out.push_back(term);
-                }
+                return false;
             }
-            return out;
+
+            bool matchesTerm(
+                const ftk::Path& path,
+                FileFilterTarget target,
+                const std::regex& regex)
+            {
+                return FileFilterTarget::Directory == target ?
+                    matchDirectoryComponents(path.getDir(), regex) :
+                    std::regex_search(getText(path, target), regex);
+            }
+
+            FileFilterCompileResult makeError(
+                FileFilterErrorCode code,
+                size_t offset,
+                const std::string& token,
+                const std::string& message)
+            {
+                FileFilterCompileResult out;
+                out.error = FileFilterError{ code, offset, token, message };
+                return out;
+            }
         }
 
-        bool matchFileFilter(const ftk::Path& path, const std::string& text)
+        struct CompiledFileFilter::Private
         {
-            const auto terms = parseFileFilter(text);
-            if (terms.empty())
-                return true;
-
-            for (const auto& term : terms)
+            struct Term
             {
-                const bool match = regexSearch(
-                    getFilterText(path, term.target),
-                    term.pattern);
-                if (term.include && !match)
-                {
-                    return false;
-                }
-                if (!term.include && match)
+                FileFilterTerm info;
+                std::regex regex;
+            };
+
+            std::string expression;
+            std::vector<FileFilterTerm> termInfo;
+            std::vector<Term> terms;
+        };
+
+        FileFilterCompileResult::operator bool() const
+        {
+            return static_cast<bool>(filter) && !error.has_value();
+        }
+
+        CompiledFileFilter::CompiledFileFilter() :
+            _p(new Private)
+        {}
+
+        CompiledFileFilter::~CompiledFileFilter()
+        {}
+
+        bool CompiledFileFilter::matches(const ftk::Path& path) const
+        {
+            if (path.get().size() > maxCandidateLength)
+            {
+                return false;
+            }
+            for (const auto& term : _p->terms)
+            {
+                const bool match = matchesTerm(path, term.info.target, term.regex);
+                if ((term.info.include && !match) || (!term.info.include && match))
                 {
                     return false;
                 }
@@ -130,15 +298,17 @@ namespace djv
             return true;
         }
 
-        bool pruneDirectoryByFileFilter(const ftk::Path& path, const std::string& text)
+        bool CompiledFileFilter::excludesDirectory(const ftk::Path& path) const
         {
-            const auto terms = parseFileFilter(text);
-            for (const auto& term : terms)
+            if (path.get().size() > maxCandidateLength)
             {
-                if (!term.include &&
-                    (FileFilterTarget::Directory == term.target ||
-                     FileFilterTarget::Path == term.target) &&
-                    regexSearch(path.get(), term.pattern))
+                return false;
+            }
+            for (const auto& term : _p->terms)
+            {
+                if (!term.info.include &&
+                    FileFilterTarget::Directory == term.info.target &&
+                    matchDirectoryComponents(path.get(), term.regex))
                 {
                     return true;
                 }
@@ -146,90 +316,158 @@ namespace djv
             return false;
         }
 
-        FileScanResult scanFiles(
-            const ftk::Path& folder,
-            const std::string& filter,
-            const std::vector<std::string>& extensions,
-            const FileScanOptions& options)
+        bool CompiledFileFilter::isEmpty() const
         {
-            FileScanResult out;
-            const std::filesystem::path root =
-                std::filesystem::u8path(folder.get());
-            std::error_code errorCode;
-            if (!std::filesystem::is_directory(root, errorCode))
+            return _p->terms.empty();
+        }
+
+        const std::string& CompiledFileFilter::getExpression() const
+        {
+            return _p->expression;
+        }
+
+        const std::vector<FileFilterTerm>& CompiledFileFilter::getTerms() const
+        {
+            return _p->termInfo;
+        }
+
+        FileFilterCompileResult compileFileFilter(const std::string& expression)
+        {
+            if (expression.size() > CompiledFileFilter::maxExpressionLength)
             {
-                out.error = "The selected playlist import folder is not available.";
-                return out;
+                return makeError(
+                    FileFilterErrorCode::ExpressionTooLong,
+                    CompiledFileFilter::maxExpressionLength,
+                    std::string(),
+                    "File filter expression is too long");
             }
 
-            std::set<std::string> normalizedExtensions;
-            for (auto extension : extensions)
+            auto filter = std::shared_ptr<CompiledFileFilter>(new CompiledFileFilter);
+            filter->_p->expression = expression;
+            size_t position = 0;
+            while (position < expression.size())
             {
-                extension = ftk::toLower(extension);
-                if (!extension.empty() && extension.front() != '.')
+                while (position < expression.size() && isSpace(expression[position]))
                 {
-                    extension.insert(extension.begin(), '.');
+                    ++position;
                 }
-                normalizedExtensions.insert(extension);
-            }
-
-            const auto directoryOptions =
-                std::filesystem::directory_options::skip_permission_denied;
-            std::filesystem::recursive_directory_iterator i(
-                root,
-                directoryOptions,
-                errorCode);
-            const std::filesystem::recursive_directory_iterator end;
-            while (i != end)
-            {
-                if (errorCode)
+                if (position >= expression.size())
                 {
-                    errorCode.clear();
-                    i.increment(errorCode);
-                    continue;
-                }
-                if (out.entriesVisited >= options.maxEntries ||
-                    out.paths.size() >= options.maxResults)
-                {
-                    out.truncated = true;
                     break;
                 }
-                ++out.entriesVisited;
 
-                const auto& entry = *i;
-                const ftk::Path path(entry.path().u8string());
-                if (entry.is_directory(errorCode))
+                const size_t tokenOffset = position;
+                while (position < expression.size() && !isSpace(expression[position]))
                 {
-                    const bool isSymlink = entry.is_symlink(errorCode);
-                    if (isSymlink ||
-                        i.depth() >= static_cast<int>(options.maxDepth) ||
-                        pruneDirectoryByFileFilter(path, filter))
-                    {
-                        i.disable_recursion_pending();
-                    }
+                    ++position;
                 }
-                else if (entry.is_regular_file(errorCode))
+                const std::string token = expression.substr(tokenOffset, position - tokenOffset);
+                if (filter->_p->terms.size() >= CompiledFileFilter::maxTermCount)
                 {
-                    const std::string extension =
-                        ftk::toLower(entry.path().extension().u8string());
-                    if ((normalizedExtensions.empty() ||
-                         normalizedExtensions.count(extension)) &&
-                        matchFileFilter(path, filter))
-                    {
-                        out.paths.push_back(path);
-                    }
+                    return makeError(
+                        FileFilterErrorCode::TooManyTerms,
+                        tokenOffset,
+                        token,
+                        "File filter contains too many terms");
                 }
-                errorCode.clear();
-                i.increment(errorCode);
+
+                FileFilterTerm info;
+                size_t patternOffset = 0;
+                if ('+' == token.front() || '-' == token.front() || '!' == token.front())
+                {
+                    info.include = '+' == token.front();
+                    patternOffset = 1;
+                }
+                if (patternOffset >= token.size())
+                {
+                    return makeError(
+                        FileFilterErrorCode::EmptyPattern,
+                        tokenOffset + patternOffset,
+                        token,
+                        "File filter term has no pattern");
+                }
+
+                const size_t colon = token.find(':', patternOffset);
+                if (std::string::npos != colon)
+                {
+                    const auto target = parseTarget(
+                        token.substr(patternOffset, colon - patternOffset));
+                    if (!target.has_value())
+                    {
+                        return makeError(
+                            FileFilterErrorCode::UnknownTarget,
+                            tokenOffset + patternOffset,
+                            token,
+                            "Unknown file filter target");
+                    }
+                    info.target = target.value();
+                    patternOffset = colon + 1;
+                }
+
+                if (patternOffset >= token.size())
+                {
+                    return makeError(
+                        FileFilterErrorCode::EmptyPattern,
+                        tokenOffset + patternOffset,
+                        token,
+                        "File filter term has no pattern");
+                }
+                info.pattern = token.substr(patternOffset);
+                if (info.pattern.size() > CompiledFileFilter::maxPatternLength)
+                {
+                    return makeError(
+                        FileFilterErrorCode::PatternTooLong,
+                        tokenOffset + patternOffset,
+                        token,
+                        "File filter pattern is too long");
+                }
+                if (const auto unsafe = validateRegexSafety(info.pattern))
+                {
+                    return makeError(
+                        FileFilterErrorCode::UnsafeRegularExpression,
+                        tokenOffset + patternOffset,
+                        token,
+                        unsafe.value());
+                }
+
+                try
+                {
+                    CompiledFileFilter::Private::Term term;
+                    term.info = info;
+                    term.regex.imbue(std::locale::classic());
+                    term.regex.assign(
+                        info.pattern,
+                        std::regex_constants::ECMAScript |
+                            std::regex_constants::icase |
+                            std::regex_constants::optimize);
+                    filter->_p->termInfo.push_back(info);
+                    filter->_p->terms.push_back(std::move(term));
+                }
+                catch (const std::regex_error& e)
+                {
+                    return makeError(
+                        FileFilterErrorCode::InvalidRegularExpression,
+                        tokenOffset + patternOffset,
+                        token,
+                        std::string("Invalid regular expression: ") + e.what());
+                }
             }
-            std::sort(
-                out.paths.begin(),
-                out.paths.end(),
-                [](const ftk::Path& a, const ftk::Path& b)
-                {
-                    return a.get() < b.get();
-                });
+
+            FileFilterCompileResult out;
+            out.filter = std::move(filter);
             return out;
+        }
+
+        std::vector<std::string> getDefaultFileFilterPresets()
+        {
+            return
+            {
+                "ext:^(mov|mp4|m4v|mxf|avi|mkv|webm)$",
+                "ext:^(exr|dpx|tif|tiff|png|jpg|jpeg)$",
+                "-dir:^(cache|tmp|temp|proxy)$",
+                "-name:(proxy|thumb|thumbnail)",
+                "name:beauty -name:proxy"
+            };
         }
     }
 }

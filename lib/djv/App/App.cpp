@@ -10,6 +10,7 @@
 #include <djv/App/DiagTool.h>
 #include <djv/App/ExportTool.h>
 #include <djv/App/FilesTool.h>
+#include <djv/App/FolderScanService.h>
 #include <djv/App/InfoTool.h>
 #include <djv/App/MagnifyTool.h>
 #include <djv/App/MainWindow.h>
@@ -60,6 +61,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <future>
 #include <optional>
 
 namespace djv
@@ -82,6 +84,11 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > seek;
             std::shared_ptr<ftk::CmdLineOption<std::string> > inPoint;
             std::shared_ptr<ftk::CmdLineOption<std::string> > outPoint;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > playlistFolder;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > playlistFilter;
+            std::shared_ptr<ftk::CmdLineFlag> playlistTopLevel;
+            std::shared_ptr<ftk::CmdLineFlag> playlistFrames;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > playlistOutput;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioFileName;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioInput;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioDisplay;
@@ -177,6 +184,12 @@ namespace djv
             std::shared_ptr<SecondaryWindow> secondaryWindow;
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
             std::shared_ptr<ui::OpenFolderFilterDialog> playlistFolderDialog;
+
+            std::unique_ptr<FolderScanService> folderScanService;
+            FolderScanServiceRequest folderScanRequest;
+            std::shared_ptr<ftk::Timer> folderScanTimer;
+            bool folderScanCreatePlaylist = true;
+            ftk::Path folderScanOutputPath;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
@@ -287,6 +300,29 @@ namespace djv
                 { "-outPoint", "-out" },
                 "Set the out point.",
                 "Playback");
+            p.cmdLine.playlistFolder =
+                ftk::CmdLineOption<std::string>::create(
+                    { "-playlistFolder" },
+                    "Create an OTIO playlist from matching media below a folder.",
+                    "OTIO Playlist");
+            p.cmdLine.playlistFilter =
+                ftk::CmdLineOption<std::string>::create(
+                    { "-playlistFilter" },
+                    "Filter expression for -playlistFolder.",
+                    "OTIO Playlist");
+            p.cmdLine.playlistTopLevel = ftk::CmdLineFlag::create(
+                { "-playlistTopLevel" },
+                "Do not recurse into subfolders for -playlistFolder.",
+                "OTIO Playlist");
+            p.cmdLine.playlistFrames = ftk::CmdLineFlag::create(
+                { "-playlistFrames" },
+                "Keep numbered image frames separate instead of collapsing sequences.",
+                "OTIO Playlist");
+            p.cmdLine.playlistOutput =
+                ftk::CmdLineOption<std::string>::create(
+                    { "-playlistOutput" },
+                    "Save the generated playlist to an .otio file.",
+                    "OTIO Playlist");
             p.cmdLine.ocioFileName = ftk::CmdLineOption<std::string>::create(
                 { "-ocio" },
                 "OCIO configuration file name (e.g., config.ocio).",
@@ -426,6 +462,11 @@ namespace djv
                     p.cmdLine.frameRange,
                     p.cmdLine.inPoint,
                     p.cmdLine.outPoint,
+                    p.cmdLine.playlistFolder,
+                    p.cmdLine.playlistFilter,
+                    p.cmdLine.playlistTopLevel,
+                    p.cmdLine.playlistFrames,
+                    p.cmdLine.playlistOutput,
                     p.cmdLine.ocioFileName,
                     p.cmdLine.ocioInput,
                     p.cmdLine.ocioDisplay,
@@ -462,7 +503,21 @@ namespace djv
         {}
 
         App::~App()
-        {}
+        {
+            FTK_P();
+            if (p.folderScanTimer)
+            {
+                p.folderScanTimer->stop();
+            }
+            if (p.folderScanService)
+            {
+                if (p.folderScanRequest)
+                {
+                    p.folderScanService->cancel(p.folderScanRequest.id);
+                }
+                p.folderScanService->shutdown();
+            }
+        }
 
         std::shared_ptr<App> App::create(
             const std::shared_ptr<ftk::Context>& context,
@@ -607,6 +662,10 @@ namespace djv
         void App::openPlaylistFolderDialog(bool createPlaylist)
         {
             FTK_P();
+            if (p.folderScanRequest)
+            {
+                return;
+            }
             p.playlistFolderDialog =
                 ui::OpenFolderFilterDialog::create(_context);
             p.playlistFolderDialog->setFilterPresets(
@@ -616,70 +675,22 @@ namespace djv
                     const ftk::Path& folder,
                     const std::string& filter)
                 {
-                    FTK_P();
-                    models::FileScanOptions options;
-                    auto extensions = tl::getExts(_context);
-                    extensions.erase(
-                        std::remove_if(
-                            extensions.begin(),
-                            extensions.end(),
-                            [](const std::string& value)
-                            {
-                                const std::string extension =
-                                    ftk::toLower(value);
-                                return
-                                    ".otio" == extension ||
-                                    ".otioz" == extension;
-                            }),
-                        extensions.end());
-                    const auto result = models::scanFiles(
+                    _startPlaylistFolderScan(
                         folder,
                         filter,
-                        extensions,
-                        options);
-                    if (p.playlistFolderDialog)
-                    {
-                        p.playlistFolderDialog->close();
-                        p.playlistFolderDialog.reset();
-                    }
-                    if (!result.error.empty())
-                    {
-                        _context->log(
-                            "djv::app::App",
-                            result.error,
-                            ftk::LogType::Error);
-                        return;
-                    }
-                    if (result.paths.empty())
-                    {
-                        _context->log(
-                            "djv::app::App",
-                            "No matching media was found in the selected folder.",
-                            ftk::LogType::Warning);
-                        return;
-                    }
-                    if (result.truncated)
-                    {
-                        _context->log(
-                            "djv::app::App",
-                            "The playlist folder import reached its safety limit; only the bounded result set was imported.",
-                            ftk::LogType::Warning);
-                    }
-                    if (createPlaylist)
-                    {
-                        createPlaylistFromMedia(result.paths.front());
-                        addPlaylistMedia(std::vector<ftk::Path>(
-                            result.paths.begin() + 1,
-                            result.paths.end()));
-                    }
-                    else
-                    {
-                        addPlaylistMedia(result.paths);
-                    }
+                        createPlaylist,
+                        true,
+                        true);
                 });
             p.playlistFolderDialog->setCloseCallback(
                 [this]
                 {
+                    FTK_P();
+                    if (p.folderScanService && p.folderScanRequest)
+                    {
+                        p.folderScanService->cancel(
+                            p.folderScanRequest.id);
+                    }
                     _p->playlistFolderDialog.reset();
                 });
             p.playlistFolderDialog->open(p.mainWindow);
@@ -855,30 +866,7 @@ namespace djv
                 p.mainWindow,
                 [this](const ftk::Path& value)
                 {
-                    FTK_P();
-                    std::string error;
-                    if (p.playlistModel->save(value, &error))
-                    {
-                        if (auto item = p.filesModel->getA())
-                        {
-                            item->playlistDirty = false;
-                            item->playlistScratch = false;
-                            p.filesModel->setPath(
-                                item,
-                                p.playlistModel->getPath());
-                        }
-                        p.recentFilesModel->addRecent(
-                            std::filesystem::u8path(
-                                p.playlistModel->getPath().get()));
-                        _refreshPlaylistTimeline();
-                    }
-                    else if (!error.empty())
-                    {
-                        _context->log(
-                            "djv::app::App",
-                            error,
-                            ftk::LogType::Error);
-                    }
+                    _savePlaylistTo(value);
                 },
                 "Save OTIO Playlist As",
                 initialPath,
@@ -1713,6 +1701,24 @@ namespace djv
                     }
                 }
             }
+            if (p.cmdLine.playlistFolder->found())
+            {
+                const std::string filter =
+                    p.cmdLine.playlistFilter->found() ?
+                    p.cmdLine.playlistFilter->getValue() :
+                    std::string();
+                const ftk::Path outputPath =
+                    p.cmdLine.playlistOutput->found() ?
+                    ftk::Path(p.cmdLine.playlistOutput->getValue()) :
+                    ftk::Path();
+                _startPlaylistFolderScan(
+                    ftk::Path(p.cmdLine.playlistFolder->getValue()),
+                    filter,
+                    true,
+                    !p.cmdLine.playlistTopLevel->found(),
+                    !p.cmdLine.playlistFrames->found(),
+                    outputPath);
+            }
         }
 
         void App::_uiInit()
@@ -2077,6 +2083,289 @@ namespace djv
                 singleImages ? 0 : imageSeq.maxDigits;
             options.readThreadCount = imageSeq.readThreadCount;
             return options;
+        }
+
+        void App::_startPlaylistFolderScan(
+            const ftk::Path& folder,
+            const std::string& filterExpression,
+            bool createPlaylist,
+            bool recursive,
+            bool collapseSequences,
+            const ftk::Path& outputPath)
+        {
+            FTK_P();
+            if (p.folderScanRequest)
+            {
+                if (p.playlistFolderDialog)
+                {
+                    p.playlistFolderDialog->setStatus(
+                        "A folder scan is already running.");
+                }
+                return;
+            }
+
+            const auto filter =
+                models::compileFileFilter(filterExpression);
+            if (!filter)
+            {
+                const std::string message =
+                    filter.error.has_value() ?
+                    filter.error->message :
+                    "The folder filter is invalid.";
+                if (p.playlistFolderDialog)
+                {
+                    p.playlistFolderDialog->setStatus(message);
+                }
+                _context->log(
+                    "djv::app::FolderScan",
+                    message,
+                    ftk::LogType::Error);
+                return;
+            }
+
+            models::FolderScanOptions options;
+            options.recursive = recursive;
+            options.collapseSequences = collapseSequences;
+            options.sequenceMaxDigits =
+                p.settingsModel->getImageSeq().maxDigits;
+            options.sequenceExtensions = tl::getExts(
+                _context,
+                static_cast<int>(tl::FileType::Seq));
+            options.fileExtensions = tl::getExts(_context);
+            options.fileExtensions.erase(
+                std::remove_if(
+                    options.fileExtensions.begin(),
+                    options.fileExtensions.end(),
+                    [](const std::string& value)
+                    {
+                        const std::string extension =
+                            ftk::toLower(value);
+                        return
+                            ".otio" == extension ||
+                            ".otioz" == extension;
+                    }),
+                options.fileExtensions.end());
+            options.maxCandidates = 250000;
+            options.maxDirectoryEntries = 100000;
+            options.maxDirectories = 50000;
+            options.maxEntries = 250000;
+            options.maxResults = 500;
+            options.maxDepth = 64;
+            options.maxWarnings = 200;
+
+            if (!p.folderScanService)
+            {
+                p.folderScanService.reset(new FolderScanService);
+            }
+            p.folderScanCreatePlaylist = createPlaylist;
+            p.folderScanOutputPath = outputPath;
+            p.folderScanRequest = p.folderScanService->request(
+                std::filesystem::u8path(folder.get()),
+                filter.filter,
+                options);
+            if (!p.folderScanRequest)
+            {
+                const std::string message =
+                    "The folder scan could not be queued.";
+                if (p.playlistFolderDialog)
+                {
+                    p.playlistFolderDialog->setStatus(message);
+                }
+                _context->log(
+                    "djv::app::FolderScan",
+                    message,
+                    ftk::LogType::Error);
+                return;
+            }
+
+            if (p.playlistFolderDialog)
+            {
+                p.playlistFolderDialog->setBusy(
+                    true,
+                    "Scanning the folder. Cancel remains available.");
+            }
+            if (!p.folderScanTimer)
+            {
+                p.folderScanTimer = ftk::Timer::create(_context);
+                p.folderScanTimer->setRepeating(true);
+            }
+            p.folderScanTimer->start(
+                std::chrono::milliseconds(50),
+                [this] { _folderScanPoll(); });
+        }
+
+        void App::_folderScanPoll()
+        {
+            FTK_P();
+            if (!p.folderScanRequest ||
+                !p.folderScanRequest.future.valid() ||
+                std::future_status::ready !=
+                    p.folderScanRequest.future.wait_for(
+                        std::chrono::milliseconds(0)))
+            {
+                return;
+            }
+
+            FolderScanServiceResult result;
+            try
+            {
+                result = p.folderScanRequest.future.get();
+            }
+            catch (const std::exception& e)
+            {
+                result.status = FolderScanServiceStatus::Failed;
+                result.error = FolderScanServiceError::InternalError;
+                result.message =
+                    std::string("Folder scan failed: ") + e.what();
+            }
+            p.folderScanRequest = FolderScanServiceRequest();
+            if (p.folderScanTimer)
+            {
+                p.folderScanTimer->stop();
+            }
+            if (p.playlistFolderDialog)
+            {
+                p.playlistFolderDialog->setBusy(false);
+            }
+            _finishPlaylistFolderScan(result);
+        }
+
+        void App::_finishPlaylistFolderScan(
+            const FolderScanServiceResult& result)
+        {
+            FTK_P();
+            if (!result.isSuccess())
+            {
+                std::string message;
+                switch (result.error)
+                {
+                case FolderScanServiceError::Cancelled:
+                    message = "The folder scan was cancelled.";
+                    break;
+                case FolderScanServiceError::LimitReached:
+                    message =
+                        "A safety limit was reached. Narrow the filter or "
+                        "choose a smaller folder.";
+                    break;
+                case FolderScanServiceError::InvalidRoot:
+                    message = "The folder is not an accessible directory.";
+                    break;
+                case FolderScanServiceError::QueueFull:
+                    message = "The folder scan queue is full.";
+                    break;
+                default:
+                    message = "The folder scan failed.";
+                    break;
+                }
+                if (p.playlistFolderDialog)
+                {
+                    p.playlistFolderDialog->setStatus(message);
+                }
+                _context->log(
+                    "djv::app::FolderScan",
+                    result.message.empty() ? message : result.message,
+                    FolderScanServiceStatus::Cancelled == result.status ?
+                        ftk::LogType::Message :
+                        ftk::LogType::Error);
+                return;
+            }
+
+            for (const auto& warning : result.scanResult.warnings)
+            {
+                const std::string detail = warning.message.empty() ?
+                    warning.path.u8string() :
+                    ftk::Format("{0}: {1}").
+                        arg(warning.path.u8string()).
+                        arg(warning.message).
+                        str();
+                _context->log(
+                    "djv::app::FolderScan",
+                    detail,
+                    ftk::LogType::Warning);
+            }
+            if (result.scanResult.suppressedWarnings)
+            {
+                _context->log(
+                    "djv::app::FolderScan",
+                    ftk::Format("{0} additional folder scan warnings suppressed.").
+                        arg(result.scanResult.suppressedWarnings).
+                        str(),
+                    ftk::LogType::Warning);
+            }
+
+            if (result.scanResult.paths.empty())
+            {
+                const std::string message =
+                    "No matching media was found in the folder.";
+                if (p.playlistFolderDialog)
+                {
+                    p.playlistFolderDialog->setStatus(message);
+                }
+                _context->log(
+                    "djv::app::FolderScan",
+                    message,
+                    ftk::LogType::Warning);
+                return;
+            }
+
+            if (p.folderScanCreatePlaylist)
+            {
+                createPlaylistFromMedia(result.scanResult.paths.front());
+                if (!p.playlistModel->isAvailable())
+                {
+                    return;
+                }
+                if (result.scanResult.paths.size() > 1)
+                {
+                    addPlaylistMedia(std::vector<ftk::Path>(
+                        result.scanResult.paths.begin() + 1,
+                        result.scanResult.paths.end()));
+                }
+            }
+            else
+            {
+                addPlaylistMedia(result.scanResult.paths);
+            }
+
+            if (!p.folderScanOutputPath.isEmpty())
+            {
+                _savePlaylistTo(p.folderScanOutputPath);
+            }
+            if (p.playlistFolderDialog)
+            {
+                p.playlistFolderDialog->close();
+                p.playlistFolderDialog.reset();
+            }
+        }
+
+        bool App::_savePlaylistTo(const ftk::Path& value)
+        {
+            FTK_P();
+            std::string error;
+            if (p.playlistModel->save(value, &error))
+            {
+                if (auto item = p.filesModel->getA())
+                {
+                    item->playlistDirty = false;
+                    item->playlistScratch = false;
+                    p.filesModel->setPath(
+                        item,
+                        p.playlistModel->getPath());
+                }
+                p.recentFilesModel->addRecent(
+                    std::filesystem::u8path(
+                        p.playlistModel->getPath().get()));
+                _refreshPlaylistTimeline();
+                return true;
+            }
+            if (!error.empty())
+            {
+                _context->log(
+                    "djv::app::App",
+                    error,
+                    ftk::LogType::Error);
+            }
+            return false;
         }
 
         void App::_refreshPlaylistTimeline()

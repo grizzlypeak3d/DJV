@@ -5,6 +5,9 @@
 
 #include <ftk/Core/Path.h>
 
+#include <cstddef>
+#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -17,10 +20,31 @@ namespace djv
         {
             Path,
             Name,
+            Extension,
             Directory
         };
 
-        //! File filter term.
+        //! File filter compilation error.
+        enum class FileFilterErrorCode
+        {
+            ExpressionTooLong,
+            TooManyTerms,
+            EmptyPattern,
+            UnknownTarget,
+            PatternTooLong,
+            UnsafeRegularExpression,
+            InvalidRegularExpression
+        };
+
+        struct FileFilterError
+        {
+            FileFilterErrorCode code = FileFilterErrorCode::InvalidRegularExpression;
+            size_t offset = 0;
+            std::string token;
+            std::string message;
+        };
+
+        //! Public description of a compiled term.
         struct FileFilterTerm
         {
             bool include = true;
@@ -28,41 +52,73 @@ namespace djv
             std::string pattern;
         };
 
-        //! Limits for a recursive folder scan.
-        struct FileScanOptions
+        class CompiledFileFilter;
+
+        //! Result of compiling a file filter expression.
+        struct FileFilterCompileResult
         {
-            size_t maxDepth = 32;
-            size_t maxEntries = 10000;
-            size_t maxResults = 1000;
+            std::shared_ptr<const CompiledFileFilter> filter;
+            std::optional<FileFilterError> error;
+
+            explicit operator bool() const;
         };
 
-        //! Result of a recursive folder scan.
-        struct FileScanResult
+        //! Immutable, compiled file filter.
+        //!
+        //! Grammar:
+        //! \code
+        //! expression := term *(ASCII-whitespace term)
+        //! term       := [ '+' | '-' | '!' ] [ target ':' ] regex
+        //! target     := path | name | file | ext | extension | dir | folder
+        //! \endcode
+        //!
+        //! Terms without a target match the full path. All include terms must
+        //! match and no exclude term may match. Regular expressions use the
+        //! C++ ECMAScript grammar with case-insensitive ASCII matching. Patterns
+        //! cannot contain literal whitespace; use a regular-expression class
+        //! such as `\\s`.
+        //! The extension target does not include the leading dot. The directory
+        //! target matches individual directory components, which makes explicit
+        //! directory exclusions safe to prune during recursive scans.
+        //!
+        //! To keep interactive filtering bounded, backreferences, lookaround,
+        //! quantified groups, repetitions above the candidate limit, and more
+        //! than two unbounded quantifiers in one term are rejected.
+        class CompiledFileFilter
         {
-            std::vector<ftk::Path> paths;
-            size_t entriesVisited = 0;
-            bool truncated = false;
-            std::string error;
+        public:
+            static constexpr size_t maxExpressionLength = 4096;
+            static constexpr size_t maxTermCount = 64;
+            static constexpr size_t maxPatternLength = 256;
+            static constexpr size_t maxCandidateLength = 4096;
+
+            ~CompiledFileFilter();
+
+            //! Match a file path. Overlong candidates do not match.
+            bool matches(const ftk::Path&) const;
+
+            //! Whether an excluded directory/path term permits pruning a
+            //! directory before visiting its children.
+            bool excludesDirectory(const ftk::Path&) const;
+
+            bool isEmpty() const;
+            const std::string& getExpression() const;
+            const std::vector<FileFilterTerm>& getTerms() const;
+
+        private:
+            CompiledFileFilter();
+
+            struct Private;
+            std::unique_ptr<Private> _p;
+
+            friend FileFilterCompileResult compileFileFilter(const std::string&);
         };
 
-        //! Get default file filter presets.
+        //! Compile a filter. Failure is explicit and never falls back to a
+        //! different matching language.
+        FileFilterCompileResult compileFileFilter(const std::string&);
+
+        //! Curated expressions suitable for a UI preset list.
         std::vector<std::string> getDefaultFileFilterPresets();
-
-        //! Parse a file filter expression into terms.
-        std::vector<FileFilterTerm> parseFileFilter(const std::string&);
-
-        //! Match a file path against a filter expression.
-        bool matchFileFilter(const ftk::Path&, const std::string&);
-
-        //! Check whether a folder can be skipped by exclude terms.
-        bool pruneDirectoryByFileFilter(const ftk::Path&, const std::string&);
-
-        //! Scan a folder recursively with deterministic ordering and hard
-        //! limits. Directory symlinks are not followed.
-        FileScanResult scanFiles(
-            const ftk::Path& folder,
-            const std::string& filter,
-            const std::vector<std::string>& extensions,
-            const FileScanOptions& = FileScanOptions());
     }
 }

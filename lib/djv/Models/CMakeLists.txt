@@ -5,6 +5,7 @@ set(HEADERS
     CommandsModel.h
     FileFilter.h
     FilesModel.h
+    FolderScanner.h
     OCIOModel.h
     PlaylistModel.h
     RecentFilesModel.h
@@ -23,6 +24,7 @@ set(SOURCE
     CommandsModel.cpp
     FileFilter.cpp
     FilesModel.cpp
+    FolderScanner.cpp
     OCIOModel.cpp
     PlaylistModel.cpp
     RecentFilesModel.cpp

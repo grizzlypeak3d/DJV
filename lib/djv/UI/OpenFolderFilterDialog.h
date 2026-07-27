@@ -42,6 +42,13 @@ namespace djv
 
             void setCancelCallback(const std::function<void(void)>&);
 
+            //! Keep cancellation available while an asynchronous scan owns
+            //! the form inputs.
+            void setBusy(bool, const std::string& status = std::string());
+
+            //! Set a validation or scan status message.
+            void setStatus(const std::string&);
+
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
 
@@ -78,6 +85,9 @@ namespace djv
             void setCallback(const std::function<void(
                 const ftk::Path&,
                 const std::string&)>&);
+
+            void setBusy(bool, const std::string& status = std::string());
+            void setStatus(const std::string&);
 
         private:
             FTK_PRIVATE();

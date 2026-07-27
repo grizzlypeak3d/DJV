@@ -3,6 +3,7 @@
 
 #include <djv/Models/PlaylistModel.h>
 #include <djv/Models/FileFilter.h>
+#include <djv/Models/FolderScanner.h>
 
 #include <tlRender/Timeline/Init.h>
 
@@ -188,30 +189,38 @@ namespace
         std::ofstream(scanDirectory / "plates" / "notes.txt").put('\n');
         std::ofstream(scanDirectory / "cache" / "beauty.exr").put('\n');
 
-        const auto result = djv::models::scanFiles(
-            ftk::Path(scanDirectory.u8string()),
-            "name:beauty -dir:cache",
-            { ".exr" });
-        require(result.error.empty(), result.error);
-        require(!result.truncated, "The small folder scan must not truncate.");
+        const auto filter = djv::models::compileFileFilter(
+            "name:beauty -dir:cache");
+        require(static_cast<bool>(filter), "The folder filter must compile.");
+        djv::models::FolderScanOptions options;
+        options.fileExtensions = { ".exr" };
+        options.collapseSequences = false;
+        const auto result = djv::models::scanFolder(
+            scanDirectory,
+            *filter.filter,
+            options);
+        require(
+            result.status == djv::models::FolderScanStatus::Completed,
+            "The small folder scan must complete.");
         require(result.paths.size() == 1, "The filter should select one EXR.");
         require(
             result.paths[0].getFileName() == "beauty.exr",
             "The filtered path should be deterministic.");
 
-        djv::models::FileScanOptions limits;
+        djv::models::FolderScanOptions limits = options;
         limits.maxResults = 1;
-        const auto limited = djv::models::scanFiles(
-            ftk::Path(scanDirectory.u8string()),
-            std::string(),
-            { ".exr" },
+        const auto emptyFilter = djv::models::compileFileFilter(std::string());
+        require(static_cast<bool>(emptyFilter), "The empty filter must compile.");
+        const auto limited = djv::models::scanFolder(
+            scanDirectory,
+            *emptyFilter.filter,
             limits);
         require(
-            limited.truncated,
+            limited.status == djv::models::FolderScanStatus::ResultLimitReached,
             "Reaching the result limit must be reported.");
         require(
-            limited.paths.size() == 1,
-            "The result limit must bound the imported path list.");
+            limited.paths.empty(),
+            "A limited scan must not publish a partial playlist.");
     }
 }
 

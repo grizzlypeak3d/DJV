@@ -27,6 +27,7 @@ namespace djv
             std::shared_ptr<ftk::LineEdit> filterEdit;
             std::shared_ptr<ftk::ComboBox> recentComboBox;
             std::shared_ptr<ftk::ComboBox> presetComboBox;
+            std::shared_ptr<ftk::Label> statusLabel;
             std::shared_ptr<ftk::PushButton> okButton;
             std::shared_ptr<ftk::PushButton> cancelButton;
             std::shared_ptr<ftk::VerticalLayout> layout;
@@ -89,6 +90,8 @@ namespace djv
             formLayout->addRow("Filter:", p.filterEdit);
             formLayout->addRow("Recent:", p.recentComboBox);
             formLayout->addRow("Preset:", p.presetComboBox);
+            p.statusLabel = ftk::Label::create(context, std::string(), p.layout);
+            p.statusLabel->setMarginRole(ftk::SizeRole::MarginSmall);
             ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
@@ -181,6 +184,29 @@ namespace djv
             _p->cancelCallback = value;
         }
 
+        void OpenFolderFilterWidget::setBusy(
+            bool value,
+            const std::string& status)
+        {
+            FTK_P();
+            p.folderEdit->setEnabled(!value);
+            p.filterEdit->setEnabled(!value);
+            p.recentComboBox->setEnabled(
+                !value && !p.recentFilters.empty());
+            p.presetComboBox->setEnabled(
+                !value && !p.filterPresets.empty());
+            p.okButton->setEnabled(!value);
+            if (!status.empty())
+            {
+                p.statusLabel->setText(status);
+            }
+        }
+
+        void OpenFolderFilterWidget::setStatus(const std::string& value)
+        {
+            _p->statusLabel->setText(value);
+        }
+
         ftk::Size2I OpenFolderFilterWidget::getSizeHint() const
         {
             ftk::Size2I out = _p->layout->getSizeHint();
@@ -267,6 +293,18 @@ namespace djv
             const std::string&)>& value)
         {
             _p->widget->setCallback(value);
+        }
+
+        void OpenFolderFilterDialog::setBusy(
+            bool value,
+            const std::string& status)
+        {
+            _p->widget->setBusy(value, status);
+        }
+
+        void OpenFolderFilterDialog::setStatus(const std::string& value)
+        {
+            _p->widget->setStatus(value);
         }
     }
 }
