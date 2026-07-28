@@ -31,6 +31,7 @@ set(HEADERS
     MessagesTool.h
     PlaybackActions.h
     PlaybackMenu.h
+    PlaybackUIState.h
     SecondaryWindow.h
     SettingsTool.h
     StatusBar.h
@@ -85,6 +86,7 @@ set(SOURCE
     MessagesTool.cpp
     PlaybackActions.cpp
     PlaybackMenu.cpp
+    PlaybackUIState.cpp
     SecondaryWindow.cpp
     SettingsTool.cpp
     StatusBar.cpp

@@ -4,6 +4,7 @@
 #include <djv/App/Viewport.h>
 
 #include <djv/App/App.h>
+#include <djv/App/PlaybackUIState.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
@@ -49,6 +50,11 @@ namespace djv
             std::shared_ptr<ftk::Observable<ftk::V2I> > pick;
             std::shared_ptr<ftk::Observable<ftk::V2I> > samplePos;
             std::shared_ptr<ftk::Observable<ftk::Color4F> > colorSample;
+            PlaybackDoubleClickDetector doubleClickDetector;
+            bool clickCandidate = false;
+            ftk::V2I clickPos;
+            std::function<void(void)> fullScreenCallback;
+            std::function<void(void)> mouseActivityCallback;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
             std::shared_ptr<ftk::Label> cacheLabel;
@@ -411,6 +417,18 @@ namespace djv
             _hudUpdate();
         }
 
+        void Viewport::setFullScreenCallback(
+            const std::function<void(void)>& value)
+        {
+            _p->fullScreenCallback = value;
+        }
+
+        void Viewport::setMouseActivityCallback(
+            const std::function<void(void)>& value)
+        {
+            _p->mouseActivityCallback = value;
+        }
+
         void Viewport::setPlayer(const std::shared_ptr<tl::Player>& player)
         {
             tl::ui::Viewport::setPlayer(player);
@@ -484,25 +502,45 @@ namespace djv
         {
             tl::ui::Viewport::mouseMoveEvent(event);
             FTK_P();
+            if (
+                event.pos != event.prev &&
+                p.mouseActivityCallback)
+            {
+                p.mouseActivityCallback();
+            }
+            if (p.clickCandidate)
+            {
+                const int dx = event.pos.x - p.clickPos.x;
+                const int dy = event.pos.y - p.clickPos.y;
+                if (dx * dx + dy * dy > 36)
+                {
+                    p.clickCandidate = false;
+                    p.doubleClickDetector.reset();
+                }
+            }
             switch (p.mouse.mode)
             {
             case Private::MouseMode::Shuttle:
                 if (auto player = getPlayer())
                 {
-                    const OTIO_NS::RationalTime offset = OTIO_NS::RationalTime(
-                        (event.pos.x - _getMousePressPos().x) * .05F * p.frameShuttleScale,
-                        p.mouse.shuttleStart.rate()).round();
-                    const OTIO_NS::TimeRange& timeRange = player->getTimeRange();
-                    OTIO_NS::RationalTime t = p.mouse.shuttleStart + offset;
-                    if (t < timeRange.start_time())
+                    const int dx =
+                        event.pos.x - _getMousePressPos().x;
+                    const int dy =
+                        event.pos.y - _getMousePressPos().y;
+                    if (dx * dx + dy * dy > 36)
                     {
-                        t = timeRange.end_time_exclusive() - (timeRange.start_time() - t);
+                        player->stop();
+                        const OTIO_NS::RationalTime offset =
+                            OTIO_NS::RationalTime(
+                                dx * .05F * p.frameShuttleScale,
+                                p.mouse.shuttleStart.rate()).round();
+                        const OTIO_NS::TimeRange& timeRange =
+                            player->getTimeRange();
+                        player->seek(
+                            tl::loop(
+                                p.mouse.shuttleStart + offset,
+                                timeRange));
                     }
-                    else if (t > timeRange.end_time_exclusive())
-                    {
-                        t = timeRange.start_time() + (t - timeRange.end_time_exclusive());
-                    }
-                    player->seek(t);
                 }
                 break;
             case Private::MouseMode::Picker:
@@ -526,6 +564,17 @@ namespace djv
         {
             tl::ui::Viewport::mousePressEvent(event);
             FTK_P();
+            p.clickCandidate =
+                ftk::MouseButton::Left == event.button &&
+                0 == event.modifiers;
+            if (p.clickCandidate)
+            {
+                p.clickPos = event.pos;
+            }
+            else
+            {
+                p.doubleClickDetector.reset();
+            }
             if (p.pickBinding.button == event.button &&
                 ftk::checkKeyModifier(p.pickBinding.modifier, event.modifiers))
             {
@@ -552,7 +601,6 @@ namespace djv
                 p.mouse.mode = Private::MouseMode::Shuttle;
                 if (auto player = getPlayer())
                 {
-                    player->stop();
                     p.mouse.shuttleStart = player->getCurrentTime();
                 }
             }
@@ -562,7 +610,20 @@ namespace djv
         {
             tl::ui::Viewport::mouseReleaseEvent(event);
             FTK_P();
+            const bool toggleFullScreen =
+                p.clickCandidate &&
+                ftk::MouseButton::Left == event.button &&
+                0 == event.modifiers &&
+                p.doubleClickDetector.release(
+                    event.pos.x,
+                    event.pos.y,
+                    PlaybackDoubleClickDetector::Clock::now());
             p.mouse = Private::MouseData();
+            p.clickCandidate = false;
+            if (toggleFullScreen && p.fullScreenCallback)
+            {
+                p.fullScreenCallback();
+            }
         }
 
         void Viewport::_videoUpdate()

@@ -21,6 +21,7 @@
 #include <djv/App/HelpMenu.h>
 #include <djv/App/PlaybackActions.h>
 #include <djv/App/PlaybackMenu.h>
+#include <djv/App/PlaybackUIState.h>
 #include <djv/App/StatusBar.h>
 #include <djv/App/TabBar.h>
 #include <djv/App/TimelineActions.h>
@@ -50,6 +51,7 @@
 
 #include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/Divider.h>
+#include <ftk/UI/DrawUtil.h>
 #include <ftk/UI/IconSystem.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/Menu.h>
@@ -59,6 +61,11 @@
 #include <ftk/UI/Splitter.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/Timer.h>
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
 
 namespace djv_resource
 {
@@ -100,6 +107,118 @@ namespace djv
                         return out;
                     };
             }
+
+            class PlaybackProgressWidget : public ftk::IWidget
+            {
+            protected:
+                void _init(
+                    const std::shared_ptr<ftk::Context>& context,
+                    const std::shared_ptr<ftk::IWidget>& parent)
+                {
+                    IWidget::_init(
+                        context,
+                        "djv::app::PlaybackProgressWidget",
+                        parent);
+                    setHStretch(ftk::Stretch::Expanding);
+                    setTooltip(
+                        "Current position in the complete media duration.");
+                }
+
+                PlaybackProgressWidget() = default;
+
+            public:
+                static std::shared_ptr<PlaybackProgressWidget> create(
+                    const std::shared_ptr<ftk::Context>& context,
+                    const std::shared_ptr<ftk::IWidget>& parent = nullptr)
+                {
+                    auto out = std::shared_ptr<PlaybackProgressWidget>(
+                        new PlaybackProgressWidget);
+                    out->_init(context, parent);
+                    return out;
+                }
+
+                void setPlayer(const std::shared_ptr<tl::Player>& player)
+                {
+                    _currentTimeObserver.reset();
+                    _timeRange = player ?
+                        player->getTimeRange() :
+                        tl::invalidTimeRange;
+                    if (player)
+                    {
+                        _setCurrentTime(player->getCurrentTime());
+                        _currentTimeObserver =
+                            ftk::Observer<OTIO_NS::RationalTime>::create(
+                                player->observeCurrentTime(),
+                                [this](const OTIO_NS::RationalTime& value)
+                                {
+                                    _setCurrentTime(value);
+                                });
+                    }
+                    else
+                    {
+                        _progress = 0.0;
+                        setDrawUpdate();
+                    }
+                }
+
+                ftk::Size2I getSizeHint() const override
+                {
+                    return ftk::Size2I(1, _height);
+                }
+
+                void sizeHintEvent(
+                    const ftk::SizeHintEvent& event) override
+                {
+                    IWidget::sizeHintEvent(event);
+                    _height = std::max(
+                        2,
+                        static_cast<int>(
+                            std::round(2.F * event.displayScale)));
+                }
+
+                void drawEvent(
+                    const ftk::Box2I& drawRect,
+                    const ftk::DrawEvent& event) override
+                {
+                    IWidget::drawEvent(drawRect, event);
+                    const ftk::Box2I& g = getGeometry();
+                    event.render->drawRect(
+                        g,
+                        event.style->getColorRole(ftk::ColorRole::Base));
+                    const int width = std::clamp(
+                        static_cast<int>(std::round(_progress * g.w())),
+                        0,
+                        g.w());
+                    if (width > 0)
+                    {
+                        event.render->drawRect(
+                            ftk::Box2I(g.x(), g.y(), width, g.h()),
+                            event.style->getColorRole(ftk::ColorRole::Red));
+                    }
+                }
+
+            private:
+                void _setCurrentTime(
+                    const OTIO_NS::RationalTime& value)
+                {
+                    const double progress = getPlaybackProgress(
+                        value.rescaled_to(1.0).value(),
+                        _timeRange.start_time().rescaled_to(1.0).value(),
+                        _timeRange.duration().rescaled_to(1.0).value());
+                    if (progress != _progress)
+                    {
+                        _progress = progress;
+                        setDrawUpdate();
+                    }
+                }
+
+                int _height = 2;
+                double _progress = 0.0;
+                OTIO_NS::TimeRange _timeRange = tl::invalidTimeRange;
+                std::shared_ptr<
+                    ftk::Observer<OTIO_NS::RationalTime> >
+                    _currentTimeObserver;
+            };
         }
 
         struct MainWindow::Private
@@ -142,6 +261,16 @@ namespace djv
             std::shared_ptr<TabBar> tabBar;
             std::shared_ptr<BottomToolBar> bottomToolBar;
             std::shared_ptr<StatusBar> statusBar;
+            std::shared_ptr<PlaybackProgressWidget> playbackProgress;
+            std::shared_ptr<ftk::VerticalLayout> playbackBar;
+            std::shared_ptr<ftk::HorizontalLayout> playbackRow;
+            std::shared_ptr<ftk::VerticalLayout> normalBottomContainer;
+            std::shared_ptr<ftk::VerticalLayout> normalStatusContainer;
+            std::shared_ptr<ftk::VerticalLayout> overlayBottomContainer;
+            std::shared_ptr<ftk::VerticalLayout> overlayStatusContainer;
+            std::shared_ptr<ftk::Divider> playbackStatusDivider;
+            PlaybackOverlayState playbackOverlayState;
+            std::shared_ptr<ftk::Timer> playbackOverlayTimer;
             std::shared_ptr<ToolsWidget> toolsWidget;
             std::shared_ptr<ui::SetupDialog> setupDialog;
             std::shared_ptr<ui::AboutDialog> aboutDialog;
@@ -162,6 +291,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<models::TimelineSettings> > timelineSettingsObserver;
             std::shared_ptr<ftk::Observer<bool> > timelineFrameViewObserver;
             std::shared_ptr<ftk::Observer<models::WindowSettings> > windowSettingsObserver;
+            std::shared_ptr<ftk::Observer<bool> > fullScreenObserver;
         };
 
         void MainWindow::_init(
@@ -289,6 +419,52 @@ namespace djv
             p.statusBar = app->createStatusBar();
             ftk::setScreenshotTag(p.statusBar, "MainWindow.StatusBar");
 
+            const auto playbackWindowWeak = std::weak_ptr<MainWindow>(
+                std::dynamic_pointer_cast<MainWindow>(
+                    shared_from_this()));
+            p.bottomToolBar->setFullScreenCallback(
+                [playbackWindowWeak](bool value)
+                {
+                    if (auto window = playbackWindowWeak.lock())
+                    {
+                        window->setFullScreen(value);
+                    }
+                });
+            p.bottomToolBar->setPinCallback(
+                [playbackWindowWeak](bool value)
+                {
+                    if (auto window = playbackWindowWeak.lock())
+                    {
+                        window->_setPlaybackPinned(value);
+                    }
+                });
+            p.viewport->setFullScreenCallback(
+                [playbackWindowWeak]
+                {
+                    if (auto window = playbackWindowWeak.lock())
+                    {
+                        if (window->hasPresentMode())
+                        {
+                            window->setPresentMode(false);
+                        }
+                        else
+                        {
+                            window->setFullScreen(
+                                !window->isFullScreen());
+                        }
+                    }
+                });
+            p.viewport->setMouseActivityCallback(
+                [playbackWindowWeak]
+                {
+                    if (auto window = playbackWindowWeak.lock())
+                    {
+                        window->_playbackActivity();
+                    }
+                });
+            p.playbackOverlayTimer = ftk::Timer::create(context);
+            p.playbackOverlayTimer->setRepeating(true);
+
             p.toolsWidget = ToolsWidget::create(
                 context,
                 app,
@@ -326,9 +502,54 @@ namespace djv
             p.toolsWidget->setParent(p.splitter2);
             p.timelineWidget->setParent(p.splitter);
             p.dividers["Bottom"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            p.bottomToolBar->setParent(p.layout);
+            p.normalBottomContainer = ftk::VerticalLayout::create(
+                context,
+                p.layout);
+            p.normalBottomContainer->setSpacingRole(ftk::SizeRole::None);
+            p.bottomToolBar->setParent(p.normalBottomContainer);
             p.dividers["Status"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            p.statusBar->setParent(p.layout);
+            p.normalStatusContainer = ftk::VerticalLayout::create(
+                context,
+                p.layout);
+            p.normalStatusContainer->setSpacingRole(ftk::SizeRole::None);
+            p.statusBar->setParent(p.normalStatusContainer);
+
+            p.playbackBar = ftk::VerticalLayout::create(
+                context);
+            p.playbackBar->setSpacingRole(ftk::SizeRole::None);
+            p.playbackBar->setBackgroundRole(ftk::ColorRole::Window);
+            ftk::setScreenshotTag(
+                p.playbackBar,
+                "MainWindow.PlaybackBar");
+
+            p.playbackProgress = PlaybackProgressWidget::create(
+                context,
+                p.playbackBar);
+            p.playbackProgress->setVisible(false);
+            ftk::setScreenshotTag(
+                p.playbackProgress,
+                "Playback.FullScreenProgress");
+
+            p.playbackRow = ftk::HorizontalLayout::create(
+                context,
+                p.playbackBar);
+            p.playbackRow->setSpacingRole(ftk::SizeRole::None);
+            ftk::setScreenshotTag(
+                p.playbackRow,
+                "MainWindow.FullScreenPlaybackRow");
+            p.overlayBottomContainer = ftk::VerticalLayout::create(
+                context,
+                p.playbackRow);
+            p.overlayBottomContainer->setSpacingRole(ftk::SizeRole::None);
+            p.overlayBottomContainer->setHStretch(ftk::Stretch::Expanding);
+            p.playbackStatusDivider = ftk::Divider::create(
+                context,
+                ftk::Orientation::Horizontal,
+                p.playbackRow);
+            p.overlayStatusContainer = ftk::VerticalLayout::create(
+                context,
+                p.playbackRow);
+            p.overlayStatusContainer->setSpacingRole(ftk::SizeRole::None);
 
             // Each context menu offers the band it belongs to, and only
             // that band; the Window menu remains the one place that lists
@@ -413,6 +634,7 @@ namespace djv
                     FTK_P();
                     p.viewport->setPlayer(player);
                     p.timelineWidget->setPlayer(player);
+                    p.playbackProgress->setPlayer(player);
                 });
 
             p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
@@ -484,8 +706,15 @@ namespace djv
             p.windowSettingsObserver = ftk::Observer<models::WindowSettings>::create(
                 p.settingsModel->observeWindow(),
                 [this](const models::WindowSettings&)
+                    {
+                        _windowUpdate();
+                    });
+
+            p.fullScreenObserver = ftk::Observer<bool>::create(
+                observeFullScreen(),
+                [this](bool value)
                 {
-                    _windowUpdate();
+                    _fullScreenUpdate(value);
                 });
         }
 
@@ -497,6 +726,7 @@ namespace djv
         {
             FTK_P();
 
+            p.playbackOverlayTimer->stop();
             _makeCurrent();
             p.viewport->setParent(nullptr);
             p.viewport.reset();
@@ -578,6 +808,7 @@ namespace djv
                     app->getViewportModel()->setHUDOptions(options);
                 }
                 setFullScreen(value);
+                _fullScreenUpdate(isFullScreen());
                 _windowUpdate();
             }
         }
@@ -622,17 +853,35 @@ namespace djv
             FTK_P();
             p.shown = true;
             p.layout->setGeometry(value);
+            if (p.playbackOverlayState.isFullScreen())
+            {
+                _playbackOverlayUpdate();
+            }
         }
 
         void MainWindow::keyPressEvent(ftk::KeyEvent& event)
         {
             FTK_P();
             if (0 == event.modifiers &&
-                ftk::Key::Escape == event.key &&
-                p.presentMode->get())
+                ftk::Key::Escape == event.key)
             {
-                event.accept = true;
-                setPresentMode(false);
+                if (p.presentMode->get())
+                {
+                    event.accept = true;
+                    setPresentMode(false);
+                }
+                else if (isFullScreen())
+                {
+                    event.accept = true;
+                    setFullScreen(false);
+                }
+                else
+                {
+                    event.accept =
+                        p.menuBar->shortcut(
+                            event.key,
+                            event.modifiers);
+                }
             }
             else
             {
@@ -706,6 +955,131 @@ namespace djv
             }
         }
 
+        void MainWindow::_fullScreenUpdate(bool value)
+        {
+            FTK_P();
+            const bool playbackFullScreen =
+                value && !p.presentMode->get();
+            const auto now = PlaybackOverlayState::Clock::now();
+            p.playbackOverlayState.setFullScreen(
+                playbackFullScreen,
+                now);
+            p.bottomToolBar->setFullScreen(playbackFullScreen);
+            p.playbackProgress->setVisible(playbackFullScreen);
+
+            if (playbackFullScreen)
+            {
+                if (p.bottomToolBar->getParent() !=
+                    p.overlayBottomContainer)
+                {
+                    p.bottomToolBar->setParent(
+                        p.overlayBottomContainer);
+                }
+                if (p.statusBar->getParent() !=
+                    p.overlayStatusContainer)
+                {
+                    p.statusBar->setParent(
+                        p.overlayStatusContainer);
+                }
+                if (p.playbackBar->getParent() !=
+                    std::dynamic_pointer_cast<ftk::IWidget>(
+                        shared_from_this()))
+                {
+                    p.playbackBar->setParent(shared_from_this());
+                }
+                p.playbackOverlayTimer->start(
+                    std::chrono::milliseconds(16),
+                    [this](
+                        const std::chrono::steady_clock::time_point& now,
+                        const std::chrono::microseconds&)
+                    {
+                        _p->playbackOverlayState.tick(now);
+                        _playbackOverlayUpdate();
+                    });
+            }
+            else
+            {
+                p.playbackOverlayTimer->stop();
+                if (p.bottomToolBar->getParent() !=
+                    p.normalBottomContainer)
+                {
+                    p.bottomToolBar->setParent(
+                        p.normalBottomContainer);
+                }
+                if (p.statusBar->getParent() !=
+                    p.normalStatusContainer)
+                {
+                    p.statusBar->setParent(
+                        p.normalStatusContainer);
+                }
+                if (p.playbackBar->getParent())
+                {
+                    p.playbackBar->setParent(nullptr);
+                }
+            }
+
+            _windowUpdate();
+            setGeometry(getGeometry());
+        }
+
+        void MainWindow::_playbackActivity()
+        {
+            FTK_P();
+            if (p.playbackOverlayState.isFullScreen())
+            {
+                p.playbackOverlayState.activity(
+                    PlaybackOverlayState::Clock::now());
+                p.playbackBar->setVisible(true);
+                _playbackOverlayUpdate();
+            }
+        }
+
+        void MainWindow::_playbackOverlayUpdate()
+        {
+            FTK_P();
+            if (!p.playbackOverlayState.isFullScreen())
+            {
+                return;
+            }
+
+            const auto now = PlaybackOverlayState::Clock::now();
+            const double visibility =
+                p.playbackOverlayState.getVisibility();
+            const bool visible =
+                visibility > .0001 ||
+                p.playbackOverlayState.wantsVisible(now);
+            p.playbackBar->setVisible(visible);
+            if (visible)
+            {
+                const ftk::Box2I& g = getGeometry();
+                const int height = std::max(
+                    1,
+                    p.playbackBar->getSizeHint().h);
+                const int y =
+                    g.y() +
+                    g.h() -
+                    static_cast<int>(
+                        std::round(height * visibility));
+                p.playbackBar->setGeometry(
+                    ftk::Box2I(
+                        g.x(),
+                        y,
+                        g.w(),
+                        height));
+                moveToFront(p.playbackBar);
+            }
+        }
+
+        void MainWindow::_setPlaybackPinned(bool value)
+        {
+            FTK_P();
+            const auto now = PlaybackOverlayState::Clock::now();
+            p.playbackOverlayState.setPinned(value, now);
+            p.bottomToolBar->setPinned(
+                p.playbackOverlayState.isPinned());
+            _playbackActivity();
+        }
+
         void MainWindow::_windowUpdate()
         {
             FTK_P();
@@ -713,44 +1087,78 @@ namespace djv
             {
                 auto settings = p.settingsModel->getWindow();
                 const bool presentMode = p.presentMode->get();
+                const bool playbackFullScreen =
+                    isFullScreen() && !presentMode;
+                const bool focusMode =
+                    presentMode || playbackFullScreen;
 
-                p.menuBar->setVisible(!presentMode);
-                p.dividers["MenuBar"]->setVisible(!presentMode);
+                p.menuBar->setVisible(!focusMode);
+                p.dividers["MenuBar"]->setVisible(!focusMode);
 
-                p.fileToolBar->setVisible(settings.fileToolBar && !presentMode);
-                p.dividers["File"]->setVisible(settings.fileToolBar && !presentMode);
+                p.fileToolBar->setVisible(settings.fileToolBar && !focusMode);
+                p.dividers["File"]->setVisible(settings.fileToolBar && !focusMode);
 
-                p.compareToolBar->setVisible(settings.compareToolBar && !presentMode);
-                p.dividers["Compare"]->setVisible(settings.compareToolBar && !presentMode);
+                p.compareToolBar->setVisible(settings.compareToolBar && !focusMode);
+                p.dividers["Compare"]->setVisible(settings.compareToolBar && !focusMode);
 
-                p.windowToolBar->setVisible(settings.windowToolBar && !presentMode);
-                p.dividers["Window"]->setVisible(settings.windowToolBar && !presentMode);
+                p.windowToolBar->setVisible(settings.windowToolBar && !focusMode);
+                p.dividers["Window"]->setVisible(settings.windowToolBar && !focusMode);
 
-                p.viewToolBar->setVisible(settings.viewToolBar && !presentMode);
-                p.dividers["View"]->setVisible(settings.viewToolBar && !presentMode);
+                p.viewToolBar->setVisible(settings.viewToolBar && !focusMode);
+                p.dividers["View"]->setVisible(settings.viewToolBar && !focusMode);
 
-                p.toolsToolBar->setVisible(settings.toolsToolBar && !presentMode);
+                p.toolsToolBar->setVisible(settings.toolsToolBar && !focusMode);
 
                 p.dividers["ToolBars"]->setVisible(
                     (settings.fileToolBar ||
                     settings.compareToolBar ||
                     settings.windowToolBar ||
                     settings.viewToolBar ||
-                    settings.toolsToolBar) && !presentMode);
+                    settings.toolsToolBar) && !focusMode);
 
-                p.tabBar->setVisible(settings.tabBar && !presentMode);
+                p.tabBar->setVisible(settings.tabBar && !focusMode);
 
                 p.toolsWidget->setVisible(
                     !app->getToolsModel()->getActiveTool().empty() &&
-                    !presentMode);
+                    !focusMode);
 
-                p.timelineWidget->setVisible(settings.timeline && !presentMode);
+                p.timelineWidget->setVisible(settings.timeline && !focusMode);
 
-                p.bottomToolBar->setVisible(settings.bottomToolBar && !presentMode);
-                p.dividers["Bottom"]->setVisible(settings.bottomToolBar && !presentMode);
+                const bool bottomVisible =
+                    (settings.bottomToolBar || playbackFullScreen) &&
+                    !presentMode;
+                const bool statusVisible =
+                    (settings.statusToolBar || playbackFullScreen) &&
+                    !presentMode;
+                p.bottomToolBar->setVisible(bottomVisible);
+                p.statusBar->setVisible(statusVisible);
+                p.playbackStatusDivider->setVisible(
+                    playbackFullScreen &&
+                    bottomVisible &&
+                    statusVisible);
+                p.playbackProgress->setVisible(playbackFullScreen);
+                p.bottomToolBar->setFullScreen(playbackFullScreen);
 
-                p.statusBar->setVisible(settings.statusToolBar && !presentMode);
-                p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
+                if (playbackFullScreen)
+                {
+                    const auto now =
+                        PlaybackOverlayState::Clock::now();
+                    p.playbackBar->setVisible(
+                        p.playbackOverlayState.getVisibility() > .0001 ||
+                        p.playbackOverlayState.wantsVisible(now));
+                    p.dividers["Bottom"]->setVisible(false);
+                    p.dividers["Status"]->setVisible(false);
+                    p.normalBottomContainer->setVisible(false);
+                    p.normalStatusContainer->setVisible(false);
+                }
+                else
+                {
+                    p.playbackBar->setVisible(false);
+                    p.normalBottomContainer->setVisible(bottomVisible);
+                    p.normalStatusContainer->setVisible(statusVisible);
+                    p.dividers["Bottom"]->setVisible(bottomVisible);
+                    p.dividers["Status"]->setVisible(statusVisible);
+                }
             }
         }
     }

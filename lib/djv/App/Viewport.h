@@ -5,6 +5,8 @@
 
 #include <tlRender/UI/Viewport.h>
 
+#include <functional>
+
 namespace djv
 {
     namespace app
@@ -44,6 +46,12 @@ namespace djv
             //! Sample the image at the given image pixel, as the pick mouse
             //! action would. Used by the documentation screenshot capture.
             void pick(const ftk::V2I& imagePos);
+
+            //! Set the callback used to toggle playback full-screen.
+            void setFullScreenCallback(const std::function<void(void)>&);
+
+            //! Set the callback used to reveal full-screen playback controls.
+            void setMouseActivityCallback(const std::function<void(void)>&);
 
             void setPlayer(const std::shared_ptr<tl::Player>&) override;
 

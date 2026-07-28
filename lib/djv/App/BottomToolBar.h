@@ -7,6 +7,8 @@
 
 #include <ftk/UI/IWidget.h>
 
+#include <functional>
+
 namespace djv
 {
     namespace app
@@ -45,6 +47,18 @@ namespace djv
 
             //! Focus the current frame widget.
             void focusCurrentFrame();
+
+            //! Set whether playback full-screen is active.
+            void setFullScreen(bool);
+
+            //! Set whether the full-screen playback bar is pinned.
+            void setPinned(bool);
+
+            //! Set the playback full-screen callback.
+            void setFullScreenCallback(const std::function<void(bool)>&);
+
+            //! Set the playback bar pin callback.
+            void setPinCallback(const std::function<void(bool)>&);
 
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
