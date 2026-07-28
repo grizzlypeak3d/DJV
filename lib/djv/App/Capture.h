@@ -65,6 +65,11 @@ namespace djv
             void _applyStep(const nlohmann::json& step);
             int _fileIndex(const nlohmann::json& value) const;
             bool _ready() const;
+            // Why the media a shot opened cannot become ready, or an empty
+            // string while it still might.
+            std::string _mediaError() const;
+            // What the shot was waiting for, for the timeout message.
+            std::string _waitingFor() const;
             void _finish(bool ok);
 
             bool _writePNG(const std::filesystem::path&) const;

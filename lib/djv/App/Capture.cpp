@@ -259,7 +259,10 @@ namespace djv
             ++p.ticks;
             if (p.ticks > timeoutTicks + (p.settleTicksShot - settleTicks))
             {
-                note(p.shotId, "timed out waiting for the shot to become ready");
+                note(p.shotId, ftk::Format("timed out waiting for {0}").
+                    arg(p.expectMedia ?
+                        _waitingFor() :
+                        std::string("the shot to become ready")));
                 _finish(false);
                 return;
             }
@@ -268,7 +271,20 @@ namespace djv
             {
             case Phase::WaitReady:
                 if (!p.expectMedia || _ready())
+                {
                     p.phase = Phase::ApplyRest;
+                }
+                else
+                {
+                    const std::string error = _mediaError();
+                    if (!error.empty())
+                    {
+                        note(p.shotId, ftk::Format("cannot read the media: {0}").
+                            arg(error));
+                        _finish(false);
+                        return;
+                    }
+                }
                 break;
             case Phase::ApplyRest:
                 _applyRest(p.shot.value("setup", nlohmann::json::array()));
@@ -891,7 +907,43 @@ namespace djv
             if (!app)
                 return false;
             auto player = app->observePlayer()->get();
-            return player && !player->getIOInfo().video.empty();
+            // Audio counts: audio-only media has no video information but
+            // does have something to show, the waveform in the timeline.
+            return player &&
+                (!player->getIOInfo().video.empty() ||
+                    player->getIOInfo().audio.isValid());
+        }
+
+        std::string Capture::_mediaError() const
+        {
+            FTK_P();
+            auto app = p.app.lock();
+            if (!app)
+                return std::string();
+            auto player = app->observePlayer()->get();
+            if (!player || _ready())
+                return std::string();
+            // A player's information is worked out when its timeline is read,
+            // so a player with neither video nor audio will never gain them:
+            // the media could not be read, and a path in the manifest that
+            // does not exist arrives here. Waiting out the timeout for it
+            // reports the wrong thing and costs twelve seconds per shot.
+            const std::string error =
+                player->getTimeline()->getReadError();
+            return !error.empty() ?
+                error :
+                std::string("no video or audio; run with -log for the reader");
+        }
+
+        std::string Capture::_waitingFor() const
+        {
+            FTK_P();
+            auto app = p.app.lock();
+            if (!app)
+                return "the application to still be running";
+            if (!app->observePlayer()->get())
+                return "a player, which the media never produced";
+            return "the media to report its video or audio information";
         }
 
         bool Capture::_writePNG(const std::filesystem::path& path) const
