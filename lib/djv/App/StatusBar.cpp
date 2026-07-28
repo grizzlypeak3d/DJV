@@ -11,14 +11,18 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/Divider.h>
+#include <ftk/UI/IWindow.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/SysLogModel.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
 #include <ftk/Core/Timer.h>
+
+#include <algorithm>
 
 namespace djv
 {
@@ -36,9 +40,11 @@ namespace djv
             bool lutEnabled = false;
             bool colorEnabled = false;
             bool audioOffsetEnabled = false;
+            bool compactInfo = false;
 
             std::shared_ptr<ftk::Label> messagesLabel;
             std::shared_ptr<ftk::Label> infoLabel;
+            std::shared_ptr<ftk::ToolButton> infoButton;
             std::shared_ptr<ftk::ToolButton> indicatorButton;
             std::shared_ptr<ui::StatusIndicatorPopup> indicatorPopup;
             std::shared_ptr<ftk::HorizontalLayout> layout;
@@ -86,6 +92,18 @@ namespace djv
             p.infoLabel = ftk::Label::create(context);
             p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
             p.infoLabel->setClipText(true);
+            ftk::setScreenshotTag(p.infoLabel, "StatusBar.MediaInfo");
+
+            p.infoButton = ftk::ToolButton::create(context);
+            p.infoButton->setIcon("Info");
+            p.infoButton->setTooltip(
+                "Display information about the current file.\n"
+                "\n"
+                "Click to open the information tool.");
+            p.infoButton->setVisible(false);
+            ftk::setScreenshotTag(
+                p.infoButton,
+                "StatusBar.MediaInfoButton");
 
             p.indicatorButton = ftk::ToolButton::create(context);
             p.indicatorButton->setIcon("MenuChecked");
@@ -99,6 +117,7 @@ namespace djv
             p.messagesLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
+            p.infoButton->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.indicatorButton->setParent(p.layout);
 
@@ -214,6 +233,12 @@ namespace djv
                 {
                     _showIndicatorPopup();
                 });
+
+            p.infoButton->setPressedCallback(
+                [this]
+                {
+                    _toggleTool("Information");
+                });
         }
 
         StatusBar::StatusBar() :
@@ -241,7 +266,31 @@ namespace djv
         void StatusBar::setGeometry(const ftk::Box2I & value)
         {
             IMouseWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
+            FTK_P();
+            float displayScale = 1.F;
+            if (auto window = getWindow())
+            {
+                displayScale = window->getDisplayScale();
+            }
+            const int messageReserve =
+                std::max(1, static_cast<int>(180.F * displayScale));
+            const int infoLimit =
+                std::max(1, static_cast<int>(480.F * displayScale));
+            const int infoWidth = std::min(
+                infoLimit,
+                p.infoLabel->getSizeHint().w);
+            const int fixedWidth =
+                p.indicatorButton->getSizeHint().w +
+                std::max(1, static_cast<int>(32.F * displayScale));
+            const bool compactInfo =
+                value.w() < messageReserve + infoWidth + fixedWidth;
+            if (compactInfo != p.compactInfo)
+            {
+                p.compactInfo = compactInfo;
+                p.infoLabel->setVisible(!compactInfo);
+                p.infoButton->setVisible(compactInfo);
+            }
+            p.layout->setGeometry(value);
         }
 
         void StatusBar::mousePressEvent(ftk::MouseClickEvent& event)
@@ -260,18 +309,15 @@ namespace djv
             {
                 tool = "Messages";
             }
-            else if (ftk::contains(p.infoLabel->getGeometry(), event.pos))
+            else if (
+                p.infoLabel->isVisible(false) &&
+                ftk::contains(p.infoLabel->getGeometry(), event.pos))
             {
-                tool = "Infofrmation";
+                tool = "Information";
             }
             if (!tool.empty())
             {
-                if (auto app = p.app.lock())
-                {
-                    auto toolsModel = app->getToolsModel();
-                    const auto active = toolsModel->getActiveTool();
-                    toolsModel->setActiveTool(tool != active ? tool : std::string());
-                }
+                _toggleTool(tool);
             }
         }
 
@@ -374,8 +420,22 @@ namespace djv
                     arg(tl::getLabel(info.audio))));
             }
             const std::string tooltip = ftk::join(s, "\n");
-            p.infoLabel->setTooltip(ftk::Format(tooltipFormat).
-                arg(!tooltip.empty() ? tooltip : tooltipDefault));
+            const std::string tooltipText = ftk::Format(tooltipFormat).
+                arg(!tooltip.empty() ? tooltip : tooltipDefault);
+            p.infoLabel->setTooltip(tooltipText);
+            p.infoButton->setTooltip(tooltipText);
+        }
+
+        void StatusBar::_toggleTool(const std::string& tool)
+        {
+            FTK_P();
+            if (auto app = p.app.lock())
+            {
+                auto toolsModel = app->getToolsModel();
+                const auto active = toolsModel->getActiveTool();
+                toolsModel->setActiveTool(
+                    tool != active ? tool : std::string());
+            }
         }
 
         void StatusBar::_showIndicatorPopup()

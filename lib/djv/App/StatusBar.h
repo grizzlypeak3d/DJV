@@ -50,6 +50,7 @@ namespace djv
             
         private:
             void _infoUpdate(const ftk::Path&, const tl::IOInfo&);
+            void _toggleTool(const std::string&);
             void _showIndicatorPopup();
 
             FTK_PRIVATE();

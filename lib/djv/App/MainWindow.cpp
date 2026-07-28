@@ -109,6 +109,7 @@ namespace djv
             std::shared_ptr<TabBar> tabBar;
             std::shared_ptr<BottomToolBar> bottomToolBar;
             std::shared_ptr<StatusBar> statusBar;
+            std::shared_ptr<ftk::HorizontalLayout> bottomRow;
             std::shared_ptr<ToolsWidget> toolsWidget;
             std::shared_ptr<ui::SetupDialog> setupDialog;
             std::shared_ptr<ui::AboutDialog> aboutDialog;
@@ -293,9 +294,15 @@ namespace djv
             p.toolsWidget->setParent(p.splitter2);
             p.timelineWidget->setParent(p.splitter);
             p.dividers["Bottom"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            p.bottomToolBar->setParent(p.layout);
-            p.dividers["Status"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            p.statusBar->setParent(p.layout);
+            p.bottomRow = ftk::HorizontalLayout::create(context, p.layout);
+            p.bottomRow->setSpacingRole(ftk::SizeRole::None);
+            ftk::setScreenshotTag(p.bottomRow, "MainWindow.BottomRow");
+            p.bottomToolBar->setParent(p.bottomRow);
+            p.dividers["BottomStatus"] = ftk::Divider::create(
+                context,
+                ftk::Orientation::Horizontal,
+                p.bottomRow);
+            p.statusBar->setParent(p.bottomRow);
 
             auto miscSettings = app->getSettingsModel()->getMisc();
             if (miscSettings.showSetup && !app->getHideSetup())
@@ -656,11 +663,17 @@ namespace djv
 
                 p.timelineWidget->setVisible(settings.timeline && !presentMode);
 
-                p.bottomToolBar->setVisible(settings.bottomToolBar && !presentMode);
-                p.dividers["Bottom"]->setVisible(settings.bottomToolBar && !presentMode);
-
-                p.statusBar->setVisible(settings.statusToolBar && !presentMode);
-                p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
+                const bool bottomVisible =
+                    settings.bottomToolBar && !presentMode;
+                const bool statusVisible =
+                    settings.statusToolBar && !presentMode;
+                p.bottomToolBar->setVisible(bottomVisible);
+                p.statusBar->setVisible(statusVisible);
+                p.dividers["BottomStatus"]->setVisible(
+                    bottomVisible && statusVisible);
+                p.bottomRow->setVisible(bottomVisible || statusVisible);
+                p.dividers["Bottom"]->setVisible(
+                    bottomVisible || statusVisible);
             }
         }
     }
