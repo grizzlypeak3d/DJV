@@ -39,7 +39,7 @@ namespace djv
             p.tools.push_back({ "Settings", "Settings", "W", true, ftk::Key::F10 });
             p.tools.push_back({ "Messages", "Messages", "X", false, ftk::Key::F11 });
             p.tools.push_back({ "System Log", std::string(), "Y", false, ftk::Key::F12 });
-            p.tools.push_back({ "Diagnostics", std::string(), "Z" });
+            p.tools.push_back({ "Diagnostics", std::string(), "Z", false, ftk::KeyShortcut() });
 
             std::string s;
             p.settings->get("/Tools/Tool.2", s);
