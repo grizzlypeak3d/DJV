@@ -68,6 +68,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<tl::Compare> > compare;
             std::shared_ptr<ftk::CmdLineOption<ftk::V2F> > wipeCenter;
             std::shared_ptr<ftk::CmdLineOption<float> > wipeRotation;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > frameRange;
             std::shared_ptr<ftk::CmdLineOption<double> > speed;
             std::shared_ptr<ftk::CmdLineOption<tl::Playback> > playback;
             std::shared_ptr<ftk::CmdLineOption<tl::Loop> > loop;
@@ -104,6 +105,39 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureShot;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureOutput;
         };
+
+        namespace
+        {
+            // "1-100", and "-10-20" for a sequence starting before zero. The
+            // separator is the first dash after the first character, so a
+            // negative start is not mistaken for it.
+            std::optional<ftk::RangeI64> parseFrameRange(const std::string& value)
+            {
+                std::optional<ftk::RangeI64> out;
+                const size_t i = value.find('-', 1);
+                if (i != std::string::npos && i + 1 < value.size())
+                {
+                    const std::string startStr = value.substr(0, i);
+                    const std::string endStr = value.substr(i + 1);
+                    try
+                    {
+                        size_t startEnd = 0;
+                        size_t endEnd = 0;
+                        const int64_t start = std::stoll(startStr, &startEnd);
+                        const int64_t end = std::stoll(endStr, &endEnd);
+                        // Both halves have to be used up, so that trailing
+                        // rubbish is rejected rather than quietly dropped.
+                        if (startEnd == startStr.size() && endEnd == endStr.size())
+                        {
+                            out = ftk::RangeI64(start, end);
+                        }
+                    }
+                    catch (const std::exception&)
+                    {}
+                }
+                return out;
+            }
+        }
 
         struct App::Private
         {
@@ -199,6 +233,15 @@ namespace djv
                 "Wipe rotation.",
                 "Compare",
                 0.F);
+            p.cmdLine.frameRange = ftk::CmdLineOption<std::string>::create(
+                { "-frameRange", "-fr" },
+                "Frame range of an image sequence (e.g., 1-100). This is the "
+                "range the sequence is meant to cover, which need not be the "
+                "frames on disk: a render in progress can be watched over the "
+                "range it will end up with, the frames that are not there yet "
+                "following the missing frames setting. Applies to the first "
+                "file opened.",
+                "Playback");
             p.cmdLine.speed = ftk::CmdLineOption<double>::create(
                 { "-speed" },
                 "Playback speed.",
@@ -369,6 +412,7 @@ namespace djv
                     p.cmdLine.loop,
                     p.cmdLine.timeUnits,
                     p.cmdLine.seek,
+                    p.cmdLine.frameRange,
                     p.cmdLine.inPoint,
                     p.cmdLine.outPoint,
                     p.cmdLine.ocioFileName,
@@ -518,16 +562,30 @@ namespace djv
                 });
         }
 
-        void App::open(const ftk::Path& path, const ftk::Path& audioPath)
+        void App::open(
+            const ftk::Path& path,
+            const ftk::Path& audioPath,
+            const std::optional<ftk::RangeI64>& frames)
         {
             FTK_P();
             ftk::DirListOptions dirListOptions;
             dirListOptions.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
             dirListOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+            bool first = true;
             for (const auto& i : tl::getPaths(_context, path, dirListOptions))
             {
                 auto item = std::make_shared<models::FilesModelItem>();
                 item->path = i;
+                if (first && frames.has_value())
+                {
+                    // Stated, so the frames on disk are not looked for and
+                    // the range is used as it is. A directory gives several
+                    // sequences and one range cannot describe them all, so
+                    // only the first takes it.
+                    item->path.setFrames(frames.value());
+                    item->framesStated = true;
+                }
+                first = false;
                 item->audioPath = audioPath;
                 p.filesModel->add(item);
                 p.recentFilesModel->addRecent(std::filesystem::u8path(path.get()));
@@ -1189,6 +1247,20 @@ namespace djv
                     audioFileName = p.cmdLine.audioFileName->getValue();
                 }
 
+                std::optional<ftk::RangeI64> frameRange;
+                if (p.cmdLine.frameRange->found())
+                {
+                    frameRange = parseFrameRange(p.cmdLine.frameRange->getValue());
+                    if (!frameRange.has_value())
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            ftk::Format("Cannot parse the frame range: \"{0}\"").
+                                arg(p.cmdLine.frameRange->getValue()),
+                            ftk::LogType::Error);
+                    }
+                }
+
                 for (const auto& input : p.cmdLine.inputs->getList())
                 {
                     ftk::Path path(input);
@@ -1196,7 +1268,9 @@ namespace djv
                     {
                         path = ftk::expandSeq(path, pathOptions);
                     }
-                    open(path, ftk::Path(audioFileName));
+                    open(path, ftk::Path(audioFileName), frameRange);
+                    // Only the first file opened takes the range.
+                    frameRange.reset();
 
                     if (auto player = p.player->get())
                     {
