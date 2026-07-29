@@ -529,6 +529,11 @@ namespace djv
             if (p.pickBinding.button == event.button &&
                 ftk::checkKeyModifier(p.pickBinding.modifier, event.modifiers))
             {
+                // The base class only claims the buttons bound to its own
+                // actions, so claim ours here; an unbound button is left
+                // free to open a context menu.
+                event.accept = true;
+                takeKeyFocus();
                 p.mouse.mode = Private::MouseMode::Picker;
                 const ftk::Box2I& g = getGeometry();
                 const ftk::V2I pos = event.pos - g.min;
@@ -542,6 +547,8 @@ namespace djv
             else if (p.frameShuttleBinding.button == event.button &&
                 ftk::checkKeyModifier(p.frameShuttleBinding.modifier, event.modifiers))
             {
+                event.accept = true;
+                takeKeyFocus();
                 p.mouse.mode = Private::MouseMode::Shuttle;
                 if (auto player = getPlayer())
                 {

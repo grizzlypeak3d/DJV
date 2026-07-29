@@ -69,6 +69,39 @@ namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            // A context menu of window chrome visibility toggles. The
+            // actions are the Window menu's own, so the check marks stay in
+            // sync and the toggles go through the same commands; the Window
+            // menu remains the complete inventory, and these are a second
+            // door to part of it.
+            std::function<std::shared_ptr<ftk::Menu>(void)> chromeMenuCallback(
+                const std::shared_ptr<ftk::Context>& context,
+                const std::shared_ptr<WindowActions>& windowActions,
+                const std::vector<std::string>& names)
+            {
+                std::weak_ptr<ftk::Context> contextWeak(context);
+                std::weak_ptr<WindowActions> windowActionsWeak(windowActions);
+                return
+                    [contextWeak, windowActionsWeak, names]() ->
+                    std::shared_ptr<ftk::Menu>
+                    {
+                        auto context = contextWeak.lock();
+                        auto windowActions = windowActionsWeak.lock();
+                        if (!context || !windowActions)
+                            return nullptr;
+                        auto out = ftk::Menu::create(context);
+                        auto actions = windowActions->getActions();
+                        for (const auto& name : names)
+                        {
+                            out->addAction(actions[name]);
+                        }
+                        return out;
+                    };
+            }
+        }
+
         struct MainWindow::Private
         {
             std::weak_ptr<App> app;
@@ -296,6 +329,63 @@ namespace djv
             p.bottomToolBar->setParent(p.layout);
             p.dividers["Status"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             p.statusBar->setParent(p.layout);
+
+            // Each context menu offers the band it belongs to, and only
+            // that band; the Window menu remains the one place that lists
+            // every piece of chrome together.
+            hLayout->setContextMenuCallback(chromeMenuCallback(
+                context,
+                p.windowActions,
+                {
+                    "FileToolBar",
+                    "CompareToolBar",
+                    "WindowToolBar",
+                    "ViewToolBar",
+                    "ToolsToolBar"
+                }));
+
+            // The timeline, playback controls and status bar form one band
+            // across the bottom of the window, so right clicking any of
+            // them offers the whole band rather than only itself.
+            const std::vector<std::string> bottomChrome =
+            {
+                "Timeline",
+                "BottomToolBar",
+                "StatusToolBar"
+            };
+            p.timelineWidget->setContextMenuCallback(
+                chromeMenuCallback(context, p.windowActions, bottomChrome));
+            p.bottomToolBar->setContextMenuCallback(
+                chromeMenuCallback(context, p.windowActions, bottomChrome));
+            p.statusBar->setContextMenuCallback(
+                chromeMenuCallback(context, p.windowActions, bottomChrome));
+
+            // Anywhere the click is not claimed, offer every toggle. The
+            // window itself is consulted last, so a band keeps its own
+            // menu; and because the viewport can never be hidden, this is
+            // the one door that cannot be closed by hiding chrome.
+            auto chromeMenu = chromeMenuCallback(
+                context,
+                p.windowActions,
+                {
+                    "FileToolBar",
+                    "CompareToolBar",
+                    "WindowToolBar",
+                    "ViewToolBar",
+                    "ToolsToolBar",
+                    "TabBar",
+                    "Timeline",
+                    "BottomToolBar",
+                    "StatusToolBar"
+                });
+            setContextMenuCallback(
+                [this, chromeMenu]() -> std::shared_ptr<ftk::Menu>
+                {
+                    // Presentation mode hides every piece of chrome
+                    // regardless of these settings, so the toggles would
+                    // do nothing you could see. Escape leaves the mode.
+                    return _p->presentMode->get() ? nullptr : chromeMenu();
+                });
 
             auto miscSettings = app->getSettingsModel()->getMisc();
             if (miscSettings.showSetup && !app->getHideSetup())
