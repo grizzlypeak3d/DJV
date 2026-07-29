@@ -262,7 +262,7 @@ namespace djv
             }
             else if (ftk::contains(p.infoLabel->getGeometry(), event.pos))
             {
-                tool = "Infofrmation";
+                tool = "Information";
             }
             if (!tool.empty())
             {
