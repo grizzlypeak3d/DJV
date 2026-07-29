@@ -137,7 +137,9 @@ namespace djv
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
+            std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > reloadObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > activeObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
@@ -1029,12 +1031,34 @@ namespace djv
                     }
                 });
 
+            // Most image sequence settings are read when a file is opened,
+            // but the missing frame policy is one to change while looking at
+            // a render in progress, so it is pushed to what is already open.
+            // Setting the options clears the cache, so frames that were read
+            // under the old policy are read again.
+            p.imageSeqObserver = ftk::Observer<models::ImageSeqSettings>::create(
+                p.settingsModel->observeImageSeq(),
+                [this](const models::ImageSeqSettings&)
+                {
+                    if (auto player = _p->player->get())
+                    {
+                        player->setIOOptions(_p->settingsModel->getIOOptions());
+                    }
+                });
+
             p.filesObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
                 p.filesModel->observeFiles(),
                 [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
                 {
                     _filesUpdate(value);
                 });
+            p.reloadObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                p.filesModel->observeReload(),
+                [this](const std::shared_ptr<models::FilesModelItem>& value)
+                {
+                    _reloadUpdate(value);
+                });
+
             p.activeObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
                 p.filesModel->observeActive(),
                 [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
@@ -1360,14 +1384,36 @@ namespace djv
                         options.ioOptions = p.settingsModel->getIOOptions();
                         options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
                         options.readThreadCount = imageSeq.readThreadCount;
+
+                        // A range that was asked for is used as it is. One
+                        // that was not is looked for on disk, so that
+                        // reopening picks up frames rendered since.
+                        options.seqExpand = !files[i]->framesStated;
                         timelines[i] = tl::Timeline::create(
                             _context,
                             files[i]->path,
                             files[i]->audioPath,
                             options);
+
+                        // Opening a sequence finds the frames on disk, which
+                        // the path does not know about when it names one
+                        // file. Kept beside the path rather than folded into
+                        // it: a path carrying a range is taken as a range
+                        // that was asked for, and reopening would stop
+                        // looking for frames that have arrived since.
+                        files[i]->timeRange = timelines[i]->getTimeRange();
+
+                        // Replaced rather than added to: a file that is
+                        // reopened comes back through here with its layers
+                        // already listed from the time before.
+                        files[i]->videoLayers.clear();
                         for (const auto& video : timelines[i]->getIOInfo().video)
                         {
                             files[i]->videoLayers.push_back(video.name);
+                        }
+                        if (files[i]->videoLayer >= files[i]->videoLayers.size())
+                        {
+                            files[i]->videoLayer = 0;
                         }
                     }
                     catch (const std::exception& e)
@@ -1379,6 +1425,56 @@ namespace djv
 
             p.files = files;
             p.timelines = timelines;
+        }
+
+        void App::_reloadUpdate(const std::shared_ptr<models::FilesModelItem>& item)
+        {
+            FTK_P();
+            if (!item)
+            {
+                return;
+            }
+
+            // Keep where playback had got to. _activeUpdate saves this for a
+            // file that is losing focus, which this one is not.
+            if (!p.activeFiles.empty() && p.activeFiles.front() == item)
+            {
+                if (auto player = p.player->get())
+                {
+                    item->speed = player->getSpeed();
+                    item->currentTime = player->getCurrentTime();
+                }
+            }
+            if (item->path.getFrames().has_value() &&
+                !item->currentTime.strictly_equal(tl::invalidTime))
+            {
+                const ftk::RangeI64& frames = item->path.getFrames().value();
+                item->currentTime = OTIO_NS::RationalTime(
+                    ftk::clamp(
+                        item->currentTime.value(),
+                        static_cast<double>(frames.min()),
+                        static_cast<double>(frames.max())),
+                    item->currentTime.rate());
+            }
+
+            const auto i = std::find(p.files.begin(), p.files.end(), item);
+            if (i != p.files.end())
+            {
+                p.timelines[i - p.files.begin()].reset();
+            }
+
+            // Thumbnails are cached by path, height and time, and the
+            // timelines behind them by path alone. None of that mentions the
+            // frame range, so a range that has changed has to throw them out
+            // by hand or the old ones go on being served.
+            _context->getSystem<tl::ui::ThumbnailSystem>()->clearCache();
+
+            // Both updates decide what can be kept by comparing item
+            // pointers, and the pointer has not changed, so the timeline and
+            // the player it belongs to have to be taken out of the way first.
+            p.activeFiles.clear();
+            _filesUpdate(p.filesModel->getFiles());
+            _activeUpdate(p.filesModel->getActive());
         }
 
         void App::_activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& activeFiles)

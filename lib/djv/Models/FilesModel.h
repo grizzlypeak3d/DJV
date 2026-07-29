@@ -31,6 +31,17 @@ namespace djv
             OTIO_NS::RationalTime    currentTime = tl::invalidTime;
             OTIO_NS::TimeRange       inOutRange  = tl::invalidTimeRange;
 
+            //! The range the file turned out to have when it was opened. For
+            //! an image sequence this is the frames that were found, which
+            //! the path does not carry when it names a single file.
+            OTIO_NS::TimeRange       timeRange   = tl::invalidTimeRange;
+
+            //! Whether the range on the path was asked for rather than found.
+            //! A stated range is used as it is; an unstated one is looked for
+            //! on disk each time the file is opened, so that frames rendered
+            //! since last time are picked up.
+            bool                     framesStated = false;
+
             bool                     newFile = true;
         };
 
@@ -142,6 +153,18 @@ namespace djv
 
             //! Set a layer.
             void setLayer(const std::shared_ptr<FilesModelItem>&, int layer);
+
+            //! Set the frame range of an image sequence. This is the range the
+            //! sequence is meant to cover, which need not be the frames that
+            //! are on disk: a render in progress is watched over the range it
+            //! will have when it finishes. The file is reopened, since
+            //! everything about a timeline is derived from its path.
+            void setFrames(
+                const std::shared_ptr<FilesModelItem>&,
+                const ftk::RangeI64&);
+
+            //! Observe files that have to be reopened.
+            std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > observeReload() const;
 
             //! Set the "A" file to the next layer.
             void nextLayer();

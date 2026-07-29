@@ -7,6 +7,8 @@
 #include <djv/UI/FileThumbnail.h>
 #include <djv/Models/SettingsModel.h>
 
+#include <tlRender/Timeline/Util.h>
+
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/CheckBox.h>
@@ -15,11 +17,14 @@
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/GridLayout.h>
+#include <ftk/UI/IntEdit.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/Spacer.h>
+
+#include <ftk/Core/Timer.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/ToolButton.h>
 
@@ -37,6 +42,8 @@ namespace djv
                 std::shared_ptr<ftk::ToolButton> aButton;
                 std::shared_ptr<ftk::ToolButton> bButton;
                 std::shared_ptr<ftk::ComboBox> layerComboBox;
+                std::shared_ptr<ftk::IntEdit> frameStartEdit;
+                std::shared_ptr<ftk::IntEdit> frameEndEdit;
             };
         }
 
@@ -57,6 +64,13 @@ namespace djv
             std::shared_ptr<ftk::FormLayout> compareLayout;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::GridLayout> widgetLayout;
+
+            // Every step of a spin box is a value change, and applying a
+            // range reopens the file, so the edits are let go of before the
+            // range is acted on.
+            std::shared_ptr<ftk::Timer> rangeTimer;
+            std::shared_ptr<models::FilesModelItem> rangeItem;
+            ftk::RangeI64 rangeValue;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
@@ -83,6 +97,8 @@ namespace djv
             FTK_P();
 
             p.settings = app->getSettings();
+
+            p.rangeTimer = ftk::Timer::create(context);
 
             p.aButtonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Radio);
             p.bButtonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Check);
@@ -306,6 +322,34 @@ namespace djv
             return out;
         }
 
+        void FilesTool::_rangeUpdate(
+            const std::shared_ptr<models::FilesModelItem>& item,
+            const ftk::RangeI64& value)
+        {
+            FTK_P();
+            p.rangeItem = item;
+            p.rangeValue = value;
+
+            // Restarted on each change, so holding a spin box down reopens
+            // the file once, at the range it is left on, rather than at every
+            // value passed through on the way there.
+            p.rangeTimer->start(
+                std::chrono::milliseconds(500),
+                [this]
+                {
+                    FTK_P();
+                    if (p.rangeItem)
+                    {
+                        if (auto app = _app.lock())
+                        {
+                            app->getFilesModel()->setFrames(
+                                p.rangeItem, p.rangeValue);
+                        }
+                        p.rangeItem.reset();
+                    }
+                });
+        }
+
         void FilesTool::_filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
         {
             FTK_P();
@@ -320,6 +364,8 @@ namespace djv
                 const auto& b = app->getFilesModel()->getB();
                 if (auto context = getContext())
                 {
+                    const std::vector<std::string> seqExts = tl::getExts(
+                        context, static_cast<int>(tl::FileType::Seq));
                     size_t row = 0;
                     for (const auto& item : value)
                     {
@@ -374,15 +420,107 @@ namespace djv
                                 }
                             });
 
+                        // Only an image sequence has a frame range to state.
+                        // The range is what the sequence is meant to cover,
+                        // which need not be what is on disk yet.
+                        if (item->path.hasNum() && item->path.testExt(seqExts))
+                        {
+                            auto rangeLayout = ftk::HorizontalLayout::create(
+                                context, p.widgetLayout);
+                            rangeLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
+                            rangeLayout->setVAlign(ftk::VAlign::Center);
+                            p.widgetLayout->setGridPos(rangeLayout, row, 5);
+
+                            widget.frameStartEdit = ftk::IntEdit::create(
+                                context, rangeLayout);
+                            widget.frameEndEdit = ftk::IntEdit::create(
+                                context, rangeLayout);
+                            widget.frameStartEdit->setRange(-999999, 999999);
+                            widget.frameEndEdit->setRange(-999999, 999999);
+                            // What the file turned out to be when it opened.
+                            // The path only knows the range once one has been
+                            // stated for it; until then it names one file.
+                            int start = 0;
+                            int end = 0;
+                            if (!tl::compareExact(item->timeRange, tl::invalidTimeRange))
+                            {
+                                start = static_cast<int>(
+                                    item->timeRange.start_time().value());
+                                end = start + static_cast<int>(
+                                    item->timeRange.duration().value()) - 1;
+                            }
+                            else if (item->path.getFrames().has_value())
+                            {
+                                const ftk::RangeI64& frames =
+                                    item->path.getFrames().value();
+                                start = static_cast<int>(frames.min());
+                                end = static_cast<int>(frames.max());
+                            }
+                            widget.frameStartEdit->setValue(start);
+                            widget.frameEndEdit->setValue(end);
+                            widget.frameStartEdit->setTooltip(
+                                "Start frame of the sequence.\n"
+                                "\n"
+                                "Frames that are not there yet follow the\n"
+                                "missing frames setting, so a render can be\n"
+                                "opened over the range it will end up with.");
+                            widget.frameEndEdit->setTooltip(
+                                "End frame of the sequence.");
+
+                            // Each holds the other's end of the range, so
+                            // neither can be taken past it. A range that runs
+                            // backwards is silently turned around when it is
+                            // built, which leaves the two edits showing
+                            // something the file does not have.
+                            widget.frameStartEdit->setRange(
+                                -999999, widget.frameEndEdit->getValue());
+                            widget.frameEndEdit->setRange(
+                                widget.frameStartEdit->getValue(), 999999);
+
+                            // Weak, so the two edits do not keep each other
+                            // alive through their callbacks.
+                            std::weak_ptr<ftk::IntEdit> startWeak =
+                                widget.frameStartEdit;
+                            std::weak_ptr<ftk::IntEdit> endWeak =
+                                widget.frameEndEdit;
+                            widget.frameStartEdit->setCallback(
+                                [this, item, endWeak](int value)
+                                {
+                                    if (auto end = endWeak.lock())
+                                    {
+                                        end->setRange(value, 999999);
+                                        _rangeUpdate(
+                                            item,
+                                            ftk::RangeI64(value, end->getValue()));
+                                    }
+                                });
+                            widget.frameEndEdit->setCallback(
+                                [this, item, startWeak](int value)
+                                {
+                                    if (auto start = startWeak.lock())
+                                    {
+                                        start->setRange(-999999, value);
+                                        _rangeUpdate(
+                                            item,
+                                            ftk::RangeI64(start->getValue(), value));
+                                    }
+                                });
+                        }
+
                         p.widgets.push_back(widget);
 
                         if (0 == row)
                         {
                             ftk::setScreenshotTag(widget.layerComboBox, "Files.CurrentLayer");
+                            if (widget.frameStartEdit)
+                            {
+                                ftk::setScreenshotTag(
+                                    widget.frameStartEdit, "Files.FrameRange");
+                            }
 
                             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.widgetLayout);
                             spacer->setSpacingRole(ftk::SizeRole::SpacingTool);
-                            p.widgetLayout->setGridPos(spacer, 0, 5);
+                            p.widgetLayout->setGridPos(spacer, 0, 6);
                         }
                         ++row;
                     }

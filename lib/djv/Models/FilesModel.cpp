@@ -21,6 +21,7 @@ namespace djv
             std::shared_ptr<ftk::ObservableList<int> > bIndexes;
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > active;
             std::shared_ptr<ftk::ObservableList<int> > layers;
+            std::shared_ptr<ftk::Observable<std::shared_ptr<FilesModelItem> > > reload;
             std::shared_ptr<ftk::Observable<tl::CompareOptions> > compareOptions;
             std::shared_ptr<ftk::Observable<tl::CompareTime> > compareTime;
         };
@@ -33,6 +34,7 @@ namespace djv
 
             p.files = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.a = ftk::Observable<std::shared_ptr<FilesModelItem> >::create();
+            p.reload = ftk::Observable<std::shared_ptr<FilesModelItem> >::create();
             p.aIndex = ftk::Observable<int>::create();
             p.b = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.bIndexes = ftk::ObservableList<int>::create();
@@ -447,6 +449,57 @@ namespace djv
         std::shared_ptr<ftk::IObservableList<int> > FilesModel::observeLayers() const
         {
             return _p->layers;
+        }
+
+        void FilesModel::setFrames(
+            const std::shared_ptr<FilesModelItem>& item,
+            const ftk::RangeI64& value)
+        {
+            FTK_P();
+            const int index = _getIndex(item);
+            if (index != -1)
+            {
+                const auto& file = p.files->getItem(index);
+
+                // What the file covers now. Until a range has been stated for
+                // it that is the range it was opened as, not the one on the
+                // path: a path that names one file carries the single frame
+                // parsed out of its name, so comparing against that takes a
+                // range matching the file name as no change at all.
+                ftk::RangeI64 current;
+                if (!tl::compareExact(file->timeRange, tl::invalidTimeRange))
+                {
+                    const int64_t start = static_cast<int64_t>(
+                        file->timeRange.start_time().value());
+                    current = ftk::RangeI64(
+                        start,
+                        start + static_cast<int64_t>(
+                            file->timeRange.duration().value()) - 1);
+                }
+                else if (file->path.getFrames().has_value())
+                {
+                    current = file->path.getFrames().value();
+                }
+
+                if (current != value || !file->framesStated)
+                {
+                    file->path.setFrames(value);
+                    file->framesStated = true;
+
+                    // In timeline time, so the range moving out from under it
+                    // makes it meaningless. The current time is brought back
+                    // inside the range when the file is reopened, where the
+                    // live playback position is known.
+                    file->inOutRange = tl::invalidTimeRange;
+
+                    p.reload->setAlways(file);
+                }
+            }
+        }
+
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > FilesModel::observeReload() const
+        {
+            return _p->reload;
         }
 
         void FilesModel::setLayer(const std::shared_ptr<FilesModelItem>& item, int layer)

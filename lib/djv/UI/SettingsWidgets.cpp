@@ -471,6 +471,7 @@ namespace djv
             std::shared_ptr<ftk::LineEdit> audioFileNameEdit;
             std::shared_ptr<ftk::IntEdit> maxDigitsEdit;
             std::shared_ptr<ftk::DoubleEdit> defaultSpeedEdit;
+            std::shared_ptr<ftk::ComboBox> missingFramesComboBox;
             std::shared_ptr<ftk::IntEdit> threadsEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
@@ -514,6 +515,19 @@ namespace djv
             p.defaultSpeedEdit = ftk::DoubleEdit::create(context);
             p.defaultSpeedEdit->setRange(1.0, 120.0);
 
+            p.missingFramesComboBox = ftk::ComboBox::create(
+                context, tl::getMissingFramesLabels());
+            p.missingFramesComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.missingFramesComboBox->setTooltip(
+                "What to show for a frame a sequence does not have, which\n"
+                "happens with a render still in progress.\n"
+                "\n"
+                "* Error: The frame does not read.\n"
+                "* Hold: Repeat the nearest frame before it.\n"
+                "* Black: A blank frame.\n"
+                "\n"
+                "A timeline that says what it wants is followed instead.");
+
             p.threadsEdit = ftk::IntEdit::create(context);
             p.threadsEdit->setRange(1, 64);
 
@@ -528,6 +542,7 @@ namespace djv
             p.defaultSpeedEdit->setParent(hLayout);
             ftk::Label::create(context, "FPS", hLayout);
             p.layout->addRow("Default speed:", hLayout);
+            p.layout->addRow("Missing frames:", p.missingFramesComboBox);
             p.layout->addRow("I/O threads:", p.threadsEdit);
 
             p.settingsObserver = ftk::Observer<models::ImageSeqSettings>::create(
@@ -542,6 +557,8 @@ namespace djv
                     p.layout->setRowVisible(p.audioFileNameEdit, tl::ImageSeqAudio::FileName == value.audio);
                     p.maxDigitsEdit->setValue(value.maxDigits);
                     p.defaultSpeedEdit->setValue(value.io.defaultSpeed);
+                    p.missingFramesComboBox->setCurrentIndex(
+                        static_cast<int>(value.io.missingFrames));
                     p.threadsEdit->setValue(value.readThreadCount);
                 });
 
@@ -587,6 +604,15 @@ namespace djv
                     FTK_P();
                     models::ImageSeqSettings settings = p.settings->getImageSeq();
                     settings.io.defaultSpeed = value;
+                    p.settings->setImageSeq(settings);
+                });
+
+            p.missingFramesComboBox->setIndexCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    models::ImageSeqSettings settings = p.settings->getImageSeq();
+                    settings.io.missingFrames = static_cast<tl::MissingFrames>(value);
                     p.settings->setImageSeq(settings);
                 });
 

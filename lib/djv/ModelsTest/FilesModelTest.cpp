@@ -50,6 +50,7 @@ namespace djv
             _files();
             _navigation();
             _compare();
+            _frames();
             _persistence();
         }
 
@@ -166,6 +167,77 @@ namespace djv
             model->setCompareOptions(options);
             FTK_ASSERT(ftk::fuzzyCompare(0.75F, model->getCompareOptions().overlay));
             FTK_ASSERT(observed);
+        }
+
+        void FilesModelTest::_frames()
+        {
+            auto settings = createTestSettings(_context);
+            auto model = models::FilesModel::create(settings);
+
+            auto item = makeItem("/tmp/render.0050.exr");
+            item->path.setFrames(ftk::RangeI64(50, 52));
+            item->currentTime = OTIO_NS::RationalTime(51.0, 24.0);
+            item->inOutRange = OTIO_NS::TimeRange(
+                OTIO_NS::RationalTime(50.0, 24.0),
+                OTIO_NS::RationalTime(3.0, 24.0));
+            model->add(item);
+
+            std::shared_ptr<models::FilesModelItem> reloaded;
+            auto observer = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                model->observeReload(),
+                [&reloaded](const std::shared_ptr<models::FilesModelItem>& value)
+                {
+                    reloaded = value;
+                },
+                ftk::ObserverAction::Suppress);
+
+            // Stating a wider range reopens the file, and drops the in/out
+            // range, which was in the old range's terms.
+            model->setFrames(item, ftk::RangeI64(1, 100));
+            FTK_ASSERT(reloaded == item);
+            FTK_ASSERT(item->path.getFrames().has_value());
+            FTK_ASSERT(ftk::RangeI64(1, 100) == item->path.getFrames().value());
+            FTK_ASSERT(tl::compareExact(item->inOutRange, tl::invalidTimeRange));
+
+            // The same range again is not a reopen.
+            reloaded.reset();
+            model->setFrames(item, ftk::RangeI64(1, 100));
+            FTK_ASSERT(!reloaded);
+
+            // A range stated against what the file was opened as, not
+            // against the frame parsed out of its name. Opening one file of a
+            // sequence leaves the path knowing only that frame, so narrowing
+            // the range down to it is still a change.
+            {
+                auto opened = makeItem("/tmp/shot.0001.exr");
+                FTK_ASSERT(ftk::RangeI64(1, 1) == opened->path.getFrames().value());
+                opened->timeRange = OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(1.0, 24.0),
+                    OTIO_NS::RationalTime(5.0, 24.0));
+                model->add(opened);
+
+                reloaded.reset();
+                model->setFrames(opened, ftk::RangeI64(1, 1));
+                FTK_ASSERT(reloaded == opened);
+                FTK_ASSERT(ftk::RangeI64(1, 1) == opened->path.getFrames().value());
+
+                // And the range it was opened as is not a change.
+                opened->timeRange = OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(1.0, 24.0),
+                    OTIO_NS::RationalTime(1.0, 24.0));
+                reloaded.reset();
+                model->setFrames(opened, ftk::RangeI64(1, 1));
+                FTK_ASSERT(!reloaded);
+            }
+
+            // A file the model does not hold is ignored. Parsing the number
+            // out of its name already gave it a range of that one frame, so
+            // what is checked is that the range did not move.
+            auto other = makeItem("/tmp/other.0001.exr");
+            FTK_ASSERT(ftk::RangeI64(1, 1) == other->path.getFrames().value());
+            model->setFrames(other, ftk::RangeI64(1, 10));
+            FTK_ASSERT(!reloaded);
+            FTK_ASSERT(ftk::RangeI64(1, 1) == other->path.getFrames().value());
         }
 
         void FilesModelTest::_persistence()

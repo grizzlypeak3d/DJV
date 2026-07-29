@@ -160,6 +160,7 @@ namespace djv
 
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
+            void _reloadUpdate(const std::shared_ptr<models::FilesModelItem>&);
             void _layersUpdate(const std::vector<int>&);
             void _audioUpdate();
 
