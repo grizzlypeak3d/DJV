@@ -580,6 +580,21 @@ namespace djv
             p.fileNameLabel->setText(!s.empty() ? s : "(No file)");
             ftk::setScreenshotTag(p.fileNameLabel, "View.HUD.FileName");
 
+            std::vector<std::string> info;
+            if (!p.ioInfo.video.empty())
+            {
+                info.push_back(std::string(ftk::Format("V: {0}").
+                    arg(ftk::getLabel(p.ioInfo.video[0]))));
+            }
+            if (p.ioInfo.audio.isValid())
+            {
+                info.push_back(std::string(ftk::Format("A: {0}").
+                    arg(tl::getLabel(p.ioInfo.audio, true))));
+            }
+            p.infoLabel->setText(ftk::join(info, ", "));
+            p.infoLabel->setVisible(!info.empty());
+            ftk::setScreenshotTag(p.infoLabel, "View.HUD.Info");
+
             s = std::string();
             if (auto app = p.app.lock())
             {
@@ -614,24 +629,6 @@ namespace djv
                 arg(static_cast<int>(p.cacheInfo.videoPercentage), 3).
                 arg(static_cast<int>(p.cacheInfo.audioPercentage), 3));
             ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");
-
-            // The file name is already its own HUD item, so it is not repeated
-            // here.
-            std::vector<std::string> info;
-            if (!p.ioInfo.video.empty())
-            {
-                info.push_back(std::string(ftk::Format("V: {0}").
-                    arg(ftk::getLabel(p.ioInfo.video[0]))));
-            }
-            if (p.ioInfo.audio.isValid())
-            {
-                info.push_back(std::string(ftk::Format("A: {0}").
-                    arg(tl::getLabel(p.ioInfo.audio, true))));
-            }
-            p.infoLabel->setText(!info.empty() ?
-                ftk::join(info, ", ") :
-                "(No media)");
-            ftk::setScreenshotTag(p.infoLabel, "View.HUD.Info");
 
             p.hudLayout->setVisible(p.hudOptions.enabled);
         }
