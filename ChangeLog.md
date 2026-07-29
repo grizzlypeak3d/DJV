@@ -1,6 +1,7 @@
 ## 3.5.0
 
 Changes:
+* Add support for OTIO multiple media references.
 * Add support for OTIO spatial coordinates.
 * Add audio export.
 * Add a waveform height option.
@@ -16,6 +17,7 @@ Changes:
 * Add the aom library for AV1 decoding support (macOS and Linux).
 * Allow the "Escape" key to be used for keyboard shortcuts.
 * Add image I/O library versions to the system information.
+* Performance improvements.
 * Style updates.
 
 Fixes:
