@@ -168,6 +168,10 @@ namespace djv
 
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
+            // Reopen the active files. When the timeline is about to be a
+            // different shape, the position and the in/out range cannot be
+            // carried over as they are, since both are in timeline time.
+            void _reload(bool restructured);
             void _reloadUpdate(const std::shared_ptr<models::FilesModelItem>&);
             void _layersUpdate(const std::vector<int>&);
             void _audioUpdate();

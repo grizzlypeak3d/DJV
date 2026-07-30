@@ -55,6 +55,7 @@
 #include <ftk/Core/Timer.h>
 
 #include <filesystem>
+#include <optional>
 
 namespace djv
 {
@@ -597,6 +598,11 @@ namespace djv
 
         void App::reload()
         {
+            _reload(false);
+        }
+
+        void App::_reload(bool restructured)
+        {
             FTK_P();
             const auto activeFiles = p.activeFiles;
             const auto files = p.files;
@@ -611,13 +617,37 @@ namespace djv
                 }
             }
             p.activeFiles.clear();
+            std::optional<int64_t> frame;
             if (!activeFiles.empty())
             {
                 if (auto player = p.player->get())
                 {
                     activeFiles.front()->speed = player->getSpeed();
-                    activeFiles.front()->currentTime = player->getCurrentTime();
-                    activeFiles.front()->inOutRange = player->getInOutRange();
+                    if (restructured)
+                    {
+                        // The position and the in/out range are both in
+                        // timeline time, and the timeline is about to be a
+                        // different length, so neither means the same thing
+                        // afterwards. What does carry over is the frame being
+                        // looked at, which the media names in its own time.
+                        frame = player->getTimeline()->getMediaFrame(
+                            player->getCurrentTime());
+                        if (!frame.has_value())
+                        {
+                            // Sitting in a hole, where there is no clip to name
+                            // the frame. The time itself is the best guess, and
+                            // under Gaps it is exactly right.
+                            frame = static_cast<int64_t>(
+                                player->getCurrentTime().value());
+                        }
+                        activeFiles.front()->currentTime = tl::invalidTime;
+                        activeFiles.front()->inOutRange = tl::invalidTimeRange;
+                    }
+                    else
+                    {
+                        activeFiles.front()->currentTime = player->getCurrentTime();
+                        activeFiles.front()->inOutRange = player->getInOutRange();
+                    }
                 }
             }
 
@@ -626,6 +656,27 @@ namespace djv
 
             _filesUpdate(files);
             _activeUpdate(activeFiles);
+
+            if (frame.has_value())
+            {
+                if (auto player = p.player->get())
+                {
+                    // Asked against the start rather than where playback was
+                    // left, which may be past the end of a timeline that has
+                    // just become shorter. A frame the new timeline does not
+                    // hold snaps to one it does.
+                    const auto& timeRange = player->getTimeRange();
+                    if (const auto time =
+                        player->getTimeline()->getTimelineTime(
+                            timeRange.start_time(),
+                            OTIO_NS::RationalTime(
+                                static_cast<double>(frame.value()),
+                                timeRange.duration().rate())))
+                    {
+                        player->seek(time.value());
+                    }
+                }
+            }
         }
 
         std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > App::observePlayer() const
@@ -1114,7 +1165,7 @@ namespace djv
                     p.missingFrames = value.io.missingFrames;
                     if (reopen)
                     {
-                        reload();
+                        _reload(true);
                     }
                     else if (auto player = p.player->get())
                     {
