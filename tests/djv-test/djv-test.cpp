@@ -77,7 +77,7 @@ namespace djv
             return out;
         }
 
-        void App::run()
+        int App::run()
         {
             FTK_P();
 
@@ -110,16 +110,24 @@ namespace djv
             }
 
             // Run the tests.
+            size_t failureCount = 0;
             for (const auto& test : runTests)
             {
                 _context->tick();
                 _print(ftk::Format("Running test: {0}").arg(test->getName()));
                 test->run();
+                failureCount += test->getFailureCount();
             }
 
             const auto now = std::chrono::steady_clock::now();
             const std::chrono::duration<float> diff = now - p.startTime;
             _print(ftk::Format("Seconds elapsed: {0}").arg(diff.count(), 2));
+            _print(ftk::Format("Failures: {0}").arg(failureCount));
+
+            // The count is printed rather than returned: exit codes are
+            // truncated to eight bits, so a run with a multiple of 256
+            // failures would report success.
+            return failureCount > 0 ? 1 : 0;
         }
     }
 }
@@ -133,7 +141,7 @@ FTK_MAIN()
         auto app = djv::tests::App::create(context, args);
         if (app->hasCmdLineHelp())
             return 0;
-        app->run();
+        return app->run();
     }
     catch (const std::exception& e)
     {
