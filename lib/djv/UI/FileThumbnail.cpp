@@ -120,7 +120,7 @@ namespace djv
                     p.thumbnail.request = thumbnailSystem->getThumbnail(
                         p.item->path,
                         p.thumbnail.height,
-                        tl::invalidTime,
+                        std::nullopt,
                         p.ioOptions);
                 }
             }

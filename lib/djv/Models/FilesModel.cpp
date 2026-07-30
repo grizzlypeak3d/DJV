@@ -467,14 +467,14 @@ namespace djv
                 // parsed out of its name, so comparing against that takes a
                 // range matching the file name as no change at all.
                 ftk::RangeI64 current;
-                if (!tl::compareExact(file->timeRange, tl::invalidTimeRange))
+                if (file->timeRange.has_value())
                 {
                     const int64_t start = static_cast<int64_t>(
-                        file->timeRange.start_time().value());
+                        file->timeRange->start_time().value());
                     current = ftk::RangeI64(
                         start,
                         start + static_cast<int64_t>(
-                            file->timeRange.duration().value()) - 1);
+                            file->timeRange->duration().value()) - 1);
                 }
                 else if (file->path.getFrames().has_value())
                 {
@@ -490,7 +490,7 @@ namespace djv
                     // makes it meaningless. The current time is brought back
                     // inside the range when the file is reopened, where the
                     // live playback position is known.
-                    file->inOutRange = tl::invalidTimeRange;
+                    file->inOutRange.reset();
 
                     p.reload->setAlways(file);
                 }

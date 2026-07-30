@@ -33,7 +33,7 @@ namespace djv
             models::HUDOptions hudOptions;
             ftk::Path path;
             tl::IOInfo ioInfo;
-            OTIO_NS::RationalTime currentTime = tl::invalidTime;
+            std::optional<OTIO_NS::RationalTime> currentTime;
             double fps = 0.0;
             size_t droppedFrames = 0;
             size_t videoFramesSize = 0;
@@ -89,7 +89,8 @@ namespace djv
             struct MouseData
             {
                 MouseMode mode = MouseMode::None;
-                OTIO_NS::RationalTime shuttleStart = tl::invalidTime;
+                // Where the shuttle started, unset until it is grabbed.
+                std::optional<OTIO_NS::RationalTime> shuttleStart;
             };
             MouseData mouse;
         };
@@ -459,7 +460,7 @@ namespace djv
                 p.path = ftk::Path();
                 p.ioInfo = tl::IOInfo();
                 p.mediaReferenceKeyObserver.reset();
-                p.currentTime = tl::invalidTime;
+                p.currentTime.reset();
                 p.currentTimeObserver.reset();
                 p.videoObserver.reset();
                 p.cacheInfo = tl::PlayerCacheInfo();
@@ -487,13 +488,14 @@ namespace djv
             switch (p.mouse.mode)
             {
             case Private::MouseMode::Shuttle:
-                if (auto player = getPlayer())
+                if (auto player = getPlayer();
+                    player && p.mouse.shuttleStart.has_value())
                 {
                     const OTIO_NS::RationalTime offset = OTIO_NS::RationalTime(
                         (event.pos.x - _getMousePressPos().x) * .05F * p.frameShuttleScale,
-                        p.mouse.shuttleStart.rate()).round();
+                        p.mouse.shuttleStart->rate()).round();
                     const OTIO_NS::TimeRange& timeRange = player->getTimeRange();
-                    OTIO_NS::RationalTime t = p.mouse.shuttleStart + offset;
+                    OTIO_NS::RationalTime t = *p.mouse.shuttleStart + offset;
                     if (t < timeRange.start_time())
                     {
                         t = timeRange.end_time_exclusive() - (timeRange.start_time() - t);

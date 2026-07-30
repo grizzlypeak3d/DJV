@@ -36,7 +36,8 @@ namespace djv
             std::weak_ptr<App> app;
             std::shared_ptr<tl::Player> player;
             std::shared_ptr<ftk::DoubleModel> speedModel;
-            OTIO_NS::RationalTime startTime = tl::invalidTime;
+            // Where the frame shuttle started, unset until it is grabbed.
+            std::optional<OTIO_NS::RationalTime> startTime;
 
             std::map<std::string, std::shared_ptr<ftk::ToolButton> > buttons;
             std::shared_ptr<tl::ui::PlaybackLoopWidget> loopWidget;
@@ -222,11 +223,11 @@ namespace djv
                 [this](int value)
                 {
                     FTK_P();
-                    if (p.player)
+                    if (p.player && p.startTime.has_value())
                     {
                         p.player->seek(OTIO_NS::RationalTime(
-                            p.startTime.value() + value,
-                            p.startTime.rate()));
+                            p.startTime->value() + value,
+                            p.startTime->rate()));
                     }
                 });
 
@@ -437,8 +438,8 @@ namespace djv
             else
             {
                 p.loopWidget->setLoop(tl::Loop::Loop);
-                p.currentTimeEdit->setValue(tl::invalidTime);
-                p.durationLabel->setValue(tl::invalidTime);
+                p.currentTimeEdit->setValue(std::nullopt);
+                p.durationLabel->setValue(std::nullopt);
                 p.speedModel->setValue(0.0);
                 p.speedButton->setText(ftk::Format("{0}").arg(0.0, 2));
 

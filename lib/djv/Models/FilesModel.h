@@ -28,13 +28,17 @@ namespace djv
             size_t                   videoLayer  = 0;
 
             double                   speed       = -1.0;
-            OTIO_NS::RationalTime    currentTime = tl::invalidTime;
-            OTIO_NS::TimeRange       inOutRange  = tl::invalidTimeRange;
+
+            //! Where playback had got to, and the in/out points, when the
+            //! file last lost focus. Unset until it has been played.
+            std::optional<OTIO_NS::RationalTime> currentTime;
+            std::optional<OTIO_NS::TimeRange>    inOutRange;
 
             //! The range the file turned out to have when it was opened. For
             //! an image sequence this is the frames that were found, which
-            //! the path does not carry when it names a single file.
-            OTIO_NS::TimeRange       timeRange   = tl::invalidTimeRange;
+            //! the path does not carry when it names a single file. Unset
+            //! until the file has been opened.
+            std::optional<OTIO_NS::TimeRange>    timeRange;
 
             //! Whether the range on the path was asked for rather than found.
             //! A stated range is used as it is; an unstated one is looked for
