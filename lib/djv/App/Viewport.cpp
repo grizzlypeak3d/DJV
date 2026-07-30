@@ -488,23 +488,28 @@ namespace djv
             switch (p.mouse.mode)
             {
             case Private::MouseMode::Shuttle:
-                if (auto player = getPlayer();
-                    player && p.mouse.shuttleStart.has_value())
+                if (auto player = getPlayer())
                 {
-                    const OTIO_NS::RationalTime offset = OTIO_NS::RationalTime(
-                        (event.pos.x - _getMousePressPos().x) * .05F * p.frameShuttleScale,
-                        p.mouse.shuttleStart->rate()).round();
-                    const OTIO_NS::TimeRange& timeRange = player->getTimeRange();
-                    OTIO_NS::RationalTime t = *p.mouse.shuttleStart + offset;
-                    if (t < timeRange.start_time())
+                    // The mode is taken on the press whether or not there was
+                    // a player to read a position from, so the two can
+                    // disagree and the shuttle has nothing to move from.
+                    if (p.mouse.shuttleStart.has_value())
                     {
-                        t = timeRange.end_time_exclusive() - (timeRange.start_time() - t);
+                        const OTIO_NS::RationalTime offset = OTIO_NS::RationalTime(
+                            (event.pos.x - _getMousePressPos().x) * .05F * p.frameShuttleScale,
+                            p.mouse.shuttleStart->rate()).round();
+                        const OTIO_NS::TimeRange& timeRange = player->getTimeRange();
+                        OTIO_NS::RationalTime t = *p.mouse.shuttleStart + offset;
+                        if (t < timeRange.start_time())
+                        {
+                            t = timeRange.end_time_exclusive() - (timeRange.start_time() - t);
+                        }
+                        else if (t > timeRange.end_time_exclusive())
+                        {
+                            t = timeRange.start_time() + (t - timeRange.end_time_exclusive());
+                        }
+                        player->seek(t);
                     }
-                    else if (t > timeRange.end_time_exclusive())
-                    {
-                        t = timeRange.start_time() + (t - timeRange.end_time_exclusive());
-                    }
-                    player->seek(t);
                 }
                 break;
             case Private::MouseMode::Picker:

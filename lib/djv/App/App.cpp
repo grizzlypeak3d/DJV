@@ -109,11 +109,6 @@ namespace djv
 
         namespace
         {
-            // The command line conversions. Both end the run on a value they
-            // cannot use, the way an option that will not parse into its type
-            // does: going on with the option ignored gives the wrong frames
-            // and says nothing about it.
-
             // "1-100", and "-10-20" for a sequence starting before zero. The
             // separator is the first dash after the first character, so a
             // negative start is not mistaken for it.
@@ -151,8 +146,6 @@ namespace djv
                 return out.value();
             }
 
-            // A time in the current units, named so that the message can say
-            // which option it came from.
             OTIO_NS::RationalTime parseTime(
                 const std::string& name,
                 const std::string& value,
