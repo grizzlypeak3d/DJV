@@ -66,6 +66,11 @@ namespace djv
             auto filesObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
                 model->observeFiles(),
                 [&count](const Items& value) { count = value.size(); });
+            std::shared_ptr<models::FilesModelItem> metadata;
+            auto metadataObserver =
+                ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                    model->observeMetadata(),
+                    [&metadata](const auto& value) { metadata = value; });
 
             // Empty by default.
             FTK_ASSERT(model->getFiles().empty());
@@ -88,9 +93,18 @@ namespace djv
             FTK_ASSERT(item2 == model->getA());
             FTK_ASSERT(2 == model->getAIndex());
 
+            // Metadata can arrive after the file list notification. Publishing
+            // it clamps stale layer indexes and notifies existing UI rows.
+            item1->videoLayers = { "Beauty", "Depth" };
+            item1->videoLayer = 9;
+            model->touchMetadata(item1);
+            FTK_ASSERT(item1 == metadata);
+            FTK_ASSERT(1 == item1->videoLayer);
+
             // Closing a file removes it and re-clamps the "A" index.
             model->close(1);
             FTK_ASSERT(2 == model->getFiles().size());
+            FTK_ASSERT(!metadata);
 
             // Closing all empties the list and clears the "A" file.
             model->closeAll();

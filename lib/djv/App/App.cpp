@@ -18,6 +18,7 @@
 #include <djv/App/SettingsTool.h>
 #include <djv/App/StatusBar.h>
 #include <djv/App/SysLogTool.h>
+#include <djv/App/TimelineLoadService.h>
 #include <djv/App/ViewTool.h>
 #include <djv/App/Viewport.h>
 #include <djv/UI/SeparateAudioDialog.h>
@@ -54,7 +55,10 @@
 #include <ftk/Core/OS.h>
 #include <ftk/Core/Timer.h>
 
+#include <chrono>
 #include <filesystem>
+#include <future>
+#include <map>
 #include <optional>
 
 namespace djv
@@ -157,6 +161,11 @@ namespace djv
             std::vector<std::shared_ptr<models::FilesModelItem> > activeFiles;
             std::shared_ptr<models::RecentFilesModel> recentFilesModel;
             std::vector<std::shared_ptr<tl::Timeline> > timelines;
+            std::unique_ptr<TimelineLoadService> timelineLoadService;
+            std::map<models::FilesModelItem*, TimelineLoadRequest> timelineLoadRequests;
+            std::shared_ptr<ftk::Timer> timelineLoadTimer;
+            bool inputOptionsPending = false;
+            std::optional<int64_t> reloadFramePending;
             std::shared_ptr<ftk::Observable<std::shared_ptr<tl::Player> > > player;
             std::shared_ptr<models::ColorModel> colorModel;
             std::shared_ptr<models::ViewportModel> viewportModel;
@@ -455,7 +464,21 @@ namespace djv
         {}
 
         App::~App()
-        {}
+        {
+            FTK_P();
+            if (p.timelineLoadTimer)
+            {
+                p.timelineLoadTimer->stop();
+            }
+            if (p.timelineLoadService)
+            {
+                for (const auto& request : p.timelineLoadRequests)
+                {
+                    p.timelineLoadService->cancel(request.second.id);
+                }
+                p.timelineLoadService->shutdown();
+            }
+        }
 
         std::shared_ptr<App> App::create(
             const std::shared_ptr<ftk::Context>& context,
@@ -608,6 +631,12 @@ namespace djv
             const auto files = p.files;
             for (const auto& i : activeFiles)
             {
+                const auto request = p.timelineLoadRequests.find(i.get());
+                if (request != p.timelineLoadRequests.end())
+                {
+                    p.timelineLoadService->cancel(request->second.id);
+                    p.timelineLoadRequests.erase(request);
+                }
                 const auto j = std::find(p.files.begin(), p.files.end(), i);
                 if (j != p.files.end())
                 {
@@ -654,29 +683,11 @@ namespace djv
             auto thumbnailSytem = _context->getSystem<tl::ui::ThumbnailSystem>();
             thumbnailSytem->clearCache();
 
+            // Timeline creation is asynchronous. Preserve a restructured
+            // reload's media frame until the replacement player exists.
+            p.reloadFramePending = frame;
             _filesUpdate(files);
             _activeUpdate(activeFiles);
-
-            if (frame.has_value())
-            {
-                if (auto player = p.player->get())
-                {
-                    // Asked against the start rather than where playback was
-                    // left, which may be past the end of a timeline that has
-                    // just become shorter. A frame the new timeline does not
-                    // hold snaps to one it does.
-                    const auto& timeRange = player->getTimeRange();
-                    if (const auto time =
-                        player->getTimeline()->getTimelineTime(
-                            timeRange.start_time(),
-                            OTIO_NS::RationalTime(
-                                static_cast<double>(frame.value()),
-                                timeRange.duration().rate())))
-                    {
-                        player->seek(time.value());
-                    }
-                }
-            }
         }
 
         std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > App::observePlayer() const
@@ -850,7 +861,6 @@ namespace djv
 
             _modelsInit();
             _observersInit();
-            _inputFilesInit();
             
             _uiInit();
 
@@ -866,6 +876,11 @@ namespace djv
             }
             
             _mainWindowInit();
+
+            // Create the visible shell before opening command-line media. A
+            // slow source must not delay the first window, and closing the app
+            // can cancel the owned timeline initialization.
+            _inputFilesInit();
 
             if (p.cmdLine.listCommands->found())
             {
@@ -1340,59 +1355,69 @@ namespace djv
                     open(path, ftk::Path(audioFileName), frameRange);
                     // Only the first file opened takes the range.
                     frameRange.reset();
-
-                    if (auto player = p.player->get())
-                    {
-                        if (p.cmdLine.speed->found())
-                        {
-                            player->setSpeed(p.cmdLine.speed->getValue());
-                        }
-                        if (p.cmdLine.timeUnits->found())
-                        {
-                            p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
-                        }
-                        const double speed = player->getSpeed();
-                        const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
-                        if (p.cmdLine.inPoint->found())
-                        {
-                            const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                tl::textToTime(
-                                    p.cmdLine.inPoint->getValue(),
-                                    speed,
-                                    timeUnits),
-                                player->getInOutRange().end_time_inclusive());
-                            player->setInOutRange(inOutRange);
-                            player->seek(inOutRange.start_time());
-                        }
-                        if (p.cmdLine.outPoint->found())
-                        {
-                            const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                player->getInOutRange().start_time(),
-                                tl::textToTime(
-                                    p.cmdLine.outPoint->getValue(),
-                                    speed,
-                                    timeUnits));
-                            player->setInOutRange(inOutRange);
-                            player->seek(inOutRange.start_time());
-                        }
-                        if (p.cmdLine.seek->found())
-                        {
-                            player->seek(tl::textToTime(
-                                p.cmdLine.seek->getValue(),
-                                speed,
-                                timeUnits));
-                        }
-                        if (p.cmdLine.loop->found())
-                        {
-                            player->setLoop(p.cmdLine.loop->getValue());
-                        }
-                        if (p.cmdLine.playback->found())
-                        {
-                            player->setPlayback(p.cmdLine.playback->getValue());
-                        }
-                    }
                 }
+                p.inputOptionsPending = true;
             }
+        }
+
+        void App::_applyInputOptions()
+        {
+            FTK_P();
+            auto player = p.player->get();
+            if (!player)
+            {
+                return;
+            }
+            if (p.cmdLine.speed->found())
+            {
+                player->setSpeed(p.cmdLine.speed->getValue());
+            }
+            if (p.cmdLine.timeUnits->found())
+            {
+                p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
+            }
+            const double speed = player->getSpeed();
+            const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
+            if (p.cmdLine.inPoint->found())
+            {
+                const auto inOutRange =
+                    OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                        tl::textToTime(
+                            p.cmdLine.inPoint->getValue(),
+                            speed,
+                            timeUnits),
+                        player->getInOutRange().end_time_inclusive());
+                player->setInOutRange(inOutRange);
+                player->seek(inOutRange.start_time());
+            }
+            if (p.cmdLine.outPoint->found())
+            {
+                const auto inOutRange =
+                    OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                        player->getInOutRange().start_time(),
+                        tl::textToTime(
+                            p.cmdLine.outPoint->getValue(),
+                            speed,
+                            timeUnits));
+                player->setInOutRange(inOutRange);
+                player->seek(inOutRange.start_time());
+            }
+            if (p.cmdLine.seek->found())
+            {
+                player->seek(tl::textToTime(
+                    p.cmdLine.seek->getValue(),
+                    speed,
+                    timeUnits));
+            }
+            if (p.cmdLine.loop->found())
+            {
+                player->setLoop(p.cmdLine.loop->getValue());
+            }
+            if (p.cmdLine.playback->found())
+            {
+                player->setPlayback(p.cmdLine.playback->getValue());
+            }
+            p.inputOptionsPending = false;
         }
 
         void App::_uiInit()
@@ -1512,62 +1537,163 @@ namespace djv
 
             for (size_t i = 0; i < files.size(); ++i)
             {
-                if (!timelines[i])
+                if (!timelines[i] &&
+                    p.timelineLoadRequests.find(files[i].get()) ==
+                    p.timelineLoadRequests.end())
                 {
-                    try
+                    tl::Options options;
+                    const models::ImageSeqSettings imageSeq =
+                        p.settingsModel->getImageSeq();
+                    options.imageSeqAudio = imageSeq.audio;
+                    options.imageSeqAudioExts = imageSeq.audioExts;
+                    options.imageSeqAudioFileName = imageSeq.audioFileName;
+                    const models::OTIOSettings otio = p.settingsModel->getOTIO();
+                    options.spatial = otio.spatial;
+                    options.compat = otio.compat;
+                    options.ioOptions = p.settingsModel->getIOOptions();
+                    options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
+                    options.readThreadCount = imageSeq.readThreadCount;
+                    // A range that was asked for is used as it is. One that
+                    // was not is looked for on disk, so reopening can pick up
+                    // frames rendered since.
+                    options.seqExpand = !files[i]->framesStated;
+                    if (!p.timelineLoadService)
                     {
-                        tl::Options options;
-                        const models::ImageSeqSettings imageSeq = p.settingsModel->getImageSeq();
-                        options.imageSeqAudio = imageSeq.audio;
-                        options.imageSeqAudioExts = imageSeq.audioExts;
-                        options.imageSeqAudioFileName = imageSeq.audioFileName;
-                        const models::OTIOSettings otio = p.settingsModel->getOTIO();
-                        options.spatial = otio.spatial;
-                        options.compat = otio.compat;
-                        options.ioOptions = p.settingsModel->getIOOptions();
-                        options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
-                        options.readThreadCount = imageSeq.readThreadCount;
-
-                        // A range that was asked for is used as it is. One
-                        // that was not is looked for on disk, so that
-                        // reopening picks up frames rendered since.
-                        options.seqExpand = !files[i]->framesStated;
-                        timelines[i] = tl::Timeline::create(
+                        p.timelineLoadService =
+                            std::make_unique<TimelineLoadService>();
+                    }
+                    p.timelineLoadRequests[files[i].get()] =
+                        p.timelineLoadService->request(
                             _context,
                             files[i]->path,
                             files[i]->audioPath,
                             options);
-
-                        // Opening a sequence finds the frames on disk, which
-                        // the path does not know about when it names one
-                        // file. Kept beside the path rather than folded into
-                        // it: a path carrying a range is taken as a range
-                        // that was asked for, and reopening would stop
-                        // looking for frames that have arrived since.
-                        files[i]->timeRange = timelines[i]->getTimeRange();
-
-                        // Replaced rather than added to: a file that is
-                        // reopened comes back through here with its layers
-                        // already listed from the time before.
-                        files[i]->videoLayers.clear();
-                        for (const auto& video : timelines[i]->getIOInfo().video)
-                        {
-                            files[i]->videoLayers.push_back(video.name);
-                        }
-                        if (files[i]->videoLayer >= files[i]->videoLayers.size())
-                        {
-                            files[i]->videoLayer = 0;
-                        }
-                    }
-                    catch (const std::exception& e)
+                    if (!p.timelineLoadTimer)
                     {
-                        _context->log("djv::app::App", e.what(), ftk::LogType::Error);
+                        p.timelineLoadTimer = ftk::Timer::create(_context);
+                        p.timelineLoadTimer->setRepeating(true);
                     }
+                    p.timelineLoadTimer->start(
+                        std::chrono::milliseconds(10),
+                        [this] { _timelineLoadsPoll(); });
                 }
             }
 
             p.files = files;
             p.timelines = timelines;
+
+            for (auto i = p.timelineLoadRequests.begin();
+                i != p.timelineLoadRequests.end();)
+            {
+                const bool found = std::any_of(
+                    files.begin(),
+                    files.end(),
+                    [i](const auto& file) { return file.get() == i->first; });
+                if (!found)
+                {
+                    p.timelineLoadService->cancel(i->second.id);
+                    i = p.timelineLoadRequests.erase(i);
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+        }
+
+        void App::_timelineLoadsPoll()
+        {
+            FTK_P();
+            bool activeTimelineChanged = false;
+            for (auto i = p.timelineLoadRequests.begin();
+                i != p.timelineLoadRequests.end();)
+            {
+                if (std::future_status::ready !=
+                    i->second.future.wait_for(std::chrono::milliseconds(0)))
+                {
+                    ++i;
+                    continue;
+                }
+
+                const TimelineLoadResult result = i->second.future.get();
+                const auto fileIt = std::find_if(
+                    p.files.begin(),
+                    p.files.end(),
+                    [i](const auto& file) { return file.get() == i->first; });
+                if (fileIt != p.files.end())
+                {
+                    const size_t index = fileIt - p.files.begin();
+                    const auto& file = *fileIt;
+                    p.timelines[index] = result.timeline;
+                    file->videoLayers.clear();
+                    if (result.timeline)
+                    {
+                        // Keep the discovered sequence range beside the path.
+                        // A stated range stays authoritative while an
+                        // unstated range can be rediscovered on reload.
+                        file->timeRange = result.timeline->getTimeRange();
+                        for (const auto& video : result.timeline->getIOInfo().video)
+                        {
+                            file->videoLayers.push_back(video.name);
+                        }
+                    }
+                    else if (!result.cancelled && !result.error.empty())
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            result.error,
+                            ftk::LogType::Error);
+                    }
+                    p.filesModel->touchMetadata(file);
+                    const bool active =
+                        std::find(
+                            p.activeFiles.begin(),
+                            p.activeFiles.end(),
+                            file) != p.activeFiles.end();
+                    activeTimelineChanged |= active;
+                    if (active &&
+                        !p.activeFiles.empty() &&
+                        file == p.activeFiles.front() &&
+                        !result.timeline)
+                    {
+                        p.reloadFramePending.reset();
+                    }
+                }
+                i = p.timelineLoadRequests.erase(i);
+            }
+
+            if (p.timelineLoadRequests.empty() && p.timelineLoadTimer)
+            {
+                p.timelineLoadTimer->stop();
+            }
+            if (activeTimelineChanged)
+            {
+                _activeUpdate(p.activeFiles);
+                if (p.reloadFramePending.has_value())
+                {
+                    if (auto player = p.player->get())
+                    {
+                        // Ask against the replacement timeline start. A frame
+                        // outside its new range snaps to one it contains.
+                        const auto& timeRange = player->getTimeRange();
+                        if (const auto time =
+                            player->getTimeline()->getTimelineTime(
+                                timeRange.start_time(),
+                                OTIO_NS::RationalTime(
+                                    static_cast<double>(
+                                        p.reloadFramePending.value()),
+                                    timeRange.duration().rate())))
+                        {
+                            player->seek(time.value());
+                        }
+                        p.reloadFramePending.reset();
+                    }
+                }
+                if (p.inputOptionsPending)
+                {
+                    _applyInputOptions();
+                }
+            }
         }
 
         void App::_reloadUpdate(const std::shared_ptr<models::FilesModelItem>& item)
@@ -1576,6 +1702,13 @@ namespace djv
             if (!item)
             {
                 return;
+            }
+
+            const auto request = p.timelineLoadRequests.find(item.get());
+            if (request != p.timelineLoadRequests.end())
+            {
+                p.timelineLoadService->cancel(request->second.id);
+                p.timelineLoadRequests.erase(request);
             }
 
             // Keep where playback had got to. _activeUpdate saves this for a
@@ -1637,7 +1770,9 @@ namespace djv
             std::shared_ptr<tl::Player> player;
             if (!activeFiles.empty())
             {
-                if (!p.activeFiles.empty() && activeFiles[0] == p.activeFiles[0])
+                if (!p.activeFiles.empty() &&
+                    activeFiles[0] == p.activeFiles[0] &&
+                    p.player->get())
                 {
                     player = p.player->get();
                 }

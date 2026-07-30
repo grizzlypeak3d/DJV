@@ -73,6 +73,7 @@ namespace djv
             ftk::RangeI64 rangeValue;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > metadataObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
@@ -264,6 +265,21 @@ namespace djv
                 [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
                 {
                     _filesUpdate(value);
+                });
+
+            p.metadataObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                app->getFilesModel()->observeMetadata(),
+                [this](const std::shared_ptr<models::FilesModelItem>& value)
+                {
+                    for (auto& widget : _p->widgets)
+                    {
+                        if (widget.item == value)
+                        {
+                            widget.layerComboBox->setItems(value->videoLayers);
+                            widget.layerComboBox->setCurrentIndex(value->videoLayer);
+                            break;
+                        }
+                    }
                 });
 
             p.aObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(

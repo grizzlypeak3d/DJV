@@ -32,6 +32,7 @@ namespace djv
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > metadataObserver;
             std::shared_ptr<ftk::Observer<int> > aIndexObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
             std::shared_ptr<ftk::ListObserver<std::filesystem::path> > recentObserver;
@@ -87,6 +88,19 @@ namespace djv
                 [this](const std::shared_ptr<models::FilesModelItem>& value)
                 {
                     _aUpdate(value);
+                });
+
+            p.metadataObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                app->getFilesModel()->observeMetadata(),
+                [this](const std::shared_ptr<models::FilesModelItem>& value)
+                {
+                    if (auto app = _p->app.lock())
+                    {
+                        if (value == app->getFilesModel()->getA())
+                        {
+                            _aUpdate(value);
+                        }
+                    }
                 });
 
             p.aIndexObserver = ftk::Observer<int>::create(

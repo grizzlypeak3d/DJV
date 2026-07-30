@@ -68,6 +68,14 @@ namespace djv
             //! Observe the files.
             std::shared_ptr<ftk::IObservableList<std::shared_ptr<FilesModelItem> > > observeFiles() const;
 
+            //! Observe metadata changes on an existing file item, such as
+            //! layers becoming available after an asynchronous timeline load.
+            std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > >
+                observeMetadata() const;
+
+            //! Publish metadata changes made to an existing file item.
+            void touchMetadata(const std::shared_ptr<FilesModelItem>&);
+
             //! Get the "A" file.
             const std::shared_ptr<FilesModelItem>& getA() const;
 
