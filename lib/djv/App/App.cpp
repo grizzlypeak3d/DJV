@@ -172,6 +172,9 @@ namespace djv
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
+            // The policy the open files were built with, so that a change to
+            // or from Skip can be told apart from the rest.
+            tl::MissingFrames missingFrames = tl::MissingFrames::First;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > reloadObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > activeObserver;
@@ -1094,13 +1097,28 @@ namespace djv
             // a render in progress, so it is pushed to what is already open.
             // Setting the options clears the cache, so frames that were read
             // under the old policy are read again.
+            //
+            // A structural policy is the exception: it decides what clips the
+            // timeline is built from, so it is settled when the file is opened
+            // and the file has to be opened again.
+            p.missingFrames = p.settingsModel->getImageSeq().io.missingFrames;
             p.imageSeqObserver = ftk::Observer<models::ImageSeqSettings>::create(
                 p.settingsModel->observeImageSeq(),
-                [this](const models::ImageSeqSettings&)
+                [this](const models::ImageSeqSettings& value)
                 {
-                    if (auto player = _p->player->get())
+                    FTK_P();
+                    const bool reopen =
+                        value.io.missingFrames != p.missingFrames &&
+                        (tl::isStructural(value.io.missingFrames) ||
+                            tl::isStructural(p.missingFrames));
+                    p.missingFrames = value.io.missingFrames;
+                    if (reopen)
                     {
-                        player->setIOOptions(_p->settingsModel->getIOOptions());
+                        reload();
+                    }
+                    else if (auto player = p.player->get())
+                    {
+                        player->setIOOptions(p.settingsModel->getIOOptions());
                     }
                 });
 

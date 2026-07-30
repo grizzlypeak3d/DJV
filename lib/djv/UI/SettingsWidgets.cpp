@@ -525,8 +525,16 @@ namespace djv
                 "* Error: The frame does not read.\n"
                 "* Hold: Repeat the nearest frame before it.\n"
                 "* Black: A blank frame.\n"
+                "* Skip: Leave it out, so only the frames that are there\n"
+                "  play and the sequence is as long as they are.\n"
+                "* Gaps: Leave a hole, so every frame keeps the time it\n"
+                "  had and the gaps show on the timeline.\n"
                 "\n"
-                "A timeline that says what it wants is followed instead.");
+                "The first three are decided as each frame is read, and a\n"
+                "timeline that says what it wants is followed instead. The\n"
+                "last two decide what the timeline is built from, so they\n"
+                "only apply to an image sequence opened on its own, and\n"
+                "changing to or from one opens the file again.");
 
             p.threadsEdit = ftk::IntEdit::create(context);
             p.threadsEdit->setRange(1, 64);
