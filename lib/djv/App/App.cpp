@@ -1354,10 +1354,12 @@ namespace djv
                         const double speed = player->getSpeed();
                         const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
 
-                        // Text that does not parse is reported rather than
-                        // used: it comes back unset, where it used to come
-                        // back as a time the range then carried.
-                        const auto parseTime = [this, speed, timeUnits](
+                        // A time that does not parse ends the run, the way an
+                        // option that does not parse into its type does. It
+                        // used to come back as a marker value that the range
+                        // then carried, which a batch caller had no way of
+                        // noticing.
+                        const auto parseTime = [speed, timeUnits](
                             const std::string& name,
                             const std::string& text)
                             {
@@ -1365,47 +1367,34 @@ namespace djv
                                     text, speed, timeUnits);
                                 if (!out.has_value())
                                 {
-                                    _context->log(
-                                        "djv::app::App",
+                                    throw std::runtime_error(
                                         ftk::Format("Cannot parse the {0}: \"{1}\"").
                                             arg(name).
-                                            arg(text),
-                                        ftk::LogType::Error);
+                                            arg(text));
                                 }
-                                return out;
+                                return out.value();
                             };
 
                         if (p.cmdLine.inPoint->found())
                         {
-                            if (const auto time = parseTime(
-                                "in point", p.cmdLine.inPoint->getValue()))
-                            {
-                                const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                    *time,
-                                    player->getInOutRange().end_time_inclusive());
-                                player->setInOutRange(inOutRange);
-                                player->seek(inOutRange.start_time());
-                            }
+                            const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                                parseTime("in point", p.cmdLine.inPoint->getValue()),
+                                player->getInOutRange().end_time_inclusive());
+                            player->setInOutRange(inOutRange);
+                            player->seek(inOutRange.start_time());
                         }
                         if (p.cmdLine.outPoint->found())
                         {
-                            if (const auto time = parseTime(
-                                "out point", p.cmdLine.outPoint->getValue()))
-                            {
-                                const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                    player->getInOutRange().start_time(),
-                                    *time);
-                                player->setInOutRange(inOutRange);
-                                player->seek(inOutRange.start_time());
-                            }
+                            const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                                player->getInOutRange().start_time(),
+                                parseTime("out point", p.cmdLine.outPoint->getValue()));
+                            player->setInOutRange(inOutRange);
+                            player->seek(inOutRange.start_time());
                         }
                         if (p.cmdLine.seek->found())
                         {
-                            if (const auto time = parseTime(
-                                "seek time", p.cmdLine.seek->getValue()))
-                            {
-                                player->seek(*time);
-                            }
+                            player->seek(
+                                parseTime("seek time", p.cmdLine.seek->getValue()));
                         }
                         if (p.cmdLine.loop->found())
                         {
