@@ -109,10 +109,15 @@ namespace djv
 
         namespace
         {
+            // The command line conversions. Both end the run on a value they
+            // cannot use, the way an option that will not parse into its type
+            // does: going on with the option ignored gives the wrong frames
+            // and says nothing about it.
+
             // "1-100", and "-10-20" for a sequence starting before zero. The
             // separator is the first dash after the first character, so a
             // negative start is not mistaken for it.
-            std::optional<ftk::RangeI64> parseFrameRange(const std::string& value)
+            ftk::RangeI64 parseFrameRange(const std::string& value)
             {
                 std::optional<ftk::RangeI64> out;
                 const size_t i = value.find('-', 1);
@@ -136,7 +141,35 @@ namespace djv
                     catch (const std::exception&)
                     {}
                 }
-                return out;
+                if (!out.has_value())
+                {
+                    throw std::runtime_error(
+                        ftk::Format("Cannot parse the frame range: \"{0}\", "
+                            "expected a range such as \"1-100\"").
+                            arg(value));
+                }
+                return out.value();
+            }
+
+            // A time in the current units, named so that the message can say
+            // which option it came from.
+            OTIO_NS::RationalTime parseTime(
+                const std::string& name,
+                const std::string& value,
+                double speed,
+                tl::TimeUnits units)
+            {
+                const auto out = tl::textToTime(value, speed, units);
+                if (!out.has_value())
+                {
+                    throw std::runtime_error(
+                        ftk::Format("Cannot parse the {0}: \"{1}\", expected a "
+                            "time in {2}").
+                            arg(name).
+                            arg(value).
+                            arg(tl::getLabel(units)));
+                }
+                return out.value();
             }
         }
 
@@ -1320,16 +1353,6 @@ namespace djv
                 if (p.cmdLine.frameRange->found())
                 {
                     frameRange = parseFrameRange(p.cmdLine.frameRange->getValue());
-                    if (!frameRange.has_value())
-                    {
-                        // Ends the run rather than opening the sequence over
-                        // whatever range it happens to find: the range asked
-                        // for is the point of the option.
-                        throw std::runtime_error(
-                            ftk::Format("Cannot parse the frame range: \"{0}\", "
-                                "expected a range such as \"1-100\"").
-                                arg(p.cmdLine.frameRange->getValue()));
-                    }
                 }
 
                 for (const auto& input : p.cmdLine.inputs->getList())
@@ -1356,31 +1379,14 @@ namespace djv
                         const double speed = player->getSpeed();
                         const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
 
-                        // A time that does not parse ends the run, the way an
-                        // option that does not parse into its type does. It
-                        // used to come back as a marker value that the range
-                        // then carried, which a batch caller had no way of
-                        // noticing.
-                        const auto parseTime = [speed, timeUnits](
-                            const std::string& name,
-                            const std::string& text)
-                            {
-                                const auto out = tl::textToTime(
-                                    text, speed, timeUnits);
-                                if (!out.has_value())
-                                {
-                                    throw std::runtime_error(
-                                        ftk::Format("Cannot parse the {0}: \"{1}\"").
-                                            arg(name).
-                                            arg(text));
-                                }
-                                return out.value();
-                            };
-
                         if (p.cmdLine.inPoint->found())
                         {
                             const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                parseTime("in point", p.cmdLine.inPoint->getValue()),
+                                parseTime(
+                                    "in point",
+                                    p.cmdLine.inPoint->getValue(),
+                                    speed,
+                                    timeUnits),
                                 player->getInOutRange().end_time_inclusive());
                             player->setInOutRange(inOutRange);
                             player->seek(inOutRange.start_time());
@@ -1389,14 +1395,21 @@ namespace djv
                         {
                             const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
                                 player->getInOutRange().start_time(),
-                                parseTime("out point", p.cmdLine.outPoint->getValue()));
+                                parseTime(
+                                    "out point",
+                                    p.cmdLine.outPoint->getValue(),
+                                    speed,
+                                    timeUnits));
                             player->setInOutRange(inOutRange);
                             player->seek(inOutRange.start_time());
                         }
                         if (p.cmdLine.seek->found())
                         {
-                            player->seek(
-                                parseTime("seek time", p.cmdLine.seek->getValue()));
+                            player->seek(parseTime(
+                                "seek time",
+                                p.cmdLine.seek->getValue(),
+                                speed,
+                                timeUnits));
                         }
                         if (p.cmdLine.loop->found())
                         {
