@@ -3,6 +3,7 @@
 Changes:
 * Add support for OTIO multiple media references.
 * Add support for OTIO spatial coordinates.
+* Add support for partial image sequences.
 * Add audio export.
 * Add a waveform height option.
 * Add an image negative option.
