@@ -1322,11 +1322,13 @@ namespace djv
                     frameRange = parseFrameRange(p.cmdLine.frameRange->getValue());
                     if (!frameRange.has_value())
                     {
-                        _context->log(
-                            "djv::app::App",
-                            ftk::Format("Cannot parse the frame range: \"{0}\"").
-                                arg(p.cmdLine.frameRange->getValue()),
-                            ftk::LogType::Error);
+                        // Ends the run rather than opening the sequence over
+                        // whatever range it happens to find: the range asked
+                        // for is the point of the option.
+                        throw std::runtime_error(
+                            ftk::Format("Cannot parse the frame range: \"{0}\", "
+                                "expected a range such as \"1-100\"").
+                                arg(p.cmdLine.frameRange->getValue()));
                     }
                 }
 
