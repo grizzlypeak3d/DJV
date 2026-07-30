@@ -19,6 +19,7 @@
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/DoubleModel.h>
+#include <ftk/UI/IconSystem.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
@@ -26,6 +27,14 @@
 #include <ftk/UI/Spacer.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
+
+#include <vector>
+
+namespace djv_resource
+{
+    extern std::vector<uint8_t> PlaybackFullScreen;
+    extern std::vector<uint8_t> PlaybackPin;
+}
 
 namespace djv
 {
@@ -51,6 +60,8 @@ namespace djv
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<ui::AudioPopup> audioPopup;
             std::shared_ptr<ftk::HorizontalLayout> layout;
+            std::function<void(bool)> fullScreenCallback;
+            std::function<void(bool)> pinCallback;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver;
@@ -79,6 +90,12 @@ namespace djv
 
             p.app = app;
 
+            auto iconSystem = context->getSystem<ftk::IconSystem>();
+            iconSystem->add(
+                "PlaybackFullScreen",
+                djv_resource::PlaybackFullScreen);
+            iconSystem->add("PlaybackPin", djv_resource::PlaybackPin);
+
             p.speedModel = ftk::DoubleModel::create();
             p.speedModel->setRange(ftk::RangeD(0.0, 1000000.0));
             p.speedModel->setStep(1.F);
@@ -88,6 +105,23 @@ namespace djv
             p.buttons["Stop"] = ftk::ToolButton::create(context, actions["Stop"]);
             p.buttons["Forward"] = ftk::ToolButton::create(context, actions["Forward"]);
             p.buttons["Reverse"] = ftk::ToolButton::create(context, actions["Reverse"]);
+            p.buttons["FullScreen"] = ftk::ToolButton::create(context);
+            p.buttons["FullScreen"]->setIcon("PlaybackFullScreen");
+            p.buttons["FullScreen"]->setCheckable(true);
+            p.buttons["FullScreen"]->setTooltip(
+                "Toggle full-screen playback. Double-clicking the video does the same.");
+            ftk::setScreenshotTag(
+                p.buttons["FullScreen"],
+                "Playback.FullScreen");
+            p.buttons["Pin"] = ftk::ToolButton::create(context);
+            p.buttons["Pin"]->setIcon("PlaybackPin");
+            p.buttons["Pin"]->setCheckable(true);
+            p.buttons["Pin"]->setTooltip(
+                "Keep the playback controls visible in full-screen.");
+            p.buttons["Pin"]->setVisible(false);
+            ftk::setScreenshotTag(
+                p.buttons["Pin"],
+                "Playback.Pin");
 
             p.loopWidget = tl::ui::PlaybackLoopWidget::create(context);
             ftk::setScreenshotTag(p.loopWidget, "Playback.Loop");
@@ -148,6 +182,8 @@ namespace djv
             p.buttons["Reverse"]->setParent(hLayout2);
             p.buttons["Stop"]->setParent(hLayout2);
             p.buttons["Forward"]->setParent(hLayout2);
+            p.buttons["FullScreen"]->setParent(hLayout2);
+            p.buttons["Pin"]->setParent(hLayout2);
             p.loopWidget->setParent(hLayout2);
             p.playbackShuttle->setParent(hLayout2);
             hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
@@ -254,6 +290,26 @@ namespace djv
                     _showAudioPopup();
                 });
 
+            p.buttons["FullScreen"]->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    if (p.fullScreenCallback)
+                    {
+                        p.fullScreenCallback(value);
+                    }
+                });
+
+            p.buttons["Pin"]->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    if (p.pinCallback)
+                    {
+                        p.pinCallback(value);
+                    }
+                });
+
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& value)
@@ -317,6 +373,34 @@ namespace djv
                 _p->currentTimeEdit->takeKeyFocus();
                 _p->currentTimeEdit->selectAll();
             }
+        }
+
+        void BottomToolBar::setFullScreen(bool value)
+        {
+            FTK_P();
+            p.buttons["FullScreen"]->setChecked(value);
+            p.buttons["Pin"]->setVisible(value);
+            if (!value)
+            {
+                setPinned(false);
+            }
+        }
+
+        void BottomToolBar::setPinned(bool value)
+        {
+            _p->buttons["Pin"]->setChecked(value);
+        }
+
+        void BottomToolBar::setFullScreenCallback(
+            const std::function<void(bool)>& value)
+        {
+            _p->fullScreenCallback = value;
+        }
+
+        void BottomToolBar::setPinCallback(
+            const std::function<void(bool)>& value)
+        {
+            _p->pinCallback = value;
         }
 
         ftk::Size2I BottomToolBar::getSizeHint() const

@@ -93,6 +93,10 @@ namespace djv
         private:
             void _settingsUpdate(const models::MouseSettings&);
             void _settingsUpdate(const models::TimelineSettings&);
+            void _fullScreenUpdate(bool);
+            void _playbackActivity();
+            void _playbackOverlayUpdate();
+            void _setPlaybackPinned(bool);
             void _windowUpdate();
 
             FTK_PRIVATE();
