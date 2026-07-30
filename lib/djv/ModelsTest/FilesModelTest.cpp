@@ -197,7 +197,7 @@ namespace djv
             FTK_ASSERT(reloaded == item);
             FTK_ASSERT(item->path.getFrames().has_value());
             FTK_ASSERT(ftk::RangeI64(1, 100) == item->path.getFrames().value());
-            FTK_ASSERT(tl::compareExact(item->inOutRange, tl::invalidTimeRange));
+            FTK_ASSERT(!item->inOutRange.has_value());
 
             // The same range again is not a reopen.
             reloaded.reset();

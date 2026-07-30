@@ -442,12 +442,12 @@ namespace djv
                             // stated for it; until then it names one file.
                             int start = 0;
                             int end = 0;
-                            if (!tl::compareExact(item->timeRange, tl::invalidTimeRange))
+                            if (item->timeRange.has_value())
                             {
                                 start = static_cast<int>(
-                                    item->timeRange.start_time().value());
+                                    item->timeRange->start_time().value());
                                 end = start + static_cast<int>(
-                                    item->timeRange.duration().value()) - 1;
+                                    item->timeRange->duration().value()) - 1;
                             }
                             else if (item->path.getFrames().has_value())
                             {

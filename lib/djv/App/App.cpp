@@ -112,7 +112,7 @@ namespace djv
             // "1-100", and "-10-20" for a sequence starting before zero. The
             // separator is the first dash after the first character, so a
             // negative start is not mistaken for it.
-            std::optional<ftk::RangeI64> parseFrameRange(const std::string& value)
+            ftk::RangeI64 parseFrameRange(const std::string& value)
             {
                 std::optional<ftk::RangeI64> out;
                 const size_t i = value.find('-', 1);
@@ -136,7 +136,33 @@ namespace djv
                     catch (const std::exception&)
                     {}
                 }
-                return out;
+                if (!out.has_value())
+                {
+                    throw std::runtime_error(
+                        ftk::Format("Cannot parse the frame range: \"{0}\", "
+                            "expected a range such as \"1-100\"").
+                            arg(value));
+                }
+                return out.value();
+            }
+
+            OTIO_NS::RationalTime parseTime(
+                const std::string& name,
+                const std::string& value,
+                double speed,
+                tl::TimeUnits units)
+            {
+                const auto out = tl::textToTime(value, speed, units);
+                if (!out.has_value())
+                {
+                    throw std::runtime_error(
+                        ftk::Format("Cannot parse the {0}: \"{1}\", expected a "
+                            "time in {2}").
+                            arg(name).
+                            arg(value).
+                            arg(tl::getLabel(units)));
+                }
+                return out.value();
             }
         }
 
@@ -640,8 +666,8 @@ namespace djv
                             frame = static_cast<int64_t>(
                                 player->getCurrentTime().value());
                         }
-                        activeFiles.front()->currentTime = tl::invalidTime;
-                        activeFiles.front()->inOutRange = tl::invalidTimeRange;
+                        activeFiles.front()->currentTime.reset();
+                        activeFiles.front()->inOutRange.reset();
                     }
                     else
                     {
@@ -1320,14 +1346,6 @@ namespace djv
                 if (p.cmdLine.frameRange->found())
                 {
                     frameRange = parseFrameRange(p.cmdLine.frameRange->getValue());
-                    if (!frameRange.has_value())
-                    {
-                        _context->log(
-                            "djv::app::App",
-                            ftk::Format("Cannot parse the frame range: \"{0}\"").
-                                arg(p.cmdLine.frameRange->getValue()),
-                            ftk::LogType::Error);
-                    }
                 }
 
                 for (const auto& input : p.cmdLine.inputs->getList())
@@ -1353,10 +1371,12 @@ namespace djv
                         }
                         const double speed = player->getSpeed();
                         const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
+
                         if (p.cmdLine.inPoint->found())
                         {
                             const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                tl::textToTime(
+                                parseTime(
+                                    "in point",
                                     p.cmdLine.inPoint->getValue(),
                                     speed,
                                     timeUnits),
@@ -1368,7 +1388,8 @@ namespace djv
                         {
                             const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
                                 player->getInOutRange().start_time(),
-                                tl::textToTime(
+                                parseTime(
+                                    "out point",
                                     p.cmdLine.outPoint->getValue(),
                                     speed,
                                     timeUnits));
@@ -1377,7 +1398,8 @@ namespace djv
                         }
                         if (p.cmdLine.seek->found())
                         {
-                            player->seek(tl::textToTime(
+                            player->seek(parseTime(
+                                "seek time",
                                 p.cmdLine.seek->getValue(),
                                 speed,
                                 timeUnits));
@@ -1589,15 +1611,15 @@ namespace djv
                 }
             }
             if (item->path.getFrames().has_value() &&
-                !item->currentTime.strictly_equal(tl::invalidTime))
+                item->currentTime.has_value())
             {
                 const ftk::RangeI64& frames = item->path.getFrames().value();
                 item->currentTime = OTIO_NS::RationalTime(
                     ftk::clamp(
-                        item->currentTime.value(),
+                        item->currentTime->value(),
                         static_cast<double>(frames.min()),
                         static_cast<double>(frames.max())),
-                    item->currentTime.rate());
+                    item->currentTime->rate());
             }
 
             const auto i = std::find(p.files.begin(), p.files.end(), item);
@@ -1676,15 +1698,19 @@ namespace djv
                 {
                     player->setSpeed(speed);
                 }
-                const OTIO_NS::TimeRange inOutRange = activeFiles.front()->inOutRange;
-                if (!tl::compareExact(inOutRange, tl::invalidTimeRange))
+                // Copied rather than referenced: the calls below are observed
+                // back into the item they came from.
+                const std::optional<OTIO_NS::TimeRange> inOutRange =
+                    activeFiles.front()->inOutRange;
+                if (inOutRange.has_value())
                 {
-                    player->setInOutRange(inOutRange);
+                    player->setInOutRange(*inOutRange);
                 }
-                const OTIO_NS::RationalTime currentTime = activeFiles.front()->currentTime;
-                if (!currentTime.strictly_equal(tl::invalidTime))
+                const std::optional<OTIO_NS::RationalTime> currentTime =
+                    activeFiles.front()->currentTime;
+                if (currentTime.has_value())
                 {
-                    player->seek(currentTime);
+                    player->seek(*currentTime);
                 }
                 std::vector<std::shared_ptr<tl::Timeline> > compare;
                 for (size_t i = 1; i < activeFiles.size(); ++i)
