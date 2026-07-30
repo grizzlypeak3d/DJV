@@ -31,6 +31,7 @@ namespace djv
             addAction(actions["AutoScroll"]);
             addAction(actions["StopOnScrub"]);
             addDivider();
+            addAction(actions["TrackMedia"]);
             addAction(actions["Thumbnails"]);
             addAction(actions["Waveforms"]);
             auto thumbnailSizeMenu = addSubMenu("Thumbnail Size");

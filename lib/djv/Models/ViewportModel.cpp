@@ -14,6 +14,7 @@ namespace djv
         TL_ENUM_IMPL(
             HUDItem,
             "File Name",
+            "Info",
             "Cache",
             "Time",
             "View Zoom",
@@ -106,7 +107,7 @@ namespace djv
             hudOptions.items[HUDItem::Cache] = HUDPos::BottomRight;
             hudOptions.items[HUDItem::Time] = HUDPos::TopRight;
             hudOptions.items[HUDItem::ColorPicker] = HUDPos::BottomLeft;
-            p.settings->getT("/Viewport/HUD.1", hudOptions);
+            p.settings->getT("/Viewport/HUD.2", hudOptions);
             p.hudOptions = ftk::Observable<HUDOptions>::create(hudOptions);
         }
 
@@ -123,7 +124,7 @@ namespace djv
             p.settings->setT("/Viewport/Background", p.backgroundOptions->get());
             p.settings->setT("/Viewport/Foreground.1", p.foregroundOptions->get());
             p.settings->set("/Viewport/ColorBuffer", ftk::gl::to_string(p.colorBuffer->get()));
-            p.settings->setT("/Viewport/HUD.1", p.hudOptions->get());
+            p.settings->setT("/Viewport/HUD.2", p.hudOptions->get());
         }
 
         std::shared_ptr<ViewportModel> ViewportModel::create(

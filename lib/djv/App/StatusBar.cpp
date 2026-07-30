@@ -262,7 +262,7 @@ namespace djv
             }
             else if (ftk::contains(p.infoLabel->getGeometry(), event.pos))
             {
-                tool = "Infofrmation";
+                tool = "Information";
             }
             if (!tool.empty())
             {
@@ -348,13 +348,13 @@ namespace djv
             if (!info.video.empty())
             {
                 s.push_back(std::string(
-                    ftk::Format("video: {0}").
+                    ftk::Format("V: {0}").
                     arg(ftk::getLabel(info.video[0]))));
             }
             if (info.audio.isValid())
             {
                 s.push_back(std::string(
-                    ftk::Format("audio: {0}").
+                    ftk::Format("A: {0}").
                     arg(tl::getLabel(info.audio, true))));
             }
             p.infoLabel->setText(ftk::join(s, ", "));

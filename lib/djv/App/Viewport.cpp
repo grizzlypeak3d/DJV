@@ -19,6 +19,7 @@
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/Spacer.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/String.h>
 
 #include <regex>
 
@@ -31,6 +32,7 @@ namespace djv
             std::weak_ptr<App> app;
             models::HUDOptions hudOptions;
             ftk::Path path;
+            tl::IOInfo ioInfo;
             OTIO_NS::RationalTime currentTime = tl::invalidTime;
             double fps = 0.0;
             size_t droppedFrames = 0;
@@ -54,11 +56,13 @@ namespace djv
             std::shared_ptr<ftk::Label> viewZoomLabel;
             std::shared_ptr<ftk::ColorSwatch> colorPickerSwatch;
             std::shared_ptr<ftk::Label> colorPickerLabel;
+            std::shared_ptr<ftk::Label> infoLabel;
             std::map<models::HUDItem, std::shared_ptr<ftk::IWidget> > hudWidgets;
             std::shared_ptr<ftk::GridLayout> hudLayout;
             std::map<models::HUDPos, std::shared_ptr<ftk::VerticalLayout> > hudLayouts;
 
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
+            std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
             std::shared_ptr<ftk::ListObserver<tl::VideoFrame> > videoObserver;
             std::shared_ptr<ftk::Observer<tl::PlayerCacheInfo> > cacheObserver;
             std::shared_ptr<ftk::Observer<double> > fpsObserver;
@@ -125,11 +129,15 @@ namespace djv
             p.colorPickerSwatch->setParent(colorPickerLayout);
             p.colorPickerLabel->setParent(colorPickerLayout);
 
+            p.infoLabel = ftk::Label::create(context);
+            p.infoLabel->setFont(ftk::FontType::Mono);
+
             p.hudWidgets[models::HUDItem::FileName] = p.fileNameLabel;
             p.hudWidgets[models::HUDItem::Cache] = p.cacheLabel;
             p.hudWidgets[models::HUDItem::Time] = p.timeLabel;
             p.hudWidgets[models::HUDItem::ViewZoom] = p.viewZoomLabel;
             p.hudWidgets[models::HUDItem::ColorPicker] = colorPickerLayout;
+            p.hudWidgets[models::HUDItem::Info] = p.infoLabel;
 
             p.hudLayout = ftk::GridLayout::create(context, shared_from_this());
             p.hudLayout->setMarginRole(ftk::SizeRole::MarginSmall);
@@ -411,6 +419,17 @@ namespace djv
             {
                 p.path = player->getPath();
 
+                // The information describes the media reference being read, so
+                // it is refreshed when the key changes. The observer also
+                // reports the current key, which covers the new player.
+                p.mediaReferenceKeyObserver = ftk::Observer<std::string>::create(
+                    player->observeMediaReferenceKey(),
+                    [this, player](const std::string&)
+                    {
+                        _p->ioInfo = player->getIOInfo();
+                        _hudUpdate();
+                    });
+
                 p.currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
                     player->observeCurrentTime(),
                     [this](const OTIO_NS::RationalTime& value)
@@ -438,6 +457,8 @@ namespace djv
             else
             {
                 p.path = ftk::Path();
+                p.ioInfo = tl::IOInfo();
+                p.mediaReferenceKeyObserver.reset();
                 p.currentTime = tl::invalidTime;
                 p.currentTimeObserver.reset();
                 p.videoObserver.reset();
@@ -508,6 +529,11 @@ namespace djv
             if (p.pickBinding.button == event.button &&
                 ftk::checkKeyModifier(p.pickBinding.modifier, event.modifiers))
             {
+                // The base class only claims the buttons bound to its own
+                // actions, so claim ours here; an unbound button is left
+                // free to open a context menu.
+                event.accept = true;
+                takeKeyFocus();
                 p.mouse.mode = Private::MouseMode::Picker;
                 const ftk::Box2I& g = getGeometry();
                 const ftk::V2I pos = event.pos - g.min;
@@ -521,6 +547,8 @@ namespace djv
             else if (p.frameShuttleBinding.button == event.button &&
                 ftk::checkKeyModifier(p.frameShuttleBinding.modifier, event.modifiers))
             {
+                event.accept = true;
+                takeKeyFocus();
                 p.mouse.mode = Private::MouseMode::Shuttle;
                 if (auto player = getPlayer())
                 {
@@ -558,6 +586,21 @@ namespace djv
             std::string s = p.path.getFileName();
             p.fileNameLabel->setText(!s.empty() ? s : "(No file)");
             ftk::setScreenshotTag(p.fileNameLabel, "View.HUD.FileName");
+
+            std::vector<std::string> info;
+            if (!p.ioInfo.video.empty())
+            {
+                info.push_back(std::string(ftk::Format("V: {0}").
+                    arg(ftk::getLabel(p.ioInfo.video[0]))));
+            }
+            if (p.ioInfo.audio.isValid())
+            {
+                info.push_back(std::string(ftk::Format("A: {0}").
+                    arg(tl::getLabel(p.ioInfo.audio, true))));
+            }
+            p.infoLabel->setText(ftk::join(info, ", "));
+            p.infoLabel->setVisible(!info.empty());
+            ftk::setScreenshotTag(p.infoLabel, "View.HUD.Info");
 
             s = std::string();
             if (auto app = p.app.lock())

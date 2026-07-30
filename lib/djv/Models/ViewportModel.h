@@ -46,7 +46,10 @@ namespace djv
         //! HUD items.
         enum class HUDItem
         {
+            //! The options map is serialized with the enumeration index as the
+            //! key, so changing this order requires a new settings version.
             FileName,
+            Info,
             Cache,
             Time,
             ViewZoom,

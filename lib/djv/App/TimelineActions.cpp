@@ -129,6 +129,21 @@ namespace djv
                     }
                 });
 
+            _addCheckCommand(
+                "TrackMedia",
+                "Toggle the timeline video thumbnails and audio waveforms.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settings = app->getSettingsModel()->getTimeline();
+                        settings.thumbnails = value;
+                        settings.waveforms = value;
+                        app->getSettingsModel()->setTimeline(settings);
+                    }
+                });
+
             _addCommand(
                 "ThumbnailSizeSmall",
                 "Small timeline thumbnails.",
@@ -229,6 +244,9 @@ namespace djv
             _actions["Waveforms"] = ftk::Action::create(
                 "Audio Waveforms",
                 _checkCommand("Waveforms"));
+            _actions["TrackMedia"] = ftk::Action::create(
+                "Track Media",
+                _checkCommand("TrackMedia"));
             _actions["ThumbnailSizeSmall"] = ftk::Action::create(
                 "Small",
                 _command("ThumbnailSizeSmall"));
@@ -259,6 +277,7 @@ namespace djv
             _addShortcut("ThumbnailSizeMedium", "Medium thumbnails");
             _addShortcut("ThumbnailSizeLarge", "Large thumbnails");
             _addShortcut("Waveforms", "Audio waveforms");
+            _addShortcut("TrackMedia", "Track media", ftk::Key::C);
             _addShortcut("WaveformSizeSmall", "Small waveforms");
             _addShortcut("WaveformSizeMedium", "Medium waveforms");
             _addShortcut("WaveformSizeLarge", "Large waveforms");
@@ -274,6 +293,11 @@ namespace djv
                     _actions["ScrollBars"]->setChecked(value.scrollBars);
                     _actions["AutoScroll"]->setChecked(value.autoScroll);
                     _actions["StopOnScrub"]->setChecked(value.stopOnScrub);
+                    // Checked whenever any track media is shown, so the
+                    // check mark answers "is there media in the timeline",
+                    // and clearing it clears everything.
+                    _actions["TrackMedia"]->setChecked(
+                        value.thumbnails || value.waveforms);
                     _actions["Thumbnails"]->setChecked(value.thumbnails);
                     _actions["Waveforms"]->setChecked(value.waveforms);
                     _actions["ThumbnailSizeSmall"]->setChecked(models::TimelineThumbnailSize::Small == value.thumbnailSize);
