@@ -621,40 +621,40 @@ namespace djv
             {
                 for (const auto& shortcut : group.shortcuts)
                 {
-                    auto i = p.primaryWidgets.find(shortcut.name);
-                    auto j = std::find_if(
+                    // The saved shortcut. Both widgets show the same one, so
+                    // it is looked up once rather than per widget.
+                    const auto j = std::find_if(
                         settings.shortcuts.begin(),
                         settings.shortcuts.end(),
                         [shortcut](const models::Shortcut& value)
                         {
                             return shortcut.name == value.name;
                         });
-                    if (i != p.primaryWidgets.end() && j != settings.shortcuts.end())
+                    if (j == settings.shortcuts.end())
+                    {
+                        continue;
+                    }
+
+                    if (auto i = p.primaryWidgets.find(shortcut.name);
+                        i != p.primaryWidgets.end())
                     {
                         i->second->setShortcut(j->primary);
                         bool collision = false;
-                        auto k = collisions.find(to_string(j->primary));
-                        if (k != collisions.end())
+                        if (auto k = collisions.find(to_string(j->primary));
+                            k != collisions.end())
                         {
                             collision = k->second > 1;
                         }
                         i->second->setCollision(collision);
                     }
 
-                    i = p.secondaryWidgets.find(shortcut.name);
-                    j = std::find_if(
-                        settings.shortcuts.begin(),
-                        settings.shortcuts.end(),
-                        [shortcut](const models::Shortcut& value)
-                        {
-                            return shortcut.name == value.name;
-                        });
-                    if (i != p.secondaryWidgets.end() && j != settings.shortcuts.end())
+                    if (auto i = p.secondaryWidgets.find(shortcut.name);
+                        i != p.secondaryWidgets.end())
                     {
                         i->second->setShortcut(j->secondary);
                         bool collision = false;
-                        auto k = collisions.find(to_string(j->secondary));
-                        if (k != collisions.end())
+                        if (auto k = collisions.find(to_string(j->secondary));
+                            k != collisions.end())
                         {
                             collision = k->second > 1;
                         }
@@ -680,8 +680,7 @@ namespace djv
 
             for (const auto& i : p.primaryWidgets)
             {
-                const auto j = visible.find(i.first);
-                if (j != visible.end())
+                if (const auto j = visible.find(i.first); j != visible.end())
                 {
                     i.second->setVisible(j->second);
                 }
@@ -689,8 +688,7 @@ namespace djv
 
             for (const auto& i : p.secondaryWidgets)
             {
-                const auto j = visible.find(i.first);
-                if (j != visible.end())
+                if (const auto j = visible.find(i.first); j != visible.end())
                 {
                     i.second->setVisible(j->second);
                 }
@@ -698,8 +696,7 @@ namespace djv
 
             for (const auto& i : p.labels)
             {
-                const auto j = visible.find(i.first);
-                if (j != visible.end())
+                if (const auto j = visible.find(i.first); j != visible.end())
                 {
                     i.second->setVisible(j->second);
                 }
@@ -710,19 +707,16 @@ namespace djv
                 bool v = false;
                 for (const auto& j : i.shortcuts)
                 {
-                    const auto k = visible.find(j.name);
-                    if (k != visible.end())
+                    if (const auto k = visible.find(j.name); k != visible.end())
                     {
                         v |= k->second;
                     }
                 }
-                auto j = p.groupSpacers.find(i.name);
-                if (j != p.groupSpacers.end())
+                if (auto j = p.groupSpacers.find(i.name); j != p.groupSpacers.end())
                 {
                     j->second->setVisible(v);
                 }
-                auto k = p.groupLabels.find(i.name);
-                if (k != p.groupLabels.end())
+                if (auto k = p.groupLabels.find(i.name); k != p.groupLabels.end())
                 {
                     k->second->setVisible(v);
                 }
