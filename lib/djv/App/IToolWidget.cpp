@@ -173,8 +173,7 @@ namespace djv
         {
             FTK_P();
             std::shared_ptr<IToolWidget> out;
-            const auto i = p.fncs.find(name);
-            if (i != p.fncs.end())
+            if (const auto i = p.fncs.find(name); i != p.fncs.end())
             {
                 out = i->second(context, app, mainWindow, parent);
             }

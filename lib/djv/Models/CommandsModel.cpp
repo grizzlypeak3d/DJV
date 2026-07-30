@@ -64,8 +64,7 @@ namespace djv
         void CommandsModel::remove(const std::string& name)
         {
             FTK_P();
-            const auto i = p.commands.find(name);
-            if (i != p.commands.end())
+            if (const auto i = p.commands.find(name); i != p.commands.end())
             {
                 p.commands.erase(i);
             }
@@ -88,8 +87,7 @@ namespace djv
         {
             FTK_P();
             bool out = false;
-            const auto i = p.commands.find(name);
-            if (i != p.commands.end())
+            if (const auto i = p.commands.find(name); i != p.commands.end())
             {
                 try
                 {

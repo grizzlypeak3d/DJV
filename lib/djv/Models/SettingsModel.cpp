@@ -696,8 +696,8 @@ namespace djv
                 p.shortcutsDefault.shortcuts.push_back(shortcut);
 
                 // Apply any saved key bindings.
-                const auto i = p.savedShortcuts.find(shortcut.name);
-                if (i != p.savedShortcuts.end())
+                if (const auto i = p.savedShortcuts.find(shortcut.name);
+                    i != p.savedShortcuts.end())
                 {
                     shortcut.primary = i->second.primary;
                     shortcut.secondary = i->second.secondary;

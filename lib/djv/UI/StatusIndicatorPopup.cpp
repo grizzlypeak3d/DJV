@@ -66,16 +66,14 @@ namespace djv
             FTK_P();
             for (const auto& i : values)
             {
-                const auto j = p.icons.find(i.first);
-                if (j != p.icons.end())
+                if (const auto j = p.icons.find(i.first); j != p.icons.end())
                 {
                     j->second->setEnabled(i.second);
                     j->second->setBackgroundRole(i.second ?
                         ftk::ColorRole::Checked :
                         ftk::ColorRole::None);
                 }
-                const auto k = p.labels.find(i.first);
-                if (k != p.labels.end())
+                if (const auto k = p.labels.find(i.first); k != p.labels.end())
                 {
                     k->second->setEnabled(i.second);
                 }

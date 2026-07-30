@@ -244,8 +244,7 @@ namespace djv
         void SettingsTool::scrollTo(const std::string& value)
         {
             FTK_P();
-            auto i = p.bellows.find(value);
-            if (i != p.bellows.end())
+            if (auto i = p.bellows.find(value); i != p.bellows.end())
             {
                 // scrollTo() expects the box in the scrolled content's
                 // coordinate space, but getGeometry() is in window space;

@@ -846,13 +846,13 @@ namespace djv
                     FTK_P();
                     for (const auto& i : value.bindings)
                     {
-                        auto j = p.buttonComboBoxes.find(i.first);
-                        if (j != p.buttonComboBoxes.end())
+                        if (auto j = p.buttonComboBoxes.find(i.first);
+                            j != p.buttonComboBoxes.end())
                         {
                             j->second->setCurrentIndex(static_cast<int>(i.second.button));
                         }
-                        j = p.modifierComboBoxes.find(i.first);
-                        if (j != p.modifierComboBoxes.end())
+                        if (auto j = p.modifierComboBoxes.find(i.first);
+                            j != p.modifierComboBoxes.end())
                         {
                             const auto k = std::find(p.modifiers.begin(), p.modifiers.end(), i.second.modifier);
                             if (k != p.modifiers.end())

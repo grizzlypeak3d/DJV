@@ -263,8 +263,8 @@ namespace djv
                 [this](const models::MouseSettings& value)
                 {
                     std::vector<std::string> s;
-                    auto i = value.bindings.find(models::MouseAction::Pick);
-                    if (i != value.bindings.end())
+                    if (auto i = value.bindings.find(models::MouseAction::Pick);
+                        i != value.bindings.end())
                     {
                         if (i->second.button != ftk::MouseButton::None)
                         {

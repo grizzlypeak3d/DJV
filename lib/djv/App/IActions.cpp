@@ -151,8 +151,8 @@ namespace djv
                 if (j != value.shortcuts.end())
                 {
                     i.second->setShortcuts({ j->primary, j->secondary });
-                    const auto k = _tooltips.find(i.first);
-                    if (k != _tooltips.end())
+                    if (const auto k = _tooltips.find(i.first);
+                        k != _tooltips.end())
                     {
                         std::vector<std::string> tmp;
                         if (j->primary != ftk::Key::Unknown)
