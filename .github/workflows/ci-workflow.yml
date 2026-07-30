@@ -41,6 +41,19 @@ jobs:
       with:
         python-version: '3.11'
 
+    # Writes the dependency cache that the pull request check reads. Only this
+    # job caches: the superbuild trees are around 4.5GB per configuration and
+    # the repository is limited to 10GB, so caching every job in the matrix
+    # would evict faster than it hits.
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          install-Debug
+          ftk-Debug
+          tl-Debug
+        key: deps-${{ runner.os }}-Debug-${{ hashFiles('djv/deps/tlRender/deps/ftk/etc/SuperBuild/**', 'djv/deps/tlRender/etc/SuperBuild/**', 'djv/.github/workflows/ci-workflow.yml') }}
+
     - name: Setup environment
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH

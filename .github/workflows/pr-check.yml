@@ -1,0 +1,95 @@
+# Answers one question about a pull request: does it build and pass the tests
+# against the pinned dependencies? The full matrix still runs on push.
+#
+# The dependencies are not built here. This reads the cache written by the
+# linux-build job of the CI workflow on the default branch; a pull request from
+# a fork can read that cache but cannot write one. If the cache is missed the
+# job builds the dependencies itself, which takes about half an hour.
+name: PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# A new push to a pull request makes the previous run pointless.
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Kept the same as the CI workflow's linux-build job: the cache key covers
+    # this file, so these have to match for the cache to be shared.
+    env:
+      JOBS: 4
+      DJV_TESTS: ON
+      TLRENDER_NET: OFF
+      TLRENDER_OCIO: ON
+      TLRENDER_JPEG: ON
+      TLRENDER_TIFF: ON
+      TLRENDER_EXR: ON
+      TLRENDER_AOM: ON
+      TLRENDER_SVTAV1: ON
+      TLRENDER_FFMPEG: ON
+      TLRENDER_FFMPEG_MINIMAL: OFF
+      TLRENDER_FFMPEG_PLUGIN: ON
+      TLRENDER_FFMPEG_CMD: OFF
+      TLRENDER_NASM: ON
+      TLRENDER_OIIO: ON
+      TLRENDER_USD: OFF
+      TLRENDER_PYTHON: OFF
+      TLRENDER_PROGRAMS: OFF
+      TLRENDER_EXAMPLES: OFF
+      TLRENDER_TESTS: OFF
+      FTK_API: GL_4_1
+      FTK_EXAMPLES: OFF
+      FTK_TESTS: OFF
+      BUILD_SHARED_LIBS: OFF
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        path: djv
+        submodules: recursive
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+
+    - name: Restore dependencies
+      id: deps
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          install-Debug
+          ftk-Debug
+          tl-Debug
+        # No restore-keys on purpose. A near match would give a prefix built
+        # from different dependency versions, and the superbuild would rebuild
+        # only what it thinks is stale, so a stale library could be linked
+        # while everything looked green. Either the dependencies are the ones
+        # this commit expects, or they get built.
+        key: deps-${{ runner.os }}-Debug-${{ hashFiles('djv/deps/tlRender/deps/ftk/etc/SuperBuild/**', 'djv/deps/tlRender/etc/SuperBuild/**', 'djv/.github/workflows/ci-workflow.yml') }}
+
+    - name: Report the cache
+      run: |
+        echo "dependency cache hit: ${{ steps.deps.outputs.cache-hit || 'false' }}"
+
+    - name: Setup environment
+      run: |
+        echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
+        echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
+        cmake --version
+        python --version
+        sh djv/etc/Linux/setup-gha.sh
+
+    - name: Build
+      run: |
+        sh djv/etc/Linux/sbuild.sh djv Debug
+
+    - name: Run tests
+      run: |
+        cd build-Debug
+        xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
