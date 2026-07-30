@@ -42,9 +42,10 @@ jobs:
         python-version: '3.11'
 
     # Writes the dependency cache that the pull request check reads. Only this
-    # job caches: the superbuild trees are around 4.5GB per configuration and
-    # the repository is limited to 10GB, so caching every job in the matrix
-    # would evict faster than it hits.
+    # job caches: an entry is around 2.5GB compressed, and the 10GB limit is
+    # repository-wide with least-recently-used eviction, so caching the rest of
+    # the matrix could evict this entry and silently return the gate to a cold
+    # twenty minute build.
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
