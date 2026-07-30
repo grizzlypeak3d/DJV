@@ -151,11 +151,11 @@ namespace djv
 
             // Create the actions.
             _actions["Start"] = ftk::Action::create(
-                "Goto Start",
+                "Go To Start",
                 "FrameStart",
                 _command("Start"));
             _actions["End"] = ftk::Action::create(
-                "Goto End",
+                "Go To End",
                 "FrameEnd",
                 _command("End"));
             _actions["Prev"] = ftk::Action::create(

@@ -330,6 +330,31 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
+        OTIO_NS::RationalTime BottomToolBar::_mediaDuration(
+            const OTIO_NS::TimeRange& value) const
+        {
+            FTK_P();
+            OTIO_NS::RationalTime out = value.duration();
+            if (p.player && value.duration().value() > 0)
+            {
+                // Counted in the media's frames rather than the player's, so
+                // that a sequence with frames left out still reads as the
+                // range it covers. Both ends are mapped because the in/out
+                // range may be a part of it.
+                const auto& timeline = p.player->getTimeline();
+                const auto first = timeline->getMediaTime(value.start_time());
+                const auto last =
+                    timeline->getMediaTime(value.end_time_inclusive());
+                if (first && last)
+                {
+                    out = OTIO_NS::RationalTime(
+                        last->value() - first->value() + 1.0,
+                        last->rate());
+                }
+            }
+            return out;
+        }
+
         void BottomToolBar::_playerUpdate(const std::shared_ptr<tl::Player>& value)
         {
             FTK_P();
@@ -338,6 +363,42 @@ namespace djv
 
             if (p.player)
             {
+                // The counter names the frame in the media's own time, which
+                // is not the player's when frames have been left out.
+                tl::ui::TimeMap timeMap;
+                timeMap.toMedia =
+                    [this](const OTIO_NS::RationalTime& value)
+                    {
+                        FTK_P();
+                        if (p.player)
+                        {
+                            if (const auto time =
+                                p.player->getTimeline()->getMediaTime(value))
+                            {
+                                return *time;
+                            }
+                        }
+                        return value;
+                    };
+                timeMap.fromMedia =
+                    [this](const OTIO_NS::RationalTime& value)
+                    {
+                        FTK_P();
+                        if (p.player)
+                        {
+                            // Read against where playback is, which is the
+                            // clip the person typing is looking at.
+                            if (const auto time =
+                                p.player->getTimeline()->getTimelineTime(
+                                    p.player->getCurrentTime(), value))
+                            {
+                                return *time;
+                            }
+                        }
+                        return value;
+                    };
+                p.currentTimeEdit->setTimeMap(timeMap);
+
                 p.speedObserver = ftk::Observer<double>::create(
                     p.player->observeSpeed(),
                     [this](double value)
@@ -370,7 +431,7 @@ namespace djv
                     p.player->observeInOutRange(),
                     [this](const OTIO_NS::TimeRange& value)
                     {
-                        _p->durationLabel->setValue(value.duration());
+                        _p->durationLabel->setValue(_mediaDuration(value));
                     });
             }
             else

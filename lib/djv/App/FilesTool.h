@@ -35,6 +35,9 @@ namespace djv
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:
+            void _rangeUpdate(
+                const std::shared_ptr<models::FilesModelItem>&,
+                const ftk::RangeI64&);
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _aUpdate(const std::shared_ptr<models::FilesModelItem>&);
             void _bUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);

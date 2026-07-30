@@ -10,6 +10,7 @@
 #include <ftk/UI/App.h>
 
 #include <filesystem>
+#include <optional>
 
 namespace ftk
 {
@@ -106,9 +107,16 @@ namespace djv
             bool getHideSetup() const;
 
             //! Open a file.
+            //!
+            //! The frame range, when given, is the range an image sequence is
+            //! meant to cover, which need not be the frames on disk: a render
+            //! in progress is watched over the range it will have when it
+            //! finishes. It applies to the first file opened, since a
+            //! directory holds sequences that each have their own.
             void open(
                 const ftk::Path& path,
-                const ftk::Path& audioPath = ftk::Path());
+                const ftk::Path& audioPath = ftk::Path(),
+                const std::optional<ftk::RangeI64>& frames = std::optional<ftk::RangeI64>());
 
             //! Open a file dialog.
             void openDialog();
@@ -160,6 +168,7 @@ namespace djv
 
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
+            void _reloadUpdate(const std::shared_ptr<models::FilesModelItem>&);
             void _layersUpdate(const std::vector<int>&);
             void _audioUpdate();
 

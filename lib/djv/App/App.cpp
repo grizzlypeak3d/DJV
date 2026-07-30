@@ -68,6 +68,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<tl::Compare> > compare;
             std::shared_ptr<ftk::CmdLineOption<ftk::V2F> > wipeCenter;
             std::shared_ptr<ftk::CmdLineOption<float> > wipeRotation;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > frameRange;
             std::shared_ptr<ftk::CmdLineOption<double> > speed;
             std::shared_ptr<ftk::CmdLineOption<tl::Playback> > playback;
             std::shared_ptr<ftk::CmdLineOption<tl::Loop> > loop;
@@ -105,6 +106,39 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureOutput;
         };
 
+        namespace
+        {
+            // "1-100", and "-10-20" for a sequence starting before zero. The
+            // separator is the first dash after the first character, so a
+            // negative start is not mistaken for it.
+            std::optional<ftk::RangeI64> parseFrameRange(const std::string& value)
+            {
+                std::optional<ftk::RangeI64> out;
+                const size_t i = value.find('-', 1);
+                if (i != std::string::npos && i + 1 < value.size())
+                {
+                    const std::string startStr = value.substr(0, i);
+                    const std::string endStr = value.substr(i + 1);
+                    try
+                    {
+                        size_t startEnd = 0;
+                        size_t endEnd = 0;
+                        const int64_t start = std::stoll(startStr, &startEnd);
+                        const int64_t end = std::stoll(endStr, &endEnd);
+                        // Both halves have to be used up, so that trailing
+                        // rubbish is rejected rather than quietly dropped.
+                        if (startEnd == startStr.size() && endEnd == endStr.size())
+                        {
+                            out = ftk::RangeI64(start, end);
+                        }
+                    }
+                    catch (const std::exception&)
+                    {}
+                }
+                return out;
+            }
+        }
+
         struct App::Private
         {
             std::filesystem::path logFile;
@@ -137,7 +171,12 @@ namespace djv
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
+            std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
+            // The policy the open files were built with, so that a change to
+            // or from Skip can be told apart from the rest.
+            tl::MissingFrames missingFrames = tl::MissingFrames::First;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > reloadObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > activeObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
@@ -197,6 +236,15 @@ namespace djv
                 "Wipe rotation.",
                 "Compare",
                 0.F);
+            p.cmdLine.frameRange = ftk::CmdLineOption<std::string>::create(
+                { "-frameRange", "-fr" },
+                "Frame range of an image sequence (e.g., 1-100). This is the "
+                "range the sequence is meant to cover, which need not be the "
+                "frames on disk: a render in progress can be watched over the "
+                "range it will end up with, the frames that are not there yet "
+                "following the missing frames setting. Applies to the first "
+                "file opened.",
+                "Playback");
             p.cmdLine.speed = ftk::CmdLineOption<double>::create(
                 { "-speed" },
                 "Playback speed.",
@@ -367,6 +415,7 @@ namespace djv
                     p.cmdLine.loop,
                     p.cmdLine.timeUnits,
                     p.cmdLine.seek,
+                    p.cmdLine.frameRange,
                     p.cmdLine.inPoint,
                     p.cmdLine.outPoint,
                     p.cmdLine.ocioFileName,
@@ -516,16 +565,30 @@ namespace djv
                 });
         }
 
-        void App::open(const ftk::Path& path, const ftk::Path& audioPath)
+        void App::open(
+            const ftk::Path& path,
+            const ftk::Path& audioPath,
+            const std::optional<ftk::RangeI64>& frames)
         {
             FTK_P();
             ftk::DirListOptions dirListOptions;
             dirListOptions.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
             dirListOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+            bool first = true;
             for (const auto& i : tl::getPaths(_context, path, dirListOptions))
             {
                 auto item = std::make_shared<models::FilesModelItem>();
                 item->path = i;
+                if (first && frames.has_value())
+                {
+                    // Stated, so the frames on disk are not looked for and
+                    // the range is used as it is. A directory gives several
+                    // sequences and one range cannot describe them all, so
+                    // only the first takes it.
+                    item->path.setFrames(frames.value());
+                    item->framesStated = true;
+                }
+                first = false;
                 item->audioPath = audioPath;
                 p.filesModel->add(item);
                 p.recentFilesModel->addRecent(std::filesystem::u8path(path.get()));
@@ -1029,12 +1092,49 @@ namespace djv
                     }
                 });
 
+            // Most image sequence settings are read when a file is opened,
+            // but the missing frame policy is one to change while looking at
+            // a render in progress, so it is pushed to what is already open.
+            // Setting the options clears the cache, so frames that were read
+            // under the old policy are read again.
+            //
+            // A structural policy is the exception: it decides what clips the
+            // timeline is built from, so it is settled when the file is opened
+            // and the file has to be opened again.
+            p.missingFrames = p.settingsModel->getImageSeq().io.missingFrames;
+            p.imageSeqObserver = ftk::Observer<models::ImageSeqSettings>::create(
+                p.settingsModel->observeImageSeq(),
+                [this](const models::ImageSeqSettings& value)
+                {
+                    FTK_P();
+                    const bool reopen =
+                        value.io.missingFrames != p.missingFrames &&
+                        (tl::isStructural(value.io.missingFrames) ||
+                            tl::isStructural(p.missingFrames));
+                    p.missingFrames = value.io.missingFrames;
+                    if (reopen)
+                    {
+                        reload();
+                    }
+                    else if (auto player = p.player->get())
+                    {
+                        player->setIOOptions(p.settingsModel->getIOOptions());
+                    }
+                });
+
             p.filesObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
                 p.filesModel->observeFiles(),
                 [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
                 {
                     _filesUpdate(value);
                 });
+            p.reloadObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                p.filesModel->observeReload(),
+                [this](const std::shared_ptr<models::FilesModelItem>& value)
+                {
+                    _reloadUpdate(value);
+                });
+
             p.activeObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
                 p.filesModel->observeActive(),
                 [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
@@ -1165,6 +1265,20 @@ namespace djv
                     audioFileName = p.cmdLine.audioFileName->getValue();
                 }
 
+                std::optional<ftk::RangeI64> frameRange;
+                if (p.cmdLine.frameRange->found())
+                {
+                    frameRange = parseFrameRange(p.cmdLine.frameRange->getValue());
+                    if (!frameRange.has_value())
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            ftk::Format("Cannot parse the frame range: \"{0}\"").
+                                arg(p.cmdLine.frameRange->getValue()),
+                            ftk::LogType::Error);
+                    }
+                }
+
                 for (const auto& input : p.cmdLine.inputs->getList())
                 {
                     ftk::Path path(input);
@@ -1172,7 +1286,9 @@ namespace djv
                     {
                         path = ftk::expandSeq(path, pathOptions);
                     }
-                    open(path, ftk::Path(audioFileName));
+                    open(path, ftk::Path(audioFileName), frameRange);
+                    // Only the first file opened takes the range.
+                    frameRange.reset();
 
                     if (auto player = p.player->get())
                     {
@@ -1360,14 +1476,36 @@ namespace djv
                         options.ioOptions = p.settingsModel->getIOOptions();
                         options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
                         options.readThreadCount = imageSeq.readThreadCount;
+
+                        // A range that was asked for is used as it is. One
+                        // that was not is looked for on disk, so that
+                        // reopening picks up frames rendered since.
+                        options.seqExpand = !files[i]->framesStated;
                         timelines[i] = tl::Timeline::create(
                             _context,
                             files[i]->path,
                             files[i]->audioPath,
                             options);
+
+                        // Opening a sequence finds the frames on disk, which
+                        // the path does not know about when it names one
+                        // file. Kept beside the path rather than folded into
+                        // it: a path carrying a range is taken as a range
+                        // that was asked for, and reopening would stop
+                        // looking for frames that have arrived since.
+                        files[i]->timeRange = timelines[i]->getTimeRange();
+
+                        // Replaced rather than added to: a file that is
+                        // reopened comes back through here with its layers
+                        // already listed from the time before.
+                        files[i]->videoLayers.clear();
                         for (const auto& video : timelines[i]->getIOInfo().video)
                         {
                             files[i]->videoLayers.push_back(video.name);
+                        }
+                        if (files[i]->videoLayer >= files[i]->videoLayers.size())
+                        {
+                            files[i]->videoLayer = 0;
                         }
                     }
                     catch (const std::exception& e)
@@ -1379,6 +1517,56 @@ namespace djv
 
             p.files = files;
             p.timelines = timelines;
+        }
+
+        void App::_reloadUpdate(const std::shared_ptr<models::FilesModelItem>& item)
+        {
+            FTK_P();
+            if (!item)
+            {
+                return;
+            }
+
+            // Keep where playback had got to. _activeUpdate saves this for a
+            // file that is losing focus, which this one is not.
+            if (!p.activeFiles.empty() && p.activeFiles.front() == item)
+            {
+                if (auto player = p.player->get())
+                {
+                    item->speed = player->getSpeed();
+                    item->currentTime = player->getCurrentTime();
+                }
+            }
+            if (item->path.getFrames().has_value() &&
+                !item->currentTime.strictly_equal(tl::invalidTime))
+            {
+                const ftk::RangeI64& frames = item->path.getFrames().value();
+                item->currentTime = OTIO_NS::RationalTime(
+                    ftk::clamp(
+                        item->currentTime.value(),
+                        static_cast<double>(frames.min()),
+                        static_cast<double>(frames.max())),
+                    item->currentTime.rate());
+            }
+
+            const auto i = std::find(p.files.begin(), p.files.end(), item);
+            if (i != p.files.end())
+            {
+                p.timelines[i - p.files.begin()].reset();
+            }
+
+            // Thumbnails are cached by path, height and time, and the
+            // timelines behind them by path alone. None of that mentions the
+            // frame range, so a range that has changed has to throw them out
+            // by hand or the old ones go on being served.
+            _context->getSystem<tl::ui::ThumbnailSystem>()->clearCache();
+
+            // Both updates decide what can be kept by comparing item
+            // pointers, and the pointer has not changed, so the timeline and
+            // the player it belongs to have to be taken out of the way first.
+            p.activeFiles.clear();
+            _filesUpdate(p.filesModel->getFiles());
+            _activeUpdate(p.filesModel->getActive());
         }
 
         void App::_activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& activeFiles)
