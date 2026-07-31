@@ -179,6 +179,10 @@ namespace djv
 
             auto topLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
             topLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            // A row sizes its children across itself from its own alignment,
+            // which defaults to filling. Without this the shorter of a pair is
+            // stretched to the height of the taller.
+            topLayout->setVAlign(ftk::VAlign::Top);
             p.hudLayouts[models::HUDPos::TopLeft]->setParent(topLayout);
             auto spacer = ftk::Spacer::create(
                 context, ftk::Orientation::Horizontal, topLayout);
@@ -207,6 +211,7 @@ namespace djv
             p.toastTimer = ftk::Timer::create(context);
             auto bottomRowLayout = ftk::HorizontalLayout::create(context, bottomLayout);
             bottomRowLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            bottomRowLayout->setVAlign(ftk::VAlign::Bottom);
             p.hudLayouts[models::HUDPos::BottomLeft]->setParent(bottomRowLayout);
             spacer = ftk::Spacer::create(
                 context, ftk::Orientation::Horizontal, bottomRowLayout);
