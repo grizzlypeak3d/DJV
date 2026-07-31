@@ -128,15 +128,27 @@ namespace djv
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFont(ftk::FontType::Mono);
+            p.fileNameLabel->setMarginRole(
+                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.fileNameLabel->setBackgroundRole(ftk::ColorRole::Overlay);
 
             p.cacheLabel = ftk::Label::create(context);
             p.cacheLabel->setFont(ftk::FontType::Mono);
+            p.cacheLabel->setMarginRole(
+                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.cacheLabel->setBackgroundRole(ftk::ColorRole::Overlay);
 
             p.timeLabel = ftk::Label::create(context);
             p.timeLabel->setFont(ftk::FontType::Mono);
+            p.timeLabel->setMarginRole(
+                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.timeLabel->setBackgroundRole(ftk::ColorRole::Overlay);
 
             p.viewZoomLabel = ftk::Label::create(context);
             p.viewZoomLabel->setFont(ftk::FontType::Mono);
+            p.viewZoomLabel->setMarginRole(
+                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.viewZoomLabel->setBackgroundRole(ftk::ColorRole::Overlay);
 
             p.colorPickerSwatch = ftk::ColorSwatch::create(context);
             // The swatch takes one size role for both dimensions, so it can be
@@ -148,11 +160,20 @@ namespace djv
             p.colorPickerLabel->setFont(ftk::FontType::Mono);
             auto colorPickerLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
             colorPickerLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            colorPickerLayout->setMarginRole(ftk::SizeRole::MarginInside);
+            // The swatch computes a square, but a row sizes its children across
+            // itself from its own alignment, which defaults to filling: without
+            // this the swatch is stretched to the height of the text.
+            colorPickerLayout->setVAlign(ftk::VAlign::Center);
+            colorPickerLayout->setBackgroundRole(ftk::ColorRole::Overlay);
             p.colorPickerSwatch->setParent(colorPickerLayout);
             p.colorPickerLabel->setParent(colorPickerLayout);
 
             p.infoLabel = ftk::Label::create(context);
             p.infoLabel->setFont(ftk::FontType::Mono);
+            p.infoLabel->setMarginRole(
+                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.infoLabel->setBackgroundRole(ftk::ColorRole::Overlay);
 
             p.hudWidgets[models::HUDItem::FileName] = p.fileNameLabel;
             p.hudWidgets[models::HUDItem::Cache] = p.cacheLabel;
@@ -173,10 +194,15 @@ namespace djv
                 if (models::HUDPos::None == i)
                     continue;
                 p.hudLayouts[i] = ftk::VerticalLayout::create(context);
-                p.hudLayouts[i]->setMarginRole(ftk::SizeRole::MarginSmall);
-                p.hudLayouts[i]->setSpacingRole(ftk::SizeRole::SpacingSmall);
-                p.hudLayouts[i]->setBackgroundRole(ftk::ColorRole::Overlay);
+                p.hudLayouts[i]->setSpacingRole(ftk::SizeRole::None);
             }
+            // Items align toward the corner they are in, so a short line in a
+            // right hand corner ends flush with a long one above it rather
+            // than leaving a gap at the edge.
+            p.hudLayouts[models::HUDPos::TopLeft]->setHAlign(ftk::HAlign::Left);
+            p.hudLayouts[models::HUDPos::TopRight]->setHAlign(ftk::HAlign::Right);
+            p.hudLayouts[models::HUDPos::BottomLeft]->setHAlign(ftk::HAlign::Left);
+            p.hudLayouts[models::HUDPos::BottomRight]->setHAlign(ftk::HAlign::Right);
 
             auto topLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
             topLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -195,8 +221,9 @@ namespace djv
             spacer->setStretch(ftk::Stretch::Expanding);
 
             auto bottomLayout = ftk::VerticalLayout::create(context, p.hudLayout);
-            bottomLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            bottomLayout->setSpacingRole(ftk::SizeRole::None);
             auto toastLayout = ftk::HorizontalLayout::create(context, bottomLayout);
+            toastLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             spacer = ftk::Spacer::create(
                 context, ftk::Orientation::Horizontal, toastLayout);
             spacer->setStretch(ftk::Stretch::Expanding);
@@ -727,6 +754,7 @@ namespace djv
                 arg(pick.x, 4).
                 arg(pick.y, 4));
             ftk::setScreenshotTag(p.colorPickerLabel, "View.HUD.ColorPicker");
+            ftk::setScreenshotTag(p.colorPickerSwatch, "View.HUD.ColorPickerSwatch");
 
             p.cacheLabel->setText(
                 ftk::Format("Cache: {0}% V, {1}% A").
