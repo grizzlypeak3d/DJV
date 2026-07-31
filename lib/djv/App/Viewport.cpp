@@ -128,52 +128,33 @@ namespace djv
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFont(ftk::FontType::Mono);
-            p.fileNameLabel->setMarginRole(
-                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
-            p.fileNameLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.fileNameLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
             p.cacheLabel = ftk::Label::create(context);
             p.cacheLabel->setFont(ftk::FontType::Mono);
-            p.cacheLabel->setMarginRole(
-                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
-            p.cacheLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.cacheLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
             p.timeLabel = ftk::Label::create(context);
             p.timeLabel->setFont(ftk::FontType::Mono);
-            p.timeLabel->setMarginRole(
-                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
-            p.timeLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.timeLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
             p.viewZoomLabel = ftk::Label::create(context);
             p.viewZoomLabel->setFont(ftk::FontType::Mono);
-            p.viewZoomLabel->setMarginRole(
-                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
-            p.viewZoomLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.viewZoomLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
             p.colorPickerSwatch = ftk::ColorSwatch::create(context);
-            // The swatch takes one size role for both dimensions, so it can be
-            // square or exactly the height of the text beside it, not both.
-            // Square and a little under, so the row's height comes from the
-            // label and the color picker matches the other HUD items.
-            p.colorPickerSwatch->setSizeRole(ftk::SizeRole::Margin);
+            p.colorPickerSwatch->setVAlign(ftk::VAlign::Center);
             p.colorPickerLabel = ftk::Label::create(context);
             p.colorPickerLabel->setFont(ftk::FontType::Mono);
+            p.colorPickerLabel->setMarginRole(ftk::SizeRole::MarginSmall);
             auto colorPickerLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
             colorPickerLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            colorPickerLayout->setMarginRole(ftk::SizeRole::MarginInside);
-            // The swatch computes a square, but a row sizes its children across
-            // itself from its own alignment, which defaults to filling: without
-            // this the swatch is stretched to the height of the text.
-            colorPickerLayout->setVAlign(ftk::VAlign::Center);
-            colorPickerLayout->setBackgroundRole(ftk::ColorRole::Overlay);
             p.colorPickerSwatch->setParent(colorPickerLayout);
             p.colorPickerLabel->setParent(colorPickerLayout);
 
             p.infoLabel = ftk::Label::create(context);
             p.infoLabel->setFont(ftk::FontType::Mono);
-            p.infoLabel->setMarginRole(
-                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
-            p.infoLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
             p.hudWidgets[models::HUDItem::FileName] = p.fileNameLabel;
             p.hudWidgets[models::HUDItem::Cache] = p.cacheLabel;
@@ -182,33 +163,27 @@ namespace djv
             p.hudWidgets[models::HUDItem::ColorPicker] = colorPickerLayout;
             p.hudWidgets[models::HUDItem::Info] = p.infoLabel;
 
-            // Rows rather than a grid: the corners are pinned by the spacers
-            // between them instead of each aligning itself, and the toast gets
-            // a full width row above the bottom pair rather than competing
-            // with them for a cell.
             p.hudLayout = ftk::VerticalLayout::create(context, shared_from_this());
             p.hudLayout->setMarginRole(ftk::SizeRole::MarginSmall);
-            p.hudLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.hudLayout->setSpacingRole(ftk::SizeRole::None);
             for (const auto i : models::getHUDPosEnums())
             {
                 if (models::HUDPos::None == i)
                     continue;
                 p.hudLayouts[i] = ftk::VerticalLayout::create(context);
+                p.hudLayouts[i]->setMarginRole(ftk::SizeRole::MarginInside);
                 p.hudLayouts[i]->setSpacingRole(ftk::SizeRole::None);
+                p.hudLayouts[i]->setBackgroundRole(ftk::ColorRole::Overlay);
             }
-            // Items align toward the corner they are in, so a short line in a
-            // right hand corner ends flush with a long one above it rather
-            // than leaving a gap at the edge.
-            p.hudLayouts[models::HUDPos::TopLeft]->setHAlign(ftk::HAlign::Left);
-            p.hudLayouts[models::HUDPos::TopRight]->setHAlign(ftk::HAlign::Right);
-            p.hudLayouts[models::HUDPos::BottomLeft]->setHAlign(ftk::HAlign::Left);
-            p.hudLayouts[models::HUDPos::BottomRight]->setHAlign(ftk::HAlign::Right);
+
+            p.toastLabel = ftk::Label::create(context);
+            p.toastLabel->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.toastLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.toastLabel->setClipText(true);
+            p.toastLabel->setVisible(false);
 
             auto topLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
             topLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            // A row sizes its children across itself from its own alignment,
-            // which defaults to filling. Without this the shorter of a pair is
-            // stretched to the height of the taller.
             topLayout->setVAlign(ftk::VAlign::Top);
             p.hudLayouts[models::HUDPos::TopLeft]->setParent(topLayout);
             auto spacer = ftk::Spacer::create(
@@ -221,22 +196,15 @@ namespace djv
             spacer->setStretch(ftk::Stretch::Expanding);
 
             auto bottomLayout = ftk::VerticalLayout::create(context, p.hudLayout);
-            bottomLayout->setSpacingRole(ftk::SizeRole::None);
+            bottomLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto toastLayout = ftk::HorizontalLayout::create(context, bottomLayout);
-            toastLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             spacer = ftk::Spacer::create(
                 context, ftk::Orientation::Horizontal, toastLayout);
             spacer->setStretch(ftk::Stretch::Expanding);
-            p.toastLabel = ftk::Label::create(context, toastLayout);
-            p.toastLabel->setMarginRole(
-                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
-            p.toastLabel->setBackgroundRole(ftk::ColorRole::Overlay);
-            p.toastLabel->setClipText(true);
-            p.toastLabel->setVisible(false);
+            p.toastLabel->setParent(toastLayout);
             spacer = ftk::Spacer::create(
                 context, ftk::Orientation::Horizontal, toastLayout);
             spacer->setStretch(ftk::Stretch::Expanding);
-            p.toastTimer = ftk::Timer::create(context);
             auto bottomRowLayout = ftk::HorizontalLayout::create(context, bottomLayout);
             bottomRowLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             bottomRowLayout->setVAlign(ftk::VAlign::Bottom);
@@ -245,6 +213,8 @@ namespace djv
                 context, ftk::Orientation::Horizontal, bottomRowLayout);
             spacer->setStretch(ftk::Stretch::Expanding);
             p.hudLayouts[models::HUDPos::BottomRight]->setParent(bottomRowLayout);
+
+            p.toastTimer = ftk::Timer::create(context);
 
             p.fpsObserver = ftk::Observer<double>::create(
                 observeFPS(),
@@ -746,7 +716,7 @@ namespace djv
             p.colorPickerSwatch->setColor(colorSample);
             const auto& pick = p.pick->get();
             p.colorPickerLabel->setText(
-                ftk::Format("Color: {0} {1} {2} {3}, Pixel: {4} {5}").
+                ftk::Format("Color: {0} {1} {2} {3}, Pixel: {4}, {5}").
                 arg(colorSample.r, 2).
                 arg(colorSample.g, 2).
                 arg(colorSample.b, 2).
@@ -761,8 +731,6 @@ namespace djv
                 arg(static_cast<int>(p.cacheInfo.videoPercentage), 3).
                 arg(static_cast<int>(p.cacheInfo.audioPercentage), 3));
             ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");
-
-
         }
 
         void Viewport::_toastUpdate()

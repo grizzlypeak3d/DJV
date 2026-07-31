@@ -14,7 +14,7 @@ namespace djv
         TL_ENUM_IMPL(
             HUDItem,
             "File Name",
-            "Info",
+            "Information",
             "Cache",
             "Time",
             "View Zoom",
