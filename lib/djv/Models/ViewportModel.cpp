@@ -18,7 +18,8 @@ namespace djv
             "Cache",
             "Time",
             "View Zoom",
-            "Color Picker");
+            "Color Picker",
+            "Render");
 
         TL_ENUM_IMPL(
             HUDPos,

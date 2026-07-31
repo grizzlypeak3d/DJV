@@ -70,6 +70,7 @@ namespace djv
             std::shared_ptr<ftk::ColorSwatch> colorPickerSwatch;
             std::shared_ptr<ftk::Label> colorPickerLabel;
             std::shared_ptr<ftk::Label> infoLabel;
+            std::shared_ptr<ftk::Label> renderLabel;
             std::map<models::HUDItem, std::shared_ptr<ftk::IWidget> > hudWidgets;
             bool toastActive = false;
             std::shared_ptr<ftk::Label> toastLabel;
@@ -156,12 +157,17 @@ namespace djv
             p.infoLabel->setFont(ftk::FontType::Mono);
             p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
+            p.renderLabel = ftk::Label::create(context);
+            p.renderLabel->setFont(ftk::FontType::Mono);
+            p.renderLabel->setMarginRole(ftk::SizeRole::MarginSmall);
+
             p.hudWidgets[models::HUDItem::FileName] = p.fileNameLabel;
             p.hudWidgets[models::HUDItem::Cache] = p.cacheLabel;
             p.hudWidgets[models::HUDItem::Time] = p.timeLabel;
             p.hudWidgets[models::HUDItem::ViewZoom] = p.viewZoomLabel;
             p.hudWidgets[models::HUDItem::ColorPicker] = colorPickerLayout;
             p.hudWidgets[models::HUDItem::Info] = p.infoLabel;
+            p.hudWidgets[models::HUDItem::Render] = p.renderLabel;
 
             p.hudLayout = ftk::VerticalLayout::create(context, shared_from_this());
             p.hudLayout->setMarginRole(ftk::SizeRole::MarginSmall);
@@ -699,6 +705,38 @@ namespace djv
             p.infoLabel->setText(ftk::join(info, ", "));
             p.infoLabel->setVisible(!info.empty());
             ftk::setScreenshotTag(p.infoLabel, "View.HUD.Info");
+
+            // What is actually rendered, which the pixel aspect ratio and the
+            // aspect ratio override can both move away from the media size
+            // reported above. The effective pixel aspect ratio is taken back
+            // out of the render size rather than read from either source, so
+            // it holds whether it came from the media or from an override.
+            s = std::string();
+            if (!p.ioInfo.video.empty())
+            {
+                const ftk::ImageInfo& videoInfo = p.ioInfo.video[0];
+                const ftk::Size2I renderSize = tl::getRenderSize(
+                    videoInfo,
+                    p.displayOptions.aspectRatio);
+                if (renderSize.isValid() && videoInfo.size.w > 0)
+                {
+                    const float pixelAspectRatio =
+                        renderSize.w / static_cast<float>(videoInfo.size.w);
+                    s = ftk::Format("Render: {0}x{1}:{2}").
+                        arg(renderSize.w).
+                        arg(renderSize.h).
+                        arg(ftk::aspectRatio(renderSize), 2);
+                    // Square pixels are the common case and add nothing.
+                    if (std::fabs(pixelAspectRatio - 1.F) > 0.001F)
+                    {
+                        s += ftk::Format(", PAR: {0}").
+                            arg(pixelAspectRatio, 2);
+                    }
+                }
+            }
+            p.renderLabel->setText(s);
+            p.renderLabel->setVisible(!s.empty());
+            ftk::setScreenshotTag(p.renderLabel, "View.HUD.Render");
 
             s = std::string();
             if (auto app = p.app.lock())

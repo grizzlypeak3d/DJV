@@ -54,6 +54,7 @@ namespace djv
             Time,
             ViewZoom,
             ColorPicker,
+            Render,
 
             Count,
             First = FileName
