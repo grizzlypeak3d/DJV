@@ -679,6 +679,57 @@ namespace djv
                     }
                     vp->setHUDOptions(hud);
                 }
+                if (v.contains("aspectRatio"))
+                {
+                    // Select one of the aspect ratio presets by its index in
+                    // the View > Aspect Ratio menu, 0 being Default, e.g.
+                    //   { "aspectRatio": 3 }
+                    // or override the preset outright, which is the only way
+                    // to capture a pixel aspect ratio since the defaults are
+                    // all display ratios, e.g.
+                    //   { "aspectRatio": { "index": 3, "num": 2, "den": 1,
+                    //                      "type": "Pixel" } }
+                    auto options = vp->getAspectRatioOptions();
+                    const auto& av = v.at("aspectRatio");
+                    int index = options.index;
+                    if (av.is_number_integer())
+                    {
+                        index = av.get<int>();
+                    }
+                    else if (av.is_object())
+                    {
+                        if (av.contains("index"))
+                            index = av.at("index").get<int>();
+                        if (index > 0 &&
+                            index < static_cast<int>(options.options.size()))
+                        {
+                            auto& preset = options.options[index];
+                            if (av.contains("num"))
+                                preset.value.num = av.at("num").get<float>();
+                            if (av.contains("den"))
+                                preset.value.den = av.at("den").get<float>();
+                            if (av.contains("type"))
+                            {
+                                const std::string s =
+                                    av.at("type").get<std::string>();
+                                if (!from_string(s, preset.type))
+                                    note(p.shotId,
+                                        "unrecognized aspect ratio type '" + s + "'");
+                            }
+                        }
+                    }
+                    if (index >= 0 &&
+                        index < static_cast<int>(options.options.size()))
+                    {
+                        options.index = index;
+                        vp->setAspectRatioOptions(options);
+                    }
+                    else
+                    {
+                        note(p.shotId, ftk::Format(
+                            "aspect ratio index {0} is out of range").arg(index));
+                    }
+                }
                 if (v.contains("magnify") || v.contains("minify"))
                 {
                     // The viewport's magnify/minify filters live in the display
