@@ -13,13 +13,16 @@
 #include <tlRender/Timeline/Util.h>
 
 #include <ftk/UI/ColorSwatch.h>
-#include <ftk/UI/GridLayout.h>
 #include <ftk/UI/Label.h>
+#include <ftk/UI/SysLogModel.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/Spacer.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
+#include <ftk/Core/Timer.h>
+
+#include <algorithm>
 
 #include <regex>
 
@@ -27,6 +30,16 @@ namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            // Long enough for a short path, short enough that the message does
+            // not run the width of the viewport. The untruncated text is in
+            // the messages tool.
+            const size_t toastTextLength = 80;
+
+            const std::chrono::seconds toastTimeout(5);
+        }
+
         struct Viewport::Private
         {
             std::weak_ptr<App> app;
@@ -58,7 +71,10 @@ namespace djv
             std::shared_ptr<ftk::Label> colorPickerLabel;
             std::shared_ptr<ftk::Label> infoLabel;
             std::map<models::HUDItem, std::shared_ptr<ftk::IWidget> > hudWidgets;
-            std::shared_ptr<ftk::GridLayout> hudLayout;
+            bool toastActive = false;
+            std::shared_ptr<ftk::Label> toastLabel;
+            std::shared_ptr<ftk::Timer> toastTimer;
+            std::shared_ptr<ftk::VerticalLayout> hudLayout;
             std::map<models::HUDPos, std::shared_ptr<ftk::VerticalLayout> > hudLayouts;
 
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
@@ -76,6 +92,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > messagesObserver;
             std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
@@ -122,7 +139,11 @@ namespace djv
             p.viewZoomLabel->setFont(ftk::FontType::Mono);
 
             p.colorPickerSwatch = ftk::ColorSwatch::create(context);
-            p.colorPickerSwatch->setSizeRole(ftk::SizeRole::MarginLarge);
+            // The swatch takes one size role for both dimensions, so it can be
+            // square or exactly the height of the text beside it, not both.
+            // Square and a little under, so the row's height comes from the
+            // label and the color picker matches the other HUD items.
+            p.colorPickerSwatch->setSizeRole(ftk::SizeRole::Margin);
             p.colorPickerLabel = ftk::Label::create(context);
             p.colorPickerLabel->setFont(ftk::FontType::Mono);
             auto colorPickerLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
@@ -140,27 +161,63 @@ namespace djv
             p.hudWidgets[models::HUDItem::ColorPicker] = colorPickerLayout;
             p.hudWidgets[models::HUDItem::Info] = p.infoLabel;
 
-            p.hudLayout = ftk::GridLayout::create(context, shared_from_this());
+            // Rows rather than a grid: the corners are pinned by the spacers
+            // between them instead of each aligning itself, and the toast gets
+            // a full width row above the bottom pair rather than competing
+            // with them for a cell.
+            p.hudLayout = ftk::VerticalLayout::create(context, shared_from_this());
             p.hudLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             p.hudLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             for (const auto i : models::getHUDPosEnums())
             {
-                p.hudLayouts[i] = ftk::VerticalLayout::create(context, p.hudLayout);
+                if (models::HUDPos::None == i)
+                    continue;
+                p.hudLayouts[i] = ftk::VerticalLayout::create(context);
                 p.hudLayouts[i]->setMarginRole(ftk::SizeRole::MarginSmall);
                 p.hudLayouts[i]->setSpacingRole(ftk::SizeRole::SpacingSmall);
                 p.hudLayouts[i]->setBackgroundRole(ftk::ColorRole::Overlay);
             }
-            p.hudLayouts[models::HUDPos::TopLeft]->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
-            p.hudLayouts[models::HUDPos::TopRight]->setAlign(ftk::HAlign::Right, ftk::VAlign::Top);
-            p.hudLayouts[models::HUDPos::BottomLeft]->setAlign(ftk::HAlign::Left, ftk::VAlign::Bottom);
-            p.hudLayouts[models::HUDPos::BottomRight]->setAlign(ftk::HAlign::Right, ftk::VAlign::Bottom);
-            p.hudLayout->setGridPos(p.hudLayouts[models::HUDPos::TopLeft], 0, 0);
-            p.hudLayout->setGridPos(p.hudLayouts[models::HUDPos::TopRight], 0, 2);
-            p.hudLayout->setGridPos(p.hudLayouts[models::HUDPos::BottomLeft], 2, 0);
-            p.hudLayout->setGridPos(p.hudLayouts[models::HUDPos::BottomRight], 2, 2);
-            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Vertical, p.hudLayout);
+
+            auto topLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
+            topLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            // A row sizes its children across itself from its own alignment,
+            // which defaults to filling. Without this the shorter of a pair is
+            // stretched to the height of the taller.
+            topLayout->setVAlign(ftk::VAlign::Top);
+            p.hudLayouts[models::HUDPos::TopLeft]->setParent(topLayout);
+            auto spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Horizontal, topLayout);
             spacer->setStretch(ftk::Stretch::Expanding);
-            p.hudLayout->setGridPos(spacer, 1, 1);
+            p.hudLayouts[models::HUDPos::TopRight]->setParent(topLayout);
+
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Vertical, p.hudLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
+
+            auto bottomLayout = ftk::VerticalLayout::create(context, p.hudLayout);
+            bottomLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            auto toastLayout = ftk::HorizontalLayout::create(context, bottomLayout);
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Horizontal, toastLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
+            p.toastLabel = ftk::Label::create(context, toastLayout);
+            p.toastLabel->setMarginRole(
+                ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            p.toastLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.toastLabel->setClipText(true);
+            p.toastLabel->setVisible(false);
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Horizontal, toastLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
+            p.toastTimer = ftk::Timer::create(context);
+            auto bottomRowLayout = ftk::HorizontalLayout::create(context, bottomLayout);
+            bottomRowLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            bottomRowLayout->setVAlign(ftk::VAlign::Bottom);
+            p.hudLayouts[models::HUDPos::BottomLeft]->setParent(bottomRowLayout);
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Horizontal, bottomRowLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
+            p.hudLayouts[models::HUDPos::BottomRight]->setParent(bottomRowLayout);
 
             p.fpsObserver = ftk::Observer<double>::create(
                 observeFPS(),
@@ -243,6 +300,30 @@ namespace djv
                 {
                     _p->viewZoom = value;
                     _hudUpdate();
+                });
+
+            p.messagesObserver = ftk::ListObserver<std::string>::create(
+                app->getSysLogModel()->observeMessages(),
+                [this](const std::vector<std::string>& value)
+                {
+                    FTK_P();
+                    // A burst replaces rather than accumulates, matching the
+                    // status bar: a sequence with many unreadable frames would
+                    // otherwise queue a message per frame.
+                    p.toastLabel->setText(!value.empty() ?
+                        ftk::elide(value.back(), toastTextLength) :
+                        std::string());
+                    _toastUpdate();
+                    if (!p.toastLabel->getText().empty())
+                    {
+                        p.toastTimer->start(
+                            toastTimeout,
+                            [this]
+                            {
+                                _p->toastLabel->setText(std::string());
+                                _toastUpdate();
+                            });
+                    }
                 });
 
             p.hudOptionsObserver = ftk::Observer<models::HUDOptions>::create(
@@ -469,6 +550,15 @@ namespace djv
             }
         }
 
+        void Viewport::setToastActive(bool value)
+        {
+            FTK_P();
+            if (value == p.toastActive)
+                return;
+            p.toastActive = value;
+            _toastUpdate();
+        }
+
         ftk::Size2I Viewport::getSizeHint() const
         {
             return _p->hudLayout->getSizeHint();
@@ -644,7 +734,14 @@ namespace djv
                 arg(static_cast<int>(p.cacheInfo.audioPercentage), 3));
             ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");
 
-            p.hudLayout->setVisible(p.hudOptions.enabled);
+
+        }
+
+        void Viewport::_toastUpdate()
+        {
+            FTK_P();
+            p.toastLabel->setVisible(
+                p.toastActive && !p.toastLabel->getText().empty());
         }
 
         void Viewport::_hudLayout()
@@ -660,7 +757,8 @@ namespace djv
             }
             for (const auto& i : p.hudLayouts)
             {
-                i.second->setVisible(i.second->getChildren().size() > 0);
+                i.second->setVisible(
+                    options.enabled && i.second->getChildren().size() > 0);
             }
         }
     }

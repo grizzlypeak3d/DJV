@@ -24,6 +24,7 @@ set(HEADERS
     HelpActions.h
     HelpMenu.h
     IActions.h
+    Indicator.h
     IToolWidget.h
     InfoTool.h
     MagnifyTool.h
@@ -78,6 +79,7 @@ set(SOURCE
     HelpActions.cpp
     HelpMenu.cpp
     IActions.cpp
+    Indicator.cpp
     IToolWidget.cpp
     InfoTool.cpp
     MainWindow.cpp

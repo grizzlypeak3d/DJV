@@ -6,6 +6,7 @@
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
 #include <djv/App/FrameActions.h>
+#include <djv/App/Indicator.h>
 #include <djv/App/PlaybackActions.h>
 #include <djv/UI/AudioPopup.h>
 #include <djv/UI/SpeedPopup.h>
@@ -51,6 +52,7 @@ namespace djv
             std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<ui::AudioPopup> audioPopup;
+            std::shared_ptr<Indicator> indicator;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
@@ -137,9 +139,10 @@ namespace djv
             p.audioButton->setPopupIcon(true);
             p.audioButton->setTooltip("Audio controls.");
 
+            p.indicator = app->createIndicator();
+
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setMarginRole(ftk::SizeRole::MarginInside);
-            p.layout->setSpacingRole(ftk::SizeRole::None);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::MarginInside);
             ftk::setScreenshotTag(hLayout, "Playback.Controls");
@@ -166,9 +169,10 @@ namespace djv
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
             spacer->setHStretch(ftk::Stretch::Expanding);
             hLayout2 = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout2->setSpacingRole(ftk::SizeRole::SpacingTool);
+            hLayout2->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.audioLabel->setParent(hLayout2);
             p.audioButton->setParent(hLayout2);
+            p.indicator->setParent(p.layout);
 
             p.loopWidget->setCallback(
                 [this](tl::Loop value)

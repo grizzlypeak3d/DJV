@@ -16,7 +16,7 @@
 #include <djv/App/MessagesTool.h>
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/SettingsTool.h>
-#include <djv/App/StatusBar.h>
+#include <djv/App/Indicator.h>
 #include <djv/App/SysLogTool.h>
 #include <djv/App/ViewTool.h>
 #include <djv/App/Viewport.h>
@@ -715,9 +715,9 @@ namespace djv
             return _p->toolWidgetFactory;
         }
 
-        std::shared_ptr<StatusBar> App::createStatusBar()
+        std::shared_ptr<Indicator> App::createIndicator()
         {
-            return StatusBar::create(
+            return Indicator::create(
                 _context,
                 std::dynamic_pointer_cast<App>(shared_from_this()));
         }

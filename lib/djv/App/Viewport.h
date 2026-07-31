@@ -47,6 +47,9 @@ namespace djv
 
             void setPlayer(const std::shared_ptr<tl::Player>&) override;
 
+            //! Set whether the toast stands in for the status bar.
+            void setToastActive(bool);
+
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
             void mouseMoveEvent(ftk::MouseMoveEvent&) override;
@@ -58,6 +61,7 @@ namespace djv
             ftk::V2I _toSourcePixel(const ftk::V2I&) const;
             ftk::V2I _fromSourcePixel(const ftk::V2I&) const;
             void _videoUpdate();
+            void _toastUpdate();
             void _hudUpdate();
             void _hudLayout();
 

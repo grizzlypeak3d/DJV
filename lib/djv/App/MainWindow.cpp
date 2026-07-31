@@ -286,7 +286,7 @@ namespace djv
                 p.audioActions);
             ftk::setScreenshotTag(p.bottomToolBar, "MainWindow.BottomToolBar");
 
-            p.statusBar = app->createStatusBar();
+            p.statusBar = StatusBar::create(context, app);
             ftk::setScreenshotTag(p.statusBar, "MainWindow.StatusBar");
 
             p.toolsWidget = ToolsWidget::create(
@@ -750,6 +750,12 @@ namespace djv
                 p.dividers["Bottom"]->setVisible(settings.bottomToolBar && !presentMode);
 
                 p.statusBar->setVisible(settings.statusToolBar && !presentMode);
+
+                // With no status bar to put them in, messages appear over the
+                // viewport instead. Not in presentation mode: an error balloon
+                // over someone else's review is worse than a missed message,
+                // and the messages tool still has them.
+                p.viewport->setToastActive(!settings.statusToolBar && !presentMode);
                 p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
             }
         }
