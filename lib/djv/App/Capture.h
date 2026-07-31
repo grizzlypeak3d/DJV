@@ -65,6 +65,7 @@ namespace djv
             void _applyStep(const nlohmann::json& step);
             int _fileIndex(const nlohmann::json& value) const;
             bool _ready() const;
+            bool _frameReady() const;
             // Why the media a shot opened cannot become ready, or an empty
             // string while it still might.
             std::string _mediaError() const;

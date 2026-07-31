@@ -297,7 +297,7 @@ namespace djv
                 // wait until the player is ready again before settling.
                 if (p.reloadGrace > 0)
                     --p.reloadGrace;
-                else if (!p.expectMedia || _ready())
+                else if (!p.expectMedia || (_ready() && _frameReady()))
                 {
                     p.phase = Phase::Settle;
                     p.settleLeft = p.settleTicksShot;
@@ -914,6 +914,32 @@ namespace djv
                     player->getIOInfo().audio.isValid());
         }
 
+        bool Capture::_frameReady() const
+        {
+            FTK_P();
+            auto app = p.app.lock();
+            if (!app)
+                return false;
+            auto player = app->observePlayer()->get();
+            if (!player)
+                return false;
+            if (player->getIOInfo().video.empty())
+                return true; // Audio-only: there is no frame to wait for.
+
+            // A seek reports the new current time straight away, but the
+            // frame for it is decoded asynchronously and arrives later. The
+            // settle alone is not long enough to cover a cold read, so a shot
+            // could capture whatever frame was on screen beforehand.
+            const auto& video = player->getCurrentVideo();
+            if (video.empty() ||
+                video.front().layers.empty() ||
+                !video.front().layers.front().image)
+                return false;
+            return tl::compareExact(
+                std::optional<OTIO_NS::RationalTime>(video.front().time),
+                std::optional<OTIO_NS::RationalTime>(player->getCurrentTime()));
+        }
+
         std::string Capture::_mediaError() const
         {
             FTK_P();
@@ -943,7 +969,9 @@ namespace djv
                 return "the application to still be running";
             if (!app->observePlayer()->get())
                 return "a player, which the media never produced";
-            return "the media to report its video or audio information";
+            if (!_ready())
+                return "the media to report its video or audio information";
+            return "the frame at the current time to be decoded";
         }
 
         bool Capture::_writePNG(const std::filesystem::path& path) const
