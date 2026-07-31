@@ -138,7 +138,11 @@ namespace djv
             p.viewZoomLabel->setFont(ftk::FontType::Mono);
 
             p.colorPickerSwatch = ftk::ColorSwatch::create(context);
-            p.colorPickerSwatch->setSizeRole(ftk::SizeRole::MarginLarge);
+            // The swatch takes one size role for both dimensions, so it can be
+            // square or exactly the height of the text beside it, not both.
+            // Square and a little under, so the row's height comes from the
+            // label and the color picker matches the other HUD items.
+            p.colorPickerSwatch->setSizeRole(ftk::SizeRole::Margin);
             p.colorPickerLabel = ftk::Label::create(context);
             p.colorPickerLabel->setFont(ftk::FontType::Mono);
             auto colorPickerLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
