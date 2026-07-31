@@ -175,6 +175,10 @@ namespace djv
                 p.hudLayouts[i]->setSpacingRole(ftk::SizeRole::None);
                 p.hudLayouts[i]->setBackgroundRole(ftk::ColorRole::Overlay);
             }
+            p.hudLayouts[models::HUDPos::TopLeft]->setVAlign(ftk::VAlign::Top);
+            p.hudLayouts[models::HUDPos::TopRight]->setVAlign(ftk::VAlign::Top);
+            p.hudLayouts[models::HUDPos::BottomLeft]->setVAlign(ftk::VAlign::Bottom);
+            p.hudLayouts[models::HUDPos::BottomRight]->setVAlign(ftk::VAlign::Bottom);
 
             p.toastLabel = ftk::Label::create(context);
             p.toastLabel->setMarginRole(ftk::SizeRole::MarginSmall);
