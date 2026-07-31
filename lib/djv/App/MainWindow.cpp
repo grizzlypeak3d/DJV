@@ -286,7 +286,7 @@ namespace djv
                 p.audioActions);
             ftk::setScreenshotTag(p.bottomToolBar, "MainWindow.BottomToolBar");
 
-            p.statusBar = app->createStatusBar();
+            p.statusBar = StatusBar::create(context, app);
             ftk::setScreenshotTag(p.statusBar, "MainWindow.StatusBar");
 
             p.toolsWidget = ToolsWidget::create(

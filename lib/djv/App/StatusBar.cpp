@@ -4,17 +4,12 @@
 #include <djv/App/StatusBar.h>
 
 #include <djv/App/App.h>
-#include <djv/UI/StatusIndicatorPopup.h>
-#include <djv/Models/AudioModel.h>
-#include <djv/Models/ColorModel.h>
 #include <djv/Models/ToolsModel.h>
-#include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/SysLogModel.h>
-#include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
@@ -28,19 +23,8 @@ namespace djv
         {
             std::weak_ptr<App> app;
 
-            bool channelsEnabled = false;
-            bool negativeEnabled = false;
-            bool mirrorEnabled = false;
-            bool aspectRatioEnabled = false;
-            bool ocioEnabled = false;
-            bool lutEnabled = false;
-            bool colorEnabled = false;
-            bool audioOffsetEnabled = false;
-
             std::shared_ptr<ftk::Label> messagesLabel;
             std::shared_ptr<ftk::Label> infoLabel;
-            std::shared_ptr<ftk::ToolButton> indicatorButton;
-            std::shared_ptr<ui::StatusIndicatorPopup> indicatorPopup;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             std::shared_ptr<ftk::Timer> messagesTimer;
@@ -50,11 +34,6 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::string> > messagesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
-            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
         };
 
         void StatusBar::_init(
@@ -87,20 +66,11 @@ namespace djv
             p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
             p.infoLabel->setClipText(true);
 
-            p.indicatorButton = ftk::ToolButton::create(context);
-            p.indicatorButton->setIcon("MenuChecked");
-            p.indicatorButton->setPopupIcon(true);
-            p.indicatorButton->setTooltip(
-                "This indicator shows options that can affect video, audio, or performance.\n"
-                "Click to show which options are enabled.");
-
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.messagesLabel->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
-            ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
-            p.indicatorButton->setParent(p.layout);
 
             p.messagesTimer = ftk::Timer::create(context);
 
@@ -155,64 +125,6 @@ namespace djv
                     {
                         _infoUpdate(ftk::Path(), tl::IOInfo());
                     }
-                });
-
-            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
-                app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::DisplayOptions& value)
-                {
-                    FTK_P();
-                    p.channelsEnabled =
-                        value.channels != ftk::ChannelDisplay::Color;
-                    p.negativeEnabled = value.negative;
-                    p.mirrorEnabled =
-                        value.mirror.x ||
-                        value.mirror.y;
-                    p.colorEnabled =
-                        value.color.enabled    ||
-                        value.levels.enabled   ||
-                        value.exposure.enabled ||
-                        value.softClip.enabled;
-                    _indicatorUpdate();
-                });
-
-            p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
-                app->getViewportModel()->observeAspectRatioOptions(),
-                [this](const models::AspectRatioOptions& value)
-                {
-                    FTK_P();
-                    p.aspectRatioEnabled = value.index != 0;
-                    _indicatorUpdate();
-                });
-
-            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeOCIOOptions(),
-                [this](const tl::OCIOOptions& value)
-                {
-                    _p->ocioEnabled = value.enabled;
-                    _indicatorUpdate();
-                });
-
-            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
-                app->getColorModel()->observeLUTOptions(),
-                [this](const tl::LUTOptions& value)
-                {
-                    _p->lutEnabled = value.enabled;
-                    _indicatorUpdate();
-                });
-
-            p.audioSyncOffsetObserver = ftk::Observer<double>::create(
-                app->getAudioModel()->observeSyncOffset(),
-                [this](double value)
-                {
-                    _p->audioOffsetEnabled = value != 0.0;
-                    _indicatorUpdate();
-                });
-
-            p.indicatorButton->setPressedCallback(
-                [this]
-                {
-                    _showIndicatorPopup();
                 });
         }
 
@@ -275,64 +187,6 @@ namespace djv
             }
         }
 
-        bool StatusBar::_hasIndicator() const
-        {
-            FTK_P();
-            return
-                p.channelsEnabled    ||
-                p.negativeEnabled    ||
-                p.mirrorEnabled      ||
-                p.aspectRatioEnabled ||
-                p.ocioEnabled        ||
-                p.lutEnabled         ||
-                p.colorEnabled       ||
-                p.audioOffsetEnabled;
-        }
-
-        std::vector<std::pair<std::string, std::string> > StatusBar::_getIndicators() const
-        {
-            return
-            {
-                { "Channels", "Image channels" },
-                { "Negative", "Negative" },
-                { "Mirror", "Mirror" },
-                { "AspectRatio", "Aspect ratio" },
-                { "OCIO", "OCIO" },
-                { "LUT", "LUT" },
-                { "Color", "Color controls" },
-                { "AudioOffset", "Audio offset" }
-            };
-        }
-        
-        std::map<std::string, bool> StatusBar::_getIndicatorValues() const
-        {
-            FTK_P();
-            return
-            {
-                { "Channels", p.channelsEnabled },
-                { "Negative", p.negativeEnabled },
-                { "Mirror", p.mirrorEnabled },
-                { "AspectRatio", p.aspectRatioEnabled },
-                { "OCIO", p.ocioEnabled },
-                { "LUT", p.lutEnabled },
-                { "Color", p.colorEnabled },
-                { "AudioOffset", p.audioOffsetEnabled }
-            };
-        }
-
-        void StatusBar::_indicatorUpdate()
-        {
-            FTK_P();
-            p.indicatorButton->setBackgroundRole(
-                _hasIndicator() ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
-            if (p.indicatorPopup)
-            {
-                p.indicatorPopup->setIndicators(_getIndicatorValues());
-            }
-        }
-
         void StatusBar::_infoUpdate(const ftk::Path& path, const tl::IOInfo& info)
         {
             FTK_P();
@@ -378,31 +232,5 @@ namespace djv
                 arg(!tooltip.empty() ? tooltip : tooltipDefault));
         }
 
-        void StatusBar::_showIndicatorPopup()
-        {
-            FTK_P();
-            if (!p.indicatorPopup)
-            {
-                p.indicatorPopup = ui::StatusIndicatorPopup::create(
-                    getContext(),
-                    _getIndicators());
-                _indicatorUpdate();
-                p.indicatorPopup->open(getWindow(), p.indicatorButton->getGeometry());
-                std::weak_ptr<StatusBar> weak(std::dynamic_pointer_cast<StatusBar>(shared_from_this()));
-                p.indicatorPopup->setCloseCallback(
-                    [weak]
-                    {
-                        if (auto widget = weak.lock())
-                        {
-                            widget->_p->indicatorPopup.reset();
-                        }
-                    });
-            }
-            else
-            {
-                p.indicatorPopup->close();
-                p.indicatorPopup.reset();
-            }
-        }
     }
 }

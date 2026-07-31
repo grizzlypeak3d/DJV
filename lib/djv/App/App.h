@@ -39,7 +39,7 @@ namespace djv
     namespace app
     {
         class MainWindow;
-        class StatusBar;
+        class Indicator;
         class ToolWidgetFactory;
 
         //! Application.
@@ -133,8 +133,8 @@ namespace djv
             //! Get the tool widget factory.
             const std::shared_ptr<ToolWidgetFactory>& getToolWidgetFactory() const;
 
-            //! Create the status bar.
-            virtual std::shared_ptr<StatusBar> createStatusBar();
+            //! Create the status indicator.
+            virtual std::shared_ptr<Indicator> createIndicator();
 
             //! Get the main window.
             const std::shared_ptr<MainWindow>& getMainWindow() const;
