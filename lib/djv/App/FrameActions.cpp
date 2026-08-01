@@ -12,7 +12,11 @@ namespace djv
     {
         struct FrameActions::Private
         {
+            bool hasPlayer = false;
+            bool hasMarkers = false;
+
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::ListObserver<int> > markersObserver;
         };
 
         void FrameActions::_init(
@@ -137,6 +141,31 @@ namespace djv
                     }
                 });
 
+            // Jump between the frames that carry a note or a drawing. In a
+            // review these are the only frames that matter, and stepping to
+            // them by hand over a long timeline is the slow part.
+            _addCommand(
+                "PrevMarker",
+                "Go to the previous frame with a note or a drawing.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->seekReviewMarker(false);
+                    }
+                });
+
+            _addCommand(
+                "NextMarker",
+                "Go to the next frame with a note or a drawing.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->seekReviewMarker(true);
+                    }
+                });
+
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
             _addCommand(
                 "FocusCurrent",
@@ -178,6 +207,14 @@ namespace djv
             _actions["NextX100"] = ftk::Action::create(
                 "Next Frame X100",
                 _command("NextX100"));
+            _actions["PrevMarker"] = ftk::Action::create(
+                "Previous Review Marker",
+                "ReviewPrev",
+                _command("PrevMarker"));
+            _actions["NextMarker"] = ftk::Action::create(
+                "Next Review Marker",
+                "ReviewNext",
+                _command("NextMarker"));
             _actions["FocusCurrent"] = ftk::Action::create(
                 "Focus Current Frame",
                 _command("FocusCurrent"));
@@ -191,9 +228,21 @@ namespace djv
             _addShortcut("Next", "Next", ftk::Key::Right);
             _addShortcut("NextX10", "Next X10", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Shift)));
             _addShortcut("NextX100", "Next X100", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Control)));
+            // Shift and Control on the arrows are already taken by the X10 and
+            // X100 steps.
+            _addShortcut("PrevMarker", "Previous review marker", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Alt)));
+            _addShortcut("NextMarker", "Next review marker", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Alt)));
             _addShortcut("FocusCurrent", "Focus Current", ftk::KeyShortcut(ftk::Key::F, static_cast<int>(ftk::KeyModifier::Control)));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
+
+            p.markersObserver = ftk::ListObserver<int>::create(
+                app->observeReviewMarkers(),
+                [this](const std::vector<int>& value)
+                {
+                    _p->hasMarkers = !value.empty();
+                    _markersUpdate();
+                });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
@@ -215,7 +264,19 @@ namespace djv
                     _actions["NextX10"]->setEnabled(frames);
                     _actions["NextX100"]->setEnabled(frames);
                     _actions["FocusCurrent"]->setEnabled(player);
+                    _p->hasPlayer = player;
+                    _markersUpdate();
                 });
+        }
+
+        void FrameActions::_markersUpdate()
+        {
+            FTK_P();
+            // The jumps need both a player and something to jump to, and the
+            // two arrive independently.
+            const bool enabled = p.hasPlayer && p.hasMarkers;
+            _actions["PrevMarker"]->setEnabled(enabled);
+            _actions["NextMarker"]->setEnabled(enabled);
         }
 
         FrameActions::FrameActions() :

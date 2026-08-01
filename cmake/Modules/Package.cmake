@@ -43,6 +43,25 @@ if(WIN32)
     set(CPACK_NSIS_MUI_UNIICON ${PROJECT_SOURCE_DIR}/etc/Windows/DJV_Icon.ico)
     set(CPACK_NSIS_INSTALLED_ICON_NAME bin/djv.exe)
 
+    # Associate review files (".djvr") with DJV so double-clicking one opens it.
+    # The application already routes a ".djvr" argument to the review (see
+    # App::_inputFilesInit); these registry entries tell Windows which command to
+    # run. The installer is elevated (Program Files), so HKCR resolves to the
+    # system-wide HKLM\Software\Classes. SHChangeNotify refreshes the icon cache.
+    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+        WriteRegStr HKCR '.djvr' '' 'DJV.Review'
+        WriteRegStr HKCR 'DJV.Review' '' 'DJV Review Session'
+        WriteRegStr HKCR 'DJV.Review\\DefaultIcon' '' '\"$INSTDIR\\bin\\djv.exe\",0'
+        WriteRegStr HKCR 'DJV.Review\\shell\\open\\command' '' '\"$INSTDIR\\bin\\djv.exe\" \"%1\"'
+        System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, i 0, i 0)'
+    ")
+    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+        DeleteRegKey HKCR 'DJV.Review'
+        DeleteRegValue HKCR '.djvr' ''
+        DeleteRegKey /ifempty HKCR '.djvr'
+        System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, i 0, i 0)'
+    ")
+
 elseif(APPLE)
 
     # A disk image holding the application bundle. The Bundle generator would

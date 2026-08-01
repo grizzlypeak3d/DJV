@@ -31,6 +31,9 @@ set(HEADERS
     MessagesTool.h
     PlaybackActions.h
     PlaybackMenu.h
+    RangeNameDialog.h
+    ReviewTool.h
+    SaveReviewDialog.h
     SecondaryWindow.h
     SettingsTool.h
     StatusBar.h
@@ -84,6 +87,9 @@ set(SOURCE
     MessagesTool.cpp
     PlaybackActions.cpp
     PlaybackMenu.cpp
+    RangeNameDialog.cpp
+    ReviewTool.cpp
+    SaveReviewDialog.cpp
     SecondaryWindow.cpp
     SettingsTool.cpp
     StatusBar.cpp

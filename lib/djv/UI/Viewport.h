@@ -68,11 +68,41 @@ namespace djv
 
             DJV_UI_API ftk::Size2I getSizeHint() const override;
             DJV_UI_API void setGeometry(const ftk::Box2I&) override;
+            DJV_UI_API void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
             DJV_UI_API void mouseMoveEvent(ftk::MouseMoveEvent&) override;
             DJV_UI_API void mousePressEvent(ftk::MouseClickEvent&) override;
             DJV_UI_API void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
         private:
+            //! Where a position in the viewport falls in the sources.
+            struct SourceHit
+            {
+                //! Index into the active files, or -1 if the position is outside
+                //! every source.
+                int      index = -1;
+
+                //! The position in the pixels of that source's image.
+                ftk::V2F pos;
+
+                //! Image pixels per render unit, for stroke widths.
+                float    scale = 1.F;
+            };
+
+            //! Map a widget-local position to a source and its image pixels.
+            SourceHit _hitTest(const ftk::V2I& widgetPos) const;
+
+            //! Map a position in a source's image pixels back to widget-local
+            //! coordinates.
+            ftk::V2F _imageToWidget(int index, const ftk::V2F& imagePos) const;
+
+            //! The boxes of the sources in render space, as used for drawing.
+            std::vector<ftk::Box2I> _sourceBoxes() const;
+
+            void _drawBegin(const ftk::V2I& widgetPos);
+            void _drawContinue(const ftk::V2I& widgetPos);
+            void _drawEnd();
+            void _erase(const ftk::V2I& widgetPos);
+
             void _videoUpdate();
             void _toastUpdate();
             void _compareUpdate();

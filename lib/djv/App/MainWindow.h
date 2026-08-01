@@ -101,6 +101,7 @@ namespace djv
             //! Show the system information dialog.
             DJV_APP_API void showSysInfoDialog();
 
+            DJV_APP_API void close() override;
             DJV_APP_API void setGeometry(const ftk::Box2I&) override;
             DJV_APP_API void keyPressEvent(ftk::KeyEvent&) override;
             DJV_APP_API void keyReleaseEvent(ftk::KeyEvent&) override;

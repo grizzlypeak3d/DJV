@@ -4,6 +4,7 @@
 #include <djv/App/ToolsActions.h>
 
 #include <djv/App/App.h>
+#include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/ToolsModel.h>
 
@@ -17,7 +18,13 @@ namespace djv
     {
         struct ToolsActions::Private
         {
+            //! The panel tools; undo and redo also live in this group
+            //! but are not panels.
+            std::vector<std::string> toolNames;
+
             std::shared_ptr<ftk::ListObserver<std::string> > openObserver;
+            std::shared_ptr<ftk::Observer<bool> > hasUndoObserver;
+            std::shared_ptr<ftk::Observer<bool> > hasRedoObserver;
         };
 
         void ToolsActions::_init(
@@ -65,18 +72,81 @@ namespace djv
 
                 // Register the shortcut.
                 _addShortcut(tool.name, tool.name, tool.shortcut);
+
+                p.toolNames.push_back(tool.name);
             }
 
+            // Undo and redo apply to the drawing annotations. A focused text
+            // widget handles Ctrl+Z itself and consumes the event, so writing a
+            // note is unaffected.
+            _addCommand(
+                "Undo",
+                "Undo the last drawing change.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getAnnotationsModel()->undo();
+                    }
+                });
+            _actions["Undo"] = ftk::Action::create(
+                "Undo",
+                "Undo",
+                _command("Undo"));
+            _addShortcut(
+                "Undo",
+                "Undo",
+                ftk::KeyShortcut(ftk::Key::Z, static_cast<int>(ftk::commandKeyModifier)));
+
+            _addCommand(
+                "Redo",
+                "Redo the last undone drawing change.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getAnnotationsModel()->redo();
+                    }
+                });
+            _actions["Redo"] = ftk::Action::create(
+                "Redo",
+                "Redo",
+                _command("Redo"));
+            _addShortcut(
+                "Redo",
+                "Redo",
+                ftk::KeyShortcut(
+                    ftk::Key::Z,
+                    static_cast<int>(ftk::KeyModifier::Shift) |
+                    static_cast<int>(ftk::commandKeyModifier)));
+
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
+
+            p.hasUndoObserver = ftk::Observer<bool>::create(
+                app->getAnnotationsModel()->observeHasUndo(),
+                [this](bool value)
+                {
+                    _actions["Undo"]->setEnabled(value);
+                });
+
+            p.hasRedoObserver = ftk::Observer<bool>::create(
+                app->getAnnotationsModel()->observeHasRedo(),
+                [this](bool value)
+                {
+                    _actions["Redo"]->setEnabled(value);
+                });
 
             p.openObserver = ftk::ListObserver<std::string>::create(
                 app->getToolsModel()->observeOpenTools(),
                 [this](const std::vector<std::string>& value)
                 {
-                    for (auto i : _actions)
+                    FTK_P();
+                    // Only the tool panels are mutually exclusive; undo and redo
+                    // are not panels and must be left alone.
+                    for (const auto& name : p.toolNames)
                     {
-                        i.second->setChecked(
-                            std::find(value.begin(), value.end(), i.first) !=
+                        _actions[name]->setChecked(
+                            std::find(value.begin(), value.end(), name) !=
                             value.end());
                     }
                 });

@@ -201,6 +201,13 @@ namespace djv
             }
             setIcon(iconSystem->get("DJV_Icon", 1.0));
 
+            // DJV's own icons, usable by name like the ftk and tlRender ones.
+            iconSystem->add("DrawTool", djv_resource::DrawTool);
+            iconSystem->add("Eraser", djv_resource::Eraser);
+            iconSystem->add("Review", djv_resource::Review);
+            iconSystem->add("ReviewNext", djv_resource::ReviewNext);
+            iconSystem->add("ReviewPrev", djv_resource::ReviewPrev);
+
             p.app = app;
             p.settingsModel = app->getSettingsModel();
             p.presentMode = ftk::Observable<bool>::create(false);
@@ -656,6 +663,25 @@ namespace djv
                 {
                     _p->sysInfoDialog.reset();
                 });
+        }
+
+        void MainWindow::close()
+        {
+            FTK_P();
+            // Intercept the window close (e.g. the title-bar button) to prompt
+            // for saving the review before actually closing.
+            if (auto app = p.app.lock())
+            {
+                app->confirmClose(
+                    [this]
+                    {
+                        ftk::Window::close();
+                    });
+            }
+            else
+            {
+                ftk::Window::close();
+            }
         }
 
         void MainWindow::setGeometry(const ftk::Box2I& value)
