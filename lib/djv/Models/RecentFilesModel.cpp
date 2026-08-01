@@ -12,20 +12,23 @@ namespace djv
         struct RecentFilesModel::Private
         {
             std::shared_ptr<ftk::Settings> settings;
+            std::string settingsGroup;
         };
 
         void RecentFilesModel::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<ftk::Settings>& settings)
+            const std::shared_ptr<ftk::Settings>& settings,
+            const std::string& settingsGroup)
         {
             ftk::RecentFilesModel::_init(context);
             FTK_P();
 
             p.settings = settings;
+            p.settingsGroup = settingsGroup;
 
             std::vector<ftk::Path> recent;
             nlohmann::json json;
-            if (p.settings->get("/Files/Recent", json))
+            if (p.settings->get("/" + p.settingsGroup + "/Recent", json))
             {
                 for (auto i = json.begin(); i != json.end(); ++i)
                 {
@@ -44,7 +47,7 @@ namespace djv
             }
             setRecent(recent);
             size_t max = 10;
-            p.settings->get("/Files/RecentMax", max);
+            p.settings->get("/" + p.settingsGroup + "/RecentMax", max);
             setRecentMax(max);
         }
 
@@ -70,16 +73,17 @@ namespace djv
                 to_json(item, path);
                 json.push_back(item);
             }
-            p.settings->set("/Files/Recent", json);
-            p.settings->set("/Files/RecentMax", getRecentMax());
+            p.settings->set("/" + p.settingsGroup + "/Recent", json);
+            p.settings->set("/" + p.settingsGroup + "/RecentMax", getRecentMax());
         }
 
         std::shared_ptr<RecentFilesModel> RecentFilesModel::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<ftk::Settings>& settings)
+            const std::shared_ptr<ftk::Settings>& settings,
+            const std::string& settingsGroup)
         {
             auto out = std::shared_ptr<RecentFilesModel>(new RecentFilesModel);
-            out->_init(context, settings);
+            out->_init(context, settings, settingsGroup);
             return out;
         }
     }

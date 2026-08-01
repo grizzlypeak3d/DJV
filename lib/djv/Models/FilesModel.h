@@ -25,6 +25,11 @@ namespace djv
         //! Files model item.
         struct DJV_MODELS_API_TYPE FilesModelItem
         {
+            //! Stable, unique identifier. Assigned when the file is opened so
+            //! that reviews and annotations can reference the file by identity
+            //! rather than by list index. See models::generateId().
+            std::string              id;
+
             ftk::Path                path;
             ftk::Path                audioPath;
 

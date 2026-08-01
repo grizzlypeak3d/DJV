@@ -24,17 +24,20 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<ftk::Settings>&);
+                const std::shared_ptr<ftk::Settings>&,
+                const std::string& settingsGroup);
 
             RecentFilesModel();
 
         public:
             DJV_MODELS_API ~RecentFilesModel();
 
-            //! Create a new model.
+//! Create a new model. The settings group is the prefix under which
+            //! the recent list is persisted, e.g. "Files" -> "/Files/Recent".
             DJV_MODELS_API static std::shared_ptr<RecentFilesModel> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<ftk::Settings>&);
+                const std::shared_ptr<ftk::Settings>&,
+                const std::string& settingsGroup = "Files");
 
             //! Save the settings.
             DJV_MODELS_API void save();

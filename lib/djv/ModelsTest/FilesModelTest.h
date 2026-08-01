@@ -24,6 +24,8 @@ namespace djv
             void _files();
             void _navigation();
             void _compare();
+            void _tileCompare();
+            void _reviewRestore();
             void _frames();
             void _refresh();
             void _persistence();

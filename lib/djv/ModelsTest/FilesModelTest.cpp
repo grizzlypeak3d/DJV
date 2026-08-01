@@ -12,6 +12,7 @@
 #include <ftk/UI/Settings.h>
 
 #include <ftk/Core/Assert.h>
+#include <ftk/Core/Format.h>
 #include <ftk/Core/Math.h>
 #include <ftk/Core/Observable.h>
 #include <ftk/Core/ObservableList.h>
@@ -50,6 +51,8 @@ namespace djv
             _files();
             _navigation();
             _compare();
+            _tileCompare();
+            _reviewRestore();
             _frames();
             _refresh();
             _persistence();
@@ -211,6 +214,108 @@ namespace djv
             FTK_CHECK(observed);
         }
 
+        void FilesModelTest::_tileCompare()
+        {
+            auto settings = createTestSettings(_context);
+            auto model = models::FilesModel::create(settings);
+            model->add(makeItem("file0.exr"));
+            model->add(makeItem("file1.exr"));
+            model->add(makeItem("file2.exr"));
+            model->add(makeItem("file3.exr"));
+            model->setA(0);
+
+            // Tile mode is the only mode that keeps several "B" files, so a
+            // review can hold more than two sources there.
+            tl::CompareOptions options;
+            options.compare = tl::Compare::Tile;
+            model->setCompareOptions(options);
+            model->clearB();
+            model->setB(1, true);
+            model->setB(2, true);
+            model->setB(3, true);
+            FTK_ASSERT(std::vector<int>({ 1, 2, 3 }) == model->getBIndexes());
+
+            // "A" stays the master source: it is the first active file, ahead of
+            // every "B", whatever the mode.
+            FTK_ASSERT(4 == model->getActive().size());
+            FTK_ASSERT(model->getA() == model->getActive()[0]);
+
+            // Switching to a single-buffer mode truncates "B" down to one file;
+            // "A" is never dropped.
+            options.compare = tl::Compare::Horizontal;
+            model->setCompareOptions(options);
+            FTK_ASSERT(1 == model->getBIndexes().size());
+            FTK_ASSERT(0 == model->getAIndex());
+            FTK_ASSERT(model->getA() == model->getActive()[0]);
+        }
+
+        void FilesModelTest::_reviewRestore()
+        {
+            // Replay the order used when a review is opened (see
+            // App::_applyReview and docs/ROADMAP_REVIEW_SESSIONS.md section 6.1):
+            // add every file, set the compare options, clear "B", rebuild "B",
+            // then set "A" last. This must hold for every compare mode.
+            const std::vector<tl::Compare> modes =
+            {
+                tl::Compare::A,
+                tl::Compare::B,
+                tl::Compare::Wipe,
+                tl::Compare::Overlay,
+                tl::Compare::Difference,
+                tl::Compare::Horizontal,
+                tl::Compare::Vertical,
+                tl::Compare::Tile
+            };
+            for (const auto mode : modes)
+            {
+                auto settings = createTestSettings(_context);
+                auto model = models::FilesModel::create(settings);
+                for (int i = 0; i < 4; ++i)
+                {
+                    model->add(makeItem("file" + std::to_string(i) + ".exr"));
+                }
+
+                // A review saved with "A" = file0 and "B" = the other three.
+                tl::CompareOptions options;
+                options.compare = mode;
+                model->setCompareOptions(options);
+                model->clearB();
+                model->setB(1, true);
+                model->setB(2, true);
+                model->setB(3, true);
+                model->setA(0);
+
+                // "A" is restored as saved in every mode, and remains the first
+                // active file -- the master the player and the timeline follow.
+                FTK_ASSERT(0 == model->getAIndex());
+                FTK_ASSERT(!model->getActive().empty());
+                FTK_ASSERT(model->getA() == model->getActive()[0]);
+
+                // Only tile mode keeps all three "B" files; the others collapse
+                // to the last one selected.
+                const size_t expectedB = tl::Compare::Tile == mode ? 3 : 1;
+                FTK_ASSERT(expectedB == model->getBIndexes().size());
+
+                // FTK_ASSERT is compiled out in Release builds, so report the
+                // observed state explicitly to keep this meaningful there too.
+                const bool aOk =
+                    0 == model->getAIndex() &&
+                    !model->getActive().empty() &&
+                    model->getA() == model->getActive()[0];
+                const bool bOk = expectedB == model->getBIndexes().size();
+                _print(ftk::Format("  {0}: A index {1}, B count {2} (expected {3}) -> {4}").
+                    arg(tl::getLabel(mode)).
+                    arg(model->getAIndex()).
+                    arg(model->getBIndexes().size()).
+                    arg(expectedB).
+                    arg(aOk && bOk ? "ok" : "FAILED"));
+                if (!aOk || !bOk)
+                {
+                    _error(ftk::Format("Review restore failed for compare mode {0}").
+                        arg(tl::getLabel(mode)));
+                }
+            }
+        }
         void FilesModelTest::_frames()
         {
             auto settings = createTestSettings(_context);

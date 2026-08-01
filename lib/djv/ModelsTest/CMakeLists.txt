@@ -1,7 +1,9 @@
 set(HEADERS
+    AnnotationsModelTest.h
     AudioModelTest.h
     FilesModelTest.h
     ModelsTestUtil.h
+    NotesModelTest.h
     PlaylistTest.h
     RecentFilesModelTest.h
     TimeUnitsModelTest.h
@@ -9,8 +11,10 @@ set(HEADERS
     ViewportModelTest.h)
 
 set(SOURCE
+    AnnotationsModelTest.cpp
     AudioModelTest.cpp
     FilesModelTest.cpp
+    NotesModelTest.cpp
     PlaylistTest.cpp
     RecentFilesModelTest.cpp
     TimeUnitsModelTest.cpp
