@@ -18,7 +18,8 @@ The **Settings** tool is divided into collapsible sections:
   [Files]({{ '/files' | relative_url }})).
 - **File Browser** — Whether to use the native or built-in file browser, and
   whether hidden files are shown.
-- **Image Sequences** — How audio is paired with image sequences (see
+- **Image Sequences** — How audio is paired with image sequences, and what
+  happens where a sequence is missing frames (see
   [Files]({{ '/files' | relative_url }})).
 - **OTIO** — How the spatial coordinates in OTIO files are used to size and
   position images, and whether to enable workarounds for timelines that do not
