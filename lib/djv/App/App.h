@@ -166,6 +166,7 @@ namespace djv
             std::filesystem::path _getLogFilePath();
             std::filesystem::path _getSettingsPath();
 
+            void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             // Reopen the active files. When the timeline is about to be a

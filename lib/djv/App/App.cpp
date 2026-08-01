@@ -221,6 +221,11 @@ namespace djv
             int debugInput = 0;
 
             std::shared_ptr<ftk::Timer> commandTimer;
+            //! Files whose timeline could not be created, closed on a
+            //! later tick: closing publishes the file list again, and
+            //! doing that while handling the list is what crashes.
+            std::vector<std::shared_ptr<models::FilesModelItem> > failedFiles;
+            std::shared_ptr<ftk::Timer> closeFailedTimer;
             int commandTicks = 0;
         };
 
@@ -1584,12 +1589,50 @@ namespace djv
                     catch (const std::exception& e)
                     {
                         _context->log("djv::app::App", e.what(), ftk::LogType::Error);
+                        // Only a file that has just been opened is taken
+                        // back out. Reloading runs through here too, and a
+                        // file that has become unreadable since it was opened
+                        // -- a share that went away, say -- should stay put
+                        // rather than disappear from the session.
+                        if (files[i]->newFile)
+                        {
+                            p.failedFiles.push_back(files[i]);
+                        }
                     }
                 }
             }
 
             p.files = files;
             p.timelines = timelines;
+
+            // A file that could not be opened should not sit in the tab bar
+            // and the files tool as though it had.
+            if (!p.failedFiles.empty())
+            {
+                if (!p.closeFailedTimer)
+                {
+                    p.closeFailedTimer = ftk::Timer::create(_context);
+                }
+                p.closeFailedTimer->start(
+                    std::chrono::milliseconds(0),
+                    [this] { _closeFailed(); });
+            }
+        }
+
+        void App::_closeFailed()
+        {
+            FTK_P();
+            auto failed = p.failedFiles;
+            p.failedFiles.clear();
+            for (const auto& item : failed)
+            {
+                const auto& files = p.filesModel->getFiles();
+                const auto i = std::find(files.begin(), files.end(), item);
+                if (i != files.end())
+                {
+                    p.filesModel->close(static_cast<int>(i - files.begin()));
+                }
+            }
         }
 
         void App::_reloadUpdate(const std::shared_ptr<models::FilesModelItem>& item)
