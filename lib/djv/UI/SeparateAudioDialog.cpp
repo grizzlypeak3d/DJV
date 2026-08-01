@@ -49,13 +49,6 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
-            auto label = ftk::Label::create(context, "Open With Audio", p.layout);
-            label->setFontSize(14);
-            label->setMarginRole(ftk::SizeRole::Margin);
-            label->setBackgroundRole(ftk::ColorRole::Header);
-            // The header spans the dialog, so the label fills rather than
-            // hugging its text.
-            label->setHAlign(ftk::HAlign::Fill);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setVStretch(ftk::Stretch::Expanding);
             formLayout->setMarginRole(ftk::SizeRole::Margin);
@@ -148,6 +141,8 @@ namespace djv
                 "djv::ui::SeparateAudioDialog",
                 parent);
             FTK_P();
+
+            setTitle("Open With Audio");
 
             p.widget = SeparateAudioWidget::create(
                 context,

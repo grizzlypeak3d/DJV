@@ -32,6 +32,7 @@ namespace djv
         {
             IWidget::_init(context, "djv::ui::SetupStartWidget", parent);
             FTK_P();
+
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             ftk::Label::create(
                 context,
@@ -96,15 +97,8 @@ namespace djv
                 parent);
             FTK_P();
 
-            auto label = ftk::Label::create(
-                context,
-                ftk::Format("Setup").arg(appInfoModel->getVersion()));
-            label->setFontSize(14);
-            label->setMarginRole(ftk::SizeRole::Margin);
-            label->setBackgroundRole(ftk::ColorRole::Header);
-            // The header spans the dialog, so the label fills rather than
-            // hugging its text.
-            label->setHAlign(ftk::HAlign::Fill);
+            setTitle("Setup");
+
 
             p.nextButton = ftk::PushButton::create(context, "Next");
             p.prevButton = ftk::PushButton::create(context, "Previous");
@@ -135,8 +129,6 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
-            label->setParent(p.layout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Vertical, p.layout);
             scrollWidget->setBorder(false);
             scrollWidget->setWidget(p.stackLayout);

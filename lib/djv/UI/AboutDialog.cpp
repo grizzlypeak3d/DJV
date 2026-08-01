@@ -32,21 +32,14 @@ namespace djv
                 parent);
             FTK_P();
 
-            auto titleLabel = ftk::Label::create(context, "About");
-            titleLabel->setFontSize(14);
-            titleLabel->setMarginRole(ftk::SizeRole::Margin);
-            titleLabel->setBackgroundRole(ftk::ColorRole::Header);
-            // The header spans the dialog, so the label fills rather than
-            // hugging its text.
-            titleLabel->setHAlign(ftk::HAlign::Fill);
+            setTitle("About");
+
 
             auto licensesButton = ftk::PushButton::create(context, "Additional Licenses");
             auto closeButton = ftk::PushButton::create(context, "Close");
 
             auto layout = ftk::VerticalLayout::create(context, shared_from_this());
             layout->setSpacingRole(ftk::SizeRole::None);
-            titleLabel->setParent(layout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
             auto vLayout = ftk::VerticalLayout::create(context);
             vLayout->setMarginRole(ftk::SizeRole::Margin);

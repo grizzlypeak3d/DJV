@@ -37,13 +37,8 @@ namespace djv
             
             p.text = text;
 
-            auto titleLabel = ftk::Label::create(context, "System Information");
-            titleLabel->setFontSize(14);
-            titleLabel->setMarginRole(ftk::SizeRole::Margin);
-            titleLabel->setBackgroundRole(ftk::ColorRole::Header);
-            // The header spans the dialog, so the label fills rather than
-            // hugging its text.
-            titleLabel->setHAlign(ftk::HAlign::Fill);
+            setTitle("System Information");
+
 
             auto copyButton = ftk::PushButton::create(context, "Copy");
             auto closeButton = ftk::PushButton::create(context, "Close");
@@ -51,8 +46,6 @@ namespace djv
             auto layout = ftk::VerticalLayout::create(context, shared_from_this());
             layout->setSpacingRole(ftk::SizeRole::None);
             layout->setStretch(ftk::Stretch::Expanding, ftk::Stretch::Expanding);
-            titleLabel->setParent(layout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
             auto textEdit = ftk::TextEdit::create(context, layout);
             textEdit->setReadOnly(true);
