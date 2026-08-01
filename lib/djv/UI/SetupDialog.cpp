@@ -102,6 +102,9 @@ namespace djv
             label->setFontSize(14);
             label->setMarginRole(ftk::SizeRole::Margin);
             label->setBackgroundRole(ftk::ColorRole::Header);
+            // The header spans the dialog, so the label fills rather than
+            // hugging its text.
+            label->setHAlign(ftk::HAlign::Fill);
 
             p.nextButton = ftk::PushButton::create(context, "Next");
             p.prevButton = ftk::PushButton::create(context, "Previous");

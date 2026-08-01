@@ -41,6 +41,9 @@ namespace djv
             titleLabel->setFontSize(14);
             titleLabel->setMarginRole(ftk::SizeRole::Margin);
             titleLabel->setBackgroundRole(ftk::ColorRole::Header);
+            // The header spans the dialog, so the label fills rather than
+            // hugging its text.
+            titleLabel->setHAlign(ftk::HAlign::Fill);
 
             auto copyButton = ftk::PushButton::create(context, "Copy");
             auto closeButton = ftk::PushButton::create(context, "Close");
