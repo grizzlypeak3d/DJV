@@ -125,6 +125,8 @@ namespace djv
             tl::ui::Viewport::_init(context, parent);
             FTK_P();
 
+            setClipChildren(true);
+
             p.app = app;
 
             p.pick = ftk::Observable<ftk::V2I>::create();
