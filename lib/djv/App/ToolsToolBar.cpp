@@ -37,6 +37,7 @@ namespace djv
                     }
                 }
             }
+
         }
 
         ToolsToolBar::~ToolsToolBar()

@@ -33,6 +33,8 @@ namespace djv
                 const std::shared_ptr<MainWindow>&);
 
         private:
+            void _markersUpdate();
+
             FTK_PRIVATE();
         };
     }

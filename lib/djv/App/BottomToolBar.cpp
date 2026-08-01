@@ -106,6 +106,8 @@ namespace djv
             p.buttons["Prev"]->setRepeatClick(true);
             p.buttons["Next"] = ftk::ToolButton::create(context, actions["Next"]);
             p.buttons["Next"]->setRepeatClick(true);
+            p.buttons["PrevMarker"] = ftk::ToolButton::create(context, actions["PrevMarker"]);
+            p.buttons["NextMarker"] = ftk::ToolButton::create(context, actions["NextMarker"]);
 
             p.frameShuttle = ftk::ShuttleWidget::create(context);
             p.frameShuttle->setTooltip("Frame shuttle. Click and drag to change the current frame.");
@@ -162,6 +164,13 @@ namespace djv
             p.buttons["Next"]->setParent(hLayout2);
             p.buttons["End"]->setParent(hLayout2);
             p.frameShuttle->setParent(hLayout2);
+            // The review jumps sit with the frame navigation: they are the same
+            // gesture, on the frames that carry a note or a drawing.
+            hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
+            hLayout2->setSpacingRole(ftk::SizeRole::None);
+            ftk::setScreenshotTag(hLayout2, "Playback.MarkerControls");
+            p.buttons["PrevMarker"]->setParent(hLayout2);
+            p.buttons["NextMarker"]->setParent(hLayout2);
             p.currentTimeEdit->setParent(hLayout);
             p.durationLabel->setParent(hLayout);
             p.timeUnitsWidget->setParent(hLayout);

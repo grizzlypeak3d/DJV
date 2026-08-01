@@ -83,6 +83,122 @@ Shortcuts:
 * Next file: <kbd>Ctrl+Page Down</kbd>
 * Previous file: <kbd>Ctrl+Page Up</kbd>
 
+## Reviews
+
+A *review* is a saved session. Instead of re-opening each file and rebuilding a
+comparison by hand, you can save the whole setup to a `.djvr` file and reopen it
+later in one step. A review stores:
+
+- The open files, including any separate audio, the active layer, and each
+  file's speed, current frame, and in/out range.
+- The active tab (the **A** file) and the comparison setup: mode, **B** files,
+  wipe, overlay, and the relative/absolute time mode.
+- The viewport state: framing, pan, and zoom.
+- Color and display state: OCIO, LUT, display, background, foreground, aspect
+  ratio, and HUD.
+- The interface: the active tool panel and the window layout.
+
+Opening a review replaces the current session. File paths are stored relative to
+the `.djvr` when possible, so a review stays valid when moved together with its
+media; any files that cannot be found are reported in the **Messages** tool.
+
+The window title shows the open review's path, with a trailing `*` while it has
+unsaved changes. **Close Review** closes the review and returns DJV to its empty
+startup state; if there are unsaved changes it prompts to save first, as does
+quitting the application.
+
+While a saved review has unsaved changes, DJV keeps a periodic autosave backup.
+If the application does not exit cleanly, the next launch offers to recover those
+changes.
+
+### Building a review: make "A" the primary source
+
+A review can hold any number of files, but **the "A" file is always the master**.
+Set it to the source the review is *about* — the shot being reviewed — and use
+the "B" files for what you compare it against.
+
+This is not a stylistic preference: "A" drives playback and timing. The player is
+built from "A", so its duration, frame rate and audio govern the session; the
+timeline shows "A"; comparison times are resolved relative to it; and **Fit to A**
+scales the other sources to match it. A review whose "A" is a reference still
+plays, but every timing decision then follows the wrong source.
+
+How many "B" files you may add depends on the comparison mode:
+
+| Mode | "B" files |
+|---|---|
+| A, B, Wipe, Overlay, Difference, Horizontal, Vertical | one |
+| Tile | any number |
+
+Selecting a second "B" in a single-buffer mode replaces the first, and switching
+from **Tile** to any other mode keeps only one "B". This is by design, and it is
+why reviews are saved with the mode: reopening a tiled review with four sources
+restores all of them, while the single-buffer modes restore one. In every mode
+"A" is restored exactly as it was saved.
+
+The recommended way to build a review:
+
+1. Open the primary source first, so it becomes "A".
+2. Open the sources to compare against, and mark them as "B".
+3. Choose the comparison mode — **Tile** if you need more than two sources.
+4. Save the review.
+
+Locations: **File** menu
+
+Shortcuts:
+
+* Open review: <kbd>Ctrl+Shift+O</kbd>
+* Save review: <kbd>Ctrl+Shift+S</kbd>
+
+Reviews can also be opened from the command line:
+
+```
+djv session.djvr
+```
+
+Personal preferences — keyboard shortcuts, style, cache size, and the audio
+device — are deliberately **not** stored in a review, so opening one received
+from someone else does not reconfigure your installation.
+
+## Annotating a review
+
+The **Review** tool holds everything you add on top of the footage: drawings and
+notes, in one panel so that marking up a frame and commenting on it stay
+visible together.
+
+Locations: **Tools** menu, **Tools** toolbar
+
+Shortcut: <kbd>F9</kbd>
+
+### Drawing
+
+Pick the **pen** or the **eraser** in the *Drawing* section to start drawing;
+click the active tool again to stop. While drawing is on, dragging with the left
+mouse button draws on the image instead of shuttling frames — panning (middle
+button) and zooming (wheel) are unchanged.
+
+* **Colour** — click the swatch to change it.
+* **Size** — the stroke width, in pixels of the source image. A stroke therefore
+  keeps its position and its weight whatever the zoom, the pan, or the
+  comparison mode, and stays crisp when you zoom in.
+* **Eraser** — removes the whole stroke it touches, not part of it.
+* **Undo** / **Redo** — <kbd>Ctrl+Z</kbd> and <kbd>Ctrl+Shift+Z</kbd>, several
+  levels deep. While you are writing a note, <kbd>Ctrl+Z</kbd> undoes your text
+  instead.
+* **Clear Frame** — removes every stroke on the current frame.
+
+A drawing belongs to one source and appears on **one frame**. In a comparison
+you can draw on either side, and each stroke stays attached to its own source.
+
+### Notes
+
+Write in the *Notes* section and press **Publish Note**: the note records the
+frame you were on and the time you published it. Each card shows its frame as a
+button that takes you back there, and a button to delete the note.
+
+Frames carrying a note or a drawing are marked in the timeline ruler. The marks
+are deliberately alike — they say *there is something here*, not what kind.
+
 ## FFmpeg plugin
 
 The FFmpeg plugin provides support for movie and audio files. Only a limited
