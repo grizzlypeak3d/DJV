@@ -108,7 +108,6 @@ namespace djv
             p.closeButton = ftk::PushButton::create(context, "Close");
 
             p.stackLayout = ftk::StackLayout::create(context);
-            p.stackLayout->setFitAll(false);
             p.stackLayout->setMarginRole(ftk::SizeRole::Margin);
 
             SetupStartWidget::create(context, appInfoModel, p.stackLayout);
