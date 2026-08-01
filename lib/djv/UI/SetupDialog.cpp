@@ -133,10 +133,9 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
-            p.layout->setHStretch(ftk::Stretch::Expanding);
             label->setParent(p.layout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Both, p.layout);
+            auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Vertical, p.layout);
             scrollWidget->setBorder(false);
             scrollWidget->setWidget(p.stackLayout);
             ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
