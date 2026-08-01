@@ -1,4 +1,5 @@
 set SOURCE_DIR=%1
+IF "%SOURCE_DIR%"=="" set SOURCE_DIR=DJV
 
 set JOBS=4
 set DJV_TESTS=OFF

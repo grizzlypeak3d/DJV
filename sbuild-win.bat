@@ -1,5 +1,6 @@
 set SOURCE_DIR=%1
 set BUILD_TYPE=%2
+IF "%SOURCE_DIR%"=="" set SOURCE_DIR=DJV
 IF "%BUILD_TYPE%"=="" set BUILD_TYPE=Release
 
 set JOBS=4
