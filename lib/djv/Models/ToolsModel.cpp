@@ -36,6 +36,7 @@ namespace djv
             p.tools.push_back({ "Magnify", "Magnify", "F", true, ftk::Key::F6 });
             p.tools.push_back({ "Information", "Info", "G", true, ftk::Key::F7 });
             p.tools.push_back({ "Audio", "Audio", "H", true, ftk::Key::F8 });
+            p.tools.push_back({ "Review", "Review", "I", true, ftk::Key::F9 });
             p.tools.push_back({ "Settings", "Settings", "W", true, ftk::Key::F10 });
             p.tools.push_back({ "Messages", "Messages", "X", false, ftk::Key::F11 });
             p.tools.push_back({ "System Log", std::string(), "Y", false, ftk::Key::F12 });

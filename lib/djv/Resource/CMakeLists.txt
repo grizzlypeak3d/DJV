@@ -1,7 +1,12 @@
 set(HEADERS)
 set(SOURCE)
 set(RESOURCES
-    etc/Icons/DJV_Icon.svg)
+    etc/Icons/DJV_Icon.svg
+    etc/Icons/DrawTool.svg
+    etc/Icons/Eraser.svg
+    etc/Icons/Review.svg
+    etc/Icons/ReviewNext.svg
+    etc/Icons/ReviewPrev.svg)
 foreach(RESOURCE ${RESOURCES})
     get_filename_component(RESOURCE_BASE ${RESOURCE} NAME_WE)
     add_custom_command(

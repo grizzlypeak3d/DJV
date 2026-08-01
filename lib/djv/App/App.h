@@ -8,14 +8,18 @@
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/App.h>
+#include <ftk/Core/ObservableList.h>
 
 #include <filesystem>
+#include <functional>
 #include <optional>
 
 namespace ftk
 {
     class Settings;
     class SysLogModel;
+
+    enum class FileBrowserMode;
 }
 
 namespace djv
@@ -23,12 +27,17 @@ namespace djv
     namespace models
     {
         struct FilesModelItem;
+        struct Review;
 
+        class AnnotationsModel;
         class AppInfoModel;
         class AudioModel;
         class ColorModel;
         class CommandsModel;
+        class DrawModel;
         class FilesModel;
+        class NotesModel;
+        class RangesModel;
         class RecentFilesModel;
         class TimeUnitsModel;
         class ToolsModel;
@@ -100,6 +109,29 @@ namespace djv
             //! Get the commands model.
             const std::shared_ptr<models::CommandsModel>& getCommandsModel() const;
 
+            //! Get the review notes model.
+            const std::shared_ptr<models::NotesModel>& getNotesModel() const;
+
+            //! Get the review annotations model.
+            const std::shared_ptr<models::AnnotationsModel>& getAnnotationsModel() const;
+
+            //! Get the review ranges model.
+            const std::shared_ptr<models::RangesModel>& getRangesModel() const;
+
+            //! Get the drawing state model.
+            const std::shared_ptr<models::DrawModel>& getDrawModel() const;
+
+            //! Observe the frames that carry a note or a drawing, sorted and
+            //! deduplicated.
+            //!
+            //! The timeline draws them as markers and the playback bar jumps
+            //! between them, so both read the same list.
+            std::shared_ptr<ftk::IObservableList<int> > observeReviewMarkers() const;
+
+            //! Seek to the review marker after (or before) the current frame,
+            //! wrapping around at the ends. Does nothing without a marker.
+            void seekReviewMarker(bool next);
+
             //! Get whether the setup dialog should be hidden. The setup
             //! dialog is hidden by the "-hideSetup" command line flag, by
             //! automation (the "-command" and "-listCommands" flags), and
@@ -123,6 +155,45 @@ namespace djv
 
             //! Open a file and separate audio file dialog.
             void openSeparateAudioDialog();
+
+            //! \name Reviews
+            //! A review (".djvr") is a saved session: the open files, the active
+            //! tab, the comparison setup, and the viewport, color and interface
+            //! state, together with its notes and drawings.
+            ///@{
+
+            //! Open a review, replacing the current session.
+            void openReview(const std::filesystem::path&);
+
+            //! Open a review file dialog.
+            void openReviewDialog();
+
+            //! Save the current session to the active review, prompting for a
+            //! location if none is set.
+            void saveReview();
+
+            //! Save the current session to the given review path.
+            void saveReview(const std::filesystem::path&);
+
+            //! Save the current session to a new review, always prompting.
+            void saveReviewAs();
+
+            //! Close the current review and reset to the empty startup state,
+            //! prompting to save first if there are unsaved changes.
+            void closeReview();
+
+            //! Get the path of the active review, or empty if none.
+            const std::filesystem::path& getReviewPath() const;
+
+            //! Get the recent reviews model.
+            const std::shared_ptr<models::RecentFilesModel>& getRecentReviewsModel() const;
+
+            //! If the review has unsaved changes, prompt the user to save,
+            //! discard, or cancel; otherwise proceed immediately. The proceed
+            //! callback runs when it is safe to close.
+            void confirmClose(const std::function<void()>& onProceed);
+
+            ///@}
 
             //! Reload the active files.
             void reload();
@@ -175,6 +246,28 @@ namespace djv
             void _reloadUpdate(const std::shared_ptr<models::FilesModelItem>&);
             void _layersUpdate(const std::vector<int>&);
             void _audioUpdate();
+
+            void _reviewFileDialog(
+                ftk::FileBrowserMode,
+                const std::string& title,
+                const std::function<void(const std::filesystem::path&)>&);
+            void _saveReviewAs(const std::function<void()>& onSaved);
+            models::Review _buildReview(const std::filesystem::path& base);
+            void _applyReview(
+                const models::Review&,
+                const std::filesystem::path& base,
+                const std::filesystem::path& reviewPath,
+                const std::filesystem::path& substituteRoot);
+            void _closeReview();
+            void _applyReviewView();
+
+            std::filesystem::path _autosavePath();
+            void _writeAutosave();
+            void _deleteAutosave();
+            void _recoverAutosave();
+            void _markModified();
+            void _updateWindowTitle();
+            void _notesUpdate();
 
             FTK_PRIVATE();
         };

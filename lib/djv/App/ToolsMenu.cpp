@@ -32,6 +32,13 @@ namespace djv
                     addAction(actions[j]);
                 }
             }
+
+            // Undo and redo drive the drawing annotations. They have to be in a
+            // menu: Menu::shortcut() is what dispatches an action's shortcut, so
+            // an action outside every menu would never see its keys.
+            addDivider();
+            addAction(actions["Undo"]);
+            addAction(actions["Redo"]);
         }
 
         ToolsMenu::~ToolsMenu()

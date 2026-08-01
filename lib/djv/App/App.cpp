@@ -14,6 +14,8 @@
 #include <djv/App/MagnifyTool.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/MessagesTool.h>
+#include <djv/App/ReviewTool.h>
+#include <djv/App/SaveReviewDialog.h>
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/SettingsTool.h>
 #include <djv/App/Indicator.h>
@@ -21,11 +23,16 @@
 #include <djv/App/ViewTool.h>
 #include <djv/App/Viewport.h>
 #include <djv/UI/SeparateAudioDialog.h>
+#include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/NotesModel.h>
+#include <djv/Models/RangesModel.h>
 #include <djv/Models/RecentFilesModel.h>
+#include <djv/Models/Review.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/CommandsModel.h>
 #include <djv/Models/ToolsModel.h>
@@ -33,6 +40,7 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/UI/ThumbnailSystem.h>
+#include <tlRender/UI/TimelineWidget.h>
 #include <tlRender/Timeline/ColorOptions.h>
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/Util.h>
@@ -45,6 +53,7 @@
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
+#include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/SysLogModel.h>
@@ -54,7 +63,10 @@
 #include <ftk/Core/OS.h>
 #include <ftk/Core/Timer.h>
 
+#include <ctime>
 #include <filesystem>
+#include <fstream>
+#include <iomanip>
 #include <optional>
 
 namespace djv
@@ -182,6 +194,15 @@ namespace djv
             std::vector<std::shared_ptr<models::FilesModelItem> > files;
             std::vector<std::shared_ptr<models::FilesModelItem> > activeFiles;
             std::shared_ptr<models::RecentFilesModel> recentFilesModel;
+            std::shared_ptr<models::RecentFilesModel> recentReviewsModel;
+            std::filesystem::path reviewPath;
+            nlohmann::json reviewRaw;
+            bool reviewModified = false;
+            std::optional<models::ReviewView> pendingReviewView;
+            std::shared_ptr<ftk::Timer> reviewViewTimer;
+            std::shared_ptr<ftk::Timer> autosaveTimer;
+            std::optional<nlohmann::json> recoveredAutosave;
+            std::shared_ptr<SaveReviewDialog> saveReviewDialog;
             std::vector<std::shared_ptr<tl::Timeline> > timelines;
             std::shared_ptr<ftk::Observable<std::shared_ptr<tl::Player> > > player;
             std::shared_ptr<models::ColorModel> colorModel;
@@ -190,12 +211,23 @@ namespace djv
             bool audioDeviceMute = false;
             std::shared_ptr<models::ToolsModel> toolsModel;
             std::shared_ptr<models::CommandsModel> commandsModel;
+            std::shared_ptr<models::NotesModel> notesModel;
+            std::shared_ptr<models::RangesModel> rangesModel;
+            std::shared_ptr<models::AnnotationsModel> annotationsModel;
+            std::shared_ptr<models::DrawModel> drawModel;
+            std::shared_ptr<ftk::ObservableList<int> > reviewMarkers;
 
             std::shared_ptr<ftk::Observable<bool> > secondaryWindowActive;
             std::shared_ptr<ToolWidgetFactory> toolWidgetFactory;
             std::shared_ptr<MainWindow> mainWindow;
             std::shared_ptr<SecondaryWindow> secondaryWindow;
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
+
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsModifiedObserver;
+            std::shared_ptr<ftk::ListObserver<int> > bIndexesModifiedObserver;
+            std::shared_ptr<ftk::ListObserver<models::ReviewRange> > rangesObserver;
+            std::shared_ptr<ftk::ListObserver<models::ReviewNote> > notesObserver;
+            std::shared_ptr<ftk::ListObserver<models::ReviewAnnotation> > annotationsObserver;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
@@ -553,6 +585,60 @@ namespace djv
             return _p->commandsModel;
         }
 
+        const std::shared_ptr<models::NotesModel>& App::getNotesModel() const
+        {
+            return _p->notesModel;
+        }
+
+        const std::shared_ptr<models::AnnotationsModel>& App::getAnnotationsModel() const
+        {
+            return _p->annotationsModel;
+        }
+
+        const std::shared_ptr<models::RangesModel>& App::getRangesModel() const
+        {
+            return _p->rangesModel;
+        }
+
+        const std::shared_ptr<models::DrawModel>& App::getDrawModel() const
+        {
+            return _p->drawModel;
+        }
+
+        std::shared_ptr<ftk::IObservableList<int> > App::observeReviewMarkers() const
+        {
+            return _p->reviewMarkers;
+        }
+
+        void App::seekReviewMarker(bool next)
+        {
+            FTK_P();
+            // The list is sorted and deduplicated by _notesUpdate().
+            const auto& markers = p.reviewMarkers->get();
+            auto player = p.player->get();
+            if (markers.empty() || !player)
+            {
+                return;
+            }
+            const OTIO_NS::RationalTime currentTime = player->getCurrentTime();
+            const int current = static_cast<int>(currentTime.value());
+            int target = 0;
+            if (next)
+            {
+                // The first marker strictly after the playhead, or wrap around
+                // to the first one so the button never becomes a dead end.
+                const auto i = std::upper_bound(markers.begin(), markers.end(), current);
+                target = i != markers.end() ? *i : markers.front();
+            }
+            else
+            {
+                const auto i = std::lower_bound(markers.begin(), markers.end(), current);
+                target = i != markers.begin() ? *(i - 1) : markers.back();
+            }
+            player->stop();
+            player->seek(OTIO_NS::RationalTime(target, currentTime.rate()));
+        }
+
         bool App::getHideSetup() const
         {
             return
@@ -605,6 +691,9 @@ namespace djv
             for (const auto& i : tl::getPaths(_context, path, dirListOptions))
             {
                 auto item = std::make_shared<models::FilesModelItem>();
+                // Annotations reference their source by this identity, so it has
+                // to exist from the moment the file is opened.
+                item->id = models::generateId();
                 item->path = i;
                 if (first && frames.has_value())
                 {
@@ -619,6 +708,812 @@ namespace djv
                 item->audioPath = audioPath;
                 p.filesModel->add(item);
                 p.recentFilesModel->addRecent(std::filesystem::u8path(path.get()));
+            }
+        }
+
+        namespace
+        {
+            const std::string reviewExtension = ".djvr";
+
+            std::string reviewTimestamp()
+            {
+                const std::time_t t = std::time(nullptr);
+                std::tm tm {};
+#if defined(_WIN32)
+                gmtime_s(&tm, &t);
+#else
+                gmtime_r(&t, &tm);
+#endif
+                char buf[32] = {};
+                std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm);
+                return std::string(buf);
+            }
+
+            //! Make an absolute path string relative to the review's directory,
+            //! falling back to the absolute form when no relative path exists
+            //! (e.g. a different drive on Windows).
+            std::string reviewRelativePath(
+                const std::string& absStr,
+                const std::filesystem::path& base)
+            {
+                if (absStr.empty() || base.empty())
+                {
+                    return absStr;
+                }
+                std::error_code ec;
+                const std::filesystem::path rel = std::filesystem::relative(
+                    std::filesystem::u8path(absStr), base, ec);
+                if (ec || rel.empty())
+                {
+                    return absStr;
+                }
+                return rel.generic_u8string();
+            }
+
+            //! Does the file exist on disk? A single file is checked exactly; an
+            //! image sequence -- whose padded/pattern path is not a literal file
+            //! -- is considered present when its directory holds a matching frame.
+            bool reviewFilePresent(
+                const std::filesystem::path& p,
+                const ftk::PathOptions& pathOptions)
+            {
+                std::error_code ec;
+                if (std::filesystem::exists(p, ec))
+                {
+                    return true;
+                }
+                const ftk::Path ftkPath(p.u8string(), pathOptions);
+                if (ftkPath.getNum().empty())
+                {
+                    // Single file: genuinely missing.
+                    return false;
+                }
+                const std::filesystem::path dir = std::filesystem::u8path(ftkPath.getDir());
+                if (!std::filesystem::exists(dir, ec))
+                {
+                    return false;
+                }
+                const std::string base = ftkPath.getBase();
+                const std::string ext = ftkPath.getExt();
+                for (const auto& entry : std::filesystem::directory_iterator(dir, ec))
+                {
+                    const std::string name = entry.path().filename().u8string();
+                    if (name.size() >= base.size() + ext.size() &&
+                        0 == name.compare(0, base.size(), base) &&
+                        0 == name.compare(name.size() - ext.size(), ext.size(), ext))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            //! Resolve a review file entry to a path on disk, preferring the
+            //! relative form, then the absolute form, then the file's name inside
+            //! an optional substitute root (used by the relocation dialog).
+            //! Reports whether the target exists.
+            std::filesystem::path resolveReviewFile(
+                const models::ReviewFile& rf,
+                const std::filesystem::path& base,
+                const std::filesystem::path& substituteRoot,
+                const ftk::PathOptions& pathOptions,
+                bool& exists)
+            {
+                auto present = [&pathOptions](const std::filesystem::path& p)
+                {
+                    return reviewFilePresent(p, pathOptions);
+                };
+                if (!rf.path.empty())
+                {
+                    const std::filesystem::path rel =
+                        (base / std::filesystem::u8path(rf.path)).lexically_normal();
+                    if (present(rel))
+                    {
+                        exists = true;
+                        return rel;
+                    }
+                }
+                if (!rf.pathAbsolute.empty())
+                {
+                    const std::filesystem::path abs =
+                        std::filesystem::u8path(rf.pathAbsolute);
+                    if (present(abs))
+                    {
+                        exists = true;
+                        return abs;
+                    }
+                }
+                if (!substituteRoot.empty())
+                {
+                    std::filesystem::path fileName;
+                    if (!rf.path.empty())
+                    {
+                        fileName = std::filesystem::u8path(rf.path).filename();
+                    }
+                    else if (!rf.pathAbsolute.empty())
+                    {
+                        fileName = std::filesystem::u8path(rf.pathAbsolute).filename();
+                    }
+                    if (!fileName.empty())
+                    {
+                        const std::filesystem::path candidate = substituteRoot / fileName;
+                        if (present(candidate))
+                        {
+                            exists = true;
+                            return candidate;
+                        }
+                    }
+                }
+                exists = false;
+                if (!rf.path.empty())
+                {
+                    return (base / std::filesystem::u8path(rf.path)).lexically_normal();
+                }
+                return std::filesystem::u8path(rf.pathAbsolute);
+            }
+        }
+
+        void App::openReview(const std::filesystem::path& path)
+        {
+            FTK_P();
+
+            std::ifstream f(path);
+            if (!f.is_open())
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Cannot open review: {0}").arg(path.u8string()),
+                    ftk::LogType::Error);
+                return;
+            }
+
+            models::Review review;
+            try
+            {
+                nlohmann::json json;
+                f >> json;
+                review = json.get<models::Review>();
+            }
+            catch (const std::exception& e)
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Cannot read review \"{0}\": {1}").
+                        arg(path.u8string()).arg(e.what()),
+                    ftk::LogType::Error);
+                return;
+            }
+
+            _applyReview(review, path.parent_path(), path, std::filesystem::path());
+        }
+
+        void App::_applyReview(
+            const models::Review& review,
+            const std::filesystem::path& base,
+            const std::filesystem::path& reviewPath,
+            const std::filesystem::path& substituteRoot)
+        {
+            FTK_P();
+
+            ftk::PathOptions pathOptions;
+            pathOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+
+            // Replace the current session.
+            p.filesModel->closeAll();
+
+            std::vector<std::string> missing;
+            for (const auto& rf : review.files)
+            {
+                bool exists = false;
+                const std::filesystem::path resolved =
+                    resolveReviewFile(rf, base, substituteRoot, pathOptions, exists);
+                if (!exists)
+                {
+                    missing.push_back(resolved.u8string());
+                }
+                auto item = std::make_shared<models::FilesModelItem>();
+                item->id = rf.id.empty() ? models::generateId() : rf.id;
+                item->path = ftk::Path(resolved.u8string(), pathOptions);
+                if (!rf.audioPath.empty())
+                {
+                    item->audioPath = ftk::Path(rf.audioPath, pathOptions);
+                }
+                item->videoLayer = static_cast<size_t>(std::max(0, rf.videoLayer));
+                item->speed = rf.speed;
+                item->currentTime = rf.currentTime;
+                item->inOutRange = rf.inOutRange;
+                // Add directly rather than through open(), which would re-expand a
+                // directory entry into multiple files.
+                p.filesModel->add(item);
+            }
+
+            // Rebuild the comparison. Order matters: setCompareOptions may pick a
+            // "B" of its own when none is set, so clear and rebuild "B" after it,
+            // then set "A". See docs/ROADMAP_REVIEW_SESSIONS.md Â§6.1.
+            const auto& files = p.filesModel->getFiles();
+            auto indexOfId = [&files](const std::string& id) -> int
+            {
+                for (int i = 0; i < static_cast<int>(files.size()); ++i)
+                {
+                    if (files[i]->id == id)
+                    {
+                        return i;
+                    }
+                }
+                return -1;
+            };
+            p.filesModel->setCompareOptions(review.compare.options);
+            p.filesModel->clearB();
+            for (const auto& bId : review.compare.bIds)
+            {
+                const int index = indexOfId(bId);
+                if (index >= 0)
+                {
+                    p.filesModel->setB(index, true);
+                }
+            }
+            int aIndex = indexOfId(review.compare.aId);
+            if (aIndex < 0 && !files.empty())
+            {
+                aIndex = 0;
+            }
+            if (aIndex >= 0)
+            {
+                p.filesModel->setA(aIndex);
+            }
+            p.filesModel->setCompareTime(review.compare.time);
+
+            // Color and image display.
+            p.colorModel->setOCIOOptions(review.color.ocio);
+            p.colorModel->setLUTOptions(review.color.lut);
+            p.viewportModel->setDisplayOptions(review.color.display);
+            p.viewportModel->setBackgroundOptions(review.color.background);
+            p.viewportModel->setForegroundOptions(review.color.foreground);
+            p.viewportModel->setAspectRatioOptions(review.color.aspectRatio);
+            p.viewportModel->setHUDOptions(review.color.hud);
+
+            // Interface.
+            if (!review.ui.activeTool.empty())
+            {
+                p.toolsModel->setActiveTool(review.ui.activeTool);
+            }
+            p.settingsModel->setWindow(review.ui.window);
+
+            p.notesModel->setNotes(review.notes);
+            p.rangesModel->setRanges(review.ranges);
+            p.annotationsModel->setAnnotations(review.annotations);
+
+            // View state is applied once the viewport exists and the new player's
+            // initial auto-frame has settled.
+            p.pendingReviewView = review.view;
+            if (p.mainWindow)
+            {
+                _applyReviewView();
+            }
+
+            p.reviewPath = reviewPath;
+            p.reviewRaw = review.raw;
+            p.recentReviewsModel->addRecent(reviewPath);
+            p.reviewModified = false;
+            _updateWindowTitle();
+            // A freshly loaded review supersedes any earlier autosave.
+            _deleteAutosave();
+
+            if (!missing.empty())
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Review \"{0}\": {1} file(s) not found: {2}").
+                        arg(reviewPath.u8string()).
+                        arg(missing.size()).
+                        arg(ftk::join(missing, ", ")),
+                    ftk::LogType::Warning);
+
+                // Offer to relocate on the first pass only (a substitute root
+                // already tried means we shouldn't loop).
+                if (substituteRoot.empty() && p.mainWindow)
+                {
+                    auto dialogSystem = _context->getSystem<ftk::DialogSystem>();
+                    // Pre-wrap with newlines: ftk::Label renders "\n" but cannot
+                    // auto-wrap, so a long single line would scroll horizontally.
+                    dialogSystem->confirm(
+                        "Relocate Files",
+                        ftk::Format("{0} file(s) from this review\n"
+                            "could not be found.\n"
+                            "\n"
+                            "Locate the folder that contains them?").
+                            arg(missing.size()),
+                        p.mainWindow,
+                        [this, review, base, reviewPath](bool value)
+                        {
+                            if (value)
+                            {
+                                auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+                                fileBrowserSystem->open(
+                                    _p->mainWindow,
+                                    [this, review, base, reviewPath](const ftk::Path& folder)
+                                    {
+                                        _applyReview(
+                                            review,
+                                            base,
+                                            reviewPath,
+                                            std::filesystem::u8path(folder.get()));
+                                    },
+                                    "Locate Files",
+                                    base,
+                                    ftk::FileBrowserMode::Dir);
+                            }
+                        },
+                        "Locate...",
+                        "Ignore");
+                }
+            }
+        }
+
+        void App::_reviewFileDialog(
+            ftk::FileBrowserMode mode,
+            const std::string& title,
+            const std::function<void(const std::filesystem::path&)>& callback)
+        {
+            FTK_P();
+            // Use the shared file browser system so reviews get the same (native
+            // by default) dialog as media, now filtered to ".djvr" with a real
+            // save dialog.
+            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+            const std::filesystem::path startPath = p.reviewPath.empty() ?
+                std::filesystem::path() : p.reviewPath.parent_path();
+            fileBrowserSystem->open(
+                p.mainWindow,
+                [callback](const ftk::Path& value)
+                {
+                    callback(std::filesystem::u8path(value.get()));
+                },
+                title,
+                startPath,
+                mode,
+                { reviewExtension },
+                "Review Session");
+        }
+
+        void App::openReviewDialog()
+        {
+            _reviewFileDialog(
+                ftk::FileBrowserMode::Open,
+                "Open Review",
+                [this](const std::filesystem::path& path)
+                {
+                    openReview(path);
+                });
+        }
+
+        void App::saveReview()
+        {
+            FTK_P();
+            if (p.reviewPath.empty())
+            {
+                saveReviewAs();
+            }
+            else
+            {
+                saveReview(p.reviewPath);
+            }
+        }
+
+        models::Review App::_buildReview(const std::filesystem::path& base)
+        {
+            FTK_P();
+
+            models::Review review;
+            review.version = models::reviewVersion;
+            review.app = ftk::Format("{0} {1}").
+                arg(p.appInfoModel->getFullName()).
+                arg(p.appInfoModel->getVersion());
+            review.created = reviewTimestamp();
+            // Carry any unknown sections from the review we last loaded so a
+            // load/save cycle does not drop them. See Â§4.4.
+            review.raw = p.reviewRaw;
+
+            for (const auto& file : p.filesModel->getFiles())
+            {
+                models::ReviewFile rf;
+                rf.id = file->id;
+                rf.pathAbsolute = file->path.get();
+                rf.path = reviewRelativePath(file->path.get(), base);
+                rf.audioPath = file->audioPath.get();
+                rf.videoLayer = static_cast<int>(file->videoLayer);
+                rf.speed = file->speed;
+                rf.currentTime = file->currentTime;
+                rf.inOutRange = file->inOutRange;
+                review.files.push_back(rf);
+            }
+
+            // Persist the live playback state of the active file, which the model
+            // item only receives when the file is switched away from.
+            if (auto player = p.player->get())
+            {
+                const int aIndex = p.filesModel->getAIndex();
+                if (aIndex >= 0 && aIndex < static_cast<int>(review.files.size()))
+                {
+                    review.files[aIndex].speed = player->getSpeed();
+                    review.files[aIndex].currentTime = player->getCurrentTime();
+                    review.files[aIndex].inOutRange = player->getInOutRange();
+                }
+            }
+
+            const auto& files = p.filesModel->getFiles();
+            const int aIndex = p.filesModel->getAIndex();
+            if (aIndex >= 0 && aIndex < static_cast<int>(files.size()))
+            {
+                review.compare.aId = files[aIndex]->id;
+            }
+            for (const int bIndex : p.filesModel->getBIndexes())
+            {
+                if (bIndex >= 0 && bIndex < static_cast<int>(files.size()))
+                {
+                    review.compare.bIds.push_back(files[bIndex]->id);
+                }
+            }
+            review.compare.options = p.filesModel->getCompareOptions();
+            review.compare.time = p.filesModel->getCompareTime();
+
+            if (p.mainWindow)
+            {
+                auto viewport = p.mainWindow->getViewport();
+                review.view.frameView = viewport->hasFrameView();
+                review.view.pos = viewport->getViewPos();
+                review.view.zoom = viewport->getZoom();
+            }
+
+            review.color.ocio = p.colorModel->getOCIOOptions();
+            review.color.lut = p.colorModel->getLUTOptions();
+            review.color.display = p.viewportModel->getDisplayOptions();
+            review.color.background = p.viewportModel->getBackgroundOptions();
+            review.color.foreground = p.viewportModel->getForegroundOptions();
+            review.color.aspectRatio = p.viewportModel->getAspectRatioOptions();
+            review.color.hud = p.viewportModel->getHUDOptions();
+
+            review.ui.activeTool = p.toolsModel->getActiveTool();
+            review.ui.window = p.settingsModel->getWindow();
+
+            review.notes = p.notesModel->getNotes();
+            review.ranges = p.rangesModel->getRanges();
+            review.annotations = p.annotationsModel->getAnnotations();
+
+            return review;
+        }
+
+        void App::saveReview(const std::filesystem::path& path)
+        {
+            FTK_P();
+
+            const models::Review review = _buildReview(path.parent_path());
+
+            nlohmann::json json = review;
+            std::ofstream f(path);
+            if (!f.is_open())
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Cannot save review: {0}").arg(path.u8string()),
+                    ftk::LogType::Error);
+                return;
+            }
+            f << std::setw(4) << json << std::endl;
+
+            p.reviewPath = path;
+            p.reviewRaw = json;
+            p.recentReviewsModel->addRecent(path);
+            p.reviewModified = false;
+            _updateWindowTitle();
+            // The work is safely on disk; drop any crash-recovery backup.
+            _deleteAutosave();
+        }
+
+        void App::saveReviewAs()
+        {
+            _saveReviewAs(nullptr);
+        }
+
+        void App::_saveReviewAs(const std::function<void()>& onSaved)
+        {
+            _reviewFileDialog(
+                ftk::FileBrowserMode::Save,
+                "Save Review",
+                [this, onSaved](const std::filesystem::path& value)
+                {
+                    std::filesystem::path path = value;
+                    if (path.extension() != reviewExtension)
+                    {
+                        // Auto-complete the extension when the user types a bare
+                        // name.
+                        path.replace_extension(reviewExtension);
+                    }
+                    saveReview(path);
+                    if (onSaved)
+                    {
+                        onSaved();
+                    }
+                });
+        }
+
+        void App::closeReview()
+        {
+            confirmClose(
+                [this]
+                {
+                    _closeReview();
+                });
+        }
+
+        void App::_closeReview()
+        {
+            FTK_P();
+            // Reset to the empty startup state.
+            p.filesModel->closeAll();
+            tl::CompareOptions compareOptions;
+            compareOptions.compare = tl::Compare::A;
+            p.filesModel->setCompareOptions(compareOptions);
+            p.notesModel->clear();
+            p.rangesModel->clear();
+            p.annotationsModel->clear();
+            p.reviewPath.clear();
+            p.reviewRaw = nlohmann::json();
+            // closeAll / setCompareOptions marked the session modified; clear it
+            // last so the empty state is clean.
+            p.reviewModified = false;
+            _updateWindowTitle();
+            _deleteAutosave();
+        }
+
+        const std::filesystem::path& App::getReviewPath() const
+        {
+            return _p->reviewPath;
+        }
+
+        const std::shared_ptr<models::RecentFilesModel>& App::getRecentReviewsModel() const
+        {
+            return _p->recentReviewsModel;
+        }
+
+        void App::confirmClose(const std::function<void()>& onProceed)
+        {
+            FTK_P();
+            // Only prompt for a review that is already saved (has a path) and has
+            // unsaved changes -- opening loose media without a review never asks.
+            if (!p.reviewModified ||
+                p.reviewPath.empty() ||
+                p.filesModel->getFiles().empty() ||
+                !p.mainWindow)
+            {
+                onProceed();
+                return;
+            }
+            if (p.saveReviewDialog)
+            {
+                p.saveReviewDialog->close();
+                p.saveReviewDialog.reset();
+            }
+            p.saveReviewDialog = SaveReviewDialog::create(
+                _context,
+                "Save Review",
+                "Save changes to the review before closing?");
+            p.saveReviewDialog->open(p.mainWindow);
+            p.saveReviewDialog->setCallback(
+                [this, onProceed](SaveReviewResult result)
+                {
+                    // Act first, then close: closing resets the dialog (via the
+                    // close callback), which can destroy this closure, so nothing
+                    // captured may be used afterwards.
+                    switch (result)
+                    {
+                    case SaveReviewResult::Save:
+                        // The prompt only appears for an already-saved review, so
+                        // the path is always set here.
+                        saveReview(_p->reviewPath);
+                        onProceed();
+                        break;
+                    case SaveReviewResult::Discard:
+                        // A deliberate discard is not a crash: drop the backup.
+                        _deleteAutosave();
+                        onProceed();
+                        break;
+                    case SaveReviewResult::Cancel:
+                    default:
+                        break;
+                    }
+                    if (_p->saveReviewDialog)
+                    {
+                        _p->saveReviewDialog->close();
+                    }
+                });
+            p.saveReviewDialog->setCloseCallback(
+                [this]
+                {
+                    _p->saveReviewDialog.reset();
+                });
+        }
+
+        void App::_markModified()
+        {
+            FTK_P();
+            if (!p.reviewModified)
+            {
+                p.reviewModified = true;
+                // Reflect the change with a "*" in the title.
+                _updateWindowTitle();
+            }
+        }
+
+        void App::_notesUpdate()
+        {
+            FTK_P();
+            // Mark the frames that carry a note or a drawing in the timeline.
+            // The markers are deliberately undifferentiated -- they say "there
+            // is something here" -- and follow the timeline, which shows "A".
+            std::vector<int> markers;
+            for (const auto& note : p.notesModel->getNotes())
+            {
+                if (note.time.has_value())
+                {
+                    markers.push_back(static_cast<int>(note.time->value()));
+                }
+            }
+            // Every annotation is stamped with the player's time, which is the
+            // timeline's own clock, so a drawing made on a "B" source still
+            // marks the right place. Filtering on the source would drop those.
+            for (const auto& annotation : p.annotationsModel->getAnnotations())
+            {
+                if (annotation.time.has_value())
+                {
+                    markers.push_back(static_cast<int>(annotation.time->value()));
+                }
+            }
+            std::sort(markers.begin(), markers.end());
+            markers.erase(std::unique(markers.begin(), markers.end()), markers.end());
+            p.reviewMarkers->setIfChanged(markers);
+            // The window can still be missing here: the observers fire while a
+            // review passed on the command line is applied. The markers are kept
+            // above regardless, and pushed again once the window exists.
+            if (p.mainWindow)
+            {
+                p.mainWindow->getTimelineWidget()->setFrameMarkers(markers);
+            }
+        }
+
+        void App::_updateWindowTitle()
+        {
+            FTK_P();
+            if (!p.mainWindow)
+            {
+                return;
+            }
+            std::string title = ftk::Format("{0} {1}").
+                arg(p.appInfoModel->getFullName()).
+                arg(p.appInfoModel->getVersion());
+            if (!p.reviewPath.empty())
+            {
+                // Show the active review so the user can tell which one is open,
+                // with a trailing "*" while it has unsaved changes.
+                title += " - " + p.reviewPath.u8string();
+                if (p.reviewModified)
+                {
+                    title += " *";
+                }
+            }
+            p.mainWindow->setTitle(title);
+        }
+
+        void App::_applyReviewView()
+        {
+            FTK_P();
+            if (!p.pendingReviewView.has_value() || !p.mainWindow)
+            {
+                return;
+            }
+            if (p.pendingReviewView->frameView)
+            {
+                p.mainWindow->getViewport()->setFrameView(true);
+                p.pendingReviewView.reset();
+            }
+            else
+            {
+                // Defer past the initial auto-frame that the new player triggers
+                // on the next layout pass. setViewPosAndZoom disables frame view,
+                // so no later re-frame overrides it.
+                if (!p.reviewViewTimer)
+                {
+                    p.reviewViewTimer = ftk::Timer::create(_context);
+                }
+                p.reviewViewTimer->start(
+                    std::chrono::milliseconds(200),
+                    [this]
+                    {
+                        FTK_P();
+                        if (p.pendingReviewView.has_value() && p.mainWindow)
+                        {
+                            p.mainWindow->getViewport()->setViewPosAndZoom(
+                                p.pendingReviewView->pos,
+                                p.pendingReviewView->zoom);
+                            p.pendingReviewView.reset();
+                        }
+                    });
+            }
+        }
+
+        std::filesystem::path App::_autosavePath()
+        {
+            FTK_P();
+            return _appDocsPath() / ftk::Format("{0}.{1}.autosave.djvr").
+                arg(p.appInfoModel->getShortName()).
+                arg(p.appInfoModel->getVersionMajor()).
+                str();
+        }
+
+        void App::_writeAutosave()
+        {
+            FTK_P();
+            // Only a saved review with unsaved changes is worth backing up.
+            if (!p.reviewModified || p.reviewPath.empty())
+            {
+                return;
+            }
+            try
+            {
+                nlohmann::json json = _buildReview(p.reviewPath.parent_path());
+                // Remember which review this backs up, for recovery.
+                json["_autosaveReviewPath"] = p.reviewPath.u8string();
+                std::ofstream f(_autosavePath());
+                if (f.is_open())
+                {
+                    f << std::setw(4) << json << std::endl;
+                }
+            }
+            catch (const std::exception& e)
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Cannot write autosave: {0}").arg(e.what()),
+                    ftk::LogType::Warning);
+            }
+        }
+
+        void App::_deleteAutosave()
+        {
+            std::error_code ec;
+            std::filesystem::remove(_autosavePath(), ec);
+        }
+
+        void App::_recoverAutosave()
+        {
+            FTK_P();
+            if (!p.recoveredAutosave.has_value())
+            {
+                return;
+            }
+            const nlohmann::json json = *p.recoveredAutosave;
+            p.recoveredAutosave.reset();
+            try
+            {
+                models::Review review = json.get<models::Review>();
+                std::filesystem::path reviewPath;
+                if (json.contains("_autosaveReviewPath"))
+                {
+                    reviewPath = std::filesystem::u8path(
+                        json.at("_autosaveReviewPath").get<std::string>());
+                }
+                // Keep the internal marker out of any later saved ".djvr".
+                review.raw.erase("_autosaveReviewPath");
+                _applyReview(review, reviewPath.parent_path(), reviewPath, std::filesystem::path());
+                // The recovered state is, by definition, unsaved.
+                p.reviewModified = true;
+                _updateWindowTitle();
+            }
+            catch (const std::exception& e)
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Cannot recover autosave: {0}").arg(e.what()),
+                    ftk::LogType::Error);
             }
         }
 
@@ -874,6 +1769,24 @@ namespace djv
                 p.settingsFile,
                 p.cmdLine.resetSettings->found());
 
+            // Capture any autosave left by a crashed session before anything can
+            // overwrite or delete it; the recovery prompt is offered once the
+            // main window exists.
+            {
+                std::ifstream f(_autosavePath());
+                if (f.is_open())
+                {
+                    try
+                    {
+                        nlohmann::json json;
+                        f >> json;
+                        p.recoveredAutosave = json;
+                    }
+                    catch (const std::exception&)
+                    {}
+                }
+            }
+
             _modelsInit();
             _observersInit();
             _inputFilesInit();
@@ -1090,6 +2003,9 @@ namespace djv
             p.filesModel = models::FilesModel::create(p.settings);
 
             p.recentFilesModel = models::RecentFilesModel::create(_context, p.settings);
+            // Reviews get their own recent list, so opening a session does not
+            // push its media into the recent files.
+            p.recentReviewsModel = models::RecentFilesModel::create(_context, p.settings, "Review");
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
             ftk::FileBrowserOptions fileBrowserOptions;
@@ -1151,6 +2067,12 @@ namespace djv
             p.toolsModel = models::ToolsModel::create(p.settings);
 
             p.commandsModel = models::CommandsModel::create(_context);
+
+            p.notesModel = models::NotesModel::create();
+            p.rangesModel = models::RangesModel::create();
+            p.annotationsModel = models::AnnotationsModel::create();
+            p.drawModel = models::DrawModel::create(p.settings);
+            p.reviewMarkers = ftk::ObservableList<int>::create();
         }
 
         void App::_observersInit()
@@ -1217,6 +2139,40 @@ namespace djv
                 [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
                 {
                     _activeUpdate(value);
+                });
+            p.notesObserver = ftk::ListObserver<models::ReviewNote>::create(
+                p.notesModel->observeNotes(),
+                [this](const std::vector<models::ReviewNote>&)
+                {
+                    _notesUpdate();
+                    _markModified();
+                });
+            p.annotationsObserver = ftk::ListObserver<models::ReviewAnnotation>::create(
+                p.annotationsModel->observeAnnotations(),
+                [this](const std::vector<models::ReviewAnnotation>&)
+                {
+                    _notesUpdate();
+                    _markModified();
+                });
+            // Ranges carry no timeline marker: they are a selection, not a
+            // point of interest. They only have to reach the review file.
+            p.rangesObserver = ftk::ListObserver<models::ReviewRange>::create(
+                p.rangesModel->observeRanges(),
+                [this](const std::vector<models::ReviewRange>&)
+                {
+                    _markModified();
+                });
+            p.compareOptionsModifiedObserver = ftk::Observer<tl::CompareOptions>::create(
+                p.filesModel->observeCompareOptions(),
+                [this](const tl::CompareOptions&)
+                {
+                    _markModified();
+                });
+            p.bIndexesModifiedObserver = ftk::ListObserver<int>::create(
+                p.filesModel->observeBIndexes(),
+                [this](const std::vector<int>&)
+                {
+                    _markModified();
                 });
             p.layersObserver = ftk::ListObserver<int>::create(
                 p.filesModel->observeLayers(),
@@ -1310,6 +2266,18 @@ namespace djv
             {
                 ftk::PathOptions pathOptions;
                 pathOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+
+                // A review (".djvr") describes an entire session; open it and
+                // ignore any other inputs.
+                {
+                    const std::filesystem::path firstPath = std::filesystem::u8path(
+                        p.cmdLine.inputs->getList().front());
+                    if (firstPath.extension() == reviewExtension)
+                    {
+                        openReview(firstPath);
+                        return;
+                    }
+                }
 
                 if (p.cmdLine.compareFileName->found())
                 {
@@ -1433,6 +2401,7 @@ namespace djv
             p.toolWidgetFactory->addTool("Information", &InfoTool::create);
             p.toolWidgetFactory->addTool("Magnify", &MagnifyTool::create);
             p.toolWidgetFactory->addTool("Messages", &MessagesTool::create);
+            p.toolWidgetFactory->addTool("Review", &ReviewTool::create);
             p.toolWidgetFactory->addTool("Settings", &SettingsTool::create);
             p.toolWidgetFactory->addTool("System Log", &SysLogTool::create);
             p.toolWidgetFactory->addTool("View", &ViewTool::create);
@@ -1473,6 +2442,58 @@ namespace djv
                         _p->mainWindow->getViewport()->getZoom(),
                         value);
                 });
+
+            // Apply any view state from a review opened before the window existed
+            // (e.g. a ".djvr" passed on the command line).
+            _applyReviewView();
+            // Reflect a review opened before the window existed in the title.
+            _updateWindowTitle();
+            // Same for the timeline markers: the notes and annotations observers
+            // fired while there was no window, so _notesUpdate() bailed out.
+            _notesUpdate();
+
+            // Start periodic crash-recovery autosave.
+            p.autosaveTimer = ftk::Timer::create(_context);
+            p.autosaveTimer->setRepeating(true);
+            p.autosaveTimer->start(
+                std::chrono::seconds(30),
+                [this]
+                {
+                    _writeAutosave();
+                });
+
+            // Offer to recover a review from a crashed session, unless files were
+            // already opened this launch (e.g. from the command line).
+            if (p.recoveredAutosave.has_value() && p.filesModel->getFiles().empty())
+            {
+                auto dialogSystem = _context->getSystem<ftk::DialogSystem>();
+                dialogSystem->confirm(
+                    "Recover Review",
+                    "Unsaved review changes from a previous\n"
+                    "session were found.\n"
+                    "\n"
+                    "Recover them?",
+                    p.mainWindow,
+                    [this](bool value)
+                    {
+                        FTK_P();
+                        if (value)
+                        {
+                            _recoverAutosave();
+                        }
+                        else
+                        {
+                            p.recoveredAutosave.reset();
+                            _deleteAutosave();
+                        }
+                    },
+                    "Recover",
+                    "Discard");
+            }
+            else
+            {
+                p.recoveredAutosave.reset();
+            }
         }
 
         void App::_setAudioDeviceMute(bool value)
