@@ -25,6 +25,7 @@ namespace djv
             std::shared_ptr<ui::ViewOutlineWidget> outlineWidget;
             std::shared_ptr<ui::ViewGridWidget> gridWidget;
             std::shared_ptr<ui::ViewCenterMarkerWidget> centerMarkerWidget;
+            std::shared_ptr<ui::ViewMissingFramesWidget> missingFramesWidget;
             std::shared_ptr<ui::ViewHUDWidget> hudWidget;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
         };
@@ -53,6 +54,7 @@ namespace djv
             p.outlineWidget = ui::ViewOutlineWidget::create(context, viewportModel);
             p.gridWidget = ui::ViewGridWidget::create(context, viewportModel);
             p.centerMarkerWidget = ui::ViewCenterMarkerWidget::create(context, viewportModel);
+            p.missingFramesWidget = ui::ViewMissingFramesWidget::create(context, viewportModel);
             p.hudWidget = ui::ViewHUDWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
@@ -71,6 +73,8 @@ namespace djv
             p.bellows["Grid"]->setWidget(p.gridWidget);
             p.bellows["CenterMarker"] = ftk::Bellows::create(context, "Center Marker", layout);
             p.bellows["CenterMarker"]->setWidget(p.centerMarkerWidget);
+            p.bellows["MissingFrames"] = ftk::Bellows::create(context, "Missing Frames", layout);
+            p.bellows["MissingFrames"]->setWidget(p.missingFramesWidget);
             p.bellows["HUD"] = ftk::Bellows::create(context, "HUD", layout);
             p.bellows["HUD"]->setWidget(p.hudWidget);
             auto scrollWidget = ftk::ScrollWidget::create(context);

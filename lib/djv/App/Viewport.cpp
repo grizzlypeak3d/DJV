@@ -50,6 +50,10 @@ namespace djv
             double fps = 0.0;
             size_t droppedFrames = 0;
             size_t videoFramesSize = 0;
+            // Whether the picture stands in for a frame the media does not
+            // have, and the frame it repeats when there is one.
+            bool missing = false;
+            std::optional<int64_t> heldFrom;
             ftk::ImageOptions imageOptions;
             tl::DisplayOptions displayOptions;
             tl::PlayerCacheInfo cacheInfo;
@@ -531,8 +535,28 @@ namespace djv
                     player->observeCurrentVideo(),
                     [this](const std::vector<tl::VideoFrame>& value)
                     {
-                        _p->videoFramesSize = value.size();
+                        FTK_P();
+                        p.videoFramesSize = value.size();
+                        p.missing = false;
+                        p.heldFrom.reset();
+                        // The first source, which is the one the time in the
+                        // heads up display is about.
+                        if (!value.empty())
+                        {
+                            for (const auto& layer : value.front().layers)
+                            {
+                                if (layer.missing)
+                                {
+                                    p.missing = true;
+                                    if (layer.heldFrom.has_value())
+                                    {
+                                        p.heldFrom = layer.heldFrom;
+                                    }
+                                }
+                            }
+                        }
                         _videoUpdate();
+                        _hudUpdate();
                     });
 
                 p.cacheObserver = ftk::Observer<tl::PlayerCacheInfo>::create(
@@ -744,10 +768,21 @@ namespace djv
                 auto timeUnitsModel = app->getTimeUnitsModel();
                 s = timeUnitsModel->getLabel(p.currentTime);
             }
-            p.timeLabel->setText(ftk::Format("Time: {0}, {1} FPS, {2} dropped").
+            std::string missing;
+            if (p.missing)
+            {
+                // Said rather than only drawn, so which frame is standing in
+                // is known and not merely that one is.
+                missing = p.heldFrom.has_value() ?
+                    ftk::Format(", held from {0}").
+                        arg(p.heldFrom.value()).str() :
+                    ", missing";
+            }
+            p.timeLabel->setText(ftk::Format("Time: {0}, {1} FPS, {2} dropped{3}").
                 arg(s).
                 arg(p.fps, 2, 6).
-                arg(static_cast<int>(p.droppedFrames), 3));
+                arg(static_cast<int>(p.droppedFrames), 3).
+                arg(missing));
             ftk::setScreenshotTag(p.timeLabel, "View.HUD.Time");
 
             p.viewZoomLabel->setText(ftk::Format("Zoom: {0}").

@@ -247,6 +247,34 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! View missing frames widget.
+        class ViewMissingFramesWidget : public ftk::IWidget
+        {
+            FTK_NON_COPYABLE(ViewMissingFramesWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            ViewMissingFramesWidget();
+
+        public:
+            virtual ~ViewMissingFramesWidget();
+
+            static std::shared_ptr<ViewMissingFramesWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            ftk::Size2I getSizeHint() const override;
+            void setGeometry(const ftk::Box2I&) override;
+
+        private:
+            FTK_PRIVATE();
+        };
+
         //! View HUD widget.
         class ViewHUDWidget : public ftk::IWidget
         {
