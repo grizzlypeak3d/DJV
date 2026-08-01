@@ -11,6 +11,7 @@
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/CheckBox.h>
+#include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
@@ -20,6 +21,7 @@
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEdit.h>
+#include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/LineEdit.h>
 #include <ftk/UI/PushButton.h>
@@ -472,15 +474,20 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> maxDigitsEdit;
             std::shared_ptr<ftk::DoubleEdit> defaultSpeedEdit;
             std::shared_ptr<ftk::ComboBox> missingFramesComboBox;
+            std::shared_ptr<ftk::CheckBox> missingIndicatorCheckBox;
+            std::shared_ptr<ftk::IntEditSlider> missingIndicatorWidthEdit;
+            std::shared_ptr<ftk::ColorSwatch> missingIndicatorColorSwatch;
             std::shared_ptr<ftk::IntEdit> threadsEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > settingsObserver;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > foregroundObserver;
         };
 
         void ImageSeqSettingsWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<IWidget>& parent)
         {
             ISettingsWidget::_init(context, "djv::ui::ImageSeqSettingsWidget", parent);
@@ -536,6 +543,33 @@ namespace djv
                 "only apply to an image sequence opened on its own, and\n"
                 "changing to or from one opens the file again.");
 
+            p.missingIndicatorCheckBox = ftk::CheckBox::create(context);
+            p.missingIndicatorCheckBox->setTooltip(
+                "Mark a picture that stands in for a frame the sequence does\n"
+                "not have, so a render still in progress does not look\n"
+                "finished.\n"
+                "\n"
+                "A cross is drawn over the picture, and the heads up display\n"
+                "time says which frame is being held.\n"
+                "\n"
+                "Applies to Hold and Black. The others either show nothing or\n"
+                "leave no missing frames to mark. Unlike the setting above,\n"
+                "this is only what is drawn, so it applies to what is already\n"
+                "open.");
+            ftk::setScreenshotTag(
+                p.missingIndicatorCheckBox, "Settings.MissingIndicator.Enabled");
+
+            p.missingIndicatorWidthEdit = ftk::IntEditSlider::create(context);
+            p.missingIndicatorWidthEdit->setRange(1, 40);
+            ftk::setScreenshotTag(
+                p.missingIndicatorWidthEdit, "Settings.MissingIndicator.LineWidth");
+
+            p.missingIndicatorColorSwatch = ftk::ColorSwatch::create(context);
+            p.missingIndicatorColorSwatch->setEditable(true);
+            p.missingIndicatorColorSwatch->setHAlign(ftk::HAlign::Left);
+            ftk::setScreenshotTag(
+                p.missingIndicatorColorSwatch, "Settings.MissingIndicator.Color");
+
             p.threadsEdit = ftk::IntEdit::create(context);
             p.threadsEdit->setRange(1, 64);
 
@@ -551,7 +585,51 @@ namespace djv
             ftk::Label::create(context, "FPS", hLayout);
             p.layout->addRow("Default speed:", hLayout);
             p.layout->addRow("Missing frames:", p.missingFramesComboBox);
+            p.layout->addRow("Indicate missing:", p.missingIndicatorCheckBox);
+            p.layout->addRow("Indicator width:", p.missingIndicatorWidthEdit);
+            p.layout->addRow("Indicator color:", p.missingIndicatorColorSwatch);
             p.layout->addRow("I/O threads:", p.threadsEdit);
+
+            // The indicator lives with the viewport's other drawing rather
+            // than with the sequence settings, since it changes only what is
+            // drawn. It is shown here because this is where someone deciding
+            // what to do about missing frames is looking.
+            p.foregroundObserver = ftk::Observer<tl::ForegroundOptions>::create(
+                viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions& value)
+                {
+                    FTK_P();
+                    p.missingIndicatorCheckBox->setChecked(
+                        value.missingIndicator.enabled);
+                    p.missingIndicatorWidthEdit->setValue(
+                        value.missingIndicator.width);
+                    p.missingIndicatorColorSwatch->setColor(
+                        value.missingIndicator.color);
+                });
+
+            p.missingIndicatorCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.missingIndicator.enabled = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.missingIndicatorWidthEdit->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.missingIndicator.width = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.missingIndicatorColorSwatch->setCallback(
+                [viewportModel](const ftk::Color4F& value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.missingIndicator.color = value;
+                    viewportModel->setForegroundOptions(options);
+                });
 
             p.settingsObserver = ftk::Observer<models::ImageSeqSettings>::create(
                 settings->observeImageSeq(),
@@ -644,10 +722,11 @@ namespace djv
         std::shared_ptr<ImageSeqSettingsWidget> ImageSeqSettingsWidget::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ImageSeqSettingsWidget>(new ImageSeqSettingsWidget);
-            out->_init(context, settings, parent);
+            out->_init(context, settings, viewportModel, parent);
             return out;
         }
 

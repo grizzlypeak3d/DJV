@@ -63,7 +63,8 @@ namespace djv
             p.bellows["ImageSeqs"] = ftk::Bellows::create(context, "Image Sequences", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
             vLayout2->setMarginRole(ftk::SizeRole::Margin);
-            ui::ImageSeqSettingsWidget::create(context, settingsModel, vLayout2);
+            ui::ImageSeqSettingsWidget::create(
+                context, settingsModel, app->getViewportModel(), vLayout2);
             p.bellows["ImageSeqs"]->setWidget(vLayout2);
 
             p.bellows["OTIO"] = ftk::Bellows::create(context, "OTIO", vLayout);

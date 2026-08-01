@@ -4,6 +4,7 @@
 #pragma once
 
 #include <djv/Models/SettingsModel.h>
+#include <djv/Models/ViewportModel.h>
 #include <djv/Models/TimeUnitsModel.h>
 
 #include <ftk/UI/IWidget.h>
@@ -145,6 +146,7 @@ namespace djv
             void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             ImageSeqSettingsWidget();
@@ -155,6 +157,7 @@ namespace djv
             static std::shared_ptr<ImageSeqSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             ftk::Size2I getSizeHint() const override;
