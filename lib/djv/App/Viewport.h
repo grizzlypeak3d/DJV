@@ -32,14 +32,16 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            //! Observe picking.
-            TL_API std::shared_ptr<ftk::IObservable<ftk::V2I> > observePick() const;
+            //! Observe picking. Unset when the position is not over an
+            //! image, where there is no pixel to name.
+            TL_API std::shared_ptr<ftk::IObservable<std::optional<ftk::V2I> > > observePick() const;
 
             //! Observe the sample position.
             TL_API std::shared_ptr<ftk::IObservable<ftk::V2I> > observeSamplePos() const;
 
-            //! Observe the color sample.
-            TL_API std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColorSample() const;
+            //! Observe the color sample. Unset when the position is not over
+            //! an image.
+            TL_API std::shared_ptr<ftk::IObservable<std::optional<ftk::Color4F> > > observeColorSample() const;
 
             //! Sample the image at the given image pixel, as the pick mouse
             //! action would. Used by the documentation screenshot capture.
@@ -60,8 +62,9 @@ namespace djv
 
         private:
             bool _getSourceBox(ftk::Box2I&, ftk::Size2I&) const;
-            ftk::V2I _toSourcePixel(const ftk::V2I&) const;
+            std::optional<ftk::V2I> _toSourcePixel(const ftk::V2I&) const;
             ftk::V2I _fromSourcePixel(const ftk::V2I&) const;
+            void _sampleUpdate();
             void _videoUpdate();
             void _toastUpdate();
             void _compareUpdate();

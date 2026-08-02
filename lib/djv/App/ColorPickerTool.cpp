@@ -27,8 +27,8 @@ namespace djv
             std::shared_ptr<ftk::Label> pixelLabel;
             std::shared_ptr<ftk::Label> mouseLabel;
 
-            std::shared_ptr<ftk::Observer<ftk::V2I> > pickObserver;
-            std::shared_ptr<ftk::Observer<ftk::Color4F> > colorSampleObserver;
+            std::shared_ptr<ftk::Observer<std::optional<ftk::V2I> > > pickObserver;
+            std::shared_ptr<ftk::Observer<std::optional<ftk::Color4F> > > colorSampleObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > settingsObserver;
         };
 
@@ -79,24 +79,35 @@ namespace djv
             scrollWidget->setWidget(layout);
             _setWidget(scrollWidget);
 
-            p.pickObserver = ftk::Observer<ftk::V2I>::create(
+            p.pickObserver = ftk::Observer<std::optional<ftk::V2I> >::create(
                 mainWindow->getViewport()->observePick(),
-                [this](const ftk::V2I& value)
+                [this](const std::optional<ftk::V2I>& value)
                 {
-                    _p->pixelLabel->setText(ftk::Format("{0}").arg(value));
+                    std::string text = "-";
+                    if (value.has_value())
+                    {
+                        text = ftk::Format("{0}").arg(value.value());
+                    }
+                    _p->pixelLabel->setText(text);
                 });
 
-            p.colorSampleObserver = ftk::Observer<ftk::Color4F>::create(
+            p.colorSampleObserver = ftk::Observer<std::optional<ftk::Color4F> >::create(
                 mainWindow->getViewport()->observeColorSample(),
-                [this](const ftk::Color4F& value)
+                [this](const std::optional<ftk::Color4F>& value)
                 {
                     FTK_P();
-                    p.colorSwatch->setColor(value);
-                    p.colorLabel->setText(ftk::Format("{0} {1} {2} {3}").
-                        arg(value.r, 2).
-                        arg(value.g, 2).
-                        arg(value.b, 2).
-                        arg(value.a, 2));
+                    p.colorSwatch->setColor(
+                        value.has_value() ? value.value() : ftk::Color4F());
+                    std::string text = "-";
+                    if (value.has_value())
+                    {
+                        text = ftk::Format("{0} {1} {2} {3}").
+                            arg(value.value().r, 2).
+                            arg(value.value().g, 2).
+                            arg(value.value().b, 2).
+                            arg(value.value().a, 2);
+                    }
+                    p.colorLabel->setText(text);
                 });
 
             p.settingsObserver = ftk::Observer<models::MouseSettings>::create(

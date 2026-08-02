@@ -52,7 +52,7 @@ namespace djv
             bool viewPosAndZoom = true;
             ftk::V2I viewPos;
             double viewZoom = 1.0;
-            ftk::V2I pick;
+            std::optional<ftk::V2I> pick;
             ftk::V2I samplePos;
             size_t videoFramesSize = 0;
             ftk::ImageOptions imageOptions;
@@ -68,7 +68,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::ListObserver<tl::VideoFrame> > videoObserver;
             std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosAndZoomObserver;
-            std::shared_ptr<ftk::Observer<ftk::V2I> > pickObserver;
+            std::shared_ptr<ftk::Observer<std::optional<ftk::V2I> > > pickObserver;
             std::shared_ptr<ftk::Observer<ftk::V2I> > samplePosObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
@@ -189,9 +189,9 @@ namespace djv
                     }
                 });
 
-            p.pickObserver = ftk::Observer<ftk::V2I>::create(
+            p.pickObserver = ftk::Observer<std::optional<ftk::V2I> >::create(
                 mainWindow->getViewport()->observePick(),
-                [this](const ftk::V2I& value)
+                [this](const std::optional<ftk::V2I>& value)
                 {
                     FTK_P();
                     p.pick = value;
@@ -336,7 +336,12 @@ namespace djv
 
             p.viewPosAndZoomCheckBox->setChecked(p.viewPosAndZoom);
 
-            p.pixelLabel->setText(ftk::Format("{0}").arg(p.pick));
+            std::string pixelText = "-";
+            if (p.pick.has_value())
+            {
+                pixelText = ftk::Format("{0}").arg(p.pick.value());
+            }
+            p.pixelLabel->setText(pixelText);
         }
 
         void MagnifyTool::_videoUpdate()

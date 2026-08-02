@@ -38,6 +38,38 @@ namespace djv
             const size_t toastTextLength = 80;
 
             const std::chrono::seconds toastTimeout(5);
+
+            // ftk::contains() stops short of a box's maximum, while a Box2I
+            // holds it -- its size is max - min + 1 -- so going through
+            // contains() loses the last row and column of an image.
+            bool within(const ftk::Box2I& box, const ftk::V2I& pos)
+            {
+                return
+                    pos.x >= box.min.x && pos.x <= box.max.x &&
+                    pos.y >= box.min.y && pos.y <= box.max.y;
+            }
+
+            // A position inside a box, in the coordinates of what the box
+            // holds. Clamped because a box and its contents are different
+            // sizes whenever the image is scaled, and the far edge rounds up
+            // to a pixel past the last one.
+            ftk::V2I mapInto(
+                const ftk::V2I& pos,
+                const ftk::Box2I& box,
+                const ftk::Size2I& size)
+            {
+                return ftk::V2I(
+                    std::clamp<int>(
+                        std::lround(
+                            (pos.x - box.min.x) / static_cast<double>(box.w()) * size.w),
+                        0,
+                        size.w - 1),
+                    std::clamp<int>(
+                        std::lround(
+                            (pos.y - box.min.y) / static_cast<double>(box.h()) * size.h),
+                        0,
+                        size.h - 1));
+            }
         }
 
         struct Viewport::Private
@@ -67,9 +99,9 @@ namespace djv
             bool picked = false;
             Resample resample = Resample::None;
             bool resampleOnFrames = false;
-            std::shared_ptr<ftk::Observable<ftk::V2I> > pick;
+            std::shared_ptr<ftk::Observable<std::optional<ftk::V2I> > > pick;
             std::shared_ptr<ftk::Observable<ftk::V2I> > samplePos;
-            std::shared_ptr<ftk::Observable<ftk::Color4F> > colorSample;
+            std::shared_ptr<ftk::Observable<std::optional<ftk::Color4F> > > colorSample;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
             std::shared_ptr<ftk::Label> cacheLabel;
@@ -139,9 +171,9 @@ namespace djv
 
             p.app = app;
 
-            p.pick = ftk::Observable<ftk::V2I>::create();
+            p.pick = ftk::Observable<std::optional<ftk::V2I> >::create();
             p.samplePos = ftk::Observable<ftk::V2I>::create();
-            p.colorSample = ftk::Observable<ftk::Color4F>::create();
+            p.colorSample = ftk::Observable<std::optional<ftk::Color4F> >::create();
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFont(ftk::FontType::Mono);
@@ -441,7 +473,7 @@ namespace djv
             return out;
         }
 
-        std::shared_ptr<ftk::IObservable<ftk::V2I> > Viewport::observePick() const
+        std::shared_ptr<ftk::IObservable<std::optional<ftk::V2I> > > Viewport::observePick() const
         {
             return _p->pick;
         }
@@ -451,7 +483,7 @@ namespace djv
             return _p->samplePos;
         }
 
-        std::shared_ptr<ftk::IObservable<ftk::Color4F> > Viewport::observeColorSample() const
+        std::shared_ptr<ftk::IObservable<std::optional<ftk::Color4F> > > Viewport::observeColorSample() const
         {
             return _p->colorSample;
         }
@@ -499,22 +531,73 @@ namespace djv
             return false;
         }
 
-        ftk::V2I Viewport::_toSourcePixel(const ftk::V2I& renderPos) const
+        std::optional<ftk::V2I> Viewport::_toSourcePixel(const ftk::V2I& renderPos) const
         {
-            ftk::Box2I box;
-            ftk::Size2I size;
-            ftk::V2I out = renderPos;
-            if (_getSourceBox(box, size))
+            // Which image the position is over, and where in it. Side by side
+            // comparisons give every image its own box, so a position has to
+            // be measured against the one it is over rather than against the
+            // first -- otherwise the second image reports where it sits in the
+            // first's coordinates, which is a pixel the file does not have.
+            // Over no image there is no pixel to name, so nothing is returned
+            // rather than a position carried on past the edge.
+            auto player = getPlayer();
+            if (!player)
+                return std::nullopt;
+            const auto& videoFrame = player->getCurrentVideo();
+            const auto& displayOptions = getDisplayOptions();
+            const tl::AspectRatioOptions aspectRatio =
+                !displayOptions.empty() ?
+                displayOptions.front().aspectRatio :
+                tl::AspectRatioOptions();
+            const auto boxes = tl::getBoxes(
+                getCompareOptions(), aspectRatio, videoFrame);
+            for (size_t i = 0; i < boxes.size() && i < videoFrame.size(); ++i)
             {
-                out = ftk::V2I(
-                    std::lround(
-                        (renderPos.x - box.min.x) /
-                        static_cast<double>(box.w()) * size.w),
-                    std::lround(
-                        (renderPos.y - box.min.y) /
-                        static_cast<double>(box.h()) * size.h));
+                if (!within(boxes[i], renderPos))
+                    continue;
+                if (videoFrame[i].canvasSize.isValid())
+                {
+                    // With OTIO spatial coordinates the box holds the timeline
+                    // canvas rather than the media, so the position crosses
+                    // into the canvas before it can find an image.
+                    const ftk::V2I canvasPos = mapInto(
+                        renderPos, boxes[i], videoFrame[i].canvasSize);
+                    for (const auto& layer : videoFrame[i].layers)
+                    {
+                        const auto& image = layer.image ? layer.image : layer.imageB;
+                        const auto& bounds = layer.image ? layer.bounds : layer.boundsB;
+                        if (image && bounds.has_value())
+                        {
+                            const ftk::Box2I box = tl::getBox(
+                                ftk::Box2I(
+                                    ftk::V2I(
+                                        std::lround(bounds.value().min.x),
+                                        std::lround(bounds.value().min.y)),
+                                    ftk::V2I(
+                                        std::lround(bounds.value().max.x),
+                                        std::lround(bounds.value().max.y))),
+                                image->getInfo(),
+                                aspectRatio);
+                            if (within(box, canvasPos))
+                            {
+                                return mapInto(
+                                    canvasPos, box, image->getInfo().size);
+                            }
+                        }
+                    }
+                    return std::nullopt;
+                }
+                for (const auto& layer : videoFrame[i].layers)
+                {
+                    const auto& image = layer.image ? layer.image : layer.imageB;
+                    if (image)
+                    {
+                        return mapInto(
+                            renderPos, boxes[i], image->getInfo().size);
+                    }
+                }
             }
-            return out;
+            return std::nullopt;
         }
 
         ftk::V2I Viewport::_fromSourcePixel(const ftk::V2I& sourcePos) const
@@ -549,8 +632,11 @@ namespace djv
                 static_cast<int>(viewPos.x + renderPos.x * zoom),
                 static_cast<int>(viewPos.y + renderPos.y * zoom));
             p.samplePos->setIfChanged(pos);
-            p.colorSample->setIfChanged(getColorSample(pos));
             p.picked = true;
+            _sampleUpdate();
+            // The pixel asked for rather than the one that comes back from
+            // converting it to a position and then converting it again, which
+            // is a pixel out at some zooms.
             p.pick->setIfChanged(imagePos);
             _hudUpdate();
         }
@@ -664,10 +750,9 @@ namespace djv
             if (Private::Resample::Read == p.resample)
             {
                 p.resample = Private::Resample::None;
-                if (p.colorSample->setIfChanged(getColorSample(p.samplePos->get())))
-                {
-                    _hudUpdate();
-                }
+                // Through the same path as a pick: a comparison can bring a
+                // different image under the position, or none at all.
+                _sampleUpdate();
             }
         }
 
@@ -727,12 +812,10 @@ namespace djv
                 {
                     const ftk::Box2I& g = getGeometry();
                     const ftk::V2I pos = event.pos - g.min;
+                    p.picked = true;
                     if (p.samplePos->setIfChanged(pos))
                     {
-                        p.colorSample->setIfChanged(getColorSample(pos));
-                        p.picked = true;
-                        p.pick->setIfChanged(_toSourcePixel((pos - getViewPos()) / getZoom()));
-                        _hudUpdate();
+                        _sampleUpdate();
                     }
                 }
                 break;
@@ -755,12 +838,10 @@ namespace djv
                 p.mouse.mode = Private::MouseMode::Picker;
                 const ftk::Box2I& g = getGeometry();
                 const ftk::V2I pos = event.pos - g.min;
+                p.picked = true;
                 if (p.samplePos->setIfChanged(pos))
                 {
-                    p.colorSample->setIfChanged(getColorSample(pos));
-                    p.picked = true;
-                    p.pick->setIfChanged(_toSourcePixel((pos - getViewPos()) / getZoom()));
-                    _hudUpdate();
+                    _sampleUpdate();
                 }
             }
             else if (p.frameShuttleBinding.button == event.button &&
@@ -918,16 +999,22 @@ namespace djv
             ftk::setScreenshotTag(p.viewZoomLabel, "View.HUD.ViewZoom");
 
             const auto& colorSample = p.colorSample->get();
-            p.colorPickerSwatch->setColor(colorSample);
             const auto& pick = p.pick->get();
-            p.colorPickerLabel->setText(
-                ftk::Format("Color: {0} {1} {2} {3}, Pixel: {4}, {5}").
-                arg(colorSample.r, 2).
-                arg(colorSample.g, 2).
-                arg(colorSample.b, 2).
-                arg(colorSample.a, 2).
-                arg(pick.x, 4).
-                arg(pick.y, 4));
+            p.colorPickerSwatch->setColor(
+                colorSample.has_value() ? colorSample.value() : ftk::Color4F());
+            std::string colorPickerText = "Color: -, Pixel: -";
+            if (colorSample.has_value() && pick.has_value())
+            {
+                colorPickerText =
+                    ftk::Format("Color: {0} {1} {2} {3}, Pixel: {4}, {5}").
+                    arg(colorSample.value().r, 2).
+                    arg(colorSample.value().g, 2).
+                    arg(colorSample.value().b, 2).
+                    arg(colorSample.value().a, 2).
+                    arg(pick.value().x, 4).
+                    arg(pick.value().y, 4);
+            }
+            p.colorPickerLabel->setText(colorPickerText);
             ftk::setScreenshotTag(p.colorPickerLabel, "View.HUD.ColorPicker");
             ftk::setScreenshotTag(p.colorPickerSwatch, "View.HUD.ColorPickerSwatch");
 
@@ -936,6 +1023,21 @@ namespace djv
                 arg(static_cast<int>(p.cacheInfo.videoPercentage), 3).
                 arg(static_cast<int>(p.cacheInfo.audioPercentage), 3));
             ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");
+        }
+
+        void Viewport::_sampleUpdate()
+        {
+            FTK_P();
+            const ftk::V2I& pos = p.samplePos->get();
+            const auto pixel = _toSourcePixel((pos - getViewPos()) / getZoom());
+            p.pick->setIfChanged(pixel);
+            // The color is read back from what was rendered, so away from the
+            // media it is the background rather than a value from anything
+            // being reviewed.
+            p.colorSample->setIfChanged(pixel.has_value() ?
+                std::optional<ftk::Color4F>(getColorSample(pos)) :
+                std::nullopt);
+            _hudUpdate();
         }
 
         void Viewport::_toastUpdate()
