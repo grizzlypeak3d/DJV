@@ -47,6 +47,8 @@ namespace djv
             bool                     framesStated = false;
 
             bool                     newFile = true;
+            bool                     playlistDirty = false;
+            bool                     playlistScratch = false;
         };
 
         //! Files model.
@@ -106,6 +108,11 @@ namespace djv
 
             //! Add a file.
             void add(const std::shared_ptr<FilesModelItem>&);
+
+            //! Update a file path and notify observers.
+            void setPath(
+                const std::shared_ptr<FilesModelItem>&,
+                const ftk::Path&);
 
             //! Close the current "A" file.
             void close();

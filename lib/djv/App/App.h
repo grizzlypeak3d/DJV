@@ -29,6 +29,7 @@ namespace djv
         class ColorModel;
         class CommandsModel;
         class FilesModel;
+        class PlaylistModel;
         class RecentFilesModel;
         class TimeUnitsModel;
         class ToolsModel;
@@ -38,6 +39,8 @@ namespace djv
     //! DJV Application
     namespace app
     {
+        struct FolderScanServiceResult;
+
         class MainWindow;
         class Indicator;
         class ToolWidgetFactory;
@@ -82,6 +85,9 @@ namespace djv
             //! Get the files model.
             const std::shared_ptr<models::FilesModel>& getFilesModel() const;
 
+            //! Get the OTIO playlist model.
+            const std::shared_ptr<models::PlaylistModel>& getPlaylistModel() const;
+
             //! Get the recent files model.
             const std::shared_ptr<models::RecentFilesModel>& getRecentFilesModel() const;
 
@@ -123,6 +129,34 @@ namespace djv
 
             //! Open a file and separate audio file dialog.
             void openSeparateAudioDialog();
+
+            //! Create an OTIO playlist from media selected in a dialog.
+            void openMediaAsPlaylistDialog();
+
+            //! Add media selected in a dialog to the active playlist.
+            void openPlaylistMediaDialog();
+
+            //! Import matching media from a folder into a new or active
+            //! playlist.
+            void openPlaylistFolderDialog(bool createPlaylist);
+
+            //! Create an OTIO playlist from one media path.
+            void createPlaylistFromMedia(const ftk::Path&);
+
+            //! Add media paths to the active playlist.
+            void addPlaylistMedia(const std::vector<ftk::Path>&);
+
+            //! Move an item in the active playlist.
+            void movePlaylistMedia(size_t from, size_t to);
+
+            //! Remove an item from the active playlist.
+            void removePlaylistMedia(size_t);
+
+            //! Save the active playlist.
+            void savePlaylist();
+
+            //! Save the active playlist to a selected path.
+            void savePlaylistAsDialog();
 
             //! Reload the active files.
             void reload();
@@ -176,6 +210,25 @@ namespace djv
             void _reloadUpdate(const std::shared_ptr<models::FilesModelItem>&);
             void _layersUpdate(const std::vector<int>&);
             void _audioUpdate();
+            tl::Options _getTimelineOptions(bool singleImages = false) const;
+            void _refreshPlaylistTimeline();
+            void _startPlaylistFolderScan(
+                const ftk::Path&,
+                const std::string& filter,
+                bool createPlaylist,
+                bool recursive,
+                bool collapseSequences,
+                const ftk::Path& outputPath = ftk::Path(),
+                bool watch = false);
+            bool _queuePlaylistFolderScan();
+            void _folderScanPoll();
+            void _finishPlaylistFolderScan(
+                const FolderScanServiceResult&);
+            bool _applyPendingPlaylistFolderScan();
+            bool _replaceWatchedPlaylist(
+                const std::vector<ftk::Path>&);
+            void _stopPlaylistFolderWatch(const std::string&);
+            bool _savePlaylistTo(const ftk::Path&);
 
             FTK_PRIVATE();
         };

@@ -29,6 +29,7 @@ namespace djv
             p.settings = settings;
 
             p.tools.push_back({ "Files", "Files", "A", true, ftk::Key::F1 });
+            p.tools.push_back({ "OTIO Playlist", "Files", "A1" });
             p.tools.push_back({ "Export", "Export", "B", true, ftk::Key::F2 });
             p.tools.push_back({ "View", "View", "C", true, ftk::Key::F3 });
             p.tools.push_back({ "Color", "ColorControls", "D", true, ftk::Key::F4 });

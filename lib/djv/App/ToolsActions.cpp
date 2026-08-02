@@ -4,6 +4,7 @@
 #include <djv/App/ToolsActions.h>
 
 #include <djv/App/App.h>
+#include <djv/Models/PlaylistModel.h>
 #include <djv/Models/ToolsModel.h>
 
 #include <ftk/Core/Format.h>
@@ -15,6 +16,7 @@ namespace djv
         struct ToolsActions::Private
         {
             std::shared_ptr<ftk::Observer<std::string> > activeObserver;
+            std::shared_ptr<ftk::Observer<int> > playlistObserver;
         };
 
         void ToolsActions::_init(
@@ -67,6 +69,25 @@ namespace djv
                     for (auto i : _actions)
                     {
                         i.second->setChecked(i.first == value);
+                    }
+                });
+
+            p.playlistObserver = ftk::Observer<int>::create(
+                app->getPlaylistModel()->observeRevision(),
+                [this, appWeak](int)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        const bool available =
+                            app->getPlaylistModel()->isAvailable();
+                        _actions["OTIO Playlist"]->setEnabled(available);
+                        if (!available &&
+                            app->getToolsModel()->getActiveTool() ==
+                                "OTIO Playlist")
+                        {
+                            app->getToolsModel()->setActiveTool(
+                                std::string());
+                        }
                     }
                 });
         }

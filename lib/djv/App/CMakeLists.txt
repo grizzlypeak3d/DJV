@@ -19,6 +19,7 @@ set(HEADERS
     FileMenu.h
     FileToolBar.h
     FilesTool.h
+    FolderScanService.h
     FrameActions.h
     FrameMenu.h
     HelpActions.h
@@ -32,6 +33,7 @@ set(HEADERS
     MessagesTool.h
     PlaybackActions.h
     PlaybackMenu.h
+    PlaylistTool.h
     SecondaryWindow.h
     SettingsTool.h
     StatusBar.h
@@ -74,6 +76,7 @@ set(SOURCE
     FileMenu.cpp
     FileToolBar.cpp
     FilesTool.cpp
+    FolderScanService.cpp
     FrameActions.cpp
     FrameMenu.cpp
     HelpActions.cpp
@@ -87,6 +90,7 @@ set(SOURCE
     MessagesTool.cpp
     PlaybackActions.cpp
     PlaybackMenu.cpp
+    PlaylistTool.cpp
     SecondaryWindow.cpp
     SettingsTool.cpp
     StatusBar.cpp

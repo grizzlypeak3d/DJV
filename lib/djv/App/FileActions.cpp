@@ -42,6 +42,28 @@ namespace djv
                 });
 
             _addCommand(
+                "NewPlaylist",
+                "Create an editable OTIO playlist from a media file.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->openMediaAsPlaylistDialog();
+                    }
+                });
+
+            _addCommand(
+                "NewPlaylistFolder",
+                "Create an editable OTIO playlist from matching media in a folder.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->openPlaylistFolderDialog(true);
+                    }
+                });
+
+            _addCommand(
                 "OpenAudio",
                 "Open a file with a separate audio file.",
                 [appWeak](const nlohmann::json&)
@@ -174,6 +196,14 @@ namespace djv
                 "Open",
                 "FileOpen",
                 _command("Open"));
+            _actions["NewPlaylist"] = ftk::Action::create(
+                "New OTIO Playlist",
+                "FileOpen",
+                _command("NewPlaylist"));
+            _actions["NewPlaylistFolder"] = ftk::Action::create(
+                "New OTIO Playlist from Folder",
+                "Files",
+                _command("NewPlaylistFolder"));
             _actions["OpenAudio"] = ftk::Action::create(
                 "Open With Audio",
                 "FileOpenAudio",
