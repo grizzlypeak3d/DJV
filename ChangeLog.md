@@ -5,6 +5,7 @@ Changes:
 * Add support for OTIO spatial coordinates.
 * Add support for partial image sequences.
 * Add audio export.
+* Remove "A" compare mode and make the other compare modes toggles.
 * Add a waveform height option.
 * Add an image negative option.
 * Add custom aspect ratios.

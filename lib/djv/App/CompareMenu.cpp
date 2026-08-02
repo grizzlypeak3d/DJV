@@ -37,9 +37,7 @@ namespace djv
             addAction(actions["Next"]);
             addAction(actions["Prev"]);
             addDivider();
-            addAction(actions["A"]);
             addAction(actions["B"]);
-            addAction(actions["ABToggle"]);
             addAction(actions["Wipe"]);
             addAction(actions["Overlay"]);
             addAction(actions["Difference"]);

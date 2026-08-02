@@ -79,7 +79,7 @@ namespace djv
             //! What is being compared, and how many images arrived for it: a
             //! comparison with no B file draws black, which four different
             //! things all look like.
-            tl::Compare compare = tl::Compare::A;
+            tl::Compare compare = tl::Compare::None;
             std::shared_ptr<models::FilesModelItem> a;
             std::vector<std::shared_ptr<models::FilesModelItem> > b;
             std::shared_ptr<ftk::Label> compareLabel;
@@ -764,7 +764,7 @@ namespace djv
             // frame, an unreadable file and a comparison out of sync all look
             // like as well.
             std::string s;
-            if (p.compare != tl::Compare::A)
+            if (p.compare != tl::Compare::None)
             {
                 if (p.videoFramesSize < 2)
                 {

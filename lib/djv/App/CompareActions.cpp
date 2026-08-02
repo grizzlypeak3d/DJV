@@ -49,124 +49,149 @@ namespace djv
                     }
                 });
 
-            _addCommand(
-                "A",
-                "Show the A file.",
-                [appWeak](const nlohmann::json&)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::Compare::A;
-                        app->getFilesModel()->setCompareOptions(options);
-                    }
-                });
-
-            _addCommand(
+            _addCheckCommand(
                 "B",
                 "Show the B file.",
-                [appWeak](const nlohmann::json&)
+                [appWeak](const nlohmann::json& args)
                 {
+                    // Absent when the command is run by name rather than by
+                    // the menu -- the command line, the screenshots -- where
+                    // asking for a comparison means turning it on.
+                    const bool value = args.contains("value") ?
+                        args.at("value").get<bool>() :
+                        true;
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::Compare::B;
+                        options.compare = value ?
+                            tl::Compare::B :
+                            tl::Compare::None;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
 
-            _addCommand(
+            _addCheckCommand(
                 "Wipe",
                 "Wipe between the A and B files.",
-                [appWeak](const nlohmann::json&)
+                [appWeak](const nlohmann::json& args)
                 {
+                    // Absent when the command is run by name rather than by
+                    // the menu -- the command line, the screenshots -- where
+                    // asking for a comparison means turning it on.
+                    const bool value = args.contains("value") ?
+                        args.at("value").get<bool>() :
+                        true;
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::Compare::Wipe;
+                        options.compare = value ?
+                            tl::Compare::Wipe :
+                            tl::Compare::None;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
 
-            _addCommand(
+            _addCheckCommand(
                 "Overlay",
                 "Overlay the A and B files.",
-                [appWeak](const nlohmann::json&)
+                [appWeak](const nlohmann::json& args)
                 {
+                    // Absent when the command is run by name rather than by
+                    // the menu -- the command line, the screenshots -- where
+                    // asking for a comparison means turning it on.
+                    const bool value = args.contains("value") ?
+                        args.at("value").get<bool>() :
+                        true;
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::Compare::Overlay;
+                        options.compare = value ?
+                            tl::Compare::Overlay :
+                            tl::Compare::None;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
 
-            _addCommand(
+            _addCheckCommand(
                 "Difference",
                 "Show the difference between the A and B files.",
-                [appWeak](const nlohmann::json&)
+                [appWeak](const nlohmann::json& args)
                 {
+                    // Absent when the command is run by name rather than by
+                    // the menu -- the command line, the screenshots -- where
+                    // asking for a comparison means turning it on.
+                    const bool value = args.contains("value") ?
+                        args.at("value").get<bool>() :
+                        true;
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::Compare::Difference;
+                        options.compare = value ?
+                            tl::Compare::Difference :
+                            tl::Compare::None;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
 
-            _addCommand(
+            _addCheckCommand(
                 "Horizontal",
                 "Show the A and B files in a horizontal layout.",
-                [appWeak](const nlohmann::json&)
+                [appWeak](const nlohmann::json& args)
                 {
+                    // Absent when the command is run by name rather than by
+                    // the menu -- the command line, the screenshots -- where
+                    // asking for a comparison means turning it on.
+                    const bool value = args.contains("value") ?
+                        args.at("value").get<bool>() :
+                        true;
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::Compare::Horizontal;
+                        options.compare = value ?
+                            tl::Compare::Horizontal :
+                            tl::Compare::None;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
 
-            _addCommand(
+            _addCheckCommand(
                 "Vertical",
                 "Show the A and B files in a vertical layout.",
-                [appWeak](const nlohmann::json&)
+                [appWeak](const nlohmann::json& args)
                 {
+                    // Absent when the command is run by name rather than by
+                    // the menu -- the command line, the screenshots -- where
+                    // asking for a comparison means turning it on.
+                    const bool value = args.contains("value") ?
+                        args.at("value").get<bool>() :
+                        true;
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::Compare::Vertical;
+                        options.compare = value ?
+                            tl::Compare::Vertical :
+                            tl::Compare::None;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
 
-            _addCommand(
+            _addCheckCommand(
                 "Tile",
                 "Show the A and B files in a tiled layout.",
-                [appWeak](const nlohmann::json&)
+                [appWeak](const nlohmann::json& args)
                 {
+                    // Absent when the command is run by name rather than by
+                    // the menu -- the command line, the screenshots -- where
+                    // asking for a comparison means turning it on.
+                    const bool value = args.contains("value") ?
+                        args.at("value").get<bool>() :
+                        true;
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.compare = tl::Compare::Tile;
-                        app->getFilesModel()->setCompareOptions(options);
-                    }
-                });
-
-            _addCommand(
-                "ABToggle",
-                "Toggle between the A and B files.",
-                [appWeak](const nlohmann::json&)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        auto options = app->getFilesModel()->getCompareOptions();
-                        switch (options.compare)
-                        {
-                        case tl::Compare::A: options.compare = tl::Compare::B; break;
-                        case tl::Compare::B:
-                        default: options.compare = tl::Compare::A; break;
-                        }
+                        options.compare = value ?
+                            tl::Compare::Tile :
+                            tl::Compare::None;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -202,41 +227,34 @@ namespace djv
                 "Previous",
                 "Prev",
                 _command("Prev"));
-            _actions["A"] = ftk::Action::create(
-                "A",
-                "CompareA",
-                _command("A"));
             _actions["B"] = ftk::Action::create(
                 "B",
                 "CompareB",
-                _command("B"));
+                _checkCommand("B"));
             _actions["Wipe"] = ftk::Action::create(
                 "Wipe",
                 "CompareWipe",
-                _command("Wipe"));
+                _checkCommand("Wipe"));
             _actions["Overlay"] = ftk::Action::create(
                 "Overlay",
                 "CompareOverlay",
-                _command("Overlay"));
+                _checkCommand("Overlay"));
             _actions["Difference"] = ftk::Action::create(
                 "Difference",
                 "CompareDifference",
-                _command("Difference"));
+                _checkCommand("Difference"));
             _actions["Horizontal"] = ftk::Action::create(
                 "Horizontal",
                 "CompareHorizontal",
-                _command("Horizontal"));
+                _checkCommand("Horizontal"));
             _actions["Vertical"] = ftk::Action::create(
                 "Vertical",
                 "CompareVertical",
-                _command("Vertical"));
+                _checkCommand("Vertical"));
             _actions["Tile"] = ftk::Action::create(
                 "Tile",
                 "CompareTile",
-                _command("Tile"));
-            _actions["ABToggle"] = ftk::Action::create(
-                "A/B Toggle",
-                _command("ABToggle"));
+                _checkCommand("Tile"));
             // The keys and the commands keep the enumeration's names, which
             // are what the shortcuts are stored under; only what is shown
             // changes.
@@ -251,9 +269,7 @@ namespace djv
             // Register the shortcuts.
             _addShortcut("Next", "Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Shift)));
             _addShortcut("Prev", "Previous", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("A", "A", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("B", "B", ftk::KeyShortcut(ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("ABToggle", "A/B Toggle", ftk::KeyShortcut(ftk::Key::A, static_cast<int>(ftk::KeyModifier::Alt)));
             _addShortcut("Wipe", "Wipe", ftk::KeyShortcut(ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("Overlay", "Overlay");
             _addShortcut("Difference", "Difference");
@@ -274,7 +290,6 @@ namespace djv
                     FTK_P();
                     _actions["Next"]->setEnabled(value.size() > 1);
                     _actions["Prev"]->setEnabled(value.size() > 1);
-                    _actions["A"]->setEnabled(!value.empty());
                     _actions["B"]->setEnabled(!value.empty());
                     _actions["Wipe"]->setEnabled(!value.empty());
                     _actions["Overlay"]->setEnabled(!value.empty());
@@ -282,7 +297,6 @@ namespace djv
                     _actions["Horizontal"]->setEnabled(!value.empty());
                     _actions["Vertical"]->setEnabled(!value.empty());
                     _actions["Tile"]->setEnabled(!value.empty());
-                    _actions["ABToggle"]->setEnabled(!value.empty());
                 });
 
             p.optionsObserver = ftk::Observer<tl::CompareOptions>::create(
@@ -294,6 +308,10 @@ namespace djv
                     const auto labels = tl::getCompareLabels();
                     for (size_t i = 0; i < enums.size(); ++i)
                     {
+                        // Not comparing is the state with none of them on, so
+                        // it is not one of them and has no action to tick.
+                        if (tl::Compare::None == enums[i])
+                            continue;
                         _actions[labels[i]]->setChecked(enums[i] == value.compare);
                     }
                 });

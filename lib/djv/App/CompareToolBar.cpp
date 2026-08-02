@@ -22,9 +22,15 @@ namespace djv
             setMarginRole(ftk::SizeRole::MarginInside);
 
             auto tmp = actions;
+            const auto enums = tl::getCompareEnums();
             const auto labels = tl::getCompareLabels();
             for (size_t i = 0; i < labels.size(); ++i)
             {
+                // Not comparing is the state with none of the buttons on, so
+                // it has no button. Asking the map for one would put an empty
+                // button here instead.
+                if (tl::Compare::None == enums[i])
+                    continue;
                 addAction(tmp[labels[i]]);
             }
         }

@@ -521,9 +521,25 @@ namespace djv
                 // Set the A/B comparison mode by its label, e.g. "Tile",
                 // "Wipe", "Overlay", "Difference". The B files themselves are
                 // set with the "b" verb.
-                const std::string name = step.at("compare").get<std::string>();
+                // Either { "compare": "Wipe" } to turn a comparison on, or
+                // { "compare": { "mode": "Wipe", "value": false } } to turn
+                // one off again: the comparisons are toggles, and not
+                // comparing is the state with none of them on.
+                const auto& v = step.at("compare");
+                std::string name;
+                nlohmann::json args;
+                if (v.is_object())
+                {
+                    name = v.at("mode").get<std::string>();
+                    if (v.contains("value"))
+                        args["value"] = v.at("value").get<bool>();
+                }
+                else
+                {
+                    name = v.get<std::string>();
+                }
                 if (!app->getCommandsModel()->exec(
-                    ftk::Format("Compare/{0}").arg(name)))
+                    ftk::Format("Compare/{0}").arg(name), args))
                 {
                     note(p.shotId, "unknown compare mode '" + name + "'");
                 }

@@ -198,7 +198,7 @@ namespace djv
                 if (files.size() <= 1)
                 {
                     auto compareOptions = p.compareOptions->get();
-                    compareOptions.compare = tl::Compare::A;
+                    compareOptions.compare = tl::Compare::None;
                     p.compareOptions->setIfChanged(compareOptions);
                 }
             }
@@ -247,7 +247,7 @@ namespace djv
                     b.push_back(p.files->getItem(index));
                     switch (p.compareOptions->get().compare)
                     {
-                    case tl::Compare::A:
+                    case tl::Compare::None:
                     case tl::Compare::B:
                     case tl::Compare::Wipe:
                     case tl::Compare::Overlay:
@@ -570,7 +570,7 @@ namespace djv
                 auto b = p.b->get();
                 switch (value.compare)
                 {
-                case tl::Compare::A:
+                case tl::Compare::None:
                 case tl::Compare::B:
                 case tl::Compare::Wipe:
                 case tl::Compare::Overlay:
@@ -667,7 +667,7 @@ namespace djv
             }
             switch (p.compareOptions->get().compare)
             {
-            case tl::Compare::A:
+            case tl::Compare::None:
                 if (!p.b->isEmpty())
                 {
                     out.push_back(p.b->getItem(0));
