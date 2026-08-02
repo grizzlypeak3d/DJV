@@ -47,7 +47,7 @@ namespace djv
             addAction(actions["Vertical"]);
             addAction(actions["Tile"]);
             addDivider();
-            p.menus["Time"] = addSubMenu("Time");
+            p.menus["Time"] = addSubMenu("Sync by");
             const auto timeLabels = tl::getCompareTimeLabels();
             for (const auto& label : timeLabels)
             {

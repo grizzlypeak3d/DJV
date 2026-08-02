@@ -202,5 +202,12 @@ namespace djv
 
             FTK_PRIVATE();
         };
+
+        //! Labels for the comparison time, as shown to the user. The
+        //! enumeration's own labels name the setting where it is stored and in
+        //! the keyboard shortcuts, so they say what the values are rather than
+        //! what they do, and are not these.
+        std::vector<std::string> getCompareTimeLabels();
+
     }
 }

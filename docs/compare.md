@@ -41,12 +41,17 @@ Drag with **Alt** + left mouse button to move the wipe between **A** and **B**.
 
 Use <kbd>Alt+A</kbd> to toggle between the **A** and **B** modes.
 
-## Compare time
+## Sync by
 
-Files can be compared in either *relative* or *absolute* time:
+Which frame of each file is shown together:
 
-- **Relative** — The **B** file is offset so its start aligns with the start of **A**.
-- **Absolute** — **A** and **B** play at the same timeline time.
+- **Start of file** — The **B** file is offset so its start aligns with the start of **A**.
+- **Timecode** — **A** and **B** play at the same timeline time.
+
+Files that start at different timecodes show black in **B** until this is set to
+**Start of file**.
+
+Locations: **Compare** menu, **Files** tool
 
 ## Comparing multiple layers
 

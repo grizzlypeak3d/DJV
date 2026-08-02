@@ -237,11 +237,15 @@ namespace djv
             _actions["ABToggle"] = ftk::Action::create(
                 "A/B Toggle",
                 _command("ABToggle"));
+            // The keys and the commands keep the enumeration's names, which
+            // are what the shortcuts are stored under; only what is shown
+            // changes.
+            const auto compareTimeLabels = models::getCompareTimeLabels();
             _actions["Relative"] = ftk::Action::create(
-                "Relative",
+                compareTimeLabels[0],
                 _command("Relative"));
             _actions["Absolute"] = ftk::Action::create(
-                "Absolute",
+                compareTimeLabels[1],
                 _command("Absolute"));
 
             // Register the shortcuts.
@@ -256,8 +260,10 @@ namespace djv
             _addShortcut("Horizontal", "Horizontal");
             _addShortcut("Vertical", "Vertical");
             _addShortcut("Tile", "Tile", ftk::KeyShortcut(ftk::Key::T, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("Relative", "Relative");
-            _addShortcut("Absolute", "Absolute");
+            // The first argument names the shortcut where it is stored; the
+            // second is what the shortcuts editor shows.
+            _addShortcut("Relative", compareTimeLabels[0]);
+            _addShortcut("Absolute", compareTimeLabels[1]);
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
