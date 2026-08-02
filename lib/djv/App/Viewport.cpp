@@ -76,6 +76,14 @@ namespace djv
             std::shared_ptr<ftk::Label> infoLabel;
             std::shared_ptr<ftk::Label> renderLabel;
             std::map<models::HUDItem, std::shared_ptr<ftk::IWidget> > hudWidgets;
+            //! What is being compared, and how many images arrived for it: a
+            //! comparison with no B file draws black, which four different
+            //! things all look like.
+            tl::Compare compare = tl::Compare::A;
+            std::shared_ptr<models::FilesModelItem> a;
+            std::vector<std::shared_ptr<models::FilesModelItem> > b;
+            std::shared_ptr<ftk::Label> compareLabel;
+
             bool toastActive = false;
             std::shared_ptr<ftk::Label> toastLabel;
             std::shared_ptr<ftk::Timer> toastTimer;
@@ -88,6 +96,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::PlayerCacheInfo> > cacheObserver;
             std::shared_ptr<ftk::Observer<double> > fpsObserver;
             std::shared_ptr<ftk::Observer<size_t> > droppedFramesObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
+            std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
@@ -192,6 +202,11 @@ namespace djv
             p.hudLayouts[models::HUDPos::BottomLeft]->setVAlign(ftk::VAlign::Bottom);
             p.hudLayouts[models::HUDPos::BottomRight]->setVAlign(ftk::VAlign::Bottom);
 
+            p.compareLabel = ftk::Label::create(context);
+            p.compareLabel->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.compareLabel->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.compareLabel->setVisible(false);
+
             p.toastLabel = ftk::Label::create(context);
             p.toastLabel->setMarginRole(ftk::SizeRole::MarginSmall);
             p.toastLabel->setBackgroundRole(ftk::ColorRole::Overlay);
@@ -207,6 +222,19 @@ namespace djv
             spacer->setStretch(ftk::Stretch::Expanding);
             p.hudLayouts[models::HUDPos::TopRight]->setParent(topLayout);
 
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Vertical, p.hudLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
+
+            auto noBLayout = ftk::HorizontalLayout::create(context, p.hudLayout);
+            noBLayout->setVAlign(ftk::VAlign::Center);
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Horizontal, noBLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
+            p.compareLabel->setParent(noBLayout);
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Horizontal, noBLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
             spacer = ftk::Spacer::create(
                 context, ftk::Orientation::Vertical, p.hudLayout);
             spacer->setStretch(ftk::Stretch::Expanding);
@@ -248,11 +276,29 @@ namespace djv
                     _hudUpdate();
                 });
 
+            p.aObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                app->getFilesModel()->observeA(),
+                [this](const std::shared_ptr<models::FilesModelItem>& value)
+                {
+                    _p->a = value;
+                    _compareUpdate();
+                });
+
+            p.bObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
+                app->getFilesModel()->observeB(),
+                [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
+                {
+                    _p->b = value;
+                    _compareUpdate();
+                });
+
             p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 app->getFilesModel()->observeCompareOptions(),
                 [this](const tl::CompareOptions& value)
                 {
+                    _p->compare = value.compare;
                     setCompareOptions(value);
+                    _compareUpdate();
                 });
 
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
@@ -539,6 +585,7 @@ namespace djv
                     {
                         FTK_P();
                         p.videoFramesSize = value.size();
+                        _compareUpdate();
                         p.missing = false;
                         p.heldFrom.reset();
                         // The first source, which is the one the time in the
@@ -707,6 +754,43 @@ namespace djv
             }
             setImageOptions(imageOptionsList);
             setDisplayOptions(displayOptionsList);
+        }
+
+        void Viewport::_compareUpdate()
+        {
+            FTK_P();
+            // Everything but A needs a B file that is not the A file. Neither
+            // draws anything, and an empty picture is the one thing a black
+            // frame, an unreadable file and a comparison out of sync all look
+            // like as well.
+            std::string s;
+            if (p.compare != tl::Compare::A)
+            {
+                if (p.videoFramesSize < 2)
+                {
+                    s = "No B file selected";
+                }
+                else if (p.a && !p.b.empty())
+                {
+                    // Only when there is nothing else in B: a file compared
+                    // with itself alongside others still has something to
+                    // show.
+                    const bool allA = std::all_of(
+                        p.b.begin(),
+                        p.b.end(),
+                        [this](const std::shared_ptr<models::FilesModelItem>& i)
+                        {
+                            return i == _p->a;
+                        });
+                    if (allA)
+                    {
+                        s = "A and B are the same file";
+                    }
+                }
+            }
+            p.compareLabel->setText(s);
+            p.compareLabel->setVisible(!s.empty());
+            ftk::setScreenshotTag(p.compareLabel, !s.empty() ? "View.Compare" : "");
         }
 
         void Viewport::_hudUpdate()

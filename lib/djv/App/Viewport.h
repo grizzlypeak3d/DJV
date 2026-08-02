@@ -62,6 +62,7 @@ namespace djv
             ftk::V2I _fromSourcePixel(const ftk::V2I&) const;
             void _videoUpdate();
             void _toastUpdate();
+            void _compareUpdate();
             void _hudUpdate();
             void _hudLayout();
 
