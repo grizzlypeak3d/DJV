@@ -6,8 +6,8 @@
 #pragma once
 
 //! The date of the commit the build was made from.
-#define DJV_COMMIT_DATE "@DJV_COMMIT_DATE@"
+#define DJV_COMMIT_DATE "@BUILD_INFO_DATE@"
 
 //! The commit the build was made from, with "-dirty" when anything was
 //! uncommitted, including the contents of a submodule.
-#define DJV_GIT_COMMIT "@DJV_GIT_COMMIT@"
+#define DJV_GIT_COMMIT "@BUILD_INFO_COMMIT@"

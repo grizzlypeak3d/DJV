@@ -10,10 +10,12 @@
 # builds of the same source would relink everything once a day and would make
 # builds unreproducible, for a value that says no more than the commit does.
 #
-# Expects SRC_DIR, IN_FILE and OUT_FILE.
+# Expects SRC_DIR, IN_FILE and OUT_FILE. Sets BUILD_INFO_COMMIT and
+# BUILD_INFO_DATE for the template, which decides what to call the macros: the
+# script is shared with the repositories that build on top of this one.
 
-set(DJV_GIT_COMMIT "unknown")
-set(DJV_COMMIT_DATE "unknown")
+set(BUILD_INFO_COMMIT "unknown")
+set(BUILD_INFO_DATE "unknown")
 find_package(Git QUIET)
 if(Git_FOUND)
     execute_process(
@@ -24,7 +26,7 @@ if(Git_FOUND)
         ERROR_QUIET
         RESULT_VARIABLE _result)
     if(_result EQUAL 0)
-        set(DJV_GIT_COMMIT "${_hash}")
+        set(BUILD_INFO_COMMIT "${_hash}")
 
         execute_process(
             COMMAND ${GIT_EXECUTABLE} log -1 --format=%cd --date=short
@@ -33,7 +35,7 @@ if(Git_FOUND)
             OUTPUT_STRIP_TRAILING_WHITESPACE
             ERROR_QUIET)
         if(_date)
-            set(DJV_COMMIT_DATE "${_date}")
+            set(BUILD_INFO_DATE "${_date}")
         endif()
 
         # Marked when anything is uncommitted, which includes a submodule whose
@@ -45,7 +47,7 @@ if(Git_FOUND)
             RESULT_VARIABLE _dirty
             ERROR_QUIET)
         if(NOT _dirty EQUAL 0)
-            set(DJV_GIT_COMMIT "${DJV_GIT_COMMIT}-dirty")
+            set(BUILD_INFO_COMMIT "${BUILD_INFO_COMMIT}-dirty")
         endif()
     endif()
 endif()
