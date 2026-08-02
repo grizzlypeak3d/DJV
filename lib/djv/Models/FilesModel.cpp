@@ -44,7 +44,7 @@ namespace djv
             p.settings->getT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
             p.settings->getT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
             p.settings->getT("/Files/Compare/Overlay", compareOptions.overlay);
-            p.settings->getT("/Files/Compare/FitToA", compareOptions.fitToA);
+            p.settings->getT("/Files/Compare/SameSize", compareOptions.sameSize);
             p.compareOptions = ftk::Observable<tl::CompareOptions>::create(compareOptions);
             std::string s;
             p.settings->get("/Files/Compare/Time", s);
@@ -64,7 +64,7 @@ namespace djv
             p.settings->setT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
             p.settings->setT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
             p.settings->setT("/Files/Compare/Overlay", compareOptions.overlay);
-            p.settings->setT("/Files/Compare/FitToA", compareOptions.fitToA);
+            p.settings->setT("/Files/Compare/SameSize", compareOptions.sameSize);
             p.settings->set("/Files/Compare/Time", to_string(p.compareTime->get()));
         }
 

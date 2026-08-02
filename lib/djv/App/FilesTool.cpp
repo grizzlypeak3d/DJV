@@ -66,7 +66,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> wipeYSlider;
             std::shared_ptr<ftk::FloatEditSlider> wipeRotationSlider;
             std::shared_ptr<ftk::FloatEditSlider> overlaySlider;
-            std::shared_ptr<ftk::CheckBox> fitToACheckBox;
+            std::shared_ptr<ftk::CheckBox> sameSizeCheckBox;
             std::shared_ptr<ftk::FormLayout> compareLayout;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::GridLayout> widgetLayout;
@@ -138,8 +138,11 @@ namespace djv
             p.overlaySlider = ftk::FloatEditSlider::create(context);
             p.overlaySlider->setDefault(.5F);
 
-            p.fitToACheckBox = ftk::CheckBox::create(context);
-            p.fitToACheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.sameSizeCheckBox = ftk::CheckBox::create(context);
+            p.sameSizeCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.sameSizeCheckBox->setTooltip(
+                "Draw the compared files at the size of the current file,\n"
+                "so a smaller one is not shown tiny beside it.");
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
@@ -162,7 +165,7 @@ namespace djv
             p.compareLayout->addRow("Y:", p.wipeYSlider);
             p.compareLayout->addRow("Rotation:", p.wipeRotationSlider);
             p.compareLayout->addRow("Amount:", p.overlaySlider);
-            p.compareLayout->addRow("Fit to A:", p.fitToACheckBox);
+            p.compareLayout->addRow("Same size:", p.sameSizeCheckBox);
             p.bellows["Compare"] = ftk::Bellows::create(context, "Compare", layout);
             p.bellows["Compare"]->setWidget(vLayout);
 
@@ -257,13 +260,13 @@ namespace djv
                     }
                 });
 
-            p.fitToACheckBox->setCheckedCallback(
+            p.sameSizeCheckBox->setCheckedCallback(
                 [appWeak](bool value)
                 {
                     if (auto app = appWeak.lock())
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
-                        options.fitToA = value;
+                        options.sameSize = value;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -569,7 +572,7 @@ namespace djv
             p.wipeYSlider->setValue(value.wipeCenter.y);
             p.wipeRotationSlider->setValue(value.wipeRotation);
             p.overlaySlider->setValue(value.overlay);
-            p.fitToACheckBox->setChecked(value.fitToA);
+            p.sameSizeCheckBox->setChecked(value.sameSize);
 
             p.compareLayout->setRowVisible(p.wipeXSlider, value.compare == tl::Compare::Wipe);
             p.compareLayout->setRowVisible(p.wipeYSlider, value.compare == tl::Compare::Wipe);
