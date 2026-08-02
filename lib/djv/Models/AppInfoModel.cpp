@@ -3,6 +3,8 @@
 
 #include <djv/Models/AppInfoModel.h>
 
+#include <BuildInfo.h>
+
 #include <djv/Models/Version.h>
 
 #include <ftk/Core/Format.h>
@@ -50,6 +52,16 @@ namespace djv
         std::string AppInfoModel::getVersion() const
         {
             return DJV_VERSION_FULL;
+        }
+
+        std::string AppInfoModel::getCommitDate() const
+        {
+            return DJV_COMMIT_DATE;
+        }
+
+        std::string AppInfoModel::getGitCommit() const
+        {
+            return DJV_GIT_COMMIT;
         }
 
         std::string AppInfoModel::getLicense() const

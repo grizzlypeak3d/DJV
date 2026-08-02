@@ -28,12 +28,31 @@ set(SOURCE
     ToolsModel.cpp
     ViewportModel.cpp)
 
+# The commit and build date, refreshed on every build rather than only when
+# the project is configured: a hash that is one commit stale is worse than
+# none, since the point of it is telling two builds apart.
+set(BUILD_INFO_H ${CMAKE_CURRENT_BINARY_DIR}/BuildInfo.h)
+set(BUILD_INFO_ARGS
+    -DSRC_DIR=${PROJECT_SOURCE_DIR}
+    -DIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/BuildInfo.h.in
+    -DOUT_FILE=${BUILD_INFO_H}
+    -P ${PROJECT_SOURCE_DIR}/cmake/Modules/BuildInfo.cmake)
+execute_process(COMMAND ${CMAKE_COMMAND} ${BUILD_INFO_ARGS})
+add_custom_target(djvBuildInfo
+    COMMAND ${CMAKE_COMMAND} ${BUILD_INFO_ARGS}
+    BYPRODUCTS ${BUILD_INFO_H}
+    COMMENT "Build information")
+set_target_properties(djvBuildInfo PROPERTIES FOLDER lib)
+
 add_library(djvModels ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+add_dependencies(djvModels djvBuildInfo)
 
 target_include_directories(djvModels
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib>
-        $<INSTALL_INTERFACE:include>)
+        $<INSTALL_INTERFACE:include>
+    PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(djvModels djvResource tlRender::tlTimeline)
 

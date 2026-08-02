@@ -43,6 +43,13 @@ namespace djv
             virtual std::string getVersionDev() const;
             virtual std::string getVersion() const;
 
+            //! Get the date of the commit the build was made from.
+            virtual std::string getCommitDate() const;
+
+            //! Get the commit the build was made from, marked "-dirty" when
+            //! anything was uncommitted.
+            virtual std::string getGitCommit() const;
+
             ///@}
 
             //! \name License

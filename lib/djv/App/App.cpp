@@ -45,6 +45,7 @@
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
+#include <ftk/GL/Window.h>
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/SysLogModel.h>
@@ -771,6 +772,12 @@ namespace djv
             labels.push_back(std::make_pair(
                 p.appInfoModel->getFullName() + " version: ",
                 p.appInfoModel->getVersion()));
+            labels.push_back(std::make_pair(
+                "Commit date: ",
+                p.appInfoModel->getCommitDate()));
+            labels.push_back(std::make_pair(
+                "Commit: ",
+                p.appInfoModel->getGitCommit()));
 
             labels.push_back(std::make_pair("", ""));
             const auto sysInfo = ftk::getSysInfo();
@@ -786,11 +793,35 @@ namespace djv
                 "Memory: ",
                 ftk::Format("{0}GB").arg(sysInfo.ramGB)));
 
+            // -sysInfo prints this and exits before the window is made. The
+            // OpenGL strings are the most useful part of the report, so ask a
+            // hidden one pixel window for them rather than leave them out.
             labels.push_back(std::make_pair("", ""));
-            const auto windowInfo = p.mainWindow->getWindowInfo();
-            for (const auto& i : windowInfo)
+            if (p.mainWindow)
             {
-                labels.push_back(std::make_pair(i.first + ": ", i.second));
+                for (const auto& i : p.mainWindow->getWindowInfo())
+                {
+                    labels.push_back(std::make_pair(i.first + ": ", i.second));
+                }
+            }
+            else
+            {
+                try
+                {
+                    auto glWindow = ftk::gl::Window::create(
+                        _context,
+                        "sysInfo",
+                        ftk::Size2I(1, 1),
+                        static_cast<int>(ftk::gl::WindowOptions::MakeCurrent));
+                    const auto& glInfo = glWindow->getGLInfo();
+                    labels.push_back(std::make_pair("GL vendor: ", glInfo.vendor));
+                    labels.push_back(std::make_pair("GL renderer: ", glInfo.renderer));
+                    labels.push_back(std::make_pair("GL version: ", glInfo.version));
+                }
+                catch (const std::exception& e)
+                {
+                    labels.push_back(std::make_pair("OpenGL: ", e.what()));
+                }
             }
 
             if (auto audioSystem = _context->getSystem<tl::AudioSystem>())

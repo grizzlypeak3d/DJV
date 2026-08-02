@@ -71,6 +71,25 @@ namespace djv
     {
         namespace
         {
+            //! A development build carries the date and the commit, so that two
+            //! of them can be told apart. A release is identified by its
+            //! version, and the rest would be noise.
+            std::string _title(
+                const std::shared_ptr<models::AppInfoModel>& appInfoModel)
+            {
+                std::string out = ftk::Format("{0} {1}").
+                    arg(appInfoModel->getFullName()).
+                    arg(appInfoModel->getVersion());
+                if (!appInfoModel->getVersionDev().empty())
+                {
+                    out = ftk::Format("{0} - {1} {2}").
+                        arg(out).
+                        arg(appInfoModel->getCommitDate()).
+                        arg(appInfoModel->getGitCommit());
+                }
+                return out;
+            }
+
             // A context menu of window chrome visibility toggles. The
             // actions are the Window menu's own, so the check marks stay in
             // sync and the toggles go through the same commands; the Window
@@ -172,9 +191,7 @@ namespace djv
             Window::_init(
                 context,
                 app,
-                ftk::Format("{0} {1}").
-                    arg(app->getAppInfoModel()->getFullName()).
-                    arg(app->getAppInfoModel()->getVersion()),
+                _title(app->getAppInfoModel()),
                 settings.size);
             FTK_P();
 
