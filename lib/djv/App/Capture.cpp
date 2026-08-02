@@ -103,7 +103,7 @@ namespace djv
             int settleTicksShot = settleTicks; // per-shot, from the "settle" field
             int reloadGrace = reloadGraceTicks;
             std::vector<nlohmann::json> lateSteps;  // applied after first settle
-            bool lateApplied = false;
+            size_t lateNext = 0;                   // next late step to apply
             bool done = false;
             bool success = false;
         };
@@ -306,13 +306,20 @@ namespace djv
             case Phase::Settle:
                 if (--p.settleLeft <= 0)
                 {
-                    if (!p.lateSteps.empty() && !p.lateApplied)
+                    if (p.lateNext < p.lateSteps.size())
                     {
-                        // Viewport is now sized and fit; apply deferred picks
-                        // and settle once more so the sample/HUD render.
-                        p.lateApplied = true;
-                        for (const auto& step : p.lateSteps)
-                            _applyStep(step);
+                        // Viewport is now sized and fit; apply the deferred
+                        // steps one per settle rather than in one go, so each
+                        // one is drawn before the next runs. A pick reads the
+                        // rendered image, so a comparison listed before it has
+                        // to have reached the screen first -- and a shot that
+                        // picks and then compares is testing what the sample
+                        // does when the image changes underneath it, which
+                        // cannot happen if both land in the same frame.
+                        //
+                        // Copied because applying a step can append another.
+                        const nlohmann::json step = p.lateSteps[p.lateNext++];
+                        _applyStep(step);
                         p.settleLeft = p.settleTicksShot;
                     }
                     else
@@ -374,25 +381,29 @@ namespace djv
         void Capture::_applyRest(const nlohmann::json& setup)
         {
             FTK_P();
+            // Everything after the first deferred step is deferred too. Only
+            // some steps have to wait, but applying the rest immediately would
+            // run them before the ones that waited, quietly turning a manifest
+            // that picks and then compares into one that compares and then
+            // picks -- which samples the settled result and can never catch a
+            // stale one.
+            bool late = false;
             for (const auto& step : setup)
             {
                 if (step.contains("open"))
                     continue;
-                if (step.contains("pick") || step.contains("zoom"))
+                // A pick samples the rendered image and a zoom needs the
+                // viewport's laid-out geometry, so both must wait until the
+                // viewport is sized and fit-zoomed. A tab selection searches
+                // the widget tree, so it must wait until the tool from a
+                // preceding step has been created and laid out.
+                late = late ||
+                    step.contains("click") ||
+                    step.contains("pick") ||
+                    step.contains("zoom") ||
+                    step.contains("tab");
+                if (late)
                 {
-                    // A pick samples the rendered image and a zoom needs the
-                    // viewport's laid-out geometry, so both must wait until the
-                    // viewport is sized and fit-zoomed. Defer to after the first
-                    // settle (see _onTick). Manifest order is preserved, so a
-                    // zoom listed before a pick is applied first.
-                    p.lateSteps.push_back(step);
-                    continue;
-                }
-                if (step.contains("tab"))
-                {
-                    // A tab selection searches the widget tree, so it must wait
-                    // until the tool from a preceding step has been created and
-                    // laid out. Defer to after the first settle (see _onTick).
                     p.lateSteps.push_back(step);
                     continue;
                 }
@@ -929,6 +940,31 @@ namespace djv
                         const ftk::V2I focus(g.w() / 2, g.h() / 2);
                         viewport->setZoom(value, focus);
                     }
+                }
+            }
+            else if (step.contains("click"))
+            {
+                // Click at a window position, e.g.
+                // { "click": [160, 90], "modifier": "Control" }. Unlike
+                // "pick", which calls the viewport directly, this goes through
+                // the window the way a real click does -- including the mouse
+                // bindings, so picking needs the modifier it is bound to.
+                // Deferred by _applyRest so the widget under it is laid out.
+                const auto& v = step.at("click");
+                if (v.is_array() && v.size() >= 2)
+                {
+                    int modifiers = 0;
+                    if (step.contains("modifier"))
+                    {
+                        ftk::KeyModifier modifier = ftk::KeyModifier::None;
+                        if (ftk::from_string(
+                            step.at("modifier").get<std::string>(), modifier))
+                        {
+                            modifiers = static_cast<int>(modifier);
+                        }
+                    }
+                    if (auto mw = app->getMainWindow())
+                        mw->click(ftk::V2I(v[0].get<int>(), v[1].get<int>()), modifiers);
                 }
             }
             else if (step.contains("pick"))

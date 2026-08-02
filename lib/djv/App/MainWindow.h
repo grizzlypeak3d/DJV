@@ -56,6 +56,12 @@ namespace djv
             //! Get the viewport.
             const std::shared_ptr<Viewport>& getViewport() const;
 
+            //! Send a mouse click at the given window position. For the
+            //! capture harness: a click routed the way a real one is, through
+            //! hit testing and the widget's own handlers, rather than by
+            //! calling the handler that is assumed to be the right one.
+            void click(const ftk::V2I&, int modifiers = 0);
+
             //! Get the timeline widget.
             const std::shared_ptr<tl::ui::TimelineWidget>& getTimelineWidget() const;
 

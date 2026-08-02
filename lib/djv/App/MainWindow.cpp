@@ -544,6 +544,14 @@ namespace djv
             return _p->menuBar;
         }
 
+        void MainWindow::click(const ftk::V2I& pos, int modifiers)
+        {
+            _cursorEnter(true);
+            _cursorPos(pos);
+            _mouseButton(ftk::MouseButton::Left, true, modifiers);
+            _mouseButton(ftk::MouseButton::Left, false, modifiers);
+        }
+
         const std::shared_ptr<Viewport>& MainWindow::getViewport() const
         {
             return _p->viewport;
