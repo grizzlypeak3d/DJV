@@ -14,8 +14,8 @@
 <path d="M 556.0 94.0 L 556.0 132.0" stroke-width="3.2"/>
 <rect x="584" y="132" width="202" height="56" rx="2" stroke-opacity="0.45" stroke-width="2.5"/>
 <path d="M 685.0 226.0 L 685.0 188.0" stroke-width="3.2"/>
-<rect x="790" y="132" width="162" height="56" rx="2" stroke-opacity="0.45" stroke-width="2.5"/>
-<path d="M 871.0 94.0 L 871.0 132.0" stroke-width="3.2"/>
+<rect x="790" y="142" width="162" height="36" rx="2" stroke-opacity="0.45" stroke-width="2.5"/>
+<path d="M 871.0 94.0 L 871.0 142.0" stroke-width="3.2"/>
 <rect x="956" y="132" width="88" height="56" rx="2" stroke-opacity="0.45" stroke-width="2.5"/>
 <path d="M 1000.0 226.0 L 1000.0 188.0" stroke-width="3.2"/>
 <rect x="1048" y="132" width="127" height="56" rx="2" stroke-opacity="0.45" stroke-width="2.5"/>
@@ -28,7 +28,7 @@
 <circle cx="444.0" cy="188.0" r="7.0"/>
 <circle cx="556.0" cy="132.0" r="7.0"/>
 <circle cx="685.0" cy="188.0" r="7.0"/>
-<circle cx="871.0" cy="132.0" r="7.0"/>
+<circle cx="871.0" cy="142.0" r="7.0"/>
 <circle cx="1000.0" cy="188.0" r="7.0"/>
 <circle cx="1111.5" cy="132.0" r="7.0"/>
 </g>
