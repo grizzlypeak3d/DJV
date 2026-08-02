@@ -3,6 +3,7 @@ set(HEADERS
     AudioPopup.h
     ColorWidgets.h
     FileThumbnail.h
+    FrameRangePopup.h
     SeparateAudioDialog.h
     SettingsWidgets.h
     SetupDialog.h
@@ -17,6 +18,7 @@ set(SOURCE
     AudioPopup.cpp
     ColorWidgets.cpp
     FileThumbnail.cpp
+    FrameRangePopup.cpp
     SeparateAudioDialog.cpp
     SettingsWidgets.cpp
     SetupDialog.cpp

@@ -31,7 +31,7 @@
     },
     {
       "id": "files-tool",
-      "window": { "w": 900, "h": 600, "splitter2": 0.5 },
+      "window": { "w": 900, "h": 600, "splitter2": 0.45 },
       "crop": "MainWindow.Tools",
       "setup": [
         { "open": "etc/SampleData/Cubes.0001.exr" },
@@ -45,6 +45,7 @@
       "annotate": [
         { "id": "Files.CurrentFile",    "caption": "Current file" },
         { "id": "Files.BFile",          "caption": "B file" },
+        { "id": "Files.FrameRange",     "caption": "Frame range" },
         { "id": "Files.CurrentLayer",   "caption": "Current layer" },
         { "id": "Files.CompareMode",    "caption": "Compare mode" },
         { "id": "Files.CompareTime",    "caption": "Compare time" },

@@ -39,6 +39,10 @@ namespace djv
                 const std::shared_ptr<models::FilesModelItem>&,
                 const ftk::RangeI64&);
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
+            void _showRangePopup(
+                const std::shared_ptr<models::FilesModelItem>&,
+                const ftk::RangeI64&,
+                const std::shared_ptr<ftk::IWidget>&);
             void _aUpdate(const std::shared_ptr<models::FilesModelItem>&);
             void _bUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _layersUpdate(const std::vector<int>&);

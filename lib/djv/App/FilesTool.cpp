@@ -3,6 +3,10 @@
 
 #include <djv/App/FilesTool.h>
 
+#include <djv/UI/FrameRangePopup.h>
+
+#include <djv/Models/FilesModel.h>
+
 #include <djv/App/App.h>
 #include <djv/UI/FileThumbnail.h>
 #include <djv/Models/SettingsModel.h>
@@ -18,6 +22,7 @@
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/GridLayout.h>
 #include <ftk/UI/IntEdit.h>
+#include <ftk/Core/Format.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
@@ -38,12 +43,12 @@ namespace djv
             {
                 std::shared_ptr<models::FilesModelItem> item;
                 std::shared_ptr<ui::FileThumbnail> thumbnail;
-                std::shared_ptr<ftk::Label> label;
-                std::shared_ptr<ftk::ToolButton> aButton;
+                //! The name is the A button: clicking a file makes it the
+                //! current one, which is what a list of files is for.
+                std::shared_ptr<ftk::ToolButton> nameButton;
                 std::shared_ptr<ftk::ToolButton> bButton;
                 std::shared_ptr<ftk::ComboBox> layerComboBox;
-                std::shared_ptr<ftk::IntEdit> frameStartEdit;
-                std::shared_ptr<ftk::IntEdit> frameEndEdit;
+                std::shared_ptr<ftk::ToolButton> rangeButton;
             };
         }
 
@@ -51,6 +56,7 @@ namespace djv
         {
             std::shared_ptr<ftk::Settings> settings;
 
+            std::shared_ptr<ui::FrameRangePopup> rangePopup;
             std::shared_ptr<ftk::ButtonGroup> aButtonGroup;
             std::shared_ptr<ftk::ButtonGroup> bButtonGroup;
             std::vector<FileWidget> widgets;
@@ -111,7 +117,10 @@ namespace djv
 
             p.compareTimeComboBox = ftk::ComboBox::create(
                 context,
-                tl::getCompareTimeLabels());
+                models::getCompareTimeLabels());
+            p.compareTimeComboBox->setTooltip(
+                "Which frame of each file is shown together: the same frame\n"
+                "counted from the start of each, or the same timecode.");
             p.compareTimeComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.compareTimeComboBox, "Files.CompareTime");
 
@@ -148,7 +157,7 @@ namespace djv
             p.compareLayout = ftk::FormLayout::create(context, vLayout);
             p.compareLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.compareLayout->addRow("Mode:", p.compareComboBox);
-            p.compareLayout->addRow("Time:", p.compareTimeComboBox);
+            p.compareLayout->addRow("Sync by:", p.compareTimeComboBox);
             p.compareLayout->addRow("X:", p.wipeXSlider);
             p.compareLayout->addRow("Y:", p.wipeYSlider);
             p.compareLayout->addRow("Rotation:", p.wipeRotationSlider);
@@ -379,22 +388,17 @@ namespace djv
                             p.widgetLayout);
                         p.widgetLayout->setGridPos(widget.thumbnail, row, 0);
 
-                        widget.label = ftk::Label::create(
+                        widget.nameButton = ftk::ToolButton::create(
                             context,
                             ftk::elide(item->path.getFileName(), 24),
                             p.widgetLayout);
-                        widget.label->setMarginRole(ftk::SizeRole::MarginSmall);
-                        widget.label->setHStretch(ftk::Stretch::Expanding);
-                        widget.label->setVAlign(ftk::VAlign::Center);
-                        widget.label->setTooltip(item->path.get());
-                        p.widgetLayout->setGridPos(widget.label, row, 1);
-
-                        widget.aButton = ftk::ToolButton::create(context, "A", p.widgetLayout);
-                        widget.aButton->setChecked(item == a);
-                        widget.aButton->setVAlign(ftk::VAlign::Center);
-                        widget.aButton->setTooltip("Set the A file.");
-                        p.aButtonGroup->addButton(widget.aButton);
-                        p.widgetLayout->setGridPos(widget.aButton, row, 2);
+                        widget.nameButton->setChecked(item == a);
+                        widget.nameButton->setHStretch(ftk::Stretch::Expanding);
+                        widget.nameButton->setVAlign(ftk::VAlign::Center);
+                        widget.nameButton->setTooltip(
+                            item->path.get() + "\n\nSet the A file.");
+                        p.aButtonGroup->addButton(widget.nameButton);
+                        p.widgetLayout->setGridPos(widget.nameButton, row, 1);
 
                         widget.bButton = ftk::ToolButton::create(context, "B", p.widgetLayout);
                         const auto i = std::find(b.begin(), b.end(), item);
@@ -402,14 +406,24 @@ namespace djv
                         widget.bButton->setVAlign(ftk::VAlign::Center);
                         widget.bButton->setTooltip("Set the B file(s).");
                         p.bButtonGroup->addButton(widget.bButton);
-                        p.widgetLayout->setGridPos(widget.bButton, row, 3);
+                        p.widgetLayout->setGridPos(widget.bButton, row, 2);
 
                         widget.layerComboBox = ftk::ComboBox::create(context, p.widgetLayout);
                         widget.layerComboBox->setItems(item->videoLayers);
                         widget.layerComboBox->setCurrentIndex(item->videoLayer);
                         widget.layerComboBox->setVAlign(ftk::VAlign::Center);
                         widget.layerComboBox->setTooltip("Set the current layer.");
-                        p.widgetLayout->setGridPos(widget.layerComboBox, row, 4);
+                        // Layer names can be long -- and are, in a multi part
+                        // EXR -- and the column is as wide as the longest one
+                        // in it. The menu still shows them whole.
+                        // Kept from the end: layer names share a prefix and
+                        // differ where they finish.
+                        widget.layerComboBox->setElide(12, ftk::ElideMode::Left);
+                        // A file with one layer has nothing to choose, and the
+                        // column is as wide as the longest layer name in it.
+                        widget.layerComboBox->setVisible(
+                            item->videoLayers.size() > 1);
+                        p.widgetLayout->setGridPos(widget.layerComboBox, row, 3);
 
                         widget.layerComboBox->setIndexCallback(
                             [appWeak, item](int value)
@@ -422,88 +436,45 @@ namespace djv
 
                         // Only an image sequence has a frame range to state.
                         // The range is what the sequence is meant to cover,
-                        // which need not be what is on disk yet.
+                        // which need not be what is on disk yet. It is set
+                        // rarely, so the row shows it and the editing is in a
+                        // popup rather than two edits in every row.
                         if (item->path.hasNum() && item->path.testExt(seqExts))
                         {
-                            auto rangeLayout = ftk::HorizontalLayout::create(
-                                context, p.widgetLayout);
-                            rangeLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
-                            rangeLayout->setVAlign(ftk::VAlign::Center);
-                            p.widgetLayout->setGridPos(rangeLayout, row, 5);
-
-                            widget.frameStartEdit = ftk::IntEdit::create(
-                                context, rangeLayout);
-                            widget.frameEndEdit = ftk::IntEdit::create(
-                                context, rangeLayout);
-                            widget.frameStartEdit->setRange(-999999, 999999);
-                            widget.frameEndEdit->setRange(-999999, 999999);
                             // What the file turned out to be when it opened.
                             // The path only knows the range once one has been
                             // stated for it; until then it names one file.
-                            int start = 0;
-                            int end = 0;
+                            ftk::RangeI64 range(0, 0);
                             if (item->timeRange.has_value())
                             {
-                                start = static_cast<int>(
+                                const int64_t start = static_cast<int64_t>(
                                     item->timeRange->start_time().value());
-                                end = start + static_cast<int>(
-                                    item->timeRange->duration().value()) - 1;
+                                range = ftk::RangeI64(
+                                    start,
+                                    start + static_cast<int64_t>(
+                                        item->timeRange->duration().value()) - 1);
                             }
                             else if (item->path.getFrames().has_value())
                             {
-                                const ftk::RangeI64& frames =
-                                    item->path.getFrames().value();
-                                start = static_cast<int>(frames.min());
-                                end = static_cast<int>(frames.max());
+                                range = item->path.getFrames().value();
                             }
-                            widget.frameStartEdit->setValue(start);
-                            widget.frameEndEdit->setValue(end);
-                            widget.frameStartEdit->setTooltip(
-                                "Start frame of the sequence.\n"
-                                "\n"
-                                "Frames that are not there yet follow the\n"
-                                "missing frames setting, so a render can be\n"
-                                "opened over the range it will end up with.");
-                            widget.frameEndEdit->setTooltip(
-                                "End frame of the sequence.");
 
-                            // Each holds the other's end of the range, so
-                            // neither can be taken past it. A range that runs
-                            // backwards is silently turned around when it is
-                            // built, which leaves the two edits showing
-                            // something the file does not have.
-                            widget.frameStartEdit->setRange(
-                                -999999, widget.frameEndEdit->getValue());
-                            widget.frameEndEdit->setRange(
-                                widget.frameStartEdit->getValue(), 999999);
+                            widget.rangeButton = ftk::ToolButton::create(
+                                context,
+                                ftk::Format("{0}-{1}").
+                                    arg(range.min()).arg(range.max()),
+                                p.widgetLayout);
+                            widget.rangeButton->setVAlign(ftk::VAlign::Center);
+                            widget.rangeButton->setTooltip(
+                                "The frame range of the sequence.");
+                            p.widgetLayout->setGridPos(widget.rangeButton, row, 4);
 
-                            // Weak, so the two edits do not keep each other
-                            // alive through their callbacks.
-                            std::weak_ptr<ftk::IntEdit> startWeak =
-                                widget.frameStartEdit;
-                            std::weak_ptr<ftk::IntEdit> endWeak =
-                                widget.frameEndEdit;
-                            widget.frameStartEdit->setCallback(
-                                [this, item, endWeak](int value)
+                            auto buttonWeak =
+                                std::weak_ptr<ftk::ToolButton>(widget.rangeButton);
+                            widget.rangeButton->setClickedCallback(
+                                [this, item, range, buttonWeak]
                                 {
-                                    if (auto end = endWeak.lock())
-                                    {
-                                        end->setRange(value, 999999);
-                                        _rangeUpdate(
-                                            item,
-                                            ftk::RangeI64(value, end->getValue()));
-                                    }
-                                });
-                            widget.frameEndEdit->setCallback(
-                                [this, item, startWeak](int value)
-                                {
-                                    if (auto start = startWeak.lock())
-                                    {
-                                        start->setRange(-999999, value);
-                                        _rangeUpdate(
-                                            item,
-                                            ftk::RangeI64(start->getValue(), value));
-                                    }
+                                    _showRangePopup(item, range, buttonWeak.lock());
                                 });
                         }
 
@@ -511,16 +482,16 @@ namespace djv
 
                         if (0 == row)
                         {
-                            ftk::setScreenshotTag(widget.layerComboBox, "Files.CurrentLayer");
-                            if (widget.frameStartEdit)
-                            {
-                                ftk::setScreenshotTag(
-                                    widget.frameStartEdit, "Files.FrameRange");
-                            }
+                            ftk::setScreenshotTag(
+                                widget.layerComboBox,
+                                "Files.CurrentLayer");
+                            ftk::setScreenshotTag(
+                                widget.rangeButton,
+                                "Files.FrameRange");
 
                             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.widgetLayout);
                             spacer->setSpacingRole(ftk::SizeRole::SpacingTool);
-                            p.widgetLayout->setGridPos(spacer, 0, 6);
+                            p.widgetLayout->setGridPos(spacer, 0, 5);
                         }
                         ++row;
                     }
@@ -534,13 +505,39 @@ namespace djv
             }
         }
 
+        void FilesTool::_showRangePopup(
+            const std::shared_ptr<models::FilesModelItem>& item,
+            const ftk::RangeI64& range,
+            const std::shared_ptr<ftk::IWidget>& button)
+        {
+            FTK_P();
+            if (p.rangePopup || !button)
+                return;
+            if (auto context = getContext())
+            {
+                p.rangePopup = ui::FrameRangePopup::create(context, range);
+                auto buttonWeak = std::weak_ptr<ftk::IWidget>(button);
+                p.rangePopup->setCallback(
+                    [this, item, buttonWeak](const ftk::RangeI64& value)
+                    {
+                        _rangeUpdate(item, value);
+                    });
+                p.rangePopup->open(getWindow(), button->getGeometry());
+                p.rangePopup->setCloseCallback(
+                    [this]
+                    {
+                        _p->rangePopup.reset();
+                    });
+            }
+        }
+
         void FilesTool::_aUpdate(const std::shared_ptr<models::FilesModelItem>& value)
         {
             FTK_P();
             for (const auto& i : p.widgets)
             {
-                i.aButton->setChecked(i.item == value);
-                ftk::setScreenshotTag(i.aButton, i.item == value ? "Files.CurrentFile" : "");
+                i.nameButton->setChecked(i.item == value);
+                ftk::setScreenshotTag(i.nameButton, i.item == value ? "Files.CurrentFile" : "");
             }
         }
 
