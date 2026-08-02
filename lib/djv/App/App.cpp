@@ -623,7 +623,6 @@ namespace djv
                 first = false;
                 item->audioPath = audioPath;
                 p.filesModel->add(item);
-                p.recentFilesModel->addRecent(std::filesystem::u8path(path.get()));
             }
         }
 
@@ -1585,6 +1584,12 @@ namespace djv
                         {
                             files[i]->videoLayer = 0;
                         }
+
+                        // Recorded here rather than when the file is opened:
+                        // one that cannot be read should not be offered back
+                        // in the recent files.
+                        p.recentFilesModel->addRecent(
+                            std::filesystem::u8path(files[i]->path.get()));
                     }
                     catch (const std::exception& e)
                     {
