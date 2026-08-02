@@ -63,6 +63,10 @@ namespace djv
             models::MouseActionBinding frameShuttleBinding =
                 models::MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift);
             float frameShuttleScale = 1.F;
+            enum class Resample { None, Wait, Read };
+            bool picked = false;
+            Resample resample = Resample::None;
+            bool resampleOnFrames = false;
             std::shared_ptr<ftk::Observable<ftk::V2I> > pick;
             std::shared_ptr<ftk::Observable<ftk::V2I> > samplePos;
             std::shared_ptr<ftk::Observable<ftk::Color4F> > colorSample;
@@ -76,9 +80,6 @@ namespace djv
             std::shared_ptr<ftk::Label> infoLabel;
             std::shared_ptr<ftk::Label> renderLabel;
             std::map<models::HUDItem, std::shared_ptr<ftk::IWidget> > hudWidgets;
-            //! What is being compared, and how many images arrived for it: a
-            //! comparison with no B file draws black, which four different
-            //! things all look like.
             tl::Compare compare = tl::Compare::None;
             std::shared_ptr<models::FilesModelItem> a;
             std::vector<std::shared_ptr<models::FilesModelItem> > b;
@@ -121,7 +122,6 @@ namespace djv
             struct MouseData
             {
                 MouseMode mode = MouseMode::None;
-                // Where the shuttle started, unset until it is grabbed.
                 std::optional<OTIO_NS::RationalTime> shuttleStart;
             };
             MouseData mouse;
@@ -296,6 +296,11 @@ namespace djv
                 app->getFilesModel()->observeCompareOptions(),
                 [this](const tl::CompareOptions& value)
                 {
+                    if (value.compare != _p->compare && _p->picked)
+                    {
+                        _p->resample = Private::Resample::Wait;
+                        _p->resampleOnFrames = true;
+                    }
                     _p->compare = value.compare;
                     setCompareOptions(value);
                     _compareUpdate();
@@ -366,9 +371,6 @@ namespace djv
                 [this](const std::vector<std::string>& value)
                 {
                     FTK_P();
-                    // A burst replaces rather than accumulates, matching the
-                    // status bar: a sequence with many unreadable frames would
-                    // otherwise queue a message per frame.
                     p.toastLabel->setText(!value.empty() ?
                         ftk::elide(value.back(), toastTextLength) :
                         std::string());
@@ -548,6 +550,7 @@ namespace djv
                 static_cast<int>(viewPos.y + renderPos.y * zoom));
             p.samplePos->setIfChanged(pos);
             p.colorSample->setIfChanged(getColorSample(pos));
+            p.picked = true;
             p.pick->setIfChanged(imagePos);
             _hudUpdate();
         }
@@ -585,6 +588,13 @@ namespace djv
                     {
                         FTK_P();
                         p.videoFramesSize = value.size();
+                        if (p.resampleOnFrames)
+                        {
+                            // The frames a comparison had to read to be shown,
+                            // which arrive after the comparison itself changed.
+                            p.resampleOnFrames = false;
+                            p.resample = Private::Resample::Wait;
+                        }
                         _compareUpdate();
                         p.missing = false;
                         p.heldFrom.reset();
@@ -644,6 +654,36 @@ namespace djv
             return _p->hudLayout->getSizeHint();
         }
 
+        void Viewport::tickEvent(
+            bool parentsVisible,
+            bool parentsEnabled,
+            const ftk::TickEvent& event)
+        {
+            tl::ui::Viewport::tickEvent(parentsVisible, parentsEnabled, event);
+            FTK_P();
+            if (Private::Resample::Read == p.resample)
+            {
+                p.resample = Private::Resample::None;
+                if (p.colorSample->setIfChanged(getColorSample(p.samplePos->get())))
+                {
+                    _hudUpdate();
+                }
+            }
+        }
+
+        void Viewport::drawEvent(
+            const ftk::Box2I& drawRect,
+            const ftk::DrawEvent& event)
+        {
+            tl::ui::Viewport::drawEvent(drawRect, event);
+            FTK_P();
+            if (Private::Resample::Wait == p.resample)
+            {
+                // This drawing carries the new picture; the next tick reads it.
+                p.resample = Private::Resample::Read;
+            }
+        }
+
         void Viewport::setGeometry(const ftk::Box2I& value)
         {
             tl::ui::Viewport::setGeometry(value);
@@ -690,6 +730,7 @@ namespace djv
                     if (p.samplePos->setIfChanged(pos))
                     {
                         p.colorSample->setIfChanged(getColorSample(pos));
+                        p.picked = true;
                         p.pick->setIfChanged(_toSourcePixel((pos - getViewPos()) / getZoom()));
                         _hudUpdate();
                     }
@@ -717,6 +758,7 @@ namespace djv
                 if (p.samplePos->setIfChanged(pos))
                 {
                     p.colorSample->setIfChanged(getColorSample(pos));
+                    p.picked = true;
                     p.pick->setIfChanged(_toSourcePixel((pos - getViewPos()) / getZoom()));
                     _hudUpdate();
                 }

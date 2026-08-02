@@ -51,6 +51,8 @@ namespace djv
             void setToastActive(bool);
 
             ftk::Size2I getSizeHint() const override;
+            void tickEvent(bool, bool, const ftk::TickEvent&) override;
+            void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
             void setGeometry(const ftk::Box2I&) override;
             void mouseMoveEvent(ftk::MouseMoveEvent&) override;
             void mousePressEvent(ftk::MouseClickEvent&) override;
