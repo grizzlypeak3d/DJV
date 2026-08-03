@@ -39,16 +39,6 @@ namespace djv
 
             const std::chrono::seconds toastTimeout(5);
 
-            // ftk::contains() stops short of a box's maximum, while a Box2I
-            // holds it -- its size is max - min + 1 -- so going through
-            // contains() loses the last row and column of an image.
-            bool within(const ftk::Box2I& box, const ftk::V2I& pos)
-            {
-                return
-                    pos.x >= box.min.x && pos.x <= box.max.x &&
-                    pos.y >= box.min.y && pos.y <= box.max.y;
-            }
-
             // A position inside a box, in the coordinates of what the box
             // holds. Clamped because a box and its contents are different
             // sizes whenever the image is scaled, and the far edge rounds up
@@ -553,7 +543,7 @@ namespace djv
                 getCompareOptions(), aspectRatio, videoFrame);
             for (size_t i = 0; i < boxes.size() && i < videoFrame.size(); ++i)
             {
-                if (!within(boxes[i], renderPos))
+                if (!ftk::contains(boxes[i], renderPos))
                     continue;
                 if (videoFrame[i].canvasSize.isValid())
                 {
@@ -578,7 +568,7 @@ namespace djv
                                         std::lround(bounds.value().max.y))),
                                 image->getInfo(),
                                 aspectRatio);
-                            if (within(box, canvasPos))
+                            if (ftk::contains(box, canvasPos))
                             {
                                 return mapInto(
                                     canvasPos, box, image->getInfo().size);
