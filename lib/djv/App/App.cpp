@@ -897,6 +897,15 @@ namespace djv
         {
             FTK_P();
 
+            // The option was being registered and then never read, so the
+            // log always went to the documents folder -- which is the one
+            // place a user cannot move it away from when something else is
+            // writing there (see #549).
+            if (p.cmdLine.logFileName->found())
+            {
+                p.logFile = std::filesystem::u8path(
+                    p.cmdLine.logFileName->getValue());
+            }
             p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
 
             if (p.cmdLine.settingsFileName->found())
