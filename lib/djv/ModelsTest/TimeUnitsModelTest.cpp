@@ -50,17 +50,17 @@ namespace djv
                 [&units](const tl::TimeUnits& value) { units = value; });
 
             // The default (with empty settings) is Timecode.
-            FTK_ASSERT(tl::TimeUnits::Timecode == model->getTimeUnits());
-            FTK_ASSERT(tl::TimeUnits::Timecode == units);
+            FTK_CHECK(tl::TimeUnits::Timecode == model->getTimeUnits());
+            FTK_CHECK(tl::TimeUnits::Timecode == units);
 
             // Set the time units; the observer should see each change.
             model->setTimeUnits(tl::TimeUnits::Frames);
-            FTK_ASSERT(tl::TimeUnits::Frames == model->getTimeUnits());
-            FTK_ASSERT(tl::TimeUnits::Frames == units);
+            FTK_CHECK(tl::TimeUnits::Frames == model->getTimeUnits());
+            FTK_CHECK(tl::TimeUnits::Frames == units);
 
             model->setTimeUnits(tl::TimeUnits::Seconds);
-            FTK_ASSERT(tl::TimeUnits::Seconds == model->getTimeUnits());
-            FTK_ASSERT(tl::TimeUnits::Seconds == units);
+            FTK_CHECK(tl::TimeUnits::Seconds == model->getTimeUnits());
+            FTK_CHECK(tl::TimeUnits::Seconds == units);
         }
 
         void TimeUnitsModelTest::_persistence()
@@ -84,7 +84,7 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::TimeUnitsModel::create(_context, settings);
-                FTK_ASSERT(tl::TimeUnits::Frames == model->getTimeUnits());
+                FTK_CHECK(tl::TimeUnits::Frames == model->getTimeUnits());
             }
 
             std::filesystem::remove(path);

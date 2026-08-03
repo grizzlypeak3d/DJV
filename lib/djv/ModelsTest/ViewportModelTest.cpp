@@ -52,12 +52,12 @@ namespace djv
             // The observer should see the current (default) value. The default is
             // platform-dependent, so compare against the model rather than a
             // literal.
-            FTK_ASSERT(model->getColorBuffer() == colorBuffer);
+            FTK_CHECK(model->getColorBuffer() == colorBuffer);
 
             // Set the color buffer; the observer should see the change.
             model->setColorBuffer(ftk::gl::TextureType::RGBA_U16);
-            FTK_ASSERT(ftk::gl::TextureType::RGBA_U16 == model->getColorBuffer());
-            FTK_ASSERT(ftk::gl::TextureType::RGBA_U16 == colorBuffer);
+            FTK_CHECK(ftk::gl::TextureType::RGBA_U16 == model->getColorBuffer());
+            FTK_CHECK(ftk::gl::TextureType::RGBA_U16 == colorBuffer);
         }
 
         void ViewportModelTest::_persistence()
@@ -80,7 +80,7 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::ViewportModel::create(_context, settings);
-                FTK_ASSERT(ftk::gl::TextureType::RGBA_U16 == model->getColorBuffer());
+                FTK_CHECK(ftk::gl::TextureType::RGBA_U16 == model->getColorBuffer());
             }
 
             std::filesystem::remove(path);

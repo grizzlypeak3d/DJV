@@ -57,28 +57,28 @@ namespace djv
             const std::filesystem::path c = std::filesystem::absolute(dir / "djv-recent-c.txt");
 
             // Empty by default; the default maximum is ten.
-            FTK_ASSERT(model->getRecent().empty());
-            FTK_ASSERT(10 == model->getRecentMax());
+            FTK_CHECK(model->getRecent().empty());
+            FTK_CHECK(10 == model->getRecentMax());
 
             // Adding files appends to the back (newest last); the observer fires.
             model->addRecent(a);
             model->addRecent(b);
-            FTK_ASSERT(Paths({ a, b }) == model->getRecent());
-            FTK_ASSERT(Paths({ a, b }) == recent);
+            FTK_CHECK(Paths({ a, b }) == model->getRecent());
+            FTK_CHECK(Paths({ a, b }) == recent);
 
             // Re-adding a file de-duplicates it and moves it to the back.
             model->addRecent(a);
-            FTK_ASSERT(Paths({ b, a }) == model->getRecent());
+            FTK_CHECK(Paths({ b, a }) == model->getRecent());
 
             // Lowering the maximum trims the oldest (front) entries immediately.
             model->addRecent(c);            // { b, a, c }
             model->setRecentMax(2);         // trims to { a, c }
-            FTK_ASSERT(2 == model->getRecentMax());
-            FTK_ASSERT(Paths({ a, c }) == model->getRecent());
+            FTK_CHECK(2 == model->getRecentMax());
+            FTK_CHECK(Paths({ a, c }) == model->getRecent());
 
             // Adding past the maximum drops the oldest (front) entry.
             model->addRecent(b);            // { a, c, b } -> { c, b }
-            FTK_ASSERT(Paths({ c, b }) == model->getRecent());
+            FTK_CHECK(Paths({ c, b }) == model->getRecent());
         }
 
         void RecentFilesModelTest::_persistence()
@@ -110,8 +110,8 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::RecentFilesModel::create(_context, settings);
-                FTK_ASSERT(Paths({ a, b }) == model->getRecent());
-                FTK_ASSERT(5 == model->getRecentMax());
+                FTK_CHECK(Paths({ a, b }) == model->getRecent());
+                FTK_CHECK(5 == model->getRecentMax());
             }
 
             std::filesystem::remove(path);

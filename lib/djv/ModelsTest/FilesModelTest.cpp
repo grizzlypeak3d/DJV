@@ -68,34 +68,34 @@ namespace djv
                 [&count](const Items& value) { count = value.size(); });
 
             // Empty by default.
-            FTK_ASSERT(model->getFiles().empty());
-            FTK_ASSERT(!model->getA());
+            FTK_CHECK(model->getFiles().empty());
+            FTK_CHECK(!model->getA());
 
             // Adding a file appends it and makes it the "A" file; the observer
             // fires.
             auto item0 = makeItem("file0.exr");
             model->add(item0);
-            FTK_ASSERT(1 == model->getFiles().size());
-            FTK_ASSERT(item0 == model->getA());
-            FTK_ASSERT(0 == model->getAIndex());
-            FTK_ASSERT(1 == count);
+            FTK_CHECK(1 == model->getFiles().size());
+            FTK_CHECK(item0 == model->getA());
+            FTK_CHECK(0 == model->getAIndex());
+            FTK_CHECK(1 == count);
 
             auto item1 = makeItem("file1.exr");
             auto item2 = makeItem("file2.exr");
             model->add(item1);
             model->add(item2);
-            FTK_ASSERT(3 == model->getFiles().size());
-            FTK_ASSERT(item2 == model->getA());
-            FTK_ASSERT(2 == model->getAIndex());
+            FTK_CHECK(3 == model->getFiles().size());
+            FTK_CHECK(item2 == model->getA());
+            FTK_CHECK(2 == model->getAIndex());
 
             // Closing a file removes it and re-clamps the "A" index.
             model->close(1);
-            FTK_ASSERT(2 == model->getFiles().size());
+            FTK_CHECK(2 == model->getFiles().size());
 
             // Closing all empties the list and clears the "A" file.
             model->closeAll();
-            FTK_ASSERT(model->getFiles().empty());
-            FTK_ASSERT(!model->getA());
+            FTK_CHECK(model->getFiles().empty());
+            FTK_CHECK(!model->getA());
         }
 
         void FilesModelTest::_navigation()
@@ -108,18 +108,18 @@ namespace djv
 
             // "A" navigation. next()/prev() wrap around the ends.
             model->setA(0);
-            FTK_ASSERT(0 == model->getAIndex());
+            FTK_CHECK(0 == model->getAIndex());
             model->next();
-            FTK_ASSERT(1 == model->getAIndex());
+            FTK_CHECK(1 == model->getAIndex());
             model->next();
             model->next();                     // wraps from the last to the first
-            FTK_ASSERT(0 == model->getAIndex());
+            FTK_CHECK(0 == model->getAIndex());
             model->prev();                     // wraps from the first to the last
-            FTK_ASSERT(2 == model->getAIndex());
+            FTK_CHECK(2 == model->getAIndex());
             model->first();
-            FTK_ASSERT(0 == model->getAIndex());
+            FTK_CHECK(0 == model->getAIndex());
             model->last();
-            FTK_ASSERT(2 == model->getAIndex());
+            FTK_CHECK(2 == model->getAIndex());
 
             // "B" files (compare). In the default single-buffer compare mode,
             // selecting a "B" file replaces any previous one; toggling the same
@@ -128,17 +128,17 @@ namespace djv
             // dedicated compare-options test.)
             model->setA(0);
             model->toggleB(1);
-            FTK_ASSERT(std::vector<int>({ 1 }) == model->getBIndexes());
+            FTK_CHECK(std::vector<int>({ 1 }) == model->getBIndexes());
             model->toggleB(2);                 // replaces (single-buffer mode)
-            FTK_ASSERT(std::vector<int>({ 2 }) == model->getBIndexes());
+            FTK_CHECK(std::vector<int>({ 2 }) == model->getBIndexes());
             model->toggleB(2);                 // toggle off
-            FTK_ASSERT(model->getBIndexes().empty());
+            FTK_CHECK(model->getBIndexes().empty());
 
             // clearB() removes all "B" files.
             model->toggleB(1);
-            FTK_ASSERT(!model->getBIndexes().empty());
+            FTK_CHECK(!model->getBIndexes().empty());
             model->clearB();
-            FTK_ASSERT(model->getBIndexes().empty());
+            FTK_CHECK(model->getBIndexes().empty());
         }
 
         void FilesModelTest::_compare()
@@ -151,10 +151,10 @@ namespace djv
             auto compareTimeObserver = ftk::Observer<tl::CompareTime>::create(
                 model->observeCompareTime(),
                 [&compareTime](const tl::CompareTime& value) { compareTime = value; });
-            FTK_ASSERT(tl::CompareTime::Relative == model->getCompareTime());
+            FTK_CHECK(tl::CompareTime::Relative == model->getCompareTime());
             model->setCompareTime(tl::CompareTime::Absolute);
-            FTK_ASSERT(tl::CompareTime::Absolute == model->getCompareTime());
-            FTK_ASSERT(tl::CompareTime::Absolute == compareTime);
+            FTK_CHECK(tl::CompareTime::Absolute == model->getCompareTime());
+            FTK_CHECK(tl::CompareTime::Absolute == compareTime);
 
             // Compare options.
             bool observed = false;
@@ -165,8 +165,8 @@ namespace djv
             tl::CompareOptions options;
             options.overlay = 0.75F;
             model->setCompareOptions(options);
-            FTK_ASSERT(ftk::fuzzyCompare(0.75F, model->getCompareOptions().overlay));
-            FTK_ASSERT(observed);
+            FTK_CHECK(ftk::fuzzyCompare(0.75F, model->getCompareOptions().overlay));
+            FTK_CHECK(observed);
         }
 
         void FilesModelTest::_frames()
@@ -194,15 +194,15 @@ namespace djv
             // Stating a wider range reopens the file, and drops the in/out
             // range, which was in the old range's terms.
             model->setFrames(item, ftk::RangeI64(1, 100));
-            FTK_ASSERT(reloaded == item);
-            FTK_ASSERT(item->path.getFrames().has_value());
-            FTK_ASSERT(ftk::RangeI64(1, 100) == item->path.getFrames().value());
-            FTK_ASSERT(!item->inOutRange.has_value());
+            FTK_CHECK(reloaded == item);
+            FTK_CHECK(item->path.getFrames().has_value());
+            FTK_CHECK(ftk::RangeI64(1, 100) == item->path.getFrames().value());
+            FTK_CHECK(!item->inOutRange.has_value());
 
             // The same range again is not a reopen.
             reloaded.reset();
             model->setFrames(item, ftk::RangeI64(1, 100));
-            FTK_ASSERT(!reloaded);
+            FTK_CHECK(!reloaded);
 
             // A range stated against what the file was opened as, not
             // against the frame parsed out of its name. Opening one file of a
@@ -210,7 +210,7 @@ namespace djv
             // the range down to it is still a change.
             {
                 auto opened = makeItem("/tmp/shot.0001.exr");
-                FTK_ASSERT(ftk::RangeI64(1, 1) == opened->path.getFrames().value());
+                FTK_CHECK(ftk::RangeI64(1, 1) == opened->path.getFrames().value());
                 opened->timeRange = OTIO_NS::TimeRange(
                     OTIO_NS::RationalTime(1.0, 24.0),
                     OTIO_NS::RationalTime(5.0, 24.0));
@@ -218,8 +218,8 @@ namespace djv
 
                 reloaded.reset();
                 model->setFrames(opened, ftk::RangeI64(1, 1));
-                FTK_ASSERT(reloaded == opened);
-                FTK_ASSERT(ftk::RangeI64(1, 1) == opened->path.getFrames().value());
+                FTK_CHECK(reloaded == opened);
+                FTK_CHECK(ftk::RangeI64(1, 1) == opened->path.getFrames().value());
 
                 // And the range it was opened as is not a change.
                 opened->timeRange = OTIO_NS::TimeRange(
@@ -227,17 +227,17 @@ namespace djv
                     OTIO_NS::RationalTime(1.0, 24.0));
                 reloaded.reset();
                 model->setFrames(opened, ftk::RangeI64(1, 1));
-                FTK_ASSERT(!reloaded);
+                FTK_CHECK(!reloaded);
             }
 
             // A file the model does not hold is ignored. Parsing the number
             // out of its name already gave it a range of that one frame, so
             // what is checked is that the range did not move.
             auto other = makeItem("/tmp/other.0001.exr");
-            FTK_ASSERT(ftk::RangeI64(1, 1) == other->path.getFrames().value());
+            FTK_CHECK(ftk::RangeI64(1, 1) == other->path.getFrames().value());
             model->setFrames(other, ftk::RangeI64(1, 10));
-            FTK_ASSERT(!reloaded);
-            FTK_ASSERT(ftk::RangeI64(1, 1) == other->path.getFrames().value());
+            FTK_CHECK(!reloaded);
+            FTK_CHECK(ftk::RangeI64(1, 1) == other->path.getFrames().value());
         }
 
         void FilesModelTest::_persistence()
@@ -261,8 +261,8 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::FilesModel::create(settings);
-                FTK_ASSERT(tl::CompareTime::Absolute == model->getCompareTime());
-                FTK_ASSERT(ftk::fuzzyCompare(0.75F, model->getCompareOptions().overlay));
+                FTK_CHECK(tl::CompareTime::Absolute == model->getCompareTime());
+                FTK_CHECK(ftk::fuzzyCompare(0.75F, model->getCompareOptions().overlay));
             }
 
             std::filesystem::remove(path);

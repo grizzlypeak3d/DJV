@@ -53,35 +53,35 @@ namespace djv
                 [&mute](const bool& value) { mute = value; });
 
             // Defaults.
-            FTK_ASSERT(1.F == model->getVolume());
-            FTK_ASSERT(1.F == volume);
-            FTK_ASSERT(!model->isMuted());
-            FTK_ASSERT(!mute);
+            FTK_CHECK(1.F == model->getVolume());
+            FTK_CHECK(1.F == volume);
+            FTK_CHECK(!model->isMuted());
+            FTK_CHECK(!mute);
 
             // Set the volume; the observer should see the change.
             model->setVolume(.5F);
-            FTK_ASSERT(.5F == model->getVolume());
-            FTK_ASSERT(.5F == volume);
+            FTK_CHECK(.5F == model->getVolume());
+            FTK_CHECK(.5F == volume);
 
             // The volume is clamped to [0, 1].
             model->setVolume(2.F);
-            FTK_ASSERT(1.F == model->getVolume());
+            FTK_CHECK(1.F == model->getVolume());
             model->setVolume(-1.F);
-            FTK_ASSERT(0.F == model->getVolume());
+            FTK_CHECK(0.F == model->getVolume());
 
             // Step the volume up and down (+/- .01).
             model->setVolume(.5F);
             model->volumeUp();
-            FTK_ASSERT(ftk::fuzzyCompare(.51F, model->getVolume()));
+            FTK_CHECK(ftk::fuzzyCompare(.51F, model->getVolume()));
             model->volumeDown();
-            FTK_ASSERT(ftk::fuzzyCompare(.5F, model->getVolume()));
+            FTK_CHECK(ftk::fuzzyCompare(.5F, model->getVolume()));
 
             // Set the mute.
             model->setMute(true);
-            FTK_ASSERT(model->isMuted());
-            FTK_ASSERT(mute);
+            FTK_CHECK(model->isMuted());
+            FTK_CHECK(mute);
             model->setMute(false);
-            FTK_ASSERT(!model->isMuted());
+            FTK_CHECK(!model->isMuted());
         }
 
         void AudioModelTest::_persistence()
@@ -109,8 +109,8 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::AudioModel::create(_context, settings);
-                FTK_ASSERT(ftk::fuzzyCompare(.5F, model->getVolume()));
-                FTK_ASSERT(model->isMuted());
+                FTK_CHECK(ftk::fuzzyCompare(.5F, model->getVolume()));
+                FTK_CHECK(model->isMuted());
             }
 
             std::filesystem::remove(path);

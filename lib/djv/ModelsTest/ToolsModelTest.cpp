@@ -48,17 +48,17 @@ namespace djv
                 [&tool](const std::string& value) { tool = value; });
 
             // The default (with empty settings) is None.
-            FTK_ASSERT(model->getActiveTool().empty());
-            FTK_ASSERT(tool.empty());
+            FTK_CHECK(model->getActiveTool().empty());
+            FTK_CHECK(tool.empty());
 
             // Set the active tool; the observer should see each change.
             model->setActiveTool("Files");
-            FTK_ASSERT("Files" == model->getActiveTool());
-            FTK_ASSERT("Files" == tool);
+            FTK_CHECK("Files" == model->getActiveTool());
+            FTK_CHECK("Files" == tool);
 
             model->setActiveTool("Color");
-            FTK_ASSERT("Color" == model->getActiveTool());
-            FTK_ASSERT("Color" == tool);
+            FTK_CHECK("Color" == model->getActiveTool());
+            FTK_CHECK("Color" == tool);
         }
 
         void ToolsModelTest::_persistence()
@@ -82,7 +82,7 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::ToolsModel::create(settings);
-                FTK_ASSERT("Files" == model->getActiveTool());
+                FTK_CHECK("Files" == model->getActiveTool());
             }
 
             std::filesystem::remove(path);
