@@ -356,6 +356,11 @@ namespace djv
                 {
                     _p->displayOptions = value;
                     _videoUpdate();
+                    // The heads up display says what is being rendered, which
+                    // the aspect ratio changes. Without this it only caught up
+                    // when something else refreshed it -- which is every frame
+                    // while playing, and nothing at all while stopped.
+                    _hudUpdate();
                 });
 
             p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
