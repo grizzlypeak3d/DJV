@@ -615,12 +615,7 @@ namespace djv
             // by the mouse handlers (image = (widget - viewPos) / zoom). Then
             // sample exactly as a pick mouse action would. The incoming
             // position is a source pixel, so it goes through the canvas first.
-            const ftk::V2I renderPos = _fromSourcePixel(imagePos);
-            const auto viewPos = getViewPos();
-            const double zoom = getZoom();
-            const ftk::V2I pos(
-                static_cast<int>(viewPos.x + renderPos.x * zoom),
-                static_cast<int>(viewPos.y + renderPos.y * zoom));
+            const ftk::V2I pos = fromRenderPos(_fromSourcePixel(imagePos));
             p.samplePos->setIfChanged(pos);
             p.picked = true;
             _sampleUpdate();
@@ -800,8 +795,7 @@ namespace djv
             case Private::MouseMode::Picker:
                 if (auto app = p.app.lock())
                 {
-                    const ftk::Box2I& g = getGeometry();
-                    const ftk::V2I pos = event.pos - g.min;
+                    const ftk::V2I pos = toViewportPos(event.pos);
                     p.picked = true;
                     if (p.samplePos->setIfChanged(pos))
                     {
@@ -826,8 +820,7 @@ namespace djv
                 event.accept = true;
                 takeKeyFocus();
                 p.mouse.mode = Private::MouseMode::Picker;
-                const ftk::Box2I& g = getGeometry();
-                const ftk::V2I pos = event.pos - g.min;
+                const ftk::V2I pos = toViewportPos(event.pos);
                 p.picked = true;
                 if (p.samplePos->setIfChanged(pos))
                 {
@@ -1019,7 +1012,7 @@ namespace djv
         {
             FTK_P();
             const ftk::V2I& pos = p.samplePos->get();
-            const auto pixel = _toSourcePixel((pos - getViewPos()) / getZoom());
+            const auto pixel = _toSourcePixel(toRenderPos(pos));
             p.pick->setIfChanged(pixel);
             // The color is read back from what was rendered, so away from the
             // media it is the background rather than a value from anything
