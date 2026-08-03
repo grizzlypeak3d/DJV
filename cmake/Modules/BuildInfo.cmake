@@ -18,8 +18,15 @@ set(BUILD_INFO_COMMIT "unknown")
 set(BUILD_INFO_DATE "unknown")
 find_package(Git QUIET)
 if(Git_FOUND)
+    # Seven characters, the length git and GitHub have always shown, rather
+    # than letting git choose. Left to itself it picks the shortest
+    # unambiguous length for the clone it is run in, so the same commit is
+    # written differently by different people -- nine characters here, eight
+    # in the repositories below -- and none of them match what the commit
+    # reads as on the web. The whole point of printing it is to compare one
+    # build against another, or against the history.
     execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short=7 HEAD
         WORKING_DIRECTORY ${SRC_DIR}
         OUTPUT_VARIABLE _hash
         OUTPUT_STRIP_TRAILING_WHITESPACE
