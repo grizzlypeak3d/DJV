@@ -52,6 +52,11 @@ namespace djv
             //! Set whether the toast stands in for the status bar.
             void setToastActive(bool);
 
+            //! Set whether the heads up display is shown at all. Separate from
+            //! the display's own options so that turning it off for
+            //! presentation does not forget what was being shown.
+            void setHUDActive(bool);
+
             ftk::Size2I getSizeHint() const override;
             void tickEvent(bool, bool, const ftk::TickEvent&) override;
             void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;

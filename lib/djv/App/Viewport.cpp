@@ -108,6 +108,7 @@ namespace djv
             std::shared_ptr<ftk::Label> compareLabel;
 
             bool toastActive = false;
+            bool hudActive = true;
             std::shared_ptr<ftk::Label> toastLabel;
             std::shared_ptr<ftk::Timer> toastTimer;
             std::shared_ptr<ftk::VerticalLayout> hudLayout;
@@ -716,6 +717,15 @@ namespace djv
             }
         }
 
+        void Viewport::setHUDActive(bool value)
+        {
+            FTK_P();
+            if (value == p.hudActive)
+                return;
+            p.hudActive = value;
+            _hudLayout();
+        }
+
         void Viewport::setToastActive(bool value)
         {
             FTK_P();
@@ -1049,7 +1059,9 @@ namespace djv
             for (const auto& i : p.hudLayouts)
             {
                 i.second->setVisible(
-                    options.enabled && i.second->getChildren().size() > 0);
+                    p.hudActive &&
+                    options.enabled &&
+                    i.second->getChildren().size() > 0);
             }
         }
     }

@@ -596,13 +596,6 @@ namespace djv
             FTK_P();
             if (p.presentMode->setIfChanged(value))
             {
-                if (value)
-                {
-                    auto app = p.app.lock();
-                    auto options = app->getViewportModel()->getHUDOptions();
-                    options.enabled = false;
-                    app->getViewportModel()->setHUDOptions(options);
-                }
                 setFullScreen(value);
                 _windowUpdate();
             }
@@ -785,6 +778,9 @@ namespace djv
                 // over someone else's review is worse than a missed message,
                 // and the messages tool still has them.
                 p.viewport->setToastActive(!settings.statusToolBar && !presentMode);
+                // Hidden rather than turned off, so that what was being shown
+                // is still being shown on the way back out.
+                p.viewport->setHUDActive(!presentMode);
                 p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
             }
         }
