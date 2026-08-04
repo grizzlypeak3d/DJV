@@ -31,6 +31,12 @@ namespace djv
 
             virtual std::string getFullName() const;
             virtual std::string getShortName() const;
+
+            //! Get the name of the directory under the user's documents where
+            //! the settings and log file are kept. Defaults to the full name;
+            //! a suite of applications built on DJV overrides it so that they
+            //! share one directory instead of scattering one apiece.
+            virtual std::string getDocsDirName() const;
             
             ///@}
 

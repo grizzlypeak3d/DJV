@@ -29,6 +29,11 @@ namespace djv
             return "djv";
         }
 
+        std::string AppInfoModel::getDocsDirName() const
+        {
+            return getFullName();
+        }
+
         int AppInfoModel::getVersionMajor() const
         {
             return DJV_VERSION_MAJOR;

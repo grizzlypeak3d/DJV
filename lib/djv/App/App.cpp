@@ -1536,7 +1536,7 @@ namespace djv
             {
                 std::filesystem::create_directory(documentsPath);
             }
-            const std::filesystem::path out = documentsPath / p.appInfoModel->getFullName();
+            const std::filesystem::path out = documentsPath / p.appInfoModel->getDocsDirName();
             if (!std::filesystem::exists(out))
             {
                 std::filesystem::create_directory(out);
