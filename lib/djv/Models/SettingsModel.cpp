@@ -250,6 +250,7 @@ namespace djv
                 scrollBars == other.scrollBars &&
                 autoScroll == other.autoScroll &&
                 stopOnScrub == other.stopOnScrub &&
+                trackMedia == other.trackMedia &&
                 thumbnails == other.thumbnails &&
                 thumbnailSize == other.thumbnailSize &&
                 waveforms == other.waveforms &&
@@ -971,6 +972,7 @@ namespace djv
             json["ScrollBars"] = value.scrollBars;
             json["AutoScroll"] = value.autoScroll;
             json["StopOnScrub"] = value.stopOnScrub;
+            json["TrackMedia"] = value.trackMedia;
             json["Thumbnails"] = value.thumbnails;
             json["ThumbnailSize"] = to_string(value.thumbnailSize);
             json["WaveformSize"] = to_string(value.waveformSize);
@@ -1127,6 +1129,12 @@ namespace djv
             json.at("ScrollBars").get_to(value.scrollBars);
             json.at("AutoScroll").get_to(value.autoScroll);
             json.at("StopOnScrub").get_to(value.stopOnScrub);
+            // Asked for rather than required, so settings written before this
+            // still load the rest of the timeline.
+            if (json.contains("TrackMedia"))
+            {
+                json.at("TrackMedia").get_to(value.trackMedia);
+            }
             json.at("Thumbnails").get_to(value.thumbnails);
             from_string(json.at("ThumbnailSize").get<std::string>(), value.thumbnailSize);
             from_string(json.at("WaveformSize").get<std::string>(), value.waveformSize);

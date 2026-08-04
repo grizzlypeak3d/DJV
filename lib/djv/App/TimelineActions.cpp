@@ -138,8 +138,7 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         auto settings = app->getSettingsModel()->getTimeline();
-                        settings.thumbnails = value;
-                        settings.waveforms = value;
+                        settings.trackMedia = value;
                         app->getSettingsModel()->setTimeline(settings);
                     }
                 });
@@ -293,13 +292,14 @@ namespace djv
                     _actions["ScrollBars"]->setChecked(value.scrollBars);
                     _actions["AutoScroll"]->setChecked(value.autoScroll);
                     _actions["StopOnScrub"]->setChecked(value.stopOnScrub);
-                    // Checked whenever any track media is shown, so the
-                    // check mark answers "is there media in the timeline",
-                    // and clearing it clears everything.
-                    _actions["TrackMedia"]->setChecked(
-                        value.thumbnails || value.waveforms);
+                    _actions["TrackMedia"]->setChecked(value.trackMedia);
+                    // Shown as they are, but with nothing to do while no
+                    // media is in the timeline at all, so the grey says why
+                    // rather than leaving them looking broken.
                     _actions["Thumbnails"]->setChecked(value.thumbnails);
+                    _actions["Thumbnails"]->setEnabled(value.trackMedia);
                     _actions["Waveforms"]->setChecked(value.waveforms);
+                    _actions["Waveforms"]->setEnabled(value.trackMedia);
                     _actions["ThumbnailSizeSmall"]->setChecked(models::TimelineThumbnailSize::Small == value.thumbnailSize);
                     _actions["ThumbnailSizeMedium"]->setChecked(models::TimelineThumbnailSize::Medium == value.thumbnailSize);
                     _actions["ThumbnailSizeLarge"]->setChecked(models::TimelineThumbnailSize::Large == value.thumbnailSize);

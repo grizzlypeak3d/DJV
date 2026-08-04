@@ -706,9 +706,11 @@ namespace djv
             auto display = p.timelineWidget->getDisplayOptions();
 
             display.minimize = settings.minimize;
-            display.thumbnails = settings.thumbnails;
+            // Track media gates the two rather than replacing them, so that
+            // turning it off and on leaves the choice below it alone.
+            display.thumbnails = settings.trackMedia && settings.thumbnails;
             display.thumbnailHeight = getTimelineThumbnailSize(settings.thumbnailSize);
-            display.waveforms = settings.waveforms;
+            display.waveforms = settings.trackMedia && settings.waveforms;
             display.waveformHeight = getTimelineWaveformSize(settings.waveformSize);
             p.timelineWidget->setDisplayOptions(display);
 
