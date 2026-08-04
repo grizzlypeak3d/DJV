@@ -5,6 +5,7 @@ Changes:
 * Add support for OTIO spatial coordinates.
 * Add support for partial image sequences.
 * Add audio export.
+* Multiple tools can now be open at the same time.
 * Remove "A" compare mode and make the other compare modes toggles.
 * Add a waveform height option.
 * Add an image negative option.
@@ -26,6 +27,7 @@ Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
 * Fixes for the grid and outline in compare mode.
 * Fixes to prevent cache usage exceeding 100%.
+* Fixes for log file failures.
 
 * Library updates:
     - OpenImageIO v3.1.14.0
