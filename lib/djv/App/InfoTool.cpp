@@ -71,6 +71,10 @@ namespace djv
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             copyButton->setParent(hLayout);
             p.searchBox->setParent(hLayout);
+            // The contents have no natural end, so this takes what room is
+            // left rather than a band of its own while other tools sit at
+            // the height they need.
+            setVStretch(ftk::Stretch::Expanding);
             _setWidget(layout);
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(

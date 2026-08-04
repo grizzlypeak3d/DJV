@@ -13,7 +13,6 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
-#include <ftk/UI/ScrollWidget.h>
 #include <ftk/Core/Format.h>
 
 namespace djv
@@ -74,10 +73,7 @@ namespace djv
             formLayout->addRow("Pixel:", p.pixelLabel);
             formLayout->addRow("Mouse:", p.mouseLabel);
 
-            auto scrollWidget = ftk::ScrollWidget::create(context);
-            scrollWidget->setBorder(false);
-            scrollWidget->setWidget(layout);
-            _setWidget(scrollWidget);
+            _setWidget(layout);
 
             p.pickObserver = ftk::Observer<std::optional<ftk::V2I> >::create(
                 mainWindow->getViewport()->observePick(),

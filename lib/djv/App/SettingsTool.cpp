@@ -182,6 +182,10 @@ namespace djv
             p.saveButton->setParent(hLayout);
             hLayout->addSpacer(ftk::Stretch::Expanding);
             p.resetButton->setParent(hLayout);
+            // The contents have no natural end, so this takes what room is
+            // left rather than a band of its own while other tools sit at
+            // the height they need.
+            setVStretch(ftk::Stretch::Expanding);
             _setWidget(p.layout);
 
             _loadSettings(p.bellows);

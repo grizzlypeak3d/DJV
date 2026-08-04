@@ -79,6 +79,10 @@ namespace djv
             p.copyButton->setParent(hLayout);
             p.clearButton->setParent(hLayout);
             p.autoScrollCheckBox->setParent(hLayout);
+            // The contents have no natural end, so this takes what room is
+            // left rather than a band of its own while other tools sit at
+            // the height they need.
+            setVStretch(ftk::Stretch::Expanding);
             _setWidget(layout);
 
             p.copyButton->setClickedCallback(

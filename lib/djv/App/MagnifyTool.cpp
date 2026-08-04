@@ -131,6 +131,9 @@ namespace djv
             formLayout->addRow("Pixel:", p.pixelLabel);
             formLayout->addRow("Track view:", p.viewPosAndZoomCheckBox);
             formLayout->addRow("Mouse:", p.mouseLabel);
+            // The magnified view has no natural size of its own, so this
+            // takes what room is left rather than a band of its own.
+            setVStretch(ftk::Stretch::Expanding);
             _setWidget(layout);
 
             p.comboBox->setIndexCallback(

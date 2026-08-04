@@ -8,7 +8,6 @@
 
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/RowLayout.h>
-#include <ftk/UI/ScrollWidget.h>
 
 namespace djv
 {
@@ -68,10 +67,7 @@ namespace djv
             p.bellows["SoftClip"] = ftk::Bellows::create(context, "Soft Clip", layout);
             p.bellows["SoftClip"]->setWidget(softClipWidget);
             p.bellows["SoftClip"]->setToolWidget(softClipWidget->getEnabledCheckBox());
-            auto scrollWidget = ftk::ScrollWidget::create(context);
-            scrollWidget->setBorder(false);
-            scrollWidget->setWidget(layout);
-            _setWidget(scrollWidget);
+            _setWidget(layout);
 
             _loadSettings(p.bellows);
         }

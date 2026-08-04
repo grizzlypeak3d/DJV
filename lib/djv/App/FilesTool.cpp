@@ -26,7 +26,6 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
-#include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/Spacer.h>
 
 #include <ftk/Core/Timer.h>
@@ -169,10 +168,7 @@ namespace djv
             p.bellows["Compare"] = ftk::Bellows::create(context, "Compare", layout);
             p.bellows["Compare"]->setWidget(vLayout);
 
-            auto scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Both);
-            scrollWidget->setBorder(false);
-            scrollWidget->setWidget(layout);
-            _setWidget(scrollWidget);
+            _setWidget(layout);
 
             _loadSettings(p.bellows);
 

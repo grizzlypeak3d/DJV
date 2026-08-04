@@ -15,7 +15,6 @@
 #include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
-#include <ftk/UI/ScrollWidget.h>
 #include <ftk/Core/Format.h>
 
 namespace djv
@@ -96,10 +95,7 @@ namespace djv
             formLayout->addRow("Channel mute:", p.channelMuteLayout);
             formLayout->addRow("Sync offset (seconds):", p.syncOffsetSlider);
 
-            auto scrollWidget = ftk::ScrollWidget::create(context);
-            scrollWidget->setBorder(false);
-            scrollWidget->setWidget(formLayout);
-            _setWidget(scrollWidget);
+            _setWidget(formLayout);
 
             auto appWeak = std::weak_ptr<App>(app);
             p.deviceComboBox->setIndexCallback(

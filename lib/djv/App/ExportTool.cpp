@@ -27,7 +27,6 @@
 #include <ftk/UI/ProgressDialog.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
-#include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/TabBar.h>
 #include <ftk/UI/TabWidget.h>
 #include <ftk/GL/GL.h>
@@ -143,10 +142,7 @@ namespace djv
             p.tabWidget->addTab("Sequence", p.seqWidget);
             p.tabWidget->addTab("Movie", p.movieWidget);
 
-            auto scrollWidget = ftk::ScrollWidget::create(context);
-            scrollWidget->setBorder(false);
-            scrollWidget->setWidget(p.layout);
-            _setWidget(scrollWidget);
+            _setWidget(p.layout);
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),

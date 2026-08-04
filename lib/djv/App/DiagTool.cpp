@@ -48,6 +48,10 @@ namespace djv
             scrollWidget->setWidget(p.diagWidget);
             scrollWidget->setBorder(false);
             scrollWidget->setVStretch(ftk::Stretch::Expanding);
+            // The contents have no natural end, so this takes what room is
+            // left rather than a band of its own while other tools sit at
+            // the height they need.
+            setVStretch(ftk::Stretch::Expanding);
             _setWidget(scrollWidget);
         }
 

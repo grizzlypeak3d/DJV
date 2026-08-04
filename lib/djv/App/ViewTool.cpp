@@ -10,7 +10,6 @@
 #include <djv/App/Viewport.h>
 
 #include <ftk/UI/RowLayout.h>
-#include <ftk/UI/ScrollWidget.h>
 
 namespace djv
 {
@@ -73,10 +72,7 @@ namespace djv
             p.bellows["CenterMarker"]->setWidget(p.centerMarkerWidget);
             p.bellows["HUD"] = ftk::Bellows::create(context, "HUD", layout);
             p.bellows["HUD"]->setWidget(p.hudWidget);
-            auto scrollWidget = ftk::ScrollWidget::create(context);
-            scrollWidget->setBorder(false);
-            scrollWidget->setWidget(layout);
-            _setWidget(scrollWidget);
+            _setWidget(layout);
 
             _loadSettings(p.bellows);
         }
