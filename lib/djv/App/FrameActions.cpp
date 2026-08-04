@@ -199,15 +199,22 @@ namespace djv
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& value)
                 {
-                    _actions["Start"]->setEnabled(value.get());
-                    _actions["End"]->setEnabled(value.get());
-                    _actions["Prev"]->setEnabled(value.get());
-                    _actions["PrevX10"]->setEnabled(value.get());
-                    _actions["PrevX100"]->setEnabled(value.get());
-                    _actions["Next"]->setEnabled(value.get());
-                    _actions["NextX10"]->setEnabled(value.get());
-                    _actions["NextX100"]->setEnabled(value.get());
-                    _actions["FocusCurrent"]->setEnabled(value.get());
+                    // A file with no video is timed in audio samples, so a
+                    // frame is one sample and stepping by frames goes
+                    // nowhere anyone can hear. Jumping by seconds is what
+                    // serves those; the ends of the file still do.
+                    const bool player = value.get();
+                    const bool frames =
+                        player && !value->getIOInfo().video.empty();
+                    _actions["Start"]->setEnabled(player);
+                    _actions["End"]->setEnabled(player);
+                    _actions["Prev"]->setEnabled(frames);
+                    _actions["PrevX10"]->setEnabled(frames);
+                    _actions["PrevX100"]->setEnabled(frames);
+                    _actions["Next"]->setEnabled(frames);
+                    _actions["NextX10"]->setEnabled(frames);
+                    _actions["NextX100"]->setEnabled(frames);
+                    _actions["FocusCurrent"]->setEnabled(player);
                 });
         }
 

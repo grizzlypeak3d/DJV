@@ -985,11 +985,22 @@ namespace djv
                         arg(p.heldFrom.value()).str() :
                     ", missing";
             }
-            p.timeLabel->setText(ftk::Format("Time: {0}, {1} FPS, {2} dropped{3}").
+            // Frames per second and frames dropped are about video, and a
+            // file without any has neither -- reporting none and an
+            // ever-growing count of what was never going to arrive reads as
+            // a fault rather than as an absence.
+            std::string timeText = ftk::Format("Time: {0}{1}").
                 arg(s).
-                arg(p.fps, 2, 6).
-                arg(static_cast<int>(p.droppedFrames), 3).
-                arg(missing));
+                arg(missing);
+            if (!p.ioInfo.video.empty())
+            {
+                timeText = ftk::Format("Time: {0}, {1} FPS, {2} dropped{3}").
+                    arg(s).
+                    arg(p.fps, 2, 6).
+                    arg(static_cast<int>(p.droppedFrames), 3).
+                    arg(missing);
+            }
+            p.timeLabel->setText(timeText);
             ftk::setScreenshotTag(p.timeLabel, "View.HUD.Time");
 
             p.viewZoomLabel->setText(ftk::Format("Zoom: {0}").
@@ -1016,10 +1027,22 @@ namespace djv
             ftk::setScreenshotTag(p.colorPickerLabel, "View.HUD.ColorPicker");
             ftk::setScreenshotTag(p.colorPickerSwatch, "View.HUD.ColorPickerSwatch");
 
-            p.cacheLabel->setText(
-                ftk::Format("Cache: {0}% V, {1}% A").
-                arg(static_cast<int>(p.cacheInfo.videoPercentage), 3).
-                arg(static_cast<int>(p.cacheInfo.audioPercentage), 3));
+            std::vector<std::string> cache;
+            if (!p.ioInfo.video.empty())
+            {
+                cache.push_back(std::string(ftk::Format("{0}% V").
+                    arg(static_cast<int>(p.cacheInfo.videoPercentage), 3)));
+            }
+            if (p.ioInfo.audio.isValid())
+            {
+                cache.push_back(std::string(ftk::Format("{0}% A").
+                    arg(static_cast<int>(p.cacheInfo.audioPercentage), 3)));
+            }
+            s = !cache.empty() ?
+                std::string(ftk::Format("Cache: {0}").arg(ftk::join(cache, ", "))) :
+                std::string();
+            p.cacheLabel->setText(s);
+            p.cacheLabel->setVisible(!s.empty());
             ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");
         }
 

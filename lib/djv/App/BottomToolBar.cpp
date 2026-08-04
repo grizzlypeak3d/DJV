@@ -415,7 +415,11 @@ namespace djv
                     p.player->observeActualSpeed(),
                     [this](double value)
                     {
-                        _p->speedButton->setText(ftk::Format("{0}").arg(value, 2));
+                        FTK_P();
+                        p.speedButton->setText(
+                            !p.player->getIOInfo().video.empty() ?
+                            ftk::Format("{0}").arg(value, 2).str() :
+                            std::string());
                     });
 
                 p.loopObserver = ftk::Observer<tl::Loop>::create(
@@ -454,12 +458,18 @@ namespace djv
                 p.inOutRangeObserver.reset();
             }
 
+            // A file with no video is timed in audio samples, so what would
+            // be shown as a speed is the sample rate and there are no frames
+            // to shuttle through. The jumps by seconds are what move around
+            // one of those.
+            const bool video =
+                p.player && !p.player->getIOInfo().video.empty();
             p.loopWidget->setEnabled(p.player.get());
             p.playbackShuttle->setEnabled(p.player.get());
-            p.frameShuttle->setEnabled(p.player.get());
+            p.frameShuttle->setEnabled(video);
             p.currentTimeEdit->setEnabled(p.player.get());
             p.durationLabel->setEnabled(p.player.get());
-            p.speedButton->setEnabled(p.player.get());
+            p.speedButton->setEnabled(video);
         }
 
         void BottomToolBar::_showSpeedPopup()
