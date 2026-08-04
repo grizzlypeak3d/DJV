@@ -205,6 +205,19 @@
       ]
     },
     {
+      "id": "view-hud-options",
+      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
+      "crop": "MainWindow.Tools",
+      "cropFit": false,
+      "setup": [
+        { "tool": "View", "expand": ["HUD"] }
+      ],
+      "annotate": [
+        { "id": "View.HUD.Enabled", "caption": "Enable" },
+        { "id": "View.HUD.FileName", "caption": "Where each item is shown" }
+      ]
+    },
+    {
       "id": "view-hud",
       "window": { "w": 900, "h": 600 },
       "layout": "horizontal",

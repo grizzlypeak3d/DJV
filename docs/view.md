@@ -137,11 +137,21 @@ Locations: **View** menu, **View** tool
 
 The heads-up display (HUD) overlays useful information on top of the view.
 
-Locations: **View** menu
+Locations: **View** menu, **View** tool
 
 Shortcut: <kbd>Ctrl+H</kbd>
 
 ![HUD]({{ '/assets/view-hud.svg' | relative_url }})
 
-* **Time** - Current frame, actual playback speed (the rate DJV is achieving, which may differ from the requested rate), number of frames dropped during playback.
+* **File name** - Name of the current file.
+* **Information** - Video (**V**) and audio (**A**) format of the current file.
 * **Cache** - Video (**V**) and audio (**A**) cache fill (%)
+* **Time** - Current frame, actual playback speed (the rate DJV is achieving, which may differ from the requested rate), number of frames dropped during playback.
+* **View zoom** - Current view zoom.
+* **Color picker** - Color and position of the picked pixel. Shown as **-** when the pointer is not over an image.
+* **Render** - Size the image is rendered at, and the pixel aspect ratio when it is not square. This differs from the file's own resolution when an aspect ratio is applied.
+
+Each item can be placed in any corner of the view, or set to **None** to hide
+it, so that only what is wanted is shown and items do not crowd each other.
+
+![HUD options]({{ '/assets/view-hud-options.svg' | relative_url }})
