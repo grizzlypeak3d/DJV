@@ -494,6 +494,18 @@ namespace djv
                     }
                 }
             }
+            else if (step.contains("command"))
+            {
+                // Run a command by name, for the things that are neither a
+                // setting nor have a verb of their own, e.g.
+                //   { "command": "Window/PresentMode",
+                //     "args": { "value": true } }
+                // The name is the one the commands model knows it by, which
+                // is what the shortcuts and the command line use.
+                app->getCommandsModel()->exec(
+                    step.at("command").get<std::string>(),
+                    step.contains("args") ? step.at("args") : nlohmann::json::object());
+            }
             else if (step.contains("frame"))
             {
                 app->getCommandsModel()->exec(
