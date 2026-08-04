@@ -448,7 +448,9 @@ namespace djv
                     else if (expand.is_array() && !expand.empty())
                         section = expand.back().get<std::string>();
                     if (!section.empty())
-                        p.lateSteps.push_back({ { "scrollTool", section } });
+                        p.lateSteps.push_back(
+                            { { "scrollTool",
+                                { { "tool", toolStr }, { "section", section } } } });
                 }
                 app->getCommandsModel()->exec(
                     ftk::Format("Tools/{0}").arg(toolStr),
@@ -482,12 +484,14 @@ namespace djv
                 // Deferred: scroll the active tool to a section (see the tool
                 // verb above). Runs after the tool is laid out so scrollTo can
                 // resolve the section's geometry.
-                const std::string section =
-                    step.at("scrollTool").get<std::string>();
+                const auto& v = step.at("scrollTool");
                 if (auto mainWindow = app->getMainWindow())
                 {
-                    if (auto tool = mainWindow->getToolWidget())
-                        tool->scrollTo(section);
+                    if (auto tool = mainWindow->getToolWidget(
+                        v.at("tool").get<std::string>()))
+                    {
+                        tool->scrollTo(v.at("section").get<std::string>());
+                    }
                 }
             }
             else if (step.contains("frame"))

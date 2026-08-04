@@ -40,25 +40,41 @@ namespace djv
             auto settings = createTestSettings(_context);
             auto model = models::ToolsModel::create(settings);
 
-            // Observe the active tool. With ObserverAction::Trigger (the default)
-            // the callback fires immediately with the current value.
-            std::string tool = "Files";
-            auto observer = ftk::Observer<std::string>::create(
-                model->observeActiveTool(),
-                [&tool](const std::string& value) { tool = value; });
+            // Observe the open tools. With ObserverAction::Trigger (the
+            // default) the callback fires immediately with the current value.
+            std::vector<std::string> tools = { "Files" };
+            auto observer = ftk::ListObserver<std::string>::create(
+                model->observeOpenTools(),
+                [&tools](const std::vector<std::string>& value) { tools = value; });
 
-            // The default (with empty settings) is None.
-            FTK_CHECK(model->getActiveTool().empty());
-            FTK_CHECK(tool.empty());
+            // The default (with empty settings) is nothing open.
+            FTK_CHECK(model->getOpenTools().empty());
+            FTK_CHECK(tools.empty());
 
-            // Set the active tool; the observer should see each change.
-            model->setActiveTool("Files");
-            FTK_CHECK("Files" == model->getActiveTool());
-            FTK_CHECK("Files" == tool);
+            // Open tools; the observer should see each change.
+            model->setToolOpen("Files", true);
+            FTK_CHECK(model->isToolOpen("Files"));
+            FTK_CHECK(std::vector<std::string>({ "Files" }) == tools);
 
-            model->setActiveTool("Color");
-            FTK_CHECK("Color" == model->getActiveTool());
-            FTK_CHECK("Color" == tool);
+            // More than one can be open, and they come back in the order the
+            // tools are listed rather than the order they were opened.
+            model->setToolOpen("Color", true);
+            FTK_CHECK(model->isToolOpen("Files"));
+            FTK_CHECK(model->isToolOpen("Color"));
+            FTK_CHECK(std::vector<std::string>({ "Files", "Color" }) == tools);
+
+            // Opening one that is already open changes nothing.
+            model->setToolOpen("Color", true);
+            FTK_CHECK(std::vector<std::string>({ "Files", "Color" }) == tools);
+
+            // Closing takes out only the one named.
+            model->setToolOpen("Files", false);
+            FTK_CHECK(!model->isToolOpen("Files"));
+            FTK_CHECK(std::vector<std::string>({ "Color" }) == tools);
+
+            model->closeTools();
+            FTK_CHECK(model->getOpenTools().empty());
+            FTK_CHECK(tools.empty());
         }
 
         void ToolsModelTest::_persistence()
@@ -75,14 +91,16 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, true);
                 auto model = models::ToolsModel::create(settings);
-                model->setActiveTool("Files");
+                model->setToolOpen("Files", true);
+                model->setToolOpen("Color Picker", true);
             }
 
             // Recreate from the same file (reset=false loads it) and verify.
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::ToolsModel::create(settings);
-                FTK_CHECK("Files" == model->getActiveTool());
+                FTK_CHECK(model->isToolOpen("Files"));
+                FTK_CHECK(model->isToolOpen("Color Picker"));
             }
 
             std::filesystem::remove(path);

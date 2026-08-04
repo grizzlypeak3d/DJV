@@ -274,6 +274,7 @@ namespace djv
                 timeline == other.timeline &&
                 bottomToolBar == other.bottomToolBar &&
                 statusToolBar == other.statusToolBar &&
+                tools == other.tools &&
                 splitter == other.splitter &&
                 splitter2 == other.splitter2;
         }
@@ -990,6 +991,7 @@ namespace djv
                 { "Timeline", in.timeline },
                 { "BottomToolBar", in.bottomToolBar },
                 { "StatusToolBar", in.statusToolBar },
+                { "Tools", in.tools },
                 { "Splitter", in.splitter },
                 { "Splitter2", in.splitter2 }
             };
@@ -1143,6 +1145,13 @@ namespace djv
             json.at("Timeline").get_to(value.timeline);
             json.at("BottomToolBar").get_to(value.bottomToolBar);
             json.at("StatusToolBar").get_to(value.statusToolBar);
+            // Asked for rather than required, so that settings written before
+            // the panel could be hidden still load the rest of the window
+            // instead of falling back to the defaults for all of it.
+            if (json.contains("Tools"))
+            {
+                json.at("Tools").get_to(value.tools);
+            }
             json.at("Splitter").get_to(value.splitter);
             json.at("Splitter2").get_to(value.splitter2);
         }

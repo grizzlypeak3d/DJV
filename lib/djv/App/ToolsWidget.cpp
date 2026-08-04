@@ -7,8 +7,11 @@
 #include <djv/App/IToolWidget.h>
 #include <djv/Models/ToolsModel.h>
 
+#include <algorithm>
+
+#include <ftk/UI/Divider.h>
 #include <ftk/UI/RowLayout.h>
-#include <ftk/UI/StackLayout.h>
+#include <ftk/UI/ScrollWidget.h>
 
 namespace djv
 {
@@ -16,8 +19,15 @@ namespace djv
     {
         struct ToolsWidget::Private
         {
-            std::shared_ptr<IToolWidget> toolWidget;
-            std::shared_ptr<ftk::Observer<std::string> > activeObserver;
+            std::weak_ptr<App> app;
+            std::weak_ptr<MainWindow> mainWindow;
+            // Kept by name so that opening a second tool does not take the
+            // first one apart and build it again.
+            std::map<std::string, std::shared_ptr<IToolWidget> > toolWidgets;
+            std::vector<std::shared_ptr<ftk::Divider> > dividers;
+            std::shared_ptr<ftk::VerticalLayout> layout;
+            std::shared_ptr<ftk::ScrollWidget> scrollWidget;
+            std::shared_ptr<ftk::ListObserver<std::string> > openObserver;
         };
 
         void ToolsWidget::_init(
@@ -32,25 +42,29 @@ namespace djv
                 parent);
             FTK_P();
 
-            std::weak_ptr<App> appWeak(app);
-            std::weak_ptr<MainWindow> mainWindowWeak(mainWindow);
-            p.activeObserver = ftk::Observer<std::string>::create(
-                app->getToolsModel()->observeActiveTool(),
-                [this, appWeak, mainWindowWeak](const std::string& value)
+            p.app = app;
+            p.mainWindow = mainWindow;
+
+            p.layout = ftk::VerticalLayout::create(context);
+            p.layout->setMarginRole(ftk::SizeRole::None);
+            p.layout->setSpacingRole(ftk::SizeRole::None);
+
+            // One scroll area for the whole stack rather than one inside each
+            // tool: a tool then takes the height its contents need instead of
+            // an equal share of the panel, and there is a single scroll bar
+            // rather than one nested in another. Tools whose contents have no
+            // natural end -- the logs -- keep their own, which stops at the
+            // scroll area size role rather than growing without limit.
+            p.scrollWidget = ftk::ScrollWidget::create(
+                context, ftk::ScrollType::Both, shared_from_this());
+            p.scrollWidget->setBorder(false);
+            p.scrollWidget->setWidget(p.layout);
+
+            p.openObserver = ftk::ListObserver<std::string>::create(
+                app->getToolsModel()->observeOpenTools(),
+                [this](const std::vector<std::string>& value)
                 {
-                    FTK_P();
-                    if (p.toolWidget)
-                    {
-                        p.toolWidget->setParent(nullptr);
-                        p.toolWidget.reset();
-                    }
-                    auto app = appWeak.lock();
-                    p.toolWidget = app->getToolWidgetFactory()->createTool(
-                        value,
-                        getContext(),
-                        app,
-                        mainWindowWeak.lock(),
-                        shared_from_this());
+                    _widgetUpdate(value);
                 });
         }
 
@@ -72,25 +86,76 @@ namespace djv
             return out;
         }
 
-        const std::shared_ptr<IToolWidget>& ToolsWidget::getToolWidget() const
+        std::shared_ptr<IToolWidget> ToolsWidget::getToolWidget(
+            const std::string& name) const
         {
-            return _p->toolWidget;
+            FTK_P();
+            const auto i = p.toolWidgets.find(name);
+            return i != p.toolWidgets.end() ? i->second : nullptr;
         }
 
         ftk::Size2I ToolsWidget::getSizeHint() const
         {
-            FTK_P();
-            return p.toolWidget ? p.toolWidget->getSizeHint() : ftk::Size2I();
+            return _p->scrollWidget->getSizeHint();
         }
 
-        void ToolsWidget::setGeometry(const ftk::Box2I & value)
+        void ToolsWidget::setGeometry(const ftk::Box2I& value)
         {
             IWidget::setGeometry(value);
+            _p->scrollWidget->setGeometry(value);
+        }
+
+        void ToolsWidget::_widgetUpdate(const std::vector<std::string>& open)
+        {
             FTK_P();
-            if (p.toolWidget)
+
+            // Take apart only what is no longer open.
+            for (auto i = p.toolWidgets.begin(); i != p.toolWidgets.end(); )
             {
-                p.toolWidget->setGeometry(value);
+                if (std::find(open.begin(), open.end(), i->first) == open.end())
+                {
+                    i->second->setParent(nullptr);
+                    i = p.toolWidgets.erase(i);
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+
+            // The dividers go between whatever the order turns out to be, so
+            // they are made again each time rather than tracked.
+            for (const auto& divider : p.dividers)
+            {
+                divider->setParent(nullptr);
+            }
+            p.dividers.clear();
+
+            auto app = p.app.lock();
+            auto mainWindow = p.mainWindow.lock();
+            auto context = getContext();
+            bool first = true;
+            for (const auto& name : open)
+            {
+                if (!first)
+                {
+                    p.dividers.push_back(ftk::Divider::create(
+                        context, ftk::Orientation::Vertical, p.layout));
+                }
+                first = false;
+                auto i = p.toolWidgets.find(name);
+                if (i == p.toolWidgets.end())
+                {
+                    i = p.toolWidgets.insert(std::make_pair(
+                        name,
+                        app->getToolWidgetFactory()->createTool(
+                            name, context, app, mainWindow, nullptr))).first;
+                }
+                // Reparented every time so the layout order follows the list
+                // rather than the order the widgets were made in.
+                i->second->setParent(p.layout);
             }
         }
+
     }
 }

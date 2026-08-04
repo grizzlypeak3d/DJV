@@ -61,6 +61,9 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::None);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::None);
+            // Coloured so that each tool reads as its own thing in a stack of
+            // them, rather than the panel being one long column of controls.
+            hLayout->setBackgroundRole(ftk::ColorRole::Header);
             p.icon->setParent(hLayout);
             p.label->setParent(hLayout);
             p.closeButton->setParent(hLayout);
@@ -70,13 +73,15 @@ namespace djv
             p.toolLayout->setHStretch(ftk::Stretch::Expanding);
             p.toolLayout->setVStretch(ftk::Stretch::Expanding);
 
+            // Closes this tool rather than whatever is open: more than one
+            // can be, and closing is how a tool is put away.
             auto appWeak = std::weak_ptr<App>(app);
             p.closeButton->setClickedCallback(
-                [appWeak]
+                [appWeak, name]
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getToolsModel()->setActiveTool(std::string());
+                        app->getToolsModel()->setToolOpen(name, false);
                     }
                 });
         }

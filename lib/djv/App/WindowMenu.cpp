@@ -65,6 +65,7 @@ namespace djv
             addAction(actions["Timeline"]);
             addAction(actions["BottomToolBar"]);
             addAction(actions["StatusToolBar"]);
+            addAction(actions["Tools"]);
         }
 
         WindowMenu::WindowMenu() :

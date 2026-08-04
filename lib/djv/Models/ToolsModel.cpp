@@ -7,6 +7,7 @@
 #include <ftk/Core/Error.h>
 #include <ftk/Core/String.h>
 
+#include <algorithm>
 #include <array>
 #include <iostream>
 #include <sstream>
@@ -19,7 +20,7 @@ namespace djv
         {
             std::shared_ptr<ftk::Settings> settings;
             std::vector<ToolInfo> tools;
-            std::shared_ptr<ftk::Observable<std::string> > activeTool;
+            std::shared_ptr<ftk::ObservableList<std::string> > openTools;
         };
 
         void ToolsModel::_init(const std::shared_ptr<ftk::Settings>& settings)
@@ -41,9 +42,12 @@ namespace djv
             p.tools.push_back({ "System Log", std::string(), "Y", false, ftk::Key::F12 });
             p.tools.push_back({ "Diagnostics", std::string(), "Z", false, ftk::KeyShortcut() });
 
-            std::string s;
-            p.settings->get("/Tools/Tool.2", s);
-            p.activeTool = ftk::Observable<std::string>::create(s);
+            // More than one tool can be open now, so what was written before
+            // says nothing about which; the key moves rather than trying to
+            // read the old one as a list of one.
+            std::vector<std::string> open;
+            p.settings->get("/Tools/Open.1", open);
+            p.openTools = ftk::ObservableList<std::string>::create(_sorted(open));
         }
 
         ToolsModel::ToolsModel() :
@@ -53,7 +57,7 @@ namespace djv
         ToolsModel::~ToolsModel()
         {
             FTK_P();
-            p.settings->set("/Tools/Tool.2", p.activeTool->get());
+            p.settings->set("/Tools/Open.1", p.openTools->get());
         }
 
         std::shared_ptr<ToolsModel> ToolsModel::create(const std::shared_ptr<ftk::Settings>& settings)
@@ -73,19 +77,57 @@ namespace djv
             _p->tools.push_back(value);
         }
 
-        const std::string& ToolsModel::getActiveTool() const
+        const std::vector<std::string>& ToolsModel::getOpenTools() const
         {
-            return _p->activeTool->get();
+            return _p->openTools->get();
         }
 
-        std::shared_ptr<ftk::Observable<std::string> > ToolsModel::observeActiveTool() const
+        std::shared_ptr<ftk::IObservableList<std::string> > ToolsModel::observeOpenTools() const
         {
-            return _p->activeTool;
+            return _p->openTools;
         }
 
-        void ToolsModel::setActiveTool(const std::string& value)
+        bool ToolsModel::isToolOpen(const std::string& value) const
         {
-            _p->activeTool->setIfChanged(value);
+            FTK_P();
+            const auto& open = p.openTools->get();
+            return std::find(open.begin(), open.end(), value) != open.end();
+        }
+
+        void ToolsModel::setToolOpen(const std::string& value, bool open)
+        {
+            FTK_P();
+            auto tools = p.openTools->get();
+            const auto i = std::find(tools.begin(), tools.end(), value);
+            if (open && i == tools.end())
+            {
+                tools.push_back(value);
+            }
+            else if (!open && i != tools.end())
+            {
+                tools.erase(i);
+            }
+            p.openTools->setIfChanged(_sorted(tools));
+        }
+
+        void ToolsModel::closeTools()
+        {
+            _p->openTools->setIfChanged(std::vector<std::string>());
+        }
+
+        std::vector<std::string> ToolsModel::_sorted(
+            const std::vector<std::string>& value) const
+        {
+            FTK_P();
+            std::vector<std::string> out;
+            for (const auto& tool : p.tools)
+            {
+                if (std::find(value.begin(), value.end(), tool.name) != value.end())
+                {
+                    out.push_back(tool.name);
+                }
+            }
+            return out;
         }
     }
 }

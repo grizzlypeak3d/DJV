@@ -4,6 +4,7 @@
 #include <djv/App/StatusBar.h>
 
 #include <djv/App/App.h>
+#include <djv/Models/SettingsModel.h>
 #include <djv/Models/ToolsModel.h>
 
 #include <ftk/UI/Divider.h>
@@ -181,8 +182,19 @@ namespace djv
                 if (auto app = p.app.lock())
                 {
                     auto toolsModel = app->getToolsModel();
-                    const auto active = toolsModel->getActiveTool();
-                    toolsModel->setActiveTool(tool != active ? tool : std::string());
+                    const bool open = !toolsModel->isToolOpen(tool);
+                    toolsModel->setToolOpen(tool, open);
+                    if (open)
+                    {
+                        // See the note in ToolsActions: a tool opened while
+                        // the panel is hidden has to bring it back.
+                        auto window = app->getSettingsModel()->getWindow();
+                        if (!window.tools)
+                        {
+                            window.tools = true;
+                            app->getSettingsModel()->setWindow(window);
+                        }
+                    }
                 }
             }
         }

@@ -204,6 +204,20 @@ namespace djv
                     }
                 });
 
+            _addCheckCommand(
+                "Tools",
+                "Toggle the tools panel.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getSettingsModel()->getWindow();
+                        options.tools = value;
+                        app->getSettingsModel()->setWindow(options);
+                    }
+                });
+
             // Create the actions.
             _actions["FullScreen"] = ftk::Action::create(
                 "Full Screen",
@@ -243,6 +257,9 @@ namespace djv
             _actions["BottomToolBar"] = ftk::Action::create(
                 "Bottom Tool Bar",
                 _checkCommand("BottomToolBar"));
+            _actions["Tools"] = ftk::Action::create(
+                "Tools",
+                _checkCommand("Tools"));
             _actions["StatusToolBar"] = ftk::Action::create(
                 "Status Tool Bar",
                 _checkCommand("StatusToolBar"));
@@ -261,6 +278,7 @@ namespace djv
             _addShortcut("Timeline", "Timeline");
             _addShortcut("BottomToolBar", "Bottom tool bar");
             _addShortcut("StatusToolBar", "Status tool bar");
+            _addShortcut("Tools", "Tools panel");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
@@ -305,6 +323,7 @@ namespace djv
                     _actions["Timeline"]->setChecked(value.timeline);
                     _actions["BottomToolBar"]->setChecked(value.bottomToolBar);
                     _actions["StatusToolBar"]->setChecked(value.statusToolBar);
+                    _actions["Tools"]->setChecked(value.tools);
                 });
         }
 

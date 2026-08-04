@@ -176,7 +176,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
-            std::shared_ptr<ftk::Observer<std::string> > activeToolObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > openToolsObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
             std::shared_ptr<ftk::Observer<models::TimelineSettings> > timelineSettingsObserver;
             std::shared_ptr<ftk::Observer<bool> > timelineFrameViewObserver;
@@ -467,9 +467,9 @@ namespace djv
                         ftk::WindowBufferType::F16);
                 });
 
-            p.activeToolObserver = ftk::Observer<std::string>::create(
-                app->getToolsModel()->observeActiveTool(),
-                [this](const std::string&)
+            p.openToolsObserver = ftk::ListObserver<std::string>::create(
+                app->getToolsModel()->observeOpenTools(),
+                [this](const std::vector<std::string>&)
                 {
                     _windowUpdate();
                 });
@@ -562,9 +562,10 @@ namespace djv
             return _p->timelineWidget;
         }
 
-        const std::shared_ptr<IToolWidget>& MainWindow::getToolWidget() const
+        std::shared_ptr<IToolWidget> MainWindow::getToolWidget(
+            const std::string& name) const
         {
-            return _p->toolsWidget->getToolWidget();
+            return _p->toolsWidget->getToolWidget(name);
         }
 
         void MainWindow::setSplitters(float splitter, float splitter2)
@@ -766,7 +767,8 @@ namespace djv
                 p.tabBar->setVisible(settings.tabBar && !presentMode);
 
                 p.toolsWidget->setVisible(
-                    !app->getToolsModel()->getActiveTool().empty() &&
+                    settings.tools &&
+                    !app->getToolsModel()->getOpenTools().empty() &&
                     !presentMode);
 
                 p.timelineWidget->setVisible(settings.timeline && !presentMode);

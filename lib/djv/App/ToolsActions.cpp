@@ -4,7 +4,10 @@
 #include <djv/App/ToolsActions.h>
 
 #include <djv/App/App.h>
+#include <djv/Models/SettingsModel.h>
 #include <djv/Models/ToolsModel.h>
+
+#include <algorithm>
 
 #include <ftk/Core/Format.h>
 
@@ -14,7 +17,7 @@ namespace djv
     {
         struct ToolsActions::Private
         {
-            std::shared_ptr<ftk::Observer<std::string> > activeObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > openObserver;
         };
 
         void ToolsActions::_init(
@@ -36,14 +39,20 @@ namespace djv
                         const bool value = args.at("value").get<bool>();
                         if (auto app = appWeak.lock())
                         {
-                            auto toolsModel = app->getToolsModel();
+                            app->getToolsModel()->setToolOpen(tool.name, value);
                             if (value)
                             {
-                                toolsModel->setActiveTool(tool.name);
-                            }
-                            else if (toolsModel->getActiveTool() == tool.name)
-                            {
-                                toolsModel->setActiveTool(std::string());
+                                // Opening a tool while the panel is hidden
+                                // would otherwise do nothing that can be
+                                // seen, which reads as the button being
+                                // broken.
+                                auto window =
+                                    app->getSettingsModel()->getWindow();
+                                if (!window.tools)
+                                {
+                                    window.tools = true;
+                                    app->getSettingsModel()->setWindow(window);
+                                }
                             }
                         }
                     });
@@ -60,13 +69,15 @@ namespace djv
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
-            p.activeObserver = ftk::Observer<std::string>::create(
-                app->getToolsModel()->observeActiveTool(),
-                [this](const std::string& value)
+            p.openObserver = ftk::ListObserver<std::string>::create(
+                app->getToolsModel()->observeOpenTools(),
+                [this](const std::vector<std::string>& value)
                 {
                     for (auto i : _actions)
                     {
-                        i.second->setChecked(i.first == value);
+                        i.second->setChecked(
+                            std::find(value.begin(), value.end(), i.first) !=
+                            value.end());
                     }
                 });
         }

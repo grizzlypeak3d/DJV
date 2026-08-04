@@ -295,6 +295,7 @@ namespace djv
             bool timeline = true;
             bool bottomToolBar = true;
             bool statusToolBar = true;
+            bool tools = true;
             float splitter = .7F;
             float splitter2 = .7F;
 

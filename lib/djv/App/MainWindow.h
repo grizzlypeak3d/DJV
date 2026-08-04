@@ -66,7 +66,8 @@ namespace djv
             const std::shared_ptr<tl::ui::TimelineWidget>& getTimelineWidget() const;
 
             //! Get the active tool widget, or null if no tool is active.
-            const std::shared_ptr<IToolWidget>& getToolWidget() const;
+            //! Get an open tool by name, or null when it is not open.
+            std::shared_ptr<IToolWidget> getToolWidget(const std::string&) const;
 
             //! Set the two splitter positions (0-1). The settings store these
             //! but only apply them at construction, so this moves the widgets

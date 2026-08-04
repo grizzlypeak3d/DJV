@@ -6,6 +6,7 @@
 #include <ftk/UI/Action.h>
 #include <ftk/UI/Event.h>
 #include <ftk/Core/Observable.h>
+#include <ftk/Core/ObservableList.h>
 
 namespace ftk
 {
@@ -49,16 +50,29 @@ namespace djv
             //! Add a tool.
             void addTool(const ToolInfo&);
 
-            //! Get the active tool.
-            const std::string& getActiveTool() const;
+            //! Get the open tools, in the order they are listed above rather
+            //! than the order they were opened, so that opening one does not
+            //! move the others around.
+            const std::vector<std::string>& getOpenTools() const;
 
-            //! Observe the active tool.
-            std::shared_ptr<ftk::Observable<std::string> > observeActiveTool() const;
+            //! Observe the open tools.
+            std::shared_ptr<ftk::IObservableList<std::string> > observeOpenTools() const;
 
-            //! Set the active tool.
-            void setActiveTool(const std::string&);
+            //! Get whether a tool is open.
+            bool isToolOpen(const std::string&) const;
+
+            //! Open or close a tool.
+            void setToolOpen(const std::string&, bool);
+
+            //! Close every tool.
+            void closeTools();
 
         private:
+            // Kept in the order the tools are listed, and anything not in that
+            // list dropped: a settings file can name a tool that no longer
+            // exists.
+            std::vector<std::string> _sorted(const std::vector<std::string>&) const;
+
             FTK_PRIVATE();
         };
     }
