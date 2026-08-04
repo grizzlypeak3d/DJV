@@ -703,7 +703,7 @@ namespace djv
 
         std::vector<std::string> getCompareTimeLabels()
         {
-            return { "Start of file", "Timecode" };
+            return { "Start of File", "Timecode" };
         }
 
     }

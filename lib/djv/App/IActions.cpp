@@ -3,6 +3,8 @@
 
 #include <djv/App/IActions.h>
 
+#include <ftk/Core/Assert.h>
+
 #include <djv/App/App.h>
 
 #include <ftk/Core/Format.h>
@@ -98,6 +100,23 @@ namespace djv
                     commandsModel->exec(commandName);
                 }
             };
+        }
+
+        void IActions::_addShortcut(
+            const std::string& name,
+            const ftk::KeyShortcut& primary,
+            const ftk::KeyShortcut& secondary)
+        {
+            // Without an action there is no name to take, and the shortcut
+            // would be listed under the key instead -- which reads like a
+            // label without being one.
+            const auto i = _actions.find(name);
+            FTK_ASSERT(i != _actions.end());
+            _addShortcut(
+                name,
+                i != _actions.end() ? i->second->getText() : name,
+                primary,
+                secondary);
         }
 
         void IActions::_addShortcut(

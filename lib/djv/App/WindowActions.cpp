@@ -265,20 +265,20 @@ namespace djv
                 _checkCommand("StatusToolBar"));
 
             // Register the shortcuts.
-            _addShortcut("FullScreen", "Full screen", ftk::Key::U);
-            _addShortcut("PresentMode", "Presentation mode", ftk::KeyShortcut(ftk::Key::P, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("FloatOnTop", "Float on top");
-            _addShortcut("Secondary", "Secondary", ftk::Key::Y);
-            _addShortcut("FileToolBar", "File tool bar");
-            _addShortcut("CompareToolBar", "Compare tool bar");
-            _addShortcut("WindowToolBar", "Window tool bar");
-            _addShortcut("ViewToolBar", "View tool bar");
-            _addShortcut("ToolsToolBar", "Tools tool bar");
-            _addShortcut("TabBar", "Tab bar");
-            _addShortcut("Timeline", "Timeline");
-            _addShortcut("BottomToolBar", "Bottom tool bar");
-            _addShortcut("StatusToolBar", "Status tool bar");
-            _addShortcut("Tools", "Tools panel");
+            _addShortcut("FullScreen", ftk::Key::U);
+            _addShortcut("PresentMode", "Presentation Mode", ftk::KeyShortcut(ftk::Key::P, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("FloatOnTop");
+            _addShortcut("Secondary", ftk::Key::Y);
+            _addShortcut("FileToolBar");
+            _addShortcut("CompareToolBar");
+            _addShortcut("WindowToolBar");
+            _addShortcut("ViewToolBar");
+            _addShortcut("ToolsToolBar");
+            _addShortcut("TabBar");
+            _addShortcut("Timeline");
+            _addShortcut("BottomToolBar");
+            _addShortcut("StatusToolBar");
+            _addShortcut("Tools", "Tools Panel");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

@@ -64,8 +64,8 @@ namespace djv
                 _checkCommand("LUT"));
 
             // Register the shortcuts.
-            _addShortcut("OCIO", "Enable OCIO", ftk::KeyShortcut(ftk::Key::N, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("LUT", "Enable LUT", ftk::KeyShortcut(ftk::Key::K, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("OCIO", ftk::KeyShortcut(ftk::Key::N, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("LUT", ftk::KeyShortcut(ftk::Key::K, static_cast<int>(ftk::KeyModifier::Control)));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

@@ -266,20 +266,20 @@ namespace djv
                 _command("WaveformSizeLarge"));
 
             // Register the shortcuts.
-            _addShortcut("Minimize", "Minimize");
-            _addShortcut("FrameView", "Frame view");
-            _addShortcut("ScrollBars", "Scroll bars");
-            _addShortcut("AutoScroll", "Auto scroll");
-            _addShortcut("StopOnScrub", "Stop on scrub");
-            _addShortcut("Thumbnails", "Video thumbnails");
-            _addShortcut("ThumbnailSizeSmall", "Small thumbnails");
-            _addShortcut("ThumbnailSizeMedium", "Medium thumbnails");
-            _addShortcut("ThumbnailSizeLarge", "Large thumbnails");
-            _addShortcut("Waveforms", "Audio waveforms");
-            _addShortcut("TrackMedia", "Track media", ftk::Key::C);
-            _addShortcut("WaveformSizeSmall", "Small waveforms");
-            _addShortcut("WaveformSizeMedium", "Medium waveforms");
-            _addShortcut("WaveformSizeLarge", "Large waveforms");
+            _addShortcut("Minimize");
+            _addShortcut("FrameView");
+            _addShortcut("ScrollBars");
+            _addShortcut("AutoScroll");
+            _addShortcut("StopOnScrub", "Stop On Scrub");
+            _addShortcut("Thumbnails");
+            _addShortcut("ThumbnailSizeSmall", "Small Thumbnails");
+            _addShortcut("ThumbnailSizeMedium", "Medium Thumbnails");
+            _addShortcut("ThumbnailSizeLarge", "Large Thumbnails");
+            _addShortcut("Waveforms");
+            _addShortcut("TrackMedia", ftk::Key::C);
+            _addShortcut("WaveformSizeSmall", "Small Waveforms");
+            _addShortcut("WaveformSizeMedium", "Medium Waveforms");
+            _addShortcut("WaveformSizeLarge", "Large Waveforms");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
@@ -293,9 +293,6 @@ namespace djv
                     _actions["AutoScroll"]->setChecked(value.autoScroll);
                     _actions["StopOnScrub"]->setChecked(value.stopOnScrub);
                     _actions["TrackMedia"]->setChecked(value.trackMedia);
-                    // Shown as they are, but with nothing to do while no
-                    // media is in the timeline at all, so the grey says why
-                    // rather than leaving them looking broken.
                     _actions["Thumbnails"]->setChecked(value.thumbnails);
                     _actions["Thumbnails"]->setEnabled(value.trackMedia);
                     _actions["Waveforms"]->setChecked(value.waveforms);
