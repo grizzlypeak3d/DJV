@@ -1096,43 +1096,14 @@ namespace djv
         bool Capture::_writePNG(const std::filesystem::path& path) const
         {
             FTK_P();
-            auto context = p.context.lock();
             auto app = p.app.lock();
-            if (!context || !app || app->getWindows().empty())
+            if (!app)
                 return false;
-            auto image = app->getWindows().front()->screenshot();
-            if (!image)
+            if (!app->writeScreenshot(path))
             {
-                note(p.shotId, "screenshot returned no image (offscreen buffer not ready)");
-                return false;
-            }
-
-            // ftk blends with straight (non-premultiplied) alpha, so a
-            // semi-transparent overlay -- e.g. a dialog's dimming scrim -- leaves
-            // that region of the RGBA buffer with alpha < 1, even though its RGB
-            // is the correct darkened result. A window capture is logically
-            // opaque; left as-is those pixels let the white docs page show
-            // through and the dimming reads as light/inverted. Force the image
-            // fully opaque before writing (the RGB already matches the screen).
-            if (uint8_t* data = image->getData())
-            {
-                const ftk::Size2I size = image->getSize();
-                const size_t bytes = image->getByteCount();
-                if (bytes == static_cast<size_t>(size.w) * size.h * 4)
-                {
-                    for (size_t i = 3; i < bytes; i += 4)
-                        data[i] = 255;
-                }
-            }
-
-            auto io = context->getSystem<ftk::ImageIO>();
-            auto writer = io->write(path, image->getInfo());
-            if (!writer)
-            {
-                note(p.shotId, ftk::Format("no PNG writer for \"{0}\"").arg(path.u8string()));
+                note(p.shotId, ftk::Format("cannot capture \"{0}\"").arg(path.u8string()));
                 return false;
             }
-            writer->write(image);
             return true;
         }
 

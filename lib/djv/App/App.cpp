@@ -94,9 +94,6 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<int> > usdStageCacheCount;
             std::shared_ptr<ftk::CmdLineOption<int> > usdDiskCacheGB;
 #endif // TLRENDER_USD
-            std::shared_ptr<ftk::CmdLineOption<std::string> > logFileName;
-            std::shared_ptr<ftk::CmdLineFlag> resetSettings;
-            std::shared_ptr<ftk::CmdLineOption<std::string> > settingsFileName;
             std::shared_ptr<ftk::CmdLineFlag> hideSetup;
             std::shared_ptr<ftk::CmdLineFlag> version;
             std::shared_ptr<ftk::CmdLineFlag> sysInfo;
@@ -169,13 +166,9 @@ namespace djv
 
         struct App::Private
         {
-            std::filesystem::path logFile;
-            std::filesystem::path settingsFile;
             CmdLine cmdLine;
 
             std::shared_ptr<models::AppInfoModel> appInfoModel;
-            std::shared_ptr<ftk::FileLogSystem> fileLogSystem;
-            std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<models::SettingsModel> settingsModel;
             std::shared_ptr<ftk::SysLogModel> sysLogModel;
             std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
@@ -238,8 +231,6 @@ namespace djv
             FTK_P();
 
             p.appInfoModel = appInfoModel ? appInfoModel : models::AppInfoModel::create();
-            p.logFile = _getLogFilePath();
-            p.settingsFile = _getSettingsPath();
 
             p.cmdLine.inputs = ftk::CmdLineListArg<std::string>::create(
                 "input",
@@ -380,19 +371,6 @@ namespace djv
                 "USD",
                 0);
 #endif // TLRENDER_USD
-            p.cmdLine.logFileName = ftk::CmdLineOption<std::string>::create(
-                { "-logFile" },
-                "Log file name.",
-                std::string(),
-                ftk::Format("{0}").arg(p.logFile.u8string()));
-            p.cmdLine.resetSettings = ftk::CmdLineFlag::create(
-                { "-resetSettings" },
-                "Reset settings to defaults.");
-            p.cmdLine.settingsFileName = ftk::CmdLineOption<std::string>::create(
-                { "-settingsFile" },
-                "Settings file name.",
-                std::string(),
-                ftk::Format("{0}").arg(p.settingsFile.u8string()));
             p.cmdLine.hideSetup = ftk::CmdLineFlag::create(
                 { "-hideSetup" },
                 "Hide the setup dialog that is shown on the first run.");
@@ -467,9 +445,6 @@ namespace djv
                     p.cmdLine.usdStageCacheCount,
                     p.cmdLine.usdDiskCacheGB,
 #endif // TLRENDER_USD
-                    p.cmdLine.logFileName,
-                    p.cmdLine.resetSettings,
-                    p.cmdLine.settingsFileName,
                     p.cmdLine.hideSetup,
                     p.cmdLine.version,
                     p.cmdLine.sysInfo,
@@ -479,7 +454,11 @@ namespace djv
                     p.cmdLine.captureManifest,
                     p.cmdLine.captureShot,
                     p.cmdLine.captureOutput
-                });
+                },
+                ftk::AppFiles{
+                    p.appInfoModel->getDocsDirName(),
+                    p.appInfoModel->getShortName(),
+                    p.appInfoModel->getVersionMajor() });
         }
 
         App::App() :
@@ -504,10 +483,6 @@ namespace djv
             return _p->appInfoModel;
         }
 
-        const std::shared_ptr<ftk::Settings>& App::getSettings() const
-        {
-            return _p->settings;
-        }
 
         const std::shared_ptr<models::SettingsModel>& App::getSettingsModel() const
         {
@@ -897,27 +872,6 @@ namespace djv
         {
             FTK_P();
 
-            // The option was being registered and then never read, so the
-            // log always went to the documents folder -- which is the one
-            // place a user cannot move it away from when something else is
-            // writing there (see #549).
-            if (p.cmdLine.logFileName->found())
-            {
-                p.logFile = std::filesystem::u8path(
-                    p.cmdLine.logFileName->getValue());
-            }
-            p.fileLogSystem = ftk::FileLogSystem::create(_context, p.logFile);
-
-            if (p.cmdLine.settingsFileName->found())
-            {
-                p.settingsFile = std::filesystem::u8path(
-                    p.cmdLine.settingsFileName->getValue());
-            }
-            p.settings = ftk::Settings::create(
-                _context,
-                p.settingsFile,
-                p.cmdLine.resetSettings->found());
-
             _modelsInit();
             _observersInit();
             _inputFilesInit();
@@ -1068,7 +1022,7 @@ namespace djv
 
             p.settingsModel = models::SettingsModel::create(
                 _context,
-                p.settings,
+                getSettings(),
                 getDefaultDisplayScale());
             if (getColorStyleCmdLineOption()->found() ||
                 getDisplayScaleCmdLineOption()->found())
@@ -1129,11 +1083,11 @@ namespace djv
 
             p.sysLogModel = ftk::SysLogModel::create(_context);
 
-            p.timeUnitsModel = models::TimeUnitsModel::create(_context, p.settings);
+            p.timeUnitsModel = models::TimeUnitsModel::create(_context, getSettings());
             
-            p.filesModel = models::FilesModel::create(p.settings);
+            p.filesModel = models::FilesModel::create(getSettings());
 
-            p.recentFilesModel = models::RecentFilesModel::create(_context, p.settings);
+            p.recentFilesModel = models::RecentFilesModel::create(_context, getSettings());
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
             ftk::FileBrowserOptions fileBrowserOptions;
@@ -1141,7 +1095,7 @@ namespace djv
             fileBrowserSystem->getModel()->setOptions(fileBrowserOptions);
             fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
 
-            p.colorModel = models::ColorModel::create(_context, p.settings);
+            p.colorModel = models::ColorModel::create(_context, getSettings());
             if (p.cmdLine.ocioFileName->found() ||
                 p.cmdLine.ocioInput->found() ||
                 p.cmdLine.ocioDisplay->found() ||
@@ -1188,11 +1142,11 @@ namespace djv
                 p.colorModel->setLUTOptions(options);
             }
 
-            p.viewportModel = models::ViewportModel::create(_context, p.settings);
+            p.viewportModel = models::ViewportModel::create(_context, getSettings());
 
-            p.audioModel = models::AudioModel::create(_context, p.settings);
+            p.audioModel = models::AudioModel::create(_context, getSettings());
 
-            p.toolsModel = models::ToolsModel::create(p.settings);
+            p.toolsModel = models::ToolsModel::create(getSettings());
 
             p.commandsModel = models::CommandsModel::create(_context);
         }
@@ -1528,39 +1482,6 @@ namespace djv
             _audioUpdate();
         }
 
-        std::filesystem::path App::_appDocsPath()
-        {
-            FTK_P();
-            const std::filesystem::path documentsPath = ftk::getUserPath(ftk::UserPath::Documents);
-            if (!std::filesystem::exists(documentsPath))
-            {
-                std::filesystem::create_directory(documentsPath);
-            }
-            const std::filesystem::path out = documentsPath / p.appInfoModel->getDocsDirName();
-            if (!std::filesystem::exists(out))
-            {
-                std::filesystem::create_directory(out);
-            }
-            return out;
-        }
-
-        std::filesystem::path App::_getLogFilePath()
-        {
-            FTK_P();
-            return _appDocsPath() / ftk::Format("{0}.{1}.log").
-                arg(p.appInfoModel->getShortName()).
-                arg(p.appInfoModel->getVersionMajor()).
-                str();
-        }
-
-        std::filesystem::path App::_getSettingsPath()
-        {
-            FTK_P();
-            return _appDocsPath() / ftk::Format("{0}.{1}.json").
-                arg(p.appInfoModel->getShortName()).
-                arg(p.appInfoModel->getVersionMajor()).
-                str();
-        }
 
         void App::_filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& files)
         {

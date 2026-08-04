@@ -67,9 +67,6 @@ namespace djv
             //! Get the application information model.
             const std::shared_ptr<models::AppInfoModel>& getAppInfoModel() const;
 
-            //! Get the settings.
-            const std::shared_ptr<ftk::Settings>& getSettings() const;
-
             //! Get the settings model.
             const std::shared_ptr<models::SettingsModel>& getSettingsModel() const;
 
@@ -162,10 +159,6 @@ namespace djv
             virtual void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);
 
         private:
-            std::filesystem::path _appDocsPath();
-            std::filesystem::path _getLogFilePath();
-            std::filesystem::path _getSettingsPath();
-
             void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
