@@ -228,6 +228,10 @@ namespace djv
                         mw->setSplitters(win.splitter, win.splitter2);
                 }
             }
+            // Nobody is watching a capture run, and a window on screen can be
+            // clicked or hovered while the shot is being taken, which puts a
+            // highlight or a tooltip into it.
+            app->setOffscreen(true);
             window->show();
 
             // Open the shot's files now; the rest of the setup waits until the
