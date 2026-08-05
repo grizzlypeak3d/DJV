@@ -277,6 +277,7 @@ namespace djv
 
             p.viewToolBar = ViewToolBar::create(
                 context,
+                app,
                 std::dynamic_pointer_cast<MainWindow>(shared_from_this()),
                 p.viewActions);
             ftk::setScreenshotTag(p.viewToolBar, "MainWindow.ViewToolBar");

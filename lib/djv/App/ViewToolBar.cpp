@@ -3,6 +3,7 @@
 
 #include <djv/App/ViewToolBar.h>
 
+#include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/ViewActions.h>
 #include <djv/App/Viewport.h>
@@ -20,11 +21,13 @@ namespace djv
             std::shared_ptr<ftk::DoubleResetButton> zoomReset;
 
             std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > posZoomObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             bool updating = false;
         };
 
         void ViewToolBar::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
             const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<ViewActions>& viewActions,
             const std::shared_ptr<IWidget>& parent)
@@ -75,6 +78,16 @@ namespace djv
                     p.zoomEdit->setValue(value.second);
                     p.updating = false;
                 });
+
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
+                app->observePlayer(),
+                [this](const std::shared_ptr<tl::Player>& value)
+                {
+                    // There is no zoom to show without an image; the actions
+                    // beside this are gated the same way in ViewActions.
+                    _p->zoomEdit->setEnabled(
+                        value && !value->getIOInfo().video.empty());
+                });
         }
 
         ViewToolBar::ViewToolBar() :
@@ -86,12 +99,13 @@ namespace djv
 
         std::shared_ptr<ViewToolBar> ViewToolBar::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<App>& app,
             const std::shared_ptr<MainWindow>& mainWindow,
             const std::shared_ptr<ViewActions>& viewActions,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ViewToolBar>(new ViewToolBar);
-            out->_init(context, mainWindow, viewActions, parent);
+            out->_init(context, app, mainWindow, viewActions, parent);
             return out;
         }
     }

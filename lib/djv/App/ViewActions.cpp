@@ -24,6 +24,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
         void ViewActions::_init(
@@ -428,6 +429,23 @@ namespace djv
                 [this](const models::HUDOptions& value)
                 {
                     _actions["HUD"]->setChecked(value.enabled);
+                });
+
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
+                app->observePlayer(),
+                [this](const std::shared_ptr<tl::Player>& value)
+                {
+                    // Framing, zooming and centering all describe where an
+                    // image sits in the view. Media with no video has no
+                    // image to place, so the zoom would report a number for
+                    // something that is not there.
+                    const bool video =
+                        value && !value->getIOInfo().video.empty();
+                    _actions["Frame"]->setEnabled(video);
+                    _actions["ZoomReset"]->setEnabled(video);
+                    _actions["ZoomIn"]->setEnabled(video);
+                    _actions["ZoomOut"]->setEnabled(video);
+                    _actions["Center"]->setEnabled(video);
                 });
         }
 
