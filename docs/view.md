@@ -65,10 +65,11 @@ Locations: **View** tool
 
 ![Options]({{ '/assets/view-options.svg' | relative_url }})
 
-* **Minify** — Filter used when the image is scaled down (**Nearest** or
-  **Linear**).
-* **Magnify** — Filter used when the image is scaled up. Use **Nearest** to see
-  individual pixels without smoothing.
+* **Minify** — Filter used when the image is scaled down (**Nearest**,
+  **Linear** or **High Quality**).
+* **Magnify** — Filter used when the image is scaled up (**Nearest**,
+  **Linear** or **High Quality**). Use **Nearest** to see individual pixels
+  without smoothing.
 * **Video levels** — How video levels are interpreted: from the file, full
   range, or legal range.
 * **Alpha blend** — How the alpha channel is blended: none, straight, or
@@ -77,6 +78,23 @@ Locations: **View** tool
   recommended because it preserves the full range of color values without
   clamping. Lower bit-depth options can be faster, but they can clamp colors —
   choose them only when performance is more important than precision.
+
+**High Quality** weighs many more pixels than **Linear**, which reads only
+four whatever the scale. The difference shows most where the scale is
+largest — a thumbnail, or the view zoomed well out — where **Linear** misses
+most of the image and fine detail breaks up into aliasing that crawls during
+playback.
+
+It costs more than **Linear**, and the two directions cost differently:
+
+* Scaling **down** is bounded, and gets cheaper the further out you zoom,
+  because there are fewer pixels on screen to produce.
+* Scaling **up** is the opposite: the cost follows the size of the view, so
+  it is highest on a large display at a high zoom.
+
+If playback drops frames, this is one of the settings to try at **Linear** —
+along with **Color buffer** — and the HUD's **Time** item reports the frames
+dropped while you compare them.
 
 ## Aspect ratio
 

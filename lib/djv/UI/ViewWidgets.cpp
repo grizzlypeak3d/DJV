@@ -257,16 +257,14 @@ namespace djv
                     FTK_P();
                     p.videoLevelsComboBox->setCurrentIndex(static_cast<int>(value.videoLevels));
                     p.alphaBlendComboBox->setCurrentIndex(static_cast<int>(value.alphaBlend));
+                    p.minifyComboBox->setCurrentIndex(static_cast<int>(value.imageFilters.minify));
+                    p.magnifyComboBox->setCurrentIndex(static_cast<int>(value.imageFilters.magnify));
                 });
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
-                [this](const tl::DisplayOptions& value)
-                {
-                    FTK_P();
-                    p.minifyComboBox->setCurrentIndex(static_cast<int>(value.imageFilters.minify));
-                    p.magnifyComboBox->setCurrentIndex(static_cast<int>(value.imageFilters.magnify));
-                });
+                [this](const tl::DisplayOptions&)
+                {});
 
             p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
                 viewportModel->observeColorBuffer(),
@@ -285,17 +283,17 @@ namespace djv
             p.minifyComboBox->setIndexCallback(
                 [viewportModel](int value)
                 {
-                    auto options = viewportModel->getDisplayOptions();
+                    auto options = viewportModel->getImageOptions();
                     options.imageFilters.minify = static_cast<ftk::ImageFilter>(value);
-                    viewportModel->setDisplayOptions(options);
+                    viewportModel->setImageOptions(options);
                 });
 
             p.magnifyComboBox->setIndexCallback(
                 [viewportModel](int value)
                 {
-                    auto options = viewportModel->getDisplayOptions();
+                    auto options = viewportModel->getImageOptions();
                     options.imageFilters.magnify = static_cast<ftk::ImageFilter>(value);
-                    viewportModel->setDisplayOptions(options);
+                    viewportModel->setImageOptions(options);
                 });
 
             p.videoLevelsComboBox->setIndexCallback(

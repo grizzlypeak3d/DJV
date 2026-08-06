@@ -76,7 +76,10 @@ namespace djv
             p.settings = settings;
 
             ftk::ImageOptions imageOptions;
-            p.settings->getT("/Viewport/Image", imageOptions);
+            // .1: the minify and magnify filters used to be written to the
+            // display options and were never read from here, so a blob from
+            // before that says nothing about what the view was set to.
+            p.settings->getT("/Viewport/Image.1", imageOptions);
             p.imageOptions = ftk::Observable<ftk::ImageOptions>::create(imageOptions);
 
             tl::DisplayOptions displayOptions;
@@ -119,7 +122,7 @@ namespace djv
         ViewportModel::~ViewportModel()
         {
             FTK_P();
-            p.settings->setT("/Viewport/Image", p.imageOptions->get());
+            p.settings->setT("/Viewport/Image.1", p.imageOptions->get());
             p.settings->setT("/Viewport/Display", p.displayOptions->get());
             p.settings->setT("/Viewport/AspectRatio.1", p.aspectRatioOptions->get());
             p.settings->setT("/Viewport/Background", p.backgroundOptions->get());

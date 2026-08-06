@@ -779,12 +779,10 @@ namespace djv
                 }
                 if (v.contains("magnify") || v.contains("minify"))
                 {
-                    // The viewport's magnify/minify filters live in the display
-                    // options (this is what the View tool reads and writes), not
-                    // the image options -- both structs have an imageFilters
-                    // field, but only the display one drives the render.
-                    // "linear" or "nearest" (case-insensitive) via from_string.
-                    auto display = vp->getDisplayOptions();
+                    // The viewport's magnify/minify filters, which the View
+                    // tool reads and writes as well. "linear", "nearest" or
+                    // "high quality" (case-insensitive) via from_string.
+                    auto display = vp->getImageOptions();
                     if (v.contains("magnify"))
                     {
                         const std::string s = v.at("magnify").get<std::string>();
@@ -799,7 +797,7 @@ namespace djv
                             note(p.shotId,
                                 "unrecognized minify filter '" + s + "'");
                     }
-                    vp->setDisplayOptions(display);
+                    vp->setImageOptions(display);
                 }
             }
             else if (step.contains("timeline"))
