@@ -50,6 +50,8 @@
 
 #include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/Divider.h>
+#include <ftk/UI/DrawUtil.h>
+#include <ftk/UI/IButton.h>
 #include <ftk/UI/IconSystem.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/Menu.h>
@@ -59,6 +61,21 @@
 #include <ftk/UI/Splitter.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif // WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif // NOMINMAX
+#include <windows.h>
+#include <windowsx.h>
+#endif // _WIN32
 
 namespace djv_resource
 {
@@ -121,6 +138,285 @@ namespace djv
             }
         }
 
+#if defined(_WIN32)
+        namespace
+        {
+            constexpr int windowsTitleButtonWidth = 44;
+            constexpr int windowsTitleButtonCount = 3;
+            constexpr int windowsTitleDragRowHeight = 32;
+            const wchar_t* windowsTitleBarOldWndProcProperty = L"DJV.WindowsTitleBarOldWndProc";
+            const wchar_t* windowsTitleBarDragStartProperty = L"DJV.WindowsTitleBarDragStart";
+            const wchar_t* windowsTitleBarControlsStartProperty = L"DJV.WindowsTitleBarControlsStart";
+
+            std::wstring toWide(const std::string& value)
+            {
+                if (value.empty()) return std::wstring();
+                const int size = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                    value.data(), static_cast<int>(value.size()), nullptr, 0);
+                if (size <= 0) return std::wstring(value.begin(), value.end());
+                std::wstring out(size, L'\0');
+                ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, value.data(),
+                    static_cast<int>(value.size()), out.data(), size);
+                return out;
+            }
+
+            struct WindowSearch
+            {
+                DWORD processId = 0;
+                std::wstring title;
+                HWND hwnd = nullptr;
+                LONGLONG area = 0;
+            };
+
+            BOOL CALLBACK findWindow(HWND hwnd, LPARAM userData)
+            {
+                auto search = reinterpret_cast<WindowSearch*>(userData);
+                DWORD processId = 0;
+                ::GetWindowThreadProcessId(hwnd, &processId);
+                if (processId != search->processId || !::IsWindowVisible(hwnd)) return TRUE;
+                const int titleSize = ::GetWindowTextLengthW(hwnd);
+                if (titleSize > 0)
+                {
+                    std::vector<wchar_t> title(titleSize + 1, L'\0');
+                    if (::GetWindowTextW(hwnd, title.data(), static_cast<int>(title.size())) > 0 &&
+                        search->title == title.data())
+                    {
+                        search->hwnd = hwnd;
+                        return FALSE;
+                    }
+                }
+                RECT rect = {};
+                if (::GetWindowRect(hwnd, &rect))
+                {
+                    const LONG width = std::max<LONG>(0, rect.right - rect.left);
+                    const LONG height = std::max<LONG>(0, rect.bottom - rect.top);
+                    const LONGLONG area = static_cast<LONGLONG>(width) * height;
+                    if (width >= 64 && height >= 64 && area > search->area)
+                    {
+                        search->hwnd = hwnd;
+                        search->area = area;
+                    }
+                }
+                return TRUE;
+            }
+
+            HWND getWindowsWindowHandle(const std::shared_ptr<ftk::IWindow>& window)
+            {
+                if (!window) return nullptr;
+                WindowSearch search;
+                search.processId = ::GetCurrentProcessId();
+                search.title = toWide(window->getTitle());
+                ::EnumWindows(findWindow, reinterpret_cast<LPARAM>(&search));
+                return search.hwnd;
+            }
+
+            int getWindowsDpiScaled(HWND hwnd, int value)
+            {
+                int dpi = 96;
+                if (hwnd)
+                {
+                    if (HDC hdc = ::GetDC(hwnd))
+                    {
+                        dpi = ::GetDeviceCaps(hdc, LOGPIXELSX);
+                        ::ReleaseDC(hwnd, hdc);
+                    }
+                }
+                return ::MulDiv(value, dpi, 96);
+            }
+
+            LRESULT getWindowsFrameHitTest(HWND hwnd, const POINT& point)
+            {
+                RECT client = {};
+                if (!hwnd || !::GetClientRect(hwnd, &client) || ::IsZoomed(hwnd)) return HTCLIENT;
+                const int borderX = ::GetSystemMetrics(SM_CXSIZEFRAME) + ::GetSystemMetrics(SM_CXPADDEDBORDER);
+                const int borderY = ::GetSystemMetrics(SM_CYSIZEFRAME) + ::GetSystemMetrics(SM_CXPADDEDBORDER);
+                const bool left = point.x < client.left + borderX;
+                const bool right = point.x >= client.right - borderX;
+                const bool top = point.y < client.top + borderY;
+                const bool bottom = point.y >= client.bottom - borderY;
+                if (top && left) return HTTOPLEFT;
+                if (top && right) return HTTOPRIGHT;
+                if (bottom && left) return HTBOTTOMLEFT;
+                if (bottom && right) return HTBOTTOMRIGHT;
+                if (left) return HTLEFT;
+                if (right) return HTRIGHT;
+                if (top) return HTTOP;
+                if (bottom) return HTBOTTOM;
+                return HTCLIENT;
+            }
+
+            LRESULT CALLBACK windowsTitleBarWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+            {
+                const auto oldWndProc = reinterpret_cast<WNDPROC>(
+                    ::GetPropW(hwnd, windowsTitleBarOldWndProcProperty));
+                if (!oldWndProc) return ::DefWindowProcW(hwnd, message, wParam, lParam);
+                if (message == WM_NCCALCSIZE)
+                {
+                    if (::IsZoomed(hwnd))
+                    {
+                        RECT* rect = wParam ? &reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam)->rgrc[0] :
+                            reinterpret_cast<RECT*>(lParam);
+                        if (rect)
+                        {
+                            const int borderX = std::max(0, ::GetSystemMetrics(SM_CXSIZEFRAME) +
+                                ::GetSystemMetrics(SM_CXPADDEDBORDER) - 1);
+                            const int borderY = std::max(0, ::GetSystemMetrics(SM_CYSIZEFRAME) +
+                                ::GetSystemMetrics(SM_CXPADDEDBORDER) - 1);
+                            rect->left += borderX; rect->top += borderY;
+                            rect->right -= borderX; rect->bottom -= borderY;
+                        }
+                    }
+                    return 0;
+                }
+                if (message == WM_NCHITTEST)
+                {
+                    const LRESULT nativeHit = ::CallWindowProcW(oldWndProc, hwnd, message, wParam, lParam);
+                    if (nativeHit == HTCLIENT)
+                    {
+                        POINT point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+                        ::ScreenToClient(hwnd, &point);
+                        const LRESULT frameHit = getWindowsFrameHitTest(hwnd, point);
+                        if (frameHit != HTCLIENT) return frameHit;
+                        const int dragStart = static_cast<int>(
+                            reinterpret_cast<INT_PTR>(
+                                ::GetPropW(hwnd, windowsTitleBarDragStartProperty))) - 1;
+                        const int controlsStart = static_cast<int>(
+                            reinterpret_cast<INT_PTR>(
+                                ::GetPropW(hwnd, windowsTitleBarControlsStartProperty))) - 1;
+                        if (point.y >= 0 && point.y < getWindowsDpiScaled(hwnd, windowsTitleDragRowHeight) &&
+                            dragStart >= 0 &&
+                            controlsStart > dragStart &&
+                            point.x >= dragStart &&
+                            point.x < controlsStart)
+                        {
+                            return HTCAPTION;
+                        }
+                    }
+                    return nativeHit;
+                }
+                if (message == WM_NCDESTROY)
+                {
+                    ::RemovePropW(hwnd, windowsTitleBarOldWndProcProperty);
+                    ::RemovePropW(hwnd, windowsTitleBarDragStartProperty);
+                    ::RemovePropW(hwnd, windowsTitleBarControlsStartProperty);
+                }
+                return ::CallWindowProcW(oldWndProc, hwnd, message, wParam, lParam);
+            }
+
+            void applyWindowsTitleBar(const std::shared_ptr<ftk::IWindow>& window)
+            {
+                if (HWND hwnd = getWindowsWindowHandle(window))
+                {
+                    if (!::GetPropW(hwnd, windowsTitleBarOldWndProcProperty))
+                    {
+                        const LONG_PTR oldWndProc = ::SetWindowLongPtrW(hwnd, GWLP_WNDPROC,
+                            reinterpret_cast<LONG_PTR>(windowsTitleBarWndProc));
+                        if (oldWndProc) ::SetPropW(hwnd, windowsTitleBarOldWndProcProperty,
+                            reinterpret_cast<HANDLE>(oldWndProc));
+                    }
+                    LONG_PTR style = ::GetWindowLongPtrW(hwnd, GWL_STYLE);
+                    style &= ~static_cast<LONG_PTR>(WS_CAPTION);
+                    style |= WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+                    ::SetWindowLongPtrW(hwnd, GWL_STYLE, style);
+                    ::SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE |
+                        SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE);
+                }
+            }
+
+            void updateWindowsTitleBarHitRegion(
+                const std::shared_ptr<ftk::IWindow>& window,
+                int dragStart,
+                int controlsStart)
+            {
+                if (HWND hwnd = getWindowsWindowHandle(window))
+                {
+                    ::SetPropW(
+                        hwnd,
+                        windowsTitleBarDragStartProperty,
+                        reinterpret_cast<HANDLE>(
+                            static_cast<INT_PTR>(std::max(0, dragStart) + 1)));
+                    ::SetPropW(
+                        hwnd,
+                        windowsTitleBarControlsStartProperty,
+                        reinterpret_cast<HANDLE>(
+                            static_cast<INT_PTR>(std::max(0, controlsStart) + 1)));
+                }
+            }
+
+            enum class WindowsTitleButtonType { Minimize, Maximize, Close };
+
+            class WindowsTitleButton : public ftk::IButton
+            {
+            protected:
+                void _init(const std::shared_ptr<ftk::Context>& context, WindowsTitleButtonType type,
+                    const std::shared_ptr<ftk::IWidget>& parent)
+                {
+                    IButton::_init(context, "djv::app::WindowsTitleButton", parent);
+                    setAcceptsKeyFocus(false);
+                    _type = type;
+                    _sizeHint = ftk::Size2I(windowsTitleButtonWidth, windowsTitleDragRowHeight);
+                    switch (_type)
+                    {
+                    case WindowsTitleButtonType::Minimize:
+                        setTooltip("Minimize window.");
+                        break;
+                    case WindowsTitleButtonType::Maximize:
+                        setTooltip("Maximize or restore window.");
+                        break;
+                    case WindowsTitleButtonType::Close:
+                        setTooltip("Close window.");
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                WindowsTitleButton() = default;
+            public:
+                static std::shared_ptr<WindowsTitleButton> create(const std::shared_ptr<ftk::Context>& context,
+                    WindowsTitleButtonType type, const std::shared_ptr<ftk::IWidget>& parent)
+                {
+                    auto out = std::shared_ptr<WindowsTitleButton>(new WindowsTitleButton);
+                    out->_init(context, type, parent);
+                    return out;
+                }
+                ftk::Size2I getSizeHint() const override { return _sizeHint; }
+                void drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event) override
+                {
+                    IButton::drawEvent(drawRect, event);
+                    const auto& geometry = getGeometry();
+                    if (!geometry.isValid()) return;
+                    const bool active = _isMouseInside() || _isMousePressed();
+                    if (active)
+                    {
+                        event.render->drawRect(geometry, _type == WindowsTitleButtonType::Close ?
+                            ftk::Color4F(.76F, .16F, .12F, 1.F) :
+                            event.style->getColorRole(ftk::ColorRole::Hover));
+                    }
+                    const auto color = _type == WindowsTitleButtonType::Close && active ?
+                        ftk::Color4F(1.F, 1.F, 1.F, 1.F) : event.style->getColorRole(ftk::ColorRole::Text);
+                    ftk::LineOptions lineOptions;
+                    lineOptions.width = std::max(1.F, 1.35F * event.displayScale);
+                    const float cx = static_cast<float>(geometry.x()) + geometry.w() / 2.F;
+                    const float cy = static_cast<float>(geometry.y()) + geometry.h() / 2.F;
+                    const float half = 5.F * event.displayScale;
+                    if (_type == WindowsTitleButtonType::Minimize)
+                        event.render->drawLine(ftk::V2F(cx - half, cy + half * .55F), ftk::V2F(cx + half, cy + half * .55F), color, lineOptions);
+                    else if (_type == WindowsTitleButtonType::Close)
+                    {
+                        event.render->drawLine(ftk::V2F(cx - half, cy - half), ftk::V2F(cx + half, cy + half), color, lineOptions);
+                        event.render->drawLine(ftk::V2F(cx + half, cy - half), ftk::V2F(cx - half, cy + half), color, lineOptions);
+                    }
+                    else
+                        event.render->drawRect(ftk::Box2I(static_cast<int>(cx - half), static_cast<int>(cy - half),
+                            static_cast<int>(half * 2.F), static_cast<int>(half * 2.F)), color);
+                }
+            private:
+                WindowsTitleButtonType _type = WindowsTitleButtonType::Minimize;
+                ftk::Size2I _sizeHint;
+            };
+        }
+#endif // _WIN32
+
         struct MainWindow::Private
         {
             std::weak_ptr<App> app;
@@ -153,6 +449,13 @@ namespace djv
             std::shared_ptr<ToolsMenu> toolsMenu;
             std::shared_ptr<HelpMenu> helpMenu;
             std::shared_ptr<ftk::MenuBar> menuBar;
+#if defined(_WIN32)
+            std::shared_ptr<ftk::HorizontalLayout> titleBar;
+            std::shared_ptr<ftk::HorizontalLayout> titleButtons;
+            std::shared_ptr<WindowsTitleButton> minimizeButton;
+            std::shared_ptr<WindowsTitleButton> maximizeButton;
+            std::shared_ptr<WindowsTitleButton> closeButton;
+#endif // _WIN32
             std::shared_ptr<FileToolBar> fileToolBar;
             std::shared_ptr<CompareToolBar> compareToolBar;
             std::shared_ptr<ViewToolBar> viewToolBar;
@@ -315,7 +618,53 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
+#if defined(_WIN32)
+            p.titleBar = ftk::HorizontalLayout::create(context, p.layout);
+            p.titleBar->setSpacingRole(ftk::SizeRole::None);
+            p.titleBar->setBackgroundRole(ftk::ColorRole::Button);
+            p.menuBar->setParent(p.titleBar);
+            p.menuBar->setHStretch(ftk::Stretch::Expanding);
+            p.titleButtons = ftk::HorizontalLayout::create(context, p.titleBar);
+            p.titleButtons->setSpacingRole(ftk::SizeRole::None);
+            p.minimizeButton = WindowsTitleButton::create(
+                context, WindowsTitleButtonType::Minimize, p.titleButtons);
+            p.maximizeButton = WindowsTitleButton::create(
+                context, WindowsTitleButtonType::Maximize, p.titleButtons);
+            p.closeButton = WindowsTitleButton::create(
+                context, WindowsTitleButtonType::Close, p.titleButtons);
+            auto mainWindowWeak = std::weak_ptr<MainWindow>(
+                std::dynamic_pointer_cast<MainWindow>(shared_from_this()));
+            p.minimizeButton->setClickedCallback(
+                [mainWindowWeak]
+                {
+                    if (auto mainWindow = mainWindowWeak.lock())
+                    {
+                        if (HWND hwnd = getWindowsWindowHandle(mainWindow)) ::ShowWindow(hwnd, SW_MINIMIZE);
+                    }
+                });
+            p.maximizeButton->setClickedCallback(
+                [mainWindowWeak]
+                {
+                    if (auto mainWindow = mainWindowWeak.lock())
+                    {
+                        if (HWND hwnd = getWindowsWindowHandle(mainWindow))
+                        {
+                            ::ShowWindow(hwnd, ::IsZoomed(hwnd) ? SW_RESTORE : SW_MAXIMIZE);
+                            mainWindow->setDrawUpdate();
+                        }
+                    }
+                });
+            p.closeButton->setClickedCallback(
+                [mainWindowWeak]
+                {
+                    if (auto mainWindow = mainWindowWeak.lock())
+                    {
+                        if (HWND hwnd = getWindowsWindowHandle(mainWindow)) ::PostMessageW(hwnd, WM_CLOSE, 0, 0);
+                    }
+                });
+#else // _WIN32
             p.menuBar->setParent(p.layout);
+#endif // _WIN32
             p.dividers["MenuBar"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::Spacing);
@@ -636,12 +985,57 @@ namespace djv
                 });
         }
 
+        void MainWindow::setVisible(bool value)
+        {
+            Window::setVisible(value);
+#if defined(_WIN32)
+            if (value)
+            {
+                applyWindowsTitleBar(std::dynamic_pointer_cast<ftk::IWindow>(shared_from_this()));
+            }
+#endif // _WIN32
+        }
+
         void MainWindow::setGeometry(const ftk::Box2I& value)
         {
             Window::setGeometry(value);
             FTK_P();
             p.shown = true;
             p.layout->setGeometry(value);
+#if defined(_WIN32)
+            if (p.titleBar && p.titleButtons)
+            {
+                const auto& titleBarGeometry = p.titleBar->getGeometry();
+                if (titleBarGeometry.isValid())
+                {
+                    const int controlsWidth = std::max(1, static_cast<int>(
+                        windowsTitleButtonWidth * windowsTitleButtonCount * getDisplayScale()));
+                    p.titleButtons->setGeometry(ftk::Box2I(
+                        titleBarGeometry.x() + std::max(0, titleBarGeometry.w() - controlsWidth),
+                        titleBarGeometry.y(),
+                        std::min(controlsWidth, titleBarGeometry.w()),
+                        titleBarGeometry.h()));
+                    const auto& controlsGeometry = p.titleButtons->getGeometry();
+                    const int buttonWidth = std::max(1, controlsGeometry.w() / windowsTitleButtonCount);
+                    p.minimizeButton->setGeometry(ftk::Box2I(
+                        controlsGeometry.x(), controlsGeometry.y(), buttonWidth, controlsGeometry.h()));
+                    p.maximizeButton->setGeometry(ftk::Box2I(
+                        controlsGeometry.x() + buttonWidth, controlsGeometry.y(), buttonWidth, controlsGeometry.h()));
+                    p.closeButton->setGeometry(ftk::Box2I(
+                        controlsGeometry.x() + buttonWidth * 2, controlsGeometry.y(),
+                        std::max(1, controlsGeometry.w() - buttonWidth * 2), controlsGeometry.h()));
+                    p.titleBar->moveToFront(p.titleButtons);
+                    updateWindowsTitleBarHitRegion(
+                        std::dynamic_pointer_cast<ftk::IWindow>(shared_from_this()),
+                        p.menuBar->getGeometry().x() + p.menuBar->getGeometry().w(),
+                        controlsGeometry.x());
+                }
+            }
+            if (isVisible(false))
+            {
+                applyWindowsTitleBar(std::dynamic_pointer_cast<ftk::IWindow>(shared_from_this()));
+            }
+#endif // _WIN32
         }
 
         void MainWindow::keyPressEvent(ftk::KeyEvent& event)
