@@ -26,6 +26,8 @@ namespace djv
             std::shared_ptr<ui::ViewCenterMarkerWidget> centerMarkerWidget;
             std::shared_ptr<ui::ViewHUDWidget> hudWidget;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
+
+            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
         void ViewTool::_init(
@@ -75,6 +77,17 @@ namespace djv
             _setWidget(layout);
 
             _loadSettings(p.bellows);
+
+            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
+                app->observePlayer(),
+                [this](const std::shared_ptr<tl::Player>& value)
+                {
+                    // The position and zoom place an image in the view, so
+                    // they mean nothing without one. The rest of the sections
+                    // are settings that outlive the current file.
+                    _p->posZoomWidget->setEnabled(
+                        value && !value->getIOInfo().video.empty());
+                });
         }
 
         ViewTool::ViewTool() :

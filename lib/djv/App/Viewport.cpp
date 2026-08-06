@@ -648,6 +648,11 @@ namespace djv
                     [this, player](const std::string&)
                     {
                         _p->ioInfo = player->getIOInfo();
+                        // Panning and zooming move an image around the view.
+                        // Media with no video has none, so the view has
+                        // nothing to move and the wheel would change a zoom
+                        // that shows nothing.
+                        setInputEnabled(!_p->ioInfo.video.empty());
                         _hudUpdate();
                     });
 
@@ -707,6 +712,7 @@ namespace djv
             {
                 p.path = ftk::Path();
                 p.ioInfo = tl::IOInfo();
+                setInputEnabled(false);
                 p.mediaReferenceKeyObserver.reset();
                 p.currentTime.reset();
                 p.currentTimeObserver.reset();
@@ -826,6 +832,13 @@ namespace djv
         {
             tl::ui::Viewport::mousePressEvent(event);
             FTK_P();
+            // Picking and shuttling are ours rather than the base class's, so
+            // they need this test of their own; without it they would go on
+            // working in a view that takes no input.
+            if (!isInputEnabled())
+            {
+                return;
+            }
             if (p.pickBinding.button == event.button &&
                 ftk::checkKeyModifier(p.pickBinding.modifier, event.modifiers))
             {
