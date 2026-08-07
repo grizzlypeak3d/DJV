@@ -510,6 +510,16 @@ namespace djv
                     step.at("command").get<std::string>(),
                     step.contains("args") ? step.at("args") : nlohmann::json::object());
             }
+            else if (step.contains("exportDir"))
+            {
+                // Set the export directory, e.g. { "exportDir": "/tmp" }. It is
+                // filled in with the home directory otherwise, which would put
+                // whoever built the documentation into the screenshot.
+                auto settingsModel = app->getSettingsModel();
+                auto exportSettings = settingsModel->getExport();
+                exportSettings.dir = step.at("exportDir").get<std::string>();
+                settingsModel->setExport(exportSettings);
+            }
             else if (step.contains("frame"))
             {
                 app->getCommandsModel()->exec(

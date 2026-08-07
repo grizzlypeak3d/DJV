@@ -484,6 +484,7 @@
       "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
+        { "exportDir": "/tmp" },
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 88 },
         { "tool": "Export" },
@@ -505,6 +506,7 @@
       "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
+        { "exportDir": "/tmp" },
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 88 },
         { "tool": "Export" },
@@ -524,6 +526,7 @@
       "window": { "w": 900, "h": 600, "splitter2": 0.5 },
       "crop": "MainWindow.Tools",
       "setup": [
+        { "exportDir": "/tmp" },
         { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
         { "frame": 88 },
         { "tool": "Export" },
