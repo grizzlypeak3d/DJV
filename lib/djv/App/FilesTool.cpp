@@ -41,9 +41,7 @@ namespace djv
             struct FileWidget
             {
                 std::shared_ptr<models::FilesModelItem> item;
-                std::shared_ptr<ui::FileThumbnail> thumbnail;
-                //! The name is the A button: clicking a file makes it the
-                //! current one, which is what a list of files is for.
+                std::shared_ptr<ui::FileThumbnail> thumbnail;\
                 std::shared_ptr<ftk::ToolButton> nameButton;
                 std::shared_ptr<ftk::ToolButton> bButton;
                 std::shared_ptr<ftk::ComboBox> layerComboBox;
@@ -60,11 +58,11 @@ namespace djv
             std::shared_ptr<ftk::ButtonGroup> bButtonGroup;
             std::vector<FileWidget> widgets;
             std::shared_ptr<ftk::ComboBox> compareComboBox;
-            std::shared_ptr<ftk::ComboBox> compareTimeComboBox;
             std::shared_ptr<ftk::FloatEditSlider> wipeXSlider;
             std::shared_ptr<ftk::FloatEditSlider> wipeYSlider;
             std::shared_ptr<ftk::FloatEditSlider> wipeRotationSlider;
             std::shared_ptr<ftk::FloatEditSlider> overlaySlider;
+            std::shared_ptr<ftk::ComboBox> compareTimeComboBox;
             std::shared_ptr<ftk::CheckBox> sameSizeCheckBox;
             std::shared_ptr<ftk::FormLayout> compareLayout;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
@@ -114,15 +112,6 @@ namespace djv
             p.compareComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.compareComboBox, "Files.CompareMode");
 
-            p.compareTimeComboBox = ftk::ComboBox::create(
-                context,
-                models::getCompareTimeLabels());
-            p.compareTimeComboBox->setTooltip(
-                "Which frame of each file is shown together: the same frame\n"
-                "counted from the start of each, or the same timecode.");
-            p.compareTimeComboBox->setHStretch(ftk::Stretch::Expanding);
-            ftk::setScreenshotTag(p.compareTimeComboBox, "Files.CompareTime");
-
             p.wipeXSlider = ftk::FloatEditSlider::create(context);
             p.wipeXSlider->setDefault(.5F);
             ftk::setScreenshotTag(p.wipeXSlider, "Files.CompareOptions");
@@ -136,6 +125,15 @@ namespace djv
 
             p.overlaySlider = ftk::FloatEditSlider::create(context);
             p.overlaySlider->setDefault(.5F);
+
+            p.compareTimeComboBox = ftk::ComboBox::create(
+                context,
+                models::getCompareTimeLabels());
+            p.compareTimeComboBox->setTooltip(
+                "Which frame of each file is shown together: the same frame\n"
+                "counted from the start of each, or the same timecode.");
+            p.compareTimeComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.compareTimeComboBox, "Files.CompareTime");
 
             p.sameSizeCheckBox = ftk::CheckBox::create(context);
             p.sameSizeCheckBox->setHStretch(ftk::Stretch::Expanding);
@@ -159,11 +157,11 @@ namespace djv
             p.compareLayout = ftk::FormLayout::create(context, vLayout);
             p.compareLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.compareLayout->addRow("Mode:", p.compareComboBox);
-            p.compareLayout->addRow("Sync by:", p.compareTimeComboBox);
             p.compareLayout->addRow("X:", p.wipeXSlider);
             p.compareLayout->addRow("Y:", p.wipeYSlider);
             p.compareLayout->addRow("Rotation:", p.wipeRotationSlider);
             p.compareLayout->addRow("Amount:", p.overlaySlider);
+            p.compareLayout->addRow("Sync by:", p.compareTimeComboBox);
             p.compareLayout->addRow("Same size:", p.sameSizeCheckBox);
             p.bellows["Compare"] = ftk::Bellows::create(context, "Compare", layout);
             p.bellows["Compare"]->setWidget(vLayout);
@@ -199,16 +197,6 @@ namespace djv
                         auto options = app->getFilesModel()->getCompareOptions();
                         options.compare = static_cast<tl::Compare>(value);
                         app->getFilesModel()->setCompareOptions(options);
-                    }
-                });
-
-            p.compareTimeComboBox->setIndexCallback(
-                [appWeak](int value)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->getFilesModel()->setCompareTime(
-                            static_cast<tl::CompareTime>(value));
                     }
                 });
 
@@ -253,6 +241,16 @@ namespace djv
                         auto options = app->getFilesModel()->getCompareOptions();
                         options.overlay = value;
                         app->getFilesModel()->setCompareOptions(options);
+                    }
+                });
+
+            p.compareTimeComboBox->setIndexCallback(
+                [appWeak](int value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getFilesModel()->setCompareTime(
+                            static_cast<tl::CompareTime>(value));
                     }
                 });
 
