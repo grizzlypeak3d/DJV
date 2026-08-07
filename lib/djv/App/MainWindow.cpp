@@ -774,11 +774,14 @@ namespace djv
 
                 p.statusBar->setVisible(settings.statusToolBar && !presentMode);
 
-                // With no status bar to put them in, messages appear over the
-                // viewport instead. Not in presentation mode: an error balloon
-                // over someone else's review is worse than a missed message,
-                // and the messages tool still has them.
-                p.viewport->setToastActive(!settings.statusToolBar && !presentMode);
+                // Errors appear over the viewport whether or not there is a
+                // status bar: the status bar is where you go to look, and the
+                // point of these is that they come to you. Only warnings and
+                // errors reach them, so there is nothing routine to interrupt
+                // with. Not in presentation mode: an error balloon over someone
+                // else's review is worse than a missed message, and the
+                // messages tool still has them.
+                p.viewport->setToastActive(!presentMode);
                 // Hidden rather than turned off, so that what was being shown
                 // is still being shown on the way back out.
                 p.viewport->setHUDActive(!presentMode);

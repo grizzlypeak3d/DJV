@@ -79,6 +79,13 @@ namespace djv
             std::string widgetText(const std::shared_ptr<ftk::IWidget>& widget)
             {
                 std::vector<std::string> out;
+                // Only what is on screen. A hidden child still has its text,
+                // and reporting it would say the capture shows something it
+                // does not -- which is the one thing this must not do.
+                if (!widget->isVisible(true))
+                {
+                    return std::string();
+                }
                 if (auto label = std::dynamic_pointer_cast<ftk::Label>(widget))
                 {
                     out.push_back(label->getText());
