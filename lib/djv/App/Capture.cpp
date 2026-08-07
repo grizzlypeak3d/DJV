@@ -45,11 +45,13 @@ namespace djv
     {
         namespace
         {
-            // Timer cadence and budgets, in timer ticks.
+            // Budgets in ticks of the timer below, which fires on the clock
+            // rather than once per drawn frame -- so these are durations, and
+            // the machine being fast or slow does not change them.
             const std::chrono::milliseconds tickInterval(30);
-            const int settleTicks = 15;     // frames to draw before capturing
-            const int reloadGraceTicks = 4; // let a setup-triggered reload begin
-            const int timeoutTicks = 400;   // ~12s hard cap waiting for media
+            const int settleTicks = 15;     // 450ms to settle before capturing
+            const int reloadGraceTicks = 4; // 120ms for a reload to begin
+            const int timeoutTicks = 400;   // 12s hard cap waiting for media
 
             // Console diagnostics so failures are not silent.
             void note(const std::string& shot, const std::string& msg)
