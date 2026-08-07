@@ -30,7 +30,13 @@ from xml.sax.saxutils import escape
 
 from PIL import Image, ImageFont
 
-ACCENT = "#c85a3c"   # DJV UI accent, matches the hand-made callouts
+# Deliberately outside the UI's palette. The annotations are editorial and
+# have to read as such: matching the accent put a callout in the same colour
+# as a checked control, so a selection box and a highlight box looked alike.
+# Blue against the orange accent is also the pairing that survives red-green
+# colour deficiency, which brown-on-brown does not. Avoid violet: the audio
+# clips in the timeline are already purple.
+ACCENT = "#5b8dd9"
 BG = "#1e1e1e"       # figure background (gutters); matches the dark UI
 TEXT = "#e8e8e8"
 
