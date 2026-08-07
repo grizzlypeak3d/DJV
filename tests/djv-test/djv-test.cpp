@@ -83,21 +83,31 @@ namespace djv
 
             // Get the tests to run.
             std::vector<std::shared_ptr<ftk::test::ITest> > runTests;
+            std::vector<std::string> unmatched;
             const auto& cmdLineTests = p.testNames->getList();
             if (!cmdLineTests.empty())
             {
+                // Every test whose name contains the argument, not just the
+                // first: a group name is the useful way to ask for part of the
+                // suite, and taking one match silently ran less than that.
                 for (const auto& test : cmdLineTests)
                 {
-                    const auto i = std::find_if(
-                        p.tests.begin(),
-                        p.tests.end(),
-                        [test](const std::shared_ptr<ftk::test::ITest>& other)
-                        {
-                            return ftk::contains(other->getName(), test, ftk::CaseCompare::Insensitive);
-                        });
-                    if (i != p.tests.end())
+                    size_t matched = 0;
+                    for (const auto& other : p.tests)
                     {
-                        runTests.push_back(*i);
+                        if (ftk::contains(other->getName(), test, ftk::CaseCompare::Insensitive))
+                        {
+                            ++matched;
+                            if (std::find(runTests.begin(), runTests.end(), other) ==
+                                runTests.end())
+                            {
+                                runTests.push_back(other);
+                            }
+                        }
+                    }
+                    if (0 == matched)
+                    {
+                        unmatched.push_back(test);
                     }
                 }
             }
@@ -107,6 +117,17 @@ namespace djv
                 {
                     runTests.push_back(test);
                 }
+            }
+
+            // A filter that matched nothing used to run zero tests and exit
+            // successfully, which reads exactly like a suite that passed.
+            if (!unmatched.empty())
+            {
+                for (const auto& name : unmatched)
+                {
+                    _print(ftk::Format("ERROR: no tests match: {0}").arg(name));
+                }
+                return 1;
             }
 
             // Run the tests.
@@ -122,6 +143,7 @@ namespace djv
             const auto now = std::chrono::steady_clock::now();
             const std::chrono::duration<float> diff = now - p.startTime;
             _print(ftk::Format("Seconds elapsed: {0}").arg(diff.count(), 2));
+            _print(ftk::Format("Tests run: {0}").arg(runTests.size()));
             _print(ftk::Format("Failures: {0}").arg(failureCount));
 
             // The count is printed rather than returned: exit codes are
