@@ -3,6 +3,8 @@
 
 #include <djv/App/BottomToolBar.h>
 
+#include <opentimelineio/clip.h>
+
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
 #include <djv/App/FrameActions.h>
@@ -54,6 +56,10 @@ namespace djv
             std::shared_ptr<ui::AudioPopup> audioPopup;
             std::shared_ptr<Indicator> indicator;
             std::shared_ptr<ftk::HorizontalLayout> layout;
+
+            // Whether media time means anything across the whole
+            // timeline, which it only does with nothing to cut between.
+            bool singleClip = false;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver;
@@ -340,12 +346,18 @@ namespace djv
         {
             FTK_P();
             OTIO_NS::RationalTime out = value.duration();
-            if (p.player && value.duration().value() > 0)
+            if (p.player && p.singleClip && value.duration().value() > 0)
             {
                 // Counted in the media's frames rather than the player's, so
                 // that a sequence with frames left out still reads as the
                 // range it covers. Both ends are mapped because the in/out
                 // range may be a part of it.
+                //
+                // Only for a single clip: media time is a position within one
+                // file, so across a cut it is not a coordinate that can be
+                // subtracted. Two clips taking the same three seconds of one
+                // file mapped the last frame to before the first and gave a
+                // duration of zero.
                 const auto& timeline = p.player->getTimeline();
                 const auto first = timeline->getMediaTime(value.start_time());
                 const auto last =
@@ -365,6 +377,15 @@ namespace djv
             FTK_P();
 
             p.player = value;
+            p.singleClip = false;
+            if (p.player)
+            {
+                if (const auto& otioTimeline = p.player->getTimeline()->getTimeline())
+                {
+                    p.singleClip =
+                        1 == otioTimeline->find_children<OTIO_NS::Clip>().size();
+                }
+            }
 
             if (p.player)
             {
