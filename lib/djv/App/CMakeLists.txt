@@ -4,6 +4,7 @@ set(HEADERS
     AudioMenu.h
     AudioTool.h
     BottomToolBar.h
+    Benchmark.h
     Capture.h
     ColorActions.h
     ColorMenu.h
@@ -59,6 +60,7 @@ set(SOURCE
     AudioMenu.cpp
     AudioTool.cpp
     BottomToolBar.cpp
+    Benchmark.cpp
     Capture.cpp
     ColorActions.cpp
     ColorMenu.cpp

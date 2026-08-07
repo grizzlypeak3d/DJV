@@ -4,6 +4,7 @@
 #include <djv/App/App.h>
 
 #include <djv/App/AudioTool.h>
+#include <djv/App/Benchmark.h>
 #include <djv/App/Capture.h>
 #include <djv/App/ColorPickerTool.h>
 #include <djv/App/ColorTool.h>
@@ -100,6 +101,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineFlag> listCommands;
             std::shared_ptr<ftk::CmdLineListOption<std::string> > command;
             std::shared_ptr<ftk::CmdLineOption<int> > debugLoop;
+            std::shared_ptr<ftk::CmdLineOption<double> > benchmark;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureManifest;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureShot;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureOutput;
@@ -396,6 +398,12 @@ namespace djv
                 "Load the command line inputs in a loop. This value is the number of seconds for each cycle.",
                 "Testing",
                 10);
+            p.cmdLine.benchmark = ftk::CmdLineOption<double>::create(
+                { "-benchmark" },
+                "Play headlessly for this many seconds and report the frame "
+                "rate achieved.",
+                "Benchmark",
+                5.0);
             p.cmdLine.captureManifest = ftk::CmdLineOption<std::string>::create(
                 { "-captureManifest" },
                 "Screenshot manifest (JSON).",
@@ -451,6 +459,7 @@ namespace djv
                     p.cmdLine.listCommands,
                     p.cmdLine.command,
                     p.cmdLine.debugLoop,
+                    p.cmdLine.benchmark,
                     p.cmdLine.captureManifest,
                     p.cmdLine.captureShot,
                     p.cmdLine.captureOutput
@@ -540,7 +549,8 @@ namespace djv
                 _p->cmdLine.hideSetup->found() ||
                 _p->cmdLine.listCommands->found() ||
                 _p->cmdLine.command->found() ||
-                _p->cmdLine.captureShot->found();
+                _p->cmdLine.captureShot->found() ||
+                _p->cmdLine.benchmark->found();
         }
 
         void App::openDialog()
@@ -990,6 +1000,23 @@ namespace djv
                             }
                         }
                     });
+            }
+
+            if (p.cmdLine.benchmark->found())
+            {
+                auto benchmark = Benchmark::create(
+                    _context, std::dynamic_pointer_cast<App>(shared_from_this()),
+                    p.cmdLine.benchmark->getValue());
+                if (!benchmark->begin())
+                {
+                    throw std::runtime_error("Cannot set up the benchmark");
+                }
+                ftk::App::run();
+                if (!benchmark->succeeded())
+                {
+                    throw std::runtime_error("The benchmark produced no measurement");
+                }
+                return;
             }
 
             if (p.cmdLine.captureShot->found())
