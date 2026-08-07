@@ -32,7 +32,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> autoScrollCheckBox;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::ListObserver<std::string> > logObserver;
+            std::shared_ptr<ftk::ListObserver<ftk::LogItem> > logObserver;
         };
 
         void MessagesTool::_init(
@@ -102,9 +102,9 @@ namespace djv
                     appWeak.lock()->getSysLogModel()->clearMessages();
                 });
 
-            p.logObserver = ftk::ListObserver<std::string>::create(
+            p.logObserver = ftk::ListObserver<ftk::LogItem>::create(
                 app->getSysLogModel()->observeMessages(),
-                [this](const std::vector<std::string>& value)
+                [this](const std::vector<ftk::LogItem>& value)
                 {
                     FTK_P();
 
@@ -114,7 +114,20 @@ namespace djv
                     const ftk::V2I scrollPos = p.textEdit->getScrollWidget()->getScrollPos();
 
                     // Update the text.
-                    p.textEdit->setText(value);
+                    // With the time, which is what makes this a record of
+                    // what happened rather than a view of the current state.
+                    std::vector<std::string> lines;
+                    for (const auto& item : value)
+                    {
+                        for (const auto& line : ftk::split(
+                            ftk::getLabel(item, ftk::LogLabel::Time),
+                            '\n',
+                            ftk::SplitOptions::KeepEmpty))
+                        {
+                            lines.push_back(line);
+                        }
+                    }
+                    p.textEdit->setText(lines);
 
                     if (p.autoScrollCheckBox->isChecked())
                     {

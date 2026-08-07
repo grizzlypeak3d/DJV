@@ -131,7 +131,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
-            std::shared_ptr<ftk::ListObserver<std::string> > messagesObserver;
+            std::shared_ptr<ftk::ListObserver<ftk::LogItem> > messagesObserver;
             std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
@@ -394,13 +394,17 @@ namespace djv
                     _hudUpdate();
                 });
 
-            p.messagesObserver = ftk::ListObserver<std::string>::create(
+            p.messagesObserver = ftk::ListObserver<ftk::LogItem>::create(
                 app->getSysLogModel()->observeMessages(),
-                [this](const std::vector<std::string>& value)
+                [this](const std::vector<ftk::LogItem>& value)
                 {
                     FTK_P();
+                    // The message alone: it has just appeared, and the space
+                    // over the image is better spent on what went wrong.
                     p.toastLabel->setText(!value.empty() ?
-                        ftk::elide(value.back(), toastTextLength) :
+                        ftk::elide(
+                            ftk::getLabel(value.back(), ftk::LogLabel::Message),
+                            toastTextLength) :
                         std::string());
                     _toastUpdate();
                     if (!p.toastLabel->getText().empty())

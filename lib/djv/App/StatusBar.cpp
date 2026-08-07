@@ -32,7 +32,7 @@ namespace djv
 
             std::shared_ptr<tl::Player> player;
 
-            std::shared_ptr<ftk::ListObserver<std::string> > messagesObserver;
+            std::shared_ptr<ftk::ListObserver<ftk::LogItem> > messagesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
         };
@@ -75,15 +75,18 @@ namespace djv
 
             p.messagesTimer = ftk::Timer::create(context);
 
-            p.messagesObserver = ftk::ListObserver<std::string>::create(
+            p.messagesObserver = ftk::ListObserver<ftk::LogItem>::create(
                 app->getSysLogModel()->observeMessages(),
-                [this](const std::vector<std::string>& value)
+                [this](const std::vector<ftk::LogItem>& value)
                 {
                     FTK_P();
                     std::string text;
                     if (!value.empty())
                     {
-                        text = value.back();
+                        // The message alone: it has just appeared, so the time
+                        // it appeared at says nothing. The messages tool has
+                        // the timestamps.
+                        text = ftk::getLabel(value.back(), ftk::LogLabel::Message);
                     }
                     p.messagesLabel->setText(text);
                     p.messagesLabel->setTooltip(text);
