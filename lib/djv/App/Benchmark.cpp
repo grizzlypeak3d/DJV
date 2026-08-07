@@ -95,8 +95,15 @@ namespace djv
                 return false;
             }
 
-            // No window on screen: nothing to interfere with.
+            // No window on screen: nothing to interfere with, and no reason
+            // to present to it. Presenting waits for the display, which would
+            // cap the measurement at the monitor's refresh rate however cheap
+            // the frame was.
             app->setOffscreen(true);
+            for (const auto& window : app->getWindows())
+            {
+                window->setSwapEnabled(false);
+            }
 
             player->setPlayback(tl::Playback::Forward);
             p.startTime = std::chrono::steady_clock::now();
