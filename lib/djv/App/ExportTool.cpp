@@ -36,6 +36,7 @@
 #include <ftk/Core/Timer.h>
 
 #include <cstring>
+#include <filesystem>
 
 namespace djv
 {
@@ -303,6 +304,18 @@ namespace djv
                     default:
                         p.exportData->info.size = getSize(options.renderSize);
                         break;
+                    }
+
+                    // Check the output directory before anything is rendered.
+                    // Each writer reports a missing one in its own way, and an
+                    // empty directory means the current one, as it always has.
+                    if (!options.dir.empty() &&
+                        !std::filesystem::is_directory(
+                            std::filesystem::u8path(options.dir)))
+                    {
+                        throw std::runtime_error(
+                            ftk::Format("Directory not found: \"{0}\"").
+                            arg(options.dir).str());
                     }
 
                     // Get the export path.
