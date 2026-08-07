@@ -5,6 +5,7 @@
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Error.h>
+#include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
 
 #include <sstream>
@@ -368,6 +369,16 @@ namespace djv
 
             ExportSettings exportSettings;
             settings->getT(keys["Export"], exportSettings);
+            if (exportSettings.dir.empty())
+            {
+                // Show where an export would go rather than leaving the field
+                // blank and writing somewhere the user cannot see. Home rather
+                // than the current directory, which depends on how the
+                // application was started and is the root of the filesystem
+                // when it is launched from the Finder.
+                exportSettings.dir =
+                    ftk::getUserPath(ftk::UserPath::Home).u8string();
+            }
             p.exportSettings = ftk::Observable<ExportSettings>::create(exportSettings);
 
             FileBrowserSettings fileBrowser;
