@@ -32,6 +32,13 @@ namespace djv
         //! what drawing costs: the only per-frame render timing ftk keeps is a
         //! DiagSystem sampler, which ticks once every three seconds and is
         //! rounded to a millisecond, so it cannot tell two filters apart.
+        //!
+        //! The rate is also capped at the display refresh. An offscreen window
+        //! still swaps buffers and the swap interval is 1, so every frame waits
+        //! for vsync however cheap it was: a 1080p sequence and a 320x180 one
+        //! both report 59 when asked for 120. A source slower than the monitor
+        //! therefore has headroom this cannot see, and a shortfall only shows
+        //! up once playback falls below the refresh rate.
         class Benchmark : public std::enable_shared_from_this<Benchmark>
         {
         protected:
