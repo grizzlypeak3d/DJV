@@ -9,12 +9,18 @@ nav_order: 8
 A/B comparison lets you view two files (or layers) at once — useful for checking
 revisions, matching color between shots, or spotting differences between renders.
 
+It is for comparing *pixels*. To compare what two files are — their resolution,
+format or timing — open them and switch between them with **File/Next** and
+**File/Previous** instead, which makes each one current in turn. See
+[Comparing file information](#comparing-file-information).
+
 ## Setting up a comparison
 
 1. Open the files in DJV.
-2. The current file is the **A** file. Set the **B** file from the **Compare/B**
-   menu or the **Files** tool.
-3. Pick a compare mode (see below).
+2. The current file is the **A** file. Mark one or more of the others as **B**
+   with the **B** button in the **Files** tool, or step through them with
+   **Compare/Next** and **Compare/Previous**.
+3. Turn on a compare mode (see below).
 
 Locations: **Compare** menu, **Compare** tool bar, **Files** tool
 
@@ -28,9 +34,12 @@ Drag with **Alt** + left mouse button to move the wipe between **A** and **B**.
 
 ## Compare modes
 
+The modes are toggles rather than a list to choose from: turning one on turns
+off any other, and turning it off again leaves the **A** file on its own. There
+is no separate mode for showing **A** — that is what no comparison looks like.
+
 | Mode           | What it shows                                                          | Shortcut          |
 | -------------- | --------------------------------------------------------------------- | ----------------- |
-| **A**          | Only the **A** file                                                    | <kbd>Ctrl+A</kbd> |
 | **B**          | Only the **B** file                                                    | <kbd>Ctrl+B</kbd> |
 | **Wipe**       | A wipe between **A** and **B** (drag with **Alt** + left mouse button) | <kbd>Ctrl+W</kbd> |
 | **Overlay**    | **B** layered on top of **A**                                          |                   |
@@ -39,17 +48,31 @@ Drag with **Alt** + left mouse button to move the wipe between **A** and **B**.
 | **Vertical**   | **A** above **B**                                                      |                   |
 | **Tile**       | **A** and **B** as tiles (supports multiple **B** files)               | <kbd>Ctrl+T</kbd> |
 
-Use <kbd>Alt+A</kbd> to toggle between the **A** and **B** modes.
+The modes without a shortcut can be given one in the **Keyboard Shortcuts**
+section of the **Settings** tool.
+
+## Same size
+
+Files of different resolutions are drawn at the size of the current file, so a
+smaller one is not shown tiny beside it. Turn **Same size** off to draw each file
+at its own size.
+
+This is what the view is describing while it is on. With a 1920x1080 **A** and a
+1280x720 **B**, the frame really is 1920x1080 whichever file is on screen, and
+the **View Zoom** and **Render** items in the HUD report that frame rather than
+either file.
+
+Locations: **Files** tool
 
 ## Sync by
 
 Which frame of each file is shown together:
 
-- **Start of file** — The **B** file is offset so its start aligns with the start of **A**.
+- **Start of File** — The **B** file is offset so its start aligns with the start of **A**.
 - **Timecode** — **A** and **B** play at the same timeline time.
 
 Files that start at different timecodes show black in **B** until this is set to
-**Start of file**.
+**Start of File**.
 
 Locations: **Compare** menu, **Files** tool
 
@@ -65,3 +88,15 @@ other instances as **B** files.
 1. Set the compare mode to **Tile**
 2. Set the current file and its layer
 3. Add the **B** files and pick a layer for each
+
+## Comparing file information
+
+The **Information** tool and the HUD describe the **A** file — the current one —
+whatever a comparison is showing. A comparison changes which pixels are drawn,
+not which file is current, so switching between **B** and a wipe does not change
+what they report.
+
+To compare what two files are rather than how they look, open them and switch
+between them with **File/Next** and **File/Previous** (<kbd>Ctrl+Page Down</kbd>
+and <kbd>Ctrl+Page Up</kbd>), or click their tabs. Each becomes the current file
+in turn, and every display follows it.
