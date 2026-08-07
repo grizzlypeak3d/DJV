@@ -18,6 +18,10 @@
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/IWindow.h>
 #include <ftk/UI/ScreenshotTag.h>
+#include <ftk/UI/ComboBox.h>
+#include <ftk/UI/IButton.h>
+#include <ftk/UI/Label.h>
+#include <ftk/UI/LineEdit.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/TabWidget.h>
 #include <ftk/Core/Context.h>
@@ -26,6 +30,7 @@
 #include <ftk/Core/ImageIO.h>
 #include <ftk/Core/Timer.h>
 #include <ftk/Core/Path.h>
+#include <ftk/Core/String.h>
 
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/Player.h>
@@ -62,6 +67,69 @@ namespace djv
                     out.push_back(widget);
                 for (const auto& child : widget->getChildren())
                     collect(child, out);
+            }
+
+            //! The text a widget is showing, for the kinds that show any. A
+            //! tagged widget is often a row or a container rather than the
+            //! label itself, so this looks down the tree and joins what it
+            //! finds: the point is to make what is on screen readable from the
+            //! sidecar instead of by cropping the image and looking at it.
+            std::string widgetText(const std::shared_ptr<ftk::IWidget>& widget)
+            {
+                std::vector<std::string> out;
+                if (auto label = std::dynamic_pointer_cast<ftk::Label>(widget))
+                {
+                    out.push_back(label->getText());
+                }
+                else if (auto lineEdit = std::dynamic_pointer_cast<ftk::LineEdit>(widget))
+                {
+                    out.push_back(lineEdit->getText());
+                }
+                else if (auto comboBox = std::dynamic_pointer_cast<ftk::ComboBox>(widget))
+                {
+                    const auto& items = comboBox->getItems();
+                    const int i = comboBox->getCurrentIndex();
+                    if (i >= 0 && i < static_cast<int>(items.size()))
+                    {
+                        out.push_back(items[i].text);
+                    }
+                }
+                else if (auto button = std::dynamic_pointer_cast<ftk::IButton>(widget))
+                {
+                    // A button reads as its label plus its state, since the
+                    // state is usually the thing under test. Most of the tool
+                    // bar has an icon and no label, and "[unchecked]" on its own
+                    // says nothing about which button it was, so fall back to
+                    // the icon name.
+                    std::string s = button->getText();
+                    if (s.empty())
+                    {
+                        s = button->getIcon();
+                    }
+                    if (button->isCheckable())
+                    {
+                        s += button->isChecked() ? " [checked]" : " [unchecked]";
+                    }
+                    out.push_back(s);
+                }
+                else
+                {
+                    for (const auto& child : widget->getChildren())
+                    {
+                        const std::string s = widgetText(child);
+                        if (!s.empty())
+                        {
+                            out.push_back(s);
+                        }
+                    }
+                }
+                out.erase(
+                    std::remove_if(
+                        out.begin(),
+                        out.end(),
+                        [](const std::string& value) { return value.empty(); }),
+                    out.end());
+                return ftk::join(out, " ");
             }
 
             std::shared_ptr<ftk::TabWidget> findTabWidget(
@@ -1134,9 +1202,15 @@ namespace djv
             for (const auto& w : tagged)
             {
                 const ftk::Box2I g = w->getGeometry();
-                widgets.push_back({
+                nlohmann::json widget = {
                     { "id", ftk::getScreenshotTag(w) },
-                    { "box", { g.x(), g.y(), g.w(), g.h() } } });
+                    { "box", { g.x(), g.y(), g.w(), g.h() } } };
+                const std::string text = widgetText(w);
+                if (!text.empty())
+                {
+                    widget["text"] = text;
+                }
+                widgets.push_back(widget);
             }
 
             // Boxes and the screenshot share the offscreen buffer's pixel space
