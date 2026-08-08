@@ -11,3 +11,6 @@ docs/_site/
 docs/.jekyll-cache/
 docs/.bundle/
 docs/vendor/
+
+# Personal build settings, read by etc/Config/default.cmake.
+etc/Config/local.cmake

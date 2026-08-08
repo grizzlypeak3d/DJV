@@ -7,30 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      JOBS: 4
-      DJV_TESTS: ON
-      TLRENDER_NET: OFF
-      TLRENDER_OCIO: ON
-      TLRENDER_JPEG: ON
-      TLRENDER_TIFF: ON
-      TLRENDER_EXR: ON
-      TLRENDER_AOM: ON
-      TLRENDER_SVTAV1: ON
-      TLRENDER_FFMPEG: ON
-      TLRENDER_FFMPEG_MINIMAL: OFF
-      TLRENDER_FFMPEG_PLUGIN: ON
-      TLRENDER_FFMPEG_CMD: OFF
-      TLRENDER_NASM: ON
-      TLRENDER_OIIO: ON
-      TLRENDER_USD: OFF
-      TLRENDER_PYTHON: OFF
-      TLRENDER_PROGRAMS: OFF
-      TLRENDER_EXAMPLES: OFF
-      TLRENDER_TESTS: OFF
-      FTK_API: GL_4_1
-      FTK_EXAMPLES: OFF
-      FTK_TESTS: OFF
-      BUILD_SHARED_LIBS: OFF
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
 
     steps:
     - uses: actions/checkout@v6
@@ -66,7 +43,7 @@ jobs:
 
     - name: Build
       run: |
-        sh djv/etc/Linux/sbuild.sh djv Debug
+        sh djv/etc/Linux/sbuild.sh djv Debug ci-linux
 
     - name: Run tests
       run: |
@@ -78,30 +55,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      JOBS: 4
-      DJV_TESTS: ON
-      TLRENDER_NET: OFF
-      TLRENDER_OCIO: OFF
-      TLRENDER_JPEG: ON
-      TLRENDER_TIFF: ON
-      TLRENDER_EXR: ON
-      TLRENDER_AOM: OFF
-      TLRENDER_SVTAV1: OFF
-      TLRENDER_FFMPEG: OFF
-      TLRENDER_FFMPEG_MINIMAL: OFF
-      TLRENDER_FFMPEG_PLUGIN: OFF
-      TLRENDER_FFMPEG_CMD: OFF
-      TLRENDER_NASM: ON
-      TLRENDER_OIIO: OFF
-      TLRENDER_USD: OFF
-      TLRENDER_PYTHON: OFF
-      TLRENDER_PROGRAMS: OFF
-      TLRENDER_EXAMPLES: OFF
-      TLRENDER_TESTS: OFF
-      FTK_API: GLES_2
-      FTK_EXAMPLES: OFF
-      FTK_TESTS: OFF
-      BUILD_SHARED_LIBS: OFF
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
 
     steps:
     - uses: actions/checkout@v6
@@ -124,7 +78,7 @@ jobs:
 
     - name: Build
       run: |
-        sh djv/etc/Linux/sbuild.sh djv Debug
+        sh djv/etc/Linux/sbuild.sh djv Debug ci-linux-gles2
 
     - name: Run tests
       run: |
@@ -135,29 +89,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      JOBS: 4
-      TLRENDER_NET: OFF
-      TLRENDER_OCIO: ON
-      TLRENDER_JPEG: ON
-      TLRENDER_TIFF: ON
-      TLRENDER_EXR: ON
-      TLRENDER_AOM: ON
-      TLRENDER_SVTAV1: ON
-      TLRENDER_FFMPEG: ON
-      TLRENDER_FFMPEG_MINIMAL: ON
-      TLRENDER_FFMPEG_PLUGIN: OFF
-      TLRENDER_FFMPEG_CMD: ON
-      TLRENDER_NASM: ON
-      TLRENDER_OIIO: ON
-      TLRENDER_USD: OFF
-      TLRENDER_PYTHON: OFF
-      TLRENDER_PROGRAMS: OFF
-      TLRENDER_EXAMPLES: OFF
-      TLRENDER_TESTS: OFF
-      FTK_API: GL_4_1
-      FTK_EXAMPLES: OFF
-      FTK_TESTS: OFF
-      BUILD_SHARED_LIBS: OFF
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
 
     steps:
     - uses: actions/checkout@v6
@@ -180,7 +112,7 @@ jobs:
 
     - name: Build
       run: |
-        sh djv/etc/Linux/sbuild.sh djv Release
+        sh djv/etc/Linux/sbuild.sh djv Release package-linux
 
     - name: Package
       run: |
@@ -196,32 +128,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      JOBS: 4
-      DJV_TESTS: OFF
-      TLRENDER_NET: OFF
-      TLRENDER_OCIO: ON
-      TLRENDER_JPEG: ON
-      TLRENDER_TIFF: ON
-      TLRENDER_EXR: ON
-      TLRENDER_AOM: ON
-      TLRENDER_SVTAV1: ON
-      TLRENDER_FFMPEG: ON
-      TLRENDER_FFMPEG_MINIMAL: OFF
-      TLRENDER_FFMPEG_PLUGIN: ON
-      TLRENDER_FFMPEG_CMD: OFF
-      TLRENDER_NASM: ON
-      TLRENDER_OIIO: ON
-      TLRENDER_USD: OFF
-      TLRENDER_PYTHON: OFF
-      TLRENDER_PROGRAMS: OFF
-      TLRENDER_EXAMPLES: OFF
-      TLRENDER_TESTS: OFF
-      FTK_API: GL_4_1
-      FTK_EXAMPLES: OFF
-      FTK_TESTS: OFF
-      BUILD_SHARED_LIBS: OFF
-      CMAKE_OSX_DEPLOYMENT_TARGET: 14
-      CMAKE_OSX_ARCHITECTURES: arm64
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
 
     steps:
     - uses: actions/checkout@v6
@@ -244,37 +151,13 @@ jobs:
     - name: Build
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
-        sh djv/etc/macOS/sbuild.sh djv Debug
+        sh djv/etc/macOS/sbuild.sh djv Debug ci-macos
 
   macos-package:
     runs-on: macos-latest
 
     env:
-      JOBS: 4
-      TLRENDER_NET: OFF
-      TLRENDER_OCIO: ON
-      TLRENDER_JPEG: ON
-      TLRENDER_TIFF: ON
-      TLRENDER_EXR: ON
-      TLRENDER_AOM: ON
-      TLRENDER_SVTAV1: ON
-      TLRENDER_FFMPEG: ON
-      TLRENDER_FFMPEG_MINIMAL: ON
-      TLRENDER_FFMPEG_PLUGIN: OFF
-      TLRENDER_FFMPEG_CMD: ON
-      TLRENDER_NASM: ON
-      TLRENDER_OIIO: ON
-      TLRENDER_USD: OFF
-      TLRENDER_PYTHON: OFF
-      TLRENDER_PROGRAMS: OFF
-      TLRENDER_EXAMPLES: OFF
-      TLRENDER_TESTS: OFF
-      FTK_API: GL_4_1
-      FTK_EXAMPLES: OFF
-      FTK_TESTS: OFF
-      BUILD_SHARED_LIBS: OFF
-      CMAKE_OSX_DEPLOYMENT_TARGET: 10.15
-      CMAKE_OSX_ARCHITECTURES: arm64
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
 
     steps:
     - uses: actions/checkout@v6
@@ -297,7 +180,7 @@ jobs:
     - name: Build
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
-        sh djv/etc/macOS/sbuild.sh djv Release
+        sh djv/etc/macOS/sbuild.sh djv Release package-macos
 
     - name: Package
       run: |
@@ -313,30 +196,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      JOBS: 2
-      DJV_TESTS: OFF
-      TLRENDER_NET: OFF
-      TLRENDER_OCIO: ON
-      TLRENDER_JPEG: ON
-      TLRENDER_TIFF: ON
-      TLRENDER_EXR: ON
-      TLRENDER_AOM: OFF
-      TLRENDER_SVTAV1: OFF
-      TLRENDER_FFMPEG: ON
-      TLRENDER_FFMPEG_MINIMAL: OFF
-      TLRENDER_FFMPEG_PLUGIN: ON
-      TLRENDER_FFMPEG_CMD: OFF
-      TLRENDER_NASM: OFF
-      TLRENDER_OIIO: ON
-      TLRENDER_USD: OFF
-      TLRENDER_PYTHON: OFF
-      TLRENDER_PROGRAMS: OFF
-      TLRENDER_EXAMPLES: OFF
-      TLRENDER_TESTS: OFF
-      FTK_API: GL_4_1
-      FTK_EXAMPLES: OFF
-      FTK_TESTS: OFF
-      BUILD_SHARED_LIBS: OFF
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
 
     steps:
     - uses: actions/checkout@v6
@@ -361,35 +221,13 @@ jobs:
     - name: Build
       shell: cmd
       run: |
-        djv\etc\Windows\sbuild.bat djv Debug
+        djv\etc\Windows\sbuild.bat djv Debug ci-windows
 
   windows-package:
     runs-on: windows-latest
 
     env:
-      JOBS: 2
-      TLRENDER_NET: OFF
-      TLRENDER_OCIO: ON
-      TLRENDER_JPEG: ON
-      TLRENDER_TIFF: ON
-      TLRENDER_EXR: ON
-      TLRENDER_AOM: OFF
-      TLRENDER_SVTAV1: OFF
-      TLRENDER_FFMPEG: ON
-      TLRENDER_FFMPEG_MINIMAL: ON
-      TLRENDER_FFMPEG_PLUGIN: OFF
-      TLRENDER_FFMPEG_CMD: ON
-      TLRENDER_NASM: OFF
-      TLRENDER_OIIO: ON
-      TLRENDER_USD: OFF
-      TLRENDER_PYTHON: OFF
-      TLRENDER_PROGRAMS: OFF
-      TLRENDER_EXAMPLES: OFF
-      TLRENDER_TESTS: OFF
-      FTK_API: GL_4_1
-      FTK_EXAMPLES: OFF
-      FTK_TESTS: OFF
-      BUILD_SHARED_LIBS: OFF
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
 
     steps:
     - uses: actions/checkout@v6
@@ -415,7 +253,7 @@ jobs:
     - name: Build
       shell: cmd
       run: |
-        djv\etc\Windows\sbuild.bat djv Release
+        djv\etc\Windows\sbuild.bat djv Release package-windows
 
     - name: Package
       shell: cmd

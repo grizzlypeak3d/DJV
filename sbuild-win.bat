@@ -1,31 +1,14 @@
+rem Usage: sbuild-win.bat [source directory] [build type] [config]
+rem
+rem The config names a file in etc/Config; "default" builds everything.
+rem Personal settings go in etc/Config/local.cmake, which is not tracked. For
+rem the number of build jobs, set CMAKE_BUILD_PARALLEL_LEVEL.
+
 set SOURCE_DIR=%1
 set BUILD_TYPE=%2
+set CONFIG=%3
 IF "%SOURCE_DIR%"=="" set SOURCE_DIR=DJV
 IF "%BUILD_TYPE%"=="" set BUILD_TYPE=Release
+IF "%CONFIG%"=="" set CONFIG=default
 
-set JOBS=4
-set DJV_TESTS=OFF
-set TLRENDER_NET=OFF
-set TLRENDER_OCIO=ON
-set TLRENDER_JPEG=ON
-set TLRENDER_TIFF=ON
-set TLRENDER_EXR=ON
-set TLRENDER_AOM=OFF
-set TLRENDER_SVTAV1=OFF
-set TLRENDER_FFMPEG=ON
-set TLRENDER_FFMPEG_MINIMAL=OFF
-set TLRENDER_FFMPEG_PLUGIN=ON
-set TLRENDER_FFMPEG_CMD=OFF
-set TLRENDER_NASM=OFF
-set TLRENDER_OIIO=ON
-set TLRENDER_USD=OFF
-set TLRENDER_PYTHON=OFF
-set TLRENDER_PROGRAMS=OFF
-set TLRENDER_EXAMPLES=OFF
-set TLRENDER_TESTS=OFF
-set FTK_API=GL_4_1
-set FTK_EXAMPLES=OFF
-set FTK_TESTS=OFF
-set BUILD_SHARED_LIBS=OFF
-
-call %SOURCE_DIR%\etc\Windows\sbuild.bat %SOURCE_DIR% %BUILD_TYPE%
+%SOURCE_DIR%\etc\Windows\sbuild.bat %SOURCE_DIR% %BUILD_TYPE% %CONFIG%
