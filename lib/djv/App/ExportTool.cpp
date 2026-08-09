@@ -484,8 +484,8 @@ namespace djv
                 // name was missed for the same reason a "Yes" would be.
                 const std::string text =
                     models::ExportFileType::Seq == fileType ?
-                    "Output files exist." :
-                    "Output file exists.";
+                    "Output files already exist; overwrite?" :
+                    "Output file already exists; overwrite?";
                 if (auto context = getContext())
                 {
                     context->getSystem<ftk::DialogSystem>()->confirm(
