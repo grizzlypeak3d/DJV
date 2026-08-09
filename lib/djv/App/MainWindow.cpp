@@ -208,6 +208,13 @@ namespace djv
 
             auto timeUnitsModel = app->getTimeUnitsModel();
             p.timelineWidget = tl::ui::TimelineWidget::create(context, timeUnitsModel);
+            // The current file's timeline and no other. Left unset the widget
+            // draws one for each file being compared as well, which is what
+            // an application built around comparing wants; here the timeline
+            // belongs to the file being played and a comparison is something
+            // done to the picture.
+            p.timelineWidget->setTimelines(
+                std::vector<std::shared_ptr<tl::Timeline> >());
             ftk::setScreenshotTag(p.timelineWidget, "MainWindow.Timeline");
 
             p.fileActions = FileActions::create(context, app);
