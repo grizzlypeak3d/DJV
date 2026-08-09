@@ -6,6 +6,8 @@ Changes:
 * Add support for partial image sequences.
 * Add audio export.
 * Add support for exporting A/B comparisons.
+* Add a gain to the difference comparison, so that differences too small to
+  see at their own size can be brought up.
 * Add high quality image scaling options.
 * Multiple tools can now be open at the same time.
 * Remove "A" compare mode and make the other compare modes toggles.

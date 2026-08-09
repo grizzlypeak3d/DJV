@@ -62,6 +62,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> wipeYSlider;
             std::shared_ptr<ftk::FloatEditSlider> wipeRotationSlider;
             std::shared_ptr<ftk::FloatEditSlider> overlaySlider;
+            std::shared_ptr<ftk::FloatEditSlider> differenceGainSlider;
             std::shared_ptr<ftk::ComboBox> compareTimeComboBox;
             std::shared_ptr<ftk::CheckBox> sameSizeCheckBox;
             std::shared_ptr<ftk::FormLayout> compareLayout;
@@ -126,6 +127,16 @@ namespace djv
             p.overlaySlider = ftk::FloatEditSlider::create(context);
             p.overlaySlider->setDefault(.5F);
 
+            p.differenceGainSlider = ftk::FloatEditSlider::create(context);
+            p.differenceGainSlider->setRange(1.F, 32.F);
+            p.differenceGainSlider->setStep(1.F);
+            p.differenceGainSlider->setLargeStep(4.F);
+            p.differenceGainSlider->setDefault(1.F);
+            p.differenceGainSlider->setTooltip(
+                "Multiply the difference, so that a small one can be seen.\n"
+                "A compressed file differs from its source by a code value\n"
+                "or two, which is not distinguishable from black on its own.");
+
             p.compareTimeComboBox = ftk::ComboBox::create(
                 context,
                 models::getCompareTimeLabels());
@@ -161,6 +172,7 @@ namespace djv
             p.compareLayout->addRow("Y:", p.wipeYSlider);
             p.compareLayout->addRow("Rotation:", p.wipeRotationSlider);
             p.compareLayout->addRow("Amount:", p.overlaySlider);
+            p.compareLayout->addRow("Gain:", p.differenceGainSlider);
             p.compareLayout->addRow("Sync by:", p.compareTimeComboBox);
             p.compareLayout->addRow("Same size:", p.sameSizeCheckBox);
             p.bellows["Compare"] = ftk::Bellows::create(context, "Compare", layout);
@@ -240,6 +252,17 @@ namespace djv
                     {
                         auto options = app->getFilesModel()->getCompareOptions();
                         options.overlay = value;
+                        app->getFilesModel()->setCompareOptions(options);
+                    }
+                });
+
+            p.differenceGainSlider->setCallback(
+                [appWeak](float value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getFilesModel()->getCompareOptions();
+                        options.differenceGain = value;
                         app->getFilesModel()->setCompareOptions(options);
                     }
                 });
@@ -566,12 +589,15 @@ namespace djv
             p.wipeYSlider->setValue(value.wipeCenter.y);
             p.wipeRotationSlider->setValue(value.wipeRotation);
             p.overlaySlider->setValue(value.overlay);
+            p.differenceGainSlider->setValue(value.differenceGain);
             p.sameSizeCheckBox->setChecked(value.sameSize);
 
             p.compareLayout->setRowVisible(p.wipeXSlider, value.compare == tl::Compare::Wipe);
             p.compareLayout->setRowVisible(p.wipeYSlider, value.compare == tl::Compare::Wipe);
             p.compareLayout->setRowVisible(p.wipeRotationSlider, value.compare == tl::Compare::Wipe);
             p.compareLayout->setRowVisible(p.overlaySlider, value.compare == tl::Compare::Overlay);
+            p.compareLayout->setRowVisible(
+                p.differenceGainSlider, value.compare == tl::Compare::Difference);
         }
     }
 }

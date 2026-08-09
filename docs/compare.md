@@ -51,6 +51,19 @@ is no separate mode for showing **A** — that is what no comparison looks like.
 The modes without a shortcut can be given one in the **Keyboard Shortcuts**
 section of the **Settings** tool.
 
+## Difference gain
+
+**Difference** shows how far apart the two files are at each pixel, and the
+differences worth looking for are often very small — a compressed version
+differs from its source by a code value or two, which is not distinguishable
+from black. **Gain** multiplies the difference so that it can be seen; at 16 a
+difference of one code value in eight bits reads as a clear grey.
+
+The brightness is the size of the difference and the colour is which channels
+it is in, so a gain high enough to make the small differences visible drives
+the large ones to white. Work down from a high gain to find where something
+differs, then back off to judge by how much.
+
 ## Same size
 
 Files of different resolutions are drawn at the size of the current file, so a
