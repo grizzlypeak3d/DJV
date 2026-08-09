@@ -3,8 +3,6 @@
 
 #include <djv/App/BottomToolBar.h>
 
-#include <opentimelineio/clip.h>
-
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
 #include <djv/App/FrameActions.h>
@@ -57,9 +55,9 @@ namespace djv
             std::shared_ptr<Indicator> indicator;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
-            // Whether media time means anything across the whole
-            // timeline, which it only does with nothing to cut between.
-            bool singleClip = false;
+            // Whether media time means anything across the whole timeline,
+            // which it only does when the timeline plays one media through.
+            bool mediaTime = false;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver;
@@ -346,18 +344,12 @@ namespace djv
         {
             FTK_P();
             OTIO_NS::RationalTime out = value.duration();
-            if (p.player && p.singleClip && value.duration().value() > 0)
+            if (p.player && p.mediaTime && value.duration().value() > 0)
             {
                 // Counted in the media's frames rather than the player's, so
                 // that a sequence with frames left out still reads as the
                 // range it covers. Both ends are mapped because the in/out
                 // range may be a part of it.
-                //
-                // Only for a single clip: media time is a position within one
-                // file, so across a cut it is not a coordinate that can be
-                // subtracted. Two clips taking the same three seconds of one
-                // file mapped the last frame to before the first and gave a
-                // duration of zero.
                 const auto& timeline = p.player->getTimeline();
                 const auto first = timeline->getMediaTime(value.start_time());
                 const auto last =
@@ -377,52 +369,56 @@ namespace djv
             FTK_P();
 
             p.player = value;
-            p.singleClip = false;
-            if (p.player)
-            {
-                if (const auto& otioTimeline = p.player->getTimeline()->getTimeline())
-                {
-                    p.singleClip =
-                        1 == otioTimeline->find_children<OTIO_NS::Clip>().size();
-                }
-            }
+            p.mediaTime = p.player ?
+                p.player->getTimeline()->isMediaTimeContinuous() :
+                false;
 
             if (p.player)
             {
                 // The counter names the frame in the media's own time, which
                 // is not the player's when frames have been left out.
+                //
+                // Only where that is one number for the whole timeline. On a
+                // cut list it is a position inside whichever clip is playing:
+                // it restarts at every cut, and a clip whose media runs at a
+                // different rate than the timeline repeats it from one frame
+                // to the next. The counter is a place on the timeline as well
+                // as a readout, so it counts the timeline there.
                 tl::ui::TimeMap timeMap;
-                timeMap.toMedia =
-                    [this](const OTIO_NS::RationalTime& value)
-                    {
-                        FTK_P();
-                        if (p.player)
+                if (p.mediaTime)
+                {
+                    timeMap.toMedia =
+                        [this](const OTIO_NS::RationalTime& value)
                         {
-                            if (const auto time =
-                                p.player->getTimeline()->getMediaTime(value))
+                            FTK_P();
+                            if (p.player)
                             {
-                                return *time;
+                                if (const auto time =
+                                    p.player->getTimeline()->getMediaTime(value))
+                                {
+                                    return *time;
+                                }
                             }
-                        }
-                        return value;
-                    };
-                timeMap.fromMedia =
-                    [this](const OTIO_NS::RationalTime& value)
-                    {
-                        FTK_P();
-                        if (p.player)
+                            return value;
+                        };
+                    timeMap.fromMedia =
+                        [this](const OTIO_NS::RationalTime& value)
                         {
-                            // Read against where playback is, which is the
-                            // clip the person typing is looking at.
-                            if (const auto time =
-                                p.player->getTimeline()->getTimelineTime(
-                                    p.player->getCurrentTime(), value))
+                            FTK_P();
+                            if (p.player)
                             {
-                                return *time;
+                                // Read against where playback is, which is the
+                                // clip the person typing is looking at.
+                                if (const auto time =
+                                    p.player->getTimeline()->getTimelineTime(
+                                        p.player->getCurrentTime(), value))
+                                {
+                                    return *time;
+                                }
                             }
-                        }
-                        return value;
-                    };
+                            return value;
+                        };
+                }
                 p.currentTimeEdit->setTimeMap(timeMap);
 
                 p.speedObserver = ftk::Observer<double>::create(

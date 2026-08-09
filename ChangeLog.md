@@ -5,6 +5,7 @@ Changes:
 * Add support for OTIO spatial coordinates.
 * Add support for partial image sequences.
 * Add audio export.
+* Add support for exporting A/B comparisons.
 * Add high quality image scaling options.
 * Multiple tools can now be open at the same time.
 * Remove "A" compare mode and make the other compare modes toggles.
@@ -26,6 +27,15 @@ Changes:
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
+* Show media frame numbers in the current time and on the timeline ruler only
+  where the timeline plays one media through. On a cut list they restarted at
+  every cut and repeated within a clip whose media ran at a different rate;
+  the timeline's own time is counted there instead.
+* Stop warning that media was not found in a timeline when a thumbnail of the
+  timeline itself was what was asked for.
+* Only errors are shown over the image; warnings stay in the status bar.
+* Exporting over files that are already there asks first, in place of the
+  "(exists)" marker beside the output file name.
 * Fixes for the grid and outline in compare mode.
 * Fixes to prevent cache usage exceeding 100%.
 * Fixes for log file failures.

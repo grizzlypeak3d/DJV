@@ -27,20 +27,20 @@ namespace djv
         TL_ENUM_IMPL(
             ExportRenderSize,
             "Default",
-            "1920x1080",
-            "3840x2160",
-            "4096x2160",
+            "1920",
+            "3840",
+            "4096",
             "Custom");
 
-        ftk::Size2I getSize(ExportRenderSize value)
+        int getWidth(ExportRenderSize value)
         {
-            const std::array<ftk::Size2I, static_cast<size_t>(ExportRenderSize::Count)> data =
+            const std::array<int, static_cast<size_t>(ExportRenderSize::Count)> data =
             {
-                ftk::Size2I(),
-                ftk::Size2I(1920, 1080),
-                ftk::Size2I(3840, 2160),
-                ftk::Size2I(4096, 2160),
-                ftk::Size2I()
+                0,
+                1920,
+                3840,
+                4096,
+                0
             };
             return data[static_cast<size_t>(value)];
         }
@@ -56,7 +56,7 @@ namespace djv
             return
                 dir == other.dir &&
                 renderSize == other.renderSize &&
-                customSize == other.customSize &&
+                customWidth == other.customWidth &&
                 fileType == other.fileType &&
                 imageBase == other.imageBase &&
                 imageZeroPad == other.imageZeroPad &&
@@ -887,7 +887,7 @@ namespace djv
         {
             json["Dir"] = value.dir;
             json["RenderSize"] = to_string(value.renderSize);
-            json["CustomSize"] = value.customSize;
+            json["CustomWidth"] = value.customWidth;
             json["FileType"] = to_string(value.fileType);
             json["ImageBase"] = value.imageBase;
             json["ImageZeroPad"] = value.imageZeroPad;
@@ -1018,8 +1018,38 @@ namespace djv
         void from_json(const nlohmann::json& json, ExportSettings& value)
         {
             json.at("Dir").get_to(value.dir);
-            from_string(json.at("RenderSize").get<std::string>(), value.renderSize);
-            json.at("CustomSize").get_to(value.customSize);
+            const std::string renderSize = json.at("RenderSize").get<std::string>();
+            if (!from_string(renderSize, value.renderSize))
+            {
+                // The presets became widths, so a settings file written
+                // before that names a size no label matches. Unmatched would
+                // silently drop to the default; carry the width over instead.
+                const std::map<std::string, ExportRenderSize> old =
+                {
+                    { "1920x1080", ExportRenderSize::_1920 },
+                    { "3840x2160", ExportRenderSize::_3840 },
+                    { "4096x2160", ExportRenderSize::_4096 }
+                };
+                const auto i = old.find(renderSize);
+                if (i != old.end())
+                {
+                    value.renderSize = i->second;
+                }
+            }
+            // Neither key is read with at(): a settings file written before
+            // the custom size became a width alone has "CustomSize" instead,
+            // and throwing on the missing key would take every other export
+            // setting with it. The width carries over from the old pair.
+            if (json.contains("CustomWidth"))
+            {
+                json.at("CustomWidth").get_to(value.customWidth);
+            }
+            else if (json.contains("CustomSize"))
+            {
+                ftk::Size2I customSize;
+                json.at("CustomSize").get_to(customSize);
+                value.customWidth = customSize.w;
+            }
             from_string(json.at("FileType").get<std::string>(), value.fileType);
             json.at("ImageBase").get_to(value.imageBase);
             json.at("ImageZeroPad").get_to(value.imageZeroPad);

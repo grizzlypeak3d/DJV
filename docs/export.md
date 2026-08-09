@@ -16,10 +16,15 @@ Shortcut: <kbd>F2</kbd>
 
 ![Export tool]({{ '/assets/export-tool.svg' | relative_url }})
 
-* Render size — The resolution of the export. **Default** uses the source
-  resolution; a custom size can also be set.
-* File — A preview of the output file name. If the file already exists it is
-  marked with a warning, so it can be caught before overwriting.
+* Render width — The width of the export: **Default** for the source width,
+  one of the presets, or **Custom**. Only the width is ever given; the height
+  follows the aspect ratio of what is being exported, so nothing is squashed
+  to fit.
+* Custom width — Shown with **Custom**, for a width the presets do not cover.
+* Output size — What the width and the aspect ratio come to between them,
+  which is the resolution the file is written at.
+* File — A preview of the output file name. Exporting over a file that is
+  already there asks first, so nothing is overwritten without saying so.
 
 ## Image
 
@@ -31,8 +36,8 @@ frame number in the output file name follows the playhead.
 The **Sequence** tab exports the in/out range as a numbered image sequence. Set
 **Zero padding** to control the number of digits in the frame numbers (for
 example, a padding of `4` produces `render.0001.exr`). The **File** preview
-shows the first and last files of the sequence, and warns if any frame in the
-range already exists on disk.
+shows the first and last files of the sequence. Exporting asks first if any
+frame of the range is already on disk.
 
 ![Export sequence]({{ '/assets/export-tool-seq.svg' | relative_url }})
 
@@ -51,4 +56,7 @@ typically support `.exr`, `.png`, `.tif`, and `.tiff`; movie exports typically
 support `.mov`, `.mp4`, and `.m4v`.
 
 Exports respect the current layer, playback speed, in/out range, and color
-settings.
+settings. A comparison is exported the way the viewport shows it: a side by
+side comparison of two files writes both of them, at the size the comparison
+comes to, and **Default** render size follows that rather than the A file on
+its own.

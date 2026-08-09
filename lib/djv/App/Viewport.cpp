@@ -399,13 +399,28 @@ namespace djv
                 [this](const std::vector<ftk::LogItem>& value)
                 {
                     FTK_P();
+                    if (value.empty())
+                    {
+                        // Cleared, so there is nothing left to be showing.
+                        p.toastLabel->setText(std::string());
+                        _toastUpdate();
+                        return;
+                    }
+                    // Errors only. The list carries warnings as well, and the
+                    // status bar shows both; drawing over the image is for
+                    // what stopped something from working, not for what is
+                    // merely worth knowing. A warning arriving is also not a
+                    // reason to cut short an error that is still up.
+                    if (ftk::LogType::Error != value.back().type)
+                    {
+                        return;
+                    }
                     // The message alone: it has just appeared, and the space
                     // over the image is better spent on what went wrong.
-                    p.toastLabel->setText(!value.empty() ?
+                    p.toastLabel->setText(
                         ftk::elide(
                             ftk::getLabel(value.back(), ftk::LogLabel::Message),
-                            toastTextLength) :
-                        std::string());
+                            toastTextLength));
                     _toastUpdate();
                     if (!p.toastLabel->getText().empty())
                     {
@@ -1081,8 +1096,13 @@ namespace djv
         void Viewport::_toastUpdate()
         {
             FTK_P();
-            p.toastLabel->setVisible(
-                p.toastActive && !p.toastLabel->getText().empty());
+            const bool visible =
+                p.toastActive && !p.toastLabel->getText().empty();
+            p.toastLabel->setVisible(visible);
+            // Tagged only while it is up, the same as the compare label, so
+            // that a capture says whether anything was drawn over the image
+            // rather than only what it would have said.
+            ftk::setScreenshotTag(p.toastLabel, visible ? "View.Toast" : "");
         }
 
         void Viewport::_hudLayout()

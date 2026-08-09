@@ -19,6 +19,13 @@ namespace djv
             models::ExportFileType,
             double frame);
 
+        //! Whether exporting the given range would overwrite anything that
+        //! is already on disk.
+        bool getExportExists(
+            const models::ExportSettings&,
+            models::ExportFileType,
+            const OTIO_NS::TimeRange&);
+
         //! Base class for export widgets.
         class IExportWidget : public ftk::IWidget
         {

@@ -202,6 +202,13 @@ as seven frames, and the fourth of them reads as frame 31.
 Typing a frame number the sequence does not have goes to the nearest frame
 before it, so the frame you land on is the frame you are shown.
 
+This holds while the timeline plays one media through, whether in one piece or
+in the runs a sparse sequence is cut into. A timeline that cuts between
+different media, or plays the same media twice, has no single numbering to
+show: the number would restart at every cut, and a clip whose media runs at a
+different rate than the timeline would repeat it from one frame to the next.
+The current time and the timeline ruler count the timeline itself there.
+
 ### Marking the frames that are not there
 
 Under **Hold** and **Black** the picture on screen is not the frame that was

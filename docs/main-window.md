@@ -12,7 +12,9 @@ nav_order: 3
 * Timeline — time scrubbing, thumbnails, and audio waveforms
 * Bottom tool bar — playback, frame, and audio controls
 * Tools — the currently active tool (for example, color picker or magnifier)
-* Status bar — warnings, errors, information, and status indicators
+* Status bar — warnings, errors, information, and status indicators. Errors
+  are also shown briefly over the image, so one is not missed while looking at
+  the picture; warnings stay in the status bar.
 
 Different parts of the interface can be shown or hidden from the **Window** menu.
 

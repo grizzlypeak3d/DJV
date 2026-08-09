@@ -10,6 +10,7 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/GL/Render.h>
+#include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/IRender.h>
 #include <tlRender/Timeline/Util.h>
 #include <tlRender/IO/System.h>
@@ -24,6 +25,7 @@
 #include <ftk/UI/FileEdit.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEdit.h>
+#include <ftk/UI/Label.h>
 #include <ftk/UI/ProgressDialog.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
@@ -35,6 +37,8 @@
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Timer.h>
 
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 
@@ -42,6 +46,41 @@ namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            const int customSizeMin = 1;
+            const int customSizeMax = 16384;
+
+            // Scale a comparison layout to the export size. The boxes come
+            // out of the comparison at the size it lays out to naturally; a
+            // custom or preset export size stretches that, the same as the
+            // single image case does. Scaling the edges rather than the
+            // origin and the size keeps neighbouring boxes touching instead
+            // of leaving a seam between them.
+            std::vector<ftk::Box2I> scaleBoxes(
+                const std::vector<ftk::Box2I>& boxes,
+                const ftk::Size2I& from,
+                const ftk::Size2I& to)
+            {
+                if (!from.isValid() || from == to)
+                {
+                    return boxes;
+                }
+                const double sx = to.w / static_cast<double>(from.w);
+                const double sy = to.h / static_cast<double>(from.h);
+                std::vector<ftk::Box2I> out;
+                for (const auto& box : boxes)
+                {
+                    const int x0 = std::lround(box.min.x * sx);
+                    const int y0 = std::lround(box.min.y * sy);
+                    const int x1 = std::lround((box.max.x + 1) * sx);
+                    const int y1 = std::lround((box.max.y + 1) * sy);
+                    out.push_back(ftk::Box2I(x0, y0, x1 - x0, y1 - y0));
+                }
+                return out;
+            }
+        }
+
         struct ExportTool::Private
         {
             std::shared_ptr<tl::Player> player;
@@ -61,8 +100,13 @@ namespace djv
                 int64_t audioSamples = 0;
                 tl::OCIOOptions ocioOptions;
                 tl::LUTOptions lutOptions;
-                ftk::ImageOptions imageOptions;
-                tl::DisplayOptions displayOptions;
+                // One entry per video source: the A file followed by the
+                // files it is being compared with. The layout is computed
+                // once so that it cannot shift part way through a movie.
+                std::vector<ftk::ImageOptions> imageOptions;
+                std::vector<tl::DisplayOptions> displayOptions;
+                tl::CompareOptions compareOptions;
+                std::vector<ftk::Box2I> boxes;
                 ftk::gl::TextureType colorBuffer = ftk::gl::TextureType::RGBA_U8;
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
                 std::shared_ptr<tl::IRender> render;
@@ -74,18 +118,22 @@ namespace djv
             std::shared_ptr<ftk::FileEdit> dirEdit;
             std::shared_ptr<ftk::ComboBox> renderSizeComboBox;
             std::shared_ptr<ftk::IntEdit> renderWidthEdit;
-            std::shared_ptr<ftk::IntEdit> renderHeightEdit;
+            std::shared_ptr<ftk::Label> outputSizeLabel;
             std::shared_ptr<ImageExportWidget> imageWidget;
             std::shared_ptr<SeqExportWidget> seqWidget;
             std::shared_ptr<MovieExportWidget> movieWidget;
             std::shared_ptr<ftk::TabWidget> tabWidget;
-            std::shared_ptr<ftk::HorizontalLayout> customSizeLayout;
             std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
             std::shared_ptr<ftk::ProgressDialog> progressDialog;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<models::ExportSettings> > settingsObserver;
+            // What the export size is worked out from, so that the size shown
+            // for it does not go stale while the tool is open.
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::ListObserver<std::shared_ptr<tl::Timeline> > > compareObserver;
 
             std::shared_ptr<ftk::Timer> progressTimer;
         };
@@ -114,9 +162,16 @@ namespace djv
             p.renderSizeComboBox = ftk::ComboBox::create(context, models::getExportRenderSizeLabels());
             ftk::setScreenshotTag(p.renderSizeComboBox, "Export.RenderSize");
             p.renderWidthEdit = ftk::IntEdit::create(context);
-            p.renderWidthEdit->setRange(1, 16384);
-            p.renderHeightEdit = ftk::IntEdit::create(context);
-            p.renderHeightEdit->setRange(1, 16384);
+            p.renderWidthEdit->setRange(customSizeMin, customSizeMax);
+            p.renderWidthEdit->setTooltip(
+                "The height follows the aspect ratio of what is being "
+                "exported.");
+            ftk::setScreenshotTag(p.renderWidthEdit, "Export.CustomWidth");
+            p.outputSizeLabel = ftk::Label::create(context);
+            p.outputSizeLabel->setTooltip(
+                "The size the export comes out at, which the width and the "
+                "aspect ratio of what is being exported give between them.");
+            ftk::setScreenshotTag(p.outputSizeLabel, "Export.OutputSize");
 
             p.imageWidget = ImageExportWidget::create(context, app);
             p.seqWidget = SeqExportWidget::create(context, app);
@@ -129,12 +184,12 @@ namespace djv
             p.formLayout = ftk::FormLayout::create(context, vLayout);
             p.formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout->addRow("Directory:", p.dirEdit);
-            p.formLayout->addRow("Render size:", p.renderSizeComboBox);
-            p.customSizeLayout = ftk::HorizontalLayout::create(context);
-            p.customSizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.renderWidthEdit->setParent(p.customSizeLayout);
-            p.renderHeightEdit->setParent(p.customSizeLayout);
-            p.formLayout->addRow("Custom size:", p.customSizeLayout);
+            p.formLayout->addRow("Render width:", p.renderSizeComboBox);
+            p.formLayout->addRow("Custom width:", p.renderWidthEdit);
+            // Under both of the ways of giving a width, since it is what
+            // either of them comes to, and it is worth saying for the
+            // default and the presets as much as for a typed width.
+            p.formLayout->addRow("Output size:", p.outputSizeLabel);
             p.tabWidget = ftk::TabWidget::create(context, p.layout);
             // Tag the tab bar rather than the whole tab widget so that
             // screenshot annotations point at the tabs.
@@ -151,6 +206,27 @@ namespace djv
                 {
                     FTK_P();
                     p.player = value;
+                    if (p.player)
+                    {
+                        // The comparison the player is running, which is not
+                        // the same news as the compare options. Turning a
+                        // comparison on with no "B" file chosen picks one, so
+                        // the options change first and the timeline that goes
+                        // with them second; without this the size was worked
+                        // out from the "A" file alone and left there.
+                        p.compareObserver =
+                            ftk::ListObserver<std::shared_ptr<tl::Timeline> >::create(
+                                p.player->observeCompare(),
+                                [this](const std::vector<std::shared_ptr<tl::Timeline> >&)
+                                {
+                                    _sizeUpdate();
+                                });
+                    }
+                    else
+                    {
+                        p.compareObserver.reset();
+                        _sizeUpdate();
+                    }
                 });
 
             p.settingsObserver = ftk::Observer<models::ExportSettings>::create(
@@ -158,6 +234,20 @@ namespace djv
                 [this](const models::ExportSettings& value)
                 {
                     _widgetUpdate(value);
+                });
+
+            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
+                app->getFilesModel()->observeCompareOptions(),
+                [this](const tl::CompareOptions&)
+                {
+                    _sizeUpdate();
+                });
+
+            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
+                app->getViewportModel()->observeDisplayOptions(),
+                [this](const tl::DisplayOptions&)
+                {
+                    _sizeUpdate();
                 });
 
             p.dirEdit->setCallback(
@@ -183,16 +273,7 @@ namespace djv
                 {
                     FTK_P();
                     auto options = p.settings->getExport();
-                    options.customSize.w = value;
-                    p.settings->setExport(options);
-                });
-
-            p.renderHeightEdit->setCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    auto options = p.settings->getExport();
-                    options.customSize.h = value;
+                    options.customWidth = value;
                     p.settings->setExport(options);
                 });
 
@@ -245,20 +326,187 @@ namespace djv
             return out;
         }
 
+        std::vector<ftk::ImageInfo> ExportTool::_getInfos() const
+        {
+            FTK_P();
+            std::vector<ftk::ImageInfo> out;
+            if (p.player)
+            {
+                const tl::IOInfo& ioInfo = p.player->getIOInfo();
+                if (!ioInfo.video.empty())
+                {
+                    out.push_back(ioInfo.video.front());
+                    for (const auto& compare : p.player->getCompare())
+                    {
+                        // A source without video still takes a place in the
+                        // layout, so that the sources stay lined up with the
+                        // frames requested for them.
+                        const tl::IOInfo& compareIOInfo = compare->getIOInfo();
+                        out.push_back(
+                            !compareIOInfo.video.empty() ?
+                            compareIOInfo.video.front() :
+                            ftk::ImageInfo());
+                    }
+                }
+            }
+            return out;
+        }
+
+        ftk::Size2I ExportTool::_getDefaultSize() const
+        {
+            ftk::Size2I out;
+            if (auto app = _app.lock())
+            {
+                const std::vector<ftk::ImageInfo> infos = _getInfos();
+                const tl::AspectRatioOptions& aspectRatio =
+                    app->getViewportModel()->getDisplayOptions().aspectRatio;
+                out = tl::getRenderSize(
+                    app->getFilesModel()->getCompareOptions(),
+                    aspectRatio,
+                    infos);
+                // The B comparison sizes itself from the B file, which there
+                // need not be one of yet. Fall back to the A file so that the
+                // export still has a size to work with; it renders the same
+                // empty picture the viewport shows in the meantime.
+                if (!out.isValid() && !infos.empty())
+                {
+                    out = tl::getRenderSize(infos.front(), aspectRatio);
+                }
+            }
+            return out;
+        }
+
+        ftk::Size2I ExportTool::_getWidthSize(int width) const
+        {
+            ftk::Size2I out;
+            const ftk::Size2I size = _getDefaultSize();
+            if (size.isValid())
+            {
+                out.w = std::clamp(width, customSizeMin, customSizeMax);
+                out.h = std::clamp(
+                    static_cast<int>(std::lround(
+                        out.w * size.h / static_cast<double>(size.w))),
+                    customSizeMin,
+                    customSizeMax);
+            }
+            return out;
+        }
+
+        ftk::Size2I ExportTool::_getExportSize(
+            const models::ExportSettings& settings) const
+        {
+            ftk::Size2I out;
+            switch (settings.renderSize)
+            {
+            case models::ExportRenderSize::Default:
+                out = _getDefaultSize();
+                break;
+            case models::ExportRenderSize::Custom:
+                out = _getWidthSize(settings.customWidth);
+                break;
+            default:
+                // A preset is a width like any other: taking its height as
+                // well would squash anything that is not the shape it was
+                // named for, since the export scales to fill rather than
+                // letterboxing.
+                out = _getWidthSize(models::getWidth(settings.renderSize));
+                break;
+            }
+            return out;
+        }
+
+        void ExportTool::_sizeUpdate()
+        {
+            FTK_P();
+            // Blank until there is something to take an aspect ratio from,
+            // which is also when there is nothing to export.
+            const ftk::Size2I size = _getExportSize(p.settings->getExport());
+            p.outputSizeLabel->setText(size.isValid() ?
+                ftk::Format("{0} x {1}").arg(size.w).arg(size.h).str() :
+                std::string());
+        }
+
         void ExportTool::_widgetUpdate(const models::ExportSettings& settings)
         {
             FTK_P();
             p.dirEdit->setPath(ftk::Path(settings.dir));
             p.renderSizeComboBox->setCurrentIndex(static_cast<int>(settings.renderSize));
-            p.renderWidthEdit->setValue(settings.customSize.w);
-            p.renderHeightEdit->setValue(settings.customSize.h);
+            p.renderWidthEdit->setValue(settings.customWidth);
+            _sizeUpdate();
             p.formLayout->setRowVisible(
-                p.customSizeLayout,
+                p.renderWidthEdit,
                 models::ExportRenderSize::Custom == settings.renderSize);
             p.tabWidget->setCurrent(static_cast<int>(settings.fileType));
         }
 
+        OTIO_NS::TimeRange ExportTool::_getExportRange(
+            models::ExportFileType fileType) const
+        {
+            FTK_P();
+            OTIO_NS::TimeRange out;
+            if (p.player)
+            {
+                switch (fileType)
+                {
+                case models::ExportFileType::Image:
+                    out = OTIO_NS::TimeRange(
+                        p.player->getCurrentTime(),
+                        OTIO_NS::RationalTime(1.0, p.player->getTimeRange().duration().rate()));
+                    break;
+                default:
+                    out = p.player->getInOutRange();
+                    break;
+                }
+            }
+            return out;
+        }
+
         void ExportTool::_export(models::ExportFileType fileType)
+        {
+            FTK_P();
+            if (!p.player)
+                return;
+            // Ask before writing over anything. The file names are worked out
+            // from a base name and the frame numbers, so the same export runs
+            // twice write the same files: overwriting is easy to do without
+            // meaning to, and a rendered sequence is expensive to lose.
+            const auto options = p.settings->getExport();
+            const OTIO_NS::TimeRange range = _getExportRange(fileType);
+            if (getExportExists(options, fileType, range))
+            {
+                // The names are in the tool, a click away from the button
+                // that opened this, so the state of things is all the dialog
+                // has to carry. A sequence is more than one file.
+                //
+                // The button says what it does rather than answering a
+                // question the text asks, so that agreeing to it does not
+                // depend on having read the text: "(exists)" beside the file
+                // name was missed for the same reason a "Yes" would be.
+                const std::string text =
+                    models::ExportFileType::Seq == fileType ?
+                    "Output files exist." :
+                    "Output file exists.";
+                if (auto context = getContext())
+                {
+                    context->getSystem<ftk::DialogSystem>()->confirm(
+                        "Export",
+                        text,
+                        getWindow(),
+                        [this, fileType](bool value)
+                        {
+                            if (value)
+                            {
+                                _exportStart(fileType);
+                            }
+                        },
+                        "Overwrite");
+                }
+                return;
+            }
+            _exportStart(fileType);
+        }
+
+        void ExportTool::_exportStart(models::ExportFileType fileType)
         {
             FTK_P();
             if (p.player)
@@ -275,36 +523,21 @@ namespace djv
 
                     // Get the time range.
                     const auto options = p.settings->getExport();
-                    switch (fileType)
-                    {
-                    case models::ExportFileType::Image:
-                        p.exportData->range = OTIO_NS::TimeRange(
-                            p.player->getCurrentTime(),
-                            OTIO_NS::RationalTime(1.0, p.player->getTimeRange().duration().rate()));
-                        break;
-                    default:
-                        p.exportData->range = p.player->getInOutRange();
-                        break;
-                    }
+                    p.exportData->range = _getExportRange(fileType);
                     p.exportData->frame = p.exportData->range.start_time().value();
 
-                    // Get the render size.
+                    // Get the video sources. The export renders what the
+                    // viewport shows, so the files being compared with the A
+                    // file are laid out alongside it rather than dropped.
                     auto app = _app.lock();
                     const auto& displayOptions = app->getViewportModel()->getDisplayOptions();
-                    switch (options.renderSize)
-                    {
-                    case models::ExportRenderSize::Default:
-                        p.exportData->info.size = getRenderSize(
-                            ioInfo.video.front(),
-                            displayOptions.aspectRatio);
-                        break;
-                    case models::ExportRenderSize::Custom:
-                        p.exportData->info.size = options.customSize;
-                        break;
-                    default:
-                        p.exportData->info.size = getSize(options.renderSize);
-                        break;
-                    }
+                    p.exportData->compareOptions =
+                        app->getFilesModel()->getCompareOptions();
+                    const std::vector<ftk::ImageInfo> infos = _getInfos();
+                    const ftk::Size2I compareSize = _getDefaultSize();
+
+                    // Get the render size.
+                    p.exportData->info.size = _getExportSize(options);
 
                     // Check the output directory before anything is rendered,
                     // rather than letting each writer report it in its own way.
@@ -345,6 +578,13 @@ namespace djv
                     {
                         p.exportData->info.type = ftk::ImageType::RGBA_U8;
                     }
+                    p.exportData->boxes = scaleBoxes(
+                        tl::getBoxes(
+                            p.exportData->compareOptions,
+                            displayOptions.aspectRatio,
+                            infos),
+                        compareSize,
+                        p.exportData->info.size);
                     p.exportData->glFormat = ftk::gl::getReadPixelsFormat(p.exportData->info.type);
                     p.exportData->glType = ftk::gl::getReadPixelsType(p.exportData->info.type);
                     if (GL_NONE == p.exportData->glFormat || GL_NONE == p.exportData->glType)
@@ -386,13 +626,27 @@ namespace djv
                     // Create the renderer.
                     p.exportData->ocioOptions = app->getColorModel()->getOCIOOptions();
                     p.exportData->lutOptions = app->getColorModel()->getLUTOptions();
-                    p.exportData->imageOptions = app->getViewportModel()->getImageOptions();
-                    p.exportData->displayOptions = app->getViewportModel()->getDisplayOptions();
+                    p.exportData->imageOptions = std::vector<ftk::ImageOptions>(
+                        infos.size(),
+                        app->getViewportModel()->getImageOptions());
+                    p.exportData->displayOptions = std::vector<tl::DisplayOptions>(
+                        infos.size(),
+                        displayOptions);
                     p.exportData->colorBuffer = app->getViewportModel()->getColorBuffer();
                     p.exportData->render = tl::gl::Render::create(
                         context->getLogSystem(),
                         context->getSystem<ftk::FontSystem>());
                     ftk::gl::OffscreenBufferOptions offscreenBufferOptions;
+                    // The wipe comparison masks with the stencil buffer, so
+                    // the buffer needs one. Paired with depth, as the
+                    // viewport does, for the combined format rather than a
+                    // stencil-only attachment.
+#if defined(FTK_API_GL_4_1)
+                    offscreenBufferOptions.depth = ftk::gl::OffscreenDepth::_24;
+                    offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
+#elif defined(FTK_API_GLES_2)
+                    offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
+#endif // FTK_API_GL_4_1
                     p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
                         p.exportData->info.size,
                         p.exportData->colorBuffer,
@@ -463,11 +717,38 @@ namespace djv
             bool out = false;
             try
             {
-                // Get the video.
+                // Get the video for the A file and each of the files it is
+                // being compared with. The requests are all made before any
+                // of them is waited on so that the sources are read in
+                // parallel.
                 const OTIO_NS::RationalTime t(p.exportData->frame, p.exportData->range.duration().rate());
                 auto ioOptions = p.player->getTimeline()->getOptions().ioOptions;
                 ioOptions["Layer"] = ftk::Format("{0}").arg(p.player->getVideoLayer());
-                auto video = p.player->getTimeline()->getVideo(t, ioOptions).future.get();
+                std::vector<tl::VideoRequest> requests;
+                requests.push_back(p.player->getTimeline()->getVideo(t, ioOptions));
+                const auto& compare = p.player->getCompare();
+                const auto& compareVideoLayers = p.player->getCompareVideoLayers();
+                for (size_t i = 0; i < compare.size(); ++i)
+                {
+                    // The same time mapping the player uses, so that the
+                    // frame exported for each source is the frame that was
+                    // on screen.
+                    const OTIO_NS::RationalTime compareTime = tl::getCompareTime(
+                        t,
+                        p.player->getTimeRange(),
+                        compare[i]->getTimeRange(),
+                        p.player->getCompareTime());
+                    ioOptions["Layer"] = ftk::Format("{0}").arg(
+                        i < compareVideoLayers.size() ?
+                        compareVideoLayers[i] :
+                        p.player->getVideoLayer());
+                    requests.push_back(compare[i]->getVideo(compareTime, ioOptions));
+                }
+                std::vector<tl::VideoFrame> videoFrame;
+                for (auto& request : requests)
+                {
+                    videoFrame.push_back(request.future.get());
+                }
 
                 // Render the video.
                 ftk::gl::OffscreenBufferBinding binding(p.exportData->buffer);
@@ -475,11 +756,11 @@ namespace djv
                 p.exportData->render->setOCIOOptions(p.exportData->ocioOptions);
                 p.exportData->render->setLUTOptions(p.exportData->lutOptions);
                 p.exportData->render->drawVideo(
-                    { video },
-                    { ftk::Box2I(0, 0, p.exportData->info.size.w, p.exportData->info.size.h) },
-                    { p.exportData->imageOptions },
-                    { p.exportData->displayOptions },
-                    tl::CompareOptions(),
+                    videoFrame,
+                    p.exportData->boxes,
+                    p.exportData->imageOptions,
+                    p.exportData->displayOptions,
+                    p.exportData->compareOptions,
                     p.exportData->colorBuffer);
                 p.exportData->render->end();
 

@@ -48,13 +48,14 @@ namespace djv
             bool operator != (const AudioSettings&) const;
         };
 
-        //! Export render size.
+        //! Export render width. Only the width, because the height follows
+        //! the aspect ratio of what is being exported.
         enum class ExportRenderSize
         {
             Default,
-            _1920_1080,
-            _3840_2160,
-            _4096_2160,
+            _1920,
+            _3840,
+            _4096,
             Custom,
 
             Count,
@@ -62,8 +63,9 @@ namespace djv
         };
         TL_ENUM(ExportRenderSize);
 
-        //! Get an export render size.
-        ftk::Size2I getSize(ExportRenderSize);
+        //! Get an export render width, or zero for the sizes that are not
+        //! one of the presets.
+        int getWidth(ExportRenderSize);
 
         //! Export file type.
         enum class ExportFileType
@@ -82,7 +84,10 @@ namespace djv
         {
             std::string dir;
             ExportRenderSize renderSize = ExportRenderSize::Default;
-            ftk::Size2I customSize = ftk::Size2I(1920, 1080);
+            // Only the width: the height follows from the aspect ratio of
+            // what is being exported, which is known whenever there is
+            // anything to export.
+            int customWidth = 1920;
             ExportFileType fileType = ExportFileType::Image;
 
             std::string imageBase = "render.";

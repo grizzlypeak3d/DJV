@@ -176,6 +176,36 @@ namespace djv
             }
         }
 
+        bool getExportExists(
+            const models::ExportSettings& options,
+            models::ExportFileType fileType,
+            const OTIO_NS::TimeRange& range)
+        {
+            bool out = false;
+            switch (fileType)
+            {
+            case models::ExportFileType::Seq:
+                // Any frame of the range, since the export writes all of
+                // them and overwrites whichever are already there.
+                out = getSeqExists(options, range);
+                break;
+            default:
+            {
+                const std::string fileName = getExportFileName(
+                    options,
+                    fileType,
+                    range.start_time().value());
+                if (!fileName.empty())
+                {
+                    out = std::filesystem::exists(std::filesystem::path(
+                        ftk::Path(options.dir, fileName).get()));
+                }
+                break;
+            }
+            }
+            return out;
+        }
+
         IExportWidget::~IExportWidget()
         {}
 
@@ -189,7 +219,6 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> zeroPadEdit;
             std::shared_ptr<ftk::ComboBox> extComboBox;
             std::shared_ptr<ftk::Label> fileLabel;
-            std::shared_ptr<ftk::Label> existsLabel;
             std::shared_ptr<ftk::PushButton> exportButton;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
@@ -220,8 +249,6 @@ namespace djv
             ftk::setScreenshotTag(p.extComboBox, "Export.ImageExt");
 
             p.fileLabel = ftk::Label::create(context);
-            p.existsLabel = ftk::Label::create(context, "(exists)");
-            p.existsLabel->setTextRole(ftk::ColorRole::Yellow);
 
             p.exportButton = ftk::PushButton::create(context, "Export Image");
             ftk::setScreenshotTag(p.exportButton, "Export.ImageExport");
@@ -234,12 +261,8 @@ namespace djv
             formLayout->addRow("Base name:", p.baseEdit);
             formLayout->addRow("Zero padding:", p.zeroPadEdit);
             formLayout->addRow("Extension:", p.extComboBox);
-            auto fileLayout = ftk::HorizontalLayout::create(context);
-            fileLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            ftk::setScreenshotTag(fileLayout, "Export.ImageFile");
-            p.fileLabel->setParent(fileLayout);
-            p.existsLabel->setParent(fileLayout);
-            formLayout->addRow("File:", fileLayout);
+            ftk::setScreenshotTag(p.fileLabel, "Export.ImageFile");
+            formLayout->addRow("File:", p.fileLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
             p.exportButton->setParent(p.layout);
 
@@ -346,7 +369,6 @@ namespace djv
         {
             FTK_P();
             std::string fileText = "-";
-            bool exists = false;
             if (p.player)
             {
                 const auto options = p.settings->getExport();
@@ -358,12 +380,9 @@ namespace djv
                 if (!fileName.empty())
                 {
                     fileText = fileName;
-                    exists = std::filesystem::exists(std::filesystem::path(
-                        ftk::Path(options.dir, fileName).get()));
                 }
             }
             p.fileLabel->setText(fileText);
-            p.existsLabel->setVisible(exists);
         }
 
         struct SeqExportWidget::Private
@@ -377,7 +396,6 @@ namespace djv
             std::shared_ptr<ftk::IntEdit> zeroPadEdit;
             std::shared_ptr<ftk::ComboBox> extComboBox;
             std::shared_ptr<ftk::Label> fileLabel;
-            std::shared_ptr<ftk::Label> existsLabel;
             std::shared_ptr<ftk::Label> rangeLabel;
             std::shared_ptr<ftk::PushButton> exportButton;
             std::shared_ptr<ftk::VerticalLayout> layout;
@@ -411,8 +429,6 @@ namespace djv
             ftk::setScreenshotTag(p.extComboBox, "Export.SeqExt");
 
             p.fileLabel = ftk::Label::create(context);
-            p.existsLabel = ftk::Label::create(context, "(exists)");
-            p.existsLabel->setTextRole(ftk::ColorRole::Yellow);
             p.rangeLabel = ftk::Label::create(context);
 
             p.exportButton = ftk::PushButton::create(context, "Export Sequence");
@@ -426,12 +442,8 @@ namespace djv
             formLayout->addRow("Base name:", p.baseEdit);
             formLayout->addRow("Zero padding:", p.zeroPadEdit);
             formLayout->addRow("Extension:", p.extComboBox);
-            auto fileLayout = ftk::HorizontalLayout::create(context);
-            fileLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            ftk::setScreenshotTag(fileLayout, "Export.SeqFile");
-            p.fileLabel->setParent(fileLayout);
-            p.existsLabel->setParent(fileLayout);
-            formLayout->addRow("File:", fileLayout);
+            ftk::setScreenshotTag(p.fileLabel, "Export.SeqFile");
+            formLayout->addRow("File:", p.fileLabel);
             ftk::setScreenshotTag(p.rangeLabel, "Export.SeqRange");
             formLayout->addRow("Range:", p.rangeLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
@@ -547,7 +559,6 @@ namespace djv
         {
             FTK_P();
             std::string fileText = "-";
-            bool exists = false;
             std::string rangeText = "-";
             if (p.player)
             {
@@ -566,12 +577,10 @@ namespace djv
                     fileText = ftk::Format("{0} - {1}").
                         arg(firstName).
                         arg(lastName);
-                    exists = getSeqExists(options, range);
                 }
                 rangeText = getRangeText(range, p.timeUnitsModel);
             }
             p.fileLabel->setText(fileText);
-            p.existsLabel->setVisible(exists);
             p.rangeLabel->setText(rangeText);
         }
 
@@ -589,7 +598,6 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> codecComboBox;
             std::shared_ptr<ftk::ComboBox> audioCodecComboBox;
             std::shared_ptr<ftk::Label> fileLabel;
-            std::shared_ptr<ftk::Label> existsLabel;
             std::shared_ptr<ftk::Label> rangeLabel;
             std::shared_ptr<ftk::PushButton> exportButton;
             std::shared_ptr<ftk::VerticalLayout> layout;
@@ -646,8 +654,6 @@ namespace djv
             ftk::setScreenshotTag(p.audioCodecComboBox, "Export.MovieAudioCodec");
 
             p.fileLabel = ftk::Label::create(context);
-            p.existsLabel = ftk::Label::create(context, "(exists)");
-            p.existsLabel->setTextRole(ftk::ColorRole::Yellow);
             p.rangeLabel = ftk::Label::create(context);
 
             p.exportButton = ftk::PushButton::create(context, "Export Movie");
@@ -662,12 +668,8 @@ namespace djv
             formLayout->addRow("Extension:", p.extComboBox);
             formLayout->addRow("Codec:", p.codecComboBox);
             formLayout->addRow("Audio codec:", p.audioCodecComboBox);
-            auto fileLayout = ftk::HorizontalLayout::create(context);
-            fileLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            ftk::setScreenshotTag(fileLayout, "Export.MovieFile");
-            p.fileLabel->setParent(fileLayout);
-            p.existsLabel->setParent(fileLayout);
-            formLayout->addRow("File:", fileLayout);
+            ftk::setScreenshotTag(p.fileLabel, "Export.MovieFile");
+            formLayout->addRow("File:", p.fileLabel);
             ftk::setScreenshotTag(p.rangeLabel, "Export.MovieRange");
             formLayout->addRow("Range:", p.rangeLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
@@ -803,7 +805,6 @@ namespace djv
         {
             FTK_P();
             std::string fileText = "-";
-            bool exists = false;
             std::string rangeText = "-";
             if (p.player)
             {
@@ -816,13 +817,10 @@ namespace djv
                 if (!fileName.empty())
                 {
                     fileText = fileName;
-                    exists = std::filesystem::exists(std::filesystem::path(
-                        ftk::Path(options.dir, fileName).get()));
                 }
                 rangeText = getRangeText(range, p.timeUnitsModel);
             }
             p.fileLabel->setText(fileText);
-            p.existsLabel->setVisible(exists);
             p.rangeLabel->setText(rangeText);
         }
     }

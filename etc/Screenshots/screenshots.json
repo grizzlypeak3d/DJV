@@ -492,7 +492,8 @@
       ],
       "annotate": [
         { "id": "Export.Dir",  "caption": "Output directory" },
-        { "id": "Export.RenderSize",  "caption": "Render size" },
+        { "id": "Export.RenderSize",  "caption": "Render width" },
+        { "id": "Export.OutputSize",  "caption": "Size the export comes out at" },
         { "id": "Export.Tabs",  "caption": "Image, sequence, and movie export" },
         { "id": "Export.ImageBaseName",  "caption": "Base output name" },
         { "id": "Export.ImageZeroPad",  "caption": "Zero padding" },
