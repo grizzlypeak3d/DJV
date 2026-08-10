@@ -61,8 +61,7 @@ namespace djv
             ftk::setScreenshotTag(p.searchBox, "Info.Search");
 
             auto layout = ftk::VerticalLayout::create(context);
-            layout->setMarginRole(ftk::SizeRole::MarginSmall);
-            layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            layout->setSpacingRole(ftk::SizeRole::Border);
             ftk::TextEditOptions textEditOptions;
             textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
             p.sectionNames = { "Video", "Audio", "Metadata" };
@@ -78,17 +77,19 @@ namespace djv
                 p.textEdits[name] = textEdit;
                 p.bellows[name] = ftk::Bellows::create(context, name, layout);
                 p.bellows[name]->setWidget(textEdit);
-                // Open to start with, so that the tool still shows what it
-                // has without being asked; the point of the sections is to
-                // put away what you are not looking at.
+                // Open until the settings say otherwise, so that a tool
+                // opened for the first time shows what it has.
                 p.bellows[name]->setOpen(true);
                 ftk::setScreenshotTag(p.bellows[name], "Info." + name);
             }
             auto hLayout = ftk::HorizontalLayout::create(context, layout);
+            hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             copyButton->setParent(hLayout);
             p.searchBox->setParent(hLayout);
             _setWidget(layout);
+
+            _loadSettings(p.bellows);
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
@@ -154,7 +155,9 @@ namespace djv
         {}
 
         InfoTool::~InfoTool()
-        {}
+        {
+            _saveSettings(_p->bellows);
+        }
 
         std::shared_ptr<InfoTool> InfoTool::create(
             const std::shared_ptr<ftk::Context>& context,
@@ -339,10 +342,6 @@ namespace djv
                     }
                 }
                 p.textEdits[name]->setText(text);
-                // A section with nothing in it, either because the file has
-                // no audio or because the search matched none of it, is not
-                // worth a bellows to open.
-                p.bellows[name]->setVisible(!text.empty());
             }
         }
     }
