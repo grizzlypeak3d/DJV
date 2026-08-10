@@ -92,6 +92,28 @@ namespace djv
                 });
 
             _addCheckCommand(
+                "Butterfly",
+                "Show the same half of the A and B files, one of them "
+                "mirrored, so that they meet on the same picture.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    // Absent when the command is run by name rather than by
+                    // the menu -- the command line, the screenshots -- where
+                    // asking for a comparison means turning it on.
+                    const bool value = args.contains("value") ?
+                        args.at("value").get<bool>() :
+                        true;
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getFilesModel()->getCompareOptions();
+                        options.compare = value ?
+                            tl::Compare::Butterfly :
+                            tl::Compare::None;
+                        app->getFilesModel()->setCompareOptions(options);
+                    }
+                });
+
+            _addCheckCommand(
                 "Overlay",
                 "Overlay the A and B files.",
                 [appWeak](const nlohmann::json& args)
@@ -235,6 +257,10 @@ namespace djv
                 "Wipe",
                 "CompareWipe",
                 _checkCommand("Wipe"));
+            _actions["Butterfly"] = ftk::Action::create(
+                "Butterfly",
+                "CompareButterfly",
+                _checkCommand("Butterfly"));
             _actions["Overlay"] = ftk::Action::create(
                 "Overlay",
                 "CompareOverlay",
@@ -292,6 +318,7 @@ namespace djv
                     _actions["Prev"]->setEnabled(value.size() > 1);
                     _actions["B"]->setEnabled(!value.empty());
                     _actions["Wipe"]->setEnabled(!value.empty());
+                    _actions["Butterfly"]->setEnabled(!value.empty());
                     _actions["Overlay"]->setEnabled(!value.empty());
                     _actions["Difference"]->setEnabled(!value.empty());
                     _actions["Horizontal"]->setEnabled(!value.empty());

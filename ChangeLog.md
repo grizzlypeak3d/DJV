@@ -8,6 +8,8 @@ Changes:
 * Add support for exporting A/B comparisons.
 * Add a gain to the difference comparison, so that differences too small to
   see at their own size can be brought up.
+* Add a "Butterfly" comparison, which shows the same half of both files with
+  one mirrored, for judging a colour adjustment against its original.
 * Add high quality image scaling options.
 * Multiple tools can now be open at the same time.
 * Remove "A" compare mode and make the other compare modes toggles.
@@ -29,6 +31,9 @@ Changes:
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
+* Fix a hang when quitting, and missing timeline thumbnails, after reading a
+  movie with the FFmpeg command plugin.
+* Fix the performance of comparing a file with itself.
 * Fixes for the grid and outline in compare mode.
 * Fixes to prevent cache usage exceeding 100%.
 * Fixes for log file failures.

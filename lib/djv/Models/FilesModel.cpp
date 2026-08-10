@@ -254,6 +254,7 @@ namespace djv
                     case tl::Compare::None:
                     case tl::Compare::B:
                     case tl::Compare::Wipe:
+                    case tl::Compare::Butterfly:
                     case tl::Compare::Overlay:
                     case tl::Compare::Difference:
                     case tl::Compare::Horizontal:
@@ -577,6 +578,7 @@ namespace djv
                 case tl::Compare::None:
                 case tl::Compare::B:
                 case tl::Compare::Wipe:
+                case tl::Compare::Butterfly:
                 case tl::Compare::Overlay:
                 case tl::Compare::Difference:
                 case tl::Compare::Horizontal:
@@ -594,6 +596,7 @@ namespace djv
                 {
                 case tl::Compare::B:
                 case tl::Compare::Wipe:
+                case tl::Compare::Butterfly:
                 case tl::Compare::Overlay:
                 case tl::Compare::Difference:
                 case tl::Compare::Horizontal:
@@ -679,6 +682,7 @@ namespace djv
                 break;
             case tl::Compare::B:
             case tl::Compare::Wipe:
+            case tl::Compare::Butterfly:
             case tl::Compare::Overlay:
             case tl::Compare::Difference:
             case tl::Compare::Horizontal:

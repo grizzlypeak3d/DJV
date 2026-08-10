@@ -42,6 +42,7 @@ is no separate mode for showing **A** — that is what no comparison looks like.
 | -------------- | --------------------------------------------------------------------- | ----------------- |
 | **B**          | Only the **B** file                                                    | <kbd>Ctrl+B</kbd> |
 | **Wipe**       | A wipe between **A** and **B** (drag with **Alt** + left mouse button) | <kbd>Ctrl+W</kbd> |
+| **Butterfly**  | The same half of **A** and **B**, one mirrored, meeting in the middle  |                   |
 | **Overlay**    | **B** layered on top of **A**                                          |                   |
 | **Difference** | The pixel difference between **A** and **B**                           |                   |
 | **Horizontal** | **A** and **B** side by side                                           |                   |
@@ -50,6 +51,18 @@ is no separate mode for showing **A** — that is what no comparison looks like.
 
 The modes without a shortcut can be given one in the **Keyboard Shortcuts**
 section of the **Settings** tool.
+
+## Butterfly
+
+**Butterfly** shows the left half of **A** beside the left half of **B**
+mirrored, so the two meet in the middle of the picture on the same subject.
+Side by side puts different parts of the frame next to each other, which is
+fine for checking a change happened and poor for judging one: a colour reads
+differently against different surroundings. Butterfly puts the same thing next
+to itself, which is what comparing a grade with its original wants.
+
+The seam is the middle of the frame, so what ends up either side of it is the
+middle of the picture, and the outer edges are both the left edge.
 
 ## Difference gain
 

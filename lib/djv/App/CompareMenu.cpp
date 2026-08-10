@@ -39,6 +39,7 @@ namespace djv
             addDivider();
             addAction(actions["B"]);
             addAction(actions["Wipe"]);
+            addAction(actions["Butterfly"]);
             addAction(actions["Overlay"]);
             addAction(actions["Difference"]);
             addAction(actions["Horizontal"]);
