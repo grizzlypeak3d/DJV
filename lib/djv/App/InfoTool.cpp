@@ -141,36 +141,172 @@ namespace djv
             return out;
         }
 
+        namespace
+        {
+            typedef std::vector<std::pair<std::string, std::string> > Pairs;
+
+            std::string timecode(const OTIO_NS::RationalTime& value)
+            {
+                std::stringstream ss;
+                ss << value.to_timecode();
+                return ss.str();
+            }
+
+            template<typename T>
+            std::string str(const T& value)
+            {
+                std::stringstream ss;
+                ss << value;
+                return ss.str();
+            }
+
+            std::string rate(double value)
+            {
+                std::stringstream ss;
+                ss.precision(1);
+                ss << std::fixed << value / 1000.0 << "kHz";
+                return ss.str();
+            }
+
+            //! The video the file holds, and the video it is decoded to. The
+            //! two are not always the same and the difference is the point:
+            //! what the rest of the application reports is the decoded one.
+            Pairs videoPairs(const tl::IOInfo& info)
+            {
+                Pairs out;
+                if (info.video.empty())
+                    return out;
+                const ftk::ImageInfo& video = info.video[0];
+                if (!info.videoSource.codec.empty())
+                {
+                    out.push_back({ "Codec", info.videoSource.codec });
+                }
+                if (!info.videoSource.pixelFormat.empty())
+                {
+                    out.push_back({ "Source Format", info.videoSource.pixelFormat });
+                }
+                out.push_back({ "Resolution",
+                    str(video.size.w) + " " + str(video.size.h) });
+                out.push_back({ "Pixel Type", str(video.type) });
+                {
+                    std::stringstream ss;
+                    ss.precision(2);
+                    ss << std::fixed << video.pixelAspectRatio;
+                    out.push_back({ "Pixel Aspect Ratio", ss.str() });
+                }
+                out.push_back({ "Levels", str(video.videoLevels) });
+                if (info.videoTime.has_value())
+                {
+                    out.push_back({ "Start Time", timecode(info.videoTime->start_time()) });
+                    out.push_back({ "Duration", timecode(info.videoTime->duration()) });
+                    std::stringstream ss;
+                    ss.precision(2);
+                    ss << std::fixed << info.videoTime->start_time().rate() << " FPS";
+                    out.push_back({ "Speed", ss.str() });
+                }
+                return out;
+            }
+
+            Pairs audioPairs(const tl::IOInfo& info)
+            {
+                Pairs out;
+                if (!info.audio.isValid())
+                    return out;
+                const tl::AudioSourceInfo& source = info.audioSource;
+                if (!source.codec.empty())
+                {
+                    out.push_back({ "Codec", source.codec });
+                }
+                out.push_back({ "Channels", str(info.audio.channelCount) });
+                out.push_back({ "Type", str(info.audio.type) });
+                out.push_back({ "Sample Rate", rate(info.audio.sampleRate) });
+                // Only when the file is not what comes out of the reader,
+                // which is the case worth showing.
+                if (source.channelCount != 0 &&
+                    static_cast<int>(source.channelCount) != info.audio.channelCount)
+                {
+                    out.push_back({ "Source Channels",
+                        str(static_cast<int>(source.channelCount)) });
+                }
+                if (source.type != tl::AudioType::None &&
+                    source.type != info.audio.type)
+                {
+                    out.push_back({ "Source Type", str(source.type) });
+                }
+                if (source.sampleRate != 0 &&
+                    static_cast<int>(source.sampleRate) != info.audio.sampleRate)
+                {
+                    out.push_back({ "Source Sample Rate", rate(source.sampleRate) });
+                }
+                if (info.audioTime.has_value())
+                {
+                    out.push_back({ "Start Time", timecode(info.audioTime->start_time()) });
+                    out.push_back({ "Duration", timecode(info.audioTime->duration()) });
+                }
+                return out;
+            }
+        }
+
         void InfoTool::_widgetUpdate()
         {
             FTK_P();
+            std::vector<std::pair<std::string, Pairs> > sections =
+            {
+                { "Video", videoPairs(p.info) },
+                { "Audio", audioPairs(p.info) },
+                { "Metadata", Pairs(p.info.tags.begin(), p.info.tags.end()) }
+            };
+
             std::vector<std::pair<std::string, std::string> > pairs;
             size_t maxSize = 0;
-            for (const auto& tag : p.info.tags)
+            for (const auto& section : sections)
             {
-                bool filter = false;
-                if (!p.search.empty() &&
-                    !ftk::contains(
-                        tag.first,
-                        p.search,
-                        ftk::CaseCompare::Insensitive) &&
-                    !ftk::contains(
-                        tag.second,
-                        p.search,
-                        ftk::CaseCompare::Insensitive))
+                Pairs kept;
+                for (const auto& tag : section.second)
                 {
-                    filter = true;
+                    bool filter = false;
+                    if (!p.search.empty() &&
+                        !ftk::contains(
+                            tag.first,
+                            p.search,
+                            ftk::CaseCompare::Insensitive) &&
+                        !ftk::contains(
+                            tag.second,
+                            p.search,
+                            ftk::CaseCompare::Insensitive))
+                    {
+                        filter = true;
+                    }
+                    if (!filter)
+                    {
+                        kept.push_back(tag);
+                    }
                 }
-                if (!filter)
+                if (kept.empty())
+                    continue;
+                // An empty name marks the heading, which is written out
+                // without a value or the indent the entries under it get.
+                pairs.push_back({ std::string(), section.first });
+                for (const auto& i : kept)
                 {
-                    const std::string first = tag.first + ": ";
-                    pairs.push_back(std::make_pair(first, tag.second));
+                    const std::string first = "    " + i.first + ": ";
+                    pairs.push_back({ first, i.second });
                     maxSize = std::max(maxSize, first.size());
                 }
             }
+
             std::vector<std::string> text;
             for (auto& i : pairs)
             {
+                if (i.first.empty())
+                {
+                    if (!text.empty())
+                    {
+                        text.emplace_back(std::string());
+                    }
+                    text.emplace_back(i.second);
+                    continue;
+                }
                 i.first.resize(maxSize, ' ');
                 // A value can have newlines in it -- descriptions and
                 // synopses do. The text edit takes one line per entry, so

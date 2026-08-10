@@ -9,6 +9,9 @@ Changes:
 * Add support for exporting A/B comparisons.
 * Add a gain to the difference comparison, so that differences too small to
   see at their own size can be brought up.
+* Group the information tool into video, audio, and file metadata, with the
+  video first, and show the format of the file next to the format it is
+  decoded to.
 * Add high quality image scaling options.
 * Multiple tools can now be open at the same time.
 * Remove "A" compare mode and make the other compare modes toggles.
