@@ -43,6 +43,8 @@ namespace djv
             void setGeometry(const ftk::Box2I&) override;
 
         private:
+            void _widgetUpdate();
+
             FTK_PRIVATE();
         };
 

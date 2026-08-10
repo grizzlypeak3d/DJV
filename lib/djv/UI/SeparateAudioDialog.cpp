@@ -84,6 +84,30 @@ namespace djv
                         _p->cancelCallback();
                     }
                 });
+
+            p.videoFileEdit->setCallback(
+                [this](const ftk::Path&)
+                {
+                    _widgetUpdate();
+                });
+
+            p.audioFileEdit->setCallback(
+                [this](const ftk::Path&)
+                {
+                    _widgetUpdate();
+                });
+
+            _widgetUpdate();
+        }
+
+        void SeparateAudioWidget::_widgetUpdate()
+        {
+            FTK_P();
+            // Both paths are needed; opening with either of them empty is
+            // not something the dialog can do.
+            p.okButton->setEnabled(
+                !p.videoFileEdit->getPath().isEmpty() &&
+                !p.audioFileEdit->getPath().isEmpty());
         }
 
         SeparateAudioWidget::SeparateAudioWidget() :
