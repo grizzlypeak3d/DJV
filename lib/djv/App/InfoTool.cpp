@@ -172,7 +172,24 @@ namespace djv
             for (auto& i : pairs)
             {
                 i.first.resize(maxSize, ' ');
-                text.emplace_back(i.first + i.second);
+                // A value can have newlines in it -- descriptions and
+                // synopses do. The text edit takes one line per entry, so
+                // give it one, with the rest lined up under the first
+                // instead of running back to the margin and over the
+                // following name.
+                const std::vector<std::string> lines = ftk::splitLines(i.second);
+                if (lines.empty())
+                {
+                    text.emplace_back(i.first);
+                }
+                else
+                {
+                    text.emplace_back(i.first + lines.front());
+                    for (size_t j = 1; j < lines.size(); ++j)
+                    {
+                        text.emplace_back(std::string(maxSize, ' ') + lines[j]);
+                    }
+                }
             }
             p.textEdit->setText(text);
         }
