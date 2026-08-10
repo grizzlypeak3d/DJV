@@ -62,6 +62,13 @@ namespace djv
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
+            // Above the sections, so that it stays in reach however much
+            // there is below it.
+            auto hLayout = ftk::HorizontalLayout::create(context, layout);
+            hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.searchBox->setParent(hLayout);
+            copyButton->setParent(hLayout);
             ftk::TextEditOptions textEditOptions;
             textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
             p.sectionNames = { "Video", "Audio", "Metadata" };
@@ -82,11 +89,6 @@ namespace djv
                 p.bellows[name]->setOpen(true);
                 ftk::setScreenshotTag(p.bellows[name], "Info." + name);
             }
-            auto hLayout = ftk::HorizontalLayout::create(context, layout);
-            hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            copyButton->setParent(hLayout);
-            p.searchBox->setParent(hLayout);
             _setWidget(layout);
 
             _loadSettings(p.bellows);
