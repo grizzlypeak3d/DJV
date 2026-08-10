@@ -22,6 +22,7 @@ namespace djv
         struct SysInfoDialog::Private
         {
             std::vector<std::string> text;
+            std::shared_ptr<ftk::PushButton> closeButton;
         };
 
         void SysInfoDialog::_init(
@@ -41,7 +42,7 @@ namespace djv
 
 
             auto copyButton = ftk::PushButton::create(context, "Copy");
-            auto closeButton = ftk::PushButton::create(context, "Close");
+            p.closeButton = ftk::PushButton::create(context, "Close");
 
             auto layout = ftk::VerticalLayout::create(context, shared_from_this());
             layout->setSpacingRole(ftk::SizeRole::None);
@@ -61,7 +62,7 @@ namespace djv
             hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             copyButton->setParent(hLayout);
             hLayout->addSpacer(ftk::SizeRole::Spacing, ftk::Stretch::Expanding);
-            closeButton->setParent(hLayout);
+            p.closeButton->setParent(hLayout);
 
             copyButton->setClickedCallback(
                 [this]
@@ -73,7 +74,7 @@ namespace djv
                     }
                 });
 
-            closeButton->setClickedCallback(
+            p.closeButton->setClickedCallback(
                 [this]
                 {
                     close();
@@ -95,6 +96,11 @@ namespace djv
             auto out = std::shared_ptr<SysInfoDialog>(new SysInfoDialog);
             out->_init(context, text, parent);
             return out;
+        }
+
+        std::shared_ptr<ftk::IWidget> SysInfoDialog::getKeyFocus() const
+        {
+            return _p->closeButton;
         }
     }
 }

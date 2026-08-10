@@ -19,6 +19,7 @@ namespace djv
     {
         struct AboutDialog::Private
         {
+            std::shared_ptr<ftk::PushButton> closeButton;
         };
 
         void AboutDialog::_init(
@@ -36,7 +37,7 @@ namespace djv
 
 
             auto licensesButton = ftk::PushButton::create(context, "Additional Licenses");
-            auto closeButton = ftk::PushButton::create(context, "Close");
+            p.closeButton = ftk::PushButton::create(context, "Close");
 
             auto layout = ftk::VerticalLayout::create(context, shared_from_this());
             layout->setSpacingRole(ftk::SizeRole::None);
@@ -63,9 +64,9 @@ namespace djv
             auto hLayout = ftk::HorizontalLayout::create(context, layout);
             hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
             hLayout->addSpacer(ftk::SizeRole::Spacing, ftk::Stretch::Expanding);
-            closeButton->setParent(hLayout);
+            p.closeButton->setParent(hLayout);
 
-            closeButton->setClickedCallback(
+            p.closeButton->setClickedCallback(
                 [this]
                 {
                     close();
@@ -94,6 +95,11 @@ namespace djv
             auto out = std::shared_ptr<AboutDialog>(new AboutDialog);
             out->_init(context, appInfoModel, parent);
             return out;
+        }
+
+        std::shared_ptr<ftk::IWidget> AboutDialog::getKeyFocus() const
+        {
+            return _p->closeButton;
         }
     }
 }

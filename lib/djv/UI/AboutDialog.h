@@ -35,6 +35,8 @@ namespace djv
                 const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            std::shared_ptr<ftk::IWidget> getKeyFocus() const override;
+
         private:
             FTK_PRIVATE();
         };

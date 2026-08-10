@@ -35,6 +35,9 @@ namespace djv
 
             void setCancelCallback(const std::function<void(void)>&);
 
+            //! Get the "OK" button, which is the dialog's default focus.
+            std::shared_ptr<ftk::IWidget> getOKButton() const;
+
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;
 
@@ -65,6 +68,8 @@ namespace djv
             void setCallback(const std::function<void(
                 const ftk::Path&,
                 const ftk::Path&)>&);
+
+            std::shared_ptr<ftk::IWidget> getKeyFocus() const override;
 
         private:
             FTK_PRIVATE();

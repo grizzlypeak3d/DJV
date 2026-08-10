@@ -191,5 +191,10 @@ namespace djv
             out->_init(context, appInfoModel, settings, timeUnitsModel, parent);
             return out;
         }
+
+        std::shared_ptr<ftk::IWidget> SetupDialog::getKeyFocus() const
+        {
+            return _p->nextButton;
+        }
     }
 }

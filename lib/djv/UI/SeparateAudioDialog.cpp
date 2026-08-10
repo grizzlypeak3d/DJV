@@ -121,6 +121,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::IWidget> SeparateAudioWidget::getOKButton() const
+        {
+            return _p->okButton;
+        }
+
         void SeparateAudioWidget::setGeometry(const ftk::Box2I& value)
         {
             IMouseWidget::setGeometry(value);
@@ -176,6 +181,11 @@ namespace djv
             const ftk::Path&)>& value)
         {
             _p->widget->setCallback(value);
+        }
+
+        std::shared_ptr<ftk::IWidget> SeparateAudioDialog::getKeyFocus() const
+        {
+            return _p->widget->getOKButton();
         }
     }
 }
