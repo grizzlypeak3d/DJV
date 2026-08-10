@@ -35,8 +35,9 @@ namespace djv
 
             void setCancelCallback(const std::function<void(void)>&);
 
-            //! Get the "OK" button, which is the dialog's default focus.
-            std::shared_ptr<ftk::IWidget> getOKButton() const;
+            //! Get the video path entry, which is the dialog's default
+            //! focus.
+            std::shared_ptr<ftk::IWidget> getFirstField() const;
 
             ftk::Size2I getSizeHint() const override;
             void setGeometry(const ftk::Box2I&) override;

@@ -121,9 +121,9 @@ namespace djv
             return out;
         }
 
-        std::shared_ptr<ftk::IWidget> SeparateAudioWidget::getOKButton() const
+        std::shared_ptr<ftk::IWidget> SeparateAudioWidget::getFirstField() const
         {
-            return _p->okButton;
+            return _p->videoFileEdit->getLineEdit();
         }
 
         void SeparateAudioWidget::setGeometry(const ftk::Box2I& value)
@@ -185,7 +185,10 @@ namespace djv
 
         std::shared_ptr<ftk::IWidget> SeparateAudioDialog::getKeyFocus() const
         {
-            return _p->widget->getOKButton();
+            // The video path, which is the first thing to fill in. "OK" is
+            // enabled from the start even with nothing chosen, so it is a
+            // poor thing to point Return at.
+            return _p->widget->getFirstField();
         }
     }
 }
