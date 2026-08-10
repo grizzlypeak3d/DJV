@@ -297,6 +297,7 @@ namespace djv
             _addShortcut("Prev", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Shift)));
             _addShortcut("B", ftk::KeyShortcut(ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("Wipe", ftk::KeyShortcut(ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Butterfly");
             _addShortcut("Overlay");
             _addShortcut("Difference");
             _addShortcut("Horizontal");
