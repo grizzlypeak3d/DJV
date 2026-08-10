@@ -36,6 +36,8 @@ Fixes:
 * Fix the duration of movies read with the FFmpeg command plugin.
 * Fix metadata with multiple lines overlapping other entries in the
   information tool.
+* Fix opening image sequences whose name ends with a hyphen before the frame
+  number, e.g. "shot-0001.exr".
 * Fixes for the grid and outline in compare mode.
 * Fixes to prevent cache usage exceeding 100%.
 * Fixes for log file failures.
