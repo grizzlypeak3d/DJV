@@ -160,6 +160,11 @@ namespace djv
             ftk::setScreenshotTag(p.dirEdit, "Export.Dir");
 
             p.renderSizeComboBox = ftk::ComboBox::create(context, models::getExportRenderSizeLabels());
+            // "Default" is the one choice that is not a width, so it is the
+            // one that needs saying.
+            p.renderSizeComboBox->setTooltip(
+                "\"Default\" is the size of what is being exported, with no "
+                "scaling. The other choices scale to the width given.");
             ftk::setScreenshotTag(p.renderSizeComboBox, "Export.RenderSize");
             p.renderWidthEdit = ftk::IntEdit::create(context);
             p.renderWidthEdit->setRange(customSizeMin, customSizeMax);

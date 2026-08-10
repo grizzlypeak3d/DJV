@@ -16,10 +16,10 @@ Shortcut: <kbd>F2</kbd>
 
 ![Export tool]({{ '/assets/export-tool.svg' | relative_url }})
 
-* Render width — The width of the export: **Default** for the source width,
-  one of the presets, or **Custom**. Only the width is ever given; the height
-  follows the aspect ratio of what is being exported, so nothing is squashed
-  to fit.
+* Render width — The width of the export: **Default** for the size of what is
+  being exported with no scaling, one of the presets, or **Custom**. Only the
+  width is ever given; the height follows the aspect ratio of what is being
+  exported, so nothing is squashed to fit.
 * Custom width — Shown with **Custom**, for a width the presets do not cover.
 * Output size — What the width and the aspect ratio come to between them,
   which is the resolution the file is written at.
