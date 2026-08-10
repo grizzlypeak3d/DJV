@@ -164,7 +164,8 @@ namespace djv
             // one that needs saying.
             p.renderSizeComboBox->setTooltip(
                 "\"Default\" is the size of what is being exported, with no "
-                "scaling. The other choices scale to the width given.");
+                "scaling.\n"
+                "The other choices scale to the width given.");
             ftk::setScreenshotTag(p.renderSizeComboBox, "Export.RenderSize");
             p.renderWidthEdit = ftk::IntEdit::create(context);
             p.renderWidthEdit->setRange(customSizeMin, customSizeMax);
