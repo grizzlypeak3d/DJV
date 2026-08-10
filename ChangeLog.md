@@ -30,8 +30,6 @@ Changes:
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
-* Fix the performance of comparing a file with itself when using the FFmpeg
-  command plugin.
 * Fixes for the grid and outline in compare mode.
 * Fixes to prevent cache usage exceeding 100%.
 * Fixes for log file failures.
