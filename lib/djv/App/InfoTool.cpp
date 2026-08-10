@@ -5,6 +5,7 @@
 
 #include <djv/App/App.h>
 
+#include <ftk/UI/Bellows.h>
 #include <ftk/UI/ClipboardSystem.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/TextEdit.h>
@@ -24,7 +25,10 @@ namespace djv
             tl::IOInfo info;
             std::string search;
 
-            std::shared_ptr<ftk::TextEdit> textEdit;
+            //! One per section, in the order they are shown.
+            std::vector<std::string> sectionNames;
+            std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
+            std::map<std::string, std::shared_ptr<ftk::TextEdit> > textEdits;
             std::shared_ptr<ftk::SearchBox> searchBox;
 
             std::shared_ptr<tl::Player> player;
@@ -49,13 +53,6 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.textEdit = ftk::TextEdit::create(context);
-            p.textEdit->setReadOnly(true);
-            ftk::TextEditOptions textEditOptions;
-            textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
-            p.textEdit->setOptions(textEditOptions);
-            p.textEdit->setVStretch(ftk::Stretch::Expanding);
-
             auto copyButton = ftk::ToolButton::create(context, "Copy");
             ftk::setScreenshotTag(copyButton, "Info.Copy");
 
@@ -66,15 +63,31 @@ namespace djv
             auto layout = ftk::VerticalLayout::create(context);
             layout->setMarginRole(ftk::SizeRole::MarginSmall);
             layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.textEdit->setParent(layout);
+            ftk::TextEditOptions textEditOptions;
+            textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
+            p.sectionNames = { "Video", "Audio", "Metadata" };
+            for (const auto& name : p.sectionNames)
+            {
+                auto textEdit = ftk::TextEdit::create(context);
+                textEdit->setReadOnly(true);
+                textEdit->setOptions(textEditOptions);
+                // The bellows are stacked in the tools panel's scroll area,
+                // so each one takes the height of what is in it rather than
+                // scrolling inside itself.
+                textEdit->setSizeHintRole(ftk::SizeRole::None);
+                p.textEdits[name] = textEdit;
+                p.bellows[name] = ftk::Bellows::create(context, name, layout);
+                p.bellows[name]->setWidget(textEdit);
+                // Open to start with, so that the tool still shows what it
+                // has without being asked; the point of the sections is to
+                // put away what you are not looking at.
+                p.bellows[name]->setOpen(true);
+                ftk::setScreenshotTag(p.bellows[name], "Info." + name);
+            }
             auto hLayout = ftk::HorizontalLayout::create(context, layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             copyButton->setParent(hLayout);
             p.searchBox->setParent(hLayout);
-            // The contents have no natural end, so this takes what room is
-            // left rather than a band of its own while other tools sit at
-            // the height they need.
-            setVStretch(ftk::Stretch::Expanding);
             _setWidget(layout);
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
@@ -112,7 +125,20 @@ namespace djv
                     FTK_P();
                     auto context = getContext();
                     auto clipboardSystem = context->getSystem<ftk::ClipboardSystem>();
-                    clipboardSystem->setText(ftk::join(p.textEdit->getText(), '\n'));
+                    std::vector<std::string> text;
+                    for (const auto& name : p.sectionNames)
+                    {
+                        const auto& lines = p.textEdits[name]->getText();
+                        if (lines.empty())
+                            continue;
+                        if (!text.empty())
+                        {
+                            text.push_back(std::string());
+                        }
+                        text.push_back(name);
+                        text.insert(text.end(), lines.begin(), lines.end());
+                    }
+                    clipboardSystem->setText(ftk::join(text, '\n'));
                 });
 
             p.searchBox->setCallback(
@@ -157,6 +183,16 @@ namespace djv
             {
                 std::stringstream ss;
                 ss << value;
+                return ss.str();
+            }
+
+            //! Audio times are counted in samples, at a rate that is not a
+            //! timecode rate, so they are given in seconds.
+            std::string seconds(const OTIO_NS::RationalTime& value)
+            {
+                std::stringstream ss;
+                ss.precision(2);
+                ss << std::fixed << value.rescaled_to(1.0).value() << " seconds";
                 return ss.str();
             }
 
@@ -240,8 +276,8 @@ namespace djv
                 }
                 if (info.audioTime.has_value())
                 {
-                    out.push_back({ "Start Time", timecode(info.audioTime->start_time()) });
-                    out.push_back({ "Duration", timecode(info.audioTime->duration()) });
+                    out.push_back({ "Start Time", seconds(info.audioTime->start_time()) });
+                    out.push_back({ "Duration", seconds(info.audioTime->duration()) });
                 }
                 return out;
             }
@@ -250,21 +286,18 @@ namespace djv
         void InfoTool::_widgetUpdate()
         {
             FTK_P();
-            std::vector<std::pair<std::string, Pairs> > sections =
+            const std::map<std::string, Pairs> sections =
             {
                 { "Video", videoPairs(p.info) },
                 { "Audio", audioPairs(p.info) },
                 { "Metadata", Pairs(p.info.tags.begin(), p.info.tags.end()) }
             };
-
-            std::vector<std::pair<std::string, std::string> > pairs;
-            size_t maxSize = 0;
-            for (const auto& section : sections)
+            for (const auto& name : p.sectionNames)
             {
                 Pairs kept;
-                for (const auto& tag : section.second)
+                size_t maxSize = 0;
+                for (const auto& tag : sections.at(name))
                 {
-                    bool filter = false;
                     if (!p.search.empty() &&
                         !ftk::contains(
                             tag.first,
@@ -275,59 +308,42 @@ namespace djv
                             p.search,
                             ftk::CaseCompare::Insensitive))
                     {
-                        filter = true;
+                        continue;
                     }
-                    if (!filter)
-                    {
-                        kept.push_back(tag);
-                    }
+                    kept.push_back(tag);
+                    maxSize = std::max(maxSize, tag.first.size() + 2);
                 }
-                if (kept.empty())
-                    continue;
-                // An empty name marks the heading, which is written out
-                // without a value or the indent the entries under it get.
-                pairs.push_back({ std::string(), section.first });
+
+                std::vector<std::string> text;
                 for (const auto& i : kept)
                 {
-                    const std::string first = "    " + i.first + ": ";
-                    pairs.push_back({ first, i.second });
-                    maxSize = std::max(maxSize, first.size());
-                }
-            }
-
-            std::vector<std::string> text;
-            for (auto& i : pairs)
-            {
-                if (i.first.empty())
-                {
-                    if (!text.empty())
+                    std::string first = i.first + ": ";
+                    first.resize(maxSize, ' ');
+                    // A value can have newlines in it -- descriptions and
+                    // synopses do. The text edit takes one line per entry,
+                    // so give it one, with the rest lined up under the first
+                    // rather than running back to the margin and over the
+                    // following name.
+                    const std::vector<std::string> lines = ftk::splitLines(i.second);
+                    if (lines.empty())
                     {
-                        text.emplace_back(std::string());
+                        text.emplace_back(first);
                     }
-                    text.emplace_back(i.second);
-                    continue;
-                }
-                i.first.resize(maxSize, ' ');
-                // A value can have newlines in it -- descriptions and
-                // synopses do. The text edit takes one line per entry, so
-                // give it one, with the rest lined up under the first
-                // instead of running back to the margin and over the
-                // following name.
-                const std::vector<std::string> lines = ftk::splitLines(i.second);
-                if (lines.empty())
-                {
-                    text.emplace_back(i.first);
-                }
-                else
-                {
-                    text.emplace_back(i.first + lines.front());
-                    for (size_t j = 1; j < lines.size(); ++j)
+                    else
                     {
-                        text.emplace_back(std::string(maxSize, ' ') + lines[j]);
+                        text.emplace_back(first + lines.front());
+                        for (size_t j = 1; j < lines.size(); ++j)
+                        {
+                            text.emplace_back(std::string(maxSize, ' ') + lines[j]);
+                        }
                     }
                 }
+                p.textEdits[name]->setText(text);
+                // A section with nothing in it, either because the file has
+                // no audio or because the search matched none of it, is not
+                // worth a bellows to open.
+                p.bellows[name]->setVisible(!text.empty());
             }
-            p.textEdit->setText(text);
         }
     }
 }
