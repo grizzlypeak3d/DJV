@@ -12,6 +12,7 @@ Changes:
 * Group the information tool into video, audio, and file metadata, with the
   video first, and show the format of the file next to the format it is
   decoded to.
+* Movie exports carry the start timecode of the range that was exported.
 * Add high quality image scaling options.
 * Multiple tools can now be open at the same time.
 * Remove "A" compare mode and make the other compare modes toggles.
@@ -38,6 +39,9 @@ Fixes:
   information tool.
 * Fix opening image sequences whose name ends with a hyphen before the frame
   number, e.g. "shot-0001.exr".
+* Fix exported image sequences being numbered from zero rather than with the
+  frame numbers the export tool shows, which also kept the overwrite warning
+  from appearing when exporting a range twice.
 * Fix the macOS application not starting after being renamed.
 * Fixes for the grid and outline in compare mode.
 * Fixes to prevent cache usage exceeding 100%.

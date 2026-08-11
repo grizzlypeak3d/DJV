@@ -88,6 +88,7 @@ namespace djv
 
             struct ExportData
             {
+                models::ExportFileType fileType = models::ExportFileType::Image;
                 OTIO_NS::TimeRange range;
                 int64_t frame = 0;
                 ftk::Path path;
@@ -526,6 +527,7 @@ namespace djv
                         throw std::runtime_error("No video to render");
                     }
                     p.exportData.reset(new Private::ExportData);
+                    p.exportData->fileType = fileType;
 
                     // Get the time range.
                     const auto options = p.settings->getExport();
@@ -605,6 +607,21 @@ namespace djv
                     outputInfo.videoTime = OTIO_NS::TimeRange(
                         OTIO_NS::RationalTime(0.0, speed),
                         p.exportData->range.duration().rescaled_to(speed));
+                    if (models::ExportFileType::Movie == fileType)
+                    {
+                        // A movie's frames start at zero, so where it came
+                        // from in the timeline is only recoverable from the
+                        // start timecode. Rates that have no timecode of
+                        // their own are left without one rather than given a
+                        // wrong one.
+                        try
+                        {
+                            outputInfo.tags["timecode"] =
+                                p.exportData->range.start_time().to_timecode();
+                        }
+                        catch (const std::exception&)
+                        {}
+                    }
 #if defined(TLRENDER_FFMPEG_PLUGIN)
                     if (models::ExportFileType::Movie == fileType &&
                         ioInfo.audio.isValid() &&
@@ -786,9 +803,18 @@ namespace djv
                     p.exportData->glType,
                     image->getData());
 
+                // The sequence writers name each file from the time it is
+                // written at, so those keep the frame numbers of the timeline
+                // -- which is what the file name shown in the tool promises.
+                // A movie has no frame numbers in its name and the time
+                // becomes the presentation timestamp, so it starts at zero.
                 const int64_t start = p.exportData->range.start_time().value();
                 const double speed = p.player->getSpeed();
-                const OTIO_NS::RationalTime t2(p.exportData->frame - start, speed);
+                const OTIO_NS::RationalTime t2(
+                    models::ExportFileType::Movie == p.exportData->fileType ?
+                        p.exportData->frame - start :
+                        p.exportData->frame,
+                    speed);
                 p.exportData->writer->writeVideo(t2, image);
 
                 ++p.exportData->frame;
