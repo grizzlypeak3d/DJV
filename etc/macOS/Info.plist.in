@@ -5,7 +5,7 @@
 	<!-- Without this the bundle's own name is used to find the executable,
 	     so renaming the application stops it starting. -->
 	<key>CFBundleExecutable</key>
-	<string>DJV</string>
+	<string>djv</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.grizzlypeak3d.djv</string>
 	<key>CFBundleName</key>

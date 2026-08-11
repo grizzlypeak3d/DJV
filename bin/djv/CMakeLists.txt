@@ -8,7 +8,8 @@ endif()
 set(DJV_BIN djv)
 set(INSTALL_DIR bin)
 if(APPLE AND DJV_MACOS_PACKAGE)
-    set(DJV_BIN DJV)
+    # The bundle names the executable in its Info.plist, so this keeps the
+    # name it has everywhere else.
     # \bug Why do we need to use ".." to avoid installing into the
     # "Resources" directory in the bundle?
     set(INSTALL_DIR ../MacOS)
