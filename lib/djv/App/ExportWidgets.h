@@ -17,7 +17,7 @@ namespace djv
         std::string getExportFileName(
             const models::ExportSettings&,
             models::ExportFileType,
-            double frame);
+            int64_t frame);
 
         //! Whether exporting the given range would overwrite anything that
         //! is already on disk.

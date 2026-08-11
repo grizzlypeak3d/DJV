@@ -81,7 +81,7 @@ namespace djv
         std::string getExportFileName(
             const models::ExportSettings& options,
             models::ExportFileType fileType,
-            double frame)
+            int64_t frame)
         {
             std::string out;
             switch (fileType)
@@ -194,7 +194,7 @@ namespace djv
                 const std::string fileName = getExportFileName(
                     options,
                     fileType,
-                    range.start_time().value());
+                    static_cast<int64_t>(range.start_time().value()));
                 if (!fileName.empty())
                 {
                     out = std::filesystem::exists(std::filesystem::path(
@@ -376,7 +376,7 @@ namespace djv
                 const std::string fileName = getExportFileName(
                     options,
                     models::ExportFileType::Image,
-                    time.value());
+                    static_cast<int64_t>(time.value()));
                 if (!fileName.empty())
                 {
                     fileText = fileName;
@@ -567,11 +567,11 @@ namespace djv
                 const std::string firstName = getExportFileName(
                     options,
                     models::ExportFileType::Seq,
-                    range.start_time().value());
+                    static_cast<int64_t>(range.start_time().value()));
                 const std::string lastName = getExportFileName(
                     options,
                     models::ExportFileType::Seq,
-                    range.end_time_inclusive().value());
+                    static_cast<int64_t>(range.end_time_inclusive().value()));
                 if (!firstName.empty())
                 {
                     fileText = ftk::Format("{0} - {1}").
@@ -813,7 +813,7 @@ namespace djv
                 const std::string fileName = getExportFileName(
                     options,
                     models::ExportFileType::Movie,
-                    range.start_time().value());
+                    static_cast<int64_t>(range.start_time().value()));
                 if (!fileName.empty())
                 {
                     fileText = fileName;

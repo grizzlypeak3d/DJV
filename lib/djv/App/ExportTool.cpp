@@ -567,7 +567,8 @@ namespace djv
                     const std::string fileName = getExportFileName(
                         options,
                         fileType,
-                        p.exportData->range.start_time().value());
+                        static_cast<int64_t>(
+                            p.exportData->range.start_time().value()));
                     p.exportData->path = ftk::Path(options.dir, fileName);
 
                     // Get the writer.
