@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Without this the bundle's own name is used to find the executable,
+	     so renaming the application stops it starting. -->
+	<key>CFBundleExecutable</key>
+	<string>DJV</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.grizzlypeak3d.djv</string>
 	<key>CFBundleName</key>
