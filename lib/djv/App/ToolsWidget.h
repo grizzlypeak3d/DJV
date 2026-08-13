@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <ftk/UI/IWidget.h>
+#include <ftk/UI/IContainer.h>
 
 namespace djv
 {
@@ -14,7 +14,7 @@ namespace djv
         class MainWindow;
 
         //! Tools widget.
-        class ToolsWidget : public ftk::IWidget
+        class ToolsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ToolsWidget);
 
@@ -40,9 +40,6 @@ namespace djv
             //! Get the active tool widget, or null if no tool is active.
             //! Get an open tool by name, or null when it is not open.
             std::shared_ptr<IToolWidget> getToolWidget(const std::string&) const;
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             void _widgetUpdate(const std::vector<std::string>&);

@@ -51,7 +51,7 @@ namespace djv
             const std::shared_ptr<tl::ui::Viewport>& viewport,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::ViewPosZoomWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::ViewPosZoomWidget", parent);
             FTK_P();
 
             p.posXEdit = ftk::IntEdit::create(context);
@@ -71,7 +71,8 @@ namespace djv
             p.zoomEdit->setDefault(1.0);
             p.zoomReset = ftk::DoubleResetButton::create(context, p.zoomEdit->getModel());
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
@@ -166,17 +167,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I ViewPosZoomWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewPosZoomWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct ViewOptionsWidget::Private
         {
             std::vector<ftk::gl::TextureType> colorBuffers;
@@ -198,7 +188,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::ViewOptionsWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::ViewOptionsWidget", parent);
             FTK_P();
 
             p.minifyComboBox = ftk::ComboBox::create(
@@ -241,7 +231,8 @@ namespace djv
             p.colorBufferComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.colorBufferComboBox, "View.Options.ColorBuffer");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Minify:", p.minifyComboBox);
@@ -340,17 +331,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I ViewOptionsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewOptionsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct AspectRatioWidget::Private
         {
             tl::AspectRatioOptions value;
@@ -364,7 +344,7 @@ namespace djv
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::AspectRatioWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::AspectRatioWidget", parent);
             FTK_P();
 
             p.edit = ftk::LineEdit::create(context);
@@ -374,7 +354,8 @@ namespace djv
             p.typeComboBox = ftk::ComboBox::create(context, tl::getAspectRatioTypeLabels());
             p.typeComboBox->setHStretch(ftk::Stretch::Expanding);
 
-            p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
+            p.layout = ftk::HorizontalLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.edit->setParent(p.layout);
             p.typeComboBox->setParent(p.layout);
@@ -450,17 +431,6 @@ namespace djv
             _p->callback = value;
         }
 
-        ftk::Size2I AspectRatioWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void AspectRatioWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         void AspectRatioWidget::_widgetUpdate()
         {
             FTK_P();
@@ -484,14 +454,15 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::ViewAspectRatioWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::ViewAspectRatioWidget", parent);
             FTK_P();
 
             p.viewportModel = viewportModel;
 
             p.buttonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Radio);
 
-            p.layout = ftk::GridLayout::create(context, shared_from_this());
+            p.layout = ftk::GridLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
@@ -530,17 +501,6 @@ namespace djv
             auto out = std::shared_ptr<ViewAspectRatioWidget>(new ViewAspectRatioWidget);
             out->_init(context, viewportModel, parent);
             return out;
-        }
-
-        ftk::Size2I ViewAspectRatioWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewAspectRatioWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         void ViewAspectRatioWidget::_widgetUpdate(const models::AspectRatioOptions& value)
@@ -614,7 +574,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::ViewBackgroundWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::ViewBackgroundWidget", parent);
             FTK_P();
 
             p.typeComboBox = ftk::ComboBox::create(
@@ -640,7 +600,8 @@ namespace djv
             p.gradientSwatch.second = ftk::ColorSwatch::create(context);
             p.gradientSwatch.second->setEditable(true);
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Type:", p.typeComboBox);
@@ -733,17 +694,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I ViewBackgroundWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewBackgroundWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         void ViewBackgroundWidget::_optionsUpdate(const tl::BackgroundOptions& value)
         {
             FTK_P();
@@ -778,7 +728,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::ViewOutlineWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::ViewOutlineWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -794,7 +744,8 @@ namespace djv
             p.colorSwatch->setHAlign(ftk::HAlign::Left);
             ftk::setScreenshotTag(p.colorSwatch, "View.Outline.Color");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enabled:", p.enabledCheckBox);
@@ -853,17 +804,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I ViewOutlineWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewOutlineWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct ViewGridWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -887,7 +827,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::ViewGridWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::ViewGridWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -925,7 +865,8 @@ namespace djv
             p.overlayColorSwatch->setEditable(true);
             p.overlayColorSwatch->setHAlign(ftk::HAlign::Left);
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enabled:", p.enabledCheckBox);
@@ -1061,17 +1002,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I ViewGridWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewGridWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct ViewCenterMarkerWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -1088,7 +1018,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::ViewCenterMarkerWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::ViewCenterMarkerWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -1108,7 +1038,8 @@ namespace djv
             p.colorSwatch->setHAlign(ftk::HAlign::Left);
             ftk::setScreenshotTag(p.colorSwatch, "View.CenterMarker.Color");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enabled:", p.enabledCheckBox);
@@ -1177,17 +1108,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I ViewCenterMarkerWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewCenterMarkerWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct ViewHUDWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -1202,7 +1122,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::app::ViewHUDWidget", parent);
+            ftk::IContainer::_init(context, "djv::app::ViewHUDWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -1216,7 +1136,8 @@ namespace djv
             }
             ftk::setScreenshotTag(p.posComboBoxes[models::HUDItem::FileName], "View.HUD.FileName");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enabled:", p.enabledCheckBox);
@@ -1275,17 +1196,6 @@ namespace djv
             auto out = std::shared_ptr<ViewHUDWidget>(new ViewHUDWidget);
             out->_init(context, viewportModel, parent);
             return out;
-        }
-
-        ftk::Size2I ViewHUDWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ViewHUDWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
     }
 }

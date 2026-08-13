@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <ftk/UI/IContainer.h>
 #include <ftk/UI/IDialog.h>
 
 namespace djv
@@ -17,7 +18,7 @@ namespace djv
     namespace ui
     {
         //! Setup start widget.
-        class SetupStartWidget : public ftk::IWidget
+        class SetupStartWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(SetupStartWidget);
 
@@ -36,9 +37,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<ftk::IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
             FTK_PRIVATE();
         };

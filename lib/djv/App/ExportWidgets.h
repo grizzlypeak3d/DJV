@@ -5,7 +5,7 @@
 
 #include <djv/Models/SettingsModel.h>
 
-#include <ftk/UI/IWidget.h>
+#include <ftk/UI/IContainer.h>
 
 namespace djv
 {
@@ -27,7 +27,7 @@ namespace djv
             const OTIO_NS::TimeRange&);
 
         //! Base class for export widgets.
-        class IExportWidget : public ftk::IWidget
+        class IExportWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(IExportWidget);
 
@@ -62,9 +62,6 @@ namespace djv
             //! Set the export callback.
             void setExportCallback(const std::function<void(void)>&);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             void _infoUpdate();
 
@@ -95,9 +92,6 @@ namespace djv
             //! Set the export callback.
             void setExportCallback(const std::function<void(void)>&);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             void _infoUpdate();
 
@@ -127,9 +121,6 @@ namespace djv
 
             //! Set the export callback.
             void setExportCallback(const std::function<void(void)>&);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             void _infoUpdate();

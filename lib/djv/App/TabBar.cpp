@@ -29,7 +29,9 @@ namespace djv
             IWidget::_init(context, "tl::play::TabBar", parent);
             FTK_P();
 
-            p.tabBar = ftk::TabBar::create(context, shared_from_this());
+            p.tabBar = ftk::TabBar::create(context);
+
+            _setWidget(p.tabBar);
             p.tabBar->setClosable(true);
 
             std::weak_ptr<App> appWeak(app);
@@ -90,17 +92,6 @@ namespace djv
             auto out = std::shared_ptr<TabBar>(new TabBar);
             out->_init(context, app, parent);
             return out;
-        }
-
-        ftk::Size2I TabBar::getSizeHint() const
-        {
-            return _p->tabBar->getSizeHint();
-        }
-
-        void TabBar::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->tabBar->setGeometry(value);
         }
     }
 }

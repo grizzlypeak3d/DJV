@@ -16,7 +16,7 @@ namespace djv
     namespace ui
     {
         //! View position and zoom widget.
-        class ViewPosZoomWidget : public ftk::IWidget
+        class ViewPosZoomWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewPosZoomWidget);
 
@@ -36,15 +36,12 @@ namespace djv
                 const std::shared_ptr<tl::ui::Viewport>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
         //! View options widget.
-        class ViewOptionsWidget : public ftk::IWidget
+        class ViewOptionsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewOptionsWidget);
 
@@ -64,15 +61,12 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
         //! Aspect ratio widget.
-        class AspectRatioWidget : public ftk::IWidget
+        class AspectRatioWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(AspectRatioWidget);
 
@@ -94,9 +88,6 @@ namespace djv
             void setValue(const tl::AspectRatioOptions&);
             void setCallback(const std::function<void(const tl::AspectRatioOptions&)>&);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             void _widgetUpdate();
 
@@ -104,7 +95,7 @@ namespace djv
         };
 
         //! View aspect ratio widget.
-        class ViewAspectRatioWidget : public ftk::IWidget
+        class ViewAspectRatioWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewAspectRatioWidget);
 
@@ -124,9 +115,6 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             void _widgetUpdate(const models::AspectRatioOptions&);
 
@@ -134,7 +122,7 @@ namespace djv
         };
 
         //! View background widget.
-        class ViewBackgroundWidget : public ftk::IWidget
+        class ViewBackgroundWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewBackgroundWidget);
 
@@ -154,9 +142,6 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             void _optionsUpdate(const tl::BackgroundOptions&);
 
@@ -164,7 +149,7 @@ namespace djv
         };
 
         //! View outline widget.
-        class ViewOutlineWidget : public ftk::IWidget
+        class ViewOutlineWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewOutlineWidget);
 
@@ -184,15 +169,12 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
         //! View grid widget.
-        class ViewGridWidget : public ftk::IWidget
+        class ViewGridWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewGridWidget);
 
@@ -212,15 +194,12 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
         //! View center marker widget.
-        class ViewCenterMarkerWidget : public ftk::IWidget
+        class ViewCenterMarkerWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewCenterMarkerWidget);
 
@@ -240,15 +219,12 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
         //! View HUD widget.
-        class ViewHUDWidget : public ftk::IWidget
+        class ViewHUDWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewHUDWidget);
 
@@ -267,9 +243,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             FTK_PRIVATE();

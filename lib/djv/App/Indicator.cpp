@@ -48,7 +48,9 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.button = ftk::ToolButton::create(context, shared_from_this());
+            p.button = ftk::ToolButton::create(context);
+
+            _setWidget(p.button);
             p.button->setIcon("MenuChecked");
             p.button->setPopupIcon(true);
             p.button->setTooltip(
@@ -129,17 +131,6 @@ namespace djv
             auto out = std::shared_ptr<Indicator>(new Indicator);
             out->_init(context, app, parent);
             return out;
-        }
-
-        ftk::Size2I Indicator::getSizeHint() const
-        {
-            return _p->button->getSizeHint();
-        }
-
-        void Indicator::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->button->setGeometry(value);
         }
 
         bool Indicator::_hasIndicator() const

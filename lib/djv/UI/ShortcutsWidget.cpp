@@ -271,7 +271,9 @@ namespace djv
             p.clearButton->setIcon("ClearSmall");
             p.clearButton->setTooltip("Clear the shortcut");
 
-            p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
+            p.layout = ftk::HorizontalLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.edit->setParent(p.layout);
             p.clearButton->setParent(p.layout);
@@ -336,17 +338,6 @@ namespace djv
             _p->edit->setCollision(value);
         }
 
-        ftk::Size2I ShortcutWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ShortcutWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct ShortcutsSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
@@ -401,7 +392,9 @@ namespace djv
             p.searchBox->setTooltip("Search the shortcuts");
             ftk::setScreenshotTag(p.searchBox, "Shortcuts.Search");
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
+            p.layout = ftk::VerticalLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::None);
             p.searchBox->setParent(p.layout);
             p.shortcutsLayout = ftk::GridLayout::create(context, p.layout);
@@ -436,17 +429,6 @@ namespace djv
             auto out = std::shared_ptr<ShortcutsSettingsWidget>(new ShortcutsSettingsWidget);
             out->_init(context, settings, parent);
             return out;
-        }
-
-        ftk::Size2I ShortcutsSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ShortcutsSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         void ShortcutsSettingsWidget::_widgetUpdate(const models::ShortcutsSettings& settings)

@@ -145,7 +145,9 @@ namespace djv
 
             p.indicator = app->createIndicator();
 
-            p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
+            p.layout = ftk::HorizontalLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::MarginInside);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::MarginInside);
@@ -326,17 +328,6 @@ namespace djv
                 _p->currentTimeEdit->takeKeyFocus();
                 _p->currentTimeEdit->selectAll();
             }
-        }
-
-        ftk::Size2I BottomToolBar::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void BottomToolBar::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         OTIO_NS::RationalTime BottomToolBar::_mediaDuration(

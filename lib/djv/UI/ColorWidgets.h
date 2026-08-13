@@ -5,6 +5,7 @@
 
 #include <djv/Models/OCIOModel.h>
 
+#include <ftk/UI/IContainer.h>
 #include <ftk/UI/IWidget.h>
 
 namespace ftk
@@ -23,7 +24,7 @@ namespace djv
 
     namespace ui
     {
-        class OCIOWidget : public ftk::IWidget
+        class OCIOWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(OCIOWidget);
 
@@ -45,14 +46,11 @@ namespace djv
 
             std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
-        class LUTWidget : public ftk::IWidget
+        class LUTWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(LUTWidget);
 
@@ -74,14 +72,11 @@ namespace djv
 
             std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
-        class ColorWidget : public ftk::IWidget
+        class ColorWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ColorWidget);
 
@@ -103,14 +98,11 @@ namespace djv
 
             std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
-        class LevelsWidget : public ftk::IWidget
+        class LevelsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(LevelsWidget);
 
@@ -134,14 +126,11 @@ namespace djv
 
             std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
-        class ExposureWidget : public ftk::IWidget
+        class ExposureWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ExposureWidget);
 
@@ -163,14 +152,11 @@ namespace djv
 
             std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
 
-        class SoftClipWidget : public ftk::IWidget
+        class SoftClipWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(SoftClipWidget);
 
@@ -191,9 +177,6 @@ namespace djv
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             FTK_PRIVATE();

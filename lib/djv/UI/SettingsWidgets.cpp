@@ -67,7 +67,9 @@ namespace djv
                 "Increase this if the audio breaks up or crackles during\n"
                 "playback. Smaller values reduce the audio latency.");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Buffer frames:", p.bufferFramesEdit);
 
@@ -103,17 +105,6 @@ namespace djv
             auto out = std::shared_ptr<AudioSettingsWidget>(new AudioSettingsWidget);
             out->_init(context, settings, parent);
             return out;
-        }
-
-        ftk::Size2I AudioSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void AudioSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         struct CacheSettingsWidget::Private
@@ -166,7 +157,9 @@ namespace djv
             p.waveformEdit->setStep(1.0);
             p.waveformEdit->setLargeStep(10.0);
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -276,17 +269,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I CacheSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void CacheSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
 #if defined(FTK_NFD)
         struct FileBrowserSettingsWidget::Private
         {
@@ -311,7 +293,9 @@ namespace djv
             p.nfdCheckBox = ftk::CheckBox::create(context);
             p.nfdCheckBox->setHStretch(ftk::Stretch::Expanding);
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Native file dialog:", p.nfdCheckBox);
 
@@ -348,17 +332,6 @@ namespace djv
             auto out = std::shared_ptr<FileBrowserSettingsWidget>(new FileBrowserSettingsWidget);
             out->_init(context, settings, parent);
             return out;
-        }
-
-        ftk::Size2I FileBrowserSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void FileBrowserSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 #endif // FTK_NFD
 
@@ -402,7 +375,9 @@ namespace djv
                 "Enable workarounds for timelines that may not conform exactly\n"
                 "to specification.");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Spatial coordinates:", p.spatialComboBox);
             p.layout->addRow("Compatibility:", p.compatCheckBox);
@@ -451,17 +426,6 @@ namespace djv
             auto out = std::shared_ptr<OTIOSettingsWidget>(new OTIOSettingsWidget);
             out->_init(context, settings, parent);
             return out;
-        }
-
-        ftk::Size2I OTIOSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void OTIOSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         struct ImageSeqSettingsWidget::Private
@@ -573,7 +537,9 @@ namespace djv
             p.threadsEdit = ftk::IntEdit::create(context);
             p.threadsEdit->setRange(1, 64);
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Open audio files:", p.audioComboBox);
             p.layout->addRow("Audio file extensions:", p.audioExtensionsEdit);
@@ -730,17 +696,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I ImageSeqSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ImageSeqSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct MiscSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
@@ -768,7 +723,9 @@ namespace djv
             p.showSetupCheckBox = ftk::CheckBox::create(context);
             p.showSetupCheckBox->setHStretch(ftk::Stretch::Expanding);
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Enable tooltips:", p.tooltipsCheckBox);
             p.layout->addRow("Show setup dialog:", p.showSetupCheckBox);
@@ -816,17 +773,6 @@ namespace djv
             auto out = std::shared_ptr<MiscSettingsWidget>(new MiscSettingsWidget);
             out->_init(context, settings, parent);
             return out;
-        }
-
-        ftk::Size2I MiscSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void MiscSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         struct MouseSettingsWidget::Private
@@ -887,7 +833,9 @@ namespace djv
             p.frameShuttleScaleEdit->setRange(.1F, 10.F);
             ftk::setScreenshotTag(p.frameShuttleScaleEdit, "Mouse.FrameShuttleScale");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             std::map<models::MouseAction, std::string> mouseActionLabels =
             {
@@ -1004,17 +952,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I MouseSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void MouseSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct PlaybackSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
@@ -1036,7 +973,9 @@ namespace djv
 
             p.startPlaybackCheckBox = ftk::CheckBox::create(context);
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Start playback on open:", p.startPlaybackCheckBox);
 
@@ -1075,17 +1014,6 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I PlaybackSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void PlaybackSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct TimeSettingsWidget::Private
         {
             std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
@@ -1108,7 +1036,9 @@ namespace djv
 
             p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Time units:", p.timeUnitsComboBox);
 
@@ -1142,17 +1072,6 @@ namespace djv
             auto out = std::shared_ptr<TimeSettingsWidget>(new TimeSettingsWidget);
             out->_init(context, timeUnitsModel, parent);
             return out;
-        }
-
-        ftk::Size2I TimeSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void TimeSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
 #if defined(TLRENDER_FFMPEG_PLUGIN)
@@ -1200,7 +1119,9 @@ namespace djv
                 "count automatically.");
             ftk::setScreenshotTag(p.threadsEdit, "FFmpeg.Threads");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
             p.layout->addRow("Hardware decoding:", p.hwAccelCheckBox);
@@ -1260,17 +1181,6 @@ namespace djv
             out->_init(context, settings, parent);
             return out;
         }
-
-        ftk::Size2I FFmpegSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void FFmpegSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
 #if defined(TLRENDER_FFMPEG_CMD)
@@ -1301,7 +1211,9 @@ namespace djv
             p.ffprobeEdit = ftk::FileEdit::create(context);
             ftk::setScreenshotTag(p.ffprobeEdit, "FFmpegCmd.FFprobe");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("ffmpeg location:", p.ffmpegEdit);
             p.layout->addRow("ffprobe location:", p.ffprobeEdit);
@@ -1349,17 +1261,6 @@ namespace djv
             auto out = std::shared_ptr<FFmpegCmdSettingsWidget>(new FFmpegCmdSettingsWidget);
             out->_init(context, settings, parent);
             return out;
-        }
-
-        ftk::Size2I FFmpegCmdSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void FFmpegCmdSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 #endif // TLRENDER_FFMPEG_CMD
 
@@ -1410,7 +1311,9 @@ namespace djv
             p.diskCacheEdit = ftk::IntEdit::create(context);
             p.diskCacheEdit->setRange(0, 1024);
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Render width:", p.renderWidthEdit);
             p.layout->addRow("Render complexity:", p.complexitySlider);
@@ -1517,17 +1420,6 @@ namespace djv
             auto out = std::shared_ptr<USDSettingsWidget>(new USDSettingsWidget);
             out->_init(context, settings, parent);
             return out;
-        }
-
-        ftk::Size2I USDSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void USDSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 #endif // TLRENDER_USD
     }

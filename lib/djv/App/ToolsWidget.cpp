@@ -56,7 +56,8 @@ namespace djv
             // natural end -- the logs -- keep their own, which stops at the
             // scroll area size role rather than growing without limit.
             p.scrollWidget = ftk::ScrollWidget::create(
-                context, ftk::ScrollType::Both, shared_from_this());
+                context, ftk::ScrollType::Both);
+            _setWidget(p.scrollWidget);
             p.scrollWidget->setBorder(false);
             p.scrollWidget->setWidget(p.layout);
 
@@ -92,17 +93,6 @@ namespace djv
             FTK_P();
             const auto i = p.toolWidgets.find(name);
             return i != p.toolWidgets.end() ? i->second : nullptr;
-        }
-
-        ftk::Size2I ToolsWidget::getSizeHint() const
-        {
-            return _p->scrollWidget->getSizeHint();
-        }
-
-        void ToolsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->scrollWidget->setGeometry(value);
         }
 
         void ToolsWidget::_widgetUpdate(const std::vector<std::string>& open)

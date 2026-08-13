@@ -85,7 +85,9 @@ namespace djv
                 p.fontFileEdits.push_back(fontFileEdit);
             }
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Color style:", p.colorStyleComboBox);
             p.layout->addRow("Brightness:", p.brightnessSlider);
@@ -202,17 +204,6 @@ namespace djv
             auto out = std::shared_ptr<StyleSettingsWidget>(new StyleSettingsWidget);
             out->_init(context, settings, parent);
             return out;
-        }
-
-        ftk::Size2I StyleSettingsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void StyleSettingsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            ISettingsWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         void StyleSettingsWidget::_widgetUpdate(const models::StyleSettings& value)

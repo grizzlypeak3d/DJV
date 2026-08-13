@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <ftk/UI/IWidget.h>
+#include <ftk/UI/IContainer.h>
 
 #include <map>
 #include <string>
@@ -20,7 +20,7 @@ namespace djv
         //!
         //! Shows whether any options are enabled that can affect video, audio,
         //! or performance, and opens a popup listing them.
-        class Indicator : public ftk::IWidget
+        class Indicator : public ftk::IContainer
         {
             FTK_NON_COPYABLE(Indicator);
 
@@ -40,9 +40,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         protected:
             virtual bool _hasIndicator() const;

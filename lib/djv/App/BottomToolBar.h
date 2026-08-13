@@ -5,7 +5,7 @@
 
 #include <tlRender/Timeline/Player.h>
 
-#include <ftk/UI/IWidget.h>
+#include <ftk/UI/IContainer.h>
 
 namespace djv
 {
@@ -17,7 +17,7 @@ namespace djv
         class PlaybackActions;
 
         //! Bottom tool bar.
-        class BottomToolBar : public ftk::IWidget
+        class BottomToolBar : public ftk::IContainer
         {
             FTK_NON_COPYABLE(BottomToolBar);
 
@@ -45,9 +45,6 @@ namespace djv
 
             //! Focus the current frame widget.
             void focusCurrentFrame();
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             OTIO_NS::RationalTime _mediaDuration(const OTIO_NS::TimeRange&) const;

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <ftk/UI/IContainer.h>
 #include <ftk/UI/ToolBar.h>
 
 namespace djv
@@ -12,7 +13,7 @@ namespace djv
         class App;
 
         //! Tab bar.
-        class TabBar : public ftk::IWidget
+        class TabBar : public ftk::IContainer
         {
             FTK_NON_COPYABLE(TabBar);
 
@@ -31,9 +32,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
         private:
             FTK_PRIVATE();
         };

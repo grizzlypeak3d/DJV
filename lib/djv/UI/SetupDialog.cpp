@@ -33,7 +33,9 @@ namespace djv
             IWidget::_init(context, "djv::ui::SetupStartWidget", parent);
             FTK_P();
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
+            p.layout = ftk::VerticalLayout::create(context);
+
+            _setWidget(p.layout);
             ftk::Label::create(
                 context,
                 ftk::Format("Welcome to {0} {1}.").
@@ -59,17 +61,6 @@ namespace djv
             auto out = std::shared_ptr<SetupStartWidget>(new SetupStartWidget);
             out->_init(context, appInfoModel, parent);
             return out;
-        }
-
-        ftk::Size2I SetupStartWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void SetupStartWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         struct SetupDialog::Private

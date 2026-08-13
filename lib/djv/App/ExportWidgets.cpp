@@ -253,7 +253,9 @@ namespace djv
             p.exportButton = ftk::PushButton::create(context, "Export Image");
             ftk::setScreenshotTag(p.exportButton, "Export.ImageExport");
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
+            p.layout = ftk::VerticalLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
@@ -354,17 +356,6 @@ namespace djv
             _p->exportButton->setClickedCallback(value);
         }
 
-        ftk::Size2I ImageExportWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ImageExportWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IExportWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         void ImageExportWidget::_infoUpdate()
         {
             FTK_P();
@@ -434,7 +425,9 @@ namespace djv
             p.exportButton = ftk::PushButton::create(context, "Export Sequence");
             ftk::setScreenshotTag(p.exportButton, "Export.SeqExport");
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
+            p.layout = ftk::VerticalLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
@@ -544,17 +537,6 @@ namespace djv
             _p->exportButton->setClickedCallback(value);
         }
 
-        ftk::Size2I SeqExportWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void SeqExportWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IExportWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         void SeqExportWidget::_infoUpdate()
         {
             FTK_P();
@@ -659,7 +641,9 @@ namespace djv
             p.exportButton = ftk::PushButton::create(context, "Export Movie");
             ftk::setScreenshotTag(p.exportButton, "Export.MovieExport");
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
+            p.layout = ftk::VerticalLayout::create(context);
+
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
@@ -788,17 +772,6 @@ namespace djv
         void MovieExportWidget::setExportCallback(const std::function<void(void)>& value)
         {
             _p->exportButton->setClickedCallback(value);
-        }
-
-        ftk::Size2I MovieExportWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void MovieExportWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IExportWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
 
         void MovieExportWidget::_infoUpdate()

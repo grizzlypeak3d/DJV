@@ -7,14 +7,14 @@
 #include <djv/Models/ViewportModel.h>
 #include <djv/Models/TimeUnitsModel.h>
 
-#include <ftk/UI/IWidget.h>
+#include <ftk/UI/IContainer.h>
 
 namespace djv
 {
     namespace ui
     {
         //! Base class for settings widgets.
-        class ISettingsWidget : public ftk::IWidget
+        class ISettingsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ISettingsWidget);
 
@@ -46,9 +46,6 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
             FTK_PRIVATE();
         };
 
@@ -72,9 +69,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             FTK_PRIVATE();
@@ -102,9 +96,6 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
             FTK_PRIVATE();
         };
 #endif // FTK_NFD
@@ -130,9 +121,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             FTK_PRIVATE();
@@ -160,9 +148,6 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
@@ -187,9 +172,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             FTK_PRIVATE();
@@ -216,9 +198,6 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
@@ -243,9 +222,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             FTK_PRIVATE();
@@ -294,7 +270,7 @@ namespace djv
         };
 
         //! Keyboard shortcut widget.
-        class ShortcutWidget : public ftk::IWidget
+        class ShortcutWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ShortcutWidget);
 
@@ -315,9 +291,6 @@ namespace djv
             void setShortcut(const ftk::KeyShortcut&);
             void setCallback(const std::function<void(const ftk::KeyShortcut&)>&);
             void setCollision(bool);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             void _widgetUpdate();
@@ -345,9 +318,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             void _widgetUpdate(const models::ShortcutsSettings&);
@@ -377,9 +347,6 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             void _widgetUpdate(const models::StyleSettings&);
 
@@ -407,9 +374,6 @@ namespace djv
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
@@ -435,9 +399,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             FTK_PRIVATE();
@@ -466,9 +427,6 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-
         private:
             FTK_PRIVATE();
         };
@@ -495,9 +453,6 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
 
         private:
             FTK_PRIVATE();

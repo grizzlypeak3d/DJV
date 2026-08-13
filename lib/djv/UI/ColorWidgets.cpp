@@ -53,7 +53,7 @@ namespace djv
             const std::shared_ptr<models::ColorModel>& colorModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::ui::OCIOWidget", parent);
+            ftk::IContainer::_init(context, "djv::ui::OCIOWidget", parent);
             FTK_P();
 
             p.ocioModel = models::OCIOModel::create(context);
@@ -88,7 +88,8 @@ namespace djv
             p.lookComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.lookComboBox, "Color.OCIO.Look");
 
-            p.layout = ftk::VerticalLayout::create(context, shared_from_this());
+            p.layout = ftk::VerticalLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout = ftk::FormLayout::create(context, p.layout);
@@ -197,17 +198,6 @@ namespace djv
             return _p->enabledCheckBox;
         }
 
-        ftk::Size2I OCIOWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void OCIOWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct LUTWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -223,7 +213,7 @@ namespace djv
             const std::shared_ptr<models::ColorModel>& colorModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::ui::LUTWidget", parent);
+            ftk::IContainer::_init(context, "djv::ui::LUTWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -248,7 +238,8 @@ namespace djv
             p.orderComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.orderComboBox, "Color.LUT.Order");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("File name:", p.fileEdit);
@@ -312,17 +303,6 @@ namespace djv
             return _p->enabledCheckBox;
         }
 
-        ftk::Size2I LUTWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void LUTWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct ColorWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -338,7 +318,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::ui::ColorWidget", parent);
+            ftk::IContainer::_init(context, "djv::ui::ColorWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -372,7 +352,8 @@ namespace djv
             p.hueSlider->setDefault(0);
             ftk::setScreenshotTag(p.hueSlider, "Color.Controls.Hue");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Add:", p.sliders["Add"]);
@@ -478,17 +459,6 @@ namespace djv
             return _p->enabledCheckBox;
         }
 
-        ftk::Size2I ColorWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ColorWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct LevelsWidget::Private
         {
             std::shared_ptr<ftk::Settings> settings;
@@ -507,7 +477,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::ui::LevelsWidget", parent);
+            ftk::IContainer::_init(context, "djv::ui::LevelsWidget", parent);
             FTK_P();
 
             p.settings = settings;
@@ -561,7 +531,8 @@ namespace djv
             p.rangeEdits["OutMax"]->setRange(-1000000.F, 1000000.F);
             p.rangeEdits["OutMax"]->setValue(range.max());
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("In low:", p.sliders["InLow"]);
@@ -717,17 +688,6 @@ namespace djv
             return _p->enabledCheckBox;
         }
 
-        ftk::Size2I LevelsWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void LevelsWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct ExposureWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -742,7 +702,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::ui::ExposureWidget", parent);
+            ftk::IContainer::_init(context, "djv::ui::ExposureWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -774,7 +734,8 @@ namespace djv
             p.sliders["Gamma"]->setDefault(1.F);
             ftk::setScreenshotTag(p.sliders["Gamma"], "Color.Exposure.Gamma");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Exposure:", p.sliders["Exposure"]);
@@ -871,17 +832,6 @@ namespace djv
             return _p->enabledCheckBox;
         }
 
-        ftk::Size2I ExposureWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void ExposureWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
-        }
-
         struct SoftClipWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -896,7 +846,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<ftk::IWidget>& parent)
         {
-            ftk::IWidget::_init(context, "djv::ui::SoftClipWidget", parent);
+            ftk::IContainer::_init(context, "djv::ui::SoftClipWidget", parent);
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
@@ -908,7 +858,8 @@ namespace djv
             p.sliders["SoftClip"]->setDefault(0.F);
             ftk::setScreenshotTag(p.sliders["SoftClip"], "Color.SoftClip.Value");
 
-            p.layout = ftk::FormLayout::create(context, shared_from_this());
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Soft clip:", p.sliders["SoftClip"]);
@@ -959,17 +910,6 @@ namespace djv
         std::shared_ptr<ftk::CheckBox> SoftClipWidget::getEnabledCheckBox() const
         {
             return _p->enabledCheckBox;
-        }
-
-        ftk::Size2I SoftClipWidget::getSizeHint() const
-        {
-            return _p->layout->getSizeHint();
-        }
-
-        void SoftClipWidget::setGeometry(const ftk::Box2I& value)
-        {
-            IWidget::setGeometry(value);
-            _p->layout->setGeometry(value);
         }
     }
 }
