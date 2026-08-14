@@ -359,8 +359,7 @@
         { "id": "Color.Controls.Brightness",   "caption": "Brightness" },
         { "id": "Color.Controls.Contrast",     "caption": "Contrast" },
         { "id": "Color.Controls.Saturation",   "caption": "Saturation" },
-        { "id": "Color.Controls.Hue",          "caption": "Hue" },
-        { "id": "Color.Controls.Invert",       "caption": "Invert" }
+        { "id": "Color.Controls.Hue",          "caption": "Hue" }
       ]
     },
     {
@@ -474,9 +473,10 @@
         { "pick": [160, 90] }
       ],
       "annotate": [
-        { "id": "Magnify.Magnify",  "caption": "Magnification" },
-        { "id": "Magnify.Pixel",    "caption": "Pixel location" },
-        { "id": "Magnify.Mouse",    "caption": "Mouse binding" }
+        { "id": "Magnify.Magnify",        "caption": "Magnification" },
+        { "id": "Magnify.Pixel",          "caption": "Pixel location" },
+        { "id": "Magnify.ViewPosAndZoom", "caption": "Track view" },
+        { "id": "Magnify.Mouse",          "caption": "Mouse binding" }
       ]
     },
     {

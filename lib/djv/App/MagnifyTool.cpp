@@ -116,7 +116,7 @@ namespace djv
             p.viewPosAndZoomCheckBox = ftk::CheckBox::create(context);
             p.viewPosAndZoomCheckBox->setHStretch(ftk::Stretch::Expanding);
             p.viewPosAndZoomCheckBox->setTooltip("Track the view position and zoom.");
-            ftk::setScreenshotTag(p.comboBox, "Magnify.ViewPosAndZoom");
+            ftk::setScreenshotTag(p.viewPosAndZoomCheckBox, "Magnify.ViewPosAndZoom");
 
             p.mouseLabel = ftk::Label::create(context);
             ftk::setScreenshotTag(p.mouseLabel, "Magnify.Mouse");
