@@ -70,7 +70,7 @@ def load_sidecar(path):
     data = json.loads(path.read_text())
     png = (path.parent / data["image"]).resolve()
     if not png.exists():
-        sys.exit(f"error: image not found: {png}")
+        sys.exit(f"ERROR: image not found: {png}")
     boxes = {}
     for w in data.get("widgets", []):
         boxes.setdefault(w["id"], []).append(w["box"])
@@ -120,7 +120,7 @@ def encode_image(png, max_width, fmt, crop=None):
     try:
         im.convert(mode).save(buf, **save_kw)
     except Exception as e:  # e.g. Pillow built without libwebp
-        sys.exit(f"error: could not encode {fmt.upper()} "
+        sys.exit(f"ERROR: could not encode {fmt.upper()} "
                  f"(is Pillow built with support for it?): {e}")
     return buf.getvalue(), mime, im.size, scale, (off_x, off_y)
 
@@ -517,7 +517,7 @@ def main():
                     bottom = min(bottom, content_bottom + CROP_FIT_PAD)
             crop = (left, top, right - left, bottom - top)
         else:
-            print(f"warning: crop id '{crop_id}' has no box; using full image",
+            print(f"WARNING: crop id '{crop_id}' has no box; using full image",
                   file=sys.stderr)
     img_bytes, mime, (w, h), scale, (ox, oy) = encode_image(
         png, args.max_width, args.format, crop)
@@ -552,7 +552,7 @@ def main():
         build_markdown(annotate) + "\n")
 
     for mid in missing:
-        print(f"warning: no box for annotated id '{mid}' (hidden or untagged?)",
+        print(f"WARNING: no box for annotated id '{mid}' (hidden or untagged?)",
               file=sys.stderr)
     print(f"wrote {svg_path}  ({len(svg)//1024} KB, {args.format})")
 
