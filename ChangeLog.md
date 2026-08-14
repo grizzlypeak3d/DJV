@@ -4,6 +4,7 @@ Changes:
 * Add support for OTIO multiple media references.
 * Add support for OTIO spatial coordinates.
 * Add support for partial image sequences.
+* Add support for reading SVG files.
 * Add audio export.
 * Add a "butterfly" compare mode.
 * Remove "A" compare mode and make the other compare modes toggles.
