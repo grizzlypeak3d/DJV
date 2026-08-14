@@ -5,7 +5,6 @@
 
 #include <djv/App/App.h>
 
-#include <ftk/UI/Divider.h>
 #include <ftk/UI/Icon.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/ToolButton.h>
@@ -58,7 +57,7 @@ namespace djv
             p.closeButton->setIcon("Close");
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
-            p.layout->setSpacingRole(ftk::SizeRole::None);
+            p.layout->setSpacingRole(ftk::SizeRole::Border);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::None);
             // Coloured so that each tool reads as its own thing in a stack of
@@ -67,7 +66,6 @@ namespace djv
             p.icon->setParent(hLayout);
             p.label->setParent(hLayout);
             p.closeButton->setParent(hLayout);
-            ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             p.toolLayout = ftk::VerticalLayout::create(context, p.layout);
             p.toolLayout->setSpacingRole(ftk::SizeRole::None);
             p.toolLayout->setHStretch(ftk::Stretch::Expanding);

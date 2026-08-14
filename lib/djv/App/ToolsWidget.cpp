@@ -9,7 +9,6 @@
 
 #include <algorithm>
 
-#include <ftk/UI/Divider.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
 
@@ -24,7 +23,6 @@ namespace djv
             // Kept by name so that opening a second tool does not take the
             // first one apart and build it again.
             std::map<std::string, std::shared_ptr<IToolWidget> > toolWidgets;
-            std::vector<std::shared_ptr<ftk::Divider> > dividers;
             std::shared_ptr<ftk::VerticalLayout> layout;
             std::shared_ptr<ftk::ScrollWidget> scrollWidget;
             std::shared_ptr<ftk::ListObserver<std::string> > openObserver;
@@ -47,7 +45,7 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setMarginRole(ftk::SizeRole::None);
-            p.layout->setSpacingRole(ftk::SizeRole::None);
+            p.layout->setSpacingRole(ftk::SizeRole::Border);
 
             // One scroll area for the whole stack rather than one inside each
             // tool: a tool then takes the height its contents need instead of
@@ -113,26 +111,11 @@ namespace djv
                 }
             }
 
-            // The dividers go between whatever the order turns out to be, so
-            // they are made again each time rather than tracked.
-            for (const auto& divider : p.dividers)
-            {
-                divider->setParent(nullptr);
-            }
-            p.dividers.clear();
-
+            auto context = getContext();
             auto app = p.app.lock();
             auto mainWindow = p.mainWindow.lock();
-            auto context = getContext();
-            bool first = true;
             for (const auto& name : open)
             {
-                if (!first)
-                {
-                    p.dividers.push_back(ftk::Divider::create(
-                        context, ftk::Orientation::Vertical, p.layout));
-                }
-                first = false;
                 auto i = p.toolWidgets.find(name);
                 if (i == p.toolWidgets.end())
                 {
@@ -146,6 +129,5 @@ namespace djv
                 i->second->setParent(p.layout);
             }
         }
-
     }
 }
