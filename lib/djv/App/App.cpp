@@ -556,13 +556,23 @@ namespace djv
         void App::openDialog()
         {
             FTK_P();
+
+            // More than one at a time: opening a shot and the two versions
+            // beside it is one trip to the browser rather than three, and
+            // each arrives as its own file the way it would have alone.
+            ftk::FileBrowserOpenOptions options;
+            options.multiple = true;
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->open(
                 p.mainWindow,
-                [this](const ftk::Path& value)
+                [this](const std::vector<ftk::Path>& value)
                 {
-                    open(value);
-                });
+                    for (const auto& i : value)
+                    {
+                        open(i);
+                    }
+                },
+                options);
         }
 
         void App::openSeparateAudioDialog()
