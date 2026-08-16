@@ -35,6 +35,13 @@ Locations: **Window** menu, **Window** toolbar
 
 Shortcut: <kbd>Ctrl+P</kbd>
 
+## Float on top
+
+Keep the window above other applications, so a small reference view stays
+visible while working in something else.
+
+Locations: **Window** menu
+
 ## Secondary window
 
 A secondary window can be used to mirror the view on a separate monitor —

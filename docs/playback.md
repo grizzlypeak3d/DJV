@@ -38,6 +38,13 @@ For continuous control, click and drag the playback shuttle: dragging in the
 playback direction speeds up, dragging the opposite way slows down, and
 releasing returns to normal speed.
 
+## Playback speed
+
+Playback runs at the file's own frame rate. To play at a different rate, click
+the speed value in the playback controls and choose from the presets; the
+**Default** entry returns to the file's rate. The HUD's **Time** item shows
+the rate actually being achieved alongside the requested one.
+
 ## Frame navigation
 
 Step through frames or jump to the start or end from the **Frame** menu and the
