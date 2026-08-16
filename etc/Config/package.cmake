@@ -6,9 +6,12 @@
 # that.
 include("${CMAKE_CURRENT_LIST_DIR}/local.cmake" OPTIONAL)
 
-set(TLRENDER_FFMPEG_MINIMAL ON CACHE BOOL "")
-set(TLRENDER_FFMPEG_CMD ON CACHE BOOL "")
-set(TLRENDER_FFMPEG_PLUGIN ON CACHE BOOL "")
+# FORCE, so that a personal local.cmake cannot change what a package ships:
+# it is included first, and a plain cache set would lose to it. A -D on the
+# command line still wins, since CMake reads those after this file.
+set(TLRENDER_FFMPEG_MINIMAL ON CACHE BOOL "" FORCE)
+set(TLRENDER_FFMPEG_CMD ON CACHE BOOL "" FORCE)
+set(TLRENDER_FFMPEG_PLUGIN ON CACHE BOOL "" FORCE)
 set(DJV_TESTS OFF CACHE BOOL "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/ci.cmake")
