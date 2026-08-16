@@ -119,6 +119,12 @@ jobs:
       run: |
         sh djv/etc/Linux/sbuild.sh djv Release package-linux
 
+    # FFmpeg's configure reports every failed dependency check the same way,
+    # and the reason is only in its own log.
+    - name: FFmpeg configure log
+      if: failure()
+      run: tail -n 150 tl-Release/FFmpeg/src/FFmpeg/ffbuild/config.log
+
     - name: Package
       run: |
         cmake --build build-Release --config Release --target package
