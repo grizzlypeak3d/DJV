@@ -8,13 +8,11 @@ always >= DJV's, so a DJV release is also a deadline for one there.
 
 ## Before building anything
 
-- [ ] **Move `local.cmake` aside** in every repository that has one:
-      `etc/Config/`, `deps/tlRender/etc/Config/`,
-      `deps/tlRender/deps/ftk/etc/Config/`. It is included before every
-      configuration and what it sets wins. The FFmpeg options in the package
-      configs are set with FORCE and are safe; nothing else is. A package
-      built with it in place picks up tests, examples, programs and the
-      Python bindings.
+- [ ] **Move `etc/Config/local.cmake` aside.** A package build now refuses to
+      configure while it is there, so this is a reminder rather than
+      something to verify afterwards. Only this one matters: `sbuild` passes
+      the top level `-C` file to every stage, so the copies in tlRender and
+      ftk are never read.
 - [ ] Working trees clean in all three repositories. A package built from a
       dirty tree records a commit that identifies nothing, which is what a
       bug report has to be traced through.
