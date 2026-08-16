@@ -86,7 +86,16 @@ jobs:
         xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
 
   linux-package:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+
+    # Rocky Linux 8, so the package runs on what people actually have rather
+    # than only on something as new as the runner: the runner's glibc is newer
+    # than Rocky 8's, and a binary built against it will not start there.
+    #
+    # CY2025 rather than a later year because it is the newest that still
+    # carries CMake 3.x. CMake 4 refuses the cmake_minimum_required that
+    # several of the dependencies still declare.
+    container: aswf/ci-base:2025
 
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
@@ -96,9 +105,6 @@ jobs:
       with:
         path: djv
         submodules: recursive
-    - uses: actions/setup-python@v6
-      with:
-        python-version: '3.11'
 
     - name: Setup environment
       run: |
@@ -107,8 +113,7 @@ jobs:
         echo "PYTHONPATH=$PWD/install-Release/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
-        python --version
-        sh djv/etc/Linux/setup-gha.sh
+        sh djv/etc/Linux/setup-gha-rocky.sh
 
     - name: Build
       run: |
