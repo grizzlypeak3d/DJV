@@ -24,7 +24,9 @@ set(TLRENDER_OCIO ON CACHE BOOL "")
 set(TLRENDER_JPEG ON CACHE BOOL "")
 set(TLRENDER_TIFF ON CACHE BOOL "")
 set(TLRENDER_EXR ON CACHE BOOL "")
-# The assembly heavy codecs need NASM, which Windows has no toolchain for.
+# The assembly heavy codecs need NASM, and the superbuild builds it with
+# autotools, which needs a Unix shell. Turning these on for Windows means
+# installing NASM there and letting the codecs find it on PATH.
 if(WIN32)
     set(TLRENDER_AOM OFF CACHE BOOL "")
     set(TLRENDER_SVTAV1 OFF CACHE BOOL "")
