@@ -1,30 +1,12 @@
+rem Usage: package-win.bat [source directory] [build type]
+rem
+rem Builds with the "package-windows" config and then makes the package. What
+rem to build is in etc/Config/package-windows.cmake, not here.
+
 set SOURCE_DIR=%1
+set BUILD_TYPE=%2
 IF "%SOURCE_DIR%"=="" set SOURCE_DIR=DJV
+IF "%BUILD_TYPE%"=="" set BUILD_TYPE=Release
 
-set JOBS=4
-set DJV_TESTS=OFF
-set TLRENDER_NET=OFF
-set TLRENDER_OCIO=ON
-set TLRENDER_JPEG=ON
-set TLRENDER_TIFF=ON
-set TLRENDER_EXR=ON
-set TLRENDER_AOM=OFF
-set TLRENDER_SVTAV1=OFF
-set TLRENDER_FFMPEG=ON
-set TLRENDER_FFMPEG_MINIMAL=ON
-set TLRENDER_FFMPEG_PLUGIN=ON
-set TLRENDER_FFMPEG_CMD=ON
-set TLRENDER_NASM=OFF
-set TLRENDER_OIIO=ON
-set TLRENDER_USD=OFF
-set TLRENDER_PYTHON=OFF
-set TLRENDER_PROGRAMS=OFF
-set TLRENDER_EXAMPLES=OFF
-set TLRENDER_TESTS=OFF
-set FTK_API=GL_4_1
-set FTK_EXAMPLES=OFF
-set FTK_TESTS=OFF
-set BUILD_SHARED_LIBS=OFF
-
-call %SOURCE_DIR%\etc\Windows\sbuild.bat %SOURCE_DIR% Release
-cmake --build build-Release --config Release --target package
+call %SOURCE_DIR%\etc\Windows\sbuild.bat %SOURCE_DIR% %BUILD_TYPE% package-windows
+cmake --build build-%BUILD_TYPE% --config %BUILD_TYPE% --target package
