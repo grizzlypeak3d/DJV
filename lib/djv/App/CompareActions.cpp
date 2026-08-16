@@ -75,9 +75,7 @@ namespace djv
                 "Wipe between the A and B files.",
                 [appWeak](const nlohmann::json& args)
                 {
-                    // Absent when the command is run by name rather than by
-                    // the menu -- the command line, the screenshots -- where
-                    // asking for a comparison means turning it on.
+                    // Absent when run by name; see the "B" command above.
                     const bool value = args.contains("value") ?
                         args.at("value").get<bool>() :
                         true;
@@ -97,9 +95,7 @@ namespace djv
                 "mirrored, so that they meet on the same picture.",
                 [appWeak](const nlohmann::json& args)
                 {
-                    // Absent when the command is run by name rather than by
-                    // the menu -- the command line, the screenshots -- where
-                    // asking for a comparison means turning it on.
+                    // Absent when run by name; see the "B" command above.
                     const bool value = args.contains("value") ?
                         args.at("value").get<bool>() :
                         true;
@@ -118,9 +114,7 @@ namespace djv
                 "Overlay the A and B files.",
                 [appWeak](const nlohmann::json& args)
                 {
-                    // Absent when the command is run by name rather than by
-                    // the menu -- the command line, the screenshots -- where
-                    // asking for a comparison means turning it on.
+                    // Absent when run by name; see the "B" command above.
                     const bool value = args.contains("value") ?
                         args.at("value").get<bool>() :
                         true;
@@ -139,9 +133,7 @@ namespace djv
                 "Show the difference between the A and B files.",
                 [appWeak](const nlohmann::json& args)
                 {
-                    // Absent when the command is run by name rather than by
-                    // the menu -- the command line, the screenshots -- where
-                    // asking for a comparison means turning it on.
+                    // Absent when run by name; see the "B" command above.
                     const bool value = args.contains("value") ?
                         args.at("value").get<bool>() :
                         true;
@@ -160,9 +152,7 @@ namespace djv
                 "Show the A and B files in a horizontal layout.",
                 [appWeak](const nlohmann::json& args)
                 {
-                    // Absent when the command is run by name rather than by
-                    // the menu -- the command line, the screenshots -- where
-                    // asking for a comparison means turning it on.
+                    // Absent when run by name; see the "B" command above.
                     const bool value = args.contains("value") ?
                         args.at("value").get<bool>() :
                         true;
@@ -181,9 +171,7 @@ namespace djv
                 "Show the A and B files in a vertical layout.",
                 [appWeak](const nlohmann::json& args)
                 {
-                    // Absent when the command is run by name rather than by
-                    // the menu -- the command line, the screenshots -- where
-                    // asking for a comparison means turning it on.
+                    // Absent when run by name; see the "B" command above.
                     const bool value = args.contains("value") ?
                         args.at("value").get<bool>() :
                         true;
@@ -202,9 +190,7 @@ namespace djv
                 "Show the A and B files in a tiled layout.",
                 [appWeak](const nlohmann::json& args)
                 {
-                    // Absent when the command is run by name rather than by
-                    // the menu -- the command line, the screenshots -- where
-                    // asking for a comparison means turning it on.
+                    // Absent when run by name; see the "B" command above.
                     const bool value = args.contains("value") ?
                         args.at("value").get<bool>() :
                         true;

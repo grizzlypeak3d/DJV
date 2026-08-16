@@ -89,7 +89,8 @@ namespace djv
             {
                 // Every test whose name contains the argument, not just the
                 // first: a group name is the useful way to ask for part of the
-                // suite, and taking one match silently ran less than that.
+                // suite, and taking one match would silently run less than
+                // that.
                 for (const auto& test : cmdLineTests)
                 {
                     size_t matched = 0;
@@ -119,8 +120,9 @@ namespace djv
                 }
             }
 
-            // A filter that matched nothing used to run zero tests and exit
-            // successfully, which reads exactly like a suite that passed.
+            // A filter that matches nothing has to fail loudly: running zero
+            // tests and exiting successfully reads exactly like a suite that
+            // passed.
             if (!unmatched.empty())
             {
                 for (const auto& name : unmatched)

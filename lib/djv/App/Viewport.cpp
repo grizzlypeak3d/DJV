@@ -358,9 +358,10 @@ namespace djv
                     _p->displayOptions = value;
                     _videoUpdate();
                     // The heads up display says what is being rendered, which
-                    // the aspect ratio changes. Without this it only caught up
-                    // when something else refreshed it -- which is every frame
-                    // while playing, and nothing at all while stopped.
+                    // the aspect ratio changes. Without this it would only
+                    // catch up when something else refreshes it -- which is
+                    // every frame while playing, and nothing at all while
+                    // stopped.
                     _hudUpdate();
                 });
 

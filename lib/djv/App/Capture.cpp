@@ -1237,7 +1237,7 @@ namespace djv
                 out["annotate"] = p.shot.at("annotate");
             // Per-shot make_svg options pass straight through to the sidecar so
             // the SVG step is driven entirely by the sidecar -- build_screenshots
-            // no longer needs to re-parse the manifest to forward them.
+            // never has to re-parse the manifest to forward them.
             if (p.shot.contains("crop"))
                 out["crop"] = p.shot.at("crop");
             if (p.shot.contains("layout"))

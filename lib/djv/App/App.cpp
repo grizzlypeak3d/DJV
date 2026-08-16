@@ -1711,10 +1711,6 @@ namespace djv
                 }
                 else
                 {
-                    //if (auto player = p.player->get())
-                    //{
-                    //    player->setAudioDevice(tl::AudioDeviceID());
-                    //}
                     auto i = std::find(p.files.begin(), p.files.end(), activeFiles[0]);
                     if (i != p.files.end())
                     {

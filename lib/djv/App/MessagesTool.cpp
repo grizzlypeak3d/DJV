@@ -113,7 +113,6 @@ namespace djv
                     const auto selection = p.textEdit->getModel()->getSelection();
                     const ftk::V2I scrollPos = p.textEdit->getScrollWidget()->getScrollPos();
 
-                    // Update the text.
                     // With the time, which is what makes this a record of
                     // what happened rather than a view of the current state.
                     std::vector<std::string> lines;

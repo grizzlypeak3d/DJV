@@ -219,8 +219,8 @@ namespace djv
                         // the same news as the compare options. Turning a
                         // comparison on with no "B" file chosen picks one, so
                         // the options change first and the timeline that goes
-                        // with them second; without this the size was worked
-                        // out from the "A" file alone and left there.
+                        // with them second; without this the size would be
+                        // worked out from the "A" file alone and left there.
                         p.compareObserver =
                             ftk::ListObserver<std::shared_ptr<tl::Timeline> >::create(
                                 p.player->observeCompare(),
