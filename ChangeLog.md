@@ -16,13 +16,14 @@ Changes:
   decoded to.
 * Movie exports carry the start timecode of the range that was exported.
 * Add high quality image scaling options.
-* Multiple tools can now be open at the same time.
+* Multiple tools can be opened at the same time.
 * Add a waveform height option.
 * Add an image negative option.
 * Add custom aspect ratios.
 * Add a center marker option.
 * Add more grid and HUD options.
 * Add an option for whether the magnify tool tracks the view.
+* Multiple files can be opened with the file browser.
 * Add the NotoSansCJKsc-Regular font for basic CJK text rendering.
 * Add more OpenEXR attributes.
 * Add the JPEG file format to export options.
