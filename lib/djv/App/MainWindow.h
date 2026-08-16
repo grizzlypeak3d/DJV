@@ -92,6 +92,7 @@ namespace djv
             //! Show the system information dialog.
             void showSysInfoDialog();
 
+            void setVisible(bool) override;
             void setGeometry(const ftk::Box2I&) override;
             void keyPressEvent(ftk::KeyEvent&) override;
             void keyReleaseEvent(ftk::KeyEvent&) override;
