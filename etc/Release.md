@@ -51,9 +51,14 @@ always >= DJV's, so a DJV release is also a deadline for one there.
       `MINIMAL=ON PLUGIN=ON CMD=ON` -- the codecs that need no license, the
       plugin for limited exports, and the command line tool for bringing your
       own.
-- [ ] Build with `package-win.bat`, `package-macos.sh`, `package-linux.sh`.
-      They take the source directory and build type, and choose the config
-      themselves.
+- [ ] macOS and Windows are built here, with `package-macos.sh` and
+      `package-win.bat`. They take the source directory and build type, and
+      choose the config themselves. Both are built locally because signing
+      needs credentials that are not in CI.
+- [ ] Linux comes from the CI artifact, which is built in a Rocky Linux
+      container so that it starts on the distributions people run. Building
+      it here with `package-linux.sh` produces something linked against
+      whatever this machine has.
 - [ ] Confirm an installer was actually produced, on Windows especially: the
       script has to `call` sbuild, or the line that makes the package is
       never reached.
