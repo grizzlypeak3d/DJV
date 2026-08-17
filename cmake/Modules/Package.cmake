@@ -504,3 +504,11 @@ else()
     install(FILES ${INSTALL_LIBS} DESTINATION lib)
 
 endif()
+
+# Prepended, so it runs before the signing scripts on macOS. Taking files out
+# of a bundle after it is signed invalidates the signature, and nothing says
+# so until Gatekeeper refuses it on a machine that is not this one. Setting it
+# here rather than per platform covers Windows and Linux, which have no
+# pre-build scripts of their own.
+list(PREPEND CPACK_PRE_BUILD_SCRIPTS
+    "${PROJECT_SOURCE_DIR}/cmake/Modules/PackagePrune.cmake")
