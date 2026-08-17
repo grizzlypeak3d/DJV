@@ -104,5 +104,4 @@ together and each keeps its own number.
   pin also means updating the library versions written out in the macOS
   install names and in the packaging: check them against
   `libavutil/version.h` and its siblings at the new tag. In this tree they
-  are in `BuildFFmpeg.cmake`, `deps/tlRender/cmake/Modules/Package.cmake` and
-  `cmake/Modules/Package.cmake`.
+  are in `BuildFFmpeg.cmake` and `cmake/Modules/Package.cmake`.
