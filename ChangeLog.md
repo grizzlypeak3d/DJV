@@ -33,6 +33,10 @@ Changes:
 * Add image I/O library versions to the system information.
 * Performance improvements.
 * Style updates.
+* Library updates:
+    - FFmpeg 8.1.2
+    - OpenImageIO v3.1.14.0
+    - subprocess
 
 Fixes:
 * Add the file extensions ".avif" and ".mxf" to the FFmpeg command plugin.
@@ -49,9 +53,6 @@ Fixes:
 * Fixes to prevent cache usage exceeding 100%.
 * Fixes for log file failures.
 
-* Library updates:
-    - OpenImageIO v3.1.14.0
-    - subprocess
 
 ## 3.4.2
 
