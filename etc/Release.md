@@ -17,10 +17,20 @@ always >= DJV's, so a DJV release is also a deadline for one there.
       dirty tree records a commit that identifies nothing, which is what a
       bug report has to be traced through.
 
-## Version and change log
+## Versions and change log
 
-- [ ] Set `VERSION_MAJOR` / `MINOR` / `PATCH` in `lib/djv/Models/Version.h`.
-- [ ] Clear `VERSION_DEV` (`"-dev"` -> `""`).
+DJV drives feather-tk and tlRender releases, so all three are versioned
+together and each keeps its own number.
+
+- [ ] Set `VERSION_MAJOR` / `MINOR` / `PATCH` in each `Version.h`:
+      `deps/tlRender/deps/ftk/lib/ftk/Core/Version.h`,
+      `deps/tlRender/lib/tlRender/Core/Version.h` and
+      `lib/djv/Models/Version.h`. Every project regex parses its own header
+      from its `CMakeLists.txt`, so those three files are the whole edit.
+- [ ] Clear `VERSION_DEV` (`"-dev"` -> `""`) **and** drop the suffix from
+      `VERSION_FULL`, which is a separate define rather than something
+      derived, and is what names the package files. Clearing `VERSION_DEV` is
+      also what drops the date and commit from the window title.
 - [ ] `ChangeLog.md`: "Changes" is for user visible changes; "Fixes" is for
       problems someone reported, not every bug fixed on the way.
 
@@ -65,9 +75,18 @@ always >= DJV's, so a DJV release is also a deadline for one there.
 
 ## Tags
 
-- [ ] Tag each repository at the commit the packages were built from. The
-      tag records the submodule SHAs, so checking it out recovers tlRender,
-      ftk and the FFmpeg pin together.
+- [ ] **Last, once the packages are built and one has been installed and
+      checked.** Nothing in the build reads a tag -- `BuildInfo.cmake` asks
+      for `git rev-parse HEAD` and the versions come from `Version.h` -- so
+      tagging earlier buys nothing, while a package build is the first time
+      the release configuration runs end to end. Whatever it turns up means
+      new commits and moved submodule pointers, and a tag pushed beforehand
+      would then name something that is not what shipped. Moving a published
+      tag is the one thing tags exist to make unnecessary.
+- [ ] Tag all three, at the commits the packages were built from. DJV's tag
+      records the submodule SHAs, so checking it out recovers tlRender, ftk
+      and the FFmpeg pin together; ftk and tlRender are tagged with their own
+      version numbers.
 
 ## Worth knowing
 
