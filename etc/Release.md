@@ -67,9 +67,15 @@ together and each keeps its own number.
       container so that it starts on the distributions people run. Building
       it here with `package-linux.sh` produces something linked against
       whatever this machine has.
-- [ ] Confirm an installer was actually produced, on Windows especially: the
-      script has to `call` sbuild, or the line that makes the package is
-      never reached.
+- [ ] Confirm the **expected** artifact appeared, not merely that one did:
+      `.dmg` on macOS, an `.exe` installer on Windows, `.tar.gz` on Linux.
+      With the platform packaging off a package build still succeeds and
+      produces the generic relocatable layout -- a zip on macOS, an installer
+      whose sample data and legal documents sit under `share/` on Windows --
+      which is a real artifact, just not the one being released. The package
+      configs ask for the right one; this is the check that they did.
+- [ ] On Windows, that an installer exists at all: the script has to `call`
+      sbuild, or the line that makes the package is never reached.
 - [ ] Install the package and open About: bare version, no `-dev`, no
       `-dirty`, and a commit that exists on the remote.
 
