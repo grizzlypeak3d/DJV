@@ -47,6 +47,8 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
+            void _extUpdate();
+
             FTK_PRIVATE();
         };
 

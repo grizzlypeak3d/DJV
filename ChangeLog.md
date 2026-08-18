@@ -4,6 +4,7 @@ Changes:
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
 * Resolve the OCIO input color space from the configuration's file rules when
   the input is set to "None".
+* Assign color spaces to file name extensions in the color tool.
 
 ## 3.5.0
 

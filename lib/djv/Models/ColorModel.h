@@ -7,6 +7,8 @@
 
 #include <ftk/Core/Observable.h>
 
+#include <map>
+
 namespace ftk
 {
     class Context;
@@ -54,6 +56,17 @@ namespace djv
 
             //! Set the file that the input color space is resolved for.
             void setActiveFile(const std::string&);
+
+            //! Get the file name extension color spaces.
+            const std::map<std::string, std::string>& getExtColorSpaces() const;
+
+            //! Observe the file name extension color spaces.
+            std::shared_ptr<ftk::IObservable<std::map<std::string, std::string> > > observeExtColorSpaces() const;
+
+            //! Set the file name extension color spaces. These take
+            //! precedence over the configuration's file rules when the
+            //! input color space is resolved.
+            void setExtColorSpaces(const std::map<std::string, std::string>&);
 
             //! Get the LUT options.
             const tl::LUTOptions& getLUTOptions() const;

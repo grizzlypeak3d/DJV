@@ -4,6 +4,8 @@
 #include <djv/Models/ColorModel.h>
 
 #include <ftk/UI/Settings.h>
+#include <ftk/Core/Path.h>
+#include <ftk/Core/String.h>
 
 #if defined(TLRENDER_OCIO)
 #include <OpenColorIO/OpenColorIO.h>
@@ -23,6 +25,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<tl::OCIOOptions> > ocioOptions;
             std::shared_ptr<ftk::Observable<tl::OCIOOptions> > resolvedOCIOOptions;
             std::shared_ptr<ftk::Observable<tl::LUTOptions> > lutOptions;
+            std::shared_ptr<ftk::Observable<std::map<std::string, std::string> > > extColorSpaces;
             std::string activeFile;
 #if defined(TLRENDER_OCIO)
             OCIO_NAMESPACE::ConstConfigRcPtr ocioConfig;
@@ -41,6 +44,9 @@ namespace djv
             p.settings->getT("/Color/OCIO", ocioOptions);
             p.ocioOptions = ftk::Observable<tl::OCIOOptions>::create(ocioOptions);
             _ocioConfigUpdate(ocioOptions);
+            std::map<std::string, std::string> extColorSpaces;
+            p.settings->getT("/Color/OCIOExtColorSpaces", extColorSpaces);
+            p.extColorSpaces = ftk::Observable<std::map<std::string, std::string> >::create(extColorSpaces);
             p.resolvedOCIOOptions = ftk::Observable<tl::OCIOOptions>::create(
                 _resolvedOCIOOptions());
 
@@ -57,6 +63,7 @@ namespace djv
         {
             FTK_P();
             p.settings->setT("/Color/OCIO", p.ocioOptions->get());
+            p.settings->setT("/Color/OCIOExtColorSpaces", p.extColorSpaces->get());
             p.settings->setT("/Color/LUT", p.lutOptions->get());
         }
 
@@ -108,6 +115,25 @@ namespace djv
             }
         }
 
+        const std::map<std::string, std::string>& ColorModel::getExtColorSpaces() const
+        {
+            return _p->extColorSpaces->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<std::map<std::string, std::string> > > ColorModel::observeExtColorSpaces() const
+        {
+            return _p->extColorSpaces;
+        }
+
+        void ColorModel::setExtColorSpaces(const std::map<std::string, std::string>& value)
+        {
+            FTK_P();
+            if (p.extColorSpaces->setIfChanged(value))
+            {
+                p.resolvedOCIOOptions->setIfChanged(_resolvedOCIOOptions());
+            }
+        }
+
         const tl::LUTOptions& ColorModel::getLUTOptions() const
         {
             return _p->lutOptions->get();
@@ -136,22 +162,34 @@ namespace djv
             // whether their configuration has rules or not.
             if (out.enabled &&
                 out.input.empty() &&
-                p.ocioConfig &&
                 !p.activeFile.empty())
             {
-                try
+                // The user's own extension assignments come before the
+                // configuration's rules: they are set from inside DJV, so
+                // they are the more deliberate of the two.
+                const std::string ext = ftk::toLower(ftk::Path(p.activeFile).getExt());
+                const auto& extColorSpaces = p.extColorSpaces->get();
+                const auto i = extColorSpaces.find(ext);
+                if (i != extColorSpaces.end() && !i->second.empty())
                 {
-                    const char* colorSpace =
-                        p.ocioConfig->getColorSpaceFromFilepath(p.activeFile.c_str());
-                    if (colorSpace &&
-                        colorSpace[0] &&
-                        !p.ocioConfig->filepathOnlyMatchesDefaultRule(p.activeFile.c_str()))
-                    {
-                        out.input = colorSpace;
-                    }
+                    out.input = i->second;
                 }
-                catch (const std::exception&)
-                {}
+                else if (p.ocioConfig)
+                {
+                    try
+                    {
+                        const char* colorSpace =
+                            p.ocioConfig->getColorSpaceFromFilepath(p.activeFile.c_str());
+                        if (colorSpace &&
+                            colorSpace[0] &&
+                            !p.ocioConfig->filepathOnlyMatchesDefaultRule(p.activeFile.c_str()))
+                        {
+                            out.input = colorSpace;
+                        }
+                    }
+                    catch (const std::exception&)
+                    {}
+                }
             }
 #endif // TLRENDER_OCIO
             return out;
