@@ -26,6 +26,13 @@ if(WIN32)
             ${CMAKE_INSTALL_PREFIX}/bin/swscale-9.dll)
         list(APPEND INSTALL_DLLS ${FFMPEG_DLLS})
     endif()
+
+    if(TLRENDER_OIIO AND TLRENDER_LIBRAW)
+        set(LIBRAW_DLLS
+            ${CMAKE_INSTALL_PREFIX}/bin/raw.dll
+            ${CMAKE_INSTALL_PREFIX}/bin/raw_r.dll)
+        list(APPEND INSTALL_DLLS ${LIBRAW_DLLS})
+    endif()
     
     if(TLRENDER_USD)
         set(MATERIALX_DLLS
@@ -161,6 +168,17 @@ elseif(APPLE)
             ${CMAKE_INSTALL_PREFIX}/lib/libswscale.9.dylib
             ${CMAKE_INSTALL_PREFIX}/lib/libswscale.dylib)
         list(APPEND INSTALL_DYLIBS ${FFMPEG_DYLIBS})
+    endif()
+
+    if(TLRENDER_OIIO AND TLRENDER_LIBRAW)
+        set(LIBRAW_DYLIBS
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw.25.0.0.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw.25.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.25.0.0.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.25.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.dylib)
+        list(APPEND INSTALL_DYLIBS ${LIBRAW_DYLIBS})
     endif()
     
     if(TLRENDER_USD)
@@ -368,6 +386,17 @@ else()
             ${CMAKE_INSTALL_PREFIX}/lib/libswscale.so.9
             ${CMAKE_INSTALL_PREFIX}/lib/libswscale.so.9.5.102)
         list(APPEND INSTALL_LIBS ${FFMPEG_LIBS})
+    endif()
+
+    if(TLRENDER_OIIO AND TLRENDER_LIBRAW)
+        set(LIBRAW_LIBS
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw.so
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw.so.25
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw.so.25.0.0
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.so
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.so.25
+            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.so.25.0.0)
+        list(APPEND INSTALL_LIBS ${LIBRAW_LIBS})
     endif()
 
     if(TLRENDER_USD)
