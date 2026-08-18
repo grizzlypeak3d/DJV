@@ -6,6 +6,8 @@
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/ViewportModel.h>
 
+#include <tlRender/Timeline/Util.h>
+
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/CheckBox.h>
@@ -16,7 +18,6 @@
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/Label.h>
-#include <ftk/UI/LineEdit.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
@@ -36,6 +37,7 @@ namespace djv
             std::shared_ptr<models::OCIOModel> ocioModel;
             std::map<std::string, std::string> extColorSpaces;
             std::vector<std::string> colorSpaces;
+            std::vector<std::string> exts;
 
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::shared_ptr<ftk::ComboBox> configComboBox;
@@ -45,11 +47,12 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> displayComboBox;
             std::shared_ptr<ftk::ComboBox> viewComboBox;
             std::shared_ptr<ftk::ComboBox> lookComboBox;
-            std::shared_ptr<ftk::LineEdit> extAddEdit;
-            std::shared_ptr<ftk::ComboBox> extAddComboBox;
+            std::shared_ptr<ftk::ComboBox> extAddExtComboBox;
+            std::shared_ptr<ftk::ComboBox> extAddColorSpaceComboBox;
             std::shared_ptr<ftk::ToolButton> extAddButton;
+            std::shared_ptr<ftk::HorizontalLayout> extAddLayout;
+            std::vector<std::shared_ptr<ftk::IWidget> > extRows;
             std::shared_ptr<ftk::FormLayout> formLayout;
-            std::shared_ptr<ftk::FormLayout> extLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > optionsObserver;
@@ -99,16 +102,15 @@ namespace djv
             p.lookComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.lookComboBox, "Color.OCIO.Look");
 
-            p.extAddEdit = ftk::LineEdit::create(context);
-            p.extAddEdit->setHStretch(ftk::Stretch::Expanding);
-            p.extAddEdit->setTooltip(
-                "File name extension to assign a color space to; "
-                "e.g., \"exr\".");
-            ftk::setScreenshotTag(p.extAddEdit, "Color.OCIO.ExtAdd");
+            p.exts = tl::getExts(context);
+            p.extAddExtComboBox = ftk::ComboBox::create(context, p.exts);
+            p.extAddExtComboBox->setTooltip(
+                "File name extension to assign a color space to.");
+            ftk::setScreenshotTag(p.extAddExtComboBox, "Color.OCIO.ExtAdd");
 
-            p.extAddComboBox = ftk::ComboBox::create(context);
-            p.extAddComboBox->setHStretch(ftk::Stretch::Expanding);
-            p.extAddComboBox->setTooltip(
+            p.extAddColorSpaceComboBox = ftk::ComboBox::create(context);
+            p.extAddColorSpaceComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.extAddColorSpaceComboBox->setTooltip(
                 "Color space to assign to the extension.");
 
             p.extAddButton = ftk::ToolButton::create(context, "Add");
@@ -132,14 +134,12 @@ namespace djv
             p.formLayout->addRow("Display:", p.displayComboBox);
             p.formLayout->addRow("View:", p.viewComboBox);
             p.formLayout->addRow("Look:", p.lookComboBox);
-            auto hLayout = ftk::HorizontalLayout::create(context);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.extAddEdit->setParent(hLayout);
-            p.extAddComboBox->setParent(hLayout);
-            p.extAddButton->setParent(hLayout);
-            p.formLayout->addRow("Extensions:", hLayout);
-            p.extLayout = ftk::FormLayout::create(context, p.layout);
-            p.extLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.extAddLayout = ftk::HorizontalLayout::create(context);
+            p.extAddLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.extAddExtComboBox->setParent(p.extAddLayout);
+            p.extAddColorSpaceComboBox->setParent(p.extAddLayout);
+            p.extAddButton->setParent(p.extAddLayout);
+            p.formLayout->addRow("Extensions:", p.extAddLayout);
 
             p.optionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 colorModel->observeOCIOOptions(),
@@ -183,7 +183,7 @@ namespace djv
                     if (colorSpaces != p.colorSpaces)
                     {
                         p.colorSpaces = colorSpaces;
-                        p.extAddComboBox->setItems(p.colorSpaces);
+                        p.extAddColorSpaceComboBox->setItems(p.colorSpaces);
                         _extUpdate();
                     }
                 });
@@ -231,20 +231,16 @@ namespace djv
                 [this]
                 {
                     FTK_P();
-                    std::string ext = ftk::toLower(p.extAddEdit->getText());
-                    if (!ext.empty() && ext[0] != '.')
-                    {
-                        ext = "." + ext;
-                    }
-                    const int index = p.extAddComboBox->getCurrentIndex();
-                    if (ext.size() > 1 &&
+                    const int extIndex = p.extAddExtComboBox->getCurrentIndex();
+                    const int index = p.extAddColorSpaceComboBox->getCurrentIndex();
+                    if (extIndex >= 0 &&
+                        extIndex < static_cast<int>(p.exts.size()) &&
                         index >= 0 &&
                         index < static_cast<int>(p.colorSpaces.size()))
                     {
                         auto extColorSpaces = p.colorModel->getExtColorSpaces();
-                        extColorSpaces[ext] = p.colorSpaces[index];
+                        extColorSpaces[p.exts[extIndex]] = p.colorSpaces[index];
                         p.colorModel->setExtColorSpaces(extColorSpaces);
-                        p.extAddEdit->setText(std::string());
                     }
                 });
 
@@ -282,7 +278,16 @@ namespace djv
         void OCIOWidget::_extUpdate()
         {
             FTK_P();
-            p.extLayout->clear();
+            // The rows share the form layout with the rest of the widgets
+            // so that everything lines up, which means rebuilding them is
+            // removing the old rows and the add row, and appending the new
+            // rows with the add row after them again.
+            for (const auto& row : p.extRows)
+            {
+                p.formLayout->removeRow(row);
+            }
+            p.extRows.clear();
+            p.formLayout->removeRow(p.extAddLayout);
             if (auto context = getContext())
             {
                 for (const auto& i : p.extColorSpaces)
@@ -293,7 +298,6 @@ namespace djv
                     hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
                     auto comboBox = ftk::ComboBox::create(context, p.colorSpaces, hLayout);
-                    comboBox->setHStretch(ftk::Stretch::Expanding);
                     const auto j = std::find(p.colorSpaces.begin(), p.colorSpaces.end(), i.second);
                     comboBox->setCurrentIndex(
                         j != p.colorSpaces.end() ? (j - p.colorSpaces.begin()) : -1);
@@ -321,9 +325,11 @@ namespace djv
                             p.colorModel->setExtColorSpaces(extColorSpaces);
                         });
 
-                    p.extLayout->addRow(ext + ":", hLayout);
+                    p.formLayout->addRow(ext + ":", hLayout);
+                    p.extRows.push_back(hLayout);
                 }
             }
+            p.formLayout->addRow("Extensions:", p.extAddLayout);
         }
 
         struct LUTWidget::Private
