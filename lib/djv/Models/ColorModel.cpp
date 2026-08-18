@@ -7,6 +7,9 @@
 #include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
 
+#include <cmath>
+#include <sstream>
+
 #if defined(TLRENDER_OCIO)
 #include <OpenColorIO/OpenColorIO.h>
 #endif // TLRENDER_OCIO
@@ -290,6 +293,59 @@ namespace djv
             // are recognized; camera log material is almost never flagged.
             if (p.ocioConfig)
             {
+                std::vector<std::string> candidates;
+
+                // EXR files carry their primaries in the header, exact
+                // for the standard sets and measured for everything else.
+                // The tolerance is generous: primaries near a standard set
+                // are that set within a small error, while falling through
+                // to a configuration rule written for the extension risks
+                // a gross one -- a camera characterization near Rec.709
+                // shown as ACES2065-1 is unrecognizable. The standard sets
+                // are about 0.04 apart at their closest, so the tolerance
+                // cannot confuse two of them.
+                if (const auto i = tags.find("Chromaticities");
+                    i != tags.end())
+                {
+                    float c[8] = { 0.F };
+                    std::stringstream ss(i->second);
+                    for (size_t j = 0; j < 8; ++j)
+                    {
+                        ss >> c[j];
+                    }
+                    struct Primaries
+                    {
+                        float c[8];
+                        std::vector<std::string> candidates;
+                    };
+                    const std::vector<Primaries> known =
+                    {
+                        { { .64F, .33F, .3F, .6F, .15F, .06F, .3127F, .329F },
+                            { "lin_rec709", "lin_srgb", "Linear Rec.709 (sRGB)" } },
+                        { { .68F, .32F, .265F, .69F, .15F, .06F, .3127F, .329F },
+                            { "lin_p3d65", "Linear P3-D65" } },
+                        { { .708F, .292F, .17F, .797F, .131F, .046F, .3127F, .329F },
+                            { "lin_rec2020", "Linear Rec.2020" } },
+                        { { .7347F, .2653F, 0.F, 1.F, .0001F, -.077F, .32168F, .33767F },
+                            { "aces2065_1", "ACES2065-1" } },
+                        { { .713F, .293F, .165F, .83F, .128F, .044F, .32168F, .33767F },
+                            { "acescg", "ACEScg" } }
+                    };
+                    for (const auto& k : known)
+                    {
+                        bool match = true;
+                        for (size_t j = 0; j < 8 && match; ++j)
+                        {
+                            match = std::abs(c[j] - k.c[j]) < .02F;
+                        }
+                        if (match)
+                        {
+                            candidates = k.candidates;
+                            break;
+                        }
+                    }
+                }
+
                 std::string primaries;
                 std::string transfer;
                 if (const auto i = tags.find("Color Primaries");
@@ -302,7 +358,6 @@ namespace djv
                 {
                     transfer = i->second;
                 }
-                std::vector<std::string> candidates;
                 if ("bt709" == primaries && "iec61966-2-1" == transfer)
                 {
                     candidates = { "srgb_tx", "sRGB - Texture", "sRGB" };

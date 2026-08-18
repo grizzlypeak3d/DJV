@@ -9,6 +9,8 @@ Changes:
   tool.
 * Resolve the input color space from the color description a movie was
   flagged with, when the configuration has a matching color space.
+* Resolve the input color space from the chromaticities an OpenEXR file
+  carries, when they match a standard set of primaries.
 * A/B comparisons of files in different color spaces show each file through
   its own input color space.
 
