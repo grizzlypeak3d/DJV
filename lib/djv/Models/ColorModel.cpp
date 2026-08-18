@@ -28,6 +28,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<tl::LUTOptions> > lutOptions;
             std::shared_ptr<ftk::Observable<std::map<std::string, std::string> > > extColorSpaces;
             std::string activeFile;
+            ftk::ImageTags activeTags;
             // Set beside the resolved options: the input color space and
             // where it came from, for display.
             std::string resolvedInputLabel;
@@ -111,12 +112,13 @@ namespace djv
             return _p->resolvedOCIOOptions;
         }
 
-        void ColorModel::setActiveFile(const std::string& value)
+        void ColorModel::setActiveFile(const std::string& value, const ftk::ImageTags& tags)
         {
             FTK_P();
-            if (value != p.activeFile)
+            if (value != p.activeFile || tags != p.activeTags)
             {
                 p.activeFile = value;
+                p.activeTags = tags;
                 _resolvedUpdate();
             }
         }
@@ -194,6 +196,12 @@ namespace djv
                     out.input = i->second;
                     p.resolvedInputLabel = out.input + " (extension)";
                 }
+                else if (const std::string declared = _declaredColorSpace();
+                    !declared.empty())
+                {
+                    out.input = declared;
+                    p.resolvedInputLabel = out.input + " (file)";
+                }
                 else if (p.ocioConfig)
                 {
                     try
@@ -206,6 +214,73 @@ namespace djv
                         {
                             out.input = colorSpace;
                             p.resolvedInputLabel = out.input + " (file rules)";
+                        }
+                    }
+                    catch (const std::exception&)
+                    {}
+                }
+            }
+#endif // TLRENDER_OCIO
+            return out;
+        }
+
+        std::string ColorModel::_declaredColorSpace() const
+        {
+            FTK_P();
+            std::string out;
+#if defined(TLRENDER_OCIO)
+            // What the file was flagged with, matched against the color
+            // spaces the configuration has. The names tried are the
+            // canonical names and aliases the OpenColorIO configurations
+            // use, so a configuration that renamed everything and carries
+            // no aliases simply does not match, and resolution falls
+            // through to the file rules. Only the common video encodings
+            // are recognized; camera log material is almost never flagged.
+            if (p.ocioConfig)
+            {
+                std::string primaries;
+                std::string transfer;
+                if (const auto i = p.activeTags.find("Color Primaries");
+                    i != p.activeTags.end())
+                {
+                    primaries = i->second;
+                }
+                if (const auto i = p.activeTags.find("Color Transfer");
+                    i != p.activeTags.end())
+                {
+                    transfer = i->second;
+                }
+                std::vector<std::string> candidates;
+                if ("bt709" == primaries && "iec61966-2-1" == transfer)
+                {
+                    candidates = { "srgb_tx", "sRGB - Texture", "sRGB" };
+                }
+                else if ("bt709" == primaries && "bt709" == transfer)
+                {
+                    candidates =
+                    {
+                        "rec1886_rec709_display",
+                        "Rec.1886 Rec.709 - Display",
+                        "Rec.709"
+                    };
+                }
+                else if ("bt2020" == primaries && "smpte2084" == transfer)
+                {
+                    candidates = { "rec2100_pq_display", "Rec.2100-PQ - Display" };
+                }
+                else if ("bt2020" == primaries && "arib-std-b67" == transfer)
+                {
+                    candidates = { "rec2100_hlg_display", "Rec.2100-HLG - Display" };
+                }
+                for (const auto& candidate : candidates)
+                {
+                    try
+                    {
+                        if (const auto colorSpace =
+                            p.ocioConfig->getColorSpace(candidate.c_str()))
+                        {
+                            out = colorSpace->getName();
+                            break;
                         }
                     }
                     catch (const std::exception&)

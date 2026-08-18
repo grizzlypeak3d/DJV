@@ -162,6 +162,7 @@ namespace djv
             void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
+            void _colorModelUpdate();
             // Reopen the active files. When the timeline is about to be a
             // different shape, the position and the in/out range cannot be
             // carried over as they are, since both are in timeline time.

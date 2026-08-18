@@ -7,6 +7,8 @@ Changes:
 * Assign color spaces to file name extensions in the color tool.
 * Show the resolved input color space, and where it came from, in the color
   tool.
+* Resolve the input color space from the color description a movie was
+  flagged with, when the configuration has a matching color space.
 
 Fixes:
 * The color corrections are applied in linear, when the OCIO configuration

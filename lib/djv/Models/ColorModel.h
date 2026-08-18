@@ -5,6 +5,7 @@
 
 #include <tlRender/Timeline/ColorOptions.h>
 
+#include <ftk/Core/Image.h>
 #include <ftk/Core/Observable.h>
 
 #include <map>
@@ -54,8 +55,9 @@ namespace djv
             //! them.
             std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > observeResolvedOCIOOptions() const;
 
-            //! Set the file that the input color space is resolved for.
-            void setActiveFile(const std::string&);
+            //! Set the file that the input color space is resolved for,
+            //! and the metadata tags the file was read with.
+            void setActiveFile(const std::string&, const ftk::ImageTags& = {});
 
             //! Observe the resolved input color space and where it came
             //! from, for display; e.g., "sRGB (extension)". Empty when
@@ -85,6 +87,7 @@ namespace djv
         private:
             void _resolvedUpdate();
             tl::OCIOOptions _resolvedOCIOOptions();
+            std::string _declaredColorSpace() const;
             void _ocioConfigUpdate(const tl::OCIOOptions&);
 
             FTK_PRIVATE();

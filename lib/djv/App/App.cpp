@@ -1634,6 +1634,7 @@ namespace djv
 
             p.files = files;
             p.timelines = timelines;
+            _colorModelUpdate();
 
             // A file that could not be opened should not sit in the tab bar
             // and the files tool as though it had.
@@ -1718,9 +1719,6 @@ namespace djv
         void App::_activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& activeFiles)
         {
             FTK_P();
-
-            p.colorModel->setActiveFile(
-                !activeFiles.empty() ? activeFiles[0]->path.get() : std::string());
 
             if (!p.activeFiles.empty())
             {
@@ -1810,9 +1808,34 @@ namespace djv
 
             p.activeFiles = activeFiles;
             p.player->setIfChanged(player);
+            _colorModelUpdate();
 
             _layersUpdate(p.filesModel->observeLayers()->get());
             _audioUpdate();
+        }
+
+        void App::_colorModelUpdate()
+        {
+            FTK_P();
+            // The path and what the file itself says about its colors, for
+            // resolving the input color space. Called from both the file
+            // and active updates: whichever runs second has both the
+            // active file and its timeline.
+            std::string path;
+            ftk::ImageTags tags;
+            if (!p.activeFiles.empty())
+            {
+                path = p.activeFiles[0]->path.get();
+                const auto i = std::find(p.files.begin(), p.files.end(), p.activeFiles[0]);
+                if (i != p.files.end())
+                {
+                    if (const auto& timeline = p.timelines[i - p.files.begin()])
+                    {
+                        tags = timeline->getIOInfo().tags;
+                    }
+                }
+            }
+            p.colorModel->setActiveFile(path, tags);
         }
 
         void App::_layersUpdate(const std::vector<int>& value)
