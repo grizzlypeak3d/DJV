@@ -37,12 +37,13 @@ set_target_properties(djvUI PROPERTIES PUBLIC_HEADER "${HEADERS}")
 install(
     TARGETS djvUI
     EXPORT djvUITargets
-    ARCHIVE DESTINATION lib
+    ARCHIVE DESTINATION lib COMPONENT dev
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
-    PUBLIC_HEADER DESTINATION include/djv/UI)
+    PUBLIC_HEADER DESTINATION include/djv/UI COMPONENT dev)
 install(
     EXPORT djvUITargets
     FILE djvUITargets.cmake
     DESTINATION "lib/cmake/djv"
-    NAMESPACE djv::)
+    NAMESPACE djv::
+    COMPONENT dev)

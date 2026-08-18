@@ -21,12 +21,13 @@ set_target_properties(djvResource PROPERTIES PUBLIC_HEADER "${HEADERS}")
 install(
     TARGETS djvResource
     EXPORT djvResourceTargets
-    ARCHIVE DESTINATION lib
+    ARCHIVE DESTINATION lib COMPONENT dev
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin)
 install(
     EXPORT djvResourceTargets
     FILE djvResourceTargets.cmake
     DESTINATION "lib/cmake/djv"
-    NAMESPACE djv::)
+    NAMESPACE djv::
+    COMPONENT dev)
 

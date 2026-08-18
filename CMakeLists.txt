@@ -36,6 +36,12 @@ set(DJV_SANITIZE "" CACHE STRING "Enable sanitizers (comma-separated, e.g. addre
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
+# The libraries mark what only development needs -- static libraries,
+# headers, CMake configuration -- as "dev"; everything else lands here, and
+# packaging takes this component alone. Installing to a prefix takes every
+# component, so a source build still gets the development files.
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME runtime)
+
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -128,7 +134,8 @@ configure_package_config_file(
     PATH_VARS INCLUDE_INSTALL_DIR)
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/djvConfig.cmake
-    DESTINATION lib/cmake/djv)
+    DESTINATION lib/cmake/djv
+    COMPONENT dev)
 
 #-------------------------------------------------------------------------------
 # Packaging
