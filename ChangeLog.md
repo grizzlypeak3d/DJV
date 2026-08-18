@@ -1,18 +1,13 @@
-## 3.5.1
+## 3.6.0
 
 Changes:
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
-* Resolve the OCIO input color space from the configuration's file rules when
-  the input is set to "None".
-* Assign color spaces to file name extensions in the color tool.
-* Show the resolved input color space, and where it came from, in the color
-  tool.
-* Resolve the input color space from the color description a movie was
-  flagged with, when the configuration has a matching color space.
-* Resolve the input color space from the chromaticities an OpenEXR file
-  carries, when they match a standard set of primaries.
-* A/B comparisons of files in different color spaces show each file through
-  its own input color space.
+* Automatic OCIO input color spaces. When the input is set to "None", each
+  file's input is resolved from the color tool's extension assignments, from
+  what the file itself declares -- a movie's color description, an OpenEXR
+  file's chromaticities -- or from the configuration's file rules. The color
+  tool shows what was resolved and where it came from, and A/B comparisons
+  show each file through its own input color space.
 
 Fixes:
 * The color corrections are applied in linear, when the OCIO configuration
