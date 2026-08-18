@@ -59,6 +59,10 @@
 #include <filesystem>
 #include <optional>
 
+#if defined(__GLIBC__)
+#include <malloc.h>
+#endif // __GLIBC__
+
 namespace djv
 {
     namespace app
@@ -215,6 +219,9 @@ namespace djv
 
             std::shared_ptr<ftk::Timer> debugTimer;
             int debugInput = 0;
+#if defined(__GLIBC__)
+            std::shared_ptr<ftk::Timer> trimTimer;
+#endif // __GLIBC__
 
             std::shared_ptr<ftk::Timer> commandTimer;
             //! Files whose timeline could not be created, closed on a
@@ -1604,6 +1611,26 @@ namespace djv
                     }
                 }
             }
+
+#if defined(__GLIBC__)
+            // Closing a file frees its memory, but glibc keeps what was
+            // freed in the allocator rather than returning it to the
+            // system, so the process still appears to be holding it. Ask
+            // for it back once the closed file's teardown has settled.
+            if (files.size() < p.files.size())
+            {
+                if (!p.trimTimer)
+                {
+                    p.trimTimer = ftk::Timer::create(_context);
+                }
+                p.trimTimer->start(
+                    std::chrono::seconds(2),
+                    []
+                    {
+                        malloc_trim(0);
+                    });
+            }
+#endif // __GLIBC__
 
             p.files = files;
             p.timelines = timelines;
