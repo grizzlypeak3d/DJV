@@ -27,8 +27,8 @@ namespace djv
             std::shared_ptr<ftk::Observable<std::string> > resolvedInput;
             std::shared_ptr<ftk::Observable<tl::LUTOptions> > lutOptions;
             std::shared_ptr<ftk::Observable<std::map<std::string, std::string> > > extColorSpaces;
-            std::string activeFile;
-            ftk::ImageTags activeTags;
+            std::vector<std::pair<std::string, ftk::ImageTags> > activeFiles;
+            std::shared_ptr<ftk::Observable<std::vector<std::string> > > resolvedInputs;
             // Set beside the resolved options: the input color space and
             // where it came from, for display.
             std::string resolvedInputLabel;
@@ -56,6 +56,8 @@ namespace djv
                 _resolvedOCIOOptions());
             p.resolvedInput = ftk::Observable<std::string>::create(
                 p.resolvedInputLabel);
+            p.resolvedInputs = ftk::Observable<std::vector<std::string> >::create(
+                std::vector<std::string>());
 
             tl::LUTOptions lutOptions;
             p.settings->getT("/Color/LUT", lutOptions);
@@ -112,15 +114,20 @@ namespace djv
             return _p->resolvedOCIOOptions;
         }
 
-        void ColorModel::setActiveFile(const std::string& value, const ftk::ImageTags& tags)
+        void ColorModel::setActiveFiles(
+            const std::vector<std::pair<std::string, ftk::ImageTags> >& value)
         {
             FTK_P();
-            if (value != p.activeFile || tags != p.activeTags)
+            if (value != p.activeFiles)
             {
-                p.activeFile = value;
-                p.activeTags = tags;
+                p.activeFiles = value;
                 _resolvedUpdate();
             }
+        }
+
+        std::shared_ptr<ftk::IObservable<std::vector<std::string> > > ColorModel::observeResolvedInputs() const
+        {
+            return _p->resolvedInputs;
         }
 
         const std::map<std::string, std::string>& ColorModel::getExtColorSpaces() const
@@ -167,6 +174,22 @@ namespace djv
             FTK_P();
             p.resolvedOCIOOptions->setIfChanged(_resolvedOCIOOptions());
             p.resolvedInput->setIfChanged(p.resolvedInputLabel);
+
+            // One resolution per active file, for the per item display
+            // options; all empty when the user chose an input themselves.
+            const tl::OCIOOptions& options = p.ocioOptions->get();
+            std::vector<std::string> inputs(p.activeFiles.size());
+            if (options.enabled && options.input.empty())
+            {
+                for (size_t i = 0; i < p.activeFiles.size(); ++i)
+                {
+                    inputs[i] = _resolveInput(
+                        p.activeFiles[i].first,
+                        p.activeFiles[i].second,
+                        nullptr);
+                }
+            }
+            p.resolvedInputs->setIfChanged(inputs);
         }
 
         tl::OCIOOptions ColorModel::_resolvedOCIOOptions()
@@ -174,57 +197,86 @@ namespace djv
             FTK_P();
             p.resolvedInputLabel = std::string();
             tl::OCIOOptions out = p.ocioOptions->get();
-#if defined(TLRENDER_OCIO)
-            // An empty input color space means automatic: it comes from the
-            // configuration's file rules for the active file. Only a rule
-            // the configuration author wrote is taken; every path matches
-            // the default rule, so taking that too would replace "no input
-            // transform" with the default rule's space for everyone,
-            // whether their configuration has rules or not.
+            // An empty input color space means automatic: it is resolved
+            // for the active file.
             if (out.enabled &&
                 out.input.empty() &&
-                !p.activeFile.empty())
+                !p.activeFiles.empty() &&
+                !p.activeFiles[0].first.empty())
             {
-                // The user's own extension assignments come before the
-                // configuration's rules: they are set from inside DJV, so
-                // they are the more deliberate of the two.
-                const std::string ext = ftk::toLower(ftk::Path(p.activeFile).getExt());
-                const auto& extColorSpaces = p.extColorSpaces->get();
-                const auto i = extColorSpaces.find(ext);
-                if (i != extColorSpaces.end() && !i->second.empty())
+                std::string label;
+                const std::string input = _resolveInput(
+                    p.activeFiles[0].first,
+                    p.activeFiles[0].second,
+                    &label);
+                if (!input.empty())
                 {
-                    out.input = i->second;
-                    p.resolvedInputLabel = out.input + " (extension)";
+                    out.input = input;
+                    p.resolvedInputLabel = label;
                 }
-                else if (const std::string declared = _declaredColorSpace();
-                    !declared.empty())
+            }
+            return out;
+        }
+
+        std::string ColorModel::_resolveInput(
+            const std::string& path,
+            const ftk::ImageTags& tags,
+            std::string* label) const
+        {
+            FTK_P();
+            std::string out;
+#if defined(TLRENDER_OCIO)
+            std::string source;
+
+            // The user's own extension assignments come before what the
+            // file says and before the configuration's rules: they are set
+            // from inside DJV, so they are the most deliberate of the
+            // three.
+            const std::string ext = ftk::toLower(ftk::Path(path).getExt());
+            const auto& extColorSpaces = p.extColorSpaces->get();
+            const auto i = extColorSpaces.find(ext);
+            if (i != extColorSpaces.end() && !i->second.empty())
+            {
+                out = i->second;
+                source = "extension";
+            }
+            else if (const std::string declared = _declaredColorSpace(tags);
+                !declared.empty())
+            {
+                out = declared;
+                source = "file";
+            }
+            else if (p.ocioConfig)
+            {
+                // Only a rule the configuration author wrote is taken;
+                // every path matches the default rule, so taking that too
+                // would replace "no input transform" with the default
+                // rule's space for everyone, whether their configuration
+                // has rules or not.
+                try
                 {
-                    out.input = declared;
-                    p.resolvedInputLabel = out.input + " (file)";
-                }
-                else if (p.ocioConfig)
-                {
-                    try
+                    const char* colorSpace =
+                        p.ocioConfig->getColorSpaceFromFilepath(path.c_str());
+                    if (colorSpace &&
+                        colorSpace[0] &&
+                        !p.ocioConfig->filepathOnlyMatchesDefaultRule(path.c_str()))
                     {
-                        const char* colorSpace =
-                            p.ocioConfig->getColorSpaceFromFilepath(p.activeFile.c_str());
-                        if (colorSpace &&
-                            colorSpace[0] &&
-                            !p.ocioConfig->filepathOnlyMatchesDefaultRule(p.activeFile.c_str()))
-                        {
-                            out.input = colorSpace;
-                            p.resolvedInputLabel = out.input + " (file rules)";
-                        }
+                        out = colorSpace;
+                        source = "file rules";
                     }
-                    catch (const std::exception&)
-                    {}
                 }
+                catch (const std::exception&)
+                {}
+            }
+            if (label && !out.empty())
+            {
+                *label = out + " (" + source + ")";
             }
 #endif // TLRENDER_OCIO
             return out;
         }
 
-        std::string ColorModel::_declaredColorSpace() const
+        std::string ColorModel::_declaredColorSpace(const ftk::ImageTags& tags) const
         {
             FTK_P();
             std::string out;
@@ -240,13 +292,13 @@ namespace djv
             {
                 std::string primaries;
                 std::string transfer;
-                if (const auto i = p.activeTags.find("Color Primaries");
-                    i != p.activeTags.end())
+                if (const auto i = tags.find("Color Primaries");
+                    i != tags.end())
                 {
                     primaries = i->second;
                 }
-                if (const auto i = p.activeTags.find("Color Transfer");
-                    i != p.activeTags.end())
+                if (const auto i = tags.find("Color Transfer");
+                    i != tags.end())
                 {
                     transfer = i->second;
                 }

@@ -9,6 +9,8 @@
 #include <ftk/Core/Observable.h>
 
 #include <map>
+#include <utility>
+#include <vector>
 
 namespace ftk
 {
@@ -55,9 +57,16 @@ namespace djv
             //! them.
             std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > observeResolvedOCIOOptions() const;
 
-            //! Set the file that the input color space is resolved for,
-            //! and the metadata tags the file was read with.
-            void setActiveFile(const std::string&, const ftk::ImageTags& = {});
+            //! Set the files that input color spaces are resolved for --
+            //! the active file first, then the compare files -- with the
+            //! metadata tags each was read with.
+            void setActiveFiles(const std::vector<std::pair<std::string, ftk::ImageTags> >&);
+
+            //! Observe the input color space resolved for each of the
+            //! active files, in their order; empty entries resolve
+            //! nothing and use the options' input. For the per item
+            //! display options overrides.
+            std::shared_ptr<ftk::IObservable<std::vector<std::string> > > observeResolvedInputs() const;
 
             //! Observe the resolved input color space and where it came
             //! from, for display; e.g., "sRGB (extension)". Empty when
@@ -87,7 +96,11 @@ namespace djv
         private:
             void _resolvedUpdate();
             tl::OCIOOptions _resolvedOCIOOptions();
-            std::string _declaredColorSpace() const;
+            std::string _resolveInput(
+                const std::string& path,
+                const ftk::ImageTags&,
+                std::string* label) const;
+            std::string _declaredColorSpace(const ftk::ImageTags&) const;
             void _ocioConfigUpdate(const tl::OCIOOptions&);
 
             FTK_PRIVATE();

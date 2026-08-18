@@ -1817,25 +1817,27 @@ namespace djv
         void App::_colorModelUpdate()
         {
             FTK_P();
-            // The path and what the file itself says about its colors, for
-            // resolving the input color space. Called from both the file
-            // and active updates: whichever runs second has both the
-            // active file and its timeline.
-            std::string path;
-            ftk::ImageTags tags;
-            if (!p.activeFiles.empty())
+            // The paths and what each file itself says about its colors,
+            // for resolving the input color spaces: the active file first,
+            // then the compare files. Called from both the file and active
+            // updates: whichever runs second has both the files and their
+            // timelines.
+            std::vector<std::pair<std::string, ftk::ImageTags> > activeFiles;
+            for (const auto& file : p.activeFiles)
             {
-                path = p.activeFiles[0]->path.get();
-                const auto i = std::find(p.files.begin(), p.files.end(), p.activeFiles[0]);
+                std::pair<std::string, ftk::ImageTags> item;
+                item.first = file->path.get();
+                const auto i = std::find(p.files.begin(), p.files.end(), file);
                 if (i != p.files.end())
                 {
                     if (const auto& timeline = p.timelines[i - p.files.begin()])
                     {
-                        tags = timeline->getIOInfo().tags;
+                        item.second = timeline->getIOInfo().tags;
                     }
                 }
+                activeFiles.push_back(item);
             }
-            p.colorModel->setActiveFile(path, tags);
+            p.colorModel->setActiveFiles(activeFiles);
         }
 
         void App::_layersUpdate(const std::vector<int>& value)

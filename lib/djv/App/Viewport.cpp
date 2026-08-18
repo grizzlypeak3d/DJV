@@ -72,6 +72,7 @@ namespace djv
             double fps = 0.0;
             size_t droppedFrames = 0;
             size_t videoFramesSize = 0;
+            std::vector<std::string> ocioInputs;
             // Whether the picture stands in for a frame the media does not
             // have, and the frame it repeats when there is one.
             bool missing = false;
@@ -124,6 +125,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<std::vector<std::string> > > resolvedInputsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
@@ -334,6 +336,14 @@ namespace djv
                 [this](const tl::OCIOOptions& value)
                 {
                    setOCIOOptions(value);
+                });
+
+            p.resolvedInputsObserver = ftk::Observer<std::vector<std::string> >::create(
+                app->getColorModel()->observeResolvedInputs(),
+                [this](const std::vector<std::string>& value)
+                {
+                    _p->ocioInputs = value;
+                    _videoUpdate();
                 });
 
             p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
@@ -905,6 +915,11 @@ namespace djv
             {
                 imageOptionsList.push_back(p.imageOptions);
                 displayOptionsList.push_back(p.displayOptions);
+                // The input color space resolved for this item's file, so
+                // a comparison of files in different color spaces shows
+                // each of them correctly.
+                displayOptionsList.back().ocioInput =
+                    i < p.ocioInputs.size() ? p.ocioInputs[i] : std::string();
             }
             setImageOptions(imageOptionsList);
             setDisplayOptions(displayOptionsList);
