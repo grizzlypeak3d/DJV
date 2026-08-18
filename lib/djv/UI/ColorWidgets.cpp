@@ -102,9 +102,13 @@ namespace djv
             p.lookComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.lookComboBox, "Color.OCIO.Look");
 
-            p.exts = tl::getExts(context);
-            // Timelines are containers of other files, so an input color
-            // space for them would name nothing that gets decoded.
+            // Audio has no color, and timelines are containers of other
+            // files, so an input color space for either would name nothing
+            // that gets decoded.
+            p.exts = tl::getExts(
+                context,
+                static_cast<int>(tl::FileType::Media) |
+                static_cast<int>(tl::FileType::Seq));
             p.exts.erase(
                 std::remove_if(
                     p.exts.begin(),
