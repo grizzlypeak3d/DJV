@@ -5,6 +5,8 @@ Changes:
 * Resolve the OCIO input color space from the configuration's file rules when
   the input is set to "None".
 * Assign color spaces to file name extensions in the color tool.
+* Show the resolved input color space, and where it came from, in the color
+  tool.
 
 ## 3.5.0
 

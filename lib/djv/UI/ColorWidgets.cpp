@@ -44,6 +44,7 @@ namespace djv
             std::shared_ptr<ftk::FileEdit> fileEdit;
             std::shared_ptr<ftk::Label> nameLabel;
             std::shared_ptr<ftk::ComboBox> inputComboBox;
+            std::shared_ptr<ftk::Label> resolvedLabel;
             std::shared_ptr<ftk::ComboBox> displayComboBox;
             std::shared_ptr<ftk::ComboBox> viewComboBox;
             std::shared_ptr<ftk::ComboBox> lookComboBox;
@@ -59,6 +60,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > optionsObserver2;
             std::shared_ptr<ftk::Observer<models::OCIOModelData> > dataObserver;
             std::shared_ptr<ftk::Observer<std::map<std::string, std::string> > > extObserver;
+            std::shared_ptr<ftk::Observer<std::string> > resolvedObserver;
         };
 
         void OCIOWidget::_init(
@@ -89,6 +91,12 @@ namespace djv
             p.inputComboBox = ftk::ComboBox::create(context);
             p.inputComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.inputComboBox, "Color.OCIO.Input");
+
+            p.resolvedLabel = ftk::Label::create(context);
+            p.resolvedLabel->setTooltip(
+                "The input color space resolved for the current file, and "
+                "where it came from.");
+            ftk::setScreenshotTag(p.resolvedLabel, "Color.OCIO.Resolved");
 
             p.displayComboBox = ftk::ComboBox::create(context);
             p.displayComboBox->setHStretch(ftk::Stretch::Expanding);
@@ -147,6 +155,7 @@ namespace djv
             p.formLayout->addRow("File name:", p.fileEdit);
             p.formLayout->addRow("Name:", p.nameLabel);
             p.formLayout->addRow("Input:", p.inputComboBox);
+            p.formLayout->addRow("Resolved:", p.resolvedLabel);
             p.formLayout->addRow("Display:", p.displayComboBox);
             p.formLayout->addRow("View:", p.viewComboBox);
             p.formLayout->addRow("Look:", p.lookComboBox);
@@ -258,6 +267,15 @@ namespace djv
                         extColorSpaces[p.exts[extIndex]] = p.colorSpaces[index];
                         p.colorModel->setExtColorSpaces(extColorSpaces);
                     }
+                });
+
+            p.resolvedObserver = ftk::Observer<std::string>::create(
+                colorModel->observeResolvedInput(),
+                [this](const std::string& value)
+                {
+                    FTK_P();
+                    p.resolvedLabel->setText(value);
+                    p.formLayout->setRowVisible(p.resolvedLabel, !value.empty());
                 });
 
             p.extObserver = ftk::Observer<std::map<std::string, std::string> >::create(

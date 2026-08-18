@@ -57,6 +57,11 @@ namespace djv
             //! Set the file that the input color space is resolved for.
             void setActiveFile(const std::string&);
 
+            //! Observe the resolved input color space and where it came
+            //! from, for display; e.g., "sRGB (extension)". Empty when
+            //! nothing is resolved.
+            std::shared_ptr<ftk::IObservable<std::string> > observeResolvedInput() const;
+
             //! Get the file name extension color spaces.
             const std::map<std::string, std::string>& getExtColorSpaces() const;
 
@@ -78,7 +83,8 @@ namespace djv
             void setLUTOptions(const tl::LUTOptions&);
 
         private:
-            tl::OCIOOptions _resolvedOCIOOptions() const;
+            void _resolvedUpdate();
+            tl::OCIOOptions _resolvedOCIOOptions();
             void _ocioConfigUpdate(const tl::OCIOOptions&);
 
             FTK_PRIVATE();

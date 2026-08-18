@@ -24,9 +24,13 @@ namespace djv
             std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<ftk::Observable<tl::OCIOOptions> > ocioOptions;
             std::shared_ptr<ftk::Observable<tl::OCIOOptions> > resolvedOCIOOptions;
+            std::shared_ptr<ftk::Observable<std::string> > resolvedInput;
             std::shared_ptr<ftk::Observable<tl::LUTOptions> > lutOptions;
             std::shared_ptr<ftk::Observable<std::map<std::string, std::string> > > extColorSpaces;
             std::string activeFile;
+            // Set beside the resolved options: the input color space and
+            // where it came from, for display.
+            std::string resolvedInputLabel;
 #if defined(TLRENDER_OCIO)
             OCIO_NAMESPACE::ConstConfigRcPtr ocioConfig;
 #endif // TLRENDER_OCIO
@@ -49,6 +53,8 @@ namespace djv
             p.extColorSpaces = ftk::Observable<std::map<std::string, std::string> >::create(extColorSpaces);
             p.resolvedOCIOOptions = ftk::Observable<tl::OCIOOptions>::create(
                 _resolvedOCIOOptions());
+            p.resolvedInput = ftk::Observable<std::string>::create(
+                p.resolvedInputLabel);
 
             tl::LUTOptions lutOptions;
             p.settings->getT("/Color/LUT", lutOptions);
@@ -97,7 +103,7 @@ namespace djv
             {
                 _ocioConfigUpdate(value);
             }
-            p.resolvedOCIOOptions->setIfChanged(_resolvedOCIOOptions());
+            _resolvedUpdate();
         }
 
         std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > ColorModel::observeResolvedOCIOOptions() const
@@ -111,7 +117,7 @@ namespace djv
             if (value != p.activeFile)
             {
                 p.activeFile = value;
-                p.resolvedOCIOOptions->setIfChanged(_resolvedOCIOOptions());
+                _resolvedUpdate();
             }
         }
 
@@ -130,7 +136,7 @@ namespace djv
             FTK_P();
             if (p.extColorSpaces->setIfChanged(value))
             {
-                p.resolvedOCIOOptions->setIfChanged(_resolvedOCIOOptions());
+                _resolvedUpdate();
             }
         }
 
@@ -149,9 +155,22 @@ namespace djv
             _p->lutOptions->setIfChanged(value);
         }
 
-        tl::OCIOOptions ColorModel::_resolvedOCIOOptions() const
+        std::shared_ptr<ftk::IObservable<std::string> > ColorModel::observeResolvedInput() const
+        {
+            return _p->resolvedInput;
+        }
+
+        void ColorModel::_resolvedUpdate()
         {
             FTK_P();
+            p.resolvedOCIOOptions->setIfChanged(_resolvedOCIOOptions());
+            p.resolvedInput->setIfChanged(p.resolvedInputLabel);
+        }
+
+        tl::OCIOOptions ColorModel::_resolvedOCIOOptions()
+        {
+            FTK_P();
+            p.resolvedInputLabel = std::string();
             tl::OCIOOptions out = p.ocioOptions->get();
 #if defined(TLRENDER_OCIO)
             // An empty input color space means automatic: it comes from the
@@ -173,6 +192,7 @@ namespace djv
                 if (i != extColorSpaces.end() && !i->second.empty())
                 {
                     out.input = i->second;
+                    p.resolvedInputLabel = out.input + " (extension)";
                 }
                 else if (p.ocioConfig)
                 {
@@ -185,6 +205,7 @@ namespace djv
                             !p.ocioConfig->filepathOnlyMatchesDefaultRule(p.activeFile.c_str()))
                         {
                             out.input = colorSpace;
+                            p.resolvedInputLabel = out.input + " (file rules)";
                         }
                     }
                     catch (const std::exception&)
