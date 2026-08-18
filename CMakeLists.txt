@@ -78,7 +78,14 @@ endif()
 
 if(WIN32)
 elseif(APPLE)
-    set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
+    # Only the bundle keeps the libraries in Frameworks; the zip and a
+    # prefix install put them in lib, so the search path follows the
+    # layout being made.
+    if(DJV_MACOS_PACKAGE)
+        set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
+    else()
+        set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
+    endif()
     set(CMAKE_BUILD_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 else()
     set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
