@@ -238,11 +238,21 @@ namespace djv
 #if defined(TLRENDER_OCIO)
             std::string source;
 
+            // A timeline is a container of media in whatever color spaces
+            // they each are, so it has no input color space of its own; the
+            // clips resolve individually in the render. Resolving the
+            // container would paint every clip with the first clip's space,
+            // since that is where a timeline's metadata is borrowed from.
+            const std::string ext = ftk::toLower(ftk::Path(path).getExt());
+            if (".otio" == ext || ".otioz" == ext)
+            {
+                return out;
+            }
+
             // The user's own extension assignments come before what the
             // file says and before the configuration's rules: they are set
             // from inside DJV, so they are the most deliberate of the
             // three.
-            const std::string ext = ftk::toLower(ftk::Path(path).getExt());
             const auto& extColorSpaces = p.extColorSpaces->get();
             const auto i = extColorSpaces.find(ext);
             if (i != extColorSpaces.end() && !i->second.empty())
