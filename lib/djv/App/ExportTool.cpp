@@ -638,6 +638,80 @@ namespace djv
                             p.exportData->range.duration().rescaled_to(1.0).value();
                     }
 #endif // TLRENDER_FFMPEG_PLUGIN
+
+                    // What the output pixels are. The export bakes the
+                    // display transform, so the color description written
+                    // is the display's; the common displays of the
+                    // OpenColorIO configurations are named here, and an
+                    // unrecognized one writes nothing rather than
+                    // guessing. Without color management the source
+                    // pixels pass through, and the source's description
+                    // with them. The YUV matrix is left unsaid either
+                    // way; it belongs to the encoder's conversion, not
+                    // the display.
+                    const tl::OCIOOptions ocioOptions =
+                        app->getColorModel()->getOCIOOptions();
+                    if (ocioOptions.enabled &&
+                        !ocioOptions.display.empty() &&
+                        !ocioOptions.view.empty())
+                    {
+                        std::string primaries;
+                        std::string transfer;
+                        std::string chromaticities;
+                        const std::string rec709 =
+                            "0.64 0.33 0.3 0.6 0.15 0.06 0.3127 0.329";
+                        if ("sRGB - Display" == ocioOptions.display)
+                        {
+                            primaries = "bt709";
+                            transfer = "iec61966-2-1";
+                            chromaticities = rec709;
+                        }
+                        else if ("Rec.1886 Rec.709 - Display" == ocioOptions.display)
+                        {
+                            primaries = "bt709";
+                            transfer = "bt709";
+                            chromaticities = rec709;
+                        }
+                        else if ("Rec.2100-PQ - Display" == ocioOptions.display)
+                        {
+                            primaries = "bt2020";
+                            transfer = "smpte2084";
+                            chromaticities =
+                                "0.708 0.292 0.17 0.797 0.131 0.046 0.3127 0.329";
+                        }
+                        else if ("Rec.2100-HLG - Display" == ocioOptions.display)
+                        {
+                            primaries = "bt2020";
+                            transfer = "arib-std-b67";
+                            chromaticities =
+                                "0.708 0.292 0.17 0.797 0.131 0.046 0.3127 0.329";
+                        }
+                        if (models::ExportFileType::Movie == fileType)
+                        {
+                            if (!primaries.empty())
+                            {
+                                outputInfo.tags["Color Primaries"] = primaries;
+                                outputInfo.tags["Color Transfer"] = transfer;
+                            }
+                        }
+                        else if (!chromaticities.empty())
+                        {
+                            outputInfo.tags["Chromaticities"] = chromaticities;
+                        }
+                    }
+                    else
+                    {
+                        for (const auto& tag :
+                            { "Color Primaries", "Color Transfer", "Chromaticities" })
+                        {
+                            const auto i = ioInfo.tags.find(tag);
+                            if (i != ioInfo.tags.end())
+                            {
+                                outputInfo.tags[tag] = i->second;
+                            }
+                        }
+                    }
+
                     tl::IOOptions ioOptions;
                     ioOptions["FFmpeg/Codec"] = options.movieCodec;
                     if (!options.movieAudioCodec.empty() &&
@@ -648,7 +722,7 @@ namespace djv
                     p.exportData->writer = plugin->write(p.exportData->path, outputInfo, ioOptions);
 
                     // Create the renderer.
-                    p.exportData->ocioOptions = app->getColorModel()->getOCIOOptions();
+                    p.exportData->ocioOptions = ocioOptions;
                     p.exportData->lutOptions = app->getColorModel()->getLUTOptions();
                     p.exportData->imageOptions = std::vector<ftk::ImageOptions>(
                         infos.size(),
@@ -656,6 +730,18 @@ namespace djv
                     p.exportData->displayOptions = std::vector<tl::DisplayOptions>(
                         infos.size(),
                         displayOptions);
+                    // Each file's resolved input color space, the same as
+                    // the viewport, so the export bakes what the viewport
+                    // shows.
+                    const auto resolvedInputs =
+                        app->getColorModel()->observeResolvedInputs()->get();
+                    for (size_t i = 0;
+                        i < p.exportData->displayOptions.size() &&
+                            i < resolvedInputs.size();
+                        ++i)
+                    {
+                        p.exportData->displayOptions[i].ocioInput = resolvedInputs[i];
+                    }
                     p.exportData->colorBuffer = app->getViewportModel()->getColorBuffer();
                     p.exportData->render = tl::gl::Render::create(
                         context->getLogSystem(),

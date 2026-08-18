@@ -9,6 +9,10 @@ Changes:
   tool shows what was resolved and where it came from, and A/B comparisons
   show each file through its own input color space.
 
+* Movie and image sequence exports carry the color description of what was
+  written: the display's when the export is color managed, the source's when
+  it is not.
+
 Fixes:
 * The color corrections are applied in linear, when the OCIO configuration
   names a scene_linear role, rather than in the file's color space.
