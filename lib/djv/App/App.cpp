@@ -1719,6 +1719,9 @@ namespace djv
         {
             FTK_P();
 
+            p.colorModel->setActiveFile(
+                !activeFiles.empty() ? activeFiles[0]->path.get() : std::string());
+
             if (!p.activeFiles.empty())
             {
                 if (auto player = p.player->get())

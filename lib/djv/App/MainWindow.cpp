@@ -449,7 +449,7 @@ namespace djv
                 });
 
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeOCIOOptions(),
+                app->getColorModel()->observeResolvedOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
                     auto options = _p->timelineWidget->getDisplayOptions();

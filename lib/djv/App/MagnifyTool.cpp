@@ -218,7 +218,7 @@ namespace djv
                 });
 
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeOCIOOptions(),
+                app->getColorModel()->observeResolvedOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
                     _p->viewport->setOCIOOptions(value);

@@ -46,6 +46,15 @@ namespace djv
             //! Set the OpenColorIO options.
             void setOCIOOptions(const tl::OCIOOptions&);
 
+            //! Observe the OpenColorIO options with the input color space
+            //! resolved for the active file. This is what rendering should
+            //! use; observeOCIOOptions() is the settings as the user wrote
+            //! them.
+            std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > observeResolvedOCIOOptions() const;
+
+            //! Set the file that the input color space is resolved for.
+            void setActiveFile(const std::string&);
+
             //! Get the LUT options.
             const tl::LUTOptions& getLUTOptions() const;
 
@@ -56,6 +65,9 @@ namespace djv
             void setLUTOptions(const tl::LUTOptions&);
 
         private:
+            tl::OCIOOptions _resolvedOCIOOptions() const;
+            void _ocioConfigUpdate(const tl::OCIOOptions&);
+
             FTK_PRIVATE();
         };
     }
