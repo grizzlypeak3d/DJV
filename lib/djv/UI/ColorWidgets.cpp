@@ -115,6 +115,7 @@ namespace djv
                     }),
                 p.exts.end());
             p.extAddExtComboBox = ftk::ComboBox::create(context, p.exts);
+            p.extAddExtComboBox->setHStretch(ftk::Stretch::Expanding);
             p.extAddExtComboBox->setTooltip(
                 "File name extension to assign a color space to.");
             ftk::setScreenshotTag(p.extAddExtComboBox, "Color.OCIO.ExtAdd");
@@ -309,6 +310,7 @@ namespace djv
                     hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
                     auto comboBox = ftk::ComboBox::create(context, p.colorSpaces, hLayout);
+                    comboBox->setHStretch(ftk::Stretch::Expanding);
                     const auto j = std::find(p.colorSpaces.begin(), p.colorSpaces.end(), i.second);
                     comboBox->setCurrentIndex(
                         j != p.colorSpaces.end() ? (j - p.colorSpaces.begin()) : -1);
