@@ -103,6 +103,17 @@ namespace djv
             ftk::setScreenshotTag(p.lookComboBox, "Color.OCIO.Look");
 
             p.exts = tl::getExts(context);
+            // Timelines are containers of other files, so an input color
+            // space for them would name nothing that gets decoded.
+            p.exts.erase(
+                std::remove_if(
+                    p.exts.begin(),
+                    p.exts.end(),
+                    [](const std::string& value)
+                    {
+                        return ".otio" == value || ".otioz" == value;
+                    }),
+                p.exts.end());
             p.extAddExtComboBox = ftk::ComboBox::create(context, p.exts);
             p.extAddExtComboBox->setTooltip(
                 "File name extension to assign a color space to.");
