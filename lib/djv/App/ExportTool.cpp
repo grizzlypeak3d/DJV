@@ -641,63 +641,23 @@ namespace djv
 
                     // What the output pixels are. The export bakes the
                     // display transform, so the color description written
-                    // is the display's; the common displays of the
-                    // OpenColorIO configurations are named here, and an
-                    // unrecognized one writes nothing rather than
-                    // guessing. Without color management the source
-                    // pixels pass through, and the source's description
-                    // with them. The YUV matrix is left unsaid either
-                    // way; it belongs to the encoder's conversion, not
-                    // the display.
+                    // is the display's; an unrecognized display writes
+                    // nothing rather than guessing. Without color
+                    // management the source pixels pass through, and the
+                    // source's description with them.
                     const tl::OCIOOptions ocioOptions =
                         app->getColorModel()->getOCIOOptions();
                     if (ocioOptions.enabled &&
                         !ocioOptions.display.empty() &&
                         !ocioOptions.view.empty())
                     {
-                        std::string primaries;
-                        std::string transfer;
-                        std::string chromaticities;
-                        const std::string rec709 =
-                            "0.64 0.33 0.3 0.6 0.15 0.06 0.3127 0.329";
-                        if ("sRGB - Display" == ocioOptions.display)
-                        {
-                            primaries = "bt709";
-                            transfer = "iec61966-2-1";
-                            chromaticities = rec709;
-                        }
-                        else if ("Rec.1886 Rec.709 - Display" == ocioOptions.display)
-                        {
-                            primaries = "bt709";
-                            transfer = "bt709";
-                            chromaticities = rec709;
-                        }
-                        else if ("Rec.2100-PQ - Display" == ocioOptions.display)
-                        {
-                            primaries = "bt2020";
-                            transfer = "smpte2084";
-                            chromaticities =
-                                "0.708 0.292 0.17 0.797 0.131 0.046 0.3127 0.329";
-                        }
-                        else if ("Rec.2100-HLG - Display" == ocioOptions.display)
-                        {
-                            primaries = "bt2020";
-                            transfer = "arib-std-b67";
-                            chromaticities =
-                                "0.708 0.292 0.17 0.797 0.131 0.046 0.3127 0.329";
-                        }
-                        if (models::ExportFileType::Movie == fileType)
-                        {
-                            if (!primaries.empty())
-                            {
-                                outputInfo.tags["Color Primaries"] = primaries;
-                                outputInfo.tags["Color Transfer"] = transfer;
-                            }
-                        }
-                        else if (!chromaticities.empty())
-                        {
-                            outputInfo.tags["Chromaticities"] = chromaticities;
-                        }
+                        const ftk::ImageTags colorTags =
+                            tl::getDisplayColorTags(
+                                ocioOptions,
+                                models::ExportFileType::Movie != fileType);
+                        outputInfo.tags.insert(
+                            colorTags.begin(),
+                            colorTags.end());
                     }
                     else
                     {
