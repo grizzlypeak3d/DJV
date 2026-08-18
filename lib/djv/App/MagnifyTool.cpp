@@ -55,6 +55,7 @@ namespace djv
             std::optional<ftk::V2I> pick;
             ftk::V2I samplePos;
             size_t videoFramesSize = 0;
+            std::vector<std::string> ocioInputs;
             ftk::ImageOptions imageOptions;
             tl::DisplayOptions displayOptions;
             bool sizeInit = true;
@@ -72,6 +73,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<ftk::V2I> > samplePosObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<std::vector<std::string> > > resolvedInputsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
@@ -217,11 +219,21 @@ namespace djv
                     _p->viewport->setCompareOptions(value);
                 });
 
+            // The options as written; the per item display options carry
+            // the resolved inputs, the same as the main viewport.
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeResolvedOCIOOptions(),
+                app->getColorModel()->observeOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
                     _p->viewport->setOCIOOptions(value);
+                });
+
+            p.resolvedInputsObserver = ftk::Observer<std::vector<std::string> >::create(
+                app->getColorModel()->observeResolvedInputs(),
+                [this](const std::vector<std::string>& value)
+                {
+                    _p->ocioInputs = value;
+                    _videoUpdate();
                 });
 
             p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
@@ -356,6 +368,8 @@ namespace djv
             {
                 imageOptions.push_back(p.imageOptions);
                 displayOptions.push_back(p.displayOptions);
+                displayOptions.back().ocioInput =
+                    i < p.ocioInputs.size() ? p.ocioInputs[i] : std::string();
             }
             p.viewport->setImageOptions(imageOptions);
             p.viewport->setDisplayOptions(displayOptions);

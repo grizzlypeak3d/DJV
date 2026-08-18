@@ -331,8 +331,12 @@ namespace djv
                     _compareUpdate();
                 });
 
+            // The options as written, not the resolved ones: the per item
+            // display options carry each file's resolved input, so a file
+            // that resolves nothing falls back to what the user chose
+            // rather than to whatever the active file resolved to.
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeResolvedOCIOOptions(),
+                app->getColorModel()->observeOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
                    setOCIOOptions(value);
