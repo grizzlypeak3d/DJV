@@ -8,6 +8,10 @@ Changes:
 * Show the resolved input color space, and where it came from, in the color
   tool.
 
+Fixes:
+* The color corrections are applied in linear, when the OCIO configuration
+  names a scene_linear role, rather than in the file's color space.
+
 ## 3.5.0
 
 Changes:
