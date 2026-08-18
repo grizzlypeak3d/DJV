@@ -350,6 +350,19 @@ namespace djv
                     _videoUpdate();
                 });
 
+            // Layers of a timeline resolve their own input color spaces --
+            // each clip of an OTIO file is its own media -- but only when
+            // the input is automatic; one the user chose applies to every
+            // layer.
+            const auto colorModel = app->getColorModel();
+            setOCIOInputResolver(
+                [colorModel](const std::string& path, const ftk::ImageTags& tags)
+                {
+                    return colorModel->getOCIOOptions().input.empty() ?
+                        colorModel->resolveInput(path, tags) :
+                        std::string();
+                });
+
             p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
                 [this](const tl::LUTOptions& value)

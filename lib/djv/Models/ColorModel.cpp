@@ -128,6 +128,13 @@ namespace djv
             }
         }
 
+        std::string ColorModel::resolveInput(
+            const std::string& path,
+            const ftk::ImageTags& tags) const
+        {
+            return _resolveInput(path, tags, nullptr);
+        }
+
         std::shared_ptr<ftk::IObservable<std::vector<std::string> > > ColorModel::observeResolvedInputs() const
         {
             return _p->resolvedInputs;

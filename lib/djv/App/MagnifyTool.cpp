@@ -236,6 +236,18 @@ namespace djv
                     _videoUpdate();
                 });
 
+            {
+                // The same per layer resolution as the main viewport.
+                const auto colorModel = app->getColorModel();
+                p.viewport->setOCIOInputResolver(
+                    [colorModel](const std::string& path, const ftk::ImageTags& tags)
+                    {
+                        return colorModel->getOCIOOptions().input.empty() ?
+                            colorModel->resolveInput(path, tags) :
+                            std::string();
+                    });
+            }
+
             p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
                 app->getColorModel()->observeLUTOptions(),
                 [this](const tl::LUTOptions& value)

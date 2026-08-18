@@ -62,6 +62,13 @@ namespace djv
             //! metadata tags each was read with.
             void setActiveFiles(const std::vector<std::pair<std::string, ftk::ImageTags> >&);
 
+            //! Resolve an input color space for a file: the extension
+            //! assignments, then what the file declares, then the
+            //! configuration's file rules. Empty when nothing resolves.
+            std::string resolveInput(
+                const std::string& path,
+                const ftk::ImageTags& = {}) const;
+
             //! Observe the input color space resolved for each of the
             //! active files, in their order; empty entries resolve
             //! nothing and use the options' input. For the per item

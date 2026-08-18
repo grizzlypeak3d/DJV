@@ -746,6 +746,18 @@ namespace djv
                     p.exportData->render = tl::gl::Render::create(
                         context->getLogSystem(),
                         context->getSystem<ftk::FontSystem>());
+                    {
+                        // The same per layer resolution as the viewport, so
+                        // the export bakes what the viewport shows.
+                        const auto colorModel = app->getColorModel();
+                        p.exportData->render->setOCIOInputResolver(
+                            [colorModel](const std::string& path, const ftk::ImageTags& tags)
+                            {
+                                return colorModel->getOCIOOptions().input.empty() ?
+                                    colorModel->resolveInput(path, tags) :
+                                    std::string();
+                            });
+                    }
                     ftk::gl::OffscreenBufferOptions offscreenBufferOptions;
                     // The wipe comparison masks with the stencil buffer, so
                     // the buffer needs one. Paired with depth, as the
