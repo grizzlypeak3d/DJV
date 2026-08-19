@@ -6,6 +6,8 @@
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
 
+#include <djv/Models/AppInfoModel.h>
+
 #include <ftk/Core/OS.h>
 
 namespace djv
@@ -26,15 +28,21 @@ namespace djv
 
             std::weak_ptr<MainWindow> mainWindowWeak(mainWindow);
 
+            // Installed beside the application rather than on the web, so
+            // that what it describes is the version that is running.
+            const std::string docsURL = app->getAppInfoModel()->getDocsURL();
+
             // Register the commands.
             _addCommand(
                 "Documentation",
                 "Open the documentation in a web browser.",
-                [](const nlohmann::json&)
+                [docsURL](const nlohmann::json&)
                 {
+                    if (docsURL.empty())
+                        return;
                     try
                     {
-                        ftk::openURL("https://grizzlypeak3d.github.io/DJV/index.html");
+                        ftk::openURL(docsURL);
                     }
                     catch (const std::exception&)
                     {}
@@ -66,6 +74,16 @@ namespace djv
             _actions["Documentation"] = ftk::Action::create(
                 "Documentation",
                 _command("Documentation"));
+            if (docsURL.empty())
+            {
+                // A build that was not installed has none. Saying so is
+                // better than a menu item that does nothing when it is
+                // clicked.
+                _actions["Documentation"]->setEnabled(false);
+                _actions["Documentation"]->setTooltip(
+                    "The documentation is installed with the application,\n"
+                    "and this build was not installed.");
+            }
             _actions["About"] = ftk::Action::create(
                 "About",
                 _command("About"));

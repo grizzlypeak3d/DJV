@@ -58,6 +58,20 @@ namespace djv
 
             ///@}
 
+            //! \name Documentation
+            ///@{
+
+            //! Get the documentation installed beside the application, as a
+            //! file URL, or empty when there is none.
+            //!
+            //! Installed rather than on the web, so that what it describes is
+            //! the version that is running. A build that was not installed --
+            //! a developer's -- has none, and the menu item says so rather
+            //! than opening nothing.
+            virtual std::string getDocsURL() const;
+
+            ///@}
+
             //! \name License
             ///@{
 

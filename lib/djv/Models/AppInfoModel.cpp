@@ -3,6 +3,10 @@
 
 #include <djv/Models/AppInfoModel.h>
 
+#include <ftk/Core/OS.h>
+
+#include <filesystem>
+
 #include <BuildInfo.h>
 
 #include <djv/Models/Version.h>
@@ -97,6 +101,34 @@ namespace djv
                 "CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\n"
                 "ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\n"
                 "POSSIBILITY OF SUCH DAMAGE.";
+        }
+
+        std::string AppInfoModel::getDocsURL() const
+        {
+            const std::filesystem::path exe = ftk::getExePath();
+            if (exe.empty())
+            {
+                return std::string();
+            }
+            const std::filesystem::path dir = exe.parent_path();
+            // The install trees the packages make: bin/ beside share/ on
+            // Linux, bin/ beside docs/ in the Windows package, and the
+            // "Resources" of a macOS bundle.
+            for (const auto& relative : {
+                "../share/djv/docs",
+                "../docs",
+                "../Resources/docs" })
+            {
+                std::error_code ec;
+                const std::filesystem::path index =
+                    std::filesystem::weakly_canonical(
+                        dir / relative / "index.html", ec);
+                if (!ec && std::filesystem::exists(index))
+                {
+                    return "file://" + index.u8string();
+                }
+            }
+            return std::string();
         }
 
         std::string AppInfoModel::getLicensesURL() const

@@ -129,6 +129,7 @@ endif()
 if(DJV_TESTS)
     add_subdirectory(tests)
 endif()
+add_subdirectory(docs)
 add_subdirectory(etc/Legal)
 add_subdirectory(etc/SampleData)
 
