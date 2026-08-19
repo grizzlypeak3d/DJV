@@ -113,6 +113,31 @@ namespace djv
 
         namespace
         {
+            // The one frame a path names, for a file chosen from a directory
+            // that was listed without gathering sequences. The range has to
+            // say so, because the path cannot: a frame parsed out of a file
+            // name looks exactly like a range of one, so a path left to speak
+            // for itself is expanded to whatever sequence is on disk beside
+            // it.
+            std::optional<ftk::RangeI64> singleFrame(const ftk::Path& path)
+            {
+                std::optional<ftk::RangeI64> out;
+                if (path.hasNum() && !path.isSeq() && !path.hasSeqWildcard())
+                {
+                    try
+                    {
+                        const int64_t frame = std::stoll(path.getNum());
+                        out = ftk::RangeI64(frame, frame);
+                    }
+                    catch (const std::exception&)
+                    {
+                        // Not a number this can open at a frame; let it be
+                        // opened the ordinary way.
+                    }
+                }
+                return out;
+            }
+
             // "1-100", and "-10-20" for a sequence starting before zero. The
             // separator is the first dash after the first character, so a
             // negative start is not mistaken for it.
@@ -572,11 +597,19 @@ namespace djv
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->open(
                 p.mainWindow,
-                [this](const std::vector<ftk::Path>& value)
+                [this, fileBrowserSystem](const std::vector<ftk::Path>& value)
                 {
+                    // A browser listing the frames of a sequence one by one
+                    // is one to choose a frame from, so opening one opens
+                    // that file rather than the sequence it belongs to.
+                    const bool seq =
+                        fileBrowserSystem->getModel()->getOptions().dirList.seq;
                     for (const auto& i : value)
                     {
-                        open(i);
+                        open(
+                            i,
+                            ftk::Path(),
+                            seq ? std::optional<ftk::RangeI64>() : singleFrame(i));
                     }
                 },
                 options);
