@@ -70,6 +70,17 @@ nav a {
 
 nav a:hover { color: var(--text); background: #eaeef2; }
 
+/* The suite's pages are a section of DJV's, so the list says where one
+ * ends and the other begins. */
+nav li.section {
+    margin: 1rem 1.5rem .25rem;
+    color: var(--muted);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
 nav a.current {
     color: var(--text);
     font-weight: 600;
