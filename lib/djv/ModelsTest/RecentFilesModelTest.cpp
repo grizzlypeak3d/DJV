@@ -37,7 +37,7 @@ namespace djv
 
         void RecentFilesModelTest::_behavior()
         {
-            typedef std::vector<std::filesystem::path> Paths;
+            typedef std::vector<ftk::Path> Paths;
 
             // In-memory settings keep this test isolated (no file I/O).
             auto settings = createTestSettings(_context);
@@ -45,16 +45,16 @@ namespace djv
 
             // Observe the recent list.
             Paths recent;
-            auto observer = ftk::ListObserver<std::filesystem::path>::create(
+            auto observer = ftk::ListObserver<ftk::Path>::create(
                 model->observeRecent(),
                 [&recent](const Paths& value) { recent = value; });
 
             // addRecent() makes paths absolute, so use absolute paths (which need
             // not exist) to keep the comparisons independent of the working dir.
             const std::filesystem::path dir = std::filesystem::temp_directory_path();
-            const std::filesystem::path a = std::filesystem::absolute(dir / "djv-recent-a.txt");
-            const std::filesystem::path b = std::filesystem::absolute(dir / "djv-recent-b.txt");
-            const std::filesystem::path c = std::filesystem::absolute(dir / "djv-recent-c.txt");
+            const ftk::Path a(std::filesystem::absolute(dir / "djv-recent-a.txt").u8string());
+            const ftk::Path b(std::filesystem::absolute(dir / "djv-recent-b.txt").u8string());
+            const ftk::Path c(std::filesystem::absolute(dir / "djv-recent-c.txt").u8string());
 
             // Empty by default; the default maximum is ten.
             FTK_CHECK(model->getRecent().empty());
@@ -83,7 +83,7 @@ namespace djv
 
         void RecentFilesModelTest::_persistence()
         {
-            typedef std::vector<std::filesystem::path> Paths;
+            typedef std::vector<ftk::Path> Paths;
 
             // A real (temporary) file is needed so the state survives across model
             // instances.
@@ -92,8 +92,15 @@ namespace djv
             std::filesystem::remove(path);
 
             const std::filesystem::path dir = std::filesystem::temp_directory_path();
-            const std::filesystem::path a = std::filesystem::absolute(dir / "djv-recent-a.txt");
-            const std::filesystem::path b = std::filesystem::absolute(dir / "djv-recent-b.txt");
+            const ftk::Path a(std::filesystem::absolute(dir / "djv-recent-a.txt").u8string());
+            const ftk::Path b(std::filesystem::absolute(dir / "djv-recent-b.txt").u8string());
+
+            // A sequence, to check the range survives the settings as well as
+            // the path. Without it an entry cannot say whether it was one
+            // frame or the sequence it sits in.
+            ftk::Path seq(
+                std::filesystem::absolute(dir / "djv-recent-seq.0001.exr").u8string());
+            seq.setFrames(ftk::RangeI64(1, 100));
 
             // Populate the list and maximum; the model writes them into the
             // settings in its destructor, which then save to disk.
@@ -102,6 +109,7 @@ namespace djv
                 auto model = models::RecentFilesModel::create(_context, settings);
                 model->addRecent(a);
                 model->addRecent(b);
+                model->addRecent(seq);
                 model->setRecentMax(5);
             }
 
@@ -110,8 +118,11 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::RecentFilesModel::create(_context, settings);
-                FTK_CHECK(Paths({ a, b }) == model->getRecent());
+                FTK_CHECK(Paths({ a, b, seq }) == model->getRecent());
                 FTK_CHECK(5 == model->getRecentMax());
+                const ftk::Path& restored = model->getRecent()[2];
+                FTK_CHECK(restored.getFrames().has_value());
+                FTK_CHECK(ftk::RangeI64(1, 100) == restored.getFrames().value());
             }
 
             std::filesystem::remove(path);

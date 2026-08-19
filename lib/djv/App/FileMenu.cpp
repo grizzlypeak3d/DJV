@@ -34,7 +34,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::Observer<int> > aIndexObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
-            std::shared_ptr<ftk::ListObserver<std::filesystem::path> > recentObserver;
+            std::shared_ptr<ftk::ListObserver<ftk::Path> > recentObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
         };
@@ -110,9 +110,9 @@ namespace djv
                     _setPlayer(value);
                 });
 
-            p.recentObserver = ftk::ListObserver<std::filesystem::path>::create(
+            p.recentObserver = ftk::ListObserver<ftk::Path>::create(
                 p.recentFilesModel->observeRecent(),
-                [this](const std::vector<std::filesystem::path>& value)
+                [this](const std::vector<ftk::Path>& value)
                 {
                     _recentUpdate(value);
                 });
@@ -288,7 +288,7 @@ namespace djv
             }
         }
 
-        void FileMenu::_recentUpdate(const std::vector<std::filesystem::path>& value)
+        void FileMenu::_recentUpdate(const std::vector<ftk::Path>& value)
         {
             FTK_P();
             p.menus["Recent"]->clear();
@@ -297,14 +297,16 @@ namespace djv
                 const auto path = *i;
                 auto weak = std::weak_ptr<FileMenu>(std::dynamic_pointer_cast<FileMenu>(shared_from_this()));
                 auto action = ftk::Action::create(
-                    path.u8string(),
+                    path.get(),
                     [weak, path]
                     {
                         if (auto widget = weak.lock())
                         {
                             if (auto app = widget->_p->app.lock())
                             {
-                                app->open(ftk::Path(path.u8string()));
+                                // The path as it was recorded, range and all,
+                                // so this opens what it opened before.
+                                app->open(path);
                             }
                             widget->close();
                         }

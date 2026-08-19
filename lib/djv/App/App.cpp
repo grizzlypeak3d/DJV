@@ -1631,8 +1631,7 @@ namespace djv
                         // Recorded here rather than when the file is opened:
                         // one that cannot be read should not be offered back
                         // in the recent files.
-                        p.recentFilesModel->addRecent(
-                            std::filesystem::u8path(files[i]->path.get()));
+                        p.recentFilesModel->addRecent(files[i]->path);
                     }
                     catch (const std::exception& e)
                     {
