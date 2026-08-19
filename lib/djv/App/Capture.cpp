@@ -1049,7 +1049,9 @@ namespace djv
             }
             else if (step.contains("click"))
             {
-                // Click at a window position, e.g.
+                // Click at a window position, in framebuffer pixels rather
+                // than the size the window was asked for -- on a display with
+                // a scale of two they are twice the numbers, e.g.
                 // { "click": [160, 90], "modifier": "Control" }. Unlike
                 // "pick", which calls the viewport directly, this goes through
                 // the window the way a real click does -- including the mouse

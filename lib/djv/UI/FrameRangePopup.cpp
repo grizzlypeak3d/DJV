@@ -32,7 +32,6 @@ namespace djv
             FTK_P();
 
             p.startEdit = ftk::IntEdit::create(context);
-            p.startEdit->setValue(static_cast<int>(range.min()));
             p.startEdit->setTooltip(
                 "Start frame of the sequence.\n"
                 "\n"
@@ -41,15 +40,21 @@ namespace djv
                 "opened over the range it will end up with.");
 
             p.endEdit = ftk::IntEdit::create(context);
-            p.endEdit->setValue(static_cast<int>(range.max()));
             p.endEdit->setTooltip("End frame of the sequence.");
 
+            // The ranges before the values: an edit holds its value inside
+            // its range, and an edit starts out with a range of nowhere near
+            // the numbers a render is numbered with, so a value given first
+            // is clamped to something the file does not have.
+            //
             // Each holds the other's end of the range, so neither can be taken
             // past it. A range that runs backwards is silently turned around
             // when it is built, which would leave the edits showing something
             // the file does not have.
-            p.startEdit->setRange(frameMin, p.endEdit->getValue());
-            p.endEdit->setRange(p.startEdit->getValue(), frameMax);
+            p.startEdit->setRange(frameMin, static_cast<int>(range.max()));
+            p.endEdit->setRange(static_cast<int>(range.min()), frameMax);
+            p.startEdit->setValue(static_cast<int>(range.min()));
+            p.endEdit->setValue(static_cast<int>(range.max()));
 
             auto layout = ftk::FormLayout::create(context);
             layout->setMarginRole(ftk::SizeRole::MarginSmall);
