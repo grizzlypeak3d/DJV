@@ -305,8 +305,13 @@ namespace djv
                             if (auto app = widget->_p->app.lock())
                             {
                                 // The path as it was recorded, range and all,
-                                // so this opens what it opened before.
-                                app->open(path);
+                                // and nothing gathered on top of it: a recent
+                                // file is already what was opened.
+                                app->open(
+                                    path,
+                                    ftk::Path(),
+                                    std::optional<ftk::RangeI64>(),
+                                    false);
                             }
                             widget->close();
                         }

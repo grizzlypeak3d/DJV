@@ -113,31 +113,6 @@ namespace djv
 
         namespace
         {
-            // The one frame a path names, for a file chosen from a directory
-            // that was listed without gathering sequences. The range has to
-            // say so, because the path cannot: a frame parsed out of a file
-            // name looks exactly like a range of one, so a path left to speak
-            // for itself is expanded to whatever sequence is on disk beside
-            // it.
-            std::optional<ftk::RangeI64> singleFrame(const ftk::Path& path)
-            {
-                std::optional<ftk::RangeI64> out;
-                if (path.hasNum() && !path.isSeq() && !path.hasSeqWildcard())
-                {
-                    try
-                    {
-                        const int64_t frame = std::stoll(path.getNum());
-                        out = ftk::RangeI64(frame, frame);
-                    }
-                    catch (const std::exception&)
-                    {
-                        // Not a number this can open at a frame; let it be
-                        // opened the ordinary way.
-                    }
-                }
-                return out;
-            }
-
             // "1-100", and "-10-20" for a sequence starting before zero. The
             // separator is the first dash after the first character, so a
             // negative start is not mistaken for it.
@@ -602,14 +577,11 @@ namespace djv
                     // A browser listing the frames of a sequence one by one
                     // is one to choose a frame from, so opening one opens
                     // that file rather than the sequence it belongs to.
-                    const bool seq =
+                    const bool gatherSeq =
                         fileBrowserSystem->getModel()->getOptions().dirList.seq;
                     for (const auto& i : value)
                     {
-                        open(
-                            i,
-                            ftk::Path(),
-                            seq ? std::optional<ftk::RangeI64>() : singleFrame(i));
+                        open(i, ftk::Path(), std::optional<ftk::RangeI64>(), gatherSeq);
                     }
                 },
                 options);
@@ -636,12 +608,17 @@ namespace djv
         void App::open(
             const ftk::Path& path,
             const ftk::Path& audioPath,
-            const std::optional<ftk::RangeI64>& frames)
+            const std::optional<ftk::RangeI64>& frames,
+            bool gatherSeq)
         {
             FTK_P();
             ftk::DirListOptions dirListOptions;
             dirListOptions.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
             dirListOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+            // Gathering a directory's frames into sequences and taking one
+            // frame to name its sequence are the same thing said twice; a
+            // stated range has already said what it wants.
+            dirListOptions.seq = gatherSeq && !frames.has_value();
             bool first = true;
             for (const auto& i : tl::getPaths(_context, path, dirListOptions))
             {
@@ -1598,12 +1575,26 @@ namespace djv
                         options.readThreadCount = imageSeq.readThreadCount;
 
                         // A range that was asked for is used as it is. One
-                        // that was not is looked for on disk, so that
-                        // reopening picks up frames rendered since.
-                        options.seqExpand = !files[i]->framesStated;
+                        // that was not is looked for on disk again here, so
+                        // that reopening picks up frames rendered since --
+                        // the path holds the frames that were there when it
+                        // was opened, and findSeq() is what goes and looks.
+                        ftk::Path path = files[i]->path;
+                        if (!files[i]->framesStated && path.isSeq())
+                        {
+                            const auto seq = ftk::findSeq(path, options.pathOptions);
+                            if (!seq.empty())
+                            {
+                                // Only when something was found: a sequence
+                                // that has gone from disk keeps the range it
+                                // had rather than becoming a timeline of
+                                // nothing.
+                                path.setSeq(seq);
+                            }
+                        }
                         timelines[i] = tl::Timeline::create(
                             _context,
-                            files[i]->path,
+                            path,
                             files[i]->audioPath,
                             options);
 

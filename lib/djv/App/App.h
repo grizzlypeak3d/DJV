@@ -110,10 +110,18 @@ namespace djv
             //! in progress is watched over the range it will have when it
             //! finishes. It applies to the first file opened, since a
             //! directory holds sequences that each have their own.
+            //! Open a file.
+            //!
+            //! Set gatherSeq to false to open the file named rather than the
+            //! sequence it belongs to. A path cannot say which is meant -- a
+            //! frame parsed out of a file name looks exactly like a range of
+            //! one -- so it is the caller that knows: a browser listing the
+            //! frames one by one, or a recent file, is naming the file.
             void open(
                 const ftk::Path& path,
                 const ftk::Path& audioPath = ftk::Path(),
-                const std::optional<ftk::RangeI64>& frames = std::optional<ftk::RangeI64>());
+                const std::optional<ftk::RangeI64>& frames = std::optional<ftk::RangeI64>(),
+                bool gatherSeq = true);
 
             //! Open a file dialog.
             void openDialog();
