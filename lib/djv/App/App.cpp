@@ -1730,12 +1730,6 @@ namespace djv
                 p.timelines[i - p.files.begin()].reset();
             }
 
-            // Thumbnails are cached by path, height and time, and the
-            // timelines behind them by path alone. None of that mentions the
-            // frame range, so a range that has changed has to throw them out
-            // by hand or the old ones go on being served.
-            _context->getSystem<tl::ui::ThumbnailSystem>()->clearCache();
-
             // Both updates decide what can be kept by comparing item
             // pointers, and the pointer has not changed, so the timeline and
             // the player it belongs to have to be taken out of the way first.

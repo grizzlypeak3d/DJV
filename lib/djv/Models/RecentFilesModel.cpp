@@ -29,22 +29,16 @@ namespace djv
             {
                 for (auto i = json.begin(); i != json.end(); ++i)
                 {
-                    if (i->is_string())
+                    try
                     {
-                        recent.push_back(ftk::Path(i->get<std::string>()));
-                    }
-                    else if (i->is_object() && i->contains("Path"))
-                    {
-                        ftk::Path path(i->at("Path").get<std::string>());
-                        if (i->contains("Frames") &&
-                            i->at("Frames").is_array() &&
-                            i->at("Frames").size() >= 2)
-                        {
-                            path.setFrames(ftk::RangeI64(
-                                i->at("Frames")[0].get<int64_t>(),
-                                i->at("Frames")[1].get<int64_t>()));
-                        }
+                        ftk::Path path;
+                        from_json(*i, path);
                         recent.push_back(path);
+                    }
+                    catch (const std::exception&)
+                    {
+                        // A recent file that cannot be read is one fewer
+                        // recent file, not a reason to start with none.
                     }
                 }
             }
@@ -61,30 +55,15 @@ namespace djv
         RecentFilesModel::~RecentFilesModel()
         {
             FTK_P();
-            // A sequence's range is the path's own state rather than part of
-            // its name, so it is written beside the path. Without it an entry
-            // could not say whether it was one frame or the sequence it sits
-            // in, and reopening it would not give back what it opened.
-            //
-            // Only a sequence needs this. A file name with a number in it
-            // parses back to the one frame it names, which is what a lone
-            // frame is, so those are written as they always were and a
-            // settings file from before this still reads.
+            // The path carries the frames it covers, so that reopening an
+            // entry gives back what it opened; a path whose name already says
+            // so is written as that name, the way it always was.
             nlohmann::json json;
             for (const auto& path : getRecent())
             {
-                if (path.isSeq())
-                {
-                    const ftk::RangeI64& frames = path.getFrames().value();
-                    nlohmann::json item;
-                    item["Path"] = path.get();
-                    item["Frames"] = { frames.min(), frames.max() };
-                    json.push_back(item);
-                }
-                else
-                {
-                    json.push_back(path.get());
-                }
+                nlohmann::json item;
+                to_json(item, path);
+                json.push_back(item);
             }
             p.settings->set("/Files/Recent", json);
             p.settings->set("/Files/RecentMax", getRecentMax());
