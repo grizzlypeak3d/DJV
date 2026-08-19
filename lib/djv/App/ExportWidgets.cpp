@@ -127,10 +127,15 @@ namespace djv
                 const int64_t start = range.start_time().value();
                 const int64_t end = range.end_time_inclusive().value();
                 std::error_code ec;
+                // u8path and u8string throughout: everything else here is
+                // UTF-8, and a plain conversion goes through the code page
+                // the system happens to be set to, which a name outside it
+                // has no mapping in.
                 for (const auto& entry :
-                    std::filesystem::directory_iterator(std::filesystem::path(options.dir), ec))
+                    std::filesystem::directory_iterator(
+                        std::filesystem::u8path(options.dir), ec))
                 {
-                    const std::string fileName = entry.path().filename().string();
+                    const std::string fileName = entry.path().filename().u8string();
                     if (fileName.size() > options.seqBase.size() + options.seqExt.size() &&
                         0 == fileName.compare(0, options.seqBase.size(), options.seqBase) &&
                         0 == fileName.compare(
@@ -197,7 +202,7 @@ namespace djv
                     static_cast<int64_t>(range.start_time().value()));
                 if (!fileName.empty())
                 {
-                    out = std::filesystem::exists(std::filesystem::path(
+                    out = std::filesystem::exists(std::filesystem::u8path(
                         ftk::Path(options.dir, fileName).get()));
                 }
                 break;
