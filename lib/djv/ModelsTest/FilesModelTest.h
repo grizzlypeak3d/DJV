@@ -25,6 +25,7 @@ namespace djv
             void _navigation();
             void _compare();
             void _frames();
+            void _refresh();
             void _persistence();
         };
     }

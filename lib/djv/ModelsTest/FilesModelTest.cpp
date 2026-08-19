@@ -51,6 +51,7 @@ namespace djv
             _navigation();
             _compare();
             _frames();
+            _refresh();
             _persistence();
         }
 
@@ -238,6 +239,67 @@ namespace djv
             model->setFrames(other, ftk::RangeI64(1, 10));
             FTK_CHECK(!reloaded);
             FTK_CHECK(ftk::RangeI64(1, 1) == other->path.getFrames().value());
+        }
+
+        void FilesModelTest::_refresh()
+        {
+            // The items are shared objects written to in place: the frame
+            // range and the layers are filled in once a file has been
+            // opened, and the list of items does not change when they are.
+            // refresh() is what says so, and it is what the tools rebuild
+            // from -- without it a file that was reopened goes on being shown
+            // as it was before.
+            typedef std::vector<std::shared_ptr<models::FilesModelItem> > Items;
+
+            auto settings = createTestSettings(_context);
+            auto model = models::FilesModel::create(settings);
+
+            size_t count = 0;
+            Items observed;
+            auto observer = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
+                model->observeFiles(),
+                [&count, &observed](const Items& value)
+                {
+                    ++count;
+                    observed = value;
+                },
+                ftk::ObserverAction::Suppress);
+
+            auto item = makeItem("/tmp/render.0001.exr");
+            model->add(item);
+            FTK_CHECK(1 == count);
+            FTK_CHECK(Items({ item }) == observed);
+
+            // The list is the same list, and it is announced again.
+            item->timeRange = OTIO_NS::TimeRange(
+                OTIO_NS::RationalTime(1.0, 24.0),
+                OTIO_NS::RationalTime(10.0, 24.0));
+            model->refresh();
+            FTK_CHECK(2 == count);
+            FTK_CHECK(Items({ item }) == observed);
+
+            // Adding and removing carry on saying so on their own.
+            auto second = makeItem("/tmp/other.0001.exr");
+            model->add(second);
+            FTK_CHECK(3 == count);
+            FTK_CHECK(Items({ item, second }) == observed);
+
+            model->refresh();
+            FTK_CHECK(4 == count);
+            FTK_CHECK(Items({ item, second }) == observed);
+
+            model->close(1);
+            FTK_CHECK(5 == count);
+            FTK_CHECK(Items({ item }) == observed);
+
+            model->closeAll();
+            FTK_CHECK(6 == count);
+            FTK_CHECK(observed.empty());
+
+            // With nothing open there is still a list to announce.
+            model->refresh();
+            FTK_CHECK(7 == count);
+            FTK_CHECK(observed.empty());
         }
 
         void FilesModelTest::_persistence()
