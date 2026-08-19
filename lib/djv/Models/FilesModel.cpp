@@ -502,6 +502,12 @@ namespace djv
             }
         }
 
+        void FilesModel::refresh()
+        {
+            FTK_P();
+            p.files->setAlways(p.files->get());
+        }
+
         std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > FilesModel::observeReload() const
         {
             return _p->reload;

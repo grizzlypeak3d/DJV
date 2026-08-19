@@ -700,6 +700,11 @@ namespace djv
             _filesUpdate(files);
             _activeUpdate(activeFiles);
 
+            // The items are the same objects holding different things now --
+            // a reload finds the frames again, so the range can have changed
+            // -- and the list of them did not change, so say so.
+            p.filesModel->refresh();
+
             if (frame.has_value())
             {
                 if (auto player = p.player->get())
@@ -1736,6 +1741,12 @@ namespace djv
             p.activeFiles.clear();
             _filesUpdate(p.filesModel->getFiles());
             _activeUpdate(p.filesModel->getActive());
+
+            // The item is the same object holding different things now -- its
+            // range and its layers were filled in by the update above -- and
+            // the list of them never changed, so say so, or the tools go on
+            // showing what was there before the file was reopened.
+            p.filesModel->refresh();
         }
 
         void App::_activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& activeFiles)

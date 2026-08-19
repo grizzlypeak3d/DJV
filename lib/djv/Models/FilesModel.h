@@ -170,6 +170,13 @@ namespace djv
             //! Observe files that have to be reopened.
             std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > observeReload() const;
 
+            //! Announce the files again, for a change to what an item holds
+            //! rather than to which items there are. The items are shared and
+            //! written to in place -- the frame range and the layers are
+            //! filled in once the file has been opened -- and the list itself
+            //! does not change when they are, so nothing else says so.
+            void refresh();
+
             //! Set the "A" file to the next layer.
             void nextLayer();
 
