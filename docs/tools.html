@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a class="current" href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Tools</h1>
+<p>DJV's features are organized into <em>tools</em>. Each tool opens in a panel on the right side of the main window, and only one tool is shown at a time. Tools can be opened from the <strong>Tools</strong> menu or the <strong>Tools</strong> tool bar, and each has a default keyboard shortcut.</p>
+<div class="table-wrap"><table><thead><tr><th>Tool</th><th>Shortcut</th><th>Purpose</th></tr></thead><tbody><tr><td><strong>Files</strong></td><td><kbd>F1</kbd></td><td>Manage open files, layers, and comparison</td></tr><tr><td><strong>Export</strong></td><td><kbd>F2</kbd></td><td>Write out images, image sequences, and movies</td></tr><tr><td><strong>View</strong></td><td><kbd>F3</kbd></td><td>View options — grid, background, outline, and more</td></tr><tr><td><strong>Color</strong></td><td><kbd>F4</kbd></td><td>OpenColorIO, LUTs, and color adjustments</td></tr><tr><td><strong>Color Picker</strong></td><td><kbd>F5</kbd></td><td>Sample pixel color values</td></tr><tr><td><strong>Magnify</strong></td><td><kbd>F6</kbd></td><td>Magnify a region of the view</td></tr><tr><td><strong>Information</strong></td><td><kbd>F7</kbd></td><td>View file metadata</td></tr><tr><td><strong>Audio</strong></td><td><kbd>F8</kbd></td><td>Audio output, volume, and sync</td></tr><tr><td><strong>Devices</strong></td><td><kbd>F9</kbd></td><td>Output to a video device</td></tr><tr><td><strong>Settings</strong></td><td><kbd>F10</kbd></td><td>Application settings</td></tr><tr><td><strong>Messages</strong></td><td><kbd>F11</kbd></td><td>Application messages</td></tr><tr><td><strong>System Log</strong></td><td><kbd>F12</kbd></td><td>Low-level system log</td></tr></tbody></table></div>
+<p>The <strong>Files</strong>, <strong>View</strong>, <strong>Color</strong>, <strong>Export</strong>, <strong>Audio</strong>, and <strong>Settings</strong> tools each have their own page. The remaining tools are described below.</p>
+<p><img src="assets/tools.svg" alt="Tools"></p>
+<h2 id="information">Information</h2>
+<p>The <strong>Information</strong> tool displays the metadata of the current file: video and audio format details (codec, resolution, pixel type, sample rate, and so on) along with any tags embedded in the file, such as camera make and model or creation date.</p>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcut: <kbd>F7</kbd></p>
+<p>Use the search box to filter the list to matching entries, and the <strong>Copy</strong> button to copy the information to the clipboard.</p>
+<p><img src="assets/info-tool.svg" alt="Information tool"></p>
+<h2 id="color-picker">Color picker</h2>
+<p>The <strong>Color picker</strong> tool samples the color of a pixel in the view.</p>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcut: <kbd>F5</kbd></p>
+<p>Pick a pixel with <strong>Ctrl</strong> + left mouse button (the binding can be changed in the <strong>Mouse</strong> section of the <strong>Settings</strong> tool). The tool shows a color swatch, the sampled RGBA values, the pixel position, and the current mouse binding.</p>
+<p><img src="assets/color-picker-tool.svg" alt="Color picker tool"></p>
+<h2 id="magnify">Magnify</h2>
+<p>The <strong>Magnify</strong> tool shows a magnified view of the area around the picked pixel — handy for inspecting fine detail.</p>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcut: <kbd>F6</kbd></p>
+<p>Pick a pixel with <strong>Ctrl</strong> + left mouse button. The magnification level can be set from <strong>2X</strong> up to <strong>128X</strong>.</p>
+<p><img src="assets/magnify-tool.svg" alt="Magnify tool"></p>
+<div class="tip">To inspect exact pixel boundaries, combine the magnifier with the grid: set <strong>Magnify</strong> to <strong>Nearest</strong> in the <strong>View</strong> tool, enable the grid, and set the grid size to <code>1</code> (see <a href="view.html">View</a>).</div>
+<h2 id="devices">Devices</h2>
+<p>The <strong>Devices</strong> tool sends the view to an external video output device, such as a Blackmagic Design card — useful for review on a broadcast monitor.</p>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcut: <kbd>F9</kbd></p>
+<p>The tool provides options for the device, display mode, pixel type, and 4:4:4 SDI output.</p>
+<div class="note">Device output requires DJV to be built with Blackmagic Design support. When the output device is enabled, a status bar indicator is shown.</div>
+<h2 id="messages-and-system-log">Messages and system log</h2>
+<p>The <strong>Messages</strong> tool shows application messages such as warnings and errors, while the <strong>System Log</strong> tool shows a more detailed, low-level log. Both are useful when reporting a problem (see <a href="troubleshooting.html">Troubleshooting</a>).</p>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcuts:</p>
+<ul><li>Messages: <kbd>F11</kbd></li><li>System Log: <kbd>F12</kbd></li></ul>
+<p>Each tool can <strong>Copy</strong> its contents to the clipboard or <strong>Clear</strong> them, and has an <strong>Auto-scroll</strong> option to keep the newest entries in view.</p>
+</main>
+</body>
+</html>

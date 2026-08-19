@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automation - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a class="current" href="automation.html">Automation</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Automation</h1>
+<p>DJV's functionality is exposed as <em>commands</em> — named operations that menus and keyboard shortcuts invoke internally, and that can also be executed from the command line for scripting and automation.</p>
+<h2 id="listing-the-commands">Listing the commands</h2>
+<pre><code>djv -listCommands</code></pre>
+<p>This prints every command with a short description:</p>
+<pre><code>Playback/Forward - Start forward playback.
+Playback/InOutRange - Set the playback in/out range from inclusive frames relative to the timeline start; e.g., { "in": 10, "out": 50 }.
+Playback/Seek - Seek to a frame, relative to the timeline start; e.g., { "frame": 100 }.
+Tools/Export - Toggle the Export tool; e.g., { "value": true }.
+...</code></pre>
+<p>Command names follow the menu structure, and are the same names used for the keyboard shortcuts in the <strong>Settings</strong> tool.</p>
+<h2 id="executing-commands">Executing commands</h2>
+<p>Use the <strong>-command</strong> option to execute a command after startup:</p>
+<pre><code>djv render.mov -command "Playback/Forward"</code></pre>
+<p>Some commands take JSON arguments, given after the command name. Quote the whole thing as a single argument; on Linux and macOS, single quotes also protect the JSON's double quotes:</p>
+<pre><code>djv render.mov -command 'Playback/Seek { "frame": 100 }'</code></pre>
+<p>On Windows, use double quotes and escape the inner quotes:</p>
+<pre><code>djv render.mov -command "Playback/Seek { \"frame\": 100 }"</code></pre>
+<p>Toggle commands take a boolean value:</p>
+<pre><code>djv render.mov -command 'Tools/Export { "value": true }'</code></pre>
+<p>The <strong>-command</strong> option can be repeated to execute multiple commands in order:</p>
+<pre><code>djv render.mov \
+    -command 'Playback/InOutRange { "in": 100, "out": 200 }' \
+    -command 'Playback/Seek { "frame": 100 }' \
+    -command 'Playback/Forward'</code></pre>
+<p>When files are given on the command line, commands wait until the files have been opened before executing.</p>
+<p>Errors, such as unknown commands or malformed arguments, are reported in the log (see <a href="troubleshooting.html">Troubleshooting</a>).</p>
+<h2 id="exiting">Exiting</h2>
+<p><strong>File/Exit</strong> is itself a command, so it can be used as the final command to run DJV as a batch process:</p>
+<pre><code>djv -command 'Timeline/WaveformSizeLarge' -command 'File/Exit'</code></pre>
+<p>Since settings are saved on exit, this example changes the timeline waveform size for future sessions and then exits.</p>
+<h2 id="command-line-basics">Command line basics</h2>
+<p>One or more files, directories, or timelines can be given on the command line:</p>
+<pre><code>djv render.mov</code></pre>
+<p>Image sequences can be opened by specifying the first frame or using the "#" wildcard (see <a href="files.html">Files</a>):</p>
+<pre><code>djv render.#.exr</code></pre>
+<p>The setup dialog that is shown on the first run is automatically hidden when <strong>-command</strong> is used, and stays available for the next interactive run. The <strong>-hideSetup</strong> option hides it for other automated runs.</p>
+<p>Use the <strong>-h</strong> option to see the complete list of command line options, including playback, comparison, color, and window options.</p>
+</main>
+</body>
+</html>

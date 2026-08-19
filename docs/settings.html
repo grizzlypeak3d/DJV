@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a class="current" href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Settings</h1>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcut: <kbd>F10</kbd></p>
+<p>Settings are stored as a JSON file in the <strong>Documents/DJV</strong> directory.</p>
+<p>The <strong>Settings</strong> tool is divided into collapsible sections:</p>
+<ul><li><strong>Cache</strong> — Memory cache sizes for video, audio, and read-behind (see <a href="files.html">Files</a>).</li><li><strong>File Browser</strong> — Whether to use the native or built-in file browser, and whether hidden files are shown.</li><li><strong>Image Sequences</strong> — How audio is paired with image sequences, and what happens where a sequence is missing frames (see <a href="files.html">Files</a>).</li><li><strong>OTIO</strong> — How the spatial coordinates in OTIO files are used to size and position images, and whether to enable workarounds for timelines that do not conform exactly to specification (see <a href="files.html">Files</a>).</li><li><strong>Mouse</strong> — Mouse button bindings and scaling (see below).</li><li><strong>Playback</strong> — Options such as whether playback starts automatically when a file is opened.</li><li><strong>Audio</strong> — The size of the buffer the audio device is given. Increase this if the audio breaks up during playback.</li><li><strong>Keyboard Shortcuts</strong> — All keyboard shortcuts (see below).</li><li><strong>Style</strong> — Interface scale and custom fonts (see below).</li><li><strong>Time</strong> — Default time units (frames or timecode).</li><li><strong>FFmpeg</strong> — Built-in FFmpeg decoding options.</li><li><strong>FFmpeg Command</strong> — The external FFmpeg command for additional formats and codecs (see <a href="files.html">Files</a>).</li><li><strong>USD</strong> — Options for the experimental USD renderer.</li><li><strong>Miscellaneous</strong> — Less common options, such as whether the setup dialog is shown at startup.</li></ul>
+<p>Use the button at the bottom of the tool to save the settings manually.</p>
+<h2 id="mouse">Mouse</h2>
+<p><img src="assets/mouse-settings.svg" alt="Mouse settings"></p>
+<p>The <strong>Mouse</strong> section maps mouse buttons (and optional modifier keys) to different actions.</p>
+<h2 id="keyboard-shortcuts">Keyboard shortcuts</h2>
+<p><img src="assets/keyboard-shortcuts.svg" alt="Keyboard shortcuts"></p>
+<p>To set a shortcut, click its widget and press the new key combination. The widget turns red if the chosen combination conflicts with an existing shortcut. Each action can have a primary and a secondary shortcut, and the search box helps find an action by name.</p>
+<div class="note">On macOS some shortcuts use the <strong>Command</strong> key instead of <strong>Ctrl</strong>.</div>
+<h2 id="font-support">Font support</h2>
+<p>Custom fonts can be added in the <strong>Style</strong> section of the <strong>Settings</strong> tool.</p>
+<p>To use custom fonts, first add the font files and then select them for use.</p>
+<p>DJV includes <strong>NotoSansCJKsc-Regular</strong> for basic CJK rendering.</p>
+<p><img src="assets/custom-fonts.svg" alt="Custom fonts"></p>
+</main>
+</body>
+</html>

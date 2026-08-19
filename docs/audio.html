@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a class="current" href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Audio</h1>
+<p>DJV plays multi-track audio in sync with video, including during variable-speed and reverse playback. Audio can come from a movie file, or be paired with an image sequence (see <a href="files.html">Files</a>).</p>
+<h2 id="volume-and-mute">Volume and mute</h2>
+<p>Volume and mute are available from the <strong>Audio</strong> menu, the speaker control in the <strong>Bottom</strong> tool bar (click to show the volume slider and mute button), and the <strong>Audio</strong> tool. The speaker icon changes to show when the audio is muted.</p>
+<p>Shortcuts:</p>
+<ul><li>Volume up — <kbd>Period</kbd></li><li>Volume down — <kbd>Comma</kbd></li><li>Mute — <kbd>M</kbd></li></ul>
+<h2 id="audio-tool">Audio tool</h2>
+<p>The <strong>Audio</strong> tool gives fine-grained control over audio output.</p>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcut: <kbd>F8</kbd></p>
+<p><img src="assets/audio-tool.svg" alt="Audio tool"></p>
+<ul><li><strong>Device</strong> — The audio output device. <strong>Default</strong> uses the system default device.</li><li><strong>Volume</strong> — Output volume, from 0 to 100.</li><li><strong>Mute</strong> — Mute all audio output.</li><li><strong>Channel mute</strong> — Mute individual channels. For stereo files the channels are labelled <strong>L</strong> and <strong>R</strong>; files with more channels are numbered.</li><li><strong>Sync offset (seconds)</strong> — Shift the audio earlier or later relative to the video, from -1.0 to 1.0 seconds. Use this to correct material where the audio and video are out of sync.</li></ul>
+<div class="note">When a non-zero sync offset is set, a status bar indicator is shown as a reminder.</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exporting files - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a class="current" href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Exporting files</h1>
+<p>The <strong>Export</strong> tool writes out the current file as a single still image, a numbered image sequence, or a movie. Each kind of export has its own tab with its own options and export button.</p>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcut: <kbd>F2</kbd></p>
+<p><img src="assets/export-tool.svg" alt="Export tool"></p>
+<ul><li>Render width — The width of the export: <strong>Default</strong> for the size of what is being exported with no scaling, one of the presets, or <strong>Custom</strong>. Only the width is ever given; the height follows the aspect ratio of what is being exported, so nothing is squashed to fit.</li><li>Custom width — Shown with <strong>Custom</strong>, for a width the presets do not cover.</li><li>Output size — What the width and the aspect ratio come to between them, which is the resolution the file is written at.</li><li>File — A preview of the output file name. Exporting over a file that is already there asks first, so nothing is overwritten without saying so.</li></ul>
+<h2 id="image">Image</h2>
+<p>The <strong>Image</strong> tab exports just the current frame as a single still image. The frame number in the output file name follows the playhead.</p>
+<h2 id="sequence">Sequence</h2>
+<p>The <strong>Sequence</strong> tab exports the in/out range as a numbered image sequence. Set <strong>Zero padding</strong> to control the number of digits in the frame numbers (for example, a padding of <code>4</code> produces <code>render.0001.exr</code>). The <strong>File</strong> preview shows the first and last files of the sequence. Exporting asks first if any frame of the range is already on disk.</p>
+<p><img src="assets/export-tool-seq.svg" alt="Export sequence"></p>
+<h2 id="movie">Movie</h2>
+<p>The <strong>Movie</strong> tab exports the in/out range as a movie file, encoded with the selected <strong>Codec</strong>. If the source has audio it is included in the movie; the <strong>Audio codec</strong> defaults to <strong>Auto</strong>, which lets the file format choose, or a specific codec can be selected. The audio codec option is disabled when the source has no audio.</p>
+<p><img src="assets/export-tool-movie.svg" alt="Export movie"></p>
+<p>Available extensions depend on how DJV was built. Image and sequence exports typically support <code>.exr</code>, <code>.png</code>, <code>.tif</code>, and <code>.tiff</code>; movie exports typically support <code>.mov</code>, <code>.mp4</code>, and <code>.m4v</code>.</p>
+<p>Exports respect the current layer, playback speed, in/out range, and color settings. A comparison is exported the way the viewport shows it: a side by side comparison of two files writes both of them, at the size the comparison comes to, and <strong>Default</strong> render size follows that rather than the A file on its own.</p>
+</main>
+</body>
+</html>

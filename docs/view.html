@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>View - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a class="current" href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>View</h1>
+<p>The view displays the current file. You can pan, zoom, or <em>frame</em> the view so the image fills the available space.</p>
+<p>Default view controls:</p>
+<ul><li><strong>Pan</strong> — Middle mouse button</li><li><strong>Zoom</strong> — Mouse wheel, or the <strong>-</strong> and <strong>=</strong> keys</li><li><strong>Frame view</strong> (fit image to view) — <strong>Backspace</strong></li><li><strong>Wipe</strong> (in compare mode) — <strong>Alt</strong> + left mouse button</li><li><strong>Color picker</strong> — <strong>Ctrl</strong> + left mouse button</li><li><strong>Frame shuttle</strong> (scrub frames by dragging) — Left mouse button</li></ul>
+<p>View controls can be remapped in the <strong>Mouse</strong> section of the <strong>Settings</strong> tool.</p>
+<h2 id="framing-and-zoom">Framing and zoom</h2>
+<p>The view can be framed (fit to the view), reset to 1:1, or zoomed in and out from the <strong>View</strong> menu and the zoom control on the <strong>View</strong> tool bar.</p>
+<p>Locations: <strong>View</strong> menu, <strong>View</strong> tool bar, <strong>View</strong> tool</p>
+<h2 id="color-channels">Color channels</h2>
+<p>Individual color channels can be isolated to inspect them.</p>
+<p>Locations: <strong>View</strong> menu</p>
+<p>Shortcuts:</p>
+<ul><li><strong>Red</strong> — <kbd>R</kbd></li><li><strong>Green</strong> — <kbd>G</kbd></li><li><strong>Blue</strong> — <kbd>B</kbd></li><li><strong>Alpha</strong> — <kbd>A</kbd></li></ul>
+<h2 id="mirror">Mirror</h2>
+<p>The image can be mirrored horizontally or vertically.</p>
+<p>Locations: <strong>View</strong> menu</p>
+<p>Shortcuts:</p>
+<ul><li><strong>Mirror horizontal</strong> — <kbd>H</kbd></li><li><strong>Mirror vertical</strong> — <kbd>V</kbd></li></ul>
+<h2 id="position-and-zoom">Position and zoom</h2>
+<p>The <strong>Position and Zoom</strong> section of the <strong>View</strong> tool shows the exact view position and zoom level, and lets you set them numerically.</p>
+<p>Locations: <strong>View</strong> tool</p>
+<p><img src="assets/view-pos-zoom.svg" alt="Position and zoom"></p>
+<h2 id="options">Options</h2>
+<p><img src="assets/view-options.svg" alt="Options"></p>
+<ul><li><strong>Minify</strong> — Filter used when the image is scaled down (<strong>Nearest</strong>, <strong>Linear</strong> or <strong>High Quality</strong>).</li><li><strong>Magnify</strong> — Filter used when the image is scaled up (<strong>Nearest</strong>, <strong>Linear</strong> or <strong>High Quality</strong>). Use <strong>Nearest</strong> to see individual pixels without smoothing.</li><li><strong>Video levels</strong> — How video levels are interpreted: from the file, full range, or legal range.</li><li><strong>Alpha blend</strong> — How the alpha channel is blended: none, straight, or pre-multiplied.</li><li><strong>Color buffer</strong> — The view's bit depth. The default, <strong>RGBA F32</strong>, is recommended because it preserves the full range of color values without clamping. Lower bit-depth options can be faster, but they can clamp colors — choose them only when performance is more important than precision.</li></ul>
+<p><strong>High Quality</strong> weighs many more pixels than <strong>Linear</strong>, which reads only four whatever the scale. The difference shows most where the scale is largest — a thumbnail, or the view zoomed well out — where <strong>Linear</strong> misses most of the image and fine detail breaks up into aliasing that crawls during playback.</p>
+<p>It costs more than <strong>Linear</strong>, and the two directions cost differently:</p>
+<ul><li>Scaling <strong>down</strong> is bounded, and gets cheaper the further out you zoom, because there are fewer pixels on screen to produce.</li><li>Scaling <strong>up</strong> is the opposite: the cost follows the size of the view, so it is highest on a large display at a high zoom.</li></ul>
+<p>If playback drops frames, this is one of the settings to try at <strong>Linear</strong> — along with <strong>Color buffer</strong> — and the HUD's <strong>Time</strong> item reports the frames dropped while you compare them.</p>
+<h2 id="aspect-ratio">Aspect ratio</h2>
+<p>The pixel aspect ratio can be left at the file's default or overridden. Up to three custom aspect ratios can be defined.</p>
+<p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
+<p><img src="assets/view-aspect-ratio.svg" alt="Aspect ratio"></p>
+<h2 id="background">Background</h2>
+<p>The view background color can be customized.</p>
+<p>Locations: <strong>View</strong> tool</p>
+<p><img src="assets/view-background.svg" alt="Background"></p>
+<h2 id="grid">Grid</h2>
+<p>A grid overlay can be shown to identify areas in the view.</p>
+<p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
+<p>Shortcut: <kbd>Ctrl+G</kbd></p>
+<p><img src="assets/view-pixel-grid.svg" alt="Pixel grid"></p>
+<p><img src="assets/view-pixel-grid2.svg" alt="Pixel grid"></p>
+<p>The grid can also help you inspect individual pixels. To do so:</p>
+<ul><li>Set <strong>Magnify</strong> to <strong>Nearest</strong></li><li>Enable the grid</li><li>Set the grid cell mode to <code>Cell Size</code></li><li>Set the grid size to <code>1</code></li><li>Set the grid labels</li></ul>
+<h2 id="outline">Outline</h2>
+<p>An outline can be drawn around the image to make transparent regions easier to distinguish from the background.</p>
+<p>Locations: <strong>View</strong> tool</p>
+<p><img src="assets/view-outline.svg" alt="Outline"></p>
+<h2 id="center-marker">Center marker</h2>
+<p>A marker can be shown at the center of the view to help with alignment and framing. Its size, line width, and color can be customized.</p>
+<p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
+<p><img src="assets/view-center-marker.svg" alt="Center marker"></p>
+<h2 id="hud">HUD</h2>
+<p>The heads-up display (HUD) overlays useful information on top of the view.</p>
+<p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
+<p>Shortcut: <kbd>Ctrl+H</kbd></p>
+<p><img src="assets/view-hud.svg" alt="HUD"></p>
+<ul><li><strong>File name</strong> - Name of the current file.</li><li><strong>Information</strong> - Video (<strong>V</strong>) and audio (<strong>A</strong>) format of the current file.</li><li><strong>Cache</strong> - Video (<strong>V</strong>) and audio (<strong>A</strong>) cache fill (%)</li><li><strong>Time</strong> - Current frame, actual playback speed (the rate DJV is achieving, which may differ from the requested rate), number of frames dropped during playback.</li><li><strong>View zoom</strong> - Current view zoom.</li><li><strong>Color picker</strong> - Color and position of the picked pixel. Shown as <strong>-</strong> when the pointer is not over an image.</li><li><strong>Render</strong> - Size the image is rendered at, and the pixel aspect ratio when it is not square. This differs from the file's own resolution when an aspect ratio is applied.</li></ul>
+<p>Each item can be placed in any corner of the view, or set to <strong>None</strong> to hide it, so that only what is wanted is shown and items do not crowd each other.</p>
+<p><img src="assets/view-hud-options.svg" alt="HUD options"></p>
+</main>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playback and frame control - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a class="current" href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Playback and frame control</h1>
+<p><img src="assets/playback-controls.svg" alt="Playback controls"></p>
+<p><img src="assets/playback-controls2.svg" alt="Playback controls 2"></p>
+<ul><li>Playback shuttle — click and drag to vary playback speed</li><li>Frame shuttle — click and drag to scrub the current frame</li><li>Time units (e.g., frames or timecode)</li></ul>
+<h2 id="playback-controls">Playback controls</h2>
+<p>Start, reverse, and stop playback from the <strong>Playback</strong> menu or the playback controls.</p>
+<p>Locations: <strong>Playback</strong> menu, <strong>Playback</strong> controls</p>
+<p>Shortcuts:</p>
+<ul><li>Forward — <kbd>L</kbd></li><li>Reverse — <kbd>J</kbd></li><li>Stop — <kbd>K</kbd></li><li>Toggle playback — <kbd>Space</kbd></li></ul>
+<h2 id="speed-multiplier">Speed multiplier</h2>
+<p>You can temporarily speed up playback by clicking the forward (or reverse) button repeatedly: each click doubles the playback speed. Clicking the opposite direction slows it back down.</p>
+<p>For continuous control, click and drag the playback shuttle: dragging in the playback direction speeds up, dragging the opposite way slows down, and releasing returns to normal speed.</p>
+<h2 id="playback-speed">Playback speed</h2>
+<p>Playback runs at the file's own frame rate. To play at a different rate, click the speed value in the playback controls and choose from the presets; the <strong>Default</strong> entry returns to the file's rate. The HUD's <strong>Time</strong> item shows the rate actually being achieved alongside the requested one.</p>
+<h2 id="frame-navigation">Frame navigation</h2>
+<p>Step through frames or jump to the start or end from the <strong>Frame</strong> menu and the frame controls. Stepping can move by one, ten, or a hundred frames at a time.</p>
+<p>Locations: <strong>Frame</strong> menu, frame controls</p>
+<p>Shortcuts:</p>
+<ul><li>Start / End — <kbd>Home</kbd> / <kbd>End</kbd></li><li>Previous / Next frame — <kbd>Left</kbd> / <kbd>Right</kbd></li><li>Previous / Next ×10 — <kbd>Shift+Left</kbd> / <kbd>Shift+Right</kbd></li><li>Previous / Next ×100 — <kbd>Ctrl+Left</kbd> / <kbd>Ctrl+Right</kbd></li><li>Focus current frame (scroll the timeline to the playhead) — <kbd>Ctrl+F</kbd></li></ul>
+<h2 id="loop-modes">Loop modes</h2>
+<p>Playback can loop in three ways, set from the <strong>Playback</strong> menu or the loop button in the playback controls:</p>
+<ul><li><strong>Loop</strong> — Repeat continuously.</li><li><strong>Once</strong> — Play through once and stop.</li><li><strong>Ping-Pong</strong> — Play forward to the end, then reverse, and repeat.</li></ul>
+<h2 id="jumping">Jumping</h2>
+<p>You can jump backward or forward by one or ten seconds.</p>
+<p>Locations: <strong>Playback</strong> menu</p>
+<p>Shortcuts:</p>
+<ul><li>Jump back 1s — <kbd>Shift+J</kbd></li><li>Jump back 10s — <kbd>Ctrl+J</kbd></li><li>Jump forward 1s — <kbd>Shift+L</kbd></li><li>Jump forward 10s — <kbd>Ctrl+L</kbd></li></ul>
+<h2 id="in-and-out-points">In and out points</h2>
+<p>In and out points can be set to limit playback to a section of the timeline.</p>
+<p>Locations: <strong>Playback</strong> menu, <strong>Playback</strong> controls</p>
+<p>Shortcuts:</p>
+<ul><li>Set in point — <kbd>I</kbd></li><li>Reset in point — <kbd>Shift+I</kbd></li><li>Set out point — <kbd>O</kbd></li><li>Reset out point — <kbd>Shift+O</kbd></li></ul>
+<h2 id="dropped-frames">Dropped frames</h2>
+<p>If playback isn't keeping up, the HUD shows the number of dropped frames in real time.</p>
+<p>Locations: <strong>View</strong> menu</p>
+</main>
+</body>
+</html>

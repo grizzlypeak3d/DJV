@@ -1,0 +1,200 @@
+/* DJV documentation.
+ *
+ * Hand written, and no more than the pages need: they are read from a web
+ * server and from a file on disk, so nothing here may be fetched at run time.
+ */
+
+:root {
+    --text: #24292f;
+    --muted: #57606a;
+    --link: #0060a8;
+    --rule: #d8dee4;
+    --sidebar: #f6f8fa;
+    --code-bg: #f2f4f7;
+    --note: #e7f1fb;
+    --note-rule: #0060a8;
+    --tip: #e8f5ec;
+    --tip-rule: #1a7f37;
+    --nav-width: 16rem;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    color: var(--text);
+    background: #fff;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+}
+
+/* Navigation ------------------------------------------------------------- */
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--nav-width);
+    height: 100%;
+    overflow-y: auto;
+    padding: 1.5rem 0;
+    background: var(--sidebar);
+    border-right: 1px solid var(--rule);
+}
+
+nav .logo {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0 1.5rem 1.25rem;
+    color: var(--text);
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+nav .logo img { width: 24px; height: 24px; }
+
+nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+nav a {
+    display: block;
+    padding: .35rem 1.5rem;
+    color: var(--muted);
+    text-decoration: none;
+}
+
+nav a:hover { color: var(--text); background: #eaeef2; }
+
+nav a.current {
+    color: var(--text);
+    font-weight: 600;
+    box-shadow: inset 3px 0 var(--link);
+}
+
+/* The toggle is only used at narrow widths; it is a checkbox rather than a
+ * script, since a page opened as a file may not fetch anything. */
+#nav-toggle, #nav-button { display: none; }
+
+/* Content ---------------------------------------------------------------- */
+
+main {
+    max-width: 46rem;
+    margin: 0 0 6rem calc(var(--nav-width) + 3rem);
+    padding: 2.5rem 1.5rem 0 0;
+}
+
+h1, h2, h3 { line-height: 1.25; }
+h1 { margin: 0 0 1.5rem; font-size: 2rem; }
+h2 {
+    margin: 2.5rem 0 1rem;
+    padding-bottom: .3rem;
+    font-size: 1.4rem;
+    border-bottom: 1px solid var(--rule);
+}
+h3 { margin: 2rem 0 .75rem; font-size: 1.1rem; }
+
+a { color: var(--link); }
+
+img {
+    display: block;
+    max-width: 100%;
+    margin: 1.5rem 0;
+}
+
+ul, ol { padding-left: 1.5rem; }
+li { margin: .3rem 0; }
+
+code {
+    padding: .15em .35em;
+    background: var(--code-bg);
+    border-radius: 3px;
+    font-size: .9em;
+}
+
+pre {
+    padding: .9rem 1rem;
+    overflow-x: auto;
+    background: var(--code-bg);
+    border-radius: 5px;
+}
+
+pre code { padding: 0; background: none; }
+
+kbd {
+    padding: .1em .45em;
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: .85em;
+    white-space: nowrap;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table {
+    width: 100%;
+    margin: 1.5rem 0;
+    border-collapse: collapse;
+    font-size: .95rem;
+}
+
+th, td {
+    padding: .5rem .6rem;
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+}
+
+th { border-bottom-width: 2px; }
+
+.note, .tip {
+    margin: 1.5rem 0;
+    padding: .8rem 1rem;
+    background: var(--note);
+    border-left: 4px solid var(--note-rule);
+    border-radius: 0 4px 4px 0;
+}
+
+.tip {
+    background: var(--tip);
+    border-left-color: var(--tip-rule);
+}
+
+/* Narrow screens --------------------------------------------------------- */
+
+@media (max-width: 60rem) {
+    nav {
+        position: static;
+        width: auto;
+        height: auto;
+        padding: 1rem 0;
+        border-right: none;
+        border-bottom: 1px solid var(--rule);
+    }
+    nav ul { display: none; }
+    #nav-toggle:checked ~ nav ul { display: block; }
+    #nav-button {
+        display: block;
+        position: absolute;
+        top: 1.1rem;
+        right: 1.5rem;
+        padding: .3rem .7rem;
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        user-select: none;
+    }
+    main {
+        max-width: none;
+        margin: 0 0 4rem;
+        padding: 1.5rem 1.25rem 0;
+    }
+}

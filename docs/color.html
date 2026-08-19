@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a class="current" href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Color</h1>
+<p>The <strong>Color</strong> tool covers everything color-related: OpenColorIO settings, LUTs (look-up tables), and image adjustments such as brightness, contrast, levels, and exposure.</p>
+<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
+<p>Shortcut: <kbd>F4</kbd></p>
+<p>The tool is divided into collapsible sections — <strong>OCIO</strong>, <strong>LUT</strong>, <strong>Color</strong>, <strong>Levels</strong>, <strong>Exposure</strong>, and <strong>Soft Clip</strong> — and each can be turned on or off independently using the checkbox in its header. This makes it easy to compare the image with and without a given adjustment.</p>
+<div class="note">When any of the color controls are active, a status bar indicator is shown so the adjustment isn't forgotten about.</div>
+<h2 id="opencolorio-ocio">OpenColorIO (OCIO)</h2>
+<p><img src="assets/color-ocio.svg" alt="OpenColorIO"></p>
+<p>The OpenColorIO configuration can be set to a built-in configuration, the <strong>OCIO</strong> environment variable, or a specific file path.</p>
+<p>Shortcuts:</p>
+<ul><li>Toggle OCIO enabled: <kbd>Ctrl+N</kbd></li></ul>
+<h2 id="lut">LUT</h2>
+<p><img src="assets/color-lut.svg" alt="LUT"></p>
+<p>A LUT can be applied either before or after the OpenColorIO pass — set the LUT <strong>Order</strong> option to <strong>PreColorConfig</strong> or <strong>PostColorConfig</strong> as needed.</p>
+<p>Shortcuts:</p>
+<ul><li>Toggle LUT enabled: <kbd>Ctrl+K</kbd></li></ul>
+<h3 id="supported-lut-formats">Supported LUT formats</h3>
+<p>The following LUT formats are supported:</p>
+<ul><li>flame: .3dl</li><li>lustre: .3dl</li><li>ColorCorrection: .cc</li><li>ColorCorrectionCollection: .ccc</li><li>ColorDecisionList: .cdl</li><li>Academy/ASC Common LUT Format: .clf</li><li>Color Transform Format: .ctf</li><li>cinespace: .csp</li><li>Discreet 1D LUT: .lut</li><li>houdini: .lut</li><li>International Color Consortium profile: .icc</li><li>Image Color Matching profile: .icm</li><li>ICC profile: .pf</li><li>iridas_cube: .cube</li><li>iridas_itx: .itx</li><li>iridas_look: .look</li><li>pandora_mga: .mga</li><li>pandora_m3d: .m3d</li><li>resolve_cube: .cube</li><li>spi1d: .spi1d</li><li>spi3d: .spi3d</li><li>spimtx: .spimtx</li><li>truelight: .cub</li><li>nukevf: .vf</li></ul>
+<p>Different formats may be available depending on how DJV was built.</p>
+<h2 id="color">Color</h2>
+<p><img src="assets/color-controls.svg" alt="Color controls"></p>
+<p>Basic color adjustments:</p>
+<ul><li><strong>Add</strong> — Add a constant value to each channel.</li><li><strong>Brightness</strong> — Scale the overall brightness.</li><li><strong>Contrast</strong> — Increase or decrease contrast around the midpoint.</li><li><strong>Saturation</strong> — Adjust color intensity, from grayscale up to oversaturated.</li><li><strong>Hue</strong> — Rotate the hue.</li><li><strong>Invert</strong> — Invert the image colors.</li></ul>
+<h2 id="levels">Levels</h2>
+<p><img src="assets/color-levels.svg" alt="Levels"></p>
+<p>Levels remap the input tonal range to an output range, similar to the levels control in an image editor:</p>
+<ul><li><strong>In low</strong> / <strong>In high</strong> — The black and white points of the input.</li><li><strong>Gamma</strong> — A midtone adjustment applied between the input and output ranges.</li><li><strong>Out low</strong> / <strong>Out high</strong> — The black and white points of the output.</li></ul>
+<h2 id="exposure">Exposure</h2>
+<p><img src="assets/color-exposure.svg" alt="Exposure"></p>
+<p>Exposure controls mimic film response and are useful for high-dynamic-range images:</p>
+<ul><li><strong>Exposure</strong> — Overall exposure, in stops.</li><li><strong>Defog</strong> — Subtract a fog (haze) value.</li><li><strong>Knee low</strong> / <strong>Knee high</strong> — The range over which the highlight roll-off (the "knee") is applied.</li><li><strong>Gamma</strong> — A final gamma adjustment.</li></ul>
+<h2 id="soft-clip">Soft clip</h2>
+<p><img src="assets/color-soft-clip.svg" alt="Soft clip"></p>
+<p><strong>Soft clip</strong> gently rolls off values approaching white instead of clipping them hard, which helps preserve detail in bright highlights.</p>
+</main>
+</body>
+</html>
