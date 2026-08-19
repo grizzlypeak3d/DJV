@@ -1134,7 +1134,12 @@ namespace djv
             p.recentFilesModel = models::RecentFilesModel::create(_context, getSettings());
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
-            ftk::FileBrowserOptions fileBrowserOptions;
+            // From what the settings restored rather than from a fresh set:
+            // the sequence extensions are the build's to say and cannot come
+            // from a settings file, but everything else in there is the
+            // user's and was just loaded.
+            ftk::FileBrowserOptions fileBrowserOptions =
+                fileBrowserSystem->getModel()->getOptions();
             fileBrowserOptions.dirList.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
             fileBrowserSystem->getModel()->setOptions(fileBrowserOptions);
             fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
