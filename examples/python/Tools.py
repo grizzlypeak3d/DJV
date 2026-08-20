@@ -769,6 +769,187 @@ class SysLogTool(IToolWidget):
     def _logUpdate(self, lines):
         self._label.text = "\n".join(lines)
 
+class SettingsTool(IToolWidget):
+    """
+    This tool provides the settings.
+    """
+    def __init__(self, context, app, parent = None):
+        IToolWidget.__init__(
+            self, context, app, "Settings", "SettingsTool", parent)
+
+        settingsModel = app.getSettingsModel()
+        layout = ftk.VerticalLayout(context)
+        layout.spacingRole = ftk.SizeRole._None
+        appWeak = weakref.ref(app)
+        selfWeak = weakref.ref(self)
+
+        def bellowsForm(title):
+            vLayout = ftk.VerticalLayout(context)
+            vLayout.marginRole = ftk.SizeRole.Margin
+            form = ftk.FormLayout(context, vLayout)
+            form.spacingRole = ftk.SizeRole.SpacingSmall
+            bellows = ftk.Bellows(context, title, layout)
+            bellows.widget = vLayout
+            return form
+
+        def setSetting(prop, field, value):
+            model = appWeak().getSettingsModel()
+            settings = getattr(model, prop)
+            setattr(settings, field, value)
+            setattr(model, prop, settings)
+
+        # Cache.
+        form = bellowsForm("Cache")
+        self._cacheVideoSlider = ftk.FloatEditSlider(context)
+        self._cacheVideoSlider.range = ftk.RangeF(0.0, 64.0)
+        self._cacheVideoSlider.setCallback(
+            lambda value: setSetting("cache", "videoGB", value))
+        form.addRow("Video GB:", self._cacheVideoSlider)
+        self._cacheAudioSlider = ftk.FloatEditSlider(context)
+        self._cacheAudioSlider.range = ftk.RangeF(0.0, 64.0)
+        self._cacheAudioSlider.setCallback(
+            lambda value: setSetting("cache", "audioGB", value))
+        form.addRow("Audio GB:", self._cacheAudioSlider)
+        self._cacheBehindSlider = ftk.FloatEditSlider(context)
+        self._cacheBehindSlider.range = ftk.RangeF(0.0, 60.0)
+        self._cacheBehindSlider.setCallback(
+            lambda value: setSetting("cache", "readBehind", value))
+        form.addRow("Read behind:", self._cacheBehindSlider)
+
+        # File browser.
+        form = bellowsForm("File Browser")
+        self._nativeFileDialogCheckBox = ftk.CheckBox(context)
+        self._nativeFileDialogCheckBox.setCheckedCallback(
+            lambda value: setSetting("fileBrowser", "nativeFileDialog", value))
+        form.addRow("Native file dialog:", self._nativeFileDialogCheckBox)
+
+        # Image sequences.
+        form = bellowsForm("Image Sequences")
+        self._seqAudioComboBox = ftk.ComboBox(
+            context, [tl.getLabel(a) for a in tl.getImageSeqAudioEnums()])
+        self._seqAudioComboBox.hStretch = ftk.Stretch.Expanding
+        self._seqAudioComboBox.setIndexCallback(
+            lambda value: setSetting(
+                "imageSeq", "audio", tl.getImageSeqAudioEnums()[value]))
+        form.addRow("Audio:", self._seqAudioComboBox)
+        self._seqAudioFileNameEdit = ftk.LineEdit(context)
+        self._seqAudioFileNameEdit.setCallback(
+            lambda value: setSetting("imageSeq", "audioFileName", value))
+        form.addRow("Audio file name:", self._seqAudioFileNameEdit)
+        self._seqMaxDigitsSlider = ftk.IntEditSlider(context)
+        self._seqMaxDigitsSlider.range = ftk.RangeI(1, 16)
+        self._seqMaxDigitsSlider.setCallback(
+            lambda value: setSetting("imageSeq", "maxDigits", value))
+        form.addRow("Maximum digits:", self._seqMaxDigitsSlider)
+        self._seqThreadsSlider = ftk.IntEditSlider(context)
+        self._seqThreadsSlider.range = ftk.RangeI(1, 64)
+        self._seqThreadsSlider.setCallback(
+            lambda value: setSetting("imageSeq", "readThreadCount", value))
+        form.addRow("Read threads:", self._seqThreadsSlider)
+
+        # Mouse.
+        form = bellowsForm("Mouse")
+        self._wheelScaleSlider = ftk.FloatEditSlider(context)
+        self._wheelScaleSlider.range = ftk.RangeF(1.0, 2.0)
+        self._wheelScaleSlider.setCallback(
+            lambda value: setSetting("mouse", "wheelScale", value))
+        form.addRow("Wheel scale:", self._wheelScaleSlider)
+
+        # Playback.
+        form = bellowsForm("Playback")
+        self._startPlaybackCheckBox = ftk.CheckBox(context)
+        self._startPlaybackCheckBox.setCheckedCallback(
+            lambda value: setSetting("playback", "startPlayback", value))
+        form.addRow("Start on open:", self._startPlaybackCheckBox)
+
+        # Style.
+        form = bellowsForm("Style")
+        self._displayScaleSlider = ftk.FloatEditSlider(context)
+        self._displayScaleSlider.range = ftk.RangeF(0.0, 4.0)
+        self._displayScaleSlider.step = 0.25
+        self._displayScaleSlider.tooltip = "The display scale; zero is automatic."
+        self._displayScaleSlider.setCallback(
+            lambda value: setSetting("style", "displayScale", value))
+        form.addRow("Display scale:", self._displayScaleSlider)
+
+        # Time.
+        form = bellowsForm("Time")
+        self._timeUnitsComboBox = ftk.ComboBox(
+            context, [tl.getLabel(u) for u in tl.getTimeUnitsEnums()])
+        self._timeUnitsComboBox.hStretch = ftk.Stretch.Expanding
+        self._timeUnitsComboBox.setIndexCallback(
+            lambda value: setattr(
+                appWeak().getTimeUnitsModel(),
+                "timeUnits",
+                tl.getTimeUnitsEnums()[value]))
+        form.addRow("Units:", self._timeUnitsComboBox)
+
+        # Miscellaneous.
+        form = bellowsForm("Miscellaneous")
+        self._tooltipsCheckBox = ftk.CheckBox(context)
+        self._tooltipsCheckBox.setCheckedCallback(
+            lambda value: setSetting("misc", "tooltipsEnabled", value))
+        form.addRow("Tooltips:", self._tooltipsCheckBox)
+
+        resetButton = ftk.PushButton(context, "Reset")
+        resetButton.tooltip = "Reset the settings to their defaults."
+        resetButton.setClickedCallback(
+            lambda: appWeak().getSettingsModel().reset())
+        vLayout = ftk.VerticalLayout(context, layout)
+        vLayout.marginRole = ftk.SizeRole.Margin
+        resetButton.parent = vLayout
+
+        self._setContent(layout)
+
+        self._cacheObserver = tl.PlayerCacheOptionsObserver(
+            settingsModel.observeCache,
+            lambda value: selfWeak()._cacheUpdate(value))
+        self._fileBrowserObserver = djv.models.FileBrowserSettingsObserver(
+            settingsModel.observeFileBrowser,
+            lambda value: selfWeak()._fileBrowserUpdate(value))
+        self._imageSeqObserver = djv.models.ImageSeqSettingsObserver(
+            settingsModel.observeImageSeq,
+            lambda value: selfWeak()._imageSeqUpdate(value))
+        self._mouseObserver = djv.models.MouseSettingsObserver(
+            settingsModel.observeMouse,
+            lambda value: selfWeak()._mouseUpdate(value))
+        self._playbackObserver = djv.models.PlaybackSettingsObserver(
+            settingsModel.observePlayback,
+            lambda value: selfWeak()._playbackUpdate(value))
+        self._styleObserver = djv.models.StyleSettingsObserver(
+            settingsModel.observeStyle,
+            lambda value: selfWeak()._styleUpdate(value))
+        self._miscObserver = djv.models.MiscSettingsObserver(
+            settingsModel.observeMisc,
+            lambda value: selfWeak()._miscUpdate(value))
+
+    def _cacheUpdate(self, value):
+        self._cacheVideoSlider.value = value.videoGB
+        self._cacheAudioSlider.value = value.audioGB
+        self._cacheBehindSlider.value = value.readBehind
+
+    def _fileBrowserUpdate(self, value):
+        self._nativeFileDialogCheckBox.checked = value.nativeFileDialog
+
+    def _imageSeqUpdate(self, value):
+        self._seqAudioComboBox.currentIndex = \
+            tl.getImageSeqAudioEnums().index(value.audio)
+        self._seqAudioFileNameEdit.text = value.audioFileName
+        self._seqMaxDigitsSlider.value = value.maxDigits
+        self._seqThreadsSlider.value = value.readThreadCount
+
+    def _mouseUpdate(self, value):
+        self._wheelScaleSlider.value = value.wheelScale
+
+    def _playbackUpdate(self, value):
+        self._startPlaybackCheckBox.checked = value.startPlayback
+
+    def _styleUpdate(self, value):
+        self._displayScaleSlider.value = value.displayScale
+
+    def _miscUpdate(self, value):
+        self._tooltipsCheckBox.checked = value.tooltipsEnabled
+
 # The tools this application implements so far; the tools model lists
 # more, and the actions only offer what can actually open.
 FACTORY = {
@@ -777,6 +958,7 @@ FACTORY = {
     "Color": ColorTool,
     "Information": InfoTool,
     "Audio": AudioTool,
+    "Settings": SettingsTool,
     "Messages": MessagesTool,
     "System Log": SysLogTool,
 }
