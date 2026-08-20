@@ -43,33 +43,32 @@ class Actions:
             self._togglePlaybackCallback)
         self.actions["TogglePlayback"].tooltip = "Toggle playback."
 
-        self.actions["Start"] = ftk.Action(
-            "Start Frame",
-            "FrameStart",
-            ftk.KeyShortcut(ftk.Key.Up),
-            self._startCallback)
-        self.actions["Start"].tooltip = "Go to the start frame."
+        for name, text, key, mod, action, tooltip in [
+            ("JumpBack1s", "Jump Back 1s", ftk.Key.J, ftk.KeyModifier.Shift,
+             tl.TimeAction.JumpBack1s, "Jump back 1 second."),
+            ("JumpBack10s", "Jump Back 10s", ftk.Key.J, ftk.KeyModifier.Control,
+             tl.TimeAction.JumpBack10s, "Jump back 10 seconds."),
+            ("JumpForward1s", "Jump Forward 1s", ftk.Key.L, ftk.KeyModifier.Shift,
+             tl.TimeAction.JumpForward1s, "Jump forward 1 second."),
+            ("JumpForward10s", "Jump Forward 10s", ftk.Key.L, ftk.KeyModifier.Control,
+             tl.TimeAction.JumpForward10s, "Jump forward 10 seconds."),
+        ]:
+            a = ftk.Action(
+                text,
+                ftk.KeyShortcut(key, mod),
+                lambda captured = action: self._timeAction(captured))
+            a.tooltip = tooltip
+            self.actions[name] = a
 
-        self.actions["Prev"] = ftk.Action(
-            "Previous Frame",
-            "FramePrev",
-            ftk.KeyShortcut(ftk.Key.Left),
-            self._prevCallback)
-        self.actions["Prev"].tooltip = "Go to the previous frame."
-
-        self.actions["Next"] = ftk.Action(
-            "Next Frame",
-            "FrameNext",
-            ftk.KeyShortcut(ftk.Key.Right),
-            self._nextCallback)
-        self.actions["Next"].tooltip = "Go to the next frame."
-
-        self.actions["End"] = ftk.Action(
-            "End Frame",
-            "FrameEnd",
-            ftk.KeyShortcut(ftk.Key.Down),
-            self._endCallback)
-        self.actions["End"].tooltip = "Go to the end frame."
+        # The loop modes are one radio group.
+        self.loopGroup = ftk.ActionGroup(ftk.ActionGroupType.Radio)
+        for mode in tl.getLoopEnums():
+            a = ftk.Action(
+                tl.getLabel(mode),
+                checkedCallback = lambda checked, captured = mode:
+                    self._loopCallback(captured) if checked else None)
+            self.actions[tl.to_string(mode)] = a
+            self.loopGroup.addAction(a)
 
         self.actions["SetInPoint"] = ftk.Action(
             "Set In Point",
@@ -116,21 +115,13 @@ class Actions:
         if self._player:
             self._player.togglePlayback()
 
-    def _startCallback(self):
+    def _timeAction(self, value):
         if self._player:
-            self._player.timeAction(tl.TimeAction.Start)
+            self._player.timeAction(value)
 
-    def _prevCallback(self):
+    def _loopCallback(self, value):
         if self._player:
-            self._player.timeAction(tl.TimeAction.FramePrev)
-
-    def _nextCallback(self):
-        if self._player:
-            self._player.timeAction(tl.TimeAction.FrameNext)
-
-    def _endCallback(self):
-        if self._player:
-            self._player.timeAction(tl.TimeAction.End)
+            self._player.loop = value
 
     def _setInPointCallback(self):
         if self._player:
@@ -157,8 +148,12 @@ class Actions:
             self._playbackObserver = tl.PlaybackObserver(
                 player.observePlayback,
                 lambda value: selfWeak()._playbackUpdate(value))
+            self._loopObserver = tl.LoopObserver(
+                player.observeLoop,
+                lambda value: selfWeak()._loopUpdate(value))
         else:
             self._playbackObserver = None
+            self._loopObserver = None
 
         for name in self.actions:
             self.actions[name].enabled = player != None
@@ -168,3 +163,6 @@ class Actions:
         self.actions["Stop"].checked = tl.Playback.Stop == playback
         self.actions["Forward"].checked = tl.Playback.Forward == playback
         self.actions["Reverse"].checked = tl.Playback.Reverse == playback
+
+    def _loopUpdate(self, loop):
+        self.loopGroup.checked = tl.getLoopEnums().index(loop)

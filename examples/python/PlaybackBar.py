@@ -12,7 +12,7 @@ class Widget(ftk.IContainer):
     """
     This widget provides playback controls and other time related widgets.
     """
-    def __init__(self, context, app, actions, parent = None):
+    def __init__(self, context, app, actions, frameActions, parent = None):
         ftk.IContainer.__init__(self, context, "PlaybackBar.Widget", parent)
 
         self._player = None
@@ -23,12 +23,12 @@ class Widget(ftk.IContainer):
         self._playbackToolBar.addAction(actions.actions["Forward"])
 
         self._frameToolBar = ftk.ToolBar(context)
-        self._frameToolBar.addAction(actions.actions["Start"])
-        button = self._frameToolBar.addAction(actions.actions["Prev"])
+        self._frameToolBar.addAction(frameActions.actions["Start"])
+        button = self._frameToolBar.addAction(frameActions.actions["Prev"])
         button.repeatClick = True
-        button = self._frameToolBar.addAction(actions.actions["Next"])
+        button = self._frameToolBar.addAction(frameActions.actions["Next"])
         button.repeatClick = True
-        self._frameToolBar.addAction(actions.actions["End"])
+        self._frameToolBar.addAction(frameActions.actions["End"])
 
         self._currentTimeEdit = tl.ui.TimeEdit(context, app.getTimeUnitsModel())
         self._currentTimeEdit.tooltip = "Current time."
@@ -45,6 +45,11 @@ class Widget(ftk.IContainer):
         self._timeUnitsWidget = tl.ui.TimeUnitsWidget(context, app.getTimeUnitsModel())
         self._timeUnitsWidget.tooltip = "Time units."
 
+        self._muteButton = ftk.ToolButton(context)
+        self._muteButton.icon = "Volume"
+        self._muteButton.checkedIcon = "Mute"
+        self._muteButton.tooltip = "Toggle the audio mute."
+
         self._layout = ftk.HorizontalLayout(context)
         self._layout.marginRole = ftk.SizeRole.MarginInside
         self._playbackToolBar.parent = self._layout
@@ -53,15 +58,24 @@ class Widget(ftk.IContainer):
         self._durationLabel.parent = self._layout
         self._speedEdit.parent = self._layout
         self._timeUnitsWidget.parent = self._layout
+        spacer = ftk.Spacer(context, ftk.Orientation.Horizontal, self._layout)
+        spacer.hStretch = ftk.Stretch.Expanding
+        self._muteButton.parent = self._layout
         self._setWidget(self._layout)
 
         self._currentTimeEdit.setCallback(self._currentTimeCallback)
         self._speedEdit.setCallback(self._speedCallback)
+        appWeak = weakref.ref(app)
+        self._muteButton.setCheckedCallback(
+            lambda value: setattr(appWeak().getAudioModel(), "mute", value))
 
         selfWeak = weakref.ref(self)
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
             lambda player: selfWeak()._playerUpdate(player))
+        self._muteObserver = ftk.BoolObserver(
+            app.getAudioModel().observeMute,
+            lambda value: selfWeak()._muteUpdate(value))
 
     def _currentTimeCallback(self, value):
         if self._player:
@@ -76,6 +90,9 @@ class Widget(ftk.IContainer):
 
     def _speedUpdate(self, value):
         self._speedEdit.value = value
+
+    def _muteUpdate(self, value):
+        self._muteButton.checked = value
 
     def _playerUpdate(self, player):
         self._player = player

@@ -58,15 +58,85 @@ class Playback(ftk.Menu):
         self.addAction(actions.actions["Reverse"])
         self.addAction(actions.actions["TogglePlayback"])
         self.addDivider();
-        self.addAction(actions.actions["Start"])
-        self.addAction(actions.actions["Prev"])
-        self.addAction(actions.actions["Next"])
-        self.addAction(actions.actions["End"])
+        self.addAction(actions.actions["JumpBack1s"])
+        self.addAction(actions.actions["JumpBack10s"])
+        self.addAction(actions.actions["JumpForward1s"])
+        self.addAction(actions.actions["JumpForward10s"])
+        self.addDivider();
+        for mode in tl.getLoopEnums():
+            self.addAction(actions.actions[tl.to_string(mode)])
         self.addDivider();
         self.addAction(actions.actions["SetInPoint"])
         self.addAction(actions.actions["ResetInPoint"])
         self.addAction(actions.actions["SetOutPoint"])
         self.addAction(actions.actions["ResetOutPoint"])
+
+class Frame(ftk.Menu):
+    """
+    Frame menu.
+    """
+    def __init__(self, context, app, actions, parent = None):
+        ftk.Menu.__init__(self, context, parent)
+
+        self.addAction(actions.actions["Start"])
+        self.addAction(actions.actions["End"])
+        self.addDivider();
+        self.addAction(actions.actions["Prev"])
+        self.addAction(actions.actions["PrevX10"])
+        self.addAction(actions.actions["PrevX100"])
+        self.addDivider();
+        self.addAction(actions.actions["Next"])
+        self.addAction(actions.actions["NextX10"])
+        self.addAction(actions.actions["NextX100"])
+
+class Timeline(ftk.Menu):
+    """
+    Timeline menu.
+    """
+    def __init__(self, context, app, actions, parent = None):
+        ftk.Menu.__init__(self, context, parent)
+
+        self.addAction(actions.actions["Minimize"])
+        self.addAction(actions.actions["FrameView"])
+        self.addAction(actions.actions["ScrollBars"])
+        self.addAction(actions.actions["AutoScroll"])
+        self.addAction(actions.actions["StopOnScrub"])
+        self.addDivider();
+        self.addAction(actions.actions["TrackMedia"])
+        self.addAction(actions.actions["Thumbnails"])
+        self.addAction(actions.actions["Waveforms"])
+
+class Audio(ftk.Menu):
+    """
+    Audio menu.
+    """
+    def __init__(self, context, app, actions, parent = None):
+        ftk.Menu.__init__(self, context, parent)
+
+        self.addAction(actions.actions["VolumeUp"])
+        self.addAction(actions.actions["VolumeDown"])
+        self.addAction(actions.actions["Mute"])
+
+class Color(ftk.Menu):
+    """
+    Color menu.
+    """
+    def __init__(self, context, app, actions, parent = None):
+        ftk.Menu.__init__(self, context, parent)
+
+        self.addAction(actions.actions["OCIO"])
+        self.addAction(actions.actions["LUT"])
+
+class Help(ftk.Menu):
+    """
+    Help menu.
+    """
+    def __init__(self, context, app, actions, parent = None):
+        ftk.Menu.__init__(self, context, parent)
+
+        self.addAction(actions.actions["Documentation"])
+        self.addDivider();
+        self.addAction(actions.actions["About"])
 
 class Compare(ftk.Menu):
     """

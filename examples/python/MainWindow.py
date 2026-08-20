@@ -6,10 +6,15 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import AudioActions
+import ColorActions
 import CompareActions
 import FileActions
+import FrameActions
+import HelpActions
 import Menus
 import PlaybackActions
+import TimelineActions
 import PlaybackBar
 import StatusBar
 import TabBar
@@ -31,6 +36,14 @@ class MainWindow(ftk.MainWindow):
         window = self._settingsModel.window
         ftk.MainWindow.__init__(self, context, app, window.size)
 
+        # The title matches the C++ application: the version, and for a
+        # development build the commit as well.
+        info = app.getAppInfoModel()
+        title = "{} {}".format(info.fullName, info.version)
+        if info.versionDev:
+            title = "{} - {} {}".format(title, info.commitDate, info.gitCommit)
+        self.title = title
+
         # Create the viewport and timeline, driven by the DJV models.
         self._viewport = tl.ui.Viewport(context)
         self._timelineWidget = tl.ui.TimelineWidget(context, app.getTimeUnitsModel())
@@ -42,27 +55,38 @@ class MainWindow(ftk.MainWindow):
         self._fileActions = FileActions.Actions(context, app, self)
         self._compareActions = CompareActions.Actions(context, app)
         self._playbackActions = PlaybackActions.Actions(context, app)
+        self._frameActions = FrameActions.Actions(context, app)
+        self._timelineActions = TimelineActions.Actions(context, app)
+        self._audioActions = AudioActions.Actions(context, app)
         self._viewActions = ViewActions.Actions(context, app, self)
+        self._colorActions = ColorActions.Actions(context, app)
         self._toolsActions = ToolsActions.Actions(context, app)
         self._windowActions = WindowActions.Actions(context, app, self)
+        self._helpActions = HelpActions.Actions(context, app, self)
 
         # Create the menu bar.
         self._menuBar = ftk.MenuBar(context)
         self._menuBar.addMenu("File", Menus.File(context, app, self._fileActions))
         self._menuBar.addMenu("Compare", Menus.Compare(context, app, self._compareActions))
         self._menuBar.addMenu("Playback", Menus.Playback(context, app, self._playbackActions))
+        self._menuBar.addMenu("Frame", Menus.Frame(context, app, self._frameActions))
+        self._menuBar.addMenu("Timeline", Menus.Timeline(context, app, self._timelineActions))
+        self._menuBar.addMenu("Audio", Menus.Audio(context, app, self._audioActions))
         self._menuBar.addMenu("View", Menus.View(context, app, self._viewActions))
         self._menuBar.addMenu("Window", Menus.Window(context, app, self._windowActions))
+        self._menuBar.addMenu("Color", Menus.Color(context, app, self._colorActions))
         self._menuBar.addMenu("Tools", Menus.ToolsMenu(context, app, self._toolsActions))
+        self._menuBar.addMenu("Help", Menus.Help(context, app, self._helpActions))
         self.menuBar = self._menuBar
 
         # Create the tool bars.
         self._fileToolBar = ToolBars.File(context, self._fileActions)
         self._compareToolBar = ToolBars.Compare(context, self._compareActions)
-        self._viewToolBar = ToolBars.View(context, self._viewActions)
+        self._viewToolBar = ToolBars.View(context, self._viewActions, self)
         self._toolsToolBar = ToolBars.Tools(context, self._toolsActions)
         self._windowToolBar = ToolBars.Window(context, self._windowActions)
-        self._playbackBar = PlaybackBar.Widget(context, app, self._playbackActions)
+        self._playbackBar = PlaybackBar.Widget(
+            context, app, self._playbackActions, self._frameActions)
         self._tabBar = TabBar.Widget(context, app)
         self._tabBar.setVisible(window.tabBar)
         self._statusBar = StatusBar.Widget(context, app, self)

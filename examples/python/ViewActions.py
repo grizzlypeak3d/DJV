@@ -27,21 +27,21 @@ class Actions:
             "Zoom Reset",
             "ViewZoomReset",
             ftk.KeyShortcut(ftk.Key._0),
-            callback = lambda: self._mainWindowWeak().getViewport().viewZoomReset())
+            callback = lambda: self._mainWindowWeak().getViewport().resetZoom())
         self.actions["ZoomReset"].tooltip = "Reset the view zoom."
 
         self.actions["ZoomIn"] = ftk.Action(
             "Zoom In",
             "ViewZoomIn",
             ftk.KeyShortcut(ftk.Key.Equals),
-            callback = lambda: self._mainWindowWeak().getViewport().viewZoomIn())
+            callback = lambda: self._mainWindowWeak().getViewport().zoomIn())
         self.actions["ZoomIn"].tooltip = "Zoom the view in."
 
         self.actions["ZoomOut"] = ftk.Action(
             "Zoom Out",
             "ViewZoomOut",
             ftk.KeyShortcut(ftk.Key.Minus),
-            callback = lambda: self._mainWindowWeak().getViewport().viewZoomOut())
+            callback = lambda: self._mainWindowWeak().getViewport().zoomOut())
         self.actions["ZoomOut"].tooltip = "Zoom the view out."
 
         self.actions["HUD"] = ftk.Action(
