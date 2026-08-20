@@ -15,3 +15,8 @@ set_target_properties(djv-test PROPERTIES FOLDER tests)
 add_test(
     NAME djv-test
     COMMAND djv-test -log)
+
+# A test that hangs should fail, not run until the job is killed: this one
+# waits on futures, and a reader that never answers waits forever. The whole
+# suite is a couple of minutes, so this only fires on a hang.
+set_tests_properties(djv-test PROPERTIES TIMEOUT 900)
