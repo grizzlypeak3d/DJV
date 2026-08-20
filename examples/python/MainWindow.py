@@ -14,6 +14,8 @@ import PlaybackBar
 import StatusBar
 import TabBar
 import ToolBars
+import Tools
+import ToolsActions
 import ViewActions
 import WindowActions
 
@@ -41,6 +43,7 @@ class MainWindow(ftk.MainWindow):
         self._compareActions = CompareActions.Actions(context, app)
         self._playbackActions = PlaybackActions.Actions(context, app)
         self._viewActions = ViewActions.Actions(context, app, self)
+        self._toolsActions = ToolsActions.Actions(context, app)
         self._windowActions = WindowActions.Actions(context, app, self)
 
         # Create the menu bar.
@@ -49,6 +52,7 @@ class MainWindow(ftk.MainWindow):
         self._menuBar.addMenu("Compare", Menus.Compare(context, app, self._compareActions))
         self._menuBar.addMenu("Playback", Menus.Playback(context, app, self._playbackActions))
         self._menuBar.addMenu("View", Menus.View(context, app, self._viewActions))
+        self._menuBar.addMenu("Tools", Menus.ToolsMenu(context, app, self._toolsActions))
         self._menuBar.addMenu("Window", Menus.Window(context, app, self._windowActions))
         self.menuBar = self._menuBar
 
@@ -56,6 +60,7 @@ class MainWindow(ftk.MainWindow):
         self._fileToolBar = ToolBars.File(context, self._fileActions)
         self._compareToolBar = ToolBars.Compare(context, self._compareActions)
         self._viewToolBar = ToolBars.View(context, self._viewActions)
+        self._toolsToolBar = ToolBars.Tools(context, self._toolsActions)
         self._windowToolBar = ToolBars.Window(context, self._windowActions)
         self._playbackBar = PlaybackBar.Widget(context, app, self._playbackActions)
         self._tabBar = TabBar.Widget(context, app)
@@ -74,12 +79,18 @@ class MainWindow(ftk.MainWindow):
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._viewToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        self._toolsToolBar.parent = hLayout
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._windowToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
         self._tabBar.parent = self._layout
         self._splitter = ftk.Splitter(context, ftk.Orientation.Vertical, self._layout)
         self._splitter.split = window.splitter
-        self._viewport.parent = self._splitter
+        self._splitter2 = ftk.Splitter(context, ftk.Orientation.Horizontal, self._splitter)
+        self._splitter2.split = window.splitter2
+        self._viewport.parent = self._splitter2
+        self._toolsWidget = Tools.ToolsWidget(context, app)
+        self._toolsWidget.parent = self._splitter2
         vLayout = ftk.VerticalLayout(context, self._splitter)
         vLayout.spacingRole = ftk.SizeRole._None
         self._playbackBar.parent = vLayout
@@ -124,6 +135,7 @@ class MainWindow(ftk.MainWindow):
         window = self._settingsModel.window
         window.size = self.size
         window.splitter = self._splitter.split
+        window.splitter2 = self._splitter2.split
         self._settingsModel.window = window
 
     def getViewport(self):

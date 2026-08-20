@@ -25,6 +25,8 @@ class App(ftk.App):
             ["-b"], "Open a file for comparison.")
         self._cmdLineCompare = ftk.CmdLineOptionString(
             ["-compare"], "The comparison mode.")
+        self._cmdLineSettings = ftk.CmdLineOptionString(
+            ["-settings"], "The settings file to use.")
 
         ftk.App.__init__(
             self,
@@ -33,7 +35,7 @@ class App(ftk.App):
             "djv-python",
             "DJV Python player",
             [ self._cmdLineInput ],
-            [ self._cmdLineB, self._cmdLineCompare ])
+            [ self._cmdLineB, self._cmdLineCompare, self._cmdLineSettings ])
 
     def __del__(self):
         if hasattr(self, "_settingsModel"):
@@ -63,6 +65,9 @@ class App(ftk.App):
     def getColorModel(self):
         return self._colorModel
 
+    def getToolsModel(self):
+        return self._toolsModel
+
     def observePlayer(self):
         """
         Observe the player for the current file.
@@ -85,11 +90,15 @@ class App(ftk.App):
 
     def run(self):
 
-        # The settings file backs all of the models.
-        docPath = ftk.getUserPath(ftk.UserPath.Documents)
-        settingsPath = ftk.getSettingsPath(
-            ftk.Path(docPath, "DJV").get(),
-            "djv-python.json")
+        # The settings file backs all of the models. A file given on the
+        # command line keeps a test run out of the real settings.
+        if self._cmdLineSettings.hasValue:
+            settingsPath = self._cmdLineSettings.value
+        else:
+            docPath = ftk.getUserPath(ftk.UserPath.Documents)
+            settingsPath = ftk.getSettingsPath(
+                ftk.Path(docPath, "DJV").get(),
+                "djv-python.json")
         self._settings = ftk.Settings(self.context, settingsPath)
 
         self._settingsModel = djv.models.SettingsModel(
@@ -103,6 +112,7 @@ class App(ftk.App):
             self.context, self._settings)
         self._audioModel = djv.models.AudioModel(self.context, self._settings)
         self._colorModel = djv.models.ColorModel(self.context, self._settings)
+        self._toolsModel = djv.models.ToolsModel(self._settings)
 
         self._player = tl.ObservablePlayer(None)
         self._files = []

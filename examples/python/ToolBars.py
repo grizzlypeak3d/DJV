@@ -39,6 +39,17 @@ class View(ftk.ToolBar):
         self.addAction(actions.actions["ZoomIn"])
         self.addAction(actions.actions["ZoomOut"])
 
+class Tools(ftk.ToolBar):
+    """
+    Tools tool bar.
+    """
+    def __init__(self, context, actions, parent = None):
+        ftk.ToolBar.__init__(self, context, ftk.Orientation.Horizontal, parent)
+
+        for tool in actions.tools:
+            if tool.toolBar:
+                self.addAction(actions.actions[tool.name])
+
 class Window(ftk.ToolBar):
     """
     Window tool bar.

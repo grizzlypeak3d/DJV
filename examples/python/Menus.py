@@ -131,6 +131,16 @@ class View(ftk.Menu):
         self.addDivider();
         self.addAction(actions.actions["HUD"])
 
+class ToolsMenu(ftk.Menu):
+    """
+    Tools menu.
+    """
+    def __init__(self, context, app, actions, parent = None):
+        ftk.Menu.__init__(self, context, parent)
+
+        for tool in actions.tools:
+            self.addAction(actions.actions[tool.name])
+
 class Window(ftk.Menu):
     """
     Window menu.
