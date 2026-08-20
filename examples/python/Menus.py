@@ -68,6 +68,55 @@ class Playback(ftk.Menu):
         self.addAction(actions.actions["SetOutPoint"])
         self.addAction(actions.actions["ResetOutPoint"])
 
+class Compare(ftk.Menu):
+    """
+    Compare menu.
+    """
+    def __init__(self, context, app, actions, parent = None):
+        ftk.Menu.__init__(self, context, parent)
+
+        self._app = weakref.ref(app)
+        self._fileActions = []
+
+        self.bMenu = self.addSubMenu("B")
+        self.addAction(actions.actions["Next"])
+        self.addAction(actions.actions["Prev"])
+        self.addDivider();
+        for mode in actions.modes:
+            self.addAction(actions.actions[tl.to_string(mode)])
+        self.addDivider();
+        self.timeMenu = self.addSubMenu("Sync by")
+        for time in tl.getCompareTimeEnums():
+            self.timeMenu.addAction(actions.actions[tl.to_string(time)])
+
+        selfWeak = weakref.ref(self)
+        self._filesObserver = djv.models.FilesModelItemListObserver(
+            app.getFilesModel().observeFiles,
+            lambda files: selfWeak()._filesUpdate(files))
+        self._bObserver = ftk.IntListObserver(
+            app.getFilesModel().observeBIndexes,
+            lambda indexes: selfWeak()._bUpdate(indexes))
+
+    def _toggleB(self, index):
+        if self._app():
+            self._app().getFilesModel().toggleB(index)
+
+    def _filesUpdate(self, files):
+        self.bMenu.clear()
+        self._fileActions = []
+        for i, item in enumerate(files):
+            action = ftk.Action(
+                item.path.fileName,
+                checkedCallback = lambda checked, captured = i:
+                    self._toggleB(captured))
+            self._fileActions.append(action)
+            self.bMenu.addAction(action)
+        self._bUpdate(self._app().getFilesModel().bIndexes)
+
+    def _bUpdate(self, indexes):
+        for i, action in enumerate(self._fileActions):
+            action.checked = i in indexes
+
 class View(ftk.Menu):
     """
     View menu.

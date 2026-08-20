@@ -17,6 +17,16 @@ class File(ftk.ToolBar):
         self.addAction(actions.actions["Close"])
         self.addAction(actions.actions["CloseAll"])
 
+class Compare(ftk.ToolBar):
+    """
+    Compare tool bar.
+    """
+    def __init__(self, context, actions, parent = None):
+        ftk.ToolBar.__init__(self, context, ftk.Orientation.Horizontal, parent)
+
+        for name in ["B", "Wipe", "Overlay", "Difference"]:
+            self.addAction(actions.actions[name])
+
 class View(ftk.ToolBar):
     """
     View tool bar.

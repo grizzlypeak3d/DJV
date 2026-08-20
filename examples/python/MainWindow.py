@@ -6,6 +6,7 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import CompareActions
 import FileActions
 import Menus
 import PlaybackActions
@@ -30,9 +31,13 @@ class MainWindow(ftk.MainWindow):
         # Create the viewport and timeline, driven by the DJV models.
         self._viewport = tl.ui.Viewport(context)
         self._timelineWidget = tl.ui.TimelineWidget(context, app.getTimeUnitsModel())
+        # The current file's timeline and no other; left unset the widget
+        # also draws one for each file being compared.
+        self._timelineWidget.setTimelines([])
 
         # Create the actions.
         self._fileActions = FileActions.Actions(context, app, self)
+        self._compareActions = CompareActions.Actions(context, app)
         self._playbackActions = PlaybackActions.Actions(context, app)
         self._viewActions = ViewActions.Actions(context, app, self)
         self._windowActions = WindowActions.Actions(context, app, self)
@@ -40,6 +45,7 @@ class MainWindow(ftk.MainWindow):
         # Create the menu bar.
         self._menuBar = ftk.MenuBar(context)
         self._menuBar.addMenu("File", Menus.File(context, app, self._fileActions))
+        self._menuBar.addMenu("Compare", Menus.Compare(context, app, self._compareActions))
         self._menuBar.addMenu("Playback", Menus.Playback(context, app, self._playbackActions))
         self._menuBar.addMenu("View", Menus.View(context, app, self._viewActions))
         self._menuBar.addMenu("Window", Menus.Window(context, app, self._windowActions))
@@ -47,6 +53,7 @@ class MainWindow(ftk.MainWindow):
 
         # Create the tool bars.
         self._fileToolBar = ToolBars.File(context, self._fileActions)
+        self._compareToolBar = ToolBars.Compare(context, self._compareActions)
         self._viewToolBar = ToolBars.View(context, self._viewActions)
         self._windowToolBar = ToolBars.Window(context, self._windowActions)
         self._playbackBar = PlaybackBar.Widget(context, app, self._playbackActions)
@@ -60,12 +67,14 @@ class MainWindow(ftk.MainWindow):
         hLayout.spacingRole = ftk.SizeRole.SpacingSmall
         self._fileToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        self._compareToolBar.parent = hLayout
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._viewToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._windowToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
         self._splitter = ftk.Splitter(context, ftk.Orientation.Vertical, self._layout)
-        self._splitter.split = 0.8
+        self._splitter.split = window.splitter
         self._viewport.parent = self._splitter
         vLayout = ftk.VerticalLayout(context, self._splitter)
         vLayout.spacingRole = ftk.SizeRole._None
@@ -90,10 +99,24 @@ class MainWindow(ftk.MainWindow):
         self._compareObserver = djv.models.CompareOptionsObserver(
             app.getFilesModel().observeCompareOptions,
             lambda value: selfWeak()._compareUpdate(value))
+        self._timelineSettingsObserver = djv.models.TimelineSettingsObserver(
+            self._settingsModel.observeTimeline,
+            lambda value: selfWeak()._timelineSettingsUpdate(value))
+        self._timelineFrameViewObserver = ftk.BoolObserver(
+            self._timelineWidget.observeFrameView,
+            lambda value: selfWeak()._timelineFrameViewUpdate(value))
+        colorModel = app.getColorModel()
+        self._ocioObserver = djv.models.OCIOOptionsObserver(
+            colorModel.observeResolvedOCIOOptions,
+            lambda value: selfWeak()._ocioUpdate(value))
+        self._lutObserver = djv.models.LUTOptionsObserver(
+            colorModel.observeLUTOptions,
+            lambda value: selfWeak()._lutUpdate(value))
 
     def __del__(self):
         window = self._settingsModel.window
         window.size = self.size
+        window.splitter = self._splitter.split
         self._settingsModel.window = window
 
     def getViewport(self):
@@ -117,3 +140,36 @@ class MainWindow(ftk.MainWindow):
 
     def _compareUpdate(self, value):
         self._viewport.compareOptions = value
+
+    def _timelineSettingsUpdate(self, settings):
+        self._timelineWidget.frameView = settings.frameView
+        self._timelineWidget.scrollBarsVisible = settings.scrollBars
+        self._timelineWidget.autoScroll = settings.autoScroll
+        self._timelineWidget.stopOnScrub = settings.stopOnScrub
+        display = self._timelineWidget.displayOptions
+        display.minimize = settings.minimize
+        # Track media gates the two rather than replacing them, so that
+        # turning it off and on leaves the choice below it alone.
+        display.thumbnails = settings.trackMedia and settings.thumbnails
+        display.thumbnailHeight = djv.models.getTimelineThumbnailSize(settings.thumbnailSize)
+        display.waveforms = settings.trackMedia and settings.waveforms
+        display.waveformHeight = djv.models.getTimelineWaveformSize(settings.waveformSize)
+        self._timelineWidget.displayOptions = display
+
+    def _timelineFrameViewUpdate(self, value):
+        settings = self._settingsModel.timeline
+        if settings.frameView != value:
+            settings.frameView = value
+            self._settingsModel.timeline = settings
+
+    def _ocioUpdate(self, value):
+        self._viewport.ocioOptions = value
+        display = self._timelineWidget.displayOptions
+        display.ocio = value
+        self._timelineWidget.displayOptions = display
+
+    def _lutUpdate(self, value):
+        self._viewport.LUTOptions = value
+        display = self._timelineWidget.displayOptions
+        display.lut = value
+        self._timelineWidget.displayOptions = display

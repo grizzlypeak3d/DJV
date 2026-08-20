@@ -21,6 +21,10 @@ class App(ftk.App):
     def __init__(self, context, argv):
 
         self._cmdLineInput = ftk.CmdLineArgString("Input", "Input file", True)
+        self._cmdLineB = ftk.CmdLineOptionString(
+            ["-b"], "Open a file for comparison.")
+        self._cmdLineCompare = ftk.CmdLineOptionString(
+            ["-compare"], "The comparison mode.")
 
         ftk.App.__init__(
             self,
@@ -28,7 +32,8 @@ class App(ftk.App):
             argv,
             "djv-python",
             "DJV Python player",
-            [ self._cmdLineInput ])
+            [ self._cmdLineInput ],
+            [ self._cmdLineB, self._cmdLineCompare ])
 
     def __del__(self):
         if hasattr(self, "_settingsModel"):
@@ -54,6 +59,9 @@ class App(ftk.App):
 
     def getAudioModel(self):
         return self._audioModel
+
+    def getColorModel(self):
+        return self._colorModel
 
     def observePlayer(self):
         """
@@ -94,9 +102,12 @@ class App(ftk.App):
         self._viewportModel = djv.models.ViewportModel(
             self.context, self._settings)
         self._audioModel = djv.models.AudioModel(self.context, self._settings)
+        self._colorModel = djv.models.ColorModel(self.context, self._settings)
 
         self._player = tl.ObservablePlayer(None)
-        self._aItem = None
+        self._files = []
+        self._timelines = []
+        self._activeFiles = []
 
         # Initialize the file browser.
         fileBrowserSystem = self.context.getSystemByName("ftk::FileBrowserSystem")
@@ -106,9 +117,15 @@ class App(ftk.App):
         self._window = MainWindow.MainWindow(self.context, self)
 
         selfWeak = weakref.ref(self)
-        self._aObserver = djv.models.FilesModelItemObserver(
-            self._filesModel.observeA,
-            lambda item: selfWeak()._aUpdate(item))
+        self._filesObserver = djv.models.FilesModelItemListObserver(
+            self._filesModel.observeFiles,
+            lambda files: selfWeak()._filesUpdate(files))
+        self._activeObserver = djv.models.FilesModelItemListObserver(
+            self._filesModel.observeActive,
+            lambda files: selfWeak()._activeUpdate(files))
+        self._compareTimeObserver = djv.models.CompareTimeObserver(
+            self._filesModel.observeCompareTime,
+            lambda value: selfWeak()._compareTimeUpdate(value))
         self._volumeObserver = ftk.FloatObserver(
             self._audioModel.observeVolume,
             lambda value: selfWeak()._volumeUpdate(value))
@@ -118,31 +135,65 @@ class App(ftk.App):
 
         if self._cmdLineInput.hasValue:
             self.open(ftk.Path(self._cmdLineInput.value))
+        if self._cmdLineB.hasValue:
+            self.open(ftk.Path(self._cmdLineB.value))
+            self._filesModel.setB(len(self._filesModel.files) - 1, True)
+            self._filesModel.setA(0)
+        if self._cmdLineCompare.hasValue:
+            for mode in tl.getCompareEnums():
+                if tl.getLabel(mode).lower() == self._cmdLineCompare.value.lower():
+                    options = self._filesModel.compareOptions
+                    options.compare = mode
+                    self._filesModel.compareOptions = options
 
         super().run()
 
-    def _aUpdate(self, item):
+    def _createTimeline(self, item):
+        options = tl.Options()
+        imageSeq = self._settingsModel.imageSeq
+        options.imageSeqAudio = imageSeq.audio
+        options.imageSeqAudioExts = imageSeq.audioExts
+        options.imageSeqAudioFileName = imageSeq.audioFileName
+        options.readThreadCount = imageSeq.readThreadCount
+        options.compat = self._settingsModel.otio.compat
+        options.ioOptions = self._settingsModel.ioOptions
+        options.pathOptions.seqMaxDigits = imageSeq.maxDigits
+        return tl.Timeline(self.context, item.path, item.audioPath, options)
+
+    def _filesUpdate(self, files):
+
+        # Timelines follow the files, reused for the files that stay.
+        timelines = []
+        for item in files:
+            timeline = None
+            for i, existing in enumerate(self._files):
+                if existing is item:
+                    timeline = self._timelines[i]
+            if timeline is None:
+                timeline = self._createTimeline(item)
+                self._recentFilesModel.addRecent(item.path)
+            timelines.append(timeline)
+        self._files = list(files)
+        self._timelines = timelines
+
+    def _activeUpdate(self, activeFiles):
 
         # Playback carries over between files the way the C++ application
         # does it: the file being left remembers where it was.
         player = self._player.get()
-        if self._aItem and player:
-            self._aItem.currentTime = player.currentTime
-            self._aItem.inOutRange = player.inOutRange
-        self._aItem = item
+        if self._activeFiles and player:
+            self._activeFiles[0].currentTime = player.currentTime
+            self._activeFiles[0].inOutRange = player.inOutRange
+        prevA = self._activeFiles[0] if self._activeFiles else None
+        self._activeFiles = list(activeFiles)
 
-        player = None
-        if item:
-            options = tl.Options()
-            imageSeq = self._settingsModel.imageSeq
-            options.imageSeqAudio = imageSeq.audio
-            options.imageSeqAudioExts = imageSeq.audioExts
-            options.imageSeqAudioFileName = imageSeq.audioFileName
-            options.readThreadCount = imageSeq.readThreadCount
-            options.compat = self._settingsModel.otio.compat
-            options.ioOptions = self._settingsModel.ioOptions
-            options.pathOptions.seqMaxDigits = imageSeq.maxDigits
-            timeline = tl.Timeline(self.context, item.path, item.audioPath, options)
+        if not activeFiles:
+            self._player.setAlways(None)
+            return
+
+        item = activeFiles[0]
+        if item is not prevA or not player:
+            timeline = self._timelineForItem(item)
             playerOptions = tl.PlayerOptions()
             playerOptions.cache = self._settingsModel.cache
             player = tl.Player(self.context, timeline, playerOptions)
@@ -152,10 +203,27 @@ class App(ftk.App):
                 player.currentTime = item.currentTime
             if item.inOutRange is not None:
                 player.inOutRange = item.inOutRange
-            if self._settingsModel.playback.startPlayback:
+            if self._settingsModel.playback.startPlayback and item.newFile:
                 player.forward()
-            self._recentFilesModel.addRecent(item.path)
-        self._player.setAlways(player)
+            item.newFile = False
+            self._player.setAlways(player)
+
+        player = self._player.get()
+        player.compare = [self._timelineForItem(i) for i in activeFiles[1:]]
+        player.compareTime = self._filesModel.compareTime
+
+    def _timelineForItem(self, item):
+        for i, existing in enumerate(self._files):
+            if existing is item:
+                return self._timelines[i]
+        timeline = self._createTimeline(item)
+        self._files.append(item)
+        self._timelines.append(timeline)
+        return timeline
+
+    def _compareTimeUpdate(self, value):
+        if self._player.get():
+            self._player.get().compareTime = value
 
     def _volumeUpdate(self, value):
         if self._player.get():
