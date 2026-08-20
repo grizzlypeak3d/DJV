@@ -65,9 +65,15 @@ class App(ftk.App):
         """
         Open an image sequence, movie, or timeline file.
         """
-        item = djv.models.FilesModelItem()
-        item.path = path if isinstance(path, ftk.Path) else ftk.Path(str(path))
-        self._filesModel.add(item)
+        path = path if isinstance(path, ftk.Path) else ftk.Path(str(path))
+        options = ftk.DirListOptions()
+        options.seqExts = tl.getExts(self.context, int(tl.FileType.Seq))
+        options.seqMaxDigits = self._settingsModel.imageSeq.maxDigits
+        options.seq = True
+        for i in tl.getPaths(self.context, path, options):
+            item = djv.models.FilesModelItem()
+            item.path = i
+            self._filesModel.add(item)
 
     def run(self):
 
@@ -127,10 +133,19 @@ class App(ftk.App):
 
         player = None
         if item:
-            timeline = tl.Timeline(self.context, item.path)
-            options = tl.PlayerOptions()
-            options.cache = self._settingsModel.cache
-            player = tl.Player(self.context, timeline, options)
+            options = tl.Options()
+            imageSeq = self._settingsModel.imageSeq
+            options.imageSeqAudio = imageSeq.audio
+            options.imageSeqAudioExts = imageSeq.audioExts
+            options.imageSeqAudioFileName = imageSeq.audioFileName
+            options.readThreadCount = imageSeq.readThreadCount
+            options.compat = self._settingsModel.otio.compat
+            options.ioOptions = self._settingsModel.ioOptions
+            options.pathOptions.seqMaxDigits = imageSeq.maxDigits
+            timeline = tl.Timeline(self.context, item.path, item.audioPath, options)
+            playerOptions = tl.PlayerOptions()
+            playerOptions.cache = self._settingsModel.cache
+            player = tl.Player(self.context, timeline, playerOptions)
             player.volume = self._audioModel.volume
             player.mute = self._audioModel.mute
             if item.currentTime is not None:
