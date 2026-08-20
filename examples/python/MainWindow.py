@@ -64,19 +64,25 @@ class MainWindow(ftk.MainWindow):
         self._windowActions = WindowActions.Actions(context, app, self)
         self._helpActions = HelpActions.Actions(context, app, self)
 
-        # Create the menu bar.
+        # Create the menu bar. The menus are kept in a dictionary as well
+        # as added to the menu bar: the C++ side only keeps the C++ half
+        # of a menu alive, and a Python menu that loses its Python half
+        # loses its observers and callbacks with it.
+        self._menus = {}
+        self._menus["File"] = Menus.File(context, app, self._fileActions)
+        self._menus["Compare"] = Menus.Compare(context, app, self._compareActions)
+        self._menus["Playback"] = Menus.Playback(context, app, self._playbackActions)
+        self._menus["Frame"] = Menus.Frame(context, app, self._frameActions)
+        self._menus["Timeline"] = Menus.Timeline(context, app, self._timelineActions)
+        self._menus["Audio"] = Menus.Audio(context, app, self._audioActions)
+        self._menus["View"] = Menus.View(context, app, self._viewActions)
+        self._menus["Window"] = Menus.Window(context, app, self._windowActions)
+        self._menus["Color"] = Menus.Color(context, app, self._colorActions)
+        self._menus["Tools"] = Menus.ToolsMenu(context, app, self._toolsActions)
+        self._menus["Help"] = Menus.Help(context, app, self._helpActions)
         self._menuBar = ftk.MenuBar(context)
-        self._menuBar.addMenu("File", Menus.File(context, app, self._fileActions))
-        self._menuBar.addMenu("Compare", Menus.Compare(context, app, self._compareActions))
-        self._menuBar.addMenu("Playback", Menus.Playback(context, app, self._playbackActions))
-        self._menuBar.addMenu("Frame", Menus.Frame(context, app, self._frameActions))
-        self._menuBar.addMenu("Timeline", Menus.Timeline(context, app, self._timelineActions))
-        self._menuBar.addMenu("Audio", Menus.Audio(context, app, self._audioActions))
-        self._menuBar.addMenu("View", Menus.View(context, app, self._viewActions))
-        self._menuBar.addMenu("Window", Menus.Window(context, app, self._windowActions))
-        self._menuBar.addMenu("Color", Menus.Color(context, app, self._colorActions))
-        self._menuBar.addMenu("Tools", Menus.ToolsMenu(context, app, self._toolsActions))
-        self._menuBar.addMenu("Help", Menus.Help(context, app, self._helpActions))
+        for name in self._menus:
+            self._menuBar.addMenu(name, self._menus[name])
         self.menuBar = self._menuBar
 
         # Create the tool bars.
