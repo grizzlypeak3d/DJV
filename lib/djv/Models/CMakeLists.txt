@@ -54,7 +54,10 @@ target_include_directories(djvModels
     PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(djvModels djvResource tlRender::tlTimeline)
+# tlUI for the thumbnail system: a shared djvModels must name every
+# library it uses directly, where the static build let the final link
+# resolve it.
+target_link_libraries(djvModels djvResource tlRender::tlUI tlRender::tlTimeline)
 
 set_target_properties(djvModels PROPERTIES FOLDER lib)
 set_target_properties(djvModels PROPERTIES PUBLIC_HEADER "${HEADERS}")

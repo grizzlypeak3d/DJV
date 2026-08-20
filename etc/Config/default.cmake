@@ -53,7 +53,16 @@ set(TLRENDER_TESTS OFF CACHE BOOL "")
 set(ftk_API "GL_4_1" CACHE STRING "")
 set(ftk_EXAMPLES OFF CACHE BOOL "")
 set(ftk_TESTS OFF CACHE BOOL "")
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+# Shared when Python is on: each binding module would otherwise carry its
+# own static copy of the stack, and three copies of SDL in one process
+# fight over the same Objective-C classes -- window creation through the
+# losing copy gets a legacy OpenGL context. Not on Windows yet: a DLL
+# exports nothing by default, and the DJV libraries have no export macros.
+if(WIN32)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+else()
+    set(BUILD_SHARED_LIBS ${TLRENDER_PYTHON} CACHE BOOL "")
+endif()
 
 if(APPLE)
     # The deployment target is policy: the oldest system supported. The
