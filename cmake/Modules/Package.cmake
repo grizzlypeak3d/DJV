@@ -27,12 +27,14 @@ if(WIN32)
         list(APPEND INSTALL_DLLS ${FFMPEG_DLLS})
     endif()
 
-    if(TLRENDER_OIIO AND TLRENDER_LIBRAW)
-        set(LIBRAW_DLLS
-            ${CMAKE_INSTALL_PREFIX}/bin/raw.dll
-            ${CMAKE_INSTALL_PREFIX}/bin/raw_r.dll)
-        list(APPEND INSTALL_DLLS ${LIBRAW_DLLS})
-    endif()
+    # LibRaw arrives through OpenImageIO rather than being asked for here,
+    # and whether the super build made it is not something this build is
+    # told: TLRENDER_LIBRAW is a super build option and does not exist in
+    # this scope, so testing it here was always false and the libraries were
+    # never packaged at all. What the prefix holds is the answer, and it
+    # does not go stale when LibRaw changes its version.
+    file(GLOB LIBRAW_DLLS "${CMAKE_INSTALL_PREFIX}/bin/raw*.dll")
+    list(APPEND INSTALL_DLLS ${LIBRAW_DLLS})
     
     if(TLRENDER_USD)
         set(MATERIALX_DLLS
@@ -170,16 +172,14 @@ elseif(APPLE)
         list(APPEND INSTALL_DYLIBS ${FFMPEG_DYLIBS})
     endif()
 
-    if(TLRENDER_OIIO AND TLRENDER_LIBRAW)
-        set(LIBRAW_DYLIBS
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw.25.0.0.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw.25.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.25.0.0.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.25.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.dylib)
-        list(APPEND INSTALL_DYLIBS ${LIBRAW_DYLIBS})
-    endif()
+    # LibRaw arrives through OpenImageIO rather than being asked for here,
+    # and whether the super build made it is not something this build is
+    # told: TLRENDER_LIBRAW is a super build option and does not exist in
+    # this scope, so testing it here was always false and the libraries were
+    # never packaged at all. What the prefix holds is the answer, and it
+    # does not go stale when LibRaw changes its version.
+    file(GLOB LIBRAW_DYLIBS "${CMAKE_INSTALL_PREFIX}/lib/libraw*.dylib")
+    list(APPEND INSTALL_DYLIBS ${LIBRAW_DYLIBS})
     
     if(TLRENDER_USD)
         set(MATERIALX_DYLIBS
@@ -388,16 +388,14 @@ else()
         list(APPEND INSTALL_LIBS ${FFMPEG_LIBS})
     endif()
 
-    if(TLRENDER_OIIO AND TLRENDER_LIBRAW)
-        set(LIBRAW_LIBS
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw.so.25
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw.so.25.0.0
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.so.25
-            ${CMAKE_INSTALL_PREFIX}/lib/libraw_r.so.25.0.0)
-        list(APPEND INSTALL_LIBS ${LIBRAW_LIBS})
-    endif()
+    # LibRaw arrives through OpenImageIO rather than being asked for here,
+    # and whether the super build made it is not something this build is
+    # told: TLRENDER_LIBRAW is a super build option and does not exist in
+    # this scope, so testing it here was always false and the libraries were
+    # never packaged at all. What the prefix holds is the answer, and it
+    # does not go stale when LibRaw changes its version.
+    file(GLOB LIBRAW_LIBS "${CMAKE_INSTALL_PREFIX}/lib/libraw*.so*")
+    list(APPEND INSTALL_LIBS ${LIBRAW_LIBS})
 
     if(TLRENDER_USD)
         set(MATERIALX_LIBS
