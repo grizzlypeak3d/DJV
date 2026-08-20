@@ -1,5 +1,4 @@
 Configuration:
-* TLRENDER_FFMPEG_CMD=ON
 
 Requirements:
 * Pillow for make_svg.py: python3 -m pip install Pillow

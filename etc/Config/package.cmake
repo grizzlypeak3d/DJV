@@ -15,7 +15,6 @@ endif()
 # FORCE, so that nothing included below can change what a package ships. A -D
 # on the command line still wins, since CMake reads those after this file.
 set(TLRENDER_FFMPEG_MINIMAL ON CACHE BOOL "" FORCE)
-set(TLRENDER_FFMPEG_CMD ON CACHE BOOL "" FORCE)
 set(TLRENDER_FFMPEG_PLUGIN ON CACHE BOOL "" FORCE)
 set(DJV_TESTS OFF CACHE BOOL "")
 
