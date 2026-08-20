@@ -52,8 +52,8 @@ class MainWindow(ftk.MainWindow):
         self._menuBar.addMenu("Compare", Menus.Compare(context, app, self._compareActions))
         self._menuBar.addMenu("Playback", Menus.Playback(context, app, self._playbackActions))
         self._menuBar.addMenu("View", Menus.View(context, app, self._viewActions))
-        self._menuBar.addMenu("Tools", Menus.ToolsMenu(context, app, self._toolsActions))
         self._menuBar.addMenu("Window", Menus.Window(context, app, self._windowActions))
+        self._menuBar.addMenu("Tools", Menus.ToolsMenu(context, app, self._toolsActions))
         self.menuBar = self._menuBar
 
         # Create the tool bars.
@@ -77,11 +77,11 @@ class MainWindow(ftk.MainWindow):
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._compareToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        self._windowToolBar.parent = hLayout
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._viewToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._toolsToolBar.parent = hLayout
-        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
-        self._windowToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
         self._tabBar.parent = self._layout
         self._splitter = ftk.Splitter(context, ftk.Orientation.Vertical, self._layout)
@@ -91,11 +91,9 @@ class MainWindow(ftk.MainWindow):
         self._viewport.parent = self._splitter2
         self._toolsWidget = Tools.ToolsWidget(context, app)
         self._toolsWidget.parent = self._splitter2
-        vLayout = ftk.VerticalLayout(context, self._splitter)
-        vLayout.spacingRole = ftk.SizeRole._None
-        self._playbackBar.parent = vLayout
-        ftk.Divider(context, ftk.Orientation.Vertical, vLayout)
-        self._timelineWidget.parent = vLayout
+        self._timelineWidget.parent = self._splitter
+        ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
+        self._playbackBar.parent = self._layout
         ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
         self._statusBar.parent = self._layout
 

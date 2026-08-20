@@ -24,8 +24,10 @@ class Compare(ftk.ToolBar):
     def __init__(self, context, actions, parent = None):
         ftk.ToolBar.__init__(self, context, ftk.Orientation.Horizontal, parent)
 
-        for name in ["B", "Wipe", "Overlay", "Difference"]:
-            self.addAction(actions.actions[name])
+        for mode in actions.modes:
+            if tl.Compare._None == mode:
+                continue
+            self.addAction(actions.actions[tl.to_string(mode)])
 
 class View(ftk.ToolBar):
     """
