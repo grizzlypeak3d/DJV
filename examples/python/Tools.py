@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class IToolWidget(ftk.IContainer):
@@ -25,7 +27,7 @@ class IToolWidget(ftk.IContainer):
 
         self._closeButton = ftk.ToolButton(context)
         self._closeButton.icon = "Close"
-        self._closeButton.setClickedCallback(self._close)
+        self._closeButton.setClickedCallback(Util.weak(self._close))
 
         self._layout = ftk.VerticalLayout(context)
         self._layout.spacingRole = ftk.SizeRole._None
@@ -122,7 +124,8 @@ class AudioTool(IToolWidget):
 
         appWeak = weakref.ref(app)
         self._deviceComboBox.setIndexCallback(
-            lambda index: self._deviceCallback(appWeak(), index))
+            lambda index, f = Util.weak(self._deviceCallback):
+                f(appWeak(), index))
         self._volumeSlider.setCallback(
             lambda value: setattr(appWeak().getAudioModel(), "volume", value))
         self._muteCheckBox.setCheckedCallback(
@@ -252,25 +255,31 @@ class FilesTool(IToolWidget):
         self._bButtonGroup.setCheckedCallback(
             lambda index, value: appWeak().getFilesModel().setB(index, value))
         self._compareComboBox.setIndexCallback(
-            lambda value: self._setCompareOption(
-                appWeak(), "compare", tl.getCompareEnums()[value]))
+            lambda value, f = Util.weak(self._setCompareOption):
+                f(appWeak(), "compare", tl.getCompareEnums()[value]))
         self._wipeXSlider.setCallback(
-            lambda value: self._setWipeCenter(appWeak(), x = value))
+            lambda value, f = Util.weak(self._setWipeCenter):
+                f(appWeak(), x = value))
         self._wipeYSlider.setCallback(
-            lambda value: self._setWipeCenter(appWeak(), y = value))
+            lambda value, f = Util.weak(self._setWipeCenter):
+                f(appWeak(), y = value))
         self._wipeRotationSlider.setCallback(
-            lambda value: self._setCompareOption(appWeak(), "wipeRotation", value))
+            lambda value, f = Util.weak(self._setCompareOption):
+                f(appWeak(), "wipeRotation", value))
         self._overlaySlider.setCallback(
-            lambda value: self._setCompareOption(appWeak(), "overlay", value))
+            lambda value, f = Util.weak(self._setCompareOption):
+                f(appWeak(), "overlay", value))
         self._gainSlider.setCallback(
-            lambda value: self._setCompareOption(appWeak(), "differenceGain", value))
+            lambda value, f = Util.weak(self._setCompareOption):
+                f(appWeak(), "differenceGain", value))
         self._compareTimeComboBox.setIndexCallback(
             lambda value: setattr(
                 appWeak().getFilesModel(),
                 "compareTime",
                 tl.getCompareTimeEnums()[value]))
         self._sameSizeCheckBox.setCheckedCallback(
-            lambda value: self._setCompareOption(appWeak(), "sameSize", value))
+            lambda value, f = Util.weak(self._setCompareOption):
+                f(appWeak(), "sameSize", value))
 
         selfWeak = weakref.ref(self)
         self._filesObserver = djv.models.FilesModelItemListObserver(
@@ -336,8 +345,8 @@ class FilesTool(IToolWidget):
             layerComboBox.tooltip = "Set the current layer."
             layerComboBox.setVisible(len(item.videoLayers) > 1)
             layerComboBox.setIndexCallback(
-                lambda value, captured = item:
-                    self._app().getFilesModel().setLayer(captured, value))
+                lambda value, captured = item, appWeak = self._app:
+                    appWeak().getFilesModel().setLayer(captured, value))
             self._grid.setGridPos(layerComboBox, row, 2)
 
             self._rowWidgets.append((nameButton, bButton, layerComboBox))
@@ -430,22 +439,29 @@ class ViewTool(IToolWidget):
 
         appWeak = weakref.ref(app)
         self._backgroundComboBox.setIndexCallback(
-            lambda value: self._setBackground(
-                appWeak(), "type", tl.getBackgroundEnums()[value]))
+            lambda value, f = Util.weak(self._setBackground):
+                f(appWeak(), "type", tl.getBackgroundEnums()[value]))
         self._solidSwatch.setCallback(
-            lambda value: self._setBackground(appWeak(), "solidColor", value))
+            lambda value, f = Util.weak(self._setBackground):
+                f(appWeak(), "solidColor", value))
         self._checkers0Swatch.setCallback(
-            lambda value: self._setCheckersColor(appWeak(), 0, value))
+            lambda value, f = Util.weak(self._setCheckersColor):
+                f(appWeak(), 0, value))
         self._checkers1Swatch.setCallback(
-            lambda value: self._setCheckersColor(appWeak(), 1, value))
+            lambda value, f = Util.weak(self._setCheckersColor):
+                f(appWeak(), 1, value))
         self._gridCheckBox.setCheckedCallback(
-            lambda value: self._setGrid(appWeak(), "enabled", value))
+            lambda value, f = Util.weak(self._setGrid):
+                f(appWeak(), "enabled", value))
         self._gridSizeSlider.setCallback(
-            lambda value: self._setGrid(appWeak(), "cellSize", value))
+            lambda value, f = Util.weak(self._setGrid):
+                f(appWeak(), "cellSize", value))
         self._gridColorSwatch.setCallback(
-            lambda value: self._setGrid(appWeak(), "color", value))
+            lambda value, f = Util.weak(self._setGrid):
+                f(appWeak(), "color", value))
         self._hudCheckBox.setCheckedCallback(
-            lambda value: self._setHUD(appWeak(), value))
+            lambda value, f = Util.weak(self._setHUD):
+                f(appWeak(), value))
 
         selfWeak = weakref.ref(self)
         self._bgObserver = djv.models.BackgroundOptionsObserver(
@@ -585,12 +601,14 @@ class ColorTool(IToolWidget):
         bellows.toolWidget = self._lutEnabledCheckBox
 
         self._lutEnabledCheckBox.setCheckedCallback(
-            lambda value: self._setLUT(appWeak(), "enabled", value))
+            lambda value, f = Util.weak(self._setLUT):
+                f(appWeak(), "enabled", value))
         self._lutFileEdit.setCallback(
-            lambda value: self._setLUT(appWeak(), "fileName", str(value)))
+            lambda value, f = Util.weak(self._setLUT):
+                f(appWeak(), "fileName", str(value)))
         self._lutOrderComboBox.setIndexCallback(
-            lambda value: self._setLUT(
-                appWeak(), "order", tl.getLUTOrderEnums()[value]))
+            lambda value, f = Util.weak(self._setLUT):
+                f(appWeak(), "order", tl.getLUTOrderEnums()[value]))
         self._lutObserver = djv.models.LUTOptionsObserver(
             colorModel.observeLUTOptions,
             lambda value: selfWeak()._lutUpdate(value))
@@ -624,8 +642,9 @@ class ColorTool(IToolWidget):
             check = ftk.CheckBox(context)
             self._displayChecks[section] = check
             check.setCheckedCallback(
-                lambda value, captured = section:
-                    self._setDisplay(appWeak(), captured, "enabled", value))
+                lambda value, captured = section, \
+                    f = Util.weak(self._setDisplay):
+                    f(appWeak(), captured, "enabled", value))
             vLayout = ftk.VerticalLayout(context)
             vLayout.marginRole = ftk.SizeRole.Margin
             form = ftk.FormLayout(context, vLayout)
@@ -634,10 +653,10 @@ class ColorTool(IToolWidget):
                 slider = ftk.FloatEditSlider(context)
                 slider.range = ftk.RangeF(lo, hi)
                 slider.setCallback(
-                    lambda value, s = section, f = field, v = vec:
-                        self._setDisplay(
-                            appWeak(), s, f,
-                            ftk.V3F(value, value, value) if v else value))
+                    lambda value, s = section, f = field, v = vec, \
+                        fn = Util.weak(self._setDisplay):
+                        fn(appWeak(), s, f,
+                           ftk.V3F(value, value, value) if v else value))
                 form.addRow(field + ":", slider)
                 self._displaySliders[(section, field)] = (slider, vec)
             title = "Soft Clip" if section == "SoftClip" else section

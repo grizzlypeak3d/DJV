@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import os
 import weakref
 
@@ -43,7 +45,8 @@ class File(ftk.Menu):
         for recent in reversed(recentList):
             action = ftk.Action(
                 recent.fileName,
-                lambda captured = recent: self._recentCallback(captured))
+                lambda captured = recent, \
+                    f = Util.weak(self._recentCallback): f(captured))
             self.recentMenu.addAction(action)
 
 class Playback(ftk.Menu):
@@ -177,8 +180,8 @@ class Compare(ftk.Menu):
         for i, item in enumerate(files):
             action = ftk.Action(
                 item.path.fileName,
-                checkedCallback = lambda checked, captured = i:
-                    self._toggleB(captured))
+                checkedCallback = lambda checked, captured = i, \
+                    f = Util.weak(self._toggleB): f(captured))
             self._fileActions.append(action)
             self.bMenu.addAction(action)
         self._bUpdate(self._app().getFilesModel().bIndexes)

@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Actions:
@@ -20,27 +22,27 @@ class Actions:
             "Stop",
             "PlaybackStop",
             ftk.KeyShortcut(ftk.Key.K),
-            self._stopCallback)
+            Util.weak(self._stopCallback))
         self.actions["Stop"].tooltip = "Stop playback."
 
         self.actions["Forward"] = ftk.Action(
             "Forward",
             "PlaybackForward",
             ftk.KeyShortcut(ftk.Key.L),
-            self._forwardCallback)
+            Util.weak(self._forwardCallback))
         self.actions["Forward"].tooltip = "Start forward playback."
 
         self.actions["Reverse"] = ftk.Action(
             "Reverse",
             "PlaybackReverse",
             ftk.KeyShortcut(ftk.Key.J),
-            self._reverseCallback)
+            Util.weak(self._reverseCallback))
         self.actions["Reverse"].tooltip = "Start reverse playback."
 
         self.actions["TogglePlayback"] = ftk.Action(
             "Toggle Playback",
             ftk.KeyShortcut(ftk.Key.Space),
-            self._togglePlaybackCallback)
+            Util.weak(self._togglePlaybackCallback))
         self.actions["TogglePlayback"].tooltip = "Toggle playback."
 
         for name, text, key, mod, action, tooltip in [
@@ -56,7 +58,8 @@ class Actions:
             a = ftk.Action(
                 text,
                 ftk.KeyShortcut(key, mod),
-                lambda captured = action: self._timeAction(captured))
+                lambda captured = action, \
+                    f = Util.weak(self._timeAction): f(captured))
             a.tooltip = tooltip
             self.actions[name] = a
 
@@ -65,33 +68,34 @@ class Actions:
         for mode in tl.getLoopEnums():
             a = ftk.Action(
                 tl.getLabel(mode),
-                checkedCallback = lambda checked, captured = mode:
-                    self._loopCallback(captured) if checked else None)
+                checkedCallback = lambda checked, captured = mode, \
+                    f = Util.weak(self._loopCallback):
+                    f(captured) if checked else None)
             self.actions[tl.to_string(mode)] = a
             self.loopGroup.addAction(a)
 
         self.actions["SetInPoint"] = ftk.Action(
             "Set In Point",
             ftk.KeyShortcut(ftk.Key.I),
-            self._setInPointCallback)
+            Util.weak(self._setInPointCallback))
         self.actions["SetInPoint"].tooltip = "Set the in point to the current frame."
 
         self.actions["ResetInPoint"] = ftk.Action(
             "Reset In Point",
             ftk.KeyShortcut(ftk.Key.I, ftk.KeyModifier.Shift),
-            self._resetInPointCallback)
+            Util.weak(self._resetInPointCallback))
         self.actions["ResetInPoint"].tooltip = "Reset the in point to the start frame."
 
         self.actions["SetOutPoint"] = ftk.Action(
             "Set Out Point",
             ftk.KeyShortcut(ftk.Key.O),
-            self._setOutPointCallback)
+            Util.weak(self._setOutPointCallback))
         self.actions["SetOutPoint"].tooltip = "Set the out point to the current frame."
 
         self.actions["ResetOutPoint"] = ftk.Action(
             "Reset Out Point",
             ftk.KeyShortcut(ftk.Key.O, ftk.KeyModifier.Shift),
-            self._resetOutPointCallback)
+            Util.weak(self._resetOutPointCallback))
         self.actions["ResetOutPoint"].tooltip = "Reset the out point to the end frame."
 
         selfWeak = weakref.ref(self)

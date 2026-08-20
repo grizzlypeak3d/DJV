@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Widget(ftk.IContainer):
@@ -23,9 +25,11 @@ class Widget(ftk.IContainer):
         self._setWidget(self._tabBar)
 
         self._tabBar.setCallback(
-            lambda index: self._app().getFilesModel().setA(index))
+            lambda index, appWeak = self._app:
+                appWeak().getFilesModel().setA(index))
         self._tabBar.setTabCloseCallback(
-            lambda index: self._app().getFilesModel().close(index))
+            lambda index, appWeak = self._app:
+                appWeak().getFilesModel().close(index))
 
         selfWeak = weakref.ref(self)
         self._filesObserver = djv.models.FilesModelItemListObserver(

@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Actions:
@@ -20,7 +22,7 @@ class Actions:
             "Full Screen",
             "WindowFullScreen",
             ftk.KeyShortcut(ftk.Key.U, ftk.commandKeyModifier),
-            checkedCallback = self._fullScreenCallback)
+            checkedCallback = Util.weak(self._fullScreenCallback))
         self.actions["FullScreen"].tooltip = "Toggle the window full screen."
 
     def _fullScreenCallback(self, value):

@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Actions:
@@ -21,34 +23,37 @@ class Actions:
             "Frame",
             "ViewFrame",
             ftk.KeyShortcut(ftk.Key.Backspace),
-            checkedCallback = self._frameCallback)
+            checkedCallback = Util.weak(self._frameCallback))
         self.actions["Frame"].tooltip = "Toggle whether to automatically frame the view."
 
         self.actions["ZoomReset"] = ftk.Action(
             "Zoom Reset",
             "ViewZoomReset",
             ftk.KeyShortcut(ftk.Key._0),
-            callback = lambda: self._mainWindowWeak().getViewport().resetZoom())
+            callback = lambda mainWindowWeak = self._mainWindowWeak:
+                mainWindowWeak().getViewport().resetZoom())
         self.actions["ZoomReset"].tooltip = "Reset the view zoom."
 
         self.actions["ZoomIn"] = ftk.Action(
             "Zoom In",
             "ViewZoomIn",
             ftk.KeyShortcut(ftk.Key.Equals),
-            callback = lambda: self._mainWindowWeak().getViewport().zoomIn())
+            callback = lambda mainWindowWeak = self._mainWindowWeak:
+                mainWindowWeak().getViewport().zoomIn())
         self.actions["ZoomIn"].tooltip = "Zoom the view in."
 
         self.actions["ZoomOut"] = ftk.Action(
             "Zoom Out",
             "ViewZoomOut",
             ftk.KeyShortcut(ftk.Key.Minus),
-            callback = lambda: self._mainWindowWeak().getViewport().zoomOut())
+            callback = lambda mainWindowWeak = self._mainWindowWeak:
+                mainWindowWeak().getViewport().zoomOut())
         self.actions["ZoomOut"].tooltip = "Zoom the view out."
 
         self.actions["HUD"] = ftk.Action(
             "HUD",
             ftk.KeyShortcut(ftk.Key.H, ftk.commandKeyModifier),
-            checkedCallback = self._hudCallback)
+            checkedCallback = Util.weak(self._hudCallback))
         self.actions["HUD"].tooltip = "Toggle the HUD (heads up display)."
 
         selfWeak = weakref.ref(self)

@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Actions:
@@ -19,13 +21,13 @@ class Actions:
         self.actions = {}
         self.actions["Documentation"] = ftk.Action(
             "Documentation",
-            self._documentation)
+            Util.weak(self._documentation))
         self.actions["Documentation"].tooltip = \
             "Open the documentation in a web browser."
 
         self.actions["About"] = ftk.Action(
             "About",
-            self._about)
+            Util.weak(self._about))
         self.actions["About"].tooltip = "Show the about dialog."
 
     def _documentation(self):

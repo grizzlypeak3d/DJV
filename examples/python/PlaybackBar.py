@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Widget(ftk.IContainer):
@@ -63,8 +65,8 @@ class Widget(ftk.IContainer):
         self._muteButton.parent = self._layout
         self._setWidget(self._layout)
 
-        self._currentTimeEdit.setCallback(self._currentTimeCallback)
-        self._speedEdit.setCallback(self._speedCallback)
+        self._currentTimeEdit.setCallback(Util.weak(self._currentTimeCallback))
+        self._speedEdit.setCallback(Util.weak(self._speedCallback))
         appWeak = weakref.ref(app)
         self._muteButton.setCheckedCallback(
             lambda value: setattr(appWeak().getAudioModel(), "mute", value))

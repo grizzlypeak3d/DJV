@@ -8,6 +8,8 @@ import djvPy as djv
 
 import Tools
 
+import Util
+
 import weakref
 
 class Actions:
@@ -26,8 +28,8 @@ class Actions:
                 tool.name,
                 tool.icon,
                 tool.shortcut,
-                checkedCallback = lambda checked, captured = tool.name:
-                    self._toolCallback(captured, checked))
+                checkedCallback = lambda checked, captured = tool.name, \
+                    f = Util.weak(self._toolCallback): f(captured, checked))
             action.tooltip = "Toggle the {} tool.".format(tool.name.lower())
             self.actions[tool.name] = action
 

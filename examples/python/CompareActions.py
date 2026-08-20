@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Actions:
@@ -44,14 +46,16 @@ class Actions:
                     tl.getLabel(mode),
                     icon,
                     shortcuts[name],
-                    checkedCallback = lambda checked, captured = mode:
-                        self._modeCallback(captured) if checked else None)
+                    checkedCallback = lambda checked, captured = mode, \
+                        f = Util.weak(self._modeCallback):
+                        f(captured) if checked else None)
             else:
                 action = ftk.Action(
                     tl.getLabel(mode),
                     icon,
-                    checkedCallback = lambda checked, captured = mode:
-                        self._modeCallback(captured) if checked else None)
+                    checkedCallback = lambda checked, captured = mode, \
+                        f = Util.weak(self._modeCallback):
+                        f(captured) if checked else None)
             action.tooltip = tooltips.get(name, "")
             self.actions[name] = action
             self.modeGroup.addAction(action)
@@ -60,14 +64,14 @@ class Actions:
             "Next",
             "Next",
             ftk.KeyShortcut(ftk.Key.PageDown, ftk.KeyModifier.Shift),
-            lambda: self._app().getFilesModel().nextB())
+            lambda appWeak = self._app: appWeak().getFilesModel().nextB())
         self.actions["Next"].tooltip = "Go to the next B file."
 
         self.actions["Prev"] = ftk.Action(
             "Previous",
             "Prev",
             ftk.KeyShortcut(ftk.Key.PageUp, ftk.KeyModifier.Shift),
-            lambda: self._app().getFilesModel().prevB())
+            lambda appWeak = self._app: appWeak().getFilesModel().prevB())
         self.actions["Prev"].tooltip = "Go to the previous B file."
 
         # The time sync modes.
@@ -79,8 +83,9 @@ class Actions:
         for time in tl.getCompareTimeEnums():
             action = ftk.Action(
                 tl.getLabel(time),
-                checkedCallback = lambda checked, captured = time:
-                    self._timeCallback(captured) if checked else None)
+                checkedCallback = lambda checked, captured = time, \
+                    f = Util.weak(self._timeCallback):
+                    f(captured) if checked else None)
             action.tooltip = timeTooltips.get(tl.to_string(time), "")
             self.actions[tl.to_string(time)] = action
             self.timeGroup.addAction(action)

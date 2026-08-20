@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Actions:
@@ -44,8 +46,8 @@ class Actions:
         for name, field, tooltip in items:
             action = ftk.Action(
                 labels[name],
-                checkedCallback = lambda checked, captured = field:
-                    self._setField(captured, checked))
+                checkedCallback = lambda checked, captured = field, \
+                    f = Util.weak(self._setField): f(captured, checked))
             action.tooltip = tooltip
             self.actions[name] = action
 

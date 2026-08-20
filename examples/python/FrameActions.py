@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Actions:
@@ -39,7 +41,8 @@ class Actions:
              "Go to the next frame X100."),
         ]
         for name, text, icon, timeAction, shortcut, tooltip in items:
-            callback = lambda captured = timeAction: self._timeAction(captured)
+            callback = lambda captured = timeAction, \
+                f = Util.weak(self._timeAction): f(captured)
             if icon:
                 action = ftk.Action(text, icon, shortcut, callback)
             else:

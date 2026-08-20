@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Actions:
@@ -19,13 +21,13 @@ class Actions:
         self.actions["OCIO"] = ftk.Action(
             "OCIO",
             ftk.KeyShortcut(ftk.Key.N, ftk.KeyModifier.Control),
-            checkedCallback = lambda value: self._setOCIO(value))
+            checkedCallback = Util.weak(self._setOCIO))
         self.actions["OCIO"].tooltip = "Toggle whether OCIO is enabled."
 
         self.actions["LUT"] = ftk.Action(
             "LUT",
             ftk.KeyShortcut(ftk.Key.K, ftk.KeyModifier.Control),
-            checkedCallback = lambda value: self._setLUT(value))
+            checkedCallback = Util.weak(self._setLUT))
         self.actions["LUT"].tooltip = "Toggle whether the LUT is enabled."
 
         selfWeak = weakref.ref(self)

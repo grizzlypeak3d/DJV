@@ -6,6 +6,8 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import Util
+
 import weakref
 
 class Widget(ftk.IContainer):
@@ -51,7 +53,7 @@ class Widget(ftk.IContainer):
                     text = pieces[0]
             self._logLabel.text = text
             if text:
-                self._logTimer.start(5.0, self._clearLog)
+                self._logTimer.start(5.0, Util.weak(self._clearLog))
 
     def _clearLog(self):
         self._logLabel.text = ""
