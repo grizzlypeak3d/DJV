@@ -13,9 +13,25 @@ Changes:
   written: the display's when the export is color managed, the source's when
   it is not.
 
+* Add thumbnails to the file browser. The size is set in the browser's
+  "Settings" section, or turned off there.
+
+* The file browser can be opened in a window of its own, so that it does not
+  cover what is being played while a file is chosen. Turned on with "Floating
+  window" in the settings; the "Pin" check box in the browser then keeps it
+  open after a file is chosen, for opening a run of files one after another.
+
+* The external FFmpeg command is part of the FFmpeg plugin rather than a
+  plugin of its own, and is chosen per file rather than configured on or off:
+  a file the packaged FFmpeg has no decoder for is read with the command, and
+  the rest are read by the libraries. Which of the two read a file is logged.
+
 Fixes:
 * The color corrections are applied in linear, when the OCIO configuration
   names a scene_linear role, rather than in the file's color space.
+
+* File information showed a frame rate of zero for movies whose container
+  declares it as "0/0", such as ARRI ProRes MXF.
 
 ## 3.5.0
 
