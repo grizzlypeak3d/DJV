@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/ToolBar.h>
 
 namespace djv
@@ -10,7 +12,7 @@ namespace djv
     namespace app
     {
         //! Compare tool bar.
-        class CompareToolBar : public ftk::ToolBar
+        class DJV_API_TYPE CompareToolBar : public ftk::ToolBar
         {
             FTK_NON_COPYABLE(CompareToolBar);
 
@@ -23,9 +25,9 @@ namespace djv
             CompareToolBar() = default;
 
         public:
-            ~CompareToolBar();
+            DJV_API ~CompareToolBar();
 
-            static std::shared_ptr<CompareToolBar> create(
+            DJV_API static std::shared_ptr<CompareToolBar> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::map<std::string, std::shared_ptr<ftk::Action> >&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

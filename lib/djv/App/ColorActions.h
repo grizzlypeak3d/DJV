@@ -4,13 +4,14 @@
 #pragma once
 
 #include <djv/App/IActions.h>
+#include <djv/Models/Export.h>
 
 namespace djv
 {
     namespace app
     {
         //! Color actions.
-        class ColorActions : public IActions
+        class DJV_API_TYPE ColorActions : public IActions
         {
             FTK_NON_COPYABLE(ColorActions);
 
@@ -22,9 +23,9 @@ namespace djv
             ColorActions();
 
         public:
-            ~ColorActions();
+            DJV_API ~ColorActions();
 
-            static std::shared_ptr<ColorActions> create(
+            DJV_API static std::shared_ptr<ColorActions> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&);
 

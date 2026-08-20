@@ -4,13 +4,14 @@
 #pragma once
 
 #include <djv/App/IToolWidget.h>
+#include <djv/Models/Export.h>
 
 namespace djv
 {
     namespace app
     {
         //! Settings tool.
-        class SettingsTool : public IToolWidget
+        class DJV_API_TYPE SettingsTool : public IToolWidget
         {
             FTK_NON_COPYABLE(SettingsTool);
 
@@ -24,17 +25,17 @@ namespace djv
             SettingsTool();
 
         public:
-            virtual ~SettingsTool();
+            DJV_API virtual ~SettingsTool();
 
             //! Create a new tool.
-            static std::shared_ptr<SettingsTool> create(
+            DJV_API static std::shared_ptr<SettingsTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Scroll to the given section.
-            void scrollTo(const std::string&);
+            DJV_API void scrollTo(const std::string&);
 
         private:
             FTK_PRIVATE();

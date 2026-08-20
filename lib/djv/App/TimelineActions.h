@@ -4,6 +4,7 @@
 #pragma once
 
 #include <djv/App/IActions.h>
+#include <djv/Models/Export.h>
 
 namespace djv
 {
@@ -12,7 +13,7 @@ namespace djv
         class MainWindow;
 
         //! Timeline actions.
-        class TimelineActions : public IActions
+        class DJV_API_TYPE TimelineActions : public IActions
         {
             FTK_NON_COPYABLE(TimelineActions);
 
@@ -25,9 +26,9 @@ namespace djv
             TimelineActions();
 
         public:
-            ~TimelineActions();
+            DJV_API ~TimelineActions();
 
-            static std::shared_ptr<TimelineActions> create(
+            DJV_API static std::shared_ptr<TimelineActions> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&);

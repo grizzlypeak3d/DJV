@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/IWidgetPopup.h>
 
 #include <ftk/Core/Range.h>
@@ -15,7 +17,7 @@ namespace djv
         //!
         //! The range a sequence is meant to cover is set rarely, and two edits
         //! in every row of the files tool cost more width than the tool has.
-        class FrameRangePopup : public ftk::IWidgetPopup
+        class DJV_API_TYPE FrameRangePopup : public ftk::IWidgetPopup
         {
             FTK_NON_COPYABLE(FrameRangePopup);
 
@@ -28,16 +30,16 @@ namespace djv
             FrameRangePopup();
 
         public:
-            virtual ~FrameRangePopup();
+            DJV_API virtual ~FrameRangePopup();
 
             //! Create a new popup.
-            static std::shared_ptr<FrameRangePopup> create(
+            DJV_API static std::shared_ptr<FrameRangePopup> create(
                 const std::shared_ptr<ftk::Context>&,
                 const ftk::RangeI64&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the callback.
-            void setCallback(const std::function<void(const ftk::RangeI64&)>&);
+            DJV_API void setCallback(const std::function<void(const ftk::RangeI64&)>&);
 
         private:
             FTK_PRIVATE();

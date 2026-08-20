@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/IWidgetPopup.h>
 
@@ -11,7 +13,7 @@ namespace djv
     namespace ui
     {
         //! Speed popup.
-        class SpeedPopup : public ftk::IWidgetPopup
+        class DJV_API_TYPE SpeedPopup : public ftk::IWidgetPopup
         {
             FTK_NON_COPYABLE(SpeedPopup);
 
@@ -25,17 +27,17 @@ namespace djv
             SpeedPopup();
 
         public:
-            virtual ~SpeedPopup();
+            DJV_API virtual ~SpeedPopup();
 
-            static std::shared_ptr<SpeedPopup> create(
+            DJV_API static std::shared_ptr<SpeedPopup> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::DoubleModel>&,
                 double defaultSpeed,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            void setCallback(const std::function<void(double)>&);
+            DJV_API void setCallback(const std::function<void(double)>&);
 
-            void open(
+            DJV_API void open(
                 const std::shared_ptr<ftk::IWindow>&,
                 const ftk::Box2I& buttonGeometry,
                 const std::optional<ftk::Box2I>& widgetGeometry = std::optional<ftk::Box2I>()) override;

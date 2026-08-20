@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <tlRender/Timeline/Player.h>
@@ -43,7 +44,7 @@ namespace djv
         class ToolWidgetFactory;
 
         //! Application.
-        class App : public ftk::App
+        class DJV_API_TYPE App : public ftk::App
         {
             FTK_NON_COPYABLE(App);
 
@@ -56,52 +57,52 @@ namespace djv
             App();
 
         public:
-            ~App();
+            DJV_API ~App();
 
             //! Create a new application.
-            static std::shared_ptr<App> create(
+            DJV_API static std::shared_ptr<App> create(
                 const std::shared_ptr<ftk::Context>&,
                 std::vector<std::string>&,
                 const std::shared_ptr<models::AppInfoModel>& = nullptr);
 
             //! Get the application information model.
-            const std::shared_ptr<models::AppInfoModel>& getAppInfoModel() const;
+            DJV_API const std::shared_ptr<models::AppInfoModel>& getAppInfoModel() const;
 
             //! Get the settings model.
-            const std::shared_ptr<models::SettingsModel>& getSettingsModel() const;
+            DJV_API const std::shared_ptr<models::SettingsModel>& getSettingsModel() const;
 
             //! Get the system log model.
-            const std::shared_ptr<ftk::SysLogModel>& getSysLogModel() const;
+            DJV_API const std::shared_ptr<ftk::SysLogModel>& getSysLogModel() const;
 
             //! Get the time units model.
-            const std::shared_ptr<models::TimeUnitsModel>& getTimeUnitsModel() const;
+            DJV_API const std::shared_ptr<models::TimeUnitsModel>& getTimeUnitsModel() const;
 
             //! Get the files model.
-            const std::shared_ptr<models::FilesModel>& getFilesModel() const;
+            DJV_API const std::shared_ptr<models::FilesModel>& getFilesModel() const;
 
             //! Get the recent files model.
-            const std::shared_ptr<models::RecentFilesModel>& getRecentFilesModel() const;
+            DJV_API const std::shared_ptr<models::RecentFilesModel>& getRecentFilesModel() const;
 
             //! Get the color model.
-            const std::shared_ptr<models::ColorModel>& getColorModel() const;
+            DJV_API const std::shared_ptr<models::ColorModel>& getColorModel() const;
 
             //! Get the viewport model.
-            const std::shared_ptr<models::ViewportModel>& getViewportModel() const;
+            DJV_API const std::shared_ptr<models::ViewportModel>& getViewportModel() const;
 
             //! Get the audio model.
-            const std::shared_ptr<models::AudioModel>& getAudioModel() const;
+            DJV_API const std::shared_ptr<models::AudioModel>& getAudioModel() const;
 
             //! Get the tools model.
-            const std::shared_ptr<models::ToolsModel>& getToolsModel() const;
+            DJV_API const std::shared_ptr<models::ToolsModel>& getToolsModel() const;
 
             //! Get the commands model.
-            const std::shared_ptr<models::CommandsModel>& getCommandsModel() const;
+            DJV_API const std::shared_ptr<models::CommandsModel>& getCommandsModel() const;
 
             //! Get whether the setup dialog should be hidden. The setup
             //! dialog is hidden by the "-hideSetup" command line flag, by
             //! automation (the "-command" and "-listCommands" flags), and
             //! during screenshot capture.
-            bool getHideSetup() const;
+            DJV_API bool getHideSetup() const;
 
             //! Open a file.
             //!
@@ -117,43 +118,43 @@ namespace djv
             //! frame parsed out of a file name looks exactly like a range of
             //! one -- so it is the caller that knows: a browser listing the
             //! frames one by one, or a recent file, is naming the file.
-            void open(
+            DJV_API void open(
                 const ftk::Path& path,
                 const ftk::Path& audioPath = ftk::Path(),
                 const std::optional<ftk::RangeI64>& frames = std::optional<ftk::RangeI64>(),
                 bool gatherSeq = true);
 
             //! Open a file dialog.
-            void openDialog();
+            DJV_API void openDialog();
 
             //! Open a file and separate audio file dialog.
-            void openSeparateAudioDialog();
+            DJV_API void openSeparateAudioDialog();
 
             //! Reload the active files.
-            void reload();
+            DJV_API void reload();
 
             //! Observe the timeline player.
-            std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > observePlayer() const;
+            DJV_API std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > observePlayer() const;
 
             //! Get the tool widget factory.
-            const std::shared_ptr<ToolWidgetFactory>& getToolWidgetFactory() const;
+            DJV_API const std::shared_ptr<ToolWidgetFactory>& getToolWidgetFactory() const;
 
             //! Create the status indicator.
-            virtual std::shared_ptr<Indicator> createIndicator();
+            DJV_API virtual std::shared_ptr<Indicator> createIndicator();
 
             //! Get the main window.
-            const std::shared_ptr<MainWindow>& getMainWindow() const;
+            DJV_API const std::shared_ptr<MainWindow>& getMainWindow() const;
 
             //! Observe whether the secondary window is active.
-            std::shared_ptr<ftk::IObservable<bool> > observeSecondaryWindow() const;
+            DJV_API std::shared_ptr<ftk::IObservable<bool> > observeSecondaryWindow() const;
 
             //! Set whether the secondary window is active.
-            void setSecondaryWindow(bool);
+            DJV_API void setSecondaryWindow(bool);
 
             //! Get system information.
-            std::vector<std::string> getSysInfo() const;
+            DJV_API std::vector<std::string> getSysInfo() const;
 
-            void run() override;
+            DJV_API void run() override;
 
         protected:
             virtual void _modelsInit();

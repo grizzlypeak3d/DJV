@@ -3,6 +3,7 @@ set(HEADERS
     AudioModel.h
     ColorModel.h
     CommandsModel.h
+    Export.h
     FilesModel.h
     OCIOModel.h
     RecentFilesModel.h
@@ -45,6 +46,11 @@ add_custom_target(djvBuildInfo
 set_target_properties(djvBuildInfo PROPERTIES FOLDER lib)
 
 add_library(djvModels ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(djvModels PUBLIC DJV_EXPORTS)
+else()
+    target_compile_definitions(djvModels PUBLIC DJV_STATIC)
+endif()
 add_dependencies(djvModels djvBuildInfo)
 
 target_include_directories(djvModels

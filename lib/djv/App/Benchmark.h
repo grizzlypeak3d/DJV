@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/Core/Util.h>
 
 #include <memory>
@@ -39,7 +41,7 @@ namespace djv
         //! both report 59 when asked for 120. A source slower than the monitor
         //! therefore has headroom this cannot see, and a shortfall only shows
         //! up once playback falls below the refresh rate.
-        class Benchmark : public std::enable_shared_from_this<Benchmark>
+        class DJV_API_TYPE Benchmark : public std::enable_shared_from_this<Benchmark>
         {
         protected:
             void _init(
@@ -50,9 +52,9 @@ namespace djv
             Benchmark();
 
         public:
-            ~Benchmark();
+            DJV_API ~Benchmark();
 
-            static std::shared_ptr<Benchmark> create(
+            DJV_API static std::shared_ptr<Benchmark> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 double seconds);
@@ -60,10 +62,10 @@ namespace djv
             //! Start playback and arm the sampling timer. Returns false if
             //! there is nothing to play. After this returns true, the caller
             //! runs the event loop.
-            bool begin();
+            DJV_API bool begin();
 
             //! Whether the run produced a measurement.
-            bool succeeded() const;
+            DJV_API bool succeeded() const;
 
         private:
             void _tick();

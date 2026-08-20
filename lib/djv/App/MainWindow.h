@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <tlRender/Timeline/Player.h>
@@ -31,7 +32,7 @@ namespace djv
         class Viewport;
 
         //! Main window.
-        class MainWindow : public ftk::Window
+        class DJV_API_TYPE MainWindow : public ftk::Window
         {
             FTK_NON_COPYABLE(MainWindow);
 
@@ -43,59 +44,59 @@ namespace djv
             MainWindow();
 
         public:
-            ~MainWindow();
+            DJV_API ~MainWindow();
 
             //! Create a new main window.
-            static std::shared_ptr<MainWindow> create(
+            DJV_API static std::shared_ptr<MainWindow> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&);
 
             //! Get the menu bar.
-            const std::shared_ptr<ftk::MenuBar> getMenuBar() const;
+            DJV_API const std::shared_ptr<ftk::MenuBar> getMenuBar() const;
 
             //! Get the viewport.
-            const std::shared_ptr<Viewport>& getViewport() const;
+            DJV_API const std::shared_ptr<Viewport>& getViewport() const;
 
             //! Send a mouse click at the given window position. For the
             //! capture harness: a click routed the way a real one is, through
             //! hit testing and the widget's own handlers, rather than by
             //! calling the handler that is assumed to be the right one.
-            void click(const ftk::V2I&, int modifiers = 0);
+            DJV_API void click(const ftk::V2I&, int modifiers = 0);
 
             //! Get the timeline widget.
-            const std::shared_ptr<tl::ui::TimelineWidget>& getTimelineWidget() const;
+            DJV_API const std::shared_ptr<tl::ui::TimelineWidget>& getTimelineWidget() const;
 
             //! Get the active tool widget, or null if no tool is active.
             //! Get an open tool by name, or null when it is not open.
-            std::shared_ptr<IToolWidget> getToolWidget(const std::string&) const;
+            DJV_API std::shared_ptr<IToolWidget> getToolWidget(const std::string&) const;
 
             //! Set the two splitter positions (0-1). The settings store these
             //! but only apply them at construction, so this moves the widgets
             //! directly -- used by the documentation screenshot capture.
-            void setSplitters(float splitter, float splitter2);
+            DJV_API void setSplitters(float splitter, float splitter2);
 
             //! Get whether presentation mode is enabled.
-            bool hasPresentMode() const;
+            DJV_API bool hasPresentMode() const;
 
             //! Observe whether presentation mode is enabled.
-            std::shared_ptr<ftk::IObservable<bool> > observePresentMode() const;
+            DJV_API std::shared_ptr<ftk::IObservable<bool> > observePresentMode() const;
 
             //! Set whether presentation mode is enabled.
-            void setPresentMode(bool);
+            DJV_API void setPresentMode(bool);
 
             //! Focus the current frame widget.
-            void focusCurrentFrame();
+            DJV_API void focusCurrentFrame();
 
             //! Show the about dialog.
-            void showAboutDialog();
+            DJV_API void showAboutDialog();
 
             //! Show the system information dialog.
-            void showSysInfoDialog();
+            DJV_API void showSysInfoDialog();
 
-            void setGeometry(const ftk::Box2I&) override;
-            void keyPressEvent(ftk::KeyEvent&) override;
-            void keyReleaseEvent(ftk::KeyEvent&) override;
-            void dropEvent(ftk::DragDropEvent&) override;
+            DJV_API void setGeometry(const ftk::Box2I&) override;
+            DJV_API void keyPressEvent(ftk::KeyEvent&) override;
+            DJV_API void keyReleaseEvent(ftk::KeyEvent&) override;
+            DJV_API void dropEvent(ftk::DragDropEvent&) override;
 
         private:
             void _settingsUpdate(const models::MouseSettings&);

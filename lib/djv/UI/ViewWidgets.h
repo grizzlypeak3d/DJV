@@ -4,6 +4,7 @@
 #pragma once
 
 #include <djv/App/ViewTool.h>
+#include <djv/Models/Export.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/UI/Viewport.h>
@@ -16,7 +17,7 @@ namespace djv
     namespace ui
     {
         //! View position and zoom widget.
-        class ViewPosZoomWidget : public ftk::IContainer
+        class DJV_API_TYPE ViewPosZoomWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewPosZoomWidget);
 
@@ -29,9 +30,9 @@ namespace djv
             ViewPosZoomWidget();
 
         public:
-            virtual ~ViewPosZoomWidget();
+            DJV_API virtual ~ViewPosZoomWidget();
 
-            static std::shared_ptr<ViewPosZoomWidget> create(
+            DJV_API static std::shared_ptr<ViewPosZoomWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<tl::ui::Viewport>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -41,7 +42,7 @@ namespace djv
         };
 
         //! View options widget.
-        class ViewOptionsWidget : public ftk::IContainer
+        class DJV_API_TYPE ViewOptionsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewOptionsWidget);
 
@@ -54,9 +55,9 @@ namespace djv
             ViewOptionsWidget();
 
         public:
-            virtual ~ViewOptionsWidget();
+            DJV_API virtual ~ViewOptionsWidget();
 
-            static std::shared_ptr<ViewOptionsWidget> create(
+            DJV_API static std::shared_ptr<ViewOptionsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -66,7 +67,7 @@ namespace djv
         };
 
         //! Aspect ratio widget.
-        class AspectRatioWidget : public ftk::IContainer
+        class DJV_API_TYPE AspectRatioWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(AspectRatioWidget);
 
@@ -78,15 +79,15 @@ namespace djv
             AspectRatioWidget();
 
         public:
-            virtual ~AspectRatioWidget();
+            DJV_API virtual ~AspectRatioWidget();
 
-            static std::shared_ptr<AspectRatioWidget> create(
+            DJV_API static std::shared_ptr<AspectRatioWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            const tl::AspectRatioOptions& getValue() const;
-            void setValue(const tl::AspectRatioOptions&);
-            void setCallback(const std::function<void(const tl::AspectRatioOptions&)>&);
+            DJV_API const tl::AspectRatioOptions& getValue() const;
+            DJV_API void setValue(const tl::AspectRatioOptions&);
+            DJV_API void setCallback(const std::function<void(const tl::AspectRatioOptions&)>&);
 
         private:
             void _widgetUpdate();
@@ -95,7 +96,7 @@ namespace djv
         };
 
         //! View aspect ratio widget.
-        class ViewAspectRatioWidget : public ftk::IContainer
+        class DJV_API_TYPE ViewAspectRatioWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewAspectRatioWidget);
 
@@ -108,9 +109,9 @@ namespace djv
             ViewAspectRatioWidget();
 
         public:
-            virtual ~ViewAspectRatioWidget();
+            DJV_API virtual ~ViewAspectRatioWidget();
 
-            static std::shared_ptr<ViewAspectRatioWidget> create(
+            DJV_API static std::shared_ptr<ViewAspectRatioWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -122,7 +123,7 @@ namespace djv
         };
 
         //! View background widget.
-        class ViewBackgroundWidget : public ftk::IContainer
+        class DJV_API_TYPE ViewBackgroundWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewBackgroundWidget);
 
@@ -135,9 +136,9 @@ namespace djv
             ViewBackgroundWidget();
 
         public:
-            virtual ~ViewBackgroundWidget();
+            DJV_API virtual ~ViewBackgroundWidget();
 
-            static std::shared_ptr<ViewBackgroundWidget> create(
+            DJV_API static std::shared_ptr<ViewBackgroundWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -149,7 +150,7 @@ namespace djv
         };
 
         //! View outline widget.
-        class ViewOutlineWidget : public ftk::IContainer
+        class DJV_API_TYPE ViewOutlineWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewOutlineWidget);
 
@@ -162,9 +163,9 @@ namespace djv
             ViewOutlineWidget();
 
         public:
-            virtual ~ViewOutlineWidget();
+            DJV_API virtual ~ViewOutlineWidget();
 
-            static std::shared_ptr<ViewOutlineWidget> create(
+            DJV_API static std::shared_ptr<ViewOutlineWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -174,7 +175,7 @@ namespace djv
         };
 
         //! View grid widget.
-        class ViewGridWidget : public ftk::IContainer
+        class DJV_API_TYPE ViewGridWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewGridWidget);
 
@@ -187,9 +188,9 @@ namespace djv
             ViewGridWidget();
 
         public:
-            virtual ~ViewGridWidget();
+            DJV_API virtual ~ViewGridWidget();
 
-            static std::shared_ptr<ViewGridWidget> create(
+            DJV_API static std::shared_ptr<ViewGridWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -199,7 +200,7 @@ namespace djv
         };
 
         //! View center marker widget.
-        class ViewCenterMarkerWidget : public ftk::IContainer
+        class DJV_API_TYPE ViewCenterMarkerWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewCenterMarkerWidget);
 
@@ -212,9 +213,9 @@ namespace djv
             ViewCenterMarkerWidget();
 
         public:
-            virtual ~ViewCenterMarkerWidget();
+            DJV_API virtual ~ViewCenterMarkerWidget();
 
-            static std::shared_ptr<ViewCenterMarkerWidget> create(
+            DJV_API static std::shared_ptr<ViewCenterMarkerWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -224,7 +225,7 @@ namespace djv
         };
 
         //! View HUD widget.
-        class ViewHUDWidget : public ftk::IContainer
+        class DJV_API_TYPE ViewHUDWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ViewHUDWidget);
 
@@ -237,9 +238,9 @@ namespace djv
             ViewHUDWidget();
 
         public:
-            virtual ~ViewHUDWidget();
+            DJV_API virtual ~ViewHUDWidget();
 
-            static std::shared_ptr<ViewHUDWidget> create(
+            DJV_API static std::shared_ptr<ViewHUDWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

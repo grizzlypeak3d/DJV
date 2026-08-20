@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/RecentFilesModel.h>
 
 namespace ftk
@@ -15,7 +17,7 @@ namespace djv
     namespace models
     {
         //! Recent files model.
-        class RecentFilesModel : public ftk::RecentFilesModel
+        class DJV_API_TYPE RecentFilesModel : public ftk::RecentFilesModel
         {
             FTK_NON_COPYABLE(RecentFilesModel);
 
@@ -27,10 +29,10 @@ namespace djv
             RecentFilesModel();
 
         public:
-            ~RecentFilesModel();
+            DJV_API ~RecentFilesModel();
 
             //! Create a new model.
-            static std::shared_ptr<RecentFilesModel> create(
+            DJV_API static std::shared_ptr<RecentFilesModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 

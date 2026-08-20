@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/IWidget.h>
 
 #include <nlohmann/json.hpp>
@@ -27,7 +29,7 @@ namespace djv
         //! One shot per process. Capture is driven from a timer running inside
         //! the normal event loop (ftk::App::run()), which is what realizes and
         //! sizes the window and produces a valid offscreen buffer to read back.
-        class Capture : public std::enable_shared_from_this<Capture>
+        class DJV_API_TYPE Capture : public std::enable_shared_from_this<Capture>
         {
         protected:
             void _init(
@@ -40,9 +42,9 @@ namespace djv
             Capture();
 
         public:
-            ~Capture();
+            DJV_API ~Capture();
 
-            static std::shared_ptr<Capture> create(
+            DJV_API static std::shared_ptr<Capture> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::filesystem::path& manifest,
@@ -53,10 +55,10 @@ namespace djv
             //! shot's files, and arm the capture timer. Returns false on a
             //! setup error (bad manifest, unknown shot, no window). After this
             //! returns true, the caller runs the event loop.
-            bool begin();
+            DJV_API bool begin();
 
             //! Whether the capture completed and wrote its outputs.
-            bool succeeded() const;
+            DJV_API bool succeeded() const;
 
         private:
             void _onTick();

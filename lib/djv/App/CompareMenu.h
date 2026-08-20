@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
 #include <djv/Models/FilesModel.h>
 
 #include <ftk/UI/Menu.h>
@@ -15,7 +16,7 @@ namespace djv
         class CompareActions;
 
         //! Compare menu.
-        class CompareMenu : public ftk::Menu
+        class DJV_API_TYPE CompareMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(CompareMenu);
 
@@ -29,15 +30,15 @@ namespace djv
             CompareMenu();
 
         public:
-            ~CompareMenu();
+            DJV_API ~CompareMenu();
 
-            static std::shared_ptr<CompareMenu> create(
+            DJV_API static std::shared_ptr<CompareMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<CompareActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            void close() override;
+            DJV_API void close() override;
 
         private:
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);

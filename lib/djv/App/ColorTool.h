@@ -4,13 +4,14 @@
 #pragma once
 
 #include <djv/App/IToolWidget.h>
+#include <djv/Models/Export.h>
 
 namespace djv
 {
     namespace app
     {
         //! Color tool.
-        class ColorTool : public IToolWidget
+        class DJV_API_TYPE ColorTool : public IToolWidget
         {
             FTK_NON_COPYABLE(ColorTool);
 
@@ -24,9 +25,9 @@ namespace djv
             ColorTool();
 
         public:
-            virtual ~ColorTool();
+            DJV_API virtual ~ColorTool();
 
-            static std::shared_ptr<ColorTool> create(
+            DJV_API static std::shared_ptr<ColorTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/Menu.h>
@@ -14,7 +16,7 @@ namespace djv
         class FrameActions;
 
         //! Frame menu.
-        class FrameMenu : public ftk::Menu
+        class DJV_API_TYPE FrameMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(FrameMenu);
 
@@ -27,9 +29,9 @@ namespace djv
             FrameMenu() = default;
 
         public:
-            ~FrameMenu();
+            DJV_API ~FrameMenu();
 
-            static std::shared_ptr<FrameMenu> create(
+            DJV_API static std::shared_ptr<FrameMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<FrameActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

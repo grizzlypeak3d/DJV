@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/Core/Util.h>
 
 #include <memory>
@@ -13,7 +15,7 @@ namespace djv
     namespace models
     {
         //! Application information model.
-        class AppInfoModel : public std::enable_shared_from_this<AppInfoModel>
+        class DJV_API_TYPE AppInfoModel : public std::enable_shared_from_this<AppInfoModel>
         {
             FTK_NON_COPYABLE(AppInfoModel);
 
@@ -24,37 +26,37 @@ namespace djv
             virtual ~AppInfoModel() = default;
 
             //! Create a new model.
-            static std::shared_ptr<AppInfoModel> create();
+            DJV_API static std::shared_ptr<AppInfoModel> create();
 
             //! \name Name
             ///@{
 
-            virtual std::string getFullName() const;
-            virtual std::string getShortName() const;
+            DJV_API virtual std::string getFullName() const;
+            DJV_API virtual std::string getShortName() const;
 
             //! Get the name of the directory under the user's documents where
             //! the settings and log file are kept. Defaults to the full name;
             //! a suite of applications built on DJV overrides it so that they
             //! share one directory instead of scattering one apiece.
-            virtual std::string getDocsDirName() const;
+            DJV_API virtual std::string getDocsDirName() const;
             
             ///@}
 
             //! \name Version
             ///@{
 
-            virtual int getVersionMajor() const;
-            virtual int getVersionMinor() const;
-            virtual int getVersionPatch() const;
-            virtual std::string getVersionDev() const;
-            virtual std::string getVersion() const;
+            DJV_API virtual int getVersionMajor() const;
+            DJV_API virtual int getVersionMinor() const;
+            DJV_API virtual int getVersionPatch() const;
+            DJV_API virtual std::string getVersionDev() const;
+            DJV_API virtual std::string getVersion() const;
 
             //! Get the date of the commit the build was made from.
-            virtual std::string getCommitDate() const;
+            DJV_API virtual std::string getCommitDate() const;
 
             //! Get the commit the build was made from, marked "-dirty" when
             //! anything was uncommitted.
-            virtual std::string getGitCommit() const;
+            DJV_API virtual std::string getGitCommit() const;
 
             ///@}
 
@@ -68,15 +70,15 @@ namespace djv
             //! the version that is running. A build that was not installed --
             //! a developer's -- has none, and the menu item says so rather
             //! than opening nothing.
-            virtual std::string getDocsURL() const;
+            DJV_API virtual std::string getDocsURL() const;
 
             ///@}
 
             //! \name License
             ///@{
 
-            virtual std::string getLicense() const;
-            virtual std::string getLicensesURL() const;
+            DJV_API virtual std::string getLicense() const;
+            DJV_API virtual std::string getLicensesURL() const;
 
             ///@}
         };

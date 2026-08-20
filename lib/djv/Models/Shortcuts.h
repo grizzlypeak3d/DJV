@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/Action.h>
 
 namespace djv
@@ -10,10 +12,10 @@ namespace djv
     namespace models
     {
         //! Keyboard shortcuts.
-        struct Shortcut
+        struct DJV_API_TYPE Shortcut
         {
             Shortcut() = default;
-            Shortcut(
+            DJV_API Shortcut(
                 const std::string& name,
                 const std::string& text,
                 const ftk::KeyShortcut& primary = ftk::KeyShortcut(),
@@ -24,16 +26,16 @@ namespace djv
             ftk::KeyShortcut primary;
             ftk::KeyShortcut secondary;
 
-            bool operator == (const Shortcut&) const;
-            bool operator != (const Shortcut&) const;
+            DJV_API bool operator == (const Shortcut&) const;
+            DJV_API bool operator != (const Shortcut&) const;
         };
 
         //! \name Serialize
         ///@{
 
-        void to_json(nlohmann::json&, const Shortcut&);
+        DJV_API void to_json(nlohmann::json&, const Shortcut&);
 
-        void from_json(const nlohmann::json&, Shortcut&);
+        DJV_API void from_json(const nlohmann::json&, Shortcut&);
 
         ///@}
     }

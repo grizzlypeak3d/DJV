@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/IContainer.h>
 #include <ftk/UI/ToolBar.h>
 
@@ -13,7 +15,7 @@ namespace djv
         class App;
 
         //! Tab bar.
-        class TabBar : public ftk::IContainer
+        class DJV_API_TYPE TabBar : public ftk::IContainer
         {
             FTK_NON_COPYABLE(TabBar);
 
@@ -26,9 +28,9 @@ namespace djv
             TabBar();
 
         public:
-            ~TabBar();
+            DJV_API ~TabBar();
 
-            static std::shared_ptr<TabBar> create(
+            DJV_API static std::shared_ptr<TabBar> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

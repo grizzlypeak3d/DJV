@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <tlRender/Timeline/BackgroundOptions.h>
 #include <tlRender/Timeline/DisplayOptions.h>
 #include <tlRender/Timeline/ForegroundOptions.h>
@@ -21,7 +23,7 @@ namespace djv
     namespace models
     {
         //! Aspect ratio options.
-        struct AspectRatioOptions
+        struct DJV_API_TYPE AspectRatioOptions
         {
             int index = 0;
 
@@ -39,12 +41,12 @@ namespace djv
                     tl::AspectRatioType::Display)
             };
 
-            bool operator == (const AspectRatioOptions&) const;
-            bool operator != (const AspectRatioOptions&) const;
+            DJV_API bool operator == (const AspectRatioOptions&) const;
+            DJV_API bool operator != (const AspectRatioOptions&) const;
         };
 
         //! HUD items.
-        enum class HUDItem
+        enum class DJV_API_TYPE HUDItem
         {
             //! The options map is serialized with the enumeration index as the
             //! key, so changing this order requires a new settings version.
@@ -62,7 +64,7 @@ namespace djv
         TL_ENUM(HUDItem);
 
         //! HUD positions.
-        enum class HUDPos
+        enum class DJV_API_TYPE HUDPos
         {
             None,
             TopLeft,
@@ -76,17 +78,17 @@ namespace djv
         TL_ENUM(HUDPos);
 
         //! HUD options.
-        struct HUDOptions
+        struct DJV_API_TYPE HUDOptions
         {
             bool enabled = false;
             std::map<HUDItem, HUDPos> items;
 
-            bool operator == (const HUDOptions&) const;
-            bool operator != (const HUDOptions&) const;
+            DJV_API bool operator == (const HUDOptions&) const;
+            DJV_API bool operator != (const HUDOptions&) const;
         };
 
         //! Viewport model.
-        class ViewportModel : public std::enable_shared_from_this<ViewportModel>
+        class DJV_API_TYPE ViewportModel : public std::enable_shared_from_this<ViewportModel>
         {
             FTK_NON_COPYABLE(ViewportModel);
 
@@ -98,72 +100,72 @@ namespace djv
             ViewportModel();
 
         public:
-            ~ViewportModel();
+            DJV_API ~ViewportModel();
 
             //! Create a new model.
-            static std::shared_ptr<ViewportModel> create(
+            DJV_API static std::shared_ptr<ViewportModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 
             //! \name Image Options
             ///@{
 
-            const ftk::ImageOptions& getImageOptions() const;
-            std::shared_ptr<ftk::IObservable<ftk::ImageOptions> > observeImageOptions() const;
-            void setImageOptions(const ftk::ImageOptions&);
+            DJV_API const ftk::ImageOptions& getImageOptions() const;
+            DJV_API std::shared_ptr<ftk::IObservable<ftk::ImageOptions> > observeImageOptions() const;
+            DJV_API void setImageOptions(const ftk::ImageOptions&);
 
             ///@}
 
             //! \name Display Options
             ///@{
 
-            const tl::DisplayOptions& getDisplayOptions() const;
-            std::shared_ptr<ftk::IObservable<tl::DisplayOptions> > observeDisplayOptions() const;
-            void setDisplayOptions(const tl::DisplayOptions&);
+            DJV_API const tl::DisplayOptions& getDisplayOptions() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::DisplayOptions> > observeDisplayOptions() const;
+            DJV_API void setDisplayOptions(const tl::DisplayOptions&);
 
             ///@}
 
             //! \name Aspect Ratio Options
             ///@{
 
-            const AspectRatioOptions& getAspectRatioOptions() const;
-            std::shared_ptr<ftk::IObservable<AspectRatioOptions> > observeAspectRatioOptions() const;
-            void setAspectRatioOptions(const AspectRatioOptions&);
+            DJV_API const AspectRatioOptions& getAspectRatioOptions() const;
+            DJV_API std::shared_ptr<ftk::IObservable<AspectRatioOptions> > observeAspectRatioOptions() const;
+            DJV_API void setAspectRatioOptions(const AspectRatioOptions&);
             ///@}
 
             //! \name Background Options
             ///@{
 
-            const tl::BackgroundOptions& getBackgroundOptions() const;
-            std::shared_ptr<ftk::IObservable<tl::BackgroundOptions> > observeBackgroundOptions() const;
-            void setBackgroundOptions(const tl::BackgroundOptions&);
+            DJV_API const tl::BackgroundOptions& getBackgroundOptions() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::BackgroundOptions> > observeBackgroundOptions() const;
+            DJV_API void setBackgroundOptions(const tl::BackgroundOptions&);
 
             ///@}
 
             //! \name Foreground Options
             ///@{
 
-            const tl::ForegroundOptions& getForegroundOptions() const;
-            std::shared_ptr<ftk::IObservable<tl::ForegroundOptions> > observeForegroundOptions() const;
-            void setForegroundOptions(const tl::ForegroundOptions&);
+            DJV_API const tl::ForegroundOptions& getForegroundOptions() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::ForegroundOptions> > observeForegroundOptions() const;
+            DJV_API void setForegroundOptions(const tl::ForegroundOptions&);
 
             ///@}
 
             //! \name Color Buffer
             ///@{
 
-            ftk::gl::TextureType getColorBuffer() const;
-            std::shared_ptr<ftk::IObservable<ftk::gl::TextureType> > observeColorBuffer() const;
-            void setColorBuffer(ftk::gl::TextureType);
+            DJV_API ftk::gl::TextureType getColorBuffer() const;
+            DJV_API std::shared_ptr<ftk::IObservable<ftk::gl::TextureType> > observeColorBuffer() const;
+            DJV_API void setColorBuffer(ftk::gl::TextureType);
 
             ///@}
 
             //! \name HUD
             ///@{
 
-            const HUDOptions& getHUDOptions() const;
-            std::shared_ptr<ftk::IObservable<HUDOptions> > observeHUDOptions() const;
-            void setHUDOptions(const HUDOptions&);
+            DJV_API const HUDOptions& getHUDOptions() const;
+            DJV_API std::shared_ptr<ftk::IObservable<HUDOptions> > observeHUDOptions() const;
+            DJV_API void setHUDOptions(const HUDOptions&);
 
             ///@}
 
@@ -174,11 +176,11 @@ namespace djv
         //! \name Serialize
         ///@{
 
-        void to_json(nlohmann::json&, const AspectRatioOptions&);
-        void to_json(nlohmann::json&, const HUDOptions&);
+        DJV_API void to_json(nlohmann::json&, const AspectRatioOptions&);
+        DJV_API void to_json(nlohmann::json&, const HUDOptions&);
 
-        void from_json(const nlohmann::json&, AspectRatioOptions&);
-        void from_json(const nlohmann::json&, HUDOptions&);
+        DJV_API void from_json(const nlohmann::json&, AspectRatioOptions&);
+        DJV_API void from_json(const nlohmann::json&, HUDOptions&);
 
         ///@}
     }

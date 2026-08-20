@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/IContainer.h>
 
 #include <map>
@@ -20,7 +22,7 @@ namespace djv
         //!
         //! Shows whether any options are enabled that can affect video, audio,
         //! or performance, and opens a popup listing them.
-        class Indicator : public ftk::IContainer
+        class DJV_API_TYPE Indicator : public ftk::IContainer
         {
             FTK_NON_COPYABLE(Indicator);
 
@@ -33,10 +35,10 @@ namespace djv
             Indicator();
 
         public:
-            virtual ~Indicator();
+            DJV_API virtual ~Indicator();
 
             //! Create a new widget.
-            static std::shared_ptr<Indicator> create(
+            DJV_API static std::shared_ptr<Indicator> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

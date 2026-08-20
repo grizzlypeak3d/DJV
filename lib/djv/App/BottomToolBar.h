@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/IContainer.h>
@@ -17,7 +19,7 @@ namespace djv
         class PlaybackActions;
 
         //! Bottom tool bar.
-        class BottomToolBar : public ftk::IContainer
+        class DJV_API_TYPE BottomToolBar : public ftk::IContainer
         {
             FTK_NON_COPYABLE(BottomToolBar);
 
@@ -33,9 +35,9 @@ namespace djv
             BottomToolBar();
 
         public:
-            ~BottomToolBar();
+            DJV_API ~BottomToolBar();
 
-            static std::shared_ptr<BottomToolBar> create(
+            DJV_API static std::shared_ptr<BottomToolBar> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<PlaybackActions>&,
@@ -44,7 +46,7 @@ namespace djv
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Focus the current frame widget.
-            void focusCurrentFrame();
+            DJV_API void focusCurrentFrame();
 
         private:
             OTIO_NS::RationalTime _mediaDuration(const OTIO_NS::TimeRange&) const;

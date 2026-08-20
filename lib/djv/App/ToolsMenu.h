@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/Menu.h>
 
 namespace djv
@@ -13,7 +15,7 @@ namespace djv
         class ToolsActions;
 
         //! Tools menu.
-        class ToolsMenu : public ftk::Menu
+        class DJV_API_TYPE ToolsMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(ToolsMenu);
 
@@ -27,9 +29,9 @@ namespace djv
             ToolsMenu() = default;
 
         public:
-            ~ToolsMenu();
+            DJV_API ~ToolsMenu();
 
-            static std::shared_ptr<ToolsMenu> create(
+            DJV_API static std::shared_ptr<ToolsMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<ToolsActions>&,

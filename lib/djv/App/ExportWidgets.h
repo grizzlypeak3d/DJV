@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <ftk/UI/IContainer.h>
@@ -14,20 +15,20 @@ namespace djv
         class App;
 
         //! Get an export file name.
-        std::string getExportFileName(
+        DJV_API std::string getExportFileName(
             const models::ExportSettings&,
             models::ExportFileType,
             int64_t frame);
 
         //! Whether exporting the given range would overwrite anything that
         //! is already on disk.
-        bool getExportExists(
+        DJV_API bool getExportExists(
             const models::ExportSettings&,
             models::ExportFileType,
             const OTIO_NS::TimeRange&);
 
         //! Base class for export widgets.
-        class IExportWidget : public ftk::IContainer
+        class DJV_API_TYPE IExportWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(IExportWidget);
 
@@ -35,11 +36,11 @@ namespace djv
             IExportWidget() = default;
 
         public:
-            virtual ~IExportWidget();
+            DJV_API virtual ~IExportWidget();
         };
 
         //! Image export widget.
-        class ImageExportWidget : public IExportWidget
+        class DJV_API_TYPE ImageExportWidget : public IExportWidget
         {
             FTK_NON_COPYABLE(ImageExportWidget);
 
@@ -52,15 +53,15 @@ namespace djv
             ImageExportWidget();
 
         public:
-            virtual ~ImageExportWidget();
+            DJV_API virtual ~ImageExportWidget();
 
-            static std::shared_ptr<ImageExportWidget> create(
+            DJV_API static std::shared_ptr<ImageExportWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the export callback.
-            void setExportCallback(const std::function<void(void)>&);
+            DJV_API void setExportCallback(const std::function<void(void)>&);
 
         private:
             void _infoUpdate();
@@ -69,7 +70,7 @@ namespace djv
         };
 
         //! Image sequence export widget.
-        class SeqExportWidget : public IExportWidget
+        class DJV_API_TYPE SeqExportWidget : public IExportWidget
         {
             FTK_NON_COPYABLE(SeqExportWidget);
 
@@ -82,15 +83,15 @@ namespace djv
             SeqExportWidget();
 
         public:
-            virtual ~SeqExportWidget();
+            DJV_API virtual ~SeqExportWidget();
 
-            static std::shared_ptr<SeqExportWidget> create(
+            DJV_API static std::shared_ptr<SeqExportWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the export callback.
-            void setExportCallback(const std::function<void(void)>&);
+            DJV_API void setExportCallback(const std::function<void(void)>&);
 
         private:
             void _infoUpdate();
@@ -99,7 +100,7 @@ namespace djv
         };
 
         //! Movie export widget.
-        class MovieExportWidget : public IExportWidget
+        class DJV_API_TYPE MovieExportWidget : public IExportWidget
         {
             FTK_NON_COPYABLE(MovieExportWidget);
 
@@ -112,15 +113,15 @@ namespace djv
             MovieExportWidget();
 
         public:
-            virtual ~MovieExportWidget();
+            DJV_API virtual ~MovieExportWidget();
 
-            static std::shared_ptr<MovieExportWidget> create(
+            DJV_API static std::shared_ptr<MovieExportWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the export callback.
-            void setExportCallback(const std::function<void(void)>&);
+            DJV_API void setExportCallback(const std::function<void(void)>&);
 
         private:
             void _infoUpdate();

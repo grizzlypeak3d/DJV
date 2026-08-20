@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/IWidgetPopup.h>
 
 namespace djv
@@ -15,7 +17,7 @@ namespace djv
     namespace ui
     {
         //! Audio popup.
-        class AudioPopup : public ftk::IWidgetPopup
+        class DJV_API_TYPE AudioPopup : public ftk::IWidgetPopup
         {
             FTK_NON_COPYABLE(AudioPopup);
 
@@ -28,9 +30,9 @@ namespace djv
             AudioPopup();
 
         public:
-            virtual ~AudioPopup();
+            DJV_API virtual ~AudioPopup();
 
-            static std::shared_ptr<AudioPopup> create(
+            DJV_API static std::shared_ptr<AudioPopup> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::AudioModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

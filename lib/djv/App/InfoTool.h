@@ -4,13 +4,14 @@
 #pragma once
 
 #include <djv/App/IToolWidget.h>
+#include <djv/Models/Export.h>
 
 namespace djv
 {
     namespace app
     {
         //! Information tool.
-        class InfoTool : public IToolWidget
+        class DJV_API_TYPE InfoTool : public IToolWidget
         {
             FTK_NON_COPYABLE(InfoTool);
 
@@ -24,9 +25,9 @@ namespace djv
             InfoTool();
 
         public:
-            virtual ~InfoTool();
+            DJV_API virtual ~InfoTool();
 
-            static std::shared_ptr<InfoTool> create(
+            DJV_API static std::shared_ptr<InfoTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,

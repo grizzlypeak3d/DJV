@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/ToolBar.h>
 
 namespace djv
@@ -10,7 +12,7 @@ namespace djv
     namespace app
     {
         //! Window tool bar.
-        class WindowToolBar : public ftk::ToolBar
+        class DJV_API_TYPE WindowToolBar : public ftk::ToolBar
         {
             FTK_NON_COPYABLE(WindowToolBar);
 
@@ -23,9 +25,9 @@ namespace djv
             WindowToolBar() = default;
 
         public:
-            ~WindowToolBar();
+            DJV_API ~WindowToolBar();
 
-            static std::shared_ptr<WindowToolBar> create(
+            DJV_API static std::shared_ptr<WindowToolBar> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::map<std::string, std::shared_ptr<ftk::Action> >&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

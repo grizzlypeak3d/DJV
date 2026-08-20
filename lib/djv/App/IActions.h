@@ -4,6 +4,7 @@
 #pragma once
 
 #include <djv/Models/CommandsModel.h>
+#include <djv/Models/Export.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <ftk/UI/Action.h>
@@ -15,7 +16,7 @@ namespace djv
         class App;
 
         //! Base class for action groups.
-        class IActions : public std::enable_shared_from_this<IActions>
+        class DJV_API_TYPE IActions : public std::enable_shared_from_this<IActions>
         {
             FTK_NON_COPYABLE(IActions);
 
@@ -28,9 +29,9 @@ namespace djv
             IActions();
 
         public:
-            ~IActions();
+            DJV_API ~IActions();
 
-            const std::map<std::string, std::shared_ptr<ftk::Action> >& getActions() const;
+            DJV_API const std::map<std::string, std::shared_ptr<ftk::Action> >& getActions() const;
 
         protected:
             //! Register a command named "<group>/<name>" with the commands

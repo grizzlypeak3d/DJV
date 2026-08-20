@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/IDialog.h>
 
 namespace djv
@@ -10,7 +12,7 @@ namespace djv
     namespace ui
     {
         //! System information dialog.
-        class SysInfoDialog : public ftk::IDialog
+        class DJV_API_TYPE SysInfoDialog : public ftk::IDialog
         {
             FTK_NON_COPYABLE(SysInfoDialog);
 
@@ -23,14 +25,14 @@ namespace djv
             SysInfoDialog();
 
         public:
-            virtual ~SysInfoDialog();
+            DJV_API virtual ~SysInfoDialog();
 
-            static std::shared_ptr<SysInfoDialog> create(
+            DJV_API static std::shared_ptr<SysInfoDialog> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::vector<std::string>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            std::shared_ptr<ftk::IWidget> getKeyFocus() const override;
+            DJV_API std::shared_ptr<ftk::IWidget> getKeyFocus() const override;
 
         private:
             FTK_PRIVATE();

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/IDialog.h>
 
 namespace djv
@@ -15,7 +17,7 @@ namespace djv
     namespace ui
     {
         //! About dialog.
-        class AboutDialog : public ftk::IDialog
+        class DJV_API_TYPE AboutDialog : public ftk::IDialog
         {
             FTK_NON_COPYABLE(AboutDialog);
 
@@ -28,14 +30,14 @@ namespace djv
             AboutDialog();
 
         public:
-            virtual ~AboutDialog();
+            DJV_API virtual ~AboutDialog();
 
-            static std::shared_ptr<AboutDialog> create(
+            DJV_API static std::shared_ptr<AboutDialog> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            std::shared_ptr<ftk::IWidget> getKeyFocus() const override;
+            DJV_API std::shared_ptr<ftk::IWidget> getKeyFocus() const override;
 
         private:
             FTK_PRIVATE();

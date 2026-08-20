@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/Menu.h>
 
 namespace djv
@@ -13,7 +15,7 @@ namespace djv
         class WindowActions;
 
         //! Window menu.
-        class WindowMenu : public ftk::Menu
+        class DJV_API_TYPE WindowMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(WindowMenu);
 
@@ -27,9 +29,9 @@ namespace djv
             WindowMenu();
 
         public:
-            ~WindowMenu();
+            DJV_API ~WindowMenu();
 
-            static std::shared_ptr<WindowMenu> create(
+            DJV_API static std::shared_ptr<WindowMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<WindowActions>&,

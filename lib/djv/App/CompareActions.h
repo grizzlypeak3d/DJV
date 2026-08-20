@@ -4,13 +4,14 @@
 #pragma once
 
 #include <djv/App/IActions.h>
+#include <djv/Models/Export.h>
 
 namespace djv
 {
     namespace app
     {
         //! Compare actions.
-        class CompareActions : public IActions
+        class DJV_API_TYPE CompareActions : public IActions
         {
             FTK_NON_COPYABLE(CompareActions);
 
@@ -22,9 +23,9 @@ namespace djv
             CompareActions();
 
         public:
-            ~CompareActions();
+            DJV_API ~CompareActions();
 
-            static std::shared_ptr<CompareActions> create(
+            DJV_API static std::shared_ptr<CompareActions> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&);
 

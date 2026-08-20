@@ -4,6 +4,7 @@
 #pragma once
 
 #include <djv/App/IActions.h>
+#include <djv/Models/Export.h>
 
 namespace djv
 {
@@ -12,7 +13,7 @@ namespace djv
         class MainWindow;
 
         //! Window actions.
-        class WindowActions : public IActions
+        class DJV_API_TYPE WindowActions : public IActions
         {
             FTK_NON_COPYABLE(WindowActions);
 
@@ -25,9 +26,9 @@ namespace djv
             WindowActions();
 
         public:
-            ~WindowActions();
+            DJV_API ~WindowActions();
 
-            static std::shared_ptr<WindowActions> create(
+            DJV_API static std::shared_ptr<WindowActions> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&);

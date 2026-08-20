@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <tlRender/Timeline/TimeUnits.h>
 
 namespace ftk
@@ -15,7 +17,7 @@ namespace djv
     namespace models
     {
         //! Time units model.
-        class TimeUnitsModel : public tl::TimeUnitsModel
+        class DJV_API_TYPE TimeUnitsModel : public tl::TimeUnitsModel
         {
             FTK_NON_COPYABLE(TimeUnitsModel);
 
@@ -27,10 +29,10 @@ namespace djv
             TimeUnitsModel();
 
         public:
-            ~TimeUnitsModel();
+            DJV_API ~TimeUnitsModel();
 
             //! Create a new model.
-            static std::shared_ptr<TimeUnitsModel> create(
+            DJV_API static std::shared_ptr<TimeUnitsModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 

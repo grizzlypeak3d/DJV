@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <tlRender/IO/IO.h>
 
 #include <ftk/UI/IMouseWidget.h>
@@ -16,7 +18,7 @@ namespace djv
         class App;
 
         //! Status bar widget.
-        class StatusBar : public ftk::IMouseWidget
+        class DJV_API_TYPE StatusBar : public ftk::IMouseWidget
         {
             FTK_NON_COPYABLE(StatusBar);
 
@@ -29,18 +31,18 @@ namespace djv
             StatusBar();
 
         public:
-            virtual ~StatusBar();
+            DJV_API virtual ~StatusBar();
 
             //! Create a new widget.
-            static std::shared_ptr<StatusBar> create(
+            DJV_API static std::shared_ptr<StatusBar> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            ftk::Size2I getSizeHint() const override;
-            void setGeometry(const ftk::Box2I&) override;
-            void mousePressEvent(ftk::MouseClickEvent&) override;
-            void mouseReleaseEvent(ftk::MouseClickEvent&) override;
+            DJV_API ftk::Size2I getSizeHint() const override;
+            DJV_API void setGeometry(const ftk::Box2I&) override;
+            DJV_API void mousePressEvent(ftk::MouseClickEvent&) override;
+            DJV_API void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
         private:
             void _infoUpdate(const ftk::Path&, const tl::IOInfo&);

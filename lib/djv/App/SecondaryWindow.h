@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/Window.h>
@@ -15,7 +17,7 @@ namespace djv
         class Viewport;
 
         //! Secondary window.
-        class SecondaryWindow : public ftk::Window
+        class DJV_API_TYPE SecondaryWindow : public ftk::Window
         {
             FTK_NON_COPYABLE(SecondaryWindow);
 
@@ -28,24 +30,24 @@ namespace djv
             SecondaryWindow();
 
         public:
-            virtual ~SecondaryWindow();
+            DJV_API virtual ~SecondaryWindow();
 
-            static std::shared_ptr<SecondaryWindow> create(
+            DJV_API static std::shared_ptr<SecondaryWindow> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<ftk::Window>& shared = nullptr);
 
             //! Get the viewport.
-            const std::shared_ptr<Viewport>& getViewport() const;
+            DJV_API const std::shared_ptr<Viewport>& getViewport() const;
 
             //! Set the view.
-            void setView(
+            DJV_API void setView(
                 const ftk::V2I& pos,
                 double          zoom,
                 bool            frame);
 
-            void keyPressEvent(ftk::KeyEvent&) override;
-            void keyReleaseEvent(ftk::KeyEvent&) override;
+            DJV_API void keyPressEvent(ftk::KeyEvent&) override;
+            DJV_API void keyReleaseEvent(ftk::KeyEvent&) override;
 
         private:
             FTK_PRIVATE();

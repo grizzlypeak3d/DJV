@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/UI/Menu.h>
 
 namespace djv
@@ -12,7 +14,7 @@ namespace djv
         class HelpActions;
 
         //! Help menu.
-        class HelpMenu : public ftk::Menu
+        class DJV_API_TYPE HelpMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(HelpMenu);
 
@@ -25,9 +27,9 @@ namespace djv
             HelpMenu() = default;
 
         public:
-            ~HelpMenu();
+            DJV_API ~HelpMenu();
 
-            static std::shared_ptr<HelpMenu> create(
+            DJV_API static std::shared_ptr<HelpMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<HelpActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

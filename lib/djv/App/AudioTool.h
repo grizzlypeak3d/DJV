@@ -4,13 +4,14 @@
 #pragma once
 
 #include <djv/App/IToolWidget.h>
+#include <djv/Models/Export.h>
 
 namespace djv
 {
     namespace app
     {
         //! Audio tool.
-        class AudioTool : public IToolWidget
+        class DJV_API_TYPE AudioTool : public IToolWidget
         {
             FTK_NON_COPYABLE(AudioTool);
 
@@ -24,9 +25,9 @@ namespace djv
             AudioTool();
 
         public:
-            virtual ~AudioTool();
+            DJV_API virtual ~AudioTool();
 
-            static std::shared_ptr<AudioTool> create(
+            DJV_API static std::shared_ptr<AudioTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,

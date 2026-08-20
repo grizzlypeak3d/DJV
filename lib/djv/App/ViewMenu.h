@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/Menu.h>
@@ -15,7 +16,7 @@ namespace djv
         class ViewActions;
 
         //! View menu.
-        class ViewMenu : public ftk::Menu
+        class DJV_API_TYPE ViewMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(ViewMenu);
 
@@ -29,9 +30,9 @@ namespace djv
             ViewMenu();
 
         public:
-            ~ViewMenu();
+            DJV_API ~ViewMenu();
 
-            static std::shared_ptr<ViewMenu> create(
+            DJV_API static std::shared_ptr<ViewMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<ViewActions>&,

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
 #include <djv/Models/Shortcuts.h>
 
 #include <tlRender/UI/ItemOptions.h>
@@ -37,20 +38,20 @@ namespace djv
     namespace models
     {
         //! Audio settings.
-        struct AudioSettings
+        struct DJV_API_TYPE AudioSettings
         {
             //! The size of the buffer the audio device is given. Larger
             //! buffers are less likely to underrun and produce glitches;
             //! smaller ones reduce latency.
             size_t bufferFrameCount = tl::PlayerOptions().audioBufferFrameCount;
 
-            bool operator == (const AudioSettings&) const;
-            bool operator != (const AudioSettings&) const;
+            DJV_API bool operator == (const AudioSettings&) const;
+            DJV_API bool operator != (const AudioSettings&) const;
         };
 
         //! Export render width. Only the width, because the height follows
         //! the aspect ratio of what is being exported.
-        enum class ExportRenderSize
+        enum class DJV_API_TYPE ExportRenderSize
         {
             Default,
             _1920,
@@ -65,10 +66,10 @@ namespace djv
 
         //! Get an export render width, or zero for the sizes that are not
         //! one of the presets.
-        int getWidth(ExportRenderSize);
+        DJV_API int getWidth(ExportRenderSize);
 
         //! Export file type.
-        enum class ExportFileType
+        enum class DJV_API_TYPE ExportFileType
         {
             Image,
             Seq,
@@ -80,7 +81,7 @@ namespace djv
         FTK_ENUM(ExportFileType);
 
         //! Export settings.
-        struct ExportSettings
+        struct DJV_API_TYPE ExportSettings
         {
             std::string dir;
             ExportRenderSize renderSize = ExportRenderSize::Default;
@@ -103,24 +104,24 @@ namespace djv
             std::string movieCodec = "mjpeg";
             std::string movieAudioCodec = "Auto";
 
-            bool operator == (const ExportSettings&) const;
-            bool operator != (const ExportSettings&) const;
+            DJV_API bool operator == (const ExportSettings&) const;
+            DJV_API bool operator != (const ExportSettings&) const;
         };
 
         //! File browser settings.
-        struct FileBrowserSettings
+        struct DJV_API_TYPE FileBrowserSettings
         {
             bool nativeFileDialog = true;
             std::string path;
             ftk::FileBrowserOptions options;
             std::string ext;
 
-            bool operator == (const FileBrowserSettings&) const;
-            bool operator != (const FileBrowserSettings&) const;
+            DJV_API bool operator == (const FileBrowserSettings&) const;
+            DJV_API bool operator != (const FileBrowserSettings&) const;
         };
 
         //! Image sequence settings.
-        struct ImageSeqSettings
+        struct DJV_API_TYPE ImageSeqSettings
         {
             tl::ImageSeqAudio audio = tl::Options().imageSeqAudio;
             std::vector<std::string> audioExts = tl::Options().imageSeqAudioExts;
@@ -134,32 +135,32 @@ namespace djv
 
             tl::SeqOptions io;
 
-            bool operator == (const ImageSeqSettings&) const;
-            bool operator != (const ImageSeqSettings&) const;
+            DJV_API bool operator == (const ImageSeqSettings&) const;
+            DJV_API bool operator != (const ImageSeqSettings&) const;
         };
 
         //! OTIO settings.
-        struct OTIOSettings
+        struct DJV_API_TYPE OTIOSettings
         {
             tl::Spatial spatial = tl::Options().spatial;
             bool compat = tl::Options().compat;
 
-            bool operator == (const OTIOSettings&) const;
-            bool operator != (const OTIOSettings&) const;
+            DJV_API bool operator == (const OTIOSettings&) const;
+            DJV_API bool operator != (const OTIOSettings&) const;
         };
 
         //! Miscellaneous settings.
-        struct MiscSettings
+        struct DJV_API_TYPE MiscSettings
         {
             bool tooltipsEnabled = true;
             bool showSetup = true;
 
-            bool operator == (const MiscSettings&) const;
-            bool operator != (const MiscSettings&) const;
+            DJV_API bool operator == (const MiscSettings&) const;
+            DJV_API bool operator != (const MiscSettings&) const;
         };
 
         //! Mouse actions.
-        enum class MouseAction
+        enum class DJV_API_TYPE MouseAction
         {
             PanView,
             CompareWipe,
@@ -172,22 +173,22 @@ namespace djv
         FTK_ENUM(MouseAction);
 
         //! Mouse action binding.
-        struct MouseActionBinding
+        struct DJV_API_TYPE MouseActionBinding
         {
             MouseActionBinding() = default;
-            MouseActionBinding(
+            DJV_API MouseActionBinding(
                 ftk::MouseButton,
                 ftk::KeyModifier modifier = ftk::KeyModifier::None);
 
             ftk::MouseButton button = ftk::MouseButton::None;
             ftk::KeyModifier modifier = ftk::KeyModifier::None;
 
-            bool operator == (const MouseActionBinding&) const;
-            bool operator != (const MouseActionBinding&) const;
+            DJV_API bool operator == (const MouseActionBinding&) const;
+            DJV_API bool operator != (const MouseActionBinding&) const;
         };
 
         //! Mouse settings.
-        struct MouseSettings
+        struct DJV_API_TYPE MouseSettings
         {
             std::map<MouseAction, MouseActionBinding> bindings =
             {
@@ -212,34 +213,34 @@ namespace djv
             float wheelScale = 1.1F;
             float frameShuttleScale = 1.F;
 
-            bool operator == (const MouseSettings&) const;
-            bool operator != (const MouseSettings&) const;
+            DJV_API bool operator == (const MouseSettings&) const;
+            DJV_API bool operator != (const MouseSettings&) const;
         };
 
         //! Playback settings.
-        struct PlaybackSettings
+        struct DJV_API_TYPE PlaybackSettings
         {
             bool startPlayback = false;
 
-            bool operator == (const PlaybackSettings&) const;
-            bool operator != (const PlaybackSettings&) const;
+            DJV_API bool operator == (const PlaybackSettings&) const;
+            DJV_API bool operator != (const PlaybackSettings&) const;
         };
 
         //! Keyboard shortcuts settings.
-        struct ShortcutsSettings
+        struct DJV_API_TYPE ShortcutsSettings
         {
-            ShortcutsSettings();
+            DJV_API ShortcutsSettings();
 
             std::vector<Shortcut> shortcuts;
 
-            bool operator == (const ShortcutsSettings&) const;
-            bool operator != (const ShortcutsSettings&) const;
+            DJV_API bool operator == (const ShortcutsSettings&) const;
+            DJV_API bool operator != (const ShortcutsSettings&) const;
         };
 
         //! Style settings.
-        struct StyleSettings
+        struct DJV_API_TYPE StyleSettings
         {
-            StyleSettings();
+            DJV_API StyleSettings();
 
             float displayScale = 1.F;
             ftk::ColorControls colorControls;
@@ -248,12 +249,12 @@ namespace djv
             std::map<ftk::FontType, std::string> fonts;
             std::vector<std::string> fontFiles;
 
-            bool operator == (const StyleSettings&) const;
-            bool operator != (const StyleSettings&) const;
+            DJV_API bool operator == (const StyleSettings&) const;
+            DJV_API bool operator != (const StyleSettings&) const;
         };
 
         //! Timeline thumbnails.
-        enum class TimelineThumbnailSize
+        enum class DJV_API_TYPE TimelineThumbnailSize
         {
             Small,
             Medium,
@@ -265,13 +266,13 @@ namespace djv
         FTK_ENUM(TimelineThumbnailSize);
 
         //! Get the timeline thumbnails size.
-        int getTimelineThumbnailSize(TimelineThumbnailSize);
+        DJV_API int getTimelineThumbnailSize(TimelineThumbnailSize);
 
         //! Get the timeline waveform size.
-        int getTimelineWaveformSize(TimelineThumbnailSize);
+        DJV_API int getTimelineWaveformSize(TimelineThumbnailSize);
 
         //! Timeline settings.
-        struct TimelineSettings
+        struct DJV_API_TYPE TimelineSettings
         {
             bool minimize = true;
             bool frameView = true;
@@ -287,12 +288,12 @@ namespace djv
             bool waveforms = true;
             TimelineThumbnailSize waveformSize = TimelineThumbnailSize::Small;
 
-            bool operator == (const TimelineSettings&) const;
-            bool operator != (const TimelineSettings&) const;
+            DJV_API bool operator == (const TimelineSettings&) const;
+            DJV_API bool operator != (const TimelineSettings&) const;
         };
 
         //! Window settings.
-        struct WindowSettings
+        struct DJV_API_TYPE WindowSettings
         {
             ftk::Size2I size = ftk::Size2I(1600, 960);
             bool fileToolBar = true;
@@ -308,12 +309,12 @@ namespace djv
             float splitter = .7F;
             float splitter2 = .7F;
 
-            bool operator == (const WindowSettings&) const;
-            bool operator != (const WindowSettings&) const;
+            DJV_API bool operator == (const WindowSettings&) const;
+            DJV_API bool operator != (const WindowSettings&) const;
         };
 
         //! Settings model.
-        class SettingsModel : public std::enable_shared_from_this<SettingsModel>
+        class DJV_API_TYPE SettingsModel : public std::enable_shared_from_this<SettingsModel>
         {
             FTK_NON_COPYABLE(SettingsModel);
 
@@ -326,142 +327,142 @@ namespace djv
             SettingsModel();
 
         public:
-            ~SettingsModel();
+            DJV_API ~SettingsModel();
 
             //! Create a new model.
-            static std::shared_ptr<SettingsModel> create(
+            DJV_API static std::shared_ptr<SettingsModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&,
                 float displayScaleDefault);
 
             //! Save the settings. Settings are also saved on exit.
-            void save();
+            DJV_API void save();
 
             //! Reset to default values.
-            void reset();
+            DJV_API void reset();
 
             //! \name Audio
             ///@{
 
-            const AudioSettings& getAudio() const;
-            std::shared_ptr<ftk::IObservable<AudioSettings> > observeAudio() const;
-            void setAudio(const AudioSettings&);
+            DJV_API const AudioSettings& getAudio() const;
+            DJV_API std::shared_ptr<ftk::IObservable<AudioSettings> > observeAudio() const;
+            DJV_API void setAudio(const AudioSettings&);
 
             ///@}
 
             //! \name Cache
             ///@{
 
-            const tl::PlayerCacheOptions& getCache() const;
-            std::shared_ptr<ftk::IObservable<tl::PlayerCacheOptions> > observeCache() const;
-            void setCache(const tl::PlayerCacheOptions&);
+            DJV_API const tl::PlayerCacheOptions& getCache() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::PlayerCacheOptions> > observeCache() const;
+            DJV_API void setCache(const tl::PlayerCacheOptions&);
 
-            const tl::ui::ThumbnailCacheOptions& getThumbnailCache() const;
-            std::shared_ptr<ftk::IObservable<tl::ui::ThumbnailCacheOptions> > observeThumbnailCache() const;
-            void setThumbnailCache(const tl::ui::ThumbnailCacheOptions&);
+            DJV_API const tl::ui::ThumbnailCacheOptions& getThumbnailCache() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::ui::ThumbnailCacheOptions> > observeThumbnailCache() const;
+            DJV_API void setThumbnailCache(const tl::ui::ThumbnailCacheOptions&);
 
             ///@}
 
             //! \name Export
             ///@{
 
-            const ExportSettings& getExport() const;
-            std::shared_ptr<ftk::IObservable<ExportSettings> > observeExport() const;
-            void setExport(const ExportSettings&);
+            DJV_API const ExportSettings& getExport() const;
+            DJV_API std::shared_ptr<ftk::IObservable<ExportSettings> > observeExport() const;
+            DJV_API void setExport(const ExportSettings&);
 
             ///@}
 
             //! \name File Browser
             ///@{
 
-            const FileBrowserSettings& getFileBrowser() const;
-            std::shared_ptr<ftk::IObservable<FileBrowserSettings> > observeFileBrowser() const;
-            void setFileBrowser(const FileBrowserSettings&);
+            DJV_API const FileBrowserSettings& getFileBrowser() const;
+            DJV_API std::shared_ptr<ftk::IObservable<FileBrowserSettings> > observeFileBrowser() const;
+            DJV_API void setFileBrowser(const FileBrowserSettings&);
 
             ///@}
 
             //! \name Image Sequences
             ///@{
 
-            const ImageSeqSettings& getImageSeq() const;
-            std::shared_ptr<ftk::IObservable<ImageSeqSettings> > observeImageSeq() const;
-            void setImageSeq(const ImageSeqSettings&);
+            DJV_API const ImageSeqSettings& getImageSeq() const;
+            DJV_API std::shared_ptr<ftk::IObservable<ImageSeqSettings> > observeImageSeq() const;
+            DJV_API void setImageSeq(const ImageSeqSettings&);
 
             ///@}
 
             //! \name OTIO
             ///@{
 
-            const OTIOSettings& getOTIO() const;
-            std::shared_ptr<ftk::IObservable<OTIOSettings> > observeOTIO() const;
-            void setOTIO(const OTIOSettings&);
+            DJV_API const OTIOSettings& getOTIO() const;
+            DJV_API std::shared_ptr<ftk::IObservable<OTIOSettings> > observeOTIO() const;
+            DJV_API void setOTIO(const OTIOSettings&);
 
             ///@}
 
             //! \name Miscellaneous
             ///@{
 
-            const MiscSettings& getMisc() const;
-            std::shared_ptr<ftk::IObservable<MiscSettings> > observeMisc() const;
-            void setMisc(const MiscSettings&);
+            DJV_API const MiscSettings& getMisc() const;
+            DJV_API std::shared_ptr<ftk::IObservable<MiscSettings> > observeMisc() const;
+            DJV_API void setMisc(const MiscSettings&);
 
             ///@}
 
             //! \name Mouse
             ///@{
 
-            const MouseSettings& getMouse() const;
-            std::shared_ptr<ftk::IObservable<MouseSettings> > observeMouse() const;
-            void setMouse(const MouseSettings&);
+            DJV_API const MouseSettings& getMouse() const;
+            DJV_API std::shared_ptr<ftk::IObservable<MouseSettings> > observeMouse() const;
+            DJV_API void setMouse(const MouseSettings&);
 
             ///@}
 
             //! \name Playback
             ///@{
 
-            const PlaybackSettings& getPlayback() const;
-            std::shared_ptr<ftk::IObservable<PlaybackSettings> > observePlayback() const;
-            void setPlayback(const PlaybackSettings&);
+            DJV_API const PlaybackSettings& getPlayback() const;
+            DJV_API std::shared_ptr<ftk::IObservable<PlaybackSettings> > observePlayback() const;
+            DJV_API void setPlayback(const PlaybackSettings&);
 
             ///@}
 
             //! \name Keyboard Shortcuts
             ///@{
 
-            const ShortcutsSettings& getShortcuts() const;
-            std::shared_ptr<ftk::IObservable<ShortcutsSettings> > observeShortcuts() const;
-            void setShortcuts(const ShortcutsSettings&);
+            DJV_API const ShortcutsSettings& getShortcuts() const;
+            DJV_API std::shared_ptr<ftk::IObservable<ShortcutsSettings> > observeShortcuts() const;
+            DJV_API void setShortcuts(const ShortcutsSettings&);
 
             //! Add keyboard shortcuts. Any saved key bindings are applied to
             //! the added shortcuts.
-            void addShortcuts(const std::vector<Shortcut>&);
+            DJV_API void addShortcuts(const std::vector<Shortcut>&);
 
             ///@}
 
             //! \name Style
             ///@{
 
-            const StyleSettings& getStyle() const;
-            std::shared_ptr<ftk::IObservable<StyleSettings> > observeStyle() const;
-            void setStyle(const StyleSettings&);
+            DJV_API const StyleSettings& getStyle() const;
+            DJV_API std::shared_ptr<ftk::IObservable<StyleSettings> > observeStyle() const;
+            DJV_API void setStyle(const StyleSettings&);
 
             ///@}
 
             //! \name Timeline
             ///@{
 
-            const TimelineSettings& getTimeline() const;
-            std::shared_ptr<ftk::IObservable<TimelineSettings> > observeTimeline() const;
-            void setTimeline(const TimelineSettings&);
+            DJV_API const TimelineSettings& getTimeline() const;
+            DJV_API std::shared_ptr<ftk::IObservable<TimelineSettings> > observeTimeline() const;
+            DJV_API void setTimeline(const TimelineSettings&);
 
             ///@}
 
             //! \name Window
             ///@{
 
-            const WindowSettings& getWindow() const;
-            std::shared_ptr<ftk::IObservable<WindowSettings> > observeWindow() const;
-            void setWindow(const WindowSettings&);
+            DJV_API const WindowSettings& getWindow() const;
+            DJV_API std::shared_ptr<ftk::IObservable<WindowSettings> > observeWindow() const;
+            DJV_API void setWindow(const WindowSettings&);
 
             ///@}
 
@@ -469,9 +470,9 @@ namespace djv
             //! \name FFmpeg
             ///@{
 
-            const tl::ffmpeg::Options& getFFmpeg() const;
-            std::shared_ptr<ftk::IObservable<tl::ffmpeg::Options> > observeFFmpeg() const;
-            void setFFmpeg(const tl::ffmpeg::Options&);
+            DJV_API const tl::ffmpeg::Options& getFFmpeg() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::ffmpeg::Options> > observeFFmpeg() const;
+            DJV_API void setFFmpeg(const tl::ffmpeg::Options&);
 
             ///@}
 #endif // TLRENDER_FFMPEG_PLUGIN
@@ -480,9 +481,9 @@ namespace djv
             //! \name FFmpeg Command
             ///@{
 
-            const tl::ffmpeg_cmd::Options& getFFmpegCmd() const;
-            std::shared_ptr<ftk::IObservable<tl::ffmpeg_cmd::Options> > observeFFmpegCmd() const;
-            void setFFmpegCmd(const tl::ffmpeg_cmd::Options&);
+            DJV_API const tl::ffmpeg_cmd::Options& getFFmpegCmd() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::ffmpeg_cmd::Options> > observeFFmpegCmd() const;
+            DJV_API void setFFmpegCmd(const tl::ffmpeg_cmd::Options&);
 
             ///@}
 #endif // TLRENDER_FFMPEG_CMD
@@ -491,9 +492,9 @@ namespace djv
             //! \name USD
             ///@{
 
-            const tl::usd::Options& getUSD() const;
-            std::shared_ptr<ftk::IObservable<tl::usd::Options> > observeUSD() const;
-            void setUSD(const tl::usd::Options&);
+            DJV_API const tl::usd::Options& getUSD() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::usd::Options> > observeUSD() const;
+            DJV_API void setUSD(const tl::usd::Options&);
 
             ///@}
 #endif // TLRENDER_USD
@@ -501,7 +502,7 @@ namespace djv
             //! \name I/O Options
             ///@{
 
-            tl::IOOptions getIOOptions() const;
+            DJV_API tl::IOOptions getIOOptions() const;
 
             ///@}
 
@@ -512,33 +513,33 @@ namespace djv
         //! \name Serialize
         ///@{
 
-        void to_json(nlohmann::json&, const AudioSettings&);
-        void to_json(nlohmann::json&, const ExportSettings&);
-        void to_json(nlohmann::json&, const FileBrowserSettings&);
-        void to_json(nlohmann::json&, const ImageSeqSettings&);
-        void to_json(nlohmann::json&, const OTIOSettings&);
-        void to_json(nlohmann::json&, const MiscSettings&);
-        void to_json(nlohmann::json&, const MouseActionBinding&);
-        void to_json(nlohmann::json&, const MouseSettings&);
-        void to_json(nlohmann::json&, const PlaybackSettings&);
-        void to_json(nlohmann::json&, const ShortcutsSettings&);
-        void to_json(nlohmann::json&, const StyleSettings&);
-        void to_json(nlohmann::json&, const TimelineSettings&);
-        void to_json(nlohmann::json&, const WindowSettings&);
+        DJV_API void to_json(nlohmann::json&, const AudioSettings&);
+        DJV_API void to_json(nlohmann::json&, const ExportSettings&);
+        DJV_API void to_json(nlohmann::json&, const FileBrowserSettings&);
+        DJV_API void to_json(nlohmann::json&, const ImageSeqSettings&);
+        DJV_API void to_json(nlohmann::json&, const OTIOSettings&);
+        DJV_API void to_json(nlohmann::json&, const MiscSettings&);
+        DJV_API void to_json(nlohmann::json&, const MouseActionBinding&);
+        DJV_API void to_json(nlohmann::json&, const MouseSettings&);
+        DJV_API void to_json(nlohmann::json&, const PlaybackSettings&);
+        DJV_API void to_json(nlohmann::json&, const ShortcutsSettings&);
+        DJV_API void to_json(nlohmann::json&, const StyleSettings&);
+        DJV_API void to_json(nlohmann::json&, const TimelineSettings&);
+        DJV_API void to_json(nlohmann::json&, const WindowSettings&);
 
-        void from_json(const nlohmann::json&, AudioSettings&);
-        void from_json(const nlohmann::json&, ExportSettings&);
-        void from_json(const nlohmann::json&, FileBrowserSettings&);
-        void from_json(const nlohmann::json&, ImageSeqSettings&);
-        void from_json(const nlohmann::json&, OTIOSettings&);
-        void from_json(const nlohmann::json&, MiscSettings&);
-        void from_json(const nlohmann::json&, MouseActionBinding&);
-        void from_json(const nlohmann::json&, MouseSettings&);
-        void from_json(const nlohmann::json&, PlaybackSettings&);
-        void from_json(const nlohmann::json&, ShortcutsSettings&);
-        void from_json(const nlohmann::json&, StyleSettings&);
-        void from_json(const nlohmann::json&, TimelineSettings&);
-        void from_json(const nlohmann::json&, WindowSettings&);
+        DJV_API void from_json(const nlohmann::json&, AudioSettings&);
+        DJV_API void from_json(const nlohmann::json&, ExportSettings&);
+        DJV_API void from_json(const nlohmann::json&, FileBrowserSettings&);
+        DJV_API void from_json(const nlohmann::json&, ImageSeqSettings&);
+        DJV_API void from_json(const nlohmann::json&, OTIOSettings&);
+        DJV_API void from_json(const nlohmann::json&, MiscSettings&);
+        DJV_API void from_json(const nlohmann::json&, MouseActionBinding&);
+        DJV_API void from_json(const nlohmann::json&, MouseSettings&);
+        DJV_API void from_json(const nlohmann::json&, PlaybackSettings&);
+        DJV_API void from_json(const nlohmann::json&, ShortcutsSettings&);
+        DJV_API void from_json(const nlohmann::json&, StyleSettings&);
+        DJV_API void from_json(const nlohmann::json&, TimelineSettings&);
+        DJV_API void from_json(const nlohmann::json&, WindowSettings&);
 
         ///@}
     }

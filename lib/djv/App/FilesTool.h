@@ -4,6 +4,7 @@
 #pragma once
 
 #include <djv/App/IToolWidget.h>
+#include <djv/Models/Export.h>
 
 #include <djv/Models/FilesModel.h>
 
@@ -12,7 +13,7 @@ namespace djv
     namespace app
     {
         //! Files tool.
-        class FilesTool : public IToolWidget
+        class DJV_API_TYPE FilesTool : public IToolWidget
         {
             FTK_NON_COPYABLE(FilesTool);
 
@@ -26,9 +27,9 @@ namespace djv
             FilesTool();
 
         public:
-            virtual ~FilesTool();
+            DJV_API virtual ~FilesTool();
 
-            static std::shared_ptr<FilesTool> create(
+            DJV_API static std::shared_ptr<FilesTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,
