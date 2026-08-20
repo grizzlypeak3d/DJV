@@ -111,6 +111,7 @@ namespace djv
         struct FileBrowserSettings
         {
             bool nativeFileDialog = true;
+            bool floating = false;
             std::string path;
             ftk::FileBrowserOptions options;
             std::string ext;

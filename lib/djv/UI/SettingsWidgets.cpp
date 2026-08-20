@@ -275,6 +275,7 @@ namespace djv
             std::shared_ptr<models::SettingsModel> settings;
 
             std::shared_ptr<ftk::CheckBox> nfdCheckBox;
+            std::shared_ptr<ftk::CheckBox> floatingCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<models::FileBrowserSettings> > settingsObserver;
@@ -293,11 +294,20 @@ namespace djv
             p.nfdCheckBox = ftk::CheckBox::create(context);
             p.nfdCheckBox->setHStretch(ftk::Stretch::Expanding);
 
+            p.floatingCheckBox = ftk::CheckBox::create(context);
+            p.floatingCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.floatingCheckBox->setTooltip(
+                "Show the file browser in a window of its own, so that it\n"
+                "does not cover what is being played while you browse.\n"
+                "\n"
+                "Takes effect the next time the file browser is opened.");
+
             p.layout = ftk::FormLayout::create(context);
 
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Native file dialog:", p.nfdCheckBox);
+            p.layout->addRow("Floating window:", p.floatingCheckBox);
 
             p.settingsObserver = ftk::Observer<models::FileBrowserSettings>::create(
                 settings->observeFileBrowser(),
@@ -305,6 +315,10 @@ namespace djv
                 {
                     FTK_P();
                     p.nfdCheckBox->setChecked(value.nativeFileDialog);
+                    p.floatingCheckBox->setChecked(value.floating);
+                    // The native dialog is a window of its own already, and
+                    // is not ours to place.
+                    p.floatingCheckBox->setEnabled(!value.nativeFileDialog);
                 });
 
             p.nfdCheckBox->setCheckedCallback(
@@ -313,6 +327,15 @@ namespace djv
                     FTK_P();
                     auto settings = p.settings->getFileBrowser();
                     settings.nativeFileDialog = value;
+                    p.settings->setFileBrowser(settings);
+                });
+
+            p.floatingCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    auto settings = p.settings->getFileBrowser();
+                    settings.floating = value;
                     p.settings->setFileBrowser(settings);
                 });
         }

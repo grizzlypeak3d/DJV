@@ -79,6 +79,7 @@ namespace djv
         {
             return
                 nativeFileDialog == other.nativeFileDialog &&
+                floating == other.floating &&
                 path == other.path &&
                 options == other.options &&
                 ext == other.ext;
@@ -386,6 +387,7 @@ namespace djv
             p.fileBrowser = ftk::Observable<FileBrowserSettings>::create(fileBrowser);
             auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->setNativeFileDialog(fileBrowser.nativeFileDialog);
+            fileBrowserSystem->setFloating(fileBrowser.floating);
             if (std::filesystem::exists(fileBrowser.path))
             {
                 fileBrowserSystem->getModel()->setPath(fileBrowser.path);
@@ -650,6 +652,7 @@ namespace djv
                 {
                     auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
                     fileBrowserSystem->setNativeFileDialog(value.nativeFileDialog);
+                    fileBrowserSystem->setFloating(value.floating);
                 }
             }
         }
@@ -904,6 +907,7 @@ namespace djv
         void to_json(nlohmann::json& json, const FileBrowserSettings& value)
         {
             json["NativeFileDialog"] = value.nativeFileDialog;
+            json["Floating"] = value.floating;
             json["Path"] = value.path;
             json["Options"] = value.options;
             json["Ext"] = value.ext;
@@ -1066,6 +1070,14 @@ namespace djv
         void from_json(const nlohmann::json& json, FileBrowserSettings& value)
         {
             json.at("NativeFileDialog").get_to(value.nativeFileDialog);
+            // Looked for rather than required: at() throws on a key that is
+            // not there, and the caller answers that by dropping the whole
+            // group back to its defaults. A settings file written before this
+            // was added would lose the path and options with it.
+            if (const auto i = json.find("Floating"); i != json.end())
+            {
+                i->get_to(value.floating);
+            }
             json.at("Path").get_to(value.path);
             json.at("Options").get_to(value.options);
             json.at("Ext").get_to(value.ext);
