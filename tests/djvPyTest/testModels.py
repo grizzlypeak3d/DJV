@@ -51,7 +51,7 @@ class ModelsTest(unittest.TestCase):
         # "None" is a Python keyword so the enum value is accessed
         # with getattr().
         self.assertEqual(
-            [getattr(tl.Compare, "None"), tl.Compare.Wipe],
+            [tl.Compare._None, tl.Compare.Wipe],
             [i.compare for i in self.compareOptions])
 
     def lutOptionsCallback(self, value):

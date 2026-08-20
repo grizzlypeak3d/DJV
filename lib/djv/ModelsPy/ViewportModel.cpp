@@ -40,7 +40,7 @@ namespace djv
             FTK_ENUM_BIND(m, HUDItem);
 
             py::enum_<HUDPos>(m, "HUDPos")
-                .value("None", HUDPos::None)
+                .value("_None", HUDPos::None)
                 .value("TopLeft", HUDPos::TopLeft)
                 .value("TopRight", HUDPos::TopRight)
                 .value("BottomLeft", HUDPos::BottomLeft)
