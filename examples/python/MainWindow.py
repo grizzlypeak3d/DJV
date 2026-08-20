@@ -12,6 +12,7 @@ import Menus
 import PlaybackActions
 import PlaybackBar
 import StatusBar
+import TabBar
 import ToolBars
 import ViewActions
 import WindowActions
@@ -57,6 +58,8 @@ class MainWindow(ftk.MainWindow):
         self._viewToolBar = ToolBars.View(context, self._viewActions)
         self._windowToolBar = ToolBars.Window(context, self._windowActions)
         self._playbackBar = PlaybackBar.Widget(context, app, self._playbackActions)
+        self._tabBar = TabBar.Widget(context, app)
+        self._tabBar.setVisible(window.tabBar)
         self._statusBar = StatusBar.Widget(context, app, self)
 
         # Layout widgets.
@@ -73,6 +76,7 @@ class MainWindow(ftk.MainWindow):
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._windowToolBar.parent = hLayout
         ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
+        self._tabBar.parent = self._layout
         self._splitter = ftk.Splitter(context, ftk.Orientation.Vertical, self._layout)
         self._splitter.split = window.splitter
         self._viewport.parent = self._splitter
@@ -99,6 +103,9 @@ class MainWindow(ftk.MainWindow):
         self._compareObserver = djv.models.CompareOptionsObserver(
             app.getFilesModel().observeCompareOptions,
             lambda value: selfWeak()._compareUpdate(value))
+        self._windowSettingsObserver = djv.models.WindowSettingsObserver(
+            self._settingsModel.observeWindow,
+            lambda value: selfWeak()._windowSettingsUpdate(value))
         self._timelineSettingsObserver = djv.models.TimelineSettingsObserver(
             self._settingsModel.observeTimeline,
             lambda value: selfWeak()._timelineSettingsUpdate(value))
@@ -140,6 +147,9 @@ class MainWindow(ftk.MainWindow):
 
     def _compareUpdate(self, value):
         self._viewport.compareOptions = value
+
+    def _windowSettingsUpdate(self, settings):
+        self._tabBar.setVisible(settings.tabBar)
 
     def _timelineSettingsUpdate(self, settings):
         self._timelineWidget.frameView = settings.frameView

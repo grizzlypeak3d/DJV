@@ -18,37 +18,70 @@ class Actions:
         self.actions = {}
 
         # One radio action per compare mode; "None" shows the "A" icon
-        # since no comparison means the "A" file alone.
+        # since no comparison means the "A" file alone. The tooltips and
+        # shortcuts are the C++ application's.
+        tooltips = {
+            "None": "Show the A file.",
+            "B": "Show the B file.",
+            "Wipe": "Wipe between the A and B files.",
+            "Overlay": "Overlay the A and B files.",
+            "Difference": "Show the difference between the A and B files.",
+            "Horizontal": "Show the A and B files in a horizontal layout.",
+            "Vertical": "Show the A and B files in a vertical layout.",
+            "Tile": "Show the A and B files in a tiled layout.",
+        }
+        shortcuts = {
+            "B": ftk.KeyShortcut(ftk.Key.B, ftk.KeyModifier.Control),
+            "Wipe": ftk.KeyShortcut(ftk.Key.W, ftk.KeyModifier.Control),
+        }
         self.modes = tl.getCompareEnums()
         self.modeGroup = ftk.ActionGroup(ftk.ActionGroupType.Radio)
         for mode in self.modes:
             name = tl.to_string(mode)
             icon = "CompareA" if tl.Compare._None == mode else "Compare" + name
-            action = ftk.Action(
-                tl.getLabel(mode),
-                icon,
-                checkedCallback = lambda checked, captured = mode:
-                    self._modeCallback(captured) if checked else None)
+            if name in shortcuts:
+                action = ftk.Action(
+                    tl.getLabel(mode),
+                    icon,
+                    shortcuts[name],
+                    checkedCallback = lambda checked, captured = mode:
+                        self._modeCallback(captured) if checked else None)
+            else:
+                action = ftk.Action(
+                    tl.getLabel(mode),
+                    icon,
+                    checkedCallback = lambda checked, captured = mode:
+                        self._modeCallback(captured) if checked else None)
+            action.tooltip = tooltips.get(name, "")
             self.actions[name] = action
             self.modeGroup.addAction(action)
 
         self.actions["Next"] = ftk.Action(
-            "Next B File",
+            "Next",
+            "Next",
+            ftk.KeyShortcut(ftk.Key.PageDown, ftk.KeyModifier.Shift),
             lambda: self._app().getFilesModel().nextB())
-        self.actions["Next"].tooltip = "Change to the next \"B\" file."
+        self.actions["Next"].tooltip = "Go to the next B file."
 
         self.actions["Prev"] = ftk.Action(
-            "Previous B File",
+            "Previous",
+            "Prev",
+            ftk.KeyShortcut(ftk.Key.PageUp, ftk.KeyModifier.Shift),
             lambda: self._app().getFilesModel().prevB())
-        self.actions["Prev"].tooltip = "Change to the previous \"B\" file."
+        self.actions["Prev"].tooltip = "Go to the previous B file."
 
         # The time sync modes.
+        timeTooltips = {
+            "Relative": "Compare files using relative time.",
+            "Absolute": "Compare files using absolute time.",
+        }
         self.timeGroup = ftk.ActionGroup(ftk.ActionGroupType.Radio)
         for time in tl.getCompareTimeEnums():
             action = ftk.Action(
                 tl.getLabel(time),
                 checkedCallback = lambda checked, captured = time:
                     self._timeCallback(captured) if checked else None)
+            action.tooltip = timeTooltips.get(tl.to_string(time), "")
             self.actions[tl.to_string(time)] = action
             self.timeGroup.addAction(action)
 
