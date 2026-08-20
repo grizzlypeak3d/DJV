@@ -112,6 +112,7 @@ namespace djv
         {
             bool nativeFileDialog = true;
             bool floating = false;
+            bool pinned = false;
             std::string path;
             ftk::FileBrowserOptions options;
             std::string ext;

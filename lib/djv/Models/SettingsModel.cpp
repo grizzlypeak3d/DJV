@@ -80,6 +80,7 @@ namespace djv
             return
                 nativeFileDialog == other.nativeFileDialog &&
                 floating == other.floating &&
+                pinned == other.pinned &&
                 path == other.path &&
                 options == other.options &&
                 ext == other.ext;
@@ -388,6 +389,7 @@ namespace djv
             auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->setNativeFileDialog(fileBrowser.nativeFileDialog);
             fileBrowserSystem->setFloating(fileBrowser.floating);
+            fileBrowserSystem->setPinned(fileBrowser.pinned);
             if (std::filesystem::exists(fileBrowser.path))
             {
                 fileBrowserSystem->getModel()->setPath(fileBrowser.path);
@@ -491,6 +493,8 @@ namespace djv
             fileBrowser.path = fileBrowserSystem->getModel()->getPath().u8string();
             fileBrowser.options = fileBrowserSystem->getModel()->getOptions();
             fileBrowser.ext = fileBrowserSystem->getModel()->getExt();
+            // Changed from inside the browser, like the path above it.
+            fileBrowser.pinned = fileBrowserSystem->isPinned();
             p.settings->setT(keys["FileBrowser"], fileBrowser);
 
             p.settings->setT(keys["ImageSeq"], p.imageSeq->get());
@@ -653,6 +657,7 @@ namespace djv
                     auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
                     fileBrowserSystem->setNativeFileDialog(value.nativeFileDialog);
                     fileBrowserSystem->setFloating(value.floating);
+                    fileBrowserSystem->setPinned(value.pinned);
                 }
             }
         }
@@ -908,6 +913,7 @@ namespace djv
         {
             json["NativeFileDialog"] = value.nativeFileDialog;
             json["Floating"] = value.floating;
+            json["Pinned"] = value.pinned;
             json["Path"] = value.path;
             json["Options"] = value.options;
             json["Ext"] = value.ext;
@@ -1077,6 +1083,10 @@ namespace djv
             if (const auto i = json.find("Floating"); i != json.end())
             {
                 i->get_to(value.floating);
+            }
+            if (const auto i = json.find("Pinned"); i != json.end())
+            {
+                i->get_to(value.pinned);
             }
             json.at("Path").get_to(value.path);
             json.at("Options").get_to(value.options);
