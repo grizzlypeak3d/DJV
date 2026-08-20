@@ -46,7 +46,7 @@ class Widget(ftk.IContainer):
             for item in logItems:
                 pieces = []
                 if ftk.LogType.Error == item.type:
-                    pieces = item.toString().split('\n')
+                    pieces = item.message.split('\n')
                 if pieces:
                     text = pieces[0]
             self._logLabel.text = text
