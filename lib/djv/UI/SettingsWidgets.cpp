@@ -16,6 +16,7 @@
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/DoubleEdit.h>
+#include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/FileEdit.h>
 #include <ftk/UI/FloatEdit.h>
 #include <ftk/UI/FloatEditSlider.h>
@@ -269,12 +270,12 @@ namespace djv
             return out;
         }
 
-#if defined(FTK_NFD)
         struct FileBrowserSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
 
             std::shared_ptr<ftk::CheckBox> nfdCheckBox;
+            std::shared_ptr<ftk::CheckBox> floatingCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<models::FileBrowserSettings> > settingsObserver;
@@ -293,18 +294,45 @@ namespace djv
             p.nfdCheckBox = ftk::CheckBox::create(context);
             p.nfdCheckBox->setHStretch(ftk::Stretch::Expanding);
 
+            p.floatingCheckBox = ftk::CheckBox::create(context);
+            p.floatingCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.floatingCheckBox->setTooltip(
+                "Show the file browser in a window of its own, so that it\n"
+                "does not cover what is being played while you browse.\n"
+                "\n"
+                "Takes effect the next time the file browser is opened.");
+
             p.layout = ftk::FormLayout::create(context);
 
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Native file dialog:", p.nfdCheckBox);
+            p.layout->addRow("Floating window:", p.floatingCheckBox);
+
+            // The native dialog is not built everywhere: it means linking to
+            // the desktop's own, which is not wanted on Linux. Where it is not
+            // built the setting is remembered but does nothing, so it is shown
+            // as what it is rather than as a choice.
+            const bool nativeAvailable = context->getSystem<ftk::FileBrowserSystem>()->
+                isNativeFileDialogAvailable();
+            p.nfdCheckBox->setEnabled(nativeAvailable);
+            if (!nativeAvailable)
+            {
+                p.nfdCheckBox->setTooltip(
+                    "The native file dialog is not available in this build.");
+            }
 
             p.settingsObserver = ftk::Observer<models::FileBrowserSettings>::create(
                 settings->observeFileBrowser(),
-                [this](const models::FileBrowserSettings& value)
+                [this, nativeAvailable](const models::FileBrowserSettings& value)
                 {
                     FTK_P();
                     p.nfdCheckBox->setChecked(value.nativeFileDialog);
+                    p.floatingCheckBox->setChecked(value.floating);
+                    // The native dialog is a window of its own already, and
+                    // is not ours to place -- but only where there is one.
+                    p.floatingCheckBox->setEnabled(
+                        !(nativeAvailable && value.nativeFileDialog));
                 });
 
             p.nfdCheckBox->setCheckedCallback(
@@ -313,6 +341,15 @@ namespace djv
                     FTK_P();
                     auto settings = p.settings->getFileBrowser();
                     settings.nativeFileDialog = value;
+                    p.settings->setFileBrowser(settings);
+                });
+
+            p.floatingCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    auto settings = p.settings->getFileBrowser();
+                    settings.floating = value;
                     p.settings->setFileBrowser(settings);
                 });
         }
@@ -333,7 +370,6 @@ namespace djv
             out->_init(context, settings, parent);
             return out;
         }
-#endif // FTK_NFD
 
         struct OTIOSettingsWidget::Private
         {

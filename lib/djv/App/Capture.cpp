@@ -952,8 +952,9 @@ namespace djv
             else if (step.contains("fileBrowser"))
             {
                 // Open the in-app file browser dialog. Force the non-native
-                // dialog so it renders inside our window and can be captured
-                // (the native OS dialog is a separate, uncapturable window).
+                // dialog, and force it not to float, so it renders inside our
+                // window and can be captured (the native OS dialog and a
+                // floating browser are separate, uncapturable windows).
                 //
                 // Accepts either { "fileBrowser": true } or an object that
                 // configures the dialog before opening:
@@ -968,6 +969,7 @@ namespace djv
                 {
                     auto fbs = context->getSystem<ftk::FileBrowserSystem>();
                     fbs->setNativeFileDialog(false);
+                    fbs->setFloating(false);
 
                     const auto& v = step.at("fileBrowser");
                     if (v.is_object())

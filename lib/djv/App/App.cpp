@@ -1515,6 +1515,9 @@ namespace djv
                         p.secondaryWindow->close();
                         p.secondaryWindow.reset();
                     }
+                    // A floating file browser is a window of its own, and
+                    // the application runs until every window is gone.
+                    _context->getSystem<ftk::FileBrowserSystem>()->close();
                 });
 
             p.viewPosZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(

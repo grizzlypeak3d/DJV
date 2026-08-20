@@ -52,13 +52,11 @@ namespace djv
             ui::CacheSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["Cache"]->setWidget(vLayout2);
 
-#if defined(FTK_NFD)
             p.bellows["FileBrowser"] = ftk::Bellows::create(context, "File Browser", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
             vLayout2->setMarginRole(ftk::SizeRole::Margin);
             ui::FileBrowserSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["FileBrowser"]->setWidget(vLayout2);
-#endif // FTK_NFD
 
             p.bellows["ImageSeqs"] = ftk::Bellows::create(context, "Image Sequences", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
