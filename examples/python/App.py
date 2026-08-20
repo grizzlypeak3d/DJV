@@ -25,9 +25,13 @@ class App(ftk.App):
             ["-b"], "Open a file for comparison.")
         self._cmdLineCompare = ftk.CmdLineOptionString(
             ["-compare"], "The comparison mode.")
-        self._cmdLineSettings = ftk.CmdLineOptionString(
-            ["-settings"], "The settings file to use.")
 
+        # The base class keeps the settings and log files under the same
+        # directory as the C++ application, with this application's own
+        # base name so the two do not read each other's settings. This
+        # also adds the -settingsFile, -logFile, and -resetSettings
+        # command line options.
+        self._appInfoModel = djv.models.AppInfoModel()
         ftk.App.__init__(
             self,
             context,
@@ -35,14 +39,15 @@ class App(ftk.App):
             "djv-python",
             "DJV Python player",
             [ self._cmdLineInput ],
-            [ self._cmdLineB, self._cmdLineCompare, self._cmdLineSettings ])
+            [ self._cmdLineB, self._cmdLineCompare ],
+            ftk.AppFiles(
+                self._appInfoModel.docsDirName,
+                "djv-python",
+                self._appInfoModel.versionMajor))
 
     def __del__(self):
         if hasattr(self, "_settingsModel"):
             self._settingsModel.save()
-
-    def getSettings(self):
-        return self._settings
 
     def getSettingsModel(self):
         return self._settingsModel
@@ -96,16 +101,8 @@ class App(ftk.App):
 
     def run(self):
 
-        # The settings file backs all of the models. A file given on the
-        # command line keeps a test run out of the real settings.
-        if self._cmdLineSettings.hasValue:
-            settingsPath = self._cmdLineSettings.value
-        else:
-            docPath = ftk.getUserPath(ftk.UserPath.Documents)
-            settingsPath = ftk.getSettingsPath(
-                ftk.Path(docPath, "DJV").get(),
-                "djv-python.json")
-        self._settings = ftk.Settings(self.context, settingsPath)
+        # The settings file from the base class backs all of the models.
+        self._settings = self.settings
 
         self._settingsModel = djv.models.SettingsModel(
             self.context, self._settings, 1.0)
@@ -120,7 +117,6 @@ class App(ftk.App):
         self._colorModel = djv.models.ColorModel(self.context, self._settings)
         self._toolsModel = djv.models.ToolsModel(self._settings)
         self._sysLogModel = ftk.SysLogModel(self.context)
-        self._appInfoModel = djv.models.AppInfoModel()
 
         self._player = tl.ObservablePlayer(None)
         self._files = []

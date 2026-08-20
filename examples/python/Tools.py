@@ -55,7 +55,6 @@ class InfoTool(IToolWidget):
         self._formLayout.marginRole = ftk.SizeRole.MarginSmall
         self._formLayout.spacingRole = ftk.SizeRole.SpacingSmall
         self._setContent(self._formLayout)
-        self._context = context
 
         selfWeak = weakref.ref(self)
         self._playerObserver = tl.PlayerObserver(
@@ -82,7 +81,7 @@ class InfoTool(IToolWidget):
             for tag in sorted(ioInfo.tags):
                 rows.append((tag, ioInfo.tags[tag]))
             for name, text in rows:
-                label = ftk.Label(self._context, text)
+                label = ftk.Label(self.context, text)
                 self._formLayout.addRow(name + ":", label)
 
 class AudioTool(IToolWidget):
@@ -178,7 +177,6 @@ class FilesTool(IToolWidget):
     def __init__(self, context, app, parent = None):
         IToolWidget.__init__(self, context, app, "Files", "FilesTool", parent)
 
-        self._context = context
         self._rowWidgets = []
 
         self._aButtonGroup = ftk.ButtonGroup(context, ftk.ButtonGroupType.Radio)
@@ -319,20 +317,20 @@ class FilesTool(IToolWidget):
         b = app.getFilesModel().b
         for row, item in enumerate(files):
             nameButton = ftk.ToolButton(
-                self._context, item.path.fileName, self._grid)
+                self.context, item.path.fileName, self._grid)
             nameButton.checked = item is a
             nameButton.hStretch = ftk.Stretch.Expanding
             nameButton.tooltip = item.path.get() + "\n\nSet the A file."
             self._aButtonGroup.addButton(nameButton)
             self._grid.setGridPos(nameButton, row, 0)
 
-            bButton = ftk.ToolButton(self._context, "B", self._grid)
+            bButton = ftk.ToolButton(self.context, "B", self._grid)
             bButton.checked = any(item is i for i in b)
             bButton.tooltip = "Set the B file(s)."
             self._bButtonGroup.addButton(bButton)
             self._grid.setGridPos(bButton, row, 1)
 
-            layerComboBox = ftk.ComboBox(self._context, self._grid)
+            layerComboBox = ftk.ComboBox(self.context, self._grid)
             layerComboBox.setItems(item.videoLayers)
             layerComboBox.currentIndex = item.videoLayer
             layerComboBox.tooltip = "Set the current layer."
@@ -506,7 +504,6 @@ class ColorTool(IToolWidget):
     def __init__(self, context, app, parent = None):
         IToolWidget.__init__(self, context, app, "Color", "ColorTool", parent)
 
-        self._context = context
         colorModel = app.getColorModel()
         # The tool owns the OCIO model and syncs it both ways with the
         # color model, the way the C++ color widgets do it.
@@ -705,7 +702,6 @@ class MessagesTool(IToolWidget):
         IToolWidget.__init__(
             self, context, app, "Messages", "MessagesTool", parent)
 
-        self._context = context
         sysLogModel = app.getSysLogModel()
 
         self._label = ftk.Label(context)
@@ -970,7 +966,6 @@ class ToolsWidget(ftk.IContainer):
     def __init__(self, context, app, parent = None):
         ftk.IContainer.__init__(self, context, "ToolsWidget", parent)
 
-        self._context = context
         self._app = weakref.ref(app)
         self._widgets = {}
 
@@ -996,7 +991,7 @@ class ToolsWidget(ftk.IContainer):
                 del self._widgets[name]
         for name in names:
             if name not in self._widgets and name in FACTORY:
-                widget = FACTORY[name](self._context, self._app())
+                widget = FACTORY[name](self.context, self._app())
                 widget.parent = self._layout
                 self._widgets[name] = widget
         self.setVisible(len(self._widgets) > 0)

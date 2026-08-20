@@ -14,6 +14,7 @@ class Actions:
     """
     def __init__(self, context, app, mainWindow):
 
+        self._app = weakref.ref(app)
         self._mainWindowWeak = weakref.ref(mainWindow)
         self.actions = {}
         self.actions["Frame"] = ftk.Action(
@@ -47,7 +48,7 @@ class Actions:
         self.actions["HUD"] = ftk.Action(
             "HUD",
             ftk.KeyShortcut(ftk.Key.H, ftk.commandKeyModifier),
-            checkedCallback = lambda value: self._hudCallback(app, value))
+            checkedCallback = self._hudCallback)
         self.actions["HUD"].tooltip = "Toggle the HUD (heads up display)."
 
         selfWeak = weakref.ref(self)
@@ -69,10 +70,11 @@ class Actions:
     def _frameUpdate(self, value):
         self.actions["Frame"].checked = value
 
-    def _hudCallback(self, app, value):
-        options = app.getViewportModel().hudOptions
+    def _hudCallback(self, value):
+        model = self._app().getViewportModel()
+        options = model.hudOptions
         options.enabled = value
-        app.getViewportModel().hudOptions = options
+        model.hudOptions = options
 
     def _hudUpdate(self, value):
         self.actions["HUD"].checked = value.enabled

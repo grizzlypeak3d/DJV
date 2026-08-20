@@ -14,7 +14,6 @@ class Actions:
     """
     def __init__(self, context, app, mainWindow):
 
-        self._context = context
         self._app = weakref.ref(app)
         self._mainWindowWeak = weakref.ref(mainWindow)
         self.actions = {}
@@ -40,5 +39,5 @@ class Actions:
             info.version,
             info.commitDate,
             info.gitCommit)
-        dialogSystem = self._context.getSystemByName("ftk::DialogSystem")
+        dialogSystem = self._app().context.getSystemByName("ftk::DialogSystem")
         dialogSystem.message("About", text, self._mainWindowWeak())
