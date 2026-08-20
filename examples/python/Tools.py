@@ -499,13 +499,286 @@ class ViewTool(IToolWidget):
     def _hudUpdate(self, options):
         self._hudCheckBox.checked = options.enabled
 
+class ColorTool(IToolWidget):
+    """
+    This tool provides the color management and adjustments.
+    """
+    def __init__(self, context, app, parent = None):
+        IToolWidget.__init__(self, context, app, "Color", "ColorTool", parent)
+
+        self._context = context
+        colorModel = app.getColorModel()
+        # The tool owns the OCIO model and syncs it both ways with the
+        # color model, the way the C++ color widgets do it.
+        self._ocioModel = djv.models.OCIOModel(context)
+        ocioModel = self._ocioModel
+        layout = ftk.VerticalLayout(context)
+        layout.spacingRole = ftk.SizeRole._None
+        appWeak = weakref.ref(app)
+        selfWeak = weakref.ref(self)
+
+        # OCIO.
+        self._ocioEnabledCheckBox = ftk.CheckBox(context)
+        self._ocioConfigComboBox = ftk.ComboBox(
+            context, [tl.getLabel(c) for c in tl.getOCIOConfigEnums()])
+        self._ocioConfigComboBox.hStretch = ftk.Stretch.Expanding
+        self._ocioFileEdit = ftk.FileEdit(context)
+        self._ocioInputComboBox = ftk.ComboBox(context)
+        self._ocioInputComboBox.hStretch = ftk.Stretch.Expanding
+        self._ocioDisplayComboBox = ftk.ComboBox(context)
+        self._ocioDisplayComboBox.hStretch = ftk.Stretch.Expanding
+        self._ocioViewComboBox = ftk.ComboBox(context)
+        self._ocioViewComboBox.hStretch = ftk.Stretch.Expanding
+        self._ocioLookComboBox = ftk.ComboBox(context)
+        self._ocioLookComboBox.hStretch = ftk.Stretch.Expanding
+        vLayout = ftk.VerticalLayout(context)
+        vLayout.marginRole = ftk.SizeRole.Margin
+        form = ftk.FormLayout(context, vLayout)
+        form.spacingRole = ftk.SizeRole.SpacingSmall
+        form.addRow("Config:", self._ocioConfigComboBox)
+        form.addRow("File:", self._ocioFileEdit)
+        form.addRow("Input:", self._ocioInputComboBox)
+        form.addRow("Display:", self._ocioDisplayComboBox)
+        form.addRow("View:", self._ocioViewComboBox)
+        form.addRow("Look:", self._ocioLookComboBox)
+        bellows = ftk.Bellows(context, "OCIO", layout)
+        bellows.widget = vLayout
+        bellows.toolWidget = self._ocioEnabledCheckBox
+
+        self._ocioEnabledCheckBox.setCheckedCallback(
+            lambda value: selfWeak()._ocioModel.setEnabled(value))
+        self._ocioConfigComboBox.setIndexCallback(
+            lambda value: selfWeak()._ocioModel.setConfig(
+                tl.getOCIOConfigEnums()[value]))
+        self._ocioFileEdit.setCallback(
+            lambda value: selfWeak()._ocioModel.setFileName(str(value)))
+        self._ocioInputComboBox.setIndexCallback(
+            lambda value: selfWeak()._ocioModel.setInputIndex(value))
+        self._ocioDisplayComboBox.setIndexCallback(
+            lambda value: selfWeak()._ocioModel.setDisplayIndex(value))
+        self._ocioViewComboBox.setIndexCallback(
+            lambda value: selfWeak()._ocioModel.setViewIndex(value))
+        self._ocioLookComboBox.setIndexCallback(
+            lambda value: selfWeak()._ocioModel.setLookIndex(value))
+        self._ocioDataObserver = djv.models.OCIOModelDataObserver(
+            ocioModel.observeData,
+            lambda value: selfWeak()._ocioDataUpdate(value))
+        self._ocioOptionsObserver = djv.models.OCIOOptionsObserver(
+            colorModel.observeOCIOOptions,
+            lambda value: selfWeak()._ocioModel.setOptions(value))
+        self._ocioOptionsObserver2 = djv.models.OCIOOptionsObserver(
+            ocioModel.observeOptions,
+            lambda value: setattr(
+                appWeak().getColorModel(), "ocioOptions", value))
+
+        # LUT.
+        self._lutEnabledCheckBox = ftk.CheckBox(context)
+        self._lutFileEdit = ftk.FileEdit(context)
+        self._lutOrderComboBox = ftk.ComboBox(
+            context, [tl.getLabel(o) for o in tl.getLUTOrderEnums()])
+        self._lutOrderComboBox.hStretch = ftk.Stretch.Expanding
+        vLayout = ftk.VerticalLayout(context)
+        vLayout.marginRole = ftk.SizeRole.Margin
+        form = ftk.FormLayout(context, vLayout)
+        form.spacingRole = ftk.SizeRole.SpacingSmall
+        form.addRow("File:", self._lutFileEdit)
+        form.addRow("Order:", self._lutOrderComboBox)
+        bellows = ftk.Bellows(context, "LUT", layout)
+        bellows.widget = vLayout
+        bellows.toolWidget = self._lutEnabledCheckBox
+
+        self._lutEnabledCheckBox.setCheckedCallback(
+            lambda value: self._setLUT(appWeak(), "enabled", value))
+        self._lutFileEdit.setCallback(
+            lambda value: self._setLUT(appWeak(), "fileName", str(value)))
+        self._lutOrderComboBox.setIndexCallback(
+            lambda value: self._setLUT(
+                appWeak(), "order", tl.getLUTOrderEnums()[value]))
+        self._lutObserver = djv.models.LUTOptionsObserver(
+            colorModel.observeLUTOptions,
+            lambda value: selfWeak()._lutUpdate(value))
+
+        # The color adjustments drive the viewport model's display
+        # options. The color values are per channel; the sliders set the
+        # channels together.
+        self._displaySliders = {}
+        self._displayChecks = {}
+        for section, fields in [
+            ("Color", [
+                ("brightness", 0.0, 4.0, True),
+                ("contrast", 0.0, 4.0, True),
+                ("saturation", 0.0, 4.0, True),
+                ("hue", -180.0, 180.0, False)]),
+            ("Levels", [
+                ("inLow", 0.0, 1.0, False),
+                ("inHigh", 0.0, 1.0, False),
+                ("gamma", 0.1, 4.0, False),
+                ("outLow", 0.0, 1.0, False),
+                ("outHigh", 0.0, 1.0, False)]),
+            ("Exposure", [
+                ("exposure", -10.0, 10.0, False),
+                ("defog", 0.0, 0.1, False),
+                ("kneeLow", -3.0, 3.0, False),
+                ("kneeHigh", 3.5, 7.5, False),
+                ("gamma", 0.1, 4.0, False)]),
+            ("SoftClip", [
+                ("value", 0.0, 1.0, False)]),
+        ]:
+            check = ftk.CheckBox(context)
+            self._displayChecks[section] = check
+            check.setCheckedCallback(
+                lambda value, captured = section:
+                    self._setDisplay(appWeak(), captured, "enabled", value))
+            vLayout = ftk.VerticalLayout(context)
+            vLayout.marginRole = ftk.SizeRole.Margin
+            form = ftk.FormLayout(context, vLayout)
+            form.spacingRole = ftk.SizeRole.SpacingSmall
+            for field, lo, hi, vec in fields:
+                slider = ftk.FloatEditSlider(context)
+                slider.range = ftk.RangeF(lo, hi)
+                slider.setCallback(
+                    lambda value, s = section, f = field, v = vec:
+                        self._setDisplay(
+                            appWeak(), s, f,
+                            ftk.V3F(value, value, value) if v else value))
+                form.addRow(field + ":", slider)
+                self._displaySliders[(section, field)] = (slider, vec)
+            title = "Soft Clip" if section == "SoftClip" else section
+            bellows = ftk.Bellows(context, title, layout)
+            bellows.widget = vLayout
+            bellows.toolWidget = check
+
+        self._setContent(layout)
+
+        self._displayObserver = djv.models.DisplayOptionsObserver(
+            app.getViewportModel().observeDisplayOptions,
+            lambda value: selfWeak()._displayUpdate(value))
+
+    def _ocioDataUpdate(self, data):
+        self._ocioEnabledCheckBox.checked = data.enabled
+        self._ocioConfigComboBox.currentIndex = \
+            tl.getOCIOConfigEnums().index(data.config)
+        self._ocioFileEdit.path = data.fileName
+        for comboBox, items, index in [
+            (self._ocioInputComboBox, data.inputs, data.inputIndex),
+            (self._ocioDisplayComboBox, data.displays, data.displayIndex),
+            (self._ocioViewComboBox, data.views, data.viewIndex),
+            (self._ocioLookComboBox, data.looks, data.lookIndex)]:
+            comboBox.setItems(items)
+            comboBox.currentIndex = index
+
+    def _setLUT(self, app, name, value):
+        options = app.getColorModel().lutOptions
+        setattr(options, name, value)
+        app.getColorModel().lutOptions = options
+
+    def _lutUpdate(self, options):
+        self._lutEnabledCheckBox.checked = options.enabled
+        self._lutFileEdit.path = options.fileName
+        self._lutOrderComboBox.currentIndex = \
+            tl.getLUTOrderEnums().index(options.order)
+
+    def _setDisplay(self, app, section, name, value):
+        options = app.getViewportModel().displayOptions
+        part = getattr(options, section[0].lower() + section[1:])
+        setattr(part, name, value)
+        setattr(options, section[0].lower() + section[1:], part)
+        app.getViewportModel().displayOptions = options
+
+    def _displayUpdate(self, options):
+        for section, part in [
+            ("Color", options.color),
+            ("Levels", options.levels),
+            ("Exposure", options.exposure),
+            ("SoftClip", options.softClip)]:
+            self._displayChecks[section].checked = part.enabled
+            for (s, field), (slider, vec) in self._displaySliders.items():
+                if s == section:
+                    value = getattr(part, field)
+                    slider.value = value.x if vec else value
+
+class MessagesTool(IToolWidget):
+    """
+    This tool displays the warning and error messages.
+    """
+    def __init__(self, context, app, parent = None):
+        IToolWidget.__init__(
+            self, context, app, "Messages", "MessagesTool", parent)
+
+        self._context = context
+        sysLogModel = app.getSysLogModel()
+
+        self._label = ftk.Label(context)
+        self._label.marginRole = ftk.SizeRole.MarginSmall
+        self._label.vStretch = ftk.Stretch.Expanding
+
+        clearButton = ftk.ToolButton(context, "Clear")
+        clearButton.tooltip = "Clear the messages."
+        appWeak = weakref.ref(app)
+        clearButton.setClickedCallback(
+            lambda: appWeak().getSysLogModel().clearMessages())
+
+        layout = ftk.VerticalLayout(context)
+        layout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._label.parent = layout
+        clearButton.parent = layout
+        self._setContent(layout)
+
+        selfWeak = weakref.ref(self)
+        self._messagesObserver = ftk.LogItemListObserver(
+            sysLogModel.observeMessages(),
+            lambda items: selfWeak()._messagesUpdate(items))
+
+    def _messagesUpdate(self, items):
+        self._label.text = "\n".join(
+            "{}: {}".format(ftk.getLabel(item.type), item.message)
+            for item in items)
+
+class SysLogTool(IToolWidget):
+    """
+    This tool displays the system log.
+    """
+    def __init__(self, context, app, parent = None):
+        IToolWidget.__init__(
+            self, context, app, "System Log", "SysLogTool", parent)
+
+        sysLogModel = app.getSysLogModel()
+
+        self._label = ftk.Label(context)
+        self._label.marginRole = ftk.SizeRole.MarginSmall
+        self._label.font = ftk.FontType.Mono
+        self._label.vStretch = ftk.Stretch.Expanding
+
+        clearButton = ftk.ToolButton(context, "Clear")
+        clearButton.tooltip = "Clear the log."
+        appWeak = weakref.ref(app)
+        clearButton.setClickedCallback(
+            lambda: appWeak().getSysLogModel().clearLog())
+
+        layout = ftk.VerticalLayout(context)
+        layout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._label.parent = layout
+        clearButton.parent = layout
+        self._setContent(layout)
+
+        selfWeak = weakref.ref(self)
+        self._logObserver = ftk.StringListObserver(
+            sysLogModel.observeLog(),
+            lambda lines: selfWeak()._logUpdate(lines))
+
+    def _logUpdate(self, lines):
+        self._label.text = "\n".join(lines)
+
 # The tools this application implements so far; the tools model lists
 # more, and the actions only offer what can actually open.
 FACTORY = {
     "Files": FilesTool,
     "View": ViewTool,
+    "Color": ColorTool,
     "Information": InfoTool,
     "Audio": AudioTool,
+    "Messages": MessagesTool,
+    "System Log": SysLogTool,
 }
 
 class ToolsWidget(ftk.IContainer):

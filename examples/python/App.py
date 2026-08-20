@@ -68,6 +68,9 @@ class App(ftk.App):
     def getToolsModel(self):
         return self._toolsModel
 
+    def getSysLogModel(self):
+        return self._sysLogModel
+
     def observePlayer(self):
         """
         Observe the player for the current file.
@@ -113,6 +116,7 @@ class App(ftk.App):
         self._audioModel = djv.models.AudioModel(self.context, self._settings)
         self._colorModel = djv.models.ColorModel(self.context, self._settings)
         self._toolsModel = djv.models.ToolsModel(self._settings)
+        self._sysLogModel = ftk.SysLogModel(self.context)
 
         self._player = tl.ObservablePlayer(None)
         self._files = []
