@@ -27,6 +27,7 @@ project(
 set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
 set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
 set(DJV_PROGRAMS ON CACHE BOOL "Build programs")
+set(DJV_PYTHON OFF CACHE BOOL "Enable support for Python")
 set(DJV_TESTS OFF CACHE BOOL "Build tests")
 set(DJV_GCOV OFF CACHE BOOL "Enable gcov code coverage")
 set(DJV_SANITIZE "" CACHE STRING "Enable sanitizers (comma-separated, e.g. address,undefined)")
@@ -97,6 +98,12 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Dependencies
 
 find_package(ZLIB REQUIRED)
+
+# Python dependencies
+if(DJV_PYTHON)
+    find_package(Python3 REQUIRED Interpreter Development)
+    find_package(pybind11 REQUIRED)
+endif()
 
 #-------------------------------------------------------------------------------
 # Git submodules
