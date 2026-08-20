@@ -9,6 +9,7 @@
 #include <ftk/Core/Context.h>
 #include <ftk/UI/Settings.h>
 
+#include <pybind11/functional.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 
