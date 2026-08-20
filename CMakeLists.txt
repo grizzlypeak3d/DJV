@@ -29,6 +29,7 @@ set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
 set(DJV_PROGRAMS ON CACHE BOOL "Build programs")
 set(DJV_PYTHON OFF CACHE BOOL "Enable support for Python")
 set(DJV_TESTS OFF CACHE BOOL "Build tests")
+set(DJV_TESTS_NO_GL OFF CACHE BOOL "Run only the tests that do not need OpenGL")
 set(DJV_GCOV OFF CACHE BOOL "Enable gcov code coverage")
 set(DJV_SANITIZE "" CACHE STRING "Enable sanitizers (comma-separated, e.g. address,undefined)")
 

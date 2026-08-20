@@ -42,6 +42,11 @@ set(TLRENDER_FFMPEG_PLUGIN ON CACHE BOOL "")
 set(TLRENDER_OIIO ON CACHE BOOL "")
 set(TLRENDER_USD OFF CACHE BOOL "")
 set(TLRENDER_PYTHON OFF CACHE BOOL "")
+# One switch for the whole stack: feather-tk and DJV have their own Python
+# options, and a value already in the cache wins, so setting TLRENDER_PYTHON
+# first is enough to turn all three on.
+set(ftk_PYTHON ${TLRENDER_PYTHON} CACHE BOOL "")
+set(DJV_PYTHON ${TLRENDER_PYTHON} CACHE BOOL "")
 set(TLRENDER_PROGRAMS OFF CACHE BOOL "")
 set(TLRENDER_EXAMPLES OFF CACHE BOOL "")
 set(TLRENDER_TESTS OFF CACHE BOOL "")

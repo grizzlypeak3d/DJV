@@ -10,3 +10,4 @@ docs/doxygen
 
 # Personal build settings, read by etc/Config/default.cmake.
 etc/Config/local.cmake
+__pycache__/
