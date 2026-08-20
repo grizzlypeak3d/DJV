@@ -164,6 +164,13 @@ jobs:
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
         sh djv/etc/macOS/sbuild.sh djv Debug ci-macos
 
+    # The runner has no working OpenGL, which djv-test does not need.
+    - name: Run tests
+      run: |
+        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
+        cd build-Debug
+        ctest --verbose --rerun-failed --output-on-failure -C Debug
+
   macos-package:
     runs-on: macos-latest
 
@@ -233,6 +240,13 @@ jobs:
       shell: cmd
       run: |
         djv\etc\Windows\sbuild.bat djv Debug ci-windows
+
+    # The runner has no working OpenGL, which djv-test does not need.
+    - name: Run tests
+      shell: cmd
+      run: |
+        cd build-Debug
+        ctest --verbose --rerun-failed --output-on-failure -C Debug
 
   windows-package:
     runs-on: windows-latest
