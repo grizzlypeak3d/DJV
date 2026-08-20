@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a class="current" href="python.html">Python</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+<li class="section">DJV Studio</li>
+<li><a href="studio-compare.html">DJV Compare</a></li>
+<li><a href="studio-bmd.html">Blackmagic output</a></li>
+</ul>
+</nav>
+<main>
+<h1>Python</h1>
+<p>The libraries DJV is built from have Python bindings, and there is a version of the DJV application written in Python on top of them. This page describes what is there, how to run it, and how to modify it. It is not an API reference — the bindings follow the C++ headers closely, so the headers and the Python examples are the reference.</p>
+<h2 id="the-modules">The modules</h2>
+<p>Four modules make up the stack:</p>
+<ul><li><strong>ftkPy</strong> — the <a href="https://github.com/darbyjohnston/feather-tk">feather-tk</a> user interface toolkit: widgets, layouts, observables, and the application classes.</li><li><strong>tlRenderPy</strong> — timelines, players, and file I/O, with the timeline and viewport widgets in the <code>tl.ui</code> submodule.</li><li><strong>djvPy</strong> — DJV's data models in the <code>djv.models</code> submodule: files, settings, color, audio, viewport, and tools.</li><li><strong>opentimelineio</strong> — the standard OTIO package. Its time types pass directly through the tlRender bindings, so a <code>RationalTime</code> from OTIO seeks a player.</li></ul>
+<p>The conventional imports:</p>
+<pre><code>import opentimelineio as otio
+import ftkPy as ftk
+import tlRenderPy as tl
+import djvPy as djv</code></pre>
+<h2 id="building">Building</h2>
+<p>One switch builds all of it. In <code>etc/Config/local.cmake</code>:</p>
+<pre><code>set(TLRENDER_PYTHON ON CACHE BOOL "")</code></pre>
+<p>The feather-tk and DJV switches follow it, the superbuild adds pybind11 and builds OpenTimelineIO's Python package, and the stack is built as shared libraries so that the modules share one copy of it. The bindings compile against the Python that CMake finds; the modules only import into that same Python, which is why the launcher below exists.</p>
+<h2 id="running">Running</h2>
+<p>The build writes a launcher that knows the interpreter and the module paths:</p>
+<pre><code>./build-Release/bin/djv-python render.mov</code></pre>
+<p>The install gets a copy at <code>bin/djv-python</code> that finds everything beside itself. The application takes an input file, and options in the C++ application's style — see <code>-h</code> for the list. The ones useful for scripting:</p>
+<ul><li><strong>-b</strong>, <strong>-compare</strong> — open a comparison file and set the mode.</li><li><strong>-settings</strong> — the settings file to use, keeping a test run out of the real settings.</li><li><strong>-exit</strong> — start the user interface and exit without showing a window.</li><li><strong>-screenshot</strong> — write a screenshot of the window to a file and exit.</li></ul>
+<h2 id="the-application">The application</h2>
+<p>The application lives in <code>examples/python</code>, one file per concern the way the C++ application is arranged: <code>djv.py</code> is the entry point, <code>App.py</code> creates the models and turns the current file into a player, <code>MainWindow.py</code> builds the window, and the rest are the actions, menus, tool bars, and tools.</p>
+<p>Everything follows the same pattern: the DJV models hold the state, and the widgets observe it. A widget changes a model through its setters, and updates itself from an observer — never directly from its own callback, so that every other view of the same state stays in step:</p>
+<pre><code>selfWeak = weakref.ref(self)
+self._volumeObserver = ftk.FloatObserver(
+    audioModel.observeVolume,
+    lambda value: selfWeak()._volumeUpdate(value))</code></pre>
+<p>Two things in that pattern matter:</p>
+<ul><li>The observer object must be kept — assign it to <code>self</code>. A discarded observer disconnects.</li><li>The callbacks capture <code>self</code> weakly. The models outlive the widgets, and a strong capture would keep the widget alive from the model's observer list.</li></ul>
+<p>Option values are copies. Reading a property, changing a field, and assigning it back is the way to change one:</p>
+<pre><code>options = filesModel.compareOptions
+options.compare = tl.Compare.Wipe
+filesModel.compareOptions = options</code></pre>
+<h2 id="modifying">Modifying it</h2>
+<p>To add a tool, write a class in <code>Tools.py</code> deriving from <code>IToolWidget</code> and add it to the <code>FACTORY</code> dictionary; the tools model already lists the tool names, icons, and shortcuts, and the actions, menu, and tool bar offer whatever the factory implements. To add an action, follow any of the <code>*Actions.py</code> files: create an <code>ftk.Action</code>, add it to a menu in <code>Menus.py</code> or a tool bar in <code>ToolBars.py</code>. Note that <code>checkedCallback</code> must be passed as a keyword argument — passed positionally it binds to the plain callback and fails when clicked.</p>
+<p>Smaller examples are in feather-tk's and tlRender's own <code>examples/python</code> directories, and the Python test suites — <code>tests/CorePyTest</code> and <code>tests/UIPyTest</code> in feather-tk, <code>tests/tlRenderPyTest</code> in tlRender, and <code>tests/djvPyTest</code> here — double as working usage of most of the bound API. They run with <code>python -m unittest discover tests</code>, or through CTest as <code>ftkPy-test</code>, <code>tlRenderPy-test</code>, and <code>djvPy-test</code>.</p>
+</main>
+</body>
+</html>
