@@ -6,6 +6,16 @@ target_link_libraries(djvPy PRIVATE djvModelsPy)
 
 set_target_properties(djvPy PROPERTIES FOLDER lib)
 
+# The rpath convention of the executables names the interpreter's
+# directory here, since the "executable" loading a Python module is
+# Python itself: the module finds the libraries beside it instead.
+if(APPLE)
+    set_target_properties(djvPy PROPERTIES INSTALL_RPATH "@loader_path")
+elseif(UNIX)
+    set_target_properties(djvPy PROPERTIES INSTALL_RPATH "$ORIGIN")
+endif()
+
+
 install(TARGETS djvPy
     ARCHIVE DESTINATION lib COMPONENT dev
     LIBRARY DESTINATION lib
