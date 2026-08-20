@@ -74,7 +74,6 @@ namespace djv
             FTK_PRIVATE();
         };
 
-#if defined(FTK_NFD)
         //! File browser settings widget.
         class FileBrowserSettingsWidget : public ISettingsWidget
         {
@@ -98,7 +97,6 @@ namespace djv
 
             FTK_PRIVATE();
         };
-#endif // FTK_NFD
 
         //! Image sequence settings widget.
         //! OTIO settings widget.
