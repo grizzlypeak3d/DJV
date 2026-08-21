@@ -25,7 +25,7 @@ target_include_directories(djvModelsPy
 
 # ftkUI directly: the bindings name ftk::Settings and ftk::RecentFilesModel,
 # which djvModels does not carry in its link interface.
-target_link_libraries(djvModelsPy djvModels ftkUI Python3::Python)
+target_link_libraries(djvModelsPy djvModels ftkUI pybind11::headers)
 
 set_target_properties(djvModelsPy PROPERTIES FOLDER lib)
 set_target_properties(djvModelsPy PROPERTIES PUBLIC_HEADER "${HEADERS}")
