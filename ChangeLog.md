@@ -33,6 +33,10 @@ Fixes:
 * File information showed a frame rate of zero for movies whose container
   declares it as "0/0", such as ARRI ProRes MXF.
 
+* An anamorphic QuickTime was shown squeezed, with a pixel aspect ratio of
+  one. The aspect ratio a QuickTime carries reaches the stream rather than
+  the codec, and only the stream is asked now.
+
 ## 3.5.0
 
 Changes:
