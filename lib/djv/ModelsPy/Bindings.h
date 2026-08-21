@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <pybind11/pybind11.h>
 
 namespace djv
@@ -22,6 +24,6 @@ namespace djv
         void toolsModel(pybind11::module_&);
         void viewportModel(pybind11::module_&);
 
-        void modelsBind(pybind11::module_&);
+        DJV_API void modelsBind(pybind11::module_&);
     }
 }

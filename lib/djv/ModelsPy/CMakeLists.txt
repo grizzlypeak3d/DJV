@@ -27,6 +27,12 @@ target_include_directories(djvModelsPy
 # which djvModels does not carry in its link interface.
 target_link_libraries(djvModelsPy djvModels ftkUI Python3::Python)
 
+# The settings bindings alone go past what a COFF object can hold, which is
+# what pybind11 does to a translation unit that names a lot of types:
+#
+#     error C1128: number of sections exceeded object file format limit
+target_compile_options(djvModelsPy PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
+
 set_target_properties(djvModelsPy PROPERTIES FOLDER lib)
 set_target_properties(djvModelsPy PROPERTIES PUBLIC_HEADER "${HEADERS}")
 

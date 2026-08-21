@@ -4,6 +4,8 @@ target_include_directories(djvPy PRIVATE ${PROJECT_SOURCE_DIR}/lib)
 
 target_link_libraries(djvPy PRIVATE djvModelsPy)
 
+target_compile_options(djvPy PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
+
 set_target_properties(djvPy PROPERTIES FOLDER lib)
 
 # The rpath convention of the executables names the interpreter's
