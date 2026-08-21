@@ -102,9 +102,7 @@ find_package(ZLIB REQUIRED)
 
 # Python dependencies
 if(DJV_PYTHON)
-    # Development.Module rather than Development; see the note in feather-tk's
-    # CMakeLists.txt. These are extension modules and must not link libpython.
-    find_package(Python3 REQUIRED Interpreter Development.Module)
+    find_package(Python3 REQUIRED Interpreter Development)
     find_package(pybind11 REQUIRED)
 endif()
 
