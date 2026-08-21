@@ -67,20 +67,6 @@ jobs:
       with:
         python-version: '3.11'
 
-    # Writes the dependency cache that the pull request check reads. Only this
-    # job caches: an entry is around 2.5GB compressed, and the 10GB limit is
-    # repository-wide with least-recently-used eviction, so caching the rest of
-    # the matrix could evict this entry and silently return the gate to a cold
-    # twenty minute build.
-    - name: Cache dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          install-Debug
-          ftk-Debug
-          tl-Debug
-        key: deps-${{ runner.os }}-Debug-${{ hashFiles('djv/deps/tlRender/deps/ftk/etc/SuperBuild/**', 'djv/deps/tlRender/etc/SuperBuild/**', 'djv/.github/workflows/ci-workflow.yml') }}
-
     - name: Setup environment
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
