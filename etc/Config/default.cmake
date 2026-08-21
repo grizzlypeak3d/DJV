@@ -54,8 +54,14 @@ set(ftk_TESTS OFF CACHE BOOL "")
 # Shared when Python is on: each binding module would otherwise carry its
 # own static copy of the stack, and three copies of SDL in one process
 # fight over the same Objective-C classes -- window creation through the
-# losing copy gets a legacy OpenGL context. Not on Windows yet: a DLL
-# exports nothing by default, and the DJV libraries have no export macros.
+# losing copy gets a legacy OpenGL context.
+#
+# Not on Windows. The libraries do carry export macros now -- FTK_API,
+# TL_API and DJV_API, selected by the *_EXPORTS and *_STATIC definitions this
+# flag sets -- so that is no longer what stands in the way. What does is that
+# *_EXPORTS is defined PUBLIC, so a project consuming these libraries compiles
+# their API as dllexport where it should be dllimport. Windows can be shared
+# once that is sorted.
 if(WIN32)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 else()

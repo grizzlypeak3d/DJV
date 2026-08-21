@@ -51,6 +51,55 @@ jobs:
         xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
 
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
+
+  linux-build-python:
+    runs-on: ubuntu-latest
+
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        path: djv
+        submodules: recursive
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+
+    # Writes the dependency cache that the pull request check reads. Only this
+    # job caches: an entry is around 2.5GB compressed, and the 10GB limit is
+    # repository-wide with least-recently-used eviction, so caching the rest of
+    # the matrix could evict this entry and silently return the gate to a cold
+    # twenty minute build.
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          install-Debug
+          ftk-Debug
+          tl-Debug
+        key: deps-${{ runner.os }}-Debug-${{ hashFiles('djv/deps/tlRender/deps/ftk/etc/SuperBuild/**', 'djv/deps/tlRender/etc/SuperBuild/**', 'djv/.github/workflows/ci-workflow.yml') }}
+
+    - name: Setup environment
+      run: |
+        echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
+        echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
+        cmake --version
+        python --version
+        sh djv/etc/Linux/setup-gha.sh
+
+    - name: Build
+      run: |
+        sh djv/etc/Linux/sbuild.sh djv Debug ci-linux-python
+
+    - name: Run tests
+      run: |
+        cd build-Debug
+        xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
+
+  # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
   linux-gles2-build:
     runs-on: ubuntu-latest
 
@@ -171,6 +220,42 @@ jobs:
         cd build-Debug
         ctest --verbose --rerun-failed --output-on-failure -C Debug
 
+
+  macos-build-python:
+    runs-on: macos-latest
+
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        path: djv
+        submodules: recursive
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+
+    # \bug DYLD_LIBRARY_PATH is not being set here?
+    - name: Setup environment
+      run: |
+        echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
+        echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
+        cmake --version
+        python --version
+
+    - name: Build
+      run: |
+        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
+        sh djv/etc/macOS/sbuild.sh djv Debug ci-macos-python
+
+    # The runner has no working OpenGL, which djv-test does not need.
+    - name: Run tests
+      run: |
+        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
+        cd build-Debug
+        ctest --verbose --rerun-failed --output-on-failure -C Debug
   macos-package:
     runs-on: macos-latest
 
@@ -248,6 +333,44 @@ jobs:
         cd build-Debug
         ctest --verbose --rerun-failed --output-on-failure -C Debug
 
+
+  windows-build-python:
+    runs-on: windows-latest
+
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        path: djv
+        submodules: recursive
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.11'
+    - uses: ilammy/setup-nasm@v1
+
+    # \bug Any spaces before the ">>" will be considered part of the path.
+    - name: Setup environment
+      shell: cmd
+      run: |
+        echo %CD%\install-Debug\bin>> %GITHUB_PATH%
+        echo %CD%\install-Debug\lib>> %GITHUB_PATH%
+        echo CTEST_OUTPUT_ON_FAILURE=1 >> %GITHUB_ENV%
+        cmake --version
+        python --version
+        
+    - name: Build
+      shell: cmd
+      run: |
+        djv\etc\Windows\sbuild.bat djv Debug ci-windows-python
+
+    # The runner has no working OpenGL, which djv-test does not need.
+    - name: Run tests
+      shell: cmd
+      run: |
+        cd build-Debug
+        ctest --verbose --rerun-failed --output-on-failure -C Debug
   windows-package:
     runs-on: windows-latest
 
