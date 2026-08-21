@@ -39,12 +39,13 @@ set(TLRENDER_FFMPEG_MINIMAL OFF CACHE BOOL "")
 set(TLRENDER_FFMPEG_PLUGIN ON CACHE BOOL "")
 set(TLRENDER_OIIO ON CACHE BOOL "")
 set(TLRENDER_USD OFF CACHE BOOL "")
-set(TLRENDER_PYTHON OFF CACHE BOOL "")
-# One switch for the whole stack: feather-tk and DJV have their own Python
-# options, and a value already in the cache wins, so setting TLRENDER_PYTHON
-# first is enough to turn all three on.
+# The Python bindings, derived down the stack the way the dependencies run:
+# djvPy imports tlRenderPy, which needs ftkPy. Setting the outermost one is
+# enough, and because local.cmake is read first, any level can still be named
+# on its own to turn that one on without the ones above it.
+set(DJV_PYTHON OFF CACHE BOOL "")
+set(TLRENDER_PYTHON ${DJV_PYTHON} CACHE BOOL "")
 set(ftk_PYTHON ${TLRENDER_PYTHON} CACHE BOOL "")
-set(DJV_PYTHON ${TLRENDER_PYTHON} CACHE BOOL "")
 set(TLRENDER_PROGRAMS OFF CACHE BOOL "")
 set(TLRENDER_EXAMPLES OFF CACHE BOOL "")
 set(TLRENDER_TESTS OFF CACHE BOOL "")
