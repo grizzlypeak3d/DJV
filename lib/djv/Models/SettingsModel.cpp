@@ -8,6 +8,7 @@
 #include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
 
+#include <filesystem>
 #include <sstream>
 
 namespace djv
@@ -390,9 +391,17 @@ namespace djv
             fileBrowserSystem->setNativeFileDialog(fileBrowser.nativeFileDialog);
             fileBrowserSystem->setFloating(fileBrowser.floating);
             fileBrowserSystem->setPinned(fileBrowser.pinned);
-            if (std::filesystem::exists(fileBrowser.path))
+            // u8path because the setting is stored as UTF-8 -- see the
+            // u8string() it is written with below. The implicit conversion
+            // reads it as the Windows ANSI code page instead, which throws
+            // for bytes that page cannot map, and this runs while settings
+            // are loading: a browsed-to Korean directory would take the
+            // application down on startup. Issue #779.
+            const std::filesystem::path fileBrowserPath =
+                std::filesystem::u8path(fileBrowser.path);
+            if (std::filesystem::exists(fileBrowserPath))
             {
-                fileBrowserSystem->getModel()->setPath(fileBrowser.path);
+                fileBrowserSystem->getModel()->setPath(fileBrowserPath);
             }
             fileBrowserSystem->getModel()->setOptions(fileBrowser.options);
             fileBrowserSystem->getModel()->setExt(fileBrowser.ext);
