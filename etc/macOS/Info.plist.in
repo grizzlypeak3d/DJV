@@ -122,15 +122,6 @@
                 <string>tiff</string>
             </array>
         </dict>
-        <dict>
-            <key>CFBundleTypeExtensions</key>
-            <array>
-                <string>usd</string>
-                <string>usda</string>
-                <string>usdc</string>
-                <string>usdz</string>
-            </array>
-        </dict>
     </array>
 </dict>
 </plist>

@@ -34,7 +34,7 @@
 <main>
 <h1>Files</h1>
 <p>DJV ships with support for the following formats:</p>
-<ul><li>Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, SGI, TGA, BMP, TIFF</li><li>Movie codecs: MJPEG, MPEG-2</li><li>Audio codecs: FLAC, MP3, WAV</li><li>Timelines: OTIO, OTIOZ</li><li>Experimental: USD</li></ul>
+<ul><li>Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, SGI, TGA, BMP, TIFF</li><li>Movie codecs: MJPEG, MPEG-2</li><li>Audio codecs: FLAC, MP3, WAV</li><li>Timelines: OTIO, OTIOZ</li></ul>
 <p>Different formats may be available depending on how DJV was built, or by using an external FFmpeg command.</p>
 <div class="note">These are the formats DJV reads. For the formats DJV writes, see <a href="export.html">Exporting files</a>.</div>
 <h2 id="opening-files">Opening files</h2>
@@ -127,10 +127,6 @@
 <ul><li><strong>None</strong> — Ignore the spatial coordinates. Clips are sized from their own resolution.</li><li><strong>Coordinates</strong> — Use the spatial coordinates where clips provide them. This is the default.</li><li><strong>Normalize</strong> — Use the spatial coordinates, and display clips that do not have them at the size of the first clip. Use this to play clips of differing resolutions at the same size when the timeline was not authored with spatial coordinates.</li></ul>
 <div class="note">The color picker and magnifier report positions in the original image, not the canvas, so the pixel coordinates always refer to the media itself.</div>
 <p>The authored coordinates are shown in the <strong>Information</strong> tool, along with the canvas DJV derived from them.</p>
-<h2 id="usd">USD</h2>
-<p>USD support is currently experimental. When a USD file is opened, DJV renders it to an image sequence using the Hydra renderer.</p>
-<p>DJV picks the rendering camera in this order:</p>
-<ol><li>The clip name, if the USD file is referenced from an OTIO file</li><li>The primary camera in the scene</li><li>The first camera found in the scene</li><li>A temporary camera generated to frame the scene</li></ol>
 </main>
 </body>
 </html>

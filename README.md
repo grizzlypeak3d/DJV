@@ -12,7 +12,6 @@ CORE FEATURES:
 * Timeline support with OpenTimelineIO
 * Color management with OpenColorIO
 * Multi-track audio with variable speed and reverse playback
-* Experimental support for USD files
 * Available for Linux, macOS, and Windows
 
 [Documentation](https://grizzlypeak3d.github.io/DJV/index.html)
@@ -53,8 +52,6 @@ build, for example:
     * TLRENDER_FFMPEG_MINIMAL=OFF
     * TLRENDER_FFMPEG_PLUGIN=ON
     * TLRENDER_FFMPEG_CMD=OFF
-* Enable USD (Universal Scene Description) support:
-    * TLRENDER_USD=ON
 
 ### Building on Linux
 
@@ -146,8 +143,6 @@ Requirements:
 * CMake 3.31
 * NASM (https://www.nasm.us) for compiling FFmpeg and libjpeg-turbo.
 * MSYS2 (https://www.msys2.org) for compiling FFmpeg.
-* Strawberry Perl (https://strawberryperl.com/) for compiling network support.
-* Python 3.11 for compiling USD.
 * NSIS (https://nsis.sourceforge.io/Main_Page) for packaging.
 
 Open the Visual Studio command console "x64 Native Tools Command Prompt for VS 2022".

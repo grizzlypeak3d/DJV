@@ -42,9 +42,6 @@
 #if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_USD)
-#include <tlRender/IO/USD.h>
-#endif // TLRENDER_USD
 
 #include <ftk/GL/Window.h>
 #include <ftk/UI/FileBrowser.h>
@@ -92,15 +89,6 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > lutFileName;
             std::shared_ptr<ftk::CmdLineOption<tl::LUTOrder> > lutOrder;
 #endif // TLRENDER_OCIO
-#if defined(TLRENDER_USD)
-            std::shared_ptr<ftk::CmdLineOption<int> > usdRenderWidth;
-            std::shared_ptr<ftk::CmdLineOption<float> > usdComplexity;
-            std::shared_ptr<ftk::CmdLineOption<tl::usd::DrawMode> > usdDrawMode;
-            std::shared_ptr<ftk::CmdLineOption<bool> > usdEnableLighting;
-            std::shared_ptr<ftk::CmdLineOption<bool> > usdSRGB;
-            std::shared_ptr<ftk::CmdLineOption<int> > usdStageCacheCount;
-            std::shared_ptr<ftk::CmdLineOption<int> > usdDiskCacheGB;
-#endif // TLRENDER_USD
             std::shared_ptr<ftk::CmdLineFlag> hideSetup;
             std::shared_ptr<ftk::CmdLineFlag> version;
             std::shared_ptr<ftk::CmdLineFlag> sysInfo;
@@ -350,44 +338,6 @@ namespace djv
                 std::optional<tl::LUTOrder>(),
                 ftk::quotes(tl::getLUTOrderLabels()));
 #endif // TLRENDER_OCIO
-#if defined(TLRENDER_USD)
-            p.cmdLine.usdRenderWidth = ftk::CmdLineOption<int>::create(
-                { "-usdRenderWidth" },
-                "Render width.",
-                "USD",
-                1920);
-            p.cmdLine.usdComplexity = ftk::CmdLineOption<float>::create(
-                { "-usdComplexity" },
-                "Render complexity setting.",
-                "USD",
-                1.F);
-            p.cmdLine.usdDrawMode = ftk::CmdLineOption<tl::usd::DrawMode>::create(
-                { "-usdDrawMode" },
-                "Draw mode.",
-                "USD",
-                tl::usd::DrawMode::ShadedSmooth,
-                ftk::quotes(tl::usd::getDrawModeLabels()));
-            p.cmdLine.usdEnableLighting = ftk::CmdLineOption<bool>::create(
-                { "-usdEnableLighting" },
-                "Enable lighting.",
-                "USD",
-                true);
-            p.cmdLine.usdSRGB = ftk::CmdLineOption<bool>::create(
-                { "-usdSRGB" },
-                "Enable sRGB color space.",
-                "USD",
-                true);
-            p.cmdLine.usdStageCacheCount = ftk::CmdLineOption<int>::create(
-                { "-usdStageCache" },
-                "Number of USD stages to cache.",
-                "USD",
-                10);
-            p.cmdLine.usdDiskCacheGB = ftk::CmdLineOption<int>::create(
-                { "-usdDiskCache" },
-                "Disk cache size in gigabytes. A size of zero disables the cache.",
-                "USD",
-                0);
-#endif // TLRENDER_USD
             p.cmdLine.hideSetup = ftk::CmdLineFlag::create(
                 { "-hideSetup" },
                 "Hide the setup dialog that is shown on the first run.");
@@ -461,15 +411,6 @@ namespace djv
                     p.cmdLine.lutFileName,
                     p.cmdLine.lutOrder,
 #endif // TLRENDER_OCIO
-#if defined(TLRENDER_USD)
-                    p.cmdLine.usdRenderWidth,
-                    p.cmdLine.usdComplexity,
-                    p.cmdLine.usdDrawMode,
-                    p.cmdLine.usdEnableLighting,
-                    p.cmdLine.usdSRGB,
-                    p.cmdLine.usdStageCacheCount,
-                    p.cmdLine.usdDiskCacheGB,
-#endif // TLRENDER_USD
                     p.cmdLine.hideSetup,
                     p.cmdLine.version,
                     p.cmdLine.sysInfo,
@@ -1108,47 +1049,6 @@ namespace djv
                 }
                 p.settingsModel->setStyle(style);
             }
-#if defined(TLRENDER_USD)
-            if (p.cmdLine.usdRenderWidth->found() ||
-                p.cmdLine.usdComplexity->found() ||
-                p.cmdLine.usdDrawMode->found() ||
-                p.cmdLine.usdEnableLighting->found() ||
-                p.cmdLine.usdSRGB->found() ||
-                p.cmdLine.usdStageCacheCount->found() ||
-                p.cmdLine.usdDiskCacheGB->found())
-            {
-                tl::usd::Options options = p.settingsModel->getUSD();
-                if (p.cmdLine.usdRenderWidth->found())
-                {
-                    options.renderWidth = p.cmdLine.usdRenderWidth->getValue();
-                }
-                if (p.cmdLine.usdComplexity->found())
-                {
-                    options.complexity = p.cmdLine.usdComplexity->getValue();
-                }
-                if (p.cmdLine.usdDrawMode->found())
-                {
-                    options.drawMode = p.cmdLine.usdDrawMode->getValue();
-                }
-                if (p.cmdLine.usdEnableLighting->found())
-                {
-                    options.enableLighting = p.cmdLine.usdEnableLighting->getValue();
-                }
-                if (p.cmdLine.usdSRGB->found())
-                {
-                        options.sRGB = p.cmdLine.usdSRGB->getValue();
-                }
-                if (p.cmdLine.usdStageCacheCount->found())
-                {
-                    options.stageCacheCount = std::max(0, p.cmdLine.usdStageCacheCount->getValue());
-                }
-                if (p.cmdLine.usdDiskCacheGB->found())
-                {
-                    options.diskCacheGB = std::max(0, p.cmdLine.usdDiskCacheGB->getValue());
-                }
-                p.settingsModel->setUSD(options);
-            }
-#endif // TLRENDER_USD
 
             p.sysLogModel = ftk::SysLogModel::create(_context);
 

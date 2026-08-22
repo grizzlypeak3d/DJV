@@ -37,7 +37,6 @@ set(TLRENDER_FFMPEG ON CACHE BOOL "")
 set(TLRENDER_FFMPEG_MINIMAL OFF CACHE BOOL "")
 set(TLRENDER_FFMPEG_PLUGIN ON CACHE BOOL "")
 set(TLRENDER_OIIO ON CACHE BOOL "")
-set(TLRENDER_USD OFF CACHE BOOL "")
 # The Python bindings, derived down the stack the way the dependencies run:
 # djvPy imports tlRenderPy, which needs ftkPy. Setting the outermost one is
 # enough, and because local.cmake is read first, any level can still be named

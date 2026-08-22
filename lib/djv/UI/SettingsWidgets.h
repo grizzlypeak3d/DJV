@@ -431,31 +431,5 @@ namespace djv
         };
 #endif // TLRENDER_FFMPEG_CMD
 
-#if defined(TLRENDER_USD)
-        //! USD settings widget.
-        class DJV_API_TYPE USDSettingsWidget : public ISettingsWidget
-        {
-            FTK_NON_COPYABLE(USDSettingsWidget);
-
-        protected:
-            void _init(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::SettingsModel>&,
-                const std::shared_ptr<IWidget>& parent);
-
-            USDSettingsWidget();
-
-        public:
-            DJV_API virtual ~USDSettingsWidget();
-
-            DJV_API static std::shared_ptr<USDSettingsWidget> create(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::SettingsModel>&,
-                const std::shared_ptr<IWidget>& parent = nullptr);
-
-        private:
-            FTK_PRIVATE();
-        };
-#endif // TLRENDER_USD
     }
 }
