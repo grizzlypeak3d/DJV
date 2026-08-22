@@ -1076,17 +1076,36 @@ namespace djv
             const auto& pick = p.pick->get();
             p.colorPickerSwatch->setColor(
                 colorSample.has_value() ? colorSample.value() : ftk::Color4F());
-            std::string colorPickerText = "Color: -, Pixel: -";
+            // The HUD sits under the pointer, so a line that changes width
+            // as values come and go moves exactly where the eye is. Both
+            // forms are built from the same layout and field widths, so the
+            // line keeps its size whether or not there is a sample -- which
+            // is what happens every time the pointer leaves the image. The
+            // widths hold a sign and two digits, so the ordinary zero to one
+            // range and a little either side of it do not move the line
+            // either; beyond that the field grows, as it did before.
+            const int colorWidth = 5;
+            const int pickWidth = 4;
+            const std::string colorPickerFormat =
+                "Color: {0} {1} {2} {3}, Pixel: {4}, {5}";
+            std::string colorPickerText =
+                ftk::Format(colorPickerFormat).
+                arg("-", colorWidth).
+                arg("-", colorWidth).
+                arg("-", colorWidth).
+                arg("-", colorWidth).
+                arg("-", pickWidth).
+                arg("-", pickWidth);
             if (colorSample.has_value() && pick.has_value())
             {
                 colorPickerText =
-                    ftk::Format("Color: {0} {1} {2} {3}, Pixel: {4}, {5}").
-                    arg(colorSample.value().r, 2).
-                    arg(colorSample.value().g, 2).
-                    arg(colorSample.value().b, 2).
-                    arg(colorSample.value().a, 2).
-                    arg(pick.value().x, 4).
-                    arg(pick.value().y, 4);
+                    ftk::Format(colorPickerFormat).
+                    arg(colorSample.value().r, 2, colorWidth).
+                    arg(colorSample.value().g, 2, colorWidth).
+                    arg(colorSample.value().b, 2, colorWidth).
+                    arg(colorSample.value().a, 2, colorWidth).
+                    arg(pick.value().x, pickWidth).
+                    arg(pick.value().y, pickWidth);
             }
             p.colorPickerLabel->setText(colorPickerText);
             ftk::setScreenshotTag(p.colorPickerLabel, "View.HUD.ColorPicker");
