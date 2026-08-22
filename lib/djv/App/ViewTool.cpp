@@ -17,7 +17,6 @@ namespace djv
     {
         struct ViewTool::Private
         {
-            std::shared_ptr<ui::ViewPosZoomWidget> posZoomWidget;
             std::shared_ptr<ui::ViewOptionsWidget> optionsWidget;
             std::shared_ptr<ui::ViewAspectRatioWidget> aspectRatioWidget;
             std::shared_ptr<ui::ViewBackgroundWidget> backgroundWidget;
@@ -27,7 +26,6 @@ namespace djv
             std::shared_ptr<ui::ViewHUDWidget> hudWidget;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
         void ViewTool::_init(
@@ -46,7 +44,6 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.posZoomWidget = ui::ViewPosZoomWidget::create(context, mainWindow->getViewport());
             auto viewportModel = app->getViewportModel();
             p.optionsWidget = ui::ViewOptionsWidget::create(context, viewportModel);
             p.aspectRatioWidget = ui::ViewAspectRatioWidget::create(context, viewportModel);
@@ -58,8 +55,6 @@ namespace djv
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
-            p.bellows["PosZoom"] = ftk::Bellows::create(context, "Position and Zoom", layout);
-            p.bellows["PosZoom"]->setWidget(p.posZoomWidget);
             p.bellows["Options"] = ftk::Bellows::create(context, "Options", layout);
             p.bellows["Options"]->setWidget(p.optionsWidget);
             p.bellows["AspectRatio"] = ftk::Bellows::create(context, "Aspect Ratio", layout);
@@ -77,17 +72,6 @@ namespace djv
             _setWidget(layout);
 
             _loadSettings(p.bellows);
-
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
-                app->observePlayer(),
-                [this](const std::shared_ptr<tl::Player>& value)
-                {
-                    // The position and zoom place an image in the view, so
-                    // they mean nothing without one. The rest of the sections
-                    // are settings that outlive the current file.
-                    _p->posZoomWidget->setEnabled(
-                        value && !value->getIOInfo().video.empty());
-                });
         }
 
         ViewTool::ViewTool() :

@@ -90,18 +90,6 @@
       "annotate": []
     },
     {
-      "id": "view-pos-zoom",
-      "window": { "w": 900, "h": 600, "splitter2": 0.6 },
-      "crop": "MainWindow.Tools",
-      "setup": [
-        { "tool": "View", "expand": ["PosZoom"] }
-      ],
-      "annotate": [
-        { "id": "View.Pos", "caption": "Position" },
-        { "id": "View.Zoom", "caption": "Zoom" }
-      ]
-    },
-    {
       "id": "view-options",
       "window": { "w": 900, "h": 600, "splitter2": 0.6 },
       "crop": "MainWindow.Tools",

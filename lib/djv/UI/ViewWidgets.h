@@ -16,31 +16,6 @@ namespace djv
 {
     namespace ui
     {
-        //! View position and zoom widget.
-        class DJV_API_TYPE ViewPosZoomWidget : public ftk::IContainer
-        {
-            FTK_NON_COPYABLE(ViewPosZoomWidget);
-
-        protected:
-            void _init(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<tl::ui::Viewport>&,
-                const std::shared_ptr<IWidget>& parent);
-
-            ViewPosZoomWidget();
-
-        public:
-            DJV_API virtual ~ViewPosZoomWidget();
-
-            DJV_API static std::shared_ptr<ViewPosZoomWidget> create(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<tl::ui::Viewport>&,
-                const std::shared_ptr<IWidget>& parent = nullptr);
-
-        private:
-            FTK_PRIVATE();
-        };
-
         //! View options widget.
         class DJV_API_TYPE ViewOptionsWidget : public ftk::IContainer
         {
