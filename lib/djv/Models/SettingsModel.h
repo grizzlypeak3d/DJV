@@ -114,6 +114,9 @@ namespace djv
             bool nativeFileDialog = true;
             bool floating = false;
             bool pinned = false;
+            //! The size a floating file browser opens at. Unset until one
+            //! has been opened, leaving the size to the file browser.
+            ftk::Size2I windowSize;
             std::string path;
             ftk::FileBrowserOptions options;
             std::string ext;

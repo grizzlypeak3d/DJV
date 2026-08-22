@@ -82,6 +82,7 @@ namespace djv
                 nativeFileDialog == other.nativeFileDialog &&
                 floating == other.floating &&
                 pinned == other.pinned &&
+                windowSize == other.windowSize &&
                 path == other.path &&
                 options == other.options &&
                 ext == other.ext;
@@ -391,6 +392,14 @@ namespace djv
             fileBrowserSystem->setNativeFileDialog(fileBrowser.nativeFileDialog);
             fileBrowserSystem->setFloating(fileBrowser.floating);
             fileBrowserSystem->setPinned(fileBrowser.pinned);
+            // Only once there is one to apply: an empty setting leaves the
+            // file browser to open at the size it chooses. Not applied with
+            // the settings below, which are the ones the settings tool
+            // edits; this one is only ever changed by resizing the browser.
+            if (fileBrowser.windowSize.isValid())
+            {
+                fileBrowserSystem->setWindowSize(fileBrowser.windowSize);
+            }
             // u8path because the setting is stored as UTF-8 -- see the
             // u8string() it is written with below. The implicit conversion
             // reads it as the Windows ANSI code page instead, which throws
@@ -504,6 +513,7 @@ namespace djv
             fileBrowser.ext = fileBrowserSystem->getModel()->getExt();
             // Changed from inside the browser, like the path above it.
             fileBrowser.pinned = fileBrowserSystem->isPinned();
+            fileBrowser.windowSize = fileBrowserSystem->getWindowSize();
             p.settings->setT(keys["FileBrowser"], fileBrowser);
 
             p.settings->setT(keys["ImageSeq"], p.imageSeq->get());
@@ -923,6 +933,7 @@ namespace djv
             json["NativeFileDialog"] = value.nativeFileDialog;
             json["Floating"] = value.floating;
             json["Pinned"] = value.pinned;
+            json["WindowSize"] = value.windowSize;
             json["Path"] = value.path;
             json["Options"] = value.options;
             json["Ext"] = value.ext;
@@ -1096,6 +1107,10 @@ namespace djv
             if (const auto i = json.find("Pinned"); i != json.end())
             {
                 i->get_to(value.pinned);
+            }
+            if (const auto i = json.find("WindowSize"); i != json.end())
+            {
+                i->get_to(value.windowSize);
             }
             json.at("Path").get_to(value.path);
             json.at("Options").get_to(value.options);
