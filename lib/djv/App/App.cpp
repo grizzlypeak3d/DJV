@@ -83,6 +83,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > seek;
             std::shared_ptr<ftk::CmdLineOption<std::string> > inPoint;
             std::shared_ptr<ftk::CmdLineOption<std::string> > outPoint;
+#if defined(TLRENDER_OCIO)
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioFileName;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioInput;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioDisplay;
@@ -90,6 +91,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioLook;
             std::shared_ptr<ftk::CmdLineOption<std::string> > lutFileName;
             std::shared_ptr<ftk::CmdLineOption<tl::LUTOrder> > lutOrder;
+#endif // TLRENDER_OCIO
 #if defined(TLRENDER_USD)
             std::shared_ptr<ftk::CmdLineOption<int> > usdRenderWidth;
             std::shared_ptr<ftk::CmdLineOption<float> > usdComplexity;
@@ -312,6 +314,11 @@ namespace djv
                 { "-outPoint", "-out" },
                 "Set the out point.",
                 "Playback");
+            // Offered only where there is something behind them: without
+            // OCIO the color options are accepted and then quietly do
+            // nothing, which reads as a broken build rather than one made
+            // without color management.
+#if defined(TLRENDER_OCIO)
             p.cmdLine.ocioFileName = ftk::CmdLineOption<std::string>::create(
                 { "-ocio" },
                 "OCIO configuration file name (e.g., config.ocio).",
@@ -342,6 +349,7 @@ namespace djv
                 "Color",
                 std::optional<tl::LUTOrder>(),
                 ftk::quotes(tl::getLUTOrderLabels()));
+#endif // TLRENDER_OCIO
 #if defined(TLRENDER_USD)
             p.cmdLine.usdRenderWidth = ftk::CmdLineOption<int>::create(
                 { "-usdRenderWidth" },
@@ -444,6 +452,7 @@ namespace djv
                     p.cmdLine.frameRange,
                     p.cmdLine.inPoint,
                     p.cmdLine.outPoint,
+#if defined(TLRENDER_OCIO)
                     p.cmdLine.ocioFileName,
                     p.cmdLine.ocioInput,
                     p.cmdLine.ocioDisplay,
@@ -451,6 +460,7 @@ namespace djv
                     p.cmdLine.ocioLook,
                     p.cmdLine.lutFileName,
                     p.cmdLine.lutOrder,
+#endif // TLRENDER_OCIO
 #if defined(TLRENDER_USD)
                     p.cmdLine.usdRenderWidth,
                     p.cmdLine.usdComplexity,
@@ -1160,6 +1170,7 @@ namespace djv
             fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
 
             p.colorModel = models::ColorModel::create(_context, getSettings());
+#if defined(TLRENDER_OCIO)
             if (p.cmdLine.ocioFileName->found() ||
                 p.cmdLine.ocioInput->found() ||
                 p.cmdLine.ocioDisplay->found() ||
@@ -1205,6 +1216,7 @@ namespace djv
                 }
                 p.colorModel->setLUTOptions(options);
             }
+#endif // TLRENDER_OCIO
 
             p.viewportModel = models::ViewportModel::create(_context, getSettings());
 
