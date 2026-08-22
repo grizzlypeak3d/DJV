@@ -9,6 +9,7 @@ set(LEGAL
     LICENSE_FreeType.txt
     LICENSE_feather-tk.txt
     LICENSE_glad.txt
+    LICENSE_LibRaw.txt
     LICENSE_Libssh2.txt
     LICENSE_libjpeg-turbo.txt
     LICENSE_libjpeg.txt
@@ -22,6 +23,7 @@ set(LEGAL
     LICENSE_OpenColorIO.txt
     LICENSE_OpenEXR.txt
     LICENSE_OpenImageIO.md
+    LICENSE_OpenJPH.txt
     LICENSE_OpenSSL.txt
     LICENSE_OpenSubdiv.txt
     LICENSE_OpenTimelineIO.txt
