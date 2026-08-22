@@ -272,14 +272,14 @@ namespace djv
             _addShortcut("AutoScroll");
             _addShortcut("StopOnScrub", "Stop On Scrub");
             _addShortcut("Thumbnails");
-            _addShortcut("ThumbnailSizeSmall", "Small Thumbnails");
-            _addShortcut("ThumbnailSizeMedium", "Medium Thumbnails");
-            _addShortcut("ThumbnailSizeLarge", "Large Thumbnails");
+            _addShortcut("ThumbnailSizeSmall", "Small Video Thumbnails");
+            _addShortcut("ThumbnailSizeMedium", "Medium Video Thumbnails");
+            _addShortcut("ThumbnailSizeLarge", "Large Video Thumbnails");
             _addShortcut("Waveforms");
             _addShortcut("TrackMedia", ftk::Key::C);
-            _addShortcut("WaveformSizeSmall", "Small Waveforms");
-            _addShortcut("WaveformSizeMedium", "Medium Waveforms");
-            _addShortcut("WaveformSizeLarge", "Large Waveforms");
+            _addShortcut("WaveformSizeSmall", "Small Audio Waveforms");
+            _addShortcut("WaveformSizeMedium", "Medium Audio Waveforms");
+            _addShortcut("WaveformSizeLarge", "Large Audio Waveforms");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

@@ -34,11 +34,11 @@ namespace djv
             addAction(actions["TrackMedia"]);
             addAction(actions["Thumbnails"]);
             addAction(actions["Waveforms"]);
-            auto thumbnailSizeMenu = addSubMenu("Thumbnail Size");
+            auto thumbnailSizeMenu = addSubMenu("Video Thumbnail Size");
             thumbnailSizeMenu->addAction(actions["ThumbnailSizeSmall"]);
             thumbnailSizeMenu->addAction(actions["ThumbnailSizeMedium"]);
             thumbnailSizeMenu->addAction(actions["ThumbnailSizeLarge"]);
-            auto waveformSizeMenu = addSubMenu("Waveform Size");
+            auto waveformSizeMenu = addSubMenu("Audio Waveform Size");
             waveformSizeMenu->addAction(actions["WaveformSizeSmall"]);
             waveformSizeMenu->addAction(actions["WaveformSizeMedium"]);
             waveformSizeMenu->addAction(actions["WaveformSizeLarge"]);
