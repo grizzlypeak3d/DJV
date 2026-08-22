@@ -11,6 +11,8 @@ Changes:
   open while a run of files is chosen.
 * The FFmpegCmd plugin is merged into the FFmpeg plugin as a fallback.
 * AV1 support is now working on Windows.
+* Add Python bindings, available when building from source with
+  DJV_PYTHON=ON.
 * Library updates:
     - OpenColorIO 2.5.2
     - OpenEXR 3.4.15
