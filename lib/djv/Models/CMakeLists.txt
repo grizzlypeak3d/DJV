@@ -47,7 +47,7 @@ set_target_properties(djvBuildInfo PROPERTIES FOLDER lib)
 
 add_library(djvModels ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(djvModels PUBLIC DJV_EXPORTS)
+    target_compile_definitions(djvModels PRIVATE DJV_EXPORTS)
 else()
     target_compile_definitions(djvModels PUBLIC DJV_STATIC)
 endif()

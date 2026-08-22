@@ -17,6 +17,9 @@ set(SOURCE
     ViewportModel.cpp)
 
 add_library(djvModelsPy ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(djvModelsPy PRIVATE DJV_EXPORTS)
+endif()
 
 target_include_directories(djvModelsPy
     PUBLIC

@@ -110,6 +110,9 @@ set(SOURCE
     Viewport.cpp)
 
 add_library(djvApp ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(djvApp PRIVATE DJV_EXPORTS)
+endif()
 target_link_libraries(djvApp djvUI)
 set_target_properties(djvApp PROPERTIES FOLDER lib)
 set_target_properties(djvApp PROPERTIES PUBLIC_HEADER "${HEADERS}")

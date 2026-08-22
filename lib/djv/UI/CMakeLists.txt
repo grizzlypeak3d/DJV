@@ -30,6 +30,9 @@ set(SOURCE
     ViewWidgets.cpp)
 
 add_library(djvUI ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(djvUI PRIVATE DJV_EXPORTS)
+endif()
 target_link_libraries(djvUI djvModels tlRender::tlUI)
 set_target_properties(djvUI PROPERTIES FOLDER lib)
 set_target_properties(djvUI PROPERTIES PUBLIC_HEADER "${HEADERS}")
