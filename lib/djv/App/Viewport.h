@@ -36,14 +36,14 @@ namespace djv
 
             //! Observe picking. Unset when the position is not over an
             //! image, where there is no pixel to name.
-            TL_API std::shared_ptr<ftk::IObservable<std::optional<ftk::V2I> > > observePick() const;
+            DJV_API std::shared_ptr<ftk::IObservable<std::optional<ftk::V2I> > > observePick() const;
 
             //! Observe the sample position.
-            TL_API std::shared_ptr<ftk::IObservable<ftk::V2I> > observeSamplePos() const;
+            DJV_API std::shared_ptr<ftk::IObservable<ftk::V2I> > observeSamplePos() const;
 
             //! Observe the color sample. Unset when the position is not over
             //! an image.
-            TL_API std::shared_ptr<ftk::IObservable<std::optional<ftk::Color4F> > > observeColorSample() const;
+            DJV_API std::shared_ptr<ftk::IObservable<std::optional<ftk::Color4F> > > observeColorSample() const;
 
             //! Sample the image at the given image pixel, as the pick mouse
             //! action would. Used by the documentation screenshot capture.
