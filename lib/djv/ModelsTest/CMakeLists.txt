@@ -15,7 +15,9 @@ set(SOURCE
     ToolsModelTest.cpp
     ViewportModelTest.cpp)
 
-add_library(djvModelsTest ${SOURCE} ${HEADERS})
+# Static, for the reason in ftk's TestLib.
+add_library(djvModelsTest STATIC ${SOURCE} ${HEADERS})
+set_target_properties(djvModelsTest PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(djvModelsTest
     PUBLIC

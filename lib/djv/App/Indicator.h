@@ -27,12 +27,12 @@ namespace djv
             FTK_NON_COPYABLE(Indicator);
 
         protected:
-            void _init(
+            DJV_API void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent);
 
-            Indicator();
+            DJV_API Indicator();
 
         public:
             DJV_API virtual ~Indicator();
@@ -44,9 +44,9 @@ namespace djv
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         protected:
-            virtual bool _hasIndicator() const;
-            virtual std::vector<std::pair<std::string, std::string> > _getIndicators() const;
-            virtual std::map<std::string, bool> _getIndicatorValues() const;
+            DJV_API virtual bool _hasIndicator() const;
+            DJV_API virtual std::vector<std::pair<std::string, std::string> > _getIndicators() const;
+            DJV_API virtual std::map<std::string, bool> _getIndicatorValues() const;
             void _indicatorUpdate();
 
         private:

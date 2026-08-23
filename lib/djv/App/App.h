@@ -49,12 +49,12 @@ namespace djv
             FTK_NON_COPYABLE(App);
 
         protected:
-            void _init(
+            DJV_API void _init(
                 const std::shared_ptr<ftk::Context>&,
                 std::vector<std::string>&,
                 const std::shared_ptr<models::AppInfoModel>&);
 
-            App();
+            DJV_API App();
 
         public:
             DJV_API ~App();
@@ -157,15 +157,15 @@ namespace djv
             DJV_API void run() override;
 
         protected:
-            virtual void _modelsInit();
-            virtual void _observersInit();
-            virtual void _inputFilesInit();
-            virtual void _uiInit();
-            virtual void _mainWindowInit();
+            DJV_API virtual void _modelsInit();
+            DJV_API virtual void _observersInit();
+            DJV_API virtual void _inputFilesInit();
+            DJV_API virtual void _uiInit();
+            DJV_API virtual void _mainWindowInit();
 
             void _setAudioDeviceMute(bool);
 
-            virtual void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);
+            DJV_API virtual void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);
 
         private:
             void _closeFailed();
