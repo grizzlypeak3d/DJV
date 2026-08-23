@@ -12,6 +12,7 @@ rem Build with every core unless told otherwise; cmake --build reads this.
 IF "%CMAKE_BUILD_PARALLEL_LEVEL%"=="" set CMAKE_BUILD_PARALLEL_LEVEL=%NUMBER_OF_PROCESSORS%
 
 git -C %SOURCE_DIR% submodule update --init --recursive
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 
 cmake ^
     -S %SOURCE_DIR%/deps/tlRender/deps/ftk/etc/SuperBuild ^
@@ -20,7 +21,9 @@ cmake ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_INSTALL_PREFIX=%CD%/install-%BUILD_TYPE% ^
     -DCMAKE_PREFIX_PATH=%CD%/install-%BUILD_TYPE%
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 cmake --build ftk-%BUILD_TYPE% --config %BUILD_TYPE%
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 
 cmake ^
     -S %SOURCE_DIR%/deps/tlRender/etc/SuperBuild ^
@@ -29,7 +32,9 @@ cmake ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_INSTALL_PREFIX=%CD%/install-%BUILD_TYPE% ^
     -DCMAKE_PREFIX_PATH=%CD%/install-%BUILD_TYPE%
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 cmake --build tl-%BUILD_TYPE% --config %BUILD_TYPE%
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 
 cmake ^
     -S %SOURCE_DIR% ^
@@ -38,10 +43,13 @@ cmake ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_INSTALL_PREFIX=%CD%/install-%BUILD_TYPE% ^
     -DCMAKE_PREFIX_PATH=%CD%/install-%BUILD_TYPE%
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 cmake --build build-%BUILD_TYPE% --config %BUILD_TYPE%
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 
 rem The install directory is how everything downstream finds what was built:
 rem the tests import the bindings from there, and packaging reads it. feather-tk
 rem and tlRender both end this way; without it the libraries stay in the build
 rem tree, where the Python tests cannot find them on Windows.
 cmake --build build-%BUILD_TYPE% --config %BUILD_TYPE% --target install
+if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
