@@ -48,7 +48,7 @@ jobs:
     - name: Run tests
       run: |
         cd build-Debug
-        xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
+        xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
 
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
 
@@ -83,7 +83,7 @@ jobs:
     - name: Run tests
       run: |
         cd build-Debug
-        xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
+        xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
 
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
   linux-gles2-build:
@@ -118,7 +118,7 @@ jobs:
     - name: Run tests
       run: |
         cd build-Debug
-        xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
+        xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
 
   linux-package:
     runs-on: ubuntu-latest
@@ -204,7 +204,7 @@ jobs:
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
         cd build-Debug
-        ctest --verbose --rerun-failed --output-on-failure -C Debug
+        ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
 
 
   macos-build-python:
@@ -241,7 +241,7 @@ jobs:
       run: |
         export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
         cd build-Debug
-        ctest --verbose --rerun-failed --output-on-failure -C Debug
+        ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
   macos-package:
     runs-on: macos-latest
 
@@ -317,7 +317,7 @@ jobs:
       shell: cmd
       run: |
         cd build-Debug
-        ctest --verbose --rerun-failed --output-on-failure -C Debug
+        ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
 
 
   windows-build-python:
@@ -356,7 +356,7 @@ jobs:
       shell: cmd
       run: |
         cd build-Debug
-        ctest --verbose --rerun-failed --output-on-failure -C Debug
+        ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
   windows-package:
     runs-on: windows-latest
 
