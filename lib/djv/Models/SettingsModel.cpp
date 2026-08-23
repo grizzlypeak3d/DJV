@@ -25,7 +25,7 @@ namespace djv
             return !(*this == other);
         }
 
-        TL_ENUM_IMPL(
+        FTK_ENUM_IMPL(
             ExportRenderSize,
             "Default",
             "1920",

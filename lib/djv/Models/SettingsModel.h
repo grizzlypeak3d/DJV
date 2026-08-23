@@ -59,7 +59,7 @@ namespace djv
             Count,
             First = Default
         };
-        TL_ENUM(ExportRenderSize);
+        FTK_ENUM(DJV_MODELS_API, ExportRenderSize);
 
         //! Get an export render width, or zero for the sizes that are not
         //! one of the presets.
@@ -75,7 +75,7 @@ namespace djv
             Count,
             First = Image
         };
-        FTK_ENUM(ExportFileType);
+        FTK_ENUM(DJV_MODELS_API, ExportFileType);
 
         //! Export settings.
         struct DJV_MODELS_API_TYPE ExportSettings
@@ -172,7 +172,7 @@ namespace djv
             Count,
             First = Pick
         };
-        FTK_ENUM(MouseAction);
+        FTK_ENUM(DJV_MODELS_API, MouseAction);
 
         //! Mouse action binding.
         struct DJV_MODELS_API_TYPE MouseActionBinding
@@ -265,7 +265,7 @@ namespace djv
             Count,
             First = Small
         };
-        FTK_ENUM(TimelineThumbnailSize);
+        FTK_ENUM(DJV_MODELS_API, TimelineThumbnailSize);
 
         //! Get the timeline thumbnails size.
         DJV_MODELS_API int getTimelineThumbnailSize(TimelineThumbnailSize);

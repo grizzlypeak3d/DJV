@@ -11,7 +11,7 @@ namespace djv
 {
     namespace models
     {
-        TL_ENUM_IMPL(
+        FTK_ENUM_IMPL(
             HUDItem,
             "File Name",
             "Information",
@@ -21,7 +21,7 @@ namespace djv
             "Color Picker",
             "Render");
 
-        TL_ENUM_IMPL(
+        FTK_ENUM_IMPL(
             HUDPos,
             "None",
             "Top Left",

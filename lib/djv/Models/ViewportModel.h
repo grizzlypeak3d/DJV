@@ -61,7 +61,7 @@ namespace djv
             Count,
             First = FileName
         };
-        TL_ENUM(HUDItem);
+        FTK_ENUM(DJV_MODELS_API, HUDItem);
 
         //! HUD positions.
         enum class DJV_MODELS_API_TYPE HUDPos
@@ -75,7 +75,7 @@ namespace djv
             Count,
             First = None
         };
-        TL_ENUM(HUDPos);
+        FTK_ENUM(DJV_MODELS_API, HUDPos);
 
         //! HUD options.
         struct DJV_MODELS_API_TYPE HUDOptions

@@ -25,7 +25,7 @@ namespace djv
             Count,
             First = _2X
         };
-        FTK_ENUM(MagnifyLevel);
+        FTK_ENUM(DJV_APP_API, MagnifyLevel);
 
         //! Get a magnification level.
         DJV_APP_API int getMagnifyLevel(MagnifyLevel);
