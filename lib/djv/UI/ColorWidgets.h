@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/UI/Export.h>
 #include <djv/Models/Export.h>
 #include <djv/Models/OCIOModel.h>
 
@@ -25,7 +26,7 @@ namespace djv
 
     namespace ui
     {
-        class DJV_API_TYPE OCIOWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE OCIOWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(OCIOWidget);
 
@@ -38,14 +39,14 @@ namespace djv
             OCIOWidget();
 
         public:
-            DJV_API virtual ~OCIOWidget();
+            DJV_UI_API virtual ~OCIOWidget();
 
-            DJV_API static std::shared_ptr<OCIOWidget> create(
+            DJV_UI_API static std::shared_ptr<OCIOWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             void _extUpdate();
@@ -53,7 +54,7 @@ namespace djv
             FTK_PRIVATE();
         };
 
-        class DJV_API_TYPE LUTWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE LUTWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(LUTWidget);
 
@@ -66,20 +67,20 @@ namespace djv
             LUTWidget();
 
         public:
-            DJV_API virtual ~LUTWidget();
+            DJV_UI_API virtual ~LUTWidget();
 
-            DJV_API static std::shared_ptr<LUTWidget> create(
+            DJV_UI_API static std::shared_ptr<LUTWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();
         };
 
-        class DJV_API_TYPE ColorWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE ColorWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ColorWidget);
 
@@ -92,20 +93,20 @@ namespace djv
             ColorWidget();
 
         public:
-            DJV_API virtual ~ColorWidget();
+            DJV_UI_API virtual ~ColorWidget();
 
-            DJV_API static std::shared_ptr<ColorWidget> create(
+            DJV_UI_API static std::shared_ptr<ColorWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();
         };
 
-        class DJV_API_TYPE LevelsWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE LevelsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(LevelsWidget);
 
@@ -119,21 +120,21 @@ namespace djv
             LevelsWidget();
 
         public:
-            DJV_API virtual ~LevelsWidget();
+            DJV_UI_API virtual ~LevelsWidget();
 
-            DJV_API static std::shared_ptr<LevelsWidget> create(
+            DJV_UI_API static std::shared_ptr<LevelsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();
         };
 
-        class DJV_API_TYPE ExposureWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE ExposureWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ExposureWidget);
 
@@ -146,20 +147,20 @@ namespace djv
             ExposureWidget();
 
         public:
-            DJV_API virtual ~ExposureWidget();
+            DJV_UI_API virtual ~ExposureWidget();
 
-            DJV_API static std::shared_ptr<ExposureWidget> create(
+            DJV_UI_API static std::shared_ptr<ExposureWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();
         };
 
-        class DJV_API_TYPE SoftClipWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE SoftClipWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(SoftClipWidget);
 
@@ -172,14 +173,14 @@ namespace djv
             SoftClipWidget();
 
         public:
-            DJV_API virtual ~SoftClipWidget();
+            DJV_UI_API virtual ~SoftClipWidget();
 
-            DJV_API static std::shared_ptr<SoftClipWidget> create(
+            DJV_UI_API static std::shared_ptr<SoftClipWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();

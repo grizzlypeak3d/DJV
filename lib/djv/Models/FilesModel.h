@@ -21,7 +21,7 @@ namespace djv
     namespace models
     {
         //! Files model item.
-        struct DJV_API_TYPE FilesModelItem
+        struct DJV_MODELS_API_TYPE FilesModelItem
         {
             ftk::Path                path;
             ftk::Path                audioPath;
@@ -52,7 +52,7 @@ namespace djv
         };
 
         //! Files model.
-        class DJV_API_TYPE FilesModel : public std::enable_shared_from_this<FilesModel>
+        class DJV_MODELS_API_TYPE FilesModel : public std::enable_shared_from_this<FilesModel>
         {
             FTK_NON_COPYABLE(FilesModel);
 
@@ -62,146 +62,146 @@ namespace djv
             FilesModel();
 
         public:
-            DJV_API ~FilesModel();
+            DJV_MODELS_API ~FilesModel();
 
             //! Create a new model.
-            DJV_API static std::shared_ptr<FilesModel> create(
+            DJV_MODELS_API static std::shared_ptr<FilesModel> create(
                 const std::shared_ptr<ftk::Settings>&);
 
             //! Get the files.
-            DJV_API const std::vector<std::shared_ptr<FilesModelItem> >& getFiles() const;
+            DJV_MODELS_API const std::vector<std::shared_ptr<FilesModelItem> >& getFiles() const;
 
             //! Observe the files.
-            DJV_API std::shared_ptr<ftk::IObservableList<std::shared_ptr<FilesModelItem> > > observeFiles() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<std::shared_ptr<FilesModelItem> > > observeFiles() const;
 
             //! Get the "A" file.
-            DJV_API const std::shared_ptr<FilesModelItem>& getA() const;
+            DJV_MODELS_API const std::shared_ptr<FilesModelItem>& getA() const;
 
             //! Observe the "A" file.
-            DJV_API std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > observeA() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > observeA() const;
 
             //! Get the "A" file index.
-            DJV_API int getAIndex() const;
+            DJV_MODELS_API int getAIndex() const;
 
             //! Observe the "A" file index.
-            DJV_API std::shared_ptr<ftk::IObservable<int> > observeAIndex() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<int> > observeAIndex() const;
 
             //! Get the "B" files.
-            DJV_API const std::vector<std::shared_ptr<FilesModelItem> >& getB() const;
+            DJV_MODELS_API const std::vector<std::shared_ptr<FilesModelItem> >& getB() const;
 
             //! Observe the "B" files.
-            DJV_API std::shared_ptr<ftk::IObservableList<std::shared_ptr<FilesModelItem> > > observeB() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<std::shared_ptr<FilesModelItem> > > observeB() const;
 
             //! Get the "B" file indexes.
-            DJV_API const std::vector<int>& getBIndexes() const;
+            DJV_MODELS_API const std::vector<int>& getBIndexes() const;
 
             //! Observe the "B" file indexes.
-            DJV_API std::shared_ptr<ftk::IObservableList<int> > observeBIndexes() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<int> > observeBIndexes() const;
 
             //! Get the active files. The active files are the "A" file and
             //! "B" files.
-            DJV_API const std::vector<std::shared_ptr<FilesModelItem> >& getActive() const;
+            DJV_MODELS_API const std::vector<std::shared_ptr<FilesModelItem> >& getActive() const;
 
             //! Observe the active files. The active files are the "A" file
             //! and "B" files.
-            DJV_API std::shared_ptr<ftk::IObservableList<std::shared_ptr<FilesModelItem> > > observeActive() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<std::shared_ptr<FilesModelItem> > > observeActive() const;
 
             //! Add a file.
-            DJV_API void add(const std::shared_ptr<FilesModelItem>&);
+            DJV_MODELS_API void add(const std::shared_ptr<FilesModelItem>&);
 
             //! Close the current "A" file.
-            DJV_API void close();
+            DJV_MODELS_API void close();
 
             //! Close the given file.
-            DJV_API void close(int);
+            DJV_MODELS_API void close(int);
 
             //! Close all the files.
-            DJV_API void closeAll();
+            DJV_MODELS_API void closeAll();
 
             //! Set the "A" file.
-            DJV_API void setA(int index);
+            DJV_MODELS_API void setA(int index);
 
             //! Set the "B" files.
-            DJV_API void setB(int index, bool);
+            DJV_MODELS_API void setB(int index, bool);
 
             //! Toggle a "B" file.
-            DJV_API void toggleB(int index);
+            DJV_MODELS_API void toggleB(int index);
 
             //! Clear the "B" files.
-            DJV_API void clearB();
+            DJV_MODELS_API void clearB();
 
             //! Set the "A" file to the first file.
-            DJV_API void first();
+            DJV_MODELS_API void first();
 
             //! Set the "A" file to the last file.
-            DJV_API void last();
+            DJV_MODELS_API void last();
 
             //! Set the "A" file to the next file.
-            DJV_API void next();
+            DJV_MODELS_API void next();
 
             //! Set the "A" file to the previous file.
-            DJV_API void prev();
+            DJV_MODELS_API void prev();
 
             //! Set the "B" file to the first file.
-            DJV_API void firstB();
+            DJV_MODELS_API void firstB();
 
             //! Set the "B" file to the last file.
-            DJV_API void lastB();
+            DJV_MODELS_API void lastB();
 
             //! Set the "B" file to the next file.
-            DJV_API void nextB();
+            DJV_MODELS_API void nextB();
 
             //! Set the "B" file to the previous file.
-            DJV_API void prevB();
+            DJV_MODELS_API void prevB();
 
             //! Observe the layers.
-            DJV_API std::shared_ptr<ftk::IObservableList<int> > observeLayers() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<int> > observeLayers() const;
 
             //! Set a layer.
-            DJV_API void setLayer(const std::shared_ptr<FilesModelItem>&, int layer);
+            DJV_MODELS_API void setLayer(const std::shared_ptr<FilesModelItem>&, int layer);
 
             //! Set the frame range of an image sequence. This is the range the
             //! sequence is meant to cover, which need not be the frames that
             //! are on disk: a render in progress is watched over the range it
             //! will have when it finishes. The file is reopened, since
             //! everything about a timeline is derived from its path.
-            DJV_API void setFrames(
+            DJV_MODELS_API void setFrames(
                 const std::shared_ptr<FilesModelItem>&,
                 const ftk::RangeI64&);
 
             //! Observe files that have to be reopened.
-            DJV_API std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > observeReload() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > observeReload() const;
 
             //! Announce the files again, for a change to what an item holds
             //! rather than to which items there are. The items are shared and
             //! written to in place -- the frame range and the layers are
             //! filled in once the file has been opened -- and the list itself
             //! does not change when they are, so nothing else says so.
-            DJV_API void refresh();
+            DJV_MODELS_API void refresh();
 
             //! Set the "A" file to the next layer.
-            DJV_API void nextLayer();
+            DJV_MODELS_API void nextLayer();
 
             //! Set the "A" file to the previous layer.
-            DJV_API void prevLayer();
+            DJV_MODELS_API void prevLayer();
 
             //! Get the compare options.
-            DJV_API const tl::CompareOptions& getCompareOptions() const;
+            DJV_MODELS_API const tl::CompareOptions& getCompareOptions() const;
 
             //! Observe the compare options.
-            DJV_API std::shared_ptr<ftk::IObservable<tl::CompareOptions> > observeCompareOptions() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::CompareOptions> > observeCompareOptions() const;
 
             //! Set the compare options.
-            DJV_API void setCompareOptions(const tl::CompareOptions&);
+            DJV_MODELS_API void setCompareOptions(const tl::CompareOptions&);
 
             //! Get the compare time mode.
-            DJV_API tl::CompareTime getCompareTime() const;
+            DJV_MODELS_API tl::CompareTime getCompareTime() const;
 
             //! Observe the compare time mode.
-            DJV_API std::shared_ptr<ftk::IObservable<tl::CompareTime> > observeCompareTime() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::CompareTime> > observeCompareTime() const;
 
             //! Set the compare time mode.
-            DJV_API void setCompareTime(tl::CompareTime);
+            DJV_MODELS_API void setCompareTime(tl::CompareTime);
 
         private:
             int _getIndex(const std::shared_ptr<FilesModelItem>&) const;
@@ -216,7 +216,7 @@ namespace djv
         //! enumeration's own labels name the setting where it is stored and in
         //! the keyboard shortcuts, so they say what the values are rather than
         //! what they do, and are not these.
-        DJV_API std::vector<std::string> getCompareTimeLabels();
+        DJV_MODELS_API std::vector<std::string> getCompareTimeLabels();
 
     }
 }

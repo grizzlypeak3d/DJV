@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/Models/Export.h>
 
 #include <ftk/UI/Menu.h>
@@ -14,7 +15,7 @@ namespace djv
         class ColorActions;
 
         //! Color menu.
-        class DJV_API_TYPE ColorMenu : public ftk::Menu
+        class DJV_APP_API_TYPE ColorMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(ColorMenu);
 
@@ -27,9 +28,9 @@ namespace djv
             ColorMenu() = default;
 
         public:
-            DJV_API ~ColorMenu();
+            DJV_APP_API ~ColorMenu();
 
-            DJV_API static std::shared_ptr<ColorMenu> create(
+            DJV_APP_API static std::shared_ptr<ColorMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ColorActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

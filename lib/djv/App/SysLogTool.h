@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/App/IToolWidget.h>
 #include <djv/Models/Export.h>
 
@@ -11,7 +12,7 @@ namespace djv
     namespace app
     {
         //! System log tool.
-        class DJV_API_TYPE SysLogTool : public IToolWidget
+        class DJV_APP_API_TYPE SysLogTool : public IToolWidget
         {
             FTK_NON_COPYABLE(SysLogTool);
 
@@ -25,9 +26,9 @@ namespace djv
             SysLogTool();
 
         public:
-            DJV_API virtual ~SysLogTool();
+            DJV_APP_API virtual ~SysLogTool();
 
-            DJV_API static std::shared_ptr<SysLogTool> create(
+            DJV_APP_API static std::shared_ptr<SysLogTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,

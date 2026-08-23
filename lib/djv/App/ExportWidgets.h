@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/Models/Export.h>
 #include <djv/Models/SettingsModel.h>
 
@@ -15,20 +16,20 @@ namespace djv
         class App;
 
         //! Get an export file name.
-        DJV_API std::string getExportFileName(
+        DJV_APP_API std::string getExportFileName(
             const models::ExportSettings&,
             models::ExportFileType,
             int64_t frame);
 
         //! Whether exporting the given range would overwrite anything that
         //! is already on disk.
-        DJV_API bool getExportExists(
+        DJV_APP_API bool getExportExists(
             const models::ExportSettings&,
             models::ExportFileType,
             const OTIO_NS::TimeRange&);
 
         //! Base class for export widgets.
-        class DJV_API_TYPE IExportWidget : public ftk::IContainer
+        class DJV_APP_API_TYPE IExportWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(IExportWidget);
 
@@ -36,11 +37,11 @@ namespace djv
             IExportWidget() = default;
 
         public:
-            DJV_API virtual ~IExportWidget();
+            DJV_APP_API virtual ~IExportWidget();
         };
 
         //! Image export widget.
-        class DJV_API_TYPE ImageExportWidget : public IExportWidget
+        class DJV_APP_API_TYPE ImageExportWidget : public IExportWidget
         {
             FTK_NON_COPYABLE(ImageExportWidget);
 
@@ -53,15 +54,15 @@ namespace djv
             ImageExportWidget();
 
         public:
-            DJV_API virtual ~ImageExportWidget();
+            DJV_APP_API virtual ~ImageExportWidget();
 
-            DJV_API static std::shared_ptr<ImageExportWidget> create(
+            DJV_APP_API static std::shared_ptr<ImageExportWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the export callback.
-            DJV_API void setExportCallback(const std::function<void(void)>&);
+            DJV_APP_API void setExportCallback(const std::function<void(void)>&);
 
         private:
             void _infoUpdate();
@@ -70,7 +71,7 @@ namespace djv
         };
 
         //! Image sequence export widget.
-        class DJV_API_TYPE SeqExportWidget : public IExportWidget
+        class DJV_APP_API_TYPE SeqExportWidget : public IExportWidget
         {
             FTK_NON_COPYABLE(SeqExportWidget);
 
@@ -83,15 +84,15 @@ namespace djv
             SeqExportWidget();
 
         public:
-            DJV_API virtual ~SeqExportWidget();
+            DJV_APP_API virtual ~SeqExportWidget();
 
-            DJV_API static std::shared_ptr<SeqExportWidget> create(
+            DJV_APP_API static std::shared_ptr<SeqExportWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the export callback.
-            DJV_API void setExportCallback(const std::function<void(void)>&);
+            DJV_APP_API void setExportCallback(const std::function<void(void)>&);
 
         private:
             void _infoUpdate();
@@ -100,7 +101,7 @@ namespace djv
         };
 
         //! Movie export widget.
-        class DJV_API_TYPE MovieExportWidget : public IExportWidget
+        class DJV_APP_API_TYPE MovieExportWidget : public IExportWidget
         {
             FTK_NON_COPYABLE(MovieExportWidget);
 
@@ -113,15 +114,15 @@ namespace djv
             MovieExportWidget();
 
         public:
-            DJV_API virtual ~MovieExportWidget();
+            DJV_APP_API virtual ~MovieExportWidget();
 
-            DJV_API static std::shared_ptr<MovieExportWidget> create(
+            DJV_APP_API static std::shared_ptr<MovieExportWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the export callback.
-            DJV_API void setExportCallback(const std::function<void(void)>&);
+            DJV_APP_API void setExportCallback(const std::function<void(void)>&);
 
         private:
             void _infoUpdate();

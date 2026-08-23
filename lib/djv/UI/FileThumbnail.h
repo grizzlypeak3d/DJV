@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/UI/Export.h>
 #include <djv/App/FilesTool.h>
 #include <djv/Models/Export.h>
 
@@ -14,7 +15,7 @@ namespace djv
 {
     namespace ui
     {
-        class DJV_API_TYPE FileThumbnail : public ftk::IWidget
+        class DJV_UI_API_TYPE FileThumbnail : public ftk::IWidget
         {
             FTK_NON_COPYABLE(FileThumbnail);
 
@@ -28,21 +29,21 @@ namespace djv
             FileThumbnail();
 
         public:
-            DJV_API virtual ~FileThumbnail();
+            DJV_UI_API virtual ~FileThumbnail();
 
-            DJV_API static std::shared_ptr<FileThumbnail> create(
+            DJV_UI_API static std::shared_ptr<FileThumbnail> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::FilesModelItem>&,
                 const tl::IOOptions&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API ftk::Size2I getSizeHint() const override;
-            DJV_API void tickEvent(
+            DJV_UI_API ftk::Size2I getSizeHint() const override;
+            DJV_UI_API void tickEvent(
                 bool,
                 bool,
                 const ftk::TickEvent&) override;
-            DJV_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
-            DJV_API void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
+            DJV_UI_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
+            DJV_UI_API void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
 
         private:
             FTK_PRIVATE();

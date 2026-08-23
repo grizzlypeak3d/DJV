@@ -17,7 +17,7 @@ namespace djv
     namespace models
     {
         //! Time units model.
-        class DJV_API_TYPE TimeUnitsModel : public tl::TimeUnitsModel
+        class DJV_MODELS_API_TYPE TimeUnitsModel : public tl::TimeUnitsModel
         {
             FTK_NON_COPYABLE(TimeUnitsModel);
 
@@ -29,10 +29,10 @@ namespace djv
             TimeUnitsModel();
 
         public:
-            DJV_API ~TimeUnitsModel();
+            DJV_MODELS_API ~TimeUnitsModel();
 
             //! Create a new model.
-            DJV_API static std::shared_ptr<TimeUnitsModel> create(
+            DJV_MODELS_API static std::shared_ptr<TimeUnitsModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 

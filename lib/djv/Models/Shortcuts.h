@@ -12,10 +12,10 @@ namespace djv
     namespace models
     {
         //! Keyboard shortcuts.
-        struct DJV_API_TYPE Shortcut
+        struct DJV_MODELS_API_TYPE Shortcut
         {
             Shortcut() = default;
-            DJV_API Shortcut(
+            DJV_MODELS_API Shortcut(
                 const std::string& name,
                 const std::string& text,
                 const ftk::KeyShortcut& primary = ftk::KeyShortcut(),
@@ -26,16 +26,16 @@ namespace djv
             ftk::KeyShortcut primary;
             ftk::KeyShortcut secondary;
 
-            DJV_API bool operator == (const Shortcut&) const;
-            DJV_API bool operator != (const Shortcut&) const;
+            DJV_MODELS_API bool operator == (const Shortcut&) const;
+            DJV_MODELS_API bool operator != (const Shortcut&) const;
         };
 
         //! \name Serialize
         ///@{
 
-        DJV_API void to_json(nlohmann::json&, const Shortcut&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const Shortcut&);
 
-        DJV_API void from_json(const nlohmann::json&, Shortcut&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, Shortcut&);
 
         ///@}
     }

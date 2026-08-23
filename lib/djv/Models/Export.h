@@ -42,27 +42,28 @@
 #define DJV_IMPORT_TEMPLATE(type, ...)                              \
     extern template type DJV_IMPORT __VA_ARGS__
 
-#if defined(DJV_STATIC)
-#    define DJV_API
-#    define DJV_API_TYPE
-#    define DJV_API_TEMPLATE_CLASS(...)
-#    define DJV_API_TEMPLATE_STRUCT(...)
-#    define DJV_LOCAL
+// The macros for the models library. Each library in this project has its own set: one
+// shared between them would be defined for whichever library is being built,
+// so a library compiling a sibling's headers would read the sibling's API as
+// dllexport where it wants dllimport. Functions survive that -- the linker
+// takes them from the import library -- and data does not.
+#if defined(DJV_MODELS_STATIC)
+#    define DJV_MODELS_API
+#    define DJV_MODELS_API_TYPE
+#    define DJV_MODELS_API_TEMPLATE_CLASS(...)
+#    define DJV_MODELS_API_TEMPLATE_STRUCT(...)
+#    define DJV_MODELS_LOCAL
 #else
-#    if defined(DJV_EXPORTS)
-#        define DJV_API DJV_EXPORT
-#        define DJV_API_TYPE DJV_EXPORT_TYPE
-#        define DJV_API_TEMPLATE_CLASS(...)                               \
-            DJV_EXPORT_TEMPLATE(class, __VA_ARGS__)
-#        define DJV_API_TEMPLATE_STRUCT(...)                              \
-            DJV_EXPORT_TEMPLATE(struct, __VA_ARGS__)
+#    if defined(DJV_MODELS_EXPORTS)
+#        define DJV_MODELS_API DJV_EXPORT
+#        define DJV_MODELS_API_TYPE DJV_EXPORT_TYPE
+#        define DJV_MODELS_API_TEMPLATE_CLASS(...)                                             DJV_EXPORT_TEMPLATE(class, __VA_ARGS__)
+#        define DJV_MODELS_API_TEMPLATE_STRUCT(...)                                            DJV_EXPORT_TEMPLATE(struct, __VA_ARGS__)
 #    else
-#        define DJV_API DJV_IMPORT
-#        define DJV_API_TYPE DJV_IMPORT_TYPE
-#        define DJV_API_TEMPLATE_CLASS(...)                               \
-            DJV_IMPORT_TEMPLATE(class, __VA_ARGS__)
-#        define DJV_API_TEMPLATE_STRUCT(...)                              \
-            DJV_IMPORT_TEMPLATE(struct, __VA_ARGS__)
+#        define DJV_MODELS_API DJV_IMPORT
+#        define DJV_MODELS_API_TYPE DJV_IMPORT_TYPE
+#        define DJV_MODELS_API_TEMPLATE_CLASS(...)                                             DJV_IMPORT_TEMPLATE(class, __VA_ARGS__)
+#        define DJV_MODELS_API_TEMPLATE_STRUCT(...)                                            DJV_IMPORT_TEMPLATE(struct, __VA_ARGS__)
 #    endif
-#    define DJV_LOCAL DJV_HIDDEN
+#    define DJV_MODELS_LOCAL DJV_HIDDEN
 #endif

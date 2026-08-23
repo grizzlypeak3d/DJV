@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/App/IActions.h>
 #include <djv/Models/Export.h>
 
@@ -13,7 +14,7 @@ namespace djv
         class MainWindow;
 
         //! Frame actions.
-        class DJV_API_TYPE FrameActions : public IActions
+        class DJV_APP_API_TYPE FrameActions : public IActions
         {
             FTK_NON_COPYABLE(FrameActions);
 
@@ -26,9 +27,9 @@ namespace djv
             FrameActions();
 
         public:
-            DJV_API ~FrameActions();
+            DJV_APP_API ~FrameActions();
 
-            DJV_API static std::shared_ptr<FrameActions> create(
+            DJV_APP_API static std::shared_ptr<FrameActions> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&);

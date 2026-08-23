@@ -17,7 +17,7 @@ namespace djv
     namespace models
     {
         //! Recent files model.
-        class DJV_API_TYPE RecentFilesModel : public ftk::RecentFilesModel
+        class DJV_MODELS_API_TYPE RecentFilesModel : public ftk::RecentFilesModel
         {
             FTK_NON_COPYABLE(RecentFilesModel);
 
@@ -29,10 +29,10 @@ namespace djv
             RecentFilesModel();
 
         public:
-            DJV_API ~RecentFilesModel();
+            DJV_MODELS_API ~RecentFilesModel();
 
             //! Create a new model.
-            DJV_API static std::shared_ptr<RecentFilesModel> create(
+            DJV_MODELS_API static std::shared_ptr<RecentFilesModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 

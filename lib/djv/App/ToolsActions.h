@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/App/IActions.h>
 #include <djv/Models/Export.h>
 
@@ -11,7 +12,7 @@ namespace djv
     namespace app
     {
         //! Tools actions.
-        class DJV_API_TYPE ToolsActions : public IActions
+        class DJV_APP_API_TYPE ToolsActions : public IActions
         {
             FTK_NON_COPYABLE(ToolsActions);
 
@@ -23,9 +24,9 @@ namespace djv
             ToolsActions();
 
         public:
-            DJV_API ~ToolsActions();
+            DJV_APP_API ~ToolsActions();
 
-            DJV_API static std::shared_ptr<ToolsActions> create(
+            DJV_APP_API static std::shared_ptr<ToolsActions> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&);
 

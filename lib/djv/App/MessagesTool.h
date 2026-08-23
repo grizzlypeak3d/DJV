@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/App/IToolWidget.h>
 #include <djv/Models/Export.h>
 
@@ -11,7 +12,7 @@ namespace djv
     namespace app
     {
         //! Messages tool.
-        class DJV_API_TYPE MessagesTool : public IToolWidget
+        class DJV_APP_API_TYPE MessagesTool : public IToolWidget
         {
             FTK_NON_COPYABLE(MessagesTool);
 
@@ -25,9 +26,9 @@ namespace djv
             MessagesTool();
 
         public:
-            DJV_API virtual ~MessagesTool();
+            DJV_APP_API virtual ~MessagesTool();
 
-            DJV_API static std::shared_ptr<MessagesTool> create(
+            DJV_APP_API static std::shared_ptr<MessagesTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,

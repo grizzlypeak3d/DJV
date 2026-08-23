@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/App/IToolWidget.h>
 #include <djv/Models/Export.h>
 
@@ -11,7 +12,7 @@ namespace djv
     namespace app
     {
         //! View tool.
-        class DJV_API_TYPE ViewTool : public IToolWidget
+        class DJV_APP_API_TYPE ViewTool : public IToolWidget
         {
             FTK_NON_COPYABLE(ViewTool);
 
@@ -25,9 +26,9 @@ namespace djv
             ViewTool();
 
         public:
-            DJV_API virtual ~ViewTool();
+            DJV_APP_API virtual ~ViewTool();
 
-            DJV_API static std::shared_ptr<ViewTool> create(
+            DJV_APP_API static std::shared_ptr<ViewTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/App/IToolWidget.h>
 #include <djv/Models/Export.h>
 
@@ -11,7 +12,7 @@ namespace djv
     namespace app
     {
         //! Magnification level.
-        enum class DJV_API_TYPE MagnifyLevel
+        enum class DJV_APP_API_TYPE MagnifyLevel
         {
             _2X,
             _4X,
@@ -27,10 +28,10 @@ namespace djv
         FTK_ENUM(MagnifyLevel);
 
         //! Get a magnification level.
-        DJV_API int getMagnifyLevel(MagnifyLevel);
+        DJV_APP_API int getMagnifyLevel(MagnifyLevel);
 
         //! Magnify tool.
-        class DJV_API_TYPE MagnifyTool : public IToolWidget
+        class DJV_APP_API_TYPE MagnifyTool : public IToolWidget
         {
             FTK_NON_COPYABLE(MagnifyTool);
 
@@ -44,15 +45,15 @@ namespace djv
             MagnifyTool();
 
         public:
-            DJV_API virtual ~MagnifyTool();
+            DJV_APP_API virtual ~MagnifyTool();
 
-            DJV_API static std::shared_ptr<MagnifyTool> create(
+            DJV_APP_API static std::shared_ptr<MagnifyTool> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API void setGeometry(const ftk::Box2I&) override;
+            DJV_APP_API void setGeometry(const ftk::Box2I&) override;
 
         private:
             void _widgetUpdate();

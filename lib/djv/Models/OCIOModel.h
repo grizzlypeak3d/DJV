@@ -19,7 +19,7 @@ namespace djv
     namespace models
     {
         //! OpenColorIO model data.
-        struct DJV_API_TYPE OCIOModelData
+        struct DJV_MODELS_API_TYPE OCIOModelData
         {
             bool enabled = false;
             tl::OCIOConfig config = tl::OCIOConfig::First;
@@ -34,12 +34,12 @@ namespace djv
             std::vector<std::string> looks;
             size_t lookIndex = 0;
 
-            DJV_API bool operator == (const OCIOModelData&) const;
-            DJV_API bool operator != (const OCIOModelData&) const;
+            DJV_MODELS_API bool operator == (const OCIOModelData&) const;
+            DJV_MODELS_API bool operator != (const OCIOModelData&) const;
         };
 
         //! OpenColorIO model.
-        class DJV_API_TYPE OCIOModel : public std::enable_shared_from_this<OCIOModel>
+        class DJV_MODELS_API_TYPE OCIOModel : public std::enable_shared_from_this<OCIOModel>
         {
             FTK_NON_COPYABLE(OCIOModel);
 
@@ -49,40 +49,40 @@ namespace djv
             OCIOModel();
 
         public:
-            DJV_API ~OCIOModel();
+            DJV_MODELS_API ~OCIOModel();
 
             //! Create a new model.
-            DJV_API static std::shared_ptr<OCIOModel> create(const std::shared_ptr<ftk::Context>&);
+            DJV_MODELS_API static std::shared_ptr<OCIOModel> create(const std::shared_ptr<ftk::Context>&);
 
             //! Observe the options.
-            DJV_API std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > observeOptions() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::OCIOOptions> > observeOptions() const;
 
             //! Set the options.
-            DJV_API void setOptions(const tl::OCIOOptions&);
+            DJV_MODELS_API void setOptions(const tl::OCIOOptions&);
 
             //! Observe the model data.
-            DJV_API std::shared_ptr<ftk::IObservable<OCIOModelData> > observeData() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<OCIOModelData> > observeData() const;
 
             //! Set whether the color configuration is enabled.
-            DJV_API void setEnabled(bool);
+            DJV_MODELS_API void setEnabled(bool);
 
             //! Set the color configuration.
-            DJV_API void setConfig(tl::OCIOConfig);
+            DJV_MODELS_API void setConfig(tl::OCIOConfig);
 
             //! Set the color configuration file.
-            DJV_API void setFileName(const std::string& fileName);
+            DJV_MODELS_API void setFileName(const std::string& fileName);
 
             //! Set the input index.
-            DJV_API void setInputIndex(size_t);
+            DJV_MODELS_API void setInputIndex(size_t);
 
             //! Set the display index.
-            DJV_API void setDisplayIndex(size_t);
+            DJV_MODELS_API void setDisplayIndex(size_t);
 
             //! Set the view index.
-            DJV_API void setViewIndex(size_t);
+            DJV_MODELS_API void setViewIndex(size_t);
 
             //! Set the look index.
-            DJV_API void setLookIndex(size_t);
+            DJV_MODELS_API void setLookIndex(size_t);
 
         private:
             OCIOModelData _getData(const tl::OCIOOptions&) const;

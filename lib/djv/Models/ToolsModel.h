@@ -20,7 +20,7 @@ namespace djv
     namespace models
     {
         //! Tool information.
-        struct DJV_API_TYPE ToolInfo
+        struct DJV_MODELS_API_TYPE ToolInfo
         {
             std::string      name;
             std::string      icon;
@@ -30,7 +30,7 @@ namespace djv
         };
 
         //! Tools model.
-        class DJV_API_TYPE ToolsModel : public std::enable_shared_from_this<ToolsModel>
+        class DJV_MODELS_API_TYPE ToolsModel : public std::enable_shared_from_this<ToolsModel>
         {
             FTK_NON_COPYABLE(ToolsModel);
 
@@ -40,34 +40,34 @@ namespace djv
             ToolsModel();
 
         public:
-            DJV_API ~ToolsModel();
+            DJV_MODELS_API ~ToolsModel();
 
             //! Create a new model.
-            DJV_API static std::shared_ptr<ToolsModel> create(
+            DJV_MODELS_API static std::shared_ptr<ToolsModel> create(
                 const std::shared_ptr<ftk::Settings>&);
 
             //! Get the tools.
-            DJV_API const std::vector<ToolInfo>& getTools() const;
+            DJV_MODELS_API const std::vector<ToolInfo>& getTools() const;
             
             //! Add a tool.
-            DJV_API void addTool(const ToolInfo&);
+            DJV_MODELS_API void addTool(const ToolInfo&);
 
             //! Get the open tools, in the order they are listed above rather
             //! than the order they were opened, so that opening one does not
             //! move the others around.
-            DJV_API const std::vector<std::string>& getOpenTools() const;
+            DJV_MODELS_API const std::vector<std::string>& getOpenTools() const;
 
             //! Observe the open tools.
-            DJV_API std::shared_ptr<ftk::IObservableList<std::string> > observeOpenTools() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<std::string> > observeOpenTools() const;
 
             //! Get whether a tool is open.
-            DJV_API bool isToolOpen(const std::string&) const;
+            DJV_MODELS_API bool isToolOpen(const std::string&) const;
 
             //! Open or close a tool.
-            DJV_API void setToolOpen(const std::string&, bool);
+            DJV_MODELS_API void setToolOpen(const std::string&, bool);
 
             //! Close every tool.
-            DJV_API void closeTools();
+            DJV_MODELS_API void closeTools();
 
         private:
             // Kept in the order the tools are listed, and anything not in that

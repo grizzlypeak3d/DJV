@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/Models/Export.h>
 #include <djv/Models/ToolsModel.h>
 
@@ -16,7 +17,7 @@ namespace djv
         class MainWindow;
 
         //! Base class for tool widgets.
-        class DJV_API_TYPE IToolWidget : public ftk::IWidget
+        class DJV_APP_API_TYPE IToolWidget : public ftk::IWidget
         {
             FTK_NON_COPYABLE(IToolWidget);
 
@@ -33,17 +34,17 @@ namespace djv
             IToolWidget();
 
         public:
-            DJV_API virtual ~IToolWidget() = 0;
+            DJV_APP_API virtual ~IToolWidget() = 0;
 
-            DJV_API const std::string& getToolName() const;
+            DJV_APP_API const std::string& getToolName() const;
 
             //! Scroll to the named section. Tools that lay their content out in
             //! scrollable sections (e.g. bellows) override this; the default
             //! does nothing.
-            DJV_API virtual void scrollTo(const std::string& section);
+            DJV_APP_API virtual void scrollTo(const std::string& section);
 
-            DJV_API ftk::Size2I getSizeHint() const override;
-            DJV_API void setGeometry(const ftk::Box2I&) override;
+            DJV_APP_API ftk::Size2I getSizeHint() const override;
+            DJV_APP_API void setGeometry(const ftk::Box2I&) override;
 
         protected:
             void _loadSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >&);
@@ -66,7 +67,7 @@ namespace djv
             const std::shared_ptr<ftk::IWidget>&)> ToolWidgetFnc;
 
         //! Tool widget factory.
-        class DJV_API_TYPE ToolWidgetFactory : public std::enable_shared_from_this<ToolWidgetFactory>
+        class DJV_APP_API_TYPE ToolWidgetFactory : public std::enable_shared_from_this<ToolWidgetFactory>
         {
             FTK_NON_COPYABLE(ToolWidgetFactory);
 
@@ -74,13 +75,13 @@ namespace djv
             ToolWidgetFactory();
 
         public:
-            DJV_API ~ToolWidgetFactory();
+            DJV_APP_API ~ToolWidgetFactory();
 
-            DJV_API static std::shared_ptr<ToolWidgetFactory> create();
+            DJV_APP_API static std::shared_ptr<ToolWidgetFactory> create();
 
-            DJV_API void addTool(const std::string& name, const ToolWidgetFnc&);
+            DJV_APP_API void addTool(const std::string& name, const ToolWidgetFnc&);
 
-            DJV_API std::shared_ptr<IToolWidget> createTool(
+            DJV_APP_API std::shared_ptr<IToolWidget> createTool(
                 const std::string&,
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,

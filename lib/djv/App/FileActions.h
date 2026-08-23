@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/App/IActions.h>
 #include <djv/Models/Export.h>
 
@@ -13,7 +14,7 @@ namespace djv
         //! File actions.
         //!
         //! \todo Add actions for opening the next/previous file in the directory.
-        class DJV_API_TYPE FileActions : public IActions
+        class DJV_APP_API_TYPE FileActions : public IActions
         {
             FTK_NON_COPYABLE(FileActions);
 
@@ -25,9 +26,9 @@ namespace djv
             FileActions();
 
         public:
-            DJV_API ~FileActions();
+            DJV_APP_API ~FileActions();
 
-            DJV_API static std::shared_ptr<FileActions> create(
+            DJV_APP_API static std::shared_ptr<FileActions> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&);
 

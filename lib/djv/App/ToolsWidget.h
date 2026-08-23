@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/Models/Export.h>
 
 #include <ftk/UI/IContainer.h>
@@ -16,7 +17,7 @@ namespace djv
         class MainWindow;
 
         //! Tools widget.
-        class DJV_API_TYPE ToolsWidget : public ftk::IContainer
+        class DJV_APP_API_TYPE ToolsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ToolsWidget);
 
@@ -30,10 +31,10 @@ namespace djv
             ToolsWidget();
 
         public:
-            DJV_API virtual ~ToolsWidget();
+            DJV_APP_API virtual ~ToolsWidget();
 
             //! Create a new widget.
-            DJV_API static std::shared_ptr<ToolsWidget> create(
+            DJV_APP_API static std::shared_ptr<ToolsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,
@@ -41,7 +42,7 @@ namespace djv
 
             //! Get the active tool widget, or null if no tool is active.
             //! Get an open tool by name, or null when it is not open.
-            DJV_API std::shared_ptr<IToolWidget> getToolWidget(const std::string&) const;
+            DJV_APP_API std::shared_ptr<IToolWidget> getToolWidget(const std::string&) const;
 
         private:
             void _widgetUpdate(const std::vector<std::string>&);

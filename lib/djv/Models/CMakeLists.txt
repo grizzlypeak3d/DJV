@@ -46,10 +46,13 @@ add_custom_target(djvBuildInfo
 set_target_properties(djvBuildInfo PROPERTIES FOLDER lib)
 
 add_library(djvModels ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+# Private when building, so this library's own API is dllexport here and
+# dllimport to everything else. Public when static, which a consumer does
+# have to know: the API then carries no declspec at all.
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(djvModels PRIVATE DJV_EXPORTS)
+    target_compile_definitions(djvModels PRIVATE DJV_MODELS_EXPORTS)
 else()
-    target_compile_definitions(djvModels PUBLIC DJV_STATIC)
+    target_compile_definitions(djvModels PUBLIC DJV_MODELS_STATIC)
 endif()
 add_dependencies(djvModels djvBuildInfo)
 

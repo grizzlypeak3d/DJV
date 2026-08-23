@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/App/IActions.h>
 #include <djv/Models/Export.h>
 
@@ -15,7 +16,7 @@ namespace djv
         //! View actions.
         //!
         //! \todo Add an action for toggling the UI visibility.
-        class DJV_API_TYPE ViewActions : public IActions
+        class DJV_APP_API_TYPE ViewActions : public IActions
         {
             FTK_NON_COPYABLE(ViewActions);
 
@@ -28,9 +29,9 @@ namespace djv
             ViewActions();
 
         public:
-            DJV_API ~ViewActions();
+            DJV_APP_API ~ViewActions();
 
-            DJV_API static std::shared_ptr<ViewActions> create(
+            DJV_APP_API static std::shared_ptr<ViewActions> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&);

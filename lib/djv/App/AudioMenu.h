@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/Models/Export.h>
 
 #include <ftk/UI/Menu.h>
@@ -14,7 +15,7 @@ namespace djv
         class AudioActions;
 
         //! Audio menu.
-        class DJV_API_TYPE AudioMenu : public ftk::Menu
+        class DJV_APP_API_TYPE AudioMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(AudioMenu);
 
@@ -27,9 +28,9 @@ namespace djv
             AudioMenu() = default;
 
         public:
-            DJV_API ~AudioMenu();
+            DJV_APP_API ~AudioMenu();
 
-            DJV_API static std::shared_ptr<AudioMenu> create(
+            DJV_APP_API static std::shared_ptr<AudioMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<AudioActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

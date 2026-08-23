@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/UI/Export.h>
 #include <djv/Models/Export.h>
 
 #include <ftk/UI/IContainer.h>
@@ -20,7 +21,7 @@ namespace djv
     namespace ui
     {
         //! Setup start widget.
-        class DJV_API_TYPE SetupStartWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE SetupStartWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(SetupStartWidget);
 
@@ -33,9 +34,9 @@ namespace djv
             SetupStartWidget();
 
         public:
-            DJV_API virtual ~SetupStartWidget();
+            DJV_UI_API virtual ~SetupStartWidget();
 
-            DJV_API static std::shared_ptr<SetupStartWidget> create(
+            DJV_UI_API static std::shared_ptr<SetupStartWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<ftk::IWidget>& parent = nullptr);
@@ -44,7 +45,7 @@ namespace djv
         };
 
         //! Setup dialog.
-        class DJV_API_TYPE SetupDialog : public ftk::IDialog
+        class DJV_UI_API_TYPE SetupDialog : public ftk::IDialog
         {
             FTK_NON_COPYABLE(SetupDialog);
 
@@ -59,16 +60,16 @@ namespace djv
             SetupDialog();
 
         public:
-            DJV_API virtual ~SetupDialog();
+            DJV_UI_API virtual ~SetupDialog();
 
-            DJV_API static std::shared_ptr<SetupDialog> create(
+            DJV_UI_API static std::shared_ptr<SetupDialog> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API std::shared_ptr<ftk::IWidget> getKeyFocus() const override;
+            DJV_UI_API std::shared_ptr<ftk::IWidget> getKeyFocus() const override;
 
         private:
             FTK_PRIVATE();

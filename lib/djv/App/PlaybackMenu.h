@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/Models/Export.h>
 
 #include <tlRender/Timeline/Player.h>
@@ -16,7 +17,7 @@ namespace djv
         class PlaybackActions;
 
         //! Playback menu.
-        class DJV_API_TYPE PlaybackMenu : public ftk::Menu
+        class DJV_APP_API_TYPE PlaybackMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(PlaybackMenu);
 
@@ -29,9 +30,9 @@ namespace djv
             PlaybackMenu() = default;
 
         public:
-            DJV_API ~PlaybackMenu();
+            DJV_APP_API ~PlaybackMenu();
 
-            DJV_API static std::shared_ptr<PlaybackMenu> create(
+            DJV_APP_API static std::shared_ptr<PlaybackMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<PlaybackActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

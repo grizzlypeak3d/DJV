@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/App/Export.h>
 #include <djv/Models/Export.h>
 
 #include <ftk/UI/Menu.h>
@@ -14,7 +15,7 @@ namespace djv
         class TimelineActions;
 
         //! Timeline menu.
-        class DJV_API_TYPE TimelineMenu : public ftk::Menu
+        class DJV_APP_API_TYPE TimelineMenu : public ftk::Menu
         {
             FTK_NON_COPYABLE(TimelineMenu);
 
@@ -27,9 +28,9 @@ namespace djv
             TimelineMenu();
 
         public:
-            DJV_API ~TimelineMenu();
+            DJV_APP_API ~TimelineMenu();
 
-            DJV_API static std::shared_ptr<TimelineMenu> create(
+            DJV_APP_API static std::shared_ptr<TimelineMenu> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<TimelineActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);

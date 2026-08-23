@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/UI/Export.h>
 #include <djv/Models/Export.h>
 
 #include <ftk/UI/IWidgetPopup.h>
@@ -12,7 +13,7 @@ namespace djv
     namespace ui
     {
         //! Status indicator popup.
-        class DJV_API_TYPE StatusIndicatorPopup : public ftk::IWidgetPopup
+        class DJV_UI_API_TYPE StatusIndicatorPopup : public ftk::IWidgetPopup
         {
             FTK_NON_COPYABLE(StatusIndicatorPopup);
 
@@ -25,14 +26,14 @@ namespace djv
             StatusIndicatorPopup();
 
         public:
-            DJV_API virtual ~StatusIndicatorPopup();
+            DJV_UI_API virtual ~StatusIndicatorPopup();
 
-            DJV_API static std::shared_ptr<StatusIndicatorPopup> create(
+            DJV_UI_API static std::shared_ptr<StatusIndicatorPopup> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::vector<std::pair<std::string, std::string> >&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API void setIndicators(const std::map<std::string, bool>&);
+            DJV_UI_API void setIndicators(const std::map<std::string, bool>&);
 
         private:
             FTK_PRIVATE();

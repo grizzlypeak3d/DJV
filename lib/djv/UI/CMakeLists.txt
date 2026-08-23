@@ -30,8 +30,13 @@ set(SOURCE
     ViewWidgets.cpp)
 
 add_library(djvUI ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+# Private when building, so this library's own API is dllexport here and
+# dllimport to everything else. Public when static, which a consumer does
+# have to know: the API then carries no declspec at all.
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(djvUI PRIVATE DJV_EXPORTS)
+    target_compile_definitions(djvUI PRIVATE DJV_UI_EXPORTS)
+else()
+    target_compile_definitions(djvUI PUBLIC DJV_UI_STATIC)
 endif()
 target_link_libraries(djvUI djvModels tlRender::tlUI)
 set_target_properties(djvUI PROPERTIES FOLDER lib)

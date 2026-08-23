@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <djv/UI/Export.h>
 #include <djv/Models/Export.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/ViewportModel.h>
@@ -15,7 +16,7 @@ namespace djv
     namespace ui
     {
         //! Base class for settings widgets.
-        class DJV_API_TYPE ISettingsWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE ISettingsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ISettingsWidget);
 
@@ -23,11 +24,11 @@ namespace djv
             ISettingsWidget() = default;
 
         public:
-            DJV_API virtual ~ISettingsWidget();
+            DJV_UI_API virtual ~ISettingsWidget();
         };
 
         //! Audio settings widget.
-        class DJV_API_TYPE AudioSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE AudioSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(AudioSettingsWidget);
 
@@ -40,9 +41,9 @@ namespace djv
             AudioSettingsWidget();
 
         public:
-            DJV_API virtual ~AudioSettingsWidget();
+            DJV_UI_API virtual ~AudioSettingsWidget();
 
-            DJV_API static std::shared_ptr<AudioSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<AudioSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -51,7 +52,7 @@ namespace djv
         };
 
         //! Cache settings widget.
-        class DJV_API_TYPE CacheSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE CacheSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(CacheSettingsWidget);
 
@@ -64,9 +65,9 @@ namespace djv
             CacheSettingsWidget();
 
         public:
-            DJV_API virtual ~CacheSettingsWidget();
+            DJV_UI_API virtual ~CacheSettingsWidget();
 
-            DJV_API static std::shared_ptr<CacheSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<CacheSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -76,7 +77,7 @@ namespace djv
         };
 
         //! File browser settings widget.
-        class DJV_API_TYPE FileBrowserSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE FileBrowserSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(FileBrowserSettingsWidget);
 
@@ -89,9 +90,9 @@ namespace djv
             FileBrowserSettingsWidget();
 
         public:
-            DJV_API virtual ~FileBrowserSettingsWidget();
+            DJV_UI_API virtual ~FileBrowserSettingsWidget();
 
-            DJV_API static std::shared_ptr<FileBrowserSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<FileBrowserSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -101,7 +102,7 @@ namespace djv
 
         //! Image sequence settings widget.
         //! OTIO settings widget.
-        class DJV_API_TYPE OTIOSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE OTIOSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(OTIOSettingsWidget);
 
@@ -114,9 +115,9 @@ namespace djv
             OTIOSettingsWidget();
 
         public:
-            DJV_API virtual ~OTIOSettingsWidget();
+            DJV_UI_API virtual ~OTIOSettingsWidget();
 
-            DJV_API static std::shared_ptr<OTIOSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<OTIOSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -125,7 +126,7 @@ namespace djv
             FTK_PRIVATE();
         };
 
-        class DJV_API_TYPE ImageSeqSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE ImageSeqSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(ImageSeqSettingsWidget);
 
@@ -139,9 +140,9 @@ namespace djv
             ImageSeqSettingsWidget();
 
         public:
-            DJV_API virtual ~ImageSeqSettingsWidget();
+            DJV_UI_API virtual ~ImageSeqSettingsWidget();
 
-            DJV_API static std::shared_ptr<ImageSeqSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<ImageSeqSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::ViewportModel>&,
@@ -152,7 +153,7 @@ namespace djv
         };
 
         //! Miscellaneous settings widget.
-        class DJV_API_TYPE MiscSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE MiscSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(MiscSettingsWidget);
 
@@ -165,9 +166,9 @@ namespace djv
             MiscSettingsWidget();
 
         public:
-            DJV_API virtual ~MiscSettingsWidget();
+            DJV_UI_API virtual ~MiscSettingsWidget();
 
-            DJV_API static std::shared_ptr<MiscSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<MiscSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -177,7 +178,7 @@ namespace djv
         };
 
         //! Mouse settings widget.
-        class DJV_API_TYPE MouseSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE MouseSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(MouseSettingsWidget);
 
@@ -190,9 +191,9 @@ namespace djv
             MouseSettingsWidget();
 
         public:
-            DJV_API virtual ~MouseSettingsWidget();
+            DJV_UI_API virtual ~MouseSettingsWidget();
 
-            DJV_API static std::shared_ptr<MouseSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<MouseSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -202,7 +203,7 @@ namespace djv
         };
 
         //! Playback settings widget.
-        class DJV_API_TYPE PlaybackSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE PlaybackSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(PlaybackSettingsWidget);
 
@@ -215,9 +216,9 @@ namespace djv
             PlaybackSettingsWidget();
 
         public:
-            DJV_API virtual ~PlaybackSettingsWidget();
+            DJV_UI_API virtual ~PlaybackSettingsWidget();
 
-            DJV_API static std::shared_ptr<PlaybackSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<PlaybackSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -227,7 +228,7 @@ namespace djv
         };
 
         //! Keyboard shortcut editor.
-        class DJV_API_TYPE ShortcutEdit : public ftk::IMouseWidget
+        class DJV_UI_API_TYPE ShortcutEdit : public ftk::IMouseWidget
         {
             FTK_NON_COPYABLE(ShortcutEdit);
 
@@ -239,28 +240,28 @@ namespace djv
             ShortcutEdit();
 
         public:
-            DJV_API virtual ~ShortcutEdit();
+            DJV_UI_API virtual ~ShortcutEdit();
 
-            DJV_API static std::shared_ptr<ShortcutEdit> create(
+            DJV_UI_API static std::shared_ptr<ShortcutEdit> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API void setShortcut(const ftk::KeyShortcut&);
-            DJV_API void setCallback(const std::function<void(const ftk::KeyShortcut&)>&);
-            DJV_API void setCollision(bool);
+            DJV_UI_API void setShortcut(const ftk::KeyShortcut&);
+            DJV_UI_API void setCallback(const std::function<void(const ftk::KeyShortcut&)>&);
+            DJV_UI_API void setCollision(bool);
 
-            DJV_API ftk::Size2I getSizeHint() const override;
-            DJV_API void setGeometry(const ftk::Box2I&) override;
-            DJV_API ftk::Box2I getChildrenClipRect() const override;
-            DJV_API void styleEvent(const ftk::StyleEvent&) override;
-            DJV_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
-            DJV_API void drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent&) override;
-            DJV_API void mouseEnterEvent(ftk::MouseEnterEvent&) override;
-            DJV_API void mouseLeaveEvent() override;
-            DJV_API void mousePressEvent(ftk::MouseClickEvent&) override;
-            DJV_API void keyFocusEvent(bool) override;
-            DJV_API void keyPressEvent(ftk::KeyEvent&) override;
-            DJV_API void keyReleaseEvent(ftk::KeyEvent&) override;
+            DJV_UI_API ftk::Size2I getSizeHint() const override;
+            DJV_UI_API void setGeometry(const ftk::Box2I&) override;
+            DJV_UI_API ftk::Box2I getChildrenClipRect() const override;
+            DJV_UI_API void styleEvent(const ftk::StyleEvent&) override;
+            DJV_UI_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
+            DJV_UI_API void drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent&) override;
+            DJV_UI_API void mouseEnterEvent(ftk::MouseEnterEvent&) override;
+            DJV_UI_API void mouseLeaveEvent() override;
+            DJV_UI_API void mousePressEvent(ftk::MouseClickEvent&) override;
+            DJV_UI_API void keyFocusEvent(bool) override;
+            DJV_UI_API void keyPressEvent(ftk::KeyEvent&) override;
+            DJV_UI_API void keyReleaseEvent(ftk::KeyEvent&) override;
 
         private:
             void _widgetUpdate();
@@ -269,7 +270,7 @@ namespace djv
         };
 
         //! Keyboard shortcut widget.
-        class DJV_API_TYPE ShortcutWidget : public ftk::IContainer
+        class DJV_UI_API_TYPE ShortcutWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ShortcutWidget);
 
@@ -281,15 +282,15 @@ namespace djv
             ShortcutWidget();
 
         public:
-            DJV_API virtual ~ShortcutWidget();
+            DJV_UI_API virtual ~ShortcutWidget();
 
-            DJV_API static std::shared_ptr<ShortcutWidget> create(
+            DJV_UI_API static std::shared_ptr<ShortcutWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_API void setShortcut(const ftk::KeyShortcut&);
-            DJV_API void setCallback(const std::function<void(const ftk::KeyShortcut&)>&);
-            DJV_API void setCollision(bool);
+            DJV_UI_API void setShortcut(const ftk::KeyShortcut&);
+            DJV_UI_API void setCallback(const std::function<void(const ftk::KeyShortcut&)>&);
+            DJV_UI_API void setCollision(bool);
 
         private:
             void _widgetUpdate();
@@ -298,7 +299,7 @@ namespace djv
         };
 
         //! Keyboard shortcuts settings widget.
-        class DJV_API_TYPE ShortcutsSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE ShortcutsSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(ShortcutsSettingsWidget);
 
@@ -311,9 +312,9 @@ namespace djv
             ShortcutsSettingsWidget();
 
         public:
-            DJV_API virtual ~ShortcutsSettingsWidget();
+            DJV_UI_API virtual ~ShortcutsSettingsWidget();
 
-            DJV_API static std::shared_ptr<ShortcutsSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<ShortcutsSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -326,7 +327,7 @@ namespace djv
         };
 
         //! Style settings widget.
-        class DJV_API_TYPE StyleSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE StyleSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(StyleSettingsWidget);
 
@@ -339,9 +340,9 @@ namespace djv
             StyleSettingsWidget();
 
         public:
-            DJV_API virtual ~StyleSettingsWidget();
+            DJV_UI_API virtual ~StyleSettingsWidget();
 
-            DJV_API static std::shared_ptr<StyleSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<StyleSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -353,7 +354,7 @@ namespace djv
         };
 
         //! Time settings widget.
-        class DJV_API_TYPE TimeSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE TimeSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(TimeSettingsWidget);
 
@@ -366,9 +367,9 @@ namespace djv
             TimeSettingsWidget();
 
         public:
-            DJV_API virtual ~TimeSettingsWidget();
+            DJV_UI_API virtual ~TimeSettingsWidget();
 
-            DJV_API static std::shared_ptr<TimeSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<TimeSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -379,7 +380,7 @@ namespace djv
 
 #if defined(TLRENDER_FFMPEG_PLUGIN)
         //! FFmpeg settings widget.
-        class DJV_API_TYPE FFmpegSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE FFmpegSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(FFmpegSettingsWidget);
 
@@ -392,9 +393,9 @@ namespace djv
             FFmpegSettingsWidget();
 
         public:
-            DJV_API virtual ~FFmpegSettingsWidget();
+            DJV_UI_API virtual ~FFmpegSettingsWidget();
 
-            DJV_API static std::shared_ptr<FFmpegSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<FFmpegSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
@@ -406,7 +407,7 @@ namespace djv
 
 #if defined(TLRENDER_FFMPEG_CMD)
         //! FFmpeg command settings widget.
-        class DJV_API_TYPE FFmpegCmdSettingsWidget : public ISettingsWidget
+        class DJV_UI_API_TYPE FFmpegCmdSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(FFmpegCmdSettingsWidget);
 
@@ -419,9 +420,9 @@ namespace djv
             FFmpegCmdSettingsWidget();
 
         public:
-            DJV_API virtual ~FFmpegCmdSettingsWidget();
+            DJV_UI_API virtual ~FFmpegCmdSettingsWidget();
 
-            DJV_API static std::shared_ptr<FFmpegCmdSettingsWidget> create(
+            DJV_UI_API static std::shared_ptr<FFmpegCmdSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
