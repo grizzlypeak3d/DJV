@@ -39,3 +39,9 @@ cmake ^
     -DCMAKE_INSTALL_PREFIX=%CD%/install-%BUILD_TYPE% ^
     -DCMAKE_PREFIX_PATH=%CD%/install-%BUILD_TYPE%
 cmake --build build-%BUILD_TYPE% --config %BUILD_TYPE%
+
+rem The install directory is how everything downstream finds what was built:
+rem the tests import the bindings from there, and packaging reads it. feather-tk
+rem and tlRender both end this way; without it the libraries stay in the build
+rem tree, where the Python tests cannot find them on Windows.
+cmake --build build-%BUILD_TYPE% --config %BUILD_TYPE% --target install
