@@ -14,6 +14,11 @@ endif()
 
 # FORCE, so that nothing included below can change what a package ships. A -D
 # on the command line still wins, since CMake reads those after this file.
+# ON here and OFF in DJV Studio's package.cmake, which is deliberate rather
+# than a disagreement to tidy up: DJV is open source and ships only the codecs
+# that need no patent license, and DJV Studio is a commercial product that
+# ships the full set. Changing either to match the other changes what that
+# product is licensed to distribute.
 set(TLRENDER_FFMPEG_MINIMAL ON CACHE BOOL "" FORCE)
 set(TLRENDER_FFMPEG_PLUGIN ON CACHE BOOL "" FORCE)
 set(DJV_TESTS OFF CACHE BOOL "")
