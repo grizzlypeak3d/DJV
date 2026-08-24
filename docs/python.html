@@ -36,7 +36,7 @@
 <p>The libraries DJV is built from have Python bindings, and there is a version of the DJV application written in Python on top of them. This page describes what is there, how to run it, and how to modify it. It is not an API reference — the bindings follow the C++ headers closely, so the headers and the Python examples are the reference.</p>
 <h2 id="the-modules">The modules</h2>
 <p>Four modules make up the stack:</p>
-<ul><li><strong>ftkPy</strong> — the <a href="https://github.com/darbyjohnston/feather-tk">feather-tk</a> user interface toolkit: widgets, layouts, observables, and the application classes.</li><li><strong>tlRenderPy</strong> — timelines, players, and file I/O, with the timeline and viewport widgets in the <code>tl.ui</code> submodule.</li><li><strong>djvPy</strong> — DJV's data models in the <code>djv.models</code> submodule: files, settings, color, audio, viewport, and tools.</li><li><strong>opentimelineio</strong> — the standard OTIO package. Its time types pass directly through the tlRender bindings, so a <code>RationalTime</code> from OTIO seeks a player.</li></ul>
+<ul><li><strong>ftkPy</strong> — the <a href="https://github.com/darbyjohnston/feather-tk">feather-tk</a> user interface toolkit: widgets, layouts, observables, and the application classes.</li><li><strong>tlRenderPy</strong> — timelines, players, and file I/O, with the timeline and viewport widgets in the <code>tl.ui</code> submodule.</li><li><strong>djvPy</strong> — DJV itself: the data models in the <code>djv.models</code> submodule — files, settings, color, audio, viewport, and tools — and the application's widgets in the <code>djv.ui</code> submodule — the viewport with its HUD and color picking, and the color, view, settings, export, and magnify widgets.</li><li><strong>opentimelineio</strong> — the standard OTIO package. Its time types pass directly through the tlRender bindings, so a <code>RationalTime</code> from OTIO seeks a player.</li></ul>
 <p>The conventional imports:</p>
 <pre><code>import opentimelineio as otio
 import ftkPy as ftk
@@ -44,8 +44,8 @@ import tlRenderPy as tl
 import djvPy as djv</code></pre>
 <h2 id="building">Building</h2>
 <p>One switch builds all of it. In <code>etc/Config/local.cmake</code>:</p>
-<pre><code>set(TLRENDER_PYTHON ON CACHE BOOL "")</code></pre>
-<p>The feather-tk and DJV switches follow it, the superbuild adds pybind11 and builds OpenTimelineIO's Python package, and the stack is built as shared libraries so that the modules share one copy of it. The bindings compile against the Python that CMake finds; the modules only import into that same Python, which is why the launcher below exists.</p>
+<pre><code>set(DJV_PYTHON ON CACHE BOOL "")</code></pre>
+<p>The feather-tk and tlRender switches follow it, the superbuild adds pybind11 and builds OpenTimelineIO's Python package, and the stack is built as shared libraries so that the modules share one copy of it. The bindings compile against the Python that CMake finds; the modules only import into that same Python, which is why the launcher below exists.</p>
 <h2 id="running">Running</h2>
 <p>The build writes a launcher that knows the interpreter and the module paths:</p>
 <pre><code>./build-Release/bin/djv-python render.mov</code></pre>
@@ -53,13 +53,14 @@ import djvPy as djv</code></pre>
 <ul><li><strong>-b</strong>, <strong>-compare</strong> — open a comparison file and set the mode.</li><li><strong>-settingsFile</strong>, <strong>-logFile</strong> — the settings and log files, which default to the same directory as the C++ application: <code>Documents/DJV/djv-python.3.json</code> and <code>.log</code>. Pointing these elsewhere keeps a test run out of the real settings.</li><li><strong>-resetSettings</strong> — reset the settings to their defaults.</li><li><strong>-exit</strong> — start the user interface and exit without showing a window.</li><li><strong>-screenshot</strong> — write a screenshot of the window to a file and exit.</li></ul>
 <h2 id="the-application">The application</h2>
 <p>The application lives in <code>examples/python</code>, one file per concern the way the C++ application is arranged: <code>djv.py</code> is the entry point, <code>App.py</code> creates the models and turns the current file into a player, <code>MainWindow.py</code> builds the window, and the rest are the actions, menus, tool bars, and tools.</p>
+<p>The division of labor: the widgets are the C++ application's own, wrapped whole in <code>djv.ui</code> — one implementation, so the two applications cannot drift apart — and the Python code is the composition around them: the models, the actions and menus, and the tool frames. A tool like Color is a stack of bellows around wrapped widgets; a tool like Files builds its own rows from feather-tk widgets where the C++ application does the same.</p>
 <p>Everything follows the same pattern: the DJV models hold the state, and the widgets observe it. A widget changes a model through its setters, and updates itself from an observer — never directly from its own callback, so that every other view of the same state stays in step:</p>
 <pre><code>selfWeak = weakref.ref(self)
 self._volumeObserver = ftk.FloatObserver(
     audioModel.observeVolume,
     lambda value: selfWeak()._volumeUpdate(value))</code></pre>
 <p>Two things in that pattern matter:</p>
-<ul><li>The observer object must be kept — assign it to <code>self</code>. A discarded observer disconnects.</li><li>The callbacks capture <code>self</code> weakly. The models outlive the widgets, and a strong capture would keep the widget alive from the model's observer list.</li></ul>
+<ul><li>The observer object must be kept — assign it to <code>self</code>. A discarded observer disconnects.</li><li>The callbacks capture <code>self</code> weakly. A callback handed to the C++ side is held by a <code>std::function</code>, an edge the garbage collector cannot see, so a strong capture forms a cycle that is never collected. <code>Util.weak()</code> wraps a bound method for use as a widget or action callback.</li></ul>
 <p>Option values are copies. Reading a property, changing a field, and assigning it back is the way to change one:</p>
 <pre><code>options = filesModel.compareOptions
 options.compare = tl.Compare.Wipe
