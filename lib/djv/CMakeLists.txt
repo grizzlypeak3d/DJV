@@ -5,6 +5,7 @@ add_subdirectory(UI)
 
 if(DJV_PYTHON)
     add_subdirectory(ModelsPy)
+    add_subdirectory(UIPy)
     add_subdirectory(djvPy)
 endif()
 

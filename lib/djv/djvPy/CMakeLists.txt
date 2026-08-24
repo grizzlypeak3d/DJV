@@ -2,7 +2,7 @@ pybind11_add_module(djvPy Bindings.cpp)
 
 target_include_directories(djvPy PRIVATE ${PROJECT_SOURCE_DIR}/lib)
 
-target_link_libraries(djvPy PRIVATE djvModelsPy)
+target_link_libraries(djvPy PRIVATE djvModelsPy djvUIPy)
 
 target_compile_options(djvPy PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
 
