@@ -4,6 +4,7 @@ set(HEADERS_PRIVATE)
 set(SOURCE
     Bindings.cpp
     ColorWidgets.cpp
+    ExportWidget.cpp
     FileThumbnail.cpp
     FrameRangePopup.cpp
     MagnifyWidget.cpp

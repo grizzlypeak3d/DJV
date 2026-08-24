@@ -767,6 +767,28 @@ class MagnifyTool(IToolWidget):
             app.observePlayer(),
             lambda player: selfWeak()._widget.setPlayer(player))
 
+class ExportTool(IToolWidget):
+    """
+    This tool exports images, sequences, and movies.
+    """
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(
+            self, context, app, mainWindow, "Export", "ExportTool", parent)
+
+        self._widget = djv.ui.ExportWidget(
+            context,
+            app.getFilesModel(),
+            app.getColorModel(),
+            app.getViewportModel(),
+            app.getSettingsModel(),
+            app.getTimeUnitsModel())
+        self._setContent(self._widget)
+
+        selfWeak = weakref.ref(self)
+        self._playerObserver = tl.PlayerObserver(
+            app.observePlayer(),
+            lambda player: selfWeak()._widget.setPlayer(player))
+
 class DiagTool(IToolWidget):
     """
     This tool displays diagnostics.
@@ -790,6 +812,7 @@ FACTORY = {
     "Color Picker": ColorPickerTool,
     "Magnify": MagnifyTool,
     "Diagnostics": DiagTool,
+    "Export": ExportTool,
     "View": ViewTool,
     "Color": ColorTool,
     "Information": InfoTool,

@@ -17,6 +17,7 @@ namespace djv
         void fileThumbnail(pybind11::module_&);
         void frameRangePopup(pybind11::module_&);
         void magnifyWidget(pybind11::module_&);
+        void exportWidget(pybind11::module_&);
 
         void uiBind(pybind11::module_&);
     }
