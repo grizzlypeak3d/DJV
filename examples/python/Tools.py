@@ -712,6 +712,11 @@ class ColorTool(IToolWidget):
         options = app.getViewportModel().displayOptions
         part = getattr(options, section[0].lower() + section[1:])
         setattr(part, name, value)
+        # Setting a value also enables the section, like the C++
+        # widgets: a slider that changes nothing on screen reads as
+        # broken.
+        if name != "enabled":
+            part.enabled = True
         setattr(options, section[0].lower() + section[1:], part)
         app.getViewportModel().displayOptions = options
 
