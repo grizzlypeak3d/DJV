@@ -125,6 +125,18 @@ class Widget(ftk.IContainer):
         self._mouseSettingsObserver = djv.models.MouseSettingsObserver(
             app.getSettingsModel().observeMouse,
             lambda value: selfWeak()._mouseSettingsUpdate(value))
+        # The image and display options render per file being compared;
+        # one entry serves them all here, so the per file OCIO input
+        # resolution the C++ application does is not carried over yet.
+        viewportModel = app.getViewportModel()
+        self._imageOptionsObserver = djv.models.ImageOptionsObserver(
+            viewportModel.observeImageOptions,
+            lambda value: setattr(
+                selfWeak()._viewport, "imageOptions", [value]))
+        self._displayOptionsObserver = djv.models.DisplayOptionsObserver(
+            viewportModel.observeDisplayOptions,
+            lambda value: setattr(
+                selfWeak()._viewport, "displayOptions", [value]))
 
     def getViewport(self):
         return self._viewport

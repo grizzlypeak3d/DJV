@@ -533,6 +533,9 @@ class ColorTool(IToolWidget):
 
         # OCIO.
         self._ocioEnabledCheckBox = ftk.CheckBox(context)
+        self._ocioEnabledCheckBox.backgroundColor = ftk.ColorRole.Header
+        self._ocioEnabledCheckBox.tooltip = "Toggle whether OCIO is enabled."
+
         self._ocioConfigComboBox = ftk.ComboBox(
             context, [tl.getLabel(c) for c in tl.getOCIOConfigEnums()])
         self._ocioConfigComboBox.hStretch = ftk.Stretch.Expanding
@@ -587,6 +590,8 @@ class ColorTool(IToolWidget):
 
         # LUT.
         self._lutEnabledCheckBox = ftk.CheckBox(context)
+        self._lutEnabledCheckBox.backgroundColor = ftk.ColorRole.Header
+        self._lutEnabledCheckBox.tooltip = "Toggle whether the LUT is enabled."
         self._lutFileEdit = ftk.FileEdit(context)
         self._lutOrderComboBox = ftk.ComboBox(
             context, [tl.getLabel(o) for o in tl.getLUTOrderEnums()])
@@ -619,28 +624,36 @@ class ColorTool(IToolWidget):
         # channels together.
         self._displaySliders = {}
         self._displayChecks = {}
+        tooltips = {
+            "Color": "Toggle whether color controls are enabled.",
+            "Levels": "Toggle whether levels are enabled.",
+            "Exposure": "Toggle whether exposure controls are enabled.",
+            "SoftClip": "Toggle whether soft clip is enabled.",
+        }
         for section, fields in [
             ("Color", [
-                ("brightness", 0.0, 4.0, True),
-                ("contrast", 0.0, 4.0, True),
-                ("saturation", 0.0, 4.0, True),
-                ("hue", -180.0, 180.0, False)]),
+                ("brightness", "Brightness", 0.0, 4.0, True),
+                ("contrast", "Contrast", 0.0, 4.0, True),
+                ("saturation", "Saturation", 0.0, 4.0, True),
+                ("hue", "Hue", -180.0, 180.0, False)]),
             ("Levels", [
-                ("inLow", 0.0, 1.0, False),
-                ("inHigh", 0.0, 1.0, False),
-                ("gamma", 0.1, 4.0, False),
-                ("outLow", 0.0, 1.0, False),
-                ("outHigh", 0.0, 1.0, False)]),
+                ("inLow", "In low", 0.0, 1.0, False),
+                ("inHigh", "In high", 0.0, 1.0, False),
+                ("gamma", "Gamma", 0.1, 4.0, False),
+                ("outLow", "Out low", 0.0, 1.0, False),
+                ("outHigh", "Out high", 0.0, 1.0, False)]),
             ("Exposure", [
-                ("exposure", -10.0, 10.0, False),
-                ("defog", 0.0, 0.1, False),
-                ("kneeLow", -3.0, 3.0, False),
-                ("kneeHigh", 3.5, 7.5, False),
-                ("gamma", 0.1, 4.0, False)]),
+                ("exposure", "Exposure", -10.0, 10.0, False),
+                ("defog", "Defog", 0.0, 0.1, False),
+                ("kneeLow", "Knee low", -3.0, 3.0, False),
+                ("kneeHigh", "Knee high", 3.5, 7.5, False),
+                ("gamma", "Gamma", 0.1, 4.0, False)]),
             ("SoftClip", [
-                ("value", 0.0, 1.0, False)]),
+                ("value", "Value", 0.0, 1.0, False)]),
         ]:
             check = ftk.CheckBox(context)
+            check.backgroundColor = ftk.ColorRole.Header
+            check.tooltip = tooltips[section]
             self._displayChecks[section] = check
             check.setCheckedCallback(
                 lambda value, captured = section, \
@@ -650,7 +663,7 @@ class ColorTool(IToolWidget):
             vLayout.marginRole = ftk.SizeRole.Margin
             form = ftk.FormLayout(context, vLayout)
             form.spacingRole = ftk.SizeRole.SpacingSmall
-            for field, lo, hi, vec in fields:
+            for field, label, lo, hi, vec in fields:
                 slider = ftk.FloatEditSlider(context)
                 slider.range = ftk.RangeF(lo, hi)
                 slider.setCallback(
@@ -658,7 +671,7 @@ class ColorTool(IToolWidget):
                         fn = Util.weak(self._setDisplay):
                         fn(appWeak(), s, f,
                            ftk.V3F(value, value, value) if v else value))
-                form.addRow(field + ":", slider)
+                form.addRow(label + ":", slider)
                 self._displaySliders[(section, field)] = (slider, vec)
             title = "Soft Clip" if section == "SoftClip" else section
             bellows = ftk.Bellows(context, title, layout)
