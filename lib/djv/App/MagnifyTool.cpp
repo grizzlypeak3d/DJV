@@ -5,81 +5,20 @@
 
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
+#include <djv/UI/MagnifyWidget.h>
 #include <djv/UI/Viewport.h>
-#include <djv/Models/ColorModel.h>
-#include <djv/Models/FilesModel.h>
-#include <djv/Models/ViewportModel.h>
 
 #include <tlRender/Timeline/Player.h>
-
-#include <ftk/UI/CheckBox.h>
-#include <ftk/UI/ComboBox.h>
-#include <ftk/UI/FormLayout.h>
-#include <ftk/UI/Label.h>
-#include <ftk/UI/RowLayout.h>
-#include <ftk/UI/ScreenshotTag.h>
-#include <ftk/UI/Settings.h>
-#include <ftk/Core/Format.h>
 
 namespace djv
 {
     namespace app
     {
-        FTK_ENUM_IMPL(
-            MagnifyLevel,
-            "2X",
-            "4X",
-            "8X",
-            "16X",
-            "32X",
-            "64X",
-            "128X");
-
-        int getMagnifyLevel(MagnifyLevel value)
-        {
-            const std::array<int, static_cast<size_t>(MagnifyLevel::Count)> data =
-            {
-                2, 4, 8, 16, 32, 64, 128
-            };
-            return data[static_cast<size_t>(value)];
-        }
-
         struct MagnifyTool::Private
         {
-            std::shared_ptr<ftk::Settings> settings;
-
-            MagnifyLevel level = MagnifyLevel::_4X;
-            bool viewPosAndZoom = true;
-            ftk::V2I viewPos;
-            double viewZoom = 1.0;
-            std::optional<ftk::V2I> pick;
-            ftk::V2I samplePos;
-            size_t videoFramesSize = 0;
-            std::vector<std::string> ocioInputs;
-            ftk::ImageOptions imageOptions;
-            tl::DisplayOptions displayOptions;
-            bool sizeInit = true;
-
-            std::shared_ptr<tl::ui::Viewport> viewport;
-            std::shared_ptr<ftk::ComboBox> comboBox;
-            std::shared_ptr<ftk::Label> pixelLabel;
-            std::shared_ptr<ftk::CheckBox> viewPosAndZoomCheckBox;
-            std::shared_ptr<ftk::Label> mouseLabel;
+            std::shared_ptr<ui::MagnifyWidget> widget;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
-            std::shared_ptr<ftk::ListObserver<tl::VideoFrame> > videoObserver;
-            std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosAndZoomObserver;
-            std::shared_ptr<ftk::Observer<std::optional<ftk::V2I> > > pickObserver;
-            std::shared_ptr<ftk::Observer<ftk::V2I> > samplePosObserver;
-            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<std::vector<std::string> > > resolvedInputsObserver;
-            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
-            std::shared_ptr<ftk::Observer<models::MouseSettings> > settingsObserver;
         };
 
         void MagnifyTool::_init(
@@ -98,212 +37,25 @@ namespace djv
                 parent);
             FTK_P();
 
-            p.settings = app->getSettings();
-            std::string s;
-            p.settings->get("/Magnify/Level", s);
-            from_string(s, p.level);
-            p.settings->get("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
+            p.widget = ui::MagnifyWidget::create(
+                context,
+                app->getSettings(),
+                mainWindow->getViewport(),
+                app->getFilesModel(),
+                app->getColorModel(),
+                app->getViewportModel(),
+                app->getSettingsModel());
 
-            p.viewport = tl::ui::Viewport::create(context);
-            p.viewport->setInputEnabled(false);
-
-            p.comboBox = ftk::ComboBox::create(context, getMagnifyLevelLabels());
-            p.comboBox->setHStretch(ftk::Stretch::Expanding);
-            ftk::setScreenshotTag(p.comboBox, "Magnify.Magnify");
-
-            p.pixelLabel = ftk::Label::create(context);
-            p.pixelLabel->setFont(ftk::FontType::Mono);
-            ftk::setScreenshotTag(p.pixelLabel, "Magnify.Pixel");
-
-            p.viewPosAndZoomCheckBox = ftk::CheckBox::create(context);
-            p.viewPosAndZoomCheckBox->setHStretch(ftk::Stretch::Expanding);
-            p.viewPosAndZoomCheckBox->setTooltip("Track the view position and zoom.");
-            ftk::setScreenshotTag(p.viewPosAndZoomCheckBox, "Magnify.ViewPosAndZoom");
-
-            p.mouseLabel = ftk::Label::create(context);
-            ftk::setScreenshotTag(p.mouseLabel, "Magnify.Mouse");
-
-            auto layout = ftk::VerticalLayout::create(context);
-            layout->setSpacingRole(ftk::SizeRole::None);
-            p.viewport->setParent(layout);
-            auto formLayout = ftk::FormLayout::create(context, layout);
-            formLayout->setMarginRole(ftk::SizeRole::Margin);
-            formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            formLayout->addRow("Magnify:", p.comboBox);
-            formLayout->addRow("Pixel:", p.pixelLabel);
-            formLayout->addRow("Track view:", p.viewPosAndZoomCheckBox);
-            formLayout->addRow("Mouse:", p.mouseLabel);
             // The magnified view has no natural size of its own, so this
             // takes what room is left rather than a band of its own.
             setVStretch(ftk::Stretch::Expanding);
-            _setWidget(layout);
-
-            p.comboBox->setIndexCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    p.level = static_cast<MagnifyLevel>(value);
-                    _widgetUpdate();
-                });
-
-            p.viewPosAndZoomCheckBox->setCheckedCallback(
-                [this](bool value)
-                {
-                    FTK_P();
-                    p.viewPosAndZoom = value;
-                    if (value)
-                    {
-                        _widgetUpdate();
-                    }
-                });
+            _setWidget(p.widget);
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& value)
                 {
-                    FTK_P();
-                    p.viewport->setPlayer(value);
-                    if (value)
-                    {
-                        p.videoObserver = ftk::ListObserver<tl::VideoFrame>::create(
-                            value->observeCurrentVideo(),
-                            [this](const std::vector<tl::VideoFrame>& value)
-                            {
-                                _p->videoFramesSize = value.size();
-                                _videoUpdate();
-                            });
-                    }
-                    else
-                    {
-                        p.videoFramesSize = 0;
-                        p.videoObserver.reset();
-                        _videoUpdate();
-                    }
-                });
-
-            p.viewPosAndZoomObserver = ftk::Observer<std::pair<ftk::V2I, double> >::create(
-                mainWindow->getViewport()->observeViewPosAndZoom(),
-                [this](const std::pair<ftk::V2I, double>& value)
-                {
-                    FTK_P();
-                    p.viewPos = value.first;
-                    p.viewZoom = value.second;
-                    if (p.viewPosAndZoom)
-                    {
-                        _widgetUpdate();
-                    }
-                });
-
-            p.pickObserver = ftk::Observer<std::optional<ftk::V2I> >::create(
-                mainWindow->getViewport()->observePick(),
-                [this](const std::optional<ftk::V2I>& value)
-                {
-                    FTK_P();
-                    p.pick = value;
-                    _widgetUpdate();
-                });
-
-            p.samplePosObserver = ftk::Observer<ftk::V2I>::create(
-                mainWindow->getViewport()->observeSamplePos(),
-                [this](const ftk::V2I& value)
-                {
-                    FTK_P();
-                    p.samplePos = value;
-                    _widgetUpdate();
-                });
-
-            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
-                app->getFilesModel()->observeCompareOptions(),
-                [this](const tl::CompareOptions& value)
-                {
-                    _p->viewport->setCompareOptions(value);
-                });
-
-            // The options as written; the per item display options carry
-            // the resolved inputs, the same as the main viewport.
-            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeOCIOOptions(),
-                [this](const tl::OCIOOptions& value)
-                {
-                    _p->viewport->setOCIOOptions(value);
-                });
-
-            p.resolvedInputsObserver = ftk::Observer<std::vector<std::string> >::create(
-                app->getColorModel()->observeResolvedInputs(),
-                [this](const std::vector<std::string>& value)
-                {
-                    _p->ocioInputs = value;
-                    _videoUpdate();
-                });
-
-            {
-                // The same per layer resolution as the main viewport.
-                const auto colorModel = app->getColorModel();
-                p.viewport->setOCIOInputResolver(
-                    [colorModel](const std::string& path, const ftk::ImageTags& tags)
-                    {
-                        return colorModel->getOCIOOptions().input.empty() ?
-                            colorModel->resolveInput(path, tags) :
-                            std::string();
-                    });
-            }
-
-            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
-                app->getColorModel()->observeLUTOptions(),
-                [this](const tl::LUTOptions& value)
-                {
-                    _p->viewport->setLUTOptions(value);
-                });
-
-            p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
-                app->getViewportModel()->observeImageOptions(),
-                [this](const ftk::ImageOptions& value)
-                {
-                    _p->imageOptions = value;
-                    _videoUpdate();
-                });
-
-            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
-                app->getViewportModel()->observeDisplayOptions(),
-                [this](const tl::DisplayOptions& value)
-                {
-                    _p->displayOptions = value;
-                    _videoUpdate();
-                });
-
-            p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
-                app->getViewportModel()->observeBackgroundOptions(),
-                [this](const tl::BackgroundOptions& value)
-                {
-                    _p->viewport->setBackgroundOptions(value);
-                });
-
-            p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
-                app->getViewportModel()->observeColorBuffer(),
-                [this](ftk::gl::TextureType value)
-                {
-                    _p->viewport->setColorBuffer(value);
-                });
-
-            p.settingsObserver = ftk::Observer<models::MouseSettings>::create(
-                app->getSettingsModel()->observeMouse(),
-                [this](const models::MouseSettings& value)
-                {
-                    std::vector<std::string> s;
-                    if (auto i = value.bindings.find(models::MouseAction::Pick);
-                        i != value.bindings.end())
-                    {
-                        if (i->second.button != ftk::MouseButton::None)
-                        {
-                            if (i->second.modifier != ftk::KeyModifier::None)
-                            {
-                                s.push_back(ftk::to_string(i->second.modifier));
-                            }
-                            s.push_back(ftk::getLabel(i->second.button));
-                        }
-                    }
-                    _p->mouseLabel->setText(
-                        ftk::Format("{0} Click").arg(ftk::join(s, " + ")));
+                    _p->widget->setPlayer(value);
                 });
         }
 
@@ -312,11 +64,7 @@ namespace djv
         {}
 
         MagnifyTool::~MagnifyTool()
-        {
-            FTK_P();
-            p.settings->set("/Magnify/Level", to_string(p.level));
-            p.settings->set("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
-        }
+        {}
 
         std::shared_ptr<MagnifyTool> MagnifyTool::create(
             const std::shared_ptr<ftk::Context>& context,
@@ -327,64 +75,6 @@ namespace djv
             auto out = std::shared_ptr<MagnifyTool>(new MagnifyTool);
             out->_init(context, app, mainWindow, parent);
             return out;
-        }
-
-        void MagnifyTool::setGeometry(const ftk::Box2I& value)
-        {
-            IToolWidget::setGeometry(value);
-            FTK_P();
-            if (p.sizeInit)
-            {
-                p.sizeInit = false;
-                _widgetUpdate();
-            }
-        }
-
-        void MagnifyTool::_widgetUpdate()
-        {
-            FTK_P();
-            const ftk::Box2I& g = p.viewport->getGeometry();
-            const int level = getMagnifyLevel(p.level);
-            ftk::V2I magnifyPos;
-            double magnifyZoom = 1.0;
-            if (p.viewPosAndZoom)
-            {
-                magnifyPos = (p.viewPos - p.samplePos) * level + (center(g) - g.min);
-                magnifyZoom = p.viewZoom * level;
-            }
-            else
-            {
-                magnifyPos = (p.viewPos - p.samplePos) / p.viewZoom * level + (center(g) - g.min);
-                magnifyZoom = level;
-            }
-            p.viewport->setViewPosAndZoom(magnifyPos, magnifyZoom);
-
-            p.comboBox->setCurrentIndex(static_cast<int>(p.level));
-
-            p.viewPosAndZoomCheckBox->setChecked(p.viewPosAndZoom);
-
-            std::string pixelText = "-";
-            if (p.pick.has_value())
-            {
-                pixelText = ftk::Format("{0}").arg(p.pick.value());
-            }
-            p.pixelLabel->setText(pixelText);
-        }
-
-        void MagnifyTool::_videoUpdate()
-        {
-            FTK_P();
-            std::vector<ftk::ImageOptions> imageOptions;
-            std::vector<tl::DisplayOptions> displayOptions;
-            for (size_t i = 0; i < p.videoFramesSize; ++i)
-            {
-                imageOptions.push_back(p.imageOptions);
-                displayOptions.push_back(p.displayOptions);
-                displayOptions.back().ocioInput =
-                    i < p.ocioInputs.size() ? p.ocioInputs[i] : std::string();
-            }
-            p.viewport->setImageOptions(imageOptions);
-            p.viewport->setDisplayOptions(displayOptions);
         }
     }
 }

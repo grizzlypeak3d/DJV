@@ -10,6 +10,7 @@ set(HEADERS
     SpeedPopup.h
     StatusIndicatorPopup.h
     SysInfoDialog.h
+    MagnifyWidget.h
     ViewWidgets.h
     Viewport.h)
 set(HEADERS_PRIVATE)
@@ -28,6 +29,7 @@ set(SOURCE
     StatusIndicatorPopup.cpp
     StyleWidget.cpp
     SysInfoDialog.cpp
+    MagnifyWidget.cpp
     ViewWidgets.cpp
     Viewport.cpp)
 
