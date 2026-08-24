@@ -35,7 +35,10 @@ namespace djv
             p.files = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.a = ftk::Observable<std::shared_ptr<FilesModelItem> >::create();
             p.reload = ftk::Observable<std::shared_ptr<FilesModelItem> >::create();
-            p.aIndex = ftk::Observable<int>::create();
+            // -1 is what _getIndex() reports with no A file; starting at the
+            // default of zero reads as "the first file" and swallows the
+            // notification when the first file arrives at index zero.
+            p.aIndex = ftk::Observable<int>::create(-1);
             p.b = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.bIndexes = ftk::ObservableList<int>::create();
             p.active = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();

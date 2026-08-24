@@ -68,18 +68,33 @@ namespace djv
                 model->observeFiles(),
                 [&count](const Items& value) { count = value.size(); });
 
+            // Observe the "A" index. It starts at -1, no file, so that the
+            // first file, at index zero, is a change that notifies.
+            int aIndex = -1;
+            size_t aIndexCount = 0;
+            auto aIndexObserver = ftk::Observer<int>::create(
+                model->observeAIndex(),
+                [&aIndex, &aIndexCount](int value)
+                {
+                    aIndex = value;
+                    ++aIndexCount;
+                });
+
             // Empty by default.
             FTK_CHECK(model->getFiles().empty());
             FTK_CHECK(!model->getA());
+            FTK_CHECK(-1 == model->getAIndex());
 
-            // Adding a file appends it and makes it the "A" file; the observer
-            // fires.
+            // Adding a file appends it and makes it the "A" file; the
+            // observers fire.
             auto item0 = makeItem("file0.exr");
             model->add(item0);
             FTK_CHECK(1 == model->getFiles().size());
             FTK_CHECK(item0 == model->getA());
             FTK_CHECK(0 == model->getAIndex());
             FTK_CHECK(1 == count);
+            FTK_CHECK(0 == aIndex);
+            FTK_CHECK(2 == aIndexCount);
 
             auto item1 = makeItem("file1.exr");
             auto item2 = makeItem("file2.exr");
