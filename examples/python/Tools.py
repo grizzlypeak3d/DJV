@@ -632,24 +632,24 @@ class ColorTool(IToolWidget):
         }
         for section, fields in [
             ("Color", [
-                ("brightness", "Brightness", 0.0, 4.0, True),
-                ("contrast", "Contrast", 0.0, 4.0, True),
-                ("saturation", "Saturation", 0.0, 4.0, True),
-                ("hue", "Hue", -180.0, 180.0, False)]),
+                ("brightness", "Brightness", 0.0, 4.0, 1.0, True),
+                ("contrast", "Contrast", 0.0, 4.0, 1.0, True),
+                ("saturation", "Saturation", 0.0, 4.0, 1.0, True),
+                ("hue", "Hue", -180.0, 180.0, 0.0, False)]),
             ("Levels", [
-                ("inLow", "In low", 0.0, 1.0, False),
-                ("inHigh", "In high", 0.0, 1.0, False),
-                ("gamma", "Gamma", 0.1, 4.0, False),
-                ("outLow", "Out low", 0.0, 1.0, False),
-                ("outHigh", "Out high", 0.0, 1.0, False)]),
+                ("inLow", "In low", 0.0, 1.0, 0.0, False),
+                ("inHigh", "In high", 0.0, 1.0, 1.0, False),
+                ("gamma", "Gamma", 0.1, 4.0, 1.0, False),
+                ("outLow", "Out low", 0.0, 1.0, 0.0, False),
+                ("outHigh", "Out high", 0.0, 1.0, 1.0, False)]),
             ("Exposure", [
-                ("exposure", "Exposure", -10.0, 10.0, False),
-                ("defog", "Defog", 0.0, 0.1, False),
-                ("kneeLow", "Knee low", -3.0, 3.0, False),
-                ("kneeHigh", "Knee high", 3.5, 7.5, False),
-                ("gamma", "Gamma", 0.1, 4.0, False)]),
+                ("exposure", "Exposure", -10.0, 10.0, 0.0, False),
+                ("defog", "Defog", 0.0, 0.1, 0.0, False),
+                ("kneeLow", "Knee low", -3.0, 3.0, 0.0, False),
+                ("kneeHigh", "Knee high", 3.5, 7.5, 5.0, False),
+                ("gamma", "Gamma", 0.1, 4.0, 1.0, False)]),
             ("SoftClip", [
-                ("value", "Value", 0.0, 1.0, False)]),
+                ("value", "Value", 0.0, 1.0, 0.0, False)]),
         ]:
             check = ftk.CheckBox(context)
             check.backgroundColor = ftk.ColorRole.Header
@@ -663,9 +663,10 @@ class ColorTool(IToolWidget):
             vLayout.marginRole = ftk.SizeRole.Margin
             form = ftk.FormLayout(context, vLayout)
             form.spacingRole = ftk.SizeRole.SpacingSmall
-            for field, label, lo, hi, vec in fields:
+            for field, label, lo, hi, default, vec in fields:
                 slider = ftk.FloatEditSlider(context)
                 slider.range = ftk.RangeF(lo, hi)
+                slider.defaultValue = default
                 slider.setCallback(
                     lambda value, s = section, f = field, v = vec, \
                         fn = Util.weak(self._setDisplay):
