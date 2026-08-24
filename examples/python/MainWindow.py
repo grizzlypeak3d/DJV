@@ -24,6 +24,7 @@ import ToolsActions
 import ViewActions
 import WindowActions
 
+import os
 import weakref
 
 class MainWindow(ftk.MainWindow):
@@ -35,6 +36,15 @@ class MainWindow(ftk.MainWindow):
         self._settingsModel = app.getSettingsModel()
         window = self._settingsModel.window
         ftk.MainWindow.__init__(self, context, app, window.size)
+
+        # The application icon, registered with the icon system so that
+        # it is rendered for the display scale.
+        iconSystem = context.getSystemByName("ftk::IconSystem")
+        with open(os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "DJV_Icon.svg"), "rb") as f:
+            iconSystem.add("DJV_Icon", list(f.read()))
+        self.setIcon(iconSystem.get("DJV_Icon", 1.0))
 
         # The title matches the C++ application: the version, and for a
         # development build the commit as well.
