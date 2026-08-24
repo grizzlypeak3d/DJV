@@ -388,155 +388,18 @@ class ViewTool(IToolWidget):
         viewportModel = app.getViewportModel()
         layout = ftk.VerticalLayout(context)
         layout.spacingRole = ftk.SizeRole._None
-
-        # Background.
-        self._backgroundComboBox = ftk.ComboBox(
-            context, [tl.getLabel(t) for t in tl.getBackgroundEnums()])
-        self._backgroundComboBox.hStretch = ftk.Stretch.Expanding
-        self._solidSwatch = ftk.ColorSwatch(context)
-        self._solidSwatch.editable = True
-        self._checkers0Swatch = ftk.ColorSwatch(context)
-        self._checkers0Swatch.editable = True
-        self._checkers1Swatch = ftk.ColorSwatch(context)
-        self._checkers1Swatch.editable = True
-        bgLayout = ftk.VerticalLayout(context)
-        bgLayout.marginRole = ftk.SizeRole.Margin
-        bgForm = ftk.FormLayout(context, bgLayout)
-        bgForm.spacingRole = ftk.SizeRole.SpacingSmall
-        bgForm.addRow("Type:", self._backgroundComboBox)
-        bgForm.addRow("Solid color:", self._solidSwatch)
-        bgForm.addRow("Checkers 0:", self._checkers0Swatch)
-        bgForm.addRow("Checkers 1:", self._checkers1Swatch)
-        bellows = ftk.Bellows(context, "Background", layout)
-        bellows.widget = bgLayout
-
-        # Grid.
-        self._gridCheckBox = ftk.CheckBox(context)
-        self._gridSizeSlider = ftk.IntEditSlider(context)
-        self._gridSizeSlider.range = ftk.RangeI(1, 1000)
-        self._gridColorSwatch = ftk.ColorSwatch(context)
-        self._gridColorSwatch.editable = True
-        gridLayout = ftk.VerticalLayout(context)
-        gridLayout.marginRole = ftk.SizeRole.Margin
-        gridForm = ftk.FormLayout(context, gridLayout)
-        gridForm.spacingRole = ftk.SizeRole.SpacingSmall
-        gridForm.addRow("Enabled:", self._gridCheckBox)
-        gridForm.addRow("Size:", self._gridSizeSlider)
-        gridForm.addRow("Color:", self._gridColorSwatch)
-        bellows = ftk.Bellows(context, "Grid", layout)
-        bellows.widget = gridLayout
-
-        # HUD.
-        self._hudCheckBox = ftk.CheckBox(context)
-        hudLayout = ftk.VerticalLayout(context)
-        hudLayout.marginRole = ftk.SizeRole.Margin
-        hudForm = ftk.FormLayout(context, hudLayout)
-        hudForm.spacingRole = ftk.SizeRole.SpacingSmall
-        hudForm.addRow("Enabled:", self._hudCheckBox)
-        self._hudPosComboBoxes = {}
-        posLabels = [djv.models.getLabel(pos)
-                     for pos in djv.models.getHUDPosEnums()]
-        for item in djv.models.getHUDItemEnums():
-            comboBox = ftk.ComboBox(context, posLabels)
-            comboBox.hStretch = ftk.Stretch.Expanding
-            self._hudPosComboBoxes[item] = comboBox
-            label = djv.models.getLabel(item)
-            hudForm.addRow(label[:1] + label[1:].lower() + ":", comboBox)
-        bellows = ftk.Bellows(context, "HUD", layout)
-        bellows.widget = hudLayout
-
+        for title, widget in [
+            ("Options", djv.ui.ViewOptionsWidget(context, viewportModel)),
+            ("Aspect Ratio", djv.ui.ViewAspectRatioWidget(context, viewportModel)),
+            ("Background", djv.ui.ViewBackgroundWidget(context, viewportModel)),
+            ("Outline", djv.ui.ViewOutlineWidget(context, viewportModel)),
+            ("Grid", djv.ui.ViewGridWidget(context, viewportModel)),
+            ("Center Marker", djv.ui.ViewCenterMarkerWidget(context, viewportModel)),
+            ("HUD", djv.ui.ViewHUDWidget(context, viewportModel)),
+        ]:
+            bellows = ftk.Bellows(context, title, layout)
+            bellows.widget = widget
         self._setContent(layout)
-
-        appWeak = weakref.ref(app)
-        self._backgroundComboBox.setIndexCallback(
-            lambda value, f = Util.weak(self._setBackground):
-                f(appWeak(), "type", tl.getBackgroundEnums()[value]))
-        self._solidSwatch.setCallback(
-            lambda value, f = Util.weak(self._setBackground):
-                f(appWeak(), "solidColor", value))
-        self._checkers0Swatch.setCallback(
-            lambda value, f = Util.weak(self._setCheckersColor):
-                f(appWeak(), 0, value))
-        self._checkers1Swatch.setCallback(
-            lambda value, f = Util.weak(self._setCheckersColor):
-                f(appWeak(), 1, value))
-        self._gridCheckBox.setCheckedCallback(
-            lambda value, f = Util.weak(self._setGrid):
-                f(appWeak(), "enabled", value))
-        self._gridSizeSlider.setCallback(
-            lambda value, f = Util.weak(self._setGrid):
-                f(appWeak(), "cellSize", value))
-        self._gridColorSwatch.setCallback(
-            lambda value, f = Util.weak(self._setGrid):
-                f(appWeak(), "color", value))
-        self._hudCheckBox.setCheckedCallback(
-            lambda value, f = Util.weak(self._setHUD):
-                f(appWeak(), value))
-        for item, comboBox in self._hudPosComboBoxes.items():
-            comboBox.setIndexCallback(
-                lambda value, captured = item, \
-                    f = Util.weak(self._setHUDPos):
-                    f(appWeak(), captured, value))
-
-        selfWeak = weakref.ref(self)
-        self._bgObserver = djv.models.BackgroundOptionsObserver(
-            viewportModel.observeBackgroundOptions,
-            lambda value: selfWeak()._bgUpdate(value))
-        self._fgObserver = djv.models.ForegroundOptionsObserver(
-            viewportModel.observeForegroundOptions,
-            lambda value: selfWeak()._fgUpdate(value))
-        self._hudObserver = djv.models.HUDOptionsObserver(
-            viewportModel.observeHUDOptions,
-            lambda value: selfWeak()._hudUpdate(value))
-
-    def _setBackground(self, app, name, value):
-        options = app.getViewportModel().backgroundOptions
-        setattr(options, name, value)
-        app.getViewportModel().backgroundOptions = options
-
-    def _setCheckersColor(self, app, index, value):
-        options = app.getViewportModel().backgroundOptions
-        colors = list(options.checkersColor)
-        colors[index] = value
-        options.checkersColor = tuple(colors)
-        app.getViewportModel().backgroundOptions = options
-
-    def _setGrid(self, app, name, value):
-        options = app.getViewportModel().foregroundOptions
-        grid = options.grid
-        setattr(grid, name, value)
-        options.grid = grid
-        app.getViewportModel().foregroundOptions = options
-
-    def _setHUD(self, app, value):
-        options = app.getViewportModel().hudOptions
-        options.enabled = value
-        app.getViewportModel().hudOptions = options
-
-    def _setHUDPos(self, app, item, value):
-        options = app.getViewportModel().hudOptions
-        items = options.items
-        items[item] = djv.models.getHUDPosEnums()[value]
-        options.items = items
-        app.getViewportModel().hudOptions = options
-
-    def _bgUpdate(self, options):
-        self._backgroundComboBox.currentIndex = \
-            tl.getBackgroundEnums().index(options.type)
-        self._solidSwatch.color = options.solidColor
-        self._checkers0Swatch.color = options.checkersColor[0]
-        self._checkers1Swatch.color = options.checkersColor[1]
-
-    def _fgUpdate(self, options):
-        self._gridCheckBox.checked = options.grid.enabled
-        self._gridSizeSlider.value = options.grid.cellSize
-        self._gridColorSwatch.color = options.grid.color
-
-    def _hudUpdate(self, options):
-        self._hudCheckBox.checked = options.enabled
-        for item, comboBox in self._hudPosComboBoxes.items():
-            pos = options.items.get(item, djv.models.HUDPos._None)
-            comboBox.currentIndex = djv.models.getHUDPosEnums().index(pos)
 
 class ColorTool(IToolWidget):
     """
@@ -546,217 +409,21 @@ class ColorTool(IToolWidget):
         IToolWidget.__init__(self, context, app, mainWindow, "Color", "ColorTool", parent)
 
         colorModel = app.getColorModel()
-        # The tool owns the OCIO model and syncs it both ways with the
-        # color model, the way the C++ color widgets do it.
-        self._ocioModel = djv.models.OCIOModel(context)
-        ocioModel = self._ocioModel
+        viewportModel = app.getViewportModel()
         layout = ftk.VerticalLayout(context)
         layout.spacingRole = ftk.SizeRole._None
-        appWeak = weakref.ref(app)
-        selfWeak = weakref.ref(self)
-
-        # OCIO.
-        self._ocioEnabledCheckBox = ftk.CheckBox(context)
-        self._ocioEnabledCheckBox.backgroundColor = ftk.ColorRole.Header
-        self._ocioEnabledCheckBox.tooltip = "Toggle whether OCIO is enabled."
-
-        self._ocioConfigComboBox = ftk.ComboBox(
-            context, [tl.getLabel(c) for c in tl.getOCIOConfigEnums()])
-        self._ocioConfigComboBox.hStretch = ftk.Stretch.Expanding
-        self._ocioFileEdit = ftk.FileEdit(context)
-        self._ocioInputComboBox = ftk.ComboBox(context)
-        self._ocioInputComboBox.hStretch = ftk.Stretch.Expanding
-        self._ocioDisplayComboBox = ftk.ComboBox(context)
-        self._ocioDisplayComboBox.hStretch = ftk.Stretch.Expanding
-        self._ocioViewComboBox = ftk.ComboBox(context)
-        self._ocioViewComboBox.hStretch = ftk.Stretch.Expanding
-        self._ocioLookComboBox = ftk.ComboBox(context)
-        self._ocioLookComboBox.hStretch = ftk.Stretch.Expanding
-        vLayout = ftk.VerticalLayout(context)
-        vLayout.marginRole = ftk.SizeRole.Margin
-        form = ftk.FormLayout(context, vLayout)
-        form.spacingRole = ftk.SizeRole.SpacingSmall
-        form.addRow("Config:", self._ocioConfigComboBox)
-        form.addRow("File:", self._ocioFileEdit)
-        form.addRow("Input:", self._ocioInputComboBox)
-        form.addRow("Display:", self._ocioDisplayComboBox)
-        form.addRow("View:", self._ocioViewComboBox)
-        form.addRow("Look:", self._ocioLookComboBox)
-        bellows = ftk.Bellows(context, "OCIO", layout)
-        bellows.widget = vLayout
-        bellows.toolWidget = self._ocioEnabledCheckBox
-
-        self._ocioEnabledCheckBox.setCheckedCallback(
-            lambda value: selfWeak()._ocioModel.setEnabled(value))
-        self._ocioConfigComboBox.setIndexCallback(
-            lambda value: selfWeak()._ocioModel.setConfig(
-                tl.getOCIOConfigEnums()[value]))
-        self._ocioFileEdit.setCallback(
-            lambda value: selfWeak()._ocioModel.setFileName(str(value)))
-        self._ocioInputComboBox.setIndexCallback(
-            lambda value: selfWeak()._ocioModel.setInputIndex(value))
-        self._ocioDisplayComboBox.setIndexCallback(
-            lambda value: selfWeak()._ocioModel.setDisplayIndex(value))
-        self._ocioViewComboBox.setIndexCallback(
-            lambda value: selfWeak()._ocioModel.setViewIndex(value))
-        self._ocioLookComboBox.setIndexCallback(
-            lambda value: selfWeak()._ocioModel.setLookIndex(value))
-        self._ocioDataObserver = djv.models.OCIOModelDataObserver(
-            ocioModel.observeData,
-            lambda value: selfWeak()._ocioDataUpdate(value))
-        self._ocioOptionsObserver = djv.models.OCIOOptionsObserver(
-            colorModel.observeOCIOOptions,
-            lambda value: selfWeak()._ocioModel.setOptions(value))
-        self._ocioOptionsObserver2 = djv.models.OCIOOptionsObserver(
-            ocioModel.observeOptions,
-            lambda value: setattr(
-                appWeak().getColorModel(), "ocioOptions", value))
-
-        # LUT.
-        self._lutEnabledCheckBox = ftk.CheckBox(context)
-        self._lutEnabledCheckBox.backgroundColor = ftk.ColorRole.Header
-        self._lutEnabledCheckBox.tooltip = "Toggle whether the LUT is enabled."
-        self._lutFileEdit = ftk.FileEdit(context)
-        self._lutOrderComboBox = ftk.ComboBox(
-            context, [tl.getLabel(o) for o in tl.getLUTOrderEnums()])
-        self._lutOrderComboBox.hStretch = ftk.Stretch.Expanding
-        vLayout = ftk.VerticalLayout(context)
-        vLayout.marginRole = ftk.SizeRole.Margin
-        form = ftk.FormLayout(context, vLayout)
-        form.spacingRole = ftk.SizeRole.SpacingSmall
-        form.addRow("File:", self._lutFileEdit)
-        form.addRow("Order:", self._lutOrderComboBox)
-        bellows = ftk.Bellows(context, "LUT", layout)
-        bellows.widget = vLayout
-        bellows.toolWidget = self._lutEnabledCheckBox
-
-        self._lutEnabledCheckBox.setCheckedCallback(
-            lambda value, f = Util.weak(self._setLUT):
-                f(appWeak(), "enabled", value))
-        self._lutFileEdit.setCallback(
-            lambda value, f = Util.weak(self._setLUT):
-                f(appWeak(), "fileName", str(value)))
-        self._lutOrderComboBox.setIndexCallback(
-            lambda value, f = Util.weak(self._setLUT):
-                f(appWeak(), "order", tl.getLUTOrderEnums()[value]))
-        self._lutObserver = djv.models.LUTOptionsObserver(
-            colorModel.observeLUTOptions,
-            lambda value: selfWeak()._lutUpdate(value))
-
-        # The color adjustments drive the viewport model's display
-        # options. The color values are per channel; the sliders set the
-        # channels together.
-        self._displaySliders = {}
-        self._displayChecks = {}
-        tooltips = {
-            "Color": "Toggle whether color controls are enabled.",
-            "Levels": "Toggle whether levels are enabled.",
-            "Exposure": "Toggle whether exposure controls are enabled.",
-            "SoftClip": "Toggle whether soft clip is enabled.",
-        }
-        for section, fields in [
-            ("Color", [
-                ("add", "Add", -1.0, 1.0, 0.0, True),
-                ("brightness", "Brightness", 0.0, 4.0, 1.0, True),
-                ("contrast", "Contrast", 0.0, 4.0, 1.0, True),
-                ("saturation", "Saturation", 0.0, 4.0, 1.0, True),
-                ("hue", "Hue", -180.0, 180.0, 0.0, False)]),
-            ("Levels", [
-                ("inLow", "In low", 0.0, 1.0, 0.0, False),
-                ("inHigh", "In high", 0.0, 1.0, 1.0, False),
-                ("gamma", "Gamma", 0.1, 4.0, 1.0, False),
-                ("outLow", "Out low", 0.0, 1.0, 0.0, False),
-                ("outHigh", "Out high", 0.0, 1.0, 1.0, False)]),
-            ("Exposure", [
-                ("exposure", "Exposure", -10.0, 10.0, 0.0, False),
-                ("defog", "Defog", 0.0, 0.1, 0.0, False),
-                ("kneeLow", "Knee low", -3.0, 3.0, 0.0, False),
-                ("kneeHigh", "Knee high", 3.5, 7.5, 5.0, False),
-                ("gamma", "Gamma", 0.1, 4.0, 1.0, False)]),
-            ("SoftClip", [
-                ("value", "Value", 0.0, 1.0, 0.0, False)]),
+        for title, widget in [
+            ("OCIO", djv.ui.OCIOWidget(context, colorModel)),
+            ("LUT", djv.ui.LUTWidget(context, colorModel)),
+            ("Color", djv.ui.ColorWidget(context, viewportModel)),
+            ("Levels", djv.ui.LevelsWidget(context, app.settings, viewportModel)),
+            ("Exposure", djv.ui.ExposureWidget(context, viewportModel)),
+            ("Soft Clip", djv.ui.SoftClipWidget(context, viewportModel)),
         ]:
-            check = ftk.CheckBox(context)
-            check.backgroundColor = ftk.ColorRole.Header
-            check.tooltip = tooltips[section]
-            self._displayChecks[section] = check
-            check.setCheckedCallback(
-                lambda value, captured = section, \
-                    f = Util.weak(self._setDisplay):
-                    f(appWeak(), captured, "enabled", value))
-            vLayout = ftk.VerticalLayout(context)
-            vLayout.marginRole = ftk.SizeRole.Margin
-            form = ftk.FormLayout(context, vLayout)
-            form.spacingRole = ftk.SizeRole.SpacingSmall
-            for field, label, lo, hi, default, vec in fields:
-                slider = ftk.FloatEditSlider(context)
-                slider.range = ftk.RangeF(lo, hi)
-                slider.defaultValue = default
-                slider.setCallback(
-                    lambda value, s = section, f = field, v = vec, \
-                        fn = Util.weak(self._setDisplay):
-                        fn(appWeak(), s, f,
-                           ftk.V3F(value, value, value) if v else value))
-                form.addRow(label + ":", slider)
-                self._displaySliders[(section, field)] = (slider, vec)
-            title = "Soft Clip" if section == "SoftClip" else section
             bellows = ftk.Bellows(context, title, layout)
-            bellows.widget = vLayout
-            bellows.toolWidget = check
-
+            bellows.widget = widget
+            bellows.toolWidget = widget.enabledCheckBox
         self._setContent(layout)
-
-        self._displayObserver = djv.models.DisplayOptionsObserver(
-            app.getViewportModel().observeDisplayOptions,
-            lambda value: selfWeak()._displayUpdate(value))
-
-    def _ocioDataUpdate(self, data):
-        self._ocioEnabledCheckBox.checked = data.enabled
-        self._ocioConfigComboBox.currentIndex = \
-            tl.getOCIOConfigEnums().index(data.config)
-        self._ocioFileEdit.path = data.fileName
-        for comboBox, items, index in [
-            (self._ocioInputComboBox, data.inputs, data.inputIndex),
-            (self._ocioDisplayComboBox, data.displays, data.displayIndex),
-            (self._ocioViewComboBox, data.views, data.viewIndex),
-            (self._ocioLookComboBox, data.looks, data.lookIndex)]:
-            comboBox.setItems(items)
-            comboBox.currentIndex = index
-
-    def _setLUT(self, app, name, value):
-        options = app.getColorModel().lutOptions
-        setattr(options, name, value)
-        app.getColorModel().lutOptions = options
-
-    def _lutUpdate(self, options):
-        self._lutEnabledCheckBox.checked = options.enabled
-        self._lutFileEdit.path = options.fileName
-        self._lutOrderComboBox.currentIndex = \
-            tl.getLUTOrderEnums().index(options.order)
-
-    def _setDisplay(self, app, section, name, value):
-        options = app.getViewportModel().displayOptions
-        part = getattr(options, section[0].lower() + section[1:])
-        setattr(part, name, value)
-        # Setting a value also enables the section, like the C++
-        # widgets: a slider that changes nothing on screen reads as
-        # broken.
-        if name != "enabled":
-            part.enabled = True
-        setattr(options, section[0].lower() + section[1:], part)
-        app.getViewportModel().displayOptions = options
-
-    def _displayUpdate(self, options):
-        for section, part in [
-            ("Color", options.color),
-            ("Levels", options.levels),
-            ("Exposure", options.exposure),
-            ("SoftClip", options.softClip)]:
-            self._displayChecks[section].checked = part.enabled
-            for (s, field), (slider, vec) in self._displaySliders.items():
-                if s == section:
-                    value = getattr(part, field)
-                    slider.value = value.x if vec else value
 
 class MessagesTool(IToolWidget):
     """
