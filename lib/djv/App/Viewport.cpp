@@ -38,28 +38,6 @@ namespace djv
             const size_t toastTextLength = 80;
 
             const std::chrono::seconds toastTimeout(5);
-
-            // A position inside a box, in the coordinates of what the box
-            // holds. Clamped because a box and its contents are different
-            // sizes whenever the image is scaled, and the far edge rounds up
-            // to a pixel past the last one.
-            ftk::V2I mapInto(
-                const ftk::V2I& pos,
-                const ftk::Box2I& box,
-                const ftk::Size2I& size)
-            {
-                return ftk::V2I(
-                    std::clamp<int>(
-                        std::lround(
-                            (pos.x - box.min.x) / static_cast<double>(box.w()) * size.w),
-                        0,
-                        size.w - 1),
-                    std::clamp<int>(
-                        std::lround(
-                            (pos.y - box.min.y) / static_cast<double>(box.h()) * size.h),
-                        0,
-                        size.h - 1));
-            }
         }
 
         struct Viewport::Private
@@ -81,18 +59,9 @@ namespace djv
             tl::DisplayOptions displayOptions;
             tl::PlayerCacheInfo cacheInfo;
             double viewZoom = 0.0;
-            models::MouseActionBinding pickBinding =
-                models::MouseActionBinding(ftk::MouseButton::Left);
             models::MouseActionBinding frameShuttleBinding =
                 models::MouseActionBinding(ftk::MouseButton::Left, ftk::KeyModifier::Shift);
             float frameShuttleScale = 1.F;
-            enum class Resample { None, Wait, Read };
-            bool picked = false;
-            Resample resample = Resample::None;
-            bool resampleOnFrames = false;
-            std::shared_ptr<ftk::Observable<std::optional<ftk::V2I> > > pick;
-            std::shared_ptr<ftk::Observable<ftk::V2I> > samplePos;
-            std::shared_ptr<ftk::Observable<std::optional<ftk::Color4F> > > colorSample;
 
             std::shared_ptr<ftk::Label> fileNameLabel;
             std::shared_ptr<ftk::Label> cacheLabel;
@@ -137,12 +106,13 @@ namespace djv
             std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
+            std::shared_ptr<ftk::Observer<std::optional<ftk::V2I> > > pickObserver;
+            std::shared_ptr<ftk::Observer<std::optional<ftk::Color4F> > > colorSampleObserver;
 
             enum class MouseMode
             {
                 None,
-                Shuttle,
-                Picker
+                Shuttle
             };
             struct MouseData
             {
@@ -163,10 +133,6 @@ namespace djv
             setClipChildren(true);
 
             p.app = app;
-
-            p.pick = ftk::Observable<std::optional<ftk::V2I> >::create();
-            p.samplePos = ftk::Observable<ftk::V2I>::create();
-            p.colorSample = ftk::Observable<std::optional<ftk::Color4F> >::create();
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFont(ftk::FontType::Mono);
@@ -321,11 +287,6 @@ namespace djv
                 app->getFilesModel()->observeCompareOptions(),
                 [this](const tl::CompareOptions& value)
                 {
-                    if (value.compare != _p->compare && _p->picked)
-                    {
-                        _p->resample = Private::Resample::Wait;
-                        _p->resampleOnFrames = true;
-                    }
                     _p->compare = value.compare;
                     setCompareOptions(value);
                     _compareUpdate();
@@ -492,10 +453,26 @@ namespace djv
                         i != value.bindings.end() ? i->second.button : ftk::MouseButton::None,
                         i != value.bindings.end() ? i->second.modifier : ftk::KeyModifier::None);
                     i = value.bindings.find(models::MouseAction::Pick);
-                    p.pickBinding = i != value.bindings.end() ? i->second : models::MouseActionBinding();
+                    setPickBinding(
+                        i != value.bindings.end() ? i->second.button : ftk::MouseButton::None,
+                        i != value.bindings.end() ? i->second.modifier : ftk::KeyModifier::None);
                     i = value.bindings.find(models::MouseAction::FrameShuttle);
                     p.frameShuttleBinding = i != value.bindings.end() ? i->second : models::MouseActionBinding();
                     p.frameShuttleScale = value.frameShuttleScale;
+                });
+
+            p.pickObserver = ftk::Observer<std::optional<ftk::V2I> >::create(
+                observePick(),
+                [this](const std::optional<ftk::V2I>&)
+                {
+                    _hudUpdate();
+                });
+
+            p.colorSampleObserver = ftk::Observer<std::optional<ftk::Color4F> >::create(
+                observeColorSample(),
+                [this](const std::optional<ftk::Color4F>&)
+                {
+                    _hudUpdate();
                 });
         }
 
@@ -514,169 +491,6 @@ namespace djv
             auto out = std::shared_ptr<Viewport>(new Viewport);
             out->_init(context, app, parent);
             return out;
-        }
-
-        std::shared_ptr<ftk::IObservable<std::optional<ftk::V2I> > > Viewport::observePick() const
-        {
-            return _p->pick;
-        }
-
-        std::shared_ptr<ftk::IObservable<ftk::V2I> > Viewport::observeSamplePos() const
-        {
-            return _p->samplePos;
-        }
-
-        std::shared_ptr<ftk::IObservable<std::optional<ftk::Color4F> > > Viewport::observeColorSample() const
-        {
-            return _p->colorSample;
-        }
-
-        bool Viewport::_getSourceBox(ftk::Box2I& box, ftk::Size2I& size) const
-        {
-            // With OTIO spatial coordinates the render space is the timeline
-            // canvas rather than the media, so the box the image is drawn into
-            // is needed to relate the two. Returns false without spatial
-            // coordinates, where render space is already the image.
-            if (auto player = getPlayer())
-            {
-                const auto& videoFrame = player->getCurrentVideo();
-                if (!videoFrame.empty() && videoFrame.front().canvasSize.isValid())
-                {
-                    const auto& displayOptions = getDisplayOptions();
-                    const tl::AspectRatioOptions aspectRatio =
-                        !displayOptions.empty() ?
-                        displayOptions.front().aspectRatio :
-                        tl::AspectRatioOptions();
-                    for (const auto& layer : videoFrame.front().layers)
-                    {
-                        const auto& image = layer.image ? layer.image : layer.imageB;
-                        const auto& bounds = layer.image ? layer.bounds : layer.boundsB;
-                        if (image && bounds.has_value())
-                        {
-                            // The image is fitted into its canvas box, so use
-                            // the same box the renderer draws into.
-                            box = tl::getBox(
-                                ftk::Box2I(
-                                    ftk::V2I(
-                                        std::lround(bounds.value().min.x),
-                                        std::lround(bounds.value().min.y)),
-                                    ftk::V2I(
-                                        std::lround(bounds.value().max.x),
-                                        std::lround(bounds.value().max.y))),
-                                image->getInfo(),
-                                aspectRatio);
-                            size = image->getInfo().size;
-                            return box.w() > 0 && box.h() > 0 && size.isValid();
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        std::optional<ftk::V2I> Viewport::_toSourcePixel(const ftk::V2I& renderPos) const
-        {
-            // Which image the position is over, and where in it. Side by side
-            // comparisons give every image its own box, so a position has to
-            // be measured against the one it is over rather than against the
-            // first -- otherwise the second image reports where it sits in the
-            // first's coordinates, which is a pixel the file does not have.
-            // Over no image there is no pixel to name, so nothing is returned
-            // rather than a position carried on past the edge.
-            auto player = getPlayer();
-            if (!player)
-                return std::nullopt;
-            const auto& videoFrame = player->getCurrentVideo();
-            const auto& displayOptions = getDisplayOptions();
-            const tl::AspectRatioOptions aspectRatio =
-                !displayOptions.empty() ?
-                displayOptions.front().aspectRatio :
-                tl::AspectRatioOptions();
-            const auto boxes = tl::getBoxes(
-                getCompareOptions(), aspectRatio, videoFrame);
-            for (size_t i = 0; i < boxes.size() && i < videoFrame.size(); ++i)
-            {
-                if (!ftk::contains(boxes[i], renderPos))
-                    continue;
-                if (videoFrame[i].canvasSize.isValid())
-                {
-                    // With OTIO spatial coordinates the box holds the timeline
-                    // canvas rather than the media, so the position crosses
-                    // into the canvas before it can find an image.
-                    const ftk::V2I canvasPos = mapInto(
-                        renderPos, boxes[i], videoFrame[i].canvasSize);
-                    for (const auto& layer : videoFrame[i].layers)
-                    {
-                        const auto& image = layer.image ? layer.image : layer.imageB;
-                        const auto& bounds = layer.image ? layer.bounds : layer.boundsB;
-                        if (image && bounds.has_value())
-                        {
-                            const ftk::Box2I box = tl::getBox(
-                                ftk::Box2I(
-                                    ftk::V2I(
-                                        std::lround(bounds.value().min.x),
-                                        std::lround(bounds.value().min.y)),
-                                    ftk::V2I(
-                                        std::lround(bounds.value().max.x),
-                                        std::lround(bounds.value().max.y))),
-                                image->getInfo(),
-                                aspectRatio);
-                            if (ftk::contains(box, canvasPos))
-                            {
-                                return mapInto(
-                                    canvasPos, box, image->getInfo().size);
-                            }
-                        }
-                    }
-                    return std::nullopt;
-                }
-                for (const auto& layer : videoFrame[i].layers)
-                {
-                    const auto& image = layer.image ? layer.image : layer.imageB;
-                    if (image)
-                    {
-                        return mapInto(
-                            renderPos, boxes[i], image->getInfo().size);
-                    }
-                }
-            }
-            return std::nullopt;
-        }
-
-        ftk::V2I Viewport::_fromSourcePixel(const ftk::V2I& sourcePos) const
-        {
-            ftk::Box2I box;
-            ftk::Size2I size;
-            ftk::V2I out = sourcePos;
-            if (_getSourceBox(box, size))
-            {
-                out = ftk::V2I(
-                    std::lround(
-                        box.min.x + sourcePos.x /
-                        static_cast<double>(size.w) * box.w()),
-                    std::lround(
-                        box.min.y + sourcePos.y /
-                        static_cast<double>(size.h) * box.h()));
-            }
-            return out;
-        }
-
-        void Viewport::pick(const ftk::V2I& imagePos)
-        {
-            FTK_P();
-            // Image pixel -> widget-local position, inverting the pick math used
-            // by the mouse handlers (image = (widget - viewPos) / zoom). Then
-            // sample exactly as a pick mouse action would. The incoming
-            // position is a source pixel, so it goes through the canvas first.
-            const ftk::V2I pos = fromRenderPos(_fromSourcePixel(imagePos));
-            p.samplePos->setIfChanged(pos);
-            p.picked = true;
-            _sampleUpdate();
-            // The pixel asked for rather than the one that comes back from
-            // converting it to a position and then converting it again, which
-            // is a pixel out at some zooms.
-            p.pick->setIfChanged(imagePos);
-            _hudUpdate();
         }
 
         void Viewport::setPlayer(const std::shared_ptr<tl::Player>& player)
@@ -717,13 +531,6 @@ namespace djv
                     {
                         FTK_P();
                         p.videoFramesSize = value.size();
-                        if (p.resampleOnFrames)
-                        {
-                            // The frames a comparison had to read to be shown,
-                            // which arrive after the comparison itself changed.
-                            p.resampleOnFrames = false;
-                            p.resample = Private::Resample::Wait;
-                        }
                         _compareUpdate();
                         p.missing = false;
                         p.heldFrom.reset();
@@ -793,35 +600,6 @@ namespace djv
             return _p->hudLayout->getSizeHint();
         }
 
-        void Viewport::tickEvent(
-            bool parentsVisible,
-            bool parentsEnabled,
-            const ftk::TickEvent& event)
-        {
-            tl::ui::Viewport::tickEvent(parentsVisible, parentsEnabled, event);
-            FTK_P();
-            if (Private::Resample::Read == p.resample)
-            {
-                p.resample = Private::Resample::None;
-                // Through the same path as a pick: a comparison can bring a
-                // different image under the position, or none at all.
-                _sampleUpdate();
-            }
-        }
-
-        void Viewport::drawEvent(
-            const ftk::Box2I& drawRect,
-            const ftk::DrawEvent& event)
-        {
-            tl::ui::Viewport::drawEvent(drawRect, event);
-            FTK_P();
-            if (Private::Resample::Wait == p.resample)
-            {
-                // This drawing carries the new picture; the next tick reads it.
-                p.resample = Private::Resample::Read;
-            }
-        }
-
         void Viewport::setGeometry(const ftk::Box2I& value)
         {
             tl::ui::Viewport::setGeometry(value);
@@ -860,17 +638,6 @@ namespace djv
                     }
                 }
                 break;
-            case Private::MouseMode::Picker:
-                if (auto app = p.app.lock())
-                {
-                    const ftk::V2I pos = toViewportPos(event.pos);
-                    p.picked = true;
-                    if (p.samplePos->setIfChanged(pos))
-                    {
-                        _sampleUpdate();
-                    }
-                }
-                break;
             default: break;
             }
         }
@@ -879,32 +646,19 @@ namespace djv
         {
             tl::ui::Viewport::mousePressEvent(event);
             FTK_P();
-            // Picking and shuttling are ours rather than the base class's, so
-            // they need this test of their own; without it they would go on
-            // working in a view that takes no input.
+            // Shuttling is ours rather than the base class's, so it needs
+            // this test of its own; without it it would go on working in a
+            // view that takes no input.
             if (!isInputEnabled())
             {
                 return;
             }
-            if (p.pickBinding.button == event.button &&
-                ftk::checkKeyModifier(p.pickBinding.modifier, event.modifiers))
+            if (p.frameShuttleBinding.button == event.button &&
+                ftk::checkKeyModifier(p.frameShuttleBinding.modifier, event.modifiers))
             {
                 // The base class only claims the buttons bound to its own
                 // actions, so claim ours here; an unbound button is left
                 // free to open a context menu.
-                event.accept = true;
-                takeKeyFocus();
-                p.mouse.mode = Private::MouseMode::Picker;
-                const ftk::V2I pos = toViewportPos(event.pos);
-                p.picked = true;
-                if (p.samplePos->setIfChanged(pos))
-                {
-                    _sampleUpdate();
-                }
-            }
-            else if (p.frameShuttleBinding.button == event.button &&
-                ftk::checkKeyModifier(p.frameShuttleBinding.modifier, event.modifiers))
-            {
                 event.accept = true;
                 takeKeyFocus();
                 p.mouse.mode = Private::MouseMode::Shuttle;
@@ -1072,8 +826,8 @@ namespace djv
                 arg(p.viewZoom, 2, 6));
             ftk::setScreenshotTag(p.viewZoomLabel, "View.HUD.ViewZoom");
 
-            const auto& colorSample = p.colorSample->get();
-            const auto& pick = p.pick->get();
+            const auto& colorSample = observeColorSample()->get();
+            const auto& pick = observePick()->get();
             p.colorPickerSwatch->setColor(
                 colorSample.has_value() ? colorSample.value() : ftk::Color4F());
             // The HUD sits under the pointer, so a line that changes width
@@ -1128,21 +882,6 @@ namespace djv
             p.cacheLabel->setText(s);
             p.cacheLabel->setVisible(!s.empty());
             ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");
-        }
-
-        void Viewport::_sampleUpdate()
-        {
-            FTK_P();
-            const ftk::V2I& pos = p.samplePos->get();
-            const auto pixel = _toSourcePixel(toRenderPos(pos));
-            p.pick->setIfChanged(pixel);
-            // The color is read back from what was rendered, so away from the
-            // media it is the background rather than a value from anything
-            // being reviewed.
-            p.colorSample->setIfChanged(pixel.has_value() ?
-                std::optional<ftk::Color4F>(getColorSample(pos)) :
-                std::nullopt);
-            _hudUpdate();
         }
 
         void Viewport::_toastUpdate()
