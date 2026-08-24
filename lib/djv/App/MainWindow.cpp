@@ -32,7 +32,7 @@
 #include <djv/App/ViewActions.h>
 #include <djv/App/ViewMenu.h>
 #include <djv/App/ViewToolBar.h>
-#include <djv/App/Viewport.h>
+#include <djv/UI/Viewport.h>
 #include <djv/App/WindowActions.h>
 #include <djv/App/WindowMenu.h>
 #include <djv/App/WindowToolBar.h>
@@ -128,7 +128,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<bool> > presentMode;
             bool shown = false;
 
-            std::shared_ptr<Viewport> viewport;
+            std::shared_ptr<ui::Viewport> viewport;
             std::shared_ptr<tl::ui::TimelineWidget> timelineWidget;
             std::shared_ptr<FileActions> fileActions;
             std::shared_ptr<CompareActions> compareActions;
@@ -203,7 +203,14 @@ namespace djv
             p.settingsModel = app->getSettingsModel();
             p.presentMode = ftk::Observable<bool>::create(false);
 
-            p.viewport = Viewport::create(context, app);
+            p.viewport = ui::Viewport::create(
+                context,
+                app->getFilesModel(),
+                app->getColorModel(),
+                app->getViewportModel(),
+                app->getTimeUnitsModel(),
+                app->getSettingsModel(),
+                app->getSysLogModel());
             ftk::setScreenshotTag(p.viewport, "MainWindow.Viewport");
 
             auto timeUnitsModel = app->getTimeUnitsModel();
@@ -560,7 +567,7 @@ namespace djv
             _mouseButton(ftk::MouseButton::Left, false, modifiers);
         }
 
-        const std::shared_ptr<Viewport>& MainWindow::getViewport() const
+        const std::shared_ptr<ui::Viewport>& MainWindow::getViewport() const
         {
             return _p->viewport;
         }

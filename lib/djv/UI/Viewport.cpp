@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/Viewport.h>
+#include <djv/UI/Viewport.h>
 
-#include <djv/App/App.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
@@ -28,7 +27,7 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
         namespace
         {
@@ -42,7 +41,8 @@ namespace djv
 
         struct Viewport::Private
         {
-            std::weak_ptr<App> app;
+            std::weak_ptr<models::ViewportModel> viewportModel;
+            std::weak_ptr<models::TimeUnitsModel> timeUnitsModel;
             models::HUDOptions hudOptions;
             ftk::Path path;
             tl::IOInfo ioInfo;
@@ -124,7 +124,12 @@ namespace djv
 
         void Viewport::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::FilesModel>& filesModel,
+            const std::shared_ptr<models::ColorModel>& colorModel,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
+            const std::shared_ptr<models::SettingsModel>& settingsModel,
+            const std::shared_ptr<ftk::SysLogModel>& sysLogModel,
             const std::shared_ptr<IWidget>& parent)
         {
             tl::ui::Viewport::_init(context, parent);
@@ -132,7 +137,8 @@ namespace djv
 
             setClipChildren(true);
 
-            p.app = app;
+            p.viewportModel = viewportModel;
+            p.timeUnitsModel = timeUnitsModel;
 
             p.fileNameLabel = ftk::Label::create(context);
             p.fileNameLabel->setFont(ftk::FontType::Mono);
@@ -268,7 +274,7 @@ namespace djv
                 });
 
             p.aObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
-                app->getFilesModel()->observeA(),
+                filesModel->observeA(),
                 [this](const std::shared_ptr<models::FilesModelItem>& value)
                 {
                     _p->a = value;
@@ -276,7 +282,7 @@ namespace djv
                 });
 
             p.bObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
-                app->getFilesModel()->observeB(),
+                filesModel->observeB(),
                 [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
                 {
                     _p->b = value;
@@ -284,7 +290,7 @@ namespace djv
                 });
 
             p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
-                app->getFilesModel()->observeCompareOptions(),
+                filesModel->observeCompareOptions(),
                 [this](const tl::CompareOptions& value)
                 {
                     _p->compare = value.compare;
@@ -297,14 +303,14 @@ namespace djv
             // that resolves nothing falls back to what the user chose
             // rather than to whatever the active file resolved to.
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeOCIOOptions(),
+                colorModel->observeOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
                    setOCIOOptions(value);
                 });
 
             p.resolvedInputsObserver = ftk::Observer<std::vector<std::string> >::create(
-                app->getColorModel()->observeResolvedInputs(),
+                colorModel->observeResolvedInputs(),
                 [this](const std::vector<std::string>& value)
                 {
                     _p->ocioInputs = value;
@@ -315,7 +321,7 @@ namespace djv
             // each clip of an OTIO file is its own media -- but only when
             // the input is automatic; one the user chose applies to every
             // layer.
-            const auto colorModel = app->getColorModel();
+            
             setOCIOInputResolver(
                 [colorModel](const std::string& path, const ftk::ImageTags& tags)
                 {
@@ -325,14 +331,14 @@ namespace djv
                 });
 
             p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
-                app->getColorModel()->observeLUTOptions(),
+                colorModel->observeLUTOptions(),
                 [this](const tl::LUTOptions& value)
                 {
                    setLUTOptions(value);
                 });
 
             p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
-                app->getViewportModel()->observeImageOptions(),
+                viewportModel->observeImageOptions(),
                 [this](const ftk::ImageOptions& value)
                 {
                     _p->imageOptions = value;
@@ -340,7 +346,7 @@ namespace djv
                 });
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
-                app->getViewportModel()->observeDisplayOptions(),
+                viewportModel->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
                     _p->displayOptions = value;
@@ -354,21 +360,21 @@ namespace djv
                 });
 
             p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
-                app->getViewportModel()->observeBackgroundOptions(),
+                viewportModel->observeBackgroundOptions(),
                 [this](const tl::BackgroundOptions& value)
                 {
                     setBackgroundOptions(value);
                 });
 
             p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
-                app->getViewportModel()->observeForegroundOptions(),
+                viewportModel->observeForegroundOptions(),
                 [this](const tl::ForegroundOptions& value)
                 {
                     setForegroundOptions(value);
                 });
 
             p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
-                app->getViewportModel()->observeColorBuffer(),
+                viewportModel->observeColorBuffer(),
                 [this](ftk::gl::TextureType value)
                 {
                     setColorBuffer(value);
@@ -384,7 +390,7 @@ namespace djv
                 });
 
             p.messagesObserver = ftk::ListObserver<ftk::LogItem>::create(
-                app->getSysLogModel()->observeMessages(),
+                sysLogModel->observeMessages(),
                 [this](const std::vector<ftk::LogItem>& value)
                 {
                     FTK_P();
@@ -424,7 +430,7 @@ namespace djv
                 });
 
             p.hudOptionsObserver = ftk::Observer<models::HUDOptions>::create(
-                app->getViewportModel()->observeHUDOptions(),
+                viewportModel->observeHUDOptions(),
                 [this](const models::HUDOptions& value)
                 {
                     _p->hudOptions = value;
@@ -433,14 +439,14 @@ namespace djv
                 });
 
             p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
-                app->getTimeUnitsModel()->observeTimeUnits(),
+                timeUnitsModel->observeTimeUnits(),
                 [this](tl::TimeUnits value)
                 {
                     _hudUpdate();
                 });
 
             p.mouseSettingsObserver = ftk::Observer<models::MouseSettings>::create(
-                app->getSettingsModel()->observeMouse(),
+                settingsModel->observeMouse(),
                 [this](const models::MouseSettings& value)
                 {
                     FTK_P();
@@ -485,11 +491,24 @@ namespace djv
 
         std::shared_ptr<Viewport> Viewport::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::FilesModel>& filesModel,
+            const std::shared_ptr<models::ColorModel>& colorModel,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
+            const std::shared_ptr<models::SettingsModel>& settingsModel,
+            const std::shared_ptr<ftk::SysLogModel>& sysLogModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<Viewport>(new Viewport);
-            out->_init(context, app, parent);
+            out->_init(
+                context,
+                filesModel,
+                colorModel,
+                viewportModel,
+                timeUnitsModel,
+                settingsModel,
+                sysLogModel,
+                parent);
             return out;
         }
 
@@ -789,9 +808,8 @@ namespace djv
             ftk::setScreenshotTag(p.renderLabel, "View.HUD.Render");
 
             s = std::string();
-            if (auto app = p.app.lock())
+            if (auto timeUnitsModel = p.timeUnitsModel.lock())
             {
-                auto timeUnitsModel = app->getTimeUnitsModel();
                 s = timeUnitsModel->getLabel(p.currentTime);
             }
             std::string missing;
@@ -899,8 +917,8 @@ namespace djv
         void Viewport::_hudLayout()
         {
             FTK_P();
-            auto app = p.app.lock();
-            const auto options = app->getViewportModel()->getHUDOptions();
+            auto viewportModel = p.viewportModel.lock();
+            const auto options = viewportModel->getHUDOptions();
             for (const auto& i : options.items)
             {
                 p.hudWidgets[i.first]->setParent(i.second != models::HUDPos::None ?

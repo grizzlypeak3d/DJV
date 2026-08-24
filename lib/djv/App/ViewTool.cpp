@@ -7,7 +7,7 @@
 
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
-#include <djv/App/Viewport.h>
+#include <djv/UI/Viewport.h>
 
 #include <ftk/UI/RowLayout.h>
 

@@ -5,7 +5,7 @@
 
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
-#include <djv/App/Viewport.h>
+#include <djv/UI/Viewport.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/ViewportModel.h>

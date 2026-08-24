@@ -26,11 +26,15 @@ namespace tl
 
 namespace djv
 {
+    namespace ui
+    {
+        class Viewport;
+    }
+
     namespace app
     {
         class App;
         class IToolWidget;
-        class Viewport;
 
         //! Main window.
         class DJV_APP_API_TYPE MainWindow : public ftk::Window
@@ -56,7 +60,7 @@ namespace djv
             DJV_APP_API const std::shared_ptr<ftk::MenuBar> getMenuBar() const;
 
             //! Get the viewport.
-            DJV_APP_API const std::shared_ptr<Viewport>& getViewport() const;
+            DJV_APP_API const std::shared_ptr<ui::Viewport>& getViewport() const;
 
             //! Send a mouse click at the given window position. For the
             //! capture harness: a click routed the way a real one is, through

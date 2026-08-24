@@ -10,7 +10,8 @@ set(HEADERS
     SpeedPopup.h
     StatusIndicatorPopup.h
     SysInfoDialog.h
-    ViewWidgets.h)
+    ViewWidgets.h
+    Viewport.h)
 set(HEADERS_PRIVATE)
 
 set(SOURCE
@@ -27,7 +28,8 @@ set(SOURCE
     StatusIndicatorPopup.cpp
     StyleWidget.cpp
     SysInfoDialog.cpp
-    ViewWidgets.cpp)
+    ViewWidgets.cpp
+    Viewport.cpp)
 
 add_library(djvUI ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 # Private when building, so this library's own API is dllexport here and

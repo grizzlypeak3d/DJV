@@ -50,8 +50,7 @@ set(HEADERS
     WindowActions.h
     WindowMenu.h
     WindowToolBar.h
-    ViewTool.h
-    Viewport.h)
+    ViewTool.h)
 set(HEADERS_PRIVATE)
 
 set(SOURCE
@@ -106,8 +105,7 @@ set(SOURCE
     WindowActions.cpp
     WindowMenu.cpp
     WindowToolBar.cpp
-    ViewTool.cpp
-    Viewport.cpp)
+    ViewTool.cpp)
 
 add_library(djvApp ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 # Private when building, so this library's own API is dllexport here and

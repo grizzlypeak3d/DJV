@@ -5,7 +5,7 @@
 
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
-#include <djv/App/Viewport.h>
+#include <djv/UI/Viewport.h>
 #include <djv/Models/AppInfoModel.h>
 
 #include <ftk/UI/MenuBar.h>
@@ -19,7 +19,7 @@ namespace djv
         {
             std::weak_ptr<App> app;
 
-            std::shared_ptr<Viewport> viewport;
+            std::shared_ptr<ui::Viewport> viewport;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
@@ -41,7 +41,14 @@ namespace djv
 
             p.app = app;
 
-            p.viewport = Viewport::create(context, app);
+            p.viewport = ui::Viewport::create(
+                context,
+                app->getFilesModel(),
+                app->getColorModel(),
+                app->getViewportModel(),
+                app->getTimeUnitsModel(),
+                app->getSettingsModel(),
+                app->getSysLogModel());
             p.viewport->setParent(shared_from_this());
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
@@ -72,7 +79,7 @@ namespace djv
             return out;
         }
 
-        const std::shared_ptr<Viewport>& SecondaryWindow::getViewport() const
+        const std::shared_ptr<ui::Viewport>& SecondaryWindow::getViewport() const
         {
             return _p->viewport;
         }

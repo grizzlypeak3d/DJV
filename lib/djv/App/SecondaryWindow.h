@@ -12,10 +12,14 @@
 
 namespace djv
 {
+    namespace ui
+    {
+        class Viewport;
+    }
+
     namespace app
     {
         class App;
-        class Viewport;
 
         //! Secondary window.
         class DJV_APP_API_TYPE SecondaryWindow : public ftk::Window
@@ -39,7 +43,7 @@ namespace djv
                 const std::shared_ptr<ftk::Window>& shared = nullptr);
 
             //! Get the viewport.
-            DJV_APP_API const std::shared_ptr<Viewport>& getViewport() const;
+            DJV_APP_API const std::shared_ptr<ui::Viewport>& getViewport() const;
 
             //! Set the view.
             DJV_APP_API void setView(

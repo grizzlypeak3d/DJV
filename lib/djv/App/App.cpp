@@ -20,7 +20,7 @@
 #include <djv/App/Indicator.h>
 #include <djv/App/SysLogTool.h>
 #include <djv/App/ViewTool.h>
-#include <djv/App/Viewport.h>
+#include <djv/UI/Viewport.h>
 #include <djv/UI/SeparateAudioDialog.h>
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
