@@ -767,12 +767,29 @@ class MagnifyTool(IToolWidget):
             app.observePlayer(),
             lambda player: selfWeak()._widget.setPlayer(player))
 
+class DiagTool(IToolWidget):
+    """
+    This tool displays diagnostics.
+    """
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(
+            self, context, app, mainWindow, "Diagnostics", "DiagTool", parent)
+
+        widget = ftk.DiagWidget(context)
+        widget.marginRole = ftk.SizeRole.Margin
+        # The contents have no natural end, so this takes what room is
+        # left rather than a band of its own while other tools sit at
+        # the height they need.
+        self.vStretch = ftk.Stretch.Expanding
+        self._setContent(widget)
+
 # The tools this application implements so far; the tools model lists
 # more, and the actions only offer what can actually open.
 FACTORY = {
     "Files": FilesTool,
     "Color Picker": ColorPickerTool,
     "Magnify": MagnifyTool,
+    "Diagnostics": DiagTool,
     "View": ViewTool,
     "Color": ColorTool,
     "Information": InfoTool,
