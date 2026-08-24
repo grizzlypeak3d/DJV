@@ -13,7 +13,6 @@ import FileActions
 import FrameActions
 import HelpActions
 import Menus
-import Viewport
 import PlaybackActions
 import TimelineActions
 import PlaybackBar
@@ -46,8 +45,14 @@ class MainWindow(ftk.MainWindow):
         self.title = title
 
         # Create the viewport and timeline, driven by the DJV models.
-        self._viewportWidget = Viewport.Widget(context, app)
-        self._viewport = self._viewportWidget.getViewport()
+        self._viewport = djv.ui.Viewport(
+            context,
+            app.getFilesModel(),
+            app.getColorModel(),
+            app.getViewportModel(),
+            app.getTimeUnitsModel(),
+            app.getSettingsModel(),
+            app.getSysLogModel())
         self._timelineWidget = tl.ui.TimelineWidget(context, app.getTimeUnitsModel())
         # The current file's timeline and no other; left unset the widget
         # also draws one for each file being compared.
@@ -120,7 +125,7 @@ class MainWindow(ftk.MainWindow):
         self._splitter.split = window.splitter
         self._splitter2 = ftk.Splitter(context, ftk.Orientation.Horizontal, self._splitter)
         self._splitter2.split = window.splitter2
-        self._viewportWidget.parent = self._splitter2
+        self._viewport.parent = self._splitter2
         self._toolsWidget = Tools.ToolsWidget(context, app, self)
         self._toolsWidget.parent = self._splitter2
         self._timelineWidget.parent = self._splitter
@@ -134,16 +139,11 @@ class MainWindow(ftk.MainWindow):
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
             lambda player: selfWeak()._playerUpdate(player))
-        viewportModel = app.getViewportModel()
-        self._bgObserver = djv.models.BackgroundOptionsObserver(
-            viewportModel.observeBackgroundOptions,
-            lambda value: selfWeak()._bgUpdate(value))
-        self._fgObserver = djv.models.ForegroundOptionsObserver(
-            viewportModel.observeForegroundOptions,
-            lambda value: selfWeak()._fgUpdate(value))
+        appWeak = weakref.ref(app)
         self._compareObserver = djv.models.CompareOptionsObserver(
-            app.getFilesModel().observeCompareOptions,
-            lambda value: selfWeak()._compareUpdate(value))
+            self._viewport.observeCompareOptions,
+            lambda value: setattr(
+                appWeak().getFilesModel(), "compareOptions", value))
         self._windowSettingsObserver = djv.models.WindowSettingsObserver(
             self._settingsModel.observeWindow,
             lambda value: selfWeak()._windowSettingsUpdate(value))
@@ -178,17 +178,8 @@ class MainWindow(ftk.MainWindow):
                 self.app.open(event.data.text[0])
 
     def _playerUpdate(self, player):
-        self._viewportWidget.setPlayer(player)
+        self._viewport.player = player
         self._timelineWidget.player = player
-
-    def _bgUpdate(self, value):
-        self._viewport.backgroundOptions = value
-
-    def _fgUpdate(self, value):
-        self._viewport.foregroundOptions = value
-
-    def _compareUpdate(self, value):
-        self._viewport.compareOptions = value
 
     def _windowSettingsUpdate(self, settings):
         self._tabBar.setVisible(settings.tabBar)
@@ -215,13 +206,11 @@ class MainWindow(ftk.MainWindow):
             self._settingsModel.timeline = settings
 
     def _ocioUpdate(self, value):
-        self._viewport.ocioOptions = value
         display = self._timelineWidget.displayOptions
         display.ocio = value
         self._timelineWidget.displayOptions = display
 
     def _lutUpdate(self, value):
-        self._viewport.LUTOptions = value
         display = self._timelineWidget.displayOptions
         display.lut = value
         self._timelineWidget.displayOptions = display
