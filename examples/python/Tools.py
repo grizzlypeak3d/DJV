@@ -832,6 +832,7 @@ class ToolsWidget(ftk.IContainer):
         self._app = weakref.ref(app)
         self._mainWindow = weakref.ref(mainWindow)
         self._widgets = {}
+        self._displayed = True
 
         self._layout = ftk.VerticalLayout(context)
         self._layout.spacingRole = ftk.SizeRole.SpacingSmall
@@ -859,4 +860,15 @@ class ToolsWidget(ftk.IContainer):
                     self.context, self._app(), self._mainWindow())
                 widget.parent = self._layout
                 self._widgets[name] = widget
-        self.setVisible(len(self._widgets) > 0)
+        self._visibleUpdate()
+
+    def setDisplayed(self, value):
+        """
+        Set whether the window shows the panel; open tools stay open
+        while it is hidden.
+        """
+        self._displayed = value
+        self._visibleUpdate()
+
+    def _visibleUpdate(self):
+        self.setVisible(self._displayed and len(self._widgets) > 0)

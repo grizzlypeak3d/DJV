@@ -8,6 +8,7 @@ set(SOURCE
     FileThumbnail.cpp
     FrameRangePopup.cpp
     MagnifyWidget.cpp
+    SeparateAudioDialog.cpp
     SettingsWidgets.cpp
     ViewWidgets.cpp
     Viewport.cpp)

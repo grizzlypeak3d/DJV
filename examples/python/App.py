@@ -85,9 +85,10 @@ class App(ftk.App):
         """
         return self._player
 
-    def open(self, path):
+    def open(self, path, audioPath = None):
         """
-        Open an image sequence, movie, or timeline file.
+        Open an image sequence, movie, or timeline file, optionally with
+        a separate audio file.
         """
         path = path if isinstance(path, ftk.Path) else ftk.Path(str(path))
         options = ftk.DirListOptions()
@@ -97,7 +98,25 @@ class App(ftk.App):
         for i in tl.getPaths(self.context, path, options):
             item = djv.models.FilesModelItem()
             item.path = i
+            if audioPath is not None:
+                item.audioPath = audioPath
             self._filesModel.add(item)
+
+    def openSeparateAudioDialog(self):
+        """
+        Open the dialog for choosing a file with a separate audio file.
+        """
+        selfWeak = weakref.ref(self)
+        self._separateAudioDialog = djv.ui.SeparateAudioDialog(self.context)
+        self._separateAudioDialog.open(self._window)
+        def callback(path, audioPath):
+            if selfWeak():
+                selfWeak().open(path, audioPath)
+                selfWeak()._separateAudioDialog.close()
+        self._separateAudioDialog.setCallback(callback)
+        self._separateAudioDialog.setCloseCallback(
+            lambda: selfWeak() and setattr(
+                selfWeak(), "_separateAudioDialog", None))
 
     def run(self):
 

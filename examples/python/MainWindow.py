@@ -37,6 +37,9 @@ class MainWindow(ftk.MainWindow):
         window = self._settingsModel.window
         ftk.MainWindow.__init__(self, context, app, window.size)
 
+        # Created before the actions; the window actions observe it.
+        self._presentMode = ftk.ObservableBool(False)
+
         # The application icon, registered with the icon system so that
         # it is rendered for the display scale.
         iconSystem = context.getSystemByName("ftk::IconSystem")
@@ -111,25 +114,32 @@ class MainWindow(ftk.MainWindow):
         self._playbackBar = PlaybackBar.Widget(
             context, app, self._playbackActions, self._frameActions)
         self._tabBar = TabBar.Widget(context, app)
-        self._tabBar.setVisible(window.tabBar)
         self._statusBar = StatusBar.Widget(context, app, self)
 
-        # Layout widgets.
+        # Layout widgets. The dividers are kept by name so that hiding a
+        # tool bar can hide its divider with it.
+        self._dividers = {}
         self._layout = ftk.VerticalLayout(context)
         self._layout.spacingRole = ftk.SizeRole._None
         self.widget = self._layout
         hLayout = ftk.HorizontalLayout(context, self._layout)
         hLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._toolBarLayout = hLayout
         self._fileToolBar.parent = hLayout
-        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        self._dividers["File"] = ftk.Divider(
+            context, ftk.Orientation.Horizontal, hLayout)
         self._compareToolBar.parent = hLayout
-        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        self._dividers["Compare"] = ftk.Divider(
+            context, ftk.Orientation.Horizontal, hLayout)
         self._windowToolBar.parent = hLayout
-        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        self._dividers["Window"] = ftk.Divider(
+            context, ftk.Orientation.Horizontal, hLayout)
         self._viewToolBar.parent = hLayout
-        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        self._dividers["View"] = ftk.Divider(
+            context, ftk.Orientation.Horizontal, hLayout)
         self._toolsToolBar.parent = hLayout
-        ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
+        self._dividers["ToolBars"] = ftk.Divider(
+            context, ftk.Orientation.Vertical, self._layout)
         self._tabBar.parent = self._layout
         self._splitter = ftk.Splitter(context, ftk.Orientation.Vertical, self._layout)
         self._splitter.split = window.splitter
@@ -139,9 +149,11 @@ class MainWindow(ftk.MainWindow):
         self._toolsWidget = Tools.ToolsWidget(context, app, self)
         self._toolsWidget.parent = self._splitter2
         self._timelineWidget.parent = self._splitter
-        ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
+        self._dividers["Bottom"] = ftk.Divider(
+            context, ftk.Orientation.Vertical, self._layout)
         self._playbackBar.parent = self._layout
-        ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
+        self._dividers["Status"] = ftk.Divider(
+            context, ftk.Orientation.Vertical, self._layout)
         self._statusBar.parent = self._layout
 
         # Create observers.
@@ -181,18 +193,93 @@ class MainWindow(ftk.MainWindow):
     def getViewport(self):
         return self._viewport
 
+    def observePresentMode(self):
+        return self._presentMode
+
+    def setPresentMode(self, value):
+        if self._presentMode.setIfChanged(value):
+            self.fullScreen = value
+            self._windowUpdate()
+
     def dropEvent(self, event):
         event.accept = True
         if isinstance(event.data, ftk.DragDropTextData):
             if event.data.text:
                 self.app.open(event.data.text[0])
 
+    def keyPressEvent(self, event):
+        if 0 == event.modifiers and \
+                ftk.Key.Escape == event.key and \
+                self._presentMode.get():
+            event.accept = True
+            self.setPresentMode(False)
+        else:
+            # The menu bar is asked directly so that the shortcuts keep
+            # working while presentation mode hides it.
+            event.accept = self._menuBar.shortcut(event.key, event.modifiers)
+
+    def keyReleaseEvent(self, event):
+        event.accept = True
+
     def _playerUpdate(self, player):
         self._viewport.player = player
         self._timelineWidget.player = player
 
     def _windowSettingsUpdate(self, settings):
-        self._tabBar.setVisible(settings.tabBar)
+        self._windowUpdate()
+
+    def _windowUpdate(self):
+        settings = self._settingsModel.window
+        presentMode = self._presentMode.get()
+
+        # The menu bar is removed rather than hidden: the base class owns
+        # the divider under it, and setting the menu bar is what hides
+        # both.
+        if presentMode:
+            self.menuBar = None
+        elif self.menuBar is None:
+            self.menuBar = self._menuBar
+
+        self._fileToolBar.setVisible(settings.fileToolBar and not presentMode)
+        self._dividers["File"].setVisible(settings.fileToolBar and not presentMode)
+
+        self._compareToolBar.setVisible(settings.compareToolBar and not presentMode)
+        self._dividers["Compare"].setVisible(settings.compareToolBar and not presentMode)
+
+        self._windowToolBar.setVisible(settings.windowToolBar and not presentMode)
+        self._dividers["Window"].setVisible(settings.windowToolBar and not presentMode)
+
+        self._viewToolBar.setVisible(settings.viewToolBar and not presentMode)
+        self._dividers["View"].setVisible(settings.viewToolBar and not presentMode)
+
+        self._toolsToolBar.setVisible(settings.toolsToolBar and not presentMode)
+
+        self._dividers["ToolBars"].setVisible(
+            (settings.fileToolBar or
+                settings.compareToolBar or
+                settings.windowToolBar or
+                settings.viewToolBar or
+                settings.toolsToolBar) and not presentMode)
+
+        self._tabBar.setVisible(settings.tabBar and not presentMode)
+
+        self._toolsWidget.setDisplayed(settings.tools and not presentMode)
+
+        self._timelineWidget.setVisible(settings.timeline and not presentMode)
+
+        self._playbackBar.setVisible(settings.bottomToolBar and not presentMode)
+        self._dividers["Bottom"].setVisible(settings.bottomToolBar and not presentMode)
+
+        self._statusBar.setVisible(settings.statusToolBar and not presentMode)
+        self._dividers["Status"].setVisible(settings.statusToolBar and not presentMode)
+
+        # Not in presentation mode: an error balloon over someone else's
+        # review is worse than a missed message, and the messages tool
+        # still has them. The HUD is hidden rather than turned off, so
+        # that what was being shown is still being shown on the way back
+        # out.
+        self._viewport.setToastActive(not presentMode)
+        self._viewport.setHUDActive(not presentMode)
 
     def _timelineSettingsUpdate(self, settings):
         self._timelineWidget.frameView = settings.frameView

@@ -21,6 +21,7 @@ class File(ftk.Menu):
         self._app = weakref.ref(app)
 
         self.addAction(actions.actions["Open"])
+        self.addAction(actions.actions["OpenAudio"])
         self.addAction(actions.actions["Close"])
         self.addAction(actions.actions["CloseAll"])
         self.addAction(actions.actions["Reload"])
@@ -28,6 +29,11 @@ class File(ftk.Menu):
         self.addDivider();
         self.addAction(actions.actions["Next"])
         self.addAction(actions.actions["Prev"])
+        self.addDivider();
+        self.addAction(actions.actions["NextLayer"])
+        self.addAction(actions.actions["PrevLayer"])
+        self.addDivider();
+        self.addAction(actions.actions["NextMediaReference"])
         self.addDivider();
         self.addAction(actions.actions["Exit"])
 
@@ -222,3 +228,16 @@ class Window(ftk.Menu):
         ftk.Menu.__init__(self, context, parent)
 
         self.addAction(actions.actions["FullScreen"])
+        self.addAction(actions.actions["PresentMode"])
+        self.addAction(actions.actions["FloatOnTop"])
+        self.addDivider();
+        self.addAction(actions.actions["FileToolBar"])
+        self.addAction(actions.actions["CompareToolBar"])
+        self.addAction(actions.actions["WindowToolBar"])
+        self.addAction(actions.actions["ViewToolBar"])
+        self.addAction(actions.actions["ToolsToolBar"])
+        self.addAction(actions.actions["TabBar"])
+        self.addAction(actions.actions["Timeline"])
+        self.addAction(actions.actions["BottomToolBar"])
+        self.addAction(actions.actions["StatusToolBar"])
+        self.addAction(actions.actions["Tools"])
