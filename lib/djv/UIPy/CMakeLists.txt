@@ -4,7 +4,8 @@ set(HEADERS_PRIVATE)
 set(SOURCE
     Bindings.cpp
     ColorWidgets.cpp
-    ViewWidgets.cpp)
+    ViewWidgets.cpp
+    Viewport.cpp)
 
 # Static. The bindings are linked by djvPy and nothing else, so there is no
 # API here for anything to import -- the module absorbs them.
