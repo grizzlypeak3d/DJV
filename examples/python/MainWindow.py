@@ -13,6 +13,7 @@ import FileActions
 import FrameActions
 import HelpActions
 import Menus
+import Viewport
 import PlaybackActions
 import TimelineActions
 import PlaybackBar
@@ -45,7 +46,8 @@ class MainWindow(ftk.MainWindow):
         self.title = title
 
         # Create the viewport and timeline, driven by the DJV models.
-        self._viewport = tl.ui.Viewport(context)
+        self._viewportWidget = Viewport.Widget(context, app)
+        self._viewport = self._viewportWidget.getViewport()
         self._timelineWidget = tl.ui.TimelineWidget(context, app.getTimeUnitsModel())
         # The current file's timeline and no other; left unset the widget
         # also draws one for each file being compared.
@@ -118,7 +120,7 @@ class MainWindow(ftk.MainWindow):
         self._splitter.split = window.splitter
         self._splitter2 = ftk.Splitter(context, ftk.Orientation.Horizontal, self._splitter)
         self._splitter2.split = window.splitter2
-        self._viewport.parent = self._splitter2
+        self._viewportWidget.parent = self._splitter2
         self._toolsWidget = Tools.ToolsWidget(context, app)
         self._toolsWidget.parent = self._splitter2
         self._timelineWidget.parent = self._splitter
@@ -176,7 +178,7 @@ class MainWindow(ftk.MainWindow):
                 self.app.open(event.data.text[0])
 
     def _playerUpdate(self, player):
-        self._viewport.player = player
+        self._viewportWidget.setPlayer(player)
         self._timelineWidget.player = player
 
     def _bgUpdate(self, value):
