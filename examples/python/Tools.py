@@ -571,7 +571,7 @@ class SettingsTool(IToolWidget):
 
         settingsModel = app.getSettingsModel()
         layout = ftk.VerticalLayout(context)
-        layout.spacingRole = ftk.SizeRole._None
+        layout.spacingRole = ftk.SizeRole.Border
         newFileNote = "Changes are applied to new files."
         sections = [
             ("Cache", [djv.ui.CacheSettingsWidget(context, settingsModel)]),
@@ -605,8 +605,10 @@ class SettingsTool(IToolWidget):
         sections.append(
             ("Miscellaneous",
              [djv.ui.MiscSettingsWidget(context, settingsModel)]))
+        self._bellows = {}
         for title, widgets in sections:
             vLayout = ftk.VerticalLayout(context)
+            vLayout.marginRole = ftk.SizeRole.Margin
             for widget in widgets:
                 if isinstance(widget, str):
                     ftk.Label(context, widget, vLayout)
@@ -614,6 +616,7 @@ class SettingsTool(IToolWidget):
                     widget.parent = vLayout
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = vLayout
+            self._bellows[title] = bellows
 
         ftk.Divider(context, ftk.Orientation.Vertical, layout)
         hLayout = ftk.HorizontalLayout(context, layout)
