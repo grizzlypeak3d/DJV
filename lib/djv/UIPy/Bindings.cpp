@@ -19,6 +19,7 @@ namespace djv
             settingsWidgets(mUI);
             fileThumbnail(mUI);
             frameRangePopup(mUI);
+            magnifyWidget(mUI);
         }
     }
 }

@@ -6,6 +6,7 @@ set(SOURCE
     ColorWidgets.cpp
     FileThumbnail.cpp
     FrameRangePopup.cpp
+    MagnifyWidget.cpp
     SettingsWidgets.cpp
     ViewWidgets.cpp
     Viewport.cpp)

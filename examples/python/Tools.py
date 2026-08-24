@@ -20,6 +20,10 @@ class IToolWidget(ftk.IContainer):
 
         self._app = weakref.ref(app)
         self._mainWindow = weakref.ref(mainWindow)
+        # The settings are kept rather than reached through the
+        # application, so the bellows can still be saved at exit when
+        # the application is already gone.
+        self._settings = app.settings
         self.name = name
 
         self._label = ftk.Label(context, name)
@@ -45,6 +49,22 @@ class IToolWidget(ftk.IContainer):
     def _close(self):
         if self._app():
             self._app().getToolsModel().setToolOpen(self.name, False)
+
+    def _loadBellows(self, bellows):
+        for title, b in bellows.items():
+            found, value = self._settings.getBool(
+                "/{}/Bellows/{}".format(self.name, title))
+            if found:
+                b.open = value
+
+    def _saveBellows(self, bellows):
+        for title, b in bellows.items():
+            self._settings.setBool(
+                "/{}/Bellows/{}".format(self.name, title), b.open)
+
+    def __del__(self):
+        if hasattr(self, "_bellows"):
+            self._saveBellows(self._bellows)
 
 class InfoTool(IToolWidget):
     """
@@ -251,6 +271,8 @@ class FilesTool(IToolWidget):
         form.addRow("Same size:", self._sameSizeCheckBox)
         self._compareBellows = ftk.Bellows(context, "Compare", layout)
         self._compareBellows.widget = vLayout
+        self._bellows = {"Compare": self._compareBellows}
+        self._loadBellows(self._bellows)
 
         self._setContent(layout)
 
@@ -453,6 +475,7 @@ class ViewTool(IToolWidget):
         viewportModel = app.getViewportModel()
         layout = ftk.VerticalLayout(context)
         layout.spacingRole = ftk.SizeRole._None
+        self._bellows = {}
         for title, widget in [
             ("Options", djv.ui.ViewOptionsWidget(context, viewportModel)),
             ("Aspect Ratio", djv.ui.ViewAspectRatioWidget(context, viewportModel)),
@@ -464,7 +487,9 @@ class ViewTool(IToolWidget):
         ]:
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget
+            self._bellows[title] = bellows
         self._setContent(layout)
+        self._loadBellows(self._bellows)
 
 class ColorTool(IToolWidget):
     """
@@ -477,6 +502,7 @@ class ColorTool(IToolWidget):
         viewportModel = app.getViewportModel()
         layout = ftk.VerticalLayout(context)
         layout.spacingRole = ftk.SizeRole._None
+        self._bellows = {}
         for title, widget in [
             ("OCIO", djv.ui.OCIOWidget(context, colorModel)),
             ("LUT", djv.ui.LUTWidget(context, colorModel)),
@@ -488,7 +514,9 @@ class ColorTool(IToolWidget):
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget
             bellows.toolWidget = widget.enabledCheckBox
+            self._bellows[title] = bellows
         self._setContent(layout)
+        self._loadBellows(self._bellows)
 
 class MessagesTool(IToolWidget):
     """
@@ -631,6 +659,8 @@ class SettingsTool(IToolWidget):
         resetButton.tooltip = "Restore settings to default values."
         self._setContent(layout)
 
+        self._loadBellows(self._bellows)
+
         appWeak = weakref.ref(app)
         saveButton.setClickedCallback(
             lambda: appWeak().getSettingsModel().save())
@@ -711,11 +741,38 @@ class ColorPickerTool(IToolWidget):
             s.append(ftk.getLabel(binding.button))
         self._mouseLabel.text = "{} Click".format(" + ".join(s))
 
+class MagnifyTool(IToolWidget):
+    """
+    This tool magnifies the viewport at the sample position.
+    """
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(
+            self, context, app, mainWindow, "Magnify", "MagnifyTool", parent)
+
+        self._widget = djv.ui.MagnifyWidget(
+            context,
+            app.settings,
+            mainWindow.getViewport(),
+            app.getFilesModel(),
+            app.getColorModel(),
+            app.getViewportModel(),
+            app.getSettingsModel())
+        # The magnified view has no natural size of its own, so this
+        # takes what room is left rather than a band of its own.
+        self.vStretch = ftk.Stretch.Expanding
+        self._setContent(self._widget)
+
+        selfWeak = weakref.ref(self)
+        self._playerObserver = tl.PlayerObserver(
+            app.observePlayer(),
+            lambda player: selfWeak()._widget.setPlayer(player))
+
 # The tools this application implements so far; the tools model lists
 # more, and the actions only offer what can actually open.
 FACTORY = {
     "Files": FilesTool,
     "Color Picker": ColorPickerTool,
+    "Magnify": MagnifyTool,
     "View": ViewTool,
     "Color": ColorTool,
     "Information": InfoTool,
