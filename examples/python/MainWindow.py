@@ -121,7 +121,7 @@ class MainWindow(ftk.MainWindow):
         self._splitter2 = ftk.Splitter(context, ftk.Orientation.Horizontal, self._splitter)
         self._splitter2.split = window.splitter2
         self._viewportWidget.parent = self._splitter2
-        self._toolsWidget = Tools.ToolsWidget(context, app)
+        self._toolsWidget = Tools.ToolsWidget(context, app, self)
         self._toolsWidget.parent = self._splitter2
         self._timelineWidget.parent = self._splitter
         ftk.Divider(context, ftk.Orientation.Vertical, self._layout)

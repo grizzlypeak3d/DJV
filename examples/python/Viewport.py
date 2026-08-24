@@ -14,8 +14,7 @@ class Widget(ftk.IContainer):
     """
     This widget stacks the HUD (heads up display) over the viewport. The
     C++ application subclasses the viewport for this; the Python
-    application wraps it instead. The color picker and render items need
-    the C++ viewport's picking, so they are not shown here.
+    application wraps it instead.
     """
     def __init__(self, context, app, parent = None):
         ftk.IContainer.__init__(self, context, "Viewport.Widget", parent)
@@ -45,12 +44,26 @@ class Widget(ftk.IContainer):
         self._viewZoomLabel = ftk.Label(context)
         self._viewZoomLabel.font = ftk.FontType.Mono
         self._viewZoomLabel.marginRole = ftk.SizeRole.MarginSmall
+        self._renderLabel = ftk.Label(context)
+        self._renderLabel.font = ftk.FontType.Mono
+        self._renderLabel.marginRole = ftk.SizeRole.MarginSmall
+        self._colorPickerSwatch = ftk.ColorSwatch(context)
+        self._colorPickerSwatch.vAlign = ftk.VAlign.Center
+        self._colorPickerLabel = ftk.Label(context)
+        self._colorPickerLabel.font = ftk.FontType.Mono
+        self._colorPickerLabel.marginRole = ftk.SizeRole.MarginSmall
+        self._colorPickerLayout = ftk.HorizontalLayout(context)
+        self._colorPickerLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._colorPickerSwatch.parent = self._colorPickerLayout
+        self._colorPickerLabel.parent = self._colorPickerLayout
         self._hudWidgets = {
             djv.models.HUDItem.FileName: self._fileNameLabel,
             djv.models.HUDItem.Time: self._timeLabel,
             djv.models.HUDItem.Info: self._infoLabel,
             djv.models.HUDItem.Cache: self._cacheLabel,
             djv.models.HUDItem.ViewZoom: self._viewZoomLabel,
+            djv.models.HUDItem.Render: self._renderLabel,
+            djv.models.HUDItem.ColorPicker: self._colorPickerLayout,
         }
 
         # One layout per corner, arranged like the C++ viewport's HUD.
@@ -103,6 +116,15 @@ class Widget(ftk.IContainer):
         self._hudOptionsObserver = djv.models.HUDOptionsObserver(
             app.getViewportModel().observeHUDOptions,
             lambda value: selfWeak()._hudOptionsUpdate(value))
+        self._pickObserver = tl.ui.OptionalV2IObserver(
+            self._viewport.observePick,
+            lambda value: selfWeak()._pickUpdate())
+        self._colorSampleObserver = tl.ui.OptionalColor4FObserver(
+            self._viewport.observeColorSample,
+            lambda value: selfWeak()._pickUpdate())
+        self._mouseSettingsObserver = djv.models.MouseSettingsObserver(
+            app.getSettingsModel().observeMouse,
+            lambda value: selfWeak()._mouseSettingsUpdate(value))
 
     def getViewport(self):
         return self._viewport
@@ -139,6 +161,34 @@ class Widget(ftk.IContainer):
 
     def _zoomUpdate(self, value):
         self._viewZoomLabel.text = "Zoom: {:.2f}".format(value)
+
+    def _mouseSettingsUpdate(self, settings):
+        # The mouse bindings go to the viewport like the C++ application's.
+        none = djv.models.MouseActionBinding(
+            ftk.MouseButton._None, ftk.KeyModifier._None)
+        b = settings.bindings.get(djv.models.MouseAction.PanView, none)
+        self._viewport.setPanBinding(b.button, b.modifier)
+        b = settings.bindings.get(djv.models.MouseAction.CompareWipe, none)
+        self._viewport.setWipeBinding(b.button, b.modifier)
+        b = settings.bindings.get(djv.models.MouseAction.Pick, none)
+        self._viewport.setPickBinding(b.button, b.modifier)
+
+    def _pickUpdate(self):
+        colorSample = self._viewport.observeColorSample.get()
+        pick = self._viewport.observePick.get()
+        self._colorPickerSwatch.color = \
+            colorSample if colorSample is not None else ftk.Color4F()
+        # The HUD sits under the pointer, so the line keeps its field
+        # widths whether or not there is a sample, the same as the C++
+        # application's.
+        if colorSample is not None and pick is not None:
+            text = "Color: {:5.2f} {:5.2f} {:5.2f} {:5.2f}, Pixel: {:4d}, {:4d}".format(
+                colorSample.r, colorSample.g, colorSample.b, colorSample.a,
+                pick.x, pick.y)
+        else:
+            text = "Color: {0:>5} {0:>5} {0:>5} {0:>5}, Pixel: {1:>4}, {1:>4}".format(
+                "-", "-")
+        self._colorPickerLabel.text = text
 
     def _currentTimeUpdate(self, value):
         self._currentTime = value
@@ -196,3 +246,18 @@ class Widget(ftk.IContainer):
         s = "Cache: {}".format(", ".join(cache)) if cache else ""
         self._cacheLabel.text = s
         self._cacheLabel.setVisible(len(s) > 0)
+
+        # What is actually rendered. The aspect ratio overrides are not
+        # wrapped yet, so only the media's own pixel aspect ratio applies.
+        s = ""
+        if ioInfo and ioInfo.video:
+            videoInfo = ioInfo.video[0]
+            par = videoInfo.pixelAspectRatio
+            w = int(round(videoInfo.size.w * par))
+            h = videoInfo.size.h
+            if w > 0 and h > 0:
+                s = "Render: {}x{}:{:.2f}".format(w, h, w / h)
+                if abs(par - 1.0) > 0.001:
+                    s += ", PAR: {:.2f}".format(par)
+        self._renderLabel.text = s
+        self._renderLabel.setVisible(len(s) > 0)

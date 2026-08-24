@@ -15,10 +15,11 @@ class IToolWidget(ftk.IContainer):
     Base class for tool widgets: a title row with a close button, and
     the tool's content below it.
     """
-    def __init__(self, context, app, name, objectName, parent = None):
+    def __init__(self, context, app, mainWindow, name, objectName, parent = None):
         ftk.IContainer.__init__(self, context, objectName, parent)
 
         self._app = weakref.ref(app)
+        self._mainWindow = weakref.ref(mainWindow)
         self.name = name
 
         self._label = ftk.Label(context, name)
@@ -49,9 +50,9 @@ class InfoTool(IToolWidget):
     """
     This tool displays information about the current file.
     """
-    def __init__(self, context, app, parent = None):
+    def __init__(self, context, app, mainWindow, parent = None):
         IToolWidget.__init__(
-            self, context, app, "Information", "InfoTool", parent)
+            self, context, app, mainWindow, "Information", "InfoTool", parent)
 
         self._formLayout = ftk.FormLayout(context)
         self._formLayout.marginRole = ftk.SizeRole.MarginSmall
@@ -90,8 +91,8 @@ class AudioTool(IToolWidget):
     """
     This tool provides the audio controls.
     """
-    def __init__(self, context, app, parent = None):
-        IToolWidget.__init__(self, context, app, "Audio", "AudioTool", parent)
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(self, context, app, mainWindow, "Audio", "AudioTool", parent)
 
         audioModel = app.getAudioModel()
 
@@ -177,8 +178,8 @@ class FilesTool(IToolWidget):
     """
     This tool manages the open files and the comparison options.
     """
-    def __init__(self, context, app, parent = None):
-        IToolWidget.__init__(self, context, app, "Files", "FilesTool", parent)
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(self, context, app, mainWindow, "Files", "FilesTool", parent)
 
         self._rowWidgets = []
 
@@ -381,8 +382,8 @@ class ViewTool(IToolWidget):
     """
     This tool provides the view options.
     """
-    def __init__(self, context, app, parent = None):
-        IToolWidget.__init__(self, context, app, "View", "ViewTool", parent)
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(self, context, app, mainWindow, "View", "ViewTool", parent)
 
         viewportModel = app.getViewportModel()
         layout = ftk.VerticalLayout(context)
@@ -517,8 +518,8 @@ class ColorTool(IToolWidget):
     """
     This tool provides the color management and adjustments.
     """
-    def __init__(self, context, app, parent = None):
-        IToolWidget.__init__(self, context, app, "Color", "ColorTool", parent)
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(self, context, app, mainWindow, "Color", "ColorTool", parent)
 
         colorModel = app.getColorModel()
         # The tool owns the OCIO model and syncs it both ways with the
@@ -717,9 +718,9 @@ class MessagesTool(IToolWidget):
     """
     This tool displays the warning and error messages.
     """
-    def __init__(self, context, app, parent = None):
+    def __init__(self, context, app, mainWindow, parent = None):
         IToolWidget.__init__(
-            self, context, app, "Messages", "MessagesTool", parent)
+            self, context, app, mainWindow, "Messages", "MessagesTool", parent)
 
         sysLogModel = app.getSysLogModel()
 
@@ -753,9 +754,9 @@ class SysLogTool(IToolWidget):
     """
     This tool displays the system log.
     """
-    def __init__(self, context, app, parent = None):
+    def __init__(self, context, app, mainWindow, parent = None):
         IToolWidget.__init__(
-            self, context, app, "System Log", "SysLogTool", parent)
+            self, context, app, mainWindow, "System Log", "SysLogTool", parent)
 
         sysLogModel = app.getSysLogModel()
 
@@ -788,9 +789,9 @@ class SettingsTool(IToolWidget):
     """
     This tool provides the settings.
     """
-    def __init__(self, context, app, parent = None):
+    def __init__(self, context, app, mainWindow, parent = None):
         IToolWidget.__init__(
-            self, context, app, "Settings", "SettingsTool", parent)
+            self, context, app, mainWindow, "Settings", "SettingsTool", parent)
 
         settingsModel = app.getSettingsModel()
         layout = ftk.VerticalLayout(context)
@@ -965,10 +966,75 @@ class SettingsTool(IToolWidget):
     def _miscUpdate(self, value):
         self._tooltipsCheckBox.checked = value.tooltipsEnabled
 
+class ColorPickerTool(IToolWidget):
+    """
+    This tool displays the picked color. The pick mouse action samples
+    the viewport.
+    """
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(
+            self, context, app, mainWindow,
+            "Color Picker", "ColorPickerTool", parent)
+
+        self._colorSwatch = ftk.ColorSwatch(context)
+        self._colorSwatch.color = ftk.Color4F(0.0, 0.0, 0.0)
+        self._colorSwatch.border = False
+        self._colorSwatch.sizeRole = ftk.SizeRole.SwatchLarge
+
+        self._colorLabel = ftk.Label(context)
+        self._colorLabel.font = ftk.FontType.Mono
+        self._pixelLabel = ftk.Label(context)
+        self._pixelLabel.font = ftk.FontType.Mono
+        self._mouseLabel = ftk.Label(context)
+
+        layout = ftk.VerticalLayout(context)
+        layout.spacingRole = ftk.SizeRole._None
+        self._colorSwatch.parent = layout
+        form = ftk.FormLayout(context, layout)
+        form.marginRole = ftk.SizeRole.Margin
+        form.spacingRole = ftk.SizeRole.SpacingSmall
+        form.addRow("Color:", self._colorLabel)
+        form.addRow("Pixel:", self._pixelLabel)
+        form.addRow("Mouse:", self._mouseLabel)
+        self._setContent(layout)
+
+        viewport = mainWindow.getViewport()
+        selfWeak = weakref.ref(self)
+        self._pickObserver = tl.ui.OptionalV2IObserver(
+            viewport.observePick,
+            lambda value: selfWeak()._pickUpdate(value))
+        self._colorSampleObserver = tl.ui.OptionalColor4FObserver(
+            viewport.observeColorSample,
+            lambda value: selfWeak()._colorSampleUpdate(value))
+        self._mouseSettingsObserver = djv.models.MouseSettingsObserver(
+            app.getSettingsModel().observeMouse,
+            lambda value: selfWeak()._mouseSettingsUpdate(value))
+
+    def _pickUpdate(self, value):
+        self._pixelLabel.text = \
+            "{} {}".format(value.x, value.y) if value is not None else "-"
+
+    def _colorSampleUpdate(self, value):
+        self._colorSwatch.color = value if value is not None else ftk.Color4F()
+        self._colorLabel.text = \
+            "{:.2f} {:.2f} {:.2f} {:.2f}".format(
+                value.r, value.g, value.b, value.a) \
+            if value is not None else "-"
+
+    def _mouseSettingsUpdate(self, settings):
+        s = []
+        binding = settings.bindings.get(djv.models.MouseAction.Pick)
+        if binding is not None and binding.button != ftk.MouseButton._None:
+            if binding.modifier != ftk.KeyModifier._None:
+                s.append(ftk.to_string(binding.modifier))
+            s.append(ftk.getLabel(binding.button))
+        self._mouseLabel.text = "{} Click".format(" + ".join(s))
+
 # The tools this application implements so far; the tools model lists
 # more, and the actions only offer what can actually open.
 FACTORY = {
     "Files": FilesTool,
+    "Color Picker": ColorPickerTool,
     "View": ViewTool,
     "Color": ColorTool,
     "Information": InfoTool,
@@ -982,10 +1048,11 @@ class ToolsWidget(ftk.IContainer):
     """
     This widget holds the open tools.
     """
-    def __init__(self, context, app, parent = None):
+    def __init__(self, context, app, mainWindow, parent = None):
         ftk.IContainer.__init__(self, context, "ToolsWidget", parent)
 
         self._app = weakref.ref(app)
+        self._mainWindow = weakref.ref(mainWindow)
         self._widgets = {}
 
         self._layout = ftk.VerticalLayout(context)
@@ -1010,7 +1077,8 @@ class ToolsWidget(ftk.IContainer):
                 del self._widgets[name]
         for name in names:
             if name not in self._widgets and name in FACTORY:
-                widget = FACTORY[name](self.context, self._app())
+                widget = FACTORY[name](
+                    self.context, self._app(), self._mainWindow())
                 widget.parent = self._layout
                 self._widgets[name] = widget
         self.setVisible(len(self._widgets) > 0)
