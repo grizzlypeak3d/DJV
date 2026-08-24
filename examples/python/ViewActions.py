@@ -52,7 +52,7 @@ class Actions:
 
         self.actions["HUD"] = ftk.Action(
             "HUD",
-            ftk.KeyShortcut(ftk.Key.H, ftk.commandKeyModifier),
+            ftk.KeyShortcut(ftk.Key.H, ftk.KeyModifier.Control),
             checkedCallback = Util.weak(self._hudCallback))
         self.actions["HUD"].tooltip = "Toggle the HUD (heads up display)."
 

@@ -35,6 +35,7 @@ class Actions:
         shortcuts = {
             "B": ftk.KeyShortcut(ftk.Key.B, ftk.KeyModifier.Control),
             "Wipe": ftk.KeyShortcut(ftk.Key.W, ftk.KeyModifier.Control),
+            "Tile": ftk.KeyShortcut(ftk.Key.T, ftk.KeyModifier.Control),
         }
         self.modes = tl.getCompareEnums()
         self.modeGroup = ftk.ActionGroup(ftk.ActionGroupType.Radio)

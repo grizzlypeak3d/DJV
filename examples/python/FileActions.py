@@ -36,26 +36,28 @@ class Actions:
         self.actions["CloseAll"] = ftk.Action(
             "Close All",
             "FileCloseAll",
-            ftk.KeyShortcut(ftk.Key.E, ftk.KeyModifier.Shift),
+            ftk.KeyShortcut(
+                ftk.Key.E, ftk.KeyModifier.Shift, ftk.commandKeyModifier),
             lambda: appWeak().getFilesModel().closeAll())
         self.actions["CloseAll"].tooltip = "Close all of the files."
 
         self.actions["Next"] = ftk.Action(
             "Next File",
-            ftk.KeyShortcut(ftk.Key.PageDown, ftk.commandKeyModifier),
+            ftk.KeyShortcut(ftk.Key.PageDown, ftk.KeyModifier.Control),
             lambda: appWeak().getFilesModel().next())
         self.actions["Next"].tooltip = "Change to the next file."
 
         self.actions["Prev"] = ftk.Action(
             "Previous File",
-            ftk.KeyShortcut(ftk.Key.PageUp, ftk.commandKeyModifier),
+            ftk.KeyShortcut(ftk.Key.PageUp, ftk.KeyModifier.Control),
             lambda: appWeak().getFilesModel().prev())
         self.actions["Prev"].tooltip = "Change to the previous file."
 
         self.actions["Reload"] = ftk.Action(
             "Reload",
             "FileReload",
-            ftk.KeyShortcut(ftk.Key.R, ftk.commandKeyModifier),
+            ftk.KeyShortcut(
+                ftk.Key.R, ftk.KeyModifier.Shift, ftk.commandKeyModifier),
             lambda: appWeak().getFilesModel().refresh())
         self.actions["Reload"].tooltip = "Reload the current file."
 
