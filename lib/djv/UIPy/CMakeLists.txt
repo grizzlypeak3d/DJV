@@ -4,6 +4,8 @@ set(HEADERS_PRIVATE)
 set(SOURCE
     Bindings.cpp
     ColorWidgets.cpp
+    FileThumbnail.cpp
+    FrameRangePopup.cpp
     SettingsWidgets.cpp
     ViewWidgets.cpp
     Viewport.cpp)

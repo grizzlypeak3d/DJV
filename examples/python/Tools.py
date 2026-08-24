@@ -182,6 +182,10 @@ class FilesTool(IToolWidget):
         IToolWidget.__init__(self, context, app, mainWindow, "Files", "FilesTool", parent)
 
         self._rowWidgets = []
+        self._rangePopup = None
+        self._rangeItem = None
+        self._rangeValue = None
+        self._rangeTimer = ftk.Timer(context)
 
         self._aButtonGroup = ftk.ButtonGroup(context, ftk.ButtonGroupType.Radio)
         self._bButtonGroup = ftk.ButtonGroup(context, ftk.ButtonGroupType.Check)
@@ -325,20 +329,26 @@ class FilesTool(IToolWidget):
         app = self._app()
         a = app.getFilesModel().a
         b = app.getFilesModel().b
+        seqExts = tl.getExts(app.context, int(tl.FileType.Seq))
         for row, item in enumerate(files):
+            thumbnail = djv.ui.FileThumbnail(
+                self.context, item,
+                app.getSettingsModel().ioOptions, self._grid)
+            self._grid.setGridPos(thumbnail, row, 0)
+
             nameButton = ftk.ToolButton(
                 self.context, item.path.fileName, self._grid)
             nameButton.checked = item is a
             nameButton.hStretch = ftk.Stretch.Expanding
             nameButton.tooltip = item.path.get() + "\n\nSet the A file."
             self._aButtonGroup.addButton(nameButton)
-            self._grid.setGridPos(nameButton, row, 0)
+            self._grid.setGridPos(nameButton, row, 1)
 
             bButton = ftk.ToolButton(self.context, "B", self._grid)
             bButton.checked = any(item is i for i in b)
             bButton.tooltip = "Set the B file(s)."
             self._bButtonGroup.addButton(bButton)
-            self._grid.setGridPos(bButton, row, 1)
+            self._grid.setGridPos(bButton, row, 2)
 
             layerComboBox = ftk.ComboBox(self.context, self._grid)
             layerComboBox.setItems(item.videoLayers)
@@ -348,9 +358,64 @@ class FilesTool(IToolWidget):
             layerComboBox.setIndexCallback(
                 lambda value, captured = item, appWeak = self._app:
                     appWeak().getFilesModel().setLayer(captured, value))
-            self._grid.setGridPos(layerComboBox, row, 2)
+            self._grid.setGridPos(layerComboBox, row, 3)
 
-            self._rowWidgets.append((nameButton, bButton, layerComboBox))
+            # Only an image sequence has a frame range to state. The range
+            # is what the sequence is meant to cover, which need not be
+            # what is on disk yet.
+            if item.path.hasNum and item.path.testExt(seqExts):
+                if item.timeRange is not None:
+                    start = int(item.timeRange.start_time().value())
+                    duration = int(item.timeRange.duration().value())
+                    frames = ftk.RangeI64(start, start + duration - 1)
+                elif item.path.frames is not None:
+                    frames = item.path.frames
+                else:
+                    frames = ftk.RangeI64(0, 0)
+                rangeButton = ftk.ToolButton(
+                    self.context,
+                    "{}-{}".format(frames.min, frames.max),
+                    self._grid)
+                rangeButton.tooltip = "The frame range of the sequence."
+                rangeButton.setClickedCallback(
+                    lambda captured = item, r = frames, index = row, \
+                        f = Util.weak(self._showRangePopup):
+                        f(captured, r, index))
+                self._grid.setGridPos(rangeButton, row, 4)
+            else:
+                rangeButton = None
+
+            self._rowWidgets.append(
+                (nameButton, bButton, layerComboBox, rangeButton))
+
+    def _showRangePopup(self, item, frames, row):
+        if self._rangePopup or row >= len(self._rowWidgets):
+            return
+        button = self._rowWidgets[row][3]
+        if button is None:
+            return
+        self._rangePopup = djv.ui.FrameRangePopup(self.context, frames)
+        selfWeak = weakref.ref(self)
+        self._rangePopup.setCallback(
+            lambda value, captured = item:
+                selfWeak()._rangeUpdate(captured, value))
+        self._rangePopup.open(self.window, button.geometry, None)
+        self._rangePopup.setCloseCallback(
+            lambda: setattr(selfWeak(), "_rangePopup", None))
+
+    def _rangeUpdate(self, item, value):
+        self._rangeItem = item
+        self._rangeValue = value
+        # Restarted on each change, so holding a spin box down reopens the
+        # file once, at the range it is left on, rather than at every value
+        # passed through on the way there.
+        self._rangeTimer.start(0.5, Util.weak(self._rangeTimeout))
+
+    def _rangeTimeout(self):
+        if self._rangeItem is not None:
+            self._app().getFilesModel().setFrames(
+                self._rangeItem, self._rangeValue)
+            self._rangeItem = None
 
     def _aIndexUpdate(self, value):
         self._aButtonGroup.setChecked(value, True)
