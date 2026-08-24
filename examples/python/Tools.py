@@ -433,6 +433,15 @@ class ViewTool(IToolWidget):
         hudForm = ftk.FormLayout(context, hudLayout)
         hudForm.spacingRole = ftk.SizeRole.SpacingSmall
         hudForm.addRow("Enabled:", self._hudCheckBox)
+        self._hudPosComboBoxes = {}
+        posLabels = [djv.models.getLabel(pos)
+                     for pos in djv.models.getHUDPosEnums()]
+        for item in djv.models.getHUDItemEnums():
+            comboBox = ftk.ComboBox(context, posLabels)
+            comboBox.hStretch = ftk.Stretch.Expanding
+            self._hudPosComboBoxes[item] = comboBox
+            label = djv.models.getLabel(item)
+            hudForm.addRow(label[:1] + label[1:].lower() + ":", comboBox)
         bellows = ftk.Bellows(context, "HUD", layout)
         bellows.widget = hudLayout
 
@@ -463,6 +472,11 @@ class ViewTool(IToolWidget):
         self._hudCheckBox.setCheckedCallback(
             lambda value, f = Util.weak(self._setHUD):
                 f(appWeak(), value))
+        for item, comboBox in self._hudPosComboBoxes.items():
+            comboBox.setIndexCallback(
+                lambda value, captured = item, \
+                    f = Util.weak(self._setHUDPos):
+                    f(appWeak(), captured, value))
 
         selfWeak = weakref.ref(self)
         self._bgObserver = djv.models.BackgroundOptionsObserver(
@@ -499,6 +513,13 @@ class ViewTool(IToolWidget):
         options.enabled = value
         app.getViewportModel().hudOptions = options
 
+    def _setHUDPos(self, app, item, value):
+        options = app.getViewportModel().hudOptions
+        items = options.items
+        items[item] = djv.models.getHUDPosEnums()[value]
+        options.items = items
+        app.getViewportModel().hudOptions = options
+
     def _bgUpdate(self, options):
         self._backgroundComboBox.currentIndex = \
             tl.getBackgroundEnums().index(options.type)
@@ -513,6 +534,9 @@ class ViewTool(IToolWidget):
 
     def _hudUpdate(self, options):
         self._hudCheckBox.checked = options.enabled
+        for item, comboBox in self._hudPosComboBoxes.items():
+            pos = options.items.get(item, djv.models.HUDPos._None)
+            comboBox.currentIndex = djv.models.getHUDPosEnums().index(pos)
 
 class ColorTool(IToolWidget):
     """
@@ -632,6 +656,7 @@ class ColorTool(IToolWidget):
         }
         for section, fields in [
             ("Color", [
+                ("add", "Add", -1.0, 1.0, 0.0, True),
                 ("brightness", "Brightness", 0.0, 4.0, 1.0, True),
                 ("contrast", "Contrast", 0.0, 4.0, 1.0, True),
                 ("saturation", "Saturation", 0.0, 4.0, 1.0, True),
