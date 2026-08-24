@@ -5,9 +5,6 @@
 
 #include <djv/App/Export.h>
 #include <djv/App/IToolWidget.h>
-#include <djv/Models/Export.h>
-
-#include <djv/Models/SettingsModel.h>
 
 namespace djv
 {
@@ -37,18 +34,6 @@ namespace djv
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:
-            std::vector<ftk::ImageInfo> _getInfos() const;
-            ftk::Size2I _getDefaultSize() const;
-            ftk::Size2I _getWidthSize(int width) const;
-            ftk::Size2I _getExportSize(const models::ExportSettings&) const;
-            void _sizeUpdate();
-            void _widgetUpdate(const models::ExportSettings&);
-            OTIO_NS::TimeRange _getExportRange(models::ExportFileType) const;
-            void _export(models::ExportFileType);
-            void _exportStart(models::ExportFileType);
-            bool _exportFrame();
-            void _exportAudio();
-
             FTK_PRIVATE();
         };
     }

@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/ExportWidgets.h>
+#include <djv/UI/ExportWidgets.h>
 
-#include <djv/App/App.h>
 #include <djv/Models/TimeUnitsModel.h>
 
 #include <tlRender/Timeline/Player.h>
@@ -30,7 +29,7 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
         namespace
         {
@@ -227,20 +226,19 @@ namespace djv
             std::shared_ptr<ftk::PushButton> exportButton;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<models::ExportSettings> > settingsObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
         };
 
         void ImageExportWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settingsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             IExportWidget::_init(context, "djv::app::ImageExportWidget", parent);
             FTK_P();
 
-            p.settings = app->getSettingsModel();
+            p.settings = settingsModel;
             p.exts = getImageExts(context);
 
             p.baseEdit = ftk::LineEdit::create(context);
@@ -272,29 +270,6 @@ namespace djv
             formLayout->addRow("File:", p.fileLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
             p.exportButton->setParent(p.layout);
-
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
-                app->observePlayer(),
-                [this](const std::shared_ptr<tl::Player>& value)
-                {
-                    FTK_P();
-                    p.player = value;
-                    p.exportButton->setEnabled(value.get());
-                    if (value)
-                    {
-                        p.currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
-                            value->observeCurrentTime(),
-                            [this](const OTIO_NS::RationalTime&)
-                            {
-                                _infoUpdate();
-                            });
-                    }
-                    else
-                    {
-                        p.currentTimeObserver.reset();
-                        _infoUpdate();
-                    }
-                });
 
             p.settingsObserver = ftk::Observer<models::ExportSettings>::create(
                 p.settings->observeExport(),
@@ -348,12 +323,33 @@ namespace djv
 
         std::shared_ptr<ImageExportWidget> ImageExportWidget::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settingsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ImageExportWidget>(new ImageExportWidget);
-            out->_init(context, app, parent);
+            out->_init(context, settingsModel, parent);
             return out;
+        }
+
+        void ImageExportWidget::setPlayer(const std::shared_ptr<tl::Player>& value)
+        {
+                FTK_P();
+                p.player = value;
+                p.exportButton->setEnabled(value.get());
+                if (value)
+                {
+                    p.currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
+                        value->observeCurrentTime(),
+                        [this](const OTIO_NS::RationalTime&)
+                        {
+                            _infoUpdate();
+                        });
+                }
+                else
+                {
+                    p.currentTimeObserver.reset();
+                    _infoUpdate();
+                }
         }
 
         void ImageExportWidget::setExportCallback(const std::function<void(void)>& value)
@@ -396,7 +392,6 @@ namespace djv
             std::shared_ptr<ftk::PushButton> exportButton;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<models::ExportSettings> > settingsObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
@@ -404,14 +399,15 @@ namespace djv
 
         void SeqExportWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settingsModel,
+            const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             IExportWidget::_init(context, "djv::app::SeqExportWidget", parent);
             FTK_P();
 
-            p.settings = app->getSettingsModel();
-            p.timeUnitsModel = app->getTimeUnitsModel();
+            p.settings = settingsModel;
+            p.timeUnitsModel = timeUnitsModel;
             p.exts = getImageExts(context);
 
             p.baseEdit = ftk::LineEdit::create(context);
@@ -446,29 +442,6 @@ namespace djv
             formLayout->addRow("Range:", p.rangeLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
             p.exportButton->setParent(p.layout);
-
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
-                app->observePlayer(),
-                [this](const std::shared_ptr<tl::Player>& value)
-                {
-                    FTK_P();
-                    p.player = value;
-                    p.exportButton->setEnabled(value.get());
-                    if (value)
-                    {
-                        p.inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
-                            value->observeInOutRange(),
-                            [this](const OTIO_NS::TimeRange&)
-                            {
-                                _infoUpdate();
-                            });
-                    }
-                    else
-                    {
-                        p.inOutRangeObserver.reset();
-                        _infoUpdate();
-                    }
-                });
 
             p.settingsObserver = ftk::Observer<models::ExportSettings>::create(
                 p.settings->observeExport(),
@@ -529,12 +502,34 @@ namespace djv
 
         std::shared_ptr<SeqExportWidget> SeqExportWidget::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settingsModel,
+            const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<SeqExportWidget>(new SeqExportWidget);
-            out->_init(context, app, parent);
+            out->_init(context, settingsModel, timeUnitsModel, parent);
             return out;
+        }
+
+        void SeqExportWidget::setPlayer(const std::shared_ptr<tl::Player>& value)
+        {
+                FTK_P();
+                p.player = value;
+                p.exportButton->setEnabled(value.get());
+                if (value)
+                {
+                    p.inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
+                        value->observeInOutRange(),
+                        [this](const OTIO_NS::TimeRange&)
+                        {
+                            _infoUpdate();
+                        });
+                }
+                else
+                {
+                    p.inOutRangeObserver.reset();
+                    _infoUpdate();
+                }
         }
 
         void SeqExportWidget::setExportCallback(const std::function<void(void)>& value)
@@ -589,7 +584,6 @@ namespace djv
             std::shared_ptr<ftk::PushButton> exportButton;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<models::ExportSettings> > settingsObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
@@ -597,14 +591,15 @@ namespace djv
 
         void MovieExportWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settingsModel,
+            const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             IExportWidget::_init(context, "djv::app::MovieExportWidget", parent);
             FTK_P();
 
-            p.settings = app->getSettingsModel();
-            p.timeUnitsModel = app->getTimeUnitsModel();
+            p.settings = settingsModel;
+            p.timeUnitsModel = timeUnitsModel;
 
             auto ioSystem = context->getSystem<tl::WriteSystem>();
             for (const auto& ext : ioSystem->getExts(static_cast<int>(tl::FileType::Media)))
@@ -663,31 +658,6 @@ namespace djv
             formLayout->addRow("Range:", p.rangeLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
             p.exportButton->setParent(p.layout);
-
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
-                app->observePlayer(),
-                [this](const std::shared_ptr<tl::Player>& value)
-                {
-                    FTK_P();
-                    p.player = value;
-                    p.exportButton->setEnabled(value.get());
-                    p.audioCodecComboBox->setEnabled(
-                        !value || value->getIOInfo().audio.isValid());
-                    if (value)
-                    {
-                        p.inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
-                            value->observeInOutRange(),
-                            [this](const OTIO_NS::TimeRange&)
-                            {
-                                _infoUpdate();
-                            });
-                    }
-                    else
-                    {
-                        p.inOutRangeObserver.reset();
-                        _infoUpdate();
-                    }
-                });
 
             p.settingsObserver = ftk::Observer<models::ExportSettings>::create(
                 p.settings->observeExport(),
@@ -766,12 +736,36 @@ namespace djv
 
         std::shared_ptr<MovieExportWidget> MovieExportWidget::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::SettingsModel>& settingsModel,
+            const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<MovieExportWidget>(new MovieExportWidget);
-            out->_init(context, app, parent);
+            out->_init(context, settingsModel, timeUnitsModel, parent);
             return out;
+        }
+
+        void MovieExportWidget::setPlayer(const std::shared_ptr<tl::Player>& value)
+        {
+                FTK_P();
+                p.player = value;
+                p.exportButton->setEnabled(value.get());
+                p.audioCodecComboBox->setEnabled(
+                    !value || value->getIOInfo().audio.isValid());
+                if (value)
+                {
+                    p.inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
+                        value->observeInOutRange(),
+                        [this](const OTIO_NS::TimeRange&)
+                        {
+                            _infoUpdate();
+                        });
+                }
+                else
+                {
+                    p.inOutRangeObserver.reset();
+                    _infoUpdate();
+                }
         }
 
         void MovieExportWidget::setExportCallback(const std::function<void(void)>& value)

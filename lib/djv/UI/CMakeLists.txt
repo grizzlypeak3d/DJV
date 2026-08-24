@@ -10,6 +10,8 @@ set(HEADERS
     SpeedPopup.h
     StatusIndicatorPopup.h
     SysInfoDialog.h
+    ExportWidget.h
+    ExportWidgets.h
     MagnifyWidget.h
     ViewWidgets.h
     Viewport.h)
@@ -29,6 +31,8 @@ set(SOURCE
     StatusIndicatorPopup.cpp
     StyleWidget.cpp
     SysInfoDialog.cpp
+    ExportWidget.cpp
+    ExportWidgets.cpp
     MagnifyWidget.cpp
     ViewWidgets.cpp
     Viewport.cpp)
