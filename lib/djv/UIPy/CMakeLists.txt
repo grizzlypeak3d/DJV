@@ -4,6 +4,7 @@ set(HEADERS_PRIVATE)
 set(SOURCE
     Bindings.cpp
     ColorWidgets.cpp
+    SettingsWidgets.cpp
     ViewWidgets.cpp
     Viewport.cpp)
 

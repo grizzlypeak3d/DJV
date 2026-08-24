@@ -16,6 +16,7 @@ namespace djv
             colorWidgets(mUI);
             viewWidgets(mUI);
             viewport(mUI);
+            settingsWidgets(mUI);
         }
     }
 }

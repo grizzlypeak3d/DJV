@@ -13,6 +13,7 @@ namespace djv
         void colorWidgets(pybind11::module_&);
         void viewWidgets(pybind11::module_&);
         void viewport(pybind11::module_&);
+        void settingsWidgets(pybind11::module_&);
 
         void uiBind(pybind11::module_&);
     }
