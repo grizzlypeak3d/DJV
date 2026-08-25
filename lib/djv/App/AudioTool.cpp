@@ -81,6 +81,7 @@ namespace djv
             p.syncOffsetSlider = ftk::DoubleEditSlider::create(context);
             p.syncOffsetSlider->setRange(-1.0, 1.0);
             p.syncOffsetSlider->setDefault(0.0);
+            p.syncOffsetSlider->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.syncOffsetSlider, "Audio.SyncOffset");
 
             auto formLayout = ftk::FormLayout::create(context);

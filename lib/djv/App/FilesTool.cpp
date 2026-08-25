@@ -132,6 +132,7 @@ namespace djv
             p.differenceGainSlider->setStep(1.F);
             p.differenceGainSlider->setLargeStep(4.F);
             p.differenceGainSlider->setDefault(1.F);
+            p.differenceGainSlider->getModel()->setRangeSoft(true);
             p.differenceGainSlider->setTooltip(
                 "Multiply the difference, so that a small one can be seen.\n"
                 "A compressed file differs from its source by a code value\n"

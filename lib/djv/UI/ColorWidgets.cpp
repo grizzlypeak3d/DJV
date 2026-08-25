@@ -497,21 +497,25 @@ namespace djv
             p.sliders["Add"] = ftk::FloatEditSlider::create(context);
             p.sliders["Add"]->setRange(-1.F, 1.F);
             p.sliders["Add"]->setDefault(0.F);
+            p.sliders["Add"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Add"], "Color.Controls.Add");
 
             p.sliders["Brightness"] = ftk::FloatEditSlider::create(context);
             p.sliders["Brightness"]->setRange(0.F, 4.F);
             p.sliders["Brightness"]->setDefault(1.F);
+            p.sliders["Brightness"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Brightness"], "Color.Controls.Brightness");
 
             p.sliders["Contrast"] = ftk::FloatEditSlider::create(context);
             p.sliders["Contrast"]->setRange(0.F, 4.F);
             p.sliders["Contrast"]->setDefault(1.F);
+            p.sliders["Contrast"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Contrast"], "Color.Controls.Contrast");
 
             p.sliders["Saturation"] = ftk::FloatEditSlider::create(context);
             p.sliders["Saturation"]->setRange(0.F, 4.F);
             p.sliders["Saturation"]->setDefault(1.F);
+            p.sliders["Saturation"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Saturation"], "Color.Controls.Saturation");
 
             p.hueSlider = ftk::IntEditSlider::create(context);
@@ -676,6 +680,7 @@ namespace djv
             p.sliders["Gamma"] = ftk::FloatEditSlider::create(context);
             p.sliders["Gamma"]->setRange(.1F, 4.F);
             p.sliders["Gamma"]->setDefault(1.F);
+            p.sliders["Gamma"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Gamma"], "Color.Levels.Gamma");
 
             p.settings->getT("/Color/Levels/OutRange", range);
@@ -851,25 +856,30 @@ namespace djv
             p.sliders["Exposure"] = ftk::FloatEditSlider::create(context);
             p.sliders["Exposure"]->setRange(-10.F, 10.F);
             p.sliders["Exposure"]->setDefault(0.F);
+            p.sliders["Exposure"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Exposure"], "Color.Exposure.Exposure");
 
             p.sliders["Defog"] = ftk::FloatEditSlider::create(context);
             p.sliders["Defog"]->setDefault(0.F);
+            p.sliders["Defog"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Defog"], "Color.Exposure.Defog");
 
             p.sliders["KneeLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["KneeLow"]->setRange(-3.F, 3.F);
             p.sliders["KneeLow"]->setDefault(0.F);
+            p.sliders["KneeLow"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["KneeLow"], "Color.Exposure.KneeLow");
 
             p.sliders["KneeHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["KneeHigh"]->setRange(3.5F, 7.5F);
             p.sliders["KneeHigh"]->setDefault(5.F);
+            p.sliders["KneeHigh"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["KneeHigh"], "Color.Exposure.KneeHigh");
 
             p.sliders["Gamma"] = ftk::FloatEditSlider::create(context);
             p.sliders["Gamma"]->setRange(.1F, 4.F);
             p.sliders["Gamma"]->setDefault(1.F);
+            p.sliders["Gamma"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Gamma"], "Color.Exposure.Gamma");
 
             p.layout = ftk::FormLayout::create(context);

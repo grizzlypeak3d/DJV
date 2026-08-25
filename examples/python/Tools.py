@@ -114,6 +114,8 @@ class AudioTool(IToolWidget):
         self._muteCheckBox.tooltip = "Mute the audio."
 
         self._syncOffsetSlider = ftk.DoubleEditSlider(context)
+        # An offset can legitimately exceed the starting range.
+        self._syncOffsetSlider.getModel().rangeSoft = True
         self._syncOffsetSlider.range = ftk.RangeD(-1.0, 1.0)
         self._syncOffsetSlider.step = 0.01
         self._syncOffsetSlider.largeStep = 0.1
@@ -223,6 +225,8 @@ class FilesTool(IToolWidget):
         self._overlaySlider.defaultValue = 0.5
 
         self._gainSlider = ftk.FloatEditSlider(context)
+        # A gain is a multiplier with no natural bound.
+        self._gainSlider.getModel().rangeSoft = True
         self._gainSlider.range = ftk.RangeF(1.0, 32.0)
         self._gainSlider.step = 1.0
         self._gainSlider.largeStep = 4.0
