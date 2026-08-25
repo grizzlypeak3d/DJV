@@ -9,7 +9,7 @@ string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${VERSION_H})
 set(DJV_VERSION_MINOR ${CMAKE_MATCH_1})
 string(REGEX MATCH "VERSION_PATCH ([0-9]*)" _ ${VERSION_H})
 set(DJV_VERSION_PATCH ${CMAKE_MATCH_1})
-string(REGEX MATCH "VERSION_DEV \"([0-9a-z\.\-]*)\"" _ ${VERSION_H})
+string(REGEX MATCH "VERSION_DEV \"([0-9a-z.-]*)\"" _ ${VERSION_H})
 set(DJV_VERSION_DEV ${CMAKE_MATCH_1})
 # Composed here rather than read: the header builds it from the macros
 # above, so there is no literal in the file to match. Keep this in step
