@@ -116,6 +116,35 @@ class App(ftk.App):
                 item.audioPath = audioPath
             self._filesModel.add(item)
 
+    def reload(self):
+        """
+        Reload the current file: the active files' timelines are dropped
+        and rebuilt, so the file is read from disk again.
+        """
+        activeFiles = list(self._activeFiles)
+        files = list(self._files)
+        for item in activeFiles:
+            for i, existing in enumerate(self._files):
+                if existing is item:
+                    del self._files[i]
+                    del self._timelines[i]
+                    break
+        self._activeFiles = []
+        if activeFiles:
+            player = self._player.get()
+            if player:
+                activeFiles[0].speed = player.speed
+                activeFiles[0].currentTime = player.currentTime
+                activeFiles[0].inOutRange = player.inOutRange
+        thumbnailSystem = self.context.getSystemByName(
+            "tl::ui::ThumbnailSystem")
+        thumbnailSystem.clearCache()
+        self._filesUpdate(files)
+        self._activeUpdate(activeFiles)
+        # The items are the same objects holding different things now,
+        # and the list of them did not change, so say so.
+        self._filesModel.refresh()
+
     def openSeparateAudioDialog(self):
         """
         Open the dialog for choosing a file with a separate audio file.
@@ -288,6 +317,7 @@ class App(ftk.App):
         # does it: the file being left remembers where it was.
         player = self._player.get()
         if self._activeFiles and player:
+            self._activeFiles[0].speed = player.speed
             self._activeFiles[0].currentTime = player.currentTime
             self._activeFiles[0].inOutRange = player.inOutRange
         prevA = self._activeFiles[0] if self._activeFiles else None
@@ -305,6 +335,8 @@ class App(ftk.App):
             player = tl.Player(self.context, timeline, playerOptions)
             player.volume = self._audioModel.volume
             player.mute = self._audioModel.mute
+            if item.speed >= 0.0:
+                player.speed = item.speed
             if item.currentTime is not None:
                 player.currentTime = item.currentTime
             if item.inOutRange is not None:

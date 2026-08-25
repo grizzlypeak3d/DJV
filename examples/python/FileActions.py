@@ -47,7 +47,7 @@ class Actions(IActions.IActions):
         self._addCommand(
             "Reload",
             "Reload the current file.",
-            lambda args: appWeak().getFilesModel().refresh())
+            lambda args: appWeak().reload())
 
         self._addCommand(
             "Next",
