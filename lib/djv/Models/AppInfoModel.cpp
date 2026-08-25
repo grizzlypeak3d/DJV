@@ -120,15 +120,29 @@ namespace djv
                 "../Resources/docs" })
             {
                 std::error_code ec;
-                const std::filesystem::path index =
-                    std::filesystem::weakly_canonical(
-                        dir / relative / "index.html", ec);
-                if (!ec && std::filesystem::exists(index))
+                const std::filesystem::path docs =
+                    std::filesystem::weakly_canonical(dir / relative, ec);
+                // index.html is what says the documentation is there. The
+                // page to open is whatever the application asks for, and an
+                // application whose own page was left out of a package still
+                // has the rest of the set to open.
+                if (ec || !std::filesystem::exists(docs / "index.html"))
                 {
-                    return "file://" + index.u8string();
+                    continue;
                 }
+                std::filesystem::path page = docs / getDocsPage();
+                if (!std::filesystem::exists(page))
+                {
+                    page = docs / "index.html";
+                }
+                return "file://" + page.u8string();
             }
             return std::string();
+        }
+
+        std::string AppInfoModel::getDocsPage() const
+        {
+            return "index.html";
         }
 
         std::string AppInfoModel::getLicensesURL() const

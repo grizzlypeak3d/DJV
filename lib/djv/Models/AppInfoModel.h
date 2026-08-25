@@ -72,6 +72,10 @@ namespace djv
             //! than opening nothing.
             DJV_MODELS_API virtual std::string getDocsURL() const;
 
+            //! Get the page the documentation opens at. "index.html" unless
+            //! an application has a section of its own to land in.
+            DJV_MODELS_API virtual std::string getDocsPage() const;
+
             ///@}
 
             //! \name License
