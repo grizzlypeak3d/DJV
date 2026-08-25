@@ -78,6 +78,13 @@ djv -widgetDump widgets.json</code></pre>
 <pre><code>djv render.mov -command 'Debug/State {"file": "state.json"}' -command 'File/Exit'</code></pre>
 <p>Setting the environment variable <strong>FTK_TRACE_EVENTS</strong> logs keyboard and mouse button dispatch: each widget an event is offered to, in order, and which one accepted it.</p>
 <p>The log's <strong>Library</strong> line records which library file the application loaded and when it was last modified, which tells a stale build from a fresh one.</p>
+<h2 id="widgets-from-json">Widgets from JSON</h2>
+<p>The reverse of the widget dump: a widget tree can be created from JSON, with the structure and the properties in the data and the behavior in code. From the Python bindings:</p>
+<pre><code>import ftkPy as ftk
+
+widget, errors = ftk.widgetLoad(context, open("panel.json").read())
+ftk.findWidget(widget, "apply").setClickedCallback(callback)</code></pre>
+<p>See the feather-tk documentation for the format. Its <strong>preview</strong> example renders a layout file and reloads it as the file is edited.</p>
 </main>
 </body>
 </html>
