@@ -634,10 +634,10 @@ namespace djv
 
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
-            std::map<std::string, std::shared_ptr<ftk::FloatEdit> > rangeEdits;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
+            std::map<std::string, std::shared_ptr<ftk::Observer<ftk::RangeF> > > rangeObservers;
         };
 
         void LevelsWidget::_init(
@@ -656,25 +656,22 @@ namespace djv
             p.enabledCheckBox->setTooltip("Toggle whether levels are enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "Color.Levels.Enabled");
 
+            // The in and out sliders get soft ranges so that values
+            // typed or set beyond the range extend it, the way the
+            // dedicated range edits used to.
             ftk::RangeF range(0.F, 1.F);
             p.settings->getT("/Color/Levels/InRange", range);
             p.sliders["InLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["InLow"]->setRange(range);
             p.sliders["InLow"]->setDefault(0.F);
+            p.sliders["InLow"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["InLow"], "Color.Levels.In");
 
             p.sliders["InHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["InHigh"]->setRange(range);
             p.sliders["InHigh"]->setDefault(1.F);
+            p.sliders["InHigh"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["InHigh"], "Color.Levels.In");
-
-            p.rangeEdits["InMin"] = ftk::FloatEdit::create(context);
-            p.rangeEdits["InMin"]->setRange(-1000000.F, 1000000.F);
-            p.rangeEdits["InMin"]->setValue(range.min());
-
-            p.rangeEdits["InMax"] = ftk::FloatEdit::create(context);
-            p.rangeEdits["InMax"]->setRange(-1000000.F, 1000000.F);
-            p.rangeEdits["InMax"]->setValue(range.max());
 
             p.sliders["Gamma"] = ftk::FloatEditSlider::create(context);
             p.sliders["Gamma"]->setRange(.1F, 4.F);
@@ -685,20 +682,14 @@ namespace djv
             p.sliders["OutLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["OutLow"]->setRange(range);
             p.sliders["OutLow"]->setDefault(0.F);
+            p.sliders["OutLow"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["OutLow"], "Color.Levels.Out");
 
             p.sliders["OutHigh"] = ftk::FloatEditSlider::create(context);
             p.sliders["OutHigh"]->setRange(range);
             p.sliders["OutHigh"]->setDefault(1.F);
+            p.sliders["OutHigh"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["OutHigh"], "Color.Levels.Out");
-
-            p.rangeEdits["OutMin"] = ftk::FloatEdit::create(context);
-            p.rangeEdits["OutMin"]->setRange(-1000000.F, 1000000.F);
-            p.rangeEdits["OutMin"]->setValue(range.min());
-
-            p.rangeEdits["OutMax"] = ftk::FloatEdit::create(context);
-            p.rangeEdits["OutMax"]->setRange(-1000000.F, 1000000.F);
-            p.rangeEdits["OutMax"]->setValue(range.max());
 
             p.layout = ftk::FormLayout::create(context);
             _setWidget(p.layout);
@@ -706,19 +697,9 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("In low:", p.sliders["InLow"]);
             p.layout->addRow("In high:", p.sliders["InHigh"]);
-            auto hLayout = ftk::HorizontalLayout::create(context);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.rangeEdits["InMin"]->setParent(hLayout);
-            p.rangeEdits["InMax"]->setParent(hLayout);
-            p.layout->addRow("In range:", hLayout);
             p.layout->addRow("Gamma:", p.sliders["Gamma"]);
             p.layout->addRow("Out low:", p.sliders["OutLow"]);
             p.layout->addRow("Out high:", p.sliders["OutHigh"]);
-            hLayout = ftk::HorizontalLayout::create(context);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.rangeEdits["OutMin"]->setParent(hLayout);
-            p.rangeEdits["OutMax"]->setParent(hLayout);
-            p.layout->addRow("Out range:", hLayout);
 
             p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
@@ -758,24 +739,22 @@ namespace djv
                     viewportModel->setDisplayOptions(options);
                 });
 
-            p.rangeEdits["InMin"]->setCallback(
-                [this](float value)
+            // Keep the low and high sliders of a pair on the same range,
+            // the way the shared range edits used to; extending one
+            // extends the other. The observers do not loop because
+            // setting an unchanged range does not notify.
+            p.rangeObservers["InLow"] = ftk::Observer<ftk::RangeF>::create(
+                p.sliders["InLow"]->getModel()->observeRange(),
+                [this](const ftk::RangeF& value)
                 {
-                    FTK_P();
-                    ftk::RangeF range = p.sliders["InLow"]->getRange();
-                    range = ftk::RangeF(value, range.max());
-                    p.sliders["InLow"]->setRange(range);
-                    p.sliders["InHigh"]->setRange(range);
+                    _p->sliders["InHigh"]->setRange(value);
                 });
 
-            p.rangeEdits["InMax"]->setCallback(
-                [this](float value)
+            p.rangeObservers["InHigh"] = ftk::Observer<ftk::RangeF>::create(
+                p.sliders["InHigh"]->getModel()->observeRange(),
+                [this](const ftk::RangeF& value)
                 {
-                    FTK_P();
-                    ftk::RangeF range = p.sliders["InLow"]->getRange();
-                    range = ftk::RangeF(range.min(), value);
-                    p.sliders["InLow"]->setRange(range);
-                    p.sliders["InHigh"]->setRange(range);
+                    _p->sliders["InLow"]->setRange(value);
                 });
 
             p.sliders["Gamma"]->setCallback(
@@ -805,24 +784,18 @@ namespace djv
                     viewportModel->setDisplayOptions(options);
                 });
 
-            p.rangeEdits["OutMin"]->setCallback(
-                [this](float value)
+            p.rangeObservers["OutLow"] = ftk::Observer<ftk::RangeF>::create(
+                p.sliders["OutLow"]->getModel()->observeRange(),
+                [this](const ftk::RangeF& value)
                 {
-                    FTK_P();
-                    ftk::RangeF range = p.sliders["OutLow"]->getRange();
-                    range = ftk::RangeF(value, range.max());
-                    p.sliders["OutLow"]->setRange(range);
-                    p.sliders["OutHigh"]->setRange(range);
+                    _p->sliders["OutHigh"]->setRange(value);
                 });
 
-            p.rangeEdits["OutMax"]->setCallback(
-                [this](float value)
+            p.rangeObservers["OutHigh"] = ftk::Observer<ftk::RangeF>::create(
+                p.sliders["OutHigh"]->getModel()->observeRange(),
+                [this](const ftk::RangeF& value)
                 {
-                    FTK_P();
-                    ftk::RangeF range = p.sliders["OutLow"]->getRange();
-                    range = ftk::RangeF(range.min(), value);
-                    p.sliders["OutLow"]->setRange(range);
-                    p.sliders["OutHigh"]->setRange(range);
+                    _p->sliders["OutLow"]->setRange(value);
                 });
         }
 
@@ -833,12 +806,8 @@ namespace djv
         LevelsWidget::~LevelsWidget()
         {
             FTK_P();
-            float min = p.rangeEdits["InMin"]->getValue();
-            float max = p.rangeEdits["InMax"]->getValue();
-            p.settings->setT("/Color/Levels/InRange", ftk::RangeF(min, max));
-            min = p.rangeEdits["OutMin"]->getValue();
-            max = p.rangeEdits["OutMax"]->getValue();
-            p.settings->setT("/Color/Levels/OutRange", ftk::RangeF(min, max));
+            p.settings->setT("/Color/Levels/InRange", p.sliders["InLow"]->getRange());
+            p.settings->setT("/Color/Levels/OutRange", p.sliders["OutLow"]->getRange());
         }
 
         std::shared_ptr<LevelsWidget> LevelsWidget::create(
