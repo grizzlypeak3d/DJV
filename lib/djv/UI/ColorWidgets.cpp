@@ -747,19 +747,23 @@ namespace djv
             // Keep the low and high sliders of a pair on the same range,
             // the way the shared range edits used to; extending one
             // extends the other. The observers do not loop because
-            // setting an unchanged range does not notify.
+            // setting an unchanged range does not notify. The range goes
+            // through the model, not the composite: the composite blocks
+            // its callbacks around programmatic changes, so when a
+            // shrinking range clamps the sibling's value, the new value
+            // would never reach the display options.
             p.rangeObservers["InLow"] = ftk::Observer<ftk::RangeF>::create(
                 p.sliders["InLow"]->getModel()->observeRange(),
                 [this](const ftk::RangeF& value)
                 {
-                    _p->sliders["InHigh"]->setRange(value);
+                    _p->sliders["InHigh"]->getModel()->setRange(value);
                 });
 
             p.rangeObservers["InHigh"] = ftk::Observer<ftk::RangeF>::create(
                 p.sliders["InHigh"]->getModel()->observeRange(),
                 [this](const ftk::RangeF& value)
                 {
-                    _p->sliders["InLow"]->setRange(value);
+                    _p->sliders["InLow"]->getModel()->setRange(value);
                 });
 
             p.sliders["Gamma"]->setCallback(
@@ -793,14 +797,14 @@ namespace djv
                 p.sliders["OutLow"]->getModel()->observeRange(),
                 [this](const ftk::RangeF& value)
                 {
-                    _p->sliders["OutHigh"]->setRange(value);
+                    _p->sliders["OutHigh"]->getModel()->setRange(value);
                 });
 
             p.rangeObservers["OutHigh"] = ftk::Observer<ftk::RangeF>::create(
                 p.sliders["OutHigh"]->getModel()->observeRange(),
                 [this](const ftk::RangeF& value)
                 {
-                    _p->sliders["OutLow"]->setRange(value);
+                    _p->sliders["OutLow"]->getModel()->setRange(value);
                 });
         }
 
