@@ -332,7 +332,7 @@ namespace djv
                 { "ImageSeq", "/ImageSeq.1" },
                 { "OTIO", "/OTIO.2" },
                 { "Shortcuts", "/Shortcuts.3" },
-                { "Misc", "/Misc.1" },
+                { "Misc", "/Misc.2" },
                 { "Mouse", "/Mouse.1" },
                 { "Playback", "/Playback.1" },
                 { "Style", "/Style.2" },
