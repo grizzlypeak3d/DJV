@@ -19,6 +19,9 @@ class Widget(ftk.IContainer):
 
         self._appWeak = weakref.ref(app)
         self._player = None
+        # Whether media time means anything across the whole timeline,
+        # which it only does when the timeline plays one media through.
+        self._mediaTime = False
         # Where the frame shuttle started, unset until it is grabbed.
         self._startTime = None
         self._speedPopup = None
@@ -224,8 +227,40 @@ class Widget(ftk.IContainer):
     def _loopUpdate(self, value):
         self._loopWidget.loop = value
 
+    def _mediaDuration(self, value):
+        duration = value.duration
+        if self._player and self._mediaTime and duration.value > 0:
+            # Counted in the media's frames rather than the player's, so
+            # that a sequence with frames left out still reads as the
+            # range it covers. Both ends are mapped because the in/out
+            # range may be a part of it.
+            timeline = self._player.timeline
+            first = timeline.getMediaTime(value.start_time)
+            last = timeline.getMediaTime(value.end_time_inclusive())
+            if first is not None and last is not None:
+                duration = otio.opentime.RationalTime(
+                    last.value - first.value + 1.0, last.rate)
+        return duration
+
+    def _toMedia(self, value):
+        if self._player:
+            time = self._player.timeline.getMediaTime(value)
+            if time is not None:
+                return time
+        return value
+
+    def _fromMedia(self, value):
+        if self._player:
+            # Read against where playback is, which is the clip the
+            # person typing is looking at.
+            time = self._player.timeline.getTimelineTime(
+                self._player.currentTime, value)
+            if time is not None:
+                return time
+        return value
+
     def _inOutRangeUpdate(self, value):
-        self._durationLabel.value = value.duration
+        self._durationLabel.value = self._mediaDuration(value)
 
     def _volumeUpdate(self, value):
         self._audioLabel.text = "{:3d}%".format(int(value * 100.0))
@@ -235,6 +270,25 @@ class Widget(ftk.IContainer):
 
     def _playerUpdate(self, player):
         self._player = player
+        self._mediaTime = \
+            player.timeline.isMediaTimeContinuous() if player else False
+        # The counter names the frame in the media's own time, which is
+        # not the player's when frames have been left out. Only where
+        # that is one number for the whole timeline.
+        timeMap = tl.ui.TimeMap()
+        if self._mediaTime:
+            # The map must always answer with a time, including after the
+            # widget is gone.
+            mapWeak = weakref.ref(self)
+            def toMedia(value):
+                widget = mapWeak()
+                return widget._toMedia(value) if widget else value
+            def fromMedia(value):
+                widget = mapWeak()
+                return widget._fromMedia(value) if widget else value
+            timeMap.toMedia = toMedia
+            timeMap.fromMedia = fromMedia
+        self._currentTimeEdit.setTimeMap(timeMap)
         if player:
             selfWeak = weakref.ref(self)
             self._speedObserver = ftk.DoubleObserver(
