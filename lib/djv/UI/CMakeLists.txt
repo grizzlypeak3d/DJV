@@ -12,6 +12,7 @@ set(HEADERS
     SysInfoDialog.h
     ExportWidget.h
     ExportWidgets.h
+    InfoWidget.h
     MagnifyWidget.h
     ViewWidgets.h
     Viewport.h)
@@ -33,6 +34,7 @@ set(SOURCE
     SysInfoDialog.cpp
     ExportWidget.cpp
     ExportWidgets.cpp
+    InfoWidget.cpp
     MagnifyWidget.cpp
     ViewWidgets.cpp
     Viewport.cpp)
