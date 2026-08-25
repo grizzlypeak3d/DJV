@@ -180,6 +180,9 @@ class App(ftk.App):
         self._muteObserver = ftk.BoolObserver(
             self._audioModel.observeMute,
             lambda value: selfWeak()._muteUpdate(value))
+        self._styleSettingsObserver = djv.models.StyleSettingsObserver(
+            self._settingsModel.observeStyle,
+            lambda value: selfWeak()._styleUpdate(value))
 
         if self._cmdLineInput.hasValue:
             self.open(ftk.Path(self._cmdLineInput.value))
@@ -335,3 +338,19 @@ class App(ftk.App):
     def _muteUpdate(self, value):
         if self._player.get():
             self._player.get().mute = value
+
+    def _styleUpdate(self, value):
+        fontSystem = self.fontSystem
+        fonts = fontSystem.fonts
+        for font in value.fontFiles:
+            if font:
+                path = ftk.Path(font)
+                fontName = path.base + path.num
+                if fontName not in fonts:
+                    fontSystem.addFont(fontName, font)
+        style = self.style
+        style.colorControls = value.colorControls
+        style.fonts = value.fonts
+        self.colorStyle = value.colorStyle
+        self.customColorRoles = value.customColorRoles
+        self.displayScale = value.displayScale
