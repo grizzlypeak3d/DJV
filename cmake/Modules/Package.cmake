@@ -45,11 +45,17 @@ if(WIN32)
 
 elseif(APPLE)
 
+    # A disk image holding the application bundle. The Bundle generator would
+    # make the .app itself, from a plist and an icon; the bundle is built by
+    # the target now, so this only has to carry it.
     if(DJV_MACOS_PACKAGE)
-        set(CPACK_GENERATOR Bundle)
+        set(CPACK_GENERATOR DragNDrop)
     else()
         set(CPACK_GENERATOR ZIP)
     endif()
+
+    # Where the bundle's own directories live, inside the install prefix.
+    set(DJV_BUNDLE_CONTENTS "djv.app/Contents")
 
     set(INSTALL_DYLIBS)
     
@@ -87,16 +93,15 @@ elseif(APPLE)
     
 
     if(DJV_MACOS_PACKAGE)
-        # CPack stages the bundle into "DJV.app/Contents/Resources", so a
-        # destination of ".." is "Contents" -- which is where the bundle's own
-        # directories belong, and that is what these relative paths are for.
+        # Beside the executable in the bundle. Its own copy: a bundle that
+        # reaches outside itself for its libraries is not one that can be
+        # signed, moved or installed on its own.
         #
-        # Outside CPack the same paths land beside the install prefix rather
-        # than inside it, writing Frameworks, MacOS and Info.plist into
-        # whatever directory holds it. So they are kept to their own component
-        # and out of an ordinary install; CPack asks for it by name below.
+        # Every destination here is inside the install prefix. These rules are
+        # their own component so an ordinary install stays an ordinary Unix
+        # prefix, and packaging asks for the component by name below.
         install(FILES ${INSTALL_DYLIBS}
-            DESTINATION ../Frameworks
+            DESTINATION "${DJV_BUNDLE_CONTENTS}/Frameworks"
             COMPONENT bundle
             EXCLUDE_FROM_ALL)
     else()
@@ -104,20 +109,23 @@ elseif(APPLE)
     endif()
 
     if(DJV_MACOS_PACKAGE)
-        set(CPACK_BUNDLE_NAME DJV)
-        configure_file(
-            ${PROJECT_SOURCE_DIR}/etc/macOS/Info.plist.in
-            ${PROJECT_BINARY_DIR}/Info.plist)
-        set(CPACK_BUNDLE_PLIST ${PROJECT_BINARY_DIR}/Info.plist)
-        set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns)
-        install(FILES ${PROJECT_BINARY_DIR}/Info.plist
-            DESTINATION ".."
-            COMPONENT bundle
-            EXCLUDE_FROM_ALL)
+        set(CPACK_DMG_VOLUME_NAME "DJV ${DJV_VERSION_FULL}")
+
         install(FILES ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns
-            DESTINATION "."
+            DESTINATION "${DJV_BUNDLE_CONTENTS}/Resources"
             COMPONENT bundle
             EXCLUDE_FROM_ALL)
+
+        # Taken from the prefix rather than installed a second time: the build
+        # installs before it packages, and this way the install rules stay as
+        # they are for every other platform. The documentation is found
+        # relative to the executable, at "../Resources/docs".
+        foreach(RESOURCE docs Legal SampleData)
+            install(DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/djv/${RESOURCE}/
+                DESTINATION "${DJV_BUNDLE_CONTENTS}/Resources/${RESOURCE}"
+                COMPONENT bundle
+                EXCLUDE_FROM_ALL)
+        endforeach()
 
         set(POST_BUILD_SCRIPTS)
         set(DJV_MACOS_TEAM_ID $ENV{DJV_MACOS_TEAM_ID})
@@ -180,7 +188,9 @@ endif()
 set(CPACK_INSTALL_CMAKE_PROJECTS
     "${CMAKE_BINARY_DIR};${PROJECT_NAME};runtime;/")
 if(APPLE AND DJV_MACOS_PACKAGE)
-    # The bundle's own layout, which an ordinary install leaves alone.
-    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
+    # The bundle alone. A full install is a Unix prefix with the application
+    # sitting inside it, and a full install is what the bundle rules opt out
+    # of, so it would arrive with no application in it at all.
+    set(CPACK_INSTALL_CMAKE_PROJECTS
         "${CMAKE_BINARY_DIR};${PROJECT_NAME};bundle;/")
 endif()

@@ -30,8 +30,11 @@ set(LEGAL
     LICENSE_yaml-cpp.txt
     LICENSE_zlib.txt)
 
+# The macOS package is not here: the bundle carries its own copy,
+# taken from the prefix by cmake/Modules/Package.cmake, so this stays
+# where every other build puts it.
 set(DEST share/djv/Legal)
-if(DJV_MACOS_PACKAGE OR DJV_WINDOWS_PACKAGE)
+if(DJV_WINDOWS_PACKAGE)
     set(DEST Legal)
 endif()
 install(FILES ${LEGAL} DESTINATION ${DEST})

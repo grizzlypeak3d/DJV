@@ -6,27 +6,35 @@ if (WIN32)
 endif()
 
 set(DJV_BIN djv)
-set(INSTALL_DIR bin)
-set(INSTALL_COMPONENT)
-if(APPLE AND DJV_MACOS_PACKAGE)
-    # The bundle names the executable in its Info.plist, so this keeps the
-    # name it has everywhere else. CPack stages into
-    # "DJV.app/Contents/Resources", so ".." is "Contents" and this is
-    # "Contents/MacOS"; outside CPack it would land beside the install prefix,
-    # which is why it belongs to the bundle component. See
-    # cmake/Modules/Package.cmake.
-    set(INSTALL_DIR ../MacOS)
-    set(INSTALL_COMPONENT COMPONENT bundle EXCLUDE_FROM_ALL)
-endif()
 
-add_executable(${DJV_BIN} WIN32 ${HEADER} ${SOURCE})
+add_executable(${DJV_BIN} WIN32 ${HEADERS} ${SOURCE})
 target_link_libraries(${DJV_BIN} djvApp)
 set_target_properties(${DJV_BIN} PROPERTIES FOLDER bin)
 
-install(TARGETS ${DJV_BIN} DESTINATION ${INSTALL_DIR} ${INSTALL_COMPONENT})
+if(APPLE AND DJV_MACOS_PACKAGE)
+    # A real application bundle, built here rather than assembled by the
+    # packaging: CMake lays out "djv.app/Contents" itself, so nothing
+    # downstream installs into a directory above the prefix to reach it, and
+    # the executable gets its install rpath rewritten on the way in.
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/etc/macOS/Info.plist.in
+        ${CMAKE_CURRENT_BINARY_DIR}/djv.plist)
+    set_target_properties(
+        ${DJV_BIN} PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/djv.plist)
+
+    install(
+        TARGETS ${DJV_BIN}
+        BUNDLE DESTINATION .
+        COMPONENT bundle
+        EXCLUDE_FROM_ALL)
+else()
+    install(TARGETS ${DJV_BIN} DESTINATION bin)
+endif()
 
 if(WIN32)
-    add_executable(djv. ${HEADER} ${SOURCE})
+    add_executable(djv. ${HEADERS} ${SOURCE})
     target_link_libraries(djv. djvApp)
     set_target_properties(
         djv. PROPERTIES
