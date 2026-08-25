@@ -16,7 +16,9 @@ namespace djv
         void settingsWidgets(pybind11::module_&);
         void fileThumbnail(pybind11::module_&);
         void frameRangePopup(pybind11::module_&);
+        void infoWidget(pybind11::module_&);
         void separateAudioDialog(pybind11::module_&);
+        void sysInfoDialog(pybind11::module_&);
         void magnifyWidget(pybind11::module_&);
         void exportWidget(pybind11::module_&);
 

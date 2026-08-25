@@ -26,6 +26,7 @@ namespace djv
             py::class_<AspectRatioOptions>(m, "AspectRatioOptions")
                 .def(py::init())
                 .def_readwrite("index", &AspectRatioOptions::index)
+                .def_readwrite("options", &AspectRatioOptions::options)
                 .def(pybind11::self == pybind11::self)
                 .def(pybind11::self != pybind11::self);
 

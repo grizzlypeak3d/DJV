@@ -7,9 +7,11 @@ set(SOURCE
     ExportWidget.cpp
     FileThumbnail.cpp
     FrameRangePopup.cpp
+    InfoWidget.cpp
     MagnifyWidget.cpp
     SeparateAudioDialog.cpp
     SettingsWidgets.cpp
+    SysInfoDialog.cpp
     ViewWidgets.cpp
     Viewport.cpp)
 

@@ -19,7 +19,9 @@ namespace djv
             settingsWidgets(mUI);
             fileThumbnail(mUI);
             frameRangePopup(mUI);
+            infoWidget(mUI);
             separateAudioDialog(mUI);
+            sysInfoDialog(mUI);
             magnifyWidget(mUI);
             exportWidget(mUI);
         }
