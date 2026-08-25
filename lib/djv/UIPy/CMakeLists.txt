@@ -2,6 +2,7 @@ set(HEADERS
     Bindings.h)
 set(HEADERS_PRIVATE)
 set(SOURCE
+    AudioPopup.cpp
     Bindings.cpp
     ColorWidgets.cpp
     ExportWidget.cpp
@@ -11,6 +12,7 @@ set(SOURCE
     MagnifyWidget.cpp
     SeparateAudioDialog.cpp
     SettingsWidgets.cpp
+    SpeedPopup.cpp
     StatusIndicator.cpp
     SysInfoDialog.cpp
     ViewWidgets.cpp

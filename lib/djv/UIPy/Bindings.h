@@ -10,6 +10,7 @@ namespace djv
 {
     namespace python
     {
+        void audioPopup(pybind11::module_&);
         void colorWidgets(pybind11::module_&);
         void viewWidgets(pybind11::module_&);
         void viewport(pybind11::module_&);
@@ -18,6 +19,7 @@ namespace djv
         void frameRangePopup(pybind11::module_&);
         void infoWidget(pybind11::module_&);
         void separateAudioDialog(pybind11::module_&);
+        void speedPopup(pybind11::module_&);
         void statusIndicator(pybind11::module_&);
         void sysInfoDialog(pybind11::module_&);
         void magnifyWidget(pybind11::module_&);
