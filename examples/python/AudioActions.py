@@ -6,40 +6,56 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import IActions
+
 import weakref
 
-class Actions:
+class Actions(IActions.IActions):
     """
     This class provides the audio actions.
     """
     def __init__(self, context, app):
+        IActions.IActions.__init__(self, context, app, "Audio")
 
         appWeak = weakref.ref(app)
-        self.actions = {}
+
+        # Register the commands.
+        self._addCommand(
+            "VolumeUp",
+            "Increase the audio volume.",
+            lambda args: appWeak().getAudioModel().volumeUp())
+
+        self._addCommand(
+            "VolumeDown",
+            "Decrease the audio volume.",
+            lambda args: appWeak().getAudioModel().volumeDown())
+
+        self._addCheckCommand(
+            "Mute",
+            "Toggle the audio mute.",
+            lambda value: setattr(appWeak().getAudioModel(), "mute", value))
+
+        # Create the actions.
         self.actions["VolumeUp"] = ftk.Action(
             "Volume Up",
-            ftk.KeyShortcut(ftk.Key.Period),
-            lambda: appWeak().getAudioModel().volumeUp())
-        self.actions["VolumeUp"].tooltip = "Increase the audio volume."
-
+            self._command("VolumeUp"))
         self.actions["VolumeDown"] = ftk.Action(
             "Volume Down",
-            ftk.KeyShortcut(ftk.Key.Comma),
-            lambda: appWeak().getAudioModel().volumeDown())
-        self.actions["VolumeDown"].tooltip = "Decrease the audio volume."
-
+            self._command("VolumeDown"))
         self.actions["Mute"] = ftk.Action(
             "Mute",
             "Mute",
-            ftk.KeyShortcut(ftk.Key.M),
-            checkedCallback = lambda value:
-                setattr(appWeak().getAudioModel(), "mute", value))
-        self.actions["Mute"].tooltip = "Toggle the audio mute."
+            checkedCallback = self._checkCommand("Mute"))
+
+        # Register the shortcuts.
+        self._addShortcut("VolumeUp", ftk.Key.Period)
+        self._addShortcut("VolumeDown", ftk.Key.Comma)
+        self._addShortcut("Mute", ftk.Key.M)
+
+        self._shortcutsUpdate(self._settingsModel.shortcuts)
 
         selfWeak = weakref.ref(self)
         self._muteObserver = ftk.BoolObserver(
             app.getAudioModel().observeMute,
-            lambda value: selfWeak()._muteUpdate(value))
-
-    def _muteUpdate(self, value):
-        self.actions["Mute"].checked = value
+            lambda value: setattr(
+                selfWeak().actions["Mute"], "checked", value))

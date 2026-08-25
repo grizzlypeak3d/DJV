@@ -65,15 +65,16 @@ class Playback(ftk.Menu):
         self.addAction(actions.actions["Stop"])
         self.addAction(actions.actions["Forward"])
         self.addAction(actions.actions["Reverse"])
-        self.addAction(actions.actions["TogglePlayback"])
+        self.addAction(actions.actions["Toggle"])
         self.addDivider();
         self.addAction(actions.actions["JumpBack1s"])
         self.addAction(actions.actions["JumpBack10s"])
         self.addAction(actions.actions["JumpForward1s"])
         self.addAction(actions.actions["JumpForward10s"])
         self.addDivider();
-        for mode in tl.getLoopEnums():
-            self.addAction(actions.actions[tl.to_string(mode)])
+        self.addAction(actions.actions["Loop"])
+        self.addAction(actions.actions["Once"])
+        self.addAction(actions.actions["PingPong"])
         self.addDivider();
         self.addAction(actions.actions["SetInPoint"])
         self.addAction(actions.actions["ResetInPoint"])
@@ -97,6 +98,8 @@ class Frame(ftk.Menu):
         self.addAction(actions.actions["Next"])
         self.addAction(actions.actions["NextX10"])
         self.addAction(actions.actions["NextX100"])
+        self.addDivider();
+        self.addAction(actions.actions["FocusCurrent"])
 
 class Timeline(ftk.Menu):
     """
@@ -114,6 +117,14 @@ class Timeline(ftk.Menu):
         self.addAction(actions.actions["TrackMedia"])
         self.addAction(actions.actions["Thumbnails"])
         self.addAction(actions.actions["Waveforms"])
+        self.thumbnailSizeMenu = self.addSubMenu("Video Thumbnail Size")
+        self.thumbnailSizeMenu.addAction(actions.actions["ThumbnailSizeSmall"])
+        self.thumbnailSizeMenu.addAction(actions.actions["ThumbnailSizeMedium"])
+        self.thumbnailSizeMenu.addAction(actions.actions["ThumbnailSizeLarge"])
+        self.waveformSizeMenu = self.addSubMenu("Audio Waveform Size")
+        self.waveformSizeMenu.addAction(actions.actions["WaveformSizeSmall"])
+        self.waveformSizeMenu.addAction(actions.actions["WaveformSizeMedium"])
+        self.waveformSizeMenu.addAction(actions.actions["WaveformSizeLarge"])
 
 class Audio(ftk.Menu):
     """
@@ -144,8 +155,8 @@ class Help(ftk.Menu):
         ftk.Menu.__init__(self, context, parent)
 
         self.addAction(actions.actions["Documentation"])
-        self.addDivider();
         self.addAction(actions.actions["About"])
+        self.addAction(actions.actions["SysInfo"])
 
 class Compare(ftk.Menu):
     """
@@ -207,7 +218,27 @@ class View(ftk.Menu):
         self.addAction(actions.actions["ZoomReset"])
         self.addAction(actions.actions["ZoomIn"])
         self.addAction(actions.actions["ZoomOut"])
+        self.addAction(actions.actions["Center"])
         self.addDivider();
+        self.addAction(actions.actions["Red"])
+        self.addAction(actions.actions["Green"])
+        self.addAction(actions.actions["Blue"])
+        self.addAction(actions.actions["Alpha"])
+        self.addDivider();
+        self.addAction(actions.actions["Negative"])
+        self.addDivider();
+        self.addAction(actions.actions["MirrorHorizontal"])
+        self.addAction(actions.actions["MirrorVertical"])
+        self.addDivider();
+        self.aspectRatioMenu = self.addSubMenu("Aspect Ratio")
+        aspectRatioOptions = djv.models.AspectRatioOptions()
+        for i in range(len(aspectRatioOptions.options)):
+            self.aspectRatioMenu.addAction(
+                actions.actions["AspectRatio_{}".format(i)])
+        self.addDivider();
+        self.addAction(actions.actions["Grid"])
+        self.addAction(actions.actions["Outline"])
+        self.addAction(actions.actions["CenterMarker"])
         self.addAction(actions.actions["HUD"])
 
 class ToolsMenu(ftk.Menu):

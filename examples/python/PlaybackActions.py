@@ -6,118 +6,176 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import IActions
 import Util
 
 import weakref
 
-class Actions:
+class Actions(IActions.IActions):
     """
     This class provides playback actions.
     """
     def __init__(self, context, app):
+        IActions.IActions.__init__(self, context, app, "Playback")
 
         self._player = None
-        self.actions = {}
+
+        # Register the commands.
+        self._addCommand(
+            "Stop",
+            "Stop playback.",
+            lambda args, f = Util.weak(self._playerCall): f("stop"))
+
+        self._addCommand(
+            "Forward",
+            "Start forward playback.",
+            lambda args, f = Util.weak(self._playerCall): f("forward"))
+
+        self._addCommand(
+            "Reverse",
+            "Start reverse playback.",
+            lambda args, f = Util.weak(self._playerCall): f("reverse"))
+
+        self._addCommand(
+            "Toggle",
+            "Toggle playback.",
+            lambda args, f = Util.weak(self._playerCall): f("togglePlayback"))
+
+        for name, doc, timeAction in [
+            ("JumpBack1s", "Jump back 1 second.", tl.TimeAction.JumpBack1s),
+            ("JumpBack10s", "Jump back 10 seconds.", tl.TimeAction.JumpBack10s),
+            ("JumpForward1s", "Jump forward 1 second.", tl.TimeAction.JumpForward1s),
+            ("JumpForward10s", "Jump forward 10 seconds.", tl.TimeAction.JumpForward10s)]:
+            self._addCommand(
+                name,
+                doc,
+                lambda args, captured = timeAction, \
+                    f = Util.weak(self._timeAction): f(captured))
+
+        for name, doc, loop in [
+            ("Loop", "Loop playback continuously.", tl.Loop.Loop),
+            ("Once", "Playback once and stop.", tl.Loop.Once),
+            ("PingPong", "Playback forward and reverse continuously.", tl.Loop.PingPong)]:
+            self._addCommand(
+                name,
+                doc,
+                lambda args, captured = loop, \
+                    f = Util.weak(self._loopCallback): f(captured))
+
+        self._addCommand(
+            "SetInPoint",
+            "Set the playback in point to the current frame.",
+            lambda args, f = Util.weak(self._playerCall): f("setInPoint"))
+
+        self._addCommand(
+            "ResetInPoint",
+            "Reset the playback in point.",
+            lambda args, f = Util.weak(self._playerCall): f("resetInPoint"))
+
+        self._addCommand(
+            "SetOutPoint",
+            "Set the playback out point to the current frame.",
+            lambda args, f = Util.weak(self._playerCall): f("setOutPoint"))
+
+        self._addCommand(
+            "ResetOutPoint",
+            "Reset the playback out point.",
+            lambda args, f = Util.weak(self._playerCall): f("resetOutPoint"))
+
+        # Commands without menu actions, for scripting and automation.
+        self._addCommand(
+            "Seek",
+            "Seek to a frame, relative to the timeline start; "
+            "e.g., { \"frame\": 100 }.",
+            lambda args, f = Util.weak(self._seekCommand): f(args))
+
+        self._addCommand(
+            "InOutRange",
+            "Set the playback in/out range from inclusive frames relative "
+            "to the timeline start; e.g., { \"in\": 10, \"out\": 50 }.",
+            lambda args, f = Util.weak(self._inOutRangeCommand): f(args))
+
+        # Create the actions.
         self.actions["Stop"] = ftk.Action(
             "Stop",
             "PlaybackStop",
-            ftk.KeyShortcut(ftk.Key.K),
-            Util.weak(self._stopCallback))
-        self.actions["Stop"].tooltip = "Stop playback."
-
+            self._command("Stop"))
         self.actions["Forward"] = ftk.Action(
             "Forward",
             "PlaybackForward",
-            ftk.KeyShortcut(ftk.Key.L),
-            Util.weak(self._forwardCallback))
-        self.actions["Forward"].tooltip = "Start forward playback."
-
+            self._command("Forward"))
         self.actions["Reverse"] = ftk.Action(
             "Reverse",
             "PlaybackReverse",
-            ftk.KeyShortcut(ftk.Key.J),
-            Util.weak(self._reverseCallback))
-        self.actions["Reverse"].tooltip = "Start reverse playback."
-
-        self.actions["TogglePlayback"] = ftk.Action(
+            self._command("Reverse"))
+        self.actions["Toggle"] = ftk.Action(
             "Toggle Playback",
-            ftk.KeyShortcut(ftk.Key.Space),
-            Util.weak(self._togglePlaybackCallback))
-        self.actions["TogglePlayback"].tooltip = "Toggle playback."
-
-        for name, text, key, mod, action, tooltip in [
-            ("JumpBack1s", "Jump Back 1s", ftk.Key.J, ftk.KeyModifier.Shift,
-             tl.TimeAction.JumpBack1s, "Jump back 1 second."),
-            ("JumpBack10s", "Jump Back 10s", ftk.Key.J, ftk.KeyModifier.Control,
-             tl.TimeAction.JumpBack10s, "Jump back 10 seconds."),
-            ("JumpForward1s", "Jump Forward 1s", ftk.Key.L, ftk.KeyModifier.Shift,
-             tl.TimeAction.JumpForward1s, "Jump forward 1 second."),
-            ("JumpForward10s", "Jump Forward 10s", ftk.Key.L, ftk.KeyModifier.Control,
-             tl.TimeAction.JumpForward10s, "Jump forward 10 seconds."),
-        ]:
-            a = ftk.Action(
-                text,
-                ftk.KeyShortcut(key, mod),
-                lambda captured = action, \
-                    f = Util.weak(self._timeAction): f(captured))
-            a.tooltip = tooltip
-            self.actions[name] = a
-
-        # The loop modes are one radio group.
-        self.loopGroup = ftk.ActionGroup(ftk.ActionGroupType.Radio)
-        for mode in tl.getLoopEnums():
-            a = ftk.Action(
-                tl.getLabel(mode),
-                checkedCallback = lambda checked, captured = mode, \
-                    f = Util.weak(self._loopCallback):
-                    f(captured) if checked else None)
-            self.actions[tl.to_string(mode)] = a
-            self.loopGroup.addAction(a)
-
+            self._command("Toggle"))
+        self.actions["JumpBack1s"] = ftk.Action(
+            "Jump Back 1s",
+            self._command("JumpBack1s"))
+        self.actions["JumpBack10s"] = ftk.Action(
+            "Jump Back 10s",
+            self._command("JumpBack10s"))
+        self.actions["JumpForward1s"] = ftk.Action(
+            "Jump Forward 1s",
+            self._command("JumpForward1s"))
+        self.actions["JumpForward10s"] = ftk.Action(
+            "Jump Forward 10s",
+            self._command("JumpForward10s"))
+        self.actions["Loop"] = ftk.Action(
+            "Playback Loop",
+            "PlaybackLoop",
+            self._command("Loop"))
+        self.actions["Once"] = ftk.Action(
+            "Playback Once",
+            "PlaybackOnce",
+            self._command("Once"))
+        self.actions["PingPong"] = ftk.Action(
+            "Playback Ping-Pong",
+            "PlaybackPingPong",
+            self._command("PingPong"))
         self.actions["SetInPoint"] = ftk.Action(
             "Set In Point",
-            ftk.KeyShortcut(ftk.Key.I),
-            Util.weak(self._setInPointCallback))
-        self.actions["SetInPoint"].tooltip = "Set the in point to the current frame."
-
+            self._command("SetInPoint"))
         self.actions["ResetInPoint"] = ftk.Action(
             "Reset In Point",
-            ftk.KeyShortcut(ftk.Key.I, ftk.KeyModifier.Shift),
-            Util.weak(self._resetInPointCallback))
-        self.actions["ResetInPoint"].tooltip = "Reset the in point to the start frame."
-
+            self._command("ResetInPoint"))
         self.actions["SetOutPoint"] = ftk.Action(
             "Set Out Point",
-            ftk.KeyShortcut(ftk.Key.O),
-            Util.weak(self._setOutPointCallback))
-        self.actions["SetOutPoint"].tooltip = "Set the out point to the current frame."
-
+            self._command("SetOutPoint"))
         self.actions["ResetOutPoint"] = ftk.Action(
             "Reset Out Point",
-            ftk.KeyShortcut(ftk.Key.O, ftk.KeyModifier.Shift),
-            Util.weak(self._resetOutPointCallback))
-        self.actions["ResetOutPoint"].tooltip = "Reset the out point to the end frame."
+            self._command("ResetOutPoint"))
+
+        # Register the shortcuts.
+        self._addShortcut("Stop", ftk.Key.K)
+        self._addShortcut("Forward", ftk.Key.L)
+        self._addShortcut("Reverse", ftk.Key.J)
+        self._addShortcut("Toggle", "Toggle", ftk.KeyShortcut(ftk.Key.Space))
+        self._addShortcut("JumpBack1s", ftk.KeyShortcut(ftk.Key.J, ftk.KeyModifier.Shift))
+        self._addShortcut("JumpBack10s", ftk.KeyShortcut(ftk.Key.J, ftk.KeyModifier.Control))
+        self._addShortcut("JumpForward1s", ftk.KeyShortcut(ftk.Key.L, ftk.KeyModifier.Shift))
+        self._addShortcut("JumpForward10s", ftk.KeyShortcut(ftk.Key.L, ftk.KeyModifier.Control))
+        self._addShortcut("Loop", "Loop")
+        self._addShortcut("Once", "Once")
+        self._addShortcut("PingPong", "Ping-Pong")
+        self._addShortcut("SetInPoint", ftk.Key.I)
+        self._addShortcut("ResetInPoint", ftk.KeyShortcut(ftk.Key.I, ftk.KeyModifier.Shift))
+        self._addShortcut("SetOutPoint", ftk.Key.O)
+        self._addShortcut("ResetOutPoint", ftk.KeyShortcut(ftk.Key.O, ftk.KeyModifier.Shift))
+
+        self._shortcutsUpdate(self._settingsModel.shortcuts)
 
         selfWeak = weakref.ref(self)
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
             lambda player: selfWeak()._playerUpdate(player))
+        self._loopUpdate(tl.Loop.Loop)
 
-    def _stopCallback(self):
+    def _playerCall(self, method):
         if self._player:
-            self._player.stop()
-
-    def _forwardCallback(self):
-        if self._player:
-            self._player.forward()
-
-    def _reverseCallback(self):
-        if self._player:
-            self._player.reverse()
-
-    def _togglePlaybackCallback(self):
-        if self._player:
-            self._player.togglePlayback()
+            getattr(self._player, method)()
 
     def _timeAction(self, value):
         if self._player:
@@ -127,21 +185,25 @@ class Actions:
         if self._player:
             self._player.loop = value
 
-    def _setInPointCallback(self):
+    def _seekCommand(self, args):
+        import json
         if self._player:
-            self._player.setInPoint()
+            start = self._player.timeRange.start_time
+            frame = json.loads(args)["frame"]
+            self._player.currentTime = otio.opentime.RationalTime(
+                start.value + frame, start.rate)
 
-    def _resetInPointCallback(self):
+    def _inOutRangeCommand(self, args):
+        import json
         if self._player:
-            self._player.resetInPoint()
-
-    def _setOutPointCallback(self):
-        if self._player:
-            self._player.setOutPoint()
-
-    def _resetOutPointCallback(self):
-        if self._player:
-            self._player.resetOutPoint()
+            start = self._player.timeRange.start_time
+            parsed = json.loads(args)
+            self._player.inOutRange = \
+                otio.opentime.TimeRange.range_from_start_end_time_inclusive(
+                    otio.opentime.RationalTime(
+                        start.value + parsed["in"], start.rate),
+                    otio.opentime.RationalTime(
+                        start.value + parsed["out"], start.rate))
 
     def _playerUpdate(self, player):
 
@@ -158,15 +220,17 @@ class Actions:
         else:
             self._playbackObserver = None
             self._loopObserver = None
+            self._playbackUpdate(tl.Playback.Stop)
 
         for name in self.actions:
             self.actions[name].enabled = player != None
 
     def _playbackUpdate(self, playback):
-
         self.actions["Stop"].checked = tl.Playback.Stop == playback
         self.actions["Forward"].checked = tl.Playback.Forward == playback
         self.actions["Reverse"].checked = tl.Playback.Reverse == playback
 
     def _loopUpdate(self, loop):
-        self.loopGroup.checked = tl.getLoopEnums().index(loop)
+        self.actions["Loop"].checked = tl.Loop.Loop == loop
+        self.actions["Once"].checked = tl.Loop.Once == loop
+        self.actions["PingPong"].checked = tl.Loop.PingPong == loop

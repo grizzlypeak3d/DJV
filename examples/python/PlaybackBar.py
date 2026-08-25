@@ -79,6 +79,11 @@ class Widget(ftk.IContainer):
             app.getAudioModel().observeMute,
             lambda value: selfWeak()._muteUpdate(value))
 
+    def focusCurrentFrame(self):
+        if self._currentTimeEdit.enabled:
+            self._currentTimeEdit.takeKeyFocus()
+            self._currentTimeEdit.selectAll()
+
     def _currentTimeCallback(self, value):
         if self._player:
             self._player.currentTime = value

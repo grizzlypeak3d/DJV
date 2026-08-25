@@ -6,49 +6,92 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import IActions
 import Util
 
 import weakref
 
-class Actions:
+class Actions(IActions.IActions):
     """
     This class provides the frame actions.
     """
-    def __init__(self, context, app):
+    def __init__(self, context, app, mainWindow):
+        IActions.IActions.__init__(self, context, app, "Frame")
 
         self._player = None
-        self.actions = {}
-        items = [
-            ("Start", "Start Frame", "FrameStart", tl.TimeAction.Start,
-             ftk.KeyShortcut(ftk.Key.Home), "Go to the start frame."),
-            ("End", "End Frame", "FrameEnd", tl.TimeAction.End,
-             ftk.KeyShortcut(ftk.Key.End), "Go to the end frame."),
-            ("Prev", "Previous Frame", "FramePrev", tl.TimeAction.FramePrev,
-             ftk.KeyShortcut(ftk.Key.Left), "Go to the previous frame."),
-            ("PrevX10", "Previous Frame X10", None, tl.TimeAction.FramePrevX10,
-             ftk.KeyShortcut(ftk.Key.Left, ftk.KeyModifier.Shift),
-             "Go to the previous frame X10."),
-            ("PrevX100", "Previous Frame X100", None, tl.TimeAction.FramePrevX100,
-             ftk.KeyShortcut(ftk.Key.Left, ftk.KeyModifier.Control),
-             "Go to the previous frame X100."),
-            ("Next", "Next Frame", "FrameNext", tl.TimeAction.FrameNext,
-             ftk.KeyShortcut(ftk.Key.Right), "Go to the next frame."),
-            ("NextX10", "Next Frame X10", None, tl.TimeAction.FrameNextX10,
-             ftk.KeyShortcut(ftk.Key.Right, ftk.KeyModifier.Shift),
-             "Go to the next frame X10."),
-            ("NextX100", "Next Frame X100", None, tl.TimeAction.FrameNextX100,
-             ftk.KeyShortcut(ftk.Key.Right, ftk.KeyModifier.Control),
-             "Go to the next frame X100."),
-        ]
-        for name, text, icon, timeAction, shortcut, tooltip in items:
-            callback = lambda captured = timeAction, \
-                f = Util.weak(self._timeAction): f(captured)
-            if icon:
-                action = ftk.Action(text, icon, shortcut, callback)
-            else:
-                action = ftk.Action(text, shortcut, callback)
-            action.tooltip = tooltip
-            self.actions[name] = action
+        mainWindowWeak = weakref.ref(mainWindow)
+
+        # Register the commands.
+        for name, doc, timeAction in [
+            ("Start", "Go to the start frame.", tl.TimeAction.Start),
+            ("End", "Go to the end frame.", tl.TimeAction.End),
+            ("Prev", "Go to the previous frame.", tl.TimeAction.FramePrev),
+            ("PrevX10", "Go to the previous frame X10.", tl.TimeAction.FramePrevX10),
+            ("PrevX100", "Go to the previous frame X100.", tl.TimeAction.FramePrevX100),
+            ("Next", "Go to the next frame.", tl.TimeAction.FrameNext),
+            ("NextX10", "Go to the next frame X10.", tl.TimeAction.FrameNextX10),
+            ("NextX100", "Go to the next frame X100.", tl.TimeAction.FrameNextX100)]:
+            self._addCommand(
+                name,
+                doc,
+                lambda args, captured = timeAction, \
+                    f = Util.weak(self._timeAction): f(captured))
+
+        self._addCommand(
+            "FocusCurrent",
+            "Set the keyboard focus to the current frame editor.",
+            lambda args: mainWindowWeak().focusCurrentFrame())
+
+        # Create the actions.
+        self.actions["Start"] = ftk.Action(
+            "Go To Start",
+            "FrameStart",
+            self._command("Start"))
+        self.actions["End"] = ftk.Action(
+            "Go To End",
+            "FrameEnd",
+            self._command("End"))
+        self.actions["Prev"] = ftk.Action(
+            "Previous Frame",
+            "FramePrev",
+            self._command("Prev"))
+        self.actions["PrevX10"] = ftk.Action(
+            "Previous Frame X10",
+            self._command("PrevX10"))
+        self.actions["PrevX100"] = ftk.Action(
+            "Previous Frame X100",
+            self._command("PrevX100"))
+        self.actions["Next"] = ftk.Action(
+            "Next Frame",
+            "FrameNext",
+            self._command("Next"))
+        self.actions["NextX10"] = ftk.Action(
+            "Next Frame X10",
+            self._command("NextX10"))
+        self.actions["NextX100"] = ftk.Action(
+            "Next Frame X100",
+            self._command("NextX100"))
+        self.actions["FocusCurrent"] = ftk.Action(
+            "Focus Current Frame",
+            self._command("FocusCurrent"))
+
+        # Register the shortcuts.
+        self._addShortcut("Start", "Start", ftk.KeyShortcut(ftk.Key.Home))
+        self._addShortcut("End", "End", ftk.KeyShortcut(ftk.Key.End))
+        self._addShortcut("Prev", "Previous", ftk.KeyShortcut(ftk.Key.Left))
+        self._addShortcut("PrevX10", "Previous X10",
+            ftk.KeyShortcut(ftk.Key.Left, ftk.KeyModifier.Shift))
+        self._addShortcut("PrevX100", "Previous X100",
+            ftk.KeyShortcut(ftk.Key.Left, ftk.KeyModifier.Control))
+        self._addShortcut("Next", "Next", ftk.KeyShortcut(ftk.Key.Right))
+        self._addShortcut("NextX10", "Next X10",
+            ftk.KeyShortcut(ftk.Key.Right, ftk.KeyModifier.Shift))
+        self._addShortcut("NextX100", "Next X100",
+            ftk.KeyShortcut(ftk.Key.Right, ftk.KeyModifier.Control))
+        self._addShortcut("FocusCurrent", "Focus Current",
+            ftk.KeyShortcut(ftk.Key.F, ftk.KeyModifier.Control))
+
+        self._shortcutsUpdate(self._settingsModel.shortcuts)
 
         selfWeak = weakref.ref(self)
         self._playerObserver = tl.PlayerObserver(

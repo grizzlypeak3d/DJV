@@ -74,38 +74,13 @@ class InfoTool(IToolWidget):
         IToolWidget.__init__(
             self, context, app, mainWindow, "Information", "InfoTool", parent)
 
-        self._formLayout = ftk.FormLayout(context)
-        self._formLayout.marginRole = ftk.SizeRole.MarginSmall
-        self._formLayout.spacingRole = ftk.SizeRole.SpacingSmall
-        self._setContent(self._formLayout)
+        self._widget = djv.ui.InfoWidget(context, app.settings)
+        self._setContent(self._widget)
 
         selfWeak = weakref.ref(self)
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
-            lambda player: selfWeak()._playerUpdate(player))
-
-    def _playerUpdate(self, player):
-        self._formLayout.clear()
-        if player:
-            rows = [("Name", player.path.get())]
-            ioInfo = player.ioInfo
-            if ioInfo.video:
-                video = ioInfo.video[0]
-                rows.append(("Video", "{}x{}:{:.2f} {}".format(
-                    video.size.w,
-                    video.size.h,
-                    video.aspect,
-                    ftk.to_string(video.type))))
-            if ioInfo.audio.isValid:
-                rows.append(("Audio", "{} {} {}".format(
-                    ioInfo.audio.channelCount,
-                    tl.to_string(ioInfo.audio.type),
-                    ioInfo.audio.sampleRate)))
-            for tag in sorted(ioInfo.tags):
-                rows.append((tag, ioInfo.tags[tag]))
-            for name, text in rows:
-                label = ftk.Label(self.context, text)
-                self._formLayout.addRow(name + ":", label)
+            lambda player: selfWeak()._widget.setPlayer(player))
 
 class AudioTool(IToolWidget):
     """

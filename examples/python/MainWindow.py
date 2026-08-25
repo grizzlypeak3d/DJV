@@ -75,7 +75,7 @@ class MainWindow(ftk.MainWindow):
         self._fileActions = FileActions.Actions(context, app, self)
         self._compareActions = CompareActions.Actions(context, app)
         self._playbackActions = PlaybackActions.Actions(context, app)
-        self._frameActions = FrameActions.Actions(context, app)
+        self._frameActions = FrameActions.Actions(context, app, self)
         self._timelineActions = TimelineActions.Actions(context, app)
         self._audioActions = AudioActions.Actions(context, app)
         self._viewActions = ViewActions.Actions(context, app, self)
@@ -195,6 +195,9 @@ class MainWindow(ftk.MainWindow):
 
     def observePresentMode(self):
         return self._presentMode
+
+    def focusCurrentFrame(self):
+        self._playbackBar.focusCurrentFrame()
 
     def setPresentMode(self, value):
         if self._presentMode.setIfChanged(value):

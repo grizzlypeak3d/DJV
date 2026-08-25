@@ -6,37 +6,54 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import IActions
 import Util
 
 import weakref
 
-class Actions:
+class Actions(IActions.IActions):
     """
     This class provides the color actions.
     """
     def __init__(self, context, app):
+        IActions.IActions.__init__(self, context, app, "Color")
 
         self._app = weakref.ref(app)
-        self.actions = {}
+
+        # Register the commands.
+        self._addCheckCommand(
+            "OCIO",
+            "Toggle whether OCIO is enabled.",
+            lambda value, f = Util.weak(self._setOCIO): f(value))
+
+        self._addCheckCommand(
+            "LUT",
+            "Toggle whether the LUT is enabled.",
+            lambda value, f = Util.weak(self._setLUT): f(value))
+
+        # Create the actions.
         self.actions["OCIO"] = ftk.Action(
             "OCIO",
-            ftk.KeyShortcut(ftk.Key.N, ftk.KeyModifier.Control),
-            checkedCallback = Util.weak(self._setOCIO))
-        self.actions["OCIO"].tooltip = "Toggle whether OCIO is enabled."
-
+            checkedCallback = self._checkCommand("OCIO"))
         self.actions["LUT"] = ftk.Action(
             "LUT",
-            ftk.KeyShortcut(ftk.Key.K, ftk.KeyModifier.Control),
-            checkedCallback = Util.weak(self._setLUT))
-        self.actions["LUT"].tooltip = "Toggle whether the LUT is enabled."
+            checkedCallback = self._checkCommand("LUT"))
+
+        # Register the shortcuts.
+        self._addShortcut("OCIO", ftk.KeyShortcut(ftk.Key.N, ftk.KeyModifier.Control))
+        self._addShortcut("LUT", ftk.KeyShortcut(ftk.Key.K, ftk.KeyModifier.Control))
+
+        self._shortcutsUpdate(self._settingsModel.shortcuts)
 
         selfWeak = weakref.ref(self)
         self._ocioObserver = djv.models.OCIOOptionsObserver(
             app.getColorModel().observeOCIOOptions,
-            lambda value: selfWeak()._ocioUpdate(value))
+            lambda value: setattr(
+                selfWeak().actions["OCIO"], "checked", value.enabled))
         self._lutObserver = djv.models.LUTOptionsObserver(
             app.getColorModel().observeLUTOptions,
-            lambda value: selfWeak()._lutUpdate(value))
+            lambda value: setattr(
+                selfWeak().actions["LUT"], "checked", value.enabled))
 
     def _setOCIO(self, value):
         model = self._app().getColorModel()
@@ -49,9 +66,3 @@ class Actions:
         options = model.lutOptions
         options.enabled = value
         model.lutOptions = options
-
-    def _ocioUpdate(self, options):
-        self.actions["OCIO"].checked = options.enabled
-
-    def _lutUpdate(self, options):
-        self.actions["LUT"].checked = options.enabled

@@ -6,29 +6,55 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import IActions
 import Util
 
 import weakref
 
-class Actions:
+class Actions(IActions.IActions):
     """
     This class provides the help actions.
     """
     def __init__(self, context, app, mainWindow):
+        IActions.IActions.__init__(self, context, app, "Help")
 
         self._app = weakref.ref(app)
         self._mainWindowWeak = weakref.ref(mainWindow)
-        self.actions = {}
+        self._sysInfoDialog = None
+
+        # Register the commands.
+        self._addCommand(
+            "Documentation",
+            "Open the documentation in a web browser.",
+            lambda args, f = Util.weak(self._documentation): f())
+
+        self._addCommand(
+            "About",
+            "Show the about dialog.",
+            lambda args, f = Util.weak(self._about): f())
+
+        self._addCommand(
+            "SysInfo",
+            "Show the system information dialog.",
+            lambda args, f = Util.weak(self._sysInfo): f())
+
+        # Create the actions.
         self.actions["Documentation"] = ftk.Action(
             "Documentation",
-            Util.weak(self._documentation))
-        self.actions["Documentation"].tooltip = \
-            "Open the documentation in a web browser."
-
+            self._command("Documentation"))
         self.actions["About"] = ftk.Action(
             "About",
-            Util.weak(self._about))
-        self.actions["About"].tooltip = "Show the about dialog."
+            self._command("About"))
+        self.actions["SysInfo"] = ftk.Action(
+            "System Information",
+            self._command("SysInfo"))
+
+        # Register the shortcuts.
+        self._addShortcut("Documentation")
+        self._addShortcut("About")
+        self._addShortcut("SysInfo", "System Information")
+
+        self._shortcutsUpdate(self._settingsModel.shortcuts)
 
     def _documentation(self):
         info = self._app().getAppInfoModel()
@@ -43,3 +69,18 @@ class Actions:
             info.gitCommit)
         dialogSystem = self._app().context.getSystemByName("ftk::DialogSystem")
         dialogSystem.message("About", text, self._mainWindowWeak())
+
+    def _sysInfo(self):
+        app = self._app()
+        mainWindow = self._mainWindowWeak()
+        text = djv.ui.getSysInfo(
+            app.context,
+            app.getAppInfoModel(),
+            app.getSettingsModel(),
+            mainWindow.getWindowInfo())
+        selfWeak = weakref.ref(self)
+        self._sysInfoDialog = djv.ui.SysInfoDialog(app.context, text)
+        self._sysInfoDialog.open(mainWindow)
+        self._sysInfoDialog.setCloseCallback(
+            lambda: selfWeak() and setattr(
+                selfWeak(), "_sysInfoDialog", None))

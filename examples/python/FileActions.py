@@ -6,96 +6,141 @@ import ftkPy as ftk
 import tlRenderPy as tl
 import djvPy as djv
 
+import IActions
 import Util
 
 import weakref
 
-class Actions:
+class Actions(IActions.IActions):
     """
     This class provides file actions.
     """
     def __init__(self, context, app, mainWindow):
+        IActions.IActions.__init__(self, context, app, "File")
 
         appWeak = weakref.ref(app)
         mainWindowWeak = weakref.ref(mainWindow)
-        self.actions = {}
+
+        # Register the commands.
+        self._addCommand(
+            "Open",
+            "Open a file.",
+            lambda args: context.getSystemByName("ftk::FileBrowserSystem").open(
+                mainWindowWeak(),
+                appWeak().open))
+
+        self._addCommand(
+            "OpenAudio",
+            "Open a file with a separate audio file.",
+            lambda args: appWeak().openSeparateAudioDialog())
+
+        self._addCommand(
+            "Close",
+            "Close the current file.",
+            lambda args: appWeak().getFilesModel().close())
+
+        self._addCommand(
+            "CloseAll",
+            "Close all files.",
+            lambda args: appWeak().getFilesModel().closeAll())
+
+        self._addCommand(
+            "Reload",
+            "Reload the current file.",
+            lambda args: appWeak().getFilesModel().refresh())
+
+        self._addCommand(
+            "Next",
+            "Change to the next file.",
+            lambda args: appWeak().getFilesModel().next())
+
+        self._addCommand(
+            "Prev",
+            "Change to the previous file.",
+            lambda args: appWeak().getFilesModel().prev())
+
+        self._addCommand(
+            "NextMediaReference",
+            "Change to the next media reference.",
+            lambda args, f = Util.weak(self._nextMediaReference): f())
+
+        self._addCommand(
+            "NextLayer",
+            "Change to the next layer.",
+            lambda args: appWeak().getFilesModel().nextLayer())
+
+        self._addCommand(
+            "PrevLayer",
+            "Change to the previous layer.",
+            lambda args: appWeak().getFilesModel().prevLayer())
+
+        self._addCommand(
+            "Exit",
+            "Exit the application.",
+            lambda args: appWeak().exit())
+
+        # Create the actions.
         self.actions["Open"] = ftk.Action(
             "Open",
             "FileOpen",
-            ftk.KeyShortcut(ftk.Key.O, ftk.commandKeyModifier),
-            lambda: context.getSystemByName("ftk::FileBrowserSystem").open(
-                mainWindowWeak(),
-                appWeak().open))
-        self.actions["Open"].tooltip = "Open an image sequence, movie, or timeline file."
-
+            self._command("Open"))
         self.actions["OpenAudio"] = ftk.Action(
             "Open With Audio",
             "FileOpenAudio",
-            ftk.KeyShortcut(
-                ftk.Key.O, ftk.KeyModifier.Shift, ftk.commandKeyModifier),
-            lambda: appWeak().openSeparateAudioDialog())
-        self.actions["OpenAudio"].tooltip = "Open a file with a separate audio file."
-
+            self._command("OpenAudio"))
         self.actions["Close"] = ftk.Action(
             "Close",
             "FileClose",
-            ftk.KeyShortcut(ftk.Key.E, ftk.commandKeyModifier),
-            lambda: appWeak().getFilesModel().close())
-        self.actions["Close"].tooltip = "Close the current file."
-
+            self._command("Close"))
         self.actions["CloseAll"] = ftk.Action(
             "Close All",
             "FileCloseAll",
-            ftk.KeyShortcut(
-                ftk.Key.E, ftk.KeyModifier.Shift, ftk.commandKeyModifier),
-            lambda: appWeak().getFilesModel().closeAll())
-        self.actions["CloseAll"].tooltip = "Close all of the files."
-
-        self.actions["Next"] = ftk.Action(
-            "Next File",
-            ftk.KeyShortcut(ftk.Key.PageDown, ftk.KeyModifier.Control),
-            lambda: appWeak().getFilesModel().next())
-        self.actions["Next"].tooltip = "Change to the next file."
-
-        self.actions["Prev"] = ftk.Action(
-            "Previous File",
-            ftk.KeyShortcut(ftk.Key.PageUp, ftk.KeyModifier.Control),
-            lambda: appWeak().getFilesModel().prev())
-        self.actions["Prev"].tooltip = "Change to the previous file."
-
+            self._command("CloseAll"))
         self.actions["Reload"] = ftk.Action(
             "Reload",
             "FileReload",
-            ftk.KeyShortcut(
-                ftk.Key.R, ftk.KeyModifier.Shift, ftk.commandKeyModifier),
-            lambda: appWeak().getFilesModel().refresh())
-        self.actions["Reload"].tooltip = "Reload the current file."
-
-        self.actions["NextLayer"] = ftk.Action(
-            "Next Layer",
+            self._command("Reload"))
+        self.actions["Next"] = ftk.Action(
             "Next",
-            ftk.KeyShortcut(ftk.Key.Equals, ftk.KeyModifier.Control),
-            lambda: appWeak().getFilesModel().nextLayer())
-        self.actions["NextLayer"].tooltip = "Change to the next layer."
-
-        self.actions["PrevLayer"] = ftk.Action(
-            "Previous Layer",
+            "Next",
+            self._command("Next"))
+        self.actions["Prev"] = ftk.Action(
+            "Previous",
             "Prev",
-            ftk.KeyShortcut(ftk.Key.Minus, ftk.KeyModifier.Control),
-            lambda: appWeak().getFilesModel().prevLayer())
-        self.actions["PrevLayer"].tooltip = "Change to the previous layer."
-
+            self._command("Prev"))
         self.actions["NextMediaReference"] = ftk.Action(
             "Next Media Reference",
             "Next",
-            ftk.KeyShortcut(ftk.Key.M, ftk.KeyModifier.Shift),
-            Util.weak(self._nextMediaReference))
-        self.actions["NextMediaReference"].tooltip = "Change to the next media reference."
-
+            self._command("NextMediaReference"))
+        self.actions["NextLayer"] = ftk.Action(
+            "Next Layer",
+            "Next",
+            self._command("NextLayer"))
+        self.actions["PrevLayer"] = ftk.Action(
+            "Previous Layer",
+            "Prev",
+            self._command("PrevLayer"))
         self.actions["Exit"] = ftk.Action(
             "Exit",
-            ftk.KeyShortcut(ftk.Key.Q, ftk.commandKeyModifier),
-            lambda: appWeak().exit())
+            self._command("Exit"))
+
+        # Register the shortcuts.
+        self._addShortcut("Open", ftk.KeyShortcut(ftk.Key.O, ftk.commandKeyModifier))
+        self._addShortcut("OpenAudio", ftk.KeyShortcut(
+            ftk.Key.O, ftk.KeyModifier.Shift, ftk.commandKeyModifier))
+        self._addShortcut("Close", ftk.KeyShortcut(ftk.Key.E, ftk.commandKeyModifier))
+        self._addShortcut("CloseAll", ftk.KeyShortcut(
+            ftk.Key.E, ftk.KeyModifier.Shift, ftk.commandKeyModifier))
+        self._addShortcut("Reload", ftk.KeyShortcut(
+            ftk.Key.R, ftk.KeyModifier.Shift, ftk.commandKeyModifier))
+        self._addShortcut("Next", ftk.KeyShortcut(ftk.Key.PageDown, ftk.KeyModifier.Control))
+        self._addShortcut("Prev", ftk.KeyShortcut(ftk.Key.PageUp, ftk.KeyModifier.Control))
+        self._addShortcut("NextMediaReference", ftk.KeyShortcut(ftk.Key.M, ftk.KeyModifier.Shift))
+        self._addShortcut("NextLayer", ftk.KeyShortcut(ftk.Key.Equals, ftk.KeyModifier.Control))
+        self._addShortcut("PrevLayer", ftk.KeyShortcut(ftk.Key.Minus, ftk.KeyModifier.Control))
+        self._addShortcut("Exit", ftk.KeyShortcut(ftk.Key.Q, ftk.commandKeyModifier))
+
+        self._shortcutsUpdate(self._settingsModel.shortcuts)
 
         selfWeak = weakref.ref(self)
         self._filesObserver = djv.models.FilesModelItemListObserver(

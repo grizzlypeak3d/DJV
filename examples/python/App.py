@@ -25,6 +25,16 @@ class App(ftk.App):
             ["-b"], "Open a file for comparison.")
         self._cmdLineCompare = ftk.CmdLineOptionString(
             ["-compare"], "The comparison mode.")
+        self._cmdLineListCommands = ftk.CmdLineFlag(
+            ["-listCommands"], "Print the list of commands and exit.")
+        self._cmdLineCommand = ftk.CmdLineListOptionString(
+            ["-command"],
+            "Execute a command after startup. The command name may be "
+            "followed by JSON arguments; e.g., \"Playback/Forward\" or "
+            "\"Playback/Seek { \\\"frame\\\": 100 }\". This option may be "
+            "repeated to execute multiple commands in order. Use "
+            "-listCommands to see the available commands.",
+            "Commands")
 
         # The base class keeps the settings and log files under the same
         # directory as the C++ application, with this application's own
@@ -39,7 +49,8 @@ class App(ftk.App):
             "djv-python",
             "DJV Python player",
             [ self._cmdLineInput ],
-            [ self._cmdLineB, self._cmdLineCompare ],
+            [ self._cmdLineB, self._cmdLineCompare,
+              self._cmdLineListCommands, self._cmdLineCommand ],
             ftk.AppFiles(
                 self._appInfoModel.docsDirName,
                 "djv-python",
@@ -75,6 +86,9 @@ class App(ftk.App):
 
     def getSysLogModel(self):
         return self._sysLogModel
+
+    def getCommandsModel(self):
+        return self._commandsModel
 
     def getAppInfoModel(self):
         return self._appInfoModel
@@ -136,6 +150,7 @@ class App(ftk.App):
         self._colorModel = djv.models.ColorModel(self.context, self._settings)
         self._toolsModel = djv.models.ToolsModel(self._settings)
         self._sysLogModel = ftk.SysLogModel(self.context)
+        self._commandsModel = djv.models.CommandsModel(self.context)
 
         self._player = tl.ObservablePlayer(None)
         self._files = []
@@ -179,7 +194,44 @@ class App(ftk.App):
                     options.compare = mode
                     self._filesModel.compareOptions = options
 
+        if self._cmdLineListCommands.found:
+            for command in self._commandsModel.commands:
+                print("{} - {}".format(command.name, command.doc))
+            return
+
+        if self._cmdLineCommand.list:
+            # Wait for the command line inputs to be opened before
+            # executing the commands.
+            selfWeak = weakref.ref(self)
+            self._commandTicks = 0
+            self._commandTimer = ftk.Timer(self.context)
+            self._commandTimer.repeating = True
+            self._commandTimer.start(
+                0.1, lambda: selfWeak()._commandTimeout())
+
         super().run()
+
+    def _commandTimeout(self):
+        self._commandTicks += 1
+        if not self._cmdLineInput.hasValue or \
+                self._player.get() or \
+                self._commandTicks > 100:
+            self._commandTimer.stop()
+            for value in self._cmdLineCommand.list:
+                # Split the command name from the optional JSON arguments
+                # at the first '{', so that command names may contain
+                # spaces (e.g., "Tools/Color Picker").
+                i = value.find("{")
+                if i >= 0:
+                    name = value[:i].rstrip()
+                    args = value[i:]
+                else:
+                    name = value.rstrip()
+                    args = "null"
+                try:
+                    self._commandsModel.exec(name, args)
+                except RuntimeError as e:
+                    print("Cannot parse command arguments: {}".format(e))
 
     def _createTimeline(self, item):
         options = tl.Options()
