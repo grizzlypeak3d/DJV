@@ -27,6 +27,8 @@
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
 
+#include <cmath>
+
 namespace djv
 {
     namespace ui
@@ -545,7 +547,7 @@ namespace djv
                     p.sliders["Brightness"]->setValue(value.color.brightness.x);
                     p.sliders["Contrast"]->setValue(value.color.contrast.x);
                     p.sliders["Saturation"]->setValue(value.color.saturation.x);
-                    p.hueSlider->setValue(value.color.hue * 360);
+                    p.hueSlider->setValue(std::round(value.color.hue * 360.F));
                 });
 
             p.enabledCheckBox->setCheckedCallback(
@@ -560,6 +562,13 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    // A value echoed back by the options observer
+                    // changes nothing; without this check the echo
+                    // would enable the stage.
+                    if (value == options.color.add.x)
+                    {
+                        return;
+                    }
                     options.color.enabled = true;
                     options.color.add.x = value;
                     options.color.add.y = value;
@@ -571,6 +580,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.color.brightness.x)
+                    {
+                        return;
+                    }
                     options.color.enabled = true;
                     options.color.brightness.x = value;
                     options.color.brightness.y = value;
@@ -582,6 +595,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.color.contrast.x)
+                    {
+                        return;
+                    }
                     options.color.enabled = true;
                     options.color.contrast.x = value;
                     options.color.contrast.y = value;
@@ -593,6 +610,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.color.saturation.x)
+                    {
+                        return;
+                    }
                     options.color.enabled = true;
                     options.color.saturation.x = value;
                     options.color.saturation.y = value;
@@ -604,6 +625,10 @@ namespace djv
                 [viewportModel](int value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == static_cast<int>(std::round(options.color.hue * 360.F)))
+                    {
+                        return;
+                    }
                     options.color.enabled = true;
                     options.color.hue = value / 360.F;
                     viewportModel->setDisplayOptions(options);
@@ -730,6 +755,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.levels.inLow)
+                    {
+                        return;
+                    }
                     options.levels.enabled = true;
                     options.levels.inLow = value;
                     viewportModel->setDisplayOptions(options);
@@ -739,6 +768,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.levels.inHigh)
+                    {
+                        return;
+                    }
                     options.levels.enabled = true;
                     options.levels.inHigh = value;
                     viewportModel->setDisplayOptions(options);
@@ -770,6 +803,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.levels.gamma)
+                    {
+                        return;
+                    }
                     options.levels.enabled = true;
                     options.levels.gamma = value;
                     viewportModel->setDisplayOptions(options);
@@ -779,6 +816,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.levels.outLow)
+                    {
+                        return;
+                    }
                     options.levels.enabled = true;
                     options.levels.outLow = value;
                     viewportModel->setDisplayOptions(options);
@@ -788,6 +829,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.levels.outHigh)
+                    {
+                        return;
+                    }
                     options.levels.enabled = true;
                     options.levels.outHigh = value;
                     viewportModel->setDisplayOptions(options);
@@ -920,6 +965,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.exposure.exposure)
+                    {
+                        return;
+                    }
                     options.exposure.enabled = true;
                     options.exposure.exposure = value;
                     viewportModel->setDisplayOptions(options);
@@ -929,6 +978,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.exposure.defog)
+                    {
+                        return;
+                    }
                     options.exposure.enabled = true;
                     options.exposure.defog = value;
                     viewportModel->setDisplayOptions(options);
@@ -938,6 +991,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.exposure.kneeLow)
+                    {
+                        return;
+                    }
                     options.exposure.enabled = true;
                     options.exposure.kneeLow = value;
                     viewportModel->setDisplayOptions(options);
@@ -947,6 +1004,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.exposure.kneeHigh)
+                    {
+                        return;
+                    }
                     options.exposure.enabled = true;
                     options.exposure.kneeHigh = value;
                     viewportModel->setDisplayOptions(options);
@@ -956,6 +1017,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.exposure.gamma)
+                    {
+                        return;
+                    }
                     options.exposure.enabled = true;
                     options.exposure.gamma = value;
                     viewportModel->setDisplayOptions(options);
@@ -1036,6 +1101,10 @@ namespace djv
                 [viewportModel](float value)
                 {
                     auto options = viewportModel->getDisplayOptions();
+                    if (value == options.softClip.value)
+                    {
+                        return;
+                    }
                     options.softClip.enabled = true;
                     options.softClip.value = value;
                     viewportModel->setDisplayOptions(options);
