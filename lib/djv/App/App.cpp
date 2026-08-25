@@ -228,7 +228,8 @@ namespace djv
         void App::_init(
             const std::shared_ptr<ftk::Context>& context,
             std::vector<std::string>& argv,
-            const std::shared_ptr<models::AppInfoModel>& appInfoModel)
+            const std::shared_ptr<models::AppInfoModel>& appInfoModel,
+            const std::vector<std::shared_ptr<ftk::ICmdLineOption> >& options)
         {
             FTK_P();
 
@@ -385,46 +386,51 @@ namespace djv
                 "Output directory for PNG + JSON.", "Capture",
                 std::string("."));
 
+            std::vector<std::shared_ptr<ftk::ICmdLineOption> > cmdLineOptions =
+            {
+                p.cmdLine.audioFileName,
+                p.cmdLine.compareFileName,
+                p.cmdLine.compare,
+                p.cmdLine.wipeCenter,
+                p.cmdLine.wipeRotation,
+                p.cmdLine.speed,
+                p.cmdLine.playback,
+                p.cmdLine.loop,
+                p.cmdLine.timeUnits,
+                p.cmdLine.seek,
+                p.cmdLine.frameRange,
+                p.cmdLine.inPoint,
+                p.cmdLine.outPoint,
+#if defined(TLRENDER_OCIO)
+                p.cmdLine.ocioFileName,
+                p.cmdLine.ocioInput,
+                p.cmdLine.ocioDisplay,
+                p.cmdLine.ocioView,
+                p.cmdLine.ocioLook,
+                p.cmdLine.lutFileName,
+                p.cmdLine.lutOrder,
+#endif // TLRENDER_OCIO
+                p.cmdLine.hideSetup,
+                p.cmdLine.version,
+                p.cmdLine.sysInfo,
+                p.cmdLine.listCommands,
+                p.cmdLine.command,
+                p.cmdLine.debugLoop,
+                p.cmdLine.benchmark,
+                p.cmdLine.captureManifest,
+                p.cmdLine.captureShot,
+                p.cmdLine.captureOutput
+            };
+            cmdLineOptions.insert(
+                cmdLineOptions.end(), options.begin(), options.end());
+
             ftk::App::_init(
                 context,
                 argv,
                 p.appInfoModel->getShortName(),
                 "Media playback and review.",
                 { p.cmdLine.inputs },
-                {
-                    p.cmdLine.audioFileName,
-                    p.cmdLine.compareFileName,
-                    p.cmdLine.compare,
-                    p.cmdLine.wipeCenter,
-                    p.cmdLine.wipeRotation,
-                    p.cmdLine.speed,
-                    p.cmdLine.playback,
-                    p.cmdLine.loop,
-                    p.cmdLine.timeUnits,
-                    p.cmdLine.seek,
-                    p.cmdLine.frameRange,
-                    p.cmdLine.inPoint,
-                    p.cmdLine.outPoint,
-#if defined(TLRENDER_OCIO)
-                    p.cmdLine.ocioFileName,
-                    p.cmdLine.ocioInput,
-                    p.cmdLine.ocioDisplay,
-                    p.cmdLine.ocioView,
-                    p.cmdLine.ocioLook,
-                    p.cmdLine.lutFileName,
-                    p.cmdLine.lutOrder,
-#endif // TLRENDER_OCIO
-                    p.cmdLine.hideSetup,
-                    p.cmdLine.version,
-                    p.cmdLine.sysInfo,
-                    p.cmdLine.listCommands,
-                    p.cmdLine.command,
-                    p.cmdLine.debugLoop,
-                    p.cmdLine.benchmark,
-                    p.cmdLine.captureManifest,
-                    p.cmdLine.captureShot,
-                    p.cmdLine.captureOutput
-                },
+                cmdLineOptions,
                 ftk::AppFiles{
                     p.appInfoModel->getDocsDirName(),
                     p.appInfoModel->getShortName(),

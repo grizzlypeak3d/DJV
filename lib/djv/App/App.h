@@ -16,6 +16,7 @@
 
 namespace ftk
 {
+    class ICmdLineOption;
     class Settings;
     class SysLogModel;
 }
@@ -54,10 +55,15 @@ namespace djv
             FTK_NON_COPYABLE(App);
 
         protected:
+            //! The trailing options are a derived application's own, added
+            //! to this one's. Without them a suite application has nowhere
+            //! to register an option: the list here is fixed, and anything
+            //! it does not know falls through to the inputs argument.
             DJV_APP_API void _init(
                 const std::shared_ptr<ftk::Context>&,
                 std::vector<std::string>&,
-                const std::shared_ptr<models::AppInfoModel>&);
+                const std::shared_ptr<models::AppInfoModel>&,
+                const std::vector<std::shared_ptr<ftk::ICmdLineOption> >& = {});
 
             DJV_APP_API App();
 
