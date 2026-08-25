@@ -38,6 +38,11 @@ namespace djv
             {
                 PYBIND11_OVERRIDE(std::string, models::AppInfoModel, getDocsDirName);
             }
+
+            std::string getStudioURL() const override
+            {
+                PYBIND11_OVERRIDE(std::string, models::AppInfoModel, getStudioURL);
+            }
         };
 
         void appInfoModel(py::module_& m)
@@ -62,7 +67,9 @@ namespace djv
                 .def_property_readonly("docsURL", &AppInfoModel::getDocsURL)
 
                 .def_property_readonly("license", &AppInfoModel::getLicense)
-                .def_property_readonly("licensesURL", &AppInfoModel::getLicensesURL);
+                .def_property_readonly("licensesURL", &AppInfoModel::getLicensesURL)
+
+                .def_property_readonly("studioURL", &AppInfoModel::getStudioURL);
         }
     }
 }

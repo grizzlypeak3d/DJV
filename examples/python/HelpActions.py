@@ -28,6 +28,13 @@ class Actions(IActions.IActions):
             "Open the documentation in a web browser.",
             lambda args, f = Util.weak(self._documentation): f())
 
+        studioURL = app.getAppInfoModel().studioURL
+        if studioURL:
+            self._addCommand(
+                "Studio",
+                "Open the DJV Studio web site in a web browser.",
+                lambda args: ftk.openURL(studioURL))
+
         self._addCommand(
             "About",
             "Show the about dialog.",
@@ -42,6 +49,13 @@ class Actions(IActions.IActions):
         self.actions["Documentation"] = ftk.Action(
             "Documentation",
             self._command("Documentation"))
+        if studioURL:
+            self.actions["Studio"] = ftk.Action(
+                "DJV Studio",
+                self._command("Studio"))
+            self.actions["Studio"].tooltip = (
+                "Open the web site for DJV Studio,\n"
+                "the commercial version of DJV.")
         self.actions["About"] = ftk.Action(
             "About",
             self._command("About"))

@@ -81,6 +81,17 @@ namespace djv
             DJV_MODELS_API virtual std::string getLicensesURL() const;
 
             ///@}
+
+            //! \name DJV Studio
+            ///@{
+
+            //! Get the web site for DJV Studio, the commercial version.
+            //! A brief mention with this link appears in the setup dialog
+            //! and the Help menu; returning an empty string hides it,
+            //! which is what the commercial applications themselves do.
+            DJV_MODELS_API virtual std::string getStudioURL() const;
+
+            ///@}
         };
     }
 }

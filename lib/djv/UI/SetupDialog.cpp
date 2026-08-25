@@ -15,6 +15,7 @@
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/StackLayout.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/OS.h>
 
 namespace djv
 {
@@ -44,6 +45,28 @@ namespace djv
                 p.layout);
             ftk::Label::create(context, "Start by configuring some settings.", p.layout);
             ftk::Label::create(context, "Changes can also be made later in the settings tool.", p.layout);
+
+            const std::string studioURL = appInfoModel->getStudioURL();
+            if (!studioURL.empty())
+            {
+                p.layout->addSpacer(ftk::SizeRole::SpacingLarge);
+                ftk::Label::create(
+                    context,
+                    "DJV Studio is the commercial version of DJV:",
+                    p.layout);
+                auto button = ftk::PushButton::create(context, studioURL, p.layout);
+                button->setHAlign(ftk::HAlign::Left);
+                button->setClickedCallback(
+                    [studioURL]
+                    {
+                        try
+                        {
+                            ftk::openURL(studioURL);
+                        }
+                        catch (const std::exception&)
+                        {}
+                    });
+            }
         }
 
         SetupStartWidget::SetupStartWidget() :

@@ -18,6 +18,11 @@ namespace djv
 
             auto actions = helpActions->getActions();
             addAction(actions["Documentation"]);
+            const auto studio = actions.find("Studio");
+            if (studio != actions.end())
+            {
+                addAction(studio->second);
+            }
             addAction(actions["About"]);
             addAction(actions["SysInfo"]);
         }

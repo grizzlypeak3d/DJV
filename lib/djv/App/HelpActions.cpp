@@ -48,6 +48,23 @@ namespace djv
                     {}
                 });
 
+            const std::string studioURL = app->getAppInfoModel()->getStudioURL();
+            if (!studioURL.empty())
+            {
+                _addCommand(
+                    "Studio",
+                    "Open the DJV Studio web site in a web browser.",
+                    [studioURL](const nlohmann::json&)
+                    {
+                        try
+                        {
+                            ftk::openURL(studioURL);
+                        }
+                        catch (const std::exception&)
+                        {}
+                    });
+            }
+
             _addCommand(
                 "About",
                 "Show the about dialog.",
@@ -83,6 +100,15 @@ namespace djv
                 _actions["Documentation"]->setTooltip(
                     "The documentation is installed with the application,\n"
                     "and this build was not installed.");
+            }
+            if (!studioURL.empty())
+            {
+                _actions["Studio"] = ftk::Action::create(
+                    "DJV Studio",
+                    _command("Studio"));
+                _actions["Studio"]->setTooltip(
+                    "Open the web site for DJV Studio,\n"
+                    "the commercial version of DJV.");
             }
             _actions["About"] = ftk::Action::create(
                 "About",

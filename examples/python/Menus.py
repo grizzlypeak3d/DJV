@@ -155,6 +155,8 @@ class Help(ftk.Menu):
         ftk.Menu.__init__(self, context, parent)
 
         self.addAction(actions.actions["Documentation"])
+        if "Studio" in actions.actions:
+            self.addAction(actions.actions["Studio"])
         self.addAction(actions.actions["About"])
         self.addAction(actions.actions["SysInfo"])
 

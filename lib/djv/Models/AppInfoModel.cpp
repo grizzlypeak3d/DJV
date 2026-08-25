@@ -135,5 +135,10 @@ namespace djv
         {
             return "https://github.com/grizzlypeak3d/DJV/tree/main/etc/Legal";
         }
+
+        std::string AppInfoModel::getStudioURL() const
+        {
+            return "https://grizzlypeak3d.com";
+        }
     }
 }
