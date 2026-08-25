@@ -10,6 +10,24 @@ import MainWindow
 
 import weakref
 
+class AppInfoModel(djv.models.AppInfoModel):
+    """
+    The application says who it is: the name shows in the window title,
+    the about dialog, and the system information. The documents
+    directory stays DJV's, so the settings live beside the C++
+    application's rather than scattering.
+    """
+    def getFullName(self):
+        return "DJV Python"
+
+    def getShortName(self):
+        return "djv-python"
+
+    def getDocsDirName(self):
+        # The base defaults this to the full name, which would move the
+        # settings; they stay in DJV's directory.
+        return "DJV"
+
 class App(ftk.App):
     """
     The application creates the models and main window.
@@ -41,7 +59,7 @@ class App(ftk.App):
         # base name so the two do not read each other's settings. This
         # also adds the -settingsFile, -logFile, and -resetSettings
         # command line options.
-        self._appInfoModel = djv.models.AppInfoModel()
+        self._appInfoModel = AppInfoModel()
         ftk.App.__init__(
             self,
             context,
