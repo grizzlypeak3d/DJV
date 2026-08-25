@@ -73,7 +73,6 @@ namespace djv
                 .def(pybind11::self == pybind11::self)
                 .def(pybind11::self != pybind11::self);
 
-            // The "io" field is omitted: tl::SeqOptions is not bound.
             py::class_<ImageSeqSettings>(m, "ImageSeqSettings")
                 .def(py::init())
                 .def_readwrite("audio", &ImageSeqSettings::audio)
@@ -81,6 +80,7 @@ namespace djv
                 .def_readwrite("audioFileName", &ImageSeqSettings::audioFileName)
                 .def_readwrite("maxDigits", &ImageSeqSettings::maxDigits)
                 .def_readwrite("readThreadCount", &ImageSeqSettings::readThreadCount)
+                .def_readwrite("io", &ImageSeqSettings::io)
                 .def(pybind11::self == pybind11::self)
                 .def(pybind11::self != pybind11::self);
 
