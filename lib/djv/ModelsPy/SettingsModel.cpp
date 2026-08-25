@@ -141,6 +141,8 @@ namespace djv
             py::class_<StyleSettings>(m, "StyleSettings")
                 .def(py::init())
                 .def_readwrite("displayScale", &StyleSettings::displayScale)
+                .def_readwrite("colorControls", &StyleSettings::colorControls)
+                .def_readwrite("colorStyle", &StyleSettings::colorStyle)
                 .def_readwrite("customColorRoles", &StyleSettings::customColorRoles)
                 .def_readwrite("fonts", &StyleSettings::fonts)
                 .def_readwrite("fontFiles", &StyleSettings::fontFiles)
