@@ -210,6 +210,24 @@ class App(ftk.App):
                 0.1, lambda: selfWeak()._commandTimeout())
 
         super().run()
+        self._saveSettings()
+
+    def _saveSettings(self):
+        """
+        Everything is written at the clean quit; the writes in the
+        destructors are a backstop. A leak that keeps a model alive no
+        longer loses its settings.
+        """
+        self._window.saveSettings()
+        self._timeUnitsModel.save()
+        self._filesModel.save()
+        self._recentFilesModel.save()
+        self._viewportModel.save()
+        self._colorModel.save()
+        self._audioModel.save()
+        self._toolsModel.save()
+        self._settingsModel.save()
+        self.settings.save()
 
     def _commandTimeout(self):
         self._commandTicks += 1

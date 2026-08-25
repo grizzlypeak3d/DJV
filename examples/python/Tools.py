@@ -56,6 +56,16 @@ class IToolWidget(ftk.IContainer):
                 "/{}/Bellows/{}".format(self.name, title))
             if found:
                 b.open = value
+        # The state is written when it changes; the write in __del__ is a
+        # backstop, and __del__ is at the garbage collector's mercy when
+        # something leaks.
+        selfWeak = weakref.ref(self)
+        for title, b in bellows.items():
+            b.setOpenCallback(
+                lambda value, captured = title:
+                    selfWeak() and selfWeak()._settings.setBool(
+                        "/{}/Bellows/{}".format(selfWeak().name, captured),
+                        value))
 
     def _saveBellows(self, bellows):
         for title, b in bellows.items():

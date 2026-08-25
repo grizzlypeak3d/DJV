@@ -184,6 +184,9 @@ class MainWindow(ftk.MainWindow):
             lambda value: selfWeak()._lutUpdate(value))
 
     def __del__(self):
+        self.saveSettings()
+
+    def saveSettings(self):
         window = self._settingsModel.window
         window.size = self.size
         window.splitter = self._splitter.split
