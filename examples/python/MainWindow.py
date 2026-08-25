@@ -123,7 +123,7 @@ class MainWindow(ftk.MainWindow):
         self._layout.spacingRole = ftk.SizeRole._None
         self.widget = self._layout
         hLayout = ftk.HorizontalLayout(context, self._layout)
-        hLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        hLayout.spacingRole = ftk.SizeRole.Spacing
         self._toolBarLayout = hLayout
         self._fileToolBar.parent = hLayout
         self._dividers["File"] = ftk.Divider(
