@@ -6,10 +6,10 @@
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
 #include <djv/App/FrameActions.h>
-#include <djv/App/Indicator.h>
 #include <djv/App/PlaybackActions.h>
 #include <djv/UI/AudioPopup.h>
 #include <djv/UI/SpeedPopup.h>
+#include <djv/UI/StatusIndicator.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/TimeUnitsModel.h>
 
@@ -52,7 +52,7 @@ namespace djv
             std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<ui::AudioPopup> audioPopup;
-            std::shared_ptr<Indicator> indicator;
+            std::shared_ptr<ui::StatusIndicator> indicator;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             // Whether media time means anything across the whole timeline,

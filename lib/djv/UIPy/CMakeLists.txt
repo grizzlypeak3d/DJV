@@ -11,6 +11,7 @@ set(SOURCE
     MagnifyWidget.cpp
     SeparateAudioDialog.cpp
     SettingsWidgets.cpp
+    StatusIndicator.cpp
     SysInfoDialog.cpp
     ViewWidgets.cpp
     Viewport.cpp)

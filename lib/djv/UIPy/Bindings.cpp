@@ -21,6 +21,7 @@ namespace djv
             frameRangePopup(mUI);
             infoWidget(mUI);
             separateAudioDialog(mUI);
+            statusIndicator(mUI);
             sysInfoDialog(mUI);
             magnifyWidget(mUI);
             exportWidget(mUI);

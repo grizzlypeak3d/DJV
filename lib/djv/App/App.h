@@ -37,11 +37,15 @@ namespace djv
         class ViewportModel;
     }
 
+    namespace ui
+    {
+        class StatusIndicator;
+    }
+
     //! DJV Application
     namespace app
     {
         class MainWindow;
-        class Indicator;
         class ToolWidgetFactory;
 
         //! Application.
@@ -141,7 +145,7 @@ namespace djv
             DJV_APP_API const std::shared_ptr<ToolWidgetFactory>& getToolWidgetFactory() const;
 
             //! Create the status indicator.
-            DJV_APP_API virtual std::shared_ptr<Indicator> createIndicator();
+            DJV_APP_API virtual std::shared_ptr<ui::StatusIndicator> createIndicator();
 
             //! Get the main window.
             DJV_APP_API const std::shared_ptr<MainWindow>& getMainWindow() const;

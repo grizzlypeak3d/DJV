@@ -17,11 +17,11 @@
 #include <djv/App/MessagesTool.h>
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/SettingsTool.h>
-#include <djv/App/Indicator.h>
 #include <djv/App/SysLogTool.h>
 #include <djv/App/ViewTool.h>
 #include <djv/UI/Viewport.h>
 #include <djv/UI/SeparateAudioDialog.h>
+#include <djv/UI/StatusIndicator.h>
 #include <djv/UI/SysInfoDialog.h>
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
@@ -689,11 +689,14 @@ namespace djv
             return _p->toolWidgetFactory;
         }
 
-        std::shared_ptr<Indicator> App::createIndicator()
+        std::shared_ptr<ui::StatusIndicator> App::createIndicator()
         {
-            return Indicator::create(
+            FTK_P();
+            return ui::StatusIndicator::create(
                 _context,
-                std::dynamic_pointer_cast<App>(shared_from_this()));
+                p.viewportModel,
+                p.colorModel,
+                p.audioModel);
         }
 
         const std::shared_ptr<MainWindow>& App::getMainWindow() const

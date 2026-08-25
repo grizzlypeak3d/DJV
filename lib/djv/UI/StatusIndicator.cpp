@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/Indicator.h>
+#include <djv/UI/StatusIndicator.h>
 
-#include <djv/App/App.h>
 #include <djv/UI/StatusIndicatorPopup.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
@@ -14,9 +13,9 @@
 
 namespace djv
 {
-    namespace app
+    namespace ui
     {
-        struct Indicator::Private
+        struct StatusIndicator::Private
         {
             bool channelsEnabled = false;
             bool negativeEnabled = false;
@@ -28,7 +27,7 @@ namespace djv
             bool audioOffsetEnabled = false;
 
             std::shared_ptr<ftk::ToolButton> button;
-            std::shared_ptr<ui::StatusIndicatorPopup> popup;
+            std::shared_ptr<StatusIndicatorPopup> popup;
 
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
@@ -37,14 +36,16 @@ namespace djv
             std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
         };
 
-        void Indicator::_init(
+        void StatusIndicator::_init(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<models::ColorModel>& colorModel,
+            const std::shared_ptr<models::AudioModel>& audioModel,
             const std::shared_ptr<IWidget>& parent)
         {
             IWidget::_init(
                 context,
-                "djv::app::Indicator",
+                "djv::ui::StatusIndicator",
                 parent);
             FTK_P();
 
@@ -58,7 +59,7 @@ namespace djv
                 "Click to show which options are enabled.");
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
-                app->getViewportModel()->observeDisplayOptions(),
+                viewportModel->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
                     FTK_P();
@@ -77,7 +78,7 @@ namespace djv
                 });
 
             p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
-                app->getViewportModel()->observeAspectRatioOptions(),
+                viewportModel->observeAspectRatioOptions(),
                 [this](const models::AspectRatioOptions& value)
                 {
                     FTK_P();
@@ -86,7 +87,7 @@ namespace djv
                 });
 
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeOCIOOptions(),
+                colorModel->observeOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
                     _p->ocioEnabled = value.enabled;
@@ -94,7 +95,7 @@ namespace djv
                 });
 
             p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
-                app->getColorModel()->observeLUTOptions(),
+                colorModel->observeLUTOptions(),
                 [this](const tl::LUTOptions& value)
                 {
                     _p->lutEnabled = value.enabled;
@@ -102,7 +103,7 @@ namespace djv
                 });
 
             p.audioSyncOffsetObserver = ftk::Observer<double>::create(
-                app->getAudioModel()->observeSyncOffset(),
+                audioModel->observeSyncOffset(),
                 [this](double value)
                 {
                     _p->audioOffsetEnabled = value != 0.0;
@@ -116,24 +117,26 @@ namespace djv
                 });
         }
 
-        Indicator::Indicator() :
+        StatusIndicator::StatusIndicator() :
             _p(new Private)
         {}
 
-        Indicator::~Indicator()
+        StatusIndicator::~StatusIndicator()
         {}
 
-        std::shared_ptr<Indicator> Indicator::create(
+        std::shared_ptr<StatusIndicator> StatusIndicator::create(
             const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<App>& app,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<models::ColorModel>& colorModel,
+            const std::shared_ptr<models::AudioModel>& audioModel,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<Indicator>(new Indicator);
-            out->_init(context, app, parent);
+            auto out = std::shared_ptr<StatusIndicator>(new StatusIndicator);
+            out->_init(context, viewportModel, colorModel, audioModel, parent);
             return out;
         }
 
-        bool Indicator::_hasIndicator() const
+        bool StatusIndicator::_hasIndicator() const
         {
             FTK_P();
             return
@@ -147,7 +150,7 @@ namespace djv
                 p.audioOffsetEnabled;
         }
 
-        std::vector<std::pair<std::string, std::string> > Indicator::_getIndicators() const
+        std::vector<std::pair<std::string, std::string> > StatusIndicator::_getIndicators() const
         {
             return
             {
@@ -162,7 +165,7 @@ namespace djv
             };
         }
 
-        std::map<std::string, bool> Indicator::_getIndicatorValues() const
+        std::map<std::string, bool> StatusIndicator::_getIndicatorValues() const
         {
             FTK_P();
             return
@@ -178,7 +181,7 @@ namespace djv
             };
         }
 
-        void Indicator::_indicatorUpdate()
+        void StatusIndicator::_indicatorUpdate()
         {
             FTK_P();
             p.button->setBackgroundRole(
@@ -191,17 +194,17 @@ namespace djv
             }
         }
 
-        void Indicator::_showIndicatorPopup()
+        void StatusIndicator::_showIndicatorPopup()
         {
             FTK_P();
             if (!p.popup)
             {
-                p.popup = ui::StatusIndicatorPopup::create(
+                p.popup = StatusIndicatorPopup::create(
                     getContext(),
                     _getIndicators());
                 _indicatorUpdate();
                 p.popup->open(getWindow(), p.button->getGeometry());
-                std::weak_ptr<Indicator> weak(std::dynamic_pointer_cast<Indicator>(shared_from_this()));
+                std::weak_ptr<StatusIndicator> weak(std::dynamic_pointer_cast<StatusIndicator>(shared_from_this()));
                 p.popup->setCloseCallback(
                     [weak]
                     {
