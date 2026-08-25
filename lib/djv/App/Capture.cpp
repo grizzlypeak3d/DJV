@@ -39,6 +39,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <optional>
+
 namespace djv
 {
     namespace app
@@ -480,6 +482,7 @@ namespace djv
                 // preceding step has been created and laid out.
                 late = late ||
                     step.contains("click") ||
+                    step.contains("key") ||
                     step.contains("pick") ||
                     step.contains("zoom") ||
                     step.contains("tab");
@@ -1051,16 +1054,78 @@ namespace djv
             }
             else if (step.contains("click"))
             {
-                // Click at a window position, in framebuffer pixels rather
-                // than the size the window was asked for -- on a display with
-                // a scale of two they are twice the numbers, e.g.
+                // Click on the widget with a screenshot tag, or at a window
+                // position in framebuffer pixels -- on a display with a scale
+                // of two the numbers are twice the requested window size, so
+                // the tag form is preferred where a tag exists. The button
+                // defaults to the left, e.g.
+                // { "click": "Files.CompareMode" },
+                // { "click": "MainWindow.Viewport", "button": "Right" },
                 // { "click": [160, 90], "modifier": "Control" }. Unlike
                 // "pick", which calls the viewport directly, this goes through
                 // the window the way a real click does -- including the mouse
                 // bindings, so picking needs the modifier it is bound to.
                 // Deferred by _applyRest so the widget under it is laid out.
                 const auto& v = step.at("click");
+                int modifiers = 0;
+                if (step.contains("modifier"))
+                {
+                    ftk::KeyModifier modifier = ftk::KeyModifier::None;
+                    if (ftk::from_string(
+                        step.at("modifier").get<std::string>(), modifier))
+                    {
+                        modifiers = static_cast<int>(modifier);
+                    }
+                }
+                ftk::MouseButton button = ftk::MouseButton::Left;
+                if (step.contains("button"))
+                {
+                    ftk::from_string(
+                        step.at("button").get<std::string>(), button);
+                }
+                auto mw = app->getMainWindow();
+                std::optional<ftk::V2I> pos;
                 if (v.is_array() && v.size() >= 2)
+                {
+                    pos = ftk::V2I(v[0].get<int>(), v[1].get<int>());
+                }
+                else if (v.is_string() && mw)
+                {
+                    std::vector<std::shared_ptr<ftk::IWidget> > tagged;
+                    collect(mw, tagged);
+                    for (const auto& w : tagged)
+                    {
+                        if (ftk::getScreenshotTag(w) == v.get<std::string>())
+                        {
+                            const ftk::Box2I g = w->getGeometry();
+                            pos = ftk::V2I(
+                                g.x() + g.w() / 2,
+                                g.y() + g.h() / 2);
+                            break;
+                        }
+                    }
+                    if (!pos.has_value())
+                    {
+                        note(p.shotId,
+                            "click: no visible widget tagged \"" +
+                            v.get<std::string>() + "\"");
+                    }
+                }
+                if (pos.has_value() && mw)
+                {
+                    std::static_pointer_cast<ftk::IWindow>(mw)->click(
+                        pos.value(), button, modifiers);
+                }
+            }
+            else if (step.contains("key"))
+            {
+                // Press and release a key through the window's dispatch,
+                // e.g. { "key": "Escape" }, { "key": "M", "modifier":
+                // "Shift" }. Deferred like "click" so the focused widget
+                // exists.
+                ftk::Key key = ftk::Key::Unknown;
+                if (ftk::from_string(step.at("key").get<std::string>(), key) &&
+                    ftk::Key::Unknown != key)
                 {
                     int modifiers = 0;
                     if (step.contains("modifier"))
@@ -1073,7 +1138,16 @@ namespace djv
                         }
                     }
                     if (auto mw = app->getMainWindow())
-                        mw->click(ftk::V2I(v[0].get<int>(), v[1].get<int>()), modifiers);
+                    {
+                        std::static_pointer_cast<ftk::IWindow>(mw)->keyPress(
+                            key, modifiers);
+                    }
+                }
+                else
+                {
+                    note(p.shotId,
+                        "key: unknown key \"" +
+                        step.at("key").get<std::string>() + "\"");
                 }
             }
             else if (step.contains("pick"))

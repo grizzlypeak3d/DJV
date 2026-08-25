@@ -55,6 +55,8 @@
 #include <ftk/Core/Timer.h>
 
 #include <filesystem>
+#include <fstream>
+#include <iostream>
 #include <optional>
 
 #if defined(__GLIBC__)
@@ -916,6 +918,71 @@ namespace djv
             _saveSettings();
         }
 
+        void App::_debugState(const nlohmann::json& args)
+        {
+            FTK_P();
+            nlohmann::json out;
+
+            nlohmann::json viewport;
+            to_json(viewport["displayOptions"], p.viewportModel->getDisplayOptions());
+            to_json(viewport["backgroundOptions"], p.viewportModel->getBackgroundOptions());
+            to_json(viewport["foregroundOptions"], p.viewportModel->getForegroundOptions());
+            out["viewport"] = viewport;
+
+            nlohmann::json color;
+            to_json(color["ocioOptions"], p.colorModel->getOCIOOptions());
+            to_json(color["lutOptions"], p.colorModel->getLUTOptions());
+            out["color"] = color;
+
+            nlohmann::json audio;
+            audio["volume"] = p.audioModel->getVolume();
+            audio["mute"] = p.audioModel->isMuted();
+            audio["syncOffset"] = p.audioModel->getSyncOffset();
+            out["audio"] = audio;
+
+            nlohmann::json files = nlohmann::json::array();
+            for (const auto& item : p.filesModel->getFiles())
+            {
+                files.push_back(item->path.get());
+            }
+            out["files"] = files;
+            out["aIndex"] = p.filesModel->getAIndex();
+
+            if (auto player = p.player->get())
+            {
+                nlohmann::json j;
+                j["path"] = player->getPath().get();
+                j["speed"] = player->getSpeed();
+                j["defaultSpeed"] = player->getDefaultSpeed();
+                j["playback"] = tl::to_string(player->getPlayback());
+                j["loop"] = tl::to_string(player->getLoop());
+                const OTIO_NS::RationalTime& time = player->getCurrentTime();
+                j["currentTime"] = { time.value(), time.rate() };
+                const OTIO_NS::TimeRange& range = player->getInOutRange();
+                j["inOutRange"] = {
+                    range.start_time().value(),
+                    range.duration().value(),
+                    range.duration().rate() };
+                j["videoLayer"] = player->getVideoLayer();
+                j["audioOffset"] = player->getAudioOffset();
+                out["player"] = j;
+            }
+
+            const std::string file =
+                args.is_object() && args.contains("file") ?
+                args.at("file").get<std::string>() :
+                std::string();
+            if (!file.empty())
+            {
+                std::ofstream f(std::filesystem::u8path(file));
+                f << out.dump(2) << std::endl;
+            }
+            else
+            {
+                std::cout << out.dump(2) << std::endl;
+            }
+        }
+
         void App::_saveSettings()
         {
             FTK_P();
@@ -1036,6 +1103,19 @@ namespace djv
             p.toolsModel = models::ToolsModel::create(getSettings());
 
             p.commandsModel = models::CommandsModel::create(_context);
+
+            // Introspection: what the models hold right now, as opposed to
+            // the settings file, which holds what survived to the last
+            // clean quit. Comparing this against a widget dump is how a
+            // UI-versus-model desync is seen directly.
+            p.commandsModel->add(
+                "Debug/State",
+                "Write the live model state as JSON, to a file or standard "
+                "output; e.g., { \"file\": \"state.json\" }.",
+                [this](const nlohmann::json& args)
+                {
+                    _debugState(args);
+                });
         }
 
         void App::_observersInit()

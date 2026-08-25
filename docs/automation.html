@@ -70,6 +70,14 @@ Tools/Export - Toggle the Export tool; e.g., { "value": true }.
 <pre><code>djv render.#.exr</code></pre>
 <p>The setup dialog that is shown on the first run is automatically hidden when <strong>-command</strong> is used, and stays available for the next interactive run. The <strong>-hideSetup</strong> option hides it for other automated runs.</p>
 <p>Use the <strong>-h</strong> option to see the complete list of command line options, including playback, comparison, color, and window options.</p>
+<h2 id="debugging">Debugging and introspection</h2>
+<pre><code>djv -screenshot window.png
+djv -widgetDump widgets.json</code></pre>
+<p><strong>-screenshot</strong> writes an image of the window to a file and exits. <strong>-widgetDump</strong> writes the window's widget tree to a file as JSON — the type, position, size, state, and text of every widget — and exits. Both work in any application built on the UI library, including the Python application.</p>
+<p><strong>Debug/State</strong> is a command that writes the live model state as JSON — the display, color, and audio options, the open files, and the player — to standard output, or to a file given as an argument:</p>
+<pre><code>djv render.mov -command 'Debug/State {"file": "state.json"}' -command 'File/Exit'</code></pre>
+<p>Setting the environment variable <strong>FTK_TRACE_EVENTS</strong> logs keyboard and mouse button dispatch: each widget an event is offered to, in order, and which one accepted it.</p>
+<p>The log's <strong>Library</strong> line records which library file the application loaded and when it was last modified, which tells a stale build from a fresh one.</p>
 </main>
 </body>
 </html>

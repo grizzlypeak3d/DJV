@@ -1,3 +1,10 @@
+Setup verbs for interaction, in addition to open/tool/expand/tab/pick/zoom:
+* { "click": "Files.CompareMode" } clicks the widget with that screenshot
+  tag; { "click": "MainWindow.Viewport", "button": "Right" } right clicks
+  it, which is how transient state -- a context menu, a popup -- gets into
+  a capture. The [x, y] form clicks a framebuffer position.
+* { "key": "Escape" } presses a key through the window's dispatch.
+
 Configuration:
 
 Requirements:
