@@ -60,10 +60,7 @@
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
 
-namespace djv_resource
-{
-    extern std::vector<uint8_t> DJV_Icon;
-}
+#include <djv_resource/IconResources.h>
 
 namespace djv
 {
@@ -195,8 +192,13 @@ namespace djv
                 settings.size);
             FTK_P();
 
+            // Every icon compiled into the library; the map is generated
+            // from the files in etc/Icons.
             auto iconSystem = context->getSystem<ftk::IconSystem>();
-            iconSystem->add("DJV_Icon", djv_resource::DJV_Icon);
+            for (const auto& i : djv_resource::getIconResources())
+            {
+                iconSystem->add(i.first, *i.second);
+            }
             setIcon(iconSystem->get("DJV_Icon", 1.0));
 
             p.app = app;

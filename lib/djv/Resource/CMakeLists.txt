@@ -1,15 +1,9 @@
 set(HEADERS)
 set(SOURCE)
-set(RESOURCES
-    etc/Icons/DJV_Icon.svg)
-foreach(RESOURCE ${RESOURCES})
-    get_filename_component(RESOURCE_BASE ${RESOURCE} NAME_WE)
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_BASE}.cpp
-        COMMAND ftk-resource ${PROJECT_SOURCE_DIR}/${RESOURCE} ${RESOURCE_BASE} djv_resource
-        DEPENDS ${PROJECT_SOURCE_DIR}/${RESOURCE})
-    list(APPEND SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${RESOURCE_BASE}.cpp)
-endforeach()
+
+# The icons go through ftk_icon_resources(): adding an icon is adding a
+# file to etc/Icons, and the main window registers the generated map.
+ftk_icon_resources(SOURCE ${PROJECT_SOURCE_DIR}/etc/Icons djv_resource)
 
 # Static, whatever the rest of the build is. The resources are data at
 # namespace scope with no export macro on them, so a shared build on Windows
@@ -26,6 +20,11 @@ endforeach()
 # and each resource is its own object file, so a consumer links only the ones
 # it names -- its consumers take the ones they use and nothing more.
 add_library(djvResource STATIC ${HEADERS} ${SOURCE})
+
+# The generated headers are found here; the build interface only, since
+# the resources are an implementation detail rather than installed API.
+target_include_directories(djvResource PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(djvResource PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(djvResource ZLIB::ZLIB)
