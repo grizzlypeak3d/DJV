@@ -56,6 +56,11 @@ namespace djv
 
         ToolsModel::~ToolsModel()
         {
+            save();
+        }
+
+        void ToolsModel::save()
+        {
             FTK_P();
             p.settings->set("/Tools/Open.1", p.openTools->get());
         }

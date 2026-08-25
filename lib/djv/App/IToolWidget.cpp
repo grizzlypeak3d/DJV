@@ -9,6 +9,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/Bellows.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Format.h>
 
@@ -20,6 +21,9 @@ namespace djv
         {
             std::shared_ptr<ftk::Settings> settings;
             std::string name;
+            // Weak, because each bellows holds the callback that reads this
+            // map: a shared pointer here would be a cycle.
+            std::map<std::string, std::weak_ptr<ftk::Bellows> > bellows;
             
             std::shared_ptr<ftk::Icon> icon;
             std::shared_ptr<ftk::Label> label;
@@ -123,6 +127,33 @@ namespace djv
                     j->second->setOpen(i.value().get<bool>());
                 }
             }
+
+            // The state is written when it changes; the write in the tool's
+            // destructor is a backstop.
+            p.bellows.clear();
+            for (const auto& i : value)
+            {
+                p.bellows[i.first] = i.second;
+                i.second->setOpenCallback(
+                    [this](bool)
+                    {
+                        _bellowsSave();
+                    });
+            }
+        }
+
+        void IToolWidget::_bellowsSave()
+        {
+            FTK_P();
+            nlohmann::json json;
+            for (const auto& i : p.bellows)
+            {
+                if (auto bellows = i.second.lock())
+                {
+                    json[i.first] = bellows->isOpen();
+                }
+            }
+            p.settings->set(ftk::Format("/{0}/Bellows").arg(p.name), json);
         }
 
         void IToolWidget::_saveSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >& value)

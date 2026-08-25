@@ -44,6 +44,9 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 
+            //! Save the settings.
+            DJV_MODELS_API void save();
+
             //! Get the OpenColorIO options.
             DJV_MODELS_API const tl::OCIOOptions& getOCIOOptions() const;
 

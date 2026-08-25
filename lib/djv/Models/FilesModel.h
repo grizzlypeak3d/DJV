@@ -68,6 +68,9 @@ namespace djv
             DJV_MODELS_API static std::shared_ptr<FilesModel> create(
                 const std::shared_ptr<ftk::Settings>&);
 
+            //! Save the settings.
+            DJV_MODELS_API void save();
+
             //! Get the files.
             DJV_MODELS_API const std::vector<std::shared_ptr<FilesModelItem> >& getFiles() const;
 

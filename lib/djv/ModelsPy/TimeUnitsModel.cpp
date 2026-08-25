@@ -24,7 +24,8 @@ namespace djv
                 .def(
                     py::init(&TimeUnitsModel::create),
                     py::arg("context"),
-                    py::arg("settings"));
+                    py::arg("settings"))
+                .def("save", &TimeUnitsModel::save);
         }
     }
 }

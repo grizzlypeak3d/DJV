@@ -64,6 +64,11 @@ namespace djv
 
         FilesModel::~FilesModel()
         {
+            save();
+        }
+
+        void FilesModel::save()
+        {
             FTK_P();
             auto compareOptions = p.compareOptions->get();
             p.settings->setT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);

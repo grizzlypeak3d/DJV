@@ -67,6 +67,7 @@ namespace djv
                     py::init(&ViewportModel::create),
                     py::arg("context"),
                     py::arg("settings"))
+                .def("save", &ViewportModel::save)
                 .def_property("imageOptions", &ViewportModel::getImageOptions, &ViewportModel::setImageOptions, py::return_value_policy::copy)
                 .def_property_readonly("observeImageOptions", &ViewportModel::observeImageOptions)
                 .def_property("displayOptions", &ViewportModel::getDisplayOptions, &ViewportModel::setDisplayOptions, py::return_value_policy::copy)

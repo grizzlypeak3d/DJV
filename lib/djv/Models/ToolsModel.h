@@ -46,6 +46,9 @@ namespace djv
             DJV_MODELS_API static std::shared_ptr<ToolsModel> create(
                 const std::shared_ptr<ftk::Settings>&);
 
+            //! Save the settings.
+            DJV_MODELS_API void save();
+
             //! Get the tools.
             DJV_MODELS_API const std::vector<ToolInfo>& getTools() const;
             

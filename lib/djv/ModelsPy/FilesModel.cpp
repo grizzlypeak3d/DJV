@@ -45,6 +45,8 @@ namespace djv
                     py::init(&FilesModel::create),
                     py::arg("settings"))
 
+                .def("save", &FilesModel::save)
+
                 .def_property_readonly("files", &FilesModel::getFiles)
                 .def_property_readonly("observeFiles", &FilesModel::observeFiles)
                 .def_property_readonly("a", &FilesModel::getA)

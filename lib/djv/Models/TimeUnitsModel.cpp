@@ -36,6 +36,11 @@ namespace djv
 
         TimeUnitsModel::~TimeUnitsModel()
         {
+            save();
+        }
+
+        void TimeUnitsModel::save()
+        {
             FTK_P();
             p.settings->set("/TimeUnits", tl::to_string(getTimeUnits()));
         }

@@ -48,6 +48,7 @@ namespace djv
 
         protected:
             void _loadSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >&);
+            void _bellowsSave();
             void _saveSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >&);
 
             void _setWidget(const std::shared_ptr<ftk::IWidget>&);

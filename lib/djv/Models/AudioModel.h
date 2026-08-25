@@ -40,6 +40,9 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&);
 
+            //! Save the settings.
+            DJV_MODELS_API void save();
+
             //! Get the output devices.
             DJV_MODELS_API const std::vector<tl::AudioDeviceID>& getDevices();
 

@@ -31,6 +31,7 @@ namespace djv
                 .def(
                     py::init(&ToolsModel::create),
                     py::arg("settings"))
+                .def("save", &ToolsModel::save)
                 .def_property_readonly("tools", &ToolsModel::getTools, py::return_value_policy::copy)
                 .def("addTool", &ToolsModel::addTool, py::arg("tool"))
                 .def_property_readonly("openTools", &ToolsModel::getOpenTools)

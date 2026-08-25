@@ -73,6 +73,11 @@ namespace djv
 
         ColorModel::~ColorModel()
         {
+            save();
+        }
+
+        void ColorModel::save()
+        {
             FTK_P();
             p.settings->setT("/Color/OCIO", p.ocioOptions->get());
             p.settings->setT("/Color/OCIOExtColorSpaces", p.extColorSpaces->get());

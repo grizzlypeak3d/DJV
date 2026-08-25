@@ -535,6 +535,12 @@ namespace djv
             p.timelineWidget->setParent(nullptr);
             p.timelineWidget.reset();
 
+            saveSettings();
+        }
+
+        void MainWindow::saveSettings()
+        {
+            FTK_P();
             if (p.shown)
             {
                 models::WindowSettings settings = p.settingsModel->getWindow();

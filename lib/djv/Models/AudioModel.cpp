@@ -66,6 +66,11 @@ namespace djv
 
         AudioModel::~AudioModel()
         {
+            save();
+        }
+
+        void AudioModel::save()
+        {
             FTK_P();
             p.settings->set("/Audio/Volume", p.volume->get());
             p.settings->set("/Audio/Mute", p.mute->get());

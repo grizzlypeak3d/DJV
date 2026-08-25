@@ -139,6 +139,8 @@ namespace djv
                 {
                     FTK_P();
                     p.level = static_cast<MagnifyLevel>(value);
+                    // Written when it changes; the destructor is a backstop.
+                    p.settings->set("/Magnify/Level", to_string(p.level));
                     _widgetUpdate();
                 });
 
@@ -147,6 +149,7 @@ namespace djv
                 {
                     FTK_P();
                     p.viewPosAndZoom = value;
+                    p.settings->set("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
                     if (value)
                     {
                         _widgetUpdate();

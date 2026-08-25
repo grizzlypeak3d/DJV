@@ -36,6 +36,7 @@ namespace djv
                 .def_property_readonly("observeDevice", &AudioModel::observeDevice)
                 .def_property("volume", &AudioModel::getVolume, &AudioModel::setVolume)
                 .def_property_readonly("observeVolume", &AudioModel::observeVolume)
+                .def("save", &AudioModel::save)
                 .def("volumeUp", &AudioModel::volumeUp)
                 .def("volumeDown", &AudioModel::volumeDown)
                 .def_property("mute", &AudioModel::isMuted, &AudioModel::setMute)

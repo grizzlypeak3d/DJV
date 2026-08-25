@@ -882,6 +882,7 @@ namespace djv
                     throw std::runtime_error("Cannot set up the benchmark");
                 }
                 ftk::App::run();
+            _saveSettings();
                 if (!benchmark->succeeded())
                 {
                     throw std::runtime_error("The benchmark produced no measurement");
@@ -902,6 +903,7 @@ namespace djv
                         "Cannot set up capture: {0}").arg(p.cmdLine.captureShot->getValue()));
                 }
                 ftk::App::run();
+            _saveSettings();
                 if (!capture->succeeded())
                 {
                     throw std::runtime_error(ftk::Format(
@@ -911,6 +913,28 @@ namespace djv
             }
 
             ftk::App::run();
+            _saveSettings();
+        }
+
+        void App::_saveSettings()
+        {
+            FTK_P();
+            // Everything is written at the clean quit; the writes in the
+            // destructors are a backstop. A leak that keeps a model alive
+            // no longer loses its settings.
+            if (p.mainWindow)
+            {
+                p.mainWindow->saveSettings();
+            }
+            p.timeUnitsModel->save();
+            p.filesModel->save();
+            p.recentFilesModel->save();
+            p.viewportModel->save();
+            p.colorModel->save();
+            p.audioModel->save();
+            p.toolsModel->save();
+            p.settingsModel->save();
+            getSettings()->save();
         }
 
         void App::_modelsInit()

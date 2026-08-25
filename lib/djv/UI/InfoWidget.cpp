@@ -82,6 +82,13 @@ namespace djv
                 // Open until the settings say otherwise, so that a tool
                 // opened for the first time shows what it has.
                 p.bellows[name]->setOpen(true);
+                // The state is written when it changes; the write in the
+                // destructor is a backstop.
+                p.bellows[name]->setOpenCallback(
+                    [this](bool)
+                    {
+                        _saveSettings();
+                    });
                 ftk::setScreenshotTag(p.bellows[name], "Info." + name);
             }
             _setWidget(layout);
@@ -134,6 +141,11 @@ namespace djv
         {}
 
         InfoWidget::~InfoWidget()
+        {
+            _saveSettings();
+        }
+
+        void InfoWidget::_saveSettings()
         {
             FTK_P();
             nlohmann::json json;

@@ -54,6 +54,11 @@ namespace djv
 
         RecentFilesModel::~RecentFilesModel()
         {
+            save();
+        }
+
+        void RecentFilesModel::save()
+        {
             FTK_P();
             // The path carries the frames it covers, so that reopening an
             // entry gives back what it opened; a path whose name already says

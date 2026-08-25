@@ -32,6 +32,7 @@ namespace djv
                     py::init(&ColorModel::create),
                     py::arg("context"),
                     py::arg("settings"))
+                .def("save", &ColorModel::save)
                 .def_property("ocioOptions", &ColorModel::getOCIOOptions, &ColorModel::setOCIOOptions, py::return_value_policy::copy)
                 .def_property_readonly("observeOCIOOptions", &ColorModel::observeOCIOOptions)
                 .def_property_readonly("observeResolvedOCIOOptions", &ColorModel::observeResolvedOCIOOptions)

@@ -121,6 +121,11 @@ namespace djv
 
         ViewportModel::~ViewportModel()
         {
+            save();
+        }
+
+        void ViewportModel::save()
+        {
             FTK_P();
             p.settings->setT("/Viewport/Image.1", p.imageOptions->get());
             p.settings->setT("/Viewport/Display", p.displayOptions->get());

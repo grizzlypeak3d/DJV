@@ -173,6 +173,7 @@ namespace djv
             DJV_APP_API virtual void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);
 
         private:
+            void _saveSettings();
             void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);

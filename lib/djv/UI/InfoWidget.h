@@ -47,6 +47,7 @@ namespace djv
             DJV_UI_API void setPlayer(const std::shared_ptr<tl::Player>&);
 
         private:
+            void _saveSettings();
             void _widgetUpdate();
 
             FTK_PRIVATE();

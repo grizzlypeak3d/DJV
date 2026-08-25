@@ -92,6 +92,9 @@ namespace djv
             //! Focus the current frame widget.
             DJV_APP_API void focusCurrentFrame();
 
+            //! Save the window settings.
+            DJV_APP_API void saveSettings();
+
             //! Show the about dialog.
             DJV_APP_API void showAboutDialog();
 

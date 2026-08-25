@@ -28,7 +28,8 @@ namespace djv
                 .def(
                     py::init(&RecentFilesModel::create),
                     py::arg("context"),
-                    py::arg("settings"));
+                    py::arg("settings"))
+                .def("save", &RecentFilesModel::save);
         }
     }
 }
