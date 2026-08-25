@@ -130,7 +130,7 @@ namespace djv
             ftk::setScreenshotTag(p.timeUnitsWidget, "Playback.TimeUnits");
 
             p.speedButton = ftk::ToolButton::create(context);
-            p.speedButton->setPopupIcon("MenuArrow");
+            p.speedButton->setPopupIcon(true);
             p.speedButton->setTooltip("Playback speed.");
             ftk::setScreenshotTag(p.speedButton, "Playback.Speed");
 
