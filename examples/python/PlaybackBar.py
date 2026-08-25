@@ -63,6 +63,12 @@ class Widget(ftk.IContainer):
         spacer = ftk.Spacer(context, ftk.Orientation.Horizontal, self._layout)
         spacer.hStretch = ftk.Stretch.Expanding
         self._muteButton.parent = self._layout
+        self._indicator = djv.ui.StatusIndicator(
+            context,
+            app.getViewportModel(),
+            app.getColorModel(),
+            app.getAudioModel())
+        self._indicator.parent = self._layout
         self._setWidget(self._layout)
 
         self._currentTimeEdit.setCallback(Util.weak(self._currentTimeCallback))
