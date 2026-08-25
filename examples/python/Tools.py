@@ -210,11 +210,14 @@ class FilesTool(IToolWidget):
         self._compareComboBox.hStretch = ftk.Stretch.Expanding
 
         self._wipeXSlider = ftk.FloatEditSlider(context)
+        self._wipeXSlider.defaultValue = 0.5
         self._wipeYSlider = ftk.FloatEditSlider(context)
+        self._wipeYSlider.defaultValue = 0.5
         self._wipeRotationSlider = ftk.FloatEditSlider(context)
         self._wipeRotationSlider.range = ftk.RangeF(0.0, 360.0)
         self._wipeRotationSlider.step = 1.0
         self._wipeRotationSlider.largeStep = 10.0
+        self._wipeRotationSlider.defaultValue = 0.0
 
         self._overlaySlider = ftk.FloatEditSlider(context)
         self._overlaySlider.defaultValue = 0.5
@@ -245,6 +248,7 @@ class FilesTool(IToolWidget):
         vLayout = ftk.VerticalLayout(context)
         vLayout.marginRole = ftk.SizeRole.Margin
         form = ftk.FormLayout(context, vLayout)
+        self._compareForm = form
         form.spacingRole = ftk.SizeRole.SpacingSmall
         form.addRow("Mode:", self._compareComboBox)
         form.addRow("X:", self._wipeXSlider)
@@ -344,15 +348,17 @@ class FilesTool(IToolWidget):
             self._grid.setGridPos(thumbnail, row, 0)
 
             nameButton = ftk.ToolButton(
-                self.context, item.path.fileName, self._grid)
+                self.context, ftk.elide(item.path.fileName, 24), self._grid)
             nameButton.checked = item is a
             nameButton.hStretch = ftk.Stretch.Expanding
+            nameButton.vAlign = ftk.VAlign.Center
             nameButton.tooltip = item.path.get() + "\n\nSet the A file."
             self._aButtonGroup.addButton(nameButton)
             self._grid.setGridPos(nameButton, row, 1)
 
             bButton = ftk.ToolButton(self.context, "B", self._grid)
             bButton.checked = any(item is i for i in b)
+            bButton.vAlign = ftk.VAlign.Center
             bButton.tooltip = "Set the B file(s)."
             self._bButtonGroup.addButton(bButton)
             self._grid.setGridPos(bButton, row, 2)
@@ -360,7 +366,12 @@ class FilesTool(IToolWidget):
             layerComboBox = ftk.ComboBox(self.context, self._grid)
             layerComboBox.setItems(item.videoLayers)
             layerComboBox.currentIndex = item.videoLayer
+            layerComboBox.vAlign = ftk.VAlign.Center
             layerComboBox.tooltip = "Set the current layer."
+            # Layer names can be long, and the column is as wide as the
+            # longest one in it. Kept from the end: layer names share a
+            # prefix and differ where they finish.
+            layerComboBox.setElide(12, ftk.ElideMode.Left)
             layerComboBox.setVisible(len(item.videoLayers) > 1)
             layerComboBox.setIndexCallback(
                 lambda value, captured = item, appWeak = self._app:
@@ -372,8 +383,8 @@ class FilesTool(IToolWidget):
             # what is on disk yet.
             if item.path.hasNum and item.path.testExt(seqExts):
                 if item.timeRange is not None:
-                    start = int(item.timeRange.start_time().value())
-                    duration = int(item.timeRange.duration().value())
+                    start = int(item.timeRange.start_time.value)
+                    duration = int(item.timeRange.duration.value)
                     frames = ftk.RangeI64(start, start + duration - 1)
                 elif item.path.frames is not None:
                     frames = item.path.frames
@@ -383,6 +394,7 @@ class FilesTool(IToolWidget):
                     self.context,
                     "{}-{}".format(frames.min, frames.max),
                     self._grid)
+                rangeButton.vAlign = ftk.VAlign.Center
                 rangeButton.tooltip = "The frame range of the sequence."
                 rangeButton.setClickedCallback(
                     lambda captured = item, r = frames, index = row, \
@@ -445,6 +457,14 @@ class FilesTool(IToolWidget):
         self._overlaySlider.value = options.overlay
         self._gainSlider.value = options.differenceGain
         self._sameSizeCheckBox.checked = options.sameSize
+        wipe = tl.Compare.Wipe == options.compare
+        self._compareForm.setRowVisible(self._wipeXSlider, wipe)
+        self._compareForm.setRowVisible(self._wipeYSlider, wipe)
+        self._compareForm.setRowVisible(self._wipeRotationSlider, wipe)
+        self._compareForm.setRowVisible(
+            self._overlaySlider, tl.Compare.Overlay == options.compare)
+        self._compareForm.setRowVisible(
+            self._gainSlider, tl.Compare.Difference == options.compare)
 
     def _compareTimeUpdate(self, value):
         self._compareTimeComboBox.currentIndex = \
