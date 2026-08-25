@@ -87,9 +87,18 @@ elseif(APPLE)
     
 
     if(DJV_MACOS_PACKAGE)
-        # \bug Why do we need to use ".." to avoid installing into the
-        # "Resources" directory in the bundle?
-        install(FILES ${INSTALL_DYLIBS} DESTINATION ../Frameworks)
+        # CPack stages the bundle into "DJV.app/Contents/Resources", so a
+        # destination of ".." is "Contents" -- which is where the bundle's own
+        # directories belong, and that is what these relative paths are for.
+        #
+        # Outside CPack the same paths land beside the install prefix rather
+        # than inside it, writing Frameworks, MacOS and Info.plist into
+        # whatever directory holds it. So they are kept to their own component
+        # and out of an ordinary install; CPack asks for it by name below.
+        install(FILES ${INSTALL_DYLIBS}
+            DESTINATION ../Frameworks
+            COMPONENT bundle
+            EXCLUDE_FROM_ALL)
     else()
         install(FILES ${INSTALL_DYLIBS} DESTINATION lib)
     endif()
@@ -101,8 +110,14 @@ elseif(APPLE)
             ${PROJECT_BINARY_DIR}/Info.plist)
         set(CPACK_BUNDLE_PLIST ${PROJECT_BINARY_DIR}/Info.plist)
         set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns)
-        install(FILES ${PROJECT_BINARY_DIR}/Info.plist DESTINATION "..")
-        install(FILES ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns DESTINATION ".")
+        install(FILES ${PROJECT_BINARY_DIR}/Info.plist
+            DESTINATION ".."
+            COMPONENT bundle
+            EXCLUDE_FROM_ALL)
+        install(FILES ${PROJECT_SOURCE_DIR}/etc/macOS/DJV.icns
+            DESTINATION "."
+            COMPONENT bundle
+            EXCLUDE_FROM_ALL)
 
         set(POST_BUILD_SCRIPTS)
         set(DJV_MACOS_TEAM_ID $ENV{DJV_MACOS_TEAM_ID})
@@ -164,3 +179,8 @@ endif()
 # and that nothing running the application reads.
 set(CPACK_INSTALL_CMAKE_PROJECTS
     "${CMAKE_BINARY_DIR};${PROJECT_NAME};runtime;/")
+if(APPLE AND DJV_MACOS_PACKAGE)
+    # The bundle's own layout, which an ordinary install leaves alone.
+    list(APPEND CPACK_INSTALL_CMAKE_PROJECTS
+        "${CMAKE_BINARY_DIR};${PROJECT_NAME};bundle;/")
+endif()
