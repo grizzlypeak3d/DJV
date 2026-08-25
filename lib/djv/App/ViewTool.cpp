@@ -9,6 +9,7 @@
 #include <djv/App/MainWindow.h>
 #include <djv/UI/Viewport.h>
 
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/RowLayout.h>
 
 namespace djv
@@ -63,12 +64,16 @@ namespace djv
             p.bellows["Background"]->setWidget(p.backgroundWidget);
             p.bellows["Outline"] = ftk::Bellows::create(context, "Outline", layout);
             p.bellows["Outline"]->setWidget(p.outlineWidget);
+            p.bellows["Outline"]->setToolWidget(p.outlineWidget->getEnabledCheckBox());
             p.bellows["Grid"] = ftk::Bellows::create(context, "Grid", layout);
             p.bellows["Grid"]->setWidget(p.gridWidget);
+            p.bellows["Grid"]->setToolWidget(p.gridWidget->getEnabledCheckBox());
             p.bellows["CenterMarker"] = ftk::Bellows::create(context, "Center Marker", layout);
             p.bellows["CenterMarker"]->setWidget(p.centerMarkerWidget);
+            p.bellows["CenterMarker"]->setToolWidget(p.centerMarkerWidget->getEnabledCheckBox());
             p.bellows["HUD"] = ftk::Bellows::create(context, "HUD", layout);
             p.bellows["HUD"]->setWidget(p.hudWidget);
+            p.bellows["HUD"]->setToolWidget(p.hudWidget->getEnabledCheckBox());
             _setWidget(layout);
 
             _loadSettings(p.bellows);

@@ -597,7 +597,8 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
+            p.enabledCheckBox->setTooltip("Toggle whether the outline is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.Outline.Enabled");
 
             p.lineWidthSlider = ftk::IntEditSlider::create(context);
@@ -613,7 +614,6 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Line width:", p.lineWidthSlider);
             p.layout->addRow("Color:", p.colorSwatch);
 
@@ -669,6 +669,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::CheckBox> ViewOutlineWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         struct ViewGridWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -696,7 +701,8 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
+            p.enabledCheckBox->setTooltip("Toggle whether the grid is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.Grid.Enabled");
 
             p.cellModeComboBox = ftk::ComboBox::create(context, tl::getGridCellModeLabels());
@@ -734,7 +740,6 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Cell mode:", p.cellModeComboBox);
             p.layout->addRow("Cell size:", p.cellSizeSlider);
             p.cellCountLayout = ftk::HorizontalLayout::create(context);
@@ -867,6 +872,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::CheckBox> ViewGridWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         struct ViewCenterMarkerWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -887,7 +897,8 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
+            p.enabledCheckBox->setTooltip("Toggle whether the center marker is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.CenterMarker.Enabled");
 
             p.sizeEdit = ftk::IntEditSlider::create(context);
@@ -907,7 +918,6 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             p.layout->addRow("Size:", p.sizeEdit);
             p.layout->addRow("Line width:", p.lineWidthEdit);
             p.layout->addRow("Color:", p.colorSwatch);
@@ -973,6 +983,11 @@ namespace djv
             return out;
         }
 
+        std::shared_ptr<ftk::CheckBox> ViewCenterMarkerWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         struct ViewHUDWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
@@ -991,6 +1006,8 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
+            p.enabledCheckBox->setTooltip("Toggle whether the HUD is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.HUD.Enabled");
 
             const auto enums = models::getHUDItemEnums();
@@ -1005,7 +1022,6 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Enabled:", p.enabledCheckBox);
             for (const auto i : enums)
             {
                 p.layout->addRow(
@@ -1061,6 +1077,11 @@ namespace djv
             auto out = std::shared_ptr<ViewHUDWidget>(new ViewHUDWidget);
             out->_init(context, viewportModel, parent);
             return out;
+        }
+
+        std::shared_ptr<ftk::CheckBox> ViewHUDWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
         }
     }
 }

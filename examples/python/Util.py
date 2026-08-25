@@ -16,8 +16,8 @@ def weak(method):
     that never make it to disk.
     """
     r = weakref.WeakMethod(method)
-    def call(*args):
+    def call(*args, **kwargs):
         m = r()
         if m is not None:
-            return m(*args)
+            return m(*args, **kwargs)
     return call

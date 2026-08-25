@@ -13,6 +13,11 @@
 #include <tlRender/Timeline/DisplayOptions.h>
 #include <tlRender/Timeline/ForegroundOptions.h>
 
+namespace ftk
+{
+    class CheckBox;
+}
+
 namespace djv
 {
     namespace ui
@@ -146,6 +151,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
         private:
             FTK_PRIVATE();
         };
@@ -170,6 +177,8 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
+
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();
@@ -196,6 +205,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
         private:
             FTK_PRIVATE();
         };
@@ -220,6 +231,8 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
+
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();

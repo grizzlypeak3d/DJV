@@ -496,6 +496,8 @@ class ViewTool(IToolWidget):
         ]:
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget
+            if hasattr(widget, "enabledCheckBox"):
+                bellows.toolWidget = widget.enabledCheckBox
             self._bellows[title] = bellows
         self._setContent(layout)
         self._loadBellows(self._bellows)
