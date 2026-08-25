@@ -185,8 +185,12 @@ endif()
 # Stage the runtime component alone, leaving out what the install rules mark
 # as "dev": the development files that are around two fifths of the download,
 # and that nothing running the application reads.
+# The documentation is its own component, so it has to be named: staging the
+# runtime alone shipped packages with no documentation in them, and a Help
+# menu that says the documentation is not installed because it is not.
 set(CPACK_INSTALL_CMAKE_PROJECTS
-    "${CMAKE_BINARY_DIR};${PROJECT_NAME};runtime;/")
+    "${CMAKE_BINARY_DIR};${PROJECT_NAME};runtime;/"
+    "${CMAKE_BINARY_DIR};${PROJECT_NAME};docs;/")
 if(APPLE AND DJV_MACOS_PACKAGE)
     # The bundle alone. A full install is a Unix prefix with the application
     # sitting inside it, and a full install is what the bundle rules opt out
