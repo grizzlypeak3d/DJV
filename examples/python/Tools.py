@@ -483,7 +483,7 @@ class ViewTool(IToolWidget):
 
         viewportModel = app.getViewportModel()
         layout = ftk.VerticalLayout(context)
-        layout.spacingRole = ftk.SizeRole._None
+        layout.spacingRole = ftk.SizeRole.Border
         self._bellows = {}
         for title, widget in [
             ("Options", djv.ui.ViewOptionsWidget(context, viewportModel)),
@@ -512,7 +512,7 @@ class ColorTool(IToolWidget):
         colorModel = app.getColorModel()
         viewportModel = app.getViewportModel()
         layout = ftk.VerticalLayout(context)
-        layout.spacingRole = ftk.SizeRole._None
+        layout.spacingRole = ftk.SizeRole.Border
         self._bellows = {}
         for title, widget in [
             ("OCIO", djv.ui.OCIOWidget(context, colorModel)),

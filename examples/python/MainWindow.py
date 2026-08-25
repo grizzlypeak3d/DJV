@@ -21,6 +21,7 @@ import TabBar
 import ToolBars
 import Tools
 import ToolsActions
+import Util
 import ViewActions
 import WindowActions
 
@@ -156,6 +157,34 @@ class MainWindow(ftk.MainWindow):
             context, ftk.Orientation.Vertical, self._layout)
         self._statusBar.parent = self._layout
 
+        # Each context menu offers the band it belongs to, and only that
+        # band; the Window menu remains the one place that lists every
+        # piece of chrome together.
+        hLayout.setContextMenuCallback(
+            lambda f = Util.weak(self._chromeMenu): f([
+                "FileToolBar",
+                "CompareToolBar",
+                "WindowToolBar",
+                "ViewToolBar",
+                "ToolsToolBar"]))
+
+        # The timeline, playback controls and status bar form one band
+        # across the bottom of the window, so right clicking any of them
+        # offers the whole band rather than only itself.
+        bottomChrome = ["Timeline", "BottomToolBar", "StatusToolBar"]
+        self._timelineWidget.setContextMenuCallback(
+            lambda f = Util.weak(self._chromeMenu): f(bottomChrome))
+        self._playbackBar.setContextMenuCallback(
+            lambda f = Util.weak(self._chromeMenu): f(bottomChrome))
+        self._statusBar.setContextMenuCallback(
+            lambda f = Util.weak(self._chromeMenu): f(bottomChrome))
+
+        # Anywhere the click is not claimed, offer every toggle. The
+        # window itself is consulted last, so a band keeps its own menu;
+        # and because the viewport can never be hidden, this is the one
+        # door that cannot be closed by hiding chrome.
+        self.setContextMenuCallback(Util.weak(self._windowChromeMenu))
+
         # Create observers.
         selfWeak = weakref.ref(self)
         self._playerObserver = tl.PlayerObserver(
@@ -226,6 +255,34 @@ class MainWindow(ftk.MainWindow):
 
     def keyReleaseEvent(self, event):
         event.accept = True
+
+    def _chromeMenu(self, names):
+        # A context menu of window chrome visibility toggles. The actions
+        # are the Window menu's own, so the check marks stay in sync and
+        # the toggles go through the same commands; the Window menu
+        # remains the complete inventory, and these are a second door to
+        # part of it.
+        menu = ftk.Menu(self.context)
+        for name in names:
+            menu.addAction(self._windowActions.actions[name])
+        return menu
+
+    def _windowChromeMenu(self):
+        # Presentation mode hides every piece of chrome regardless of
+        # these settings, so the toggles would do nothing you could see.
+        # Escape leaves the mode.
+        if self._presentMode.get():
+            return None
+        return self._chromeMenu([
+            "FileToolBar",
+            "CompareToolBar",
+            "WindowToolBar",
+            "ViewToolBar",
+            "ToolsToolBar",
+            "TabBar",
+            "Timeline",
+            "BottomToolBar",
+            "StatusToolBar"])
 
     def _playerUpdate(self, player):
         self._viewport.player = player
