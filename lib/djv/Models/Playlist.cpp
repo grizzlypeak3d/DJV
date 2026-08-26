@@ -372,6 +372,15 @@ namespace djv
                             item->currentTime =
                                 std::any_cast<OTIO_NS::RationalTime>(i->second);
                         }
+                        else if (item->inOutRange.has_value())
+                        {
+                            // A clip with a range but no saved position
+                            // starts at its in point. Starting at zero would
+                            // sit before the in point whenever the range
+                            // does not begin there, and the player reads
+                            // nothing outside the range: a black frame.
+                            item->currentTime = item->inOutRange->start_time();
+                        }
                         item->framesStated = getMeta(djvC, "framesStated", false);
 
                         markers += clip->markers().size();

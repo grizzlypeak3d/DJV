@@ -151,10 +151,15 @@ namespace djv
             OTIO_NS::AnyDictionary shot;
             shot["shot"] = std::string("sh010");
             foreignMetadata["studio"] = shot;
+            // A range that does not begin at zero, the way a clip cut from
+            // the middle of a movie does not.
+            const OTIO_NS::TimeRange rangeC(
+                OTIO_NS::RationalTime(10.0, 24.0),
+                OTIO_NS::RationalTime(24.0, 24.0));
             auto clipC = new OTIO_NS::Clip(
                 "c",
                 new OTIO_NS::ExternalReference("c.mov"),
-                range,
+                rangeC,
                 foreignMetadata);
             auto trackB = new OTIO_NS::Track(
                 "B", std::nullopt, OTIO_NS::Track::Kind::video);
@@ -198,6 +203,11 @@ namespace djv
             // clip when the playlist is saved from DJV.
             const auto& first = result.items.front();
             FTK_CHECK(first->metadata.find("studio") != first->metadata.end());
+
+            // With no saved position, the item starts at its in point;
+            // starting at zero would sit before it, where there is nothing
+            // to show.
+            FTK_CHECK(first->currentTime == rangeC.start_time());
             auto saved = models::playlistToOTIO(result, std::string(), 24.0);
             std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> > clips;
             for (const auto& child :
