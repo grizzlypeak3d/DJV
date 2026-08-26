@@ -661,6 +661,7 @@ namespace djv
             ftk::FileBrowserOpenOptions options;
             options.title = "Save Playlist";
             options.mode = ftk::FileBrowserMode::Save;
+            options.fileName = "playlist.otio";
             options.extensions.push_back(".otio");
             options.extensionsLabel = "Playlists";
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();

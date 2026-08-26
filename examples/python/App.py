@@ -206,6 +206,7 @@ class App(ftk.App):
         options = ftk.FileBrowserOpenOptions()
         options.title = "Save Playlist"
         options.mode = ftk.FileBrowserMode.Save
+        options.fileName = "playlist.otio"
         options.extensions = [".otio"]
         options.extensionsLabel = "Playlists"
         self.context.getSystemByName("ftk::FileBrowserSystem").open(
