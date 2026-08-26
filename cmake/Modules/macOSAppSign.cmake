@@ -5,4 +5,4 @@ execute_process(
     --options runtime
     --identifier com.grizzlypeak3d.djv
     --deep
-    ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/DJV.app)
+    ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/djv.app)

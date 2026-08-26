@@ -1,0 +1,24 @@
+# The navigation, in order, shared by every page.
+#
+# One entry per line: the page, a space, then the title. A line starting
+# with "= " is a section heading rather than a link.
+#
+# The pages are generated from this: docs/Nav.cmake writes the list into
+# each of them, marking the one it is writing as current. Editing a page's
+# navigation by hand is undone the next time that runs.
+index.html Home
+install.html Download and install
+main-window.html Main window
+files.html Files
+view.html View
+playback.html Playback and frame control
+timeline.html Timeline
+compare.html A/B comparison
+color.html Color
+audio.html Audio
+tools.html Tools
+export.html Exporting files
+settings.html Settings
+automation.html Automation
+python.html Python
+troubleshooting.html Troubleshooting

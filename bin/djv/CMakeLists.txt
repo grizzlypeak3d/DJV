@@ -6,23 +6,35 @@ if (WIN32)
 endif()
 
 set(DJV_BIN djv)
-set(INSTALL_DIR bin)
-if(APPLE AND DJV_MACOS_PACKAGE)
-    # The bundle names the executable in its Info.plist, so this keeps the
-    # name it has everywhere else.
-    # \bug Why do we need to use ".." to avoid installing into the
-    # "Resources" directory in the bundle?
-    set(INSTALL_DIR ../MacOS)
-endif()
 
-add_executable(${DJV_BIN} WIN32 ${HEADER} ${SOURCE})
+add_executable(${DJV_BIN} WIN32 ${HEADERS} ${SOURCE})
 target_link_libraries(${DJV_BIN} djvApp)
 set_target_properties(${DJV_BIN} PROPERTIES FOLDER bin)
 
-install(TARGETS ${DJV_BIN} DESTINATION ${INSTALL_DIR})
+if(APPLE AND DJV_MACOS_PACKAGE)
+    # A real application bundle, built here rather than assembled by the
+    # packaging: CMake lays out "djv.app/Contents" itself, so nothing
+    # downstream installs into a directory above the prefix to reach it, and
+    # the executable gets its install rpath rewritten on the way in.
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/etc/macOS/Info.plist.in
+        ${CMAKE_CURRENT_BINARY_DIR}/djv.plist)
+    set_target_properties(
+        ${DJV_BIN} PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/djv.plist)
+
+    install(
+        TARGETS ${DJV_BIN}
+        BUNDLE DESTINATION .
+        COMPONENT bundle
+        EXCLUDE_FROM_ALL)
+else()
+    install(TARGETS ${DJV_BIN} DESTINATION bin)
+endif()
 
 if(WIN32)
-    add_executable(djv. ${HEADER} ${SOURCE})
+    add_executable(djv. ${HEADERS} ${SOURCE})
     target_link_libraries(djv. djvApp)
     set_target_properties(
         djv. PROPERTIES

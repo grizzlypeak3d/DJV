@@ -103,8 +103,11 @@ set(SAMPLE_DATA
     Counter.9.png
     MultipleClips.otio)
 
+# The macOS package is not here: the bundle carries its own copy,
+# taken from the prefix by cmake/Modules/Package.cmake, so this stays
+# where every other build puts it.
 set(DEST share/djv/SampleData)
-if(DJV_MACOS_PACKAGE OR DJV_WINDOWS_PACKAGE)
+if(DJV_WINDOWS_PACKAGE)
     set(DEST SampleData)
 endif()
 install(FILES ${SAMPLE_DATA} DESTINATION ${DEST})
