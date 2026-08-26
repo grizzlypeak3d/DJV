@@ -4,6 +4,10 @@ Setup verbs for interaction, in addition to open/tool/expand/tab/pick/zoom:
   it, which is how transient state -- a context menu, a popup -- gets into
   a capture. The [x, y] form clicks a framebuffer position.
 * { "key": "Escape" } presses a key through the window's dispatch.
+* { "drag": ["Files.FileThumbnail0", [1343, 350]] } presses at the first
+  point, moves through the rest, and releases -- for drag and drop, or a
+  slider. Each entry is a screenshot tag, whose widget's center is used,
+  or a framebuffer position.
 
 Configuration:
 

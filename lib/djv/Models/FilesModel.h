@@ -126,6 +126,11 @@ namespace djv
             //! them along the way too.
             DJV_MODELS_API void add(const std::vector<std::shared_ptr<FilesModelItem> >&);
 
+            //! Move a file so it ends at the given index. The "A" and "B"
+            //! choices follow the file: reordering changes where things are,
+            //! not what is being looked at.
+            DJV_MODELS_API void move(int from, int to);
+
             //! Close the current "A" file.
             DJV_MODELS_API void close();
 

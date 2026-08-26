@@ -36,7 +36,18 @@ namespace djv
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            DJV_APP_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
+            DJV_APP_API void drawOverlayEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
+            DJV_APP_API void dragEnterEvent(ftk::DragDropEvent&) override;
+            DJV_APP_API void dragLeaveEvent(ftk::DragDropEvent&) override;
+            DJV_APP_API void dragMoveEvent(ftk::DragDropEvent&) override;
+            DJV_APP_API void dropEvent(ftk::DragDropEvent&) override;
+
         private:
+            ftk::Box2I _getRowGeom(size_t) const;
+            int _getDropIndex(const ftk::V2I&) const;
+            ftk::Box2I _getDropGeom(int) const;
+
             void _rangeUpdate(
                 const std::shared_ptr<models::FilesModelItem>&,
                 const ftk::RangeI64&);

@@ -9,13 +9,28 @@
 
 #include <tlRender/IO/IO.h>
 
-#include <ftk/UI/IWidget.h>
+#include <ftk/UI/IMouseWidget.h>
 
 namespace djv
 {
     namespace ui
     {
-        class DJV_UI_API_TYPE FileThumbnail : public ftk::IWidget
+        //! What dragging a file carries: the item itself. The receiver
+        //! looks the item up in the list it has, so a drag from a stale
+        //! row cannot name a row that no longer exists.
+        class DJV_UI_API_TYPE FileDragDropData : public ftk::IDragDropData
+        {
+        public:
+            DJV_UI_API FileDragDropData(const std::shared_ptr<models::FilesModelItem>&);
+            DJV_UI_API virtual ~FileDragDropData();
+
+            DJV_UI_API const std::shared_ptr<models::FilesModelItem>& getItem() const;
+
+        private:
+            std::shared_ptr<models::FilesModelItem> _item;
+        };
+
+        class DJV_UI_API_TYPE FileThumbnail : public ftk::IMouseWidget
         {
             FTK_NON_COPYABLE(FileThumbnail);
 
@@ -44,6 +59,7 @@ namespace djv
                 const ftk::TickEvent&) override;
             DJV_UI_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
             DJV_UI_API void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
+            DJV_UI_API void mouseMoveEvent(ftk::MouseMoveEvent&) override;
 
         private:
             FTK_PRIVATE();

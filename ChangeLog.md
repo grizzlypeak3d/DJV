@@ -5,6 +5,8 @@ Changes:
   file, with each file's in/out points, position, speed, and layer, and the
   A/B comparison; "File/Open Playlist" opens one back into the file list.
   Any OTIO timeline can be opened as a playlist.
+* The file list can be reordered by dragging a file's thumbnail in the
+  Files tool. The list scrolls when the drag reaches the edge of the panel.
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
 * Add support for reading OpenEXR files with HTJ2K compression.
 * Automatic OCIO input color spaces.

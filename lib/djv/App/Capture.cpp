@@ -482,6 +482,7 @@ namespace djv
                 // preceding step has been created and laid out.
                 late = late ||
                     step.contains("click") ||
+                    step.contains("drag") ||
                     step.contains("key") ||
                     step.contains("pick") ||
                     step.contains("zoom") ||
@@ -1115,6 +1116,73 @@ namespace djv
                 {
                     std::static_pointer_cast<ftk::IWindow>(mw)->click(
                         pos.value(), button, modifiers);
+                }
+            }
+            else if (step.contains("drag"))
+            {
+                // Press at the first point, move through the rest, release --
+                // the window's drag helper, aimed the way "click" is aimed.
+                // Each entry is a screenshot tag, whose widget's center is
+                // used, or a position in framebuffer pixels, e.g.
+                // { "drag": ["Files.Thumbnail", [160, 300]] },
+                // { "drag": [[100, 50], [100, 250]], "modifier": "Control" }.
+                // Deferred by _applyRest like "click".
+                const auto& v = step.at("drag");
+                int modifiers = 0;
+                if (step.contains("modifier"))
+                {
+                    ftk::KeyModifier modifier = ftk::KeyModifier::None;
+                    if (ftk::from_string(
+                        step.at("modifier").get<std::string>(), modifier))
+                    {
+                        modifiers = static_cast<int>(modifier);
+                    }
+                }
+                auto mw = app->getMainWindow();
+                std::vector<ftk::V2I> path;
+                bool pathOK = v.is_array() && mw;
+                if (pathOK)
+                {
+                    std::vector<std::shared_ptr<ftk::IWidget> > tagged;
+                    collect(mw, tagged);
+                    for (const auto& entry : v)
+                    {
+                        if (entry.is_array() && entry.size() >= 2)
+                        {
+                            path.push_back(ftk::V2I(
+                                entry[0].get<int>(),
+                                entry[1].get<int>()));
+                        }
+                        else if (entry.is_string())
+                        {
+                            bool found = false;
+                            for (const auto& w : tagged)
+                            {
+                                if (ftk::getScreenshotTag(w) ==
+                                    entry.get<std::string>())
+                                {
+                                    const ftk::Box2I g = w->getGeometry();
+                                    path.push_back(ftk::V2I(
+                                        g.x() + g.w() / 2,
+                                        g.y() + g.h() / 2));
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found)
+                            {
+                                pathOK = false;
+                                note(p.shotId,
+                                    "drag: no visible widget tagged \"" +
+                                    entry.get<std::string>() + "\"");
+                            }
+                        }
+                    }
+                }
+                if (pathOK && path.size() >= 2)
+                {
+                    std::static_pointer_cast<ftk::IWindow>(mw)->drag(
+                        path, modifiers);
                 }
             }
             else if (step.contains("key"))

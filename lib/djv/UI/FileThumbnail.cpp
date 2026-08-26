@@ -14,6 +14,19 @@ namespace djv
 {
     namespace ui
     {
+        FileDragDropData::FileDragDropData(
+            const std::shared_ptr<models::FilesModelItem>& item) :
+            _item(item)
+        {}
+
+        FileDragDropData::~FileDragDropData()
+        {}
+
+        const std::shared_ptr<models::FilesModelItem>& FileDragDropData::getItem() const
+        {
+            return _item;
+        }
+
         struct FileThumbnail::Private
         {
             std::shared_ptr<models::FilesModelItem> item;
@@ -23,6 +36,7 @@ namespace djv
             {
                 bool init = true;
                 int margin = 0;
+                int dragLength = 0;
             };
             SizeData size;
 
@@ -43,8 +57,9 @@ namespace djv
             const tl::IOOptions& ioOptions,
             const std::shared_ptr<IWidget>& parent)
         {
-            IWidget::_init(context, "djv::ui::FileThumbnail", parent);
+            IMouseWidget::_init(context, "djv::ui::FileThumbnail", parent);
             FTK_P();
+            _setMousePressEnabled(true);
             p.item = item;
             p.ioOptions = ioOptions;
         }
@@ -84,7 +99,7 @@ namespace djv
             bool parentsEnabled,
             const ftk::TickEvent& event)
         {
-            IWidget::tickEvent(parentsVisible, parentsEnabled, event);
+            IMouseWidget::tickEvent(parentsVisible, parentsEnabled, event);
             FTK_P();
             if (p.thumbnail.request.future.valid() &&
                 p.thumbnail.request.future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
@@ -99,10 +114,12 @@ namespace djv
         {
             FTK_P();
 
+            IMouseWidget::sizeHintEvent(event);
             if (p.size.init)
             {
                 p.size.init = false;
                 p.size.margin = event.style->getSizeRole(ftk::SizeRole::MarginInside, event.displayScale);
+                p.size.dragLength = event.style->getSizeRole(ftk::SizeRole::DragLength, event.displayScale);
             }
 
             if (event.displayScale != p.thumbnail.scale)
@@ -147,6 +164,27 @@ namespace djv
                         thumbnailSize.h),
                     ftk::Color4F(1.F, 1.F, 1.F),
                     imageOptions);
+            }
+        }
+
+        void FileThumbnail::mouseMoveEvent(ftk::MouseMoveEvent& event)
+        {
+            IMouseWidget::mouseMoveEvent(event);
+            FTK_P();
+            if (_isMousePressed())
+            {
+                const float length = ftk::length(event.pos - _getMousePressPos());
+                if (length > p.size.dragLength)
+                {
+                    event.dragDropData = std::make_shared<FileDragDropData>(p.item);
+                    if (p.thumbnail.image)
+                    {
+                        event.dragDropCursor = p.thumbnail.image;
+                        event.dragDropCursorHotspot = ftk::V2I(
+                            p.thumbnail.image->getWidth() / 2,
+                            p.thumbnail.image->getHeight() / 2);
+                    }
+                }
             }
         }
     }

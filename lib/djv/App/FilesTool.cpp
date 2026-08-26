@@ -32,6 +32,8 @@
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/ToolButton.h>
 
+#include <algorithm>
+
 namespace djv
 {
     namespace app
@@ -41,7 +43,7 @@ namespace djv
             struct FileWidget
             {
                 std::shared_ptr<models::FilesModelItem> item;
-                std::shared_ptr<ui::FileThumbnail> thumbnail;\
+                std::shared_ptr<ui::FileThumbnail> thumbnail;
                 std::shared_ptr<ftk::ToolButton> nameButton;
                 std::shared_ptr<ftk::ToolButton> bButton;
                 std::shared_ptr<ftk::ComboBox> layerComboBox;
@@ -68,6 +70,11 @@ namespace djv
             std::shared_ptr<ftk::FormLayout> compareLayout;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::GridLayout> widgetLayout;
+
+            // Where a dragged file would land: an index into the rows,
+            // counting the gap after the last one, or -1 for nowhere.
+            int dropTarget = -1;
+            int handle = 0;
 
             // Every step of a spin box is a value change, and applying a
             // range reopens the file, so the edits are let go of before the
@@ -383,6 +390,62 @@ namespace djv
         void FilesTool::_filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
         {
             FTK_P();
+
+            // The same files in a different order: move the rows rather than
+            // rebuilding them. Rebuilding makes new thumbnails and lays out
+            // an empty grid along the way, which loses the scroll position,
+            // so reordering a long list would jump. The same files in the
+            // same order fall through to the rebuild -- that is refresh(),
+            // announcing that what the items hold has changed.
+            if (!value.empty() && value.size() == p.widgets.size())
+            {
+                std::vector<FileWidget> widgets;
+                bool reordered = false;
+                for (size_t i = 0; i < value.size(); ++i)
+                {
+                    const auto j = std::find_if(
+                        p.widgets.begin(),
+                        p.widgets.end(),
+                        [&value, i](const FileWidget& w)
+                        {
+                            return w.item == value[i];
+                        });
+                    if (j == p.widgets.end())
+                    {
+                        break;
+                    }
+                    widgets.push_back(*j);
+                    reordered |= p.widgets[i].item != value[i];
+                }
+                if (widgets.size() == value.size() && reordered)
+                {
+                    p.widgets = widgets;
+                    // The button groups answer clicks with an index in the
+                    // order the buttons were added, so they have to follow
+                    // the new order or every click selects the old row.
+                    p.aButtonGroup->clearButtons();
+                    p.bButtonGroup->clearButtons();
+                    for (size_t row = 0; row < p.widgets.size(); ++row)
+                    {
+                        auto& widget = p.widgets[row];
+                        p.aButtonGroup->addButton(widget.nameButton);
+                        p.bButtonGroup->addButton(widget.bButton);
+                        ftk::setScreenshotTag(
+                            widget.thumbnail,
+                            ftk::Format("Files.FileThumbnail{0}").arg(row));
+                        p.widgetLayout->setGridPos(widget.thumbnail, row, 0);
+                        p.widgetLayout->setGridPos(widget.nameButton, row, 1);
+                        p.widgetLayout->setGridPos(widget.bButton, row, 2);
+                        p.widgetLayout->setGridPos(widget.layerComboBox, row, 3);
+                        if (widget.rangeButton)
+                        {
+                            p.widgetLayout->setGridPos(widget.rangeButton, row, 4);
+                        }
+                    }
+                    return;
+                }
+            }
+
             p.widgets.clear();
             p.aButtonGroup->clearButtons();
             p.bButtonGroup->clearButtons();
@@ -407,6 +470,9 @@ namespace djv
                             item,
                             app->getSettingsModel()->getIOOptions(),
                             p.widgetLayout);
+                        ftk::setScreenshotTag(
+                            widget.thumbnail,
+                            ftk::Format("Files.FileThumbnail{0}").arg(row));
                         p.widgetLayout->setGridPos(widget.thumbnail, row, 0);
 
                         widget.nameButton = ftk::ToolButton::create(
@@ -418,12 +484,20 @@ namespace djv
                         widget.nameButton->setVAlign(ftk::VAlign::Center);
                         widget.nameButton->setTooltip(
                             item->path.get() + "\n\nSet the A file.");
+                        // The same tag _aUpdate maintains: rebuilding the
+                        // rows would otherwise lose it until "A" changes.
+                        ftk::setScreenshotTag(
+                            widget.nameButton,
+                            item == a ? "Files.CurrentFile" : "");
                         p.aButtonGroup->addButton(widget.nameButton);
                         p.widgetLayout->setGridPos(widget.nameButton, row, 1);
 
                         widget.bButton = ftk::ToolButton::create(context, "B", p.widgetLayout);
                         const auto i = std::find(b.begin(), b.end(), item);
                         widget.bButton->setChecked(i != b.end());
+                        ftk::setScreenshotTag(
+                            widget.bButton,
+                            i != b.end() ? "Files.BFile" : "");
                         widget.bButton->setVAlign(ftk::VAlign::Center);
                         widget.bButton->setTooltip("Set the B file(s).");
                         p.bButtonGroup->addButton(widget.bButton);
@@ -599,6 +673,167 @@ namespace djv
             p.compareLayout->setRowVisible(p.overlaySlider, value.compare == tl::Compare::Overlay);
             p.compareLayout->setRowVisible(
                 p.differenceGainSlider, value.compare == tl::Compare::Difference);
+        }
+
+        void FilesTool::sizeHintEvent(const ftk::SizeHintEvent& event)
+        {
+            IToolWidget::sizeHintEvent(event);
+            FTK_P();
+            p.handle = event.style->getSizeRole(
+                ftk::SizeRole::Handle, event.displayScale);
+        }
+
+        void FilesTool::drawOverlayEvent(
+            const ftk::Box2I& drawRect,
+            const ftk::DrawEvent& event)
+        {
+            IToolWidget::drawOverlayEvent(drawRect, event);
+            FTK_P();
+            if (p.dropTarget != -1)
+            {
+                const ftk::Box2I g = _getDropGeom(p.dropTarget);
+                if (g.isValid())
+                {
+                    event.render->drawRect(
+                        g,
+                        event.style->getColorRole(ftk::ColorRole::Checked));
+                }
+            }
+        }
+
+        void FilesTool::dragEnterEvent(ftk::DragDropEvent& event)
+        {
+            FTK_P();
+            if (std::dynamic_pointer_cast<ui::FileDragDropData>(event.data))
+            {
+                event.accept = true;
+                p.dropTarget = _getDropIndex(event.pos);
+                setDrawUpdate();
+            }
+        }
+
+        void FilesTool::dragLeaveEvent(ftk::DragDropEvent& event)
+        {
+            FTK_P();
+            if (std::dynamic_pointer_cast<ui::FileDragDropData>(event.data))
+            {
+                event.accept = true;
+                p.dropTarget = -1;
+                setDrawUpdate();
+            }
+        }
+
+        void FilesTool::dragMoveEvent(ftk::DragDropEvent& event)
+        {
+            FTK_P();
+            if (std::dynamic_pointer_cast<ui::FileDragDropData>(event.data))
+            {
+                event.accept = true;
+                const int dropTarget = _getDropIndex(event.pos);
+                if (dropTarget != p.dropTarget)
+                {
+                    p.dropTarget = dropTarget;
+                    setDrawUpdate();
+                }
+            }
+        }
+
+        void FilesTool::dropEvent(ftk::DragDropEvent& event)
+        {
+            FTK_P();
+            if (auto data = std::dynamic_pointer_cast<ui::FileDragDropData>(event.data))
+            {
+                event.accept = true;
+                if (p.dropTarget != -1)
+                {
+                    if (auto app = _app.lock())
+                    {
+                        const auto& files = app->getFilesModel()->getFiles();
+                        const auto i = std::find(
+                            files.begin(), files.end(), data->getItem());
+                        if (i != files.end())
+                        {
+                            const int from = static_cast<int>(i - files.begin());
+                            int to = p.dropTarget;
+                            if (from < to)
+                            {
+                                --to;
+                            }
+                            app->getFilesModel()->move(from, to);
+                        }
+                    }
+                }
+                p.dropTarget = -1;
+                setDrawUpdate();
+            }
+        }
+
+        ftk::Box2I FilesTool::_getRowGeom(size_t index) const
+        {
+            FTK_P();
+            // The whole row rather than one widget in it: the name button
+            // is centered in a row the thumbnail makes taller, so its box
+            // alone sits low.
+            const auto& widget = p.widgets[index];
+            return ftk::expand(
+                widget.thumbnail->getGeometry(),
+                widget.nameButton->getGeometry());
+        }
+
+        int FilesTool::_getDropIndex(const ftk::V2I& pos) const
+        {
+            FTK_P();
+            int out = -1;
+            // Only over the rows themselves, with a little reach: the tool
+            // also holds the comparison section, and a drop there should
+            // mean nothing.
+            if (!p.widgets.empty() &&
+                ftk::contains(ftk::margin(p.widgetLayout->getGeometry(), p.handle), pos))
+            {
+                out = 0;
+                for (size_t i = 0; i < p.widgets.size(); ++i)
+                {
+                    if (pos.y < ftk::center(_getRowGeom(i)).y)
+                    {
+                        break;
+                    }
+                    ++out;
+                }
+            }
+            return out;
+        }
+
+        ftk::Box2I FilesTool::_getDropGeom(int index) const
+        {
+            FTK_P();
+            ftk::Box2I out;
+            if (!p.widgets.empty())
+            {
+                const ftk::Box2I& layoutGeom = p.widgetLayout->getGeometry();
+                const int size = static_cast<int>(p.widgets.size());
+                // Centered in the gap between the rows; at the ends there
+                // is no gap, so the row's own edge is the line.
+                int y = 0;
+                if (0 == index)
+                {
+                    y = _getRowGeom(0).min.y;
+                }
+                else if (index < size)
+                {
+                    y = (_getRowGeom(index - 1).max.y +
+                        _getRowGeom(index).min.y) / 2;
+                }
+                else
+                {
+                    y = _getRowGeom(size - 1).max.y;
+                }
+                out = ftk::Box2I(
+                    layoutGeom.min.x,
+                    y - p.handle / 2,
+                    layoutGeom.w(),
+                    p.handle);
+            }
+            return out;
         }
     }
 }

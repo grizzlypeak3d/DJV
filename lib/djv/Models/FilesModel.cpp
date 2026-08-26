@@ -188,6 +188,28 @@ namespace djv
             }
         }
 
+        void FilesModel::move(int from, int to)
+        {
+            FTK_P();
+            auto files = p.files->get();
+            const int size = static_cast<int>(files.size());
+            if (from >= 0 && from < size &&
+                to >= 0 && to < size &&
+                from != to)
+            {
+                auto item = files[from];
+                files.erase(files.begin() + from);
+                files.insert(files.begin() + to, item);
+                p.files->setIfChanged(files);
+
+                // The "A" and "B" items are unchanged, so nothing reopens;
+                // only where they sit in the list has moved.
+                p.aIndex->setIfChanged(_getIndex(p.a->get()));
+                p.bIndexes->setIfChanged(_getBIndexes());
+                p.layers->setIfChanged(_getLayers());
+            }
+        }
+
         void FilesModel::close(int index)
         {
             FTK_P();

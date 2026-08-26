@@ -104,6 +104,32 @@ namespace djv
             FTK_CHECK(item2 == model->getA());
             FTK_CHECK(2 == model->getAIndex());
 
+            // Moving a file changes where it sits, not what is being looked
+            // at: the "A" and "B" choices follow their items, only the
+            // indexes move. Adding a batch changes "A" once, at the end.
+            model->add({ makeItem("file3.exr"), makeItem("file4.exr") });
+            FTK_CHECK(5 == model->getFiles().size());
+            FTK_CHECK(4 == model->getAIndex());
+            model->setA(0);
+            model->setB(1, true);
+            model->move(0, 4);
+            FTK_CHECK(item0 == model->getFiles()[4]);
+            FTK_CHECK(item1 == model->getFiles()[0]);
+            FTK_CHECK(item0 == model->getA());
+            FTK_CHECK(4 == model->getAIndex());
+            FTK_CHECK(std::vector<int>{ 0 } == model->getBIndexes());
+            model->move(4, 0);
+            FTK_CHECK(item0 == model->getFiles()[0]);
+            FTK_CHECK(0 == model->getAIndex());
+            FTK_CHECK(std::vector<int>{ 1 } == model->getBIndexes());
+            // Out of range does nothing.
+            model->move(0, 5);
+            model->move(-1, 0);
+            FTK_CHECK(item0 == model->getFiles()[0]);
+            model->clearB();
+            model->close(4);
+            model->close(3);
+
             // Closing a file removes it and re-clamps the "A" index.
             model->close(1);
             FTK_CHECK(2 == model->getFiles().size());

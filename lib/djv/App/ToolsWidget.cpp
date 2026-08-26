@@ -57,6 +57,10 @@ namespace djv
                 context, ftk::ScrollType::Both);
             _setWidget(p.scrollWidget);
             p.scrollWidget->setBorder(false);
+            // Reordering the file list by dragging needs the list to move
+            // when the drag reaches the edge of the panel, or a drop target
+            // off the screen cannot be reached.
+            p.scrollWidget->setDragScroll(true);
             p.scrollWidget->setWidget(p.layout);
 
             p.openObserver = ftk::ListObserver<std::string>::create(
