@@ -102,6 +102,13 @@ Opening a review replaces the current session. File paths are stored relative to
 the `.djvr` when possible, so a review stays valid when moved together with its
 media; any files that cannot be found are reported in the **Messages** tool.
 
+A review written by a newer DJV than the one you are running is refused, with
+the reason given in the **Messages** tool, rather than opened in part. Anything
+else in a review that this version does not understand is left alone: it is
+kept as it stands when you save, so passing a session between different
+versions of DJV does not quietly strip it. The document itself is described in
+[Review file format]({{ site.baseurl }}/review-format.html).
+
 The window title shows the open review's path, with a trailing `*` while it has
 unsaved changes. **Close Review** closes the review and returns DJV to its empty
 startup state; if there are unsaved changes it prompts to save first, as does
@@ -159,6 +166,9 @@ djv session.djvr
 Personal preferences — keyboard shortcuts, style, cache size, and the audio
 device — are deliberately **not** stored in a review, so opening one received
 from someone else does not reconfigure your installation.
+
+Notes and drawings record who made them, taken from your account name on the
+machine, so a session that has been passed around stays readable.
 
 ## Annotating a review
 
