@@ -252,6 +252,21 @@ namespace djv
                 caught = true;
             }
             FTK_CHECK(caught);
+
+            // A bundle is refused with the reason: its media lives inside
+            // it, so its clips cannot become a file list.
+            caught = false;
+            try
+            {
+                std::vector<std::string> report;
+                models::playlistOpen("bundle.otioz", report);
+            }
+            catch (const std::exception& e)
+            {
+                _print(e.what());
+                caught = std::string(e.what()).find("otioz") != std::string::npos;
+            }
+            FTK_CHECK(caught);
         }
     }
 }

@@ -6,6 +6,7 @@
 #include <tlRender/Timeline/Util.h>
 
 #include <ftk/Core/Format.h>
+#include <ftk/Core/String.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/externalReference.h>
@@ -473,6 +474,18 @@ namespace djv
             const std::string& fileName,
             std::vector<std::string>& report)
         {
+            // A bundle's media lives inside it -- the references point into
+            // the archive, not at files -- so its clips cannot become a file
+            // list. Refuse with the reason rather than the JSON parse error
+            // that reading zip bytes as text produces.
+            if (".otioz" == ftk::toLower(
+                std::filesystem::u8path(fileName).extension().u8string()))
+            {
+                throw std::runtime_error(ftk::Format(
+                    "Cannot open {0}: a \".otioz\" bundle's media lives "
+                    "inside it; open it as a timeline instead").arg(fileName));
+            }
+
             OTIO_NS::ErrorStatus errorStatus;
             OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> timeline(
                 dynamic_cast<OTIO_NS::Timeline*>(OTIO_NS::Timeline::from_json_file(
