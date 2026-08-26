@@ -191,7 +191,7 @@ class App(ftk.App):
         playlist.compareOptions = self._filesModel.compareOptions
         playlist.compareTime = self._filesModel.compareTime
         fileName = path.getFileName(True)
-        if path.getExt().lower() != ".otio":
+        if path.ext.lower() != ".otio":
             fileName += ".otio"
         djv.models.playlistSave(
             fileName,
