@@ -162,6 +162,7 @@ class App(ftk.App):
         """
         selfWeak = weakref.ref(self)
         options = ftk.FileBrowserOpenOptions()
+        options.title = "Open Playlist"
         options.extensions = [".otio"]
         options.extensionsLabel = "Playlists"
         self.context.getSystemByName("ftk::FileBrowserSystem").open(
@@ -203,6 +204,7 @@ class App(ftk.App):
         """
         selfWeak = weakref.ref(self)
         options = ftk.FileBrowserOpenOptions()
+        options.title = "Save Playlist"
         options.mode = ftk.FileBrowserMode.Save
         options.extensions = [".otio"]
         options.extensionsLabel = "Playlists"
