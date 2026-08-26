@@ -174,6 +174,10 @@ namespace djv
                 annotation.id = generateId();
                 annotation.sourceId = sourceId;
                 annotation.time = time;
+                // Attributed once, when the drawing on this frame starts: the
+                // strokes added to it afterwards belong to the same hand.
+                annotation.author = reviewAuthor();
+                annotation.created = timestamp();
                 annotation.strokes.push_back(stroke);
                 annotations.push_back(annotation);
             }

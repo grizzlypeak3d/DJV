@@ -5,6 +5,7 @@ set(HEADERS
     NotesModelTest.h
     ModelsTestUtil.h
     RecentFilesModelTest.h
+    ReviewTest.h
     TimeUnitsModelTest.h
     ToolsModelTest.h
     ViewportModelTest.h)
@@ -15,6 +16,7 @@ set(SOURCE
     FilesModelTest.cpp
     NotesModelTest.cpp
     RecentFilesModelTest.cpp
+    ReviewTest.cpp
     TimeUnitsModelTest.cpp
     ToolsModelTest.cpp
     ViewportModelTest.cpp)

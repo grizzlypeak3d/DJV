@@ -210,7 +210,7 @@ namespace djv
         void FilesModelTest::_reviewRestore()
         {
             // Replay the order used when a review is opened (see
-            // App::_applyReview and docs/ROADMAP_REVIEW_SESSIONS.md section 6.1):
+            // App::_applyReview):
             // add every file, set the compare options, clear "B", rebuild "B",
             // then set "A" last. This must hold for every compare mode.
             const std::vector<tl::Compare> modes =

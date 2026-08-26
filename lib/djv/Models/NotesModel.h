@@ -39,8 +39,8 @@ namespace djv
             //! Replace all the notes, e.g. when a review is opened.
             void setNotes(const std::vector<ReviewNote>&);
 
-            //! Add a note. The identifier and creation time are filled in here,
-            //! so callers only provide the frame and the text.
+            //! Add a note. The identifier, creation time and author are filled
+            //! in here, so callers only provide the frame and the text.
             void add(const std::optional<OTIO_NS::RationalTime>&, const std::string& text);
 
             //! Remove the note with the given identifier.

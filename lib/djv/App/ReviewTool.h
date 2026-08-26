@@ -14,8 +14,7 @@ namespace djv
         //! Review tool: annotations and notes.
         //!
         //! The drawing and notes sections share one panel so that marking up a
-        //! frame and commenting on it stay visible together. See
-        //! docs/ROADMAP_REVIEW_SESSIONS.md section 7.2.bis.
+        //! frame and commenting on it stay visible together.
         class ReviewTool : public IToolWidget
         {
             FTK_NON_COPYABLE(ReviewTool);
