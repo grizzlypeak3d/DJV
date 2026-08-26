@@ -21,6 +21,15 @@ namespace djv
         {
             using namespace ui;
 
+            py::class_<
+                FileDragDropData,
+                ftk::IDragDropData,
+                std::shared_ptr<FileDragDropData> >(m, "FileDragDropData")
+                .def(
+                    py::init<const std::shared_ptr<models::FilesModelItem>&>(),
+                    py::arg("item"))
+                .def_property_readonly("item", &FileDragDropData::getItem);
+
             py::class_<FileThumbnail, ftk::IWidget, std::shared_ptr<FileThumbnail> >(m, "FileThumbnail")
                 .def(
                     py::init(&FileThumbnail::create),

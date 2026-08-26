@@ -189,6 +189,10 @@ class FilesTool(IToolWidget):
         IToolWidget.__init__(self, context, app, mainWindow, "Files", "FilesTool", parent)
 
         self._rowWidgets = []
+        # Where a dragged file would land: an index into the rows, counting
+        # the gap after the last one, or -1 for nowhere.
+        self._dropTarget = -1
+        self._handle = 0
         self._rangePopup = None
         self._rangeItem = None
         self._rangeValue = None
@@ -336,6 +340,96 @@ class FilesTool(IToolWidget):
         options.wipeCenter = center
         app.getFilesModel().compareOptions = options
 
+    def sizeHintEvent(self, event):
+        super().sizeHintEvent(event)
+        self._handle = event.style.getSizeRole(
+            ftk.SizeRole.Handle, event.displayScale)
+
+    def drawOverlayEvent(self, drawRect, event):
+        super().drawOverlayEvent(drawRect, event)
+        if self._dropTarget != -1:
+            g = self._getDropGeom(self._dropTarget)
+            if g is not None:
+                event.render.drawRect(
+                    g, event.style.getColorRole(ftk.ColorRole.Checked))
+
+    def dragEnterEvent(self, event):
+        if isinstance(event.data, djv.ui.FileDragDropData):
+            event.accept = True
+            self._dropTarget = self._getDropIndex(event.pos)
+            self.setDrawUpdate()
+
+    def dragLeaveEvent(self, event):
+        if isinstance(event.data, djv.ui.FileDragDropData):
+            event.accept = True
+            self._dropTarget = -1
+            self.setDrawUpdate()
+
+    def dragMoveEvent(self, event):
+        if isinstance(event.data, djv.ui.FileDragDropData):
+            event.accept = True
+            dropTarget = self._getDropIndex(event.pos)
+            if dropTarget != self._dropTarget:
+                self._dropTarget = dropTarget
+                self.setDrawUpdate()
+
+    def dropEvent(self, event):
+        if isinstance(event.data, djv.ui.FileDragDropData):
+            event.accept = True
+            if self._dropTarget != -1:
+                filesModel = self._app().getFilesModel()
+                for i, f in enumerate(filesModel.files):
+                    if f is event.data.item:
+                        to = self._dropTarget
+                        if i < to:
+                            to -= 1
+                        filesModel.move(i, to)
+                        break
+            self._dropTarget = -1
+            self.setDrawUpdate()
+
+    def _rowSpanY(self, row):
+        # The whole row rather than one widget in it: the name button is
+        # centered in a row the thumbnail makes taller, so its box alone
+        # sits low.
+        n = self._rowWidgets[row][0].geometry
+        t = self._rowWidgets[row][4].geometry
+        return (min(t.min.y, n.min.y), max(t.max.y, n.max.y))
+
+    def _getDropIndex(self, pos):
+        # Only over the rows themselves, with a little reach: the tool also
+        # holds the comparison section, and a drop there should mean
+        # nothing.
+        out = -1
+        g = self._grid.geometry
+        m = self._handle
+        if self._rowWidgets and \
+                g.min.x - m <= pos.x <= g.max.x + m and \
+                g.min.y - m <= pos.y <= g.max.y + m:
+            out = 0
+            for row in range(len(self._rowWidgets)):
+                lo, hi = self._rowSpanY(row)
+                if pos.y < (lo + hi) // 2:
+                    break
+                out += 1
+        return out
+
+    def _getDropGeom(self, index):
+        # Centered in the gap between the rows; at the ends there is no
+        # gap, so the row's own edge is the line.
+        if not self._rowWidgets:
+            return None
+        count = len(self._rowWidgets)
+        if 0 == index:
+            y = self._rowSpanY(0)[0]
+        elif index < count:
+            y = (self._rowSpanY(index - 1)[1] + self._rowSpanY(index)[0]) // 2
+        else:
+            y = self._rowSpanY(count - 1)[1]
+        g = self._grid.geometry
+        return ftk.Box2I(
+            g.min.x, y - self._handle // 2, g.w, self._handle)
+
     def _filesUpdate(self, files):
         self._rowWidgets = []
         self._aButtonGroup.clearButtons()
@@ -409,7 +503,7 @@ class FilesTool(IToolWidget):
                 rangeButton = None
 
             self._rowWidgets.append(
-                (nameButton, bButton, layerComboBox, rangeButton))
+                (nameButton, bButton, layerComboBox, rangeButton, thumbnail))
 
     def _showRangePopup(self, item, frames, row):
         if self._rangePopup or row >= len(self._rowWidgets):
@@ -852,6 +946,9 @@ class ToolsWidget(ftk.IContainer):
         # each tool, so a tool takes the height its contents need.
         self._scrollWidget = ftk.ScrollWidget(context, ftk.ScrollType.Both)
         self._scrollWidget.border = False
+        # Reordering the file list by dragging needs the list to move when
+        # the drag reaches the edge of the panel.
+        self._scrollWidget.dragScroll = True
         self._scrollWidget.widget = self._layout
         self._setWidget(self._scrollWidget)
 
