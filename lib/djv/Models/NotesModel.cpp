@@ -56,6 +56,7 @@ namespace djv
             note.id = generateId();
             note.time = time;
             note.created = timestamp();
+            note.author = reviewAuthor();
             note.text = text;
             auto notes = p.notes->get();
             notes.push_back(note);

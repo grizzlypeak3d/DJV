@@ -290,6 +290,9 @@ namespace djv
                 const std::filesystem::path& base,
                 const std::filesystem::path& reviewPath,
                 const std::filesystem::path& substituteRoot);
+            void _logUnreadSections(
+                const models::Review&,
+                const std::filesystem::path& reviewPath);
             void _closeReview();
             void _applyReviewView();
 

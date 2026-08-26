@@ -3,11 +3,15 @@
 
 #include <djv/Models/Review.h>
 
+#include <ftk/Core/OS.h>
+
+#include <algorithm>
 #include <atomic>
 #include <ctime>
 #include <iomanip>
 #include <random>
 #include <sstream>
+#include <stdexcept>
 
 namespace djv
 {
@@ -45,6 +49,94 @@ namespace djv
                     jsonToTime(json.at("duration")));
             }
 
+            //! The only coordinate space this version knows: the pixels of the
+            //! source image.
+            const std::string imageSpace = "image";
+
+            //! Check a coordinate space, refusing one this version cannot place.
+            //!
+            //! An absent space means the image space, which was not always
+            //! written. Refusing here means the caller keeps the item verbatim
+            //! instead of drawing it in the wrong coordinates.
+            void requireSpace(const nlohmann::json& json, const std::string& key)
+            {
+                const auto i = json.find(key);
+                if (i == json.end())
+                {
+                    return;
+                }
+                if (!i->is_string() || i->get<std::string>() != imageSpace)
+                {
+                    throw std::runtime_error("unknown " + key + ": " + i->dump());
+                }
+            }
+
+            //! Read one top-level section, containing a failure to that section.
+            //!
+            //! The color, compare and interface sections delegate to serializers
+            //! that require every key they know, so a key added upstream makes
+            //! the whole section throw. Letting that reach the caller would cost
+            //! the reader the entire document.
+            template<typename T>
+            void readSection(
+                const nlohmann::json& json,
+                const std::string& key,
+                T& out,
+                Review& review)
+            {
+                const auto i = json.find(key);
+                if (i == json.end())
+                {
+                    return;
+                }
+                try
+                {
+                    i->get_to(out);
+                }
+                catch (const std::exception&)
+                {
+                    // A partial read leaves the section half-written.
+                    out = T();
+                    review.unreadSections.push_back(key);
+                }
+            }
+
+            //! Read a list section, containing a failure to the offending item.
+            //!
+            //! Unlike the sections above, these lists are edited during the
+            //! session, so they must be written back. An item that cannot be
+            //! read is kept verbatim and re-emitted on save rather than dropped:
+            //! it belongs to whoever wrote it.
+            template<typename T>
+            void readList(
+                const nlohmann::json& json,
+                const std::string& key,
+                std::vector<T>& out,
+                Review& review)
+            {
+                const auto i = json.find(key);
+                if (i == json.end())
+                {
+                    return;
+                }
+                if (!i->is_array())
+                {
+                    review.unreadSections.push_back(key);
+                    return;
+                }
+                out.clear();
+                for (const auto& item : *i)
+                {
+                    try
+                    {
+                        out.push_back(item.get<T>());
+                    }
+                    catch (const std::exception&)
+                    {
+                        review.unreadItems[key].push_back(item);
+                    }
+                }
+            }
         }
 
         bool sameTime(
@@ -85,6 +177,22 @@ namespace djv
             return ss.str();
         }
 
+        bool reviewVersionSupported(int version)
+        {
+            return version <= reviewVersion;
+        }
+
+        std::string reviewAuthor()
+        {
+            std::string out;
+#if defined(_WIN32)
+            ftk::getEnv("USERNAME", out);
+#else
+            ftk::getEnv("USER", out);
+#endif
+            return out;
+        }
+
         std::string timestamp()
         {
             const std::time_t t = std::time(nullptr);
@@ -112,6 +220,10 @@ namespace djv
             {
                 json["audioPath"] = in.audioPath;
             }
+            if (!in.audioPathAbsolute.empty())
+            {
+                json["audioPathAbsolute"] = in.audioPathAbsolute;
+            }
             json["videoLayer"] = in.videoLayer;
             if (in.speed >= 0.0)
             {
@@ -133,6 +245,7 @@ namespace djv
             if (json.contains("path")) json.at("path").get_to(out.path);
             if (json.contains("pathAbsolute")) json.at("pathAbsolute").get_to(out.pathAbsolute);
             if (json.contains("audioPath")) json.at("audioPath").get_to(out.audioPath);
+            if (json.contains("audioPathAbsolute")) json.at("audioPathAbsolute").get_to(out.audioPathAbsolute);
             if (json.contains("videoLayer")) json.at("videoLayer").get_to(out.videoLayer);
             if (json.contains("speed")) json.at("speed").get_to(out.speed);
             if (json.contains("currentTime")) out.currentTime = jsonToTime(json.at("currentTime"));
@@ -231,6 +344,8 @@ namespace djv
                 id == other.id &&
                 sourceId == other.sourceId &&
                 sameTime(time, other.time) &&
+                author == other.author &&
+                created == other.created &&
                 strokes == other.strokes;
         }
 
@@ -257,6 +372,7 @@ namespace djv
 
         void from_json(const nlohmann::json& json, ReviewStroke& out)
         {
+            requireSpace(json, "widthSpace");
             if (json.contains("color")) json.at("color").get_to(out.color);
             if (json.contains("width")) json.at("width").get_to(out.width);
             out.points.clear();
@@ -277,19 +393,30 @@ namespace djv
             json = nlohmann::json::object();
             json["id"] = in.id;
             json["sourceId"] = in.sourceId;
-            json["space"] = "image";
+            json["space"] = imageSpace;
             if (in.time.has_value())
             {
                 json["time"] = timeToJson(in.time.value());
+            }
+            if (!in.author.empty())
+            {
+                json["author"] = in.author;
+            }
+            if (!in.created.empty())
+            {
+                json["created"] = in.created;
             }
             json["strokes"] = in.strokes;
         }
 
         void from_json(const nlohmann::json& json, ReviewAnnotation& out)
         {
+            requireSpace(json, "space");
             if (json.contains("id")) json.at("id").get_to(out.id);
             if (json.contains("sourceId")) json.at("sourceId").get_to(out.sourceId);
             if (json.contains("time")) out.time = jsonToTime(json.at("time"));
+            if (json.contains("author")) json.at("author").get_to(out.author);
+            if (json.contains("created")) json.at("created").get_to(out.created);
             if (json.contains("strokes")) json.at("strokes").get_to(out.strokes);
         }
 
@@ -299,6 +426,7 @@ namespace djv
                 id == other.id &&
                 sameTime(time, other.time) &&
                 created == other.created &&
+                author == other.author &&
                 text == other.text;
         }
 
@@ -316,6 +444,10 @@ namespace djv
                 json["time"] = timeToJson(in.time.value());
             }
             json["created"] = in.created;
+            if (!in.author.empty())
+            {
+                json["author"] = in.author;
+            }
             json["text"] = in.text;
         }
 
@@ -324,6 +456,7 @@ namespace djv
             if (json.contains("id")) json.at("id").get_to(out.id);
             if (json.contains("time")) out.time = jsonToTime(json.at("time"));
             if (json.contains("created")) json.at("created").get_to(out.created);
+            if (json.contains("author")) json.at("author").get_to(out.author);
             if (json.contains("text")) json.at("text").get_to(out.text);
         }
 
@@ -360,36 +493,75 @@ namespace djv
 
         void to_json(nlohmann::json& json, const Review& in)
         {
-            // Start from the loaded document so unknown sections (e.g. a future
-            // "annotations"/"notes") survive a load/save round-trip untouched.
+            // Start from the loaded document so unknown sections survive a
+            // load/save round-trip untouched.
             json = in.raw.is_object() ? in.raw : nlohmann::json::object();
+
+            // A section that could not be read is left exactly as it was found.
+            // Overwriting it with the defaults the application fell back to
+            // would destroy state this version merely failed to understand.
+            const auto& unread = in.unreadSections;
+            auto write = [&json, &unread](
+                const std::string& key, nlohmann::json value)
+            {
+                if (std::find(unread.begin(), unread.end(), key) == unread.end())
+                {
+                    json[key] = std::move(value);
+                }
+            };
+
+            // A list is written even when some of its items were not read: it is
+            // edited during the session, so a new note has to reach the file.
+            // Those items are appended back, after the ones this version
+            // understands.
+            auto writeList = [&in, &write](
+                const std::string& key, nlohmann::json value)
+            {
+                if (in.unreadItems.is_object() && in.unreadItems.contains(key))
+                {
+                    for (const auto& item : in.unreadItems.at(key))
+                    {
+                        value.push_back(item);
+                    }
+                }
+                write(key, std::move(value));
+            };
+
             json["djvReview"] = in.version;
             json["app"] = in.app;
             json["created"] = in.created;
-            json["files"] = in.files;
-            json["compare"] = in.compare;
-            json["view"] = in.view;
-            json["color"] = in.color;
-            json["ui"] = in.ui;
-            json["annotations"] = in.annotations;
-            json["notes"] = in.notes;
-            json["ranges"] = in.ranges;
+            writeList("files", in.files);
+            write("compare", in.compare);
+            write("view", in.view);
+            write("color", in.color);
+            write("ui", in.ui);
+            writeList("annotations", in.annotations);
+            writeList("notes", in.notes);
+            writeList("ranges", in.ranges);
         }
 
         void from_json(const nlohmann::json& json, Review& out)
         {
             out.raw = json;
+
+            // The version first: a caller that finds one it does not know must
+            // refuse the document before trusting anything below. See
+            // docs/review-format.md.
             if (json.contains("djvReview")) json.at("djvReview").get_to(out.version);
             if (json.contains("app")) json.at("app").get_to(out.app);
             if (json.contains("created")) json.at("created").get_to(out.created);
-            if (json.contains("files")) json.at("files").get_to(out.files);
-            if (json.contains("compare")) json.at("compare").get_to(out.compare);
-            if (json.contains("view")) json.at("view").get_to(out.view);
-            if (json.contains("color")) json.at("color").get_to(out.color);
-            if (json.contains("ui")) json.at("ui").get_to(out.ui);
-            if (json.contains("annotations")) json.at("annotations").get_to(out.annotations);
-            if (json.contains("notes")) json.at("notes").get_to(out.notes);
-            if (json.contains("ranges")) json.at("ranges").get_to(out.ranges);
+
+            // Every section below is read on its own. The annotations and the
+            // notes are the part of a review that exists nowhere else, and one
+            // stale section elsewhere must not be allowed to cost them.
+            readList(json, "files", out.files, out);
+            readSection(json, "compare", out.compare, out);
+            readSection(json, "view", out.view, out);
+            readSection(json, "color", out.color, out);
+            readSection(json, "ui", out.ui, out);
+            readList(json, "annotations", out.annotations, out);
+            readList(json, "notes", out.notes, out);
+            readList(json, "ranges", out.ranges, out);
         }
     }
 }

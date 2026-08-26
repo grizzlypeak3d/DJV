@@ -6,6 +6,7 @@ set(HEADERS
     NotesModelTest.h
     PlaylistTest.h
     RecentFilesModelTest.h
+    ReviewTest.h
     TimeUnitsModelTest.h
     ToolsModelTest.h
     ViewportModelTest.h)
@@ -17,6 +18,7 @@ set(SOURCE
     NotesModelTest.cpp
     PlaylistTest.cpp
     RecentFilesModelTest.cpp
+    ReviewTest.cpp
     TimeUnitsModelTest.cpp
     ToolsModelTest.cpp
     ViewportModelTest.cpp)

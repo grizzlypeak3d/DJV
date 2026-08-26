@@ -190,6 +190,11 @@ namespace djv
             std::shared_ptr<models::RecentFilesModel> recentReviewsModel;
             std::filesystem::path reviewPath;
             nlohmann::json reviewRaw;
+            //! What the open review could not be read from, carried alongside
+            //! the raw document so that saving puts it back rather than
+            //! overwriting it with the defaults we fell back to.
+            std::vector<std::string> reviewUnreadSections;
+            nlohmann::json reviewUnreadItems;
             bool reviewModified = false;
             std::optional<models::ReviewView> pendingReviewView;
             std::shared_ptr<ftk::Timer> reviewViewTimer;
@@ -853,6 +858,19 @@ namespace djv
                 return rel.generic_u8string();
             }
 
+            //! Store a path with forward slashes, whatever the platform wrote.
+            //!
+            //! Windows accepts either separator, so this costs nothing there and
+            //! keeps a document legible -- and diffable -- when it travels.
+            std::string reviewGenericPath(const std::string& value)
+            {
+                if (value.empty())
+                {
+                    return value;
+                }
+                return std::filesystem::u8path(value).generic_u8string();
+            }
+
             //! Does the file exist on disk? A single file is checked exactly; an
             //! image sequence -- whose padded/pattern path is not a literal file
             //! -- is considered present when its directory holds a matching frame.
@@ -891,12 +909,13 @@ namespace djv
                 return false;
             }
 
-            //! Resolve a review file entry to a path on disk, preferring the
-            //! relative form, then the absolute form, then the file's name inside
-            //! an optional substitute root (used by the relocation dialog).
-            //! Reports whether the target exists.
-            std::filesystem::path resolveReviewFile(
-                const models::ReviewFile& rf,
+            //! Resolve a stored relative/absolute path pair to a path on disk,
+            //! preferring the relative form, then the absolute form, then the
+            //! file's name inside an optional substitute root (used by the
+            //! relocation dialog). Reports whether the target exists.
+            std::filesystem::path resolveReviewPath(
+                const std::string& relative,
+                const std::string& absolute,
                 const std::filesystem::path& base,
                 const std::filesystem::path& substituteRoot,
                 const ftk::PathOptions& pathOptions,
@@ -906,20 +925,20 @@ namespace djv
                 {
                     return reviewFilePresent(p, pathOptions);
                 };
-                if (!rf.path.empty())
+                if (!relative.empty())
                 {
                     const std::filesystem::path rel =
-                        (base / std::filesystem::u8path(rf.path)).lexically_normal();
+                        (base / std::filesystem::u8path(relative)).lexically_normal();
                     if (present(rel))
                     {
                         exists = true;
                         return rel;
                     }
                 }
-                if (!rf.pathAbsolute.empty())
+                if (!absolute.empty())
                 {
                     const std::filesystem::path abs =
-                        std::filesystem::u8path(rf.pathAbsolute);
+                        std::filesystem::u8path(absolute);
                     if (present(abs))
                     {
                         exists = true;
@@ -929,13 +948,13 @@ namespace djv
                 if (!substituteRoot.empty())
                 {
                     std::filesystem::path fileName;
-                    if (!rf.path.empty())
+                    if (!relative.empty())
                     {
-                        fileName = std::filesystem::u8path(rf.path).filename();
+                        fileName = std::filesystem::u8path(relative).filename();
                     }
-                    else if (!rf.pathAbsolute.empty())
+                    else if (!absolute.empty())
                     {
-                        fileName = std::filesystem::u8path(rf.pathAbsolute).filename();
+                        fileName = std::filesystem::u8path(absolute).filename();
                     }
                     if (!fileName.empty())
                     {
@@ -948,11 +967,23 @@ namespace djv
                     }
                 }
                 exists = false;
-                if (!rf.path.empty())
+                if (!relative.empty())
                 {
-                    return (base / std::filesystem::u8path(rf.path)).lexically_normal();
+                    return (base / std::filesystem::u8path(relative)).lexically_normal();
                 }
-                return std::filesystem::u8path(rf.pathAbsolute);
+                return std::filesystem::u8path(absolute);
+            }
+
+            //! Resolve a review file entry to a path on disk.
+            std::filesystem::path resolveReviewFile(
+                const models::ReviewFile& rf,
+                const std::filesystem::path& base,
+                const std::filesystem::path& substituteRoot,
+                const ftk::PathOptions& pathOptions,
+                bool& exists)
+            {
+                return resolveReviewPath(
+                    rf.path, rf.pathAbsolute, base, substituteRoot, pathOptions, exists);
             }
         }
 
@@ -987,7 +1018,41 @@ namespace djv
                 return;
             }
 
+            if (!models::reviewVersionSupported(review.version))
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format(
+                        "Cannot read review \"{0}\": it is format version {1}, "
+                        "and this build of DJV reads up to version {2}. Open it "
+                        "with a newer DJV.").
+                        arg(path.u8string()).
+                        arg(review.version).
+                        arg(models::reviewVersion),
+                    ftk::LogType::Error);
+                return;
+            }
+            _logUnreadSections(review, path);
+
             _applyReview(review, path.parent_path(), path, std::filesystem::path());
+        }
+
+        void App::_logUnreadSections(
+            const models::Review& review,
+            const std::filesystem::path& path)
+        {
+            for (const auto& section : review.unreadSections)
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format(
+                        "Review \"{0}\": the \"{1}\" section could not be read "
+                        "and is left at its defaults. It is kept as it stands "
+                        "when the review is saved, not overwritten.").
+                        arg(path.u8string()).
+                        arg(section),
+                    ftk::LogType::Warning);
+            }
         }
 
         void App::_applyReview(
@@ -1017,9 +1082,21 @@ namespace djv
                 auto item = std::make_shared<models::FilesModelItem>();
                 item->id = rf.id.empty() ? models::generateId() : rf.id;
                 item->path = ftk::Path(resolved.u8string(), pathOptions);
-                if (!rf.audioPath.empty())
+                if (!rf.audioPath.empty() || !rf.audioPathAbsolute.empty())
                 {
-                    item->audioPath = ftk::Path(rf.audioPath, pathOptions);
+                    bool audioExists = false;
+                    const std::filesystem::path audio = resolveReviewPath(
+                        rf.audioPath,
+                        rf.audioPathAbsolute,
+                        base,
+                        substituteRoot,
+                        pathOptions,
+                        audioExists);
+                    if (!audioExists)
+                    {
+                        missing.push_back(audio.u8string());
+                    }
+                    item->audioPath = ftk::Path(audio.u8string(), pathOptions);
                 }
                 item->videoLayer = static_cast<size_t>(std::max(0, rf.videoLayer));
                 item->speed = rf.speed;
@@ -1032,7 +1109,7 @@ namespace djv
 
             // Rebuild the comparison. Order matters: setCompareOptions may pick a
             // "B" of its own when none is set, so clear and rebuild "B" after it,
-            // then set "A". See docs/ROADMAP_REVIEW_SESSIONS.md Â§6.1.
+            // then set "A".
             const auto& files = p.filesModel->getFiles();
             auto indexOfId = [&files](const std::string& id) -> int
             {
@@ -1096,6 +1173,8 @@ namespace djv
 
             p.reviewPath = reviewPath;
             p.reviewRaw = review.raw;
+            p.reviewUnreadSections = review.unreadSections;
+            p.reviewUnreadItems = review.unreadItems;
             p.recentReviewsModel->addRecent(reviewPath);
             p.reviewModified = false;
             _updateWindowTitle();
@@ -1212,17 +1291,24 @@ namespace djv
                 arg(p.appInfoModel->getFullName()).
                 arg(p.appInfoModel->getVersion());
             review.created = reviewTimestamp();
-            // Carry any unknown sections from the review we last loaded so a
-            // load/save cycle does not drop them. See Â§4.4.
+            // Carry what the review we last loaded held but we could not use:
+            // the sections we do not know, and the ones we failed to read. The
+            // document is rebuilt from the models, so without this the save
+            // would replace them with whatever we fell back to.
             review.raw = p.reviewRaw;
+            review.unreadSections = p.reviewUnreadSections;
+            review.unreadItems = p.reviewUnreadItems;
 
             for (const auto& file : p.filesModel->getFiles())
             {
                 models::ReviewFile rf;
                 rf.id = file->id;
-                rf.pathAbsolute = file->path.get();
+                rf.pathAbsolute = reviewGenericPath(file->path.get());
                 rf.path = reviewRelativePath(file->path.get(), base);
-                rf.audioPath = file->audioPath.get();
+                // The separate audio travels with the review like the file does:
+                // stored absolute only, it would not survive the move.
+                rf.audioPath = reviewRelativePath(file->audioPath.get(), base);
+                rf.audioPathAbsolute = reviewGenericPath(file->audioPath.get());
                 rf.videoLayer = static_cast<int>(file->videoLayer);
                 rf.speed = file->speed;
                 rf.currentTime = file->currentTime;
@@ -1361,6 +1447,8 @@ namespace djv
             p.annotationsModel->clear();
             p.reviewPath.clear();
             p.reviewRaw = nlohmann::json();
+            p.reviewUnreadSections.clear();
+            p.reviewUnreadItems = nlohmann::json();
             // closeAll / setCompareOptions marked the session modified; clear it
             // last so the empty state is clean.
             p.reviewModified = false;
@@ -1598,6 +1686,18 @@ namespace djv
             try
             {
                 models::Review review = json.get<models::Review>();
+                if (!models::reviewVersionSupported(review.version))
+                {
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format(
+                            "Cannot recover autosave: it is format version {0}, "
+                            "and this build of DJV reads up to version {1}.").
+                            arg(review.version).
+                            arg(models::reviewVersion),
+                        ftk::LogType::Error);
+                    return;
+                }
                 std::filesystem::path reviewPath;
                 if (json.contains("_autosaveReviewPath"))
                 {
@@ -1606,6 +1706,7 @@ namespace djv
                 }
                 // Keep the internal marker out of any later saved ".djvr".
                 review.raw.erase("_autosaveReviewPath");
+                _logUnreadSections(review, reviewPath);
                 _applyReview(review, reviewPath.parent_path(), reviewPath, std::filesystem::path());
                 // The recovered state is, by definition, unsaved.
                 p.reviewModified = true;
