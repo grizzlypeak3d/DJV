@@ -223,6 +223,26 @@ namespace djv
             const auto& metadata = clips.front()->metadata();
             FTK_CHECK(metadata.find("studio") != metadata.end());
             FTK_CHECK(metadata.find("djv") != metadata.end());
+
+            // A timeline of only audio opens its first audio track, since
+            // the file list holds audio files the same as anything else.
+            {
+                auto clip = new OTIO_NS::Clip(
+                    "tone", new OTIO_NS::ExternalReference("tone.wav"), range);
+                auto audioOnly = new OTIO_NS::Track(
+                    "Audio", std::nullopt, OTIO_NS::Track::Kind::audio);
+                audioOnly->append_child(clip);
+                auto stack = new OTIO_NS::Stack;
+                stack->append_child(audioOnly);
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> t(
+                    new OTIO_NS::Timeline);
+                t->set_tracks(stack);
+                std::vector<std::string> report;
+                const models::Playlist result =
+                    models::playlistFromOTIO(t, std::string(), report);
+                FTK_CHECK(1 == result.items.size());
+                FTK_CHECK(report.empty());
+            }
         }
 
         void PlaylistTest::_version()

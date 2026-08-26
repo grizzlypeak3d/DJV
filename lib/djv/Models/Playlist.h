@@ -52,8 +52,10 @@ namespace djv
         //! Any timeline is accepted, not only ones DJV wrote: multiple video
         //! tracks are flattened, and whatever the file list cannot carry --
         //! transitions, effects, markers, audio tracks -- is dropped and
-        //! reported, one line per kind. The source file is never rewritten,
-        //! so the flattening loses nothing on disk.
+        //! reported, one line per kind. A timeline of only audio opens its
+        //! first audio track, since the file list holds audio files the same
+        //! as anything else. The source file is never rewritten, so the
+        //! flattening loses nothing on disk.
         //!
         //! Clip metadata is kept on each item, so what another application
         //! wrote survives a save from DJV.

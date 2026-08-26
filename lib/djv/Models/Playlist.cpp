@@ -293,7 +293,7 @@ namespace djv
             // The source file is never rewritten, so nothing is lost on disk;
             // what the file list cannot carry is counted and reported below.
             std::vector<OTIO_NS::Track*> videoTracks;
-            size_t audioTracks = 0;
+            std::vector<OTIO_NS::Track*> audioTracks;
             for (const auto& child : timeline->tracks()->children())
             {
                 if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(child))
@@ -304,13 +304,24 @@ namespace djv
                     }
                     else if (OTIO_NS::Track::Kind::audio == track->kind())
                     {
-                        ++audioTracks;
+                        audioTracks.push_back(track);
                     }
                 }
             }
+            // The audio tracks are ignored when there is video: a movie
+            // carries its own audio, and a separate track would make a
+            // second answer. A timeline of only audio opens its first
+            // track, since the file list holds audio files the same as
+            // anything else.
+            size_t audioIgnored = audioTracks.size();
             OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> flattened;
             OTIO_NS::Track* track = nullptr;
-            if (videoTracks.size() > 1)
+            if (videoTracks.empty() && !audioTracks.empty())
+            {
+                track = audioTracks.front();
+                --audioIgnored;
+            }
+            else if (videoTracks.size() > 1)
             {
                 OTIO_NS::ErrorStatus errorStatus;
                 flattened = OTIO_NS::flatten_stack(videoTracks, &errorStatus);
@@ -420,9 +431,9 @@ namespace djv
             {
                 report.push_back(ftk::Format("Dropped {0} other items").arg(other));
             }
-            if (audioTracks > 0)
+            if (audioIgnored > 0)
             {
-                report.push_back(ftk::Format("Ignored {0} audio tracks").arg(audioTracks));
+                report.push_back(ftk::Format("Ignored {0} audio tracks").arg(audioIgnored));
             }
 
             const int size = static_cast<int>(out.items.size());
