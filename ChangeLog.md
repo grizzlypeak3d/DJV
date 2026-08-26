@@ -7,6 +7,13 @@ Changes:
   Any OTIO timeline can be opened as a playlist.
 * The file list can be reordered by dragging a file's thumbnail in the
   Files tool. The list scrolls when the drag reaches the edge of the panel.
+* The Python application keeps pace with the C++ application: playlists and
+  reordering the file list work there as well, and the bindings pass every
+  widget event through to Python, so a drag and drop source or target can
+  be written in Python.
+* The file browser shows keyboard focus on the file list, pressing Return
+  in the save dialog's file name accepts it, and saving suggests a file
+  name -- so a file can be opened or saved without leaving the keyboard.
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
 * Add support for reading OpenEXR files with HTJ2K compression.
 * Automatic OCIO input color spaces.
