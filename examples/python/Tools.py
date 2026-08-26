@@ -431,6 +431,41 @@ class FilesTool(IToolWidget):
             g.min.x, y - self._handle // 2, g.w, self._handle)
 
     def _filesUpdate(self, files):
+        # The same files in a different order: move the rows rather than
+        # rebuilding them. Rebuilding makes new thumbnails and lays out an
+        # empty grid along the way, which loses the scroll position, so
+        # reordering a long list would jump. The same files in the same
+        # order fall through to the rebuild -- that is refresh(),
+        # announcing that what the items hold has changed. The button
+        # groups follow the new order, since they answer clicks with an
+        # index in the order their buttons were added.
+        if files and len(files) == len(self._rowWidgets):
+            widgets = []
+            reordered = False
+            for i, item in enumerate(files):
+                match = next(
+                    (w for w in self._rowWidgets if w[5] is item), None)
+                if match is None:
+                    break
+                widgets.append(match)
+                reordered |= self._rowWidgets[i][5] is not item
+            if len(widgets) == len(files) and reordered:
+                self._rowWidgets = widgets
+                self._aButtonGroup.clearButtons()
+                self._bButtonGroup.clearButtons()
+                for row, w in enumerate(self._rowWidgets):
+                    nameButton, bButton, layerComboBox, rangeButton, \
+                        thumbnail = w[:5]
+                    self._aButtonGroup.addButton(nameButton)
+                    self._bButtonGroup.addButton(bButton)
+                    self._grid.setGridPos(thumbnail, row, 0)
+                    self._grid.setGridPos(nameButton, row, 1)
+                    self._grid.setGridPos(bButton, row, 2)
+                    self._grid.setGridPos(layerComboBox, row, 3)
+                    if rangeButton is not None:
+                        self._grid.setGridPos(rangeButton, row, 4)
+                return
+
         self._rowWidgets = []
         self._aButtonGroup.clearButtons()
         self._bButtonGroup.clearButtons()
@@ -503,7 +538,8 @@ class FilesTool(IToolWidget):
                 rangeButton = None
 
             self._rowWidgets.append(
-                (nameButton, bButton, layerComboBox, rangeButton, thumbnail))
+                (nameButton, bButton, layerComboBox, rangeButton, thumbnail,
+                 item))
 
     def _showRangePopup(self, item, frames, row):
         if self._rangePopup or row >= len(self._rowWidgets):
