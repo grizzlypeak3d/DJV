@@ -7,6 +7,8 @@
 
 #include <tlRender/Timeline/CompareOptions.h>
 
+#include <opentimelineio/anyDictionary.h>
+
 #include <ftk/Core/ObservableList.h>
 #include <ftk/Core/Observable.h>
 #include <ftk/Core/Path.h>
@@ -49,6 +51,12 @@ namespace djv
             bool                     framesStated = false;
 
             bool                     newFile = true;
+
+            //! Metadata carried from the playlist clip this item came from,
+            //! and written back out when a playlist is saved, so what another
+            //! application put on the clip survives a pass through DJV. DJV's
+            //! own state lives in the fields above, never in here.
+            OTIO_NS::AnyDictionary   metadata;
         };
 
         //! Files model.
@@ -111,6 +119,12 @@ namespace djv
 
             //! Add a file.
             DJV_MODELS_API void add(const std::shared_ptr<FilesModelItem>&);
+
+            //! Add files together, with the "A" file changing once at the
+            //! end. Adding a list one file at a time would make each of them
+            //! "A" along the way, and everything watching would open each of
+            //! them along the way too.
+            DJV_MODELS_API void add(const std::vector<std::shared_ptr<FilesModelItem> >&);
 
             //! Close the current "A" file.
             DJV_MODELS_API void close();

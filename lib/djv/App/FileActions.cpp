@@ -53,6 +53,46 @@ namespace djv
                 });
 
             _addCommand(
+                "OpenPlaylist",
+                "Open a playlist into the file list. Takes an optional "
+                "\"fileName\"; without one a file browser is shown.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        if (args.contains("fileName"))
+                        {
+                            app->openPlaylist(ftk::Path(
+                                args.at("fileName").get<std::string>()));
+                        }
+                        else
+                        {
+                            app->openPlaylistDialog();
+                        }
+                    }
+                });
+
+            _addCommand(
+                "SavePlaylist",
+                "Save the file list as a playlist. Takes an optional "
+                "\"fileName\"; without one a file browser is shown.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        if (args.contains("fileName"))
+                        {
+                            app->savePlaylist(ftk::Path(
+                                args.at("fileName").get<std::string>()));
+                        }
+                        else
+                        {
+                            app->savePlaylistDialog();
+                        }
+                    }
+                });
+
+            _addCommand(
                 "Close",
                 "Close the current file.",
                 [appWeak](const nlohmann::json&)
@@ -178,6 +218,17 @@ namespace djv
                 "Open With Audio",
                 "FileOpenAudio",
                 _command("OpenAudio"));
+            _actions["OpenPlaylist"] = ftk::Action::create(
+                "Open Playlist",
+                _command("OpenPlaylist"));
+            _actions["OpenPlaylist"]->setTooltip(
+                "Open a playlist into the file list. Opening a \".otio\" "
+                "file normally plays it as a timeline.");
+            _actions["SavePlaylist"] = ftk::Action::create(
+                "Save Playlist",
+                _command("SavePlaylist"));
+            _actions["SavePlaylist"]->setTooltip(
+                "Save the file list as a \".otio\" playlist.");
             _actions["Close"] = ftk::Action::create(
                 "Close",
                 "FileClose",
@@ -245,6 +296,7 @@ namespace djv
                 [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
                 {
                     FTK_P();
+                    _actions["SavePlaylist"]->setEnabled(!value.empty());
                     _actions["Close"]->setEnabled(!value.empty());
                     _actions["CloseAll"]->setEnabled(!value.empty());
                     _actions["Reload"]->setEnabled(!value.empty());

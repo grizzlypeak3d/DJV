@@ -1,6 +1,10 @@
 ## 3.6.0
 
 Changes:
+* Add playlists: "File/Save Playlist" saves the open file list as an OTIO
+  file, with each file's in/out points, position, speed, and layer, and the
+  A/B comparison; "File/Open Playlist" opens one back into the file list.
+  Any OTIO timeline can be opened as a playlist.
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
 * Add support for reading OpenEXR files with HTJ2K compression.
 * Automatic OCIO input color spaces.

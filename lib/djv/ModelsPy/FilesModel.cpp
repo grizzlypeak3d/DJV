@@ -60,7 +60,10 @@ namespace djv
                 .def_property_readonly("active", &FilesModel::getActive)
                 .def_property_readonly("observeActive", &FilesModel::observeActive)
 
-                .def("add", &FilesModel::add)
+                .def("add", py::overload_cast<
+                    const std::shared_ptr<FilesModelItem>&>(&FilesModel::add))
+                .def("add", py::overload_cast<
+                    const std::vector<std::shared_ptr<FilesModelItem> >&>(&FilesModel::add))
                 .def("close", py::overload_cast<>(&FilesModel::close))
                 .def("close", py::overload_cast<int>(&FilesModel::close), py::arg("index"))
                 .def("closeAll", &FilesModel::closeAll)

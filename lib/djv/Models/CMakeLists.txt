@@ -6,6 +6,7 @@ set(HEADERS
     Export.h
     FilesModel.h
     OCIOModel.h
+    Playlist.h
     RecentFilesModel.h
     SettingsModel.h
     Shortcuts.h
@@ -22,6 +23,7 @@ set(SOURCE
     CommandsModel.cpp
     FilesModel.cpp
     OCIOModel.cpp
+    Playlist.cpp
     RecentFilesModel.cpp
     SettingsModel.cpp
     Shortcuts.cpp

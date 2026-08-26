@@ -27,6 +27,9 @@ class File(ftk.Menu):
         self.addAction(actions.actions["Reload"])
         self.recentMenu = self.addSubMenu("Recent")
         self.addDivider();
+        self.addAction(actions.actions["OpenPlaylist"])
+        self.addAction(actions.actions["SavePlaylist"])
+        self.addDivider();
         self.addAction(actions.actions["Next"])
         self.addAction(actions.actions["Prev"])
         self.addDivider();

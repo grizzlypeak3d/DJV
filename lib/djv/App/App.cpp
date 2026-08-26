@@ -27,6 +27,7 @@
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/Playlist.h>
 #include <djv/Models/RecentFilesModel.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/CommandsModel.h>
@@ -537,6 +538,129 @@ namespace djv
                     {
                         open(i, ftk::Path(), std::optional<ftk::RangeI64>(), gatherSeq);
                     }
+                },
+                options);
+        }
+
+        void App::openPlaylist(const ftk::Path& path)
+        {
+            FTK_P();
+            try
+            {
+                std::vector<std::string> report;
+                const models::Playlist playlist = models::playlistOpen(
+                    path.getFileName(true),
+                    report);
+
+                // Added to what is open rather than replacing it, the same
+                // as opening anything else; the playlist's own A/B indexes
+                // are offsets into what it added.
+                const int offset = static_cast<int>(
+                    p.filesModel->getFiles().size());
+                p.filesModel->add(playlist.items);
+                if (playlist.aIndex >= 0)
+                {
+                    p.filesModel->setA(offset + playlist.aIndex);
+                }
+                for (int b : playlist.bIndexes)
+                {
+                    p.filesModel->setB(offset + b, true);
+                }
+                p.filesModel->setCompareOptions(playlist.compareOptions);
+                p.filesModel->setCompareTime(playlist.compareTime);
+                p.recentFilesModel->addRecent(path);
+
+                if (!report.empty())
+                {
+                    // A warning so the status bar shows it: what the file
+                    // list could not carry was dropped, and saying nothing
+                    // would look like it was.
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format("{0}: {1}").
+                            arg(path.getFileName()).
+                            arg(ftk::join(report, ", ")),
+                        ftk::LogType::Warning);
+                }
+            }
+            catch (const std::exception& e)
+            {
+                _context->log("djv::app::App", e.what(), ftk::LogType::Error);
+            }
+        }
+
+        void App::openPlaylistDialog()
+        {
+            FTK_P();
+            ftk::FileBrowserOpenOptions options;
+            options.extensions.push_back(".otio");
+            options.extensionsLabel = "Playlists";
+            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+            fileBrowserSystem->open(
+                p.mainWindow,
+                [this](const ftk::Path& value)
+                {
+                    openPlaylist(value);
+                },
+                options);
+        }
+
+        void App::savePlaylist(const ftk::Path& path)
+        {
+            FTK_P();
+
+            models::Playlist playlist;
+            playlist.items = p.filesModel->getFiles();
+
+            // The active file's position and in/out points live in the
+            // player until the file loses focus, so bring its item up to
+            // date before it is written.
+            if (!p.activeFiles.empty())
+            {
+                if (auto player = p.player->get())
+                {
+                    p.activeFiles.front()->speed = player->getSpeed();
+                    p.activeFiles.front()->currentTime = player->getCurrentTime();
+                    p.activeFiles.front()->inOutRange = player->getInOutRange();
+                }
+            }
+
+            playlist.aIndex = p.filesModel->getAIndex();
+            playlist.bIndexes = p.filesModel->getBIndexes();
+            playlist.compareOptions = p.filesModel->getCompareOptions();
+            playlist.compareTime = p.filesModel->getCompareTime();
+
+            std::string fileName = path.getFileName(true);
+            if (".otio" != ftk::toLower(path.getExt()))
+            {
+                fileName += ".otio";
+            }
+            try
+            {
+                models::playlistSave(
+                    fileName,
+                    playlist,
+                    p.settingsModel->getImageSeq().io.defaultSpeed);
+            }
+            catch (const std::exception& e)
+            {
+                _context->log("djv::app::App", e.what(), ftk::LogType::Error);
+            }
+        }
+
+        void App::savePlaylistDialog()
+        {
+            FTK_P();
+            ftk::FileBrowserOpenOptions options;
+            options.mode = ftk::FileBrowserMode::Save;
+            options.extensions.push_back(".otio");
+            options.extensionsLabel = "Playlists";
+            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+            fileBrowserSystem->open(
+                p.mainWindow,
+                [this](const ftk::Path& value)
+                {
+                    savePlaylist(value);
                 },
                 options);
         }

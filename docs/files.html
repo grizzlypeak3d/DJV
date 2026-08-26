@@ -61,6 +61,12 @@
 <p>Locations: <strong>File</strong> menu, <strong>Tab Bar</strong>, <strong>Files</strong> tool</p>
 <p>Shortcuts:</p>
 <ul><li>Next file: <kbd>Ctrl+Page Down</kbd></li><li>Previous file: <kbd>Ctrl+Page Up</kbd></li></ul>
+<h2 id="playlists">Playlists</h2>
+<p><strong>File/Save Playlist</strong> saves the list of open files as an OTIO file: the order, each file's in/out points, position, speed, and layer, and the A/B comparison. <strong>File/Open Playlist</strong> opens one back into the file list.</p>
+<p>Locations: <strong>File</strong> menu</p>
+<p>A playlist is a plain OTIO timeline — a single video track with one clip per file — so other applications can open it, and DJV's own state rides in metadata they ignore. Opening a <code>.otio</code> file with <strong>File/Open</strong> plays it as a timeline in one tab; <strong>Open Playlist</strong> is what expands it into the file list. Any timeline can be opened as a playlist: multiple video tracks are flattened, and whatever the file list cannot carry — transitions, effects, markers, audio tracks — is dropped and reported in the log. The file being opened is never modified.</p>
+<p>Media references are saved relative to the playlist's directory when the media is under it, so a playlist saved above its media can move with it. Everything else is saved with an absolute path.</p>
+<p>A playlist holds the file list and the comparison. Color, view, and window state stay in the <a href="settings.html">settings</a>.</p>
 <h2 id="ffmpeg-plugin">FFmpeg plugin</h2>
 <p>The FFmpeg plugin provides support for movie and audio files. Only a limited set of codecs is enabled in the open source packages; anything the packaged FFmpeg cannot decode is read with the <a href="#ffmpeg-command">FFmpeg command</a> instead, or you can build from source.</p>
 <p><img src="assets/ffmpeg-plugin.svg" alt="FFmpeg plugin"></p>

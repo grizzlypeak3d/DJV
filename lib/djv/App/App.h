@@ -135,6 +135,21 @@ namespace djv
             //! Open a file and separate audio file dialog.
             DJV_APP_API void openSeparateAudioDialog();
 
+            //! Open a playlist: the file list, not a timeline. A ".otio"
+            //! given to open() plays as a timeline in one tab; this expands
+            //! it into the file list instead. The file cannot say which is
+            //! meant, so the caller does.
+            DJV_APP_API void openPlaylist(const ftk::Path&);
+
+            //! Open a playlist dialog.
+            DJV_APP_API void openPlaylistDialog();
+
+            //! Save the file list as a playlist.
+            DJV_APP_API void savePlaylist(const ftk::Path&);
+
+            //! Save a playlist dialog.
+            DJV_APP_API void savePlaylistDialog();
+
             //! Reload the active files.
             DJV_APP_API void reload();
 

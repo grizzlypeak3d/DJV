@@ -35,6 +35,20 @@ class Actions(IActions.IActions):
             lambda args: appWeak().openSeparateAudioDialog())
 
         self._addCommand(
+            "OpenPlaylist",
+            "Open a playlist into the file list.",
+            lambda args: appWeak().openPlaylist(ftk.Path(args["fileName"]))
+                if args and "fileName" in args
+                else appWeak().openPlaylistDialog())
+
+        self._addCommand(
+            "SavePlaylist",
+            "Save the file list as a playlist.",
+            lambda args: appWeak().savePlaylist(ftk.Path(args["fileName"]))
+                if args and "fileName" in args
+                else appWeak().savePlaylistDialog())
+
+        self._addCommand(
             "Close",
             "Close the current file.",
             lambda args: appWeak().getFilesModel().close())
@@ -88,6 +102,17 @@ class Actions(IActions.IActions):
             "Open With Audio",
             "FileOpenAudio",
             self._command("OpenAudio"))
+        self.actions["OpenPlaylist"] = ftk.Action(
+            "Open Playlist",
+            self._command("OpenPlaylist"))
+        self.actions["OpenPlaylist"].tooltip = (
+            "Open a playlist into the file list. Opening a \".otio\" "
+            "file normally plays it as a timeline.")
+        self.actions["SavePlaylist"] = ftk.Action(
+            "Save Playlist",
+            self._command("SavePlaylist"))
+        self.actions["SavePlaylist"].tooltip = (
+            "Save the file list as a \".otio\" playlist.")
         self.actions["Close"] = ftk.Action(
             "Close",
             "FileClose",
@@ -171,6 +196,7 @@ class Actions(IActions.IActions):
 
     def _filesUpdate(self, files):
         enabled = len(files) > 0
+        self.actions["SavePlaylist"].enabled = enabled
         self.actions["Close"].enabled = enabled
         self.actions["CloseAll"].enabled = enabled
         self.actions["Reload"].enabled = enabled

@@ -2,6 +2,7 @@ set(HEADERS
     AudioModelTest.h
     FilesModelTest.h
     ModelsTestUtil.h
+    PlaylistTest.h
     RecentFilesModelTest.h
     TimeUnitsModelTest.h
     ToolsModelTest.h
@@ -10,6 +11,7 @@ set(HEADERS
 set(SOURCE
     AudioModelTest.cpp
     FilesModelTest.cpp
+    PlaylistTest.cpp
     RecentFilesModelTest.cpp
     TimeUnitsModelTest.cpp
     ToolsModelTest.cpp

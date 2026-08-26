@@ -19,6 +19,7 @@ namespace djv
             commandsModel(mModels);
             filesModel(mModels);
             ocioModel(mModels);
+            playlist(mModels);
             recentFilesModel(mModels);
             settingsModel(mModels);
             shortcuts(mModels);

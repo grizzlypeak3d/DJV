@@ -134,6 +134,83 @@ class App(ftk.App):
                 item.audioPath = audioPath
             self._filesModel.add(item)
 
+    def openPlaylist(self, path):
+        """
+        Open a playlist into the file list. Opening a ".otio" file
+        normally plays it as a timeline in one tab; this expands it
+        instead. The file cannot say which is meant, so the caller does.
+        """
+        path = path if isinstance(path, ftk.Path) else ftk.Path(str(path))
+        playlist, report = djv.models.playlistOpen(path.getFileName(True))
+        offset = len(self._filesModel.files)
+        self._filesModel.add(playlist.items)
+        if playlist.aIndex >= 0:
+            self._filesModel.setA(offset + playlist.aIndex)
+        for b in playlist.bIndexes:
+            self._filesModel.setB(offset + b, True)
+        self._filesModel.compareOptions = playlist.compareOptions
+        self._filesModel.compareTime = playlist.compareTime
+        if report:
+            self.context.getSystemByName("ftk::LogSystem").print(
+                "djv.App",
+                "{0}: {1}".format(path.getFileName(), ", ".join(report)),
+                ftk.LogType.Warning)
+
+    def openPlaylistDialog(self):
+        """
+        Open the dialog for choosing a playlist to open.
+        """
+        selfWeak = weakref.ref(self)
+        options = ftk.FileBrowserOpenOptions()
+        options.extensions = [".otio"]
+        options.extensionsLabel = "Playlists"
+        self.context.getSystemByName("ftk::FileBrowserSystem").open(
+            self._window,
+            lambda path: selfWeak() and selfWeak().openPlaylist(path),
+            options)
+
+    def savePlaylist(self, path):
+        """
+        Save the file list as a ".otio" playlist.
+        """
+        path = path if isinstance(path, ftk.Path) else ftk.Path(str(path))
+        playlist = djv.models.Playlist()
+        playlist.items = list(self._filesModel.files)
+        # The active file's position and in/out points live in the player
+        # until the file loses focus, so bring its item up to date before
+        # it is written.
+        if self._activeFiles:
+            player = self._player.get()
+            if player:
+                self._activeFiles[0].speed = player.speed
+                self._activeFiles[0].currentTime = player.currentTime
+                self._activeFiles[0].inOutRange = player.inOutRange
+        playlist.aIndex = self._filesModel.aIndex
+        playlist.bIndexes = list(self._filesModel.bIndexes)
+        playlist.compareOptions = self._filesModel.compareOptions
+        playlist.compareTime = self._filesModel.compareTime
+        fileName = path.getFileName(True)
+        if path.getExt().lower() != ".otio":
+            fileName += ".otio"
+        djv.models.playlistSave(
+            fileName,
+            playlist,
+            self._settingsModel.imageSeq.io.defaultSpeed)
+
+    def savePlaylistDialog(self):
+        """
+        Open the dialog for choosing where to save a playlist.
+        """
+        selfWeak = weakref.ref(self)
+        options = ftk.FileBrowserOpenOptions()
+        options.mode = ftk.FileBrowserMode.Save
+        options.extensions = [".otio"]
+        options.extensionsLabel = "Playlists"
+        self.context.getSystemByName("ftk::FileBrowserSystem").open(
+            self._window,
+            lambda path: selfWeak() and selfWeak().savePlaylist(path),
+            options)
+
     def reload(self):
         """
         Reload the current file: the active files' timelines are dropped

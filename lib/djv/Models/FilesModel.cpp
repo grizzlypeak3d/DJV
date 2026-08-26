@@ -160,6 +160,25 @@ namespace djv
             p.layers->setIfChanged(_getLayers());
         }
 
+        void FilesModel::add(const std::vector<std::shared_ptr<FilesModelItem> >& items)
+        {
+            FTK_P();
+            if (items.empty())
+            {
+                return;
+            }
+
+            auto files = p.files->get();
+            files.insert(files.end(), items.begin(), items.end());
+            p.files->setIfChanged(files);
+
+            p.a->setIfChanged(p.files->getItem(p.files->getSize() - 1));
+            p.aIndex->setIfChanged(_getIndex(p.a->get()));
+
+            p.active->setIfChanged(_getActive());
+            p.layers->setIfChanged(_getLayers());
+        }
+
         void FilesModel::close()
         {
             FTK_P();
