@@ -275,8 +275,13 @@ namespace djv
 
             DJV_APP_API virtual void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);
 
+            //! Add to the live model state that Debug/State writes. The base
+            //! class puts in the models it owns; an application with models
+            //! of its own adds them here.
+            DJV_APP_API virtual void _debugState(nlohmann::json&);
+
         private:
-            void _debugState(const nlohmann::json&);
+            void _debugStateCommand(const nlohmann::json&);
             void _saveSettings();
             void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);

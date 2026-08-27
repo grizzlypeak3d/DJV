@@ -2072,10 +2072,9 @@ namespace djv
             _saveSettings();
         }
 
-        void App::_debugState(const nlohmann::json& args)
+        void App::_debugState(nlohmann::json& out)
         {
             FTK_P();
-            nlohmann::json out;
 
             nlohmann::json viewport;
             to_json(viewport["displayOptions"], p.viewportModel->getDisplayOptions());
@@ -2121,6 +2120,12 @@ namespace djv
                 j["audioOffset"] = player->getAudioOffset();
                 out["player"] = j;
             }
+        }
+
+        void App::_debugStateCommand(const nlohmann::json& args)
+        {
+            nlohmann::json out;
+            _debugState(out);
 
             const std::string file =
                 args.is_object() && args.contains("file") ?
@@ -2276,7 +2281,7 @@ namespace djv
                 "output; e.g., { \"file\": \"state.json\" }.",
                 [this](const nlohmann::json& args)
                 {
-                    _debugState(args);
+                    _debugStateCommand(args);
                 });
         }
 
