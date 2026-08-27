@@ -741,7 +741,7 @@ namespace djv
 #if defined(FTK_API_GL_4_1)
                     offscreenBufferOptions.depth = ftk::gl::OffscreenDepth::_24;
                     offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
-#elif defined(FTK_API_GLES_2)
+#elif defined(FTK_API_GLES_3)
                     offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
 #endif // FTK_API_GL_4_1
                     p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
