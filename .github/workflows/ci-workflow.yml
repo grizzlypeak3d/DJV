@@ -86,7 +86,7 @@ jobs:
         xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
 
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
-  linux-gles2-build:
+  linux-gles3-build:
     runs-on: ubuntu-latest
 
     env:
@@ -113,7 +113,7 @@ jobs:
 
     - name: Build
       run: |
-        sh djv/etc/Linux/sbuild.sh djv Debug ci-linux-gles2
+        sh djv/etc/Linux/sbuild.sh djv Debug ci-linux-gles3
 
     - name: Run tests
       run: |
