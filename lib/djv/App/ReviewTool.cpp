@@ -284,6 +284,10 @@ namespace djv
             auto scrollWidget = ftk::ScrollWidget::create(context);
             scrollWidget->setBorder(false);
             scrollWidget->setWidget(layout);
+            // The notes have no natural end, so take what room is left
+            // rather than a band of its own while other tools sit at the
+            // height they need.
+            setVStretch(ftk::Stretch::Expanding);
             _setWidget(scrollWidget);
 
             auto appWeak = std::weak_ptr<App>(app);
