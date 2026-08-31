@@ -129,7 +129,8 @@ namespace djv
         //! deliberately absent: it belongs to the reader, not the session.
         struct DJV_MODELS_API_TYPE ReviewUI
         {
-            std::string activeTool;
+            //! The open tool panels, in their listed order.
+            std::vector<std::string> openTools;
         };
 
         //! A single freehand stroke of an annotation.

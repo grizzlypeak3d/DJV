@@ -1155,13 +1155,10 @@ namespace djv
             p.viewportModel->setHUDOptions(review.color.hud);
 
             // Interface.
-            // The tools are a set of open panels now rather than one
-            // active tool; the review's single tool becomes the one open
-            // panel.
             p.toolsModel->closeTools();
-            if (!review.ui.activeTool.empty())
+            for (const auto& tool : review.ui.openTools)
             {
-                p.toolsModel->setToolOpen(review.ui.activeTool, true);
+                p.toolsModel->setToolOpen(tool, true);
             }
 
             p.notesModel->setNotes(review.notes);
@@ -1370,10 +1367,7 @@ namespace djv
             review.color.aspectRatio = p.viewportModel->getAspectRatioOptions();
             review.color.hud = p.viewportModel->getHUDOptions();
 
-            // The first open panel stands in for the active tool.
-            const auto& openTools = p.toolsModel->getOpenTools();
-            review.ui.activeTool =
-                openTools.empty() ? std::string() : openTools.front();
+            review.ui.openTools = p.toolsModel->getOpenTools();
 
             review.notes = p.notesModel->getNotes();
             review.ranges = p.rangesModel->getRanges();
