@@ -1,31 +1,21 @@
 ## 3.6.0
 
 Changes:
-* Add playlists: "File/Save Playlist" saves the open file list as an OTIO
-  file, with each file's in/out points, position, speed, and layer, and the
-  A/B comparison; "File/Open Playlist" opens one back into the file list.
-  Any OTIO timeline can be opened as a playlist.
-* The file list can be reordered by dragging a file's thumbnail in the
-  Files tool. The list scrolls when the drag reaches the edge of the panel.
-* The Python application keeps pace with the C++ application: playlists and
-  reordering the file list work there as well, and the bindings pass every
-  widget event through to Python, so a drag and drop source or target can
-  be written in Python.
-* The file browser shows keyboard focus on the file list, pressing Return
-  in the save dialog's file name accepts it, and saving suggests a file
-  name -- so a file can be opened or saved without leaving the keyboard.
+* Add review sessions, contributed by MattRM2: the whole session, with
+  drawn annotations, notes, and frame ranges, saves as a ".djvr" file.
+* Add playlists: the file list saves and opens as an OTIO file.
+* The file list can be reordered by dragging.
+* Add Python bindings, available when building from source with
+  DJV_PYTHON=ON.
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
 * Add support for reading OpenEXR files with HTJ2K compression.
 * Automatic OCIO input color spaces.
 * Movie and image sequence exports carry color information.
-* Add thumbnails to the file browser. The size is set in the browser's
-  "Settings" section, or turned off there.
-* The file browser can be opened in a window of its own, and pinned to stay
-  open while a run of files is chosen.
+* Add thumbnails to the file browser.
+* The file browser can be opened in a window of its own.
+* The file browser can be driven from the keyboard.
 * The FFmpegCmd plugin is merged into the FFmpeg plugin as a fallback.
 * AV1 support is now working on Windows.
-* Add Python bindings, available when building from source with
-  DJV_PYTHON=ON.
 * Library updates:
     - OpenColorIO 2.5.2
     - OpenEXR 3.4.15
