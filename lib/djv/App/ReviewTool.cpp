@@ -263,8 +263,10 @@ namespace djv
             p.noteEdit = ftk::TextEdit::create(context, notesWidget);
             p.noteEdit->setTooltip("Write a note about the current frame.");
 
-            p.publishButton = ftk::PushButton::create(context, "Publish Note", notesWidget);
-            p.publishButton->setTooltip("Attach the note to the current frame.");
+            p.publishButton = ftk::PushButton::create(context, "Add", notesWidget);
+            p.publishButton->setTooltip(
+                "Attach the note to the current frame. Return with the\n"
+                "command key also adds, from inside the editor.");
 
             p.noteListLayout = ftk::VerticalLayout::create(context, notesWidget);
             p.noteListLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -707,6 +709,25 @@ namespace djv
                         widget->_p->rangeNameDialog.reset();
                     }
                 });
+        }
+
+        void ReviewTool::keyPressEvent(ftk::KeyEvent& event)
+        {
+            IToolWidget::keyPressEvent(event);
+            // Return with the command modifier, bubbled up from the note
+            // editor: the same as the add button.
+            if (!event.accept &&
+                ftk::Key::Return == event.key &&
+                static_cast<int>(ftk::commandKeyModifier) == event.modifiers)
+            {
+                event.accept = true;
+                _publish();
+            }
+        }
+
+        void ReviewTool::keyReleaseEvent(ftk::KeyEvent& event)
+        {
+            IToolWidget::keyReleaseEvent(event);
         }
 
         void ReviewTool::_publish()
