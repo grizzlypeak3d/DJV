@@ -20,6 +20,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/TextEdit.h>
 #include <ftk/UI/ToolButton.h>
@@ -254,6 +255,9 @@ namespace djv
 
             p.clearFrameButton = ftk::PushButton::create(context, "Clear Frame", drawingWidget);
             p.clearFrameButton->setTooltip("Remove every stroke on this frame.");
+            ftk::setScreenshotTag(p.penButton, "Review.Pen");
+            ftk::setScreenshotTag(p.eraserButton, "Review.Eraser");
+            ftk::setScreenshotTag(p.clearFrameButton, "Review.ClearFrame");
 
             // Notes.
             auto notesWidget = ftk::VerticalLayout::create(context);
@@ -270,6 +274,8 @@ namespace djv
 
             p.noteListLayout = ftk::VerticalLayout::create(context, notesWidget);
             p.noteListLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            ftk::setScreenshotTag(p.noteEdit, "Review.NoteEdit");
+            ftk::setScreenshotTag(p.publishButton, "Review.AddNote");
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
