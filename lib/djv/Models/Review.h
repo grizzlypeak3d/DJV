@@ -146,8 +146,8 @@ namespace djv
             float                 width = 4.F;
             std::vector<ftk::V2F> points;
 
-            bool operator == (const ReviewStroke&) const;
-            bool operator != (const ReviewStroke&) const;
+            DJV_MODELS_API bool operator == (const ReviewStroke&) const;
+            DJV_MODELS_API bool operator != (const ReviewStroke&) const;
         };
 
         //! The drawing on one frame of one source.
@@ -169,8 +169,8 @@ namespace djv
 
             std::vector<ReviewStroke> strokes;
 
-            bool operator == (const ReviewAnnotation&) const;
-            bool operator != (const ReviewAnnotation&) const;
+            DJV_MODELS_API bool operator == (const ReviewAnnotation&) const;
+            DJV_MODELS_API bool operator != (const ReviewAnnotation&) const;
         };
 
         //! A timestamped note attached to a frame of the review.
@@ -192,8 +192,8 @@ namespace djv
 
             std::string text;
 
-            bool operator == (const ReviewNote&) const;
-            bool operator != (const ReviewNote&) const;
+            DJV_MODELS_API bool operator == (const ReviewNote&) const;
+            DJV_MODELS_API bool operator != (const ReviewNote&) const;
         };
 
         //! A named range of frames in a review.
@@ -209,8 +209,8 @@ namespace djv
 
             std::optional<OTIO_NS::TimeRange> range;
 
-            bool operator == (const ReviewRange&) const;
-            bool operator != (const ReviewRange&) const;
+            DJV_MODELS_API bool operator == (const ReviewRange&) const;
+            DJV_MODELS_API bool operator != (const ReviewRange&) const;
         };
 
         //! A complete review: files, comparison, view, color and interface state.
