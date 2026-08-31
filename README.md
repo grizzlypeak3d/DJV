@@ -88,6 +88,12 @@ Enable newer compiler:
 scl enable gcc-toolset-13 bash
 ```
 
+NVIDIA hardware decoding loads the driver's CUDA library at run time. On
+RHEL family systems that is a separate package:
+```
+sudo dnf install nvidia-driver-cuda-libs
+```
+
 #### Build
 
 Clone the repository:
