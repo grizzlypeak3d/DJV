@@ -54,6 +54,7 @@ namespace djv
             void _aIndexUpdate(int);
             void _layersUpdate(const std::vector<int>&);
             void _recentUpdate(const std::vector<ftk::Path>&);
+            void _recentPlaylistsUpdate(const std::vector<ftk::Path>&);
             void _recentReviewsUpdate(const std::vector<ftk::Path>&);
             void _setPlayer(const std::shared_ptr<tl::Player>&);
             void _mediaReferencesUpdate();

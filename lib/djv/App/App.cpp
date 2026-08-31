@@ -190,6 +190,7 @@ namespace djv
             std::vector<std::shared_ptr<models::FilesModelItem> > activeFiles;
             std::shared_ptr<models::RecentFilesModel> recentFilesModel;
             std::shared_ptr<models::RecentFilesModel> recentReviewsModel;
+            std::shared_ptr<models::RecentFilesModel> recentPlaylistsModel;
             std::filesystem::path reviewPath;
             nlohmann::json reviewRaw;
             //! What the open review could not be read from, carried alongside
@@ -656,6 +657,7 @@ namespace djv
                 const int offset = static_cast<int>(
                     p.filesModel->getFiles().size());
                 p.filesModel->add(playlist.items);
+                p.recentPlaylistsModel->addRecent(path);
                 if (playlist.aIndex >= 0)
                 {
                     p.filesModel->setA(offset + playlist.aIndex);
@@ -745,6 +747,7 @@ namespace djv
             {
                 _context->log("djv::app::App", e.what(), ftk::LogType::Error);
             }
+            p.recentPlaylistsModel->addRecent(path);
         }
 
         void App::savePlaylistDialog()
@@ -1252,6 +1255,14 @@ namespace djv
             options.title = title;
             options.path = startPath;
             options.mode = mode;
+            if (ftk::FileBrowserMode::Save == mode)
+            {
+                // The review's own name where there is one, the way the
+                // playlists suggest "playlist.otio".
+                options.fileName = p.reviewPath.empty() ?
+                    std::string("review") + reviewExtension :
+                    p.reviewPath.filename().u8string();
+            }
             options.extensions = { reviewExtension };
             options.extensionsLabel = "Review Session";
             fileBrowserSystem->open(
@@ -1469,6 +1480,11 @@ namespace djv
         const std::shared_ptr<models::RecentFilesModel>& App::getRecentReviewsModel() const
         {
             return _p->recentReviewsModel;
+        }
+
+        const std::shared_ptr<models::RecentFilesModel>& App::getRecentPlaylistsModel() const
+        {
+            return _p->recentPlaylistsModel;
         }
 
         void App::confirmClose(const std::function<void()>& onProceed)
@@ -2189,9 +2205,10 @@ namespace djv
             p.filesModel = models::FilesModel::create(getSettings());
 
             p.recentFilesModel = models::RecentFilesModel::create(_context, getSettings());
-            // Reviews get their own recent list, so opening a session does not
-            // push its media into the recent files.
+            // Reviews and playlists get their own recent lists, so opening
+            // one does not push its media into the recent files.
             p.recentReviewsModel = models::RecentFilesModel::create(_context, getSettings(), "Review");
+            p.recentPlaylistsModel = models::RecentFilesModel::create(_context, getSettings(), "Playlist");
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
             // From what the settings restored rather than from a fresh set:

@@ -36,6 +36,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
             std::shared_ptr<ftk::ListObserver<ftk::Path> > recentObserver;
             std::shared_ptr<ftk::ListObserver<ftk::Path> > recentReviewsObserver;
+            std::shared_ptr<ftk::ListObserver<ftk::Path> > recentPlaylistsObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
         };
@@ -56,22 +57,25 @@ namespace djv
             p.recentFilesModel = app->getRecentFilesModel();
 
             auto actions = fileActions->getActions();
+            // Getting things in and out first -- files, playlists and
+            // reviews, three groups of the same shape -- then what acts
+            // on the current file, then leaving.
             addAction(actions["Open"]);
             addAction(actions["OpenAudio"]);
             p.menus["Recent"] = addSubMenu("Recent");
-            addDivider();
-            addAction(actions["OpenReview"]);
-            addAction(actions["SaveReview"]);
-            addAction(actions["SaveReviewAs"]);
-            addAction(actions["CloseReview"]);
-            p.menus["RecentReviews"] = addSubMenu("Recent Reviews");
-            addDivider();
             addAction(actions["Close"]);
             addAction(actions["CloseAll"]);
             addAction(actions["Reload"]);
             addDivider();
             addAction(actions["OpenPlaylist"]);
             addAction(actions["SavePlaylist"]);
+            p.menus["RecentPlaylists"] = addSubMenu("Recent Playlists");
+            addDivider();
+            addAction(actions["OpenReview"]);
+            addAction(actions["SaveReview"]);
+            addAction(actions["SaveReviewAs"]);
+            addAction(actions["CloseReview"]);
+            p.menus["RecentReviews"] = addSubMenu("Recent Reviews");
             addDivider();
             p.menus["Current"] = addSubMenu("Current");
             addAction(actions["Next"]);
@@ -133,6 +137,13 @@ namespace djv
                 [this](const std::vector<ftk::Path>& value)
                 {
                     _recentReviewsUpdate(value);
+                });
+
+            p.recentPlaylistsObserver = ftk::ListObserver<ftk::Path>::create(
+                app->getRecentPlaylistsModel()->observeRecent(),
+                [this](const std::vector<ftk::Path>& value)
+                {
+                    _recentPlaylistsUpdate(value);
                 });
         }
 
@@ -303,6 +314,31 @@ namespace djv
                 p.menus["MediaReferences"]->setChecked(
                     p.mediaReferencesActions[i],
                     p.mediaReferenceKeys[i] == value);
+            }
+        }
+
+        void FileMenu::_recentPlaylistsUpdate(const std::vector<ftk::Path>& value)
+        {
+            FTK_P();
+            p.menus["RecentPlaylists"]->clear();
+            for (auto i = value.rbegin(); i != value.rend(); ++i)
+            {
+                const auto path = *i;
+                auto weak = std::weak_ptr<FileMenu>(std::dynamic_pointer_cast<FileMenu>(shared_from_this()));
+                auto action = ftk::Action::create(
+                    path.get(),
+                    [weak, path]
+                    {
+                        if (auto widget = weak.lock())
+                        {
+                            if (auto app = widget->_p->app.lock())
+                            {
+                                app->openPlaylist(path);
+                            }
+                            widget->close();
+                        }
+                    });
+                p.menus["RecentPlaylists"]->addAction(action);
             }
         }
 

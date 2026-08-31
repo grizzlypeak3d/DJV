@@ -220,6 +220,9 @@ namespace djv
             //! Get the recent reviews model.
             const std::shared_ptr<models::RecentFilesModel>& getRecentReviewsModel() const;
 
+            //! Get the recent playlists model.
+            DJV_APP_API const std::shared_ptr<models::RecentFilesModel>& getRecentPlaylistsModel() const;
+
             //! If the review has unsaved changes, prompt the user to save,
             //! discard, or cancel; otherwise proceed immediately. The proceed
             //! callback runs when it is safe to close.
