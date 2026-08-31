@@ -316,13 +316,11 @@ namespace djv
         {
             json = nlohmann::json::object();
             json["activeTool"] = in.activeTool;
-            json["window"] = in.window;
         }
 
         void from_json(const nlohmann::json& json, ReviewUI& out)
         {
             if (json.contains("activeTool")) json.at("activeTool").get_to(out.activeTool);
-            if (json.contains("window")) json.at("window").get_to(out.window);
         }
 
         bool ReviewStroke::operator == (const ReviewStroke& other) const

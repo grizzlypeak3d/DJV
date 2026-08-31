@@ -125,11 +125,11 @@ namespace djv
             HUDOptions            hud;
         };
 
-        //! Interface state for a review.
+        //! Interface state for a review. The window layout is
+        //! deliberately absent: it belongs to the reader, not the session.
         struct DJV_MODELS_API_TYPE ReviewUI
         {
-            std::string    activeTool;
-            WindowSettings window;
+            std::string activeTool;
         };
 
         //! A single freehand stroke of an annotation.

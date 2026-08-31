@@ -48,7 +48,20 @@
 <p><strong>Do not overwrite what you could not read.</strong> A section that failed to load is written back exactly as it was found, rather than replaced by the defaults the application fell back to.</p>
 <p><strong>Skip, but keep, what you cannot place.</strong> An annotation or a stroke in a coordinate space the reader does not know is not drawn — and not deleted either. It is written back as it was found, after the items that were understood.</p>
 <h2 id="the-document">The document</h2>
-<p>| Key | Contents | |---|---| | <code>djvReview</code> | Format version, integer. | | <code>app</code> | The application and version that wrote the document, informational. | | <code>created</code> | When it was written, ISO 8601 UTC. | | <code>files</code> | The open sources, in tab order. | | <code>compare</code> | The A/B setup: <code>aId</code>, <code>bIds</code>, comparison options and time mode. | | <code>view</code> | Viewport framing, pan and zoom. | | <code>color</code> | OCIO, LUT, display, background, foreground, aspect ratio and HUD. | | <code>ui</code> | The active tool panel and the window layout. | | <code>annotations</code> | Drawings, by source and frame. | | <code>notes</code> | Timestamped comments. | | <code>ranges</code> | Named frame ranges. |</p>
+<table>
+<tr><th>Key</th><th>Contents</th></tr>
+<tr><td><code>djvReview</code></td><td>Format version, integer.</td></tr>
+<tr><td><code>app</code></td><td>The application and version that wrote the document, informational.</td></tr>
+<tr><td><code>created</code></td><td>When it was written, ISO 8601 UTC.</td></tr>
+<tr><td><code>files</code></td><td>The open sources, in tab order.</td></tr>
+<tr><td><code>compare</code></td><td>The A/B setup: <code>aId</code>, <code>bIds</code>, comparison options and time mode.</td></tr>
+<tr><td><code>view</code></td><td>Viewport framing, pan and zoom.</td></tr>
+<tr><td><code>color</code></td><td>OCIO, LUT, display, background, foreground, aspect ratio and HUD.</td></tr>
+<tr><td><code>ui</code></td><td>The active tool panel.</td></tr>
+<tr><td><code>annotations</code></td><td>Drawings, by source and frame.</td></tr>
+<tr><td><code>notes</code></td><td>Timestamped comments.</td></tr>
+<tr><td><code>ranges</code></td><td>Named frame ranges.</td></tr>
+</table>
 <p><code>compare</code>, <code>view</code>, <code>color</code> and <code>ui</code> delegate to serializers shared with the application settings, and those require every key they know. They are therefore the sections most likely to fail against a document written by a different version — which is why the rules above exist.</p>
 <h3 id="files">Files</h3>
 <pre><code>{

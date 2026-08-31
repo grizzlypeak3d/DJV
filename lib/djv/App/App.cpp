@@ -1163,7 +1163,6 @@ namespace djv
             {
                 p.toolsModel->setToolOpen(review.ui.activeTool, true);
             }
-            p.settingsModel->setWindow(review.ui.window);
 
             p.notesModel->setNotes(review.notes);
             p.rangesModel->setRanges(review.ranges);
@@ -1375,7 +1374,6 @@ namespace djv
             const auto& openTools = p.toolsModel->getOpenTools();
             review.ui.activeTool =
                 openTools.empty() ? std::string() : openTools.front();
-            review.ui.window = p.settingsModel->getWindow();
 
             review.notes = p.notesModel->getNotes();
             review.ranges = p.rangesModel->getRanges();
