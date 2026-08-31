@@ -50,20 +50,20 @@ namespace djv
         void AnnotationsModelTest::_strokes()
         {
             auto model = models::AnnotationsModel::create();
-            FTK_ASSERT(model->getAnnotations().empty());
+            FTK_CHECK(model->getAnnotations().empty());
 
             // Strokes on the same source and frame join one annotation.
             model->addStroke("srcA", frame(100), makeStroke(0.F, 0.F, 10.F, 10.F));
             model->addStroke("srcA", frame(100), makeStroke(20.F, 20.F, 30.F, 30.F));
-            FTK_ASSERT(1 == model->getAnnotations().size());
-            FTK_ASSERT(2 == model->getStrokes("srcA", frame(100)).size());
+            FTK_CHECK(1 == model->getAnnotations().size());
+            FTK_CHECK(2 == model->getStrokes("srcA", frame(100)).size());
 
             // A different frame, or a different source, is a separate annotation:
             // a drawing is visible on its own frame only.
             model->addStroke("srcA", frame(200), makeStroke(0.F, 0.F, 5.F, 5.F));
             model->addStroke("srcB", frame(100), makeStroke(0.F, 0.F, 5.F, 5.F));
-            FTK_ASSERT(3 == model->getAnnotations().size());
-            FTK_ASSERT(model->getStrokes("srcA", frame(999)).empty());
+            FTK_CHECK(3 == model->getAnnotations().size());
+            FTK_CHECK(model->getStrokes("srcA", frame(999)).empty());
 
             const bool ok =
                 3 == model->getAnnotations().size() &&
@@ -96,9 +96,9 @@ namespace djv
             model->eraseStrokes("srcA", frame(100), ftk::V2F(5.F, 100.F), 2.F);
             const bool dropped = model->getAnnotations().empty();
 
-            FTK_ASSERT(erasedOne);
-            FTK_ASSERT(untouched);
-            FTK_ASSERT(dropped);
+            FTK_CHECK(erasedOne);
+            FTK_CHECK(untouched);
+            FTK_CHECK(dropped);
             const bool ok = erasedOne && untouched && dropped;
             _print(ftk::Format("  eraser removes touched strokes only -> {0}").arg(ok ? "ok" : "FAILED"));
             if (!ok)
@@ -116,11 +116,11 @@ namespace djv
                 model->observeHasUndo(),
                 [&hasUndo](bool value) { hasUndo = value; });
 
-            FTK_ASSERT(!hasUndo);
+            FTK_CHECK(!hasUndo);
             model->addStroke("srcA", frame(100), makeStroke(0.F, 0.F, 10.F, 10.F));
             model->addStroke("srcA", frame(100), makeStroke(20.F, 20.F, 30.F, 30.F));
-            FTK_ASSERT(hasUndo);
-            FTK_ASSERT(2 == model->getStrokes("srcA", frame(100)).size());
+            FTK_CHECK(hasUndo);
+            FTK_CHECK(2 == model->getStrokes("srcA", frame(100)).size());
 
             // Undo is multi-level: each stroke is its own step.
             model->undo();
@@ -132,9 +132,9 @@ namespace djv
             model->redo();
             const bool redone = 1 == model->getStrokes("srcA", frame(100)).size();
 
-            FTK_ASSERT(oneLeft);
-            FTK_ASSERT(noneLeft);
-            FTK_ASSERT(redone);
+            FTK_CHECK(oneLeft);
+            FTK_CHECK(noneLeft);
+            FTK_CHECK(redone);
             const bool ok = oneLeft && noneLeft && redone;
             _print(ftk::Format("  multi-level undo and redo -> {0}").arg(ok ? "ok" : "FAILED"));
             if (!ok)
@@ -155,7 +155,7 @@ namespace djv
             const nlohmann::json json = annotation;
             const auto out = json.get<models::ReviewAnnotation>();
 
-            FTK_ASSERT(annotation == out);
+            FTK_CHECK(annotation == out);
             const bool ok = annotation == out;
             _print(ftk::Format("  annotation JSON round trip -> {0}").arg(ok ? "ok" : "FAILED"));
             if (!ok)

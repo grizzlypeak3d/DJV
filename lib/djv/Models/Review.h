@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/ViewportModel.h>
 
@@ -39,7 +41,7 @@ namespace djv
         //! False means the document was written by a newer DJV. Reading it
         //! anyway would drop what this build does not understand, and the next
         //! save would write that loss back over the user's file.
-        bool reviewVersionSupported(int version);
+        DJV_MODELS_API bool reviewVersionSupported(int version);
 
         //! \name Optional time comparison
         //! Compare strictly: either both unset, or both set to the same value
@@ -50,10 +52,10 @@ namespace djv
         //! and two annotations on different frames would compare equal.
         ///@{
 
-        bool sameTime(
+        DJV_MODELS_API bool sameTime(
             const std::optional<OTIO_NS::RationalTime>&,
             const std::optional<OTIO_NS::RationalTime>&);
-        bool sameRange(
+        DJV_MODELS_API bool sameRange(
             const std::optional<OTIO_NS::TimeRange>&,
             const std::optional<OTIO_NS::TimeRange>&);
 
@@ -64,10 +66,10 @@ namespace djv
         //! Assigned when a file is opened so that annotations and notes (phase 3)
         //! can reference a file by identity rather than by list index, which is
         //! not stable across close/reorder.
-        std::string generateId();
+        DJV_MODELS_API std::string generateId();
 
         //! The current UTC time, ISO 8601 (e.g. "2026-07-26T18:05:00Z").
-        std::string timestamp();
+        DJV_MODELS_API std::string timestamp();
 
         //! The current user, for attributing notes and annotations.
         //!
@@ -75,10 +77,10 @@ namespace djv
         //! and empty when neither is set. DJV has no accounts and reviews are
         //! passed from hand to hand, so this is a label rather than an identity:
         //! it says who wrote a note when a session comes back from someone else.
-        std::string reviewAuthor();
+        DJV_MODELS_API std::string reviewAuthor();
 
         //! A single file entry in a review.
-        struct ReviewFile
+        struct DJV_MODELS_API_TYPE ReviewFile
         {
             std::string id;
             std::string path;          //!< Preferred: relative to the .djvr.
@@ -95,7 +97,7 @@ namespace djv
         };
 
         //! Comparison setup for a review.
-        struct ReviewCompare
+        struct DJV_MODELS_API_TYPE ReviewCompare
         {
             std::string              aId;   //!< The "A" file, by ReviewFile::id.
             std::vector<std::string> bIds;  //!< The "B" files, by ReviewFile::id.
@@ -104,7 +106,7 @@ namespace djv
         };
 
         //! Viewport view state for a review.
-        struct ReviewView
+        struct DJV_MODELS_API_TYPE ReviewView
         {
             bool     frameView = true;  //!< If true, pos/zoom are ignored on load.
             ftk::V2I pos;
@@ -112,7 +114,7 @@ namespace djv
         };
 
         //! Color and image display state for a review.
-        struct ReviewColor
+        struct DJV_MODELS_API_TYPE ReviewColor
         {
             tl::OCIOOptions       ocio;
             tl::LUTOptions        lut;
@@ -124,7 +126,7 @@ namespace djv
         };
 
         //! Interface state for a review.
-        struct ReviewUI
+        struct DJV_MODELS_API_TYPE ReviewUI
         {
             std::string    activeTool;
             WindowSettings window;
@@ -137,7 +139,7 @@ namespace djv
         //! zoom, the pan or the comparison mode. Both are written with the space
         //! they are expressed in, and a stroke in a space this version does not
         //! know is skipped rather than misplaced. See docs/review-format.md.
-        struct ReviewStroke
+        struct DJV_MODELS_API_TYPE ReviewStroke
         {
             ftk::Color4F          color = ftk::Color4F(1.F, .365F, .02F, 1.F);
             float                 width = 4.F;
@@ -148,7 +150,7 @@ namespace djv
         };
 
         //! The drawing on one frame of one source.
-        struct ReviewAnnotation
+        struct DJV_MODELS_API_TYPE ReviewAnnotation
         {
             std::string id;
 
@@ -174,7 +176,7 @@ namespace djv
         //!
         //! Notes belong to the review rather than to a source: the frame is
         //! enough to locate them. See docs/review-format.md.
-        struct ReviewNote
+        struct DJV_MODELS_API_TYPE ReviewNote
         {
             std::string id;
 
@@ -197,7 +199,7 @@ namespace djv
         //!
         //! Selecting one sets the timeline in/out points. Like notes, a range
         //! belongs to the review rather than to a source: the frames locate it.
-        struct ReviewRange
+        struct DJV_MODELS_API_TYPE ReviewRange
         {
             std::string id;
 
@@ -213,7 +215,7 @@ namespace djv
         //! A complete review: files, comparison, view, color and interface state.
         //!
         //! Serialized to a versioned JSON document with the ".djvr" extension.
-        struct Review
+        struct DJV_MODELS_API_TYPE Review
         {
             int         version = reviewVersion;
             std::string app;
@@ -258,27 +260,27 @@ namespace djv
         //! \name Serialize
         ///@{
 
-        void to_json(nlohmann::json&, const ReviewFile&);
-        void to_json(nlohmann::json&, const ReviewCompare&);
-        void to_json(nlohmann::json&, const ReviewView&);
-        void to_json(nlohmann::json&, const ReviewColor&);
-        void to_json(nlohmann::json&, const ReviewUI&);
-        void to_json(nlohmann::json&, const ReviewStroke&);
-        void to_json(nlohmann::json&, const ReviewAnnotation&);
-        void to_json(nlohmann::json&, const ReviewNote&);
-        void to_json(nlohmann::json&, const ReviewRange&);
-        void to_json(nlohmann::json&, const Review&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewFile&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewCompare&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewView&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewColor&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewUI&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewStroke&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewAnnotation&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewNote&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewRange&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const Review&);
 
-        void from_json(const nlohmann::json&, ReviewFile&);
-        void from_json(const nlohmann::json&, ReviewCompare&);
-        void from_json(const nlohmann::json&, ReviewView&);
-        void from_json(const nlohmann::json&, ReviewColor&);
-        void from_json(const nlohmann::json&, ReviewUI&);
-        void from_json(const nlohmann::json&, ReviewStroke&);
-        void from_json(const nlohmann::json&, ReviewAnnotation&);
-        void from_json(const nlohmann::json&, ReviewNote&);
-        void from_json(const nlohmann::json&, ReviewRange&);
-        void from_json(const nlohmann::json&, Review&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewFile&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewCompare&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewView&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewColor&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewUI&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewStroke&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewAnnotation&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewNote&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewRange&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, Review&);
 
         ///@}
     }

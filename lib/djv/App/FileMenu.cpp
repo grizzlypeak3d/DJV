@@ -128,9 +128,9 @@ namespace djv
                     _recentUpdate(value);
                 });
 
-            p.recentReviewsObserver = ftk::ListObserver<std::filesystem::path>::create(
+            p.recentReviewsObserver = ftk::ListObserver<ftk::Path>::create(
                 app->getRecentReviewsModel()->observeRecent(),
-                [this](const std::vector<std::filesystem::path>& value)
+                [this](const std::vector<ftk::Path>& value)
                 {
                     _recentReviewsUpdate(value);
                 });
@@ -322,7 +322,7 @@ namespace djv
                         {
                             if (auto app = widget->_p->app.lock())
                             {
-                                app->openReview(path);
+                                app->openReview(std::filesystem::u8path(path.get()));
                             }
                             widget->close();
                         }

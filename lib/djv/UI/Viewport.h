@@ -16,7 +16,9 @@ namespace djv
 {
     namespace models
     {
+        class AnnotationsModel;
         class ColorModel;
+        class DrawModel;
         class FilesModel;
         class SettingsModel;
         class TimeUnitsModel;
@@ -38,6 +40,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<models::AnnotationsModel>&,
+                const std::shared_ptr<models::DrawModel>&,
                 const std::shared_ptr<ftk::SysLogModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
@@ -53,6 +57,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
+                const std::shared_ptr<models::AnnotationsModel>&,
+                const std::shared_ptr<models::DrawModel>&,
                 const std::shared_ptr<ftk::SysLogModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 

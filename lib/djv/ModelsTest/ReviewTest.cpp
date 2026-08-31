@@ -33,13 +33,13 @@ namespace djv
 
         void ReviewTest::_version()
         {
-            FTK_ASSERT(models::reviewVersionSupported(models::reviewVersion));
-            FTK_ASSERT(models::reviewVersionSupported(models::reviewVersion - 1));
+            FTK_CHECK(models::reviewVersionSupported(models::reviewVersion));
+            FTK_CHECK(models::reviewVersionSupported(models::reviewVersion - 1));
 
             // A document from a newer DJV is refused rather than read in part:
             // a best-effort read followed by a save would write the loss back
             // over the author's own file.
-            FTK_ASSERT(!models::reviewVersionSupported(models::reviewVersion + 1));
+            FTK_CHECK(!models::reviewVersionSupported(models::reviewVersion + 1));
         }
 
         void ReviewTest::_roundTrip()
@@ -79,19 +79,19 @@ namespace djv
             const nlohmann::json json = review;
             const auto out = json.get<models::Review>();
 
-            FTK_ASSERT(out.unreadSections.empty());
-            FTK_ASSERT(1 == out.notes.size());
-            FTK_ASSERT(note == out.notes[0]);
-            FTK_ASSERT(1 == out.annotations.size());
-            FTK_ASSERT(annotation == out.annotations[0]);
-            FTK_ASSERT(1 == out.ranges.size());
-            FTK_ASSERT(range == out.ranges[0]);
+            FTK_CHECK(out.unreadSections.empty());
+            FTK_CHECK(1 == out.notes.size());
+            FTK_CHECK(note == out.notes[0]);
+            FTK_CHECK(1 == out.annotations.size());
+            FTK_CHECK(annotation == out.annotations[0]);
+            FTK_CHECK(1 == out.ranges.size());
+            FTK_CHECK(range == out.ranges[0]);
 
             // The author and the time are what make a review readable when it
             // comes back from someone else; they must survive the trip.
-            FTK_ASSERT("reviewer" == out.notes[0].author);
-            FTK_ASSERT("reviewer" == out.annotations[0].author);
-            FTK_ASSERT("2026-08-26T09:01:00Z" == out.annotations[0].created);
+            FTK_CHECK("reviewer" == out.notes[0].author);
+            FTK_CHECK("reviewer" == out.annotations[0].author);
+            FTK_CHECK("2026-08-26T09:01:00Z" == out.annotations[0].created);
         }
 
         void ReviewTest::_unreadableSection()
@@ -113,17 +113,17 @@ namespace djv
 
             const auto out = json.get<models::Review>();
 
-            FTK_ASSERT(1 == out.unreadSections.size());
-            FTK_ASSERT("color" == out.unreadSections[0]);
-            FTK_ASSERT(1 == out.notes.size());
-            FTK_ASSERT(note == out.notes[0]);
+            FTK_CHECK(1 == out.unreadSections.size());
+            FTK_CHECK("color" == out.unreadSections[0]);
+            FTK_CHECK(1 == out.notes.size());
+            FTK_CHECK(note == out.notes[0]);
 
             // Saving leaves the section exactly as it was found. Writing the
             // defaults the application fell back to would destroy state this
             // build merely failed to understand.
             const nlohmann::json saved = out;
-            FTK_ASSERT(saved.contains("color"));
-            FTK_ASSERT(brokenColor == saved.at("color"));
+            FTK_CHECK(saved.contains("color"));
+            FTK_CHECK(brokenColor == saved.at("color"));
         }
 
         void ReviewTest::_unknownSpace()
@@ -150,13 +150,13 @@ namespace djv
 
             const auto out = json.get<models::Review>();
 
-            FTK_ASSERT(1 == out.annotations.size());
-            FTK_ASSERT("a0" == out.annotations[0].id);
-            FTK_ASSERT(out.unreadSections.empty());
+            FTK_CHECK(1 == out.annotations.size());
+            FTK_CHECK("a0" == out.annotations[0].id);
+            FTK_CHECK(out.unreadSections.empty());
 
             const nlohmann::json saved = out;
-            FTK_ASSERT(2 == saved.at("annotations").size());
-            FTK_ASSERT(foreign == saved.at("annotations")[1]);
+            FTK_CHECK(2 == saved.at("annotations").size());
+            FTK_CHECK(foreign == saved.at("annotations")[1]);
 
             // The same holds for a stroke width in an unknown space: the
             // annotation carrying it is kept whole rather than half-read.
@@ -175,10 +175,10 @@ namespace djv
             json2["annotations"].push_back(foreignWidth);
 
             const auto out2 = json2.get<models::Review>();
-            FTK_ASSERT(out2.annotations.empty());
+            FTK_CHECK(out2.annotations.empty());
             const nlohmann::json saved2 = out2;
-            FTK_ASSERT(1 == saved2.at("annotations").size());
-            FTK_ASSERT(foreignWidth == saved2.at("annotations")[0]);
+            FTK_CHECK(1 == saved2.at("annotations").size());
+            FTK_CHECK(foreignWidth == saved2.at("annotations")[0]);
         }
 
         void ReviewTest::_unknownKeys()
@@ -194,8 +194,8 @@ namespace djv
             const auto out = json.get<models::Review>();
             const nlohmann::json saved = out;
 
-            FTK_ASSERT(saved.contains("playlists"));
-            FTK_ASSERT(future == saved.at("playlists"));
+            FTK_CHECK(saved.contains("playlists"));
+            FTK_CHECK(future == saved.at("playlists"));
         }
     }
 }

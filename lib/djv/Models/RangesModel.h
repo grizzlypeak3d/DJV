@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <djv/Models/Review.h>
 
 #include <ftk/Core/ObservableList.h>
@@ -16,12 +18,12 @@ namespace djv
         //! Ranges are session state: they live in the review file, not in the
         //! application settings. The list is kept sorted by start frame, so it
         //! reads like a shot breakdown rather than like a history.
-        class RangesModel : public std::enable_shared_from_this<RangesModel>
+        class DJV_MODELS_API_TYPE RangesModel : public std::enable_shared_from_this<RangesModel>
         {
             FTK_NON_COPYABLE(RangesModel);
 
         protected:
-            void _init();
+            DJV_MODELS_API void _init();
 
             RangesModel();
 
@@ -29,30 +31,30 @@ namespace djv
             ~RangesModel();
 
             //! Create a new model.
-            static std::shared_ptr<RangesModel> create();
+            DJV_MODELS_API static std::shared_ptr<RangesModel> create();
 
             //! Get the ranges.
-            const std::vector<ReviewRange>& getRanges() const;
+            DJV_MODELS_API const std::vector<ReviewRange>& getRanges() const;
 
             //! Observe the ranges.
-            std::shared_ptr<ftk::IObservableList<ReviewRange> > observeRanges() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<ReviewRange> > observeRanges() const;
 
             //! Replace all the ranges, e.g. when a review is opened.
-            void setRanges(const std::vector<ReviewRange>&);
+            DJV_MODELS_API void setRanges(const std::vector<ReviewRange>&);
 
             //! Add a range. The identifier is filled in here, so callers only
             //! provide the range and its name.
-            void add(const OTIO_NS::TimeRange&, const std::string& name);
+            DJV_MODELS_API void add(const OTIO_NS::TimeRange&, const std::string& name);
 
             //! Remove the range with the given identifier.
-            void remove(const std::string& id);
+            DJV_MODELS_API void remove(const std::string& id);
 
             //! Remove all the ranges.
-            void clear();
+            DJV_MODELS_API void clear();
 
         private:
             //! Sort by start frame, then set.
-            void _set(std::vector<ReviewRange>);
+            DJV_MODELS_API void _set(std::vector<ReviewRange>);
 
             FTK_PRIVATE();
         };

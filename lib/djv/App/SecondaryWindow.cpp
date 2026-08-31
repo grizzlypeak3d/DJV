@@ -48,6 +48,8 @@ namespace djv
                 app->getViewportModel(),
                 app->getTimeUnitsModel(),
                 app->getSettingsModel(),
+                app->getAnnotationsModel(),
+                app->getDrawModel(),
                 app->getSysLogModel());
             p.viewport->setParent(shared_from_this());
 

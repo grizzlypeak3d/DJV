@@ -3,8 +3,6 @@
 
 #include <djv/UI/Viewport.h>
 
-#include <djv/App/App.h>
-
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/DrawModel.h>
@@ -353,6 +351,10 @@ namespace djv
             //! The stroke being drawn, in the image pixels of its source.
             models::ReviewStroke stroke;
             int strokeSource = -1;
+
+            std::shared_ptr<models::FilesModel> filesModel;
+            std::shared_ptr<models::AnnotationsModel> annotationsModel;
+            std::shared_ptr<models::DrawModel> drawModel;
         };
 
         void Viewport::_init(
@@ -362,6 +364,8 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<models::SettingsModel>& settingsModel,
+            const std::shared_ptr<models::AnnotationsModel>& annotationsModel,
+            const std::shared_ptr<models::DrawModel>& drawModel,
             const std::shared_ptr<ftk::SysLogModel>& sysLogModel,
             const std::shared_ptr<IWidget>& parent)
         {
@@ -370,6 +374,9 @@ namespace djv
 
             setClipChildren(true);
 
+            p.filesModel = filesModel;
+            p.annotationsModel = annotationsModel;
+            p.drawModel = drawModel;
             p.viewportModel = viewportModel;
             p.timeUnitsModel = timeUnitsModel;
 
@@ -684,7 +691,7 @@ namespace djv
             // this the frame keeps showing stale strokes until some unrelated
             // event happens to repaint the window.
             p.annotationsObserver = ftk::ListObserver<models::ReviewAnnotation>::create(
-                app->getAnnotationsModel()->observeAnnotations(),
+                annotationsModel->observeAnnotations(),
                 [this](const std::vector<models::ReviewAnnotation>&)
                 {
                     setDrawUpdate();
@@ -741,6 +748,8 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<models::SettingsModel>& settingsModel,
+            const std::shared_ptr<models::AnnotationsModel>& annotationsModel,
+            const std::shared_ptr<models::DrawModel>& drawModel,
             const std::shared_ptr<ftk::SysLogModel>& sysLogModel,
             const std::shared_ptr<IWidget>& parent)
         {
@@ -752,6 +761,8 @@ namespace djv
                 viewportModel,
                 timeUnitsModel,
                 settingsModel,
+                annotationsModel,
+                drawModel,
                 sysLogModel,
                 parent);
             return out;
@@ -930,9 +941,7 @@ namespace djv
 
             // Drawing owns the plain left button while it is enabled, which is
             // why it is an explicit mode: it displaces the frame shuttle.
-            auto app = p.app.lock();
-            if (app &&
-                app->getDrawModel()->isEnabled() &&
+            if (p.drawModel->isEnabled() &&
                 ftk::MouseButton::Left == event.button &&
                 0 == event.modifiers)
             {
@@ -944,7 +953,7 @@ namespace djv
                 takeKeyFocus();
                 const ftk::Box2I& g = getGeometry();
                 const ftk::V2I pos = event.pos - g.min;
-                if (models::DrawTool::Eraser == app->getDrawModel()->getTool())
+                if (models::DrawTool::Eraser == p.drawModel->getTool())
                 {
                     p.mouse.mode = Private::MouseMode::Erase;
                     _erase(pos);
@@ -1081,9 +1090,8 @@ namespace djv
             {
                 return;
             }
-            if (auto app = p.app.lock())
             {
-                auto drawModel = app->getDrawModel();
+                const auto& drawModel = p.drawModel;
                 p.strokeSource = hit.index;
                 p.stroke = models::ReviewStroke();
                 p.stroke.color = drawModel->getColor();
@@ -1127,12 +1135,11 @@ namespace djv
             FTK_P();
             if (p.strokeSource >= 0 && !p.stroke.points.empty())
             {
-                if (auto app = p.app.lock())
                 {
-                    const auto& active = app->getFilesModel()->getActive();
+                    const auto& active = p.filesModel->getActive();
                     if (p.strokeSource < static_cast<int>(active.size()))
                     {
-                        app->getAnnotationsModel()->addStroke(
+                        p.annotationsModel->addStroke(
                             active[p.strokeSource]->id,
                             *p.currentTime,
                             p.stroke);
@@ -1152,18 +1159,17 @@ namespace djv
             {
                 return;
             }
-            if (auto app = p.app.lock())
             {
-                const auto& active = app->getFilesModel()->getActive();
+                const auto& active = p.filesModel->getActive();
                 if (hit.index < static_cast<int>(active.size()))
                 {
                     // The eraser removes whole strokes it touches; its reach
                     // follows the tool size.
-                    app->getAnnotationsModel()->eraseStrokes(
+                    p.annotationsModel->eraseStrokes(
                         active[hit.index]->id,
                         *p.currentTime,
                         hit.pos,
-                        app->getDrawModel()->getSize());
+                        p.drawModel->getSize());
                 }
             }
         }
@@ -1173,14 +1179,9 @@ namespace djv
             tl::ui::Viewport::drawEvent(drawRect, event);
             FTK_P();
 
-            auto app = p.app.lock();
-            if (!app)
-            {
-                return;
-            }
             const ftk::Box2I& g = getGeometry();
             const double zoom = getZoom();
-            const auto& active = app->getFilesModel()->getActive();
+            const auto& active = p.filesModel->getActive();
 
             // Keep the overlay inside the viewport: a stroke zoomed past the
             // edges would otherwise be painted over the panels and toolbars.
@@ -1239,7 +1240,7 @@ namespace djv
             };
 
             // The strokes already committed on this frame.
-            const auto& annotations = app->getAnnotationsModel()->getAnnotations();
+            const auto& annotations = p.annotationsModel->getAnnotations();
             for (const auto& annotation : annotations)
             {
                 if (!models::sameTime(annotation.time, p.currentTime))

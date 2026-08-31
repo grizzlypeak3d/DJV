@@ -201,13 +201,6 @@ namespace djv
             }
             setIcon(iconSystem->get("DJV_Icon", 1.0));
 
-            // DJV's own icons, usable by name like the ftk and tlRender ones.
-            iconSystem->add("DrawTool", djv_resource::DrawTool);
-            iconSystem->add("Eraser", djv_resource::Eraser);
-            iconSystem->add("Review", djv_resource::Review);
-            iconSystem->add("ReviewNext", djv_resource::ReviewNext);
-            iconSystem->add("ReviewPrev", djv_resource::ReviewPrev);
-
             p.app = app;
             p.settingsModel = app->getSettingsModel();
             p.presentMode = ftk::Observable<bool>::create(false);
@@ -219,6 +212,8 @@ namespace djv
                 app->getViewportModel(),
                 app->getTimeUnitsModel(),
                 app->getSettingsModel(),
+                app->getAnnotationsModel(),
+                app->getDrawModel(),
                 app->getSysLogModel());
             ftk::setScreenshotTag(p.viewport, "MainWindow.Viewport");
 

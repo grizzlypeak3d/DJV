@@ -5,7 +5,9 @@
 
 #include <djv/UI/Viewport.h>
 
+#include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/TimeUnitsModel.h>
@@ -36,6 +38,8 @@ namespace djv
                     py::arg("viewportModel"),
                     py::arg("timeUnitsModel"),
                     py::arg("settingsModel"),
+                    py::arg("annotationsModel"),
+                    py::arg("drawModel"),
                     py::arg("sysLogModel"),
                     py::arg("parent") = nullptr)
                 .def("setToastActive", &Viewport::setToastActive)

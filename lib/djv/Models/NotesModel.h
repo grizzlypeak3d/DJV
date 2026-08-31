@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <djv/Models/Review.h>
 
 #include <ftk/Core/ObservableList.h>
@@ -15,12 +17,12 @@ namespace djv
         //!
         //! Notes are session state: they live in the review file, not in the
         //! application settings.
-        class NotesModel : public std::enable_shared_from_this<NotesModel>
+        class DJV_MODELS_API_TYPE NotesModel : public std::enable_shared_from_this<NotesModel>
         {
             FTK_NON_COPYABLE(NotesModel);
 
         protected:
-            void _init();
+            DJV_MODELS_API void _init();
 
             NotesModel();
 
@@ -28,26 +30,26 @@ namespace djv
             ~NotesModel();
 
             //! Create a new model.
-            static std::shared_ptr<NotesModel> create();
+            DJV_MODELS_API static std::shared_ptr<NotesModel> create();
 
             //! Get the notes.
-            const std::vector<ReviewNote>& getNotes() const;
+            DJV_MODELS_API const std::vector<ReviewNote>& getNotes() const;
 
             //! Observe the notes.
-            std::shared_ptr<ftk::IObservableList<ReviewNote> > observeNotes() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<ReviewNote> > observeNotes() const;
 
             //! Replace all the notes, e.g. when a review is opened.
-            void setNotes(const std::vector<ReviewNote>&);
+            DJV_MODELS_API void setNotes(const std::vector<ReviewNote>&);
 
             //! Add a note. The identifier, creation time and author are filled
             //! in here, so callers only provide the frame and the text.
-            void add(const std::optional<OTIO_NS::RationalTime>&, const std::string& text);
+            DJV_MODELS_API void add(const std::optional<OTIO_NS::RationalTime>&, const std::string& text);
 
             //! Remove the note with the given identifier.
-            void remove(const std::string& id);
+            DJV_MODELS_API void remove(const std::string& id);
 
             //! Remove all the notes.
-            void clear();
+            DJV_MODELS_API void clear();
 
         private:
             FTK_PRIVATE();

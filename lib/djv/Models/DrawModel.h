@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <djv/Models/Export.h>
+
 #include <ftk/Core/Observable.h>
 #include <ftk/Core/Color.h>
 
@@ -26,12 +28,12 @@ namespace djv
         //!
         //! These are preferences rather than review contents, so they are kept
         //! in the settings and not in the review file.
-        class DrawModel : public std::enable_shared_from_this<DrawModel>
+        class DJV_MODELS_API_TYPE DrawModel : public std::enable_shared_from_this<DrawModel>
         {
             FTK_NON_COPYABLE(DrawModel);
 
         protected:
-            void _init(const std::shared_ptr<ftk::Settings>&);
+            DJV_MODELS_API void _init(const std::shared_ptr<ftk::Settings>&);
 
             DrawModel();
 
@@ -39,29 +41,29 @@ namespace djv
             ~DrawModel();
 
             //! Create a new model.
-            static std::shared_ptr<DrawModel> create(
+            DJV_MODELS_API static std::shared_ptr<DrawModel> create(
                 const std::shared_ptr<ftk::Settings>&);
 
             //! Is drawing active? While it is, the viewport draws instead of
             //! shuttling frames with the left mouse button.
-            bool isEnabled() const;
-            std::shared_ptr<ftk::IObservable<bool> > observeEnabled() const;
-            void setEnabled(bool);
+            DJV_MODELS_API bool isEnabled() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeEnabled() const;
+            DJV_MODELS_API void setEnabled(bool);
 
             //! The current tool.
-            DrawTool getTool() const;
-            std::shared_ptr<ftk::IObservable<DrawTool> > observeTool() const;
-            void setTool(DrawTool);
+            DJV_MODELS_API DrawTool getTool() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<DrawTool> > observeTool() const;
+            DJV_MODELS_API void setTool(DrawTool);
 
             //! The stroke colour.
-            const ftk::Color4F& getColor() const;
-            std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColor() const;
-            void setColor(const ftk::Color4F&);
+            DJV_MODELS_API const ftk::Color4F& getColor() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColor() const;
+            DJV_MODELS_API void setColor(const ftk::Color4F&);
 
             //! The stroke width, in the pixels of the source image.
-            float getSize() const;
-            std::shared_ptr<ftk::IObservable<float> > observeSize() const;
-            void setSize(float);
+            DJV_MODELS_API float getSize() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<float> > observeSize() const;
+            DJV_MODELS_API void setSize(float);
 
         private:
             FTK_PRIVATE();

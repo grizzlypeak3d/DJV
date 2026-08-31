@@ -65,6 +65,8 @@
 #include <ftk/Core/Timer.h>
 
 #include <ctime>
+#include <ftk/Core/Path.h>
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -1153,9 +1155,13 @@ namespace djv
             p.viewportModel->setHUDOptions(review.color.hud);
 
             // Interface.
+            // The tools are a set of open panels now rather than one
+            // active tool; the review's single tool becomes the one open
+            // panel.
+            p.toolsModel->closeTools();
             if (!review.ui.activeTool.empty())
             {
-                p.toolsModel->setActiveTool(review.ui.activeTool);
+                p.toolsModel->setToolOpen(review.ui.activeTool, true);
             }
             p.settingsModel->setWindow(review.ui.window);
 
@@ -1175,7 +1181,7 @@ namespace djv
             p.reviewRaw = review.raw;
             p.reviewUnreadSections = review.unreadSections;
             p.reviewUnreadItems = review.unreadItems;
-            p.recentReviewsModel->addRecent(reviewPath);
+            p.recentReviewsModel->addRecent(ftk::Path(reviewPath.u8string()));
             p.reviewModified = false;
             _updateWindowTitle();
             // A freshly loaded review supersedes any earlier autosave.
@@ -1211,6 +1217,10 @@ namespace djv
                             if (value)
                             {
                                 auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+                                ftk::FileBrowserOpenOptions options;
+                                options.title = "Locate Files";
+                                options.path = base;
+                                options.mode = ftk::FileBrowserMode::Dir;
                                 fileBrowserSystem->open(
                                     _p->mainWindow,
                                     [this, review, base, reviewPath](const ftk::Path& folder)
@@ -1221,9 +1231,7 @@ namespace djv
                                             reviewPath,
                                             std::filesystem::u8path(folder.get()));
                                     },
-                                    "Locate Files",
-                                    base,
-                                    ftk::FileBrowserMode::Dir);
+                                    options);
                             }
                         },
                         "Locate...",
@@ -1244,17 +1252,19 @@ namespace djv
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             const std::filesystem::path startPath = p.reviewPath.empty() ?
                 std::filesystem::path() : p.reviewPath.parent_path();
+            ftk::FileBrowserOpenOptions options;
+            options.title = title;
+            options.path = startPath;
+            options.mode = mode;
+            options.extensions = { reviewExtension };
+            options.extensionsLabel = "Review Session";
             fileBrowserSystem->open(
                 p.mainWindow,
                 [callback](const ftk::Path& value)
                 {
                     callback(std::filesystem::u8path(value.get()));
                 },
-                title,
-                startPath,
-                mode,
-                { reviewExtension },
-                "Review Session");
+                options);
         }
 
         void App::openReviewDialog()
@@ -1361,7 +1371,10 @@ namespace djv
             review.color.aspectRatio = p.viewportModel->getAspectRatioOptions();
             review.color.hud = p.viewportModel->getHUDOptions();
 
-            review.ui.activeTool = p.toolsModel->getActiveTool();
+            // The first open panel stands in for the active tool.
+            const auto& openTools = p.toolsModel->getOpenTools();
+            review.ui.activeTool =
+                openTools.empty() ? std::string() : openTools.front();
             review.ui.window = p.settingsModel->getWindow();
 
             review.notes = p.notesModel->getNotes();
@@ -1391,7 +1404,7 @@ namespace djv
 
             p.reviewPath = path;
             p.reviewRaw = json;
-            p.recentReviewsModel->addRecent(path);
+            p.recentReviewsModel->addRecent(ftk::Path(path.u8string()));
             p.reviewModified = false;
             _updateWindowTitle();
             // The work is safely on disk; drop any crash-recovery backup.
@@ -1440,7 +1453,7 @@ namespace djv
             // Reset to the empty startup state.
             p.filesModel->closeAll();
             tl::CompareOptions compareOptions;
-            compareOptions.compare = tl::Compare::A;
+            compareOptions.compare = tl::Compare::None;
             p.filesModel->setCompareOptions(compareOptions);
             p.notesModel->clear();
             p.rangesModel->clear();
@@ -1634,7 +1647,10 @@ namespace djv
         std::filesystem::path App::_autosavePath()
         {
             FTK_P();
-            return _appDocsPath() / ftk::Format("{0}.{1}.autosave.djvr").
+            // The same directory the settings and log live in.
+            return ftk::getUserPath(ftk::UserPath::Documents) /
+                p.appInfoModel->getShortName() /
+                ftk::Format("{0}.{1}.autosave.djvr").
                 arg(p.appInfoModel->getShortName()).
                 arg(p.appInfoModel->getVersionMajor()).
                 str();

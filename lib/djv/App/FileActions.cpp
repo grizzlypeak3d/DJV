@@ -342,16 +342,20 @@ namespace djv
             // symmetrical is worth more than reusing it.
             _addShortcut(
                 "OpenReview",
+                "Open review",
                 ftk::KeyShortcut(
                     ftk::Key::O,
                     static_cast<int>(ftk::KeyModifier::Alt) |
                     static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut(
                 "SaveReview",
+                "Save review",
                 ftk::KeyShortcut(
                     ftk::Key::S,
                     static_cast<int>(ftk::KeyModifier::Alt) |
                     static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("SaveReviewAs", "Save review as");
+            _addShortcut("CloseReview", "Close review");
             _addShortcut("Close", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("CloseAll",
                 ftk::KeyShortcut(

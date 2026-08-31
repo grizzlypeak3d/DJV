@@ -233,20 +233,20 @@ namespace djv
             model->setB(1, true);
             model->setB(2, true);
             model->setB(3, true);
-            FTK_ASSERT(std::vector<int>({ 1, 2, 3 }) == model->getBIndexes());
+            FTK_CHECK(std::vector<int>({ 1, 2, 3 }) == model->getBIndexes());
 
             // "A" stays the master source: it is the first active file, ahead of
             // every "B", whatever the mode.
-            FTK_ASSERT(4 == model->getActive().size());
-            FTK_ASSERT(model->getA() == model->getActive()[0]);
+            FTK_CHECK(4 == model->getActive().size());
+            FTK_CHECK(model->getA() == model->getActive()[0]);
 
             // Switching to a single-buffer mode truncates "B" down to one file;
             // "A" is never dropped.
             options.compare = tl::Compare::Horizontal;
             model->setCompareOptions(options);
-            FTK_ASSERT(1 == model->getBIndexes().size());
-            FTK_ASSERT(0 == model->getAIndex());
-            FTK_ASSERT(model->getA() == model->getActive()[0]);
+            FTK_CHECK(1 == model->getBIndexes().size());
+            FTK_CHECK(0 == model->getAIndex());
+            FTK_CHECK(model->getA() == model->getActive()[0]);
         }
 
         void FilesModelTest::_reviewRestore()
@@ -257,9 +257,10 @@ namespace djv
             // then set "A" last. This must hold for every compare mode.
             const std::vector<tl::Compare> modes =
             {
-                tl::Compare::A,
+                tl::Compare::None,
                 tl::Compare::B,
                 tl::Compare::Wipe,
+                tl::Compare::Butterfly,
                 tl::Compare::Overlay,
                 tl::Compare::Difference,
                 tl::Compare::Horizontal,
@@ -287,14 +288,14 @@ namespace djv
 
                 // "A" is restored as saved in every mode, and remains the first
                 // active file -- the master the player and the timeline follow.
-                FTK_ASSERT(0 == model->getAIndex());
-                FTK_ASSERT(!model->getActive().empty());
-                FTK_ASSERT(model->getA() == model->getActive()[0]);
+                FTK_CHECK(0 == model->getAIndex());
+                FTK_CHECK(!model->getActive().empty());
+                FTK_CHECK(model->getA() == model->getActive()[0]);
 
                 // Only tile mode keeps all three "B" files; the others collapse
                 // to the last one selected.
                 const size_t expectedB = tl::Compare::Tile == mode ? 3 : 1;
-                FTK_ASSERT(expectedB == model->getBIndexes().size());
+                FTK_CHECK(expectedB == model->getBIndexes().size());
 
                 // FTK_ASSERT is compiled out in Release builds, so report the
                 // observed state explicitly to keep this meaningful there too.
