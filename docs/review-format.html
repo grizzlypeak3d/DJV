@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review file format - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="python.html">Python</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1 id="review-file-format">Review file format</h1>
+<p>A review is a JSON document with the <code>.djvr</code> extension. This page describes version 1 of that format: what a document contains, and what a program reading one is expected to do. For how reviews are used in DJV, see <a href="files.html#reviews">Files</a>.</p>
+<h2 id="version">Version</h2>
+<p>Every document carries an integer under <code>djvReview</code>:</p>
+<pre><code>{ "djvReview": 1 }
+</code></pre>
+<p>The version is incremented <strong>only</strong> when a document can no longer be read correctly by an older DJV. Adding a key, or a whole new section, does not change it: a reader ignores what it does not recognize, so those changes are already safe.</p>
+<p>A reader that finds a version higher than the one it knows <strong>refuses the document</strong> and says so. It does not read what it can and leave the rest: the next save would write that loss back over the author's own file. DJV reports this in the <strong>Messages</strong> tool and leaves the current session untouched.</p>
+<p>A document with no <code>djvReview</code> key is read as version 1.</p>
+<h2 id="what-a-reader-must-do">What a reader must do</h2>
+<p>These four rules are what make a review safe to pass between people running different versions of DJV.</p>
+<p><strong>Keep an unknown section.</strong> A top-level section the reader does not know is carried through a load/save cycle untouched. Opening a review in an older DJV and saving it does not strip what a newer one wrote.</p>
+<p><strong>Read each section on its own.</strong> A section that cannot be read costs that section and nothing else. In particular it must never cost the <code>annotations</code> and <code>notes</code>, which exist nowhere but in this file — the rest of a review is a convenience that can be rebuilt by hand.</p>
+<p><strong>Do not overwrite what you could not read.</strong> A section that failed to load is written back exactly as it was found, rather than replaced by the defaults the application fell back to.</p>
+<p><strong>Skip, but keep, what you cannot place.</strong> An annotation or a stroke in a coordinate space the reader does not know is not drawn — and not deleted either. It is written back as it was found, after the items that were understood.</p>
+<h2 id="the-document">The document</h2>
+<p>| Key | Contents | |---|---| | <code>djvReview</code> | Format version, integer. | | <code>app</code> | The application and version that wrote the document, informational. | | <code>created</code> | When it was written, ISO 8601 UTC. | | <code>files</code> | The open sources, in tab order. | | <code>compare</code> | The A/B setup: <code>aId</code>, <code>bIds</code>, comparison options and time mode. | | <code>view</code> | Viewport framing, pan and zoom. | | <code>color</code> | OCIO, LUT, display, background, foreground, aspect ratio and HUD. | | <code>ui</code> | The active tool panel and the window layout. | | <code>annotations</code> | Drawings, by source and frame. | | <code>notes</code> | Timestamped comments. | | <code>ranges</code> | Named frame ranges. |</p>
+<p><code>compare</code>, <code>view</code>, <code>color</code> and <code>ui</code> delegate to serializers shared with the application settings, and those require every key they know. They are therefore the sections most likely to fail against a document written by a different version — which is why the rules above exist.</p>
+<h3 id="files">Files</h3>
+<pre><code>{
+  "id": "ca708ac647f6600300000000",
+  "path": "shots/sh010/sh010_comp_v004.mov",
+  "pathAbsolute": "P:/show/shots/sh010/sh010_comp_v004.mov",
+  "audioPath": "shots/sh010/sh010_mix.wav",
+  "videoLayer": 0,
+  "speed": 24.0,
+  "currentTime": { "value": 168.0, "rate": 24.0 },
+  "inOutRange": {
+    "start":    { "value": 0.0,   "rate": 24.0 },
+    "duration": { "value": 476.0, "rate": 24.0 }
+  }
+}
+</code></pre>
+<p><code>id</code> is what the rest of the document refers to a source by — <code>compare.aId</code>, <code>compare.bIds</code>, <code>annotations[].sourceId</code>. Indices are not used anywhere, because they do not survive closing or reordering a file.</p>
+<p>Paths are stored twice. <code>path</code> is relative to the <code>.djvr</code> and is tried first, so a review stays valid when it travels with its media; <code>pathAbsolute</code> is the fallback for media that lives outside the review's folder. Separate audio uses the same pair, <code>audioPath</code> and <code>audioPathAbsolute</code>. <strong>All four are stored with forward slashes</strong>, on every platform, so a document moves between them unchanged.</p>
+<p>When neither form resolves, DJV reports the missing sources and offers to look for them in a folder you choose.</p>
+<h3 id="annotations">Annotations</h3>
+<pre><code>{
+  "id": "0eecb7e26602f91b00000000",
+  "sourceId": "ca708ac647f6600300000000",
+  "space": "image",
+  "time": { "value": 168.0, "rate": 24.0 },
+  "author": "matthieu",
+  "created": "2026-08-26T09:01:00Z",
+  "strokes": [
+    {
+      "color": [1.0, 0.365, 0.02, 1.0],
+      "width": 4.0,
+      "widthSpace": "image",
+      "points": [120.5, 340.0, 121.0, 341.5]
+    }
+  ]
+}
+</code></pre>
+<p>An annotation belongs to one source and is visible on one frame only.</p>
+<p><code>space</code> and <code>widthSpace</code> are both <code>"image"</code> in version 1: points and widths are expressed in the pixels of the source image, so a drawing keeps its position and its weight whatever the zoom, the pan or the comparison mode. A reader that meets any other value must not draw the item — the coordinates would land somewhere else entirely — and must keep it, per the rules above. An absent space means <code>"image"</code>.</p>
+<p><code>points</code> is a flat <code>[x, y, x, y, ...]</code> array, which keeps long strokes compact. A trailing odd value is ignored.</p>
+<h3 id="notes-and-ranges">Notes and ranges</h3>
+<pre><code>{
+  "id": "b1c2d3e4f5a6b7c800000001",
+  "time": { "value": 96.0, "rate": 24.0 },
+  "created": "2026-08-26T09:00:00Z",
+  "author": "matthieu",
+  "text": "Grade is too cold from here."
+}
+</code></pre>
+<p>A note belongs to the review rather than to a source: the frame locates it. A range is an <code>id</code>, a free-text <code>name</code> and a <code>range</code>; selecting one sets the timeline in and out points.</p>
+<h3 id="attribution">Attribution</h3>
+<p><code>author</code> is optional on both notes and annotations, and is empty when it is not known. DJV has no accounts: it fills the field from the environment — <code>USERNAME</code> on Windows, <code>USER</code> elsewhere — when the item is created. Treat it as a label saying who wrote something when a session comes back from someone else, not as an identity, and never as a permission.</p>
+<p>Identifiers are 64 random bits plus a counter, so items written independently by two people do not collide.</p>
+<h2 id="what-is-not-stored">What is not stored</h2>
+<p>Keyboard shortcuts, style, cache size and the audio device are deliberately absent: opening a review someone sends you must not reconfigure your installation.</p>
+</main>
+</body>
+</html>
