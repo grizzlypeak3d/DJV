@@ -199,50 +199,6 @@ namespace djv
                 });
 
             _addCommand(
-                "OpenReview",
-                "Open a review, replacing the current session.",
-                [appWeak](const nlohmann::json&)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->openReviewDialog();
-                    }
-                });
-
-            _addCommand(
-                "SaveReview",
-                "Save the current session as a review.",
-                [appWeak](const nlohmann::json&)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->saveReview();
-                    }
-                });
-
-            _addCommand(
-                "SaveReviewAs",
-                "Save the current session as a new review.",
-                [appWeak](const nlohmann::json&)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->saveReviewAs();
-                    }
-                });
-
-            _addCommand(
-                "CloseReview",
-                "Close the review and reset to the startup state.",
-                [appWeak](const nlohmann::json&)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->closeReview();
-                    }
-                });
-
-            _addCommand(
                 "Exit",
                 "Exit the application.",
                 [appWeak](const nlohmann::json&)
@@ -282,18 +238,6 @@ namespace djv
                 _command("SavePlaylist"));
             _actions["SavePlaylist"]->setTooltip(
                 "Save the file list as a \".otio\" playlist.");
-            _actions["OpenReview"] = ftk::Action::create(
-                "Open Review",
-                _command("OpenReview"));
-            _actions["SaveReview"] = ftk::Action::create(
-                "Save Review",
-                _command("SaveReview"));
-            _actions["SaveReviewAs"] = ftk::Action::create(
-                "Save Review As...",
-                _command("SaveReviewAs"));
-            _actions["CloseReview"] = ftk::Action::create(
-                "Close Review",
-                _command("CloseReview"));
             _actions["Close"] = ftk::Action::create(
                 "Close",
                 "FileClose",
@@ -339,25 +283,6 @@ namespace djv
                     static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("OpenPlaylist", "Open playlist");
             _addShortcut("SavePlaylist", "Save playlist");
-            // Alt rather than Shift on the command modifier: Shift+Ctrl+O is
-            // "Open with audio", and Shift+Ctrl+S is free but keeping the pair
-            // symmetrical is worth more than reusing it.
-            _addShortcut(
-                "OpenReview",
-                "Open review",
-                ftk::KeyShortcut(
-                    ftk::Key::O,
-                    static_cast<int>(ftk::KeyModifier::Alt) |
-                    static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut(
-                "SaveReview",
-                "Save review",
-                ftk::KeyShortcut(
-                    ftk::Key::S,
-                    static_cast<int>(ftk::KeyModifier::Alt) |
-                    static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut("SaveReviewAs", "Save review as");
-            _addShortcut("CloseReview", "Close review");
             _addShortcut("Close", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("CloseAll",
                 ftk::KeyShortcut(
@@ -386,11 +311,6 @@ namespace djv
                     _actions["Close"]->setEnabled(!value.empty());
                     _actions["CloseAll"]->setEnabled(!value.empty());
                     _actions["Reload"]->setEnabled(!value.empty());
-                    // There is nothing to save, and nothing to close, until a
-                    // file is open. Opening a review stays available.
-                    _actions["SaveReview"]->setEnabled(!value.empty());
-                    _actions["SaveReviewAs"]->setEnabled(!value.empty());
-                    _actions["CloseReview"]->setEnabled(!value.empty());
                     _actions["Next"]->setEnabled(value.size() > 1);
                     _actions["Prev"]->setEnabled(value.size() > 1);
                 });

@@ -14,6 +14,7 @@ import FrameActions
 import HelpActions
 import Menus
 import PlaybackActions
+import ReviewActions
 import TimelineActions
 import PlaybackBar
 import StatusBar
@@ -67,6 +68,7 @@ class MainWindow(ftk.MainWindow):
 
         # Create the actions.
         self._fileActions = FileActions.Actions(context, app, self)
+        self._reviewActions = ReviewActions.Actions(context, app, self)
         self._compareActions = CompareActions.Actions(context, app)
         self._playbackActions = PlaybackActions.Actions(context, app)
         self._frameActions = FrameActions.Actions(context, app, self)
@@ -84,6 +86,7 @@ class MainWindow(ftk.MainWindow):
         # loses its observers and callbacks with it.
         self._menus = {}
         self._menus["File"] = Menus.File(context, app, self._fileActions)
+        self._menus["Review"] = Menus.Review(context, app, self._reviewActions)
         self._menus["Compare"] = Menus.Compare(context, app, self._compareActions)
         self._menus["Playback"] = Menus.Playback(context, app, self._playbackActions)
         self._menus["Frame"] = Menus.Frame(context, app, self._frameActions)

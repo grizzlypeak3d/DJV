@@ -20,6 +20,8 @@
 #include <djv/App/HelpActions.h>
 #include <djv/App/HelpMenu.h>
 #include <djv/App/PlaybackActions.h>
+#include <djv/App/ReviewActions.h>
+#include <djv/App/ReviewMenu.h>
 #include <djv/App/PlaybackMenu.h>
 #include <djv/App/StatusBar.h>
 #include <djv/App/TabBar.h>
@@ -108,6 +110,7 @@ namespace djv
             std::shared_ptr<ui::Viewport> viewport;
             std::shared_ptr<tl::ui::TimelineWidget> timelineWidget;
             std::shared_ptr<FileActions> fileActions;
+            std::shared_ptr<ReviewActions> reviewActions;
             std::shared_ptr<CompareActions> compareActions;
             std::shared_ptr<PlaybackActions> playbackActions;
             std::shared_ptr<FrameActions> frameActions;
@@ -119,6 +122,7 @@ namespace djv
             std::shared_ptr<ToolsActions> toolsActions;
             std::shared_ptr<HelpActions> helpActions;
             std::shared_ptr<FileMenu> fileMenu;
+            std::shared_ptr<ReviewMenu> reviewMenu;
             std::shared_ptr<CompareMenu> compareMenu;
             std::shared_ptr<PlaybackMenu> playbackMenu;
             std::shared_ptr<FrameMenu> frameMenu;
@@ -204,6 +208,7 @@ namespace djv
             ftk::setScreenshotTag(p.timelineWidget, "MainWindow.Timeline");
 
             p.fileActions = FileActions::create(context, app);
+            p.reviewActions = ReviewActions::create(context, app);
             p.compareActions = CompareActions::create(context, app);
             p.playbackActions = PlaybackActions::create(context, app);
             p.frameActions = FrameActions::create(
@@ -231,6 +236,7 @@ namespace djv
                 std::dynamic_pointer_cast<MainWindow>(shared_from_this()));
 
             p.fileMenu = FileMenu::create(context, app, p.fileActions);
+            p.reviewMenu = ReviewMenu::create(context, app, p.reviewActions);
             p.compareMenu = CompareMenu::create(context, app, p.compareActions);
             p.playbackMenu = PlaybackMenu::create(context, p.playbackActions);
             p.frameMenu = FrameMenu::create(context, p.frameActions);
@@ -247,6 +253,7 @@ namespace djv
             p.menuBar = ftk::MenuBar::create(context);
             ftk::setScreenshotTag(p.menuBar, "MainWindow.MenuBar");
             p.menuBar->addMenu("File", p.fileMenu);
+            p.menuBar->addMenu("Review", p.reviewMenu);
             p.menuBar->addMenu("Compare", p.compareMenu);
             p.menuBar->addMenu("Playback", p.playbackMenu);
             p.menuBar->addMenu("Frame", p.frameMenu);

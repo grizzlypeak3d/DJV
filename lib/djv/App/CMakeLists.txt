@@ -32,6 +32,8 @@ set(HEADERS
     PlaybackActions.h
     PlaybackMenu.h
     RangeNameDialog.h
+    ReviewActions.h
+    ReviewMenu.h
     ReviewTool.h
     SaveReviewDialog.h
     SecondaryWindow.h
@@ -88,6 +90,8 @@ set(SOURCE
     PlaybackActions.cpp
     PlaybackMenu.cpp
     RangeNameDialog.cpp
+    ReviewActions.cpp
+    ReviewMenu.cpp
     ReviewTool.cpp
     SaveReviewDialog.cpp
     SecondaryWindow.cpp

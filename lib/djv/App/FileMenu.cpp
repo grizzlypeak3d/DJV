@@ -35,7 +35,6 @@ namespace djv
             std::shared_ptr<ftk::Observer<int> > aIndexObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
             std::shared_ptr<ftk::ListObserver<ftk::Path> > recentObserver;
-            std::shared_ptr<ftk::ListObserver<ftk::Path> > recentReviewsObserver;
             std::shared_ptr<ftk::ListObserver<ftk::Path> > recentPlaylistsObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
@@ -70,12 +69,6 @@ namespace djv
             addAction(actions["OpenPlaylist"]);
             addAction(actions["SavePlaylist"]);
             p.menus["RecentPlaylists"] = addSubMenu("Recent Playlists");
-            addDivider();
-            addAction(actions["OpenReview"]);
-            addAction(actions["SaveReview"]);
-            addAction(actions["SaveReviewAs"]);
-            addAction(actions["CloseReview"]);
-            p.menus["RecentReviews"] = addSubMenu("Recent Reviews");
             addDivider();
             p.menus["Current"] = addSubMenu("Current");
             addAction(actions["Next"]);
@@ -130,13 +123,6 @@ namespace djv
                 [this](const std::vector<ftk::Path>& value)
                 {
                     _recentUpdate(value);
-                });
-
-            p.recentReviewsObserver = ftk::ListObserver<ftk::Path>::create(
-                app->getRecentReviewsModel()->observeRecent(),
-                [this](const std::vector<ftk::Path>& value)
-                {
-                    _recentReviewsUpdate(value);
                 });
 
             p.recentPlaylistsObserver = ftk::ListObserver<ftk::Path>::create(
@@ -339,31 +325,6 @@ namespace djv
                         }
                     });
                 p.menus["RecentPlaylists"]->addAction(action);
-            }
-        }
-
-        void FileMenu::_recentReviewsUpdate(const std::vector<ftk::Path>& value)
-        {
-            FTK_P();
-            p.menus["RecentReviews"]->clear();
-            for (auto i = value.rbegin(); i != value.rend(); ++i)
-            {
-                const auto path = *i;
-                auto weak = std::weak_ptr<FileMenu>(std::dynamic_pointer_cast<FileMenu>(shared_from_this()));
-                auto action = ftk::Action::create(
-                    path.get(),
-                    [weak, path]
-                    {
-                        if (auto widget = weak.lock())
-                        {
-                            if (auto app = widget->_p->app.lock())
-                            {
-                                app->openReview(std::filesystem::u8path(path.get()));
-                            }
-                            widget->close();
-                        }
-                    });
-                p.menus["RecentReviews"]->addAction(action);
             }
         }
 

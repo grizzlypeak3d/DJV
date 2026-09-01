@@ -40,12 +40,6 @@ class File(ftk.Menu):
         self.addAction(actions.actions["SavePlaylist"])
         self.recentPlaylistsMenu = self.addSubMenu("Recent Playlists")
         self.addDivider();
-        self.addAction(actions.actions["OpenReview"])
-        self.addAction(actions.actions["SaveReview"])
-        self.addAction(actions.actions["SaveReviewAs"])
-        self.addAction(actions.actions["CloseReview"])
-        self.recentReviewsMenu = self.addSubMenu("Recent Reviews")
-        self.addDivider();
         self.currentMenu = self.addSubMenu("Current")
         self.addAction(actions.actions["Next"])
         self.addAction(actions.actions["Prev"])
@@ -66,9 +60,6 @@ class File(ftk.Menu):
         self.recentPlaylistsObserver = ftk.PathListObserver(
             app.getRecentPlaylistsModel().observeRecent,
             lambda recentList: selfWeak()._recentPlaylistsUpdate(recentList))
-        self.recentReviewsObserver = ftk.PathListObserver(
-            app.getRecentReviewsModel().observeRecent,
-            lambda recentList: selfWeak()._recentReviewsUpdate(recentList))
         self._filesObserver = djv.models.FilesModelItemListObserver(
             app.getFilesModel().observeFiles,
             lambda files: selfWeak()._filesUpdate(files))
@@ -110,19 +101,6 @@ class File(ftk.Menu):
                 lambda captured = recent, \
                     f = Util.weak(self._recentPlaylistCallback): f(captured))
             self.recentPlaylistsMenu.addAction(action)
-
-    def _recentReviewCallback(self, recent):
-        if (self._app):
-            self._app().openReview(recent.getFileName(True))
-
-    def _recentReviewsUpdate(self, recentList):
-        self.recentReviewsMenu.clear()
-        for recent in reversed(recentList):
-            action = ftk.Action(
-                recent.get(),
-                lambda captured = recent, \
-                    f = Util.weak(self._recentReviewCallback): f(captured))
-            self.recentReviewsMenu.addAction(action)
 
     def _setA(self, index):
         self.close()
@@ -207,6 +185,39 @@ class File(ftk.Menu):
         for i, action in enumerate(self._mediaReferencesActions):
             self.mediaReferencesMenu.setChecked(
                 action, self._mediaReferenceKeys[i] == key)
+
+class Review(ftk.Menu):
+    """
+    Review menu.
+    """
+    def __init__(self, context, app, actions, parent = None):
+        ftk.Menu.__init__(self, context, parent)
+
+        self._app = weakref.ref(app)
+
+        self.addAction(actions.actions["Open"])
+        self.addAction(actions.actions["Save"])
+        self.addAction(actions.actions["SaveAs"])
+        self.addAction(actions.actions["Close"])
+        self.recentMenu = self.addSubMenu("Recent")
+
+        selfWeak = weakref.ref(self)
+        self.recentObserver = ftk.PathListObserver(
+            app.getRecentReviewsModel().observeRecent,
+            lambda recentList: selfWeak()._recentUpdate(recentList))
+
+    def _recentCallback(self, recent):
+        if (self._app):
+            self._app().openReview(recent.getFileName(True))
+
+    def _recentUpdate(self, recentList):
+        self.recentMenu.clear()
+        for recent in reversed(recentList):
+            action = ftk.Action(
+                recent.get(),
+                lambda captured = recent, \
+                    f = Util.weak(self._recentCallback): f(captured))
+            self.recentMenu.addAction(action)
 
 class Playback(ftk.Menu):
     """
