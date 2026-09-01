@@ -17,6 +17,7 @@ namespace djv
         class App;
         class AudioActions;
         class FrameActions;
+        class ReviewActions;
         class PlaybackActions;
 
         //! Bottom tool bar.
@@ -30,6 +31,7 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<PlaybackActions>&,
                 const std::shared_ptr<FrameActions>&,
+                const std::shared_ptr<ReviewActions>&,
                 const std::shared_ptr<AudioActions>&,
                 const std::shared_ptr<IWidget>& parent);
 
@@ -43,6 +45,7 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<PlaybackActions>&,
                 const std::shared_ptr<FrameActions>&,
+                const std::shared_ptr<ReviewActions>&,
                 const std::shared_ptr<AudioActions>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 

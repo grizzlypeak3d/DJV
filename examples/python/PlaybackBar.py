@@ -14,7 +14,7 @@ class Widget(ftk.IContainer):
     """
     This widget provides playback controls and other time related widgets.
     """
-    def __init__(self, context, app, actions, frameActions, parent = None):
+    def __init__(self, context, app, actions, frameActions, reviewActions, parent = None):
         ftk.IContainer.__init__(self, context, "PlaybackBar.Widget", parent)
 
         self._appWeak = weakref.ref(app)
@@ -42,10 +42,12 @@ class Widget(ftk.IContainer):
         self._playbackShuttle.tooltip = \
             "Playback shuttle. Click and drag to change playback speed."
 
-        for name in ["Start", "Prev", "Next", "End",
-                     "PrevReview", "NextReview"]:
+        for name in ["Start", "Prev", "Next", "End"]:
             self._buttons[name] = ftk.ToolButton(
                 context, frameActions.actions[name])
+        for name in ["PrevFrame", "NextFrame"]:
+            self._buttons[name] = ftk.ToolButton(
+                context, reviewActions.actions[name])
         self._buttons["Prev"].repeatClick = True
         self._buttons["Next"].repeatClick = True
 
@@ -110,8 +112,8 @@ class Widget(ftk.IContainer):
         # same gesture, on the frames that carry a note or a drawing.
         hLayout2 = ftk.HorizontalLayout(context, hLayout)
         hLayout2.spacingRole = ftk.SizeRole._None
-        self._buttons["PrevReview"].parent = hLayout2
-        self._buttons["NextReview"].parent = hLayout2
+        self._buttons["PrevFrame"].parent = hLayout2
+        self._buttons["NextFrame"].parent = hLayout2
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         hLayout2 = ftk.HorizontalLayout(context, hLayout)
         hLayout2.spacingRole = ftk.SizeRole.SpacingSmall

@@ -1046,10 +1046,10 @@ class ReviewTool(IToolWidget):
         toolLayout.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
         self._undoButton = ftk.ToolButton(context, toolLayout)
         self._undoButton.icon = "Undo"
-        self._undoButton.tooltip = "Undo."
+        self._undoButton.tooltip = "Undo drawing."
         self._redoButton = ftk.ToolButton(context, toolLayout)
         self._redoButton.icon = "Redo"
-        self._redoButton.tooltip = "Redo."
+        self._redoButton.tooltip = "Redo drawing."
         sizeLayout = ftk.HorizontalLayout(context, drawingWidget)
         sizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
         sizeLabel = ftk.Label(context, "Size:", sizeLayout)
@@ -1179,6 +1179,12 @@ class ReviewTool(IToolWidget):
             lambda player: selfWeak() and selfWeak()._setPlayer(player))
 
         self._loadBellows(self._bellows)
+
+    def focusNote(self):
+        """
+        Set the keyboard focus to the note editor.
+        """
+        self._noteEdit.takeKeyFocus()
 
     def _setPlayer(self, player):
         self._player = player
@@ -1394,11 +1400,11 @@ class ReviewTool(IToolWidget):
                     player.currentTime = time
             frameButton.setClickedCallback(
                 lambda captured = note.time: seek(captured))
+            header.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
             createdLabel = ftk.Label(
                 context, _formatCreated(note.created), header)
             createdLabel.textRole = ftk.ColorRole.TextDisabled
             createdLabel.vAlign = ftk.VAlign.Center
-            header.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
             deleteButton = ftk.ToolButton(context, header)
             deleteButton.icon = "CloseSmall"
             deleteButton.tooltip = "Delete this note."
@@ -1455,6 +1461,9 @@ class ToolsWidget(ftk.IContainer):
         self._openObserver = ftk.StringListObserver(
             app.getToolsModel().observeOpenTools,
             lambda names: selfWeak()._openUpdate(names))
+
+    def getToolWidget(self, name):
+        return self._widgets.get(name)
 
     def _openUpdate(self, names):
         for name, widget in list(self._widgets.items()):

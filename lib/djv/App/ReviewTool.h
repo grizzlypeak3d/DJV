@@ -37,6 +37,9 @@ namespace djv
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Set the keyboard focus to the note editor.
+            void focusNote();
+
             void keyPressEvent(ftk::KeyEvent&) override;
             void keyReleaseEvent(ftk::KeyEvent&) override;
 

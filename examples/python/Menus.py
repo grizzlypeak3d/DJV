@@ -200,6 +200,15 @@ class Review(ftk.Menu):
         self.addAction(actions.actions["SaveAs"])
         self.addAction(actions.actions["Close"])
         self.recentMenu = self.addSubMenu("Recent")
+        self.addDivider();
+        self.addAction(actions.actions["Draw"])
+        self.addAction(actions.actions["Erase"])
+        self.addAction(actions.actions["Undo"])
+        self.addAction(actions.actions["Redo"])
+        self.addDivider();
+        self.addAction(actions.actions["AddNote"])
+        self.addAction(actions.actions["PrevFrame"])
+        self.addAction(actions.actions["NextFrame"])
 
         selfWeak = weakref.ref(self)
         self.recentObserver = ftk.PathListObserver(
@@ -262,9 +271,6 @@ class Frame(ftk.Menu):
         self.addAction(actions.actions["Next"])
         self.addAction(actions.actions["NextX10"])
         self.addAction(actions.actions["NextX100"])
-        self.addDivider();
-        self.addAction(actions.actions["PrevReview"])
-        self.addAction(actions.actions["NextReview"])
         self.addDivider();
         self.addAction(actions.actions["FocusCurrent"])
 

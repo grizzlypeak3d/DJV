@@ -92,6 +92,10 @@ namespace djv
             //! Focus the current frame widget.
             DJV_APP_API void focusCurrentFrame();
 
+            //! Open the review tool with the keyboard focus on the note
+            //! editor.
+            DJV_APP_API void focusReviewNote();
+
             //! Save the window settings.
             DJV_APP_API void saveSettings();
 

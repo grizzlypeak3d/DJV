@@ -22,6 +22,7 @@
 #include <djv/App/PlaybackActions.h>
 #include <djv/App/ReviewActions.h>
 #include <djv/App/ReviewMenu.h>
+#include <djv/App/ReviewTool.h>
 #include <djv/App/PlaybackMenu.h>
 #include <djv/App/StatusBar.h>
 #include <djv/App/TabBar.h>
@@ -208,7 +209,10 @@ namespace djv
             ftk::setScreenshotTag(p.timelineWidget, "MainWindow.Timeline");
 
             p.fileActions = FileActions::create(context, app);
-            p.reviewActions = ReviewActions::create(context, app);
+            p.reviewActions = ReviewActions::create(
+                context,
+                app,
+                std::dynamic_pointer_cast<MainWindow>(shared_from_this()));
             p.compareActions = CompareActions::create(context, app);
             p.playbackActions = PlaybackActions::create(context, app);
             p.frameActions = FrameActions::create(
@@ -301,6 +305,7 @@ namespace djv
                 app,
                 p.playbackActions,
                 p.frameActions,
+                p.reviewActions,
                 p.audioActions);
             ftk::setScreenshotTag(p.bottomToolBar, "MainWindow.BottomToolBar");
 
@@ -611,6 +616,21 @@ namespace djv
         void MainWindow::focusCurrentFrame()
         {
             _p->bottomToolBar->focusCurrentFrame();
+        }
+
+        void MainWindow::focusReviewNote()
+        {
+            FTK_P();
+            if (auto app = p.app.lock())
+            {
+                // Opening the tool creates it if this is the first time.
+                app->getToolsModel()->setToolOpen("Review", true);
+            }
+            if (auto reviewTool = std::dynamic_pointer_cast<ReviewTool>(
+                p.toolsWidget->getToolWidget("Review")))
+            {
+                reviewTool->focusNote();
+            }
         }
 
         void MainWindow::showAboutDialog()

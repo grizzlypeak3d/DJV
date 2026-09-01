@@ -35,6 +35,7 @@ class MainWindow(ftk.MainWindow):
     """
     def __init__(self, context, app):
 
+        self._app = weakref.ref(app)
         self._settingsModel = app.getSettingsModel()
         window = self._settingsModel.window
         ftk.MainWindow.__init__(self, context, app, window.size)
@@ -109,7 +110,8 @@ class MainWindow(ftk.MainWindow):
         self._toolsToolBar = ToolBars.Tools(context, self._toolsActions)
         self._windowToolBar = ToolBars.Window(context, self._windowActions)
         self._playbackBar = PlaybackBar.Widget(
-            context, app, self._playbackActions, self._frameActions)
+            context, app, self._playbackActions, self._frameActions,
+            self._reviewActions)
         self._tabBar = TabBar.Widget(context, app)
         self._statusBar = StatusBar.Widget(context, app, self)
 
@@ -229,6 +231,16 @@ class MainWindow(ftk.MainWindow):
 
     def focusCurrentFrame(self):
         self._playbackBar.focusCurrentFrame()
+
+    def focusReviewNote(self):
+        app = self._app()
+        if app is None:
+            return
+        # Opening the tool creates it if this is the first time.
+        app.getToolsModel().setToolOpen("Review", True)
+        widget = self._toolsWidget.getToolWidget("Review")
+        if widget is not None:
+            widget.focusNote()
 
     def setPresentMode(self, value):
         if self._presentMode.setIfChanged(value):

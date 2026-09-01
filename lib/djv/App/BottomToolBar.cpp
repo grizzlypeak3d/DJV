@@ -7,6 +7,7 @@
 #include <djv/App/AudioActions.h>
 #include <djv/App/FrameActions.h>
 #include <djv/App/PlaybackActions.h>
+#include <djv/App/ReviewActions.h>
 #include <djv/UI/AudioPopup.h>
 #include <djv/UI/SpeedPopup.h>
 #include <djv/UI/StatusIndicator.h>
@@ -76,6 +77,7 @@ namespace djv
             const std::shared_ptr<App>& app,
             const std::shared_ptr<PlaybackActions>& playbackActions,
             const std::shared_ptr<FrameActions>& frameActions,
+            const std::shared_ptr<ReviewActions>& reviewActions,
             const std::shared_ptr<AudioActions>& audioActions,
             const std::shared_ptr<IWidget>& parent)
         {
@@ -111,8 +113,10 @@ namespace djv
             p.buttons["Prev"]->setRepeatClick(true);
             p.buttons["Next"] = ftk::ToolButton::create(context, actions["Next"]);
             p.buttons["Next"]->setRepeatClick(true);
-            p.buttons["PrevReview"] = ftk::ToolButton::create(context, actions["PrevReview"]);
-            p.buttons["NextReview"] = ftk::ToolButton::create(context, actions["NextReview"]);
+
+            actions = reviewActions->getActions();
+            p.buttons["PrevReview"] = ftk::ToolButton::create(context, actions["PrevFrame"]);
+            p.buttons["NextReview"] = ftk::ToolButton::create(context, actions["NextFrame"]);
 
             p.frameShuttle = ftk::ShuttleWidget::create(context);
             p.frameShuttle->setTooltip("Frame shuttle. Click and drag to change the current frame.");
@@ -331,11 +335,12 @@ namespace djv
             const std::shared_ptr<App>& app,
             const std::shared_ptr<PlaybackActions>& playbackActions,
             const std::shared_ptr<FrameActions>& frameActions,
+            const std::shared_ptr<ReviewActions>& reviewActions,
             const std::shared_ptr<AudioActions>& audioActions,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<BottomToolBar>(new BottomToolBar);
-            out->_init(context, app, playbackActions, frameActions, audioActions, parent);
+            out->_init(context, app, playbackActions, frameActions, reviewActions, audioActions, parent);
             return out;
         }
 

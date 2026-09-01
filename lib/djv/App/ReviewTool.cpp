@@ -237,11 +237,11 @@ namespace djv
 
             p.undoButton = ftk::ToolButton::create(context, toolLayout);
             p.undoButton->setIcon("Undo");
-            p.undoButton->setTooltip("Undo.");
+            p.undoButton->setTooltip("Undo drawing.");
 
             p.redoButton = ftk::ToolButton::create(context, toolLayout);
             p.redoButton->setIcon("Redo");
-            p.redoButton->setTooltip("Redo.");
+            p.redoButton->setTooltip("Redo drawing.");
 
             auto sizeLayout = ftk::HorizontalLayout::create(context, drawingWidget);
             sizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -715,6 +715,12 @@ namespace djv
             IToolWidget::keyReleaseEvent(event);
         }
 
+        void ReviewTool::focusNote()
+        {
+            FTK_P();
+            p.noteEdit->takeKeyFocus();
+        }
+
         void ReviewTool::_publish()
         {
             FTK_P();
@@ -806,11 +812,11 @@ namespace djv
                         }
                     });
 
+                header->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
+
                 auto createdLabel = ftk::Label::create(context, formatCreated(note.created), header);
                 createdLabel->setTextRole(ftk::ColorRole::TextDisabled);
                 createdLabel->setVAlign(ftk::VAlign::Center);
-
-                header->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
 
                 auto deleteButton = ftk::ToolButton::create(context, header);
                 deleteButton->setIcon("CloseSmall");

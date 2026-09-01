@@ -36,6 +36,15 @@ namespace djv
             addAction(actions["SaveAs"]);
             addAction(actions["Close"]);
             p.recentMenu = addSubMenu("Recent");
+            addDivider();
+            addAction(actions["Draw"]);
+            addAction(actions["Erase"]);
+            addAction(actions["Undo"]);
+            addAction(actions["Redo"]);
+            addDivider();
+            addAction(actions["AddNote"]);
+            addAction(actions["PrevFrame"]);
+            addAction(actions["NextFrame"]);
 
             p.recentObserver = ftk::ListObserver<ftk::Path>::create(
                 app->getRecentReviewsModel()->observeRecent(),

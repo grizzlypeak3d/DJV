@@ -37,20 +37,6 @@ class Actions(IActions.IActions):
                 lambda args, captured = timeAction, \
                     f = Util.weak(self._timeAction): f(captured))
 
-        # Jump between the frames that carry a note or a drawing. In a
-        # review these are the only frames that matter, and stepping to
-        # them by hand over a long timeline is the slow part.
-        appWeak = weakref.ref(app)
-        self._addCommand(
-            "PrevReview",
-            "Go to the previous frame with a note or a drawing.",
-            lambda args: appWeak().seekReviewMarker(False))
-
-        self._addCommand(
-            "NextReview",
-            "Go to the next frame with a note or a drawing.",
-            lambda args: appWeak().seekReviewMarker(True))
-
         self._addCommand(
             "FocusCurrent",
             "Set the keyboard focus to the current frame editor.",
@@ -85,14 +71,6 @@ class Actions(IActions.IActions):
         self.actions["NextX100"] = ftk.Action(
             "Next Frame X100",
             self._command("NextX100"))
-        self.actions["PrevReview"] = ftk.Action(
-            "Previous Review",
-            "ReviewPrev",
-            self._command("PrevReview"))
-        self.actions["NextReview"] = ftk.Action(
-            "Next Review",
-            "ReviewNext",
-            self._command("NextReview"))
         self.actions["FocusCurrent"] = ftk.Action(
             "Focus Current Frame",
             self._command("FocusCurrent"))
@@ -110,25 +88,15 @@ class Actions(IActions.IActions):
             ftk.KeyShortcut(ftk.Key.Right, ftk.KeyModifier.Shift))
         self._addShortcut("NextX100", "Next X100",
             ftk.KeyShortcut(ftk.Key.Right, ftk.KeyModifier.Control))
-        # Shift and Control on the arrows are already taken by the X10
-        # and X100 steps.
-        self._addShortcut("PrevReview", "Previous review",
-            ftk.KeyShortcut(ftk.Key.Left, ftk.KeyModifier.Alt))
-        self._addShortcut("NextReview", "Next review",
-            ftk.KeyShortcut(ftk.Key.Right, ftk.KeyModifier.Alt))
         self._addShortcut("FocusCurrent", "Focus Current",
             ftk.KeyShortcut(ftk.Key.F, ftk.KeyModifier.Control))
 
         self._shortcutsUpdate(self._settingsModel.shortcuts)
 
         selfWeak = weakref.ref(self)
-        self._hasMarkers = False
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
             lambda player: selfWeak()._playerUpdate(player))
-        self._markersObserver = ftk.IntListObserver(
-            app.observeReviewMarkers(),
-            lambda markers: selfWeak()._markersUpdate(markers))
 
     def _timeAction(self, value):
         if self._player:
@@ -138,13 +106,3 @@ class Actions(IActions.IActions):
         self._player = player
         for action in self.actions.values():
             action.enabled = player != None
-        self._markersUpdate(None)
-
-    def _markersUpdate(self, markers):
-        if markers is not None:
-            self._hasMarkers = len(markers) > 0
-        # There is nowhere to jump until a frame carries a note or a
-        # drawing.
-        enabled = self._player is not None and self._hasMarkers
-        self.actions["PrevReview"].enabled = enabled
-        self.actions["NextReview"].enabled = enabled
