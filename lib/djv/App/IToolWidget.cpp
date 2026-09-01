@@ -51,10 +51,9 @@ namespace djv
             p.name = name;
 
             p.icon = ftk::Icon::create(context, icon);
-            p.icon->setMarginRole(ftk::SizeRole::MarginSmall);
 
             p.label = ftk::Label::create(context, name);
-            p.label->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.label->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
             p.label->setHStretch(ftk::Stretch::Expanding);
 
             p.closeButton = ftk::ToolButton::create(context);
@@ -63,6 +62,7 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::Border);
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
+            hLayout->setMarginRole(ftk::SizeRole::MarginInside);
             hLayout->setSpacingRole(ftk::SizeRole::None);
             // Coloured so that each tool reads as its own thing in a stack of
             // them, rather than the panel being one long column of controls.

@@ -1,9 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="100%" height="100%" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-    <g id="Layer-1" serif:id="Layer 1" transform="matrix(3.779528,0,0,3.779528,0,-1102.519611)">
-        <g transform="matrix(0.187089,0.187089,-0.187089,0.187089,2.645833,290.61237)">
-            <path d="M6.891,13.324L6.891,4.773C6.891,4.346 7.237,4 7.664,4L12.336,4C12.763,4 13.109,4.346 13.109,4.773L13.109,13.324L6.891,13.324ZM13.109,14.374L13.109,15.227C13.109,15.654 12.763,16 12.336,16L7.664,16C7.237,16 6.891,15.654 6.891,15.227L6.891,14.374L13.109,14.374Z" style="fill:rgb(240,240,240);"/>
-        </g>
-    </g>
+<svg
+   width="100%"
+   height="100%"
+   viewBox="0 0 20 20"
+   version="1.1"
+   xml:space="preserve"
+   style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"
+   id="svg1"
+   sodipodi:docname="Eraser.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs1" /><sodipodi:namedview
+   id="namedview1"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   showgrid="true"
+   inkscape:zoom="31.041988"
+   inkscape:cx="10.002581"
+   inkscape:cy="8.1824657"
+   inkscape:window-width="1442"
+   inkscape:window-height="1027"
+   inkscape:window-x="0"
+   inkscape:window-y="25"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="svg1"><inkscape:grid
+     id="grid1"
+     units="px"
+     originx="0"
+     originy="0"
+     spacingx="1"
+     spacingy="1"
+     empcolor="#0099e5"
+     empopacity="0.30196078"
+     color="#0099e5"
+     opacity="0.14901961"
+     empspacing="5"
+     enabled="true"
+     visible="true" /></sodipodi:namedview>
+    <path
+   id="rect1"
+   style="fill:#f0f0f0;fill-opacity:1;stroke-width:1.5"
+   d="m 7.1715729,17.071068 c 0.3917371,0.391737 1.0224764,0.391737 1.4142135,0 L 10.707107,14.949747 5.0502525,9.2928932 2.9289322,11.414214 c -0.3917372,0.391737 -0.3917372,1.022476 0,1.414213 z m 4.2426411,-2.828427 5.656854,-5.6568546 c 0.391737,-0.3917371 0.391737,-1.0224764 0,-1.4142135 L 12.828427,2.9289322 c -0.391737,-0.3917372 -1.022476,-0.3917372 -1.414213,0 L 5.7573593,8.5857864 Z" />
 </svg>
