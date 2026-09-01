@@ -39,6 +39,11 @@ namespace djv
                 PYBIND11_OVERRIDE(std::string, models::AppInfoModel, getDocsDirName);
             }
 
+            std::string getTitle() const override
+            {
+                PYBIND11_OVERRIDE(std::string, models::AppInfoModel, getTitle);
+            }
+
             std::string getStudioURL() const override
             {
                 PYBIND11_OVERRIDE(std::string, models::AppInfoModel, getStudioURL);
@@ -68,6 +73,8 @@ namespace djv
                 .def_property_readonly("version", &AppInfoModel::getVersion)
                 .def_property_readonly("commitDate", &AppInfoModel::getCommitDate)
                 .def_property_readonly("gitCommit", &AppInfoModel::getGitCommit)
+
+                .def_property_readonly("title", &AppInfoModel::getTitle)
 
                 .def_property_readonly("docsURL", &AppInfoModel::getDocsURL)
                 .def_property_readonly("docsSearchPath", &AppInfoModel::getDocsSearchPath)

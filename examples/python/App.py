@@ -429,6 +429,7 @@ class App(ftk.App):
         self._reviewPath = reviewPath
         self._reviewCarry = review
         self._recentReviewsModel.addRecent(ftk.Path(reviewPath))
+        self._updateWindowTitle()
 
         if missing:
             self._log(
@@ -561,6 +562,7 @@ class App(ftk.App):
         self._reviewPath = path
         self._reviewCarry = review
         self._recentReviewsModel.addRecent(ftk.Path(path))
+        self._updateWindowTitle()
 
     def saveReviewAs(self):
         """
@@ -622,6 +624,7 @@ class App(ftk.App):
         self._annotationsModel.clear()
         self._reviewPath = None
         self._reviewCarry = None
+        self._updateWindowTitle()
 
     def getReviewPath(self):
         return self._reviewPath
@@ -676,6 +679,14 @@ class App(ftk.App):
         markers = sorted(markers)
         self._reviewMarkers.setIfChanged(markers)
         self._window.getTimelineWidget().frameMarkers = markers
+
+    def _updateWindowTitle(self):
+        title = self._appInfoModel.title
+        if self._reviewPath is not None:
+            # Show the active review so the user can tell which one is
+            # open.
+            title += " - " + self._reviewPath
+        self._window.title = title
 
     def _log(self, message, logType):
         self.context.getSystemByName("ftk::LogSystem").print(

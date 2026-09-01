@@ -1381,9 +1381,7 @@ namespace djv
             {
                 return;
             }
-            std::string title = ftk::Format("{0} {1}").
-                arg(p.appInfoModel->getFullName()).
-                arg(p.appInfoModel->getVersion());
+            std::string title = p.appInfoModel->getTitle();
             if (!p.reviewPath.empty())
             {
                 // Show the active review so the user can tell which one is open,

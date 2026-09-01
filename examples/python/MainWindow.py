@@ -47,13 +47,7 @@ class MainWindow(ftk.MainWindow):
         iconSystem = context.getSystemByName("ftk::IconSystem")
         self.setIcon(iconSystem.get("DJV_Icon", 1.0))
 
-        # The title matches the C++ application: the version, and for a
-        # development build the commit as well.
-        info = app.getAppInfoModel()
-        title = "{} {}".format(info.fullName, info.version)
-        if info.versionDev:
-            title = "{} - {} {}".format(title, info.commitDate, info.gitCommit)
-        self.title = title
+        self.title = app.getAppInfoModel().title
 
         # Create the viewport and timeline, driven by the DJV models.
         self._viewport = djv.ui.Viewport(

@@ -103,6 +103,21 @@ namespace djv
                 "POSSIBILITY OF SUCH DAMAGE.";
         }
 
+        std::string AppInfoModel::getTitle() const
+        {
+            std::string out = ftk::Format("{0} {1}").
+                arg(getFullName()).
+                arg(getVersion());
+            if (!getVersionDev().empty())
+            {
+                out = ftk::Format("{0} - {1} {2}").
+                    arg(out).
+                    arg(getCommitDate()).
+                    arg(getGitCommit());
+            }
+            return out;
+        }
+
         std::string AppInfoModel::getDocsURL() const
         {
             const std::string searchPath = getDocsSearchPath();

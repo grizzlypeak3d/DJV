@@ -63,6 +63,12 @@ namespace djv
             //! \name Documentation
             ///@{
 
+            //! Get the window title: the name and the version, and for a
+            //! development build the commit date and hash as well, so that
+            //! two of them can be told apart. A release is identified by its
+            //! version, and the rest would be noise.
+            DJV_MODELS_API virtual std::string getTitle() const;
+
             //! Get the documentation installed beside the application, as a
             //! file URL, or empty when there is none.
             //!
