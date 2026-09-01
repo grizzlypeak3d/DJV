@@ -684,8 +684,10 @@ class App(ftk.App):
         title = self._appInfoModel.title
         if self._reviewPath is not None:
             # Show the active review so the user can tell which one is
-            # open.
-            title += " - " + self._reviewPath
+            # open. The name rather than the path, the way document
+            # titles usually read; the Recent Reviews menu is where the
+            # whole paths are.
+            title += " - " + os.path.basename(self._reviewPath)
         self._window.title = title
 
     def _log(self, message, logType):

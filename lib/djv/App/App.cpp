@@ -1384,9 +1384,11 @@ namespace djv
             std::string title = p.appInfoModel->getTitle();
             if (!p.reviewPath.empty())
             {
-                // Show the active review so the user can tell which one is open,
-                // with a trailing "*" while it has unsaved changes.
-                title += " - " + p.reviewPath.u8string();
+                // Show the active review so the user can tell which one is
+                // open, with a trailing "*" while it has unsaved changes. The
+                // name rather than the path, the way document titles usually
+                // read; the Recent Reviews menu is where the whole paths are.
+                title += " - " + p.reviewPath.filename().u8string();
                 if (p.reviewModified)
                 {
                     title += " *";
