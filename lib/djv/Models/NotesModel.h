@@ -27,7 +27,7 @@ namespace djv
             NotesModel();
 
         public:
-            ~NotesModel();
+            DJV_MODELS_API ~NotesModel();
 
             //! Create a new model.
             DJV_MODELS_API static std::shared_ptr<NotesModel> create();

@@ -38,7 +38,7 @@ namespace djv
             DrawModel();
 
         public:
-            ~DrawModel();
+            DJV_MODELS_API ~DrawModel();
 
             //! Create a new model.
             DJV_MODELS_API static std::shared_ptr<DrawModel> create(

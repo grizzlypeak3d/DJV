@@ -34,7 +34,7 @@ namespace djv
             AnnotationsModel();
 
         public:
-            ~AnnotationsModel();
+            DJV_MODELS_API ~AnnotationsModel();
 
             //! Create a new model.
             DJV_MODELS_API static std::shared_ptr<AnnotationsModel> create();

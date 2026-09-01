@@ -28,7 +28,7 @@ namespace djv
             RangesModel();
 
         public:
-            ~RangesModel();
+            DJV_MODELS_API ~RangesModel();
 
             //! Create a new model.
             DJV_MODELS_API static std::shared_ptr<RangesModel> create();
