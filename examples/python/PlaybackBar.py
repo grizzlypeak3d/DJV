@@ -42,7 +42,8 @@ class Widget(ftk.IContainer):
         self._playbackShuttle.tooltip = \
             "Playback shuttle. Click and drag to change playback speed."
 
-        for name in ["Start", "Prev", "Next", "End"]:
+        for name in ["Start", "Prev", "Next", "End",
+                     "PrevMarker", "NextMarker"]:
             self._buttons[name] = ftk.ToolButton(
                 context, frameActions.actions[name])
         self._buttons["Prev"].repeatClick = True
@@ -101,6 +102,12 @@ class Widget(ftk.IContainer):
         self._buttons["Next"].parent = hLayout2
         self._buttons["End"].parent = hLayout2
         self._frameShuttle.parent = hLayout2
+        # The review jumps sit with the frame navigation: they are the
+        # same gesture, on the frames that carry a note or a drawing.
+        hLayout2 = ftk.HorizontalLayout(context, hLayout)
+        hLayout2.spacingRole = ftk.SizeRole._None
+        self._buttons["PrevMarker"].parent = hLayout2
+        self._buttons["NextMarker"].parent = hLayout2
         self._currentTimeEdit.parent = hLayout
         self._durationLabel.parent = hLayout
         self._timeUnitsWidget.parent = hLayout

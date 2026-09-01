@@ -252,6 +252,9 @@ class Frame(ftk.Menu):
         self.addAction(actions.actions["NextX10"])
         self.addAction(actions.actions["NextX100"])
         self.addDivider();
+        self.addAction(actions.actions["PrevMarker"])
+        self.addAction(actions.actions["NextMarker"])
+        self.addDivider();
         self.addAction(actions.actions["FocusCurrent"])
 
 class Timeline(ftk.Menu):

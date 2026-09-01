@@ -618,6 +618,57 @@ class App(ftk.App):
     def getReviewPath(self):
         return self._reviewPath
 
+    def getReviewMarkers(self):
+        return list(self._reviewMarkers.get())
+
+    def observeReviewMarkers(self):
+        """
+        Observe the frames that carry a note or a drawing, sorted.
+        """
+        return self._reviewMarkers
+
+    def seekReviewMarker(self, next):
+        """
+        Go to the next or previous frame with a note or a drawing.
+        """
+        markers = self._reviewMarkers.get()
+        player = self._player.get()
+        if not markers or player is None:
+            return
+        currentTime = player.currentTime
+        current = int(currentTime.value)
+        if next:
+            # The first marker strictly after the playhead, or wrap
+            # around to the first one so the button never becomes a
+            # dead end.
+            following = [m for m in markers if m > current]
+            target = following[0] if following else markers[0]
+        else:
+            preceding = [m for m in markers if m < current]
+            target = preceding[-1] if preceding else markers[-1]
+        player.stop()
+        player.currentTime = otio.opentime.RationalTime(
+            target, currentTime.rate)
+
+    def _reviewMarkersUpdate(self):
+        # Mark the frames that carry a note or a drawing in the
+        # timeline. The markers are deliberately undifferentiated --
+        # they say "there is something here" -- and follow the
+        # timeline, which shows "A".
+        markers = set()
+        for note in self._notesModel.notes:
+            if note.time is not None:
+                markers.add(int(note.time.value))
+        # Every annotation is stamped with the player's time, which is
+        # the timeline's own clock, so a drawing made on a "B" source
+        # still marks the right place.
+        for annotation in self._annotationsModel.annotations:
+            if annotation.time is not None:
+                markers.add(int(annotation.time.value))
+        markers = sorted(markers)
+        self._reviewMarkers.setIfChanged(markers)
+        self._window.getTimelineWidget().frameMarkers = markers
+
     def _log(self, message, logType):
         self.context.getSystemByName("ftk::LogSystem").print(
             "djv.App", message, logType)
@@ -811,6 +862,7 @@ class App(ftk.App):
         self._reviewCarry = None
         self._pendingReviewView = None
         self._reviewViewTimer = None
+        self._reviewMarkers = ftk.ObservableIntList([])
 
         # Initialize the file browser.
         fileBrowserSystem = self.context.getSystemByName("ftk::FileBrowserSystem")
@@ -838,6 +890,13 @@ class App(ftk.App):
         self._styleSettingsObserver = djv.models.StyleSettingsObserver(
             self._settingsModel.observeStyle,
             lambda value: selfWeak()._styleUpdate(value))
+        self._notesMarkersObserver = djv.models.ReviewNoteListObserver(
+            self._notesModel.observeNotes,
+            lambda value: selfWeak()._reviewMarkersUpdate())
+        self._annotationsMarkersObserver = \
+            djv.models.ReviewAnnotationListObserver(
+                self._annotationsModel.observeAnnotations,
+                lambda value: selfWeak()._reviewMarkersUpdate())
 
         if self._cmdLineSysInfo.found:
             print("\n".join(djv.ui.getSysInfo(
