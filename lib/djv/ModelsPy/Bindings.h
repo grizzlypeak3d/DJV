@@ -17,9 +17,12 @@ namespace djv
         void commandsModel(pybind11::module_&);
         void drawModel(pybind11::module_&);
         void filesModel(pybind11::module_&);
+        void notesModel(pybind11::module_&);
         void ocioModel(pybind11::module_&);
         void playlist(pybind11::module_&);
+        void rangesModel(pybind11::module_&);
         void recentFilesModel(pybind11::module_&);
+        void review(pybind11::module_&);
         void settingsModel(pybind11::module_&);
         void shortcuts(pybind11::module_&);
         void timeUnitsModel(pybind11::module_&);

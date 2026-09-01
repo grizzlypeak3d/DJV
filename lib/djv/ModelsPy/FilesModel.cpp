@@ -24,6 +24,7 @@ namespace djv
 
             py::class_<FilesModelItem, std::shared_ptr<FilesModelItem> >(m, "FilesModelItem")
                 .def(py::init<>())
+                .def_readwrite("id", &FilesModelItem::id)
                 .def_readwrite("path", &FilesModelItem::path)
                 .def_readwrite("audioPath", &FilesModelItem::audioPath)
                 .def_readwrite("videoLayers", &FilesModelItem::videoLayers)

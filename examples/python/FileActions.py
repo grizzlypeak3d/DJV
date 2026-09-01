@@ -89,6 +89,28 @@ class Actions(IActions.IActions):
             lambda args: appWeak().getFilesModel().prevLayer())
 
         self._addCommand(
+            "OpenReview",
+            "Open a review, replacing the current session.",
+            lambda args: appWeak().openReview(args["fileName"])
+                if args and "fileName" in args
+                else appWeak().openReviewDialog())
+
+        self._addCommand(
+            "SaveReview",
+            "Save the current session as a review.",
+            lambda args: appWeak().saveReview())
+
+        self._addCommand(
+            "SaveReviewAs",
+            "Save the current session as a new review.",
+            lambda args: appWeak().saveReviewAs())
+
+        self._addCommand(
+            "CloseReview",
+            "Close the review and reset to the startup state.",
+            lambda args: appWeak().closeReview())
+
+        self._addCommand(
             "Exit",
             "Exit the application.",
             lambda args: appWeak().exit())
@@ -113,6 +135,18 @@ class Actions(IActions.IActions):
             self._command("SavePlaylist"))
         self.actions["SavePlaylist"].tooltip = (
             "Save the file list as a \".otio\" playlist.")
+        self.actions["OpenReview"] = ftk.Action(
+            "Open Review",
+            self._command("OpenReview"))
+        self.actions["SaveReview"] = ftk.Action(
+            "Save Review",
+            self._command("SaveReview"))
+        self.actions["SaveReviewAs"] = ftk.Action(
+            "Save Review As...",
+            self._command("SaveReviewAs"))
+        self.actions["CloseReview"] = ftk.Action(
+            "Close Review",
+            self._command("CloseReview"))
         self.actions["Close"] = ftk.Action(
             "Close",
             "FileClose",
@@ -153,6 +187,15 @@ class Actions(IActions.IActions):
         self._addShortcut("Open", ftk.KeyShortcut(ftk.Key.O, ftk.commandKeyModifier))
         self._addShortcut("OpenAudio", ftk.KeyShortcut(
             ftk.Key.O, ftk.KeyModifier.Shift, ftk.commandKeyModifier))
+        # Alt rather than Shift on the command modifier: Shift+Ctrl+O is
+        # "Open with audio", and Shift+Ctrl+S is free but keeping the
+        # pair symmetrical is worth more than reusing it.
+        self._addShortcut("OpenReview", "Open review", ftk.KeyShortcut(
+            ftk.Key.O, ftk.KeyModifier.Alt, ftk.commandKeyModifier))
+        self._addShortcut("SaveReview", "Save review", ftk.KeyShortcut(
+            ftk.Key.S, ftk.KeyModifier.Alt, ftk.commandKeyModifier))
+        self._addShortcut("SaveReviewAs", "Save review as")
+        self._addShortcut("CloseReview", "Close review")
         self._addShortcut("Close", ftk.KeyShortcut(ftk.Key.E, ftk.commandKeyModifier))
         self._addShortcut("CloseAll", ftk.KeyShortcut(
             ftk.Key.E, ftk.KeyModifier.Shift, ftk.commandKeyModifier))
@@ -200,6 +243,11 @@ class Actions(IActions.IActions):
         self.actions["Close"].enabled = enabled
         self.actions["CloseAll"].enabled = enabled
         self.actions["Reload"].enabled = enabled
+        # There is nothing to save, and nothing to close, until a file
+        # is open. Opening a review stays available.
+        self.actions["SaveReview"].enabled = enabled
+        self.actions["SaveReviewAs"].enabled = enabled
+        self.actions["CloseReview"].enabled = enabled
         self.actions["Next"].enabled = len(files) > 1
         self.actions["Prev"].enabled = len(files) > 1
 

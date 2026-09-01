@@ -19,23 +19,42 @@ class File(ftk.Menu):
         ftk.Menu.__init__(self, context, parent)
 
         self._app = weakref.ref(app)
+        self._currentActions = []
+        self._layersActions = []
+        self._mediaReferencesActions = []
+        self._mediaReferenceKeys = []
+        self._player = None
+        self._mediaReferenceKeyObserver = None
 
+        # Getting things in and out first -- files, playlists and
+        # reviews, three groups of the same shape -- then what acts
+        # on the current file, then leaving.
         self.addAction(actions.actions["Open"])
         self.addAction(actions.actions["OpenAudio"])
+        self.recentMenu = self.addSubMenu("Recent")
         self.addAction(actions.actions["Close"])
         self.addAction(actions.actions["CloseAll"])
         self.addAction(actions.actions["Reload"])
-        self.recentMenu = self.addSubMenu("Recent")
         self.addDivider();
         self.addAction(actions.actions["OpenPlaylist"])
         self.addAction(actions.actions["SavePlaylist"])
+        self.recentPlaylistsMenu = self.addSubMenu("Recent Playlists")
         self.addDivider();
+        self.addAction(actions.actions["OpenReview"])
+        self.addAction(actions.actions["SaveReview"])
+        self.addAction(actions.actions["SaveReviewAs"])
+        self.addAction(actions.actions["CloseReview"])
+        self.recentReviewsMenu = self.addSubMenu("Recent Reviews")
+        self.addDivider();
+        self.currentMenu = self.addSubMenu("Current")
         self.addAction(actions.actions["Next"])
         self.addAction(actions.actions["Prev"])
         self.addDivider();
+        self.layersMenu = self.addSubMenu("Layers")
         self.addAction(actions.actions["NextLayer"])
         self.addAction(actions.actions["PrevLayer"])
         self.addDivider();
+        self.mediaReferencesMenu = self.addSubMenu("Media References")
         self.addAction(actions.actions["NextMediaReference"])
         self.addDivider();
         self.addAction(actions.actions["Exit"])
@@ -44,6 +63,27 @@ class File(ftk.Menu):
         self.recentObserver = ftk.PathListObserver(
             app.getRecentFilesModel().observeRecent,
             lambda recentList: selfWeak()._recentUpdate(recentList))
+        self.recentPlaylistsObserver = ftk.PathListObserver(
+            app.getRecentPlaylistsModel().observeRecent,
+            lambda recentList: selfWeak()._recentPlaylistsUpdate(recentList))
+        self.recentReviewsObserver = ftk.PathListObserver(
+            app.getRecentReviewsModel().observeRecent,
+            lambda recentList: selfWeak()._recentReviewsUpdate(recentList))
+        self._filesObserver = djv.models.FilesModelItemListObserver(
+            app.getFilesModel().observeFiles,
+            lambda files: selfWeak()._filesUpdate(files))
+        self._aObserver = djv.models.FilesModelItemObserver(
+            app.getFilesModel().observeA,
+            lambda item: selfWeak()._aUpdate(item))
+        self._aIndexObserver = ftk.IntObserver(
+            app.getFilesModel().observeAIndex,
+            lambda index: selfWeak()._aIndexUpdate(index))
+        self._layersObserver = ftk.IntListObserver(
+            app.getFilesModel().observeLayers,
+            lambda layers: selfWeak()._layersUpdate(layers))
+        self._playerObserver = tl.PlayerObserver(
+            app.observePlayer(),
+            lambda player: selfWeak()._setPlayer(player))
 
     def _recentCallback(self, recent):
         if (self._app):
@@ -57,6 +97,116 @@ class File(ftk.Menu):
                 lambda captured = recent, \
                     f = Util.weak(self._recentCallback): f(captured))
             self.recentMenu.addAction(action)
+
+    def _recentPlaylistCallback(self, recent):
+        if (self._app):
+            self._app().openPlaylist(recent)
+
+    def _recentPlaylistsUpdate(self, recentList):
+        self.recentPlaylistsMenu.clear()
+        for recent in reversed(recentList):
+            action = ftk.Action(
+                recent.getFileName(True),
+                lambda captured = recent, \
+                    f = Util.weak(self._recentPlaylistCallback): f(captured))
+            self.recentPlaylistsMenu.addAction(action)
+
+    def _recentReviewCallback(self, recent):
+        if (self._app):
+            self._app().openReview(recent.getFileName(True))
+
+    def _recentReviewsUpdate(self, recentList):
+        self.recentReviewsMenu.clear()
+        for recent in reversed(recentList):
+            action = ftk.Action(
+                recent.getFileName(True),
+                lambda captured = recent, \
+                    f = Util.weak(self._recentReviewCallback): f(captured))
+            self.recentReviewsMenu.addAction(action)
+
+    def _setA(self, index):
+        self.close()
+        if self._app():
+            self._app().getFilesModel().setA(index)
+
+    def _filesUpdate(self, files):
+        self.currentMenu.clear()
+        self._currentActions = []
+        for i, item in enumerate(files):
+            action = ftk.Action(
+                item.path.fileName,
+                lambda captured = i, f = Util.weak(self._setA): f(captured))
+            self.currentMenu.addAction(action)
+            self._currentActions.append(action)
+
+    def _setLayer(self, item, index):
+        self.close()
+        if self._app():
+            self._app().getFilesModel().setLayer(item, index)
+
+    def _aUpdate(self, item):
+        self.layersMenu.clear()
+        self._layersActions = []
+        if item:
+            for i, layer in enumerate(item.videoLayers):
+                action = ftk.Action(
+                    layer,
+                    lambda captured = (item, i), \
+                        f = Util.weak(self._setLayer): f(*captured))
+                action.checked = i == item.videoLayer
+                self.layersMenu.addAction(action)
+                self._layersActions.append(action)
+
+    def _aIndexUpdate(self, index):
+        for i, action in enumerate(self._currentActions):
+            self.currentMenu.setChecked(action, i == index)
+
+    def _layersUpdate(self, layers):
+        if self._app():
+            a = self._app().getFilesModel().a
+            if a:
+                for i, action in enumerate(self._layersActions):
+                    self.layersMenu.setChecked(action, i == a.videoLayer)
+
+    def _setMediaReferenceKey(self, key):
+        self.close()
+        if self._player:
+            self._player.mediaReferenceKey = key
+
+    def _setPlayer(self, player):
+        self._player = player
+        # The list of keys is rebuilt first, so that the observer below
+        # has actions to check when it reports the current key.
+        self._mediaReferenceKeyObserver = None
+        self._mediaReferencesUpdate()
+        if player:
+            selfWeak = weakref.ref(self)
+            self._mediaReferenceKeyObserver = ftk.StringObserver(
+                player.observeMediaReferenceKey,
+                lambda key: selfWeak()._mediaReferenceKeyUpdate(key))
+
+    def _mediaReferencesUpdate(self):
+        self.mediaReferencesMenu.clear()
+        self._mediaReferencesActions = []
+        self._mediaReferenceKeys = []
+        if self._player:
+            # The empty key leaves each clip on the media reference it
+            # was authored with, which is where a timeline starts.
+            keys = [""] + list(self._player.mediaReferenceKeys)
+            for key in keys:
+                action = ftk.Action(
+                    key if key else "As Authored",
+                    lambda captured = key, \
+                        f = Util.weak(self._setMediaReferenceKey): f(captured))
+                self.mediaReferencesMenu.addAction(action)
+                self._mediaReferencesActions.append(action)
+                self._mediaReferenceKeys.append(key)
+            self._mediaReferenceKeyUpdate(self._player.mediaReferenceKey)
+
+    def _mediaReferenceKeyUpdate(self, key):
+        for i, action in enumerate(self._mediaReferencesActions):
+            self.mediaReferencesMenu.setChecked(
+                action, self._mediaReferenceKeys[i] == key)
 
 class Playback(ftk.Menu):
     """

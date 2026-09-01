@@ -20,9 +20,12 @@ namespace djv
             commandsModel(mModels);
             drawModel(mModels);
             filesModel(mModels);
+            notesModel(mModels);
             ocioModel(mModels);
             playlist(mModels);
+            rangesModel(mModels);
             recentFilesModel(mModels);
+            review(mModels);
             settingsModel(mModels);
             shortcuts(mModels);
             timeUnitsModel(mModels);

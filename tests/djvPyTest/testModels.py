@@ -253,6 +253,57 @@ class ModelsTest(unittest.TestCase):
         model.clear()
         self.assertEqual(0, len(model.annotations))
 
+    def test_notesModel(self):
+        import opentimelineio as otio
+        model = djv.models.NotesModel()
+        t = otio.opentime.RationalTime(3.0, 24.0)
+        model.add(t, "first")
+        model.add(None, "no frame")
+        self.assertEqual(2, len(model.notes))
+        self.assertEqual("first", model.notes[0].text)
+        self.assertTrue(djv.models.sameTime(model.notes[0].time, t))
+        self.assertIsNone(model.notes[1].time)
+        model.remove(model.notes[0].id)
+        self.assertEqual(1, len(model.notes))
+        model.clear()
+        self.assertEqual(0, len(model.notes))
+
+    def test_rangesModel(self):
+        import opentimelineio as otio
+        model = djv.models.RangesModel()
+        r = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0.0, 24.0),
+            otio.opentime.RationalTime(10.0, 24.0))
+        model.add(r, "intro")
+        self.assertEqual(1, len(model.ranges))
+        self.assertEqual("intro", model.ranges[0].name)
+        self.assertTrue(djv.models.sameRange(model.ranges[0].range, r))
+        model.remove(model.ranges[0].id)
+        self.assertEqual(0, len(model.ranges))
+
+    def test_review(self):
+        import opentimelineio as otio
+        review = djv.models.Review()
+        review.app = "test"
+        review.created = djv.models.timestamp()
+        f = djv.models.ReviewFile()
+        f.id = djv.models.generateId()
+        f.path = "shot/comp.mov"
+        review.files = [f]
+        note = djv.models.ReviewNote()
+        note.id = djv.models.generateId()
+        note.text = "hello"
+        note.time = otio.opentime.RationalTime(12.0, 24.0)
+        review.notes = [note]
+        path = os.path.join(self.tempDir, "test.djvr")
+        djv.models.reviewSave(path, review)
+        review2 = djv.models.reviewOpen(path)
+        self.assertEqual(djv.models.reviewVersion, review2.version)
+        self.assertEqual("shot/comp.mov", review2.files[0].path)
+        self.assertEqual([note], review2.notes)
+        self.assertEqual([], review2.unreadSections)
+        review2.carryUnread(review2)
+
     def test_drawModel(self):
         model = djv.models.DrawModel(self.settings)
 

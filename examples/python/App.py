@@ -8,6 +8,7 @@ import djvPy as djv
 
 import MainWindow
 
+import os
 import weakref
 
 class AppInfoModel(djv.models.AppInfoModel):
@@ -108,6 +109,18 @@ class App(ftk.App):
     def getDrawModel(self):
         return self._drawModel
 
+    def getNotesModel(self):
+        return self._notesModel
+
+    def getRangesModel(self):
+        return self._rangesModel
+
+    def getRecentReviewsModel(self):
+        return self._recentReviewsModel
+
+    def getRecentPlaylistsModel(self):
+        return self._recentPlaylistsModel
+
     def getSysLogModel(self):
         return self._sysLogModel
 
@@ -135,6 +148,9 @@ class App(ftk.App):
         options.seq = True
         for i in tl.getPaths(self.context, path, options):
             item = djv.models.FilesModelItem()
+            # Annotations reference their source by this identity, so it
+            # has to exist from the moment the file is opened.
+            item.id = djv.models.generateId()
             item.path = i
             if audioPath is not None:
                 item.audioPath = audioPath
@@ -161,6 +177,7 @@ class App(ftk.App):
                 "djv.App",
                 "{0}: {1}".format(path.getFileName(), ", ".join(report)),
                 ftk.LogType.Warning)
+        self._recentPlaylistsModel.addRecent(path)
 
     def openPlaylistDialog(self):
         """
@@ -203,6 +220,7 @@ class App(ftk.App):
             fileName,
             playlist,
             self._settingsModel.imageSeq.io.defaultSpeed)
+        self._recentPlaylistsModel.addRecent(ftk.Path(fileName))
 
     def savePlaylistDialog(self):
         """
@@ -219,6 +237,302 @@ class App(ftk.App):
             self._window,
             lambda path: selfWeak() and selfWeak().savePlaylist(path),
             options)
+
+    def openReview(self, path):
+        """
+        Open a review, replacing the current session.
+        """
+        path = str(path)
+        try:
+            review = djv.models.reviewOpen(path)
+        except RuntimeError as e:
+            self._log(str(e), ftk.LogType.Error)
+            return
+        for section in review.unreadSections:
+            self._log(
+                "Review \"{}\": the \"{}\" section could not be read "
+                "and was left as it was.".format(path, section),
+                ftk.LogType.Warning)
+        self._applyReview(review, os.path.dirname(path), path)
+
+    def _applyReview(self, review, base, reviewPath):
+        pathOptions = ftk.PathOptions()
+        pathOptions.seqMaxDigits = self._settingsModel.imageSeq.maxDigits
+
+        # Replace the current session.
+        self._filesModel.closeAll()
+
+        missing = []
+        for rf in review.files:
+            resolved, exists = djv.models.resolveReviewPath(
+                rf.path, rf.pathAbsolute, base, "", pathOptions)
+            if not exists:
+                missing.append(str(resolved))
+            item = djv.models.FilesModelItem()
+            item.id = rf.id if rf.id else djv.models.generateId()
+            item.path = ftk.Path(str(resolved), pathOptions)
+            if rf.audioPath or rf.audioPathAbsolute:
+                audio, audioExists = djv.models.resolveReviewPath(
+                    rf.audioPath, rf.audioPathAbsolute, base, "", pathOptions)
+                if not audioExists:
+                    missing.append(str(audio))
+                item.audioPath = ftk.Path(str(audio), pathOptions)
+            item.videoLayer = max(0, rf.videoLayer)
+            item.speed = rf.speed
+            item.currentTime = rf.currentTime
+            item.inOutRange = rf.inOutRange
+            # Add directly rather than through open(), which would
+            # re-expand a directory entry into multiple files.
+            self._filesModel.add(item)
+
+        # Rebuild the comparison. Order matters: setting the compare
+        # options may pick a "B" of its own when none is set, so clear
+        # and rebuild "B" after it, then set "A".
+        files = self._filesModel.files
+        def indexOfId(id):
+            for i, item in enumerate(files):
+                if item.id == id:
+                    return i
+            return -1
+        self._filesModel.compareOptions = review.compare.options
+        self._filesModel.clearB()
+        for bId in review.compare.bIds:
+            index = indexOfId(bId)
+            if index >= 0:
+                self._filesModel.setB(index, True)
+        aIndex = indexOfId(review.compare.aId)
+        if aIndex < 0 and files:
+            aIndex = 0
+        if aIndex >= 0:
+            self._filesModel.setA(aIndex)
+        self._filesModel.compareTime = review.compare.time
+
+        # Color and image display.
+        self._colorModel.ocioOptions = review.color.ocio
+        self._colorModel.lutOptions = review.color.lut
+        self._viewportModel.displayOptions = review.color.display
+        self._viewportModel.backgroundOptions = review.color.background
+        self._viewportModel.foregroundOptions = review.color.foreground
+        self._viewportModel.aspectRatioOptions = review.color.aspectRatio
+        self._viewportModel.hudOptions = review.color.hud
+
+        # Interface.
+        self._toolsModel.closeTools()
+        for tool in review.ui.openTools:
+            self._toolsModel.setToolOpen(tool, True)
+
+        self._notesModel.setNotes(review.notes)
+        self._rangesModel.setRanges(review.ranges)
+        self._annotationsModel.setAnnotations(review.annotations)
+
+        # View state is applied once the new player's initial auto-frame
+        # has settled.
+        self._pendingReviewView = review.view
+        self._applyReviewView()
+
+        self._reviewPath = reviewPath
+        self._reviewCarry = review
+        self._recentReviewsModel.addRecent(ftk.Path(reviewPath))
+
+        if missing:
+            self._log(
+                "Review \"{}\": {} file(s) not found: {}".format(
+                    reviewPath, len(missing), ", ".join(missing)),
+                ftk.LogType.Warning)
+
+    def _applyReviewView(self):
+        view = self._pendingReviewView
+        if view is None:
+            return
+        viewport = self._window.getViewport()
+        if view.frameView:
+            viewport.frameView = True
+            self._pendingReviewView = None
+        else:
+            # Defer past the initial auto-frame that the new player
+            # triggers on the next layout pass. Setting the position and
+            # zoom disables frame view, so no later re-frame overrides it.
+            selfWeak = weakref.ref(self)
+            def apply():
+                self_ = selfWeak()
+                if self_ is None or self_._pendingReviewView is None:
+                    return
+                view = self_._pendingReviewView
+                self_._window.getViewport().setViewPosAndZoom(
+                    view.pos, view.zoom)
+                self_._pendingReviewView = None
+            self._reviewViewTimer = ftk.Timer(self.context)
+            self._reviewViewTimer.start(0.2, apply)
+
+    def _buildReview(self, base):
+        review = djv.models.Review()
+        review.app = "{} {}".format(
+            self._appInfoModel.fullName, self._appInfoModel.version)
+        review.created = djv.models.timestamp()
+        # Carry what the review we last loaded held but we could not
+        # use, so the save does not replace it with what we fell back
+        # to.
+        if self._reviewCarry is not None:
+            review.carryUnread(self._reviewCarry)
+
+        files = self._filesModel.files
+        reviewFiles = []
+        for item in files:
+            rf = djv.models.ReviewFile()
+            rf.id = item.id
+            rf.pathAbsolute = djv.models.reviewGenericPath(
+                item.path.getFileName(True))
+            rf.path = djv.models.reviewRelativePath(
+                item.path.getFileName(True), base)
+            # The separate audio travels with the review like the file
+            # does: stored absolute only, it would not survive the move.
+            audio = item.audioPath.getFileName(True)
+            rf.audioPath = djv.models.reviewRelativePath(audio, base)
+            rf.audioPathAbsolute = djv.models.reviewGenericPath(audio)
+            rf.videoLayer = item.videoLayer
+            rf.speed = item.speed
+            rf.currentTime = item.currentTime
+            rf.inOutRange = item.inOutRange
+            reviewFiles.append(rf)
+
+        # Persist the live playback state of the active file, which the
+        # model item only receives when the file is switched away from.
+        player = self._player.get()
+        aIndex = self._filesModel.aIndex
+        if player and 0 <= aIndex < len(reviewFiles):
+            reviewFiles[aIndex].speed = player.speed
+            reviewFiles[aIndex].currentTime = player.currentTime
+            reviewFiles[aIndex].inOutRange = player.inOutRange
+        review.files = reviewFiles
+
+        compare = djv.models.ReviewCompare()
+        if 0 <= aIndex < len(files):
+            compare.aId = files[aIndex].id
+        bIds = []
+        for bIndex in self._filesModel.bIndexes:
+            if 0 <= bIndex < len(files):
+                bIds.append(files[bIndex].id)
+        compare.bIds = bIds
+        compare.options = self._filesModel.compareOptions
+        compare.time = self._filesModel.compareTime
+        review.compare = compare
+
+        viewport = self._window.getViewport()
+        view = djv.models.ReviewView()
+        view.frameView = viewport.frameView
+        view.pos = viewport.viewPos
+        view.zoom = viewport.zoom
+        review.view = view
+
+        color = djv.models.ReviewColor()
+        color.ocio = self._colorModel.ocioOptions
+        color.lut = self._colorModel.lutOptions
+        color.display = self._viewportModel.displayOptions
+        color.background = self._viewportModel.backgroundOptions
+        color.foreground = self._viewportModel.foregroundOptions
+        color.aspectRatio = self._viewportModel.aspectRatioOptions
+        color.hud = self._viewportModel.hudOptions
+        review.color = color
+
+        ui = djv.models.ReviewUI()
+        ui.openTools = self._toolsModel.openTools
+        review.ui = ui
+
+        review.notes = self._notesModel.notes
+        review.ranges = self._rangesModel.ranges
+        review.annotations = self._annotationsModel.annotations
+
+        return review
+
+    def saveReview(self, path = None):
+        """
+        Save the current session as a review. Without a path, the
+        review's own path is used, and without one of those the save
+        dialog is shown.
+        """
+        if path is None:
+            if self._reviewPath is None:
+                self.saveReviewAs()
+                return
+            path = self._reviewPath
+        path = str(path)
+        review = self._buildReview(os.path.dirname(path))
+        try:
+            djv.models.reviewSave(path, review)
+        except RuntimeError as e:
+            self._log(str(e), ftk.LogType.Error)
+            return
+        self._reviewPath = path
+        self._reviewCarry = review
+        self._recentReviewsModel.addRecent(ftk.Path(path))
+
+    def saveReviewAs(self):
+        """
+        Open the dialog for choosing where to save a review.
+        """
+        selfWeak = weakref.ref(self)
+        def callback(path):
+            self_ = selfWeak()
+            if self_ is None:
+                return
+            fileName = path.getFileName(True)
+            ext = djv.models.reviewExtension()
+            if path.ext.lower() != ext:
+                # Auto-complete the extension when the user types a
+                # bare name.
+                fileName = os.path.splitext(fileName)[0] + ext
+            self_.saveReview(fileName)
+        self._reviewFileDialog(ftk.FileBrowserMode.Save, "Save Review", callback)
+
+    def openReviewDialog(self):
+        """
+        Open the dialog for choosing a review to open.
+        """
+        selfWeak = weakref.ref(self)
+        self._reviewFileDialog(
+            ftk.FileBrowserMode.Open,
+            "Open Review",
+            lambda path: selfWeak() and selfWeak().openReview(
+                path.getFileName(True)))
+
+    def _reviewFileDialog(self, mode, title, callback):
+        options = ftk.FileBrowserOpenOptions()
+        options.title = title
+        if self._reviewPath is not None:
+            options.path = os.path.dirname(self._reviewPath)
+        options.mode = mode
+        if ftk.FileBrowserMode.Save == mode:
+            # The review's own name where there is one, the way the
+            # playlists suggest "playlist.otio".
+            options.fileName = (
+                os.path.basename(self._reviewPath)
+                if self._reviewPath is not None
+                else "review" + djv.models.reviewExtension())
+        options.extensions = [djv.models.reviewExtension()]
+        options.extensionsLabel = "Review Session"
+        self.context.getSystemByName("ftk::FileBrowserSystem").open(
+            self._window, callback, options)
+
+    def closeReview(self):
+        """
+        Close the review and reset to the startup state.
+        """
+        self._filesModel.closeAll()
+        compareOptions = tl.CompareOptions()
+        compareOptions.compare = tl.Compare._None
+        self._filesModel.compareOptions = compareOptions
+        self._notesModel.clear()
+        self._rangesModel.clear()
+        self._annotationsModel.clear()
+        self._reviewPath = None
+        self._reviewCarry = None
+
+    def getReviewPath(self):
+        return self._reviewPath
+
+    def _log(self, message, logType):
+        self.context.getSystemByName("ftk::LogSystem").print(
+            "djv.App", message, logType)
 
     def reload(self):
         """
@@ -284,6 +598,12 @@ class App(ftk.App):
         self._toolsModel = djv.models.ToolsModel(self._settings)
         self._annotationsModel = djv.models.AnnotationsModel()
         self._drawModel = djv.models.DrawModel(self._settings)
+        self._notesModel = djv.models.NotesModel()
+        self._rangesModel = djv.models.RangesModel()
+        self._recentReviewsModel = djv.models.RecentFilesModel(
+            self.context, self._settings, "Review")
+        self._recentPlaylistsModel = djv.models.RecentFilesModel(
+            self.context, self._settings, "Playlist")
         self._sysLogModel = ftk.SysLogModel(self.context)
         self._commandsModel = djv.models.CommandsModel(self.context)
 
@@ -291,6 +611,10 @@ class App(ftk.App):
         self._files = []
         self._timelines = []
         self._activeFiles = []
+        self._reviewPath = None
+        self._reviewCarry = None
+        self._pendingReviewView = None
+        self._reviewViewTimer = None
 
         # Initialize the file browser.
         fileBrowserSystem = self.context.getSystemByName("ftk::FileBrowserSystem")
@@ -320,7 +644,13 @@ class App(ftk.App):
             lambda value: selfWeak()._styleUpdate(value))
 
         if self._cmdLineInput.hasValue:
-            self.open(ftk.Path(self._cmdLineInput.value))
+            # A review (".djvr") describes an entire session; open it
+            # instead of the file list.
+            value = self._cmdLineInput.value
+            if os.path.splitext(value)[1] == djv.models.reviewExtension():
+                self.openReview(value)
+            else:
+                self.open(ftk.Path(value))
         if self._cmdLineB.hasValue:
             self.open(ftk.Path(self._cmdLineB.value))
             self._filesModel.setB(len(self._filesModel.files) - 1, True)
@@ -360,6 +690,8 @@ class App(ftk.App):
         self._timeUnitsModel.save()
         self._filesModel.save()
         self._recentFilesModel.save()
+        self._recentReviewsModel.save()
+        self._recentPlaylistsModel.save()
         self._viewportModel.save()
         self._colorModel.save()
         self._audioModel.save()

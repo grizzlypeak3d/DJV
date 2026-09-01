@@ -948,6 +948,451 @@ class DiagTool(IToolWidget):
 
 # The tools this application implements so far; the tools model lists
 # more, and the actions only offer what can actually open.
+def _formatCreated(iso):
+    """
+    Format an ISO 8601 timestamp for display in local time, e.g.
+    "2026-07-26T17:22:06Z" -> "26/07/2026 - 19:22" at UTC+2. Falls back
+    to the raw string if it is not the expected shape.
+    """
+    try:
+        import calendar, time
+        t = calendar.timegm(time.strptime(iso, "%Y-%m-%dT%H:%M:%SZ"))
+        return time.strftime("%d/%m/%Y - %H:%M", time.localtime(t))
+    except ValueError:
+        return iso
+
+def _formatRange(range):
+    """
+    Format a range as its frame bounds, e.g. "0001-0120". Both ends are
+    inclusive: the range reads as the frames you will see.
+    """
+    return "{:04d}-{:04d}".format(
+        int(range.start_time.value),
+        int(range.end_time_inclusive().value))
+
+def _wrapText(text, columns):
+    """
+    Soft-wrap text to a column. ftk.Label renders newlines but does not
+    wrap on its own, so long lines would otherwise overflow.
+    """
+    out = []
+    for line in text.split("\n"):
+        current = ""
+        for word in line.split(" "):
+            if current and len(current) + len(word) + 1 > columns:
+                out.append(current)
+                current = word
+            elif current:
+                current += " " + word
+            else:
+                current = word
+        out.append(current)
+    return "\n".join(out)
+
+class ReviewTool(IToolWidget):
+    """
+    This tool provides the review ranges, drawing, and notes.
+    """
+    def __init__(self, context, app, mainWindow, parent = None):
+        IToolWidget.__init__(
+            self, context, app, mainWindow, "Review", "ReviewTool", parent)
+
+        drawModel = app.getDrawModel()
+        self._player = None
+        self._currentTime = None
+        self._inOutRange = None
+        self._notes = []
+        self._ranges = []
+        self._rangeButtons = {}
+        # The selected range, or None. Only one can be active: selecting
+        # is what drives the timeline in/out points.
+        self._selectedRangeId = None
+        self._currentTimeObserver = None
+        self._inOutRangeObserver = None
+
+        # Review ranges.
+        rangesWidget = ftk.VerticalLayout(context)
+        rangesWidget.marginRole = ftk.SizeRole.MarginSmall
+        rangesWidget.spacingRole = ftk.SizeRole.SpacingSmall
+        self._addRangeButton = ftk.PushButton(context, "Add")
+        self._addRangeButton.tooltip = \
+            "Save the timeline in/out points as a named range."
+        self._addRangeButton.parent = rangesWidget
+        self._rangeListLayout = ftk.VerticalLayout(context, rangesWidget)
+        self._rangeListLayout.spacingRole = ftk.SizeRole.SpacingSmall
+
+        # Drawing.
+        drawingWidget = ftk.VerticalLayout(context)
+        drawingWidget.marginRole = ftk.SizeRole.MarginSmall
+        drawingWidget.spacingRole = ftk.SizeRole.SpacingSmall
+        toolLayout = ftk.HorizontalLayout(context, drawingWidget)
+        toolLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._colorSwatch = ftk.ColorSwatch(context, toolLayout)
+        self._colorSwatch.editable = True
+        self._colorSwatch.sizeRole = ftk.SizeRole.MarginLarge
+        self._colorSwatch.color = drawModel.color
+        self._colorSwatch.tooltip = "The stroke colour."
+        self._penButton = ftk.ToolButton(context, toolLayout)
+        self._penButton.icon = "DrawTool"
+        # Deliberately not checkable: a checkable button flips its own
+        # state after the callback, which would invert whatever the
+        # model observer had just set. The model stays the only source
+        # of truth and the observer drives the highlight.
+        self._penButton.tooltip = "Draw strokes. Click again to stop drawing."
+        self._eraserButton = ftk.ToolButton(context, toolLayout)
+        self._eraserButton.icon = "Eraser"
+        self._eraserButton.tooltip = \
+            "Erase the strokes you touch. Click again to stop."
+        toolLayout.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
+        self._undoButton = ftk.ToolButton(context, toolLayout)
+        self._undoButton.icon = "Undo"
+        self._undoButton.tooltip = "Undo."
+        self._redoButton = ftk.ToolButton(context, toolLayout)
+        self._redoButton.icon = "Redo"
+        self._redoButton.tooltip = "Redo."
+        sizeLayout = ftk.HorizontalLayout(context, drawingWidget)
+        sizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        sizeLabel = ftk.Label(context, "Size:", sizeLayout)
+        sizeLabel.vAlign = ftk.VAlign.Center
+        self._sizeSlider = ftk.FloatEditSlider(context, sizeLayout)
+        self._sizeSlider.setRange(1.0, 50.0)
+        self._sizeSlider.value = drawModel.size
+        self._sizeSlider.tooltip = "The stroke width, in source pixels."
+        self._clearFrameButton = ftk.PushButton(
+            context, "Clear Frame", drawingWidget)
+        self._clearFrameButton.tooltip = "Remove every stroke on this frame."
+
+        # Notes.
+        notesWidget = ftk.VerticalLayout(context)
+        notesWidget.marginRole = ftk.SizeRole.MarginSmall
+        notesWidget.spacingRole = ftk.SizeRole.SpacingSmall
+        self._noteEdit = ftk.TextEdit(context, notesWidget)
+        self._noteEdit.tooltip = "Write a note about the current frame."
+        self._publishButton = ftk.PushButton(context, "Add", notesWidget)
+        self._publishButton.tooltip = "Attach the note to the current frame."
+        self._noteListLayout = ftk.VerticalLayout(context, notesWidget)
+        self._noteListLayout.spacingRole = ftk.SizeRole.SpacingSmall
+
+        layout = ftk.VerticalLayout(context)
+        layout.spacingRole = ftk.SizeRole.Border
+        self._bellows = {}
+        for title, widget in [
+            ("Review Ranges", rangesWidget),
+            ("Drawing", drawingWidget),
+            ("Notes", notesWidget),
+        ]:
+            bellows = ftk.Bellows(context, title, layout)
+            bellows.widget = widget
+            bellows.open = True
+            self._bellows[title] = bellows
+
+        scrollWidget = ftk.ScrollWidget(context)
+        scrollWidget.border = False
+        scrollWidget.widget = layout
+        # The notes have no natural end, so take what room is left
+        # rather than a band of its own while other tools sit at the
+        # height they need.
+        self.vStretch = ftk.Stretch.Expanding
+        self._setContent(scrollWidget)
+
+        appWeak = weakref.ref(app)
+        selfWeak = weakref.ref(self)
+
+        self._colorSwatch.setCallback(
+            lambda value: appWeak() and
+                appWeak().getDrawModel().setColor(value))
+
+        # Pen and eraser are the only way in and out of drawing:
+        # selecting one turns drawing on, clicking the active one turns
+        # it off and gives the left mouse button back to the frame
+        # shuttle.
+        def toolClicked(tool):
+            app_ = appWeak()
+            if app_ is None:
+                return
+            drawModel = app_.getDrawModel()
+            active = drawModel.enabled and drawModel.tool == tool
+            drawModel.tool = tool
+            drawModel.enabled = not active
+        self._penButton.setClickedCallback(
+            lambda: toolClicked(djv.models.DrawTool.Pen))
+        self._eraserButton.setClickedCallback(
+            lambda: toolClicked(djv.models.DrawTool.Eraser))
+
+        self._sizeSlider.setCallback(
+            lambda value: appWeak() and
+                setattr(appWeak().getDrawModel(), "size", value))
+        self._undoButton.setClickedCallback(
+            lambda: appWeak() and appWeak().getAnnotationsModel().undo())
+        self._redoButton.setClickedCallback(
+            lambda: appWeak() and appWeak().getAnnotationsModel().redo())
+
+        def clearFrame():
+            app_ = appWeak()
+            if app_ is None:
+                return
+            a = app_.getFilesModel().a
+            player = app_.observePlayer().get()
+            if a and player:
+                app_.getAnnotationsModel().clearFrame(a.id, player.currentTime)
+        self._clearFrameButton.setClickedCallback(clearFrame)
+
+        self._toolObserver = djv.models.DrawToolObserver(
+            drawModel.observeTool,
+            lambda value: selfWeak() and selfWeak()._drawStateUpdate())
+        self._enabledObserver = ftk.BoolObserver(
+            drawModel.observeEnabled,
+            lambda value: selfWeak() and selfWeak()._drawStateUpdate())
+        self._colorObserver = djv.models.Color4FObserver(
+            drawModel.observeColor,
+            lambda value: selfWeak() and setattr(
+                selfWeak()._colorSwatch, "color", value))
+        self._sizeObserver = ftk.FloatObserver(
+            drawModel.observeSize,
+            lambda value: selfWeak() and setattr(
+                selfWeak()._sizeSlider, "value", value))
+        self._hasUndoObserver = ftk.BoolObserver(
+            app.getAnnotationsModel().observeHasUndo,
+            lambda value: selfWeak() and setattr(
+                selfWeak()._undoButton, "enabled", value))
+        self._hasRedoObserver = ftk.BoolObserver(
+            app.getAnnotationsModel().observeHasRedo,
+            lambda value: selfWeak() and setattr(
+                selfWeak()._redoButton, "enabled", value))
+
+        self._addRangeButton.setClickedCallback(Util.weak(self._addRange))
+        self._rangesObserver = djv.models.ReviewRangeListObserver(
+            app.getRangesModel().observeRanges,
+            lambda value: selfWeak() and selfWeak()._rangesUpdate(value))
+
+        self._publishButton.setClickedCallback(Util.weak(self._publish))
+        self._notesObserver = djv.models.ReviewNoteListObserver(
+            app.getNotesModel().observeNotes,
+            lambda value: selfWeak() and selfWeak()._notesListUpdate(value))
+
+        # A note is shown only on the frame it refers to, like a
+        # drawing, so the list follows the playhead.
+        self._playerObserver = tl.PlayerObserver(
+            app.observePlayer(),
+            lambda player: selfWeak() and selfWeak()._setPlayer(player))
+
+        self._loadBellows(self._bellows)
+
+    def _setPlayer(self, player):
+        self._player = player
+        selfWeak = weakref.ref(self)
+        if player:
+            self._currentTimeObserver = tl.RationalTimeObserver(
+                player.observeCurrentTime,
+                lambda value: selfWeak() and
+                    selfWeak()._currentTimeUpdate(value))
+            self._inOutRangeObserver = tl.TimeRangeObserver(
+                player.observeInOutRange,
+                lambda value: selfWeak() and selfWeak()._inOutUpdate(value))
+        else:
+            self._currentTimeObserver = None
+            self._inOutRangeObserver = None
+            self._currentTime = None
+            self._inOutRange = None
+            self._notesUpdate()
+            self._inOutStateUpdate()
+
+    def _currentTimeUpdate(self, value):
+        self._currentTime = value
+        self._notesUpdate()
+
+    def _inOutUpdate(self, value):
+        self._inOutRange = value
+        self._inOutStateUpdate()
+
+    def _drawStateUpdate(self):
+        if self._app():
+            drawModel = self._app().getDrawModel()
+            enabled = drawModel.enabled
+            tool = drawModel.tool
+            self._penButton.checked = \
+                enabled and djv.models.DrawTool.Pen == tool
+            self._eraserButton.checked = \
+                enabled and djv.models.DrawTool.Eraser == tool
+
+    def _rangesUpdate(self, ranges):
+        self._ranges = ranges
+        self._rangeListLayout.clear()
+        self._rangeButtons = {}
+        context = self.context
+        if not ranges:
+            label = ftk.Label(context, "No ranges yet.", self._rangeListLayout)
+            label.marginRole = ftk.SizeRole.MarginSmall
+            label.textRole = ftk.ColorRole.TextDisabled
+            return
+        appWeak = self._app
+        # The model keeps the list sorted by start frame.
+        for range_ in ranges:
+            row = ftk.HorizontalLayout(context, self._rangeListLayout)
+            row.spacingRole = ftk.SizeRole.SpacingSmall
+            # Deliberately not checkable, for the reason given on the
+            # pen button: the click would flip the state after the
+            # callback and fight the highlight set from the selection.
+            button = ftk.ToolButton(
+                context,
+                "{}  {}".format(
+                    range_.name,
+                    _formatRange(range_.range)
+                        if range_.range is not None else ""),
+                row)
+            button.hStretch = ftk.Stretch.Expanding
+            button.tooltip = (
+                "Set the timeline in/out points to this range. Click "
+                "again to clear them.")
+            button.setClickedCallback(
+                lambda captured = range_.id,
+                    f = Util.weak(self._rangeClicked): f(captured))
+            self._rangeButtons[range_.id] = button
+            deleteButton = ftk.ToolButton(context, row)
+            deleteButton.icon = "CloseSmall"
+            deleteButton.tooltip = "Delete this range."
+            deleteButton.setClickedCallback(
+                lambda captured = range_.id:
+                    appWeak() and appWeak().getRangesModel().remove(captured))
+        self._rangeSelectionUpdate()
+
+    def _rangeSelectionUpdate(self):
+        for id, button in self._rangeButtons.items():
+            button.checked = id == self._selectedRangeId
+
+    def _rangeClicked(self, id):
+        if not self._player:
+            return
+        if id == self._selectedRangeId:
+            # Clicking the active range clears the in/out points and
+            # gives the whole timeline back.
+            self._selectedRangeId = None
+            self._player.resetInPoint()
+            self._player.resetOutPoint()
+        else:
+            found = None
+            for range_ in self._ranges:
+                if range_.id == id:
+                    found = range_
+            if found is None:
+                return
+            # Set the selection first: applying the range makes the
+            # in/out observer fire, and it must not read this as a
+            # stale highlight.
+            self._selectedRangeId = id
+            self._player.inOutRange = found.range
+            # Without this the playhead stays outside the range it
+            # just set.
+            self._player.currentTime = found.range.start_time
+        self._rangeSelectionUpdate()
+
+    def _inOutStateUpdate(self):
+        # Adding is only meaningful once the in/out points actually
+        # narrow the timeline.
+        narrowed = (
+            self._player is not None and
+            self._inOutRange is not None and
+            self._inOutRange != self._player.timeRange)
+        self._addRangeButton.enabled = narrowed
+        # Drop the highlight as soon as the in/out points stop matching
+        # the selected range, e.g. after dragging them by hand.
+        if self._selectedRangeId is not None:
+            found = None
+            for range_ in self._ranges:
+                if range_.id == self._selectedRangeId:
+                    found = range_
+            if found is None or not djv.models.sameRange(
+                    found.range, self._inOutRange):
+                self._selectedRangeId = None
+                self._rangeSelectionUpdate()
+
+    def _addRange(self):
+        if not self._player or self._inOutRange is None:
+            return
+        # The C++ application asks for a name; here the frame range
+        # names the row.
+        self._app().getRangesModel().add(
+            self._inOutRange, _formatRange(self._inOutRange))
+
+    def _publish(self):
+        text = self._noteEdit.text
+        if isinstance(text, list):
+            text = "\n".join(text)
+        if not text:
+            return
+        if self._app():
+            # The note is anchored to the frame shown when it is
+            # published.
+            time = None
+            player = self._app().observePlayer().get()
+            if player:
+                time = player.currentTime
+            self._app().getNotesModel().add(time, text)
+            self._noteEdit.clearText()
+
+    def _notesListUpdate(self, notes):
+        self._notes = notes
+        self._notesUpdate()
+
+    def _notesUpdate(self):
+        self._noteListLayout.clear()
+        context = self.context
+        # Only the notes anchored to the frame on screen, so the panel
+        # says what this frame is about rather than the whole session.
+        value = [
+            note for note in self._notes
+            if djv.models.sameTime(note.time, self._currentTime)]
+        if not value:
+            # Without this the section is silently empty, which reads
+            # as a bug rather than as "nothing to say about this frame".
+            label = ftk.Label(
+                context, "No notes on this frame.", self._noteListLayout)
+            label.marginRole = ftk.SizeRole.MarginSmall
+            label.textRole = ftk.ColorRole.TextDisabled
+            return
+        appWeak = self._app
+        # Newest first: the note just published is the one being read.
+        for note in reversed(value):
+            card = ftk.VerticalLayout(context, self._noteListLayout)
+            card.spacingRole = ftk.SizeRole._None
+            card.backgroundRole = ftk.ColorRole.Button
+            header = ftk.HorizontalLayout(context, card)
+            header.marginRole = ftk.SizeRole.MarginSmall
+            header.spacingRole = ftk.SizeRole.SpacingSmall
+            # The frame doubles as the button that goes to it.
+            hasTime = note.time is not None
+            frameButton = ftk.ToolButton(
+                context,
+                "Frame {}".format(int(note.time.value))
+                    if hasTime else "No frame",
+                header)
+            frameButton.enabled = hasTime
+            frameButton.tooltip = "Go to the note's frame."
+            def seek(time, appWeak = appWeak):
+                app_ = appWeak()
+                if app_ is None:
+                    return
+                player = app_.observePlayer().get()
+                if player:
+                    player.currentTime = time
+            frameButton.setClickedCallback(
+                lambda captured = note.time: seek(captured))
+            createdLabel = ftk.Label(
+                context, _formatCreated(note.created), header)
+            createdLabel.textRole = ftk.ColorRole.TextDisabled
+            createdLabel.vAlign = ftk.VAlign.Center
+            header.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
+            deleteButton = ftk.ToolButton(context, header)
+            deleteButton.icon = "CloseSmall"
+            deleteButton.tooltip = "Delete this note."
+            deleteButton.setClickedCallback(
+                lambda captured = note.id:
+                    appWeak() and appWeak().getNotesModel().remove(captured))
+            textLabel = ftk.Label(context, _wrapText(note.text, 40), card)
+            textLabel.marginRole = ftk.SizeRole.MarginSmall
+            textLabel.hAlign = ftk.HAlign.Left
+            textLabel.vAlign = ftk.VAlign.Top
+
 FACTORY = {
     "Files": FilesTool,
     "Color Picker": ColorPickerTool,
@@ -958,6 +1403,7 @@ FACTORY = {
     "Color": ColorTool,
     "Information": InfoTool,
     "Audio": AudioTool,
+    "Review": ReviewTool,
     "Settings": SettingsTool,
     "Messages": MessagesTool,
     "System Log": SysLogTool,
