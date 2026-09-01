@@ -19,6 +19,7 @@
 #include <tlRender/UI/TimeUnitsWidget.h>
 #include <tlRender/Timeline/Player.h>
 
+#include <ftk/UI/Divider.h>
 #include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
@@ -151,8 +152,10 @@ namespace djv
 
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::MarginInside);
+            // Grouped like the top tool bar: the groups separated by
+            // dividers, with the tool bar's spacing between them.
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::MarginInside);
+            hLayout->setSpacingRole(ftk::SizeRole::Spacing);
             ftk::setScreenshotTag(hLayout, "Playback.Controls");
             auto hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
             hLayout2->setSpacingRole(ftk::SizeRole::None);
@@ -162,6 +165,7 @@ namespace djv
             p.buttons["Forward"]->setParent(hLayout2);
             p.loopWidget->setParent(hLayout2);
             p.playbackShuttle->setParent(hLayout2);
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
             hLayout2->setSpacingRole(ftk::SizeRole::None);
             ftk::setScreenshotTag(hLayout2, "Playback.FrameControls");
@@ -170,6 +174,7 @@ namespace djv
             p.buttons["Next"]->setParent(hLayout2);
             p.buttons["End"]->setParent(hLayout2);
             p.frameShuttle->setParent(hLayout2);
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             // The review jumps sit with the frame navigation: they are the same
             // gesture, on the frames that carry a note or a drawing.
             hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
@@ -177,10 +182,14 @@ namespace djv
             ftk::setScreenshotTag(hLayout2, "Playback.ReviewControls");
             p.buttons["PrevReview"]->setParent(hLayout2);
             p.buttons["NextReview"]->setParent(hLayout2);
-            p.currentTimeEdit->setParent(hLayout);
-            p.durationLabel->setParent(hLayout);
-            p.timeUnitsWidget->setParent(hLayout);
-            p.speedButton->setParent(hLayout);
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
+            hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
+            hLayout2->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            ftk::setScreenshotTag(hLayout2, "Playback.TimeControls");
+            p.currentTimeEdit->setParent(hLayout2);
+            p.durationLabel->setParent(hLayout2);
+            p.timeUnitsWidget->setParent(hLayout2);
+            p.speedButton->setParent(hLayout2);
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
             spacer->setHStretch(ftk::Stretch::Expanding);
             hLayout2 = ftk::HorizontalLayout::create(context, p.layout);

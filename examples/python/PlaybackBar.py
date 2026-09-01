@@ -84,10 +84,12 @@ class Widget(ftk.IContainer):
             app.getColorModel(),
             app.getAudioModel())
 
+        # Grouped like the top tool bar: the groups separated by
+        # dividers, with the tool bar's spacing between them.
         self._layout = ftk.HorizontalLayout(context)
         self._layout.marginRole = ftk.SizeRole.MarginInside
         hLayout = ftk.HorizontalLayout(context, self._layout)
-        hLayout.spacingRole = ftk.SizeRole.MarginInside
+        hLayout.spacingRole = ftk.SizeRole.Spacing
         hLayout2 = ftk.HorizontalLayout(context, hLayout)
         hLayout2.spacingRole = ftk.SizeRole._None
         self._buttons["Reverse"].parent = hLayout2
@@ -95,6 +97,7 @@ class Widget(ftk.IContainer):
         self._buttons["Forward"].parent = hLayout2
         self._loopWidget.parent = hLayout2
         self._playbackShuttle.parent = hLayout2
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         hLayout2 = ftk.HorizontalLayout(context, hLayout)
         hLayout2.spacingRole = ftk.SizeRole._None
         self._buttons["Start"].parent = hLayout2
@@ -102,16 +105,20 @@ class Widget(ftk.IContainer):
         self._buttons["Next"].parent = hLayout2
         self._buttons["End"].parent = hLayout2
         self._frameShuttle.parent = hLayout2
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         # The review jumps sit with the frame navigation: they are the
         # same gesture, on the frames that carry a note or a drawing.
         hLayout2 = ftk.HorizontalLayout(context, hLayout)
         hLayout2.spacingRole = ftk.SizeRole._None
         self._buttons["PrevReview"].parent = hLayout2
         self._buttons["NextReview"].parent = hLayout2
-        self._currentTimeEdit.parent = hLayout
-        self._durationLabel.parent = hLayout
-        self._timeUnitsWidget.parent = hLayout
-        self._speedButton.parent = hLayout
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        hLayout2 = ftk.HorizontalLayout(context, hLayout)
+        hLayout2.spacingRole = ftk.SizeRole.SpacingSmall
+        self._currentTimeEdit.parent = hLayout2
+        self._durationLabel.parent = hLayout2
+        self._timeUnitsWidget.parent = hLayout2
+        self._speedButton.parent = hLayout2
         spacer = ftk.Spacer(context, ftk.Orientation.Horizontal, self._layout)
         spacer.hStretch = ftk.Stretch.Expanding
         hLayout2 = ftk.HorizontalLayout(context, self._layout)
