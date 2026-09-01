@@ -1083,7 +1083,7 @@ class ReviewTool(IToolWidget):
         layout.spacingRole = ftk.SizeRole.Border
         self._bellows = {}
         for title, widget, toolWidget in [
-            ("Review Ranges", rangesWidget, self._addRangeButton),
+            ("Ranges", rangesWidget, self._addRangeButton),
             ("Drawing", drawingWidget, None),
             ("Notes", notesWidget, self._publishButton),
         ]:

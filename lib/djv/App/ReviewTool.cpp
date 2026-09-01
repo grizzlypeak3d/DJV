@@ -289,7 +289,7 @@ namespace djv
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
-            p.bellows["Ranges"] = ftk::Bellows::create(context, "Review Ranges", layout);
+            p.bellows["Ranges"] = ftk::Bellows::create(context, "Ranges", layout);
             p.bellows["Ranges"]->setWidget(rangesWidget);
             p.bellows["Ranges"]->setToolWidget(p.addRangeButton);
             p.bellows["Ranges"]->setOpen(true);
