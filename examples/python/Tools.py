@@ -1508,11 +1508,13 @@ class ReviewTool(IToolWidget):
                     selfWeak() and selfWeak()._noteClicked(captured))
             if note.id is not None:
                 self._noteButtons[note.id] = button
+            # One margin around the whole note, carried by the card,
+            # so the header and the text sit evenly inside the item.
             card = ftk.VerticalLayout(context)
+            card.marginRole = ftk.SizeRole.MarginInside
             card.spacingRole = ftk.SizeRole._None
             button.widget = card
             header = ftk.HorizontalLayout(context, card)
-            header.marginRole = ftk.SizeRole.MarginInside
             header.spacingRole = ftk.SizeRole.SpacingSmall
             frameLabel = ftk.Label(
                 context,
@@ -1538,13 +1540,9 @@ class ReviewTool(IToolWidget):
                         appWeak() and
                         appWeak().getNotesModel().remove(captured))
             if editing:
-                # Written and edited in place; the editor keeps the
-                # label's margin so the item does not jump. The note
-                # keeps itself when the editor loses the focus, or on
-                # Command-Return.
-                editLayout = ftk.VerticalLayout(context, card)
-                editLayout.marginRole = ftk.SizeRole.Margin
-                self._editNoteEdit = ftk.TextEdit(context, editLayout)
+                # Written and edited in place. The note keeps itself
+                # when the editor loses the focus, or on Command-Return.
+                self._editNoteEdit = ftk.TextEdit(context, card)
                 self._editNoteEdit.sizeHintRole = \
                     ftk.SizeRole.ScrollAreaSmall
                 if note.id is not None:
@@ -1559,7 +1557,8 @@ class ReviewTool(IToolWidget):
             else:
                 textLabel = ftk.Label(
                     context, _wrapText(note.text, 40), card)
-                textLabel.marginRole = ftk.SizeRole.Margin
+                textLabel.setMarginRole(
+                    ftk.SizeRole.LabelPad, ftk.SizeRole._None)
                 textLabel.hAlign = ftk.HAlign.Left
                 textLabel.vAlign = ftk.VAlign.Top
         if self._editNoteEdit is not None:

@@ -1019,12 +1019,14 @@ namespace djv
                     p.noteButtons[note.id] = button;
                 }
 
+                // One margin around the whole note, carried by the card,
+                // so the header and the text sit evenly inside the item.
                 auto card = ftk::VerticalLayout::create(context);
+                card->setMarginRole(ftk::SizeRole::MarginInside);
                 card->setSpacingRole(ftk::SizeRole::None);
                 button->setWidget(card);
 
                 auto header = ftk::HorizontalLayout::create(context, card);
-                header->setMarginRole(ftk::SizeRole::MarginInside);
                 header->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
                 auto frameLabel = ftk::Label::create(
@@ -1063,13 +1065,10 @@ namespace djv
 
                 if (editing)
                 {
-                    // Written and edited in place; the editor keeps the
-                    // label's margin so the item does not jump. The note
-                    // keeps itself when the editor loses the focus, or on
-                    // Command-Return where the key bubbles to.
-                    auto editLayout = ftk::VerticalLayout::create(context, card);
-                    editLayout->setMarginRole(ftk::SizeRole::Margin);
-                    p.editNoteEdit = ftk::TextEdit::create(context, editLayout);
+                    // Written and edited in place. The note keeps itself
+                    // when the editor loses the focus, or on Command-Return
+                    // where the key bubbles to.
+                    p.editNoteEdit = ftk::TextEdit::create(context, card);
                     p.editNoteEdit->setSizeHintRole(ftk::SizeRole::ScrollAreaSmall);
                     if (!note.id.empty())
                     {
@@ -1091,7 +1090,7 @@ namespace djv
                 else
                 {
                     auto textLabel = ftk::Label::create(context, wrapText(note.text, 40), card);
-                    textLabel->setMarginRole(ftk::SizeRole::Margin);
+                    textLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                     textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
                 }
             }
