@@ -53,7 +53,10 @@ namespace djv
         private:
             void _drawStateUpdate();
             //! Move the key focus along a list, and follow a note's frame.
-            bool _navigate(bool down);
+            //! Without a focused row, the list under the cursor is entered
+            //! at its selection.
+            bool _navigate(bool down, const ftk::V2I& pos);
+            void _goToNote(size_t index);
             //! Seek, releasing the in/out range when the target lies
             //! outside it.
             void _seekTo(const OTIO_NS::RationalTime&);

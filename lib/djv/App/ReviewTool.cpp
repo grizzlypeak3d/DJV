@@ -783,7 +783,7 @@ namespace djv
                 0 == event.modifiers &&
                 (ftk::Key::Up == event.key || ftk::Key::Down == event.key))
             {
-                event.accept = _navigate(ftk::Key::Down == event.key);
+                event.accept = _navigate(ftk::Key::Down == event.key, event.pos);
             }
         }
 
@@ -814,7 +814,7 @@ namespace djv
             _notesUpdate();
         }
 
-        bool ReviewTool::_navigate(bool down)
+        bool ReviewTool::_navigate(bool down, const ftk::V2I& pos)
         {
             FTK_P();
             auto window = getWindow();
@@ -849,18 +849,72 @@ namespace djv
                         (i > 0 ? i - 1 : 0);
                     if (j != i)
                     {
-                        p.noteItemOrder[j].first->takeKeyFocus();
-                        // Browsing the feedback is looking at the frames it
-                        // is about, so the arrows follow.
-                        if (p.noteItemOrder[j].second.has_value())
-                        {
-                            _seekTo(*p.noteItemOrder[j].second);
-                        }
+                        _goToNote(j);
                     }
                     return true;
                 }
             }
+
+            // No row is focused: the arrows enter the list under the cursor,
+            // moving off its selection -- hovering a list and pressing an
+            // arrow changes the current item straight away.
+            const auto i = p.bellows.find("Ranges");
+            if (i != p.bellows.end() &&
+                i->second->isOpen() &&
+                !p.rangeItemOrder.empty() &&
+                ftk::contains(p.rangeListLayout->getGeometry(), pos))
+            {
+                size_t j = down ? 0 : p.rangeItemOrder.size() - 1;
+                for (size_t k = 0; k < p.rangeItemOrder.size(); ++k)
+                {
+                    if (p.rangeItemOrder[k]->isChecked())
+                    {
+                        j = down ?
+                            std::min(k + 1, p.rangeItemOrder.size() - 1) :
+                            (k > 0 ? k - 1 : 0);
+                        break;
+                    }
+                }
+                p.rangeItemOrder[j]->takeKeyFocus();
+                return true;
+            }
+            const auto n = p.bellows.find("Notes");
+            if (n != p.bellows.end() &&
+                n->second->isOpen() &&
+                !p.noteItemOrder.empty() &&
+                ftk::contains(p.noteListLayout->getGeometry(), pos))
+            {
+                size_t j = down ? 0 : p.noteItemOrder.size() - 1;
+                for (size_t k = 0; k < p.noteItemOrder.size(); ++k)
+                {
+                    if (p.noteItemOrder[k].first->isChecked())
+                    {
+                        j = down ?
+                            std::min(k + 1, p.noteItemOrder.size() - 1) :
+                            (k > 0 ? k - 1 : 0);
+                        break;
+                    }
+                }
+                _goToNote(j);
+                return true;
+            }
             return false;
+        }
+
+        void ReviewTool::_goToNote(size_t index)
+        {
+            FTK_P();
+            if (index >= p.noteItemOrder.size())
+            {
+                return;
+            }
+            p.noteItemOrder[index].first->takeKeyFocus();
+            // Browsing the feedback is looking at the frames it is about,
+            // so the arrows follow.
+            if (p.noteItemOrder[index].second.has_value())
+            {
+                _seekTo(*p.noteItemOrder[index].second);
+            }
         }
 
         void ReviewTool::_seekTo(const OTIO_NS::RationalTime& time)
