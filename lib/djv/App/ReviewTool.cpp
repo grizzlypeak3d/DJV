@@ -546,17 +546,17 @@ namespace djv
                 // Deliberately not checkable, for the reason given on the pen
                 // button: click() would flip the state after the callback and
                 // fight the highlight set from the selection.
-                // The frames follow the name, so a named row says where it
+                // The frames sit against the right edge, the way the file
+                // browser lays out its columns, so a named row says where it
                 // points -- unless the name is the frames, which the default
                 // is, and saying them twice reads as a mistake.
                 const std::string frames = range.range.has_value() ?
                     formatRange(*range.range) : std::string();
-                auto button = ftk::ToolButton::create(
-                    context,
-                    range.name == frames || frames.empty() ?
-                        range.name :
-                        ftk::Format("{0}  {1}").arg(range.name).arg(frames).str(),
-                    row);
+                auto button = ftk::ToolButton::create(context, range.name, row);
+                if (range.name != frames)
+                {
+                    button->setSecondaryText(frames);
+                }
                 button->setHStretch(ftk::Stretch::Expanding);
                 button->setTooltip(
                     "Set the timeline in/out points to this range. Click again "
