@@ -70,6 +70,19 @@ class Actions(IActions.IActions):
             "Redo drawing.",
             lambda args: appWeak().getAnnotationsModel().redo())
 
+        def clearDrawing(args):
+            app_ = appWeak()
+            if app_ is None:
+                return
+            a = app_.getFilesModel().a
+            player = app_.observePlayer().get()
+            if a and player:
+                app_.getAnnotationsModel().clearFrame(a.id, player.currentTime)
+        self._addCommand(
+            "ClearDrawing",
+            "Remove every stroke on the current frame.",
+            clearDrawing)
+
         self._addCommand(
             "AddNote",
             "Open the review tool with the keyboard focus on the note "
@@ -118,6 +131,10 @@ class Actions(IActions.IActions):
             "Redo Drawing",
             "Redo",
             self._command("Redo"))
+        self.actions["ClearDrawing"] = ftk.Action(
+            "Clear Drawing",
+            "Remove",
+            self._command("ClearDrawing"))
         self.actions["AddNote"] = ftk.Action(
             "Add Note",
             self._command("AddNote"))
@@ -147,6 +164,7 @@ class Actions(IActions.IActions):
         self._addShortcut("Erase", "Erase strokes")
         self._addShortcut("Undo", "Undo drawing")
         self._addShortcut("Redo", "Redo drawing")
+        self._addShortcut("ClearDrawing", "Clear drawing")
         self._addShortcut("AddNote", "Add a note")
         # Shift and Control on the arrows are already taken by the X10
         # and X100 frame steps.
@@ -228,5 +246,6 @@ class Actions(IActions.IActions):
         self._hasPlayer = player is not None
         self.actions["Draw"].enabled = self._hasPlayer
         self.actions["Erase"].enabled = self._hasPlayer
+        self.actions["ClearDrawing"].enabled = self._hasPlayer
         self.actions["AddNote"].enabled = self._hasPlayer
         self._markersUpdate(None)

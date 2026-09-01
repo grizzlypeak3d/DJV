@@ -205,6 +205,7 @@ class Review(ftk.Menu):
         self.addAction(actions.actions["Erase"])
         self.addAction(actions.actions["Undo"])
         self.addAction(actions.actions["Redo"])
+        self.addAction(actions.actions["ClearDrawing"])
         self.addDivider();
         self.addAction(actions.actions["AddNote"])
         self.addAction(actions.actions["PrevFrame"])

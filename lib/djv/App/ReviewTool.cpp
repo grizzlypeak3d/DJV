@@ -148,7 +148,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> sizeSlider;
             std::shared_ptr<ftk::ToolButton> undoButton;
             std::shared_ptr<ftk::ToolButton> redoButton;
-            std::shared_ptr<ftk::ToolButton> clearFrameButton;
+            std::shared_ptr<ftk::ToolButton> clearDrawingButton;
 
             std::shared_ptr<ftk::TextEdit> noteEdit;
             std::shared_ptr<ftk::ToolButton> publishButton;
@@ -257,14 +257,14 @@ namespace djv
             p.sizeSlider->setValue(drawModel->getSize());
             p.sizeSlider->setTooltip("The stroke width, in source pixels.");
 
-            p.clearFrameButton = ftk::ToolButton::create(context, "Clear Frame", drawingWidget);
-            p.clearFrameButton->setIcon("Remove");
-            p.clearFrameButton->setHAlign(ftk::HAlign::Left);
-            p.clearFrameButton->setTooltip("Remove every stroke on this frame.");
+            p.clearDrawingButton = ftk::ToolButton::create(context, "Clear Drawing", drawingWidget);
+            p.clearDrawingButton->setIcon("Remove");
+            p.clearDrawingButton->setHAlign(ftk::HAlign::Left);
+            p.clearDrawingButton->setTooltip("Remove every stroke on this frame.");
             ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
             ftk::setScreenshotTag(p.eraserButton, "Review.Eraser");
-            ftk::setScreenshotTag(p.clearFrameButton, "Review.ClearFrame");
+            ftk::setScreenshotTag(p.clearDrawingButton, "Review.ClearDrawing");
 
             // Notes.
             auto notesWidget = ftk::VerticalLayout::create(context);
@@ -367,7 +367,7 @@ namespace djv
                     }
                 });
 
-            p.clearFrameButton->setClickedCallback(
+            p.clearDrawingButton->setClickedCallback(
                 [appWeak]
                 {
                     if (auto app = appWeak.lock())

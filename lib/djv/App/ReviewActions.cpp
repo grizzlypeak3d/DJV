@@ -148,6 +148,24 @@ namespace djv
                     }
                 });
 
+            _addCommand(
+                "ClearDrawing",
+                "Remove every stroke on the current frame.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        const auto& a = app->getFilesModel()->getA();
+                        auto player = app->observePlayer()->get();
+                        if (a && player)
+                        {
+                            app->getAnnotationsModel()->clearFrame(
+                                a->id,
+                                player->getCurrentTime());
+                        }
+                    }
+                });
+
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
             _addCommand(
                 "AddNote",
@@ -215,6 +233,10 @@ namespace djv
                 "Redo Drawing",
                 "Redo",
                 _command("Redo"));
+            _actions["ClearDrawing"] = ftk::Action::create(
+                "Clear Drawing",
+                "Remove",
+                _command("ClearDrawing"));
             _actions["AddNote"] = ftk::Action::create(
                 "Add Note",
                 _command("AddNote"));
@@ -254,6 +276,7 @@ namespace djv
             _addShortcut("Erase", "Erase strokes");
             _addShortcut("Undo", "Undo drawing");
             _addShortcut("Redo", "Redo drawing");
+            _addShortcut("ClearDrawing", "Clear drawing");
             _addShortcut("AddNote", "Add a note");
             // Shift and Control on the arrows are already taken by the X10 and
             // X100 frame steps.
@@ -332,6 +355,7 @@ namespace djv
                     p.hasPlayer = value.get();
                     _actions["Draw"]->setEnabled(p.hasPlayer);
                     _actions["Erase"]->setEnabled(p.hasPlayer);
+                    _actions["ClearDrawing"]->setEnabled(p.hasPlayer);
                     _actions["AddNote"]->setEnabled(p.hasPlayer);
                     _markersUpdate();
                 });

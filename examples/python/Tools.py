@@ -1061,11 +1061,11 @@ class ReviewTool(IToolWidget):
         self._sizeSlider.setRange(1.0, 50.0)
         self._sizeSlider.value = drawModel.size
         self._sizeSlider.tooltip = "The stroke width, in source pixels."
-        self._clearFrameButton = ftk.ToolButton(
-            context, "Clear Frame", drawingWidget)
-        self._clearFrameButton.icon = "Remove"
-        self._clearFrameButton.hAlign = ftk.HAlign.Left
-        self._clearFrameButton.tooltip = "Remove every stroke on this frame."
+        self._clearDrawingButton = ftk.ToolButton(
+            context, "Clear Drawing", drawingWidget)
+        self._clearDrawingButton.icon = "Remove"
+        self._clearDrawingButton.hAlign = ftk.HAlign.Left
+        self._clearDrawingButton.tooltip = "Remove every stroke on this frame."
 
         # Notes.
         notesWidget = ftk.VerticalLayout(context)
@@ -1148,7 +1148,7 @@ class ReviewTool(IToolWidget):
             player = app_.observePlayer().get()
             if a and player:
                 app_.getAnnotationsModel().clearFrame(a.id, player.currentTime)
-        self._clearFrameButton.setClickedCallback(clearFrame)
+        self._clearDrawingButton.setClickedCallback(clearFrame)
 
         self._toolObserver = djv.models.DrawToolObserver(
             drawModel.observeTool,

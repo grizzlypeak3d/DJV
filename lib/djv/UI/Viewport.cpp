@@ -687,7 +687,7 @@ namespace djv
 
             // The overlay is drawn straight from the model, so any change to it
             // has to ask for a redraw. Drawing does that from the mouse events,
-            // but undo, redo and "Clear Frame" only touch the model: without
+            // but undo, redo and "Clear Drawing" only touch the model: without
             // this the frame keeps showing stale strokes until some unrelated
             // event happens to repaint the window.
             p.annotationsObserver = ftk::ListObserver<models::ReviewAnnotation>::create(

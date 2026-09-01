@@ -41,6 +41,7 @@ namespace djv
             addAction(actions["Erase"]);
             addAction(actions["Undo"]);
             addAction(actions["Redo"]);
+            addAction(actions["ClearDrawing"]);
             addDivider();
             addAction(actions["AddNote"]);
             addAction(actions["PrevFrame"]);
