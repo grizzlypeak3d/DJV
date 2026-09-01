@@ -47,6 +47,7 @@ namespace djv
             void _drawStateUpdate();
             void _publish();
             void _notesUpdate();
+            void _noteSelectionUpdate();
             void _rangesUpdate();
             void _rangeSelectionUpdate();
             void _rangeClicked(const std::string& id);

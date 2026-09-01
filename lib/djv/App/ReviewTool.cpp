@@ -28,6 +28,7 @@
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
 
+#include <algorithm>
 #include <ctime>
 #include <stdexcept>
 
@@ -153,11 +154,13 @@ namespace djv
             std::shared_ptr<ftk::TextEdit> noteEdit;
             std::shared_ptr<ftk::PushButton> publishButton;
             std::shared_ptr<ftk::VerticalLayout> noteListLayout;
+            //! The frame buttons, by note identifier, so the current frame's
+            //! highlight can move without rebuilding the list.
+            std::map<std::string, std::shared_ptr<ftk::ToolButton> > noteButtons;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
 
-            //! The notes of the whole review, and the frame currently shown.
-            //! Only the notes of that frame are listed, so both are needed to
-            //! rebuild the list and either one can change on its own.
+            //! Every note is listed; the frame currently shown only moves
+            //! the highlight.
             std::vector<models::ReviewNote> notes;
             std::optional<OTIO_NS::RationalTime> currentTime;
 
@@ -455,7 +458,7 @@ namespace djv
                             [this](const OTIO_NS::RationalTime& value)
                             {
                                 _p->currentTime = value;
-                                _notesUpdate();
+                                _noteSelectionUpdate();
                             });
 
                         p.inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
@@ -472,7 +475,7 @@ namespace djv
                         p.inOutRangeObserver.reset();
                         p.currentTime.reset();
                         p.inOutRange.reset();
-                        _notesUpdate();
+                        _noteSelectionUpdate();
                         _inOutUpdate();
                     }
                 });
@@ -746,29 +749,40 @@ namespace djv
         {
             FTK_P();
             p.noteListLayout->clear();
+            p.noteButtons.clear();
             auto context = getContext();
             if (!context)
             {
                 return;
             }
 
-            // Only the notes anchored to the frame on screen, so the panel says
-            // what this frame is about rather than the whole session.
-            std::vector<models::ReviewNote> value;
-            for (const auto& note : p.notes)
-            {
-                if (models::sameTime(note.time, p.currentTime))
+            // Every note, so the panel reads as the review's feedback rather
+            // than one frame's -- browsing beats following bread crumbs. In
+            // frame order, with the notes about no frame in particular first:
+            // they speak about the whole review.
+            std::vector<models::ReviewNote> value = p.notes;
+            std::stable_sort(
+                value.begin(),
+                value.end(),
+                [](const models::ReviewNote& a, const models::ReviewNote& b)
                 {
-                    value.push_back(note);
-                }
-            }
+                    if (a.time.has_value() != b.time.has_value())
+                    {
+                        return !a.time.has_value();
+                    }
+                    if (!a.time.has_value())
+                    {
+                        return false;
+                    }
+                    return a.time->value() < b.time->value();
+                });
             if (value.empty())
             {
                 // Without this the section is silently empty, which reads as a
-                // bug rather than as "nothing to say about this frame".
+                // bug rather than as "nothing to say yet".
                 auto label = ftk::Label::create(
                     context,
-                    "No notes on this frame.",
+                    "No notes yet.",
                     p.noteListLayout);
                 label->setMarginRole(ftk::SizeRole::MarginSmall);
                 label->setTextRole(ftk::ColorRole::TextDisabled);
@@ -776,10 +790,8 @@ namespace djv
             }
 
             auto appWeak = _app;
-            // Newest first: the note just published is the one being read.
-            for (auto i = value.rbegin(); i != value.rend(); ++i)
+            for (const auto& note : value)
             {
-                const models::ReviewNote note = *i;
 
                 auto card = ftk::VerticalLayout::create(context, p.noteListLayout);
                 card->setSpacingRole(ftk::SizeRole::None);
@@ -811,6 +823,7 @@ namespace djv
                             }
                         }
                     });
+                p.noteButtons[note.id] = frameButton;
 
                 header->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
 
@@ -834,6 +847,22 @@ namespace djv
                 auto textLabel = ftk::Label::create(context, wrapText(note.text, 40), card);
                 textLabel->setMarginRole(ftk::SizeRole::MarginSmall);
                 textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
+            }
+            _noteSelectionUpdate();
+        }
+
+        void ReviewTool::_noteSelectionUpdate()
+        {
+            FTK_P();
+            // Highlight the notes on the frame being shown.
+            for (const auto& note : p.notes)
+            {
+                const auto i = p.noteButtons.find(note.id);
+                if (i != p.noteButtons.end())
+                {
+                    i->second->setChecked(
+                        models::sameTime(note.time, p.currentTime));
+                }
             }
         }
     }

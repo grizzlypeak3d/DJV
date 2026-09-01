@@ -55,12 +55,15 @@ namespace djv
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<ui::AudioPopup> audioPopup;
             std::shared_ptr<ui::StatusIndicator> indicator;
+            std::shared_ptr<ftk::Divider> reviewDivider;
+            std::shared_ptr<ftk::HorizontalLayout> reviewLayout;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             // Whether media time means anything across the whole timeline,
             // which it only does when the timeline plays one media through.
             bool mediaTime = false;
 
+            std::shared_ptr<ftk::ListObserver<int> > reviewMarkersObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<double> > speedObserver;
             std::shared_ptr<ftk::Observer<double> > actualSpeedObserver;
@@ -178,14 +181,15 @@ namespace djv
             p.buttons["Next"]->setParent(hLayout2);
             p.buttons["End"]->setParent(hLayout2);
             p.frameShuttle->setParent(hLayout2);
-            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
+            p.reviewDivider = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             // The review jumps sit with the frame navigation: they are the same
-            // gesture, on the frames that carry a note or a drawing.
-            hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
-            hLayout2->setSpacingRole(ftk::SizeRole::None);
-            ftk::setScreenshotTag(hLayout2, "Playback.ReviewControls");
-            p.buttons["PrevReview"]->setParent(hLayout2);
-            p.buttons["NextReview"]->setParent(hLayout2);
+            // gesture, on the frames that carry a note or a drawing -- and the
+            // group is only there when such a frame exists.
+            p.reviewLayout = ftk::HorizontalLayout::create(context, hLayout);
+            p.reviewLayout->setSpacingRole(ftk::SizeRole::None);
+            ftk::setScreenshotTag(p.reviewLayout, "Playback.ReviewControls");
+            p.buttons["PrevReview"]->setParent(p.reviewLayout);
+            p.buttons["NextReview"]->setParent(p.reviewLayout);
             ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
             hLayout2->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -285,6 +289,15 @@ namespace djv
                 [this]
                 {
                     _showAudioPopup();
+                });
+
+            p.reviewMarkersObserver = ftk::ListObserver<int>::create(
+                app->observeReviewMarkers(),
+                [this](const std::vector<int>& value)
+                {
+                    FTK_P();
+                    p.reviewDivider->setVisible(!value.empty());
+                    p.reviewLayout->setVisible(!value.empty());
                 });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(

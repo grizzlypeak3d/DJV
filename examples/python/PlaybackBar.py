@@ -107,13 +107,15 @@ class Widget(ftk.IContainer):
         self._buttons["Next"].parent = hLayout2
         self._buttons["End"].parent = hLayout2
         self._frameShuttle.parent = hLayout2
-        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
+        self._reviewDivider = ftk.Divider(
+            context, ftk.Orientation.Horizontal, hLayout)
         # The review jumps sit with the frame navigation: they are the
-        # same gesture, on the frames that carry a note or a drawing.
-        hLayout2 = ftk.HorizontalLayout(context, hLayout)
-        hLayout2.spacingRole = ftk.SizeRole._None
-        self._buttons["PrevFrame"].parent = hLayout2
-        self._buttons["NextFrame"].parent = hLayout2
+        # same gesture, on the frames that carry a note or a drawing --
+        # and the group is only there when such a frame exists.
+        self._reviewLayout = ftk.HorizontalLayout(context, hLayout)
+        self._reviewLayout.spacingRole = ftk.SizeRole._None
+        self._buttons["PrevFrame"].parent = self._reviewLayout
+        self._buttons["NextFrame"].parent = self._reviewLayout
         ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         hLayout2 = ftk.HorizontalLayout(context, hLayout)
         hLayout2.spacingRole = ftk.SizeRole.SpacingSmall
@@ -141,6 +143,9 @@ class Widget(ftk.IContainer):
         self._audioButton.setPressedCallback(Util.weak(self._showAudioPopup))
 
         selfWeak = weakref.ref(self)
+        self._reviewMarkersObserver = ftk.IntListObserver(
+            app.observeReviewMarkers(),
+            lambda markers: selfWeak()._reviewMarkersUpdate(markers))
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
             lambda player: selfWeak()._playerUpdate(player))
@@ -153,6 +158,11 @@ class Widget(ftk.IContainer):
         self._muteObserver = ftk.BoolObserver(
             app.getAudioModel().observeMute,
             lambda value: selfWeak()._muteUpdate(value))
+
+    def _reviewMarkersUpdate(self, markers):
+        visible = len(markers) > 0
+        self._reviewDivider.setVisible(visible)
+        self._reviewLayout.setVisible(visible)
 
     def focusCurrentFrame(self):
         if self._currentTimeEdit.enabled:

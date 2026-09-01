@@ -1004,6 +1004,7 @@ class ReviewTool(IToolWidget):
         self._notes = []
         self._ranges = []
         self._rangeButtons = {}
+        self._noteButtons = {}
         # The selected range, or None. Only one can be active: selecting
         # is what drives the timeline in/out points.
         self._selectedRangeId = None
@@ -1202,12 +1203,12 @@ class ReviewTool(IToolWidget):
             self._inOutRangeObserver = None
             self._currentTime = None
             self._inOutRange = None
-            self._notesUpdate()
+            self._noteSelectionUpdate()
             self._inOutStateUpdate()
 
     def _currentTimeUpdate(self, value):
         self._currentTime = value
-        self._notesUpdate()
+        self._noteSelectionUpdate()
 
     def _inOutUpdate(self, value):
         self._inOutRange = value
@@ -1359,23 +1360,26 @@ class ReviewTool(IToolWidget):
 
     def _notesUpdate(self):
         self._noteListLayout.clear()
+        self._noteButtons = {}
         context = self.context
-        # Only the notes anchored to the frame on screen, so the panel
-        # says what this frame is about rather than the whole session.
-        value = [
-            note for note in self._notes
-            if djv.models.sameTime(note.time, self._currentTime)]
+        # Every note, so the panel reads as the review's feedback rather
+        # than one frame's -- browsing beats following bread crumbs. In
+        # frame order, with the notes about no frame in particular
+        # first: they speak about the whole review.
+        value = sorted(
+            self._notes,
+            key = lambda note:
+                (0, 0.0) if note.time is None else (1, note.time.value))
         if not value:
             # Without this the section is silently empty, which reads
-            # as a bug rather than as "nothing to say about this frame".
+            # as a bug rather than as "nothing to say yet".
             label = ftk.Label(
-                context, "No notes on this frame.", self._noteListLayout)
+                context, "No notes yet.", self._noteListLayout)
             label.marginRole = ftk.SizeRole.MarginSmall
             label.textRole = ftk.ColorRole.TextDisabled
             return
         appWeak = self._app
-        # Newest first: the note just published is the one being read.
-        for note in reversed(value):
+        for note in value:
             card = ftk.VerticalLayout(context, self._noteListLayout)
             card.spacingRole = ftk.SizeRole._None
             card.backgroundRole = ftk.ColorRole.Button
@@ -1400,6 +1404,7 @@ class ReviewTool(IToolWidget):
                     player.currentTime = time
             frameButton.setClickedCallback(
                 lambda captured = note.time: seek(captured))
+            self._noteButtons[note.id] = frameButton
             header.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
             createdLabel = ftk.Label(
                 context, _formatCreated(note.created), header)
@@ -1415,6 +1420,15 @@ class ReviewTool(IToolWidget):
             textLabel.marginRole = ftk.SizeRole.MarginSmall
             textLabel.hAlign = ftk.HAlign.Left
             textLabel.vAlign = ftk.VAlign.Top
+        self._noteSelectionUpdate()
+
+    def _noteSelectionUpdate(self):
+        # Highlight the notes on the frame being shown.
+        for note in self._notes:
+            button = self._noteButtons.get(note.id)
+            if button is not None:
+                button.checked = djv.models.sameTime(
+                    note.time, self._currentTime)
 
 FACTORY = {
     "Files": FilesTool,
