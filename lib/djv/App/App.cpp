@@ -31,6 +31,7 @@
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/Parse.h>
 #include <djv/Models/Playlist.h>
 #include <djv/Models/NotesModel.h>
 #include <djv/Models/RangesModel.h>
@@ -119,65 +120,6 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureShot;
             std::shared_ptr<ftk::CmdLineOption<std::string> > captureOutput;
         };
-
-        namespace
-        {
-            // "1-100", and "-10-20" for a sequence starting before zero. The
-            // separator is the first dash after the first character, so a
-            // negative start is not mistaken for it.
-            ftk::RangeI64 parseFrameRange(const std::string& value)
-            {
-                std::optional<ftk::RangeI64> out;
-                const size_t i = value.find('-', 1);
-                if (i != std::string::npos && i + 1 < value.size())
-                {
-                    const std::string startStr = value.substr(0, i);
-                    const std::string endStr = value.substr(i + 1);
-                    try
-                    {
-                        size_t startEnd = 0;
-                        size_t endEnd = 0;
-                        const int64_t start = std::stoll(startStr, &startEnd);
-                        const int64_t end = std::stoll(endStr, &endEnd);
-                        // Both halves have to be used up, so that trailing
-                        // rubbish is rejected rather than quietly dropped.
-                        if (startEnd == startStr.size() && endEnd == endStr.size())
-                        {
-                            out = ftk::RangeI64(start, end);
-                        }
-                    }
-                    catch (const std::exception&)
-                    {}
-                }
-                if (!out.has_value())
-                {
-                    throw std::runtime_error(
-                        ftk::Format("Cannot parse the frame range: \"{0}\", "
-                            "expected a range such as \"1-100\"").
-                            arg(value));
-                }
-                return out.value();
-            }
-
-            OTIO_NS::RationalTime parseTime(
-                const std::string& name,
-                const std::string& value,
-                double speed,
-                tl::TimeUnits units)
-            {
-                const auto out = tl::textToTime(value, speed, units);
-                if (!out.has_value())
-                {
-                    throw std::runtime_error(
-                        ftk::Format("Cannot parse the {0}: \"{1}\", expected a "
-                            "time in {2}").
-                            arg(name).
-                            arg(value).
-                            arg(tl::getLabel(units)));
-                }
-                return out.value();
-            }
-        }
 
         struct App::Private
         {
@@ -2375,7 +2317,7 @@ namespace djv
                 std::optional<ftk::RangeI64> frameRange;
                 if (p.cmdLine.frameRange->found())
                 {
-                    frameRange = parseFrameRange(p.cmdLine.frameRange->getValue());
+                    frameRange = models::parseFrameRange(p.cmdLine.frameRange->getValue());
                 }
 
                 for (const auto& input : p.cmdLine.inputs->getList())
@@ -2405,7 +2347,7 @@ namespace djv
                         if (p.cmdLine.inPoint->found())
                         {
                             const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                parseTime(
+                                models::parseTime(
                                     "in point",
                                     p.cmdLine.inPoint->getValue(),
                                     speed,
@@ -2418,7 +2360,7 @@ namespace djv
                         {
                             const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
                                 player->getInOutRange().start_time(),
-                                parseTime(
+                                models::parseTime(
                                     "out point",
                                     p.cmdLine.outPoint->getValue(),
                                     speed,
@@ -2428,7 +2370,7 @@ namespace djv
                         }
                         if (p.cmdLine.seek->found())
                         {
-                            player->seek(parseTime(
+                            player->seek(models::parseTime(
                                 "seek time",
                                 p.cmdLine.seek->getValue(),
                                 speed,

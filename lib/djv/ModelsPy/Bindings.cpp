@@ -22,6 +22,7 @@ namespace djv
             filesModel(mModels);
             notesModel(mModels);
             ocioModel(mModels);
+            parse(mModels);
             playlist(mModels);
             rangesModel(mModels);
             recentFilesModel(mModels);

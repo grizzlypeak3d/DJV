@@ -9,6 +9,7 @@ set(HEADERS
     FilesModel.h
     NotesModel.h
     OCIOModel.h
+    Parse.h
     Playlist.h
     RangesModel.h
     RecentFilesModel.h
@@ -31,6 +32,7 @@ set(SOURCE
     FilesModel.cpp
     NotesModel.cpp
     OCIOModel.cpp
+    Parse.cpp
     Playlist.cpp
     RangesModel.cpp
     RecentFilesModel.cpp

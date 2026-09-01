@@ -12,6 +12,7 @@ set(SOURCE
     FilesModel.cpp
     NotesModel.cpp
     OCIOModel.cpp
+    Parse.cpp
     Playlist.cpp
     RangesModel.cpp
     RecentFilesModel.cpp
