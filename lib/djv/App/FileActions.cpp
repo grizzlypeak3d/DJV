@@ -337,6 +337,8 @@ namespace djv
                     ftk::Key::O,
                     static_cast<int>(ftk::KeyModifier::Shift) |
                     static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("OpenPlaylist", "Open playlist");
+            _addShortcut("SavePlaylist", "Save playlist");
             // Alt rather than Shift on the command modifier: Shift+Ctrl+O is
             // "Open with audio", and Shift+Ctrl+S is free but keeping the pair
             // symmetrical is worth more than reusing it.
