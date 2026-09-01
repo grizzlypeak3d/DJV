@@ -248,7 +248,8 @@ namespace djv
             // than one on every row.
             p.deleteRangeButton = ftk::ToolButton::create(context);
             p.deleteRangeButton->setIcon("Remove");
-            p.deleteRangeButton->setTooltip("Delete the selected range.");
+            p.deleteRangeButton->setTooltip(
+                "Delete the selected or applied range.");
             p.deleteRangeButton->setEnabled(false);
             // Clicking the delete must not move the key focus, or it would
             // clear the very selection it is about to act on.
@@ -325,7 +326,9 @@ namespace djv
 
             p.deleteNoteButton = ftk::ToolButton::create(context);
             p.deleteNoteButton->setIcon("Remove");
-            p.deleteNoteButton->setTooltip("Delete the selected note.");
+            p.deleteNoteButton->setTooltip(
+                "Delete the selected note, or the note on the current "
+                "frame.");
             p.deleteNoteButton->setEnabled(false);
             p.deleteNoteButton->setAcceptsKeyFocus(false);
 
@@ -613,6 +616,7 @@ namespace djv
                     p.rangeListLayout);
                 label->setMarginRole(ftk::SizeRole::MarginSmall);
                 label->setTextRole(ftk::ColorRole::TextDisabled);
+                _deleteButtonsUpdate();
                 return;
             }
 
@@ -691,6 +695,7 @@ namespace djv
             {
                 i.second->setChecked(i.first == p.selectedRangeId);
             }
+            _deleteButtonsUpdate();
         }
 
         void ReviewTool::_rangeClicked(const std::string& id)
@@ -993,7 +998,7 @@ namespace djv
             {
                 p.focusedRangeId.clear();
             }
-            p.deleteRangeButton->setEnabled(!p.focusedRangeId.empty());
+            _deleteButtonsUpdate();
         }
 
         void ReviewTool::_noteRowFocus(const std::string& id, bool value)
@@ -1007,13 +1012,48 @@ namespace djv
             {
                 p.focusedNoteId.clear();
             }
-            p.deleteNoteButton->setEnabled(!p.focusedNoteId.empty());
+            _deleteButtonsUpdate();
+        }
+
+        std::string ReviewTool::_rangeDeleteTarget() const
+        {
+            FTK_P();
+            return !p.focusedRangeId.empty() ?
+                p.focusedRangeId : p.selectedRangeId;
+        }
+
+        std::string ReviewTool::_noteDeleteTarget() const
+        {
+            FTK_P();
+            if (!p.focusedNoteId.empty())
+            {
+                return p.focusedNoteId;
+            }
+            // The note on the current frame: what the highlight shows. With
+            // several on the frame the first goes; the button stays enabled
+            // for the rest.
+            for (const auto& row : p.noteItemOrder)
+            {
+                if (row.button->isChecked())
+                {
+                    return row.id;
+                }
+            }
+            return std::string();
+        }
+
+        void ReviewTool::_deleteButtonsUpdate()
+        {
+            FTK_P();
+            p.deleteRangeButton->setEnabled(!_rangeDeleteTarget().empty());
+            p.deleteNoteButton->setEnabled(!_noteDeleteTarget().empty());
         }
 
         void ReviewTool::_deleteRange()
         {
             FTK_P();
-            if (p.focusedRangeId.empty())
+            const std::string id = _rangeDeleteTarget();
+            if (id.empty())
             {
                 return;
             }
@@ -1023,17 +1063,18 @@ namespace djv
             size_t index = 0;
             for (size_t i = 0; i < p.rangeItemOrder.size(); ++i)
             {
-                if (p.rangeItemOrder[i].id == p.focusedRangeId)
+                if (p.rangeItemOrder[i].id == id)
                 {
                     index = i;
                     break;
                 }
             }
+            const bool focused = !p.focusedRangeId.empty();
             if (auto app = _app.lock())
             {
-                app->getRangesModel()->remove(p.focusedRangeId);
+                app->getRangesModel()->remove(id);
             }
-            if (!p.rangeItemOrder.empty())
+            if (focused && !p.rangeItemOrder.empty())
             {
                 const size_t j = std::min(index, p.rangeItemOrder.size() - 1);
                 p.rangeItemOrder[j].button->takeKeyFocus();
@@ -1043,24 +1084,26 @@ namespace djv
         void ReviewTool::_deleteNote()
         {
             FTK_P();
-            if (p.focusedNoteId.empty())
+            const std::string id = _noteDeleteTarget();
+            if (id.empty())
             {
                 return;
             }
             size_t index = 0;
             for (size_t i = 0; i < p.noteItemOrder.size(); ++i)
             {
-                if (p.noteItemOrder[i].id == p.focusedNoteId)
+                if (p.noteItemOrder[i].id == id)
                 {
                     index = i;
                     break;
                 }
             }
+            const bool focused = !p.focusedNoteId.empty();
             if (auto app = _app.lock())
             {
-                app->getNotesModel()->remove(p.focusedNoteId);
+                app->getNotesModel()->remove(id);
             }
-            if (!p.noteItemOrder.empty())
+            if (focused && !p.noteItemOrder.empty())
             {
                 // Focus without following the frame: deleting is not
                 // browsing.
@@ -1270,6 +1313,7 @@ namespace djv
                     p.noteListLayout);
                 label->setMarginRole(ftk::SizeRole::MarginSmall);
                 label->setTextRole(ftk::ColorRole::TextDisabled);
+                _deleteButtonsUpdate();
                 return;
             }
 
@@ -1403,6 +1447,7 @@ namespace djv
                         models::sameTime(note.time, p.currentTime));
                 }
             }
+            _deleteButtonsUpdate();
         }
     }
 }

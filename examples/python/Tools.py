@@ -1025,7 +1025,8 @@ class ReviewTool(IToolWidget):
         # focus, or it would clear the very selection it acts on.
         self._deleteRangeButton = ftk.ToolButton(context)
         self._deleteRangeButton.icon = "Remove"
-        self._deleteRangeButton.tooltip = "Delete the selected range."
+        self._deleteRangeButton.tooltip = \
+            "Delete the selected or applied range."
         self._deleteRangeButton.enabled = False
         self._deleteRangeButton.acceptsKeyFocus = False
         rangeToolLayout = ftk.HorizontalLayout(context)
@@ -1082,7 +1083,9 @@ class ReviewTool(IToolWidget):
         self._publishButton.tooltip = "Add a note about the current frame."
         self._deleteNoteButton = ftk.ToolButton(context)
         self._deleteNoteButton.icon = "Remove"
-        self._deleteNoteButton.tooltip = "Delete the selected note."
+        self._deleteNoteButton.tooltip = (
+            "Delete the selected note, or the note on the current "
+            "frame.")
         self._deleteNoteButton.enabled = False
         self._deleteNoteButton.acceptsKeyFocus = False
         noteToolLayout = ftk.HorizontalLayout(context)
@@ -1298,41 +1301,69 @@ class ReviewTool(IToolWidget):
             self._focusedRangeId = id
         elif self._focusedRangeId == id:
             self._focusedRangeId = None
-        self._deleteRangeButton.enabled = self._focusedRangeId is not None
+        self._deleteButtonsUpdate()
 
     def _noteRowFocus(self, id, value):
         if value:
             self._focusedNoteId = id
         elif self._focusedNoteId == id:
             self._focusedNoteId = None
-        self._deleteNoteButton.enabled = self._focusedNoteId is not None
+        self._deleteButtonsUpdate()
+
+    def _rangeDeleteTarget(self):
+        # The focused row, or failing that the applied range.
+        return self._focusedRangeId \
+            if self._focusedRangeId is not None else self._selectedRangeId
+
+    def _noteDeleteTarget(self):
+        if self._focusedNoteId is not None:
+            return self._focusedNoteId
+        # The note on the current frame: what the highlight shows. With
+        # several on the frame the first goes; the button stays enabled
+        # for the rest.
+        for button, id in self._noteItemOrder:
+            if button.checked:
+                return id
+        return None
+
+    def _deleteButtonsUpdate(self):
+        self._deleteRangeButton.enabled = \
+            self._rangeDeleteTarget() is not None
+        self._deleteNoteButton.enabled = \
+            self._noteDeleteTarget() is not None
 
     def _deleteRange(self):
-        if self._focusedRangeId is None:
+        id = self._rangeDeleteTarget()
+        if id is None:
             return
         # The index before the removal, to land the focus on the
         # neighbour after: repeated deletes then cull a list without
         # re-selecting.
         index = next(
-            (i for i, (b, id) in enumerate(self._rangeItemOrder)
-                if id == self._focusedRangeId), 0)
+            (i for i, (b, rowId) in enumerate(self._rangeItemOrder)
+                if rowId == id), 0)
+        focused = self._focusedRangeId is not None
         app = self._app()
         if app is not None:
-            app.getRangesModel().remove(self._focusedRangeId)
-        if self._rangeItemOrder:
+            app.getRangesModel().remove(id)
+        if focused and self._rangeItemOrder:
             j = min(index, len(self._rangeItemOrder) - 1)
             self._rangeItemOrder[j][0].takeKeyFocus()
 
     def _deleteNote(self):
-        if self._focusedNoteId is None:
+        id = self._noteDeleteTarget()
+        if id is None:
             return
         index = next(
-            (i for i, (b, id) in enumerate(self._noteItemOrder)
-                if id == self._focusedNoteId), 0)
+            (i for i, (b, rowId) in enumerate(self._noteItemOrder)
+                if rowId == id), 0)
+        focused = self._focusedNoteId is not None
         app = self._app()
         if app is not None:
-            app.getNotesModel().remove(self._focusedNoteId)
-        if self._noteItemOrder:
+            app.getNotesModel().remove(id)
+        if focused and self._noteItemOrder:
+            # Focus without following the frame: deleting is not
+            # browsing.
             j = min(index, len(self._noteItemOrder) - 1)
             self._noteItemOrder[j][0].takeKeyFocus()
 
@@ -1407,6 +1438,7 @@ class ReviewTool(IToolWidget):
             label = ftk.Label(context, "No ranges yet.", self._rangeListLayout)
             label.marginRole = ftk.SizeRole.MarginSmall
             label.textRole = ftk.ColorRole.TextDisabled
+            self._deleteButtonsUpdate()
             return
         appWeak = self._app
         # The model keeps the list sorted by start frame.
@@ -1458,6 +1490,7 @@ class ReviewTool(IToolWidget):
     def _rangeSelectionUpdate(self):
         for id, button in self._rangeButtons.items():
             button.checked = id == self._selectedRangeId
+        self._deleteButtonsUpdate()
 
     def _rangeClicked(self, id):
         if not self._player:
@@ -1562,6 +1595,7 @@ class ReviewTool(IToolWidget):
                 context, "No notes yet.", self._noteListLayout)
             label.marginRole = ftk.SizeRole.MarginSmall
             label.textRole = ftk.ColorRole.TextDisabled
+            self._deleteButtonsUpdate()
             return
         appWeak = self._app
         selfWeak = weakref.ref(self)
@@ -1664,6 +1698,7 @@ class ReviewTool(IToolWidget):
             if button is not None:
                 button.checked = djv.models.sameTime(
                     note.time, self._currentTime)
+        self._deleteButtonsUpdate()
 
 FACTORY = {
     "Files": FilesTool,

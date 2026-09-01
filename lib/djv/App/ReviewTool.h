@@ -59,6 +59,12 @@ namespace djv
             void _goToNote(size_t index);
             void _rangeRowFocus(const std::string& id, bool value);
             void _noteRowFocus(const std::string& id, bool value);
+            //! What the header delete buttons would delete: the focused row,
+            //! or failing that the active one -- the applied range, the note
+            //! on the current frame.
+            std::string _rangeDeleteTarget() const;
+            std::string _noteDeleteTarget() const;
+            void _deleteButtonsUpdate();
             void _deleteRange();
             void _deleteNote();
             //! Seek, releasing the in/out range when the target lies
