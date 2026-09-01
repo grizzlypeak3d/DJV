@@ -3,11 +3,13 @@
 
 #include <djv/Models/Review.h>
 
+#include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
 
 #include <algorithm>
 #include <atomic>
 #include <ctime>
+#include <fstream>
 #include <iomanip>
 #include <random>
 #include <sstream>
@@ -560,6 +562,184 @@ namespace djv
             readList(json, "annotations", out.annotations, out);
             readList(json, "notes", out.notes, out);
             readList(json, "ranges", out.ranges, out);
+        }
+
+        const std::string& reviewExtension()
+        {
+            static const std::string out = ".djvr";
+            return out;
+        }
+
+        Review reviewOpen(const std::string& fileName)
+        {
+            std::ifstream f(std::filesystem::u8path(fileName));
+            if (!f.is_open())
+            {
+                throw std::runtime_error(ftk::Format(
+                    "Cannot open review: {0}").arg(fileName));
+            }
+            Review out;
+            try
+            {
+                nlohmann::json json;
+                f >> json;
+                out = json.get<Review>();
+            }
+            catch (const std::exception& e)
+            {
+                throw std::runtime_error(ftk::Format(
+                    "Cannot read review \"{0}\": {1}").
+                    arg(fileName).arg(e.what()));
+            }
+            if (!reviewVersionSupported(out.version))
+            {
+                throw std::runtime_error(ftk::Format(
+                    "Cannot read review \"{0}\": it is format version {1}, "
+                    "and this build of DJV reads up to version {2}. Open it "
+                    "with a newer DJV.").
+                    arg(fileName).
+                    arg(out.version).
+                    arg(reviewVersion));
+            }
+            return out;
+        }
+
+        void reviewSave(const std::string& fileName, Review& review)
+        {
+            nlohmann::json json = review;
+            std::ofstream f(std::filesystem::u8path(fileName));
+            if (!f.is_open())
+            {
+                throw std::runtime_error(ftk::Format(
+                    "Cannot save review: {0}").arg(fileName));
+            }
+            f << std::setw(4) << json << std::endl;
+            review.raw = json;
+        }
+
+        std::string reviewRelativePath(
+            const std::string& path,
+            const std::filesystem::path& base)
+        {
+            if (path.empty() || base.empty())
+            {
+                return path;
+            }
+            std::error_code ec;
+            const std::filesystem::path rel = std::filesystem::relative(
+                std::filesystem::u8path(path), base, ec);
+            if (ec || rel.empty())
+            {
+                return path;
+            }
+            return rel.generic_u8string();
+        }
+
+        std::string reviewGenericPath(const std::string& path)
+        {
+            if (path.empty())
+            {
+                return path;
+            }
+            return std::filesystem::u8path(path).generic_u8string();
+        }
+
+        namespace
+        {
+            //! Does the file exist on disk? A single file is checked exactly; an
+            //! image sequence -- whose padded/pattern path is not a literal file
+            //! -- is considered present when its directory holds a matching frame.
+            bool reviewFilePresent(
+                const std::filesystem::path& p,
+                const ftk::PathOptions& pathOptions)
+            {
+                std::error_code ec;
+                if (std::filesystem::exists(p, ec))
+                {
+                    return true;
+                }
+                const ftk::Path ftkPath(p.u8string(), pathOptions);
+                if (ftkPath.getNum().empty())
+                {
+                    // Single file: genuinely missing.
+                    return false;
+                }
+                const std::filesystem::path dir = std::filesystem::u8path(ftkPath.getDir());
+                if (!std::filesystem::exists(dir, ec))
+                {
+                    return false;
+                }
+                const std::string base = ftkPath.getBase();
+                const std::string ext = ftkPath.getExt();
+                for (const auto& entry : std::filesystem::directory_iterator(dir, ec))
+                {
+                    const std::string name = entry.path().filename().u8string();
+                    if (name.size() >= base.size() + ext.size() &&
+                        0 == name.compare(0, base.size(), base) &&
+                        0 == name.compare(name.size() - ext.size(), ext.size(), ext))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        std::filesystem::path resolveReviewPath(
+            const std::string& relative,
+            const std::string& absolute,
+            const std::filesystem::path& base,
+            const std::filesystem::path& substituteRoot,
+            const ftk::PathOptions& pathOptions,
+            bool& exists)
+        {
+            if (!relative.empty())
+            {
+                const std::filesystem::path rel =
+                    (base / std::filesystem::u8path(relative)).lexically_normal();
+                if (reviewFilePresent(rel, pathOptions))
+                {
+                    exists = true;
+                    return rel;
+                }
+            }
+            if (!absolute.empty())
+            {
+                const std::filesystem::path abs =
+                    std::filesystem::u8path(absolute);
+                if (reviewFilePresent(abs, pathOptions))
+                {
+                    exists = true;
+                    return abs;
+                }
+            }
+            if (!substituteRoot.empty())
+            {
+                std::filesystem::path fileName;
+                if (!relative.empty())
+                {
+                    fileName = std::filesystem::u8path(relative).filename();
+                }
+                else if (!absolute.empty())
+                {
+                    fileName = std::filesystem::u8path(absolute).filename();
+                }
+                if (!fileName.empty())
+                {
+                    const std::filesystem::path candidate = substituteRoot / fileName;
+                    if (reviewFilePresent(candidate, pathOptions))
+                    {
+                        exists = true;
+                        return candidate;
+                    }
+                }
+            }
+            exists = false;
+            if (!relative.empty())
+            {
+                return (base / std::filesystem::u8path(relative)).lexically_normal();
+            }
+            return std::filesystem::u8path(absolute);
         }
     }
 }

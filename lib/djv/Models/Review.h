@@ -15,10 +15,12 @@
 #include <tlRender/Timeline/ForegroundOptions.h>
 #include <tlRender/Core/Time.h>
 
+#include <ftk/Core/Path.h>
 #include <ftk/Core/Vector.h>
 
 #include <nlohmann/json.hpp>
 
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
@@ -282,6 +284,52 @@ namespace djv
         DJV_MODELS_API void from_json(const nlohmann::json&, ReviewNote&);
         DJV_MODELS_API void from_json(const nlohmann::json&, ReviewRange&);
         DJV_MODELS_API void from_json(const nlohmann::json&, Review&);
+
+        ///@}
+
+        //! \name Review files
+        ///@{
+
+        //! The review file extension (".djvr").
+        DJV_MODELS_API const std::string& reviewExtension();
+
+        //! Open a review from a ".djvr" file.
+        //!
+        //! Throws on a file that cannot be read, and on a review written by a
+        //! newer DJV, since silently dropping what the newer version wrote
+        //! would corrupt it on the next save. The sections that were present
+        //! but could not be read are in Review::unreadSections.
+        DJV_MODELS_API Review reviewOpen(const std::string& fileName);
+
+        //! Save a review to a ".djvr" file. Throws on a file that cannot be
+        //! written. The document as written becomes Review::raw, so a
+        //! following save carries forward from this one.
+        DJV_MODELS_API void reviewSave(const std::string& fileName, Review&);
+
+        //! Make an absolute path string relative to the review's directory,
+        //! falling back to the absolute form when no relative path exists
+        //! (e.g. a different drive on Windows).
+        DJV_MODELS_API std::string reviewRelativePath(
+            const std::string& path,
+            const std::filesystem::path& base);
+
+        //! Store a path with forward slashes, whatever the platform wrote.
+        //!
+        //! Windows accepts either separator, so this costs nothing there and
+        //! keeps a document legible -- and diffable -- when it travels.
+        DJV_MODELS_API std::string reviewGenericPath(const std::string& path);
+
+        //! Resolve a stored relative/absolute path pair to a path on disk,
+        //! preferring the relative form, then the absolute form, then the
+        //! file's name inside an optional substitute root (used by the
+        //! relocation dialog). Reports whether the target exists.
+        DJV_MODELS_API std::filesystem::path resolveReviewPath(
+            const std::string& relative,
+            const std::string& absolute,
+            const std::filesystem::path& base,
+            const std::filesystem::path& substituteRoot,
+            const ftk::PathOptions&,
+            bool& exists);
 
         ///@}
     }

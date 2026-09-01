@@ -852,159 +852,6 @@ namespace djv
 
         namespace
         {
-            const std::string reviewExtension = ".djvr";
-
-            std::string reviewTimestamp()
-            {
-                const std::time_t t = std::time(nullptr);
-                std::tm tm {};
-#if defined(_WIN32)
-                gmtime_s(&tm, &t);
-#else
-                gmtime_r(&t, &tm);
-#endif
-                char buf[32] = {};
-                std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm);
-                return std::string(buf);
-            }
-
-            //! Make an absolute path string relative to the review's directory,
-            //! falling back to the absolute form when no relative path exists
-            //! (e.g. a different drive on Windows).
-            std::string reviewRelativePath(
-                const std::string& absStr,
-                const std::filesystem::path& base)
-            {
-                if (absStr.empty() || base.empty())
-                {
-                    return absStr;
-                }
-                std::error_code ec;
-                const std::filesystem::path rel = std::filesystem::relative(
-                    std::filesystem::u8path(absStr), base, ec);
-                if (ec || rel.empty())
-                {
-                    return absStr;
-                }
-                return rel.generic_u8string();
-            }
-
-            //! Store a path with forward slashes, whatever the platform wrote.
-            //!
-            //! Windows accepts either separator, so this costs nothing there and
-            //! keeps a document legible -- and diffable -- when it travels.
-            std::string reviewGenericPath(const std::string& value)
-            {
-                if (value.empty())
-                {
-                    return value;
-                }
-                return std::filesystem::u8path(value).generic_u8string();
-            }
-
-            //! Does the file exist on disk? A single file is checked exactly; an
-            //! image sequence -- whose padded/pattern path is not a literal file
-            //! -- is considered present when its directory holds a matching frame.
-            bool reviewFilePresent(
-                const std::filesystem::path& p,
-                const ftk::PathOptions& pathOptions)
-            {
-                std::error_code ec;
-                if (std::filesystem::exists(p, ec))
-                {
-                    return true;
-                }
-                const ftk::Path ftkPath(p.u8string(), pathOptions);
-                if (ftkPath.getNum().empty())
-                {
-                    // Single file: genuinely missing.
-                    return false;
-                }
-                const std::filesystem::path dir = std::filesystem::u8path(ftkPath.getDir());
-                if (!std::filesystem::exists(dir, ec))
-                {
-                    return false;
-                }
-                const std::string base = ftkPath.getBase();
-                const std::string ext = ftkPath.getExt();
-                for (const auto& entry : std::filesystem::directory_iterator(dir, ec))
-                {
-                    const std::string name = entry.path().filename().u8string();
-                    if (name.size() >= base.size() + ext.size() &&
-                        0 == name.compare(0, base.size(), base) &&
-                        0 == name.compare(name.size() - ext.size(), ext.size(), ext))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            //! Resolve a stored relative/absolute path pair to a path on disk,
-            //! preferring the relative form, then the absolute form, then the
-            //! file's name inside an optional substitute root (used by the
-            //! relocation dialog). Reports whether the target exists.
-            std::filesystem::path resolveReviewPath(
-                const std::string& relative,
-                const std::string& absolute,
-                const std::filesystem::path& base,
-                const std::filesystem::path& substituteRoot,
-                const ftk::PathOptions& pathOptions,
-                bool& exists)
-            {
-                auto present = [&pathOptions](const std::filesystem::path& p)
-                {
-                    return reviewFilePresent(p, pathOptions);
-                };
-                if (!relative.empty())
-                {
-                    const std::filesystem::path rel =
-                        (base / std::filesystem::u8path(relative)).lexically_normal();
-                    if (present(rel))
-                    {
-                        exists = true;
-                        return rel;
-                    }
-                }
-                if (!absolute.empty())
-                {
-                    const std::filesystem::path abs =
-                        std::filesystem::u8path(absolute);
-                    if (present(abs))
-                    {
-                        exists = true;
-                        return abs;
-                    }
-                }
-                if (!substituteRoot.empty())
-                {
-                    std::filesystem::path fileName;
-                    if (!relative.empty())
-                    {
-                        fileName = std::filesystem::u8path(relative).filename();
-                    }
-                    else if (!absolute.empty())
-                    {
-                        fileName = std::filesystem::u8path(absolute).filename();
-                    }
-                    if (!fileName.empty())
-                    {
-                        const std::filesystem::path candidate = substituteRoot / fileName;
-                        if (present(candidate))
-                        {
-                            exists = true;
-                            return candidate;
-                        }
-                    }
-                }
-                exists = false;
-                if (!relative.empty())
-                {
-                    return (base / std::filesystem::u8path(relative)).lexically_normal();
-                }
-                return std::filesystem::u8path(absolute);
-            }
-
             //! Resolve a review file entry to a path on disk.
             std::filesystem::path resolveReviewFile(
                 const models::ReviewFile& rf,
@@ -1013,7 +860,7 @@ namespace djv
                 const ftk::PathOptions& pathOptions,
                 bool& exists)
             {
-                return resolveReviewPath(
+                return models::resolveReviewPath(
                     rf.path, rf.pathAbsolute, base, substituteRoot, pathOptions, exists);
             }
         }
@@ -1022,45 +869,14 @@ namespace djv
         {
             FTK_P();
 
-            std::ifstream f(path);
-            if (!f.is_open())
-            {
-                _context->log(
-                    "djv::app::App",
-                    ftk::Format("Cannot open review: {0}").arg(path.u8string()),
-                    ftk::LogType::Error);
-                return;
-            }
-
             models::Review review;
             try
             {
-                nlohmann::json json;
-                f >> json;
-                review = json.get<models::Review>();
+                review = models::reviewOpen(path.u8string());
             }
             catch (const std::exception& e)
             {
-                _context->log(
-                    "djv::app::App",
-                    ftk::Format("Cannot read review \"{0}\": {1}").
-                        arg(path.u8string()).arg(e.what()),
-                    ftk::LogType::Error);
-                return;
-            }
-
-            if (!models::reviewVersionSupported(review.version))
-            {
-                _context->log(
-                    "djv::app::App",
-                    ftk::Format(
-                        "Cannot read review \"{0}\": it is format version {1}, "
-                        "and this build of DJV reads up to version {2}. Open it "
-                        "with a newer DJV.").
-                        arg(path.u8string()).
-                        arg(review.version).
-                        arg(models::reviewVersion),
-                    ftk::LogType::Error);
+                _context->log("djv::app::App", e.what(), ftk::LogType::Error);
                 return;
             }
             _logUnreadSections(review, path);
@@ -1116,7 +932,7 @@ namespace djv
                 if (!rf.audioPath.empty() || !rf.audioPathAbsolute.empty())
                 {
                     bool audioExists = false;
-                    const std::filesystem::path audio = resolveReviewPath(
+                    const std::filesystem::path audio = models::resolveReviewPath(
                         rf.audioPath,
                         rf.audioPathAbsolute,
                         base,
@@ -1286,10 +1102,10 @@ namespace djv
                 // The review's own name where there is one, the way the
                 // playlists suggest "playlist.otio".
                 options.fileName = p.reviewPath.empty() ?
-                    std::string("review") + reviewExtension :
+                    std::string("review") + models::reviewExtension() :
                     p.reviewPath.filename().u8string();
             }
-            options.extensions = { reviewExtension };
+            options.extensions = { models::reviewExtension() };
             options.extensionsLabel = "Review Session";
             fileBrowserSystem->open(
                 p.mainWindow,
@@ -1333,7 +1149,7 @@ namespace djv
             review.app = ftk::Format("{0} {1}").
                 arg(p.appInfoModel->getFullName()).
                 arg(p.appInfoModel->getVersion());
-            review.created = reviewTimestamp();
+            review.created = models::timestamp();
             // Carry what the review we last loaded held but we could not use:
             // the sections we do not know, and the ones we failed to read. The
             // document is rebuilt from the models, so without this the save
@@ -1346,12 +1162,12 @@ namespace djv
             {
                 models::ReviewFile rf;
                 rf.id = file->id;
-                rf.pathAbsolute = reviewGenericPath(file->path.get());
-                rf.path = reviewRelativePath(file->path.get(), base);
+                rf.pathAbsolute = models::reviewGenericPath(file->path.get());
+                rf.path = models::reviewRelativePath(file->path.get(), base);
                 // The separate audio travels with the review like the file does:
                 // stored absolute only, it would not survive the move.
-                rf.audioPath = reviewRelativePath(file->audioPath.get(), base);
-                rf.audioPathAbsolute = reviewGenericPath(file->audioPath.get());
+                rf.audioPath = models::reviewRelativePath(file->audioPath.get(), base);
+                rf.audioPathAbsolute = models::reviewGenericPath(file->audioPath.get());
                 rf.videoLayer = static_cast<int>(file->videoLayer);
                 rf.speed = file->speed;
                 rf.currentTime = file->currentTime;
@@ -1417,22 +1233,20 @@ namespace djv
         {
             FTK_P();
 
-            const models::Review review = _buildReview(path.parent_path());
+            models::Review review = _buildReview(path.parent_path());
 
-            nlohmann::json json = review;
-            std::ofstream f(path);
-            if (!f.is_open())
+            try
             {
-                _context->log(
-                    "djv::app::App",
-                    ftk::Format("Cannot save review: {0}").arg(path.u8string()),
-                    ftk::LogType::Error);
+                models::reviewSave(path.u8string(), review);
+            }
+            catch (const std::exception& e)
+            {
+                _context->log("djv::app::App", e.what(), ftk::LogType::Error);
                 return;
             }
-            f << std::setw(4) << json << std::endl;
 
             p.reviewPath = path;
-            p.reviewRaw = json;
+            p.reviewRaw = review.raw;
             p.recentReviewsModel->addRecent(ftk::Path(path.u8string()));
             p.reviewModified = false;
             _updateWindowTitle();
@@ -1453,11 +1267,11 @@ namespace djv
                 [this, onSaved](const std::filesystem::path& value)
                 {
                     std::filesystem::path path = value;
-                    if (path.extension() != reviewExtension)
+                    if (path.extension() != models::reviewExtension())
                     {
                         // Auto-complete the extension when the user types a bare
                         // name.
-                        path.replace_extension(reviewExtension);
+                        path.replace_extension(models::reviewExtension());
                     }
                     saveReview(path);
                     if (onSaved)
@@ -2520,7 +2334,7 @@ namespace djv
                 {
                     const std::filesystem::path firstPath = std::filesystem::u8path(
                         p.cmdLine.inputs->getList().front());
-                    if (firstPath.extension() == reviewExtension)
+                    if (firstPath.extension() == models::reviewExtension())
                     {
                         openReview(firstPath);
                         return;
