@@ -1018,7 +1018,7 @@ class ReviewTool(IToolWidget):
         # The add buttons live in their bellows title rows, so the lists
         # read like the lists elsewhere: + in the header, - on the rows.
         self._addRangeButton = ftk.ToolButton(context)
-        self._addRangeButton.icon = "AddSmall"
+        self._addRangeButton.icon = "Add"
         self._addRangeButton.tooltip = \
             "Save the timeline in/out points as a named range."
         self._rangeListLayout = ftk.VerticalLayout(context, rangesWidget)
@@ -1074,7 +1074,7 @@ class ReviewTool(IToolWidget):
         self._noteEdit.sizeHintRole = ftk.SizeRole.ScrollAreaSmall
         self._noteEdit.tooltip = "Write a note about the current frame."
         self._publishButton = ftk.ToolButton(context)
-        self._publishButton.icon = "AddSmall"
+        self._publishButton.icon = "Add"
         self._publishButton.tooltip = "Attach the note to the current frame."
         self._noteListLayout = ftk.VerticalLayout(context, notesWidget)
         self._noteListLayout.spacingRole = ftk.SizeRole.SpacingSmall

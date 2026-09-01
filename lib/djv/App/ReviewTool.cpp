@@ -203,7 +203,7 @@ namespace djv
             // The add buttons live in their bellows title rows, so the lists
             // read like the lists elsewhere: + in the header, - on the rows.
             p.addRangeButton = ftk::ToolButton::create(context);
-            p.addRangeButton->setIcon("AddSmall");
+            p.addRangeButton->setIcon("Add");
             p.addRangeButton->setTooltip(
                 "Save the timeline in/out points as a named range.");
 
@@ -277,7 +277,7 @@ namespace djv
             p.noteEdit->setTooltip("Write a note about the current frame.");
 
             p.publishButton = ftk::ToolButton::create(context);
-            p.publishButton->setIcon("AddSmall");
+            p.publishButton->setIcon("Add");
             p.publishButton->setTooltip(
                 "Attach the note to the current frame. Return with the\n"
                 "command key also adds, from inside the editor.");
