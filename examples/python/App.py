@@ -39,11 +39,70 @@ class App(ftk.App):
     """
     def __init__(self, context, argv):
 
-        self._cmdLineInput = ftk.CmdLineArgString("Input", "Input file", True)
-        self._cmdLineB = ftk.CmdLineOptionString(
-            ["-b"], "Open a file for comparison.")
+        self._cmdLineInputs = ftk.CmdLineListArgString(
+            "input",
+            "One or more timelines, movies, image sequences, or directories.",
+            True)
+        self._cmdLineAudio = ftk.CmdLineOptionString(
+            ["-audio", "-a"], "Audio file name.", "Audio")
         self._cmdLineCompare = ftk.CmdLineOptionString(
-            ["-compare"], "The comparison mode.")
+            ["-compare", "-b"], "Compare \"B\" file name.", "Compare")
+        self._cmdLineCompareMode = ftk.CmdLineOptionString(
+            ["-compareMode", "-c"], "Compare mode.", "Compare")
+        self._cmdLineWipeCenter = ftk.CmdLineOptionString(
+            ["-wipeCenter", "-wc"],
+            "Wipe center; e.g., \"0.5,0.5\".", "Compare")
+        self._cmdLineWipeRotation = ftk.CmdLineOptionF(
+            ["-wipeRotation", "-wr"], "Wipe rotation.", "Compare")
+        self._cmdLineFrameRange = ftk.CmdLineOptionString(
+            ["-frameRange", "-fr"],
+            "Frame range of an image sequence (e.g., 1-100). This is the "
+            "range the sequence is meant to cover, which need not be the "
+            "frames on disk. Applies to the first file opened.",
+            "Playback")
+        self._cmdLineSpeed = ftk.CmdLineOptionD(
+            ["-speed"], "Playback speed.", "Playback")
+        self._cmdLinePlayback = ftk.CmdLineOptionString(
+            ["-playback", "-p"], "Playback mode.", "Playback")
+        self._cmdLineLoop = ftk.CmdLineOptionString(
+            ["-loop"], "Loop mode.", "Playback")
+        self._cmdLineTimeUnits = ftk.CmdLineOptionString(
+            ["-timeUnits", "-tu"], "Set the time units.", "Playback")
+        self._cmdLineSeek = ftk.CmdLineOptionString(
+            ["-seek"], "Seek to the given time.", "Playback")
+        self._cmdLineInPoint = ftk.CmdLineOptionString(
+            ["-inPoint", "-in"], "Set the in point.", "Playback")
+        self._cmdLineOutPoint = ftk.CmdLineOptionString(
+            ["-outPoint", "-out"], "Set the out point.", "Playback")
+        self._cmdLineDirFilter = ftk.CmdLineOptionString(
+            ["-dirFilter"],
+            "Filter the files when opening a directory: a "
+            "case-insensitive substring, or a wildcard pattern with "
+            "\"*\" and \"?\" (e.g., \"*.mov\").",
+            "Directories")
+        self._cmdLineDirDepth = ftk.CmdLineOptionI(
+            ["-dirDepth"],
+            "How many directory levels to open: 1 opens the directory "
+            "alone.",
+            "Directories",
+            1)
+        self._cmdLineOCIO = ftk.CmdLineOptionString(
+            ["-ocio"],
+            "OCIO configuration file name (e.g., config.ocio).", "Color")
+        self._cmdLineOCIOInput = ftk.CmdLineOptionString(
+            ["-ocioInput"], "OCIO input name.", "Color")
+        self._cmdLineOCIODisplay = ftk.CmdLineOptionString(
+            ["-ocioDisplay"], "OCIO display name.", "Color")
+        self._cmdLineOCIOView = ftk.CmdLineOptionString(
+            ["-ocioView"], "OCIO view name.", "Color")
+        self._cmdLineOCIOLook = ftk.CmdLineOptionString(
+            ["-ocioLook"], "OCIO look name.", "Color")
+        self._cmdLineLUT = ftk.CmdLineOptionString(
+            ["-lut"], "LUT file name.", "Color")
+        self._cmdLineLUTOrder = ftk.CmdLineOptionString(
+            ["-lutOrder"], "LUT operation order.", "Color")
+        self._cmdLineSysInfo = ftk.CmdLineFlag(
+            ["-sysInfo"], "Print the system information and exit.")
         self._cmdLineListCommands = ftk.CmdLineFlag(
             ["-listCommands"], "Print the list of commands and exit.")
         self._cmdLineCommand = ftk.CmdLineListOptionString(
@@ -67,8 +126,19 @@ class App(ftk.App):
             argv,
             "djv-python",
             "DJV Python player",
-            [ self._cmdLineInput ],
-            [ self._cmdLineB, self._cmdLineCompare,
+            [ self._cmdLineInputs ],
+            [ self._cmdLineAudio, self._cmdLineCompare,
+              self._cmdLineCompareMode, self._cmdLineWipeCenter,
+              self._cmdLineWipeRotation, self._cmdLineSpeed,
+              self._cmdLinePlayback, self._cmdLineLoop,
+              self._cmdLineTimeUnits, self._cmdLineSeek,
+              self._cmdLineFrameRange, self._cmdLineInPoint,
+              self._cmdLineOutPoint, self._cmdLineDirFilter,
+              self._cmdLineDirDepth, self._cmdLineOCIO,
+              self._cmdLineOCIOInput, self._cmdLineOCIODisplay,
+              self._cmdLineOCIOView, self._cmdLineOCIOLook,
+              self._cmdLineLUT, self._cmdLineLUTOrder,
+              self._cmdLineSysInfo,
               self._cmdLineListCommands, self._cmdLineCommand ],
             ftk.AppFiles(
                 self._appInfoModel.docsDirName,
@@ -136,22 +206,40 @@ class App(ftk.App):
         """
         return self._player
 
-    def open(self, path, audioPath = None):
+    def open(self, path, audioPath = None, frames = None):
         """
         Open an image sequence, movie, or timeline file, optionally with
-        a separate audio file.
+        a separate audio file and a stated frame range.
         """
         path = path if isinstance(path, ftk.Path) else ftk.Path(str(path))
         options = ftk.DirListOptions()
         options.seqExts = tl.getExts(self.context, int(tl.FileType.Seq))
         options.seqMaxDigits = self._settingsModel.imageSeq.maxDigits
-        options.seq = True
+        # Gathering a directory's frames into sequences and taking one
+        # frame to name its sequence are the same thing said twice; a
+        # stated range has already said what it wants.
+        options.seq = frames is None
+        # The command line said how directories are read; that holds
+        # for the whole session, dialogs included.
+        if self._cmdLineDirFilter.hasValue:
+            options.filter = self._cmdLineDirFilter.value
+        if self._cmdLineDirDepth.found:
+            options.depth = max(1, self._cmdLineDirDepth.value)
+        first = True
         for i in tl.getPaths(self.context, path, options):
             item = djv.models.FilesModelItem()
             # Annotations reference their source by this identity, so it
             # has to exist from the moment the file is opened.
             item.id = djv.models.generateId()
             item.path = i
+            if first and frames is not None:
+                # Stated, so the frames on disk are not looked for and
+                # the range is used as it is. A directory gives several
+                # sequences and one range cannot describe them all, so
+                # only the first takes it.
+                item.path.frames = frames
+                item.framesStated = True
+            first = False
             if audioPath is not None:
                 item.audioPath = audioPath
             self._filesModel.add(item)
@@ -534,6 +622,114 @@ class App(ftk.App):
         self.context.getSystemByName("ftk::LogSystem").print(
             "djv.App", message, logType)
 
+    def _parseEnum(self, name, value, enums):
+        for e in enums:
+            if tl.getLabel(e).lower() == value.lower():
+                return e
+        raise RuntimeError(
+            "Cannot parse the {}: \"{}\", expected one of: {}".format(
+                name, value, ", ".join(tl.getLabel(e) for e in enums)))
+
+    def _inputFilesInit(self):
+        inputs = list(self._cmdLineInputs.list)
+        if not inputs:
+            return
+
+        # A review (".djvr") describes an entire session; open it and
+        # ignore any other inputs.
+        if os.path.splitext(inputs[0])[1] == djv.models.reviewExtension():
+            self.openReview(inputs[0])
+            return
+
+        pathOptions = ftk.PathOptions()
+        pathOptions.seqMaxDigits = self._settingsModel.imageSeq.maxDigits
+
+        if self._cmdLineCompare.hasValue:
+            path = ftk.Path(self._cmdLineCompare.value, pathOptions)
+            if path.hasSeqWildcard:
+                path = ftk.expandSeq(path, pathOptions)
+            self.open(path)
+            options = self._filesModel.compareOptions
+            if self._cmdLineCompareMode.hasValue:
+                options.compare = self._parseEnum(
+                    "compare mode",
+                    self._cmdLineCompareMode.value,
+                    tl.getCompareEnums())
+            if self._cmdLineWipeCenter.hasValue:
+                parts = self._cmdLineWipeCenter.value.replace(",", " ").split()
+                options.wipeCenter = ftk.V2F(float(parts[0]), float(parts[1]))
+            if self._cmdLineWipeRotation.hasValue:
+                options.wipeRotation = self._cmdLineWipeRotation.value
+            self._filesModel.compareOptions = options
+            self._filesModel.setB(0, True)
+
+        audioPath = None
+        if self._cmdLineAudio.hasValue:
+            audioPath = ftk.Path(self._cmdLineAudio.value)
+        frameRange = None
+        if self._cmdLineFrameRange.hasValue:
+            frameRange = djv.models.parseFrameRange(
+                self._cmdLineFrameRange.value)
+
+        for value in inputs:
+            path = ftk.Path(value, pathOptions)
+            if path.hasSeqWildcard:
+                path = ftk.expandSeq(path, pathOptions)
+            self.open(path, audioPath, frameRange)
+            # Only the first file opened takes the range.
+            frameRange = None
+
+            player = self._player.get()
+            if player is None:
+                continue
+            if self._cmdLineSpeed.hasValue:
+                player.speed = self._cmdLineSpeed.value
+            if self._cmdLineTimeUnits.hasValue:
+                self._timeUnitsModel.timeUnits = self._parseEnum(
+                    "time units",
+                    self._cmdLineTimeUnits.value,
+                    tl.getTimeUnitsEnums())
+            speed = player.speed
+            timeUnits = self._timeUnitsModel.timeUnits
+            if self._cmdLineInPoint.hasValue:
+                inOutRange = \
+                    otio.opentime.TimeRange.range_from_start_end_time_inclusive(
+                        djv.models.parseTime(
+                            "in point",
+                            self._cmdLineInPoint.value,
+                            speed,
+                            timeUnits),
+                        player.inOutRange.end_time_inclusive())
+                player.inOutRange = inOutRange
+                player.currentTime = inOutRange.start_time
+            if self._cmdLineOutPoint.hasValue:
+                inOutRange = \
+                    otio.opentime.TimeRange.range_from_start_end_time_inclusive(
+                        player.inOutRange.start_time,
+                        djv.models.parseTime(
+                            "out point",
+                            self._cmdLineOutPoint.value,
+                            speed,
+                            timeUnits))
+                player.inOutRange = inOutRange
+                player.currentTime = inOutRange.start_time
+            if self._cmdLineSeek.hasValue:
+                player.currentTime = djv.models.parseTime(
+                    "seek time",
+                    self._cmdLineSeek.value,
+                    speed,
+                    timeUnits)
+            if self._cmdLineLoop.hasValue:
+                player.loop = self._parseEnum(
+                    "loop mode",
+                    self._cmdLineLoop.value,
+                    tl.getLoopEnums())
+            if self._cmdLinePlayback.hasValue:
+                player.playback = self._parseEnum(
+                    "playback mode",
+                    self._cmdLinePlayback.value,
+                    tl.getPlaybackEnums())
+
     def reload(self):
         """
         Reload the current file: the active files' timelines are dropped
@@ -643,24 +839,44 @@ class App(ftk.App):
             self._settingsModel.observeStyle,
             lambda value: selfWeak()._styleUpdate(value))
 
-        if self._cmdLineInput.hasValue:
-            # A review (".djvr") describes an entire session; open it
-            # instead of the file list.
-            value = self._cmdLineInput.value
-            if os.path.splitext(value)[1] == djv.models.reviewExtension():
-                self.openReview(value)
-            else:
-                self.open(ftk.Path(value))
-        if self._cmdLineB.hasValue:
-            self.open(ftk.Path(self._cmdLineB.value))
-            self._filesModel.setB(len(self._filesModel.files) - 1, True)
-            self._filesModel.setA(0)
-        if self._cmdLineCompare.hasValue:
-            for mode in tl.getCompareEnums():
-                if tl.getLabel(mode).lower() == self._cmdLineCompare.value.lower():
-                    options = self._filesModel.compareOptions
-                    options.compare = mode
-                    self._filesModel.compareOptions = options
+        if self._cmdLineSysInfo.found:
+            print("\n".join(djv.ui.getSysInfo(
+                self.context, self._appInfoModel, self._settingsModel)))
+            return
+
+        # Color options apply to the session whether or not a file was
+        # named.
+        if (self._cmdLineOCIO.hasValue or
+                self._cmdLineOCIOInput.hasValue or
+                self._cmdLineOCIODisplay.hasValue or
+                self._cmdLineOCIOView.hasValue or
+                self._cmdLineOCIOLook.hasValue):
+            options = self._colorModel.ocioOptions
+            options.enabled = True
+            if self._cmdLineOCIO.hasValue:
+                options.fileName = self._cmdLineOCIO.value
+            if self._cmdLineOCIOInput.hasValue:
+                options.input = self._cmdLineOCIOInput.value
+            if self._cmdLineOCIODisplay.hasValue:
+                options.display = self._cmdLineOCIODisplay.value
+            if self._cmdLineOCIOView.hasValue:
+                options.view = self._cmdLineOCIOView.value
+            if self._cmdLineOCIOLook.hasValue:
+                options.look = self._cmdLineOCIOLook.value
+            self._colorModel.ocioOptions = options
+        if self._cmdLineLUT.hasValue or self._cmdLineLUTOrder.hasValue:
+            options = self._colorModel.lutOptions
+            options.enabled = True
+            if self._cmdLineLUT.hasValue:
+                options.fileName = self._cmdLineLUT.value
+            if self._cmdLineLUTOrder.hasValue:
+                options.order = self._parseEnum(
+                    "LUT operation order",
+                    self._cmdLineLUTOrder.value,
+                    tl.getLUTOrderEnums())
+            self._colorModel.lutOptions = options
+
+        self._inputFilesInit()
 
         if self._cmdLineListCommands.found:
             for command in self._commandsModel.commands:
@@ -701,7 +917,7 @@ class App(ftk.App):
 
     def _commandTimeout(self):
         self._commandTicks += 1
-        if not self._cmdLineInput.hasValue or \
+        if not self._cmdLineInputs.list or \
                 self._player.get() or \
                 self._commandTicks > 100:
             self._commandTimer.stop()
