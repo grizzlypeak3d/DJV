@@ -66,6 +66,8 @@ class MainWindow(ftk.MainWindow):
             app.getViewportModel(),
             app.getTimeUnitsModel(),
             app.getSettingsModel(),
+            app.getAnnotationsModel(),
+            app.getDrawModel(),
             app.getSysLogModel())
         self._timelineWidget = tl.ui.TimelineWidget(context, app.getTimeUnitsModel())
         # The current file's timeline and no other; left unset the widget

@@ -13,10 +13,12 @@ namespace djv
         {
             auto mModels = m.def_submodule("models", "Data models");
 
+            annotationsModel(mModels);
             appInfoModel(mModels);
             audioModel(mModels);
             colorModel(mModels);
             commandsModel(mModels);
+            drawModel(mModels);
             filesModel(mModels);
             ocioModel(mModels);
             playlist(mModels);

@@ -102,6 +102,12 @@ class App(ftk.App):
     def getToolsModel(self):
         return self._toolsModel
 
+    def getAnnotationsModel(self):
+        return self._annotationsModel
+
+    def getDrawModel(self):
+        return self._drawModel
+
     def getSysLogModel(self):
         return self._sysLogModel
 
@@ -276,6 +282,8 @@ class App(ftk.App):
         self._audioModel = djv.models.AudioModel(self.context, self._settings)
         self._colorModel = djv.models.ColorModel(self.context, self._settings)
         self._toolsModel = djv.models.ToolsModel(self._settings)
+        self._annotationsModel = djv.models.AnnotationsModel()
+        self._drawModel = djv.models.DrawModel(self._settings)
         self._sysLogModel = ftk.SysLogModel(self.context)
         self._commandsModel = djv.models.CommandsModel(self.context)
 

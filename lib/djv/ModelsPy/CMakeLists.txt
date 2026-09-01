@@ -2,11 +2,13 @@ set(HEADERS
     Bindings.h)
 set(HEADERS_PRIVATE)
 set(SOURCE
+    AnnotationsModel.cpp
     AppInfoModel.cpp
     AudioModel.cpp
     Bindings.cpp
     ColorModel.cpp
     CommandsModel.cpp
+    DrawModel.cpp
     FilesModel.cpp
     OCIOModel.cpp
     Playlist.cpp

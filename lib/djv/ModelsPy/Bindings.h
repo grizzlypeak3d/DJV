@@ -10,10 +10,12 @@ namespace djv
 {
     namespace python
     {
+        void annotationsModel(pybind11::module_&);
         void appInfoModel(pybind11::module_&);
         void audioModel(pybind11::module_&);
         void colorModel(pybind11::module_&);
         void commandsModel(pybind11::module_&);
+        void drawModel(pybind11::module_&);
         void filesModel(pybind11::module_&);
         void ocioModel(pybind11::module_&);
         void playlist(pybind11::module_&);

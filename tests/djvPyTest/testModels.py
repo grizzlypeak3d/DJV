@@ -221,5 +221,49 @@ class ModelsTest(unittest.TestCase):
         model.volumeDown()
         self.assertAlmostEqual(0.0, model.volume)
 
+    def annotationsCallback(self, value):
+        self.annotations = value
+
+    def test_annotationsModel(self):
+        import opentimelineio as otio
+        model = djv.models.AnnotationsModel()
+
+        self.annotations = None
+        observer = djv.models.ReviewAnnotationListObserver(
+            model.observeAnnotations,
+            self.annotationsCallback)
+
+        stroke = djv.models.ReviewStroke()
+        stroke.width = 2.0
+        stroke.points = [ftk.V2F(0.0, 0.0), ftk.V2F(10.0, 10.0)]
+        time = otio.opentime.RationalTime(1.0, 24.0)
+        model.addStroke("source", time, stroke)
+        self.assertEqual(1, len(model.annotations))
+        self.assertEqual(1, len(self.annotations))
+        strokes = model.getStrokes("source", time)
+        self.assertEqual([stroke], strokes)
+        self.assertEqual(
+            [], model.getStrokes("source", otio.opentime.RationalTime(2.0, 24.0)))
+
+        model.undo()
+        self.assertEqual([], model.getStrokes("source", time))
+        model.redo()
+        self.assertEqual([stroke], model.getStrokes("source", time))
+
+        model.clear()
+        self.assertEqual(0, len(model.annotations))
+
+    def test_drawModel(self):
+        model = djv.models.DrawModel(self.settings)
+
+        model.enabled = True
+        self.assertTrue(model.enabled)
+        model.tool = djv.models.DrawTool.Eraser
+        self.assertEqual(djv.models.DrawTool.Eraser, model.tool)
+        model.color = ftk.Color4F(1.0, 0.0, 0.0, 1.0)
+        self.assertEqual(ftk.Color4F(1.0, 0.0, 0.0, 1.0), model.color)
+        model.size = 8.0
+        self.assertAlmostEqual(8.0, model.size)
+
 if __name__ == '__main__':
     unittest.main()
