@@ -1392,8 +1392,9 @@ class ReviewTool(IToolWidget):
             card = ftk.VerticalLayout(context, self._noteListLayout)
             card.spacingRole = ftk.SizeRole._None
             card.backgroundRole = ftk.ColorRole.Button
+            # The same row as a range: a full-width button with the
+            # dimmed detail against the right edge, then the delete.
             header = ftk.HorizontalLayout(context, card)
-            header.marginRole = ftk.SizeRole.MarginSmall
             header.spacingRole = ftk.SizeRole.SpacingSmall
             # The frame doubles as the button that goes to it.
             hasTime = note.time is not None
@@ -1402,6 +1403,8 @@ class ReviewTool(IToolWidget):
                 "Frame {}".format(int(note.time.value))
                     if hasTime else "No frame",
                 header)
+            frameButton.secondaryText = _formatCreated(note.created)
+            frameButton.hStretch = ftk.Stretch.Expanding
             frameButton.enabled = hasTime
             frameButton.tooltip = "Go to the note's frame."
             def seek(time, appWeak = appWeak):
@@ -1414,11 +1417,6 @@ class ReviewTool(IToolWidget):
             frameButton.setClickedCallback(
                 lambda captured = note.time: seek(captured))
             self._noteButtons[note.id] = frameButton
-            header.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
-            createdLabel = ftk.Label(
-                context, _formatCreated(note.created), header)
-            createdLabel.textRole = ftk.ColorRole.TextDisabled
-            createdLabel.vAlign = ftk.VAlign.Center
             deleteButton = ftk.ToolButton(context, header)
             deleteButton.icon = "RemoveSmall"
             deleteButton.tooltip = "Delete this note."
@@ -1426,7 +1424,7 @@ class ReviewTool(IToolWidget):
                 lambda captured = note.id:
                     appWeak() and appWeak().getNotesModel().remove(captured))
             textLabel = ftk.Label(context, _wrapText(note.text, 40), card)
-            textLabel.marginRole = ftk.SizeRole.MarginSmall
+            textLabel.marginRole = ftk.SizeRole.Margin
             textLabel.hAlign = ftk.HAlign.Left
             textLabel.vAlign = ftk.VAlign.Top
         self._noteSelectionUpdate()

@@ -808,8 +808,9 @@ namespace djv
                 card->setSpacingRole(ftk::SizeRole::None);
                 card->setBackgroundRole(ftk::ColorRole::Button);
 
+                // The same row as a range: a full-width button with the
+                // dimmed detail against the right edge, then the delete.
                 auto header = ftk::HorizontalLayout::create(context, card);
-                header->setMarginRole(ftk::SizeRole::MarginSmall);
                 header->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
                 // The frame doubles as the button that goes to it.
@@ -820,6 +821,8 @@ namespace djv
                         ftk::Format("Frame {0}").arg(static_cast<int>(note.time->value())).operator std::string() :
                         std::string("No frame"),
                     header);
+                frameButton->setSecondaryText(formatCreated(note.created));
+                frameButton->setHStretch(ftk::Stretch::Expanding);
                 frameButton->setEnabled(hasTime);
                 frameButton->setTooltip("Go to the note's frame.");
                 const std::optional<OTIO_NS::RationalTime> time = note.time;
@@ -836,12 +839,6 @@ namespace djv
                     });
                 p.noteButtons[note.id] = frameButton;
 
-                header->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
-
-                auto createdLabel = ftk::Label::create(context, formatCreated(note.created), header);
-                createdLabel->setTextRole(ftk::ColorRole::TextDisabled);
-                createdLabel->setVAlign(ftk::VAlign::Center);
-
                 auto deleteButton = ftk::ToolButton::create(context, header);
                 deleteButton->setIcon("RemoveSmall");
                 deleteButton->setTooltip("Delete this note.");
@@ -856,7 +853,7 @@ namespace djv
                     });
 
                 auto textLabel = ftk::Label::create(context, wrapText(note.text, 40), card);
-                textLabel->setMarginRole(ftk::SizeRole::MarginSmall);
+                textLabel->setMarginRole(ftk::SizeRole::Margin);
                 textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
             }
             _noteSelectionUpdate();
