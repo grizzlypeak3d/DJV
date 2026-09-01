@@ -1235,12 +1235,15 @@ class ReviewTool(IToolWidget):
             # Deliberately not checkable, for the reason given on the
             # pen button: the click would flip the state after the
             # callback and fight the highlight set from the selection.
+            # The frames follow the name, so a named row says where it
+            # points -- unless the name is the frames, which the default
+            # is, and saying them twice reads as a mistake.
+            frames = _formatRange(range_.range) \
+                if range_.range is not None else ""
             button = ftk.ToolButton(
                 context,
-                "{}  {}".format(
-                    range_.name,
-                    _formatRange(range_.range)
-                        if range_.range is not None else ""),
+                range_.name if range_.name == frames or not frames
+                    else "{}  {}".format(range_.name, frames),
                 row)
             button.hStretch = ftk.Stretch.Expanding
             button.tooltip = (

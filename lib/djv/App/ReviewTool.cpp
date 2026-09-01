@@ -546,11 +546,16 @@ namespace djv
                 // Deliberately not checkable, for the reason given on the pen
                 // button: click() would flip the state after the callback and
                 // fight the highlight set from the selection.
+                // The frames follow the name, so a named row says where it
+                // points -- unless the name is the frames, which the default
+                // is, and saying them twice reads as a mistake.
+                const std::string frames = range.range.has_value() ?
+                    formatRange(*range.range) : std::string();
                 auto button = ftk::ToolButton::create(
                     context,
-                    ftk::Format("{0}  {1}").
-                        arg(range.name).
-                        arg(range.range.has_value() ? formatRange(*range.range) : std::string()),
+                    range.name == frames || frames.empty() ?
+                        range.name :
+                        ftk::Format("{0}  {1}").arg(range.name).arg(frames).str(),
                     row);
                 button->setHStretch(ftk::Stretch::Expanding);
                 button->setTooltip(
