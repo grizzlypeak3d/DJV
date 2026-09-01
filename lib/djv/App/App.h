@@ -228,6 +228,10 @@ namespace djv
             //! callback runs when it is safe to close.
             void confirmClose(const std::function<void()>& onProceed);
 
+            //! Quit asks about unsaved review changes first: this override is
+            //! what the window system's quit (e.g. Command-Q) reaches.
+            DJV_APP_API void exit() override;
+
             ///@}
 
             //! Reload the active files.

@@ -1278,6 +1278,24 @@ namespace djv
             return _p->recentPlaylistsModel;
         }
 
+        void App::exit()
+        {
+            // A headless run has nobody to answer the question, and the
+            // capture harness exits the application itself when it is done.
+            if (getHideSetup())
+            {
+                ftk::App::exit();
+                return;
+            }
+            // The base class exit is what actually stops the event loop, so
+            // nothing may call it while the question is still open.
+            confirmClose(
+                [this]
+                {
+                    ftk::App::exit();
+                });
+        }
+
         void App::confirmClose(const std::function<void()>& onProceed)
         {
             FTK_P();
