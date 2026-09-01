@@ -1512,7 +1512,7 @@ class ReviewTool(IToolWidget):
             # so the header and the text sit evenly inside the item.
             card = ftk.VerticalLayout(context)
             card.marginRole = ftk.SizeRole.MarginInside
-            card.spacingRole = ftk.SizeRole._None
+            card.spacingRole = ftk.SizeRole.Spacing
             button.widget = card
             header = ftk.HorizontalLayout(context, card)
             header.spacingRole = ftk.SizeRole.SpacingSmall
