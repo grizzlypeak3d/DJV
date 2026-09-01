@@ -173,6 +173,26 @@ th { border-bottom-width: 2px; }
     border-radius: 0 4px 4px 0;
 }
 
+/* Table of contents ------------------------------------------------------ */
+
+.toc {
+    margin: 1rem 0 1.5rem 0;
+}
+.toc ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .1rem 1.5rem;
+}
+.toc li { white-space: nowrap; }
+.toc a {
+    color: var(--muted);
+    text-decoration: none;
+}
+.toc a:hover { color: var(--link); text-decoration: underline; }
+
 .tip {
     background: var(--tip);
     border-left-color: var(--tip-rule);

@@ -19,8 +19,10 @@ install(
         PATTERN "*.svg"
         PATTERN "*.png")
 
-# Writing the navigation into the pages, from nav.txt. Not part of the build:
-# it edits the sources, and what is in the repository is what is published.
+# Writing the navigation into the pages, from nav.txt, and the table of
+# contents into the pages that carry one, from their own headings. Not part
+# of the build: it edits the sources, and what is in the repository is what
+# is published.
 add_custom_target(djvDocsNav
     COMMAND ${CMAKE_COMMAND}
         -DNAV_DIR=${CMAKE_CURRENT_SOURCE_DIR}
@@ -30,7 +32,8 @@ add_custom_target(djvDocsNav
 set_target_properties(djvDocsNav PROPERTIES FOLDER docs)
 
 # The same, reporting rather than writing, for a build that wants to know
-# whether anyone has edited a page's navigation by hand.
+# whether anyone has edited a page's navigation or table of contents by
+# hand.
 add_custom_target(djvDocsNavCheck
     COMMAND ${CMAKE_COMMAND}
         -DNAV_DIR=${CMAKE_CURRENT_SOURCE_DIR}

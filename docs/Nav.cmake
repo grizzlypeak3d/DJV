@@ -1,9 +1,12 @@
-# Write the navigation into the documentation pages.
+# Write the navigation into the documentation pages, and a table of
+# contents into the pages that carry one.
 #
 # The pages have to be self-contained -- they are read from disk as often as
 # from a server, and a file:// origin cannot fetch anything -- so each one
 # carries the whole list. That is a copy per page, which is fine as long as
-# nobody maintains them: the list lives in nav.txt and this puts it in.
+# nobody maintains them: the list lives in nav.txt and this puts it in. The
+# table of contents is built the same way, from the page's own "h2" headings,
+# on any page holding a <div class="toc"> block.
 #
 # Run over the sources to update the repository, and over an installed copy
 # to add a section that only that install has. See docs/CMakeLists.txt.
@@ -91,6 +94,37 @@ foreach(PAGE ${PAGES})
     string(SUBSTRING "${TEXT}" 0 ${START} BEFORE)
     string(SUBSTRING "${TEXT}" ${END} -1 AFTER)
     set(UPDATED "${BEFORE}${LIST_HTML}${AFTER}")
+
+    # The table of contents, on the pages that carry the block.
+    set(TOC_OPEN "<div class=\"toc\">\n<ul>\n")
+    set(TOC_CLOSE "\n</ul>\n</div>")
+    string(FIND "${UPDATED}" "${TOC_OPEN}" TOC_START)
+    if(NOT TOC_START EQUAL -1)
+        string(REGEX MATCHALL "<h2 id=\"[^\"]+\">[^<]*</h2>" HEADINGS "${UPDATED}")
+        set(TOC_HTML)
+        foreach(HEADING ${HEADINGS})
+            string(REGEX REPLACE
+                "<h2 id=\"([^\"]+)\">([^<]*)</h2>"
+                "<li><a href=\"#\\1\">\\2</a></li>"
+                LINE "${HEADING}")
+            if(TOC_HTML)
+                set(TOC_HTML "${TOC_HTML}\n${LINE}")
+            else()
+                set(TOC_HTML "${LINE}")
+            endif()
+        endforeach()
+        string(LENGTH "${TOC_OPEN}" TOC_OPEN_LENGTH)
+        math(EXPR TOC_CONTENT "${TOC_START} + ${TOC_OPEN_LENGTH}")
+        string(SUBSTRING "${UPDATED}" ${TOC_CONTENT} -1 TOC_REST)
+        string(FIND "${TOC_REST}" "${TOC_CLOSE}" TOC_END)
+        if(TOC_END EQUAL -1)
+            message(WARNING "No table of contents end in ${NAME}")
+        else()
+            string(SUBSTRING "${UPDATED}" 0 ${TOC_CONTENT} TOC_BEFORE)
+            string(SUBSTRING "${TOC_REST}" ${TOC_END} -1 TOC_AFTER)
+            set(UPDATED "${TOC_BEFORE}${TOC_HTML}${TOC_AFTER}")
+        endif()
+    endif()
 
     if(UPDATED STREQUAL TEXT)
         continue()
