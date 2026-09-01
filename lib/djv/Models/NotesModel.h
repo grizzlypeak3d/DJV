@@ -45,6 +45,11 @@ namespace djv
             //! in here, so callers only provide the frame and the text.
             DJV_MODELS_API void add(const std::optional<OTIO_NS::RationalTime>&, const std::string& text);
 
+            //! Replace the text of the note with the given identifier. The
+            //! creation time and author stay: they say who raised the point
+            //! and when, not who last touched the wording.
+            DJV_MODELS_API void update(const std::string& id, const std::string& text);
+
             //! Remove the note with the given identifier.
             DJV_MODELS_API void remove(const std::string& id);
 

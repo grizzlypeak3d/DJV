@@ -8,6 +8,7 @@ import djvPy as djv
 
 import Util
 
+import types
 import weakref
 
 class IToolWidget(ftk.IContainer):
@@ -1011,17 +1012,15 @@ class ReviewTool(IToolWidget):
         self._currentTimeObserver = None
         self._inOutRangeObserver = None
 
-        # Review ranges.
-        rangesWidget = ftk.VerticalLayout(context)
-        rangesWidget.marginRole = ftk.SizeRole.MarginSmall
-        rangesWidget.spacingRole = ftk.SizeRole.SpacingSmall
+        # Review ranges. The list is the bellows content with no margin,
+        # so the items run edge to edge.
         # The add buttons live in their bellows title rows, so the lists
         # read like the lists elsewhere: + in the header, - on the rows.
         self._addRangeButton = ftk.ToolButton(context)
         self._addRangeButton.icon = "Add"
         self._addRangeButton.tooltip = \
             "Save the timeline in/out points as a named range."
-        self._rangeListLayout = ftk.VerticalLayout(context, rangesWidget)
+        self._rangeListLayout = ftk.VerticalLayout(context)
         self._rangeListLayout.spacingRole = ftk.SizeRole._None
 
         # Drawing.
@@ -1064,28 +1063,35 @@ class ReviewTool(IToolWidget):
         self._sizeSlider.value = drawModel.size
         self._sizeSlider.tooltip = "The stroke width, in source pixels."
 
-        # Notes.
-        notesWidget = ftk.VerticalLayout(context)
-        notesWidget.marginRole = ftk.SizeRole.MarginSmall
-        notesWidget.spacingRole = ftk.SizeRole.SpacingSmall
-        self._noteEdit = ftk.TextEdit(context, notesWidget)
-        # A few lines: the list below is the review's feedback index, so
-        # the leftover height belongs to it, not to the editor.
-        self._noteEdit.sizeHintRole = ftk.SizeRole.ScrollAreaSmall
-        self._noteEdit.tooltip = "Write a note about the current frame."
+        # Notes. A note is written and edited in place in the list;
+        # there is no separate editor to keep in sync with it.
         self._publishButton = ftk.ToolButton(context)
         self._publishButton.icon = "Add"
-        self._publishButton.tooltip = "Attach the note to the current frame."
-        self._noteListLayout = ftk.VerticalLayout(context, notesWidget)
+        self._publishButton.tooltip = "Add a note about the current frame."
+        self._noteListLayout = ftk.VerticalLayout(context)
         self._noteListLayout.spacingRole = ftk.SizeRole._None
+
+        # The note being edited in place, a new note being written, and
+        # the deferred work both need: the commit is deferred a tick
+        # because the focus loss is reported from inside the editor and
+        # the commit rebuilds the list that owns it, and the scroll is
+        # deferred a tick because a rebuilt list has no geometry yet.
+        self._editingNoteId = None
+        self._draftActive = False
+        self._draftTime = None
+        self._editNoteEdit = None
+        self._editItem = None
+        self._commitTimer = ftk.Timer(context)
+        self._scrollTimer = ftk.Timer(context)
 
         layout = ftk.VerticalLayout(context)
         layout.spacingRole = ftk.SizeRole.Border
+        self._scrollLayout = layout
         self._bellows = {}
         for title, widget, toolWidget in [
-            ("Ranges", rangesWidget, self._addRangeButton),
+            ("Ranges", self._rangeListLayout, self._addRangeButton),
             ("Drawing", drawingWidget, None),
-            ("Notes", notesWidget, self._publishButton),
+            ("Notes", self._noteListLayout, self._publishButton),
         ]:
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget
@@ -1094,16 +1100,16 @@ class ReviewTool(IToolWidget):
             bellows.open = True
             self._bellows[title] = bellows
 
-        scrollWidget = ftk.ScrollWidget(context)
-        scrollWidget.border = False
-        scrollWidget.widget = layout
+        self._scrollWidget = ftk.ScrollWidget(context)
+        self._scrollWidget.border = False
+        self._scrollWidget.widget = layout
         # The notes have no natural end, so take what room is left
         # rather than a band of its own while other tools sit at the
         # height they need. The scroll widget has to expand with the
         # tool, or the extra room stays empty below it.
-        scrollWidget.vStretch = ftk.Stretch.Expanding
+        self._scrollWidget.vStretch = ftk.Stretch.Expanding
         self.vStretch = ftk.Stretch.Expanding
-        self._setContent(scrollWidget)
+        self._setContent(self._scrollWidget)
 
         appWeak = weakref.ref(app)
         selfWeak = weakref.ref(self)
@@ -1175,7 +1181,7 @@ class ReviewTool(IToolWidget):
             app.getRangesModel().observeRanges,
             lambda value: selfWeak() and selfWeak()._rangesUpdate(value))
 
-        self._publishButton.setClickedCallback(Util.weak(self._publish))
+        self._publishButton.setClickedCallback(Util.weak(self.addNote))
         self._notesObserver = djv.models.ReviewNoteListObserver(
             app.getNotesModel().observeNotes,
             lambda value: selfWeak() and selfWeak()._notesListUpdate(value))
@@ -1187,11 +1193,91 @@ class ReviewTool(IToolWidget):
 
         self._loadBellows(self._bellows)
 
-    def focusNote(self):
+    def addNote(self):
         """
-        Set the keyboard focus to the note editor.
+        Start a new note about the current frame, edited in place in
+        the list.
         """
-        self._noteEdit.takeKeyFocus()
+        app = self._app()
+        if app is None:
+            return
+        player = app.observePlayer().get()
+        if player is None:
+            return
+        # Keep whatever was being written before starting the next note.
+        self._commitNote()
+        self._draftActive = True
+        # The note is anchored to the frame shown when it is started.
+        self._draftTime = player.currentTime
+        self._editingNoteId = None
+        self._notesUpdate()
+
+    def _editNote(self, id):
+        if id == self._editingNoteId:
+            return
+        self._commitNote()
+        self._draftActive = False
+        self._draftTime = None
+        self._editingNoteId = id
+        self._notesUpdate()
+
+    def _commitNote(self):
+        if self._editNoteEdit is None:
+            return
+        text = self._editNoteEdit.text
+        if isinstance(text, list):
+            text = "\n".join(text)
+        draft = self._draftActive
+        id = self._editingNoteId
+        time = self._draftTime
+        # Clear the state before touching the model: the model observer
+        # rebuilds the list, and must not find a half-finished edit.
+        self._draftActive = False
+        self._draftTime = None
+        self._editingNoteId = None
+        self._editNoteEdit = None
+        self._editItem = None
+        app = self._app()
+        if app is not None:
+            if draft and text:
+                app.getNotesModel().add(time, text)
+            elif not draft and id is not None and text:
+                app.getNotesModel().update(id, text)
+        # An empty draft or an unchanged edit does not move the model,
+        # so rebuild by hand; the extra rebuild after a model change is
+        # harmless.
+        self._notesUpdate()
+
+    def _editFocus(self, editor, value):
+        if editor is None or editor is not self._editNoteEdit:
+            return
+        if value:
+            # Focus came back before the deferred commit fired.
+            self._commitTimer.stop()
+            return
+        selfWeak = weakref.ref(self)
+        editorRef = weakref.ref(editor)
+        def commit():
+            widget = selfWeak()
+            if widget is not None and \
+                    editorRef() is widget._editNoteEdit:
+                widget._commitNote()
+        self._commitTimer.start(0.0, commit)
+
+    def _noteClicked(self, id):
+        if id is None or id == self._editingNoteId:
+            return
+        note = next((n for n in self._notes if n.id == id), None)
+        if note is None:
+            return
+        # The first click goes to the note's frame; a click on the note
+        # already showing -- or on one about no frame in particular --
+        # opens it for editing.
+        if note.time is None or djv.models.sameTime(
+                note.time, self._currentTime):
+            self._editNote(id)
+        elif self._player:
+            self._player.currentTime = note.time
 
     def _setPlayer(self, player):
         self._player = player
@@ -1358,27 +1444,16 @@ class ReviewTool(IToolWidget):
             self._mainWindow(),
             callback)
 
-    def _publish(self):
-        text = self._noteEdit.text
-        if isinstance(text, list):
-            text = "\n".join(text)
-        if not text:
-            return
-        if self._app():
-            # The note is anchored to the frame shown when it is
-            # published.
-            time = None
-            player = self._app().observePlayer().get()
-            if player:
-                time = player.currentTime
-            self._app().getNotesModel().add(time, text)
-            self._noteEdit.clearText()
-
     def _notesListUpdate(self, notes):
         self._notes = notes
         self._notesUpdate()
 
     def _notesUpdate(self):
+        # Let go of any editor before the clear destroys it, so the
+        # focus loss it reports on the way out finds nothing left to
+        # commit.
+        self._editNoteEdit = None
+        self._editItem = None
         self._noteListLayout.clear()
         self._noteButtons = {}
         context = self.context
@@ -1386,8 +1461,15 @@ class ReviewTool(IToolWidget):
         # than one frame's -- browsing beats following bread crumbs. In
         # frame order, with the notes about no frame in particular
         # first: they speak about the whole review.
+        value = list(self._notes)
+        # A new note is written in place: it appears as an item with an
+        # editor, and joins the model when the edit commits.
+        if self._draftActive:
+            value.append(types.SimpleNamespace(
+                id = None, time = self._draftTime, created = "",
+                text = ""))
         value = sorted(
-            self._notes,
+            value,
             key = lambda note:
                 (0, 0.0) if note.time is None else (1, note.time.value))
         if not value:
@@ -1399,23 +1481,27 @@ class ReviewTool(IToolWidget):
             label.textRole = ftk.ColorRole.TextDisabled
             return
         appWeak = self._app
+        selfWeak = weakref.ref(self)
         for note in value:
             # The whole note is one item button, like a range row: the
             # note is what the click selects, not one widget inside it.
             button = ftk.ItemButton(context, self._noteListLayout)
             hasTime = note.time is not None
-            if hasTime:
-                button.tooltip = "Go to the note's frame."
-            def seek(time, appWeak = appWeak):
-                app_ = appWeak()
-                if app_ is None or time is None:
-                    return
-                player = app_.observePlayer().get()
-                if player:
-                    player.currentTime = time
+            # The draft has no identifier; an existing note is being
+            # edited when its identifier matches.
+            editing = note.id is None if self._draftActive \
+                else (note.id is not None and
+                    note.id == self._editingNoteId)
+            if not editing:
+                button.tooltip = (
+                    "Go to the note's frame. Click the note already "
+                    "showing to edit it.") if hasTime else \
+                    "Edit the note."
             button.setClickedCallback(
-                lambda captured = note.time: seek(captured))
-            self._noteButtons[note.id] = button
+                lambda captured = note.id:
+                    selfWeak() and selfWeak()._noteClicked(captured))
+            if note.id is not None:
+                self._noteButtons[note.id] = button
             card = ftk.VerticalLayout(context)
             card.spacingRole = ftk.SizeRole._None
             button.widget = card
@@ -1430,23 +1516,63 @@ class ReviewTool(IToolWidget):
             frameLabel.setMarginRole(ftk.SizeRole.LabelPad, ftk.SizeRole._None)
             frameLabel.vAlign = ftk.VAlign.Center
             frameLabel.hStretch = ftk.Stretch.Expanding
-            createdLabel = ftk.Label(
-                context, _formatCreated(note.created), header)
-            createdLabel.setMarginRole(
-                ftk.SizeRole.LabelPad, ftk.SizeRole._None)
-            createdLabel.textRole = ftk.ColorRole.TextDisabled
-            createdLabel.vAlign = ftk.VAlign.Center
-            deleteButton = ftk.ToolButton(context, header)
-            deleteButton.icon = "RemoveSmall"
-            deleteButton.tooltip = "Delete this note."
-            deleteButton.setClickedCallback(
-                lambda captured = note.id:
-                    appWeak() and appWeak().getNotesModel().remove(captured))
-            textLabel = ftk.Label(context, _wrapText(note.text, 40), card)
-            textLabel.marginRole = ftk.SizeRole.Margin
-            textLabel.hAlign = ftk.HAlign.Left
-            textLabel.vAlign = ftk.VAlign.Top
+            if note.created:
+                createdLabel = ftk.Label(
+                    context, _formatCreated(note.created), header)
+                createdLabel.setMarginRole(
+                    ftk.SizeRole.LabelPad, ftk.SizeRole._None)
+                createdLabel.textRole = ftk.ColorRole.TextDisabled
+                createdLabel.vAlign = ftk.VAlign.Center
+            if note.id is not None:
+                deleteButton = ftk.ToolButton(context, header)
+                deleteButton.icon = "RemoveSmall"
+                deleteButton.tooltip = "Delete this note."
+                deleteButton.setClickedCallback(
+                    lambda captured = note.id:
+                        appWeak() and
+                        appWeak().getNotesModel().remove(captured))
+            if editing:
+                # Written and edited in place; the editor keeps the
+                # label's margin so the item does not jump. The note
+                # keeps itself when the editor loses the focus, or on
+                # Command-Return.
+                editLayout = ftk.VerticalLayout(context, card)
+                editLayout.marginRole = ftk.SizeRole.Margin
+                self._editNoteEdit = ftk.TextEdit(context, editLayout)
+                self._editNoteEdit.sizeHintRole = \
+                    ftk.SizeRole.ScrollAreaSmall
+                if note.id is not None:
+                    self._editNoteEdit.setText(note.text.split("\n"))
+                editorRef = weakref.ref(self._editNoteEdit)
+                self._editNoteEdit.setFocusCallback(
+                    lambda value, editorRef = editorRef:
+                        selfWeak() and
+                        selfWeak()._editFocus(editorRef(), value))
+                self._editItem = button
+                self._scrollToEdit()
+            else:
+                textLabel = ftk.Label(
+                    context, _wrapText(note.text, 40), card)
+                textLabel.marginRole = ftk.SizeRole.Margin
+                textLabel.hAlign = ftk.HAlign.Left
+                textLabel.vAlign = ftk.VAlign.Top
+        if self._editNoteEdit is not None:
+            self._editNoteEdit.takeKeyFocus()
         self._noteSelectionUpdate()
+
+    def _scrollToEdit(self):
+        # Deferred a tick: only after a layout pass does the rebuilt
+        # item have a geometry to scroll to.
+        selfWeak = weakref.ref(self)
+        def scroll():
+            widget = selfWeak()
+            if widget is None or widget._editItem is None:
+                return
+            g = widget._editItem.geometry
+            c = widget._scrollLayout.geometry
+            widget._scrollWidget.scrollTo(ftk.Box2I(
+                g.min.x - c.min.x, g.min.y - c.min.y, g.w, g.h))
+        self._scrollTimer.start(0.0, scroll)
 
     def _noteSelectionUpdate(self):
         # Highlight the notes on the frame being shown.

@@ -27,6 +27,7 @@
 
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
+#include <ftk/Core/Timer.h>
 
 #include <algorithm>
 #include <ctime>
@@ -151,13 +152,31 @@ namespace djv
             std::shared_ptr<ftk::ToolButton> redoButton;
             std::shared_ptr<ftk::ToolButton> clearDrawingButton;
 
-            std::shared_ptr<ftk::TextEdit> noteEdit;
             std::shared_ptr<ftk::ToolButton> publishButton;
             std::shared_ptr<ftk::VerticalLayout> noteListLayout;
             //! The frame buttons, by note identifier, so the current frame's
             //! highlight can move without rebuilding the list.
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > noteButtons;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
+            std::shared_ptr<ftk::ScrollWidget> scrollWidget;
+
+            //! The note being edited in place, or empty.
+            std::string editingNoteId;
+            //! A new note being written in place; it only reaches the model
+            //! when the edit commits with text.
+            bool draftActive = false;
+            std::optional<OTIO_NS::RationalTime> draftTime;
+            //! The live in-place editor and its item, for the commit to read
+            //! and the scroll to find.
+            std::shared_ptr<ftk::TextEdit> editNoteEdit;
+            std::shared_ptr<ftk::ItemButton> editItem;
+            //! Scroll the edited item into view on the next layout, when the
+            //! rebuilt list has a geometry to scroll to.
+            bool scrollToEdit = false;
+            //! The editor commits when it loses the key focus, deferred a
+            //! tick: the loss is reported from inside the editor, and the
+            //! commit rebuilds the list that owns it.
+            std::shared_ptr<ftk::Timer> commitTimer;
 
             //! Every note is listed; the frame currently shown only moves
             //! the highlight.
@@ -196,11 +215,8 @@ namespace djv
                 parent);
             FTK_P();
 
-            // Review ranges.
-            auto rangesWidget = ftk::VerticalLayout::create(context);
-            rangesWidget->setMarginRole(ftk::SizeRole::MarginSmall);
-            rangesWidget->setSpacingRole(ftk::SizeRole::SpacingSmall);
-
+            // Review ranges. The list is the bellows content with no margin,
+            // so the items run edge to edge.
             // The add buttons live in their bellows title rows, so the lists
             // read like the lists elsewhere: + in the header, - on the rows.
             p.addRangeButton = ftk::ToolButton::create(context);
@@ -208,7 +224,7 @@ namespace djv
             p.addRangeButton->setTooltip(
                 "Save the timeline in/out points as a named range.");
 
-            p.rangeListLayout = ftk::VerticalLayout::create(context, rangesWidget);
+            p.rangeListLayout = ftk::VerticalLayout::create(context);
             p.rangeListLayout->setSpacingRole(ftk::SizeRole::None);
 
             // Drawing.
@@ -266,52 +282,42 @@ namespace djv
             ftk::setScreenshotTag(p.eraserButton, "Review.Eraser");
             ftk::setScreenshotTag(p.clearDrawingButton, "Review.ClearDrawing");
 
-            // Notes.
-            auto notesWidget = ftk::VerticalLayout::create(context);
-            notesWidget->setMarginRole(ftk::SizeRole::MarginSmall);
-            notesWidget->setSpacingRole(ftk::SizeRole::SpacingSmall);
-
-            p.noteEdit = ftk::TextEdit::create(context, notesWidget);
-            // A few lines: the list below is the review's feedback index, so
-            // the leftover height belongs to it, not to the editor.
-            p.noteEdit->setSizeHintRole(ftk::SizeRole::ScrollAreaSmall);
-            p.noteEdit->setTooltip("Write a note about the current frame.");
-
+            // Notes. A note is written and edited in place in the list; there
+            // is no separate editor to keep in sync with it.
             p.publishButton = ftk::ToolButton::create(context);
             p.publishButton->setIcon("Add");
-            p.publishButton->setTooltip(
-                "Attach the note to the current frame. Return with the\n"
-                "command key also adds, from inside the editor.");
+            p.publishButton->setTooltip("Add a note about the current frame.");
 
-            p.noteListLayout = ftk::VerticalLayout::create(context, notesWidget);
+            p.noteListLayout = ftk::VerticalLayout::create(context);
             p.noteListLayout->setSpacingRole(ftk::SizeRole::None);
-            ftk::setScreenshotTag(p.noteEdit, "Review.NoteEdit");
             ftk::setScreenshotTag(p.publishButton, "Review.AddNote");
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
             p.bellows["Ranges"] = ftk::Bellows::create(context, "Ranges", layout);
-            p.bellows["Ranges"]->setWidget(rangesWidget);
+            p.bellows["Ranges"]->setWidget(p.rangeListLayout);
             p.bellows["Ranges"]->setToolWidget(p.addRangeButton);
             p.bellows["Ranges"]->setOpen(true);
             p.bellows["Drawing"] = ftk::Bellows::create(context, "Drawing", layout);
             p.bellows["Drawing"]->setWidget(drawingWidget);
             p.bellows["Drawing"]->setOpen(true);
             p.bellows["Notes"] = ftk::Bellows::create(context, "Notes", layout);
-            p.bellows["Notes"]->setWidget(notesWidget);
+            p.bellows["Notes"]->setWidget(p.noteListLayout);
             p.bellows["Notes"]->setToolWidget(p.publishButton);
             p.bellows["Notes"]->setOpen(true);
 
-            auto scrollWidget = ftk::ScrollWidget::create(context);
-            scrollWidget->setBorder(false);
-            scrollWidget->setWidget(layout);
+            p.scrollWidget = ftk::ScrollWidget::create(context);
+            p.scrollWidget->setBorder(false);
+            p.scrollWidget->setWidget(layout);
             // The notes have no natural end, so take what room is left
             // rather than a band of its own while other tools sit at the
             // height they need.
             setVStretch(ftk::Stretch::Expanding);
-            _setWidget(scrollWidget);
+            _setWidget(p.scrollWidget);
 
             auto appWeak = std::weak_ptr<App>(app);
+
+            p.commitTimer = ftk::Timer::create(context);
 
             p.colorSwatch->setCallback(
                 [appWeak](const ftk::Color4F& value)
@@ -442,7 +448,7 @@ namespace djv
             p.publishButton->setClickedCallback(
                 [this]
                 {
-                    _publish();
+                    addNote();
                 });
 
             p.notesObserver = ftk::ListObserver<models::ReviewNote>::create(
@@ -723,17 +729,39 @@ namespace djv
                 });
         }
 
+        void ReviewTool::setGeometry(const ftk::Box2I& value)
+        {
+            IToolWidget::setGeometry(value);
+            FTK_P();
+            // Deferred from the rebuild: only now does the edited item have a
+            // geometry to scroll to.
+            if (p.scrollToEdit && p.editItem)
+            {
+                p.scrollToEdit = false;
+                if (auto content = p.scrollWidget->getWidget())
+                {
+                    const ftk::Box2I& g = p.editItem->getGeometry();
+                    p.scrollWidget->scrollTo(ftk::Box2I(
+                        g.min - content->getGeometry().min,
+                        g.size()));
+                }
+            }
+        }
+
         void ReviewTool::keyPressEvent(ftk::KeyEvent& event)
         {
             IToolWidget::keyPressEvent(event);
+            FTK_P();
             // Return with the command modifier, bubbled up from the note
-            // editor: the same as the add button.
+            // being edited: keep it. (Escape also commits, by way of the
+            // editor releasing the focus.)
             if (!event.accept &&
+                p.editNoteEdit &&
                 ftk::Key::Return == event.key &&
                 static_cast<int>(ftk::commandKeyModifier) == event.modifiers)
             {
                 event.accept = true;
-                _publish();
+                _commitNote();
             }
         }
 
@@ -742,36 +770,149 @@ namespace djv
             IToolWidget::keyReleaseEvent(event);
         }
 
-        void ReviewTool::focusNote()
+        void ReviewTool::addNote()
         {
             FTK_P();
-            p.noteEdit->takeKeyFocus();
-        }
-
-        void ReviewTool::_publish()
-        {
-            FTK_P();
-            const std::string text = ftk::join(p.noteEdit->getText(), '\n');
-            if (text.empty())
+            auto app = _app.lock();
+            if (!app)
             {
                 return;
             }
+            auto player = app->observePlayer()->get();
+            if (!player)
+            {
+                return;
+            }
+            // Keep whatever was being written before starting the next note.
+            _commitNote();
+            p.draftActive = true;
+            // The note is anchored to the frame shown when it is started.
+            p.draftTime = player->getCurrentTime();
+            p.editingNoteId.clear();
+            _notesUpdate();
+        }
+
+        void ReviewTool::_editNote(const std::string& id)
+        {
+            FTK_P();
+            if (id == p.editingNoteId)
+            {
+                return;
+            }
+            _commitNote();
+            p.draftActive = false;
+            p.draftTime.reset();
+            p.editingNoteId = id;
+            _notesUpdate();
+        }
+
+        void ReviewTool::_commitNote()
+        {
+            FTK_P();
+            if (!p.editNoteEdit)
+            {
+                return;
+            }
+            const std::string text = ftk::join(p.editNoteEdit->getText(), '\n');
+            const bool draft = p.draftActive;
+            const std::string id = p.editingNoteId;
+            const std::optional<OTIO_NS::RationalTime> time = p.draftTime;
+            // Clear the state before touching the model: the model observer
+            // rebuilds the list, and must not find a half-finished edit.
+            p.draftActive = false;
+            p.draftTime.reset();
+            p.editingNoteId.clear();
+            p.editNoteEdit.reset();
+            p.editItem.reset();
             if (auto app = _app.lock())
             {
-                // The note is anchored to the frame shown when it is published.
-                std::optional<OTIO_NS::RationalTime> time;
-                if (auto player = app->observePlayer()->get())
+                if (draft && !text.empty())
                 {
-                    time = player->getCurrentTime();
+                    app->getNotesModel()->add(time, text);
                 }
-                app->getNotesModel()->add(time, text);
-                p.noteEdit->clearText();
+                else if (!draft && !id.empty() && !text.empty())
+                {
+                    app->getNotesModel()->update(id, text);
+                }
+            }
+            // An empty draft or an unchanged edit does not move the model, so
+            // rebuild by hand; the extra rebuild after a model change is
+            // harmless.
+            _notesUpdate();
+        }
+
+        void ReviewTool::_editFocus(
+            const std::shared_ptr<ftk::TextEdit>& editor,
+            bool value)
+        {
+            FTK_P();
+            if (!editor || editor != p.editNoteEdit)
+            {
+                return;
+            }
+            if (value)
+            {
+                // Focus came back before the deferred commit fired.
+                p.commitTimer->stop();
+                return;
+            }
+            // Commit on the next tick: the loss is reported from inside the
+            // editor, and the commit rebuilds the list that owns it.
+            auto weak = std::weak_ptr<ReviewTool>(
+                std::dynamic_pointer_cast<ReviewTool>(shared_from_this()));
+            std::weak_ptr<ftk::TextEdit> editWeak(editor);
+            p.commitTimer->start(
+                std::chrono::milliseconds(0),
+                [weak, editWeak]
+                {
+                    if (auto widget = weak.lock())
+                    {
+                        if (auto editor = editWeak.lock())
+                        {
+                            if (editor == widget->_p->editNoteEdit)
+                            {
+                                widget->_commitNote();
+                            }
+                        }
+                    }
+                });
+        }
+
+        void ReviewTool::_noteClicked(const std::string& id)
+        {
+            FTK_P();
+            if (id == p.editingNoteId)
+            {
+                return;
+            }
+            const auto i = std::find_if(
+                p.notes.begin(),
+                p.notes.end(),
+                [&id](const models::ReviewNote& value) { return value.id == id; });
+            if (i == p.notes.end())
+            {
+                return;
+            }
+            // The first click goes to the note's frame; a click on the note
+            // already showing -- or on one about no frame in particular --
+            // opens it for editing.
+            if (!i->time.has_value() || models::sameTime(i->time, p.currentTime))
+            {
+                _editNote(id);
+            }
+            else if (p.player)
+            {
+                p.player->seek(*i->time);
             }
         }
 
         void ReviewTool::_notesUpdate()
         {
             FTK_P();
+            // Let go of any editor before the clear destroys it, so the focus
+            // loss it reports on the way out finds nothing left to commit.
+            p.editNoteEdit.reset();
+            p.editItem.reset();
             p.noteListLayout->clear();
             p.noteButtons.clear();
             auto context = getContext();
@@ -800,6 +941,29 @@ namespace djv
                     }
                     return a.time->value() < b.time->value();
                 });
+            // A new note is written in place: it appears as an item with an
+            // editor, and joins the model when the edit commits.
+            if (p.draftActive)
+            {
+                models::ReviewNote draft;
+                draft.time = p.draftTime;
+                value.push_back(draft);
+                std::stable_sort(
+                    value.begin(),
+                    value.end(),
+                    [](const models::ReviewNote& a, const models::ReviewNote& b)
+                    {
+                        if (a.time.has_value() != b.time.has_value())
+                        {
+                            return !a.time.has_value();
+                        }
+                        if (!a.time.has_value())
+                        {
+                            return false;
+                        }
+                        return a.time->value() < b.time->value();
+                    });
+            }
             if (value.empty())
             {
                 // Without this the section is silently empty, which reads as a
@@ -814,32 +978,38 @@ namespace djv
             }
 
             auto appWeak = _app;
+            std::weak_ptr<ReviewTool> weak(
+                std::dynamic_pointer_cast<ReviewTool>(shared_from_this()));
             for (const auto& note : value)
             {
                 // The whole note is one item button, like a range row: the
                 // note is what the click selects, not one widget inside it.
                 auto button = ftk::ItemButton::create(context, p.noteListLayout);
                 const bool hasTime = note.time.has_value();
-                if (hasTime)
+                // The draft has an empty identifier; an existing note is being
+                // edited when its identifier matches.
+                const bool editing = p.draftActive ?
+                    note.id.empty() : (!note.id.empty() && note.id == p.editingNoteId);
+                if (!editing)
                 {
-                    button->setTooltip("Go to the note's frame.");
+                    button->setTooltip(hasTime ?
+                        "Go to the note's frame. Click the note already "
+                        "showing to edit it." :
+                        "Edit the note.");
                 }
-                const std::optional<OTIO_NS::RationalTime> time = note.time;
+                const std::string id = note.id;
                 button->setClickedCallback(
-                    [appWeak, time]
+                    [weak, id]
                     {
-                        if (auto app = appWeak.lock())
+                        if (auto widget = weak.lock())
                         {
-                            if (auto player = app->observePlayer()->get())
-                            {
-                                if (time.has_value())
-                                {
-                                    player->seek(*time);
-                                }
-                            }
+                            widget->_noteClicked(id);
                         }
                     });
-                p.noteButtons[note.id] = button;
+                if (!note.id.empty())
+                {
+                    p.noteButtons[note.id] = button;
+                }
 
                 auto card = ftk::VerticalLayout::create(context);
                 card->setSpacingRole(ftk::SizeRole::None);
@@ -859,28 +1029,67 @@ namespace djv
                 frameLabel->setVAlign(ftk::VAlign::Center);
                 frameLabel->setHStretch(ftk::Stretch::Expanding);
 
-                auto createdLabel = ftk::Label::create(
-                    context, formatCreated(note.created), header);
-                createdLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
-                createdLabel->setTextRole(ftk::ColorRole::TextDisabled);
-                createdLabel->setVAlign(ftk::VAlign::Center);
+                if (!note.created.empty())
+                {
+                    auto createdLabel = ftk::Label::create(
+                        context, formatCreated(note.created), header);
+                    createdLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                    createdLabel->setTextRole(ftk::ColorRole::TextDisabled);
+                    createdLabel->setVAlign(ftk::VAlign::Center);
+                }
 
-                auto deleteButton = ftk::ToolButton::create(context, header);
-                deleteButton->setIcon("RemoveSmall");
-                deleteButton->setTooltip("Delete this note.");
-                const std::string id = note.id;
-                deleteButton->setClickedCallback(
-                    [appWeak, id]
-                    {
-                        if (auto app = appWeak.lock())
+                if (!note.id.empty())
+                {
+                    auto deleteButton = ftk::ToolButton::create(context, header);
+                    deleteButton->setIcon("RemoveSmall");
+                    deleteButton->setTooltip("Delete this note.");
+                    deleteButton->setClickedCallback(
+                        [appWeak, id]
                         {
-                            app->getNotesModel()->remove(id);
-                        }
-                    });
+                            if (auto app = appWeak.lock())
+                            {
+                                app->getNotesModel()->remove(id);
+                            }
+                        });
+                }
 
-                auto textLabel = ftk::Label::create(context, wrapText(note.text, 40), card);
-                textLabel->setMarginRole(ftk::SizeRole::Margin);
-                textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
+                if (editing)
+                {
+                    // Written and edited in place; the editor keeps the
+                    // label's margin so the item does not jump. The note
+                    // keeps itself when the editor loses the focus, or on
+                    // Command-Return where the key bubbles to.
+                    auto editLayout = ftk::VerticalLayout::create(context, card);
+                    editLayout->setMarginRole(ftk::SizeRole::Margin);
+                    p.editNoteEdit = ftk::TextEdit::create(context, editLayout);
+                    p.editNoteEdit->setSizeHintRole(ftk::SizeRole::ScrollAreaSmall);
+                    if (!note.id.empty())
+                    {
+                        p.editNoteEdit->setText(ftk::split(note.text, '\n'));
+                    }
+                    std::weak_ptr<ftk::TextEdit> editWeak(p.editNoteEdit);
+                    p.editNoteEdit->setFocusCallback(
+                        [weak, editWeak](bool value)
+                        {
+                            if (auto widget = weak.lock())
+                            {
+                                widget->_editFocus(editWeak.lock(), value);
+                            }
+                        });
+                    ftk::setScreenshotTag(p.editNoteEdit, "Review.NoteEdit");
+                    p.editItem = button;
+                    p.scrollToEdit = true;
+                }
+                else
+                {
+                    auto textLabel = ftk::Label::create(context, wrapText(note.text, 40), card);
+                    textLabel->setMarginRole(ftk::SizeRole::Margin);
+                    textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
+                }
+            }
+            if (p.editNoteEdit)
+            {
+                p.editNoteEdit->takeKeyFocus();
             }
             _noteSelectionUpdate();
         }

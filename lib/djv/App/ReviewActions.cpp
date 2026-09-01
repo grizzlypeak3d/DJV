@@ -169,13 +169,12 @@ namespace djv
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
             _addCommand(
                 "AddNote",
-                "Open the review tool with the keyboard focus on the note "
-                "editor.",
+                "Open the review tool and start a new note, edited in place.",
                 [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
                     {
-                        mainWindow->focusReviewNote();
+                        mainWindow->addReviewNote();
                     }
                 });
 

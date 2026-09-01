@@ -63,6 +63,21 @@ namespace djv
             p.notes->setIfChanged(notes);
         }
 
+        void NotesModel::update(const std::string& id, const std::string& text)
+        {
+            FTK_P();
+            auto notes = p.notes->get();
+            const auto i = std::find_if(
+                notes.begin(),
+                notes.end(),
+                [id](const ReviewNote& note) { return note.id == id; });
+            if (i != notes.end())
+            {
+                i->text = text;
+                p.notes->setIfChanged(notes);
+            }
+        }
+
         void NotesModel::remove(const std::string& id)
         {
             FTK_P();

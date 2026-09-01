@@ -39,6 +39,7 @@ namespace djv
                 .def_property_readonly("observeNotes", &NotesModel::observeNotes)
                 .def("setNotes", &NotesModel::setNotes, py::arg("notes"))
                 .def("add", &NotesModel::add, py::arg("time"), py::arg("text"))
+                .def("update", &NotesModel::update, py::arg("id"), py::arg("text"))
                 .def("remove", &NotesModel::remove, py::arg("id"))
                 .def("clear", &NotesModel::clear);
         }

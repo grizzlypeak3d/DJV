@@ -85,9 +85,9 @@ class Actions(IActions.IActions):
 
         self._addCommand(
             "AddNote",
-            "Open the review tool with the keyboard focus on the note "
-            "editor.",
-            lambda args: mainWindowWeak().focusReviewNote())
+            "Open the review tool and start a new note, edited in "
+            "place.",
+            lambda args: mainWindowWeak().addReviewNote())
 
         # Jump between the frames that carry a note or a drawing. In a
         # review these are the only frames that matter, and stepping to

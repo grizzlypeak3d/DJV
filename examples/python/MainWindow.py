@@ -232,7 +232,7 @@ class MainWindow(ftk.MainWindow):
     def focusCurrentFrame(self):
         self._playbackBar.focusCurrentFrame()
 
-    def focusReviewNote(self):
+    def addReviewNote(self):
         app = self._app()
         if app is None:
             return
@@ -240,7 +240,7 @@ class MainWindow(ftk.MainWindow):
         app.getToolsModel().setToolOpen("Review", True)
         widget = self._toolsWidget.getToolWidget("Review")
         if widget is not None:
-            widget.focusNote()
+            widget.addNote()
 
     def setPresentMode(self, value):
         if self._presentMode.setIfChanged(value):

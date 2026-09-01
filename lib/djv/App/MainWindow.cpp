@@ -618,7 +618,7 @@ namespace djv
             _p->bottomToolBar->focusCurrentFrame();
         }
 
-        void MainWindow::focusReviewNote()
+        void MainWindow::addReviewNote()
         {
             FTK_P();
             if (auto app = p.app.lock())
@@ -629,7 +629,7 @@ namespace djv
             if (auto reviewTool = std::dynamic_pointer_cast<ReviewTool>(
                 p.toolsWidget->getToolWidget("Review")))
             {
-                reviewTool->focusNote();
+                reviewTool->addNote();
             }
         }
 

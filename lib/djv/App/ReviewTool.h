@@ -7,6 +7,11 @@
 
 #include <djv/Models/Review.h>
 
+namespace ftk
+{
+    class TextEdit;
+}
+
 namespace djv
 {
     namespace app
@@ -37,15 +42,20 @@ namespace djv
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            //! Set the keyboard focus to the note editor.
-            void focusNote();
+            //! Start a new note about the current frame, edited in place in
+            //! the list.
+            void addNote();
 
+            void setGeometry(const ftk::Box2I&) override;
             void keyPressEvent(ftk::KeyEvent&) override;
             void keyReleaseEvent(ftk::KeyEvent&) override;
 
         private:
             void _drawStateUpdate();
-            void _publish();
+            void _editNote(const std::string& id);
+            void _commitNote();
+            void _editFocus(const std::shared_ptr<ftk::TextEdit>&, bool);
+            void _noteClicked(const std::string& id);
             void _notesUpdate();
             void _noteSelectionUpdate();
             void _rangesUpdate();
