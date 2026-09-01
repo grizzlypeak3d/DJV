@@ -76,6 +76,12 @@ namespace djv
             //! an application has a section of its own to land in.
             DJV_MODELS_API virtual std::string getDocsPage() const;
 
+            //! Get the directory the documentation search starts from: the
+            //! executable's own, unless an application says otherwise. The
+            //! Python application does -- its executable is the interpreter,
+            //! which lives nowhere near the install.
+            DJV_MODELS_API virtual std::string getDocsSearchPath() const;
+
             ///@}
 
             //! \name License

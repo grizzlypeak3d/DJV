@@ -105,12 +105,13 @@ namespace djv
 
         std::string AppInfoModel::getDocsURL() const
         {
-            const std::filesystem::path exe = ftk::getExePath();
-            if (exe.empty())
+            const std::string searchPath = getDocsSearchPath();
+            if (searchPath.empty())
             {
                 return std::string();
             }
-            const std::filesystem::path dir = exe.parent_path();
+            const std::filesystem::path dir =
+                std::filesystem::u8path(searchPath);
             // The install trees the packages make: bin/ beside share/ on
             // Linux, bin/ beside docs/ in the Windows package, and the
             // "Resources" of a macOS bundle.
@@ -143,6 +144,16 @@ namespace djv
         std::string AppInfoModel::getDocsPage() const
         {
             return "index.html";
+        }
+
+        std::string AppInfoModel::getDocsSearchPath() const
+        {
+            const std::filesystem::path exe = ftk::getExePath();
+            if (exe.empty())
+            {
+                return std::string();
+            }
+            return exe.parent_path().u8string();
         }
 
         std::string AppInfoModel::getLicensesURL() const

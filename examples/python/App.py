@@ -29,6 +29,14 @@ class AppInfoModel(djv.models.AppInfoModel):
         # settings; they stay in DJV's directory.
         return "DJV"
 
+    def getDocsSearchPath(self):
+        # The default is the executable's directory, but this
+        # application's executable is the Python interpreter, which
+        # lives nowhere near the install. The application's own
+        # directory serves instead: examples/python sits beside the
+        # documentation the same way bin does.
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 class App(ftk.App):
     """
     The application creates the models and main window.

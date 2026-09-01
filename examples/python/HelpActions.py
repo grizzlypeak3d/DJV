@@ -49,6 +49,14 @@ class Actions(IActions.IActions):
         self.actions["Documentation"] = ftk.Action(
             "Documentation",
             self._command("Documentation"))
+        if not app.getAppInfoModel().docsURL:
+            # A build that was not installed has none. Saying so is
+            # better than a menu item that does nothing when it is
+            # clicked.
+            self.actions["Documentation"].enabled = False
+            self.actions["Documentation"].tooltip = (
+                "The documentation is installed with the application,\n"
+                "and this build was not installed.")
         if studioURL:
             self.actions["Studio"] = ftk.Action(
                 "DJV Studio",
