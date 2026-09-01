@@ -25,6 +25,7 @@ Changes:
     - libtiff 4.7.2
 
 Fixes:
+* Naming a review range and pressing Return crashed.
 * The keypad's Enter key works like the Return key.
 * The color corrections are applied in linear, when the OCIO configuration
   names a scene_linear role, rather than in the file's color space.

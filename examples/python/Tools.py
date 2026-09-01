@@ -1311,10 +1311,23 @@ class ReviewTool(IToolWidget):
     def _addRange(self):
         if not self._player or self._inOutRange is None:
             return
-        # The C++ application asks for a name; here the frame range
-        # names the row.
-        self._app().getRangesModel().add(
-            self._inOutRange, _formatRange(self._inOutRange))
+        range_ = self._inOutRange
+        defaultName = _formatRange(range_)
+        appWeak = self._app
+        def callback(value, appWeak = appWeak, range_ = range_,
+                     defaultName = defaultName):
+            app_ = appWeak()
+            if app_ is None:
+                return
+            # An emptied field falls back to the frame range rather
+            # than producing a nameless row.
+            app_.getRangesModel().add(range_, value if value else defaultName)
+        self.context.getSystemByName("ftk::DialogSystem").input(
+            "Add Review Range",
+            "Frames {}".format(defaultName),
+            defaultName,
+            self._mainWindow(),
+            callback)
 
     def _publish(self):
         text = self._noteEdit.text

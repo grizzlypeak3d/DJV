@@ -4,7 +4,6 @@
 #include <djv/App/ReviewTool.h>
 
 #include <djv/App/App.h>
-#include <djv/App/RangeNameDialog.h>
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
@@ -15,6 +14,7 @@
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ColorSwatch.h>
+#include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/Label.h>
@@ -141,7 +141,6 @@ namespace djv
             //! The selected range, or empty. Only one can be active: selecting
             //! is what drives the timeline in/out points.
             std::string selectedRangeId;
-            std::shared_ptr<RangeNameDialog> rangeNameDialog;
 
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::ToolButton> penButton;
@@ -255,6 +254,7 @@ namespace djv
 
             p.clearFrameButton = ftk::PushButton::create(context, "Clear Frame", drawingWidget);
             p.clearFrameButton->setTooltip("Remove every stroke on this frame.");
+            ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
             ftk::setScreenshotTag(p.eraserButton, "Review.Eraser");
             ftk::setScreenshotTag(p.clearFrameButton, "Review.ClearFrame");
@@ -671,23 +671,14 @@ namespace djv
                 return;
             }
             const OTIO_NS::TimeRange range = *p.inOutRange;
-            if (p.rangeNameDialog)
-            {
-                p.rangeNameDialog->close();
-                p.rangeNameDialog.reset();
-            }
             const std::string defaultName = formatRange(range);
-            p.rangeNameDialog = RangeNameDialog::create(
-                context,
+            auto appWeak = _app;
+            context->getSystem<ftk::DialogSystem>()->input(
                 "Add Review Range",
                 ftk::Format("Frames {0}").arg(defaultName),
-                defaultName);
-            p.rangeNameDialog->open(getWindow());
-            auto appWeak = _app;
-            std::weak_ptr<ReviewTool> weak(
-                std::dynamic_pointer_cast<ReviewTool>(shared_from_this()));
-            p.rangeNameDialog->setCallback(
-                [weak, appWeak, range, defaultName](const std::string& value)
+                defaultName,
+                getWindow(),
+                [appWeak, range, defaultName](const std::string& value)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -696,23 +687,6 @@ namespace djv
                         app->getRangesModel()->add(
                             range,
                             value.empty() ? defaultName : value);
-                    }
-                    // Close last: it resets the dialog, which destroys this
-                    // closure, so nothing captured may be used afterwards.
-                    if (auto widget = weak.lock())
-                    {
-                        if (widget->_p->rangeNameDialog)
-                        {
-                            widget->_p->rangeNameDialog->close();
-                        }
-                    }
-                });
-            p.rangeNameDialog->setCloseCallback(
-                [weak]
-                {
-                    if (auto widget = weak.lock())
-                    {
-                        widget->_p->rangeNameDialog.reset();
                     }
                 });
         }

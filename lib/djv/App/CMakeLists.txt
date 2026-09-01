@@ -31,7 +31,6 @@ set(HEADERS
     MessagesTool.h
     PlaybackActions.h
     PlaybackMenu.h
-    RangeNameDialog.h
     ReviewActions.h
     ReviewMenu.h
     ReviewTool.h
@@ -89,7 +88,6 @@ set(SOURCE
     MessagesTool.cpp
     PlaybackActions.cpp
     PlaybackMenu.cpp
-    RangeNameDialog.cpp
     ReviewActions.cpp
     ReviewMenu.cpp
     ReviewTool.cpp
