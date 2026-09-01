@@ -1456,8 +1456,10 @@ namespace djv
         void App::_writeAutosave()
         {
             FTK_P();
-            // Only a saved review with unsaved changes is worth backing up.
-            if (!p.reviewModified || p.reviewPath.empty())
+            // Only a saved review with unsaved changes is worth backing up --
+            // and never from a headless run, which would plant its scratch
+            // state in the user's one recovery slot.
+            if (!p.reviewModified || p.reviewPath.empty() || getHideSetup())
             {
                 return;
             }
@@ -2477,8 +2479,12 @@ namespace djv
                 });
 
             // Offer to recover a review from a crashed session, unless files were
-            // already opened this launch (e.g. from the command line).
-            if (p.recoveredAutosave.has_value() && p.filesModel->getFiles().empty())
+            // already opened this launch (e.g. from the command line). A headless
+            // run neither offers nor discards: the backup is the user's, and it
+            // waits for them.
+            if (p.recoveredAutosave.has_value() &&
+                p.filesModel->getFiles().empty() &&
+                !getHideSetup())
             {
                 auto dialogSystem = _context->getSystem<ftk::DialogSystem>();
                 dialogSystem->confirm(
