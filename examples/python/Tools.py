@@ -1020,6 +1020,18 @@ class ReviewTool(IToolWidget):
         self._addRangeButton.icon = "Add"
         self._addRangeButton.tooltip = \
             "Save the timeline in/out points as a named range."
+        # One delete for the list, acting on the focused row, rather
+        # than one on every row. Clicking it must not move the key
+        # focus, or it would clear the very selection it acts on.
+        self._deleteRangeButton = ftk.ToolButton(context)
+        self._deleteRangeButton.icon = "Remove"
+        self._deleteRangeButton.tooltip = "Delete the selected range."
+        self._deleteRangeButton.enabled = False
+        self._deleteRangeButton.acceptsKeyFocus = False
+        rangeToolLayout = ftk.HorizontalLayout(context)
+        rangeToolLayout.spacingRole = ftk.SizeRole._None
+        self._addRangeButton.parent = rangeToolLayout
+        self._deleteRangeButton.parent = rangeToolLayout
         self._rangeListLayout = ftk.VerticalLayout(context)
         self._rangeListLayout.spacingRole = ftk.SizeRole._None
 
@@ -1068,6 +1080,19 @@ class ReviewTool(IToolWidget):
         self._publishButton = ftk.ToolButton(context)
         self._publishButton.icon = "Add"
         self._publishButton.tooltip = "Add a note about the current frame."
+        self._deleteNoteButton = ftk.ToolButton(context)
+        self._deleteNoteButton.icon = "Remove"
+        self._deleteNoteButton.tooltip = "Delete the selected note."
+        self._deleteNoteButton.enabled = False
+        self._deleteNoteButton.acceptsKeyFocus = False
+        noteToolLayout = ftk.HorizontalLayout(context)
+        noteToolLayout.spacingRole = ftk.SizeRole._None
+        self._publishButton.parent = noteToolLayout
+        self._deleteNoteButton.parent = noteToolLayout
+        self._focusedRangeId = None
+        self._focusedNoteId = None
+        self._rangeItemOrder = []
+        self._noteItemOrder = []
         self._noteListLayout = ftk.VerticalLayout(context)
         self._noteListLayout.spacingRole = ftk.SizeRole._None
 
@@ -1089,9 +1114,9 @@ class ReviewTool(IToolWidget):
         self._scrollLayout = layout
         self._bellows = {}
         for title, widget, toolWidget in [
-            ("Ranges", self._rangeListLayout, self._addRangeButton),
+            ("Ranges", self._rangeListLayout, rangeToolLayout),
             ("Drawing", drawingWidget, None),
-            ("Notes", self._noteListLayout, self._publishButton),
+            ("Notes", self._noteListLayout, noteToolLayout),
         ]:
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget
@@ -1182,6 +1207,10 @@ class ReviewTool(IToolWidget):
             lambda value: selfWeak() and selfWeak()._rangesUpdate(value))
 
         self._publishButton.setClickedCallback(Util.weak(self.addNote))
+        self._deleteRangeButton.setClickedCallback(
+            Util.weak(self._deleteRange))
+        self._deleteNoteButton.setClickedCallback(
+            Util.weak(self._deleteNote))
         self._notesObserver = djv.models.ReviewNoteListObserver(
             app.getNotesModel().observeNotes,
             lambda value: selfWeak() and selfWeak()._notesListUpdate(value))
@@ -1264,6 +1293,49 @@ class ReviewTool(IToolWidget):
                 widget._commitNote()
         self._commitTimer.start(0.0, commit)
 
+    def _rangeRowFocus(self, id, value):
+        if value:
+            self._focusedRangeId = id
+        elif self._focusedRangeId == id:
+            self._focusedRangeId = None
+        self._deleteRangeButton.enabled = self._focusedRangeId is not None
+
+    def _noteRowFocus(self, id, value):
+        if value:
+            self._focusedNoteId = id
+        elif self._focusedNoteId == id:
+            self._focusedNoteId = None
+        self._deleteNoteButton.enabled = self._focusedNoteId is not None
+
+    def _deleteRange(self):
+        if self._focusedRangeId is None:
+            return
+        # The index before the removal, to land the focus on the
+        # neighbour after: repeated deletes then cull a list without
+        # re-selecting.
+        index = next(
+            (i for i, (b, id) in enumerate(self._rangeItemOrder)
+                if id == self._focusedRangeId), 0)
+        app = self._app()
+        if app is not None:
+            app.getRangesModel().remove(self._focusedRangeId)
+        if self._rangeItemOrder:
+            j = min(index, len(self._rangeItemOrder) - 1)
+            self._rangeItemOrder[j][0].takeKeyFocus()
+
+    def _deleteNote(self):
+        if self._focusedNoteId is None:
+            return
+        index = next(
+            (i for i, (b, id) in enumerate(self._noteItemOrder)
+                if id == self._focusedNoteId), 0)
+        app = self._app()
+        if app is not None:
+            app.getNotesModel().remove(self._focusedNoteId)
+        if self._noteItemOrder:
+            j = min(index, len(self._noteItemOrder) - 1)
+            self._noteItemOrder[j][0].takeKeyFocus()
+
     def _noteClicked(self, id):
         if id is None or id == self._editingNoteId:
             return
@@ -1329,6 +1401,7 @@ class ReviewTool(IToolWidget):
         self._ranges = ranges
         self._rangeListLayout.clear()
         self._rangeButtons = {}
+        self._rangeItemOrder = []
         context = self.context
         if not ranges:
             label = ftk.Label(context, "No ranges yet.", self._rangeListLayout)
@@ -1356,6 +1429,10 @@ class ReviewTool(IToolWidget):
                 lambda captured = range_.id,
                     f = Util.weak(self._rangeClicked): f(captured))
             self._rangeButtons[range_.id] = button
+            self._rangeItemOrder.append((button, range_.id))
+            button.setFocusCallback(
+                lambda value, captured = range_.id,
+                    f = Util.weak(self._rangeRowFocus): f(captured, value))
             row = ftk.HorizontalLayout(context)
             row.marginRole = ftk.SizeRole.MarginInside
             row.spacingRole = ftk.SizeRole.SpacingSmall
@@ -1376,12 +1453,6 @@ class ReviewTool(IToolWidget):
                     ftk.SizeRole.LabelPad, ftk.SizeRole._None)
                 framesLabel.textRole = ftk.ColorRole.TextDisabled
                 framesLabel.vAlign = ftk.VAlign.Center
-            deleteButton = ftk.ToolButton(context, row)
-            deleteButton.icon = "RemoveSmall"
-            deleteButton.tooltip = "Delete this range."
-            deleteButton.setClickedCallback(
-                lambda captured = range_.id:
-                    appWeak() and appWeak().getRangesModel().remove(captured))
         self._rangeSelectionUpdate()
 
     def _rangeSelectionUpdate(self):
@@ -1467,6 +1538,7 @@ class ReviewTool(IToolWidget):
         self._editItem = None
         self._noteListLayout.clear()
         self._noteButtons = {}
+        self._noteItemOrder = []
         context = self.context
         # Every note, so the panel reads as the review's feedback rather
         # than one frame's -- browsing beats following bread crumbs. In
@@ -1518,6 +1590,10 @@ class ReviewTool(IToolWidget):
                     selfWeak() and selfWeak()._noteClicked(captured))
             if note.id is not None:
                 self._noteButtons[note.id] = button
+                self._noteItemOrder.append((button, note.id))
+                button.setFocusCallback(
+                    lambda value, captured = note.id,
+                        f = Util.weak(self._noteRowFocus): f(captured, value))
             # One margin around the whole note, carried by the card,
             # so the header and the text sit evenly inside the item.
             card = ftk.VerticalLayout(context)
@@ -1541,14 +1617,6 @@ class ReviewTool(IToolWidget):
                     ftk.SizeRole.LabelPad, ftk.SizeRole._None)
                 createdLabel.textRole = ftk.ColorRole.TextDisabled
                 createdLabel.vAlign = ftk.VAlign.Center
-            if note.id is not None:
-                deleteButton = ftk.ToolButton(context, header)
-                deleteButton.icon = "RemoveSmall"
-                deleteButton.tooltip = "Delete this note."
-                deleteButton.setClickedCallback(
-                    lambda captured = note.id:
-                        appWeak() and
-                        appWeak().getNotesModel().remove(captured))
             if editing:
                 # Written and edited in place. The note keeps itself
                 # when the editor loses the focus, or on Command-Return.

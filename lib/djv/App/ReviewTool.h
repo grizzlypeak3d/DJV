@@ -57,6 +57,10 @@ namespace djv
             //! at its selection.
             bool _navigate(bool down, const ftk::V2I& pos);
             void _goToNote(size_t index);
+            void _rangeRowFocus(const std::string& id, bool value);
+            void _noteRowFocus(const std::string& id, bool value);
+            void _deleteRange();
+            void _deleteNote();
             //! Seek, releasing the in/out range when the target lies
             //! outside it.
             void _seekTo(const OTIO_NS::RationalTime&);

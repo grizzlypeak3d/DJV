@@ -140,8 +140,20 @@ namespace djv
             //! The row buttons, by range identifier, so the highlight can be
             //! moved without rebuilding the list.
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > rangeButtons;
+            //! A list row: the item, what it stands for, and for notes its
+            //! frame.
+            struct RowRef
+            {
+                std::shared_ptr<ftk::ItemButton> button;
+                std::string id;
+                std::optional<OTIO_NS::RationalTime> time;
+            };
             //! The rows in display order, for the arrow keys.
-            std::vector<std::shared_ptr<ftk::ItemButton> > rangeItemOrder;
+            std::vector<RowRef> rangeItemOrder;
+            std::shared_ptr<ftk::ToolButton> deleteRangeButton;
+            //! The row with the key focus, or empty: what the header delete
+            //! buttons act on.
+            std::string focusedRangeId;
             std::vector<models::ReviewRange> ranges;
             //! The selected range, or empty. Only one can be active: selecting
             //! is what drives the timeline in/out points.
@@ -162,9 +174,9 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > noteButtons;
             //! The rows in display order with their frames, for the arrow
             //! keys, which also follow the notes' frames.
-            std::vector<std::pair<
-                std::shared_ptr<ftk::ItemButton>,
-                std::optional<OTIO_NS::RationalTime> > > noteItemOrder;
+            std::vector<RowRef> noteItemOrder;
+            std::shared_ptr<ftk::ToolButton> deleteNoteButton;
+            std::string focusedNoteId;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::ScrollWidget> scrollWidget;
 
@@ -232,6 +244,21 @@ namespace djv
             p.addRangeButton->setTooltip(
                 "Save the timeline in/out points as a named range.");
 
+            // One delete for the list, acting on the focused row, rather
+            // than one on every row.
+            p.deleteRangeButton = ftk::ToolButton::create(context);
+            p.deleteRangeButton->setIcon("Remove");
+            p.deleteRangeButton->setTooltip("Delete the selected range.");
+            p.deleteRangeButton->setEnabled(false);
+            // Clicking the delete must not move the key focus, or it would
+            // clear the very selection it is about to act on.
+            p.deleteRangeButton->setAcceptsKeyFocus(false);
+
+            auto rangeToolLayout = ftk::HorizontalLayout::create(context);
+            rangeToolLayout->setSpacingRole(ftk::SizeRole::None);
+            p.addRangeButton->setParent(rangeToolLayout);
+            p.deleteRangeButton->setParent(rangeToolLayout);
+
             p.rangeListLayout = ftk::VerticalLayout::create(context);
             p.rangeListLayout->setSpacingRole(ftk::SizeRole::None);
 
@@ -296,22 +323,35 @@ namespace djv
             p.publishButton->setIcon("Add");
             p.publishButton->setTooltip("Add a note about the current frame.");
 
+            p.deleteNoteButton = ftk::ToolButton::create(context);
+            p.deleteNoteButton->setIcon("Remove");
+            p.deleteNoteButton->setTooltip("Delete the selected note.");
+            p.deleteNoteButton->setEnabled(false);
+            p.deleteNoteButton->setAcceptsKeyFocus(false);
+
+            auto noteToolLayout = ftk::HorizontalLayout::create(context);
+            noteToolLayout->setSpacingRole(ftk::SizeRole::None);
+            p.publishButton->setParent(noteToolLayout);
+            p.deleteNoteButton->setParent(noteToolLayout);
+
             p.noteListLayout = ftk::VerticalLayout::create(context);
             p.noteListLayout->setSpacingRole(ftk::SizeRole::None);
             ftk::setScreenshotTag(p.publishButton, "Review.AddNote");
+            ftk::setScreenshotTag(p.deleteRangeButton, "Review.DeleteRange");
+            ftk::setScreenshotTag(p.deleteNoteButton, "Review.DeleteNote");
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
             p.bellows["Ranges"] = ftk::Bellows::create(context, "Ranges", layout);
             p.bellows["Ranges"]->setWidget(p.rangeListLayout);
-            p.bellows["Ranges"]->setToolWidget(p.addRangeButton);
+            p.bellows["Ranges"]->setToolWidget(rangeToolLayout);
             p.bellows["Ranges"]->setOpen(true);
             p.bellows["Drawing"] = ftk::Bellows::create(context, "Drawing", layout);
             p.bellows["Drawing"]->setWidget(drawingWidget);
             p.bellows["Drawing"]->setOpen(true);
             p.bellows["Notes"] = ftk::Bellows::create(context, "Notes", layout);
             p.bellows["Notes"]->setWidget(p.noteListLayout);
-            p.bellows["Notes"]->setToolWidget(p.publishButton);
+            p.bellows["Notes"]->setToolWidget(noteToolLayout);
             p.bellows["Notes"]->setOpen(true);
 
             p.scrollWidget = ftk::ScrollWidget::create(context);
@@ -459,6 +499,18 @@ namespace djv
                     addNote();
                 });
 
+            p.deleteRangeButton->setClickedCallback(
+                [this]
+                {
+                    _deleteRange();
+                });
+
+            p.deleteNoteButton->setClickedCallback(
+                [this]
+                {
+                    _deleteNote();
+                });
+
             p.notesObserver = ftk::ListObserver<models::ReviewNote>::create(
                 app->getNotesModel()->observeNotes(),
                 [this](const std::vector<models::ReviewNote>& value)
@@ -578,14 +630,22 @@ namespace djv
                 // The whole row is one item button, so the list reads as a
                 // list rather than a row of separate widgets.
                 auto button = ftk::ItemButton::create(context, p.rangeListLayout);
-                p.rangeItemOrder.push_back(button);
+                const std::string id = range.id;
+                p.rangeItemOrder.push_back({ button, id, std::nullopt });
+                button->setFocusCallback(
+                    [weak, id](bool value)
+                    {
+                        if (auto widget = weak.lock())
+                        {
+                            widget->_rangeRowFocus(id, value);
+                        }
+                    });
                 // Deliberately not checkable, for the reason given on the pen
                 // button: click() would flip the state after the callback and
                 // fight the highlight set from the selection.
                 button->setTooltip(
                     "Set the timeline in/out points to this range. Click again "
                     "to clear them.");
-                const std::string id = range.id;
                 button->setClickedCallback(
                     [weak, id]
                     {
@@ -620,17 +680,6 @@ namespace djv
                     framesLabel->setVAlign(ftk::VAlign::Center);
                 }
 
-                auto deleteButton = ftk::ToolButton::create(context, row);
-                deleteButton->setIcon("RemoveSmall");
-                deleteButton->setTooltip("Delete this range.");
-                deleteButton->setClickedCallback(
-                    [appWeak, id]
-                    {
-                        if (auto app = appWeak.lock())
-                        {
-                            app->getRangesModel()->remove(id);
-                        }
-                    });
             }
             _rangeSelectionUpdate();
         }
@@ -785,6 +834,22 @@ namespace djv
             {
                 event.accept = _navigate(ftk::Key::Down == event.key, event.pos);
             }
+            // Delete the selected row, like the header delete buttons.
+            else if (!event.accept &&
+                0 == event.modifiers &&
+                (ftk::Key::Delete == event.key || ftk::Key::Backspace == event.key))
+            {
+                if (!p.focusedRangeId.empty())
+                {
+                    event.accept = true;
+                    _deleteRange();
+                }
+                else if (!p.focusedNoteId.empty())
+                {
+                    event.accept = true;
+                    _deleteNote();
+                }
+            }
         }
 
         void ReviewTool::keyReleaseEvent(ftk::KeyEvent& event)
@@ -828,21 +893,21 @@ namespace djv
             // elsewhere.
             for (size_t i = 0; i < p.rangeItemOrder.size(); ++i)
             {
-                if (p.rangeItemOrder[i] == focus)
+                if (p.rangeItemOrder[i].button == focus)
                 {
                     const size_t j = down ?
                         std::min(i + 1, p.rangeItemOrder.size() - 1) :
                         (i > 0 ? i - 1 : 0);
                     if (j != i)
                     {
-                        p.rangeItemOrder[j]->takeKeyFocus();
+                        p.rangeItemOrder[j].button->takeKeyFocus();
                     }
                     return true;
                 }
             }
             for (size_t i = 0; i < p.noteItemOrder.size(); ++i)
             {
-                if (p.noteItemOrder[i].first == focus)
+                if (p.noteItemOrder[i].button == focus)
                 {
                     const size_t j = down ?
                         std::min(i + 1, p.noteItemOrder.size() - 1) :
@@ -867,7 +932,7 @@ namespace djv
                 size_t j = down ? 0 : p.rangeItemOrder.size() - 1;
                 for (size_t k = 0; k < p.rangeItemOrder.size(); ++k)
                 {
-                    if (p.rangeItemOrder[k]->isChecked())
+                    if (p.rangeItemOrder[k].button->isChecked())
                     {
                         j = down ?
                             std::min(k + 1, p.rangeItemOrder.size() - 1) :
@@ -875,7 +940,7 @@ namespace djv
                         break;
                     }
                 }
-                p.rangeItemOrder[j]->takeKeyFocus();
+                p.rangeItemOrder[j].button->takeKeyFocus();
                 return true;
             }
             const auto n = p.bellows.find("Notes");
@@ -887,7 +952,7 @@ namespace djv
                 size_t j = down ? 0 : p.noteItemOrder.size() - 1;
                 for (size_t k = 0; k < p.noteItemOrder.size(); ++k)
                 {
-                    if (p.noteItemOrder[k].first->isChecked())
+                    if (p.noteItemOrder[k].button->isChecked())
                     {
                         j = down ?
                             std::min(k + 1, p.noteItemOrder.size() - 1) :
@@ -908,12 +973,99 @@ namespace djv
             {
                 return;
             }
-            p.noteItemOrder[index].first->takeKeyFocus();
+            p.noteItemOrder[index].button->takeKeyFocus();
             // Browsing the feedback is looking at the frames it is about,
             // so the arrows follow.
-            if (p.noteItemOrder[index].second.has_value())
+            if (p.noteItemOrder[index].time.has_value())
             {
-                _seekTo(*p.noteItemOrder[index].second);
+                _seekTo(*p.noteItemOrder[index].time);
+            }
+        }
+
+        void ReviewTool::_rangeRowFocus(const std::string& id, bool value)
+        {
+            FTK_P();
+            if (value)
+            {
+                p.focusedRangeId = id;
+            }
+            else if (p.focusedRangeId == id)
+            {
+                p.focusedRangeId.clear();
+            }
+            p.deleteRangeButton->setEnabled(!p.focusedRangeId.empty());
+        }
+
+        void ReviewTool::_noteRowFocus(const std::string& id, bool value)
+        {
+            FTK_P();
+            if (value)
+            {
+                p.focusedNoteId = id;
+            }
+            else if (p.focusedNoteId == id)
+            {
+                p.focusedNoteId.clear();
+            }
+            p.deleteNoteButton->setEnabled(!p.focusedNoteId.empty());
+        }
+
+        void ReviewTool::_deleteRange()
+        {
+            FTK_P();
+            if (p.focusedRangeId.empty())
+            {
+                return;
+            }
+            // The index before the removal, to land the focus on the
+            // neighbour after: repeated deletes then cull a list without
+            // re-selecting.
+            size_t index = 0;
+            for (size_t i = 0; i < p.rangeItemOrder.size(); ++i)
+            {
+                if (p.rangeItemOrder[i].id == p.focusedRangeId)
+                {
+                    index = i;
+                    break;
+                }
+            }
+            if (auto app = _app.lock())
+            {
+                app->getRangesModel()->remove(p.focusedRangeId);
+            }
+            if (!p.rangeItemOrder.empty())
+            {
+                const size_t j = std::min(index, p.rangeItemOrder.size() - 1);
+                p.rangeItemOrder[j].button->takeKeyFocus();
+            }
+        }
+
+        void ReviewTool::_deleteNote()
+        {
+            FTK_P();
+            if (p.focusedNoteId.empty())
+            {
+                return;
+            }
+            size_t index = 0;
+            for (size_t i = 0; i < p.noteItemOrder.size(); ++i)
+            {
+                if (p.noteItemOrder[i].id == p.focusedNoteId)
+                {
+                    index = i;
+                    break;
+                }
+            }
+            if (auto app = _app.lock())
+            {
+                app->getNotesModel()->remove(p.focusedNoteId);
+            }
+            if (!p.noteItemOrder.empty())
+            {
+                // Focus without following the frame: deleting is not
+                // browsing.
+                const size_t j = std::min(index, p.noteItemOrder.size() - 1);
+                p.noteItemOrder[j].button->takeKeyFocus();
             }
         }
 
@@ -1160,7 +1312,15 @@ namespace djv
                 if (!note.id.empty())
                 {
                     p.noteButtons[note.id] = button;
-                    p.noteItemOrder.push_back({ button, note.time });
+                    p.noteItemOrder.push_back({ button, note.id, note.time });
+                    button->setFocusCallback(
+                        [weak, id](bool value)
+                        {
+                            if (auto widget = weak.lock())
+                            {
+                                widget->_noteRowFocus(id, value);
+                            }
+                        });
                 }
 
                 // One margin around the whole note, carried by the card,
@@ -1190,21 +1350,6 @@ namespace djv
                     createdLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                     createdLabel->setTextRole(ftk::ColorRole::TextDisabled);
                     createdLabel->setVAlign(ftk::VAlign::Center);
-                }
-
-                if (!note.id.empty())
-                {
-                    auto deleteButton = ftk::ToolButton::create(context, header);
-                    deleteButton->setIcon("RemoveSmall");
-                    deleteButton->setTooltip("Delete this note.");
-                    deleteButton->setClickedCallback(
-                        [appWeak, id]
-                        {
-                            if (auto app = appWeak.lock())
-                            {
-                                app->getNotesModel()->remove(id);
-                            }
-                        });
                 }
 
                 if (editing)
