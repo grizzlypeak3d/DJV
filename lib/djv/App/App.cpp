@@ -16,7 +16,6 @@
 #include <djv/App/MainWindow.h>
 #include <djv/App/MessagesTool.h>
 #include <djv/App/ReviewTool.h>
-#include <djv/App/SaveReviewDialog.h>
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/SettingsTool.h>
 #include <djv/App/SysLogTool.h>
@@ -147,7 +146,6 @@ namespace djv
             std::shared_ptr<ftk::Timer> reviewViewTimer;
             std::shared_ptr<ftk::Timer> autosaveTimer;
             std::optional<nlohmann::json> recoveredAutosave;
-            std::shared_ptr<SaveReviewDialog> saveReviewDialog;
             std::vector<std::shared_ptr<tl::Timeline> > timelines;
             std::shared_ptr<ftk::Observable<std::shared_ptr<tl::Player> > > player;
             std::shared_ptr<models::ColorModel> colorModel;
@@ -1309,48 +1307,30 @@ namespace djv
                 onProceed();
                 return;
             }
-            if (p.saveReviewDialog)
-            {
-                p.saveReviewDialog->close();
-                p.saveReviewDialog.reset();
-            }
-            p.saveReviewDialog = SaveReviewDialog::create(
-                _context,
+            _context->getSystem<ftk::DialogSystem>()->choice(
                 "Save Review",
-                "Save changes to the review before closing?");
-            p.saveReviewDialog->open(p.mainWindow);
-            p.saveReviewDialog->setCallback(
-                [this, onProceed](SaveReviewResult result)
+                "Save changes to the review before closing?",
+                { "Save", "Don't Save", "Cancel" },
+                p.mainWindow,
+                [this, onProceed](int value)
                 {
-                    // Act first, then close: closing resets the dialog (via the
-                    // close callback), which can destroy this closure, so nothing
-                    // captured may be used afterwards.
-                    switch (result)
+                    switch (value)
                     {
-                    case SaveReviewResult::Save:
+                    case 0:
                         // The prompt only appears for an already-saved review, so
                         // the path is always set here.
                         saveReview(_p->reviewPath);
                         onProceed();
                         break;
-                    case SaveReviewResult::Discard:
+                    case 1:
                         // A deliberate discard is not a crash: drop the backup.
                         _deleteAutosave();
                         onProceed();
                         break;
-                    case SaveReviewResult::Cancel:
                     default:
+                        // Cancel, and dismissing the dialog means the same.
                         break;
                     }
-                    if (_p->saveReviewDialog)
-                    {
-                        _p->saveReviewDialog->close();
-                    }
-                });
-            p.saveReviewDialog->setCloseCallback(
-                [this]
-                {
-                    _p->saveReviewDialog.reset();
                 });
         }
 

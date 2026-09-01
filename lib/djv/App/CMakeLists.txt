@@ -34,7 +34,6 @@ set(HEADERS
     ReviewActions.h
     ReviewMenu.h
     ReviewTool.h
-    SaveReviewDialog.h
     SecondaryWindow.h
     SettingsTool.h
     StatusBar.h
@@ -91,7 +90,6 @@ set(SOURCE
     ReviewActions.cpp
     ReviewMenu.cpp
     ReviewTool.cpp
-    SaveReviewDialog.cpp
     SecondaryWindow.cpp
     SettingsTool.cpp
     StatusBar.cpp
