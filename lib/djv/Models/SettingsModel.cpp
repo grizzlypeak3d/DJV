@@ -68,6 +68,9 @@ namespace djv
                 movieBase == other.movieBase &&
                 movieExt == other.movieExt &&
                 movieCodec == other.movieCodec &&
+                movieCmd == other.movieCmd &&
+                movieCmdPreset == other.movieCmdPreset &&
+                movieCmdArgs == other.movieCmdArgs &&
                 movieAudioCodec == other.movieAudioCodec;
         }
 
@@ -888,6 +891,9 @@ namespace djv
             json["MovieBase"] = value.movieBase;
             json["MovieExt"] = value.movieExt;
             json["MovieCodec"] = value.movieCodec;
+            json["MovieCmd"] = value.movieCmd;
+            json["MovieCmdPreset"] = value.movieCmdPreset;
+            json["MovieCmdArgs"] = value.movieCmdArgs;
             json["MovieAudioCodec"] = value.movieAudioCodec;
             json["SeqBase"] = value.seqBase;
             json["SeqZeroPad"] = value.seqZeroPad;
@@ -1053,6 +1059,12 @@ namespace djv
             json.at("MovieBase").get_to(value.movieBase);
             json.at("MovieExt").get_to(value.movieExt);
             json.at("MovieCodec").get_to(value.movieCodec);
+            if (json.contains("MovieCmd"))
+            {
+                json.at("MovieCmd").get_to(value.movieCmd);
+                json.at("MovieCmdPreset").get_to(value.movieCmdPreset);
+                json.at("MovieCmdArgs").get_to(value.movieCmdArgs);
+            }
             json.at("MovieAudioCodec").get_to(value.movieAudioCodec);
             json.at("SeqBase").get_to(value.seqBase);
             json.at("SeqZeroPad").get_to(value.seqZeroPad);

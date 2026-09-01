@@ -688,11 +688,26 @@ namespace djv
                     }
 
                     tl::IOOptions ioOptions;
-                    ioOptions["FFmpeg/Codec"] = options.movieCodec;
-                    if (!options.movieAudioCodec.empty() &&
-                        options.movieAudioCodec != "Auto")
+                    if (options.movieCmd)
                     {
-                        ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
+                        // The command line application does the encoding, with
+                        // the settings' paths so a custom ffmpeg is honoured.
+                        ioOptions = p.settings->getIOOptions();
+                        ioOptions["FFmpeg/WriteCommandLine"] = "1";
+                        ioOptions["FFmpeg/WritePreset"] = options.movieCmdPreset;
+                        if (!options.movieCmdArgs.empty())
+                        {
+                            ioOptions["FFmpeg/WriteArgs"] = options.movieCmdArgs;
+                        }
+                    }
+                    else
+                    {
+                        ioOptions["FFmpeg/Codec"] = options.movieCodec;
+                        if (!options.movieAudioCodec.empty() &&
+                            options.movieAudioCodec != "Auto")
+                        {
+                            ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
+                        }
                     }
                     p.exportData->writer = plugin->write(p.exportData->path, outputInfo, ioOptions);
 

@@ -100,6 +100,11 @@ namespace djv
             std::string movieExt = ".mov";
             std::string movieCodec = "mjpeg";
             std::string movieAudioCodec = "Auto";
+            //! Write movies with the FFmpeg command line application
+            //! instead of the library, using its encoders. Video only.
+            bool movieCmd = false;
+            std::string movieCmdPreset = "H.264";
+            std::string movieCmdArgs;
 
             DJV_MODELS_API bool operator == (const ExportSettings&) const;
             DJV_MODELS_API bool operator != (const ExportSettings&) const;

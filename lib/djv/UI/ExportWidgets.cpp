@@ -10,8 +10,10 @@
 #include <tlRender/IO/System.h>
 #if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
+#include <tlRender/IO/FFmpegCmd.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEdit.h>
@@ -574,11 +576,15 @@ namespace djv
             std::vector<std::string> exts;
             std::vector<std::string> codecs;
             std::vector<std::string> audioCodecs;
+            std::vector<std::string> cmdPresets;
 
             std::shared_ptr<ftk::LineEdit> baseEdit;
             std::shared_ptr<ftk::ComboBox> extComboBox;
             std::shared_ptr<ftk::ComboBox> codecComboBox;
             std::shared_ptr<ftk::ComboBox> audioCodecComboBox;
+            std::shared_ptr<ftk::CheckBox> cmdCheckBox;
+            std::shared_ptr<ftk::ComboBox> cmdPresetComboBox;
+            std::shared_ptr<ftk::LineEdit> cmdArgsEdit;
             std::shared_ptr<ftk::Label> fileLabel;
             std::shared_ptr<ftk::Label> rangeLabel;
             std::shared_ptr<ftk::PushButton> exportButton;
@@ -634,6 +640,27 @@ namespace djv
             p.audioCodecComboBox = ftk::ComboBox::create(context, p.audioCodecs);
             p.audioCodecComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.audioCodecComboBox, "Export.MovieAudioCodec");
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            for (const auto& preset : tl::ffmpeg_cmd::getWritePresets())
+            {
+                p.cmdPresets.push_back(preset.name);
+            }
+#endif // TLRENDER_FFMPEG_PLUGIN
+            p.cmdCheckBox = ftk::CheckBox::create(context);
+            p.cmdCheckBox->setTooltip(
+                "Write with the FFmpeg command line application instead of "
+                "the library, using its encoders -- H.264 and other codecs "
+                "this build does not ship. Video only.");
+            ftk::setScreenshotTag(p.cmdCheckBox, "Export.MovieCmd");
+            p.cmdPresetComboBox = ftk::ComboBox::create(context, p.cmdPresets);
+            p.cmdPresetComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.cmdPresetComboBox->setTooltip("The encoding preset.");
+            ftk::setScreenshotTag(p.cmdPresetComboBox, "Export.MovieCmdPreset");
+            p.cmdArgsEdit = ftk::LineEdit::create(context);
+            p.cmdArgsEdit->setHStretch(ftk::Stretch::Expanding);
+            p.cmdArgsEdit->setTooltip(
+                "Extra arguments appended to the command line.");
+            ftk::setScreenshotTag(p.cmdArgsEdit, "Export.MovieCmdArgs");
 
             p.fileLabel = ftk::Label::create(context);
             p.rangeLabel = ftk::Label::create(context);
@@ -652,6 +679,9 @@ namespace djv
             formLayout->addRow("Extension:", p.extComboBox);
             formLayout->addRow("Codec:", p.codecComboBox);
             formLayout->addRow("Audio codec:", p.audioCodecComboBox);
+            formLayout->addRow("FFmpeg command:", p.cmdCheckBox);
+            formLayout->addRow("Preset:", p.cmdPresetComboBox);
+            formLayout->addRow("Arguments:", p.cmdArgsEdit);
             ftk::setScreenshotTag(p.fileLabel, "Export.MovieFile");
             formLayout->addRow("File:", p.fileLabel);
             ftk::setScreenshotTag(p.rangeLabel, "Export.MovieRange");
@@ -671,6 +701,16 @@ namespace djv
                     p.codecComboBox->setCurrentIndex(i != p.codecs.end() ? (i - p.codecs.begin()) : -1);
                     i = std::find(p.audioCodecs.begin(), p.audioCodecs.end(), value.movieAudioCodec);
                     p.audioCodecComboBox->setCurrentIndex(i != p.audioCodecs.end() ? (i - p.audioCodecs.begin()) : -1);
+                    p.cmdCheckBox->setChecked(value.movieCmd);
+                    i = std::find(p.cmdPresets.begin(), p.cmdPresets.end(), value.movieCmdPreset);
+                    p.cmdPresetComboBox->setCurrentIndex(i != p.cmdPresets.end() ? (i - p.cmdPresets.begin()) : -1);
+                    p.cmdArgsEdit->setText(value.movieCmdArgs);
+                    // The command line writer replaces the library codecs,
+                    // and writes video only.
+                    p.codecComboBox->setEnabled(!value.movieCmd);
+                    p.audioCodecComboBox->setEnabled(!value.movieCmd);
+                    p.cmdPresetComboBox->setEnabled(value.movieCmd);
+                    p.cmdArgsEdit->setEnabled(value.movieCmd);
                     _infoUpdate();
                 });
 
@@ -724,6 +764,36 @@ namespace djv
                         options.movieAudioCodec = p.audioCodecs[value];
                         p.settings->setExport(options);
                     }
+                });
+
+            p.cmdCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    auto options = p.settings->getExport();
+                    options.movieCmd = value;
+                    p.settings->setExport(options);
+                });
+
+            p.cmdPresetComboBox->setIndexCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    if (value >= 0 && value < static_cast<int>(p.cmdPresets.size()))
+                    {
+                        auto options = p.settings->getExport();
+                        options.movieCmdPreset = p.cmdPresets[value];
+                        p.settings->setExport(options);
+                    }
+                });
+
+            p.cmdArgsEdit->setCallback(
+                [this](const std::string& value)
+                {
+                    FTK_P();
+                    auto options = p.settings->getExport();
+                    options.movieCmdArgs = value;
+                    p.settings->setExport(options);
                 });
         }
 
