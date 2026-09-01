@@ -1068,6 +1068,9 @@ class ReviewTool(IToolWidget):
         notesWidget.marginRole = ftk.SizeRole.MarginSmall
         notesWidget.spacingRole = ftk.SizeRole.SpacingSmall
         self._noteEdit = ftk.TextEdit(context, notesWidget)
+        # A few lines: the list below is the review's feedback index, so
+        # the leftover height belongs to it, not to the editor.
+        self._noteEdit.sizeHintRole = ftk.SizeRole.ScrollAreaSmall
         self._noteEdit.tooltip = "Write a note about the current frame."
         self._publishButton = ftk.PushButton(context, "Add", notesWidget)
         self._publishButton.tooltip = "Attach the note to the current frame."

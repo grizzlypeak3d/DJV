@@ -268,6 +268,9 @@ namespace djv
             notesWidget->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
             p.noteEdit = ftk::TextEdit::create(context, notesWidget);
+            // A few lines: the list below is the review's feedback index, so
+            // the leftover height belongs to it, not to the editor.
+            p.noteEdit->setSizeHintRole(ftk::SizeRole::ScrollAreaSmall);
             p.noteEdit->setTooltip("Write a note about the current frame.");
 
             p.publishButton = ftk::PushButton::create(context, "Add", notesWidget);
