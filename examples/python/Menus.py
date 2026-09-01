@@ -252,8 +252,8 @@ class Frame(ftk.Menu):
         self.addAction(actions.actions["NextX10"])
         self.addAction(actions.actions["NextX100"])
         self.addDivider();
-        self.addAction(actions.actions["PrevMarker"])
-        self.addAction(actions.actions["NextMarker"])
+        self.addAction(actions.actions["PrevReview"])
+        self.addAction(actions.actions["NextReview"])
         self.addDivider();
         self.addAction(actions.actions["FocusCurrent"])
 

@@ -145,7 +145,7 @@ namespace djv
             // review these are the only frames that matter, and stepping to
             // them by hand over a long timeline is the slow part.
             _addCommand(
-                "PrevMarker",
+                "PrevReview",
                 "Go to the previous frame with a note or a drawing.",
                 [appWeak](const nlohmann::json&)
                 {
@@ -156,7 +156,7 @@ namespace djv
                 });
 
             _addCommand(
-                "NextMarker",
+                "NextReview",
                 "Go to the next frame with a note or a drawing.",
                 [appWeak](const nlohmann::json&)
                 {
@@ -207,14 +207,14 @@ namespace djv
             _actions["NextX100"] = ftk::Action::create(
                 "Next Frame X100",
                 _command("NextX100"));
-            _actions["PrevMarker"] = ftk::Action::create(
-                "Previous Review Marker",
+            _actions["PrevReview"] = ftk::Action::create(
+                "Previous Review",
                 "ReviewPrev",
-                _command("PrevMarker"));
-            _actions["NextMarker"] = ftk::Action::create(
-                "Next Review Marker",
+                _command("PrevReview"));
+            _actions["NextReview"] = ftk::Action::create(
+                "Next Review",
                 "ReviewNext",
-                _command("NextMarker"));
+                _command("NextReview"));
             _actions["FocusCurrent"] = ftk::Action::create(
                 "Focus Current Frame",
                 _command("FocusCurrent"));
@@ -230,8 +230,8 @@ namespace djv
             _addShortcut("NextX100", "Next X100", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Control)));
             // Shift and Control on the arrows are already taken by the X10 and
             // X100 steps.
-            _addShortcut("PrevMarker", "Previous review marker", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Alt)));
-            _addShortcut("NextMarker", "Next review marker", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Alt)));
+            _addShortcut("PrevReview", "Previous review", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Alt)));
+            _addShortcut("NextReview", "Next review", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Alt)));
             _addShortcut("FocusCurrent", "Focus Current", ftk::KeyShortcut(ftk::Key::F, static_cast<int>(ftk::KeyModifier::Control)));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
@@ -275,8 +275,8 @@ namespace djv
             // The jumps need both a player and something to jump to, and the
             // two arrive independently.
             const bool enabled = p.hasPlayer && p.hasMarkers;
-            _actions["PrevMarker"]->setEnabled(enabled);
-            _actions["NextMarker"]->setEnabled(enabled);
+            _actions["PrevReview"]->setEnabled(enabled);
+            _actions["NextReview"]->setEnabled(enabled);
         }
 
         FrameActions::FrameActions() :

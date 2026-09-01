@@ -110,8 +110,8 @@ namespace djv
             p.buttons["Prev"]->setRepeatClick(true);
             p.buttons["Next"] = ftk::ToolButton::create(context, actions["Next"]);
             p.buttons["Next"]->setRepeatClick(true);
-            p.buttons["PrevMarker"] = ftk::ToolButton::create(context, actions["PrevMarker"]);
-            p.buttons["NextMarker"] = ftk::ToolButton::create(context, actions["NextMarker"]);
+            p.buttons["PrevReview"] = ftk::ToolButton::create(context, actions["PrevReview"]);
+            p.buttons["NextReview"] = ftk::ToolButton::create(context, actions["NextReview"]);
 
             p.frameShuttle = ftk::ShuttleWidget::create(context);
             p.frameShuttle->setTooltip("Frame shuttle. Click and drag to change the current frame.");
@@ -174,9 +174,9 @@ namespace djv
             // gesture, on the frames that carry a note or a drawing.
             hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
             hLayout2->setSpacingRole(ftk::SizeRole::None);
-            ftk::setScreenshotTag(hLayout2, "Playback.MarkerControls");
-            p.buttons["PrevMarker"]->setParent(hLayout2);
-            p.buttons["NextMarker"]->setParent(hLayout2);
+            ftk::setScreenshotTag(hLayout2, "Playback.ReviewControls");
+            p.buttons["PrevReview"]->setParent(hLayout2);
+            p.buttons["NextReview"]->setParent(hLayout2);
             p.currentTimeEdit->setParent(hLayout);
             p.durationLabel->setParent(hLayout);
             p.timeUnitsWidget->setParent(hLayout);
