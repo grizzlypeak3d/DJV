@@ -93,7 +93,7 @@ class File(ftk.Menu):
         self.recentMenu.clear()
         for recent in reversed(recentList):
             action = ftk.Action(
-                recent.fileName,
+                recent.get(),
                 lambda captured = recent, \
                     f = Util.weak(self._recentCallback): f(captured))
             self.recentMenu.addAction(action)
@@ -106,7 +106,7 @@ class File(ftk.Menu):
         self.recentPlaylistsMenu.clear()
         for recent in reversed(recentList):
             action = ftk.Action(
-                recent.getFileName(True),
+                recent.get(),
                 lambda captured = recent, \
                     f = Util.weak(self._recentPlaylistCallback): f(captured))
             self.recentPlaylistsMenu.addAction(action)
@@ -119,7 +119,7 @@ class File(ftk.Menu):
         self.recentReviewsMenu.clear()
         for recent in reversed(recentList):
             action = ftk.Action(
-                recent.getFileName(True),
+                recent.get(),
                 lambda captured = recent, \
                     f = Util.weak(self._recentReviewCallback): f(captured))
             self.recentReviewsMenu.addAction(action)
