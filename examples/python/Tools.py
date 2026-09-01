@@ -1053,6 +1053,8 @@ class ReviewTool(IToolWidget):
         self._redoButton = ftk.ToolButton(context, toolLayout)
         self._redoButton.icon = "Redo"
         self._redoButton.tooltip = "Redo drawing."
+        self._clearDrawingButton = ftk.ToolButton(context, "Clear", toolLayout)
+        self._clearDrawingButton.tooltip = "Remove every stroke on this frame."
         sizeLayout = ftk.HorizontalLayout(context, drawingWidget)
         sizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
         sizeLabel = ftk.Label(context, "Size:", sizeLayout)
@@ -1061,11 +1063,6 @@ class ReviewTool(IToolWidget):
         self._sizeSlider.setRange(1.0, 50.0)
         self._sizeSlider.value = drawModel.size
         self._sizeSlider.tooltip = "The stroke width, in source pixels."
-        self._clearDrawingButton = ftk.ToolButton(
-            context, "Clear Drawing", drawingWidget)
-        self._clearDrawingButton.icon = "Remove"
-        self._clearDrawingButton.hAlign = ftk.HAlign.Left
-        self._clearDrawingButton.tooltip = "Remove every stroke on this frame."
 
         # Notes.
         notesWidget = ftk.VerticalLayout(context)

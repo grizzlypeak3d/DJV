@@ -248,6 +248,9 @@ namespace djv
             p.redoButton->setIcon("Redo");
             p.redoButton->setTooltip("Redo drawing.");
 
+            p.clearDrawingButton = ftk::ToolButton::create(context, "Clear", toolLayout);
+            p.clearDrawingButton->setTooltip("Remove every stroke on this frame.");
+
             auto sizeLayout = ftk::HorizontalLayout::create(context, drawingWidget);
             sizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto sizeLabel = ftk::Label::create(context, "Size:", sizeLayout);
@@ -257,10 +260,6 @@ namespace djv
             p.sizeSlider->setValue(drawModel->getSize());
             p.sizeSlider->setTooltip("The stroke width, in source pixels.");
 
-            p.clearDrawingButton = ftk::ToolButton::create(context, "Clear Drawing", drawingWidget);
-            p.clearDrawingButton->setIcon("Remove");
-            p.clearDrawingButton->setHAlign(ftk::HAlign::Left);
-            p.clearDrawingButton->setTooltip("Remove every stroke on this frame.");
             ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
             ftk::setScreenshotTag(p.eraserButton, "Review.Eraser");
