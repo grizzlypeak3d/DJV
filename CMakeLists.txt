@@ -91,7 +91,17 @@ elseif(APPLE)
     else()
         set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
     endif()
-    set(CMAKE_BUILD_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+    # The freshly built libraries have to come before the installed
+    # copies, or a binary run from the build tree quietly loads the
+    # stale install -- so they are gathered into one directory that
+    # leads the search path. The install prefix entry cannot simply be
+    # dropped: CMake adds it back for the prebuilt dependencies, and
+    # after the build tree's own directories only because they are
+    # listed here first.
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+    set(CMAKE_BUILD_RPATH
+        "${CMAKE_BINARY_DIR}/lib"
+        "${CMAKE_INSTALL_PREFIX}/lib")
 else()
     set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 endif()
