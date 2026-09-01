@@ -1091,7 +1091,9 @@ class ReviewTool(IToolWidget):
         scrollWidget.widget = layout
         # The notes have no natural end, so take what room is left
         # rather than a band of its own while other tools sit at the
-        # height they need.
+        # height they need. The scroll widget has to expand with the
+        # tool, or the extra room stays empty below it.
+        scrollWidget.vStretch = ftk.Stretch.Expanding
         self.vStretch = ftk.Stretch.Expanding
         self._setContent(scrollWidget)
 
