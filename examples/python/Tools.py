@@ -1277,6 +1277,12 @@ class ReviewTool(IToolWidget):
                 note.time, self._currentTime):
             self._editNote(id)
         elif self._player:
+            # Going to feedback wins over a narrower in/out range: with
+            # the note outside it, the seek would move the clock into a
+            # span the player cannot show.
+            if not self._player.inOutRange.contains(note.time):
+                self._player.resetInPoint()
+                self._player.resetOutPoint()
             self._player.currentTime = note.time
 
     def _setPlayer(self, player):

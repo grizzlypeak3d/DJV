@@ -902,6 +902,14 @@ namespace djv
             }
             else if (p.player)
             {
+                // Going to feedback wins over a narrower in/out range: with
+                // the note outside it, the seek would move the clock into a
+                // span the player cannot show.
+                if (!p.player->getInOutRange().contains(*i->time))
+                {
+                    p.player->resetInPoint();
+                    p.player->resetOutPoint();
+                }
                 p.player->seek(*i->time);
             }
         }

@@ -658,8 +658,14 @@ class App(ftk.App):
             preceding = [m for m in markers if m < current]
             target = preceding[-1] if preceding else markers[-1]
         player.stop()
-        player.currentTime = otio.opentime.RationalTime(
-            target, currentTime.rate)
+        targetTime = otio.opentime.RationalTime(target, currentTime.rate)
+        # Going to feedback wins over a narrower in/out range: with the
+        # target outside it, the seek would move the clock into a span
+        # the player cannot show.
+        if not player.inOutRange.contains(targetTime):
+            player.resetInPoint()
+            player.resetOutPoint()
+        player.currentTime = targetTime
 
     def _reviewMarkersUpdate(self):
         # Mark the frames that carry a note or a drawing in the

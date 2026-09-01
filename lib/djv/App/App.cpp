@@ -559,7 +559,16 @@ namespace djv
                 target = i != markers.begin() ? *(i - 1) : markers.back();
             }
             player->stop();
-            player->seek(OTIO_NS::RationalTime(target, currentTime.rate()));
+            const OTIO_NS::RationalTime targetTime(target, currentTime.rate());
+            // Going to feedback wins over a narrower in/out range: with the
+            // target outside it, the seek would move the clock into a span
+            // the player cannot show.
+            if (!player->getInOutRange().contains(targetTime))
+            {
+                player->resetInPoint();
+                player->resetOutPoint();
+            }
+            player->seek(targetTime);
         }
 
         bool App::getHideSetup() const
