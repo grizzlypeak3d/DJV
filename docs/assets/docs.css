@@ -182,11 +182,8 @@ th { border-bottom-width: 2px; }
     margin: 0;
     padding: 0;
     list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: .1rem 1.5rem;
+    line-height: 1.5;
 }
-.toc li { white-space: nowrap; }
 .toc a {
     color: var(--muted);
     text-decoration: none;
