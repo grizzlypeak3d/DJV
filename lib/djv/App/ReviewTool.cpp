@@ -17,6 +17,7 @@
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
+#include <ftk/UI/ItemButton.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
@@ -136,7 +137,7 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> rangeListLayout;
             //! The row buttons, by range identifier, so the highlight can be
             //! moved without rebuilding the list.
-            std::map<std::string, std::shared_ptr<ftk::ToolButton> > rangeButtons;
+            std::map<std::string, std::shared_ptr<ftk::ItemButton> > rangeButtons;
             std::vector<models::ReviewRange> ranges;
             //! The selected range, or empty. Only one can be active: selecting
             //! is what drives the timeline in/out points.
@@ -155,7 +156,7 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> noteListLayout;
             //! The frame buttons, by note identifier, so the current frame's
             //! highlight can move without rebuilding the list.
-            std::map<std::string, std::shared_ptr<ftk::ToolButton> > noteButtons;
+            std::map<std::string, std::shared_ptr<ftk::ItemButton> > noteButtons;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
 
             //! Every note is listed; the frame currently shown only moves
@@ -208,7 +209,7 @@ namespace djv
                 "Save the timeline in/out points as a named range.");
 
             p.rangeListLayout = ftk::VerticalLayout::create(context, rangesWidget);
-            p.rangeListLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.rangeListLayout->setSpacingRole(ftk::SizeRole::None);
 
             // Drawing.
             auto drawingWidget = ftk::VerticalLayout::create(context);
@@ -283,7 +284,7 @@ namespace djv
                 "command key also adds, from inside the editor.");
 
             p.noteListLayout = ftk::VerticalLayout::create(context, notesWidget);
-            p.noteListLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.noteListLayout->setSpacingRole(ftk::SizeRole::None);
             ftk::setScreenshotTag(p.noteEdit, "Review.NoteEdit");
             ftk::setScreenshotTag(p.publishButton, "Review.AddNote");
 
@@ -554,24 +555,12 @@ namespace djv
             // The model keeps the list sorted by start frame.
             for (const auto& range : p.ranges)
             {
-                auto row = ftk::HorizontalLayout::create(context, p.rangeListLayout);
-                row->setSpacingRole(ftk::SizeRole::SpacingSmall);
-
+                // The whole row is one item button, so the list reads as a
+                // list rather than a row of separate widgets.
+                auto button = ftk::ItemButton::create(context, p.rangeListLayout);
                 // Deliberately not checkable, for the reason given on the pen
                 // button: click() would flip the state after the callback and
                 // fight the highlight set from the selection.
-                // The frames sit against the right edge, the way the file
-                // browser lays out its columns, so a named row says where it
-                // points -- unless the name is the frames, which the default
-                // is, and saying them twice reads as a mistake.
-                const std::string frames = range.range.has_value() ?
-                    formatRange(*range.range) : std::string();
-                auto button = ftk::ToolButton::create(context, range.name, row);
-                if (range.name != frames)
-                {
-                    button->setSecondaryText(frames);
-                }
-                button->setHStretch(ftk::Stretch::Expanding);
                 button->setTooltip(
                     "Set the timeline in/out points to this range. Click again "
                     "to clear them.");
@@ -585,6 +574,30 @@ namespace djv
                         }
                     });
                 p.rangeButtons[id] = button;
+
+                auto row = ftk::HorizontalLayout::create(context);
+                row->setMarginRole(ftk::SizeRole::MarginInside);
+                row->setSpacingRole(ftk::SizeRole::SpacingSmall);
+                button->setWidget(row);
+
+                auto nameLabel = ftk::Label::create(context, range.name, row);
+                nameLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                nameLabel->setVAlign(ftk::VAlign::Center);
+                nameLabel->setHStretch(ftk::Stretch::Expanding);
+
+                // The frames sit against the right edge, the way the file
+                // browser lays out its columns, so a named row says where it
+                // points -- unless the name is the frames, which the default
+                // is, and saying them twice reads as a mistake.
+                const std::string frames = range.range.has_value() ?
+                    formatRange(*range.range) : std::string();
+                if (range.name != frames)
+                {
+                    auto framesLabel = ftk::Label::create(context, frames, row);
+                    framesLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                    framesLabel->setTextRole(ftk::ColorRole::TextDisabled);
+                    framesLabel->setVAlign(ftk::VAlign::Center);
+                }
 
                 auto deleteButton = ftk::ToolButton::create(context, row);
                 deleteButton->setIcon("RemoveSmall");
@@ -803,41 +816,54 @@ namespace djv
             auto appWeak = _app;
             for (const auto& note : value)
             {
-
-                auto card = ftk::VerticalLayout::create(context, p.noteListLayout);
-                card->setSpacingRole(ftk::SizeRole::None);
-                card->setBackgroundRole(ftk::ColorRole::Button);
-
-                // The same row as a range: a full-width button with the
-                // dimmed detail against the right edge, then the delete.
-                auto header = ftk::HorizontalLayout::create(context, card);
-                header->setSpacingRole(ftk::SizeRole::SpacingSmall);
-
-                // The frame doubles as the button that goes to it.
+                // The whole note is one item button, like a range row: the
+                // note is what the click selects, not one widget inside it.
+                auto button = ftk::ItemButton::create(context, p.noteListLayout);
                 const bool hasTime = note.time.has_value();
-                auto frameButton = ftk::ToolButton::create(
-                    context,
-                    hasTime ?
-                        ftk::Format("Frame {0}").arg(static_cast<int>(note.time->value())).operator std::string() :
-                        std::string("No frame"),
-                    header);
-                frameButton->setSecondaryText(formatCreated(note.created));
-                frameButton->setHStretch(ftk::Stretch::Expanding);
-                frameButton->setEnabled(hasTime);
-                frameButton->setTooltip("Go to the note's frame.");
+                if (hasTime)
+                {
+                    button->setTooltip("Go to the note's frame.");
+                }
                 const std::optional<OTIO_NS::RationalTime> time = note.time;
-                frameButton->setClickedCallback(
+                button->setClickedCallback(
                     [appWeak, time]
                     {
                         if (auto app = appWeak.lock())
                         {
                             if (auto player = app->observePlayer()->get())
                             {
-                                player->seek(*time);
+                                if (time.has_value())
+                                {
+                                    player->seek(*time);
+                                }
                             }
                         }
                     });
-                p.noteButtons[note.id] = frameButton;
+                p.noteButtons[note.id] = button;
+
+                auto card = ftk::VerticalLayout::create(context);
+                card->setSpacingRole(ftk::SizeRole::None);
+                button->setWidget(card);
+
+                auto header = ftk::HorizontalLayout::create(context, card);
+                header->setMarginRole(ftk::SizeRole::MarginInside);
+                header->setSpacingRole(ftk::SizeRole::SpacingSmall);
+
+                auto frameLabel = ftk::Label::create(
+                    context,
+                    hasTime ?
+                        ftk::Format("Frame {0}").arg(static_cast<int>(note.time->value())).operator std::string() :
+                        std::string("No frame"),
+                    header);
+                frameLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                frameLabel->setVAlign(ftk::VAlign::Center);
+                frameLabel->setHStretch(ftk::Stretch::Expanding);
+
+                auto createdLabel = ftk::Label::create(
+                    context, formatCreated(note.created), header);
+                createdLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                createdLabel->setTextRole(ftk::ColorRole::TextDisabled);
+                createdLabel->setVAlign(ftk::VAlign::Center);
 
                 auto deleteButton = ftk::ToolButton::create(context, header);
                 deleteButton->setIcon("RemoveSmall");

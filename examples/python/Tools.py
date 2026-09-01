@@ -1022,7 +1022,7 @@ class ReviewTool(IToolWidget):
         self._addRangeButton.tooltip = \
             "Save the timeline in/out points as a named range."
         self._rangeListLayout = ftk.VerticalLayout(context, rangesWidget)
-        self._rangeListLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._rangeListLayout.spacingRole = ftk.SizeRole._None
 
         # Drawing.
         drawingWidget = ftk.VerticalLayout(context)
@@ -1077,7 +1077,7 @@ class ReviewTool(IToolWidget):
         self._publishButton.icon = "Add"
         self._publishButton.tooltip = "Attach the note to the current frame."
         self._noteListLayout = ftk.VerticalLayout(context, notesWidget)
-        self._noteListLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._noteListLayout.spacingRole = ftk.SizeRole._None
 
         layout = ftk.VerticalLayout(context)
         layout.spacingRole = ftk.SizeRole.Border
@@ -1246,21 +1246,12 @@ class ReviewTool(IToolWidget):
         appWeak = self._app
         # The model keeps the list sorted by start frame.
         for range_ in ranges:
-            row = ftk.HorizontalLayout(context, self._rangeListLayout)
-            row.spacingRole = ftk.SizeRole.SpacingSmall
+            # The whole row is one item button, so the list reads as a
+            # list rather than a row of separate widgets.
+            button = ftk.ItemButton(context, self._rangeListLayout)
             # Deliberately not checkable, for the reason given on the
             # pen button: the click would flip the state after the
             # callback and fight the highlight set from the selection.
-            # The frames sit against the right edge, the way the file
-            # browser lays out its columns, so a named row says where it
-            # points -- unless the name is the frames, which the default
-            # is, and saying them twice reads as a mistake.
-            frames = _formatRange(range_.range) \
-                if range_.range is not None else ""
-            button = ftk.ToolButton(context, range_.name, row)
-            if range_.name != frames:
-                button.secondaryText = frames
-            button.hStretch = ftk.Stretch.Expanding
             button.tooltip = (
                 "Set the timeline in/out points to this range. Click "
                 "again to clear them.")
@@ -1268,6 +1259,26 @@ class ReviewTool(IToolWidget):
                 lambda captured = range_.id,
                     f = Util.weak(self._rangeClicked): f(captured))
             self._rangeButtons[range_.id] = button
+            row = ftk.HorizontalLayout(context)
+            row.marginRole = ftk.SizeRole.MarginInside
+            row.spacingRole = ftk.SizeRole.SpacingSmall
+            button.widget = row
+            nameLabel = ftk.Label(context, range_.name, row)
+            nameLabel.setMarginRole(ftk.SizeRole.LabelPad, ftk.SizeRole._None)
+            nameLabel.vAlign = ftk.VAlign.Center
+            nameLabel.hStretch = ftk.Stretch.Expanding
+            # The frames sit against the right edge, the way the file
+            # browser lays out its columns, so a named row says where it
+            # points -- unless the name is the frames, which the default
+            # is, and saying them twice reads as a mistake.
+            frames = _formatRange(range_.range) \
+                if range_.range is not None else ""
+            if range_.name != frames:
+                framesLabel = ftk.Label(context, frames, row)
+                framesLabel.setMarginRole(
+                    ftk.SizeRole.LabelPad, ftk.SizeRole._None)
+                framesLabel.textRole = ftk.ColorRole.TextDisabled
+                framesLabel.vAlign = ftk.VAlign.Center
             deleteButton = ftk.ToolButton(context, row)
             deleteButton.icon = "RemoveSmall"
             deleteButton.tooltip = "Delete this range."
@@ -1389,34 +1400,42 @@ class ReviewTool(IToolWidget):
             return
         appWeak = self._app
         for note in value:
-            card = ftk.VerticalLayout(context, self._noteListLayout)
-            card.spacingRole = ftk.SizeRole._None
-            card.backgroundRole = ftk.ColorRole.Button
-            # The same row as a range: a full-width button with the
-            # dimmed detail against the right edge, then the delete.
-            header = ftk.HorizontalLayout(context, card)
-            header.spacingRole = ftk.SizeRole.SpacingSmall
-            # The frame doubles as the button that goes to it.
+            # The whole note is one item button, like a range row: the
+            # note is what the click selects, not one widget inside it.
+            button = ftk.ItemButton(context, self._noteListLayout)
             hasTime = note.time is not None
-            frameButton = ftk.ToolButton(
-                context,
-                "Frame {}".format(int(note.time.value))
-                    if hasTime else "No frame",
-                header)
-            frameButton.secondaryText = _formatCreated(note.created)
-            frameButton.hStretch = ftk.Stretch.Expanding
-            frameButton.enabled = hasTime
-            frameButton.tooltip = "Go to the note's frame."
+            if hasTime:
+                button.tooltip = "Go to the note's frame."
             def seek(time, appWeak = appWeak):
                 app_ = appWeak()
-                if app_ is None:
+                if app_ is None or time is None:
                     return
                 player = app_.observePlayer().get()
                 if player:
                     player.currentTime = time
-            frameButton.setClickedCallback(
+            button.setClickedCallback(
                 lambda captured = note.time: seek(captured))
-            self._noteButtons[note.id] = frameButton
+            self._noteButtons[note.id] = button
+            card = ftk.VerticalLayout(context)
+            card.spacingRole = ftk.SizeRole._None
+            button.widget = card
+            header = ftk.HorizontalLayout(context, card)
+            header.marginRole = ftk.SizeRole.MarginInside
+            header.spacingRole = ftk.SizeRole.SpacingSmall
+            frameLabel = ftk.Label(
+                context,
+                "Frame {}".format(int(note.time.value))
+                    if hasTime else "No frame",
+                header)
+            frameLabel.setMarginRole(ftk.SizeRole.LabelPad, ftk.SizeRole._None)
+            frameLabel.vAlign = ftk.VAlign.Center
+            frameLabel.hStretch = ftk.Stretch.Expanding
+            createdLabel = ftk.Label(
+                context, _formatCreated(note.created), header)
+            createdLabel.setMarginRole(
+                ftk.SizeRole.LabelPad, ftk.SizeRole._None)
+            createdLabel.textRole = ftk.ColorRole.TextDisabled
+            createdLabel.vAlign = ftk.VAlign.Center
             deleteButton = ftk.ToolButton(context, header)
             deleteButton.icon = "RemoveSmall"
             deleteButton.tooltip = "Delete this note."
