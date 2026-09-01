@@ -90,6 +90,8 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<ftk::V2F> > wipeCenter;
             std::shared_ptr<ftk::CmdLineOption<float> > wipeRotation;
             std::shared_ptr<ftk::CmdLineOption<std::string> > frameRange;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > dirFilter;
+            std::shared_ptr<ftk::CmdLineOption<int> > dirDepth;
             std::shared_ptr<ftk::CmdLineOption<double> > speed;
             std::shared_ptr<ftk::CmdLineOption<tl::Playback> > playback;
             std::shared_ptr<ftk::CmdLineOption<tl::Loop> > loop;
@@ -312,6 +314,18 @@ namespace djv
                 "following the missing frames setting. Applies to the first "
                 "file opened.",
                 "Playback");
+            p.cmdLine.dirFilter = ftk::CmdLineOption<std::string>::create(
+                { "-dirFilter" },
+                "Filter the files when opening a directory: a "
+                "case-insensitive substring, or a wildcard pattern with "
+                "\"*\" and \"?\" (e.g., \"*.mov\").",
+                "Directories");
+            p.cmdLine.dirDepth = ftk::CmdLineOption<int>::create(
+                { "-dirDepth" },
+                "How many directory levels to open: 1 opens the directory "
+                "alone.",
+                "Directories",
+                1);
             p.cmdLine.speed = ftk::CmdLineOption<double>::create(
                 { "-speed" },
                 "Playback speed.",
@@ -441,6 +455,8 @@ namespace djv
                 p.cmdLine.frameRange,
                 p.cmdLine.inPoint,
                 p.cmdLine.outPoint,
+                p.cmdLine.dirFilter,
+                p.cmdLine.dirDepth,
 #if defined(TLRENDER_OCIO)
                 p.cmdLine.ocioFileName,
                 p.cmdLine.ocioInput,
@@ -797,6 +813,16 @@ namespace djv
             ftk::DirListOptions dirListOptions;
             dirListOptions.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
             dirListOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+            // The command line said how directories are read; that holds
+            // for the whole session, dialogs included.
+            if (p.cmdLine.dirFilter->found())
+            {
+                dirListOptions.filter = p.cmdLine.dirFilter->getValue();
+            }
+            if (p.cmdLine.dirDepth->found())
+            {
+                dirListOptions.depth = std::max(1, p.cmdLine.dirDepth->getValue());
+            }
             // Gathering a directory's frames into sequences and taking one
             // frame to name its sequence are the same thing said twice; a
             // stated range has already said what it wants.
