@@ -459,6 +459,9 @@ namespace djv
                 {
                     FTK_P();
                     p.player = value;
+                    // A note is anchored to the current frame, so without
+                    // media there is nothing to attach it to.
+                    p.publishButton->setEnabled(value.get());
                     if (value)
                     {
                         p.currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(

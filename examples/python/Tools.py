@@ -1180,8 +1180,7 @@ class ReviewTool(IToolWidget):
             app.getNotesModel().observeNotes,
             lambda value: selfWeak() and selfWeak()._notesListUpdate(value))
 
-        # A note is shown only on the frame it refers to, like a
-        # drawing, so the list follows the playhead.
+        # The list shows every note; the playhead moves the highlight.
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
             lambda player: selfWeak() and selfWeak()._setPlayer(player))
@@ -1196,6 +1195,9 @@ class ReviewTool(IToolWidget):
 
     def _setPlayer(self, player):
         self._player = player
+        # A note is anchored to the current frame, so without media
+        # there is nothing to attach it to.
+        self._publishButton.enabled = player is not None
         selfWeak = weakref.ref(self)
         if player:
             self._currentTimeObserver = tl.RationalTimeObserver(
