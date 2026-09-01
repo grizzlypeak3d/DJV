@@ -18,7 +18,6 @@
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/Label.h>
-#include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
@@ -133,7 +132,7 @@ namespace djv
 
         struct ReviewTool::Private
         {
-            std::shared_ptr<ftk::PushButton> addRangeButton;
+            std::shared_ptr<ftk::ToolButton> addRangeButton;
             std::shared_ptr<ftk::VerticalLayout> rangeListLayout;
             //! The row buttons, by range identifier, so the highlight can be
             //! moved without rebuilding the list.
@@ -149,10 +148,10 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> sizeSlider;
             std::shared_ptr<ftk::ToolButton> undoButton;
             std::shared_ptr<ftk::ToolButton> redoButton;
-            std::shared_ptr<ftk::PushButton> clearFrameButton;
+            std::shared_ptr<ftk::ToolButton> clearFrameButton;
 
             std::shared_ptr<ftk::TextEdit> noteEdit;
-            std::shared_ptr<ftk::PushButton> publishButton;
+            std::shared_ptr<ftk::ToolButton> publishButton;
             std::shared_ptr<ftk::VerticalLayout> noteListLayout;
             //! The frame buttons, by note identifier, so the current frame's
             //! highlight can move without rebuilding the list.
@@ -201,7 +200,10 @@ namespace djv
             rangesWidget->setMarginRole(ftk::SizeRole::MarginSmall);
             rangesWidget->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
-            p.addRangeButton = ftk::PushButton::create(context, "Add", rangesWidget);
+            // The add buttons live in their bellows title rows, so the lists
+            // read like the lists elsewhere: + in the header, - on the rows.
+            p.addRangeButton = ftk::ToolButton::create(context);
+            p.addRangeButton->setIcon("AddSmall");
             p.addRangeButton->setTooltip(
                 "Save the timeline in/out points as a named range.");
 
@@ -255,7 +257,9 @@ namespace djv
             p.sizeSlider->setValue(drawModel->getSize());
             p.sizeSlider->setTooltip("The stroke width, in source pixels.");
 
-            p.clearFrameButton = ftk::PushButton::create(context, "Clear Frame", drawingWidget);
+            p.clearFrameButton = ftk::ToolButton::create(context, "Clear Frame", drawingWidget);
+            p.clearFrameButton->setIcon("Remove");
+            p.clearFrameButton->setHAlign(ftk::HAlign::Left);
             p.clearFrameButton->setTooltip("Remove every stroke on this frame.");
             ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
@@ -273,7 +277,8 @@ namespace djv
             p.noteEdit->setSizeHintRole(ftk::SizeRole::ScrollAreaSmall);
             p.noteEdit->setTooltip("Write a note about the current frame.");
 
-            p.publishButton = ftk::PushButton::create(context, "Add", notesWidget);
+            p.publishButton = ftk::ToolButton::create(context);
+            p.publishButton->setIcon("AddSmall");
             p.publishButton->setTooltip(
                 "Attach the note to the current frame. Return with the\n"
                 "command key also adds, from inside the editor.");
@@ -287,12 +292,14 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::Border);
             p.bellows["Ranges"] = ftk::Bellows::create(context, "Review Ranges", layout);
             p.bellows["Ranges"]->setWidget(rangesWidget);
+            p.bellows["Ranges"]->setToolWidget(p.addRangeButton);
             p.bellows["Ranges"]->setOpen(true);
             p.bellows["Drawing"] = ftk::Bellows::create(context, "Drawing", layout);
             p.bellows["Drawing"]->setWidget(drawingWidget);
             p.bellows["Drawing"]->setOpen(true);
             p.bellows["Notes"] = ftk::Bellows::create(context, "Notes", layout);
             p.bellows["Notes"]->setWidget(notesWidget);
+            p.bellows["Notes"]->setToolWidget(p.publishButton);
             p.bellows["Notes"]->setOpen(true);
 
             auto scrollWidget = ftk::ScrollWidget::create(context);
@@ -446,8 +453,7 @@ namespace djv
                     _notesUpdate();
                 });
 
-            // A note is shown only on the frame it refers to, like a drawing, so
-            // the list follows the playhead.
+            // The list shows every note; the playhead moves the highlight.
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& value)
@@ -579,7 +585,7 @@ namespace djv
                 p.rangeButtons[id] = button;
 
                 auto deleteButton = ftk::ToolButton::create(context, row);
-                deleteButton->setIcon("CloseSmall");
+                deleteButton->setIcon("RemoveSmall");
                 deleteButton->setTooltip("Delete this range.");
                 deleteButton->setClickedCallback(
                     [appWeak, id]
@@ -835,7 +841,7 @@ namespace djv
                 createdLabel->setVAlign(ftk::VAlign::Center);
 
                 auto deleteButton = ftk::ToolButton::create(context, header);
-                deleteButton->setIcon("CloseSmall");
+                deleteButton->setIcon("RemoveSmall");
                 deleteButton->setTooltip("Delete this note.");
                 const std::string id = note.id;
                 deleteButton->setClickedCallback(

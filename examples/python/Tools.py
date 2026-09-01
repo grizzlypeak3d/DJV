@@ -1015,10 +1015,12 @@ class ReviewTool(IToolWidget):
         rangesWidget = ftk.VerticalLayout(context)
         rangesWidget.marginRole = ftk.SizeRole.MarginSmall
         rangesWidget.spacingRole = ftk.SizeRole.SpacingSmall
-        self._addRangeButton = ftk.PushButton(context, "Add")
+        # The add buttons live in their bellows title rows, so the lists
+        # read like the lists elsewhere: + in the header, - on the rows.
+        self._addRangeButton = ftk.ToolButton(context)
+        self._addRangeButton.icon = "AddSmall"
         self._addRangeButton.tooltip = \
             "Save the timeline in/out points as a named range."
-        self._addRangeButton.parent = rangesWidget
         self._rangeListLayout = ftk.VerticalLayout(context, rangesWidget)
         self._rangeListLayout.spacingRole = ftk.SizeRole.SpacingSmall
 
@@ -1059,8 +1061,10 @@ class ReviewTool(IToolWidget):
         self._sizeSlider.setRange(1.0, 50.0)
         self._sizeSlider.value = drawModel.size
         self._sizeSlider.tooltip = "The stroke width, in source pixels."
-        self._clearFrameButton = ftk.PushButton(
+        self._clearFrameButton = ftk.ToolButton(
             context, "Clear Frame", drawingWidget)
+        self._clearFrameButton.icon = "Remove"
+        self._clearFrameButton.hAlign = ftk.HAlign.Left
         self._clearFrameButton.tooltip = "Remove every stroke on this frame."
 
         # Notes.
@@ -1072,7 +1076,8 @@ class ReviewTool(IToolWidget):
         # the leftover height belongs to it, not to the editor.
         self._noteEdit.sizeHintRole = ftk.SizeRole.ScrollAreaSmall
         self._noteEdit.tooltip = "Write a note about the current frame."
-        self._publishButton = ftk.PushButton(context, "Add", notesWidget)
+        self._publishButton = ftk.ToolButton(context)
+        self._publishButton.icon = "AddSmall"
         self._publishButton.tooltip = "Attach the note to the current frame."
         self._noteListLayout = ftk.VerticalLayout(context, notesWidget)
         self._noteListLayout.spacingRole = ftk.SizeRole.SpacingSmall
@@ -1080,13 +1085,15 @@ class ReviewTool(IToolWidget):
         layout = ftk.VerticalLayout(context)
         layout.spacingRole = ftk.SizeRole.Border
         self._bellows = {}
-        for title, widget in [
-            ("Review Ranges", rangesWidget),
-            ("Drawing", drawingWidget),
-            ("Notes", notesWidget),
+        for title, widget, toolWidget in [
+            ("Review Ranges", rangesWidget, self._addRangeButton),
+            ("Drawing", drawingWidget, None),
+            ("Notes", notesWidget, self._publishButton),
         ]:
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget
+            if toolWidget is not None:
+                bellows.toolWidget = toolWidget
             bellows.open = True
             self._bellows[title] = bellows
 
@@ -1263,7 +1270,7 @@ class ReviewTool(IToolWidget):
                     f = Util.weak(self._rangeClicked): f(captured))
             self._rangeButtons[range_.id] = button
             deleteButton = ftk.ToolButton(context, row)
-            deleteButton.icon = "CloseSmall"
+            deleteButton.icon = "RemoveSmall"
             deleteButton.tooltip = "Delete this range."
             deleteButton.setClickedCallback(
                 lambda captured = range_.id:
@@ -1414,7 +1421,7 @@ class ReviewTool(IToolWidget):
             createdLabel.textRole = ftk.ColorRole.TextDisabled
             createdLabel.vAlign = ftk.VAlign.Center
             deleteButton = ftk.ToolButton(context, header)
-            deleteButton.icon = "CloseSmall"
+            deleteButton.icon = "RemoveSmall"
             deleteButton.tooltip = "Delete this note."
             deleteButton.setClickedCallback(
                 lambda captured = note.id:
