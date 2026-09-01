@@ -1337,7 +1337,12 @@ class ReviewTool(IToolWidget):
             return
         appWeak = self._app
         # The model keeps the list sorted by start frame.
+        first = True
         for range_ in ranges:
+            if not first:
+                ftk.Divider(
+                    context, ftk.Orientation.Vertical, self._rangeListLayout)
+            first = False
             # The whole row is one item button, so the list reads as a
             # list rather than a row of separate widgets.
             button = ftk.ItemButton(context, self._rangeListLayout)
@@ -1488,7 +1493,12 @@ class ReviewTool(IToolWidget):
             return
         appWeak = self._app
         selfWeak = weakref.ref(self)
+        first = True
         for note in value:
+            if not first:
+                ftk.Divider(
+                    context, ftk.Orientation.Vertical, self._noteListLayout)
+            first = False
             # The whole note is one item button, like a range row: the
             # note is what the click selects, not one widget inside it.
             button = ftk.ItemButton(context, self._noteListLayout)

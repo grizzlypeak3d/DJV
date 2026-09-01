@@ -17,6 +17,7 @@
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
+#include <ftk/UI/IWindow.h>
 #include <ftk/UI/ItemButton.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
@@ -139,6 +140,8 @@ namespace djv
             //! The row buttons, by range identifier, so the highlight can be
             //! moved without rebuilding the list.
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > rangeButtons;
+            //! The rows in display order, for the arrow keys.
+            std::vector<std::shared_ptr<ftk::ItemButton> > rangeItemOrder;
             std::vector<models::ReviewRange> ranges;
             //! The selected range, or empty. Only one can be active: selecting
             //! is what drives the timeline in/out points.
@@ -157,6 +160,11 @@ namespace djv
             //! The frame buttons, by note identifier, so the current frame's
             //! highlight can move without rebuilding the list.
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > noteButtons;
+            //! The rows in display order with their frames, for the arrow
+            //! keys, which also follow the notes' frames.
+            std::vector<std::pair<
+                std::shared_ptr<ftk::ItemButton>,
+                std::optional<OTIO_NS::RationalTime> > > noteItemOrder;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::ScrollWidget> scrollWidget;
 
@@ -539,6 +547,7 @@ namespace djv
             FTK_P();
             p.rangeListLayout->clear();
             p.rangeButtons.clear();
+            p.rangeItemOrder.clear();
             auto context = getContext();
             if (!context)
             {
@@ -561,9 +570,15 @@ namespace djv
             // The model keeps the list sorted by start frame.
             for (const auto& range : p.ranges)
             {
+                if (!p.rangeItemOrder.empty())
+                {
+                    ftk::Divider::create(
+                        context, ftk::Orientation::Vertical, p.rangeListLayout);
+                }
                 // The whole row is one item button, so the list reads as a
                 // list rather than a row of separate widgets.
                 auto button = ftk::ItemButton::create(context, p.rangeListLayout);
+                p.rangeItemOrder.push_back(button);
                 // Deliberately not checkable, for the reason given on the pen
                 // button: click() would flip the state after the callback and
                 // fight the highlight set from the selection.
@@ -763,6 +778,13 @@ namespace djv
                 event.accept = true;
                 _commitNote();
             }
+            // The arrows walk the list rows, bubbled up from a focused row.
+            else if (!event.accept &&
+                0 == event.modifiers &&
+                (ftk::Key::Up == event.key || ftk::Key::Down == event.key))
+            {
+                event.accept = _navigate(ftk::Key::Down == event.key);
+            }
         }
 
         void ReviewTool::keyReleaseEvent(ftk::KeyEvent& event)
@@ -790,6 +812,73 @@ namespace djv
             p.draftTime = player->getCurrentTime();
             p.editingNoteId.clear();
             _notesUpdate();
+        }
+
+        bool ReviewTool::_navigate(bool down)
+        {
+            FTK_P();
+            auto window = getWindow();
+            if (!window)
+            {
+                return false;
+            }
+            const auto focus = window->getKeyFocus();
+            // While the focus is on a row the arrows stay in its list, even
+            // at the ends, rather than leaking to whatever the keys mean
+            // elsewhere.
+            for (size_t i = 0; i < p.rangeItemOrder.size(); ++i)
+            {
+                if (p.rangeItemOrder[i] == focus)
+                {
+                    const size_t j = down ?
+                        std::min(i + 1, p.rangeItemOrder.size() - 1) :
+                        (i > 0 ? i - 1 : 0);
+                    if (j != i)
+                    {
+                        p.rangeItemOrder[j]->takeKeyFocus();
+                    }
+                    return true;
+                }
+            }
+            for (size_t i = 0; i < p.noteItemOrder.size(); ++i)
+            {
+                if (p.noteItemOrder[i].first == focus)
+                {
+                    const size_t j = down ?
+                        std::min(i + 1, p.noteItemOrder.size() - 1) :
+                        (i > 0 ? i - 1 : 0);
+                    if (j != i)
+                    {
+                        p.noteItemOrder[j].first->takeKeyFocus();
+                        // Browsing the feedback is looking at the frames it
+                        // is about, so the arrows follow.
+                        if (p.noteItemOrder[j].second.has_value())
+                        {
+                            _seekTo(*p.noteItemOrder[j].second);
+                        }
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        void ReviewTool::_seekTo(const OTIO_NS::RationalTime& time)
+        {
+            FTK_P();
+            if (!p.player)
+            {
+                return;
+            }
+            // Going to feedback wins over a narrower in/out range: with the
+            // target outside it, the seek would move the clock into a span
+            // the player cannot show.
+            if (!p.player->getInOutRange().contains(time))
+            {
+                p.player->resetInPoint();
+                p.player->resetOutPoint();
+            }
+            p.player->seek(time);
         }
 
         void ReviewTool::_editNote(const std::string& id)
@@ -902,15 +991,7 @@ namespace djv
             }
             else if (p.player)
             {
-                // Going to feedback wins over a narrower in/out range: with
-                // the note outside it, the seek would move the clock into a
-                // span the player cannot show.
-                if (!p.player->getInOutRange().contains(*i->time))
-                {
-                    p.player->resetInPoint();
-                    p.player->resetOutPoint();
-                }
-                p.player->seek(*i->time);
+                _seekTo(*i->time);
             }
         }
 
@@ -923,6 +1004,7 @@ namespace djv
             p.editItem.reset();
             p.noteListLayout->clear();
             p.noteButtons.clear();
+            p.noteItemOrder.clear();
             auto context = getContext();
             if (!context)
             {
@@ -988,8 +1070,15 @@ namespace djv
             auto appWeak = _app;
             std::weak_ptr<ReviewTool> weak(
                 std::dynamic_pointer_cast<ReviewTool>(shared_from_this()));
+            bool firstNote = true;
             for (const auto& note : value)
             {
+                if (!firstNote)
+                {
+                    ftk::Divider::create(
+                        context, ftk::Orientation::Vertical, p.noteListLayout);
+                }
+                firstNote = false;
                 // The whole note is one item button, like a range row: the
                 // note is what the click selects, not one widget inside it.
                 auto button = ftk::ItemButton::create(context, p.noteListLayout);
@@ -1017,6 +1106,7 @@ namespace djv
                 if (!note.id.empty())
                 {
                     p.noteButtons[note.id] = button;
+                    p.noteItemOrder.push_back({ button, note.time });
                 }
 
                 // One margin around the whole note, carried by the card,

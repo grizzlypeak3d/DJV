@@ -52,6 +52,11 @@ namespace djv
 
         private:
             void _drawStateUpdate();
+            //! Move the key focus along a list, and follow a note's frame.
+            bool _navigate(bool down);
+            //! Seek, releasing the in/out range when the target lies
+            //! outside it.
+            void _seekTo(const OTIO_NS::RationalTime&);
             void _editNote(const std::string& id);
             void _commitNote();
             void _editFocus(const std::shared_ptr<ftk::TextEdit>&, bool);
