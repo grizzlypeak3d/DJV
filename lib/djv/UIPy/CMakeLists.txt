@@ -8,6 +8,7 @@ set(SOURCE
     ExportWidget.cpp
     FileThumbnail.cpp
     FrameRangePopup.cpp
+    Init.cpp
     InfoWidget.cpp
     MagnifyWidget.cpp
     SeparateAudioDialog.cpp

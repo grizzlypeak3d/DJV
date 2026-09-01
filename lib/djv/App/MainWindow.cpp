@@ -37,6 +37,7 @@
 #include <djv/App/WindowMenu.h>
 #include <djv/App/WindowToolBar.h>
 #include <djv/UI/AboutDialog.h>
+#include <djv/UI/Init.h>
 #include <djv/UI/SetupDialog.h>
 #include <djv/UI/SysInfoDialog.h>
 #include <djv/Models/AppInfoModel.h>
@@ -59,8 +60,6 @@
 #include <ftk/UI/Splitter.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
-
-#include <djv_resource/IconResources.h>
 
 namespace djv
 {
@@ -192,13 +191,8 @@ namespace djv
                 settings.size);
             FTK_P();
 
-            // Every icon compiled into the library; the map is generated
-            // from the files in etc/Icons.
+            ui::initIcons(context);
             auto iconSystem = context->getSystem<ftk::IconSystem>();
-            for (const auto& i : djv_resource::getIconResources())
-            {
-                iconSystem->add(i.first, *i.second);
-            }
             setIcon(iconSystem->get("DJV_Icon", 1.0));
 
             p.app = app;

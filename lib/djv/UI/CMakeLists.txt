@@ -4,6 +4,7 @@ set(HEADERS
     ColorWidgets.h
     FileThumbnail.h
     FrameRangePopup.h
+    Init.h
     SeparateAudioDialog.h
     SettingsWidgets.h
     SetupDialog.h
@@ -25,6 +26,7 @@ set(SOURCE
     ColorWidgets.cpp
     FileThumbnail.cpp
     FrameRangePopup.cpp
+    Init.cpp
     SeparateAudioDialog.cpp
     SettingsWidgets.cpp
     SetupDialog.cpp
@@ -50,7 +52,7 @@ if(BUILD_SHARED_LIBS)
 else()
     target_compile_definitions(djvUI PUBLIC DJV_UI_STATIC)
 endif()
-target_link_libraries(djvUI djvModels tlRender::tlUI)
+target_link_libraries(djvUI djvModels djvResource tlRender::tlUI)
 set_target_properties(djvUI PROPERTIES FOLDER lib)
 set_target_properties(djvUI PROPERTIES PUBLIC_HEADER "${HEADERS}")
 

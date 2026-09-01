@@ -11,6 +11,7 @@ namespace djv
     namespace python
     {
         void audioPopup(pybind11::module_&);
+        void uiInit(pybind11::module_&);
         void colorWidgets(pybind11::module_&);
         void viewWidgets(pybind11::module_&);
         void viewport(pybind11::module_&);

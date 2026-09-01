@@ -14,6 +14,7 @@ namespace djv
             auto mUI = m.def_submodule("ui", "User interface widgets");
 
             audioPopup(mUI);
+            uiInit(mUI);
             colorWidgets(mUI);
             viewWidgets(mUI);
             viewport(mUI);

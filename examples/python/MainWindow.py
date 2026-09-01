@@ -41,13 +41,10 @@ class MainWindow(ftk.MainWindow):
         # Created before the actions; the window actions observe it.
         self._presentMode = ftk.ObservableBool(False)
 
-        # The application icon, registered with the icon system so that
-        # it is rendered for the display scale.
+        # Every icon compiled into the resource library, the application
+        # icon included.
+        djv.ui.initIcons(context)
         iconSystem = context.getSystemByName("ftk::IconSystem")
-        with open(os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "DJV_Icon.svg"), "rb") as f:
-            iconSystem.add("DJV_Icon", list(f.read()))
         self.setIcon(iconSystem.get("DJV_Icon", 1.0))
 
         # The title matches the C++ application: the version, and for a
@@ -223,6 +220,9 @@ class MainWindow(ftk.MainWindow):
         window.splitter = self._splitter.split
         window.splitter2 = self._splitter2.split
         self._settingsModel.window = window
+
+    def getTimelineWidget(self):
+        return self._timelineWidget
 
     def getViewport(self):
         return self._viewport
