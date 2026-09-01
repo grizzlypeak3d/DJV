@@ -40,7 +40,9 @@
 <h2 id="opening-files">Opening files</h2>
 <p>You can open files and folders in three ways:</p>
 <ul><li>From the <strong>File</strong> menu or <strong>File</strong> tool bar</li><li>By dragging and dropping onto the main window</li><li>From the command line</li></ul>
-<p>Opening a folder opens every supported file in that folder (non-recursively).</p>
+<p>Opening a folder opens every supported file in that folder. From the command line, <strong>-dirFilter</strong> filters the files by name — a case-insensitive substring, or a wildcard pattern with "*" and "?" — and <strong>-dirDepth</strong> opens that many folder levels, the default being one, the folder alone. So a whole shot tree opens as one file list:</p>
+<pre><code>djv shots -dirFilter "*latest*" -dirDepth 3</code></pre>
+<p>The files keep a fixed order, grouped by folder. Folder links are listed but not followed. The options hold for the whole session, folders opened from the dialogs included.</p>
 <p>Shortcuts:</p>
 <ul><li>Open: <kbd>Ctrl+O</kbd></li><li>Open with audio: <kbd>Ctrl+Shift+O</kbd></li><li>Reload: <kbd>Ctrl+R</kbd></li><li>Close: <kbd>Ctrl+E</kbd></li><li>Close all: <kbd>Ctrl+Shift+E</kbd></li></ul>
 <p>Image sequences can be opened from the command line by either specifying the first frame or using the "#" wildcard. For example:</p>
