@@ -597,7 +597,6 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether the outline is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.Outline.Enabled");
 
@@ -701,7 +700,6 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether the grid is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.Grid.Enabled");
 
@@ -897,7 +895,6 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether the center marker is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.CenterMarker.Enabled");
 
@@ -1006,7 +1003,6 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether the HUD is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.HUD.Enabled");
 

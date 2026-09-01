@@ -77,7 +77,6 @@ namespace djv
             p.ocioModel = models::OCIOModel::create(context);
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether OCIO is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "Color.OCIO.Enabled");
 
@@ -388,7 +387,6 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether the LUT is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "Color.LUT.Enabled");
 
@@ -493,7 +491,6 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether color controls are enabled.");
 
             p.sliders["Add"] = ftk::FloatEditSlider::create(context);
@@ -681,7 +678,6 @@ namespace djv
             p.settings = settings;
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether levels are enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "Color.Levels.Enabled");
 
@@ -898,7 +894,6 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether exposure controls are enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "Color.Exposure.Enabled");
 
@@ -1067,7 +1062,6 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setBackgroundRole(ftk::ColorRole::Header);
             p.enabledCheckBox->setTooltip("Toggle whether soft clip is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "Color.SoftClip.Enabled");
 
