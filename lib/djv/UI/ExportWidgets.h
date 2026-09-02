@@ -147,6 +147,7 @@ namespace djv
             DJV_UI_API void setExportCallback(const std::function<void(void)>&);
 
         private:
+            void _audioUpdate();
             void _infoUpdate();
 
             FTK_PRIVATE();

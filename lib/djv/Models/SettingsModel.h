@@ -98,16 +98,11 @@ namespace djv
 
             std::string movieBase = "render";
             std::string movieExt = ".mov";
-            std::string movieCodec = "mjpeg";
             std::string movieAudioCodec = "Auto";
-            //! The movie export preset, or "Custom" for the codec and
-            //! command controls below.
+            //! The movie export preset. Presets are the whole surface:
+            //! what they cannot express is what tlbake and the command
+            //! line writer's options are for.
             std::string moviePreset = "MJPEG";
-            //! Write movies with the FFmpeg command line application
-            //! instead of the library, using its encoders. Video only.
-            bool movieCmd = false;
-            std::string movieCmdPreset = "H.264";
-            std::string movieCmdArgs;
 
             DJV_MODELS_API bool operator == (const ExportSettings&) const;
             DJV_MODELS_API bool operator != (const ExportSettings&) const;

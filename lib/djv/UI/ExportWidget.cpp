@@ -687,58 +687,35 @@ namespace djv
                         }
                     }
 
+                    // The preset carries the options and which writer does
+                    // the work; an unknown name falls back to the first
+                    // preset rather than exporting with nothing set.
                     tl::IOOptions ioOptions;
-                    const tl::ffmpeg::WritePreset* preset = nullptr;
-                    if (options.moviePreset != "Custom")
+                    const auto& presets = tl::ffmpeg::getWritePresets();
+                    const tl::ffmpeg::WritePreset* preset = &presets.front();
+                    for (const auto& i : presets)
                     {
-                        for (const auto& i : tl::ffmpeg::getWritePresets())
+                        if (i.name == options.moviePreset)
                         {
-                            if (i.name == options.moviePreset)
-                            {
-                                preset = &i;
-                                break;
-                            }
+                            preset = &i;
+                            break;
                         }
                     }
-                    if (preset)
+                    if (preset->command)
                     {
-                        if (preset->command)
-                        {
-                            // The settings' paths, so a custom ffmpeg is
-                            // honoured.
-                            ioOptions = p.settings->getIOOptions();
-                        }
-                        for (const auto& i : preset->options)
-                        {
-                            ioOptions[i.first] = i.second;
-                        }
-                        if (!preset->command &&
-                            !options.movieAudioCodec.empty() &&
-                            options.movieAudioCodec != "Auto")
-                        {
-                            ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
-                        }
-                    }
-                    else if (options.movieCmd)
-                    {
-                        // The command line application does the encoding, with
-                        // the settings' paths so a custom ffmpeg is honoured.
+                        // The settings' paths, so a custom ffmpeg is
+                        // honoured.
                         ioOptions = p.settings->getIOOptions();
-                        ioOptions["FFmpeg/WriteCommandLine"] = "1";
-                        ioOptions["FFmpeg/WritePreset"] = options.movieCmdPreset;
-                        if (!options.movieCmdArgs.empty())
-                        {
-                            ioOptions["FFmpeg/WriteArgs"] = options.movieCmdArgs;
-                        }
                     }
-                    else
+                    for (const auto& i : preset->options)
                     {
-                        ioOptions["FFmpeg/Codec"] = options.movieCodec;
-                        if (!options.movieAudioCodec.empty() &&
-                            options.movieAudioCodec != "Auto")
-                        {
-                            ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
-                        }
+                        ioOptions[i.first] = i.second;
+                    }
+                    if (!preset->command &&
+                        !options.movieAudioCodec.empty() &&
+                        options.movieAudioCodec != "Auto")
+                    {
+                        ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
                     }
                     p.exportData->writer = plugin->write(p.exportData->path, outputInfo, ioOptions);
 

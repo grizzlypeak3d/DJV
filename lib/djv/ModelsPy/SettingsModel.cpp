@@ -59,7 +59,7 @@ namespace djv
                 .def_readwrite("seqExt", &ExportSettings::seqExt)
                 .def_readwrite("movieBase", &ExportSettings::movieBase)
                 .def_readwrite("movieExt", &ExportSettings::movieExt)
-                .def_readwrite("movieCodec", &ExportSettings::movieCodec)
+                .def_readwrite("moviePreset", &ExportSettings::moviePreset)
                 .def_readwrite("movieAudioCodec", &ExportSettings::movieAudioCodec)
                 .def(pybind11::self == pybind11::self)
                 .def(pybind11::self != pybind11::self);
