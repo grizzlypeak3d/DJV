@@ -96,7 +96,7 @@ namespace djv
             p.resolvedLabel = ftk::Label::create(context);
             p.resolvedLabel->setTooltip(
                 "The input color space resolved for the current file, and "
-                "where it came from. A file whose declared color space is "
+                "where it came from.\nA file whose declared color space is "
                 "not in the configuration says so here, and is shown "
                 "unmanaged.");
             ftk::setScreenshotTag(p.resolvedLabel, "Color.OCIO.Resolved");
@@ -145,7 +145,7 @@ namespace djv
                 "Assign the color space to files with the extension.\n"
                 "\n"
                 "The assignments are used when the input color space is "
-                "\"None\", and take precedence over the configuration's "
+                "\"Automatic\", and take precedence over the configuration's "
                 "file rules.");
 
             p.layout = ftk::VerticalLayout::create(context);

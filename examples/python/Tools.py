@@ -1079,11 +1079,11 @@ class ReviewTool(IToolWidget):
         # state after the callback, which would invert whatever the
         # model observer had just set. The model stays the only source
         # of truth and the observer drives the highlight.
-        self._penButton.tooltip = "Draw strokes. Click again to stop drawing."
+        self._penButton.tooltip = "Draw strokes.\n\nClick again to stop drawing."
         self._eraserButton = ftk.ToolButton(context, toolLayout)
         self._eraserButton.icon = "Eraser"
         self._eraserButton.tooltip = \
-            "Erase the strokes you touch. Click again to stop."
+            "Erase the strokes you touch.\n\nClick again to stop."
         toolLayout.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
         self._undoButton = ftk.ToolButton(context, toolLayout)
         self._undoButton.icon = "Undo"
@@ -1493,12 +1493,12 @@ class ReviewTool(IToolWidget):
                     button.tooltip = "Edit the marker."
                 elif _isSingleFrame(marker.range):
                     button.tooltip = (
-                        "Go to the marker's frame. Click the marker "
+                        "Go to the marker's frame.\n\nClick the marker "
                         "already showing to edit it.")
                 else:
                     button.tooltip = (
                         "Go to the marker's frames, setting the "
-                        "timeline in/out points to them. Click the "
+                        "timeline in/out points to them.\n\nClick the "
                         "marker already showing to edit it.")
             button.setClickedCallback(
                 lambda captured = marker.id:

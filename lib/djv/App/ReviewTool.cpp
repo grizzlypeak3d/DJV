@@ -319,11 +319,11 @@ namespace djv
             // state *after* running the callback, which would invert whatever
             // the model observer had just set. The model stays the only source
             // of truth and the observer drives the highlight.
-            p.penButton->setTooltip("Draw strokes. Click again to stop drawing.");
+            p.penButton->setTooltip("Draw strokes.\n\nClick again to stop drawing.");
 
             p.eraserButton = ftk::ToolButton::create(context, toolLayout);
             p.eraserButton->setIcon("Eraser");
-            p.eraserButton->setTooltip("Erase the strokes you touch. Click again to stop.");
+            p.eraserButton->setTooltip("Erase the strokes you touch.\n\nClick again to stop.");
 
             toolLayout->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
 
@@ -1066,11 +1066,11 @@ namespace djv
                 {
                     button->setTooltip(hasRange ?
                         (isSingleFrame(*marker.range) ?
-                            "Go to the marker's frame. Click the marker "
+                            "Go to the marker's frame.\n\nClick the marker "
                             "already showing to edit it." :
                             "Go to the marker's frames, setting the timeline "
-                            "in/out points to them. Click the marker already "
-                            "showing to edit it.") :
+                            "in/out points to them.\n\nClick the marker "
+                            "already showing to edit it.") :
                         "Edit the marker.");
                 }
                 const std::string id = marker.id;
