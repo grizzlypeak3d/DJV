@@ -38,12 +38,11 @@
 <li><a href="#information">Information</a></li>
 <li><a href="#color-picker">Color picker</a></li>
 <li><a href="#magnify">Magnify</a></li>
-<li><a href="#devices">Devices</a></li>
 <li><a href="#messages-and-system-log">Messages and system log</a></li>
 </ul>
 </div>
 <p>DJV's features are organized into <em>tools</em>. Each tool opens in a panel on the right side of the main window, and only one tool is shown at a time. Tools can be opened from the <strong>Tools</strong> menu or the <strong>Tools</strong> tool bar, and each has a default keyboard shortcut.</p>
-<div class="table-wrap"><table><thead><tr><th>Tool</th><th>Shortcut</th><th>Purpose</th></tr></thead><tbody><tr><td><strong>Files</strong></td><td><kbd>F1</kbd></td><td>Manage open files, layers, and comparison</td></tr><tr><td><strong>Export</strong></td><td><kbd>F2</kbd></td><td>Write out images, image sequences, and movies</td></tr><tr><td><strong>View</strong></td><td><kbd>F3</kbd></td><td>View options — grid, background, outline, and more</td></tr><tr><td><strong>Color</strong></td><td><kbd>F4</kbd></td><td>OpenColorIO, LUTs, and color adjustments</td></tr><tr><td><strong>Color Picker</strong></td><td><kbd>F5</kbd></td><td>Sample pixel color values</td></tr><tr><td><strong>Magnify</strong></td><td><kbd>F6</kbd></td><td>Magnify a region of the view</td></tr><tr><td><strong>Information</strong></td><td><kbd>F7</kbd></td><td>View file metadata</td></tr><tr><td><strong>Audio</strong></td><td><kbd>F8</kbd></td><td>Audio output, volume, and sync</td></tr><tr><td><strong>Devices</strong></td><td><kbd>F9</kbd></td><td>Output to a video device</td></tr><tr><td><strong>Settings</strong></td><td><kbd>F10</kbd></td><td>Application settings</td></tr><tr><td><strong>Messages</strong></td><td><kbd>F11</kbd></td><td>Application messages</td></tr><tr><td><strong>System Log</strong></td><td><kbd>F12</kbd></td><td>Low-level system log</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>Tool</th><th>Shortcut</th><th>Purpose</th></tr></thead><tbody><tr><td><strong>Files</strong></td><td><kbd>F1</kbd></td><td>Manage open files, layers, and comparison</td></tr><tr><td><strong>Export</strong></td><td><kbd>F2</kbd></td><td>Write out images, image sequences, and movies</td></tr><tr><td><strong>View</strong></td><td><kbd>F3</kbd></td><td>View options — grid, background, outline, and more</td></tr><tr><td><strong>Color</strong></td><td><kbd>F4</kbd></td><td>OpenColorIO, LUTs, and color adjustments</td></tr><tr><td><strong>Color Picker</strong></td><td><kbd>F5</kbd></td><td>Sample pixel color values</td></tr><tr><td><strong>Magnify</strong></td><td><kbd>F6</kbd></td><td>Magnify a region of the view</td></tr><tr><td><strong>Information</strong></td><td><kbd>F7</kbd></td><td>View file metadata</td></tr><tr><td><strong>Audio</strong></td><td><kbd>F8</kbd></td><td>Audio output, volume, and sync</td></tr><tr><td><strong>Review</strong></td><td><kbd>F9</kbd></td><td>Markers and drawn annotations — see <a href="files.html#reviews">Reviews</a></td></tr><tr><td><strong>Settings</strong></td><td><kbd>F10</kbd></td><td>Application settings</td></tr><tr><td><strong>Messages</strong></td><td><kbd>F11</kbd></td><td>Application messages</td></tr><tr><td><strong>System Log</strong></td><td><kbd>F12</kbd></td><td>Low-level system log</td></tr></tbody></table></div>
 <p>The <strong>Files</strong>, <strong>View</strong>, <strong>Color</strong>, <strong>Export</strong>, <strong>Audio</strong>, and <strong>Settings</strong> tools each have their own page. The remaining tools are described below.</p>
 <p><img src="assets/tools.svg" alt="Tools"></p>
 <h2 id="information">Information</h2>
@@ -65,12 +64,6 @@
 <p>Pick a pixel with <strong>Ctrl</strong> + left mouse button. The magnification level can be set from <strong>2X</strong> up to <strong>128X</strong>.</p>
 <p><img src="assets/magnify-tool.svg" alt="Magnify tool"></p>
 <div class="tip">To inspect exact pixel boundaries, combine the magnifier with the grid: set <strong>Magnify</strong> to <strong>Nearest</strong> in the <strong>View</strong> tool, enable the grid, and set the grid size to <code>1</code> (see <a href="view.html">View</a>).</div>
-<h2 id="devices">Devices</h2>
-<p>The <strong>Devices</strong> tool sends the view to an external video output device, such as a Blackmagic Design card — useful for review on a broadcast monitor.</p>
-<p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
-<p>Shortcut: <kbd>F9</kbd></p>
-<p>The tool provides options for the device, display mode, pixel type, and 4:4:4 SDI output.</p>
-<div class="note">Device output requires DJV to be built with Blackmagic Design support. When the output device is enabled, a status bar indicator is shown.</div>
 <h2 id="messages-and-system-log">Messages and system log</h2>
 <p>The <strong>Messages</strong> tool shows application messages such as warnings and errors, while the <strong>System Log</strong> tool shows a more detailed, low-level log. Both are useful when reporting a problem (see <a href="troubleshooting.html">Troubleshooting</a>).</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
