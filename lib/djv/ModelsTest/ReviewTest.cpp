@@ -5,6 +5,12 @@
 
 #include <djv/Models/Review.h>
 
+#include <opentimelineio/clip.h>
+#include <opentimelineio/externalReference.h>
+#include <opentimelineio/marker.h>
+#include <opentimelineio/stack.h>
+#include <opentimelineio/track.h>
+
 #include <ftk/Core/Assert.h>
 #include <ftk/Core/Format.h>
 
@@ -30,6 +36,7 @@ namespace djv
             _unknownSpace();
             _unknownKeys();
             _courtesyRead();
+            _otioMarkers();
         }
 
         void ReviewTest::_version()
@@ -242,6 +249,77 @@ namespace djv
             FTK_CHECK(2 == saved.at("markers").size());
             FTK_CHECK(!saved.contains("notes"));
             FTK_CHECK(!saved.contains("ranges"));
+        }
+
+        void ReviewTest::_otioMarkers()
+        {
+            // The round trip: markers written to a timeline's stack come
+            // back whole -- identity, attribution, text as the comment,
+            // and a rangeless marker restored by its flag.
+            OTIO_NS::ErrorStatus errorStatus;
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> timeline(
+                new OTIO_NS::Timeline);
+            auto track = new OTIO_NS::Track(
+                "Video", std::nullopt, OTIO_NS::Track::Kind::video);
+            auto clip = new OTIO_NS::Clip(
+                "clip",
+                new OTIO_NS::ExternalReference("media.mov"),
+                OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(0.0, 24.0),
+                    OTIO_NS::RationalTime(100.0, 24.0)));
+            track->append_child(clip, &errorStatus);
+            timeline->tracks()->append_child(track, &errorStatus);
+            FTK_CHECK(!OTIO_NS::is_error(errorStatus));
+
+            std::vector<models::ReviewMarker> markers;
+            models::ReviewMarker span;
+            span.id = "m0";
+            span.name = "Intro";
+            span.range = OTIO_NS::TimeRange(
+                OTIO_NS::RationalTime(10.0, 24.0),
+                OTIO_NS::RationalTime(20.0, 24.0));
+            span.color = ftk::Color4F(1.F, 0.F, 0.F, 1.F);
+            span.text = "Too slow.";
+            span.author = "reviewer";
+            span.created = "2026-09-02T10:00:00Z";
+            markers.push_back(span);
+            models::ReviewMarker rangeless;
+            rangeless.id = "m1";
+            rangeless.text = "About the whole review.";
+            markers.push_back(rangeless);
+
+            models::reviewMarkersToTimeline(markers, timeline);
+            const auto stackMarkers = timeline->tracks()->markers();
+            FTK_CHECK(2 == stackMarkers.size());
+            FTK_CHECK("Too slow." == stackMarkers[0]->comment());
+
+            const auto out = models::reviewMarkersFromTimeline(timeline);
+            FTK_CHECK(2 == out.size());
+            FTK_CHECK(span == out[0]);
+            FTK_CHECK(rangeless == out[1]);
+
+            // A foreign marker on a clip: its time transforms to the
+            // timeline's, its comment becomes the text, and it gets a
+            // fresh identity with no false attribution.
+            OTIO_NS::AnyDictionary metadata;
+            clip->markers().push_back(
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>(
+                    new OTIO_NS::Marker(
+                        "editor note",
+                        OTIO_NS::TimeRange(
+                            OTIO_NS::RationalTime(5.0, 24.0),
+                            OTIO_NS::RationalTime(1.0, 24.0)),
+                        OTIO_NS::Color::red,
+                        metadata,
+                        "From the editor.")));
+            const auto out2 = models::reviewMarkersFromTimeline(timeline);
+            FTK_CHECK(3 == out2.size());
+            FTK_CHECK("editor note" == out2[2].name);
+            FTK_CHECK("From the editor." == out2[2].text);
+            FTK_CHECK(out2[2].range.has_value());
+            FTK_CHECK(5.0 == out2[2].range->start_time().value());
+            FTK_CHECK(!out2[2].id.empty());
+            FTK_CHECK(out2[2].author.empty());
         }
     }
 }

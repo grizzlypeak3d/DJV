@@ -34,6 +34,7 @@ namespace djv
             addAction(actions["Open"]);
             addAction(actions["Save"]);
             addAction(actions["SaveAs"]);
+            addAction(actions["ExportMarkers"]);
             addAction(actions["Close"]);
             p.recentMenu = addSubMenu("Recent");
             addDivider();

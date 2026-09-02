@@ -187,6 +187,10 @@
 <pre><code>djv session.djvr
 </code></pre>
 <p>Personal preferences — keyboard shortcuts, style, cache size, and the audio device — are deliberately <strong>not</strong> stored in a review, so opening one received from someone else does not reconfigure your installation.</p>
+<h3 id="markers">Markers</h3>
+<p>Feedback is written as <em>markers</em>: one list in the <strong>Review</strong> tool, each anchored to a frame or a span of frames, with a color, and text if it wants words. The add button makes a marker on the current frame and opens its text for writing in place; the in/out button makes one for the timeline in/out points. A marker needs no text &mdash; a bare marker is a flag. Clicking a marker goes to its frames, a span narrowing the timeline to itself on the way; clicking the marker already showing edits its text. The arrow keys browse the list the same way, and <kbd>Delete</kbd> removes the current marker.</p>
+<p>The markers draw on the timeline in their colors: a span as a band along the top of the ruler, a single frame as a tick.</p>
+<p>Markers are standard OpenTimelineIO markers. <strong>Review/Open</strong> also accepts a <code>.otio</code> timeline: it becomes the review's first file, and its markers &mdash; wherever they sit, on the stack, the tracks, or the clips &mdash; are copied into the feedback. <strong>Review/Export Markers</strong> writes the review's markers into a <code>.otio</code>: a copy of the reviewed timeline when there is one, and a timeline with one clip referencing the media otherwise, with the markers at the timeline level and the text in each marker's comment. The file being imported is never modified.</p>
 <p>Markers and drawings record who made them, taken from your account name on the machine, so a session that has been passed around stays readable.</p>
 
 <h2 id="otio-spatial-coordinates">OTIO spatial coordinates</h2>

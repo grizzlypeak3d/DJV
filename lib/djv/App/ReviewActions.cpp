@@ -8,6 +8,7 @@
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/MarkersModel.h>
 
 #include <tlRender/Timeline/Player.h>
 
@@ -19,6 +20,7 @@ namespace djv
         {
             bool hasPlayer = false;
             bool hasMarkers = false;
+            bool hasMarkerItems = false;
             //! Whether the in/out points narrow the timeline: adding a range
             //! marker is only meaningful when they do.
             bool narrowed = false;
@@ -29,6 +31,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<bool> > hasUndoObserver;
             std::shared_ptr<ftk::Observer<bool> > hasRedoObserver;
             std::shared_ptr<ftk::ListObserver<int> > markersObserver;
+            std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markerItemsObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutObserver;
         };
@@ -73,6 +76,17 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         app->saveReviewAs();
+                    }
+                });
+
+            _addCommand(
+                "ExportMarkers",
+                "Write the review's markers to an OTIO file.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->exportReviewMarkers();
                     }
                 });
 
@@ -234,6 +248,9 @@ namespace djv
             _actions["SaveAs"] = ftk::Action::create(
                 "Save As...",
                 _command("SaveAs"));
+            _actions["ExportMarkers"] = ftk::Action::create(
+                "Export Markers...",
+                _command("ExportMarkers"));
             _actions["Close"] = ftk::Action::create(
                 "Close",
                 _command("Close"));
@@ -291,6 +308,7 @@ namespace djv
                     static_cast<int>(ftk::KeyModifier::Alt) |
                     static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("SaveAs", "Save review as");
+            _addShortcut("ExportMarkers", "Export markers");
             _addShortcut("Close", "Close review");
             // No default keys yet: which keys serve drawing best is still
             // being worked out with the users (#838). The actions are in the
@@ -363,6 +381,16 @@ namespace djv
                     _actions["Redo"]->setEnabled(value);
                 });
 
+            p.markerItemsObserver = ftk::ListObserver<models::ReviewMarker>::create(
+                app->getMarkersModel()->observeMarkers(),
+                [this](const std::vector<models::ReviewMarker>& value)
+                {
+                    FTK_P();
+                    p.hasMarkerItems = !value.empty();
+                    _actions["ExportMarkers"]->setEnabled(
+                        p.hasPlayer && p.hasMarkerItems);
+                });
+
             p.markersObserver = ftk::ListObserver<int>::create(
                 app->observeReviewMarkers(),
                 [this](const std::vector<int>& value)
@@ -381,6 +409,8 @@ namespace djv
                     _actions["Erase"]->setEnabled(p.hasPlayer);
                     _actions["ClearDrawing"]->setEnabled(p.hasPlayer);
                     _actions["AddNote"]->setEnabled(p.hasPlayer);
+                    _actions["ExportMarkers"]->setEnabled(
+                        p.hasPlayer && p.hasMarkerItems);
                     if (value)
                     {
                         p.inOutObserver = ftk::Observer<OTIO_NS::TimeRange>::create(

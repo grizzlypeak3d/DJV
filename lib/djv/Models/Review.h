@@ -18,6 +18,8 @@
 #include <ftk/Core/Path.h>
 #include <ftk/Core/Vector.h>
 
+#include <opentimelineio/timeline.h>
+
 #include <nlohmann/json.hpp>
 
 #include <filesystem>
@@ -288,6 +290,25 @@ namespace djv
 
         //! The review file extension (".djvr").
         DJV_MODELS_API const std::string& reviewExtension();
+
+        //! Extract review markers from a timeline: the stack's, the
+        //! tracks', and the clips', with clip markers transformed into the
+        //! timeline's time. The mapping is one to one -- name, range,
+        //! color, and the comment as the text -- and a marker written by
+        //! DJV comes back with its identity and attribution from the
+        //! marker's "djv" metadata.
+        DJV_MODELS_API std::vector<ReviewMarker> reviewMarkersFromTimeline(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
+
+        //! Write review markers into a timeline's stack, the timeline
+        //! level. The inverse of reviewMarkersFromTimeline(): the text
+        //! becomes the comment, and the identity and attribution ride the
+        //! marker's "djv" metadata. A marker about no frame in particular
+        //! is written at the start with no duration, flagged in the
+        //! metadata so a round trip restores it.
+        DJV_MODELS_API void reviewMarkersToTimeline(
+            const std::vector<ReviewMarker>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
 
         //! Open a review from a ".djvr" file.
         //!

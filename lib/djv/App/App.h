@@ -209,6 +209,9 @@ namespace djv
 
             //! Close the current review and reset to the empty startup state,
             //! prompting to save first if there are unsaved changes.
+            //! Export the review's markers to an OTIO file, asking where.
+            void exportReviewMarkers();
+
             void closeReview();
 
             //! Get the path of the active review, or empty if none.
@@ -298,6 +301,8 @@ namespace djv
                 const models::Review&,
                 const std::filesystem::path& reviewPath);
             void _closeReview();
+            void _importReviewTimeline(const std::filesystem::path&);
+            void _exportReviewMarkers(const std::filesystem::path&);
             void _applyReviewView();
 
             std::filesystem::path _autosavePath();

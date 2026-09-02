@@ -6,6 +6,11 @@
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
 
+#include <opentimelineio/clip.h>
+#include <opentimelineio/marker.h>
+#include <opentimelineio/stack.h>
+#include <opentimelineio/track.h>
+
 #include <algorithm>
 #include <atomic>
 #include <ctime>
@@ -609,6 +614,168 @@ namespace djv
         {
             static const std::string out = ".djvr";
             return out;
+        }
+
+        namespace
+        {
+            ftk::Color4F fromOTIOColor(const std::optional<OTIO_NS::Color>& value)
+            {
+                // OTIO gives markers green by default, the same default the
+                // review markers use.
+                return value.has_value() ?
+                    ftk::Color4F(
+                        static_cast<float>(value->r()),
+                        static_cast<float>(value->g()),
+                        static_cast<float>(value->b()),
+                        static_cast<float>(value->a())) :
+                    reviewMarkerColor();
+            }
+
+            std::string getMeta(
+                const OTIO_NS::AnyDictionary& dict,
+                const std::string& key)
+            {
+                std::string out;
+                const auto i = dict.find(key);
+                if (i != dict.end() && i->second.type() == typeid(std::string))
+                {
+                    out = std::any_cast<std::string>(i->second);
+                }
+                return out;
+            }
+
+            void markerFromOTIO(
+                const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>& marker,
+                const std::optional<OTIO_NS::TimeRange>& range,
+                std::vector<ReviewMarker>& out)
+            {
+                ReviewMarker m;
+                m.name = marker->name();
+                m.range = range;
+                m.color = fromOTIOColor(marker->color());
+                m.text = marker->comment();
+                // A marker DJV wrote comes back with its identity and
+                // attribution; a foreign marker gets a fresh identity and
+                // no false attribution.
+                const auto& metadata = marker->metadata();
+                const auto i = metadata.find("djv");
+                if (i != metadata.end() &&
+                    i->second.type() == typeid(OTIO_NS::AnyDictionary))
+                {
+                    const auto djv =
+                        std::any_cast<OTIO_NS::AnyDictionary>(i->second);
+                    m.id = getMeta(djv, "id");
+                    m.author = getMeta(djv, "author");
+                    m.created = getMeta(djv, "created");
+                    if (m.text.empty())
+                    {
+                        m.text = getMeta(djv, "text");
+                    }
+                    const auto j = djv.find("rangeless");
+                    if (j != djv.end() &&
+                        j->second.type() == typeid(bool) &&
+                        std::any_cast<bool>(j->second))
+                    {
+                        m.range.reset();
+                    }
+                }
+                if (m.id.empty())
+                {
+                    m.id = generateId();
+                }
+                out.push_back(m);
+            }
+        }
+
+        std::vector<ReviewMarker> reviewMarkersFromTimeline(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline)
+        {
+            std::vector<ReviewMarker> out;
+            const auto stack = timeline->tracks();
+            for (const auto& marker : stack->markers())
+            {
+                markerFromOTIO(marker, marker->marked_range(), out);
+            }
+            for (const auto& child : stack->children())
+            {
+                auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(child);
+                if (!track)
+                {
+                    continue;
+                }
+                for (const auto& marker : track->markers())
+                {
+                    markerFromOTIO(marker, marker->marked_range(), out);
+                }
+                for (const auto& item : track->children())
+                {
+                    auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(item);
+                    if (!clip)
+                    {
+                        continue;
+                    }
+                    for (const auto& marker : clip->markers())
+                    {
+                        // Clip markers are in the clip's own time; the
+                        // review's clock is the timeline's.
+                        OTIO_NS::ErrorStatus errorStatus;
+                        const OTIO_NS::TimeRange transformed =
+                            clip->transformed_time_range(
+                                marker->marked_range(),
+                                stack,
+                                &errorStatus);
+                        if (!OTIO_NS::is_error(errorStatus))
+                        {
+                            markerFromOTIO(marker, transformed, out);
+                        }
+                    }
+                }
+            }
+            return out;
+        }
+
+        void reviewMarkersToTimeline(
+            const std::vector<ReviewMarker>& markers,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline)
+        {
+            const auto stack = timeline->tracks();
+            const double rate = timeline->duration().rate();
+            for (const auto& marker : markers)
+            {
+                OTIO_NS::AnyDictionary djv;
+                djv["id"] = marker.id;
+                if (!marker.author.empty())
+                {
+                    djv["author"] = marker.author;
+                }
+                if (!marker.created.empty())
+                {
+                    djv["created"] = marker.created;
+                }
+                if (!marker.range.has_value())
+                {
+                    djv["rangeless"] = true;
+                }
+                OTIO_NS::AnyDictionary metadata;
+                metadata["djv"] = djv;
+                auto otioMarker =
+                    OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>(
+                        new OTIO_NS::Marker(
+                            marker.name,
+                            marker.range.has_value() ?
+                                *marker.range :
+                                OTIO_NS::TimeRange(
+                                    OTIO_NS::RationalTime(0.0, rate),
+                                    OTIO_NS::RationalTime(0.0, rate)),
+                            OTIO_NS::Color(
+                                marker.color.r,
+                                marker.color.g,
+                                marker.color.b,
+                                marker.color.a),
+                            metadata,
+                            marker.text));
+                stack->markers().push_back(otioMarker);
+            }
         }
 
         Review reviewOpen(const std::string& fileName)

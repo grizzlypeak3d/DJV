@@ -41,6 +41,11 @@ class Actions(IActions.IActions):
             lambda args: appWeak().saveReviewAs())
 
         self._addCommand(
+            "ExportMarkers",
+            "Write the review's markers to an OTIO file.",
+            lambda args: appWeak().exportReviewMarkers())
+
+        self._addCommand(
             "Close",
             "Close the review and reset to the startup state.",
             lambda args: appWeak().closeReview())
@@ -120,6 +125,9 @@ class Actions(IActions.IActions):
         self.actions["SaveAs"] = ftk.Action(
             "Save As...",
             self._command("SaveAs"))
+        self.actions["ExportMarkers"] = ftk.Action(
+            "Export Markers...",
+            self._command("ExportMarkers"))
         self.actions["Close"] = ftk.Action(
             "Close",
             self._command("Close"))
@@ -167,6 +175,7 @@ class Actions(IActions.IActions):
         self._addShortcut("Save", "Save review", ftk.KeyShortcut(
             ftk.Key.S, ftk.KeyModifier.Alt, ftk.commandKeyModifier))
         self._addShortcut("SaveAs", "Save review as")
+        self._addShortcut("ExportMarkers", "Export markers")
         self._addShortcut("Close", "Close review")
         # No default keys yet: which keys serve drawing best is still
         # being worked out with the users (#838). The actions are in the
@@ -207,6 +216,9 @@ class Actions(IActions.IActions):
             app.getAnnotationsModel().observeHasRedo,
             lambda value: selfWeak() and setattr(
                 selfWeak().actions["Redo"], "enabled", value))
+        self._markerItemsObserver = djv.models.ReviewMarkerListObserver(
+            app.getMarkersModel().observeMarkers,
+            lambda value: selfWeak() and selfWeak()._markerItemsUpdate(value))
         self._markersObserver = ftk.IntListObserver(
             app.observeReviewMarkers(),
             lambda markers: selfWeak()._markersUpdate(markers))
@@ -254,8 +266,15 @@ class Actions(IActions.IActions):
         self.actions["PrevFrame"].enabled = enabled
         self.actions["NextFrame"].enabled = enabled
 
+    def _markerItemsUpdate(self, value):
+        self._hasMarkerItems = len(value) > 0
+        self.actions["ExportMarkers"].enabled = (
+            self._hasPlayer and self._hasMarkerItems)
+
     def _playerUpdate(self, player):
         self._hasPlayer = player is not None
+        self.actions["ExportMarkers"].enabled = (
+            self._hasPlayer and getattr(self, "_hasMarkerItems", False))
         self.actions["Draw"].enabled = self._hasPlayer
         self.actions["Erase"].enabled = self._hasPlayer
         self.actions["ClearDrawing"].enabled = self._hasPlayer

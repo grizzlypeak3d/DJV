@@ -32,6 +32,11 @@
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/Parse.h>
 #include <djv/Models/Playlist.h>
+
+#include <opentimelineio/clip.h>
+#include <opentimelineio/externalReference.h>
+#include <opentimelineio/stack.h>
+#include <opentimelineio/track.h>
 #include <djv/Models/MarkersModel.h>
 #include <djv/Models/RecentFilesModel.h>
 #include <djv/Models/Review.h>
@@ -810,6 +815,16 @@ namespace djv
         {
             FTK_P();
 
+            // A timeline imports rather than opens: it becomes the review's
+            // "A" source by reference, and its markers copy into the
+            // feedback.
+            const std::string ext = ftk::toLower(path.extension().u8string());
+            if (".otio" == ext || ".otioz" == ext)
+            {
+                _importReviewTimeline(path);
+                return;
+            }
+
             models::Review review;
             try
             {
@@ -1055,7 +1070,15 @@ namespace djv
                     std::string("review") + models::reviewExtension() :
                     p.reviewPath.filename().u8string();
             }
-            options.extensions = { models::reviewExtension() };
+            if (ftk::FileBrowserMode::Open == mode)
+            {
+                options.extensions =
+                    { models::reviewExtension(), ".otio", ".otioz" };
+            }
+            else
+            {
+                options.extensions = { models::reviewExtension() };
+            }
             options.extensionsLabel = "Review Session";
             fileBrowserSystem->open(
                 p.mainWindow,
@@ -1228,6 +1251,118 @@ namespace djv
                         onSaved();
                     }
                 });
+        }
+
+        void App::_importReviewTimeline(const std::filesystem::path& path)
+        {
+            FTK_P();
+            // The file is never modified, the playlist rule carried
+            // forward, and the review path stays unset: saving asks where
+            // to write DJV's own document. A review that includes a
+            // timeline references it, the same way a timeline references
+            // its media.
+            _closeReview();
+            open(ftk::Path(path.u8string()));
+            if (!p.timelines.empty() && p.timelines.front())
+            {
+                p.markersModel->setMarkers(
+                    models::reviewMarkersFromTimeline(
+                        p.timelines.front()->getOTIOTimeline()));
+            }
+            // The feedback still lives in the source file, so quitting
+            // straight away has nothing to lose; the first change made
+            // here marks the session the usual way.
+            p.reviewModified = false;
+            _updateWindowTitle();
+        }
+
+        void App::exportReviewMarkers()
+        {
+            FTK_P();
+            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+            ftk::FileBrowserOpenOptions options;
+            options.title = "Export Markers";
+            options.mode = ftk::FileBrowserMode::Save;
+            options.path = p.reviewPath.empty() ?
+                std::filesystem::path() : p.reviewPath.parent_path();
+            options.fileName = p.reviewPath.empty() ?
+                std::string("markers.otio") :
+                p.reviewPath.stem().u8string() + ".otio";
+            options.extensions = { ".otio" };
+            options.extensionsLabel = "Timeline";
+            fileBrowserSystem->open(
+                p.mainWindow,
+                [this](const ftk::Path& value)
+                {
+                    std::filesystem::path path =
+                        std::filesystem::u8path(value.get());
+                    if (path.extension() != ".otio")
+                    {
+                        path.replace_extension(".otio");
+                    }
+                    _exportReviewMarkers(path);
+                },
+                options);
+        }
+
+        void App::_exportReviewMarkers(const std::filesystem::path& path)
+        {
+            FTK_P();
+            auto player = p.player->get();
+            if (!player)
+            {
+                return;
+            }
+            // The shape follows what "A" is. A timeline exports as a copy
+            // of itself with the markers written in, the editorial round
+            // trip; plain media exports as a minimal timeline with one clip
+            // referencing it, so the document always says what the feedback
+            // is about. The live timeline is never touched: the export
+            // builds its own document and discards it.
+            OTIO_NS::ErrorStatus errorStatus;
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> timeline;
+            const ftk::Path& aPath = player->getPath();
+            const std::string ext = ftk::toLower(aPath.getExt());
+            if (".otio" == ext || ".otioz" == ext)
+            {
+                timeline = dynamic_cast<OTIO_NS::Timeline*>(
+                    player->getTimeline()->getOTIOTimeline()->clone(&errorStatus));
+            }
+            else
+            {
+                const OTIO_NS::TimeRange timeRange = player->getTimeRange();
+                auto clip = new OTIO_NS::Clip(
+                    aPath.getFileName(),
+                    new OTIO_NS::ExternalReference(aPath.getFileName(true)),
+                    timeRange);
+                auto track = new OTIO_NS::Track(
+                    "Video",
+                    std::nullopt,
+                    OTIO_NS::Track::Kind::video);
+                track->append_child(clip, &errorStatus);
+                timeline = new OTIO_NS::Timeline;
+                timeline->tracks()->append_child(track, &errorStatus);
+            }
+            if (!timeline || OTIO_NS::is_error(errorStatus))
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Cannot export markers: {0}").
+                        arg(errorStatus.details),
+                    ftk::LogType::Error);
+                return;
+            }
+            models::reviewMarkersToTimeline(
+                p.markersModel->getMarkers(), timeline);
+            if (!timeline->to_json_file(path.u8string(), &errorStatus))
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Cannot export markers \"{0}\": {1}").
+                        arg(path.u8string()).
+                        arg(errorStatus.details),
+                    ftk::LogType::Error);
+            }
         }
 
         void App::closeReview()

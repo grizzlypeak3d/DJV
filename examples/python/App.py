@@ -37,6 +37,76 @@ class AppInfoModel(djv.models.AppInfoModel):
         # documentation the same way bin does.
         return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+def _markerFromOTIO(marker, range, out):
+    m = djv.models.ReviewMarker()
+    m.name = marker.name
+    m.range = range
+    if marker.color is not None:
+        m.color = ftk.Color4F(
+            marker.color.r, marker.color.g, marker.color.b, marker.color.a)
+    m.text = marker.comment
+    # A marker DJV wrote comes back with its identity and attribution; a
+    # foreign marker gets a fresh identity and no false attribution.
+    meta = marker.metadata.get("djv")
+    if meta is not None:
+        m.id = str(meta.get("id", ""))
+        m.author = str(meta.get("author", ""))
+        m.created = str(meta.get("created", ""))
+        if not m.text:
+            m.text = str(meta.get("text", ""))
+        if meta.get("rangeless", False):
+            m.range = None
+    if not m.id:
+        m.id = djv.models.generateId()
+    out.append(m)
+
+def _markersFromTimeline(timeline):
+    out = []
+    stack = timeline.tracks
+    for marker in stack.markers:
+        _markerFromOTIO(marker, marker.marked_range, out)
+    for track in stack:
+        if not isinstance(track, otio.schema.Track):
+            continue
+        for marker in track.markers:
+            _markerFromOTIO(marker, marker.marked_range, out)
+        for item in track:
+            markers = getattr(item, "markers", None)
+            if not markers:
+                continue
+            for marker in markers:
+                # Clip markers are in the clip's own time; the review's
+                # clock is the timeline's.
+                try:
+                    transformed = item.transformed_time_range(
+                        marker.marked_range, stack)
+                except Exception:
+                    continue
+                _markerFromOTIO(marker, transformed, out)
+    return out
+
+def _markersToTimeline(markers, timeline):
+    rate = timeline.duration().rate
+    for marker in markers:
+        meta = { "id": marker.id }
+        if marker.author:
+            meta["author"] = marker.author
+        if marker.created:
+            meta["created"] = marker.created
+        if marker.range is None:
+            meta["rangeless"] = True
+        timeline.tracks.markers.append(otio.schema.Marker(
+            name = marker.name,
+            marked_range = marker.range if marker.range is not None else
+                otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0.0, rate),
+                    otio.opentime.RationalTime(0.0, rate)),
+            color = otio.core.Color(
+                marker.color.r, marker.color.g, marker.color.b,
+                marker.color.a),
+            metadata = { "djv": meta },
+            comment = marker.text))
+
 class App(ftk.App):
     """
     The application creates the models and main window.
@@ -333,9 +403,15 @@ class App(ftk.App):
 
     def openReview(self, path):
         """
-        Open a review, replacing the current session.
+        Open a review, replacing the current session. A timeline imports
+        rather than opens: it becomes the review's "A" source by
+        reference, and its markers copy into the feedback.
         """
         path = str(path)
+        ext = os.path.splitext(path)[1].lower()
+        if ext in (".otio", ".otioz"):
+            self._importReviewTimeline(path)
+            return
         try:
             review = djv.models.reviewOpen(path)
         except RuntimeError as e:
@@ -608,10 +684,77 @@ class App(ftk.App):
                 os.path.basename(self._reviewPath)
                 if self._reviewPath is not None
                 else "review" + djv.models.reviewExtension())
-        options.extensions = [djv.models.reviewExtension()]
+        if ftk.FileBrowserMode.Open == mode:
+            options.extensions = [
+                djv.models.reviewExtension(), ".otio", ".otioz"]
+        else:
+            options.extensions = [djv.models.reviewExtension()]
         options.extensionsLabel = "Review Session"
         self.context.getSystemByName("ftk::FileBrowserSystem").open(
             self._window, callback, options)
+
+    def _importReviewTimeline(self, path):
+        # The file is never modified, the playlist rule carried forward,
+        # and the review path stays unset: saving asks where to write
+        # DJV's own document.
+        self.closeReview()
+        self.open(ftk.Path(path))
+        timeline = otio.adapters.read_from_file(path)
+        self._markersModel.setMarkers(_markersFromTimeline(timeline))
+        self._updateWindowTitle()
+
+    def exportReviewMarkers(self):
+        """
+        Export the review's markers to an OTIO file, asking where.
+        """
+        options = ftk.FileBrowserOpenOptions()
+        options.title = "Export Markers"
+        options.mode = ftk.FileBrowserMode.Save
+        if self._reviewPath is not None:
+            options.path = os.path.dirname(self._reviewPath)
+            options.fileName = os.path.splitext(
+                os.path.basename(self._reviewPath))[0] + ".otio"
+        else:
+            options.fileName = "markers.otio"
+        options.extensions = [".otio"]
+        options.extensionsLabel = "Timeline"
+        selfWeak = weakref.ref(self)
+        def callback(value):
+            app = selfWeak()
+            if app is None:
+                return
+            path = str(value)
+            if os.path.splitext(path)[1] != ".otio":
+                path = os.path.splitext(path)[0] + ".otio"
+            app._exportReviewMarkers(path)
+        self.context.getSystemByName("ftk::FileBrowserSystem").open(
+            self._window, callback, options)
+
+    def _exportReviewMarkers(self, path):
+        player = self._player.get()
+        if player is None:
+            return
+        # The shape follows what "A" is: a timeline exports as a copy of
+        # itself with the markers written in, plain media as a minimal
+        # timeline with one clip referencing it -- the document always
+        # says what the feedback is about.
+        aPath = player.path
+        ext = aPath.ext.lower()
+        if ext in (".otio", ".otioz"):
+            timeline = otio.adapters.read_from_file(aPath.get())
+        else:
+            timeline = otio.schema.Timeline()
+            track = otio.schema.Track(
+                name = "Video", kind = otio.schema.TrackKind.Video)
+            clip = otio.schema.Clip(
+                name = aPath.getFileName(),
+                media_reference = otio.schema.ExternalReference(
+                    target_url = aPath.getFileName(True)),
+                source_range = player.timeRange)
+            track.append(clip)
+            timeline.tracks.append(track)
+        _markersToTimeline(self._markersModel.markers, timeline)
+        otio.adapters.write_to_file(timeline, path)
 
     def closeReview(self):
         """

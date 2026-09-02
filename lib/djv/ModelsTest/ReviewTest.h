@@ -27,6 +27,7 @@ namespace djv
             void _unknownSpace();
             void _unknownKeys();
             void _courtesyRead();
+            void _otioMarkers();
         };
     }
 }
