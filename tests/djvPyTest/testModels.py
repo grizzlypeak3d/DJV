@@ -253,33 +253,32 @@ class ModelsTest(unittest.TestCase):
         model.clear()
         self.assertEqual(0, len(model.annotations))
 
-    def test_notesModel(self):
+    def test_markersModel(self):
         import opentimelineio as otio
-        model = djv.models.NotesModel()
-        t = otio.opentime.RationalTime(3.0, 24.0)
-        model.add(t, "first")
-        model.add(None, "no frame")
-        self.assertEqual(2, len(model.notes))
-        self.assertEqual("first", model.notes[0].text)
-        self.assertTrue(djv.models.sameTime(model.notes[0].time, t))
-        self.assertIsNone(model.notes[1].time)
-        model.remove(model.notes[0].id)
-        self.assertEqual(1, len(model.notes))
-        model.clear()
-        self.assertEqual(0, len(model.notes))
-
-    def test_rangesModel(self):
-        import opentimelineio as otio
-        model = djv.models.RangesModel()
+        model = djv.models.MarkersModel()
         r = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(3.0, 24.0),
+            otio.opentime.RationalTime(1.0, 24.0))
+        model.add(r, "", "first")
+        model.add(None, "", "no frame")
+        # Time order, the markers about no frame in particular first.
+        self.assertEqual(2, len(model.markers))
+        self.assertEqual("no frame", model.markers[0].text)
+        self.assertIsNone(model.markers[0].range)
+        self.assertEqual("first", model.markers[1].text)
+        self.assertTrue(djv.models.sameRange(model.markers[1].range, r))
+        span = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 24.0),
             otio.opentime.RationalTime(10.0, 24.0))
-        model.add(r, "intro")
-        self.assertEqual(1, len(model.ranges))
-        self.assertEqual("intro", model.ranges[0].name)
-        self.assertTrue(djv.models.sameRange(model.ranges[0].range, r))
-        model.remove(model.ranges[0].id)
-        self.assertEqual(0, len(model.ranges))
+        model.add(span, "intro", "")
+        self.assertEqual("intro", model.markers[1].name)
+        model.update(model.markers[1].id, "slow here")
+        self.assertEqual("slow here", model.markers[1].text)
+        self.assertEqual("intro", model.markers[1].name)
+        model.remove(model.markers[0].id)
+        self.assertEqual(2, len(model.markers))
+        model.clear()
+        self.assertEqual(0, len(model.markers))
 
     def test_review(self):
         import opentimelineio as otio
@@ -290,17 +289,19 @@ class ModelsTest(unittest.TestCase):
         f.id = djv.models.generateId()
         f.path = "shot/comp.mov"
         review.files = [f]
-        note = djv.models.ReviewNote()
-        note.id = djv.models.generateId()
-        note.text = "hello"
-        note.time = otio.opentime.RationalTime(12.0, 24.0)
-        review.notes = [note]
+        marker = djv.models.ReviewMarker()
+        marker.id = djv.models.generateId()
+        marker.text = "hello"
+        marker.range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(12.0, 24.0),
+            otio.opentime.RationalTime(1.0, 24.0))
+        review.markers = [marker]
         path = os.path.join(self.tempDir, "test.djvr")
         djv.models.reviewSave(path, review)
         review2 = djv.models.reviewOpen(path)
         self.assertEqual(djv.models.reviewVersion, review2.version)
         self.assertEqual("shot/comp.mov", review2.files[0].path)
-        self.assertEqual([note], review2.notes)
+        self.assertEqual([marker], review2.markers)
         self.assertEqual([], review2.unreadSections)
         review2.carryUnread(review2)
 
