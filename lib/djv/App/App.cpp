@@ -861,6 +861,8 @@ namespace djv
 
             ftk::PathOptions pathOptions;
             pathOptions.seqMaxDigits = p.settingsModel->getImageSeq().maxDigits;
+            const std::vector<std::string> seqExts =
+                tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
 
             // Replace the current session.
             p.filesModel->closeAll();
@@ -878,6 +880,14 @@ namespace djv
                 auto item = std::make_shared<models::FilesModelItem>();
                 item->id = rf.id.empty() ? models::generateId() : rf.id;
                 item->path = ftk::Path(resolved.u8string(), pathOptions);
+                // The review stores one frame's path, so the sequence is
+                // gathered from the disk the way opening the frame would
+                // gather it; without this the file restores as that one
+                // frame.
+                if (exists && item->path.testExt(seqExts))
+                {
+                    item->path = ftk::expandSeq(item->path, pathOptions);
+                }
                 if (!rf.audioPath.empty() || !rf.audioPathAbsolute.empty())
                 {
                     bool audioExists = false;

@@ -354,6 +354,7 @@ class App(ftk.App):
     def _applyReview(self, review, base, reviewPath):
         pathOptions = ftk.PathOptions()
         pathOptions.seqMaxDigits = self._settingsModel.imageSeq.maxDigits
+        seqExts = tl.getExts(self.context, int(tl.FileType.Seq))
 
         # Replace the current session.
         self._filesModel.closeAll()
@@ -367,6 +368,12 @@ class App(ftk.App):
             item = djv.models.FilesModelItem()
             item.id = rf.id if rf.id else djv.models.generateId()
             item.path = ftk.Path(str(resolved), pathOptions)
+            # The review stores one frame's path, so the sequence is
+            # gathered from the disk the way opening the frame would
+            # gather it; without this the file restores as that one
+            # frame.
+            if exists and item.path.testExt(seqExts):
+                item.path = ftk.expandSeq(item.path, pathOptions)
             if rf.audioPath or rf.audioPathAbsolute:
                 audio, audioExists = djv.models.resolveReviewPath(
                     rf.audioPath, rf.audioPathAbsolute, base, "", pathOptions)
