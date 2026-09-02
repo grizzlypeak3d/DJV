@@ -7,8 +7,8 @@ Changes:
 * Directories can be opened with a wildcard filter and a depth, so a
   whole shot tree opens as a playlist. Based on a proposal by NathanOtano.
 * The file list can be reordered by dragging.
-* Add Python bindings, available when building from source with
-  DJV_PYTHON=ON.
+* Add Python bindings and a full Python version of DJV as an example, available
+  when building from source with DJV_PYTHON=ON.
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
 * Add support for reading OpenEXR files with HTJ2K compression.
 * Automatic OCIO input color spaces, including the OpenEXR
