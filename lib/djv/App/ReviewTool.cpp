@@ -188,6 +188,9 @@ namespace djv
             //! The row buttons, by marker identifier, so the highlight can be
             //! moved without rebuilding the list.
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > markerButtons;
+            //! The row color swatches, by marker identifier, so a color
+            //! change can update in place rather than rebuild.
+            std::map<std::string, std::shared_ptr<ftk::ColorSwatch> > swatches;
             //! A list row: the item, what it stands for, and its frames.
             struct RowRef
             {
@@ -511,8 +514,35 @@ namespace djv
                 app->getMarkersModel()->observeMarkers(),
                 [this](const std::vector<models::ReviewMarker>& value)
                 {
-                    _p->markers = value;
-                    _markersUpdate();
+                    FTK_P();
+                    // A color-only change updates the rows in place:
+                    // rebuilding would destroy the very swatch whose popup
+                    // the user is still picking from.
+                    bool colorOnly =
+                        !p.markers.empty() &&
+                        value.size() == p.markers.size();
+                    for (size_t i = 0; colorOnly && i < value.size(); ++i)
+                    {
+                        models::ReviewMarker recolored = value[i];
+                        recolored.color = p.markers[i].color;
+                        colorOnly = recolored == p.markers[i];
+                    }
+                    p.markers = value;
+                    if (colorOnly)
+                    {
+                        for (const auto& marker : value)
+                        {
+                            const auto i = p.swatches.find(marker.id);
+                            if (i != p.swatches.end())
+                            {
+                                i->second->setColor(marker.color);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _markersUpdate();
+                    }
                 });
 
             // The labels show times, so they follow the units the timeline
@@ -1017,6 +1047,7 @@ namespace djv
             p.editItem.reset();
             p.markerListLayout->clear();
             p.markerButtons.clear();
+            p.swatches.clear();
             p.itemOrder.clear();
             auto context = getContext();
             if (!context)
@@ -1112,6 +1143,7 @@ namespace djv
                 if (!marker.id.empty())
                 {
                     auto swatch = ftk::ColorSwatch::create(context, header);
+                    p.swatches[marker.id] = swatch;
                     swatch->setColor(marker.color);
                     swatch->setEditable(true);
                     swatch->setTooltip("The marker's color.");

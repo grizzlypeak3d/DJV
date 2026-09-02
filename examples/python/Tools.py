@@ -1030,6 +1030,7 @@ class ReviewTool(IToolWidget):
         self._inOutRange = None
         self._markers = []
         self._markerButtons = {}
+        self._swatches = {}
         self._currentTimeObserver = None
         self._inOutRangeObserver = None
 
@@ -1112,6 +1113,8 @@ class ReviewTool(IToolWidget):
         # deferred a tick because a rebuilt list has no geometry yet.
         self._editingId = None
         self._editEdit = None
+        # Before any observer can rebuild the list: the labels read this.
+        self._timeUnits = app.getTimeUnitsModel().timeUnits
         self._editItem = None
         self._commitTimer = ftk.Timer(context)
         self._scrollTimer = ftk.Timer(context)
@@ -1216,7 +1219,6 @@ class ReviewTool(IToolWidget):
 
         # The labels show times, so they follow the units the timeline
         # shows.
-        self._timeUnits = app.getTimeUnitsModel().timeUnits
         self._timeUnitsObserver = tl.TimeUnitsObserver(
             app.getTimeUnitsModel().observeTimeUnits,
             lambda value: selfWeak() and selfWeak()._timeUnitsUpdate(value))
@@ -1274,6 +1276,8 @@ class ReviewTool(IToolWidget):
         # rebuilds the list, and must not find a half-finished edit.
         self._editingId = None
         self._editEdit = None
+        # Before any observer can rebuild the list: the labels read this.
+        self._timeUnits = app.getTimeUnitsModel().timeUnits
         self._editItem = None
         app = self._app()
         if app is not None and id is not None:
@@ -1446,8 +1450,26 @@ class ReviewTool(IToolWidget):
             self._editMarker(id)
 
     def _markersListUpdate(self, markers):
+        # A color-only change updates the rows in place: rebuilding
+        # would destroy the very swatch whose popup the user is still
+        # picking from.
+        def sameButColor(a, b):
+            return (a.id == b.id and a.name == b.name and
+                djv.models.sameRange(a.range, b.range) and
+                a.text == b.text and a.author == b.author and
+                a.created == b.created)
+        colorOnly = (len(self._markers) > 0 and
+            len(markers) == len(self._markers) and
+            all(sameButColor(a, b)
+                for a, b in zip(markers, self._markers)))
         self._markers = markers
-        self._markersUpdate()
+        if colorOnly:
+            for marker in markers:
+                swatch = self._swatches.get(marker.id)
+                if swatch is not None:
+                    swatch.color = marker.color
+        else:
+            self._markersUpdate()
 
     def _markersUpdate(self):
         # Let go of any editor before the clear destroys it, so the
@@ -1457,6 +1479,7 @@ class ReviewTool(IToolWidget):
         self._editItem = None
         self._markerListLayout.clear()
         self._markerButtons = {}
+        self._swatches = {}
         self._itemOrder = []
         context = self.context
         # Every marker, so the panel reads as the review's feedback
@@ -1522,6 +1545,7 @@ class ReviewTool(IToolWidget):
             # clicking the row.
             if marker.id is not None:
                 swatch = ftk.ColorSwatch(context, header)
+                self._swatches[marker.id] = swatch
                 swatch.color = marker.color
                 swatch.editable = True
                 swatch.tooltip = "The marker's color."
