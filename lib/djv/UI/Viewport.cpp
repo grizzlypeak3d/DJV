@@ -14,6 +14,7 @@
 #include <tlRender/Timeline/Util.h>
 
 #include <ftk/UI/ColorSwatch.h>
+#include <ftk/UI/IWindow.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/SysLogModel.h>
 #include <ftk/UI/RowLayout.h>
@@ -319,6 +320,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
+            std::shared_ptr<ftk::Observer<bool> > drawEnabledObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<std::vector<std::string> > > resolvedInputsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
@@ -538,6 +540,13 @@ namespace djv
                     _p->compare = value.compare;
                     setCompareOptions(value);
                     _compareUpdate();
+                });
+
+            p.drawEnabledObserver = ftk::Observer<bool>::create(
+                drawModel->observeEnabled(),
+                [this](bool)
+                {
+                    _cursorUpdate();
                 });
 
             p.compareTimeObserver = ftk::Observer<tl::CompareTime>::create(
@@ -1003,6 +1012,30 @@ namespace djv
                 _drawEnd();
             }
             p.mouse = Private::MouseData();
+        }
+
+        void Viewport::mouseEnterEvent(ftk::MouseEnterEvent& event)
+        {
+            tl::ui::Viewport::mouseEnterEvent(event);
+            _cursorUpdate();
+        }
+
+        void Viewport::mouseLeaveEvent()
+        {
+            tl::ui::Viewport::mouseLeaveEvent();
+            _cursorUpdate();
+        }
+
+        void Viewport::_cursorUpdate()
+        {
+            FTK_P();
+            if (auto window = getWindow())
+            {
+                window->setCursor(
+                    _isMouseInside() && p.drawModel->isEnabled() ?
+                    ftk::CursorShape::Crosshair :
+                    ftk::CursorShape::Arrow);
+            }
         }
 
         std::vector<ftk::Box2I> Viewport::_sourceBoxes() const

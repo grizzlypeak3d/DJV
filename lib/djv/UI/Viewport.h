@@ -78,6 +78,8 @@ namespace djv
             DJV_UI_API void mouseMoveEvent(ftk::MouseMoveEvent&) override;
             DJV_UI_API void mousePressEvent(ftk::MouseClickEvent&) override;
             DJV_UI_API void mouseReleaseEvent(ftk::MouseClickEvent&) override;
+            DJV_UI_API void mouseEnterEvent(ftk::MouseEnterEvent&) override;
+            DJV_UI_API void mouseLeaveEvent() override;
 
         private:
             //! Where a position in the viewport falls in the sources.
@@ -108,6 +110,10 @@ namespace djv
             void _drawContinue(const ftk::V2I& widgetPos);
             void _drawEnd();
             void _erase(const ftk::V2I& widgetPos);
+
+            //! The cursor follows the drawing mode: a crosshair while the
+            //! pointer is inside and drawing is enabled.
+            void _cursorUpdate();
 
             void _videoUpdate();
             void _toastUpdate();
