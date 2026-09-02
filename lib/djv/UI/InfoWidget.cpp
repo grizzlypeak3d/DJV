@@ -14,6 +14,7 @@
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/SearchBox.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
 
 namespace djv
@@ -25,6 +26,7 @@ namespace djv
             std::shared_ptr<ftk::Settings> settings;
 
             tl::IOInfo info;
+            ftk::Path path;
             std::string search;
 
             //! One per section, in the order they are shown.
@@ -66,7 +68,7 @@ namespace djv
             copyButton->setParent(hLayout);
             ftk::TextEditOptions textEditOptions;
             textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
-            p.sectionNames = { "Video", "Audio", "Metadata" };
+            p.sectionNames = { "File", "Video", "Audio", "Metadata" };
             for (const auto& name : p.sectionNames)
             {
                 auto textEdit = ftk::TextEdit::create(context);
@@ -170,6 +172,7 @@ namespace djv
         {
             FTK_P();
             p.player = value;
+            p.path = value ? value->getPath() : ftk::Path();
             p.mediaReferenceKeyObserver.reset();
             if (value)
             {
@@ -228,6 +231,19 @@ namespace djv
                 ss.precision(1);
                 ss << std::fixed << value / 1000.0 << "kHz";
                 return ss.str();
+            }
+
+            //! Name and directory rather than one full path: the name is
+            //! what somebody scanning the tool wants first, and the two
+            //! compose the full path for sharing.
+            Pairs filePairs(const ftk::Path& path)
+            {
+                Pairs out;
+                if (path.isEmpty())
+                    return out;
+                out.push_back({ "Name", path.getFileName() });
+                out.push_back({ "Directory", path.getDir() });
+                return out;
             }
 
             //! The video the file holds, and the video it is decoded to. The
@@ -314,6 +330,7 @@ namespace djv
             FTK_P();
             const std::map<std::string, Pairs> sections =
             {
+                { "File", filePairs(p.path) },
                 { "Video", videoPairs(p.info) },
                 { "Audio", audioPairs(p.info) },
                 { "Metadata", Pairs(p.info.tags.begin(), p.info.tags.end()) }

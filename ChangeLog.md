@@ -23,6 +23,8 @@ Changes:
 * Movies can be exported with the FFmpeg command line application, whose
   encoders provide H.264, HEVC, and VP9.
 * AV1 support is now working on Windows.
+* The Information tool shows the file name and directory. Thanks to
+  aberkl for the suggestion.
 * Library updates:
     - OpenColorIO 2.5.2
     - OpenEXR 3.4.15
