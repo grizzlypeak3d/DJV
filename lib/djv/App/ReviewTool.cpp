@@ -274,7 +274,8 @@ namespace djv
             p.addRangeButton = ftk::ToolButton::create(context);
             p.addRangeButton->setIcon("FrameInOut");
             p.addRangeButton->setTooltip(
-                "Add a marker for the timeline in/out points.");
+                "Add a marker for the timeline in/out points, written in "
+                "place.");
 
             // One delete for the list, acting on the focused row, rather
             // than one on every row.
@@ -619,12 +620,15 @@ namespace djv
                 return;
             }
             // No dialog and no name: the marker's row is titled by its
-            // frames, and words belong in its text, added by clicking the
-            // row -- so every row DJV makes reads the same way.
+            // frames, and words belong in its text -- the editor opens in
+            // place, and leaving it empty leaves the bare span. The two add
+            // gestures differ only in the span they stamp.
             if (auto app = _app.lock())
             {
-                app->getMarkersModel()->add(
+                _commitMarker();
+                const std::string id = app->getMarkersModel()->add(
                     *p.inOutRange, std::string(), std::string());
+                _editMarker(id);
             }
         }
 

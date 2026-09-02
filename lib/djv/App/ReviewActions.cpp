@@ -190,7 +190,7 @@ namespace djv
             _addCommand(
                 "AddRange",
                 "Open the review tool and add a marker for the timeline "
-                "in/out points.",
+                "in/out points, edited in place.",
                 [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())

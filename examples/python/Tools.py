@@ -1044,7 +1044,8 @@ class ReviewTool(IToolWidget):
         self._addRangeButton = ftk.ToolButton(context)
         self._addRangeButton.icon = "FrameInOut"
         self._addRangeButton.tooltip = \
-            "Add a marker for the timeline in/out points."
+            "Add a marker for the timeline in/out points, written in " \
+            "place."
         # One delete for the list, acting on the focused row, rather
         # than one on every row. Clicking it must not move the key
         # focus, or it would clear the very selection it acts on.
@@ -1430,16 +1431,19 @@ class ReviewTool(IToolWidget):
 
     def addRange(self):
         """
-        Add a marker for the timeline in/out points.
+        Add a marker for the timeline in/out points, edited in place.
         """
         if not self._player or self._inOutRange is None:
             return
         # No dialog and no name: the marker's row is titled by its
-        # frames, and words belong in its text, added by clicking the
-        # row -- so every row reads the same way.
+        # frames, and words belong in its text -- the editor opens in
+        # place, and leaving it empty leaves the bare span. The two add
+        # gestures differ only in the span they stamp.
         app = self._app()
         if app is not None:
-            app.getMarkersModel().add(self._inOutRange, "", "")
+            self._commitMarker()
+            id = app.getMarkersModel().add(self._inOutRange, "", "")
+            self._editMarker(id)
 
     def _markersListUpdate(self, markers):
         self._markers = markers

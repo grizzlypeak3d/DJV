@@ -94,7 +94,7 @@ class Actions(IActions.IActions):
         self._addCommand(
             "AddRange",
             "Open the review tool and add a marker for the timeline "
-            "in/out points.",
+            "in/out points, edited in place.",
             lambda args: mainWindowWeak().addReviewRange())
 
         # Jump between the frames that carry a marker or a drawing. In
