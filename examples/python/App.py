@@ -669,24 +669,33 @@ class App(ftk.App):
         player.currentTime = targetTime
 
     def _reviewMarkersUpdate(self):
-        # Mark the frames that carry feedback or a drawing in the
-        # timeline. The ticks are deliberately undifferentiated --
-        # they say "there is something here" -- and follow the
-        # timeline, which shows "A". A ranged marker ticks its start
-        # frame.
-        markers = set()
+        # The frames worth jumping to: a marker's start, a drawing's
+        # frame. This is what the previous/next marker actions walk,
+        # and it follows the timeline, which shows "A".
+        jumps = set()
+        # The undifferentiated ticks -- "there is something here" --
+        # carry only the drawings; the markers draw as themselves.
+        ticks = set()
+        timelineMarkers = []
         for marker in self._markersModel.markers:
             if marker.range is not None:
-                markers.add(int(marker.range.start_time.value))
+                jumps.add(int(marker.range.start_time.value))
+                m = tl.ui.Marker()
+                m.name = marker.name
+                m.color = marker.color
+                m.range = marker.range
+                timelineMarkers.append(m)
         # Every annotation is stamped with the player's time, which is
         # the timeline's own clock, so a drawing made on a "B" source
         # still marks the right place.
         for annotation in self._annotationsModel.annotations:
             if annotation.time is not None:
-                markers.add(int(annotation.time.value))
-        markers = sorted(markers)
-        self._reviewMarkers.setIfChanged(markers)
-        self._window.getTimelineWidget().frameMarkers = markers
+                frame = int(annotation.time.value)
+                jumps.add(frame)
+                ticks.add(frame)
+        self._reviewMarkers.setIfChanged(sorted(jumps))
+        self._window.getTimelineWidget().frameMarkers = sorted(ticks)
+        self._window.getTimelineWidget().markers = timelineMarkers
 
     def _updateWindowTitle(self):
         title = self._appInfoModel.title

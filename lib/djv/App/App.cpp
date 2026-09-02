@@ -1362,16 +1362,18 @@ namespace djv
         void App::_markersUpdate()
         {
             FTK_P();
-            // Mark the frames that carry feedback or a drawing in the
-            // timeline. The ticks are deliberately undifferentiated -- they
-            // say "there is something here" -- and follow the timeline,
-            // which shows "A". A ranged marker ticks its start frame.
-            std::vector<int> markers;
+            // The frames worth jumping to: a marker's start, a drawing's
+            // frame. This is what the previous/next marker actions walk, and
+            // it follows the timeline, which shows "A".
+            std::vector<int> jumps;
+            // The undifferentiated ticks -- "there is something here" --
+            // now carry only the drawings; the markers draw as themselves.
+            std::vector<int> ticks;
             for (const auto& marker : p.markersModel->getMarkers())
             {
                 if (marker.range.has_value())
                 {
-                    markers.push_back(
+                    jumps.push_back(
                         static_cast<int>(marker.range->start_time().value()));
                 }
             }
@@ -1382,19 +1384,47 @@ namespace djv
             {
                 if (annotation.time.has_value())
                 {
-                    markers.push_back(static_cast<int>(annotation.time->value()));
+                    const int frame =
+                        static_cast<int>(annotation.time->value());
+                    jumps.push_back(frame);
+                    ticks.push_back(frame);
                 }
             }
-            std::sort(markers.begin(), markers.end());
-            markers.erase(std::unique(markers.begin(), markers.end()), markers.end());
-            p.reviewMarkers->setIfChanged(markers);
+            std::sort(jumps.begin(), jumps.end());
+            jumps.erase(std::unique(jumps.begin(), jumps.end()), jumps.end());
+            p.reviewMarkers->setIfChanged(jumps);
+            std::sort(ticks.begin(), ticks.end());
+            ticks.erase(std::unique(ticks.begin(), ticks.end()), ticks.end());
             // The window can still be missing here: the observers fire while a
-            // review passed on the command line is applied. The markers are kept
+            // review passed on the command line is applied. The lists are kept
             // above regardless, and pushed again once the window exists.
             if (p.mainWindow)
             {
-                p.mainWindow->getTimelineWidget()->setFrameMarkers(markers);
+                p.mainWindow->getTimelineWidget()->setFrameMarkers(ticks);
+                _timelineMarkersUpdate();
             }
+        }
+
+        void App::_timelineMarkersUpdate()
+        {
+            FTK_P();
+            // The review markers draw on the timeline as ranged, colored
+            // markers; the undifferentiated ticks above stay for the
+            // drawings. Markers about no frame in particular have nowhere
+            // to draw.
+            std::vector<tl::ui::Marker> markers;
+            for (const auto& marker : p.markersModel->getMarkers())
+            {
+                if (marker.range.has_value())
+                {
+                    tl::ui::Marker m;
+                    m.name = marker.name;
+                    m.color = marker.color;
+                    m.range = *marker.range;
+                    markers.push_back(m);
+                }
+            }
+            p.mainWindow->getTimelineWidget()->setMarkers(markers);
         }
 
         void App::_updateWindowTitle()

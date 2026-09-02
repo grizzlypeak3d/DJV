@@ -307,6 +307,7 @@ namespace djv
             void _markModified();
             void _updateWindowTitle();
             void _markersUpdate();
+            void _timelineMarkersUpdate();
 
             FTK_PRIVATE();
         };
