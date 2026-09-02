@@ -245,16 +245,7 @@ namespace djv
                 out.push_back({ "Directory", path.getDir() });
                 if (path.isSeq())
                 {
-                    // The same presentation as the file browser: the range,
-                    // with the number of frames when the sequence is missing
-                    // some of them.
-                    std::string frames = path.getFrameRange();
-                    if (path.isPartialSeq())
-                    {
-                        frames += ftk::Format(" ({0})").
-                            arg(static_cast<int>(path.getSeqSize())).str();
-                    }
-                    out.push_back({ "Frames", frames });
+                    out.push_back({ "Frames", path.getFrameRange(true) });
                 }
                 return out;
             }
