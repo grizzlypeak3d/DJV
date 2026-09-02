@@ -11,12 +11,17 @@ Changes:
   DJV_PYTHON=ON.
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
 * Add support for reading OpenEXR files with HTJ2K compression.
-* Automatic OCIO input color spaces.
+* Automatic OCIO input color spaces, including the OpenEXR
+  "colorInteropID" attribute. Thanks to SteffenDuenner for the feedback.
 * Movie and image sequence exports carry color information.
 * Add thumbnails to the file browser.
 * The file browser can be opened in a window of its own.
 * The file browser can be driven from the keyboard.
 * The FFmpegCmd plugin is merged into the FFmpeg plugin as a fallback.
+* Movie exports are chosen from a preset list: MJPEG, ProRes, FFV1, AV1,
+  and more.
+* Movies can be exported with the FFmpeg command line application, whose
+  encoders provide H.264, HEVC, and VP9.
 * AV1 support is now working on Windows.
 * Library updates:
     - OpenColorIO 2.5.2
@@ -26,6 +31,8 @@ Changes:
 
 Fixes:
 * Naming a review range and pressing Return crashed.
+* Hardware decoding now reaches AV1: the software decoder was chosen even
+  when a hardware capable one was available.
 * The keypad's Enter key works like the Return key.
 * The color corrections are applied in linear, when the OCIO configuration
   names a scene_linear role, rather than in the file's color space.
