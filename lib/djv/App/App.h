@@ -209,6 +209,10 @@ namespace djv
 
             //! Close the current review and reset to the empty startup state,
             //! prompting to save first if there are unsaved changes.
+            //! Import a timeline as a review, asking which: it becomes the
+            //! review's "A" by reference and its markers become feedback.
+            void importReviewDialog();
+
             //! Export the review's markers to an OTIO file, asking where.
             void exportReviewMarkers();
 

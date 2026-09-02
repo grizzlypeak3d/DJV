@@ -684,11 +684,7 @@ class App(ftk.App):
                 os.path.basename(self._reviewPath)
                 if self._reviewPath is not None
                 else "review" + djv.models.reviewExtension())
-        if ftk.FileBrowserMode.Open == mode:
-            options.extensions = [
-                djv.models.reviewExtension(), ".otio", ".otioz"]
-        else:
-            options.extensions = [djv.models.reviewExtension()]
+        options.extensions = [djv.models.reviewExtension()]
         options.extensionsLabel = "Review Session"
         self.context.getSystemByName("ftk::FileBrowserSystem").open(
             self._window, callback, options)
@@ -703,12 +699,28 @@ class App(ftk.App):
         self._markersModel.setMarkers(_markersFromTimeline(timeline))
         self._updateWindowTitle()
 
+    def importReviewDialog(self):
+        """
+        Import a timeline as a review, asking which.
+        """
+        options = ftk.FileBrowserOpenOptions()
+        options.title = "Import"
+        options.mode = ftk.FileBrowserMode.Open
+        options.extensions = [".otio", ".otioz"]
+        options.extensionsLabel = "Timeline"
+        selfWeak = weakref.ref(self)
+        self.context.getSystemByName("ftk::FileBrowserSystem").open(
+            self._window,
+            lambda value: selfWeak() and
+                selfWeak()._importReviewTimeline(str(value)),
+            options)
+
     def exportReviewMarkers(self):
         """
         Export the review's markers to an OTIO file, asking where.
         """
         options = ftk.FileBrowserOpenOptions()
-        options.title = "Export Markers"
+        options.title = "Export"
         options.mode = ftk.FileBrowserMode.Save
         if self._reviewPath is not None:
             options.path = os.path.dirname(self._reviewPath)

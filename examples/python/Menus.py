@@ -198,7 +198,8 @@ class Review(ftk.Menu):
         self.addAction(actions.actions["Open"])
         self.addAction(actions.actions["Save"])
         self.addAction(actions.actions["SaveAs"])
-        self.addAction(actions.actions["ExportMarkers"])
+        self.addAction(actions.actions["Import"])
+        self.addAction(actions.actions["Export"])
         self.addAction(actions.actions["Close"])
         self.recentMenu = self.addSubMenu("Recent")
         self.addDivider();

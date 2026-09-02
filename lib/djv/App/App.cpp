@@ -1070,15 +1070,7 @@ namespace djv
                     std::string("review") + models::reviewExtension() :
                     p.reviewPath.filename().u8string();
             }
-            if (ftk::FileBrowserMode::Open == mode)
-            {
-                options.extensions =
-                    { models::reviewExtension(), ".otio", ".otioz" };
-            }
-            else
-            {
-                options.extensions = { models::reviewExtension() };
-            }
+            options.extensions = { models::reviewExtension() };
             options.extensionsLabel = "Review Session";
             fileBrowserSystem->open(
                 p.mainWindow,
@@ -1276,12 +1268,31 @@ namespace djv
             _updateWindowTitle();
         }
 
+        void App::importReviewDialog()
+        {
+            FTK_P();
+            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+            ftk::FileBrowserOpenOptions options;
+            options.title = "Import";
+            options.mode = ftk::FileBrowserMode::Open;
+            options.extensions = { ".otio", ".otioz" };
+            options.extensionsLabel = "Timeline";
+            fileBrowserSystem->open(
+                p.mainWindow,
+                [this](const ftk::Path& value)
+                {
+                    _importReviewTimeline(
+                        std::filesystem::u8path(value.get()));
+                },
+                options);
+        }
+
         void App::exportReviewMarkers()
         {
             FTK_P();
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             ftk::FileBrowserOpenOptions options;
-            options.title = "Export Markers";
+            options.title = "Export";
             options.mode = ftk::FileBrowserMode::Save;
             options.path = p.reviewPath.empty() ?
                 std::filesystem::path() : p.reviewPath.parent_path();

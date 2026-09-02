@@ -80,7 +80,19 @@ namespace djv
                 });
 
             _addCommand(
-                "ExportMarkers",
+                "Import",
+                "Import an OTIO timeline as a review: it becomes the "
+                "review's first file, and its markers become the feedback.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->importReviewDialog();
+                    }
+                });
+
+            _addCommand(
+                "Export",
                 "Write the review's markers to an OTIO file.",
                 [appWeak](const nlohmann::json&)
                 {
@@ -248,9 +260,12 @@ namespace djv
             _actions["SaveAs"] = ftk::Action::create(
                 "Save As...",
                 _command("SaveAs"));
-            _actions["ExportMarkers"] = ftk::Action::create(
-                "Export Markers...",
-                _command("ExportMarkers"));
+            _actions["Import"] = ftk::Action::create(
+                "Import...",
+                _command("Import"));
+            _actions["Export"] = ftk::Action::create(
+                "Export...",
+                _command("Export"));
             _actions["Close"] = ftk::Action::create(
                 "Close",
                 _command("Close"));
@@ -308,7 +323,8 @@ namespace djv
                     static_cast<int>(ftk::KeyModifier::Alt) |
                     static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("SaveAs", "Save review as");
-            _addShortcut("ExportMarkers", "Export markers");
+            _addShortcut("Import", "Import a timeline");
+            _addShortcut("Export", "Export markers");
             _addShortcut("Close", "Close review");
             // No default keys yet: which keys serve drawing best is still
             // being worked out with the users (#838). The actions are in the
@@ -387,7 +403,7 @@ namespace djv
                 {
                     FTK_P();
                     p.hasMarkerItems = !value.empty();
-                    _actions["ExportMarkers"]->setEnabled(
+                    _actions["Export"]->setEnabled(
                         p.hasPlayer && p.hasMarkerItems);
                 });
 
@@ -409,7 +425,7 @@ namespace djv
                     _actions["Erase"]->setEnabled(p.hasPlayer);
                     _actions["ClearDrawing"]->setEnabled(p.hasPlayer);
                     _actions["AddNote"]->setEnabled(p.hasPlayer);
-                    _actions["ExportMarkers"]->setEnabled(
+                    _actions["Export"]->setEnabled(
                         p.hasPlayer && p.hasMarkerItems);
                     if (value)
                     {
