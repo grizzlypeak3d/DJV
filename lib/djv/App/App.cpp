@@ -1296,10 +1296,15 @@ namespace djv
         void App::confirmClose(const std::function<void()>& onProceed)
         {
             FTK_P();
-            // Only prompt for a review that is already saved (has a path) and has
-            // unsaved changes -- opening loose media without a review never asks.
+            // Prompt for a review that is already saved (has a path) and has
+            // unsaved changes, and for a session that authored feedback --
+            // markers or drawings, which exist nowhere but here -- without
+            // ever saving. Opening loose media and only looking never asks.
+            const bool hasFeedback =
+                !p.markersModel->getMarkers().empty() ||
+                !p.annotationsModel->getAnnotations().empty();
             if (!p.reviewModified ||
-                p.reviewPath.empty() ||
+                (p.reviewPath.empty() && !hasFeedback) ||
                 p.filesModel->getFiles().empty() ||
                 !p.mainWindow)
             {
@@ -1308,7 +1313,9 @@ namespace djv
             }
             _context->getSystem<ftk::DialogSystem>()->choice(
                 "Save Review",
-                "Save changes to the review before closing?",
+                p.reviewPath.empty() ?
+                    "Save the session as a review before closing?" :
+                    "Save changes to the review before closing?",
                 { "Save", "Don't Save", "Cancel" },
                 p.mainWindow,
                 [this, onProceed](int value)
@@ -1316,10 +1323,18 @@ namespace djv
                     switch (value)
                     {
                     case 0:
-                        // The prompt only appears for an already-saved review, so
-                        // the path is always set here.
-                        saveReview(_p->reviewPath);
-                        onProceed();
+                        if (_p->reviewPath.empty())
+                        {
+                            // Never saved: ask where. Cancelling the file
+                            // dialog cancels the close, the same as Cancel
+                            // here.
+                            _saveReviewAs(onProceed);
+                        }
+                        else
+                        {
+                            saveReview(_p->reviewPath);
+                            onProceed();
+                        }
                         break;
                     case 1:
                         // A deliberate discard is not a crash: drop the backup.
