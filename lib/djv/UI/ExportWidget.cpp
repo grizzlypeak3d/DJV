@@ -688,7 +688,38 @@ namespace djv
                     }
 
                     tl::IOOptions ioOptions;
-                    if (options.movieCmd)
+                    const tl::ffmpeg::WritePreset* preset = nullptr;
+                    if (options.moviePreset != "Custom")
+                    {
+                        for (const auto& i : tl::ffmpeg::getWritePresets())
+                        {
+                            if (i.name == options.moviePreset)
+                            {
+                                preset = &i;
+                                break;
+                            }
+                        }
+                    }
+                    if (preset)
+                    {
+                        if (preset->command)
+                        {
+                            // The settings' paths, so a custom ffmpeg is
+                            // honoured.
+                            ioOptions = p.settings->getIOOptions();
+                        }
+                        for (const auto& i : preset->options)
+                        {
+                            ioOptions[i.first] = i.second;
+                        }
+                        if (!preset->command &&
+                            !options.movieAudioCodec.empty() &&
+                            options.movieAudioCodec != "Auto")
+                        {
+                            ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
+                        }
+                    }
+                    else if (options.movieCmd)
                     {
                         // The command line application does the encoding, with
                         // the settings' paths so a custom ffmpeg is honoured.

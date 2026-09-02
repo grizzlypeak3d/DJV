@@ -577,11 +577,13 @@ namespace djv
             std::vector<std::string> codecs;
             std::vector<std::string> audioCodecs;
             std::vector<std::string> cmdPresets;
+            std::vector<std::string> presets;
 
             std::shared_ptr<ftk::LineEdit> baseEdit;
             std::shared_ptr<ftk::ComboBox> extComboBox;
             std::shared_ptr<ftk::ComboBox> codecComboBox;
             std::shared_ptr<ftk::ComboBox> audioCodecComboBox;
+            std::shared_ptr<ftk::ComboBox> presetComboBox;
             std::shared_ptr<ftk::CheckBox> cmdCheckBox;
             std::shared_ptr<ftk::ComboBox> cmdPresetComboBox;
             std::shared_ptr<ftk::LineEdit> cmdArgsEdit;
@@ -645,7 +647,21 @@ namespace djv
             {
                 p.cmdPresets.push_back(preset.name);
             }
+            for (const auto& preset : tl::ffmpeg::getWritePresets())
+            {
+                p.presets.push_back(preset.name);
+            }
 #endif // TLRENDER_FFMPEG_PLUGIN
+            // "Custom" opens the codec and command controls; the named
+            // presets are the curated list, so choosing an output does not
+            // mean picking through every encoder FFmpeg has.
+            p.presets.push_back("Custom");
+            p.presetComboBox = ftk::ComboBox::create(context, p.presets);
+            p.presetComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.presetComboBox->setTooltip(
+                "What to export. \"Custom\" opens the codec and command "
+                "controls below.");
+            ftk::setScreenshotTag(p.presetComboBox, "Export.MoviePreset");
             p.cmdCheckBox = ftk::CheckBox::create(context);
             p.cmdCheckBox->setTooltip(
                 "Write with the FFmpeg command line application instead of "
@@ -677,10 +693,11 @@ namespace djv
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             formLayout->addRow("Base name:", p.baseEdit);
             formLayout->addRow("Extension:", p.extComboBox);
+            formLayout->addRow("Preset:", p.presetComboBox);
             formLayout->addRow("Codec:", p.codecComboBox);
             formLayout->addRow("Audio codec:", p.audioCodecComboBox);
             formLayout->addRow("FFmpeg command:", p.cmdCheckBox);
-            formLayout->addRow("Preset:", p.cmdPresetComboBox);
+            formLayout->addRow("Command preset:", p.cmdPresetComboBox);
             formLayout->addRow("Arguments:", p.cmdArgsEdit);
             ftk::setScreenshotTag(p.fileLabel, "Export.MovieFile");
             formLayout->addRow("File:", p.fileLabel);
@@ -701,16 +718,34 @@ namespace djv
                     p.codecComboBox->setCurrentIndex(i != p.codecs.end() ? (i - p.codecs.begin()) : -1);
                     i = std::find(p.audioCodecs.begin(), p.audioCodecs.end(), value.movieAudioCodec);
                     p.audioCodecComboBox->setCurrentIndex(i != p.audioCodecs.end() ? (i - p.audioCodecs.begin()) : -1);
+                    i = std::find(p.presets.begin(), p.presets.end(), value.moviePreset);
+                    p.presetComboBox->setCurrentIndex(i != p.presets.end() ? (i - p.presets.begin()) : -1);
                     p.cmdCheckBox->setChecked(value.movieCmd);
                     i = std::find(p.cmdPresets.begin(), p.cmdPresets.end(), value.movieCmdPreset);
                     p.cmdPresetComboBox->setCurrentIndex(i != p.cmdPresets.end() ? (i - p.cmdPresets.begin()) : -1);
                     p.cmdArgsEdit->setText(value.movieCmdArgs);
-                    // The command line writer replaces the library codecs,
-                    // and writes video only.
-                    p.codecComboBox->setEnabled(!value.movieCmd);
-                    p.audioCodecComboBox->setEnabled(!value.movieCmd);
-                    p.cmdPresetComboBox->setEnabled(value.movieCmd);
-                    p.cmdArgsEdit->setEnabled(value.movieCmd);
+                    // A named preset says it all; "Custom" opens the manual
+                    // controls. The command line writer replaces the library
+                    // codecs, and writes video only -- for a named preset the
+                    // audio codec follows whether the preset is a command one.
+                    const bool custom = "Custom" == value.moviePreset;
+                    bool presetCmd = false;
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+                    for (const auto& preset : tl::ffmpeg::getWritePresets())
+                    {
+                        if (preset.name == value.moviePreset)
+                        {
+                            presetCmd = preset.command;
+                            break;
+                        }
+                    }
+#endif // TLRENDER_FFMPEG_PLUGIN
+                    p.codecComboBox->setEnabled(custom && !value.movieCmd);
+                    p.audioCodecComboBox->setEnabled(
+                        custom ? !value.movieCmd : !presetCmd);
+                    p.cmdCheckBox->setEnabled(custom);
+                    p.cmdPresetComboBox->setEnabled(custom && value.movieCmd);
+                    p.cmdArgsEdit->setEnabled(custom && value.movieCmd);
                     _infoUpdate();
                 });
 
@@ -762,6 +797,18 @@ namespace djv
                     {
                         auto options = p.settings->getExport();
                         options.movieAudioCodec = p.audioCodecs[value];
+                        p.settings->setExport(options);
+                    }
+                });
+
+            p.presetComboBox->setIndexCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    if (value >= 0 && value < static_cast<int>(p.presets.size()))
+                    {
+                        auto options = p.settings->getExport();
+                        options.moviePreset = p.presets[value];
                         p.settings->setExport(options);
                     }
                 });

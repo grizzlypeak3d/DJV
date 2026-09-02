@@ -68,6 +68,7 @@ namespace djv
                 movieBase == other.movieBase &&
                 movieExt == other.movieExt &&
                 movieCodec == other.movieCodec &&
+                moviePreset == other.moviePreset &&
                 movieCmd == other.movieCmd &&
                 movieCmdPreset == other.movieCmdPreset &&
                 movieCmdArgs == other.movieCmdArgs &&
@@ -891,6 +892,7 @@ namespace djv
             json["MovieBase"] = value.movieBase;
             json["MovieExt"] = value.movieExt;
             json["MovieCodec"] = value.movieCodec;
+            json["MoviePreset"] = value.moviePreset;
             json["MovieCmd"] = value.movieCmd;
             json["MovieCmdPreset"] = value.movieCmdPreset;
             json["MovieCmdArgs"] = value.movieCmdArgs;
@@ -1059,6 +1061,10 @@ namespace djv
             json.at("MovieBase").get_to(value.movieBase);
             json.at("MovieExt").get_to(value.movieExt);
             json.at("MovieCodec").get_to(value.movieCodec);
+            if (json.contains("MoviePreset"))
+            {
+                json.at("MoviePreset").get_to(value.moviePreset);
+            }
             if (json.contains("MovieCmd"))
             {
                 json.at("MovieCmd").get_to(value.movieCmd);

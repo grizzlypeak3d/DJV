@@ -100,6 +100,9 @@ namespace djv
             std::string movieExt = ".mov";
             std::string movieCodec = "mjpeg";
             std::string movieAudioCodec = "Auto";
+            //! The movie export preset, or "Custom" for the codec and
+            //! command controls below.
+            std::string moviePreset = "MJPEG";
             //! Write movies with the FFmpeg command line application
             //! instead of the library, using its encoders. Video only.
             bool movieCmd = false;
