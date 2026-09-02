@@ -34,6 +34,8 @@ Changes:
 
 Fixes:
 * Naming a review range and pressing Return crashed.
+* The frame cache reloaded continuously while the current frame sat
+  outside the in/out points.
 * Hardware decoding now reaches AV1: the software decoder was chosen even
   when a hardware capable one was available.
 * The keypad's Enter key works like the Return key.
