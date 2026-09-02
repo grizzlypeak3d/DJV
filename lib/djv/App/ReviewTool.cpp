@@ -1151,6 +1151,10 @@ namespace djv
                     p.swatches[marker.id] = swatch;
                     swatch->setColor(marker.color);
                     swatch->setEditable(true);
+                    // The row is the focus unit in this list; the dot acts
+                    // like the header delete button and stays out of the
+                    // tab order. After setEditable, which opts in.
+                    swatch->setAcceptsKeyFocus(false);
                     swatch->setVAlign(ftk::VAlign::Center);
                     swatch->setTooltip("The marker's color.");
                     swatch->setCallback(

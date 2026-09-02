@@ -1553,6 +1553,9 @@ class ReviewTool(IToolWidget):
                 self._swatches[marker.id] = swatch
                 swatch.color = marker.color
                 swatch.editable = True
+                # The row is the focus unit in this list; the dot stays
+                # out of the tab order. After editable, which opts in.
+                swatch.acceptsKeyFocus = False
                 swatch.tooltip = "The marker's color."
                 def colorPicked(value, captured = marker.id,
                         appWeak = appWeak):
