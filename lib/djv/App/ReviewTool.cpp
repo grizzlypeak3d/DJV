@@ -288,9 +288,10 @@ namespace djv
             p.deleteButton->setTooltip(
                 "Delete the selected or active marker.");
             p.deleteButton->setEnabled(false);
-            // Clicking the delete must not move the key focus, or it would
-            // clear the very selection it is about to act on.
-            p.deleteButton->setAcceptsKeyFocus(false);
+            // The delete takes the key focus like any button. Taking it
+            // puts down the row focus, and the target falls back to the
+            // marker on the current frame -- the row's own Delete key is
+            // the path that acts on a focused row exactly.
 
             auto markerToolLayout = ftk::HorizontalLayout::create(context);
             markerToolLayout->setSpacingRole(ftk::SizeRole::None);

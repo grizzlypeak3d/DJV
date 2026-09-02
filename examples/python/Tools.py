@@ -1054,7 +1054,10 @@ class ReviewTool(IToolWidget):
         self._deleteButton.icon = "Remove"
         self._deleteButton.tooltip = "Delete the selected or active marker."
         self._deleteButton.enabled = False
-        self._deleteButton.acceptsKeyFocus = False
+        # The delete takes the key focus like any button. Taking it
+        # puts down the row focus, and the target falls back to the
+        # marker on the current frame -- the row's own Delete key is
+        # the path that acts on a focused row exactly.
         markerToolLayout = ftk.HorizontalLayout(context)
         markerToolLayout.spacingRole = ftk.SizeRole._None
         self._addNoteButton.parent = markerToolLayout
