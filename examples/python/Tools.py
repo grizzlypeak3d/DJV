@@ -1207,7 +1207,7 @@ class ReviewTool(IToolWidget):
                 selfWeak()._redoButton, "enabled", value))
 
         self._addNoteButton.setClickedCallback(Util.weak(self.addNote))
-        self._addRangeButton.setClickedCallback(Util.weak(self._addRange))
+        self._addRangeButton.setClickedCallback(Util.weak(self.addRange))
         self._deleteButton.setClickedCallback(Util.weak(self._deleteMarker))
         self._markersObserver = djv.models.ReviewMarkerListObserver(
             app.getMarkersModel().observeMarkers,
@@ -1428,7 +1428,10 @@ class ReviewTool(IToolWidget):
             self._inOutRange != self._player.timeRange)
         self._addRangeButton.enabled = narrowed
 
-    def _addRange(self):
+    def addRange(self):
+        """
+        Add a marker for the timeline in/out points.
+        """
         if not self._player or self._inOutRange is None:
             return
         # No dialog and no name: the marker's row is titled by its

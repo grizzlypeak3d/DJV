@@ -9,6 +9,8 @@
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
 
+#include <tlRender/Timeline/Player.h>
+
 namespace djv
 {
     namespace app
@@ -17,6 +19,9 @@ namespace djv
         {
             bool hasPlayer = false;
             bool hasMarkers = false;
+            //! Whether the in/out points narrow the timeline: adding a range
+            //! marker is only meaningful when they do.
+            bool narrowed = false;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<models::DrawTool> > toolObserver;
@@ -25,6 +30,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<bool> > hasRedoObserver;
             std::shared_ptr<ftk::ListObserver<int> > markersObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutObserver;
         };
 
         void ReviewActions::_init(
@@ -167,9 +173,12 @@ namespace djv
                 });
 
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
+            // The identifier stays "AddNote" so saved shortcut bindings
+            // survive the marker unification.
             _addCommand(
                 "AddNote",
-                "Open the review tool and start a new note, edited in place.",
+                "Open the review tool and add a marker about the current "
+                "frame, edited in place.",
                 [mainWindowWeak](const nlohmann::json&)
                 {
                     if (auto mainWindow = mainWindowWeak.lock())
@@ -178,12 +187,24 @@ namespace djv
                     }
                 });
 
-            // Jump between the frames that carry a note or a drawing. In a
+            _addCommand(
+                "AddRange",
+                "Open the review tool and add a marker for the timeline "
+                "in/out points.",
+                [mainWindowWeak](const nlohmann::json&)
+                {
+                    if (auto mainWindow = mainWindowWeak.lock())
+                    {
+                        mainWindow->addReviewRange();
+                    }
+                });
+
+            // Jump between the frames that carry a marker or a drawing. In a
             // review these are the only frames that matter, and stepping to
             // them by hand over a long timeline is the slow part.
             _addCommand(
                 "PrevFrame",
-                "Go to the previous frame with a note or a drawing.",
+                "Go to the previous frame with a marker or a drawing.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
@@ -194,7 +215,7 @@ namespace djv
 
             _addCommand(
                 "NextFrame",
-                "Go to the next frame with a note or a drawing.",
+                "Go to the next frame with a marker or a drawing.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
@@ -237,14 +258,17 @@ namespace djv
                 "Remove",
                 _command("ClearDrawing"));
             _actions["AddNote"] = ftk::Action::create(
-                "Add Note",
+                "Add Marker",
                 _command("AddNote"));
+            _actions["AddRange"] = ftk::Action::create(
+                "Add Range",
+                _command("AddRange"));
             _actions["PrevFrame"] = ftk::Action::create(
-                "Previous Frame",
+                "Previous Marker",
                 "ReviewPrev",
                 _command("PrevFrame"));
             _actions["NextFrame"] = ftk::Action::create(
-                "Next Frame",
+                "Next Marker",
                 "ReviewNext",
                 _command("NextFrame"));
 
@@ -276,18 +300,19 @@ namespace djv
             _addShortcut("Undo", "Undo drawing");
             _addShortcut("Redo", "Redo drawing");
             _addShortcut("ClearDrawing", "Clear drawing");
-            _addShortcut("AddNote", "Add a note");
+            _addShortcut("AddNote", "Add a marker");
+            _addShortcut("AddRange", "Add a range");
             // Shift and Control on the arrows are already taken by the X10 and
             // X100 frame steps.
             _addShortcut(
                 "PrevFrame",
-                "Previous review frame",
+                "Previous marker",
                 ftk::KeyShortcut(
                     ftk::Key::Left,
                     static_cast<int>(ftk::KeyModifier::Alt)));
             _addShortcut(
                 "NextFrame",
-                "Next review frame",
+                "Next marker",
                 ftk::KeyShortcut(
                     ftk::Key::Right,
                     static_cast<int>(ftk::KeyModifier::Alt)));
@@ -356,6 +381,24 @@ namespace djv
                     _actions["Erase"]->setEnabled(p.hasPlayer);
                     _actions["ClearDrawing"]->setEnabled(p.hasPlayer);
                     _actions["AddNote"]->setEnabled(p.hasPlayer);
+                    if (value)
+                    {
+                        p.inOutObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
+                            value->observeInOutRange(),
+                            [this, value](const OTIO_NS::TimeRange& range)
+                            {
+                                FTK_P();
+                                p.narrowed = !tl::compareExact(
+                                    range, value->getTimeRange());
+                                _actions["AddRange"]->setEnabled(p.narrowed);
+                            });
+                    }
+                    else
+                    {
+                        p.inOutObserver.reset();
+                        p.narrowed = false;
+                        _actions["AddRange"]->setEnabled(false);
+                    }
                     _markersUpdate();
                 });
         }
@@ -391,7 +434,7 @@ namespace djv
         void ReviewActions::_markersUpdate()
         {
             FTK_P();
-            // There is nowhere to jump until a frame carries a note or a
+            // There is nowhere to jump until a frame carries a marker or a
             // drawing.
             const bool enabled = p.hasPlayer && p.hasMarkers;
             _actions["PrevFrame"]->setEnabled(enabled);

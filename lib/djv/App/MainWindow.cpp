@@ -633,6 +633,20 @@ namespace djv
             }
         }
 
+        void MainWindow::addReviewRange()
+        {
+            FTK_P();
+            if (auto app = p.app.lock())
+            {
+                app->getToolsModel()->setToolOpen("Review", true);
+            }
+            if (auto reviewTool = std::dynamic_pointer_cast<ReviewTool>(
+                p.toolsWidget->getToolWidget("Review")))
+            {
+                reviewTool->addRange();
+            }
+        }
+
         void MainWindow::showAboutDialog()
         {
             FTK_P();

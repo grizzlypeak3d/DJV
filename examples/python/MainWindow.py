@@ -242,6 +242,18 @@ class MainWindow(ftk.MainWindow):
         if widget is not None:
             widget.addNote()
 
+    def addReviewRange(self):
+        """
+        Open the review tool and add a marker for the timeline in/out
+        points.
+        """
+        app = self._app()
+        if app is not None:
+            app.getToolsModel().setToolOpen("Review", True)
+        widget = self._toolsWidget.getToolWidget("Review")
+        if widget is not None:
+            widget.addRange()
+
     def setPresentMode(self, value):
         if self._presentMode.setIfChanged(value):
             self.fullScreen = value

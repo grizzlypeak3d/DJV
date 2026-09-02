@@ -44,6 +44,7 @@ namespace djv
             addAction(actions["ClearDrawing"]);
             addDivider();
             addAction(actions["AddNote"]);
+            addAction(actions["AddRange"]);
             addAction(actions["PrevFrame"]);
             addAction(actions["NextFrame"]);
 

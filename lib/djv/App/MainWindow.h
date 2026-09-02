@@ -95,6 +95,10 @@ namespace djv
             //! Open the review tool and start a new note, edited in place.
             DJV_APP_API void addReviewNote();
 
+            //! Open the review tool and add a marker for the timeline
+            //! in/out points.
+            DJV_APP_API void addReviewRange();
+
             //! Save the window settings.
             DJV_APP_API void saveSettings();
 

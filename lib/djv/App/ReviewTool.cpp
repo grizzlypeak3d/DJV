@@ -497,7 +497,7 @@ namespace djv
             p.addRangeButton->setClickedCallback(
                 [this]
                 {
-                    _addRange();
+                    addRange();
                 });
 
             p.deleteButton->setClickedCallback(
@@ -611,7 +611,7 @@ namespace djv
             p.addRangeButton->setEnabled(narrowed);
         }
 
-        void ReviewTool::_addRange()
+        void ReviewTool::addRange()
         {
             FTK_P();
             if (!p.player || !p.inOutRange.has_value())

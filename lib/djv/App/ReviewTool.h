@@ -42,9 +42,12 @@ namespace djv
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            //! Start a new marker about the current frame, edited in place in
+            //! Add a marker about the current frame, edited in place in
             //! the list.
             void addNote();
+
+            //! Add a marker for the timeline in/out points.
+            void addRange();
 
             void setGeometry(const ftk::Box2I&) override;
             void keyPressEvent(ftk::KeyEvent&) override;
@@ -77,7 +80,6 @@ namespace djv
             void _markersUpdate();
             void _selectionUpdate();
             void _inOutUpdate();
-            void _addRange();
 
             FTK_PRIVATE();
         };

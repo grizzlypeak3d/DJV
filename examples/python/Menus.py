@@ -208,6 +208,7 @@ class Review(ftk.Menu):
         self.addAction(actions.actions["ClearDrawing"])
         self.addDivider();
         self.addAction(actions.actions["AddNote"])
+        self.addAction(actions.actions["AddRange"])
         self.addAction(actions.actions["PrevFrame"])
         self.addAction(actions.actions["NextFrame"])
 

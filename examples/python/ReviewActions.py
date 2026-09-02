@@ -83,23 +83,31 @@ class Actions(IActions.IActions):
             "Remove every stroke on the current frame.",
             clearDrawing)
 
+        # The identifier stays "AddNote" so saved shortcut bindings
+        # survive the marker unification.
         self._addCommand(
             "AddNote",
-            "Open the review tool and start a new note, edited in "
-            "place.",
+            "Open the review tool and add a marker about the current "
+            "frame, edited in place.",
             lambda args: mainWindowWeak().addReviewNote())
 
-        # Jump between the frames that carry a note or a drawing. In a
-        # review these are the only frames that matter, and stepping to
-        # them by hand over a long timeline is the slow part.
+        self._addCommand(
+            "AddRange",
+            "Open the review tool and add a marker for the timeline "
+            "in/out points.",
+            lambda args: mainWindowWeak().addReviewRange())
+
+        # Jump between the frames that carry a marker or a drawing. In
+        # a review these are the only frames that matter, and stepping
+        # to them by hand over a long timeline is the slow part.
         self._addCommand(
             "PrevFrame",
-            "Go to the previous frame with a note or a drawing.",
+            "Go to the previous frame with a marker or a drawing.",
             lambda args: appWeak().seekReviewMarker(False))
 
         self._addCommand(
             "NextFrame",
-            "Go to the next frame with a note or a drawing.",
+            "Go to the next frame with a marker or a drawing.",
             lambda args: appWeak().seekReviewMarker(True))
 
         # Create the actions.
@@ -136,14 +144,17 @@ class Actions(IActions.IActions):
             "Remove",
             self._command("ClearDrawing"))
         self.actions["AddNote"] = ftk.Action(
-            "Add Note",
+            "Add Marker",
             self._command("AddNote"))
+        self.actions["AddRange"] = ftk.Action(
+            "Add Range",
+            self._command("AddRange"))
         self.actions["PrevFrame"] = ftk.Action(
-            "Previous Frame",
+            "Previous Marker",
             "ReviewPrev",
             self._command("PrevFrame"))
         self.actions["NextFrame"] = ftk.Action(
-            "Next Frame",
+            "Next Marker",
             "ReviewNext",
             self._command("NextFrame"))
 
@@ -165,12 +176,13 @@ class Actions(IActions.IActions):
         self._addShortcut("Undo", "Undo drawing")
         self._addShortcut("Redo", "Redo drawing")
         self._addShortcut("ClearDrawing", "Clear drawing")
-        self._addShortcut("AddNote", "Add a note")
+        self._addShortcut("AddNote", "Add a marker")
+        self._addShortcut("AddRange", "Add a range")
         # Shift and Control on the arrows are already taken by the X10
         # and X100 frame steps.
-        self._addShortcut("PrevFrame", "Previous review frame",
+        self._addShortcut("PrevFrame", "Previous marker",
             ftk.KeyShortcut(ftk.Key.Left, ftk.KeyModifier.Alt))
-        self._addShortcut("NextFrame", "Next review frame",
+        self._addShortcut("NextFrame", "Next marker",
             ftk.KeyShortcut(ftk.Key.Right, ftk.KeyModifier.Alt))
 
         self._shortcutsUpdate(self._settingsModel.shortcuts)
@@ -248,4 +260,20 @@ class Actions(IActions.IActions):
         self.actions["Erase"].enabled = self._hasPlayer
         self.actions["ClearDrawing"].enabled = self._hasPlayer
         self.actions["AddNote"].enabled = self._hasPlayer
+        selfWeak = weakref.ref(self)
+        if player is not None:
+            # Adding a range marker is only meaningful when the in/out
+            # points narrow the timeline.
+            self._inOutObserver = tl.TimeRangeObserver(
+                player.observeInOutRange,
+                lambda value, playerRef = weakref.ref(player):
+                    selfWeak() and selfWeak()._inOutUpdate(
+                        value, playerRef()))
+        else:
+            self._inOutObserver = None
+            self.actions["AddRange"].enabled = False
         self._markersUpdate(None)
+
+    def _inOutUpdate(self, value, player):
+        self.actions["AddRange"].enabled = (
+            player is not None and value != player.timeRange)
