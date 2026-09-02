@@ -43,9 +43,10 @@ namespace djv
             //! Replace all the markers, e.g. when a review is opened.
             DJV_MODELS_API void setMarkers(const std::vector<ReviewMarker>&);
 
-            //! Add a marker. The identifier, creation time and author are
-            //! filled in here, so callers only provide the rest.
-            DJV_MODELS_API void add(
+            //! Add a marker, returning its identifier. The identifier,
+            //! creation time and author are filled in here, so callers only
+            //! provide the rest.
+            DJV_MODELS_API std::string add(
                 const std::optional<OTIO_NS::TimeRange>&,
                 const std::string& name,
                 const std::string& text);

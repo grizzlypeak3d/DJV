@@ -965,19 +965,20 @@ def _formatCreated(iso):
 def _isSingleFrame(range):
     return range.duration.value <= 1.0
 
-def _formatRange(range):
+def _formatRange(range, units):
     """
-    Format a range as its frame bounds, e.g. "0001-0120", or as the one
-    frame it covers. Both ends are inclusive: the range reads as the
-    frames you will see.
+    Format a range in the current time units, so the labels read the
+    same as the times on the timeline. A single frame is one value; a
+    span is both ends, inclusive.
     """
     if _isSingleFrame(range):
-        return "Frame {}".format(int(range.start_time.value))
-    return "{:04d}-{:04d}".format(
-        int(range.start_time.value),
-        int(range.end_time_inclusive().value))
+        return tl.timeToText(range.start_time, units)
+    # Frame numbers read as one token; the longer forms need the space.
+    separator = "-" if tl.TimeUnits.Frames == units else " - "
+    return (tl.timeToText(range.start_time, units) + separator +
+        tl.timeToText(range.end_time_inclusive(), units))
 
-def _markerTitle(marker):
+def _markerTitle(marker, units):
     """
     The title a marker's row shows: the name where there is one, its
     frames otherwise, and what it is about failing both.
@@ -985,7 +986,7 @@ def _markerTitle(marker):
     if marker.name:
         return marker.name
     if marker.range is not None:
-        return _formatRange(marker.range)
+        return _formatRange(marker.range, units)
     return "No frame"
 
 def _markerShowing(marker, currentTime):
@@ -1109,8 +1110,6 @@ class ReviewTool(IToolWidget):
         # the commit rebuilds the list that owns it, and the scroll is
         # deferred a tick because a rebuilt list has no geometry yet.
         self._editingId = None
-        self._draftActive = False
-        self._draftRange = None
         self._editEdit = None
         self._editItem = None
         self._commitTimer = ftk.Timer(context)
@@ -1214,6 +1213,13 @@ class ReviewTool(IToolWidget):
             app.getMarkersModel().observeMarkers,
             lambda value: selfWeak() and selfWeak()._markersListUpdate(value))
 
+        # The labels show times, so they follow the units the timeline
+        # shows.
+        self._timeUnits = app.getTimeUnitsModel().timeUnits
+        self._timeUnitsObserver = tl.TimeUnitsObserver(
+            app.getTimeUnitsModel().observeTimeUnits,
+            lambda value: selfWeak() and selfWeak()._timeUnitsUpdate(value))
+
         # The list shows every marker; the playhead moves the highlight.
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
@@ -1223,8 +1229,8 @@ class ReviewTool(IToolWidget):
 
     def addNote(self):
         """
-        Start a new marker about the current frame, edited in place in
-        the list.
+        Add a marker about the current frame, edited in place in the
+        list.
         """
         app = self._app()
         if app is None:
@@ -1235,20 +1241,24 @@ class ReviewTool(IToolWidget):
         # Keep whatever was being written before starting the next
         # marker.
         self._commitMarker()
-        self._draftActive = True
-        # The marker is anchored to the frame shown when it is started.
+        # The marker exists from the moment it is asked for -- a bare
+        # frame marker is a flag, the way a bare span is -- and its
+        # text is edited in place.
         time = player.currentTime
-        self._draftRange = otio.opentime.TimeRange(
-            time, otio.opentime.RationalTime(1.0, time.rate))
-        self._editingId = None
+        id = app.getMarkersModel().add(
+            otio.opentime.TimeRange(
+                time, otio.opentime.RationalTime(1.0, time.rate)),
+            "", "")
+        self._editMarker(id)
+
+    def _timeUnitsUpdate(self, value):
+        self._timeUnits = value
         self._markersUpdate()
 
     def _editMarker(self, id):
         if id == self._editingId:
             return
         self._commitMarker()
-        self._draftActive = False
-        self._draftRange = None
         self._editingId = id
         self._markersUpdate()
 
@@ -1258,25 +1268,19 @@ class ReviewTool(IToolWidget):
         text = self._editEdit.text
         if isinstance(text, list):
             text = "\n".join(text)
-        draft = self._draftActive
         id = self._editingId
-        range_ = self._draftRange
         # Clear the state before touching the model: the model observer
         # rebuilds the list, and must not find a half-finished edit.
-        self._draftActive = False
-        self._draftRange = None
         self._editingId = None
         self._editEdit = None
         self._editItem = None
         app = self._app()
-        if app is not None:
-            if draft and text:
-                app.getMarkersModel().add(range_, "", text)
-            elif not draft and id is not None and text:
-                app.getMarkersModel().update(id, text)
-        # An empty draft or an unchanged edit does not move the model,
-        # so rebuild by hand; the extra rebuild after a model change is
-        # harmless.
+        if app is not None and id is not None:
+            # Emptied text is kept as emptied: a bare marker is a flag,
+            # not a mistake.
+            app.getMarkersModel().update(id, text)
+        # An unchanged edit does not move the model, so rebuild by
+        # hand; the extra rebuild after a model change is harmless.
         self._markersUpdate()
 
     def _editFocus(self, editor, value):
@@ -1453,18 +1457,7 @@ class ReviewTool(IToolWidget):
         # crumbs. The model keeps the list in time order, with the
         # markers about no frame in particular first: they speak about
         # the whole review.
-        value = list(self._markers)
-        # A new marker is written in place: it appears as an item with
-        # an editor, and joins the model when the edit commits.
-        if self._draftActive:
-            value.append(types.SimpleNamespace(
-                id = None, name = "", range = self._draftRange,
-                created = "", text = ""))
-            value = sorted(
-                value,
-                key = lambda marker:
-                    (0, 0.0) if marker.range is None else
-                    (1, marker.range.start_time.value))
+        value = self._markers
         if not value:
             # Without this the section is silently empty, which reads
             # as a bug rather than as "nothing to say yet".
@@ -1486,11 +1479,8 @@ class ReviewTool(IToolWidget):
             # the click selects, not one widget inside it.
             button = ftk.ItemButton(context, self._markerListLayout)
             hasRange = marker.range is not None
-            # The draft has no identifier; an existing marker is being
-            # edited when its identifier matches.
-            editing = marker.id is None if self._draftActive \
-                else (marker.id is not None and
-                    marker.id == self._editingId)
+            editing = (marker.id is not None and
+                marker.id == self._editingId)
             if not editing:
                 if not hasRange:
                     button.tooltip = "Edit the marker."
@@ -1520,7 +1510,8 @@ class ReviewTool(IToolWidget):
             button.widget = card
             header = ftk.HorizontalLayout(context, card)
             header.spacingRole = ftk.SizeRole.SpacingSmall
-            titleLabel = ftk.Label(context, _markerTitle(marker), header)
+            titleLabel = ftk.Label(
+                context, _markerTitle(marker, self._timeUnits), header)
             titleLabel.setMarginRole(ftk.SizeRole.LabelPad, ftk.SizeRole._None)
             titleLabel.vAlign = ftk.VAlign.Center
             titleLabel.hStretch = ftk.Stretch.Expanding
@@ -1529,7 +1520,7 @@ class ReviewTool(IToolWidget):
             # it points -- unless the title is the frames already, and
             # saying them twice reads as a mistake.
             if hasRange and marker.name:
-                frames = _formatRange(marker.range)
+                frames = _formatRange(marker.range, self._timeUnits)
                 if marker.name != frames:
                     framesLabel = ftk.Label(context, frames, header)
                     framesLabel.setMarginRole(
@@ -1549,8 +1540,7 @@ class ReviewTool(IToolWidget):
                 self._editEdit = ftk.TextEdit(context, card)
                 self._editEdit.sizeHintRole = \
                     ftk.SizeRole.ScrollAreaSmall
-                if marker.id is not None:
-                    self._editEdit.setText(marker.text.split("\n"))
+                self._editEdit.setText(marker.text.split("\n"))
                 editorRef = weakref.ref(self._editEdit)
                 self._editEdit.setFocusCallback(
                     lambda value, editorRef = editorRef:

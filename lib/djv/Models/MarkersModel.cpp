@@ -49,7 +49,7 @@ namespace djv
             _set(value);
         }
 
-        void MarkersModel::add(
+        std::string MarkersModel::add(
             const std::optional<OTIO_NS::TimeRange>& range,
             const std::string& name,
             const std::string& text)
@@ -65,6 +65,7 @@ namespace djv
             auto markers = p.markers->get();
             markers.push_back(marker);
             _set(markers);
+            return marker.id;
         }
 
         void MarkersModel::update(const std::string& id, const std::string& text)

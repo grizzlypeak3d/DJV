@@ -8,6 +8,7 @@
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/MarkersModel.h>
+#include <djv/Models/TimeUnitsModel.h>
 
 #include <tlRender/Timeline/Player.h>
 
@@ -95,24 +96,33 @@ namespace djv
                 return range.duration().value() <= 1.0;
             }
 
-            //! Format a range as its frame bounds, e.g. "0001-0120", or as the
-            //! one frame it covers. Both ends are inclusive: the range reads
+            //! Format a range in the current time units, so the labels
+            //! read the same as the times on the timeline. A single frame is
+            //! one value; a span is both ends, inclusive -- the range reads
             //! as the frames you will see, not as a half-open interval.
-            std::string formatRange(const OTIO_NS::TimeRange& range)
+            std::string formatRange(
+                const OTIO_NS::TimeRange& range,
+                tl::TimeUnits units)
             {
                 if (isSingleFrame(range))
                 {
-                    return ftk::Format("Frame {0}").
-                        arg(static_cast<int>(range.start_time().value()));
+                    return tl::timeToText(range.start_time(), units);
                 }
-                return ftk::Format("{0}-{1}").
-                    arg(static_cast<int>(range.start_time().value()), 4, '0').
-                    arg(static_cast<int>(range.end_time_inclusive().value()), 4, '0');
+                // Frame numbers read as one token; the longer forms need
+                // the space.
+                const char* separator =
+                    tl::TimeUnits::Frames == units ? "-" : " - ";
+                return
+                    tl::timeToText(range.start_time(), units) +
+                    separator +
+                    tl::timeToText(range.end_time_inclusive(), units);
             }
 
             //! The title a marker's row shows: the name where there is one,
             //! its frames otherwise, and what it is about failing both.
-            std::string markerTitle(const models::ReviewMarker& marker)
+            std::string markerTitle(
+                const models::ReviewMarker& marker,
+                tl::TimeUnits units)
             {
                 if (!marker.name.empty())
                 {
@@ -120,7 +130,7 @@ namespace djv
                 }
                 if (marker.range.has_value())
                 {
-                    return formatRange(*marker.range);
+                    return formatRange(*marker.range, units);
                 }
                 return "No frame";
             }
@@ -205,10 +215,6 @@ namespace djv
 
             //! The marker being edited in place, or empty.
             std::string editingId;
-            //! A new marker being written in place; it only reaches the model
-            //! when the edit commits with text.
-            bool draftActive = false;
-            std::optional<OTIO_NS::TimeRange> draftRange;
             //! The live in-place editor and its item, for the commit to read
             //! and the scroll to find.
             std::shared_ptr<ftk::TextEdit> editEdit;
@@ -222,11 +228,13 @@ namespace djv
             std::shared_ptr<ftk::Timer> commitTimer;
 
             std::optional<OTIO_NS::RationalTime> currentTime;
+            tl::TimeUnits timeUnits = tl::TimeUnits::Timecode;
 
             std::shared_ptr<tl::Player> player;
             std::optional<OTIO_NS::TimeRange> inOutRange;
 
             std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markersObserver;
+            std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
@@ -506,6 +514,16 @@ namespace djv
                     _markersUpdate();
                 });
 
+            // The labels show times, so they follow the units the timeline
+            // shows.
+            p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
+                app->getTimeUnitsModel()->observeTimeUnits(),
+                [this](tl::TimeUnits value)
+                {
+                    _p->timeUnits = value;
+                    _markersUpdate();
+                });
+
             // The list shows every marker; the playhead moves the highlight.
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
@@ -684,14 +702,17 @@ namespace djv
             }
             // Keep whatever was being written before starting the next marker.
             _commitMarker();
-            p.draftActive = true;
-            // The marker is anchored to the frame shown when it is started.
+            // The marker exists from the moment it is asked for -- a bare
+            // frame marker is a flag, the way a bare span is -- and its text
+            // is edited in place.
             const OTIO_NS::RationalTime time = player->getCurrentTime();
-            p.draftRange = OTIO_NS::TimeRange(
-                time,
-                OTIO_NS::RationalTime(1.0, time.rate()));
-            p.editingId.clear();
-            _markersUpdate();
+            const std::string id = app->getMarkersModel()->add(
+                OTIO_NS::TimeRange(
+                    time,
+                    OTIO_NS::RationalTime(1.0, time.rate())),
+                std::string(),
+                std::string());
+            _editMarker(id);
         }
 
         bool ReviewTool::_navigate(bool down, const ftk::V2I& pos)
@@ -885,8 +906,6 @@ namespace djv
                 return;
             }
             _commitMarker();
-            p.draftActive = false;
-            p.draftRange.reset();
             p.editingId = id;
             _markersUpdate();
         }
@@ -899,30 +918,23 @@ namespace djv
                 return;
             }
             const std::string text = ftk::join(p.editEdit->getText(), '\n');
-            const bool draft = p.draftActive;
             const std::string id = p.editingId;
-            const std::optional<OTIO_NS::TimeRange> range = p.draftRange;
             // Clear the state before touching the model: the model observer
             // rebuilds the list, and must not find a half-finished edit.
-            p.draftActive = false;
-            p.draftRange.reset();
             p.editingId.clear();
             p.editEdit.reset();
             p.editItem.reset();
             if (auto app = _app.lock())
             {
-                if (draft && !text.empty())
+                if (!id.empty())
                 {
-                    app->getMarkersModel()->add(range, std::string(), text);
-                }
-                else if (!draft && !id.empty() && !text.empty())
-                {
+                    // Emptied text is kept as emptied: a bare marker is a
+                    // flag, not a mistake.
                     app->getMarkersModel()->update(id, text);
                 }
             }
-            // An empty draft or an unchanged edit does not move the model, so
-            // rebuild by hand; the extra rebuild after a model change is
-            // harmless.
+            // An unchanged edit does not move the model, so rebuild by hand;
+            // the extra rebuild after a model change is harmless.
             _markersUpdate();
         }
 
@@ -1013,30 +1025,7 @@ namespace djv
             // crumbs. The model keeps the list in time order, with the
             // markers about no frame in particular first: they speak about
             // the whole review.
-            std::vector<models::ReviewMarker> value = p.markers;
-            // A new marker is written in place: it appears as an item with an
-            // editor, and joins the model when the edit commits.
-            if (p.draftActive)
-            {
-                models::ReviewMarker draft;
-                draft.range = p.draftRange;
-                value.push_back(draft);
-                std::stable_sort(
-                    value.begin(),
-                    value.end(),
-                    [](const models::ReviewMarker& a, const models::ReviewMarker& b)
-                    {
-                        if (a.range.has_value() != b.range.has_value())
-                        {
-                            return !a.range.has_value();
-                        }
-                        if (!a.range.has_value())
-                        {
-                            return false;
-                        }
-                        return a.range->start_time() < b.range->start_time();
-                    });
-            }
+            const std::vector<models::ReviewMarker>& value = p.markers;
             if (value.empty())
             {
                 // Without this the section is silently empty, which reads as a
@@ -1067,10 +1056,8 @@ namespace djv
                 // click selects, not one widget inside it.
                 auto button = ftk::ItemButton::create(context, p.markerListLayout);
                 const bool hasRange = marker.range.has_value();
-                // The draft has an empty identifier; an existing marker is
-                // being edited when its identifier matches.
-                const bool editing = p.draftActive ?
-                    marker.id.empty() : (!marker.id.empty() && marker.id == p.editingId);
+                const bool editing =
+                    !marker.id.empty() && marker.id == p.editingId;
                 if (!editing)
                 {
                     button->setTooltip(hasRange ?
@@ -1116,7 +1103,7 @@ namespace djv
                 header->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
                 auto titleLabel = ftk::Label::create(
-                    context, markerTitle(marker), header);
+                    context, markerTitle(marker, p.timeUnits), header);
                 titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                 titleLabel->setVAlign(ftk::VAlign::Center);
                 titleLabel->setHStretch(ftk::Stretch::Expanding);
@@ -1127,7 +1114,7 @@ namespace djv
                 // saying them twice reads as a mistake.
                 if (hasRange && !marker.name.empty())
                 {
-                    const std::string frames = formatRange(*marker.range);
+                    const std::string frames = formatRange(*marker.range, p.timeUnits);
                     if (marker.name != frames)
                     {
                         auto framesLabel = ftk::Label::create(context, frames, header);
@@ -1153,10 +1140,7 @@ namespace djv
                     // where the key bubbles to.
                     p.editEdit = ftk::TextEdit::create(context, card);
                     p.editEdit->setSizeHintRole(ftk::SizeRole::ScrollAreaSmall);
-                    if (!marker.id.empty())
-                    {
-                        p.editEdit->setText(ftk::split(marker.text, '\n'));
-                    }
+                    p.editEdit->setText(ftk::split(marker.text, '\n'));
                     std::weak_ptr<ftk::TextEdit> editWeak(p.editEdit);
                     p.editEdit->setFocusCallback(
                         [weak, editWeak](bool value)
