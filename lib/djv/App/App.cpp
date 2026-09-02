@@ -173,6 +173,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<int> > bIndexesModifiedObserver;
             std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markersObserver;
             std::shared_ptr<ftk::ListObserver<models::ReviewAnnotation> > annotationsObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > drawToolsObserver;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
@@ -2350,6 +2351,20 @@ namespace djv
                 {
                     _markersUpdate();
                     _markModified();
+                });
+            // Drawing lives with the Review tool: closing the tool disarms
+            // the pen, or an invisible mode is left painting over playback
+            // and the color picker.
+            p.drawToolsObserver = ftk::ListObserver<std::string>::create(
+                p.toolsModel->observeOpenTools(),
+                [this](const std::vector<std::string>& value)
+                {
+                    FTK_P();
+                    if (std::find(value.begin(), value.end(), "Review") ==
+                        value.end())
+                    {
+                        p.drawModel->setEnabled(false);
+                    }
                 });
             p.annotationsObserver = ftk::ListObserver<models::ReviewAnnotation>::create(
                 p.annotationsModel->observeAnnotations(),

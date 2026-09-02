@@ -1089,6 +1089,13 @@ class App(ftk.App):
             djv.models.ReviewAnnotationListObserver(
                 self._annotationsModel.observeAnnotations,
                 lambda value: selfWeak()._reviewMarkersUpdate())
+        # Drawing lives with the Review tool: closing the tool disarms the
+        # pen, or an invisible mode is left painting over playback and the
+        # color picker.
+        self._drawToolsObserver = ftk.StringListObserver(
+            self._toolsModel.observeOpenTools,
+            lambda value: selfWeak()._drawModel.setEnabled(False)
+                if "Review" not in value else None)
 
         if self._cmdLineSysInfo.found:
             print("\n".join(djv.ui.getSysInfo(

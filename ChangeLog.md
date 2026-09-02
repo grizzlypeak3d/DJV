@@ -37,6 +37,8 @@ Changes:
     - libtiff 4.7.2
 
 Fixes:
+* Closing the Review tool left drawing armed, so a later click in the
+  viewport painted a stroke. Reported by aberkl.
 * Naming a review range and pressing Return crashed.
 * The frame cache reloaded continuously while the current frame sat
   outside the in/out points.
