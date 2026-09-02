@@ -71,7 +71,9 @@ namespace djv
             void _commitMarker();
             void _editFocus(const std::shared_ptr<ftk::TextEdit>&, bool);
             void _markerClicked(const std::string& id);
-            void _applyClicked(const std::string& id);
+            //! Seek to a marker's frames; a span narrows the timeline
+            //! in/out points to itself on the way.
+            void _goToRange(const OTIO_NS::TimeRange&);
             void _markersUpdate();
             void _selectionUpdate();
             void _inOutUpdate();

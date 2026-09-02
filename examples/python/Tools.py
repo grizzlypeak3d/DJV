@@ -1029,11 +1029,6 @@ class ReviewTool(IToolWidget):
         self._inOutRange = None
         self._markers = []
         self._markerButtons = {}
-        self._applyButtons = {}
-        # The marker whose span the in/out points carry, or None. Only
-        # one can be applied: applying is what drives the timeline
-        # in/out points.
-        self._appliedId = None
         self._currentTimeObserver = None
         self._inOutRangeObserver = None
 
@@ -1048,7 +1043,7 @@ class ReviewTool(IToolWidget):
         self._addRangeButton = ftk.ToolButton(context)
         self._addRangeButton.icon = "FrameInOut"
         self._addRangeButton.tooltip = \
-            "Add a marker from the timeline in/out points."
+            "Add a marker for the timeline in/out points."
         # One delete for the list, acting on the focused row, rather
         # than one on every row. Clicking it must not move the key
         # focus, or it would clear the very selection it acts on.
@@ -1310,8 +1305,6 @@ class ReviewTool(IToolWidget):
     def _deleteTarget(self):
         if self._focusedId is not None:
             return self._focusedId
-        if self._appliedId is not None:
-            return self._appliedId
         # The marker on the current frame: what the highlight shows.
         # With several there the first goes; the button stays enabled
         # for the rest.
@@ -1360,36 +1353,27 @@ class ReviewTool(IToolWidget):
         marker = next((m for m in self._markers if m.id == id), None)
         if marker is None:
             return
-        # The first click goes to the marker's frames; a click on the
-        # marker already showing -- or on one about no frame in
-        # particular -- opens it for editing.
+        # The first click goes to the marker's frames -- a span narrows
+        # the timeline to itself on the way; a click on the marker
+        # already showing -- or on one about no frame in particular --
+        # opens it for editing.
         if marker.range is None or _markerShowing(marker, self._currentTime):
             self._editMarker(id)
         elif self._player:
-            self._seekTo(marker.range.start_time)
+            self._goToRange(marker.range)
 
-    def _applyClicked(self, id):
+    def _goToRange(self, range_):
         if not self._player:
             return
-        if id == self._appliedId:
-            # Clicking the applied span clears the in/out points and
-            # gives the whole timeline back.
-            self._appliedId = None
-            self._player.resetInPoint()
-            self._player.resetOutPoint()
+        if _isSingleFrame(range_):
+            self._seekTo(range_.start_time)
         else:
-            marker = next((m for m in self._markers if m.id == id), None)
-            if marker is None or marker.range is None:
-                return
-            # Set the state first: applying the span makes the in/out
-            # observer fire, and it must not read this as a stale
-            # highlight.
-            self._appliedId = id
-            self._player.inOutRange = marker.range
-            # Without this the playhead stays outside the range it
-            # just set.
-            self._player.currentTime = marker.range.start_time
-        self._selectionUpdate()
+            # Going to a span narrows the timeline to it: the span is
+            # what the marker is about, and the in/out points are how
+            # the timeline says "these frames". Going elsewhere is what
+            # gives the timeline back.
+            self._player.inOutRange = range_
+            self._player.currentTime = range_.start_time
 
     def _setPlayer(self, player):
         self._player = player
@@ -1439,37 +1423,16 @@ class ReviewTool(IToolWidget):
             self._inOutRange is not None and
             self._inOutRange != self._player.timeRange)
         self._addRangeButton.enabled = narrowed
-        # Drop the highlight as soon as the in/out points stop matching
-        # the applied span, e.g. after dragging them by hand.
-        if self._appliedId is not None:
-            marker = next(
-                (m for m in self._markers if m.id == self._appliedId), None)
-            if marker is None or not djv.models.sameRange(
-                    marker.range, self._inOutRange):
-                self._appliedId = None
-                self._selectionUpdate()
 
     def _addRange(self):
         if not self._player or self._inOutRange is None:
             return
-        range_ = self._inOutRange
-        defaultName = _formatRange(range_)
-        appWeak = self._app
-        def callback(value, appWeak = appWeak, range_ = range_,
-                     defaultName = defaultName):
-            app_ = appWeak()
-            if app_ is None:
-                return
-            # An emptied field falls back to the frame range rather
-            # than producing a nameless row.
-            app_.getMarkersModel().add(
-                range_, value if value else defaultName, "")
-        self.context.getSystemByName("ftk::DialogSystem").input(
-            "Add Marker",
-            "Frames {}".format(defaultName),
-            defaultName,
-            self._mainWindow(),
-            callback)
+        # No dialog and no name: the marker's row is titled by its
+        # frames, and words belong in its text, added by clicking the
+        # row -- so every row reads the same way.
+        app = self._app()
+        if app is not None:
+            app.getMarkersModel().add(self._inOutRange, "", "")
 
     def _markersListUpdate(self, markers):
         self._markers = markers
@@ -1483,7 +1446,6 @@ class ReviewTool(IToolWidget):
         self._editItem = None
         self._markerListLayout.clear()
         self._markerButtons = {}
-        self._applyButtons = {}
         self._itemOrder = []
         context = self.context
         # Every marker, so the panel reads as the review's feedback
@@ -1530,10 +1492,17 @@ class ReviewTool(IToolWidget):
                 else (marker.id is not None and
                     marker.id == self._editingId)
             if not editing:
-                button.tooltip = (
-                    "Go to the marker's frames. Click the marker "
-                    "already showing to edit it.") if hasRange else \
-                    "Edit the marker."
+                if not hasRange:
+                    button.tooltip = "Edit the marker."
+                elif _isSingleFrame(marker.range):
+                    button.tooltip = (
+                        "Go to the marker's frame. Click the marker "
+                        "already showing to edit it.")
+                else:
+                    button.tooltip = (
+                        "Go to the marker's frames, setting the "
+                        "timeline in/out points to them. Click the "
+                        "marker already showing to edit it.")
             button.setClickedCallback(
                 lambda captured = marker.id:
                     selfWeak() and selfWeak()._markerClicked(captured))
@@ -1574,22 +1543,6 @@ class ReviewTool(IToolWidget):
                     ftk.SizeRole.LabelPad, ftk.SizeRole._None)
                 createdLabel.textRole = ftk.ColorRole.TextDisabled
                 createdLabel.vAlign = ftk.VAlign.Center
-            # Setting the in/out points from a span is an explicit
-            # affordance on the row rather than the row's click, so
-            # that every row answers a click the same way.
-            if hasRange and not _isSingleFrame(marker.range) and \
-                    marker.id is not None:
-                applyButton = ftk.ToolButton(context, header)
-                applyButton.icon = "FrameInOut"
-                applyButton.tooltip = (
-                    "Set the timeline in/out points to these frames. "
-                    "Click again to clear them.")
-                # Clicking must not move the key focus off the row.
-                applyButton.acceptsKeyFocus = False
-                applyButton.setClickedCallback(
-                    lambda captured = marker.id:
-                        selfWeak() and selfWeak()._applyClicked(captured))
-                self._applyButtons[marker.id] = applyButton
             if editing:
                 # Written and edited in place. The marker keeps itself
                 # when the editor loses the focus, or on Command-Return.
@@ -1631,15 +1584,11 @@ class ReviewTool(IToolWidget):
         self._scrollTimer.start(0.0, scroll)
 
     def _selectionUpdate(self):
-        # Highlight the markers about the frame being shown, and the
-        # affordance of the applied span.
+        # Highlight the markers about the frame being shown.
         for marker in self._markers:
             button = self._markerButtons.get(marker.id)
             if button is not None:
                 button.checked = _markerShowing(marker, self._currentTime)
-            applyButton = self._applyButtons.get(marker.id)
-            if applyButton is not None:
-                applyButton.checked = marker.id == self._appliedId
         self._deleteButtonUpdate()
 
 FACTORY = {

@@ -178,9 +178,6 @@ namespace djv
             //! The row buttons, by marker identifier, so the highlight can be
             //! moved without rebuilding the list.
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > markerButtons;
-            //! The in/out affordances of the ranged rows, by marker
-            //! identifier, for the applied highlight.
-            std::map<std::string, std::shared_ptr<ftk::ToolButton> > applyButtons;
             //! A list row: the item, what it stands for, and its frames.
             struct RowRef
             {
@@ -193,10 +190,6 @@ namespace djv
             //! The row with the key focus, or empty: what the header delete
             //! button acts on.
             std::string focusedId;
-            //! The marker whose span the in/out points carry, or empty. Only
-            //! one can be applied: applying is what drives the timeline
-            //! in/out points.
-            std::string appliedId;
             std::vector<models::ReviewMarker> markers;
 
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
@@ -273,7 +266,7 @@ namespace djv
             p.addRangeButton = ftk::ToolButton::create(context);
             p.addRangeButton->setIcon("FrameInOut");
             p.addRangeButton->setTooltip(
-                "Add a marker from the timeline in/out points.");
+                "Add a marker for the timeline in/out points.");
 
             // One delete for the list, acting on the focused row, rather
             // than one on every row.
@@ -598,60 +591,23 @@ namespace djv
                 p.inOutRange.has_value() &&
                 !tl::compareExact(*p.inOutRange, p.player->getTimeRange());
             p.addRangeButton->setEnabled(narrowed);
-
-            // Drop the highlight as soon as the in/out points stop matching the
-            // applied span, e.g. after dragging them by hand. Otherwise the
-            // next click on that affordance would read as "clear" when the
-            // user meant "apply it again".
-            if (!p.appliedId.empty())
-            {
-                const auto i = std::find_if(
-                    p.markers.begin(),
-                    p.markers.end(),
-                    [this](const models::ReviewMarker& value)
-                    {
-                        return value.id == _p->appliedId;
-                    });
-                if (i == p.markers.end() || !models::sameRange(i->range, p.inOutRange))
-                {
-                    p.appliedId.clear();
-                    _selectionUpdate();
-                }
-            }
         }
 
         void ReviewTool::_addRange()
         {
             FTK_P();
-            auto context = getContext();
-            if (!context || !p.player)
+            if (!p.player || !p.inOutRange.has_value())
             {
                 return;
             }
-            if (!p.inOutRange.has_value())
+            // No dialog and no name: the marker's row is titled by its
+            // frames, and words belong in its text, added by clicking the
+            // row -- so every row DJV makes reads the same way.
+            if (auto app = _app.lock())
             {
-                return;
+                app->getMarkersModel()->add(
+                    *p.inOutRange, std::string(), std::string());
             }
-            const OTIO_NS::TimeRange range = *p.inOutRange;
-            const std::string defaultName = formatRange(range);
-            auto appWeak = _app;
-            context->getSystem<ftk::DialogSystem>()->input(
-                "Add Marker",
-                ftk::Format("Frames {0}").arg(defaultName),
-                defaultName,
-                getWindow(),
-                [appWeak, range, defaultName](const std::string& value)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        // An emptied field falls back to the frame range rather
-                        // than producing a nameless row.
-                        app->getMarkersModel()->add(
-                            range,
-                            value.empty() ? defaultName : value,
-                            std::string());
-                    }
-                });
         }
 
         void ReviewTool::setGeometry(const ftk::Box2I& value)
@@ -803,7 +759,29 @@ namespace djv
             // so the arrows follow.
             if (p.itemOrder[index].range.has_value())
             {
-                _seekTo(p.itemOrder[index].range->start_time());
+                _goToRange(*p.itemOrder[index].range);
+            }
+        }
+
+        void ReviewTool::_goToRange(const OTIO_NS::TimeRange& range)
+        {
+            FTK_P();
+            if (!p.player)
+            {
+                return;
+            }
+            if (isSingleFrame(range))
+            {
+                _seekTo(range.start_time());
+            }
+            else
+            {
+                // Going to a span narrows the timeline to it: the span is
+                // what the marker is about, and the in/out points are how
+                // the timeline says "these frames". Going elsewhere is what
+                // gives the timeline back.
+                p.player->setInOutRange(range);
+                p.player->seek(range.start_time());
             }
         }
 
@@ -827,10 +805,6 @@ namespace djv
             if (!p.focusedId.empty())
             {
                 return p.focusedId;
-            }
-            if (!p.appliedId.empty())
-            {
-                return p.appliedId;
             }
             // The marker on the current frame: what the highlight shows. With
             // several there the first goes; the button stays enabled for the
@@ -1004,53 +978,18 @@ namespace djv
             {
                 return;
             }
-            // The first click goes to the marker's frames; a click on the
-            // marker already showing -- or on one about no frame in
-            // particular -- opens it for editing.
+            // The first click goes to the marker's frames -- a span narrows
+            // the timeline to itself on the way; a click on the marker
+            // already showing -- or on one about no frame in particular --
+            // opens it for editing.
             if (!i->range.has_value() || markerShowing(*i, p.currentTime))
             {
                 _editMarker(id);
             }
             else if (p.player)
             {
-                _seekTo(i->range->start_time());
+                _goToRange(*i->range);
             }
-        }
-
-        void ReviewTool::_applyClicked(const std::string& id)
-        {
-            FTK_P();
-            if (!p.player)
-            {
-                return;
-            }
-            if (id == p.appliedId)
-            {
-                // Clicking the applied span clears the in/out points and gives
-                // the whole timeline back.
-                p.appliedId.clear();
-                p.player->resetInPoint();
-                p.player->resetOutPoint();
-            }
-            else
-            {
-                const auto i = std::find_if(
-                    p.markers.begin(),
-                    p.markers.end(),
-                    [&id](const models::ReviewMarker& value) { return value.id == id; });
-                if (i == p.markers.end() || !i->range.has_value())
-                {
-                    return;
-                }
-                // Set the state first: applying the span makes the in/out
-                // observer fire, and it must not read this as a stale
-                // highlight.
-                p.appliedId = id;
-                p.player->setInOutRange(*i->range);
-                // Without this the playhead stays outside the range it just set.
-                p.player->seek(i->range->start_time());
-            }
-            _selectionUpdate();
         }
 
         void ReviewTool::_markersUpdate()
@@ -1062,7 +1001,6 @@ namespace djv
             p.editItem.reset();
             p.markerListLayout->clear();
             p.markerButtons.clear();
-            p.applyButtons.clear();
             p.itemOrder.clear();
             auto context = getContext();
             if (!context)
@@ -1136,8 +1074,12 @@ namespace djv
                 if (!editing)
                 {
                     button->setTooltip(hasRange ?
-                        "Go to the marker's frames. Click the marker already "
-                        "showing to edit it." :
+                        (isSingleFrame(*marker.range) ?
+                            "Go to the marker's frame. Click the marker "
+                            "already showing to edit it." :
+                            "Go to the marker's frames, setting the timeline "
+                            "in/out points to them. Click the marker already "
+                            "showing to edit it.") :
                         "Edit the marker.");
                 }
                 const std::string id = marker.id;
@@ -1204,29 +1146,6 @@ namespace djv
                     createdLabel->setVAlign(ftk::VAlign::Center);
                 }
 
-                // Setting the in/out points from a span is an explicit
-                // affordance on the row rather than the row's click, so that
-                // every row answers a click the same way.
-                if (hasRange && !isSingleFrame(*marker.range) && !marker.id.empty())
-                {
-                    auto applyButton = ftk::ToolButton::create(context, header);
-                    applyButton->setIcon("FrameInOut");
-                    applyButton->setTooltip(
-                        "Set the timeline in/out points to these frames. "
-                        "Click again to clear them.");
-                    // Clicking must not move the key focus off the row.
-                    applyButton->setAcceptsKeyFocus(false);
-                    applyButton->setClickedCallback(
-                        [weak, id]
-                        {
-                            if (auto widget = weak.lock())
-                            {
-                                widget->_applyClicked(id);
-                            }
-                        });
-                    p.applyButtons[marker.id] = applyButton;
-                }
-
                 if (editing)
                 {
                     // Written and edited in place. The marker keeps itself
@@ -1268,19 +1187,13 @@ namespace djv
         void ReviewTool::_selectionUpdate()
         {
             FTK_P();
-            // Highlight the markers about the frame being shown, and the
-            // affordance of the applied span.
+            // Highlight the markers about the frame being shown.
             for (const auto& marker : p.markers)
             {
                 const auto i = p.markerButtons.find(marker.id);
                 if (i != p.markerButtons.end())
                 {
                     i->second->setChecked(markerShowing(marker, p.currentTime));
-                }
-                const auto j = p.applyButtons.find(marker.id);
-                if (j != p.applyButtons.end())
-                {
-                    j->second->setChecked(marker.id == p.appliedId);
                 }
             }
             _deleteButtonUpdate();
