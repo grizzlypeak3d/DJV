@@ -297,6 +297,7 @@ namespace djv
             std::shared_ptr<ftk::Label> renderLabel;
             std::map<models::HUDItem, std::shared_ptr<ftk::IWidget> > hudWidgets;
             tl::Compare compare = tl::Compare::None;
+            tl::CompareTime compareTime = tl::CompareTime::Relative;
             std::shared_ptr<models::FilesModelItem> a;
             std::vector<std::shared_ptr<models::FilesModelItem> > b;
             std::shared_ptr<ftk::Label> compareLabel;
@@ -317,6 +318,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<std::vector<std::string> > > resolvedInputsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
@@ -535,6 +537,14 @@ namespace djv
                 {
                     _p->compare = value.compare;
                     setCompareOptions(value);
+                    _compareUpdate();
+                });
+
+            p.compareTimeObserver = ftk::Observer<tl::CompareTime>::create(
+                filesModel->observeCompareTime(),
+                [this](tl::CompareTime value)
+                {
+                    _p->compareTime = value;
                     _compareUpdate();
                 });
 
@@ -1325,6 +1335,28 @@ namespace djv
                     if (allA)
                     {
                         s = "A and B are the same file";
+                    }
+                    else if (tl::CompareTime::Absolute == p.compareTime &&
+                        p.a->timeRange.has_value())
+                    {
+                        // Timecode sync with no timecode in common: every B
+                        // frame maps outside its file, so B never draws.
+                        // Decided from the ranges rather than the missing
+                        // frame, which is also what a frame still loading
+                        // looks like.
+                        const bool noOverlap = std::all_of(
+                            p.b.begin(),
+                            p.b.end(),
+                            [this](const std::shared_ptr<models::FilesModelItem>& i)
+                            {
+                                return i->timeRange.has_value() &&
+                                    !i->timeRange->intersects(
+                                        *_p->a->timeRange);
+                            });
+                        if (noOverlap)
+                        {
+                            s = "A and B timecodes do not overlap";
+                        }
                     }
                 }
             }

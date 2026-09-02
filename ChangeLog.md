@@ -39,6 +39,9 @@ Changes:
 Fixes:
 * Closing the Review tool left drawing armed, so a later click in the
   viewport painted a stroke. Reported by aberkl.
+* Comparing files by timecode showed nothing, silently, when their
+  timecodes do not overlap; the viewport now says so. Reported by
+  aberkl.
 * Naming a review range and pressing Return crashed.
 * The frame cache reloaded continuously while the current frame sat
   outside the in/out points.

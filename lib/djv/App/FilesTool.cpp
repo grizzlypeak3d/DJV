@@ -150,7 +150,9 @@ namespace djv
                 models::getCompareTimeLabels());
             p.compareTimeComboBox->setTooltip(
                 "Which frame of each file is shown together: the same frame\n"
-                "counted from the start of each, or the same timecode.");
+                "counted from the start of each, or the same timecode.\n"
+                "Files whose timecodes do not overlap have nothing to show\n"
+                "together.");
             p.compareTimeComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.compareTimeComboBox, "Files.CompareTime");
 
