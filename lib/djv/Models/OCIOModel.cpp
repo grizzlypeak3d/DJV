@@ -255,7 +255,10 @@ namespace djv
                         out.name = path.parent_path().filename().u8string();
                     }
                 }
-                out.inputs.push_back("None");
+                // Not "None": an empty input means the color space is
+                // resolved automatically -- extension assignments, then what
+                // the file declares, then the configuration's file rules.
+                out.inputs.push_back("Automatic");
                 for (int i = 0; i < p.ocioConfig->getNumColorSpaces(); ++i)
                 {
                     out.inputs.push_back(p.ocioConfig->getColorSpaceNameByIndex(i));

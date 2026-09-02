@@ -265,14 +265,26 @@ namespace djv
                 out = i->second;
                 source = "extension";
             }
-            else if (const std::string declared = _declaredColorSpace(tags);
-                !declared.empty())
+            else if (bool declaredUnmatched = false; true)
             {
-                out = declared;
-                source = "file";
-            }
-            else if (p.ocioConfig)
-            {
+                const std::string declared =
+                    _declaredColorSpace(tags, declaredUnmatched);
+                if (!declared.empty())
+                {
+                    out = declared;
+                    source = "file";
+                }
+                else if (declaredUnmatched)
+                {
+                    // The file said what it is and the configuration cannot
+                    // name it. Guessing from the extension rules here would
+                    // dress a wrong answer as a resolution -- an XYZ or
+                    // E-Gamut EXR shown as ACES2065-1 -- so nothing resolves
+                    // and the image is shown unmanaged.
+                    return out;
+                }
+                else if (p.ocioConfig)
+                {
                 // Only a rule the configuration author wrote is taken;
                 // every path matches the default rule, so taking that too
                 // would replace "no input transform" with the default
@@ -292,6 +304,7 @@ namespace djv
                 }
                 catch (const std::exception&)
                 {}
+                }
             }
             if (label && !out.empty())
             {
@@ -301,21 +314,36 @@ namespace djv
             return out;
         }
 
-        std::string ColorModel::_declaredColorSpace(const ftk::ImageTags& tags) const
+        std::string ColorModel::_declaredColorSpace(
+            const ftk::ImageTags& tags,
+            bool& declaredUnmatched) const
         {
             FTK_P();
             std::string out;
+            declaredUnmatched = false;
 #if defined(TLRENDER_OCIO)
             // What the file was flagged with, matched against the color
             // spaces the configuration has. The names tried are the
             // canonical names and aliases the OpenColorIO configurations
             // use, so a configuration that renamed everything and carries
-            // no aliases simply does not match, and resolution falls
-            // through to the file rules. Only the common video encodings
-            // are recognized; camera log material is almost never flagged.
+            // no aliases simply does not match. Only the common video
+            // encodings are recognized; camera log material is almost never
+            // flagged.
             if (p.ocioConfig)
             {
                 std::vector<std::string> candidates;
+                bool declared = false;
+
+                // The OpenEXR 3.4 colorInteropID attribute is the file
+                // saying its color space by the color interop forum's
+                // names, which the configurations carry as aliases -- the
+                // most direct declaration there is, so it comes first.
+                if (const auto i = tags.find("colorInteropID");
+                    i != tags.end() && !i->second.empty())
+                {
+                    candidates.push_back(i->second);
+                    declared = true;
+                }
 
                 // EXR files carry their primaries in the header, exact
                 // for the standard sets and measured for everything else.
@@ -327,8 +355,9 @@ namespace djv
                 // are about 0.04 apart at their closest, so the tolerance
                 // cannot confuse two of them.
                 if (const auto i = tags.find("Chromaticities");
-                    i != tags.end())
+                    i != tags.end() && candidates.empty())
                 {
+                    declared = true;
                     float c[8] = { 0.F };
                     std::stringstream ss(i->second);
                     for (size_t j = 0; j < 8; ++j)
@@ -343,7 +372,8 @@ namespace djv
                     const std::vector<Primaries> known =
                     {
                         { { .64F, .33F, .3F, .6F, .15F, .06F, .3127F, .329F },
-                            { "lin_rec709", "lin_srgb", "Linear Rec.709 (sRGB)" } },
+                            { "lin_rec709", "lin_srgb", "Linear Rec.709 (sRGB)",
+                              "Linear Rec.709" } },
                         { { .68F, .32F, .265F, .69F, .15F, .06F, .3127F, .329F },
                             { "lin_p3d65", "Linear P3-D65" } },
                         { { .708F, .292F, .17F, .797F, .131F, .046F, .3127F, .329F },
@@ -415,6 +445,7 @@ namespace djv
                     catch (const std::exception&)
                     {}
                 }
+                declaredUnmatched = declared && out.empty();
             }
 #endif // TLRENDER_OCIO
             return out;

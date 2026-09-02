@@ -112,7 +112,13 @@ namespace djv
                 const std::string& path,
                 const ftk::ImageTags&,
                 std::string* label) const;
-            std::string _declaredColorSpace(const ftk::ImageTags&) const;
+            //! declaredUnmatched is set when the file declares its color
+            //! -- a colorInteropID, chromaticities -- but the configuration
+            //! has no matching space: an explicit declaration that cannot be
+            //! honoured must not be papered over by an extension rule.
+            std::string _declaredColorSpace(
+                const ftk::ImageTags&,
+                bool& declaredUnmatched) const;
             void _ocioConfigUpdate(const tl::OCIOOptions&);
 
             FTK_PRIVATE();

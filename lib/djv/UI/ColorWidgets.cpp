@@ -199,7 +199,7 @@ namespace djv
                     p.viewComboBox->setCurrentIndex(value.viewIndex);
                     p.lookComboBox->setItems(value.looks);
                     p.lookComboBox->setCurrentIndex(value.lookIndex);
-                    // The first input is "None", which is not a color
+                    // The first input is "Automatic", which is not a color
                     // space an extension can be assigned to.
                     std::vector<std::string> colorSpaces;
                     if (!value.inputs.empty())
