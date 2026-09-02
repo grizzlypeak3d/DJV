@@ -691,6 +691,7 @@ namespace djv
                     // the work; an unknown name falls back to the first
                     // preset rather than exporting with nothing set.
                     tl::IOOptions ioOptions;
+#if defined(TLRENDER_FFMPEG_PLUGIN)
                     const auto& presets = tl::ffmpeg::getWritePresets();
                     const tl::ffmpeg::WritePreset* preset = &presets.front();
                     for (const auto& i : presets)
@@ -717,6 +718,7 @@ namespace djv
                     {
                         ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
                     }
+#endif // TLRENDER_FFMPEG_PLUGIN
                     p.exportData->writer = plugin->write(p.exportData->path, outputInfo, ioOptions);
 
                     // Create the renderer.
