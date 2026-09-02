@@ -54,7 +54,7 @@
 <p>The OpenColorIO configuration can be set to a built-in configuration, the <strong>OCIO</strong> environment variable, or a specific file path.</p>
 <h3 id="input-color-spaces">Input color spaces</h3>
 <p>The <strong>Input</strong> color space can be named explicitly, or left at <strong>Automatic</strong> and resolved for each file. Resolving takes the first of:</p>
-<ul><li>The extension assignments in the <strong>Color</strong> tool.</li><li>What the file declares &mdash; an OpenEXR file's <code>colorInteropID</code> attribute or chromaticities, a movie's color description. A declaration the configuration has no color space for ends the resolution: the image is shown unmanaged rather than guessed at.</li><li>A file rule from the configuration. The default rule, which matches every path, is not used.</li></ul>
+<ul><li>The extension assignments in the <strong>Color</strong> tool.</li><li>What the file declares &mdash; an OpenEXR file's <code>colorInteropID</code> attribute or chromaticities, a movie's color description. A declaration the configuration has no color space for ends the resolution: the image is shown unmanaged rather than guessed at, and the resolved display in the <strong>Color</strong> tool says so.</li><li>A file rule from the configuration. The default rule, which matches every path, is not used.</li></ul>
 <p>The <strong>Color</strong> tool shows what was resolved and where it came from, and files being compared are each shown through their own input color space.</p>
 <p>An OTIO timeline resolves per clip rather than as a whole.</p>
 <p>Shortcuts:</p>

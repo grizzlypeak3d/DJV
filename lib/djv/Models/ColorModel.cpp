@@ -227,8 +227,11 @@ namespace djv
                 if (!input.empty())
                 {
                     out.input = input;
-                    p.resolvedInputLabel = label;
                 }
+                // Kept when the input is empty as well: an unresolved
+                // declaration labels itself, so the row can say why the
+                // image is unmanaged rather than saying nothing.
+                p.resolvedInputLabel = label;
             }
             return out;
         }
@@ -267,8 +270,9 @@ namespace djv
             }
             else if (bool declaredUnmatched = false; true)
             {
+                std::string declaredName;
                 const std::string declared =
-                    _declaredColorSpace(tags, declaredUnmatched);
+                    _declaredColorSpace(tags, declaredUnmatched, declaredName);
                 if (!declared.empty())
                 {
                     out = declared;
@@ -280,7 +284,12 @@ namespace djv
                     // name it. Guessing from the extension rules here would
                     // dress a wrong answer as a resolution -- an XYZ or
                     // E-Gamut EXR shown as ACES2065-1 -- so nothing resolves
-                    // and the image is shown unmanaged.
+                    // and the image is shown unmanaged. The label says so,
+                    // where a resolution would be shown.
+                    if (label)
+                    {
+                        *label = declaredName + " (not in the configuration)";
+                    }
                     return out;
                 }
                 else if (p.ocioConfig)
@@ -316,11 +325,13 @@ namespace djv
 
         std::string ColorModel::_declaredColorSpace(
             const ftk::ImageTags& tags,
-            bool& declaredUnmatched) const
+            bool& declaredUnmatched,
+            std::string& declaredName) const
         {
             FTK_P();
             std::string out;
             declaredUnmatched = false;
+            declaredName = std::string();
 #if defined(TLRENDER_OCIO)
             // What the file was flagged with, matched against the color
             // spaces the configuration has. The names tried are the
@@ -343,6 +354,7 @@ namespace djv
                 {
                     candidates.push_back(i->second);
                     declared = true;
+                    declaredName = i->second;
                 }
 
                 // EXR files carry their primaries in the header, exact
@@ -358,6 +370,9 @@ namespace djv
                     i != tags.end() && candidates.empty())
                 {
                     declared = true;
+                    // Named after the standard set when one matches below;
+                    // primaries the tables do not know keep this.
+                    declaredName = "chromaticities";
                     float c[8] = { 0.F };
                     std::stringstream ss(i->second);
                     for (size_t j = 0; j < 8; ++j)
@@ -393,6 +408,7 @@ namespace djv
                         if (match)
                         {
                             candidates = k.candidates;
+                            declaredName = k.candidates.front();
                             break;
                         }
                     }

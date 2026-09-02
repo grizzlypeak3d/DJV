@@ -1072,6 +1072,7 @@ class App(ftk.App):
 
         if not activeFiles:
             self._player.setAlways(None)
+            self._colorModel.setActiveFiles([])
             return
 
         item = activeFiles[0]
@@ -1096,6 +1097,13 @@ class App(ftk.App):
         player = self._player.get()
         player.compare = [self._timelineForItem(i) for i in activeFiles[1:]]
         player.compareTime = self._filesModel.compareTime
+
+        # The paths and what each file itself says about its colors, for
+        # resolving the input color spaces: the active file first, then
+        # the compare files.
+        self._colorModel.setActiveFiles(
+            [(str(i.path.get()), self._timelineForItem(i).ioInfo.tags)
+                for i in activeFiles])
 
     def _timelineForItem(self, item):
         for i, existing in enumerate(self._files):

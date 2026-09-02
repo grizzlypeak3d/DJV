@@ -116,9 +116,11 @@ namespace djv
             //! -- a colorInteropID, chromaticities -- but the configuration
             //! has no matching space: an explicit declaration that cannot be
             //! honoured must not be papered over by an extension rule.
+            //! declaredName is what the file declared, for saying so.
             std::string _declaredColorSpace(
                 const ftk::ImageTags&,
-                bool& declaredUnmatched) const;
+                bool& declaredUnmatched,
+                std::string& declaredName) const;
             void _ocioConfigUpdate(const tl::OCIOOptions&);
 
             FTK_PRIVATE();

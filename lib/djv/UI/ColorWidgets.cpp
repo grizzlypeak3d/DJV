@@ -96,7 +96,9 @@ namespace djv
             p.resolvedLabel = ftk::Label::create(context);
             p.resolvedLabel->setTooltip(
                 "The input color space resolved for the current file, and "
-                "where it came from.");
+                "where it came from. A file whose declared color space is "
+                "not in the configuration says so here, and is shown "
+                "unmanaged.");
             ftk::setScreenshotTag(p.resolvedLabel, "Color.OCIO.Resolved");
 
             p.displayComboBox = ftk::ComboBox::create(context);
