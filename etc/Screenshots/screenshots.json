@@ -1313,8 +1313,8 @@
           "caption": "Output file extension"
         },
         {
-          "id": "Export.MovieCodec",
-          "caption": "Video codec"
+          "id": "Export.MoviePreset",
+          "caption": "Export preset"
         },
         {
           "id": "Export.MovieAudioCodec",
