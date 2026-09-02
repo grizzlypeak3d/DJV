@@ -1071,6 +1071,9 @@ class ReviewTool(IToolWidget):
         toolLayout.spacingRole = ftk.SizeRole.SpacingSmall
         self._colorSwatch = ftk.ColorSwatch(context, toolLayout)
         self._colorSwatch.editable = True
+        # Centered rather than filling the row: the buttons beside it
+        # set the row height, and a filled swatch reads as a rectangle.
+        self._colorSwatch.vAlign = ftk.VAlign.Center
         self._colorSwatch.sizeRole = ftk.SizeRole.MarginLarge
         self._colorSwatch.color = drawModel.color
         self._colorSwatch.tooltip = "The stroke colour."
@@ -1540,11 +1543,13 @@ class ReviewTool(IToolWidget):
             button.widget = card
             header = ftk.HorizontalLayout(context, card)
             header.spacingRole = ftk.SizeRole.SpacingSmall
-            # The marker's color, editable in place. The swatch takes
+            # The marker's color, editable in place as a small dot --
+            # quieter than a swatch in a list of many. The dot takes
             # the click itself, so choosing a color does not read as
             # clicking the row.
             if marker.id is not None:
-                swatch = ftk.ColorSwatch(context, header)
+                swatch = ftk.ColorDot(context, header)
+                swatch.vAlign = ftk.VAlign.Center
                 self._swatches[marker.id] = swatch
                 swatch.color = marker.color
                 swatch.editable = True

@@ -13,6 +13,7 @@
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/Bellows.h>
+#include <ftk/UI/ColorDot.h>
 #include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
@@ -188,9 +189,9 @@ namespace djv
             //! The row buttons, by marker identifier, so the highlight can be
             //! moved without rebuilding the list.
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > markerButtons;
-            //! The row color swatches, by marker identifier, so a color
+            //! The row color dots, by marker identifier, so a color
             //! change can update in place rather than rebuild.
-            std::map<std::string, std::shared_ptr<ftk::ColorSwatch> > swatches;
+            std::map<std::string, std::shared_ptr<ftk::ColorDot> > swatches;
             //! A list row: the item, what it stands for, and its frames.
             struct RowRef
             {
@@ -313,6 +314,9 @@ namespace djv
             p.colorSwatch = ftk::ColorSwatch::create(context, toolLayout);
             p.colorSwatch->setEditable(true);
             p.colorSwatch->setSizeRole(ftk::SizeRole::MarginLarge);
+            // Centered rather than filling the row: the buttons beside it
+            // set the row height, and a filled swatch reads as a rectangle.
+            p.colorSwatch->setVAlign(ftk::VAlign::Center);
             p.colorSwatch->setColor(drawModel->getColor());
             p.colorSwatch->setTooltip("The stroke colour.");
 
@@ -1137,15 +1141,17 @@ namespace djv
                 auto header = ftk::HorizontalLayout::create(context, card);
                 header->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
-                // The marker's color, editable in place. The swatch takes
+                // The marker's color, editable in place as a small dot --
+                // quieter than a swatch in a list of many. The dot takes
                 // the click itself, so choosing a color does not read as
                 // clicking the row.
                 if (!marker.id.empty())
                 {
-                    auto swatch = ftk::ColorSwatch::create(context, header);
+                    auto swatch = ftk::ColorDot::create(context, header);
                     p.swatches[marker.id] = swatch;
                     swatch->setColor(marker.color);
                     swatch->setEditable(true);
+                    swatch->setVAlign(ftk::VAlign::Center);
                     swatch->setTooltip("The marker's color.");
                     swatch->setCallback(
                         [weak, id](const ftk::Color4F& value)
