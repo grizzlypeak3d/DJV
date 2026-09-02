@@ -8,6 +8,10 @@ Setup verbs for interaction, in addition to open/tool/expand/tab/pick/zoom:
   point, moves through the rest, and releases -- for drag and drop, or a
   slider. Each entry is a screenshot tag, whose widget's center is used,
   or a framebuffer position.
+* { "markers": [{ "frame": 15, "text": "..." }, { "range": [30, 60],
+  "name": "Sky", "color": [.3, .5, .9] }] } replaces the review markers,
+  bypassing the editor. Frames are 0-based from the timeline start; the
+  out frame is inclusive.
 
 Configuration:
 

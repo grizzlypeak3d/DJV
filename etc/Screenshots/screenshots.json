@@ -1447,8 +1447,9 @@
     {
       "id": "review-tool",
       "window": {
-        "w": 900,
-        "h": 600
+        "w": 1000,
+        "h": 600,
+        "splitter2": 0.55
       },
       "setup": [
         {
@@ -1459,6 +1460,25 @@
         },
         {
           "tool": "Review"
+        },
+        {
+          "markers": [
+            {
+              "frame": 12,
+              "text": "Exposure jumps between these frames."
+            },
+            {
+              "range": [30, 55],
+              "name": "Train pass",
+              "color": [0.3, 0.5, 0.9],
+              "text": "Hold the timing through the platform."
+            },
+            {
+              "range": [70, 85],
+              "name": "Sky",
+              "color": [1.0, 0.6, 0.1]
+            }
+          ]
         },
         {
           "click": "Review.Pen"

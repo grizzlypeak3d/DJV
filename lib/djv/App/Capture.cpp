@@ -9,6 +9,7 @@
 #include <djv/UI/Viewport.h>
 #include <djv/Models/CommandsModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/MarkersModel.h>
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/SettingsModel.h>
@@ -623,6 +624,65 @@ namespace djv
                             { "out", io[1].get<double>() }
                         });
                 }
+            }
+            else if (step.contains("markers"))
+            {
+                // Replace the review markers, bypassing the editor. The
+                // frames are 0-based relative to the timeline start like the
+                // "frame" verb, and the out frame is inclusive. The creation
+                // time is fixed here so rebuilding the documentation does not
+                // stamp the build date into the shot. e.g.
+                //   { "markers": [
+                //     { "frame": 15, "text": "Flare on the lens" },
+                //     { "range": [30, 60], "name": "Sky",
+                //       "color": [.3, .5, .9] } ] }
+                std::vector<models::ReviewMarker> markers;
+                if (auto player = app->observePlayer()->get())
+                {
+                    const auto start = player->getTimeRange().start_time();
+                    const double rate = start.rate();
+                    int index = 0;
+                    for (const auto& v : step.at("markers"))
+                    {
+                        models::ReviewMarker marker;
+                        marker.id = ftk::Format("capture-{0}").arg(index++);
+                        marker.created = "2026-09-01T17:00:00Z";
+                        if (v.contains("name"))
+                            marker.name = v.at("name").get<std::string>();
+                        if (v.contains("text"))
+                            marker.text = v.at("text").get<std::string>();
+                        if (v.contains("frame"))
+                        {
+                            const OTIO_NS::RationalTime frame(
+                                start.value() + v.at("frame").get<double>(),
+                                rate);
+                            marker.range = OTIO_NS::TimeRange(
+                                frame, OTIO_NS::RationalTime(1.0, rate));
+                        }
+                        else if (v.contains("range"))
+                        {
+                            const auto& r = v.at("range");
+                            marker.range = OTIO_NS::TimeRange::
+                                range_from_start_end_time_inclusive(
+                                    OTIO_NS::RationalTime(
+                                        start.value() + r[0].get<double>(),
+                                        rate),
+                                    OTIO_NS::RationalTime(
+                                        start.value() + r[1].get<double>(),
+                                        rate));
+                        }
+                        if (v.contains("color"))
+                        {
+                            const auto& c = v.at("color");
+                            marker.color = ftk::Color4F(
+                                c[0].get<float>(),
+                                c[1].get<float>(),
+                                c[2].get<float>());
+                        }
+                        markers.push_back(marker);
+                    }
+                }
+                app->getMarkersModel()->setMarkers(markers);
             }
             else if (step.contains("a"))
             {
