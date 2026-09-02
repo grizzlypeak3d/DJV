@@ -187,11 +187,8 @@ class App(ftk.App):
     def getDrawModel(self):
         return self._drawModel
 
-    def getNotesModel(self):
-        return self._notesModel
-
-    def getRangesModel(self):
-        return self._rangesModel
+    def getMarkersModel(self):
+        return self._markersModel
 
     def getRecentReviewsModel(self):
         return self._recentReviewsModel
@@ -424,8 +421,7 @@ class App(ftk.App):
         for tool in review.ui.openTools:
             self._toolsModel.setToolOpen(tool, True)
 
-        self._notesModel.setNotes(review.notes)
-        self._rangesModel.setRanges(review.ranges)
+        self._markersModel.setMarkers(review.markers)
         self._annotationsModel.setAnnotations(review.annotations)
 
         # View state is applied once the new player's initial auto-frame
@@ -542,8 +538,7 @@ class App(ftk.App):
         ui.openTools = self._toolsModel.openTools
         review.ui = ui
 
-        review.notes = self._notesModel.notes
-        review.ranges = self._rangesModel.ranges
+        review.markers = self._markersModel.markers
         review.annotations = self._annotationsModel.annotations
 
         return review
@@ -626,8 +621,7 @@ class App(ftk.App):
         compareOptions = tl.CompareOptions()
         compareOptions.compare = tl.Compare._None
         self._filesModel.compareOptions = compareOptions
-        self._notesModel.clear()
-        self._rangesModel.clear()
+        self._markersModel.clear()
         self._annotationsModel.clear()
         self._reviewPath = None
         self._reviewCarry = None
@@ -675,14 +669,15 @@ class App(ftk.App):
         player.currentTime = targetTime
 
     def _reviewMarkersUpdate(self):
-        # Mark the frames that carry a note or a drawing in the
-        # timeline. The markers are deliberately undifferentiated --
+        # Mark the frames that carry feedback or a drawing in the
+        # timeline. The ticks are deliberately undifferentiated --
         # they say "there is something here" -- and follow the
-        # timeline, which shows "A".
+        # timeline, which shows "A". A ranged marker ticks its start
+        # frame.
         markers = set()
-        for note in self._notesModel.notes:
-            if note.time is not None:
-                markers.add(int(note.time.value))
+        for marker in self._markersModel.markers:
+            if marker.range is not None:
+                markers.add(int(marker.range.start_time.value))
         # Every annotation is stamped with the player's time, which is
         # the timeline's own clock, so a drawing made on a "B" source
         # still marks the right place.
@@ -879,8 +874,7 @@ class App(ftk.App):
         self._toolsModel = djv.models.ToolsModel(self._settings)
         self._annotationsModel = djv.models.AnnotationsModel()
         self._drawModel = djv.models.DrawModel(self._settings)
-        self._notesModel = djv.models.NotesModel()
-        self._rangesModel = djv.models.RangesModel()
+        self._markersModel = djv.models.MarkersModel()
         self._recentReviewsModel = djv.models.RecentFilesModel(
             self.context, self._settings, "Review")
         self._recentPlaylistsModel = djv.models.RecentFilesModel(
@@ -924,8 +918,8 @@ class App(ftk.App):
         self._styleSettingsObserver = djv.models.StyleSettingsObserver(
             self._settingsModel.observeStyle,
             lambda value: selfWeak()._styleUpdate(value))
-        self._notesMarkersObserver = djv.models.ReviewNoteListObserver(
-            self._notesModel.observeNotes,
+        self._markersMarkersObserver = djv.models.ReviewMarkerListObserver(
+            self._markersModel.observeMarkers,
             lambda value: selfWeak()._reviewMarkersUpdate())
         self._annotationsMarkersObserver = \
             djv.models.ReviewAnnotationListObserver(

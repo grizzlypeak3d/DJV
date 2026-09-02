@@ -6,7 +6,7 @@
 #include <djv/ModelsTest/AnnotationsModelTest.h>
 #include <djv/ModelsTest/AudioModelTest.h>
 #include <djv/ModelsTest/FilesModelTest.h>
-#include <djv/ModelsTest/NotesModelTest.h>
+#include <djv/ModelsTest/MarkersModelTest.h>
 #include <djv/ModelsTest/PlaylistTest.h>
 #include <djv/ModelsTest/ReviewTest.h>
 #include <djv/ModelsTest/RecentFilesModelTest.h>
@@ -60,7 +60,7 @@ namespace djv
             p.tests.push_back(models_tests::AnnotationsModelTest::create(context));
             p.tests.push_back(models_tests::AudioModelTest::create(context));
             p.tests.push_back(models_tests::FilesModelTest::create(context));
-            p.tests.push_back(models_tests::NotesModelTest::create(context));
+            p.tests.push_back(models_tests::MarkersModelTest::create(context));
             p.tests.push_back(models_tests::PlaylistTest::create(context));
             p.tests.push_back(models_tests::ReviewTest::create(context));
             p.tests.push_back(models_tests::RecentFilesModelTest::create(context));

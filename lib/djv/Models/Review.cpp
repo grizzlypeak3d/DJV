@@ -420,75 +420,67 @@ namespace djv
             if (json.contains("strokes")) json.at("strokes").get_to(out.strokes);
         }
 
-        bool ReviewNote::operator == (const ReviewNote& other) const
+        const ftk::Color4F& reviewMarkerColor()
         {
-            return
-                id == other.id &&
-                sameTime(time, other.time) &&
-                created == other.created &&
-                author == other.author &&
-                text == other.text;
+            // Green: the traditional marker color, and distinct from the
+            // drawing default so feedback and strokes read apart.
+            static const ftk::Color4F out(0.F, .6F, 0.F, 1.F);
+            return out;
         }
 
-        bool ReviewNote::operator != (const ReviewNote& other) const
-        {
-            return !(*this == other);
-        }
-
-        void to_json(nlohmann::json& json, const ReviewNote& in)
-        {
-            json = nlohmann::json::object();
-            json["id"] = in.id;
-            if (in.time.has_value())
-            {
-                json["time"] = timeToJson(in.time.value());
-            }
-            json["created"] = in.created;
-            if (!in.author.empty())
-            {
-                json["author"] = in.author;
-            }
-            json["text"] = in.text;
-        }
-
-        void from_json(const nlohmann::json& json, ReviewNote& out)
-        {
-            if (json.contains("id")) json.at("id").get_to(out.id);
-            if (json.contains("time")) out.time = jsonToTime(json.at("time"));
-            if (json.contains("created")) json.at("created").get_to(out.created);
-            if (json.contains("author")) json.at("author").get_to(out.author);
-            if (json.contains("text")) json.at("text").get_to(out.text);
-        }
-
-        bool ReviewRange::operator == (const ReviewRange& other) const
+        bool ReviewMarker::operator == (const ReviewMarker& other) const
         {
             return
                 id == other.id &&
                 name == other.name &&
-                sameRange(range, other.range);
+                sameRange(range, other.range) &&
+                color == other.color &&
+                text == other.text &&
+                author == other.author &&
+                created == other.created;
         }
 
-        bool ReviewRange::operator != (const ReviewRange& other) const
+        bool ReviewMarker::operator != (const ReviewMarker& other) const
         {
             return !(*this == other);
         }
 
-        void to_json(nlohmann::json& json, const ReviewRange& in)
+        void to_json(nlohmann::json& json, const ReviewMarker& in)
         {
             json = nlohmann::json::object();
             json["id"] = in.id;
-            json["name"] = in.name;
+            if (!in.name.empty())
+            {
+                json["name"] = in.name;
+            }
             if (in.range.has_value())
             {
                 json["range"] = rangeToJson(in.range.value());
             }
+            json["color"] = in.color;
+            if (!in.text.empty())
+            {
+                json["text"] = in.text;
+            }
+            if (!in.author.empty())
+            {
+                json["author"] = in.author;
+            }
+            if (!in.created.empty())
+            {
+                json["created"] = in.created;
+            }
         }
 
-        void from_json(const nlohmann::json& json, ReviewRange& out)
+        void from_json(const nlohmann::json& json, ReviewMarker& out)
         {
             if (json.contains("id")) json.at("id").get_to(out.id);
             if (json.contains("name")) json.at("name").get_to(out.name);
             if (json.contains("range")) out.range = jsonToRange(json.at("range"));
+            if (json.contains("color")) json.at("color").get_to(out.color);
+            if (json.contains("text")) json.at("text").get_to(out.text);
+            if (json.contains("author")) json.at("author").get_to(out.author);
+            if (json.contains("created")) json.at("created").get_to(out.created);
         }
 
         void to_json(nlohmann::json& json, const Review& in)
@@ -511,7 +503,7 @@ namespace djv
             };
 
             // A list is written even when some of its items were not read: it is
-            // edited during the session, so a new note has to reach the file.
+            // edited during the session, so a new marker has to reach the file.
             // Those items are appended back, after the ones this version
             // understands.
             auto writeList = [&in, &write](
@@ -536,8 +528,12 @@ namespace djv
             write("color", in.color);
             write("ui", in.ui);
             writeList("annotations", in.annotations);
-            writeList("notes", in.notes);
-            writeList("ranges", in.ranges);
+            writeList("markers", in.markers);
+            // The development-era sections were lifted into the markers on
+            // load; left in the raw copy they would come back as duplicates
+            // the next time the document is read.
+            json.erase("notes");
+            json.erase("ranges");
         }
 
         void from_json(const nlohmann::json& json, Review& out)
@@ -552,7 +548,7 @@ namespace djv
             if (json.contains("created")) json.at("created").get_to(out.created);
 
             // Every section below is read on its own. The annotations and the
-            // notes are the part of a review that exists nowhere else, and one
+            // markers are the part of a review that exists nowhere else, and one
             // stale section elsewhere must not be allowed to cost them.
             readList(json, "files", out.files, out);
             readSection(json, "compare", out.compare, out);
@@ -560,8 +556,53 @@ namespace djv
             readSection(json, "color", out.color, out);
             readSection(json, "ui", out.ui, out);
             readList(json, "annotations", out.annotations, out);
-            readList(json, "notes", out.notes, out);
-            readList(json, "ranges", out.ranges, out);
+            readList(json, "markers", out.markers, out);
+
+            // Courtesy read of the development-era shape: the "notes" and
+            // "ranges" sections written between August 2026 and the marker
+            // unification lift into markers on load, for one development
+            // cycle. Format version 1 never shipped with them.
+            if (json.contains("notes") && json.at("notes").is_array())
+            {
+                for (const auto& item : json.at("notes"))
+                {
+                    try
+                    {
+                        ReviewMarker marker;
+                        if (item.contains("id")) item.at("id").get_to(marker.id);
+                        if (item.contains("time"))
+                        {
+                            const OTIO_NS::RationalTime time =
+                                jsonToTime(item.at("time"));
+                            marker.range = OTIO_NS::TimeRange(
+                                time,
+                                OTIO_NS::RationalTime(1.0, time.rate()));
+                        }
+                        if (item.contains("created")) item.at("created").get_to(marker.created);
+                        if (item.contains("author")) item.at("author").get_to(marker.author);
+                        if (item.contains("text")) item.at("text").get_to(marker.text);
+                        out.markers.push_back(marker);
+                    }
+                    catch (const std::exception&)
+                    {}
+                }
+            }
+            if (json.contains("ranges") && json.at("ranges").is_array())
+            {
+                for (const auto& item : json.at("ranges"))
+                {
+                    try
+                    {
+                        ReviewMarker marker;
+                        if (item.contains("id")) item.at("id").get_to(marker.id);
+                        if (item.contains("name")) item.at("name").get_to(marker.name);
+                        if (item.contains("range")) marker.range = jsonToRange(item.at("range"));
+                        out.markers.push_back(marker);
+                    }
+                    catch (const std::exception&)
+                    {}
+                }
+            }
         }
 
         const std::string& reviewExtension()

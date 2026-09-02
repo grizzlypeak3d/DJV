@@ -26,6 +26,7 @@ namespace djv
             void _unreadableSection();
             void _unknownSpace();
             void _unknownKeys();
+            void _courtesyRead();
         };
     }
 }

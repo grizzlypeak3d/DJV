@@ -29,6 +29,7 @@ namespace djv
             _unreadableSection();
             _unknownSpace();
             _unknownKeys();
+            _courtesyRead();
         }
 
         void ReviewTest::_version()
@@ -46,13 +47,15 @@ namespace djv
         {
             models::Review review;
 
-            models::ReviewNote note;
-            note.id = "n0";
-            note.time = OTIO_NS::RationalTime(24.0, 24.0);
-            note.created = "2026-08-26T09:00:00Z";
-            note.author = "reviewer";
-            note.text = "Too dark here.";
-            review.notes.push_back(note);
+            models::ReviewMarker marker;
+            marker.id = "m0";
+            marker.range = OTIO_NS::TimeRange(
+                OTIO_NS::RationalTime(24.0, 24.0),
+                OTIO_NS::RationalTime(1.0, 24.0));
+            marker.created = "2026-08-26T09:00:00Z";
+            marker.author = "reviewer";
+            marker.text = "Too dark here.";
+            review.markers.push_back(marker);
 
             models::ReviewStroke stroke;
             stroke.width = 8.F;
@@ -68,28 +71,27 @@ namespace djv
             annotation.strokes.push_back(stroke);
             review.annotations.push_back(annotation);
 
-            models::ReviewRange range;
-            range.id = "r0";
-            range.name = "Opening";
-            range.range = OTIO_NS::TimeRange(
+            models::ReviewMarker span;
+            span.id = "m1";
+            span.name = "Opening";
+            span.range = OTIO_NS::TimeRange(
                 OTIO_NS::RationalTime(0.0, 24.0),
                 OTIO_NS::RationalTime(48.0, 24.0));
-            review.ranges.push_back(range);
+            review.markers.push_back(span);
 
             const nlohmann::json json = review;
             const auto out = json.get<models::Review>();
 
             FTK_CHECK(out.unreadSections.empty());
-            FTK_CHECK(1 == out.notes.size());
-            FTK_CHECK(note == out.notes[0]);
+            FTK_CHECK(2 == out.markers.size());
+            FTK_CHECK(marker == out.markers[0]);
+            FTK_CHECK(span == out.markers[1]);
             FTK_CHECK(1 == out.annotations.size());
             FTK_CHECK(annotation == out.annotations[0]);
-            FTK_CHECK(1 == out.ranges.size());
-            FTK_CHECK(range == out.ranges[0]);
 
             // The author and the time are what make a review readable when it
             // comes back from someone else; they must survive the trip.
-            FTK_CHECK("reviewer" == out.notes[0].author);
+            FTK_CHECK("reviewer" == out.markers[0].author);
             FTK_CHECK("reviewer" == out.annotations[0].author);
             FTK_CHECK("2026-08-26T09:01:00Z" == out.annotations[0].created);
         }
@@ -98,13 +100,13 @@ namespace djv
         {
             // "color" delegates to serializers that require every key they know,
             // so an incomplete one throws. That must cost the color state and
-            // nothing else: the annotations and the notes exist nowhere but here.
+            // nothing else: the annotations and the markers exist nowhere but here.
             models::Review review;
-            models::ReviewNote note;
-            note.id = "n0";
-            note.created = "2026-08-26T09:00:00Z";
-            note.text = "Kept.";
-            review.notes.push_back(note);
+            models::ReviewMarker marker;
+            marker.id = "m0";
+            marker.created = "2026-08-26T09:00:00Z";
+            marker.text = "Kept.";
+            review.markers.push_back(marker);
 
             nlohmann::json json = review;
             nlohmann::json brokenColor = nlohmann::json::object();
@@ -115,8 +117,8 @@ namespace djv
 
             FTK_CHECK(1 == out.unreadSections.size());
             FTK_CHECK("color" == out.unreadSections[0]);
-            FTK_CHECK(1 == out.notes.size());
-            FTK_CHECK(note == out.notes[0]);
+            FTK_CHECK(1 == out.markers.size());
+            FTK_CHECK(marker == out.markers[0]);
 
             // Saving leaves the section exactly as it was found. Writing the
             // defaults the application fell back to would destroy state this
@@ -196,6 +198,50 @@ namespace djv
 
             FTK_CHECK(saved.contains("playlists"));
             FTK_CHECK(future == saved.at("playlists"));
+        }
+
+        void ReviewTest::_courtesyRead()
+        {
+            // The development-era "notes" and "ranges" sections lift into
+            // markers on load: a note becomes a one-frame marker with its
+            // text, a range a marker with its name and span. Format version 1
+            // never shipped with them, so this path lasts one development
+            // cycle.
+            nlohmann::json json = nlohmann::json(models::Review());
+            nlohmann::json note = nlohmann::json::object();
+            note["id"] = "n0";
+            note["time"] = { { "value", 24.0 }, { "rate", 24.0 } };
+            note["created"] = "2026-08-26T09:00:00Z";
+            note["author"] = "reviewer";
+            note["text"] = "Too dark here.";
+            json["notes"] = nlohmann::json::array({ note });
+            nlohmann::json range = nlohmann::json::object();
+            range["id"] = "r0";
+            range["name"] = "Opening";
+            range["range"] = {
+                { "start", { { "value", 0.0 }, { "rate", 24.0 } } },
+                { "duration", { { "value", 48.0 }, { "rate", 24.0 } } } };
+            json["ranges"] = nlohmann::json::array({ range });
+
+            const auto out = json.get<models::Review>();
+            FTK_CHECK(2 == out.markers.size());
+            FTK_CHECK("n0" == out.markers[0].id);
+            FTK_CHECK("Too dark here." == out.markers[0].text);
+            FTK_CHECK(out.markers[0].range.has_value());
+            FTK_CHECK(24.0 == out.markers[0].range->start_time().value());
+            FTK_CHECK(1.0 == out.markers[0].range->duration().value());
+            FTK_CHECK("reviewer" == out.markers[0].author);
+            FTK_CHECK("r0" == out.markers[1].id);
+            FTK_CHECK("Opening" == out.markers[1].name);
+            FTK_CHECK(48.0 == out.markers[1].range->duration().value());
+
+            // Saving writes markers and drops the lifted sections; left in
+            // place they would come back as duplicates on the next read.
+            const nlohmann::json saved = out;
+            FTK_CHECK(saved.contains("markers"));
+            FTK_CHECK(2 == saved.at("markers").size());
+            FTK_CHECK(!saved.contains("notes"));
+            FTK_CHECK(!saved.contains("ranges"));
         }
     }
 }

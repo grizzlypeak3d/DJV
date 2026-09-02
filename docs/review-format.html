@@ -52,7 +52,7 @@
 <h2 id="what-a-reader-must-do">What a reader must do</h2>
 <p>These four rules are what make a review safe to pass between people running different versions of DJV.</p>
 <p><strong>Keep an unknown section.</strong> A top-level section the reader does not know is carried through a load/save cycle untouched. Opening a review in an older DJV and saving it does not strip what a newer one wrote.</p>
-<p><strong>Read each section on its own.</strong> A section that cannot be read costs that section and nothing else. In particular it must never cost the <code>annotations</code> and <code>notes</code>, which exist nowhere but in this file — the rest of a review is a convenience that can be rebuilt by hand.</p>
+<p><strong>Read each section on its own.</strong> A section that cannot be read costs that section and nothing else. In particular it must never cost the <code>annotations</code> and <code>markers</code>, which exist nowhere but in this file — the rest of a review is a convenience that can be rebuilt by hand.</p>
 <p><strong>Do not overwrite what you could not read.</strong> A section that failed to load is written back exactly as it was found, rather than replaced by the defaults the application fell back to.</p>
 <p><strong>Skip, but keep, what you cannot place.</strong> An annotation or a stroke in a coordinate space the reader does not know is not drawn — and not deleted either. It is written back as it was found, after the items that were understood.</p>
 <h2 id="the-document">The document</h2>
@@ -67,8 +67,7 @@
 <tr><td><code>color</code></td><td>OCIO, LUT, display, background, foreground, aspect ratio and HUD.</td></tr>
 <tr><td><code>ui</code></td><td>The open tool panels.</td></tr>
 <tr><td><code>annotations</code></td><td>Drawings, by source and frame.</td></tr>
-<tr><td><code>notes</code></td><td>Timestamped comments.</td></tr>
-<tr><td><code>ranges</code></td><td>Named frame ranges.</td></tr>
+<tr><td><code>markers</code></td><td>Feedback: comments and named frame ranges, anchored to spans of frames.</td></tr>
 </table>
 <p><code>compare</code>, <code>view</code>, <code>color</code> and <code>ui</code> delegate to serializers shared with the application settings, and those require every key they know. They are therefore the sections most likely to fail against a document written by a different version — which is why the rules above exist.</p>
 <h3 id="files">Files</h3>
@@ -110,18 +109,23 @@
 <p>An annotation belongs to one source and is visible on one frame only.</p>
 <p><code>space</code> and <code>widthSpace</code> are both <code>"image"</code> in version 1: points and widths are expressed in the pixels of the source image, so a drawing keeps its position and its weight whatever the zoom, the pan or the comparison mode. A reader that meets any other value must not draw the item — the coordinates would land somewhere else entirely — and must keep it, per the rules above. An absent space means <code>"image"</code>.</p>
 <p><code>points</code> is a flat <code>[x, y, x, y, ...]</code> array, which keeps long strokes compact. A trailing odd value is ignored.</p>
-<h3 id="notes-and-ranges">Notes and ranges</h3>
+<h3 id="markers">Markers</h3>
 <pre><code>{
   "id": "b1c2d3e4f5a6b7c800000001",
-  "time": { "value": 96.0, "rate": 24.0 },
+  "name": "Intro",
+  "range": {
+    "start":    { "value": 96.0, "rate": 24.0 },
+    "duration": { "value": 48.0, "rate": 24.0 }
+  },
+  "color": [0.0, 0.6, 0.0, 1.0],
+  "text": "Grade is too cold from here.",
   "created": "2026-08-26T09:00:00Z",
-  "author": "matthieu",
-  "text": "Grade is too cold from here."
+  "author": "matthieu"
 }
 </code></pre>
-<p>A note belongs to the review rather than to a source: the frame locates it. A range is an <code>id</code>, a free-text <code>name</code> and a <code>range</code>; selecting one sets the timeline in and out points.</p>
+<p>A marker belongs to the review rather than to a source: the frames locate it. One type covers a comment on a frame (a one-frame <code>range</code> with <code>text</code>), a named span of frames (a wider <code>range</code> with a <code>name</code>), and both at once. <code>name</code>, <code>range</code>, <code>text</code>, <code>author</code> and <code>created</code> are each optional; a marker with no <code>range</code> speaks about the whole review. The fields map one to one onto OpenTimelineIO markers.</p>
 <h3 id="attribution">Attribution</h3>
-<p><code>author</code> is optional on both notes and annotations, and is empty when it is not known. DJV has no accounts: it fills the field from the environment — <code>USERNAME</code> on Windows, <code>USER</code> elsewhere — when the item is created. Treat it as a label saying who wrote something when a session comes back from someone else, not as an identity, and never as a permission.</p>
+<p><code>author</code> is optional on both markers and annotations, and is empty when it is not known. DJV has no accounts: it fills the field from the environment — <code>USERNAME</code> on Windows, <code>USER</code> elsewhere — when the item is created. Treat it as a label saying who wrote something when a session comes back from someone else, not as an identity, and never as a permission.</p>
 <p>Identifiers are 64 random bits plus a counter, so items written independently by two people do not collide.</p>
 <h2 id="what-is-not-stored">What is not stored</h2>
 <p>Keyboard shortcuts, style, cache size and the audio device are deliberately absent: opening a review someone sends you must not reconfigure your installation.</p>

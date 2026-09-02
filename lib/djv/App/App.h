@@ -39,8 +39,7 @@ namespace djv
         class CommandsModel;
         class DrawModel;
         class FilesModel;
-        class NotesModel;
-        class RangesModel;
+        class MarkersModel;
         class RecentFilesModel;
         class TimeUnitsModel;
         class ToolsModel;
@@ -118,14 +117,12 @@ namespace djv
             //! Get the commands model.
             DJV_APP_API const std::shared_ptr<models::CommandsModel>& getCommandsModel() const;
 
-            //! Get the review notes model.
-            const std::shared_ptr<models::NotesModel>& getNotesModel() const;
+            //! Get the review markers model.
+            const std::shared_ptr<models::MarkersModel>& getMarkersModel() const;
 
             //! Get the review annotations model.
             const std::shared_ptr<models::AnnotationsModel>& getAnnotationsModel() const;
 
-            //! Get the review ranges model.
-            const std::shared_ptr<models::RangesModel>& getRangesModel() const;
 
             //! Get the drawing state model.
             const std::shared_ptr<models::DrawModel>& getDrawModel() const;
@@ -309,7 +306,7 @@ namespace djv
             void _recoverAutosave();
             void _markModified();
             void _updateWindowTitle();
-            void _notesUpdate();
+            void _markersUpdate();
 
             FTK_PRIVATE();
         };

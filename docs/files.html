@@ -155,6 +155,7 @@
 <li>The viewport state: framing, pan, and zoom.</li>
 <li>Color and display state: OCIO, LUT, display, background, foreground, aspect ratio, and HUD.</li>
 <li>The interface: the open tool panels.</li>
+<li>The feedback: markers and drawings.</li>
 </ul>
 <p>Opening a review replaces the current session. File paths are stored relative to the <code>.djvr</code> when possible, so a review stays valid when moved together with its media; any files that cannot be found are reported in the <strong>Messages</strong> tool.</p>
 <p>A review written by a newer DJV than the one you are running is refused, with the reason given in the <strong>Messages</strong> tool, rather than opened in part. Anything else in a review that this version does not understand is left alone: it is kept as it stands when you save, so passing a session between different versions of DJV does not quietly strip it. The document itself is described in <a href="review-format.html">Review file format</a>.</p>
@@ -186,7 +187,7 @@
 <pre><code>djv session.djvr
 </code></pre>
 <p>Personal preferences — keyboard shortcuts, style, cache size, and the audio device — are deliberately <strong>not</strong> stored in a review, so opening one received from someone else does not reconfigure your installation.</p>
-<p>Notes and drawings record who made them, taken from your account name on the machine, so a session that has been passed around stays readable.</p>
+<p>Markers and drawings record who made them, taken from your account name on the machine, so a session that has been passed around stays readable.</p>
 
 <h2 id="otio-spatial-coordinates">OTIO spatial coordinates</h2>
 <p>OTIO files can give each clip a bounding box, called the <a target="_blank" href="https://opentimelineio.readthedocs.io/en/stable/tutorials/spatial-coordinates.html">spatial coordinates</a>, that describes the area the image occupies on a canvas shared by the whole timeline. DJV uses these boxes to size and position the images.</p>

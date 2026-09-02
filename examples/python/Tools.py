@@ -962,14 +962,39 @@ def _formatCreated(iso):
     except ValueError:
         return iso
 
+def _isSingleFrame(range):
+    return range.duration.value <= 1.0
+
 def _formatRange(range):
     """
-    Format a range as its frame bounds, e.g. "0001-0120". Both ends are
-    inclusive: the range reads as the frames you will see.
+    Format a range as its frame bounds, e.g. "0001-0120", or as the one
+    frame it covers. Both ends are inclusive: the range reads as the
+    frames you will see.
     """
+    if _isSingleFrame(range):
+        return "Frame {}".format(int(range.start_time.value))
     return "{:04d}-{:04d}".format(
         int(range.start_time.value),
         int(range.end_time_inclusive().value))
+
+def _markerTitle(marker):
+    """
+    The title a marker's row shows: the name where there is one, its
+    frames otherwise, and what it is about failing both.
+    """
+    if marker.name:
+        return marker.name
+    if marker.range is not None:
+        return _formatRange(marker.range)
+    return "No frame"
+
+def _markerShowing(marker, currentTime):
+    """
+    Whether the marker speaks about the frame being shown.
+    """
+    return (marker.range is not None and
+        currentTime is not None and
+        marker.range.contains(currentTime))
 
 def _wrapText(text, columns):
     """
@@ -992,7 +1017,7 @@ def _wrapText(text, columns):
 
 class ReviewTool(IToolWidget):
     """
-    This tool provides the review ranges, drawing, and notes.
+    This tool provides the review drawing and markers.
     """
     def __init__(self, context, app, mainWindow, parent = None):
         IToolWidget.__init__(
@@ -1002,39 +1027,43 @@ class ReviewTool(IToolWidget):
         self._player = None
         self._currentTime = None
         self._inOutRange = None
-        self._notes = []
-        self._ranges = []
-        self._rangeButtons = {}
-        self._noteButtons = {}
-        # The selected range, or None. Only one can be active: selecting
-        # is what drives the timeline in/out points.
-        self._selectedRangeId = None
+        self._markers = []
+        self._markerButtons = {}
+        self._applyButtons = {}
+        # The marker whose span the in/out points carry, or None. Only
+        # one can be applied: applying is what drives the timeline
+        # in/out points.
+        self._appliedId = None
         self._currentTimeObserver = None
         self._inOutRangeObserver = None
 
-        # Review ranges. The list is the bellows content with no margin,
-        # so the items run edge to edge.
-        # The add buttons live in their bellows title rows, so the lists
-        # read like the lists elsewhere: + in the header, - on the rows.
+        # Markers. The list is the bellows content with no margin, so
+        # the items run edge to edge.
+        # The add buttons live in the bellows title row, so the list
+        # reads like the lists elsewhere: + in the header, - on the rows.
+        self._addNoteButton = ftk.ToolButton(context)
+        self._addNoteButton.icon = "Add"
+        self._addNoteButton.tooltip = \
+            "Add a marker about the current frame, written in place."
         self._addRangeButton = ftk.ToolButton(context)
-        self._addRangeButton.icon = "Add"
+        self._addRangeButton.icon = "FrameInOut"
         self._addRangeButton.tooltip = \
-            "Save the timeline in/out points as a named range."
+            "Add a marker from the timeline in/out points."
         # One delete for the list, acting on the focused row, rather
         # than one on every row. Clicking it must not move the key
         # focus, or it would clear the very selection it acts on.
-        self._deleteRangeButton = ftk.ToolButton(context)
-        self._deleteRangeButton.icon = "Remove"
-        self._deleteRangeButton.tooltip = \
-            "Delete the selected or applied range."
-        self._deleteRangeButton.enabled = False
-        self._deleteRangeButton.acceptsKeyFocus = False
-        rangeToolLayout = ftk.HorizontalLayout(context)
-        rangeToolLayout.spacingRole = ftk.SizeRole._None
-        self._addRangeButton.parent = rangeToolLayout
-        self._deleteRangeButton.parent = rangeToolLayout
-        self._rangeListLayout = ftk.VerticalLayout(context)
-        self._rangeListLayout.spacingRole = ftk.SizeRole._None
+        self._deleteButton = ftk.ToolButton(context)
+        self._deleteButton.icon = "Remove"
+        self._deleteButton.tooltip = "Delete the selected or active marker."
+        self._deleteButton.enabled = False
+        self._deleteButton.acceptsKeyFocus = False
+        markerToolLayout = ftk.HorizontalLayout(context)
+        markerToolLayout.spacingRole = ftk.SizeRole._None
+        self._addNoteButton.parent = markerToolLayout
+        self._addRangeButton.parent = markerToolLayout
+        self._deleteButton.parent = markerToolLayout
+        self._markerListLayout = ftk.VerticalLayout(context)
+        self._markerListLayout.spacingRole = ftk.SizeRole._None
 
         # Drawing.
         drawingWidget = ftk.VerticalLayout(context)
@@ -1076,38 +1105,18 @@ class ReviewTool(IToolWidget):
         self._sizeSlider.value = drawModel.size
         self._sizeSlider.tooltip = "The stroke width, in source pixels."
 
-        # Notes. A note is written and edited in place in the list;
-        # there is no separate editor to keep in sync with it.
-        self._publishButton = ftk.ToolButton(context)
-        self._publishButton.icon = "Add"
-        self._publishButton.tooltip = "Add a note about the current frame."
-        self._deleteNoteButton = ftk.ToolButton(context)
-        self._deleteNoteButton.icon = "Remove"
-        self._deleteNoteButton.tooltip = (
-            "Delete the selected note, or the note on the current "
-            "frame.")
-        self._deleteNoteButton.enabled = False
-        self._deleteNoteButton.acceptsKeyFocus = False
-        noteToolLayout = ftk.HorizontalLayout(context)
-        noteToolLayout.spacingRole = ftk.SizeRole._None
-        self._publishButton.parent = noteToolLayout
-        self._deleteNoteButton.parent = noteToolLayout
-        self._focusedRangeId = None
-        self._focusedNoteId = None
-        self._rangeItemOrder = []
-        self._noteItemOrder = []
-        self._noteListLayout = ftk.VerticalLayout(context)
-        self._noteListLayout.spacingRole = ftk.SizeRole._None
+        self._focusedId = None
+        self._itemOrder = []
 
-        # The note being edited in place, a new note being written, and
-        # the deferred work both need: the commit is deferred a tick
+        # The marker being edited in place, a new marker being written,
+        # and the deferred work both need: the commit is deferred a tick
         # because the focus loss is reported from inside the editor and
         # the commit rebuilds the list that owns it, and the scroll is
         # deferred a tick because a rebuilt list has no geometry yet.
-        self._editingNoteId = None
+        self._editingId = None
         self._draftActive = False
-        self._draftTime = None
-        self._editNoteEdit = None
+        self._draftRange = None
+        self._editEdit = None
         self._editItem = None
         self._commitTimer = ftk.Timer(context)
         self._scrollTimer = ftk.Timer(context)
@@ -1117,9 +1126,8 @@ class ReviewTool(IToolWidget):
         self._scrollLayout = layout
         self._bellows = {}
         for title, widget, toolWidget in [
-            ("Ranges", self._rangeListLayout, rangeToolLayout),
             ("Drawing", drawingWidget, None),
-            ("Notes", self._noteListLayout, noteToolLayout),
+            ("Markers", self._markerListLayout, markerToolLayout),
         ]:
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget
@@ -1131,7 +1139,7 @@ class ReviewTool(IToolWidget):
         self._scrollWidget = ftk.ScrollWidget(context)
         self._scrollWidget.border = False
         self._scrollWidget.widget = layout
-        # The notes have no natural end, so take what room is left
+        # The markers have no natural end, so take what room is left
         # rather than a band of its own while other tools sit at the
         # height they need. The scroll widget has to expand with the
         # tool, or the extra room stays empty below it.
@@ -1204,21 +1212,14 @@ class ReviewTool(IToolWidget):
             lambda value: selfWeak() and setattr(
                 selfWeak()._redoButton, "enabled", value))
 
+        self._addNoteButton.setClickedCallback(Util.weak(self.addNote))
         self._addRangeButton.setClickedCallback(Util.weak(self._addRange))
-        self._rangesObserver = djv.models.ReviewRangeListObserver(
-            app.getRangesModel().observeRanges,
-            lambda value: selfWeak() and selfWeak()._rangesUpdate(value))
+        self._deleteButton.setClickedCallback(Util.weak(self._deleteMarker))
+        self._markersObserver = djv.models.ReviewMarkerListObserver(
+            app.getMarkersModel().observeMarkers,
+            lambda value: selfWeak() and selfWeak()._markersListUpdate(value))
 
-        self._publishButton.setClickedCallback(Util.weak(self.addNote))
-        self._deleteRangeButton.setClickedCallback(
-            Util.weak(self._deleteRange))
-        self._deleteNoteButton.setClickedCallback(
-            Util.weak(self._deleteNote))
-        self._notesObserver = djv.models.ReviewNoteListObserver(
-            app.getNotesModel().observeNotes,
-            lambda value: selfWeak() and selfWeak()._notesListUpdate(value))
-
-        # The list shows every note; the playhead moves the highlight.
+        # The list shows every marker; the playhead moves the highlight.
         self._playerObserver = tl.PlayerObserver(
             app.observePlayer(),
             lambda player: selfWeak() and selfWeak()._setPlayer(player))
@@ -1227,7 +1228,7 @@ class ReviewTool(IToolWidget):
 
     def addNote(self):
         """
-        Start a new note about the current frame, edited in place in
+        Start a new marker about the current frame, edited in place in
         the list.
         """
         app = self._app()
@@ -1236,52 +1237,55 @@ class ReviewTool(IToolWidget):
         player = app.observePlayer().get()
         if player is None:
             return
-        # Keep whatever was being written before starting the next note.
-        self._commitNote()
+        # Keep whatever was being written before starting the next
+        # marker.
+        self._commitMarker()
         self._draftActive = True
-        # The note is anchored to the frame shown when it is started.
-        self._draftTime = player.currentTime
-        self._editingNoteId = None
-        self._notesUpdate()
+        # The marker is anchored to the frame shown when it is started.
+        time = player.currentTime
+        self._draftRange = otio.opentime.TimeRange(
+            time, otio.opentime.RationalTime(1.0, time.rate))
+        self._editingId = None
+        self._markersUpdate()
 
-    def _editNote(self, id):
-        if id == self._editingNoteId:
+    def _editMarker(self, id):
+        if id == self._editingId:
             return
-        self._commitNote()
+        self._commitMarker()
         self._draftActive = False
-        self._draftTime = None
-        self._editingNoteId = id
-        self._notesUpdate()
+        self._draftRange = None
+        self._editingId = id
+        self._markersUpdate()
 
-    def _commitNote(self):
-        if self._editNoteEdit is None:
+    def _commitMarker(self):
+        if self._editEdit is None:
             return
-        text = self._editNoteEdit.text
+        text = self._editEdit.text
         if isinstance(text, list):
             text = "\n".join(text)
         draft = self._draftActive
-        id = self._editingNoteId
-        time = self._draftTime
+        id = self._editingId
+        range_ = self._draftRange
         # Clear the state before touching the model: the model observer
         # rebuilds the list, and must not find a half-finished edit.
         self._draftActive = False
-        self._draftTime = None
-        self._editingNoteId = None
-        self._editNoteEdit = None
+        self._draftRange = None
+        self._editingId = None
+        self._editEdit = None
         self._editItem = None
         app = self._app()
         if app is not None:
             if draft and text:
-                app.getNotesModel().add(time, text)
+                app.getMarkersModel().add(range_, "", text)
             elif not draft and id is not None and text:
-                app.getNotesModel().update(id, text)
+                app.getMarkersModel().update(id, text)
         # An empty draft or an unchanged edit does not move the model,
         # so rebuild by hand; the extra rebuild after a model change is
         # harmless.
-        self._notesUpdate()
+        self._markersUpdate()
 
     def _editFocus(self, editor, value):
-        if editor is None or editor is not self._editNoteEdit:
+        if editor is None or editor is not self._editEdit:
             return
         if value:
             # Focus came back before the deferred commit fired.
@@ -1292,107 +1296,106 @@ class ReviewTool(IToolWidget):
         def commit():
             widget = selfWeak()
             if widget is not None and \
-                    editorRef() is widget._editNoteEdit:
-                widget._commitNote()
+                    editorRef() is widget._editEdit:
+                widget._commitMarker()
         self._commitTimer.start(0.0, commit)
 
-    def _rangeRowFocus(self, id, value):
+    def _rowFocus(self, id, value):
         if value:
-            self._focusedRangeId = id
-        elif self._focusedRangeId == id:
-            self._focusedRangeId = None
-        self._deleteButtonsUpdate()
+            self._focusedId = id
+        elif self._focusedId == id:
+            self._focusedId = None
+        self._deleteButtonUpdate()
 
-    def _noteRowFocus(self, id, value):
-        if value:
-            self._focusedNoteId = id
-        elif self._focusedNoteId == id:
-            self._focusedNoteId = None
-        self._deleteButtonsUpdate()
-
-    def _rangeDeleteTarget(self):
-        # The focused row, or failing that the applied range.
-        return self._focusedRangeId \
-            if self._focusedRangeId is not None else self._selectedRangeId
-
-    def _noteDeleteTarget(self):
-        if self._focusedNoteId is not None:
-            return self._focusedNoteId
-        # The note on the current frame: what the highlight shows. With
-        # several on the frame the first goes; the button stays enabled
+    def _deleteTarget(self):
+        if self._focusedId is not None:
+            return self._focusedId
+        if self._appliedId is not None:
+            return self._appliedId
+        # The marker on the current frame: what the highlight shows.
+        # With several there the first goes; the button stays enabled
         # for the rest.
-        for button, id in self._noteItemOrder:
+        for button, id in self._itemOrder:
             if button.checked:
                 return id
         return None
 
-    def _deleteButtonsUpdate(self):
-        self._deleteRangeButton.enabled = \
-            self._rangeDeleteTarget() is not None
-        self._deleteNoteButton.enabled = \
-            self._noteDeleteTarget() is not None
+    def _deleteButtonUpdate(self):
+        self._deleteButton.enabled = self._deleteTarget() is not None
 
-    def _deleteRange(self):
-        id = self._rangeDeleteTarget()
+    def _deleteMarker(self):
+        id = self._deleteTarget()
         if id is None:
             return
         # The index before the removal, to land the focus on the
         # neighbour after: repeated deletes then cull a list without
         # re-selecting.
         index = next(
-            (i for i, (b, rowId) in enumerate(self._rangeItemOrder)
+            (i for i, (b, rowId) in enumerate(self._itemOrder)
                 if rowId == id), 0)
-        focused = self._focusedRangeId is not None
+        focused = self._focusedId is not None
         app = self._app()
         if app is not None:
-            app.getRangesModel().remove(id)
-        if focused and self._rangeItemOrder:
-            j = min(index, len(self._rangeItemOrder) - 1)
-            self._rangeItemOrder[j][0].takeKeyFocus()
-
-    def _deleteNote(self):
-        id = self._noteDeleteTarget()
-        if id is None:
-            return
-        index = next(
-            (i for i, (b, rowId) in enumerate(self._noteItemOrder)
-                if rowId == id), 0)
-        focused = self._focusedNoteId is not None
-        app = self._app()
-        if app is not None:
-            app.getNotesModel().remove(id)
-        if focused and self._noteItemOrder:
-            # Focus without following the frame: deleting is not
+            app.getMarkersModel().remove(id)
+        if focused and self._itemOrder:
+            # Focus without following the frames: deleting is not
             # browsing.
-            j = min(index, len(self._noteItemOrder) - 1)
-            self._noteItemOrder[j][0].takeKeyFocus()
+            j = min(index, len(self._itemOrder) - 1)
+            self._itemOrder[j][0].takeKeyFocus()
 
-    def _noteClicked(self, id):
-        if id is None or id == self._editingNoteId:
+    def _seekTo(self, time):
+        if not self._player:
             return
-        note = next((n for n in self._notes if n.id == id), None)
-        if note is None:
+        # Going to feedback wins over a narrower in/out range: with the
+        # target outside it, the seek would move the clock into a span
+        # the player cannot show.
+        if not self._player.inOutRange.contains(time):
+            self._player.resetInPoint()
+            self._player.resetOutPoint()
+        self._player.currentTime = time
+
+    def _markerClicked(self, id):
+        if id is None or id == self._editingId:
             return
-        # The first click goes to the note's frame; a click on the note
-        # already showing -- or on one about no frame in particular --
-        # opens it for editing.
-        if note.time is None or djv.models.sameTime(
-                note.time, self._currentTime):
-            self._editNote(id)
+        marker = next((m for m in self._markers if m.id == id), None)
+        if marker is None:
+            return
+        # The first click goes to the marker's frames; a click on the
+        # marker already showing -- or on one about no frame in
+        # particular -- opens it for editing.
+        if marker.range is None or _markerShowing(marker, self._currentTime):
+            self._editMarker(id)
         elif self._player:
-            # Going to feedback wins over a narrower in/out range: with
-            # the note outside it, the seek would move the clock into a
-            # span the player cannot show.
-            if not self._player.inOutRange.contains(note.time):
-                self._player.resetInPoint()
-                self._player.resetOutPoint()
-            self._player.currentTime = note.time
+            self._seekTo(marker.range.start_time)
+
+    def _applyClicked(self, id):
+        if not self._player:
+            return
+        if id == self._appliedId:
+            # Clicking the applied span clears the in/out points and
+            # gives the whole timeline back.
+            self._appliedId = None
+            self._player.resetInPoint()
+            self._player.resetOutPoint()
+        else:
+            marker = next((m for m in self._markers if m.id == id), None)
+            if marker is None or marker.range is None:
+                return
+            # Set the state first: applying the span makes the in/out
+            # observer fire, and it must not read this as a stale
+            # highlight.
+            self._appliedId = id
+            self._player.inOutRange = marker.range
+            # Without this the playhead stays outside the range it
+            # just set.
+            self._player.currentTime = marker.range.start_time
+        self._selectionUpdate()
 
     def _setPlayer(self, player):
         self._player = player
-        # A note is anchored to the current frame, so without media
+        # A marker is anchored to the current frame, so without media
         # there is nothing to attach it to.
-        self._publishButton.enabled = player is not None
+        self._addNoteButton.enabled = player is not None
         selfWeak = weakref.ref(self)
         if player:
             self._currentTimeObserver = tl.RationalTimeObserver(
@@ -1407,12 +1410,12 @@ class ReviewTool(IToolWidget):
             self._inOutRangeObserver = None
             self._currentTime = None
             self._inOutRange = None
-            self._noteSelectionUpdate()
+            self._selectionUpdate()
             self._inOutStateUpdate()
 
     def _currentTimeUpdate(self, value):
         self._currentTime = value
-        self._noteSelectionUpdate()
+        self._selectionUpdate()
 
     def _inOutUpdate(self, value):
         self._inOutRange = value
@@ -1428,96 +1431,6 @@ class ReviewTool(IToolWidget):
             self._eraserButton.checked = \
                 enabled and djv.models.DrawTool.Eraser == tool
 
-    def _rangesUpdate(self, ranges):
-        self._ranges = ranges
-        self._rangeListLayout.clear()
-        self._rangeButtons = {}
-        self._rangeItemOrder = []
-        context = self.context
-        if not ranges:
-            label = ftk.Label(context, "No ranges yet.", self._rangeListLayout)
-            label.marginRole = ftk.SizeRole.MarginSmall
-            label.textRole = ftk.ColorRole.TextDisabled
-            self._deleteButtonsUpdate()
-            return
-        appWeak = self._app
-        # The model keeps the list sorted by start frame.
-        first = True
-        for range_ in ranges:
-            if not first:
-                ftk.Divider(
-                    context, ftk.Orientation.Vertical, self._rangeListLayout)
-            first = False
-            # The whole row is one item button, so the list reads as a
-            # list rather than a row of separate widgets.
-            button = ftk.ItemButton(context, self._rangeListLayout)
-            # Deliberately not checkable, for the reason given on the
-            # pen button: the click would flip the state after the
-            # callback and fight the highlight set from the selection.
-            button.tooltip = (
-                "Set the timeline in/out points to this range. Click "
-                "again to clear them.")
-            button.setClickedCallback(
-                lambda captured = range_.id,
-                    f = Util.weak(self._rangeClicked): f(captured))
-            self._rangeButtons[range_.id] = button
-            self._rangeItemOrder.append((button, range_.id))
-            button.setFocusCallback(
-                lambda value, captured = range_.id,
-                    f = Util.weak(self._rangeRowFocus): f(captured, value))
-            row = ftk.HorizontalLayout(context)
-            row.marginRole = ftk.SizeRole.MarginInside
-            row.spacingRole = ftk.SizeRole.SpacingSmall
-            button.widget = row
-            nameLabel = ftk.Label(context, range_.name, row)
-            nameLabel.setMarginRole(ftk.SizeRole.LabelPad, ftk.SizeRole._None)
-            nameLabel.vAlign = ftk.VAlign.Center
-            nameLabel.hStretch = ftk.Stretch.Expanding
-            # The frames sit against the right edge, the way the file
-            # browser lays out its columns, so a named row says where it
-            # points -- unless the name is the frames, which the default
-            # is, and saying them twice reads as a mistake.
-            frames = _formatRange(range_.range) \
-                if range_.range is not None else ""
-            if range_.name != frames:
-                framesLabel = ftk.Label(context, frames, row)
-                framesLabel.setMarginRole(
-                    ftk.SizeRole.LabelPad, ftk.SizeRole._None)
-                framesLabel.textRole = ftk.ColorRole.TextDisabled
-                framesLabel.vAlign = ftk.VAlign.Center
-        self._rangeSelectionUpdate()
-
-    def _rangeSelectionUpdate(self):
-        for id, button in self._rangeButtons.items():
-            button.checked = id == self._selectedRangeId
-        self._deleteButtonsUpdate()
-
-    def _rangeClicked(self, id):
-        if not self._player:
-            return
-        if id == self._selectedRangeId:
-            # Clicking the active range clears the in/out points and
-            # gives the whole timeline back.
-            self._selectedRangeId = None
-            self._player.resetInPoint()
-            self._player.resetOutPoint()
-        else:
-            found = None
-            for range_ in self._ranges:
-                if range_.id == id:
-                    found = range_
-            if found is None:
-                return
-            # Set the selection first: applying the range makes the
-            # in/out observer fire, and it must not read this as a
-            # stale highlight.
-            self._selectedRangeId = id
-            self._player.inOutRange = found.range
-            # Without this the playhead stays outside the range it
-            # just set.
-            self._player.currentTime = found.range.start_time
-        self._rangeSelectionUpdate()
-
     def _inOutStateUpdate(self):
         # Adding is only meaningful once the in/out points actually
         # narrow the timeline.
@@ -1527,16 +1440,14 @@ class ReviewTool(IToolWidget):
             self._inOutRange != self._player.timeRange)
         self._addRangeButton.enabled = narrowed
         # Drop the highlight as soon as the in/out points stop matching
-        # the selected range, e.g. after dragging them by hand.
-        if self._selectedRangeId is not None:
-            found = None
-            for range_ in self._ranges:
-                if range_.id == self._selectedRangeId:
-                    found = range_
-            if found is None or not djv.models.sameRange(
-                    found.range, self._inOutRange):
-                self._selectedRangeId = None
-                self._rangeSelectionUpdate()
+        # the applied span, e.g. after dragging them by hand.
+        if self._appliedId is not None:
+            marker = next(
+                (m for m in self._markers if m.id == self._appliedId), None)
+            if marker is None or not djv.models.sameRange(
+                    marker.range, self._inOutRange):
+                self._appliedId = None
+                self._selectionUpdate()
 
     def _addRange(self):
         if not self._player or self._inOutRange is None:
@@ -1551,84 +1462,88 @@ class ReviewTool(IToolWidget):
                 return
             # An emptied field falls back to the frame range rather
             # than producing a nameless row.
-            app_.getRangesModel().add(range_, value if value else defaultName)
+            app_.getMarkersModel().add(
+                range_, value if value else defaultName, "")
         self.context.getSystemByName("ftk::DialogSystem").input(
-            "Add Review Range",
+            "Add Marker",
             "Frames {}".format(defaultName),
             defaultName,
             self._mainWindow(),
             callback)
 
-    def _notesListUpdate(self, notes):
-        self._notes = notes
-        self._notesUpdate()
+    def _markersListUpdate(self, markers):
+        self._markers = markers
+        self._markersUpdate()
 
-    def _notesUpdate(self):
+    def _markersUpdate(self):
         # Let go of any editor before the clear destroys it, so the
         # focus loss it reports on the way out finds nothing left to
         # commit.
-        self._editNoteEdit = None
+        self._editEdit = None
         self._editItem = None
-        self._noteListLayout.clear()
-        self._noteButtons = {}
-        self._noteItemOrder = []
+        self._markerListLayout.clear()
+        self._markerButtons = {}
+        self._applyButtons = {}
+        self._itemOrder = []
         context = self.context
-        # Every note, so the panel reads as the review's feedback rather
-        # than one frame's -- browsing beats following bread crumbs. In
-        # frame order, with the notes about no frame in particular
-        # first: they speak about the whole review.
-        value = list(self._notes)
-        # A new note is written in place: it appears as an item with an
-        # editor, and joins the model when the edit commits.
+        # Every marker, so the panel reads as the review's feedback
+        # rather than one frame's -- browsing beats following bread
+        # crumbs. The model keeps the list in time order, with the
+        # markers about no frame in particular first: they speak about
+        # the whole review.
+        value = list(self._markers)
+        # A new marker is written in place: it appears as an item with
+        # an editor, and joins the model when the edit commits.
         if self._draftActive:
             value.append(types.SimpleNamespace(
-                id = None, time = self._draftTime, created = "",
-                text = ""))
-        value = sorted(
-            value,
-            key = lambda note:
-                (0, 0.0) if note.time is None else (1, note.time.value))
+                id = None, name = "", range = self._draftRange,
+                created = "", text = ""))
+            value = sorted(
+                value,
+                key = lambda marker:
+                    (0, 0.0) if marker.range is None else
+                    (1, marker.range.start_time.value))
         if not value:
             # Without this the section is silently empty, which reads
             # as a bug rather than as "nothing to say yet".
             label = ftk.Label(
-                context, "No notes yet.", self._noteListLayout)
+                context, "No markers yet.", self._markerListLayout)
             label.marginRole = ftk.SizeRole.MarginSmall
             label.textRole = ftk.ColorRole.TextDisabled
-            self._deleteButtonsUpdate()
+            self._deleteButtonUpdate()
             return
         appWeak = self._app
         selfWeak = weakref.ref(self)
         first = True
-        for note in value:
+        for marker in value:
             if not first:
                 ftk.Divider(
-                    context, ftk.Orientation.Vertical, self._noteListLayout)
+                    context, ftk.Orientation.Vertical, self._markerListLayout)
             first = False
-            # The whole note is one item button, like a range row: the
-            # note is what the click selects, not one widget inside it.
-            button = ftk.ItemButton(context, self._noteListLayout)
-            hasTime = note.time is not None
-            # The draft has no identifier; an existing note is being
+            # The whole marker is one item button: the marker is what
+            # the click selects, not one widget inside it.
+            button = ftk.ItemButton(context, self._markerListLayout)
+            hasRange = marker.range is not None
+            # The draft has no identifier; an existing marker is being
             # edited when its identifier matches.
-            editing = note.id is None if self._draftActive \
-                else (note.id is not None and
-                    note.id == self._editingNoteId)
+            editing = marker.id is None if self._draftActive \
+                else (marker.id is not None and
+                    marker.id == self._editingId)
             if not editing:
                 button.tooltip = (
-                    "Go to the note's frame. Click the note already "
-                    "showing to edit it.") if hasTime else \
-                    "Edit the note."
+                    "Go to the marker's frames. Click the marker "
+                    "already showing to edit it.") if hasRange else \
+                    "Edit the marker."
             button.setClickedCallback(
-                lambda captured = note.id:
-                    selfWeak() and selfWeak()._noteClicked(captured))
-            if note.id is not None:
-                self._noteButtons[note.id] = button
-                self._noteItemOrder.append((button, note.id))
+                lambda captured = marker.id:
+                    selfWeak() and selfWeak()._markerClicked(captured))
+            if marker.id is not None:
+                self._markerButtons[marker.id] = button
+                self._itemOrder.append((button, marker.id))
                 button.setFocusCallback(
-                    lambda value, captured = note.id,
-                        f = Util.weak(self._noteRowFocus): f(captured, value))
-            # One margin around the whole note, carried by the card,
+                    lambda value, captured = marker.id,
+                        f = Util.weak(self._rowFocus): f(captured, value))
+            # One margin around the whole marker, carried by the card,
             # so the header and the text sit evenly inside the item.
             card = ftk.VerticalLayout(context)
             card.marginRole = ftk.SizeRole.MarginInside
@@ -1636,46 +1551,70 @@ class ReviewTool(IToolWidget):
             button.widget = card
             header = ftk.HorizontalLayout(context, card)
             header.spacingRole = ftk.SizeRole.SpacingSmall
-            frameLabel = ftk.Label(
-                context,
-                "Frame {}".format(int(note.time.value))
-                    if hasTime else "No frame",
-                header)
-            frameLabel.setMarginRole(ftk.SizeRole.LabelPad, ftk.SizeRole._None)
-            frameLabel.vAlign = ftk.VAlign.Center
-            frameLabel.hStretch = ftk.Stretch.Expanding
-            if note.created:
+            titleLabel = ftk.Label(context, _markerTitle(marker), header)
+            titleLabel.setMarginRole(ftk.SizeRole.LabelPad, ftk.SizeRole._None)
+            titleLabel.vAlign = ftk.VAlign.Center
+            titleLabel.hStretch = ftk.Stretch.Expanding
+            # The frames sit against the right edge, the way the file
+            # browser lays out its columns, so a named row says where
+            # it points -- unless the title is the frames already, and
+            # saying them twice reads as a mistake.
+            if hasRange and marker.name:
+                frames = _formatRange(marker.range)
+                if marker.name != frames:
+                    framesLabel = ftk.Label(context, frames, header)
+                    framesLabel.setMarginRole(
+                        ftk.SizeRole.LabelPad, ftk.SizeRole._None)
+                    framesLabel.textRole = ftk.ColorRole.TextDisabled
+                    framesLabel.vAlign = ftk.VAlign.Center
+            if marker.created:
                 createdLabel = ftk.Label(
-                    context, _formatCreated(note.created), header)
+                    context, _formatCreated(marker.created), header)
                 createdLabel.setMarginRole(
                     ftk.SizeRole.LabelPad, ftk.SizeRole._None)
                 createdLabel.textRole = ftk.ColorRole.TextDisabled
                 createdLabel.vAlign = ftk.VAlign.Center
+            # Setting the in/out points from a span is an explicit
+            # affordance on the row rather than the row's click, so
+            # that every row answers a click the same way.
+            if hasRange and not _isSingleFrame(marker.range) and \
+                    marker.id is not None:
+                applyButton = ftk.ToolButton(context, header)
+                applyButton.icon = "FrameInOut"
+                applyButton.tooltip = (
+                    "Set the timeline in/out points to these frames. "
+                    "Click again to clear them.")
+                # Clicking must not move the key focus off the row.
+                applyButton.acceptsKeyFocus = False
+                applyButton.setClickedCallback(
+                    lambda captured = marker.id:
+                        selfWeak() and selfWeak()._applyClicked(captured))
+                self._applyButtons[marker.id] = applyButton
             if editing:
-                # Written and edited in place. The note keeps itself
+                # Written and edited in place. The marker keeps itself
                 # when the editor loses the focus, or on Command-Return.
-                self._editNoteEdit = ftk.TextEdit(context, card)
-                self._editNoteEdit.sizeHintRole = \
+                self._editEdit = ftk.TextEdit(context, card)
+                self._editEdit.sizeHintRole = \
                     ftk.SizeRole.ScrollAreaSmall
-                if note.id is not None:
-                    self._editNoteEdit.setText(note.text.split("\n"))
-                editorRef = weakref.ref(self._editNoteEdit)
-                self._editNoteEdit.setFocusCallback(
+                if marker.id is not None:
+                    self._editEdit.setText(marker.text.split("\n"))
+                editorRef = weakref.ref(self._editEdit)
+                self._editEdit.setFocusCallback(
                     lambda value, editorRef = editorRef:
                         selfWeak() and
                         selfWeak()._editFocus(editorRef(), value))
                 self._editItem = button
                 self._scrollToEdit()
-            else:
+            elif marker.text:
                 textLabel = ftk.Label(
-                    context, _wrapText(note.text, 40), card)
+                    context, _wrapText(marker.text, 40), card)
                 textLabel.setMarginRole(
                     ftk.SizeRole.LabelPad, ftk.SizeRole._None)
                 textLabel.hAlign = ftk.HAlign.Left
                 textLabel.vAlign = ftk.VAlign.Top
-        if self._editNoteEdit is not None:
-            self._editNoteEdit.takeKeyFocus()
-        self._noteSelectionUpdate()
+        if self._editEdit is not None:
+            self._editEdit.takeKeyFocus()
+        self._selectionUpdate()
 
     def _scrollToEdit(self):
         # Deferred a tick: only after a layout pass does the rebuilt
@@ -1691,14 +1630,17 @@ class ReviewTool(IToolWidget):
                 g.min.x - c.min.x, g.min.y - c.min.y, g.w, g.h))
         self._scrollTimer.start(0.0, scroll)
 
-    def _noteSelectionUpdate(self):
-        # Highlight the notes on the frame being shown.
-        for note in self._notes:
-            button = self._noteButtons.get(note.id)
+    def _selectionUpdate(self):
+        # Highlight the markers about the frame being shown, and the
+        # affordance of the applied span.
+        for marker in self._markers:
+            button = self._markerButtons.get(marker.id)
             if button is not None:
-                button.checked = djv.models.sameTime(
-                    note.time, self._currentTime)
-        self._deleteButtonsUpdate()
+                button.checked = _markerShowing(marker, self._currentTime)
+            applyButton = self._applyButtons.get(marker.id)
+            if applyButton is not None:
+                applyButton.checked = marker.id == self._appliedId
+        self._deleteButtonUpdate()
 
 FACTORY = {
     "Files": FilesTool,

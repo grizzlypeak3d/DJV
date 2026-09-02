@@ -175,44 +175,43 @@ namespace djv
             DJV_MODELS_API bool operator != (const ReviewAnnotation&) const;
         };
 
-        //! A timestamped note attached to a frame of the review.
+        //! The default marker color.
+        DJV_MODELS_API const ftk::Color4F& reviewMarkerColor();
+
+        //! Review feedback: a marker anchored to a span of frames.
         //!
-        //! Notes belong to the review rather than to a source: the frame is
-        //! enough to locate them. See docs/review-format.md.
-        struct DJV_MODELS_API_TYPE ReviewNote
+        //! One type covers what used to be two: a note is a marker with text
+        //! and a one-frame span, a named range is a marker with a name and a
+        //! wider one, and a marker may be both. The fields map one to one
+        //! onto OTIO markers, so import and export are lossless by
+        //! construction. Markers belong to the review rather than to a
+        //! source: the frames locate them. See docs/review-format.md.
+        struct DJV_MODELS_API_TYPE ReviewMarker
         {
             std::string id;
 
-            //! The frame the note refers to, captured when it is published.
-            std::optional<OTIO_NS::RationalTime> time;
+            //! Short label. Optional: the interface shows the frames when
+            //! there is no name to show.
+            std::string name;
 
-            //! When the note was published, ISO 8601.
-            std::string created;
+            //! The frames the marker is about; a single frame is a one-frame
+            //! span. Optional: a marker about no frame in particular speaks
+            //! about the whole review.
+            std::optional<OTIO_NS::TimeRange> range;
+
+            ftk::Color4F color = reviewMarkerColor();
+
+            //! The body.
+            std::string text;
 
             //! Who wrote it. Optional: empty when the environment does not say.
             std::string author;
 
-            std::string text;
+            //! When the marker was made, ISO 8601.
+            std::string created;
 
-            DJV_MODELS_API bool operator == (const ReviewNote&) const;
-            DJV_MODELS_API bool operator != (const ReviewNote&) const;
-        };
-
-        //! A named range of frames in a review.
-        //!
-        //! Selecting one sets the timeline in/out points. Like notes, a range
-        //! belongs to the review rather than to a source: the frames locate it.
-        struct DJV_MODELS_API_TYPE ReviewRange
-        {
-            std::string id;
-
-            //! Free text, defaulted to the frame range when it is created.
-            std::string name;
-
-            std::optional<OTIO_NS::TimeRange> range;
-
-            DJV_MODELS_API bool operator == (const ReviewRange&) const;
-            DJV_MODELS_API bool operator != (const ReviewRange&) const;
+            DJV_MODELS_API bool operator == (const ReviewMarker&) const;
+            DJV_MODELS_API bool operator != (const ReviewMarker&) const;
         };
 
         //! A complete review: files, comparison, view, color and interface state.
@@ -230,8 +229,7 @@ namespace djv
             ReviewColor             color;
             ReviewUI                ui;
             std::vector<ReviewAnnotation> annotations;
-            std::vector<ReviewNote> notes;
-            std::vector<ReviewRange> ranges;
+            std::vector<ReviewMarker> markers;
 
             //! The document as loaded, verbatim. Used to carry unknown top-level
             //! sections through a load/save cycle without loss. See
@@ -249,7 +247,7 @@ namespace djv
             //! raw document untouched rather than overwriting it with defaults.
             std::vector<std::string> unreadSections;
 
-            //! The items of the annotations, notes, ranges and files lists that
+            //! The items of the annotations, markers and files lists that
             //! could not be read, verbatim, keyed by section name.
             //!
             //! Those lists are edited during the session, so they cannot simply
@@ -270,8 +268,7 @@ namespace djv
         DJV_MODELS_API void to_json(nlohmann::json&, const ReviewUI&);
         DJV_MODELS_API void to_json(nlohmann::json&, const ReviewStroke&);
         DJV_MODELS_API void to_json(nlohmann::json&, const ReviewAnnotation&);
-        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewNote&);
-        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewRange&);
+        DJV_MODELS_API void to_json(nlohmann::json&, const ReviewMarker&);
         DJV_MODELS_API void to_json(nlohmann::json&, const Review&);
 
         DJV_MODELS_API void from_json(const nlohmann::json&, ReviewFile&);
@@ -281,8 +278,7 @@ namespace djv
         DJV_MODELS_API void from_json(const nlohmann::json&, ReviewUI&);
         DJV_MODELS_API void from_json(const nlohmann::json&, ReviewStroke&);
         DJV_MODELS_API void from_json(const nlohmann::json&, ReviewAnnotation&);
-        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewNote&);
-        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewRange&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, ReviewMarker&);
         DJV_MODELS_API void from_json(const nlohmann::json&, Review&);
 
         ///@}

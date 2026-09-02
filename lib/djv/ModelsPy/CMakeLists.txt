@@ -10,11 +10,10 @@ set(SOURCE
     CommandsModel.cpp
     DrawModel.cpp
     FilesModel.cpp
-    NotesModel.cpp
+    MarkersModel.cpp
     OCIOModel.cpp
     Parse.cpp
     Playlist.cpp
-    RangesModel.cpp
     RecentFilesModel.cpp
     Review.cpp
     SettingsModel.cpp

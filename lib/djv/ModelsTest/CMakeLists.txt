@@ -3,7 +3,7 @@ set(HEADERS
     AudioModelTest.h
     FilesModelTest.h
     ModelsTestUtil.h
-    NotesModelTest.h
+    MarkersModelTest.h
     PlaylistTest.h
     RecentFilesModelTest.h
     ReviewTest.h
@@ -15,7 +15,7 @@ set(SOURCE
     AnnotationsModelTest.cpp
     AudioModelTest.cpp
     FilesModelTest.cpp
-    NotesModelTest.cpp
+    MarkersModelTest.cpp
     PlaylistTest.cpp
     RecentFilesModelTest.cpp
     ReviewTest.cpp

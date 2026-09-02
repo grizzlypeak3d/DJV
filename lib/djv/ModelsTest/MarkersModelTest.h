@@ -9,19 +9,19 @@ namespace djv
 {
     namespace models_tests
     {
-        class NotesModelTest : public ftk::test::ITest
+        class MarkersModelTest : public ftk::test::ITest
         {
         protected:
-            NotesModelTest(const std::shared_ptr<ftk::Context>&);
+            MarkersModelTest(const std::shared_ptr<ftk::Context>&);
 
         public:
-            static std::shared_ptr<NotesModelTest> create(
+            static std::shared_ptr<MarkersModelTest> create(
                 const std::shared_ptr<ftk::Context>&);
 
             void run() override;
 
         private:
-            void _notes();
+            void _markers();
             void _serialize();
         };
     }

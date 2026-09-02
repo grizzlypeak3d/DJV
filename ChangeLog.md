@@ -2,7 +2,8 @@
 
 Changes:
 * Add review sessions, contributed by MattRM2: the whole session, with
-  drawn annotations, notes, and frame ranges, saves as a ".djvr" file.
+  drawn annotations and markers -- notes and frame ranges, unified --
+  saves as a ".djvr" file.
 * Add playlists: the file list saves and opens as an OTIO file.
 * Directories can be opened with a wildcard filter and a depth, so a
   whole shot tree opens as a playlist. Based on a proposal by NathanOtano.

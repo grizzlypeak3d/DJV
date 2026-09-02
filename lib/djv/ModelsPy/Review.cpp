@@ -77,8 +77,7 @@ namespace djv
                 .def_readwrite("color", &Review::color)
                 .def_readwrite("ui", &Review::ui)
                 .def_readwrite("annotations", &Review::annotations)
-                .def_readwrite("notes", &Review::notes)
-                .def_readwrite("ranges", &Review::ranges)
+                .def_readwrite("markers", &Review::markers)
                 .def_readonly("unreadSections", &Review::unreadSections)
                 // The raw document and the unread items are nlohmann JSON,
                 // which has no Python form; what Python needs is to carry

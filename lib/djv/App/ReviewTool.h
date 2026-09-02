@@ -16,10 +16,10 @@ namespace djv
 {
     namespace app
     {
-        //! Review tool: annotations and notes.
+        //! Review tool: drawing and markers.
         //!
-        //! The drawing and notes sections share one panel so that marking up a
-        //! frame and commenting on it stay visible together.
+        //! The drawing and marker sections share one panel so that marking up
+        //! a frame and commenting on it stay visible together.
         class ReviewTool : public IToolWidget
         {
             FTK_NON_COPYABLE(ReviewTool);
@@ -42,7 +42,7 @@ namespace djv
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            //! Start a new note about the current frame, edited in place in
+            //! Start a new marker about the current frame, edited in place in
             //! the list.
             void addNote();
 
@@ -52,33 +52,28 @@ namespace djv
 
         private:
             void _drawStateUpdate();
-            //! Move the key focus along a list, and follow a note's frame.
-            //! Without a focused row, the list under the cursor is entered
-            //! at its selection.
+            //! Move the key focus along the list, and follow a marker's
+            //! frames. Without a focused row, the list is entered at its
+            //! selection when the cursor is over it.
             bool _navigate(bool down, const ftk::V2I& pos);
-            void _goToNote(size_t index);
-            void _rangeRowFocus(const std::string& id, bool value);
-            void _noteRowFocus(const std::string& id, bool value);
-            //! What the header delete buttons would delete: the focused row,
-            //! or failing that the active one -- the applied range, the note
-            //! on the current frame.
-            std::string _rangeDeleteTarget() const;
-            std::string _noteDeleteTarget() const;
-            void _deleteButtonsUpdate();
-            void _deleteRange();
-            void _deleteNote();
+            void _goToRow(size_t index);
+            void _rowFocus(const std::string& id, bool value);
+            //! What the header delete button would delete: the focused row,
+            //! or failing that the active one -- the applied span, the
+            //! marker on the current frame.
+            std::string _deleteTarget() const;
+            void _deleteButtonUpdate();
+            void _deleteMarker();
             //! Seek, releasing the in/out range when the target lies
             //! outside it.
             void _seekTo(const OTIO_NS::RationalTime&);
-            void _editNote(const std::string& id);
-            void _commitNote();
+            void _editMarker(const std::string& id);
+            void _commitMarker();
             void _editFocus(const std::shared_ptr<ftk::TextEdit>&, bool);
-            void _noteClicked(const std::string& id);
-            void _notesUpdate();
-            void _noteSelectionUpdate();
-            void _rangesUpdate();
-            void _rangeSelectionUpdate();
-            void _rangeClicked(const std::string& id);
+            void _markerClicked(const std::string& id);
+            void _applyClicked(const std::string& id);
+            void _markersUpdate();
+            void _selectionUpdate();
             void _inOutUpdate();
             void _addRange();
 

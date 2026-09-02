@@ -7,8 +7,7 @@
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
-#include <djv/Models/NotesModel.h>
-#include <djv/Models/RangesModel.h>
+#include <djv/Models/MarkersModel.h>
 
 #include <tlRender/Timeline/Player.h>
 
@@ -44,10 +43,10 @@ namespace djv
             //! "2026-07-26T17:22:06Z" -> "26/07/2026 - 19:22" at UTC+2. Falls
             //! back to the raw string if it is not the expected shape.
             //!
-            //! Notes are stored in UTC so that a review stays unambiguous when
-            //! it travels between time zones, which means the stored digits are
-            //! not the ones to show: they must be converted to the reader's
-            //! local time, or a note published at 19:22 reads 17:22.
+            //! Markers are stored in UTC so that a review stays unambiguous
+            //! when it travels between time zones, which means the stored
+            //! digits are not the ones to show: they must be converted to the
+            //! reader's local time, or a marker made at 19:22 reads 17:22.
             std::string formatCreated(const std::string& iso)
             {
                 if (iso.size() < 16 || 'T' != iso[10])
@@ -90,14 +89,51 @@ namespace djv
                 return std::string(buf);
             }
 
-            //! Format a range as its frame bounds, e.g. "0001-0120". Both ends
-            //! are inclusive: the range reads as the frames you will see, not
-            //! as a half-open interval.
+            //! Whether a marker's span is a single frame.
+            bool isSingleFrame(const OTIO_NS::TimeRange& range)
+            {
+                return range.duration().value() <= 1.0;
+            }
+
+            //! Format a range as its frame bounds, e.g. "0001-0120", or as the
+            //! one frame it covers. Both ends are inclusive: the range reads
+            //! as the frames you will see, not as a half-open interval.
             std::string formatRange(const OTIO_NS::TimeRange& range)
             {
+                if (isSingleFrame(range))
+                {
+                    return ftk::Format("Frame {0}").
+                        arg(static_cast<int>(range.start_time().value()));
+                }
                 return ftk::Format("{0}-{1}").
                     arg(static_cast<int>(range.start_time().value()), 4, '0').
                     arg(static_cast<int>(range.end_time_inclusive().value()), 4, '0');
+            }
+
+            //! The title a marker's row shows: the name where there is one,
+            //! its frames otherwise, and what it is about failing both.
+            std::string markerTitle(const models::ReviewMarker& marker)
+            {
+                if (!marker.name.empty())
+                {
+                    return marker.name;
+                }
+                if (marker.range.has_value())
+                {
+                    return formatRange(*marker.range);
+                }
+                return "No frame";
+            }
+
+            //! Whether the marker speaks about the frame being shown.
+            bool markerShowing(
+                const models::ReviewMarker& marker,
+                const std::optional<OTIO_NS::RationalTime>& currentTime)
+            {
+                return
+                    marker.range.has_value() &&
+                    currentTime.has_value() &&
+                    marker.range->contains(*currentTime);
             }
 
             //! Soft-wrap text to a column. ftk::Label renders newlines but does
@@ -135,29 +171,33 @@ namespace djv
 
         struct ReviewTool::Private
         {
+            std::shared_ptr<ftk::ToolButton> addNoteButton;
             std::shared_ptr<ftk::ToolButton> addRangeButton;
-            std::shared_ptr<ftk::VerticalLayout> rangeListLayout;
-            //! The row buttons, by range identifier, so the highlight can be
+            std::shared_ptr<ftk::ToolButton> deleteButton;
+            std::shared_ptr<ftk::VerticalLayout> markerListLayout;
+            //! The row buttons, by marker identifier, so the highlight can be
             //! moved without rebuilding the list.
-            std::map<std::string, std::shared_ptr<ftk::ItemButton> > rangeButtons;
-            //! A list row: the item, what it stands for, and for notes its
-            //! frame.
+            std::map<std::string, std::shared_ptr<ftk::ItemButton> > markerButtons;
+            //! The in/out affordances of the ranged rows, by marker
+            //! identifier, for the applied highlight.
+            std::map<std::string, std::shared_ptr<ftk::ToolButton> > applyButtons;
+            //! A list row: the item, what it stands for, and its frames.
             struct RowRef
             {
                 std::shared_ptr<ftk::ItemButton> button;
                 std::string id;
-                std::optional<OTIO_NS::RationalTime> time;
+                std::optional<OTIO_NS::TimeRange> range;
             };
             //! The rows in display order, for the arrow keys.
-            std::vector<RowRef> rangeItemOrder;
-            std::shared_ptr<ftk::ToolButton> deleteRangeButton;
+            std::vector<RowRef> itemOrder;
             //! The row with the key focus, or empty: what the header delete
-            //! buttons act on.
-            std::string focusedRangeId;
-            std::vector<models::ReviewRange> ranges;
-            //! The selected range, or empty. Only one can be active: selecting
-            //! is what drives the timeline in/out points.
-            std::string selectedRangeId;
+            //! button acts on.
+            std::string focusedId;
+            //! The marker whose span the in/out points carry, or empty. Only
+            //! one can be applied: applying is what drives the timeline
+            //! in/out points.
+            std::string appliedId;
+            std::vector<models::ReviewMarker> markers;
 
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::ToolButton> penButton;
@@ -167,28 +207,18 @@ namespace djv
             std::shared_ptr<ftk::ToolButton> redoButton;
             std::shared_ptr<ftk::ToolButton> clearDrawingButton;
 
-            std::shared_ptr<ftk::ToolButton> publishButton;
-            std::shared_ptr<ftk::VerticalLayout> noteListLayout;
-            //! The frame buttons, by note identifier, so the current frame's
-            //! highlight can move without rebuilding the list.
-            std::map<std::string, std::shared_ptr<ftk::ItemButton> > noteButtons;
-            //! The rows in display order with their frames, for the arrow
-            //! keys, which also follow the notes' frames.
-            std::vector<RowRef> noteItemOrder;
-            std::shared_ptr<ftk::ToolButton> deleteNoteButton;
-            std::string focusedNoteId;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::ScrollWidget> scrollWidget;
 
-            //! The note being edited in place, or empty.
-            std::string editingNoteId;
-            //! A new note being written in place; it only reaches the model
+            //! The marker being edited in place, or empty.
+            std::string editingId;
+            //! A new marker being written in place; it only reaches the model
             //! when the edit commits with text.
             bool draftActive = false;
-            std::optional<OTIO_NS::RationalTime> draftTime;
+            std::optional<OTIO_NS::TimeRange> draftRange;
             //! The live in-place editor and its item, for the commit to read
             //! and the scroll to find.
-            std::shared_ptr<ftk::TextEdit> editNoteEdit;
+            std::shared_ptr<ftk::TextEdit> editEdit;
             std::shared_ptr<ftk::ItemButton> editItem;
             //! Scroll the edited item into view on the next layout, when the
             //! rebuilt list has a geometry to scroll to.
@@ -198,16 +228,12 @@ namespace djv
             //! commit rebuilds the list that owns it.
             std::shared_ptr<ftk::Timer> commitTimer;
 
-            //! Every note is listed; the frame currently shown only moves
-            //! the highlight.
-            std::vector<models::ReviewNote> notes;
             std::optional<OTIO_NS::RationalTime> currentTime;
 
             std::shared_ptr<tl::Player> player;
             std::optional<OTIO_NS::TimeRange> inOutRange;
 
-            std::shared_ptr<ftk::ListObserver<models::ReviewNote> > notesObserver;
-            std::shared_ptr<ftk::ListObserver<models::ReviewRange> > rangesObserver;
+            std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markersObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
@@ -235,33 +261,39 @@ namespace djv
                 parent);
             FTK_P();
 
-            // Review ranges. The list is the bellows content with no margin,
-            // so the items run edge to edge.
-            // The add buttons live in their bellows title rows, so the lists
-            // read like the lists elsewhere: + in the header, - on the rows.
+            // Markers. The list is the bellows content with no margin, so the
+            // items run edge to edge.
+            // The add buttons live in the bellows title row, so the list
+            // reads like the lists elsewhere: + in the header, - on the rows.
+            p.addNoteButton = ftk::ToolButton::create(context);
+            p.addNoteButton->setIcon("Add");
+            p.addNoteButton->setTooltip(
+                "Add a marker about the current frame, written in place.");
+
             p.addRangeButton = ftk::ToolButton::create(context);
-            p.addRangeButton->setIcon("Add");
+            p.addRangeButton->setIcon("FrameInOut");
             p.addRangeButton->setTooltip(
-                "Save the timeline in/out points as a named range.");
+                "Add a marker from the timeline in/out points.");
 
             // One delete for the list, acting on the focused row, rather
             // than one on every row.
-            p.deleteRangeButton = ftk::ToolButton::create(context);
-            p.deleteRangeButton->setIcon("Remove");
-            p.deleteRangeButton->setTooltip(
-                "Delete the selected or applied range.");
-            p.deleteRangeButton->setEnabled(false);
+            p.deleteButton = ftk::ToolButton::create(context);
+            p.deleteButton->setIcon("Remove");
+            p.deleteButton->setTooltip(
+                "Delete the selected or active marker.");
+            p.deleteButton->setEnabled(false);
             // Clicking the delete must not move the key focus, or it would
             // clear the very selection it is about to act on.
-            p.deleteRangeButton->setAcceptsKeyFocus(false);
+            p.deleteButton->setAcceptsKeyFocus(false);
 
-            auto rangeToolLayout = ftk::HorizontalLayout::create(context);
-            rangeToolLayout->setSpacingRole(ftk::SizeRole::None);
-            p.addRangeButton->setParent(rangeToolLayout);
-            p.deleteRangeButton->setParent(rangeToolLayout);
+            auto markerToolLayout = ftk::HorizontalLayout::create(context);
+            markerToolLayout->setSpacingRole(ftk::SizeRole::None);
+            p.addNoteButton->setParent(markerToolLayout);
+            p.addRangeButton->setParent(markerToolLayout);
+            p.deleteButton->setParent(markerToolLayout);
 
-            p.rangeListLayout = ftk::VerticalLayout::create(context);
-            p.rangeListLayout->setSpacingRole(ftk::SizeRole::None);
+            p.markerListLayout = ftk::VerticalLayout::create(context);
+            p.markerListLayout->setSpacingRole(ftk::SizeRole::None);
 
             // Drawing.
             auto drawingWidget = ftk::VerticalLayout::create(context);
@@ -313,54 +345,27 @@ namespace djv
             p.sizeSlider->setValue(drawModel->getSize());
             p.sizeSlider->setTooltip("The stroke width, in source pixels.");
 
+            ftk::setScreenshotTag(p.addNoteButton, "Review.AddNote");
             ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
+            ftk::setScreenshotTag(p.deleteButton, "Review.Delete");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
             ftk::setScreenshotTag(p.eraserButton, "Review.Eraser");
             ftk::setScreenshotTag(p.clearDrawingButton, "Review.ClearDrawing");
 
-            // Notes. A note is written and edited in place in the list; there
-            // is no separate editor to keep in sync with it.
-            p.publishButton = ftk::ToolButton::create(context);
-            p.publishButton->setIcon("Add");
-            p.publishButton->setTooltip("Add a note about the current frame.");
-
-            p.deleteNoteButton = ftk::ToolButton::create(context);
-            p.deleteNoteButton->setIcon("Remove");
-            p.deleteNoteButton->setTooltip(
-                "Delete the selected note, or the note on the current "
-                "frame.");
-            p.deleteNoteButton->setEnabled(false);
-            p.deleteNoteButton->setAcceptsKeyFocus(false);
-
-            auto noteToolLayout = ftk::HorizontalLayout::create(context);
-            noteToolLayout->setSpacingRole(ftk::SizeRole::None);
-            p.publishButton->setParent(noteToolLayout);
-            p.deleteNoteButton->setParent(noteToolLayout);
-
-            p.noteListLayout = ftk::VerticalLayout::create(context);
-            p.noteListLayout->setSpacingRole(ftk::SizeRole::None);
-            ftk::setScreenshotTag(p.publishButton, "Review.AddNote");
-            ftk::setScreenshotTag(p.deleteRangeButton, "Review.DeleteRange");
-            ftk::setScreenshotTag(p.deleteNoteButton, "Review.DeleteNote");
-
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
-            p.bellows["Ranges"] = ftk::Bellows::create(context, "Ranges", layout);
-            p.bellows["Ranges"]->setWidget(p.rangeListLayout);
-            p.bellows["Ranges"]->setToolWidget(rangeToolLayout);
-            p.bellows["Ranges"]->setOpen(true);
             p.bellows["Drawing"] = ftk::Bellows::create(context, "Drawing", layout);
             p.bellows["Drawing"]->setWidget(drawingWidget);
             p.bellows["Drawing"]->setOpen(true);
-            p.bellows["Notes"] = ftk::Bellows::create(context, "Notes", layout);
-            p.bellows["Notes"]->setWidget(p.noteListLayout);
-            p.bellows["Notes"]->setToolWidget(noteToolLayout);
-            p.bellows["Notes"]->setOpen(true);
+            p.bellows["Markers"] = ftk::Bellows::create(context, "Markers", layout);
+            p.bellows["Markers"]->setWidget(p.markerListLayout);
+            p.bellows["Markers"]->setToolWidget(markerToolLayout);
+            p.bellows["Markers"]->setOpen(true);
 
             p.scrollWidget = ftk::ScrollWidget::create(context);
             p.scrollWidget->setBorder(false);
             p.scrollWidget->setWidget(layout);
-            // The notes have no natural end, so take what room is left
+            // The markers have no natural end, so take what room is left
             // rather than a band of its own while other tools sit at the
             // height they need.
             setVStretch(ftk::Stretch::Expanding);
@@ -482,56 +487,42 @@ namespace djv
                     _p->redoButton->setEnabled(value);
                 });
 
+            p.addNoteButton->setClickedCallback(
+                [this]
+                {
+                    addNote();
+                });
+
             p.addRangeButton->setClickedCallback(
                 [this]
                 {
                     _addRange();
                 });
 
-            p.rangesObserver = ftk::ListObserver<models::ReviewRange>::create(
-                app->getRangesModel()->observeRanges(),
-                [this](const std::vector<models::ReviewRange>& value)
-                {
-                    _p->ranges = value;
-                    _rangesUpdate();
-                });
-
-            p.publishButton->setClickedCallback(
+            p.deleteButton->setClickedCallback(
                 [this]
                 {
-                    addNote();
+                    _deleteMarker();
                 });
 
-            p.deleteRangeButton->setClickedCallback(
-                [this]
+            p.markersObserver = ftk::ListObserver<models::ReviewMarker>::create(
+                app->getMarkersModel()->observeMarkers(),
+                [this](const std::vector<models::ReviewMarker>& value)
                 {
-                    _deleteRange();
+                    _p->markers = value;
+                    _markersUpdate();
                 });
 
-            p.deleteNoteButton->setClickedCallback(
-                [this]
-                {
-                    _deleteNote();
-                });
-
-            p.notesObserver = ftk::ListObserver<models::ReviewNote>::create(
-                app->getNotesModel()->observeNotes(),
-                [this](const std::vector<models::ReviewNote>& value)
-                {
-                    _p->notes = value;
-                    _notesUpdate();
-                });
-
-            // The list shows every note; the playhead moves the highlight.
+            // The list shows every marker; the playhead moves the highlight.
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& value)
                 {
                     FTK_P();
                     p.player = value;
-                    // A note is anchored to the current frame, so without
+                    // A marker is anchored to the current frame, so without
                     // media there is nothing to attach it to.
-                    p.publishButton->setEnabled(value.get());
+                    p.addNoteButton->setEnabled(value.get());
                     if (value)
                     {
                         p.currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
@@ -539,7 +530,7 @@ namespace djv
                             [this](const OTIO_NS::RationalTime& value)
                             {
                                 _p->currentTime = value;
-                                _noteSelectionUpdate();
+                                _selectionUpdate();
                             });
 
                         p.inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
@@ -556,7 +547,7 @@ namespace djv
                         p.inOutRangeObserver.reset();
                         p.currentTime.reset();
                         p.inOutRange.reset();
-                        _noteSelectionUpdate();
+                        _selectionUpdate();
                         _inOutUpdate();
                     }
                 });
@@ -597,142 +588,6 @@ namespace djv
             }
         }
 
-        void ReviewTool::_rangesUpdate()
-        {
-            FTK_P();
-            p.rangeListLayout->clear();
-            p.rangeButtons.clear();
-            p.rangeItemOrder.clear();
-            auto context = getContext();
-            if (!context)
-            {
-                return;
-            }
-            if (p.ranges.empty())
-            {
-                auto label = ftk::Label::create(
-                    context,
-                    "No ranges yet.",
-                    p.rangeListLayout);
-                label->setMarginRole(ftk::SizeRole::MarginSmall);
-                label->setTextRole(ftk::ColorRole::TextDisabled);
-                _deleteButtonsUpdate();
-                return;
-            }
-
-            auto appWeak = _app;
-            std::weak_ptr<ReviewTool> weak(
-                std::dynamic_pointer_cast<ReviewTool>(shared_from_this()));
-            // The model keeps the list sorted by start frame.
-            for (const auto& range : p.ranges)
-            {
-                if (!p.rangeItemOrder.empty())
-                {
-                    ftk::Divider::create(
-                        context, ftk::Orientation::Vertical, p.rangeListLayout);
-                }
-                // The whole row is one item button, so the list reads as a
-                // list rather than a row of separate widgets.
-                auto button = ftk::ItemButton::create(context, p.rangeListLayout);
-                const std::string id = range.id;
-                p.rangeItemOrder.push_back({ button, id, std::nullopt });
-                button->setFocusCallback(
-                    [weak, id](bool value)
-                    {
-                        if (auto widget = weak.lock())
-                        {
-                            widget->_rangeRowFocus(id, value);
-                        }
-                    });
-                // Deliberately not checkable, for the reason given on the pen
-                // button: click() would flip the state after the callback and
-                // fight the highlight set from the selection.
-                button->setTooltip(
-                    "Set the timeline in/out points to this range. Click again "
-                    "to clear them.");
-                button->setClickedCallback(
-                    [weak, id]
-                    {
-                        if (auto widget = weak.lock())
-                        {
-                            widget->_rangeClicked(id);
-                        }
-                    });
-                p.rangeButtons[id] = button;
-
-                auto row = ftk::HorizontalLayout::create(context);
-                row->setMarginRole(ftk::SizeRole::MarginInside);
-                row->setSpacingRole(ftk::SizeRole::SpacingSmall);
-                button->setWidget(row);
-
-                auto nameLabel = ftk::Label::create(context, range.name, row);
-                nameLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
-                nameLabel->setVAlign(ftk::VAlign::Center);
-                nameLabel->setHStretch(ftk::Stretch::Expanding);
-
-                // The frames sit against the right edge, the way the file
-                // browser lays out its columns, so a named row says where it
-                // points -- unless the name is the frames, which the default
-                // is, and saying them twice reads as a mistake.
-                const std::string frames = range.range.has_value() ?
-                    formatRange(*range.range) : std::string();
-                if (range.name != frames)
-                {
-                    auto framesLabel = ftk::Label::create(context, frames, row);
-                    framesLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
-                    framesLabel->setTextRole(ftk::ColorRole::TextDisabled);
-                    framesLabel->setVAlign(ftk::VAlign::Center);
-                }
-
-            }
-            _rangeSelectionUpdate();
-        }
-
-        void ReviewTool::_rangeSelectionUpdate()
-        {
-            FTK_P();
-            for (const auto& i : p.rangeButtons)
-            {
-                i.second->setChecked(i.first == p.selectedRangeId);
-            }
-            _deleteButtonsUpdate();
-        }
-
-        void ReviewTool::_rangeClicked(const std::string& id)
-        {
-            FTK_P();
-            if (!p.player)
-            {
-                return;
-            }
-            if (id == p.selectedRangeId)
-            {
-                // Clicking the active range clears the in/out points and gives
-                // the whole timeline back.
-                p.selectedRangeId.clear();
-                p.player->resetInPoint();
-                p.player->resetOutPoint();
-            }
-            else
-            {
-                const auto i = std::find_if(
-                    p.ranges.begin(),
-                    p.ranges.end(),
-                    [&id](const models::ReviewRange& value) { return value.id == id; });
-                if (i == p.ranges.end())
-                {
-                    return;
-                }
-                // Set the selection first: applying the range makes the in/out
-                // observer fire, and it must not read this as a stale highlight.
-                p.selectedRangeId = id;
-                p.player->setInOutRange(*i->range);
-                // Without this the playhead stays outside the range it just set.
-                p.player->seek(i->range->start_time());
-            }
-            _rangeSelectionUpdate();
-        }
-
         void ReviewTool::_inOutUpdate()
         {
             FTK_P();
@@ -745,22 +600,22 @@ namespace djv
             p.addRangeButton->setEnabled(narrowed);
 
             // Drop the highlight as soon as the in/out points stop matching the
-            // selected range, e.g. after dragging them by hand. Otherwise the
-            // next click on that row would read as "clear" when the user meant
-            // "apply it again".
-            if (!p.selectedRangeId.empty())
+            // applied span, e.g. after dragging them by hand. Otherwise the
+            // next click on that affordance would read as "clear" when the
+            // user meant "apply it again".
+            if (!p.appliedId.empty())
             {
                 const auto i = std::find_if(
-                    p.ranges.begin(),
-                    p.ranges.end(),
-                    [this](const models::ReviewRange& value)
+                    p.markers.begin(),
+                    p.markers.end(),
+                    [this](const models::ReviewMarker& value)
                     {
-                        return value.id == _p->selectedRangeId;
+                        return value.id == _p->appliedId;
                     });
-                if (i == p.ranges.end() || !models::sameRange(i->range, p.inOutRange))
+                if (i == p.markers.end() || !models::sameRange(i->range, p.inOutRange))
                 {
-                    p.selectedRangeId.clear();
-                    _rangeSelectionUpdate();
+                    p.appliedId.clear();
+                    _selectionUpdate();
                 }
             }
         }
@@ -781,7 +636,7 @@ namespace djv
             const std::string defaultName = formatRange(range);
             auto appWeak = _app;
             context->getSystem<ftk::DialogSystem>()->input(
-                "Add Review Range",
+                "Add Marker",
                 ftk::Format("Frames {0}").arg(defaultName),
                 defaultName,
                 getWindow(),
@@ -791,9 +646,10 @@ namespace djv
                     {
                         // An emptied field falls back to the frame range rather
                         // than producing a nameless row.
-                        app->getRangesModel()->add(
+                        app->getMarkersModel()->add(
                             range,
-                            value.empty() ? defaultName : value);
+                            value.empty() ? defaultName : value,
+                            std::string());
                     }
                 });
         }
@@ -821,16 +677,16 @@ namespace djv
         {
             IToolWidget::keyPressEvent(event);
             FTK_P();
-            // Return with the command modifier, bubbled up from the note
+            // Return with the command modifier, bubbled up from the marker
             // being edited: keep it. (Escape also commits, by way of the
             // editor releasing the focus.)
             if (!event.accept &&
-                p.editNoteEdit &&
+                p.editEdit &&
                 ftk::Key::Return == event.key &&
                 static_cast<int>(ftk::commandKeyModifier) == event.modifiers)
             {
                 event.accept = true;
-                _commitNote();
+                _commitMarker();
             }
             // The arrows walk the list rows, bubbled up from a focused row.
             else if (!event.accept &&
@@ -839,20 +695,15 @@ namespace djv
             {
                 event.accept = _navigate(ftk::Key::Down == event.key, event.pos);
             }
-            // Delete the selected row, like the header delete buttons.
+            // Delete the selected row, like the header delete button.
             else if (!event.accept &&
                 0 == event.modifiers &&
                 (ftk::Key::Delete == event.key || ftk::Key::Backspace == event.key))
             {
-                if (!p.focusedRangeId.empty())
+                if (!p.focusedId.empty())
                 {
                     event.accept = true;
-                    _deleteRange();
-                }
-                else if (!p.focusedNoteId.empty())
-                {
-                    event.accept = true;
-                    _deleteNote();
+                    _deleteMarker();
                 }
             }
         }
@@ -875,13 +726,16 @@ namespace djv
             {
                 return;
             }
-            // Keep whatever was being written before starting the next note.
-            _commitNote();
+            // Keep whatever was being written before starting the next marker.
+            _commitMarker();
             p.draftActive = true;
-            // The note is anchored to the frame shown when it is started.
-            p.draftTime = player->getCurrentTime();
-            p.editingNoteId.clear();
-            _notesUpdate();
+            // The marker is anchored to the frame shown when it is started.
+            const OTIO_NS::RationalTime time = player->getCurrentTime();
+            p.draftRange = OTIO_NS::TimeRange(
+                time,
+                OTIO_NS::RationalTime(1.0, time.rate()));
+            p.editingId.clear();
+            _markersUpdate();
         }
 
         bool ReviewTool::_navigate(bool down, const ftk::V2I& pos)
@@ -893,146 +747,95 @@ namespace djv
                 return false;
             }
             const auto focus = window->getKeyFocus();
-            // While the focus is on a row the arrows stay in its list, even
+            // While the focus is on a row the arrows stay in the list, even
             // at the ends, rather than leaking to whatever the keys mean
             // elsewhere.
-            for (size_t i = 0; i < p.rangeItemOrder.size(); ++i)
+            for (size_t i = 0; i < p.itemOrder.size(); ++i)
             {
-                if (p.rangeItemOrder[i].button == focus)
+                if (p.itemOrder[i].button == focus)
                 {
                     const size_t j = down ?
-                        std::min(i + 1, p.rangeItemOrder.size() - 1) :
+                        std::min(i + 1, p.itemOrder.size() - 1) :
                         (i > 0 ? i - 1 : 0);
                     if (j != i)
                     {
-                        p.rangeItemOrder[j].button->takeKeyFocus();
-                    }
-                    return true;
-                }
-            }
-            for (size_t i = 0; i < p.noteItemOrder.size(); ++i)
-            {
-                if (p.noteItemOrder[i].button == focus)
-                {
-                    const size_t j = down ?
-                        std::min(i + 1, p.noteItemOrder.size() - 1) :
-                        (i > 0 ? i - 1 : 0);
-                    if (j != i)
-                    {
-                        _goToNote(j);
+                        _goToRow(j);
                     }
                     return true;
                 }
             }
 
             // No row is focused: the arrows enter the list under the cursor,
-            // moving off its selection -- hovering a list and pressing an
+            // moving off its selection -- hovering the list and pressing an
             // arrow changes the current item straight away.
-            const auto i = p.bellows.find("Ranges");
+            const auto i = p.bellows.find("Markers");
             if (i != p.bellows.end() &&
                 i->second->isOpen() &&
-                !p.rangeItemOrder.empty() &&
-                ftk::contains(p.rangeListLayout->getGeometry(), pos))
+                !p.itemOrder.empty() &&
+                ftk::contains(p.markerListLayout->getGeometry(), pos))
             {
-                size_t j = down ? 0 : p.rangeItemOrder.size() - 1;
-                for (size_t k = 0; k < p.rangeItemOrder.size(); ++k)
+                size_t j = down ? 0 : p.itemOrder.size() - 1;
+                for (size_t k = 0; k < p.itemOrder.size(); ++k)
                 {
-                    if (p.rangeItemOrder[k].button->isChecked())
+                    if (p.itemOrder[k].button->isChecked())
                     {
                         j = down ?
-                            std::min(k + 1, p.rangeItemOrder.size() - 1) :
+                            std::min(k + 1, p.itemOrder.size() - 1) :
                             (k > 0 ? k - 1 : 0);
                         break;
                     }
                 }
-                p.rangeItemOrder[j].button->takeKeyFocus();
-                return true;
-            }
-            const auto n = p.bellows.find("Notes");
-            if (n != p.bellows.end() &&
-                n->second->isOpen() &&
-                !p.noteItemOrder.empty() &&
-                ftk::contains(p.noteListLayout->getGeometry(), pos))
-            {
-                size_t j = down ? 0 : p.noteItemOrder.size() - 1;
-                for (size_t k = 0; k < p.noteItemOrder.size(); ++k)
-                {
-                    if (p.noteItemOrder[k].button->isChecked())
-                    {
-                        j = down ?
-                            std::min(k + 1, p.noteItemOrder.size() - 1) :
-                            (k > 0 ? k - 1 : 0);
-                        break;
-                    }
-                }
-                _goToNote(j);
+                _goToRow(j);
                 return true;
             }
             return false;
         }
 
-        void ReviewTool::_goToNote(size_t index)
+        void ReviewTool::_goToRow(size_t index)
         {
             FTK_P();
-            if (index >= p.noteItemOrder.size())
+            if (index >= p.itemOrder.size())
             {
                 return;
             }
-            p.noteItemOrder[index].button->takeKeyFocus();
+            p.itemOrder[index].button->takeKeyFocus();
             // Browsing the feedback is looking at the frames it is about,
             // so the arrows follow.
-            if (p.noteItemOrder[index].time.has_value())
+            if (p.itemOrder[index].range.has_value())
             {
-                _seekTo(*p.noteItemOrder[index].time);
+                _seekTo(p.itemOrder[index].range->start_time());
             }
         }
 
-        void ReviewTool::_rangeRowFocus(const std::string& id, bool value)
+        void ReviewTool::_rowFocus(const std::string& id, bool value)
         {
             FTK_P();
             if (value)
             {
-                p.focusedRangeId = id;
+                p.focusedId = id;
             }
-            else if (p.focusedRangeId == id)
+            else if (p.focusedId == id)
             {
-                p.focusedRangeId.clear();
+                p.focusedId.clear();
             }
-            _deleteButtonsUpdate();
+            _deleteButtonUpdate();
         }
 
-        void ReviewTool::_noteRowFocus(const std::string& id, bool value)
+        std::string ReviewTool::_deleteTarget() const
         {
             FTK_P();
-            if (value)
+            if (!p.focusedId.empty())
             {
-                p.focusedNoteId = id;
+                return p.focusedId;
             }
-            else if (p.focusedNoteId == id)
+            if (!p.appliedId.empty())
             {
-                p.focusedNoteId.clear();
+                return p.appliedId;
             }
-            _deleteButtonsUpdate();
-        }
-
-        std::string ReviewTool::_rangeDeleteTarget() const
-        {
-            FTK_P();
-            return !p.focusedRangeId.empty() ?
-                p.focusedRangeId : p.selectedRangeId;
-        }
-
-        std::string ReviewTool::_noteDeleteTarget() const
-        {
-            FTK_P();
-            if (!p.focusedNoteId.empty())
-            {
-                return p.focusedNoteId;
-            }
-            // The note on the current frame: what the highlight shows. With
-            // several on the frame the first goes; the button stays enabled
-            // for the rest.
-            for (const auto& row : p.noteItemOrder)
+            // The marker on the current frame: what the highlight shows. With
+            // several there the first goes; the button stays enabled for the
+            // rest.
+            for (const auto& row : p.itemOrder)
             {
                 if (row.button->isChecked())
                 {
@@ -1042,17 +845,16 @@ namespace djv
             return std::string();
         }
 
-        void ReviewTool::_deleteButtonsUpdate()
+        void ReviewTool::_deleteButtonUpdate()
         {
             FTK_P();
-            p.deleteRangeButton->setEnabled(!_rangeDeleteTarget().empty());
-            p.deleteNoteButton->setEnabled(!_noteDeleteTarget().empty());
+            p.deleteButton->setEnabled(!_deleteTarget().empty());
         }
 
-        void ReviewTool::_deleteRange()
+        void ReviewTool::_deleteMarker()
         {
             FTK_P();
-            const std::string id = _rangeDeleteTarget();
+            const std::string id = _deleteTarget();
             if (id.empty())
             {
                 return;
@@ -1061,54 +863,25 @@ namespace djv
             // neighbour after: repeated deletes then cull a list without
             // re-selecting.
             size_t index = 0;
-            for (size_t i = 0; i < p.rangeItemOrder.size(); ++i)
+            for (size_t i = 0; i < p.itemOrder.size(); ++i)
             {
-                if (p.rangeItemOrder[i].id == id)
+                if (p.itemOrder[i].id == id)
                 {
                     index = i;
                     break;
                 }
             }
-            const bool focused = !p.focusedRangeId.empty();
+            const bool focused = !p.focusedId.empty();
             if (auto app = _app.lock())
             {
-                app->getRangesModel()->remove(id);
+                app->getMarkersModel()->remove(id);
             }
-            if (focused && !p.rangeItemOrder.empty())
+            if (focused && !p.itemOrder.empty())
             {
-                const size_t j = std::min(index, p.rangeItemOrder.size() - 1);
-                p.rangeItemOrder[j].button->takeKeyFocus();
-            }
-        }
-
-        void ReviewTool::_deleteNote()
-        {
-            FTK_P();
-            const std::string id = _noteDeleteTarget();
-            if (id.empty())
-            {
-                return;
-            }
-            size_t index = 0;
-            for (size_t i = 0; i < p.noteItemOrder.size(); ++i)
-            {
-                if (p.noteItemOrder[i].id == id)
-                {
-                    index = i;
-                    break;
-                }
-            }
-            const bool focused = !p.focusedNoteId.empty();
-            if (auto app = _app.lock())
-            {
-                app->getNotesModel()->remove(id);
-            }
-            if (focused && !p.noteItemOrder.empty())
-            {
-                // Focus without following the frame: deleting is not
+                // Focus without following the frames: deleting is not
                 // browsing.
-                const size_t j = std::min(index, p.noteItemOrder.size() - 1);
-                p.noteItemOrder[j].button->takeKeyFocus();
+                const size_t j = std::min(index, p.itemOrder.size() - 1);
+                p.itemOrder[j].button->takeKeyFocus();
             }
         }
 
@@ -1130,53 +903,53 @@ namespace djv
             p.player->seek(time);
         }
 
-        void ReviewTool::_editNote(const std::string& id)
+        void ReviewTool::_editMarker(const std::string& id)
         {
             FTK_P();
-            if (id == p.editingNoteId)
+            if (id == p.editingId)
             {
                 return;
             }
-            _commitNote();
+            _commitMarker();
             p.draftActive = false;
-            p.draftTime.reset();
-            p.editingNoteId = id;
-            _notesUpdate();
+            p.draftRange.reset();
+            p.editingId = id;
+            _markersUpdate();
         }
 
-        void ReviewTool::_commitNote()
+        void ReviewTool::_commitMarker()
         {
             FTK_P();
-            if (!p.editNoteEdit)
+            if (!p.editEdit)
             {
                 return;
             }
-            const std::string text = ftk::join(p.editNoteEdit->getText(), '\n');
+            const std::string text = ftk::join(p.editEdit->getText(), '\n');
             const bool draft = p.draftActive;
-            const std::string id = p.editingNoteId;
-            const std::optional<OTIO_NS::RationalTime> time = p.draftTime;
+            const std::string id = p.editingId;
+            const std::optional<OTIO_NS::TimeRange> range = p.draftRange;
             // Clear the state before touching the model: the model observer
             // rebuilds the list, and must not find a half-finished edit.
             p.draftActive = false;
-            p.draftTime.reset();
-            p.editingNoteId.clear();
-            p.editNoteEdit.reset();
+            p.draftRange.reset();
+            p.editingId.clear();
+            p.editEdit.reset();
             p.editItem.reset();
             if (auto app = _app.lock())
             {
                 if (draft && !text.empty())
                 {
-                    app->getNotesModel()->add(time, text);
+                    app->getMarkersModel()->add(range, std::string(), text);
                 }
                 else if (!draft && !id.empty() && !text.empty())
                 {
-                    app->getNotesModel()->update(id, text);
+                    app->getMarkersModel()->update(id, text);
                 }
             }
             // An empty draft or an unchanged edit does not move the model, so
             // rebuild by hand; the extra rebuild after a model change is
             // harmless.
-            _notesUpdate();
+            _markersUpdate();
         }
 
         void ReviewTool::_editFocus(
@@ -1184,7 +957,7 @@ namespace djv
             bool value)
         {
             FTK_P();
-            if (!editor || editor != p.editNoteEdit)
+            if (!editor || editor != p.editEdit)
             {
                 return;
             }
@@ -1207,100 +980,123 @@ namespace djv
                     {
                         if (auto editor = editWeak.lock())
                         {
-                            if (editor == widget->_p->editNoteEdit)
+                            if (editor == widget->_p->editEdit)
                             {
-                                widget->_commitNote();
+                                widget->_commitMarker();
                             }
                         }
                     }
                 });
         }
 
-        void ReviewTool::_noteClicked(const std::string& id)
+        void ReviewTool::_markerClicked(const std::string& id)
         {
             FTK_P();
-            if (id == p.editingNoteId)
+            if (id == p.editingId)
             {
                 return;
             }
             const auto i = std::find_if(
-                p.notes.begin(),
-                p.notes.end(),
-                [&id](const models::ReviewNote& value) { return value.id == id; });
-            if (i == p.notes.end())
+                p.markers.begin(),
+                p.markers.end(),
+                [&id](const models::ReviewMarker& value) { return value.id == id; });
+            if (i == p.markers.end())
             {
                 return;
             }
-            // The first click goes to the note's frame; a click on the note
-            // already showing -- or on one about no frame in particular --
-            // opens it for editing.
-            if (!i->time.has_value() || models::sameTime(i->time, p.currentTime))
+            // The first click goes to the marker's frames; a click on the
+            // marker already showing -- or on one about no frame in
+            // particular -- opens it for editing.
+            if (!i->range.has_value() || markerShowing(*i, p.currentTime))
             {
-                _editNote(id);
+                _editMarker(id);
             }
             else if (p.player)
             {
-                _seekTo(*i->time);
+                _seekTo(i->range->start_time());
             }
         }
 
-        void ReviewTool::_notesUpdate()
+        void ReviewTool::_applyClicked(const std::string& id)
+        {
+            FTK_P();
+            if (!p.player)
+            {
+                return;
+            }
+            if (id == p.appliedId)
+            {
+                // Clicking the applied span clears the in/out points and gives
+                // the whole timeline back.
+                p.appliedId.clear();
+                p.player->resetInPoint();
+                p.player->resetOutPoint();
+            }
+            else
+            {
+                const auto i = std::find_if(
+                    p.markers.begin(),
+                    p.markers.end(),
+                    [&id](const models::ReviewMarker& value) { return value.id == id; });
+                if (i == p.markers.end() || !i->range.has_value())
+                {
+                    return;
+                }
+                // Set the state first: applying the span makes the in/out
+                // observer fire, and it must not read this as a stale
+                // highlight.
+                p.appliedId = id;
+                p.player->setInOutRange(*i->range);
+                // Without this the playhead stays outside the range it just set.
+                p.player->seek(i->range->start_time());
+            }
+            _selectionUpdate();
+        }
+
+        void ReviewTool::_markersUpdate()
         {
             FTK_P();
             // Let go of any editor before the clear destroys it, so the focus
             // loss it reports on the way out finds nothing left to commit.
-            p.editNoteEdit.reset();
+            p.editEdit.reset();
             p.editItem.reset();
-            p.noteListLayout->clear();
-            p.noteButtons.clear();
-            p.noteItemOrder.clear();
+            p.markerListLayout->clear();
+            p.markerButtons.clear();
+            p.applyButtons.clear();
+            p.itemOrder.clear();
             auto context = getContext();
             if (!context)
             {
                 return;
             }
 
-            // Every note, so the panel reads as the review's feedback rather
-            // than one frame's -- browsing beats following bread crumbs. In
-            // frame order, with the notes about no frame in particular first:
-            // they speak about the whole review.
-            std::vector<models::ReviewNote> value = p.notes;
-            std::stable_sort(
-                value.begin(),
-                value.end(),
-                [](const models::ReviewNote& a, const models::ReviewNote& b)
-                {
-                    if (a.time.has_value() != b.time.has_value())
-                    {
-                        return !a.time.has_value();
-                    }
-                    if (!a.time.has_value())
-                    {
-                        return false;
-                    }
-                    return a.time->value() < b.time->value();
-                });
-            // A new note is written in place: it appears as an item with an
+            // Every marker, so the panel reads as the review's feedback
+            // rather than one frame's -- browsing beats following bread
+            // crumbs. The model keeps the list in time order, with the
+            // markers about no frame in particular first: they speak about
+            // the whole review.
+            std::vector<models::ReviewMarker> value = p.markers;
+            // A new marker is written in place: it appears as an item with an
             // editor, and joins the model when the edit commits.
             if (p.draftActive)
             {
-                models::ReviewNote draft;
-                draft.time = p.draftTime;
+                models::ReviewMarker draft;
+                draft.range = p.draftRange;
                 value.push_back(draft);
                 std::stable_sort(
                     value.begin(),
                     value.end(),
-                    [](const models::ReviewNote& a, const models::ReviewNote& b)
+                    [](const models::ReviewMarker& a, const models::ReviewMarker& b)
                     {
-                        if (a.time.has_value() != b.time.has_value())
+                        if (a.range.has_value() != b.range.has_value())
                         {
-                            return !a.time.has_value();
+                            return !a.range.has_value();
                         }
-                        if (!a.time.has_value())
+                        if (!a.range.has_value())
                         {
                             return false;
                         }
-                        return a.time->value() < b.time->value();
+                        return a.range->start_time() < b.range->start_time();
                     });
             }
             if (value.empty())
@@ -1309,65 +1105,65 @@ namespace djv
                 // bug rather than as "nothing to say yet".
                 auto label = ftk::Label::create(
                     context,
-                    "No notes yet.",
-                    p.noteListLayout);
+                    "No markers yet.",
+                    p.markerListLayout);
                 label->setMarginRole(ftk::SizeRole::MarginSmall);
                 label->setTextRole(ftk::ColorRole::TextDisabled);
-                _deleteButtonsUpdate();
+                _deleteButtonUpdate();
                 return;
             }
 
             auto appWeak = _app;
             std::weak_ptr<ReviewTool> weak(
                 std::dynamic_pointer_cast<ReviewTool>(shared_from_this()));
-            bool firstNote = true;
-            for (const auto& note : value)
+            bool first = true;
+            for (const auto& marker : value)
             {
-                if (!firstNote)
+                if (!first)
                 {
                     ftk::Divider::create(
-                        context, ftk::Orientation::Vertical, p.noteListLayout);
+                        context, ftk::Orientation::Vertical, p.markerListLayout);
                 }
-                firstNote = false;
-                // The whole note is one item button, like a range row: the
-                // note is what the click selects, not one widget inside it.
-                auto button = ftk::ItemButton::create(context, p.noteListLayout);
-                const bool hasTime = note.time.has_value();
-                // The draft has an empty identifier; an existing note is being
-                // edited when its identifier matches.
+                first = false;
+                // The whole marker is one item button: the marker is what the
+                // click selects, not one widget inside it.
+                auto button = ftk::ItemButton::create(context, p.markerListLayout);
+                const bool hasRange = marker.range.has_value();
+                // The draft has an empty identifier; an existing marker is
+                // being edited when its identifier matches.
                 const bool editing = p.draftActive ?
-                    note.id.empty() : (!note.id.empty() && note.id == p.editingNoteId);
+                    marker.id.empty() : (!marker.id.empty() && marker.id == p.editingId);
                 if (!editing)
                 {
-                    button->setTooltip(hasTime ?
-                        "Go to the note's frame. Click the note already "
+                    button->setTooltip(hasRange ?
+                        "Go to the marker's frames. Click the marker already "
                         "showing to edit it." :
-                        "Edit the note.");
+                        "Edit the marker.");
                 }
-                const std::string id = note.id;
+                const std::string id = marker.id;
                 button->setClickedCallback(
                     [weak, id]
                     {
                         if (auto widget = weak.lock())
                         {
-                            widget->_noteClicked(id);
+                            widget->_markerClicked(id);
                         }
                     });
-                if (!note.id.empty())
+                if (!marker.id.empty())
                 {
-                    p.noteButtons[note.id] = button;
-                    p.noteItemOrder.push_back({ button, note.id, note.time });
+                    p.markerButtons[marker.id] = button;
+                    p.itemOrder.push_back({ button, marker.id, marker.range });
                     button->setFocusCallback(
                         [weak, id](bool value)
                         {
                             if (auto widget = weak.lock())
                             {
-                                widget->_noteRowFocus(id, value);
+                                widget->_rowFocus(id, value);
                             }
                         });
                 }
 
-                // One margin around the whole note, carried by the card,
+                // One margin around the whole marker, carried by the card,
                 // so the header and the text sit evenly inside the item.
                 auto card = ftk::VerticalLayout::create(context);
                 card->setMarginRole(ftk::SizeRole::MarginInside);
@@ -1377,38 +1173,73 @@ namespace djv
                 auto header = ftk::HorizontalLayout::create(context, card);
                 header->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
-                auto frameLabel = ftk::Label::create(
-                    context,
-                    hasTime ?
-                        ftk::Format("Frame {0}").arg(static_cast<int>(note.time->value())).operator std::string() :
-                        std::string("No frame"),
-                    header);
-                frameLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
-                frameLabel->setVAlign(ftk::VAlign::Center);
-                frameLabel->setHStretch(ftk::Stretch::Expanding);
+                auto titleLabel = ftk::Label::create(
+                    context, markerTitle(marker), header);
+                titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                titleLabel->setVAlign(ftk::VAlign::Center);
+                titleLabel->setHStretch(ftk::Stretch::Expanding);
 
-                if (!note.created.empty())
+                // The frames sit against the right edge, the way the file
+                // browser lays out its columns, so a named row says where it
+                // points -- unless the title is the frames already, and
+                // saying them twice reads as a mistake.
+                if (hasRange && !marker.name.empty())
+                {
+                    const std::string frames = formatRange(*marker.range);
+                    if (marker.name != frames)
+                    {
+                        auto framesLabel = ftk::Label::create(context, frames, header);
+                        framesLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                        framesLabel->setTextRole(ftk::ColorRole::TextDisabled);
+                        framesLabel->setVAlign(ftk::VAlign::Center);
+                    }
+                }
+
+                if (!marker.created.empty())
                 {
                     auto createdLabel = ftk::Label::create(
-                        context, formatCreated(note.created), header);
+                        context, formatCreated(marker.created), header);
                     createdLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                     createdLabel->setTextRole(ftk::ColorRole::TextDisabled);
                     createdLabel->setVAlign(ftk::VAlign::Center);
                 }
 
+                // Setting the in/out points from a span is an explicit
+                // affordance on the row rather than the row's click, so that
+                // every row answers a click the same way.
+                if (hasRange && !isSingleFrame(*marker.range) && !marker.id.empty())
+                {
+                    auto applyButton = ftk::ToolButton::create(context, header);
+                    applyButton->setIcon("FrameInOut");
+                    applyButton->setTooltip(
+                        "Set the timeline in/out points to these frames. "
+                        "Click again to clear them.");
+                    // Clicking must not move the key focus off the row.
+                    applyButton->setAcceptsKeyFocus(false);
+                    applyButton->setClickedCallback(
+                        [weak, id]
+                        {
+                            if (auto widget = weak.lock())
+                            {
+                                widget->_applyClicked(id);
+                            }
+                        });
+                    p.applyButtons[marker.id] = applyButton;
+                }
+
                 if (editing)
                 {
-                    // Written and edited in place. The note keeps itself
+                    // Written and edited in place. The marker keeps itself
                     // when the editor loses the focus, or on Command-Return
                     // where the key bubbles to.
-                    p.editNoteEdit = ftk::TextEdit::create(context, card);
-                    p.editNoteEdit->setSizeHintRole(ftk::SizeRole::ScrollAreaSmall);
-                    if (!note.id.empty())
+                    p.editEdit = ftk::TextEdit::create(context, card);
+                    p.editEdit->setSizeHintRole(ftk::SizeRole::ScrollAreaSmall);
+                    if (!marker.id.empty())
                     {
-                        p.editNoteEdit->setText(ftk::split(note.text, '\n'));
+                        p.editEdit->setText(ftk::split(marker.text, '\n'));
                     }
-                    std::weak_ptr<ftk::TextEdit> editWeak(p.editNoteEdit);
-                    p.editNoteEdit->setFocusCallback(
+                    std::weak_ptr<ftk::TextEdit> editWeak(p.editEdit);
+                    p.editEdit->setFocusCallback(
                         [weak, editWeak](bool value)
                         {
                             if (auto widget = weak.lock())
@@ -1416,38 +1247,43 @@ namespace djv
                                 widget->_editFocus(editWeak.lock(), value);
                             }
                         });
-                    ftk::setScreenshotTag(p.editNoteEdit, "Review.NoteEdit");
+                    ftk::setScreenshotTag(p.editEdit, "Review.MarkerEdit");
                     p.editItem = button;
                     p.scrollToEdit = true;
                 }
-                else
+                else if (!marker.text.empty())
                 {
-                    auto textLabel = ftk::Label::create(context, wrapText(note.text, 40), card);
+                    auto textLabel = ftk::Label::create(context, wrapText(marker.text, 40), card);
                     textLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                     textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
                 }
             }
-            if (p.editNoteEdit)
+            if (p.editEdit)
             {
-                p.editNoteEdit->takeKeyFocus();
+                p.editEdit->takeKeyFocus();
             }
-            _noteSelectionUpdate();
+            _selectionUpdate();
         }
 
-        void ReviewTool::_noteSelectionUpdate()
+        void ReviewTool::_selectionUpdate()
         {
             FTK_P();
-            // Highlight the notes on the frame being shown.
-            for (const auto& note : p.notes)
+            // Highlight the markers about the frame being shown, and the
+            // affordance of the applied span.
+            for (const auto& marker : p.markers)
             {
-                const auto i = p.noteButtons.find(note.id);
-                if (i != p.noteButtons.end())
+                const auto i = p.markerButtons.find(marker.id);
+                if (i != p.markerButtons.end())
                 {
-                    i->second->setChecked(
-                        models::sameTime(note.time, p.currentTime));
+                    i->second->setChecked(markerShowing(marker, p.currentTime));
+                }
+                const auto j = p.applyButtons.find(marker.id);
+                if (j != p.applyButtons.end())
+                {
+                    j->second->setChecked(marker.id == p.appliedId);
                 }
             }
-            _deleteButtonsUpdate();
+            _deleteButtonUpdate();
         }
     }
 }

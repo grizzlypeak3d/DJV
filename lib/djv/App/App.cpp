@@ -32,8 +32,7 @@
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/Parse.h>
 #include <djv/Models/Playlist.h>
-#include <djv/Models/NotesModel.h>
-#include <djv/Models/RangesModel.h>
+#include <djv/Models/MarkersModel.h>
 #include <djv/Models/RecentFilesModel.h>
 #include <djv/Models/Review.h>
 #include <djv/Models/TimeUnitsModel.h>
@@ -154,8 +153,7 @@ namespace djv
             bool audioDeviceMute = false;
             std::shared_ptr<models::ToolsModel> toolsModel;
             std::shared_ptr<models::CommandsModel> commandsModel;
-            std::shared_ptr<models::NotesModel> notesModel;
-            std::shared_ptr<models::RangesModel> rangesModel;
+            std::shared_ptr<models::MarkersModel> markersModel;
             std::shared_ptr<models::AnnotationsModel> annotationsModel;
             std::shared_ptr<models::DrawModel> drawModel;
             std::shared_ptr<ftk::ObservableList<int> > reviewMarkers;
@@ -168,8 +166,7 @@ namespace djv
 
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsModifiedObserver;
             std::shared_ptr<ftk::ListObserver<int> > bIndexesModifiedObserver;
-            std::shared_ptr<ftk::ListObserver<models::ReviewRange> > rangesObserver;
-            std::shared_ptr<ftk::ListObserver<models::ReviewNote> > notesObserver;
+            std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markersObserver;
             std::shared_ptr<ftk::ListObserver<models::ReviewAnnotation> > annotationsObserver;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
@@ -506,19 +503,14 @@ namespace djv
             return _p->commandsModel;
         }
 
-        const std::shared_ptr<models::NotesModel>& App::getNotesModel() const
+        const std::shared_ptr<models::MarkersModel>& App::getMarkersModel() const
         {
-            return _p->notesModel;
+            return _p->markersModel;
         }
 
         const std::shared_ptr<models::AnnotationsModel>& App::getAnnotationsModel() const
         {
             return _p->annotationsModel;
-        }
-
-        const std::shared_ptr<models::RangesModel>& App::getRangesModel() const
-        {
-            return _p->rangesModel;
         }
 
         const std::shared_ptr<models::DrawModel>& App::getDrawModel() const
@@ -534,7 +526,7 @@ namespace djv
         void App::seekReviewMarker(bool next)
         {
             FTK_P();
-            // The list is sorted and deduplicated by _notesUpdate().
+            // The list is sorted and deduplicated by _markersUpdate().
             const auto& markers = p.reviewMarkers->get();
             auto player = p.player->get();
             if (markers.empty() || !player)
@@ -965,8 +957,7 @@ namespace djv
                 p.toolsModel->setToolOpen(tool, true);
             }
 
-            p.notesModel->setNotes(review.notes);
-            p.rangesModel->setRanges(review.ranges);
+            p.markersModel->setMarkers(review.markers);
             p.annotationsModel->setAnnotations(review.annotations);
 
             // View state is applied once the viewport exists and the new player's
@@ -1181,8 +1172,7 @@ namespace djv
 
             review.ui.openTools = p.toolsModel->getOpenTools();
 
-            review.notes = p.notesModel->getNotes();
-            review.ranges = p.rangesModel->getRanges();
+            review.markers = p.markersModel->getMarkers();
             review.annotations = p.annotationsModel->getAnnotations();
 
             return review;
@@ -1257,8 +1247,7 @@ namespace djv
             tl::CompareOptions compareOptions;
             compareOptions.compare = tl::Compare::None;
             p.filesModel->setCompareOptions(compareOptions);
-            p.notesModel->clear();
-            p.rangesModel->clear();
+            p.markersModel->clear();
             p.annotationsModel->clear();
             p.reviewPath.clear();
             p.reviewRaw = nlohmann::json();
@@ -1355,18 +1344,20 @@ namespace djv
             }
         }
 
-        void App::_notesUpdate()
+        void App::_markersUpdate()
         {
             FTK_P();
-            // Mark the frames that carry a note or a drawing in the timeline.
-            // The markers are deliberately undifferentiated -- they say "there
-            // is something here" -- and follow the timeline, which shows "A".
+            // Mark the frames that carry feedback or a drawing in the
+            // timeline. The ticks are deliberately undifferentiated -- they
+            // say "there is something here" -- and follow the timeline,
+            // which shows "A". A ranged marker ticks its start frame.
             std::vector<int> markers;
-            for (const auto& note : p.notesModel->getNotes())
+            for (const auto& marker : p.markersModel->getMarkers())
             {
-                if (note.time.has_value())
+                if (marker.range.has_value())
                 {
-                    markers.push_back(static_cast<int>(note.time->value()));
+                    markers.push_back(
+                        static_cast<int>(marker.range->start_time().value()));
                 }
             }
             // Every annotation is stamped with the player's time, which is the
@@ -2079,8 +2070,7 @@ namespace djv
 
             p.commandsModel = models::CommandsModel::create(_context);
 
-            p.notesModel = models::NotesModel::create();
-            p.rangesModel = models::RangesModel::create();
+            p.markersModel = models::MarkersModel::create();
             p.annotationsModel = models::AnnotationsModel::create();
             p.drawModel = models::DrawModel::create(getSettings());
             p.reviewMarkers = ftk::ObservableList<int>::create();
@@ -2163,26 +2153,18 @@ namespace djv
                 {
                     _activeUpdate(value);
                 });
-            p.notesObserver = ftk::ListObserver<models::ReviewNote>::create(
-                p.notesModel->observeNotes(),
-                [this](const std::vector<models::ReviewNote>&)
+            p.markersObserver = ftk::ListObserver<models::ReviewMarker>::create(
+                p.markersModel->observeMarkers(),
+                [this](const std::vector<models::ReviewMarker>&)
                 {
-                    _notesUpdate();
+                    _markersUpdate();
                     _markModified();
                 });
             p.annotationsObserver = ftk::ListObserver<models::ReviewAnnotation>::create(
                 p.annotationsModel->observeAnnotations(),
                 [this](const std::vector<models::ReviewAnnotation>&)
                 {
-                    _notesUpdate();
-                    _markModified();
-                });
-            // Ranges carry no timeline marker: they are a selection, not a
-            // point of interest. They only have to reach the review file.
-            p.rangesObserver = ftk::ListObserver<models::ReviewRange>::create(
-                p.rangesModel->observeRanges(),
-                [this](const std::vector<models::ReviewRange>&)
-                {
+                    _markersUpdate();
                     _markModified();
                 });
             p.compareOptionsModifiedObserver = ftk::Observer<tl::CompareOptions>::create(
@@ -2475,8 +2457,8 @@ namespace djv
             // Reflect a review opened before the window existed in the title.
             _updateWindowTitle();
             // Same for the timeline markers: the notes and annotations observers
-            // fired while there was no window, so _notesUpdate() bailed out.
-            _notesUpdate();
+            // fired while there was no window, so _markersUpdate() bailed out.
+            _markersUpdate();
 
             // Start periodic crash-recovery autosave.
             p.autosaveTimer = ftk::Timer::create(_context);
