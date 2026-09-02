@@ -20,6 +20,7 @@
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/IWindow.h>
 #include <ftk/UI/ItemButton.h>
+#include <ftk/UI/ItemButtonList.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
@@ -185,7 +186,7 @@ namespace djv
             std::shared_ptr<ftk::ToolButton> addNoteButton;
             std::shared_ptr<ftk::ToolButton> addRangeButton;
             std::shared_ptr<ftk::ToolButton> deleteButton;
-            std::shared_ptr<ftk::VerticalLayout> markerListLayout;
+            std::shared_ptr<ftk::ItemButtonList> markerListLayout;
             //! The row buttons, by marker identifier, so the highlight can be
             //! moved without rebuilding the list.
             std::map<std::string, std::shared_ptr<ftk::ItemButton> > markerButtons;
@@ -199,11 +200,8 @@ namespace djv
                 std::string id;
                 std::optional<OTIO_NS::TimeRange> range;
             };
-            //! The rows in display order, for the arrow keys.
+            //! The rows in display order, aligned with the list's items.
             std::vector<RowRef> itemOrder;
-            //! The row with the key focus, or empty: what the header delete
-            //! button acts on.
-            std::string focusedId;
             std::vector<models::ReviewMarker> markers;
 
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
@@ -299,7 +297,11 @@ namespace djv
             p.addRangeButton->setParent(markerToolLayout);
             p.deleteButton->setParent(markerToolLayout);
 
-            p.markerListLayout = ftk::VerticalLayout::create(context);
+            // The list is the focus unit: one tab stop, a current item the
+            // arrows move, and rows that do not take the focus themselves.
+            // The current item outlives the focus leaving, so the delete
+            // button always has its target.
+            p.markerListLayout = ftk::ItemButtonList::create(context);
             p.markerListLayout->setSpacingRole(ftk::SizeRole::None);
 
             // Drawing.
@@ -515,6 +517,41 @@ namespace djv
                     _deleteMarker();
                 });
 
+            p.markerListLayout->setCurrentCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    // Browsing the feedback is looking at the frames it is
+                    // about, so the arrows follow.
+                    if (value >= 0 &&
+                        value < static_cast<int>(p.itemOrder.size()) &&
+                        p.itemOrder[value].range.has_value())
+                    {
+                        _goToRange(*p.itemOrder[value].range);
+                    }
+                    _deleteButtonUpdate();
+                });
+            p.markerListLayout->setActivateCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    if (value >= 0 &&
+                        value < static_cast<int>(p.itemOrder.size()))
+                    {
+                        _markerClicked(p.itemOrder[value].id);
+                    }
+                });
+            p.markerListLayout->setDeleteCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    if (value >= 0 &&
+                        value < static_cast<int>(p.itemOrder.size()))
+                    {
+                        _deleteMarkerId(p.itemOrder[value].id, value);
+                    }
+                });
+
             p.markersObserver = ftk::ListObserver<models::ReviewMarker>::create(
                 app->getMarkersModel()->observeMarkers(),
                 [this](const std::vector<models::ReviewMarker>& value)
@@ -701,24 +738,6 @@ namespace djv
                 event.accept = true;
                 _commitMarker();
             }
-            // The arrows walk the list rows, bubbled up from a focused row.
-            else if (!event.accept &&
-                0 == event.modifiers &&
-                (ftk::Key::Up == event.key || ftk::Key::Down == event.key))
-            {
-                event.accept = _navigate(ftk::Key::Down == event.key, event.pos);
-            }
-            // Delete the selected row, like the header delete button.
-            else if (!event.accept &&
-                0 == event.modifiers &&
-                (ftk::Key::Delete == event.key || ftk::Key::Backspace == event.key))
-            {
-                if (!p.focusedId.empty())
-                {
-                    event.accept = true;
-                    _deleteMarker();
-                }
-            }
         }
 
         void ReviewTool::keyReleaseEvent(ftk::KeyEvent& event)
@@ -754,75 +773,6 @@ namespace djv
             _editMarker(id);
         }
 
-        bool ReviewTool::_navigate(bool down, const ftk::V2I& pos)
-        {
-            FTK_P();
-            auto window = getWindow();
-            if (!window)
-            {
-                return false;
-            }
-            const auto focus = window->getKeyFocus();
-            // While the focus is on a row the arrows stay in the list, even
-            // at the ends, rather than leaking to whatever the keys mean
-            // elsewhere.
-            for (size_t i = 0; i < p.itemOrder.size(); ++i)
-            {
-                if (p.itemOrder[i].button == focus)
-                {
-                    const size_t j = down ?
-                        std::min(i + 1, p.itemOrder.size() - 1) :
-                        (i > 0 ? i - 1 : 0);
-                    if (j != i)
-                    {
-                        _goToRow(j);
-                    }
-                    return true;
-                }
-            }
-
-            // No row is focused: the arrows enter the list under the cursor,
-            // moving off its selection -- hovering the list and pressing an
-            // arrow changes the current item straight away.
-            const auto i = p.bellows.find("Markers");
-            if (i != p.bellows.end() &&
-                i->second->isOpen() &&
-                !p.itemOrder.empty() &&
-                ftk::contains(p.markerListLayout->getGeometry(), pos))
-            {
-                size_t j = down ? 0 : p.itemOrder.size() - 1;
-                for (size_t k = 0; k < p.itemOrder.size(); ++k)
-                {
-                    if (p.itemOrder[k].button->isChecked())
-                    {
-                        j = down ?
-                            std::min(k + 1, p.itemOrder.size() - 1) :
-                            (k > 0 ? k - 1 : 0);
-                        break;
-                    }
-                }
-                _goToRow(j);
-                return true;
-            }
-            return false;
-        }
-
-        void ReviewTool::_goToRow(size_t index)
-        {
-            FTK_P();
-            if (index >= p.itemOrder.size())
-            {
-                return;
-            }
-            p.itemOrder[index].button->takeKeyFocus();
-            // Browsing the feedback is looking at the frames it is about,
-            // so the arrows follow.
-            if (p.itemOrder[index].range.has_value())
-            {
-                _goToRange(*p.itemOrder[index].range);
-            }
-        }
-
         void ReviewTool::_goToRange(const OTIO_NS::TimeRange& range)
         {
             FTK_P();
@@ -845,30 +795,19 @@ namespace djv
             }
         }
 
-        void ReviewTool::_rowFocus(const std::string& id, bool value)
-        {
-            FTK_P();
-            if (value)
-            {
-                p.focusedId = id;
-            }
-            else if (p.focusedId == id)
-            {
-                p.focusedId.clear();
-            }
-            _deleteButtonUpdate();
-        }
-
         std::string ReviewTool::_deleteTarget() const
         {
             FTK_P();
-            if (!p.focusedId.empty())
+            // The list's current item first: it outlives the focus moving
+            // to the delete button itself. Failing that, the marker on the
+            // current frame -- what the highlight shows; with several there
+            // the first goes, and the button stays enabled for the rest.
+            const int current = p.markerListLayout->getCurrent();
+            if (current >= 0 &&
+                current < static_cast<int>(p.itemOrder.size()))
             {
-                return p.focusedId;
+                return p.itemOrder[current].id;
             }
-            // The marker on the current frame: what the highlight shows. With
-            // several there the first goes; the button stays enabled for the
-            // rest.
             for (const auto& row : p.itemOrder)
             {
                 if (row.button->isChecked())
@@ -893,9 +832,6 @@ namespace djv
             {
                 return;
             }
-            // The index before the removal, to land the focus on the
-            // neighbour after: repeated deletes then cull a list without
-            // re-selecting.
             size_t index = 0;
             for (size_t i = 0; i < p.itemOrder.size(); ++i)
             {
@@ -905,18 +841,25 @@ namespace djv
                     break;
                 }
             }
-            const bool focused = !p.focusedId.empty();
+            _deleteMarkerId(id, static_cast<int>(index));
+        }
+
+        void ReviewTool::_deleteMarkerId(const std::string& id, int index)
+        {
+            FTK_P();
             if (auto app = _app.lock())
             {
                 app->getMarkersModel()->remove(id);
             }
-            if (focused && !p.itemOrder.empty())
+            // The current item lands on the neighbour, without following
+            // its frames: repeated deletes cull the list without browsing.
+            if (!p.itemOrder.empty())
             {
-                // Focus without following the frames: deleting is not
-                // browsing.
-                const size_t j = std::min(index, p.itemOrder.size() - 1);
-                p.itemOrder[j].button->takeKeyFocus();
+                p.markerListLayout->setCurrent(std::min(
+                    index,
+                    static_cast<int>(p.itemOrder.size()) - 1));
             }
+            _deleteButtonUpdate();
         }
 
         void ReviewTool::_seekTo(const OTIO_NS::RationalTime& time)
@@ -1029,6 +972,14 @@ namespace djv
             {
                 return;
             }
+            for (size_t j = 0; j < p.itemOrder.size(); ++j)
+            {
+                if (p.itemOrder[j].id == id)
+                {
+                    p.markerListLayout->setCurrent(static_cast<int>(j));
+                    break;
+                }
+            }
             // The first click goes to the marker's frames -- a span narrows
             // the timeline to itself on the way; a click on the marker
             // already showing -- or on one about no frame in particular --
@@ -1040,12 +991,23 @@ namespace djv
             else if (p.player)
             {
                 _goToRange(*i->range);
+                // The keyboard continues from here: the arrows walk on
+                // without a trip through the tab order.
+                p.markerListLayout->takeKeyFocus();
             }
+            _deleteButtonUpdate();
         }
 
         void ReviewTool::_markersUpdate()
         {
             FTK_P();
+            // The current item survives the rebuild by identifier.
+            std::string currentId;
+            const int current = p.markerListLayout->getCurrent();
+            if (current >= 0 && current < static_cast<int>(p.itemOrder.size()))
+            {
+                currentId = p.itemOrder[current].id;
+            }
             // Let go of any editor before the clear destroys it, so the focus
             // loss it reports on the way out finds nothing left to commit.
             p.editEdit.reset();
@@ -1122,15 +1084,9 @@ namespace djv
                 {
                     p.markerButtons[marker.id] = button;
                     p.itemOrder.push_back({ button, marker.id, marker.range });
-                    button->setFocusCallback(
-                        [weak, id](bool value)
-                        {
-                            if (auto widget = weak.lock())
-                            {
-                                widget->_rowFocus(id, value);
-                            }
-                        });
                 }
+                // The list is the focus unit; the rows are not tab stops.
+                button->setAcceptsKeyFocus(false);
 
                 // One margin around the whole marker, carried by the card,
                 // so the header and the text sit evenly inside the item.
@@ -1228,6 +1184,14 @@ namespace djv
                     auto textLabel = ftk::Label::create(context, wrapText(marker.text, 40), card);
                     textLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                     textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
+                }
+            }
+            for (size_t i = 0; i < p.itemOrder.size(); ++i)
+            {
+                if (p.itemOrder[i].id == currentId)
+                {
+                    p.markerListLayout->setCurrent(static_cast<int>(i));
+                    break;
                 }
             }
             if (p.editEdit)

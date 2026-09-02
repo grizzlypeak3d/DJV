@@ -1063,8 +1063,16 @@ class ReviewTool(IToolWidget):
         self._addNoteButton.parent = markerToolLayout
         self._addRangeButton.parent = markerToolLayout
         self._deleteButton.parent = markerToolLayout
-        self._markerListLayout = ftk.VerticalLayout(context)
+        # The list is the focus unit: one tab stop, a current item the
+        # arrows move, and rows that do not take the focus themselves.
+        self._markerListLayout = ftk.ItemButtonList(context)
         self._markerListLayout.spacingRole = ftk.SizeRole._None
+        self._markerListLayout.setCurrentCallback(
+            Util.weak(self._currentItem))
+        self._markerListLayout.setActivateCallback(
+            Util.weak(self._activateItem))
+        self._markerListLayout.setDeleteCallback(
+            Util.weak(self._deleteItem))
 
         # Drawing.
         drawingWidget = ftk.VerticalLayout(context)
@@ -1109,7 +1117,6 @@ class ReviewTool(IToolWidget):
         self._sizeSlider.value = drawModel.size
         self._sizeSlider.tooltip = "The stroke width, in source pixels."
 
-        self._focusedId = None
         self._itemOrder = []
 
         # The marker being edited in place, a new marker being written,
@@ -1310,19 +1317,32 @@ class ReviewTool(IToolWidget):
                 widget._commitMarker()
         self._commitTimer.start(0.0, commit)
 
-    def _rowFocus(self, id, value):
-        if value:
-            self._focusedId = id
-        elif self._focusedId == id:
-            self._focusedId = None
+    def _currentItem(self, value):
+        # Browsing the feedback is looking at the frames it is about,
+        # so the arrows follow.
+        if 0 <= value < len(self._itemOrder):
+            marker = next(
+                (m for m in self._markers
+                    if m.id == self._itemOrder[value][1]), None)
+            if marker is not None and marker.range is not None:
+                self._goToRange(marker.range)
         self._deleteButtonUpdate()
 
+    def _activateItem(self, value):
+        if 0 <= value < len(self._itemOrder):
+            self._markerClicked(self._itemOrder[value][1])
+
+    def _deleteItem(self, value):
+        if 0 <= value < len(self._itemOrder):
+            self._deleteMarkerId(self._itemOrder[value][1], value)
+
     def _deleteTarget(self):
-        if self._focusedId is not None:
-            return self._focusedId
-        # The marker on the current frame: what the highlight shows.
-        # With several there the first goes; the button stays enabled
-        # for the rest.
+        # The list's current item first: it outlives the focus moving
+        # to the delete button itself. Failing that, the marker on the
+        # current frame.
+        current = self._markerListLayout.current
+        if 0 <= current < len(self._itemOrder):
+            return self._itemOrder[current][1]
         for button, id in self._itemOrder:
             if button.checked:
                 return id
@@ -1335,21 +1355,21 @@ class ReviewTool(IToolWidget):
         id = self._deleteTarget()
         if id is None:
             return
-        # The index before the removal, to land the focus on the
-        # neighbour after: repeated deletes then cull a list without
-        # re-selecting.
         index = next(
             (i for i, (b, rowId) in enumerate(self._itemOrder)
                 if rowId == id), 0)
-        focused = self._focusedId is not None
+        self._deleteMarkerId(id, index)
+
+    def _deleteMarkerId(self, id, index):
         app = self._app()
         if app is not None:
             app.getMarkersModel().remove(id)
-        if focused and self._itemOrder:
-            # Focus without following the frames: deleting is not
-            # browsing.
-            j = min(index, len(self._itemOrder) - 1)
-            self._itemOrder[j][0].takeKeyFocus()
+        # The current item lands on the neighbour, without following
+        # its frames: repeated deletes cull the list without browsing.
+        if self._itemOrder:
+            self._markerListLayout.current = min(
+                index, len(self._itemOrder) - 1)
+        self._deleteButtonUpdate()
 
     def _seekTo(self, time):
         if not self._player:
@@ -1368,6 +1388,10 @@ class ReviewTool(IToolWidget):
         marker = next((m for m in self._markers if m.id == id), None)
         if marker is None:
             return
+        for j, (b, rowId) in enumerate(self._itemOrder):
+            if rowId == id:
+                self._markerListLayout.current = j
+                break
         # The first click goes to the marker's frames -- a span narrows
         # the timeline to itself on the way; a click on the marker
         # already showing -- or on one about no frame in particular --
@@ -1376,6 +1400,9 @@ class ReviewTool(IToolWidget):
             self._editMarker(id)
         elif self._player:
             self._goToRange(marker.range)
+            # The keyboard continues from here.
+            self._markerListLayout.takeKeyFocus()
+        self._deleteButtonUpdate()
 
     def _goToRange(self, range_):
         if not self._player:
@@ -1478,6 +1505,11 @@ class ReviewTool(IToolWidget):
             self._markersUpdate()
 
     def _markersUpdate(self):
+        # The current item survives the rebuild by identifier.
+        currentId = None
+        current = self._markerListLayout.current
+        if 0 <= current < len(self._itemOrder):
+            currentId = self._itemOrder[current][1]
         # Let go of any editor before the clear destroys it, so the
         # focus loss it reports on the way out finds nothing left to
         # commit.
@@ -1535,9 +1567,8 @@ class ReviewTool(IToolWidget):
             if marker.id is not None:
                 self._markerButtons[marker.id] = button
                 self._itemOrder.append((button, marker.id))
-                button.setFocusCallback(
-                    lambda value, captured = marker.id,
-                        f = Util.weak(self._rowFocus): f(captured, value))
+            # The list is the focus unit; the rows are not tab stops.
+            button.acceptsKeyFocus = False
             # One margin around the whole marker, carried by the card,
             # so the header and the text sit evenly inside the item.
             card = ftk.VerticalLayout(context)
@@ -1611,6 +1642,10 @@ class ReviewTool(IToolWidget):
                     ftk.SizeRole.LabelPad, ftk.SizeRole._None)
                 textLabel.hAlign = ftk.HAlign.Left
                 textLabel.vAlign = ftk.VAlign.Top
+        for i, (b, rowId) in enumerate(self._itemOrder):
+            if rowId == currentId:
+                self._markerListLayout.current = i
+                break
         if self._editEdit is not None:
             self._editEdit.takeKeyFocus()
         self._selectionUpdate()

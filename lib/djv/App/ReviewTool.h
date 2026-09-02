@@ -55,18 +55,13 @@ namespace djv
 
         private:
             void _drawStateUpdate();
-            //! Move the key focus along the list, and follow a marker's
-            //! frames. Without a focused row, the list is entered at its
-            //! selection when the cursor is over it.
-            bool _navigate(bool down, const ftk::V2I& pos);
-            void _goToRow(size_t index);
-            void _rowFocus(const std::string& id, bool value);
-            //! What the header delete button would delete: the focused row,
-            //! or failing that the active one -- the applied span, the
-            //! marker on the current frame.
+            //! What the header delete button would delete: the list's
+            //! current item, or failing that the marker on the current
+            //! frame.
             std::string _deleteTarget() const;
             void _deleteButtonUpdate();
             void _deleteMarker();
+            void _deleteMarkerId(const std::string& id, int index);
             //! Seek, releasing the in/out range when the target lies
             //! outside it.
             void _seekTo(const OTIO_NS::RationalTime&);
