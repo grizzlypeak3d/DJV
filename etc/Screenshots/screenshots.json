@@ -1052,10 +1052,11 @@
       "id": "info-tool",
       "window": {
         "w": 900,
-        "h": 600,
+        "h": 660,
         "splitter2": 0.6
       },
       "crop": "MainWindow.Tools",
+      "cropFit": false,
       "setup": [
         {
           "open": "etc/SampleData/BART_2021-02-07.#.jpg"
