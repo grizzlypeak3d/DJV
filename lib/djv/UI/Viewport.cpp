@@ -1089,6 +1089,18 @@ namespace djv
                 out.pos = ftk::V2F(
                     (render.x - box.min.x) * imageSize.w / static_cast<float>(box.w()),
                     (render.y - box.min.y) * imageSize.h / static_cast<float>(box.h()));
+                // The mirror flips the image inside its box, so the same
+                // flip takes the hit back to the image's own pixels. Strokes
+                // are stored unmirrored, and follow the image when the
+                // mirror changes.
+                if (p.displayOptions.mirror.x)
+                {
+                    out.pos.x = imageSize.w - out.pos.x;
+                }
+                if (p.displayOptions.mirror.y)
+                {
+                    out.pos.y = imageSize.h - out.pos.y;
+                }
                 out.scale = box.w() / static_cast<float>(imageSize.w);
                 break;
             }
@@ -1116,8 +1128,19 @@ namespace djv
             {
                 return ftk::V2F();
             }
-            const float renderX = box.min.x + imagePos.x * box.w() / static_cast<float>(imageSize.w);
-            const float renderY = box.min.y + imagePos.y * box.h() / static_cast<float>(imageSize.h);
+            // The inverse of the flip in _hitTest: stored image pixels back
+            // to where the mirror shows them.
+            ftk::V2F pos = imagePos;
+            if (p.displayOptions.mirror.x)
+            {
+                pos.x = imageSize.w - pos.x;
+            }
+            if (p.displayOptions.mirror.y)
+            {
+                pos.y = imageSize.h - pos.y;
+            }
+            const float renderX = box.min.x + pos.x * box.w() / static_cast<float>(imageSize.w);
+            const float renderY = box.min.y + pos.y * box.h() / static_cast<float>(imageSize.h);
             const double zoom = getZoom();
             const ftk::V2I& viewPos = getViewPos();
             return ftk::V2F(

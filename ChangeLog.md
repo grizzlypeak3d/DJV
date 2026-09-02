@@ -43,6 +43,7 @@ Fixes:
 * Comparing files by timecode showed nothing, silently, when their
   timecodes do not overlap; the viewport now says so. Reported by
   aberkl.
+* Review drawings did not follow the image mirror. Reported by aberkl.
 * Naming a review range and pressing Return crashed.
 * The frame cache reloaded continuously while the current frame sat
   outside the in/out points.
