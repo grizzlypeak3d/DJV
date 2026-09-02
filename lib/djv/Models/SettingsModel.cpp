@@ -3,6 +3,8 @@
 
 #include <djv/Models/SettingsModel.h>
 
+#include <ftk/UI/ColorWidgetSystem.h>
+
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Error.h>
 #include <ftk/Core/Path.h>
@@ -381,6 +383,20 @@ namespace djv
             }
             p.exportSettings = ftk::Observable<ExportSettings>::create(exportSettings);
 
+            // The color picker opens on the tab the user last chose.
+            {
+                auto colorWidgetSystem =
+                    context->getSystem<ftk::ColorWidgetSystem>();
+                int mode = static_cast<int>(colorWidgetSystem->getMode());
+                settings->get("/ColorWidget/Mode", mode);
+                if (mode >= 0 &&
+                    mode < static_cast<int>(ftk::ColorWidgetMode::Count))
+                {
+                    colorWidgetSystem->setMode(
+                        static_cast<ftk::ColorWidgetMode>(mode));
+                }
+            }
+
             FileBrowserSettings fileBrowser;
             settings->getT(keys["FileBrowser"], fileBrowser);
             p.fileBrowser = ftk::Observable<FileBrowserSettings>::create(fileBrowser);
@@ -506,6 +522,11 @@ namespace djv
             fileBrowser.pinned = fileBrowserSystem->isPinned();
             fileBrowser.windowSize = fileBrowserSystem->getWindowSize();
             p.settings->setT(keys["FileBrowser"], fileBrowser);
+
+            p.settings->set(
+                "/ColorWidget/Mode",
+                static_cast<int>(
+                    context->getSystem<ftk::ColorWidgetSystem>()->getMode()));
 
             p.settings->setT(keys["ImageSeq"], p.imageSeq->get());
 

@@ -1106,6 +1106,28 @@ namespace djv
                 auto header = ftk::HorizontalLayout::create(context, card);
                 header->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
+                // The marker's color, editable in place. The swatch takes
+                // the click itself, so choosing a color does not read as
+                // clicking the row.
+                if (!marker.id.empty())
+                {
+                    auto swatch = ftk::ColorSwatch::create(context, header);
+                    swatch->setColor(marker.color);
+                    swatch->setEditable(true);
+                    swatch->setTooltip("The marker's color.");
+                    swatch->setCallback(
+                        [weak, id](const ftk::Color4F& value)
+                        {
+                            if (auto widget = weak.lock())
+                            {
+                                if (auto app = widget->_app.lock())
+                                {
+                                    app->getMarkersModel()->updateColor(id, value);
+                                }
+                            }
+                        });
+                }
+
                 auto titleLabel = ftk::Label::create(
                     context, markerTitle(marker, p.timeUnits), header);
                 titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);

@@ -26,6 +26,8 @@ Changes:
 * AV1 support is now working on Windows.
 * The Information tool shows the file name and directory. Thanks to
   aberkl for the suggestion.
+* The color pickers gain a palette of preset colors, and remember which
+  tab was used.
 * Library updates:
     - OpenColorIO 2.5.2
     - OpenEXR 3.4.15

@@ -56,6 +56,9 @@ namespace djv
             //! and when, not who last touched the wording.
             DJV_MODELS_API void update(const std::string& id, const std::string& text);
 
+            //! Replace the color of the marker with the given identifier.
+            DJV_MODELS_API void updateColor(const std::string& id, const ftk::Color4F&);
+
             //! Remove the marker with the given identifier.
             DJV_MODELS_API void remove(const std::string& id);
 

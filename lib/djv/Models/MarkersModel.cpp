@@ -83,6 +83,21 @@ namespace djv
             }
         }
 
+        void MarkersModel::updateColor(const std::string& id, const ftk::Color4F& color)
+        {
+            FTK_P();
+            auto markers = p.markers->get();
+            const auto i = std::find_if(
+                markers.begin(),
+                markers.end(),
+                [id](const ReviewMarker& marker) { return marker.id == id; });
+            if (i != markers.end())
+            {
+                i->color = color;
+                p.markers->setIfChanged(markers);
+            }
+        }
+
         void MarkersModel::remove(const std::string& id)
         {
             FTK_P();

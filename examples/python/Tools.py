@@ -1517,6 +1517,20 @@ class ReviewTool(IToolWidget):
             button.widget = card
             header = ftk.HorizontalLayout(context, card)
             header.spacingRole = ftk.SizeRole.SpacingSmall
+            # The marker's color, editable in place. The swatch takes
+            # the click itself, so choosing a color does not read as
+            # clicking the row.
+            if marker.id is not None:
+                swatch = ftk.ColorSwatch(context, header)
+                swatch.color = marker.color
+                swatch.editable = True
+                swatch.tooltip = "The marker's color."
+                def colorPicked(value, captured = marker.id,
+                        appWeak = appWeak):
+                    app_ = appWeak()
+                    if app_ is not None:
+                        app_.getMarkersModel().updateColor(captured, value)
+                swatch.setCallback(colorPicked)
             titleLabel = ftk.Label(
                 context, _markerTitle(marker, self._timeUnits), header)
             titleLabel.setMarginRole(ftk.SizeRole.LabelPad, ftk.SizeRole._None)

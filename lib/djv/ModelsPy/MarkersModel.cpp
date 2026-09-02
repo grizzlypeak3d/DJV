@@ -45,6 +45,7 @@ namespace djv
                 .def("add", &MarkersModel::add,
                     py::arg("range"), py::arg("name"), py::arg("text"))
                 .def("update", &MarkersModel::update, py::arg("id"), py::arg("text"))
+                .def("updateColor", &MarkersModel::updateColor, py::arg("id"), py::arg("color"))
                 .def("remove", &MarkersModel::remove, py::arg("id"))
                 .def("clear", &MarkersModel::clear);
         }
