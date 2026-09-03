@@ -4,6 +4,8 @@
 #include <djv/App/ReviewTool.h>
 
 #include <djv/App/App.h>
+#include <djv/App/MainWindow.h>
+#include <djv/App/ReviewActions.h>
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
@@ -228,6 +230,7 @@ namespace djv
             //! tick: the loss is reported from inside the editor, and the
             //! commit rebuilds the list that owns it.
             std::shared_ptr<ftk::Timer> commitTimer;
+            std::vector<std::shared_ptr<ftk::Observer<std::string> > > tooltipObservers;
 
             std::optional<OTIO_NS::RationalTime> currentTime;
             tl::TimeUnits timeUnits = tl::TimeUnits::Timecode;
@@ -270,14 +273,9 @@ namespace djv
             // reads like the lists elsewhere: + in the header, - on the rows.
             p.addNoteButton = ftk::ToolButton::create(context);
             p.addNoteButton->setIcon("Add");
-            p.addNoteButton->setTooltip(
-                "Add a marker about the current frame, written in place.");
 
             p.addRangeButton = ftk::ToolButton::create(context);
             p.addRangeButton->setIcon("FrameInOut");
-            p.addRangeButton->setTooltip(
-                "Add a marker for the timeline in/out points, written in "
-                "place.");
 
             // One delete for the list, acting on the focused row, rather
             // than one on every row.
@@ -329,24 +327,19 @@ namespace djv
             // state *after* running the callback, which would invert whatever
             // the model observer had just set. The model stays the only source
             // of truth and the observer drives the highlight.
-            p.penButton->setTooltip("Draw strokes.\n\nClick again to stop drawing.");
 
             p.eraserButton = ftk::ToolButton::create(context, toolLayout);
             p.eraserButton->setIcon("Eraser");
-            p.eraserButton->setTooltip("Erase the strokes you touch.\n\nClick again to stop.");
 
             toolLayout->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
 
             p.undoButton = ftk::ToolButton::create(context, toolLayout);
             p.undoButton->setIcon("Undo");
-            p.undoButton->setTooltip("Undo drawing.");
 
             p.redoButton = ftk::ToolButton::create(context, toolLayout);
             p.redoButton->setIcon("Redo");
-            p.redoButton->setTooltip("Redo drawing.");
 
             p.clearDrawingButton = ftk::ToolButton::create(context, "Clear", toolLayout);
-            p.clearDrawingButton->setTooltip("Remove every stroke on this frame.");
 
             auto sizeLayout = ftk::HorizontalLayout::create(context, drawingWidget);
             sizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -384,6 +377,30 @@ namespace djv
             _setWidget(p.scrollWidget);
 
             auto appWeak = std::weak_ptr<App>(app);
+
+            // The tooltips come from the actions, where the shortcut
+            // bindings are appended (#839). The buttons stay unbound
+            // otherwise: see the pen button above for why.
+            const auto& reviewActions =
+                mainWindow->getReviewActions()->getActions();
+            auto bindTooltip = [&p](
+                const std::shared_ptr<ftk::IWidget>& widget,
+                const std::shared_ptr<ftk::Action>& action)
+            {
+                p.tooltipObservers.push_back(ftk::Observer<std::string>::create(
+                    action->observeTooltip(),
+                    [widget](const std::string& value)
+                    {
+                        widget->setTooltip(value);
+                    }));
+            };
+            bindTooltip(p.addNoteButton, reviewActions.at("AddNote"));
+            bindTooltip(p.addRangeButton, reviewActions.at("AddRange"));
+            bindTooltip(p.penButton, reviewActions.at("Draw"));
+            bindTooltip(p.eraserButton, reviewActions.at("Erase"));
+            bindTooltip(p.undoButton, reviewActions.at("Undo"));
+            bindTooltip(p.redoButton, reviewActions.at("Redo"));
+            bindTooltip(p.clearDrawingButton, reviewActions.at("ClearDrawing"));
 
             p.commitTimer = ftk::Timer::create(context);
 

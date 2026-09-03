@@ -175,6 +175,21 @@ class Actions(IActions.IActions):
             "ReviewNext",
             self._command("NextFrame"))
 
+        # The tooltips the review tool's buttons show, richer than the
+        # command documentation that fills these in by default: the
+        # buttons bind to them, and the shortcut suffix follows the
+        # bindings.
+        self._tooltips["Draw"] = \
+            "Draw strokes.\n\nClick again to stop drawing."
+        self._tooltips["Erase"] = \
+            "Erase the strokes you touch.\n\nClick again to stop."
+        self._tooltips["ClearDrawing"] = "Remove every stroke on this frame."
+        self._tooltips["AddNote"] = \
+            "Add a marker about the current frame, written in place."
+        self._tooltips["AddRange"] = \
+            "Add a marker for the timeline in/out points, written in " \
+            "place."
+
         # Register the shortcuts.
         # Alt rather than Shift on the command modifier: Shift+Ctrl+O is
         # "Open with audio", and Shift+Ctrl+S is free but keeping the

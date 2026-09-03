@@ -182,12 +182,17 @@ namespace djv
                         {
                             tmp.push_back(ftk::getShortcutLabel(j->secondary.key, j->secondary.modifiers));
                         }
-                        i.second->setTooltip(ftk::Format(
-                            "{0}\n"
-                            "\n"
-                            "Shortcut: {1}").
-                            arg(k->second).
-                            arg(ftk::join(tmp, ", ")));
+                        // With no key bound the tooltip is the text alone:
+                        // a trailing "Shortcut:" with nothing after it reads
+                        // as a mistake. Set either way, so unbinding a key
+                        // takes the suffix off again.
+                        i.second->setTooltip(tmp.empty() ? k->second :
+                            std::string(ftk::Format(
+                                "{0}\n"
+                                "\n"
+                                "Shortcut: {1}").
+                                arg(k->second).
+                                arg(ftk::join(tmp, ", "))));
                     }
                 }
             }

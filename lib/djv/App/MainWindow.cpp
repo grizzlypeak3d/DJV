@@ -569,6 +569,11 @@ namespace djv
             return _p->viewport;
         }
 
+        const std::shared_ptr<ReviewActions>& MainWindow::getReviewActions() const
+        {
+            return _p->reviewActions;
+        }
+
         const std::shared_ptr<tl::ui::TimelineWidget>& MainWindow::getTimelineWidget() const
         {
             return _p->timelineWidget;

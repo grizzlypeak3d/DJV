@@ -223,6 +223,9 @@ class MainWindow(ftk.MainWindow):
     def getTimelineWidget(self):
         return self._timelineWidget
 
+    def getReviewActions(self):
+        return self._reviewActions
+
     def getViewport(self):
         return self._viewport
 

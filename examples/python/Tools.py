@@ -1040,13 +1040,8 @@ class ReviewTool(IToolWidget):
         # reads like the lists elsewhere: + in the header, - on the rows.
         self._addNoteButton = ftk.ToolButton(context)
         self._addNoteButton.icon = "Add"
-        self._addNoteButton.tooltip = \
-            "Add a marker about the current frame, written in place."
         self._addRangeButton = ftk.ToolButton(context)
         self._addRangeButton.icon = "FrameInOut"
-        self._addRangeButton.tooltip = \
-            "Add a marker for the timeline in/out points, written in " \
-            "place."
         # One delete for the list, acting on the focused row, rather
         # than one on every row. Clicking it must not move the key
         # focus, or it would clear the very selection it acts on.
@@ -1094,20 +1089,14 @@ class ReviewTool(IToolWidget):
         # state after the callback, which would invert whatever the
         # model observer had just set. The model stays the only source
         # of truth and the observer drives the highlight.
-        self._penButton.tooltip = "Draw strokes.\n\nClick again to stop drawing."
         self._eraserButton = ftk.ToolButton(context, toolLayout)
         self._eraserButton.icon = "Eraser"
-        self._eraserButton.tooltip = \
-            "Erase the strokes you touch.\n\nClick again to stop."
         toolLayout.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
         self._undoButton = ftk.ToolButton(context, toolLayout)
         self._undoButton.icon = "Undo"
-        self._undoButton.tooltip = "Undo drawing."
         self._redoButton = ftk.ToolButton(context, toolLayout)
         self._redoButton.icon = "Redo"
-        self._redoButton.tooltip = "Redo drawing."
         self._clearDrawingButton = ftk.ToolButton(context, "Clear", toolLayout)
-        self._clearDrawingButton.tooltip = "Remove every stroke on this frame."
         sizeLayout = ftk.HorizontalLayout(context, drawingWidget)
         sizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
         sizeLabel = ftk.Label(context, "Size:", sizeLayout)
@@ -1118,6 +1107,24 @@ class ReviewTool(IToolWidget):
         self._sizeSlider.tooltip = "The stroke width, in source pixels."
 
         self._itemOrder = []
+
+        # The tooltips come from the actions, where the shortcut
+        # bindings are appended (#839). The buttons stay unbound
+        # otherwise: see the pen button above for why.
+        reviewActions = mainWindow.getReviewActions().actions
+        self._tooltipObservers = []
+        def bindTooltip(widget, action):
+            def update(value, widget = widget):
+                widget.tooltip = value
+            self._tooltipObservers.append(
+                ftk.StringObserver(action.observeTooltip, update))
+        bindTooltip(self._addNoteButton, reviewActions["AddNote"])
+        bindTooltip(self._addRangeButton, reviewActions["AddRange"])
+        bindTooltip(self._penButton, reviewActions["Draw"])
+        bindTooltip(self._eraserButton, reviewActions["Erase"])
+        bindTooltip(self._undoButton, reviewActions["Undo"])
+        bindTooltip(self._redoButton, reviewActions["Redo"])
+        bindTooltip(self._clearDrawingButton, reviewActions["ClearDrawing"])
 
         # The marker being edited in place, a new marker being written,
         # and the deferred work both need: the commit is deferred a tick

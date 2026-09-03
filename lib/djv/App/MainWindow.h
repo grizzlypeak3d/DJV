@@ -35,6 +35,7 @@ namespace djv
     {
         class App;
         class IToolWidget;
+        class ReviewActions;
 
         //! Main window.
         class DJV_APP_API_TYPE MainWindow : public ftk::Window
@@ -61,6 +62,10 @@ namespace djv
 
             //! Get the viewport.
             DJV_APP_API const std::shared_ptr<ui::Viewport>& getViewport() const;
+
+            //! Get the review actions, e.g. for widgets whose tooltips
+            //! follow the shortcut bindings.
+            DJV_APP_API const std::shared_ptr<ReviewActions>& getReviewActions() const;
 
             //! Send a mouse click at the given window position. For the
             //! capture harness: a click routed the way a real one is, through

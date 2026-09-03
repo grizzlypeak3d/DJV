@@ -304,6 +304,25 @@ namespace djv
                 "ReviewNext",
                 _command("NextFrame"));
 
+            // The tooltips the review tool's buttons show, richer than the
+            // command documentation that fills these in by default: the
+            // buttons bind to them, and the shortcut suffix follows the
+            // bindings.
+            _tooltips["Draw"] =
+                "Draw strokes.\n"
+                "\n"
+                "Click again to stop drawing.";
+            _tooltips["Erase"] =
+                "Erase the strokes you touch.\n"
+                "\n"
+                "Click again to stop.";
+            _tooltips["ClearDrawing"] = "Remove every stroke on this frame.";
+            _tooltips["AddNote"] =
+                "Add a marker about the current frame, written in place.";
+            _tooltips["AddRange"] =
+                "Add a marker for the timeline in/out points, written in "
+                "place.";
+
             // Register the shortcuts.
             // Alt rather than Shift on the command modifier: Shift+Ctrl+O is
             // "Open with audio", and Shift+Ctrl+S is free but keeping the pair

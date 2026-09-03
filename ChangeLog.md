@@ -44,6 +44,8 @@ Fixes:
   timecodes do not overlap; the viewport now says so. Reported by
   aberkl.
 * Review drawings did not follow the image mirror. Reported by aberkl.
+* The review tool's button tooltips follow the keyboard shortcut
+  bindings, like the toolbars. Reported by aberkl.
 * Naming a review range and pressing Return crashed.
 * The frame cache reloaded continuously while the current frame sat
   outside the in/out points.
