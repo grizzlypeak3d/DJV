@@ -33,12 +33,15 @@ namespace djv
         // carries the canonical names and interop aliases the resolver
         // matches. The tests compare resolutions to each other rather than
         // to configuration names, so a configuration update that renames a
-        // space does not break them.
+        // space does not break them. Without OpenColorIO -- the GLES3
+        // continuous integration build -- nothing resolves, and the tests
+        // check that instead.
         void ColorModelTest::_resolve()
         {
             auto settings = createTestSettings(_context);
             auto model = models::ColorModel::create(_context, settings);
 
+#if defined(TLRENDER_OCIO)
             // The colorInteropID attribute is the file naming its color
             // space directly.
             const std::string rec709 = model->resolveInput(
@@ -90,6 +93,12 @@ namespace djv
             // says, including the OpenEXR default.
             model->setExtColorSpaces({ { ".exr", acescg } });
             FTK_CHECK(acescg == model->resolveInput("render.0001.exr"));
+#else // TLRENDER_OCIO
+            FTK_CHECK(model->resolveInput(
+                "render.0001.exr",
+                { { "colorInteropID", "lin_rec709" } }).empty());
+            FTK_CHECK(model->resolveInput("image.png").empty());
+#endif // TLRENDER_OCIO
         }
 
         // The resolved input label names the resolution and its source, or
@@ -105,6 +114,7 @@ namespace djv
             options.enabled = true;
             model->setOCIOOptions(options);
 
+#if defined(TLRENDER_OCIO)
             const std::string rec709 = model->resolveInput("render.0001.exr");
             model->setActiveFiles({ { "render.0001.exr", {} } });
             FTK_CHECK(
@@ -130,6 +140,10 @@ namespace djv
             FTK_CHECK(
                 rec709 + " (extension)" ==
                 model->observeResolvedInput()->get());
+#else // TLRENDER_OCIO
+            model->setActiveFiles({ { "render.0001.exr", {} } });
+            FTK_CHECK(model->observeResolvedInput()->get().empty());
+#endif // TLRENDER_OCIO
         }
     }
 }
