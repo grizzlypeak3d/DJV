@@ -2786,7 +2786,28 @@ namespace djv
                         // it: a path carrying a range is taken as a range
                         // that was asked for, and reopening would stop
                         // looking for frames that have arrived since.
+                        const std::optional<OTIO_NS::TimeRange> prevTimeRange =
+                            files[i]->timeRange;
                         files[i]->timeRange = timelines[i]->getTimeRange();
+
+                        // An in/out range that was the whole file follows the
+                        // file: it was never narrowed, only saved when the
+                        // file last lost focus. Restoring it as it is would
+                        // stop a reloaded sequence at where it used to end,
+                        // which reads as the reload not finding the new
+                        // frames at all. A narrowed range is kept; those are
+                        // the user's marks.
+                        if (files[i]->inOutRange.has_value() &&
+                            prevTimeRange.has_value() &&
+                            tl::compareExact(
+                                files[i]->inOutRange.value(),
+                                prevTimeRange.value()) &&
+                            !tl::compareExact(
+                                prevTimeRange.value(),
+                                files[i]->timeRange.value()))
+                        {
+                            files[i]->inOutRange.reset();
+                        }
 
                         // Replaced rather than added to: a file that is
                         // reopened comes back through here with its layers
