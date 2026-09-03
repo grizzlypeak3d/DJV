@@ -271,12 +271,14 @@ namespace djv
             else if (bool declaredUnmatched = false; true)
             {
                 std::string declaredName;
-                const std::string declared =
-                    _declaredColorSpace(tags, declaredUnmatched, declaredName);
+                std::string declaredSource;
+                const std::string declared = _declaredColorSpace(
+                    ext, tags, declaredUnmatched, declaredName,
+                    declaredSource);
                 if (!declared.empty())
                 {
                     out = declared;
-                    source = "file";
+                    source = declaredSource;
                 }
                 else if (declaredUnmatched)
                 {
@@ -324,14 +326,17 @@ namespace djv
         }
 
         std::string ColorModel::_declaredColorSpace(
+            const std::string& ext,
             const ftk::ImageTags& tags,
             bool& declaredUnmatched,
-            std::string& declaredName) const
+            std::string& declaredName,
+            std::string& declaredSource) const
         {
             FTK_P();
             std::string out;
             declaredUnmatched = false;
             declaredName = std::string();
+            declaredSource = "file";
 #if defined(TLRENDER_OCIO)
             // What the file was flagged with, matched against the color
             // spaces the configuration has. The names tried are the
@@ -412,6 +417,26 @@ namespace djv
                             break;
                         }
                     }
+                }
+
+                // An OpenEXR with no declaration at all still has one,
+                // by the format's own rules: absent chromaticities mean
+                // Rec.709 primaries, and the encoding is scene linear.
+                // The specification's default outranks a configuration's
+                // file rules, which are written for paths, not formats --
+                // Blender's map ".exr" to sRGB.
+                if (".exr" == ext && !declared && candidates.empty())
+                {
+                    declared = true;
+                    declaredName = "Rec.709 primaries";
+                    declaredSource = "EXR default";
+                    candidates =
+                    {
+                        "lin_rec709",
+                        "lin_srgb",
+                        "Linear Rec.709 (sRGB)",
+                        "Linear Rec.709"
+                    };
                 }
 
                 std::string primaries;
