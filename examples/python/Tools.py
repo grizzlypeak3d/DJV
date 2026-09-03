@@ -512,6 +512,9 @@ class FilesTool(IToolWidget):
                     thumbnailWeak().thumbnail if thumbnailWeak() else None)
 
             bButton = ftk.ToolButton(self.context, "B", rowLayout)
+            # Its own color, not the row's: a checked "B" on the checked
+            # "A" row would vanish into it.
+            bButton.checkedRole = ftk.ColorRole.Blue
             bButton.checked = any(item is i for i in b)
             bButton.vAlign = ftk.VAlign.Center
             bButton.tooltip = "Set the B file(s)."
@@ -563,10 +566,17 @@ class FilesTool(IToolWidget):
                  item))
 
     def _showRangePopup(self, item, frames, row):
-        if self._rangePopup or row >= len(self._rowWidgets):
+        if row >= len(self._rowWidgets):
             return
         button = self._rowWidgets[row][3]
         if button is None:
+            return
+        # The button toggles, the way the slider popups do: the press
+        # falls through the open popup to the button, and the click
+        # closes it.
+        if self._rangePopup:
+            self._rangePopup.close()
+            self._rangePopup = None
             return
         self._rangePopup = djv.ui.FrameRangePopup(self.context, frames)
         selfWeak = weakref.ref(self)

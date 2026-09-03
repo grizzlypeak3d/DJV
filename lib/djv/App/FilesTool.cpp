@@ -532,6 +532,9 @@ namespace djv
                             });
 
                         widget.bButton = ftk::ToolButton::create(context, "B", rowLayout);
+                        // Its own color, not the row's: a checked "B" on the
+                        // checked "A" row would vanish into it.
+                        widget.bButton->setCheckedRole(ftk::ColorRole::Blue);
                         const auto i = std::find(b.begin(), b.end(), item);
                         widget.bButton->setChecked(i != b.end());
                         ftk::setScreenshotTag(
@@ -637,8 +640,17 @@ namespace djv
             const std::shared_ptr<ftk::IWidget>& button)
         {
             FTK_P();
-            if (p.rangePopup || !button)
+            if (!button)
                 return;
+            // The button toggles, the way the slider popups do: the press
+            // falls through the open popup to the button, and the click
+            // closes it.
+            if (p.rangePopup)
+            {
+                p.rangePopup->close();
+                p.rangePopup.reset();
+                return;
+            }
             if (auto context = getContext())
             {
                 p.rangePopup = ui::FrameRangePopup::create(context, range);
