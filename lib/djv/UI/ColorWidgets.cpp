@@ -374,6 +374,7 @@ namespace djv
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::shared_ptr<ftk::FileEdit> fileEdit;
+            std::shared_ptr<ftk::ComboBox> directionComboBox;
             std::shared_ptr<ftk::ComboBox> orderComboBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
@@ -405,6 +406,15 @@ namespace djv
             p.fileEdit->setTooltip(ftk::Format("Supported LUT formats:\n{0}").arg(ftk::join(s, '\n')));
             ftk::setScreenshotTag(p.fileEdit, "Color.LUT.File");
 
+            p.directionComboBox = ftk::ComboBox::create(context, tl::getLUTDirectionLabels());
+            p.directionComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.directionComboBox->setTooltip(
+                "The direction the LUT is applied in.\n\n"
+                "Forward is the direction the file itself reads. An ICC "
+                "monitor profile reads from the monitor's code values, so "
+                "correcting the display with one takes Inverse.");
+            ftk::setScreenshotTag(p.directionComboBox, "Color.LUT.Direction");
+
             p.orderComboBox = ftk::ComboBox::create(context, tl::getLUTOrderLabels());
             p.orderComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.orderComboBox, "Color.LUT.Order");
@@ -414,6 +424,7 @@ namespace djv
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("File name:", p.fileEdit);
+            p.layout->addRow("Direction:", p.directionComboBox);
             p.layout->addRow("Order:", p.orderComboBox);
 
             p.optionsObservers = ftk::Observer<tl::LUTOptions>::create(
@@ -422,6 +433,7 @@ namespace djv
                 {
                     _p->enabledCheckBox->setChecked(value.enabled);
                     _p->fileEdit->setPath(ftk::Path(value.fileName));
+                    _p->directionComboBox->setCurrentIndex(static_cast<size_t>(value.direction));
                     _p->orderComboBox->setCurrentIndex(static_cast<size_t>(value.order));
                 });
 
@@ -439,6 +451,15 @@ namespace djv
                     auto options = colorModel->getLUTOptions();
                     options.enabled = true;
                     options.fileName = value.get();
+                    colorModel->setLUTOptions(options);
+                });
+
+            p.directionComboBox->setIndexCallback(
+                [colorModel](int value)
+                {
+                    auto options = colorModel->getLUTOptions();
+                    options.enabled = true;
+                    options.direction = static_cast<tl::LUTDirection>(value);
                     colorModel->setLUTOptions(options);
                 });
 

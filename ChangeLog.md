@@ -21,6 +21,8 @@ Changes:
 * Add support for reading OpenEXR files with HTJ2K compression.
 * Automatic OCIO input color spaces, including the OpenEXR
   "colorInteropID" attribute. Thanks to SteffenDuenner for the feedback.
+* The LUT can be applied inverted, so an ICC monitor profile corrects
+  the display for wide gamut monitors.
 * Movie and image sequence exports carry color information.
 * Add thumbnails to the file browser.
 * The file browser can be opened in a window of its own.

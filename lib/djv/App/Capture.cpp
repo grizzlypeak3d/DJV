@@ -1029,10 +1029,26 @@ namespace djv
             else if (step.contains("lut"))
             {
                 // Enable a LUT file, any format OpenColorIO's FileTransform
-                // reads. e.g. { "lut": "monitor.icc" }.
+                // reads. Two forms:
+                //   { "lut": "monitor.icc" }
+                //   { "lut": { "fileName": "monitor.icc",
+                //              "direction": "Inverse" } }  // or "Forward"
                 auto options = app->getColorModel()->getLUTOptions();
                 options.enabled = true;
-                options.fileName = step.at("lut").get<std::string>();
+                const auto& lut = step.at("lut");
+                if (lut.is_string())
+                {
+                    options.fileName = lut.get<std::string>();
+                }
+                else if (lut.is_object())
+                {
+                    if (lut.contains("fileName"))
+                        options.fileName = lut.at("fileName").get<std::string>();
+                    if (lut.contains("direction"))
+                        from_string(
+                            lut.at("direction").get<std::string>(),
+                            options.direction);
+                }
                 app->getColorModel()->setLUTOptions(options);
             }
             else if (step.contains("fileBrowser"))
