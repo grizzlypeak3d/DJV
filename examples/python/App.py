@@ -1092,10 +1092,11 @@ class App(ftk.App):
         # Drawing lives with the Review tool: closing the tool disarms the
         # pen, or an invisible mode is left painting over playback and the
         # color picker.
+        def drawToolsUpdate(value):
+            if "Review" not in value:
+                selfWeak()._drawModel.enabled = False
         self._drawToolsObserver = ftk.StringListObserver(
-            self._toolsModel.observeOpenTools,
-            lambda value: selfWeak()._drawModel.setEnabled(False)
-                if "Review" not in value else None)
+            self._toolsModel.observeOpenTools, drawToolsUpdate)
 
         if self._cmdLineSysInfo.found:
             print("\n".join(djv.ui.getSysInfo(
