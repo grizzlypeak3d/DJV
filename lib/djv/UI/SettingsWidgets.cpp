@@ -870,6 +870,10 @@ namespace djv
 
             p.wheelScaleEdit = ftk::FloatEdit::create(context);
             p.wheelScaleEdit->setRange(.5F, 5.F);
+            p.wheelScaleEdit->setTooltip(
+                "How much one wheel click zooms, in the viewport and the "
+                "timeline. The \"-\" and \"=\" keys zoom by a factor of "
+                "two regardless.");
             ftk::setScreenshotTag(p.wheelScaleEdit, "Mouse.WheelScale");
 
             p.frameShuttleScaleEdit = ftk::FloatEdit::create(context);
@@ -925,7 +929,7 @@ namespace djv
                     p.wheelComboBoxes[wheelAction],
                     wheelActionScreenshots.at(wheelAction));
             }
-            p.layout->addRow("Wheel scale:", p.wheelScaleEdit);
+            p.layout->addRow("Zoom scale:", p.wheelScaleEdit);
             p.layout->addRow("Frame shuttle scale:", p.frameShuttleScaleEdit);
 
             p.settingsObserver = ftk::Observer<models::MouseSettings>::create(
