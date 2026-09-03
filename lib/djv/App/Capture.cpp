@@ -485,6 +485,7 @@ namespace djv
                 // preceding step has been created and laid out.
                 late = late ||
                     step.contains("click") ||
+                    step.contains("scroll") ||
                     step.contains("drag") ||
                     step.contains("key") ||
                     step.contains("pick") ||
@@ -1151,6 +1152,66 @@ namespace djv
                     }
                 }
             }
+            else if (step.contains("scroll"))
+            {
+                // Scroll the mouse wheel over a tagged widget or a window
+                // position, aimed the way "click" is aimed. e.g.
+                // { "scroll": "MainWindow.Viewport", "delta": [0, 1] },
+                // { "scroll": [160, 90], "delta": [0, -1], "modifier":
+                // "Control" }. Deferred by _applyRest like "click".
+                const auto& v = step.at("scroll");
+                int modifiers = 0;
+                if (step.contains("modifier"))
+                {
+                    ftk::KeyModifier modifier = ftk::KeyModifier::None;
+                    if (ftk::from_string(
+                        step.at("modifier").get<std::string>(), modifier))
+                    {
+                        modifiers = static_cast<int>(modifier);
+                    }
+                }
+                ftk::V2F delta(0.F, 1.F);
+                if (step.contains("delta") &&
+                    step.at("delta").is_array() &&
+                    step.at("delta").size() >= 2)
+                {
+                    delta.x = step.at("delta")[0].get<float>();
+                    delta.y = step.at("delta")[1].get<float>();
+                }
+                auto mw = app->getMainWindow();
+                std::optional<ftk::V2I> pos;
+                if (v.is_array() && v.size() >= 2)
+                {
+                    pos = ftk::V2I(v[0].get<int>(), v[1].get<int>());
+                }
+                else if (v.is_string() && mw)
+                {
+                    std::vector<std::shared_ptr<ftk::IWidget> > tagged;
+                    collect(mw, tagged);
+                    for (const auto& w : tagged)
+                    {
+                        if (ftk::getScreenshotTag(w) == v.get<std::string>())
+                        {
+                            const ftk::Box2I g = w->getGeometry();
+                            pos = ftk::V2I(
+                                g.x() + g.w() / 2,
+                                g.y() + g.h() / 2);
+                            break;
+                        }
+                    }
+                    if (!pos.has_value())
+                    {
+                        note(p.shotId,
+                            "scroll: no visible widget tagged \"" +
+                            v.get<std::string>() + "\"");
+                    }
+                }
+                if (pos.has_value() && mw)
+                {
+                    std::static_pointer_cast<ftk::IWindow>(mw)->scroll(
+                        pos.value(), delta, modifiers);
+                }
+            }
             else if (step.contains("click"))
             {
                 // Click on the widget with a screenshot tag, or at a window
@@ -1160,7 +1221,7 @@ namespace djv
                 // defaults to the left, e.g.
                 // { "click": "Files.CompareMode" },
                 // { "click": "MainWindow.Viewport", "button": "Right" },
-                // { "click": [160, 90], "modifier": "Control" }. Unlike
+                // { "click": [160, 90], "modifier": "Ctrl" }. Unlike
                 // "pick", which calls the viewport directly, this goes through
                 // the window the way a real click does -- including the mouse
                 // bindings, so picking needs the modifier it is bound to.
@@ -1223,7 +1284,7 @@ namespace djv
                 // Each entry is a screenshot tag, whose widget's center is
                 // used, or a position in framebuffer pixels, e.g.
                 // { "drag": ["Files.Thumbnail", [160, 300]] },
-                // { "drag": [[100, 50], [100, 250]], "modifier": "Control" }.
+                // { "drag": [[100, 50], [100, 250]], "modifier": "Ctrl" }.
                 // Deferred by _applyRest like "click".
                 const auto& v = step.at("drag");
                 int modifiers = 0;

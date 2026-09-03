@@ -23,6 +23,8 @@ Changes:
   "colorInteropID" attribute. Thanks to SteffenDuenner for the feedback.
 * The LUT can be applied inverted, so an ICC monitor profile corrects
   the display for wide gamut monitors.
+* The mouse wheel actions can be remapped, so the wheel can scrub
+  frames without the "Ctrl" key. Based on a request by hced.
 * Movie and image sequence exports carry color information.
 * Add thumbnails to the file browser.
 * The file browser can be opened in a window of its own.

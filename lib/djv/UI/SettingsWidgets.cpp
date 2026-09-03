@@ -818,6 +818,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEdit> frameShuttleScaleEdit;
             std::map<models::MouseAction, std::shared_ptr<ftk::ComboBox> > buttonComboBoxes;
             std::map<models::MouseAction, std::shared_ptr<ftk::ComboBox> > modifierComboBoxes;
+            std::map<models::WheelAction, std::shared_ptr<ftk::ComboBox> > wheelComboBoxes;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<models::MouseSettings> > settingsObserver;
@@ -858,6 +859,15 @@ namespace djv
                 p.modifierComboBoxes[mouseAction]->setHStretch(ftk::Stretch::Expanding);
             }
 
+            // The wheel actions ride a modifier rather than a button, so
+            // their rows have only the modifier; the missing button box is
+            // the information that these ride the wheel.
+            for (const auto wheelAction : models::getWheelActionEnums())
+            {
+                p.wheelComboBoxes[wheelAction] = ftk::ComboBox::create(context, p.modifierLabels);
+                p.wheelComboBoxes[wheelAction]->setHStretch(ftk::Stretch::Expanding);
+            }
+
             p.wheelScaleEdit = ftk::FloatEdit::create(context);
             p.wheelScaleEdit->setRange(.5F, 5.F);
             ftk::setScreenshotTag(p.wheelScaleEdit, "Mouse.WheelScale");
@@ -896,6 +906,25 @@ namespace djv
                     hLayout);
                 ftk::setScreenshotTag(hLayout, mouseActionScreenshots[mouseAction]);
             }
+            const std::map<models::WheelAction, std::string> wheelActionLabels =
+            {
+                { models::WheelAction::Zoom, "Wheel zoom" },
+                { models::WheelAction::Scrub, "Wheel scrub" }
+            };
+            const std::map<models::WheelAction, std::string> wheelActionScreenshots =
+            {
+                { models::WheelAction::Zoom, "Mouse.WheelZoom" },
+                { models::WheelAction::Scrub, "Mouse.WheelScrub" }
+            };
+            for (const auto wheelAction : models::getWheelActionEnums())
+            {
+                p.layout->addRow(ftk::Format("{0}:").
+                    arg(wheelActionLabels.at(wheelAction)),
+                    p.wheelComboBoxes[wheelAction]);
+                ftk::setScreenshotTag(
+                    p.wheelComboBoxes[wheelAction],
+                    wheelActionScreenshots.at(wheelAction));
+            }
             p.layout->addRow("Wheel scale:", p.wheelScaleEdit);
             p.layout->addRow("Frame shuttle scale:", p.frameShuttleScaleEdit);
 
@@ -922,6 +951,18 @@ namespace djv
                             }
                         }
                     }
+                    for (const auto& i : value.wheelBindings)
+                    {
+                        if (auto j = p.wheelComboBoxes.find(i.first);
+                            j != p.wheelComboBoxes.end())
+                        {
+                            const auto k = std::find(p.modifiers.begin(), p.modifiers.end(), i.second);
+                            if (k != p.modifiers.end())
+                            {
+                                j->second->setCurrentIndex(k - p.modifiers.begin());
+                            }
+                        }
+                    }
                     p.wheelScaleEdit->setValue(value.wheelScale);
                     p.frameShuttleScaleEdit->setValue(value.frameShuttleScale);
                 });
@@ -944,6 +985,21 @@ namespace djv
                         {
                             auto settings = p.settings->getMouse();
                             settings.bindings[mouseAction].modifier = p.modifiers[index];
+                            p.settings->setMouse(settings);
+                        }
+                    });
+            }
+
+            for (const auto wheelAction : models::getWheelActionEnums())
+            {
+                p.wheelComboBoxes[wheelAction]->setIndexCallback(
+                    [this, wheelAction](int index)
+                    {
+                        FTK_P();
+                        if (index >= 0 && index < static_cast<int>(p.modifiers.size()))
+                        {
+                            auto settings = p.settings->getMouse();
+                            settings.wheelBindings[wheelAction] = p.modifiers[index];
                             p.settings->setMouse(settings);
                         }
                     });

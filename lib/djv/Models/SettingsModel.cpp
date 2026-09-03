@@ -155,6 +155,11 @@ namespace djv
             "Pick",
             "Frame Shuttle");
 
+        FTK_ENUM_IMPL(
+            WheelAction,
+            "Zoom",
+            "Scrub");
+
         MouseActionBinding::MouseActionBinding(
             ftk::MouseButton button,
             ftk::KeyModifier modifier) :
@@ -178,6 +183,7 @@ namespace djv
         {
             return
                 bindings == other.bindings &&
+                wheelBindings == other.wheelBindings &&
                 wheelScale == other.wheelScale &&
                 frameShuttleScale == other.frameShuttleScale;
         }
@@ -968,6 +974,10 @@ namespace djv
             {
                 to_json(json["Bindings"][to_string(i.first)], i.second);
             }
+            for (const auto& i : value.wheelBindings)
+            {
+                json["WheelBindings"][to_string(i.first)] = to_string(i.second);
+            }
             json["WheelScale"] = value.wheelScale;
             json["FrameShuttleScale"] = value.frameShuttleScale;
         }
@@ -1142,6 +1152,21 @@ namespace djv
                 MouseAction mouseAction = MouseAction::First;
                 from_string(i.key(), mouseAction);
                 from_json(i.value(), value.bindings[mouseAction]);
+            }
+            // Not required: settings written before the wheel bindings
+            // existed still load.
+            if (json.contains("WheelBindings"))
+            {
+                for (auto i = json.at("WheelBindings").begin();
+                    i != json.at("WheelBindings").end();
+                    ++i)
+                {
+                    WheelAction wheelAction = WheelAction::First;
+                    from_string(i.key(), wheelAction);
+                    ftk::KeyModifier modifier = ftk::KeyModifier::None;
+                    from_string(i.value().get<std::string>(), modifier);
+                    value.wheelBindings[wheelAction] = modifier;
+                }
             }
             json.at("WheelScale").get_to(value.wheelScale);
             json.at("FrameShuttleScale").get_to(value.frameShuttleScale);

@@ -736,6 +736,14 @@ namespace djv
                     i = value.bindings.find(models::MouseAction::FrameShuttle);
                     p.frameShuttleBinding = i != value.bindings.end() ? i->second : models::MouseActionBinding();
                     p.frameShuttleScale = value.frameShuttleScale;
+                    auto j = value.wheelBindings.find(models::WheelAction::Zoom);
+                    setWheelZoomBinding(j != value.wheelBindings.end() ?
+                        j->second :
+                        ftk::KeyModifier::None);
+                    j = value.wheelBindings.find(models::WheelAction::Scrub);
+                    setWheelScrubBinding(j != value.wheelBindings.end() ?
+                        j->second :
+                        ftk::KeyModifier::Control);
                 });
 
             p.pickObserver = ftk::Observer<std::optional<ftk::V2I> >::create(

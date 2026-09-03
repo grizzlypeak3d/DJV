@@ -177,6 +177,18 @@ namespace djv
         };
         FTK_ENUM(DJV_MODELS_API, MouseAction);
 
+        //! Mouse wheel actions. The wheel rides a modifier rather than a
+        //! button, so these bind separately from the button actions.
+        enum class DJV_MODELS_API_TYPE WheelAction
+        {
+            Zoom,
+            Scrub,
+
+            Count,
+            First = Zoom
+        };
+        FTK_ENUM(DJV_MODELS_API, WheelAction);
+
         //! Mouse action binding.
         struct DJV_MODELS_API_TYPE MouseActionBinding
         {
@@ -213,6 +225,12 @@ namespace djv
                     MouseAction::FrameShuttle,
                     MouseActionBinding(ftk::MouseButton::Left)
                 }
+            };
+
+            std::map<WheelAction, ftk::KeyModifier> wheelBindings =
+            {
+                { WheelAction::Zoom, ftk::KeyModifier::None },
+                { WheelAction::Scrub, ftk::KeyModifier::Control }
             };
 
             float wheelScale = 1.1F;
