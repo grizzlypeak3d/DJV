@@ -21,6 +21,7 @@
 <li><a href="playback.html">Playback and frame control</a></li>
 <li><a href="timeline.html">Timeline</a></li>
 <li><a href="compare.html">A/B comparison</a></li>
+<li><a href="reviews.html">Review</a></li>
 <li><a href="color.html">Color</a></li>
 <li><a href="audio.html">Audio</a></li>
 <li><a href="tools.html">Tools</a></li>
@@ -47,7 +48,6 @@
 <li><a href="#image-sequences-with-audio">Image sequences with audio</a></li>
 <li><a href="#timelines">Timelines</a></li>
 <li><a href="#media-references">Media references</a></li>
-<li><a href="#reviews">Reviews</a></li>
 <li><a href="#otio-spatial-coordinates">OTIO spatial coordinates</a></li>
 </ul>
 </div>
@@ -147,52 +147,7 @@
 <p>Shortcuts:</p>
 <ul><li>Next media reference: <kbd>Shift+M</kbd></li></ul>
 <h2 id="reviews">Reviews</h2>
-<p><img src="assets/review-tool.svg" alt="Review tool"></p>
-<p>A <em>review</em> is a saved session. Instead of re-opening each file and rebuilding a comparison by hand, you can save the whole setup to a <code>.djvr</code> file and reopen it later in one step. A review stores:</p>
-<ul>
-<li>The open files, including any separate audio, the active layer, and each file's speed, current frame, and in/out range.</li>
-<li>The active tab (the <strong>A</strong> file) and the comparison setup: mode, <strong>B</strong> files, wipe, overlay, and the relative/absolute time mode.</li>
-<li>The viewport state: framing, pan, and zoom.</li>
-<li>Color and display state: OCIO, LUT, display, background, foreground, aspect ratio, and HUD.</li>
-<li>The interface: the open tool panels.</li>
-<li>The feedback: markers and drawings.</li>
-</ul>
-<p>Opening a review replaces the current session. File paths are stored relative to the <code>.djvr</code> when possible, so a review stays valid when moved together with its media; any files that cannot be found are reported in the <strong>Messages</strong> tool.</p>
-<p>A review written by a newer DJV than the one you are running is refused, with the reason given in the <strong>Messages</strong> tool, rather than opened in part. Anything else in a review that this version does not understand is left alone: it is kept as it stands when you save, so passing a session between different versions of DJV does not quietly strip it. The document itself is described in <a href="review-format.html">Review file format</a>.</p>
-<p>The window title shows the open review's name, with a trailing <code>*</code> while it has unsaved changes. <strong>Close Review</strong> closes the review and returns DJV to its empty startup state; if there are unsaved changes it prompts to save first, as does quitting the application.</p>
-<p>While a saved review has unsaved changes, DJV keeps a periodic autosave backup. If the application does not exit cleanly, the next launch offers to recover those changes.</p>
-<h3 id="building-a-review-make-a-the-primary-source">Building a review: make "A" the primary source</h3>
-<p>A review can hold any number of files, but <strong>the "A" file is always the master</strong>. Set it to the source the review is <em>about</em> — the shot being reviewed — and use the "B" files for what you compare it against.</p>
-<p>This is not a stylistic preference: "A" drives playback and timing. The player is built from "A", so its duration, frame rate and audio govern the session; the timeline shows "A"; comparison times are resolved relative to it; and <strong>Fit to A</strong> scales the other sources to match it. A review whose "A" is a reference still plays, but every timing decision then follows the wrong source.</p>
-<p>How many "B" files you may add depends on the comparison mode:</p>
-<table>
-<thead><tr><th>Mode</th><th>"B" files</th></tr></thead>
-<tbody>
-<tr><td>A, B, Wipe, Overlay, Difference, Horizontal, Vertical</td><td>one</td></tr>
-<tr><td>Tile</td><td>any number</td></tr>
-</tbody>
-</table>
-<p>Selecting a second "B" in a single-buffer mode replaces the first, and switching from <strong>Tile</strong> to any other mode keeps only one "B". This is by design, and it is why reviews are saved with the mode: reopening a tiled review with four sources restores all of them, while the single-buffer modes restore one. In every mode "A" is restored exactly as it was saved.</p>
-<p>The recommended way to build a review:</p>
-<ol>
-<li>Open the primary source first, so it becomes "A".</li>
-<li>Open the sources to compare against, and mark them as "B".</li>
-<li>Choose the comparison mode — <strong>Tile</strong> if you need more than two sources.</li>
-<li>Save the review.</li>
-</ol>
-<p>Locations: <strong>Review</strong> menu</p>
-<p>Shortcuts:</p>
-<ul><li>Open review: <kbd>Ctrl+Alt+O</kbd></li><li>Save review: <kbd>Ctrl+Alt+S</kbd></li></ul>
-<p>Reviews can also be opened from the command line:</p>
-<pre><code>djv session.djvr
-</code></pre>
-<p>Personal preferences — keyboard shortcuts, style, cache size, and the audio device — are deliberately <strong>not</strong> stored in a review, so opening one received from someone else does not reconfigure your installation.</p>
-<h3 id="markers">Markers</h3>
-<p>Feedback is written as <em>markers</em>: one list in the <strong>Review</strong> tool, each anchored to a frame or a span of frames, with a color, and text if it wants words. The add button makes a marker on the current frame and opens its text for writing in place; the in/out button makes one for the timeline in/out points. A marker needs no text &mdash; a bare marker is a flag. Clicking a marker goes to its frames, a span narrowing the timeline to itself on the way; clicking the marker already showing edits its text. The arrow keys browse the list the same way, and <kbd>Delete</kbd> removes the current marker.</p>
-<p>The markers draw on the timeline in their colors: a span as a band along the top of the ruler, a single frame as a tick.</p>
-<p>Markers are standard OpenTimelineIO markers. <strong>Review/Import</strong> opens a <code>.otio</code> timeline as a review: it becomes the review's first file, and its markers &mdash; wherever they sit, on the stack, the tracks, or the clips &mdash; are copied into the feedback. <strong>Review/Export</strong> writes the review's markers into a <code>.otio</code>: a copy of the reviewed timeline when there is one, and a timeline with one clip referencing the media otherwise, with the markers at the timeline level and the text in each marker's comment. The file being imported is never modified.</p>
-<p>Markers and drawings record who made them, taken from your account name on the machine, so a session that has been passed around stays readable.</p>
-
+<p id="markers">Reviews — saved sessions with markers and drawn feedback — have a page of their own: <a href="reviews.html">Review</a>.</p>
 <h2 id="otio-spatial-coordinates">OTIO spatial coordinates</h2>
 <p>OTIO files can give each clip a bounding box, called the <a target="_blank" href="https://opentimelineio.readthedocs.io/en/stable/tutorials/spatial-coordinates.html">spatial coordinates</a>, that describes the area the image occupies on a canvas shared by the whole timeline. DJV uses these boxes to size and position the images.</p>
 <p>The most common use is playing back clips that were rendered at different resolutions. Give the clips the same box and they are all displayed at the same size, so the view no longer jumps between them when playback moves from one clip to the next. This also keeps the zoom and pan steady across a cut, which is useful for checking continuity between shots.</p>
