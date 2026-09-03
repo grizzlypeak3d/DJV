@@ -1026,6 +1026,15 @@ namespace djv
                 }
                 app->getColorModel()->setOCIOOptions(options);
             }
+            else if (step.contains("lut"))
+            {
+                // Enable a LUT file, any format OpenColorIO's FileTransform
+                // reads. e.g. { "lut": "monitor.icc" }.
+                auto options = app->getColorModel()->getLUTOptions();
+                options.enabled = true;
+                options.fileName = step.at("lut").get<std::string>();
+                app->getColorModel()->setLUTOptions(options);
+            }
             else if (step.contains("fileBrowser"))
             {
                 // Open the in-app file browser dialog. Force the non-native
