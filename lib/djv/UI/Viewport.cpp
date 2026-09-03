@@ -1384,7 +1384,19 @@ namespace djv
             {
                 if (p.videoFramesSize < 2)
                 {
-                    s = "No B file selected";
+                    if (p.b.empty())
+                    {
+                        s = "No B file selected";
+                    }
+                    else if (p.a && p.a->videoLayers.empty())
+                    {
+                        // The player is built from "A", and one with no
+                        // video runs no video at all -- the comparison has
+                        // nothing to composite, however real the B file is.
+                        s = "A has no video to compare";
+                    }
+                    // Otherwise the frames are still loading, which is not
+                    // worth an announcement.
                 }
                 else if (p.a && !p.b.empty())
                 {
