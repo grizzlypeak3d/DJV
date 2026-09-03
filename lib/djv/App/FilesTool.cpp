@@ -531,19 +531,6 @@ namespace djv
                                     nullptr;
                             });
 
-                        widget.bButton = ftk::ToolButton::create(context, "B", rowLayout);
-                        // Its own color, not the row's: a checked "B" on the
-                        // checked "A" row would vanish into it.
-                        widget.bButton->setCheckedRole(ftk::ColorRole::Blue);
-                        const auto i = std::find(b.begin(), b.end(), item);
-                        widget.bButton->setChecked(i != b.end());
-                        ftk::setScreenshotTag(
-                            widget.bButton,
-                            i != b.end() ? "Files.BFile" : "");
-                        widget.bButton->setVAlign(ftk::VAlign::Center);
-                        widget.bButton->setTooltip("Set the B file(s).");
-                        p.bButtonGroup->addButton(widget.bButton);
-
                         widget.layerComboBox = ftk::ComboBox::create(context, rowLayout);
                         widget.layerComboBox->setItems(item->videoLayers);
                         widget.layerComboBox->setCurrentIndex(item->videoLayer);
@@ -609,6 +596,22 @@ namespace djv
                                     _showRangePopup(item, range, buttonWeak.lock());
                                 });
                         }
+
+                        // Last, so the one control every row has lines
+                        // up at the right edge whatever else the row
+                        // holds.
+                        widget.bButton = ftk::ToolButton::create(context, "B", rowLayout);
+                        // Its own color, not the row's: a checked "B" on the
+                        // checked "A" row would vanish into it.
+                        widget.bButton->setCheckedRole(ftk::ColorRole::Blue);
+                        const auto i = std::find(b.begin(), b.end(), item);
+                        widget.bButton->setChecked(i != b.end());
+                        ftk::setScreenshotTag(
+                            widget.bButton,
+                            i != b.end() ? "Files.BFile" : "");
+                        widget.bButton->setVAlign(ftk::VAlign::Center);
+                        widget.bButton->setTooltip("Set the B file(s).");
+                        p.bButtonGroup->addButton(widget.bButton);
 
                         widget.button->setWidget(rowLayout);
 

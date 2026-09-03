@@ -93,13 +93,12 @@ namespace djv
         ftk::Size2I FileThumbnail::getSizeHint() const
         {
             FTK_P();
-            ftk::Size2I thumbnailSize;
-            if (p.thumbnail.image)
-            {
-                const ftk::Size2I& size = p.thumbnail.image->getSize();
-                thumbnailSize = ftk::Size2I(size.w * p.thumbnail.image->getInfo().pixelAspectRatio, size.h);
-            }
-            return thumbnailSize + p.size.margin * 2;
+            // A fixed slot rather than the image's own width: a portrait
+            // thumbnail beside a widescreen one would start the next
+            // column at a different place on every row.
+            return ftk::Size2I(
+                p.thumbnail.height * 16 / 9,
+                p.thumbnail.height) + p.size.margin * 2;
         }
 
         void FileThumbnail::tickEvent(
@@ -162,11 +161,12 @@ namespace djv
                 const ftk::Size2I thumbnailSize(size.w * p.thumbnail.image->getInfo().pixelAspectRatio, size.h);
                 ftk::ImageOptions imageOptions;
                 imageOptions.cache = false;
+                // Centered in the slot; see getSizeHint().
                 event.render->drawImage(
                     p.thumbnail.image,
                     ftk::Box2I(
-                        g.min.x + p.size.margin,
-                        g.min.y + p.size.margin,
+                        g.min.x + (g.w() - thumbnailSize.w) / 2,
+                        g.min.y + (g.h() - thumbnailSize.h) / 2,
                         thumbnailSize.w,
                         thumbnailSize.h),
                     ftk::Color4F(1.F, 1.F, 1.F),

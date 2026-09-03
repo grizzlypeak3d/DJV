@@ -511,15 +511,6 @@ class FilesTool(IToolWidget):
                 lambda thumbnailWeak = weakref.ref(thumbnail):
                     thumbnailWeak().thumbnail if thumbnailWeak() else None)
 
-            bButton = ftk.ToolButton(self.context, "B", rowLayout)
-            # Its own color, not the row's: a checked "B" on the checked
-            # "A" row would vanish into it.
-            bButton.checkedRole = ftk.ColorRole.Blue
-            bButton.checked = any(item is i for i in b)
-            bButton.vAlign = ftk.VAlign.Center
-            bButton.tooltip = "Set the B file(s)."
-            self._bButtonGroup.addButton(bButton)
-
             layerComboBox = ftk.ComboBox(self.context, rowLayout)
             layerComboBox.setItems(item.videoLayers)
             layerComboBox.currentIndex = item.videoLayer
@@ -558,6 +549,17 @@ class FilesTool(IToolWidget):
                         f(captured, r, index))
             else:
                 rangeButton = None
+
+            # Last, so the one control every row has lines up at the
+            # right edge whatever else the row holds.
+            bButton = ftk.ToolButton(self.context, "B", rowLayout)
+            # Its own color, not the row's: a checked "B" on the checked
+            # "A" row would vanish into it.
+            bButton.checkedRole = ftk.ColorRole.Blue
+            bButton.checked = any(item is i for i in b)
+            bButton.vAlign = ftk.VAlign.Center
+            bButton.tooltip = "Set the B file(s)."
+            self._bButtonGroup.addButton(bButton)
 
             button.widget = rowLayout
 
