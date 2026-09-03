@@ -184,6 +184,7 @@ namespace djv
             int reloadGrace = reloadGraceTicks;
             std::vector<nlohmann::json> lateSteps;  // applied after first settle
             size_t lateNext = 0;                   // next late step to apply
+            int waitTicks = 0;                     // from the "wait" step
             bool done = false;
             bool success = false;
         };
@@ -404,7 +405,8 @@ namespace djv
                         // Copied because applying a step can append another.
                         const nlohmann::json step = p.lateSteps[p.lateNext++];
                         _applyStep(step);
-                        p.settleLeft = p.settleTicksShot;
+                        p.settleLeft = std::max(p.settleTicksShot, p.waitTicks);
+                        p.waitTicks = 0;
                     }
                     else
                     {
@@ -487,7 +489,8 @@ namespace djv
                     step.contains("key") ||
                     step.contains("pick") ||
                     step.contains("zoom") ||
-                    step.contains("tab");
+                    step.contains("tab") ||
+                    step.contains("wait");
                 if (late)
                 {
                     p.lateSteps.push_back(step);
@@ -579,6 +582,16 @@ namespace djv
                         tool->scrollTo(v.at("section").get<std::string>());
                     }
                 }
+            }
+            else if (step.contains("wait"))
+            {
+                // Hold this many seconds before the next step, for the things
+                // that happen outside the app -- a render adding frames to a
+                // sequence the shot is about to reload. e.g. { "wait": 2.0 }.
+                // The wait spends the shot's overall timeout budget.
+                p.waitTicks = static_cast<int>(
+                    step.at("wait").get<double>() * 1000.0 /
+                    tickInterval.count());
             }
             else if (step.contains("command"))
             {
