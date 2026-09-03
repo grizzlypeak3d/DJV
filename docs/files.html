@@ -141,6 +141,7 @@
 <p>To pair audio manually, use the menu <strong>File/Open With Audio</strong>.</p>
 <h2 id="timelines">Timelines</h2>
 <p>OTIO timelines are opened like any other file. An <code>.otio</code> file references other pieces of media, and relative paths are relative to the <code>.otio</code> file. An <code>.otioz</code> bundle carries the media inside the one file: it is self-contained, so it can be moved or sent somewhere else, and DJV reads the media from the bundle itself rather than from disk.</p>
+<p>A timeline's layers are those of its first video clip; choosing one applies to every clip that has it.</p>
 <h2 id="media-references">Media references</h2>
 <p>A clip in an OTIO timeline can carry more than one version of its media as <em>media references</em> — for example a proxy and a full resolution render of the same shot, selected by name.</p>
 <p>DJV lists the names it finds in the <strong>File/Media References</strong> menu. Choosing one switches every clip in the timeline to the reference with that name; clips that do not have one keep the reference they were authored with. Switching changes only what is read — the layout and zoom stay where they are — and the <strong>Information</strong> tool and HUD describe the reference being read.</p>
