@@ -28,6 +28,8 @@ Changes:
 * AV1 support is now working on Windows.
 * The Information tool shows the file name and directory. Thanks to
   aberkl for the suggestion.
+* The Information tool lines its values up in one column across the
+  sections, in the tool and in the copied text. Suggested by aberkl.
 * The color pickers gain a palette of preset colors, and remember which
   tab was used.
 * Library updates:

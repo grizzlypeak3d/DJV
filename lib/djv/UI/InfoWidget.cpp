@@ -339,10 +339,15 @@ namespace djv
                 { "Audio", audioPairs(p.info) },
                 { "Metadata", Pairs(p.info.tags.begin(), p.info.tags.end()) }
             };
+            // The values line up in one column across the sections, so the
+            // tool and the copied text read as one document (#37). Metadata
+            // is left out of the shared width: its keys are foreign and can
+            // be very long, and a single camera tag should not push every
+            // value to the right margin.
+            std::map<std::string, Pairs> kept;
+            size_t sharedSize = 0;
             for (const auto& name : p.sectionNames)
             {
-                Pairs kept;
-                size_t maxSize = 0;
                 for (const auto& tag : sections.at(name))
                 {
                     if (!p.search.empty() &&
@@ -357,12 +362,27 @@ namespace djv
                     {
                         continue;
                     }
-                    kept.push_back(tag);
-                    maxSize = std::max(maxSize, tag.first.size() + 2);
+                    kept[name].push_back(tag);
+                    if (name != "Metadata")
+                    {
+                        sharedSize = std::max(sharedSize, tag.first.size() + 2);
+                    }
+                }
+            }
+            for (const auto& name : p.sectionNames)
+            {
+                size_t maxSize = sharedSize;
+                if ("Metadata" == name)
+                {
+                    maxSize = 0;
+                    for (const auto& i : kept[name])
+                    {
+                        maxSize = std::max(maxSize, i.first.size() + 2);
+                    }
                 }
 
                 std::vector<std::string> text;
-                for (const auto& i : kept)
+                for (const auto& i : kept[name])
                 {
                     std::string first = i.first + ": ";
                     first.resize(maxSize, ' ');
