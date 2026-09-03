@@ -38,6 +38,8 @@ Changes:
     - libtiff 4.7.2
 
 Fixes:
+* Browsing directories ran memory up toward a gigabyte; the file browser
+  thumbnails no longer keep a GPU context of their own.
 * Closing the Review tool left drawing armed, so a later click in the
   viewport painted a stroke. The cursor is now a crosshair while
   drawing, so an armed pen can be seen.
