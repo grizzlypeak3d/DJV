@@ -26,10 +26,7 @@ Changes:
 * Movies can be exported with the FFmpeg command line application, whose
   encoders provide H.264, HEVC, and VP9.
 * AV1 support is now working on Windows.
-* The Information tool shows the file name and directory. Thanks to
-  aberkl for the suggestion.
-* The Information tool lines its values up in one column across the
-  sections, in the tool and in the copied text. Suggested by aberkl.
+* The Information tool shows the file name and directory.
 * The color pickers gain a palette of preset colors, and remember which
   tab was used.
 * Library updates:
@@ -40,20 +37,19 @@ Changes:
 
 Fixes:
 * Closing the Review tool left drawing armed, so a later click in the
-  viewport painted a stroke. Reported by aberkl. The cursor is now a
-  crosshair while drawing, so an armed pen can be seen.
+  viewport painted a stroke. The cursor is now a crosshair while
+  drawing, so an armed pen can be seen.
 * Comparing files by timecode showed nothing, silently, when their
-  timecodes do not overlap; the viewport now says so. Reported by
-  aberkl.
-* Review drawings did not follow the image mirror. Reported by aberkl.
+  timecodes do not overlap; the viewport now says so.
+* Review drawings did not follow the image mirror.
 * The review tool's button tooltips follow the keyboard shortcut
-  bindings, like the toolbars. Reported by aberkl.
+  bindings, like the toolbars.
 * A drawing made on a compared file bled onto the current file when the
   comparison was turned off. A drawing now shows only when, and where,
-  its own file is shown. Reported by aberkl.
+  its own file is shown.
 * The slider reset was hard to find in a right-click menu; a popup
   button on each slider now holds the reset and the range. Double
-  clicking a slider still resets it. Reported by aberkl.
+  clicking a slider still resets it.
 * Naming a review range and pressing Return crashed.
 * The frame cache reloaded continuously while the current frame sat
   outside the in/out points.
