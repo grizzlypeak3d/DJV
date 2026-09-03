@@ -106,6 +106,11 @@ namespace djv
             //! The boxes of the sources in render space, as used for drawing.
             std::vector<ftk::Box2I> _sourceBoxes() const;
 
+            //! Whether a source's image is drawn in the current compare
+            //! mode. Ink follows its image: strokes draw and hit-test only
+            //! on sources that are shown.
+            bool _sourceShown(int index) const;
+
             void _drawBegin(const ftk::V2I& widgetPos);
             void _drawContinue(const ftk::V2I& widgetPos);
             void _drawEnd();

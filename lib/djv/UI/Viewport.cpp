@@ -1049,6 +1049,26 @@ namespace djv
                 p.videoFrames);
         }
 
+        bool Viewport::_sourceShown(int index) const
+        {
+            FTK_P();
+            // The same choice the renderer makes: "None" draws the first
+            // source alone and "B" the second alone; every other mode draws
+            // them all, each in its own box.
+            bool out = true;
+            switch (p.compare)
+            {
+            case tl::Compare::None:
+                out = 0 == index;
+                break;
+            case tl::Compare::B:
+                out = 1 == index;
+                break;
+            default: break;
+            }
+            return out;
+        }
+
         Viewport::SourceHit Viewport::_hitTest(const ftk::V2I& widgetPos) const
         {
             FTK_P();
@@ -1067,6 +1087,10 @@ namespace djv
             const auto boxes = _sourceBoxes();
             for (size_t i = 0; i < boxes.size() && i < p.videoFrames.size(); ++i)
             {
+                if (!_sourceShown(static_cast<int>(i)))
+                {
+                    continue;
+                }
                 const ftk::Box2I& box = boxes[i];
                 if (render.x < box.min.x || render.x > box.max.x ||
                     render.y < box.min.y || render.y > box.max.y ||
@@ -1322,7 +1346,7 @@ namespace djv
                         break;
                     }
                 }
-                if (index < 0)
+                if (index < 0 || !_sourceShown(index))
                 {
                     continue;
                 }

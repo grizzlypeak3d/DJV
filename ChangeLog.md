@@ -46,6 +46,9 @@ Fixes:
 * Review drawings did not follow the image mirror. Reported by aberkl.
 * The review tool's button tooltips follow the keyboard shortcut
   bindings, like the toolbars. Reported by aberkl.
+* A drawing made on a compared file bled onto the current file when the
+  comparison was turned off. A drawing now shows only when, and where,
+  its own file is shown. Reported by aberkl.
 * Naming a review range and pressing Return crashed.
 * The frame cache reloaded continuously while the current frame sat
   outside the in/out points.
