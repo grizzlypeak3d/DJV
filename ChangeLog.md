@@ -9,7 +9,9 @@ Changes:
 * Add playlists: the file list saves and opens as an OTIO file.
 * Directories can be opened with a wildcard filter and a depth, so a
   whole shot tree opens as a playlist. Based on a proposal by NathanOtano.
-* The file list can be reordered by dragging.
+* The file list can be reordered by dragging any part of a row, and
+  driven from the keyboard: the arrows browse it, Return sets the
+  current file, and Delete closes one.
 * Add Python bindings and a full Python version of DJV as an example, available
   when building from source with DJV_PYTHON=ON.
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).

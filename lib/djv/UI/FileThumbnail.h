@@ -52,6 +52,10 @@ namespace djv
                 const tl::IOOptions&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the thumbnail image, e.g. for a drag cursor. Null until
+            //! the thumbnail has loaded.
+            DJV_UI_API const std::shared_ptr<ftk::Image>& getThumbnail() const;
+
             DJV_UI_API ftk::Size2I getSizeHint() const override;
             DJV_UI_API void tickEvent(
                 bool,
@@ -59,7 +63,6 @@ namespace djv
                 const ftk::TickEvent&) override;
             DJV_UI_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
             DJV_UI_API void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
-            DJV_UI_API void mouseMoveEvent(ftk::MouseMoveEvent&) override;
 
         private:
             FTK_PRIVATE();

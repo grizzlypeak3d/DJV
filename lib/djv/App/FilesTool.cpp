@@ -20,7 +20,7 @@
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
-#include <ftk/UI/GridLayout.h>
+#include <ftk/UI/ItemButtonList.h>
 #include <ftk/UI/IntEdit.h>
 #include <ftk/Core/Format.h>
 #include <ftk/UI/Label.h>
@@ -43,8 +43,8 @@ namespace djv
             struct FileWidget
             {
                 std::shared_ptr<models::FilesModelItem> item;
+                std::shared_ptr<ftk::ItemButton> button;
                 std::shared_ptr<ui::FileThumbnail> thumbnail;
-                std::shared_ptr<ftk::ToolButton> nameButton;
                 std::shared_ptr<ftk::ToolButton> bButton;
                 std::shared_ptr<ftk::ComboBox> layerComboBox;
                 std::shared_ptr<ftk::ToolButton> rangeButton;
@@ -56,7 +56,6 @@ namespace djv
             std::shared_ptr<ftk::Settings> settings;
 
             std::shared_ptr<ui::FrameRangePopup> rangePopup;
-            std::shared_ptr<ftk::ButtonGroup> aButtonGroup;
             std::shared_ptr<ftk::ButtonGroup> bButtonGroup;
             std::vector<FileWidget> widgets;
             std::shared_ptr<ftk::ComboBox> compareComboBox;
@@ -69,7 +68,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> sameSizeCheckBox;
             std::shared_ptr<ftk::FormLayout> compareLayout;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
-            std::shared_ptr<ftk::GridLayout> widgetLayout;
+            std::shared_ptr<ftk::ItemButtonList> fileList;
 
             // Where a dragged file would land: an index into the rows,
             // counting the gap after the last one, or -1 for nowhere.
@@ -111,7 +110,6 @@ namespace djv
 
             p.rangeTimer = ftk::Timer::create(context);
 
-            p.aButtonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Radio);
             p.bButtonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Check);
 
             p.compareComboBox = ftk::ComboBox::create(
@@ -165,11 +163,11 @@ namespace djv
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
 
-            p.widgetLayout = ftk::GridLayout::create(context, layout);
-            p.widgetLayout->setSpacingRole(
-                ftk::SizeRole::SpacingSmall,
-                ftk::SizeRole::None);
-            p.widgetLayout->setRowBackgroundRole(ftk::ColorRole::Header);
+            // The files are a list of items, like the markers and the file
+            // browser: the list is the focus unit, the arrows browse it,
+            // Return sets "A", Delete closes, and the whole row drags.
+            p.fileList = ftk::ItemButtonList::create(context, layout);
+            p.fileList->setSpacingRole(ftk::SizeRole::None);
 
             ftk::Divider::create(context, ftk::Orientation::Vertical, layout);
 
@@ -193,12 +191,21 @@ namespace djv
             _loadSettings(p.bellows);
 
             auto appWeak = std::weak_ptr<App>(app);
-            p.aButtonGroup->setCheckedCallback(
-                [appWeak](int index, bool value)
+            p.fileList->setActivateCallback(
+                [appWeak](int index)
                 {
                     if (auto app = appWeak.lock())
                     {
                         app->getFilesModel()->setA(index);
+                    }
+                });
+
+            p.fileList->setDeleteCallback(
+                [appWeak](int index)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getFilesModel()->close(index);
                     }
                 });
 
@@ -422,36 +429,26 @@ namespace djv
                 if (widgets.size() == value.size() && reordered)
                 {
                     p.widgets = widgets;
-                    // The button groups answer clicks with an index in the
-                    // order the buttons were added, so they have to follow
+                    // The button group answers clicks with an index in the
+                    // order the buttons were added, so it has to follow
                     // the new order or every click selects the old row.
-                    p.aButtonGroup->clearButtons();
                     p.bButtonGroup->clearButtons();
                     for (size_t row = 0; row < p.widgets.size(); ++row)
                     {
                         auto& widget = p.widgets[row];
-                        p.aButtonGroup->addButton(widget.nameButton);
                         p.bButtonGroup->addButton(widget.bButton);
                         ftk::setScreenshotTag(
                             widget.thumbnail,
                             ftk::Format("Files.FileThumbnail{0}").arg(row));
-                        p.widgetLayout->setGridPos(widget.thumbnail, row, 0);
-                        p.widgetLayout->setGridPos(widget.nameButton, row, 1);
-                        p.widgetLayout->setGridPos(widget.bButton, row, 2);
-                        p.widgetLayout->setGridPos(widget.layerComboBox, row, 3);
-                        if (widget.rangeButton)
-                        {
-                            p.widgetLayout->setGridPos(widget.rangeButton, row, 4);
-                        }
+                        p.fileList->moveToIndex(widget.button, row);
                     }
                     return;
                 }
             }
 
             p.widgets.clear();
-            p.aButtonGroup->clearButtons();
             p.bButtonGroup->clearButtons();
-            p.widgetLayout->clear();
+            p.fileList->clear();
             auto appWeak = _app;
             if (auto app = appWeak.lock())
             {
@@ -467,34 +464,74 @@ namespace djv
                         FileWidget widget;
                         widget.item = item;
 
+                        // The row is one item: click or Return sets "A",
+                        // and a press that moves drags the file to a new
+                        // place in the list.
+                        widget.button = ftk::ItemButton::create(
+                            context, p.fileList);
+                        widget.button->setAcceptsKeyFocus(false);
+                        widget.button->setChecked(item == a);
+                        widget.button->setTooltip(
+                            item->path.get() + "\n\nSet the A file.");
+                        ftk::setScreenshotTag(
+                            widget.button,
+                            item == a ? "Files.CurrentFile" : "");
+
+                        auto rowLayout = ftk::HorizontalLayout::create(context);
+                        rowLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+
                         widget.thumbnail = ui::FileThumbnail::create(
                             context,
                             item,
                             app->getSettingsModel()->getIOOptions(),
-                            p.widgetLayout);
+                            rowLayout);
                         ftk::setScreenshotTag(
                             widget.thumbnail,
                             ftk::Format("Files.FileThumbnail{0}").arg(row));
-                        p.widgetLayout->setGridPos(widget.thumbnail, row, 0);
 
-                        widget.nameButton = ftk::ToolButton::create(
+                        auto nameLabel = ftk::Label::create(
                             context,
                             ftk::elide(item->path.getFileName(), 24),
-                            p.widgetLayout);
-                        widget.nameButton->setChecked(item == a);
-                        widget.nameButton->setHStretch(ftk::Stretch::Expanding);
-                        widget.nameButton->setVAlign(ftk::VAlign::Center);
-                        widget.nameButton->setTooltip(
-                            item->path.get() + "\n\nSet the A file.");
-                        // The same tag _aUpdate maintains: rebuilding the
-                        // rows would otherwise lose it until "A" changes.
-                        ftk::setScreenshotTag(
-                            widget.nameButton,
-                            item == a ? "Files.CurrentFile" : "");
-                        p.aButtonGroup->addButton(widget.nameButton);
-                        p.widgetLayout->setGridPos(widget.nameButton, row, 1);
+                            rowLayout);
+                        nameLabel->setHStretch(ftk::Stretch::Expanding);
+                        nameLabel->setVAlign(ftk::VAlign::Center);
 
-                        widget.bButton = ftk::ToolButton::create(context, "B", p.widgetLayout);
+                        widget.button->setClickedCallback(
+                            [appWeak, item]
+                            {
+                                if (auto app = appWeak.lock())
+                                {
+                                    // By the item rather than a captured
+                                    // index: the rows move.
+                                    const auto& files =
+                                        app->getFilesModel()->getFiles();
+                                    const auto i = std::find(
+                                        files.begin(), files.end(), item);
+                                    if (i != files.end())
+                                    {
+                                        app->getFilesModel()->setA(
+                                            static_cast<int>(i - files.begin()));
+                                    }
+                                }
+                            });
+
+                        widget.button->setDragDropDataCallback(
+                            [item]
+                            {
+                                return std::make_shared<ui::FileDragDropData>(item);
+                            });
+                        auto thumbnailWeak =
+                            std::weak_ptr<ui::FileThumbnail>(widget.thumbnail);
+                        widget.button->setDragDropCursorCallback(
+                            [thumbnailWeak]() -> std::shared_ptr<ftk::Image>
+                            {
+                                auto thumbnail = thumbnailWeak.lock();
+                                return thumbnail ?
+                                    thumbnail->getThumbnail() :
+                                    nullptr;
+                            });
+
+                        widget.bButton = ftk::ToolButton::create(context, "B", rowLayout);
                         const auto i = std::find(b.begin(), b.end(), item);
                         widget.bButton->setChecked(i != b.end());
                         ftk::setScreenshotTag(
@@ -503,24 +540,20 @@ namespace djv
                         widget.bButton->setVAlign(ftk::VAlign::Center);
                         widget.bButton->setTooltip("Set the B file(s).");
                         p.bButtonGroup->addButton(widget.bButton);
-                        p.widgetLayout->setGridPos(widget.bButton, row, 2);
 
-                        widget.layerComboBox = ftk::ComboBox::create(context, p.widgetLayout);
+                        widget.layerComboBox = ftk::ComboBox::create(context, rowLayout);
                         widget.layerComboBox->setItems(item->videoLayers);
                         widget.layerComboBox->setCurrentIndex(item->videoLayer);
                         widget.layerComboBox->setVAlign(ftk::VAlign::Center);
                         widget.layerComboBox->setTooltip("Set the current layer.");
                         // Layer names can be long -- and are, in a multi part
-                        // EXR -- and the column is as wide as the longest one
-                        // in it. The menu still shows them whole.
+                        // EXR. The menu still shows them whole.
                         // Kept from the end: layer names share a prefix and
                         // differ where they finish.
                         widget.layerComboBox->setElide(12, ftk::ElideMode::Left);
-                        // A file with one layer has nothing to choose, and the
-                        // column is as wide as the longest layer name in it.
+                        // A file with one layer has nothing to choose.
                         widget.layerComboBox->setVisible(
                             item->videoLayers.size() > 1);
-                        p.widgetLayout->setGridPos(widget.layerComboBox, row, 3);
 
                         widget.layerComboBox->setIndexCallback(
                             [appWeak, item](int value)
@@ -560,11 +593,10 @@ namespace djv
                                 context,
                                 ftk::Format("{0}-{1}").
                                     arg(range.min()).arg(range.max()),
-                                p.widgetLayout);
+                                rowLayout);
                             widget.rangeButton->setVAlign(ftk::VAlign::Center);
                             widget.rangeButton->setTooltip(
                                 "The frame range of the sequence.");
-                            p.widgetLayout->setGridPos(widget.rangeButton, row, 4);
 
                             auto buttonWeak =
                                 std::weak_ptr<ftk::ToolButton>(widget.rangeButton);
@@ -575,7 +607,9 @@ namespace djv
                                 });
                         }
 
-                        p.widgets.push_back(widget);
+                        widget.button->setWidget(rowLayout);
+
+                                                p.widgets.push_back(widget);
 
                         if (0 == row)
                         {
@@ -585,18 +619,13 @@ namespace djv
                             ftk::setScreenshotTag(
                                 widget.rangeButton,
                                 "Files.FrameRange");
-
-                            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.widgetLayout);
-                            spacer->setSpacingRole(ftk::SizeRole::SpacingTool);
-                            p.widgetLayout->setGridPos(spacer, 0, 5);
                         }
                         ++row;
                     }
                     if (value.empty())
                     {
-                        auto label = ftk::Label::create(context, "No files open", p.widgetLayout);
+                        auto label = ftk::Label::create(context, "No files open", p.fileList);
                         label->setMarginRole(ftk::SizeRole::Margin);
-                        p.widgetLayout->setGridPos(label, 0, 0);
                     }
                 }
             }
@@ -631,10 +660,18 @@ namespace djv
         void FilesTool::_aUpdate(const std::shared_ptr<models::FilesModelItem>& value)
         {
             FTK_P();
-            for (const auto& i : p.widgets)
+            for (size_t i = 0; i < p.widgets.size(); ++i)
             {
-                i.nameButton->setChecked(i.item == value);
-                ftk::setScreenshotTag(i.nameButton, i.item == value ? "Files.CurrentFile" : "");
+                const auto& widget = p.widgets[i];
+                widget.button->setChecked(widget.item == value);
+                ftk::setScreenshotTag(
+                    widget.button,
+                    widget.item == value ? "Files.CurrentFile" : "");
+                if (widget.item == value)
+                {
+                    // The keyboard starts from "A".
+                    p.fileList->setCurrent(static_cast<int>(i));
+                }
             }
         }
 
@@ -773,13 +810,7 @@ namespace djv
         ftk::Box2I FilesTool::_getRowGeom(size_t index) const
         {
             FTK_P();
-            // The whole row rather than one widget in it: the name button
-            // is centered in a row the thumbnail makes taller, so its box
-            // alone sits low.
-            const auto& widget = p.widgets[index];
-            return ftk::expand(
-                widget.thumbnail->getGeometry(),
-                widget.nameButton->getGeometry());
+            return p.widgets[index].button->getGeometry();
         }
 
         int FilesTool::_getDropIndex(const ftk::V2I& pos) const
@@ -790,7 +821,7 @@ namespace djv
             // also holds the comparison section, and a drop there should
             // mean nothing.
             if (!p.widgets.empty() &&
-                ftk::contains(ftk::margin(p.widgetLayout->getGeometry(), p.handle), pos))
+                ftk::contains(ftk::margin(p.fileList->getGeometry(), p.handle), pos))
             {
                 out = 0;
                 for (size_t i = 0; i < p.widgets.size(); ++i)
@@ -811,7 +842,7 @@ namespace djv
             ftk::Box2I out;
             if (!p.widgets.empty())
             {
-                const ftk::Box2I& layoutGeom = p.widgetLayout->getGeometry();
+                const ftk::Box2I& layoutGeom = p.fileList->getGeometry();
                 const int size = static_cast<int>(p.widgets.size());
                 // Centered in the gap between the rows; at the ends there
                 // is no gap, so the row's own edge is the line.

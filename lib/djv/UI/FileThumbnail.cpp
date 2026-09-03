@@ -36,7 +36,6 @@ namespace djv
             {
                 bool init = true;
                 int margin = 0;
-                int dragLength = 0;
             };
             SizeData size;
 
@@ -58,10 +57,19 @@ namespace djv
             const std::shared_ptr<IWidget>& parent)
         {
             IMouseWidget::_init(context, "djv::ui::FileThumbnail", parent);
+            // The row owns the gestures: the whole file row is draggable
+            // and clickable, so the thumbnail leaves the press alone -- and
+            // the hover, which is what the button's click follows.
+            _setMousePressEnabled(false);
+            _setMouseHoverEnabled(false);
             FTK_P();
-            _setMousePressEnabled(true);
             p.item = item;
             p.ioOptions = ioOptions;
+        }
+
+        const std::shared_ptr<ftk::Image>& FileThumbnail::getThumbnail() const
+        {
+            return _p->thumbnail.image;
         }
 
         FileThumbnail::FileThumbnail() :
@@ -119,7 +127,6 @@ namespace djv
             {
                 p.size.init = false;
                 p.size.margin = event.style->getSizeRole(ftk::SizeRole::MarginInside, event.displayScale);
-                p.size.dragLength = event.style->getSizeRole(ftk::SizeRole::DragLength, event.displayScale);
             }
 
             if (event.displayScale != p.thumbnail.scale)
@@ -167,25 +174,5 @@ namespace djv
             }
         }
 
-        void FileThumbnail::mouseMoveEvent(ftk::MouseMoveEvent& event)
-        {
-            IMouseWidget::mouseMoveEvent(event);
-            FTK_P();
-            if (_isMousePressed())
-            {
-                const float length = ftk::length(event.pos - _getMousePressPos());
-                if (length > p.size.dragLength)
-                {
-                    event.dragDropData = std::make_shared<FileDragDropData>(p.item);
-                    if (p.thumbnail.image)
-                    {
-                        event.dragDropCursor = p.thumbnail.image;
-                        event.dragDropCursorHotspot = ftk::V2I(
-                            p.thumbnail.image->getWidth() / 2,
-                            p.thumbnail.image->getHeight() / 2);
-                    }
-                }
-            }
-        }
     }
 }

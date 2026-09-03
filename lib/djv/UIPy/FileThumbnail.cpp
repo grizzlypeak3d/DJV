@@ -36,7 +36,8 @@ namespace djv
                     py::arg("context"),
                     py::arg("item"),
                     py::arg("ioOptions"),
-                    py::arg("parent") = nullptr);
+                    py::arg("parent") = nullptr)
+                .def_property_readonly("thumbnail", &FileThumbnail::getThumbnail);
         }
     }
 }

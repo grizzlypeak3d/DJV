@@ -199,15 +199,16 @@ class FilesTool(IToolWidget):
         self._rangeValue = None
         self._rangeTimer = ftk.Timer(context)
 
-        self._aButtonGroup = ftk.ButtonGroup(context, ftk.ButtonGroupType.Radio)
         self._bButtonGroup = ftk.ButtonGroup(context, ftk.ButtonGroupType.Check)
 
         layout = ftk.VerticalLayout(context)
         layout.spacingRole = ftk.SizeRole._None
 
-        self._grid = ftk.GridLayout(context, layout)
-        self._grid.setSpacingRole(ftk.SizeRole.SpacingSmall, ftk.SizeRole._None)
-        self._grid.rowBackgroundRole = ftk.ColorRole.Header
+        # The files are a list of items, like the markers and the file
+        # browser: the list is the focus unit, the arrows browse it,
+        # Return sets "A", Delete closes, and the whole row drags.
+        self._fileList = ftk.ItemButtonList(context, layout)
+        self._fileList.spacingRole = ftk.SizeRole._None
 
         ftk.Divider(context, ftk.Orientation.Vertical, layout)
 
@@ -275,8 +276,10 @@ class FilesTool(IToolWidget):
         self._setContent(layout)
 
         appWeak = weakref.ref(app)
-        self._aButtonGroup.setCheckedCallback(
-            lambda index, value: appWeak().getFilesModel().setA(index))
+        self._fileList.setActivateCallback(
+            lambda index: appWeak().getFilesModel().setA(index))
+        self._fileList.setDeleteCallback(
+            lambda index: appWeak().getFilesModel().close(index))
         self._bButtonGroup.setCheckedCallback(
             lambda index, value: appWeak().getFilesModel().setB(index, value))
         self._compareComboBox.setIndexCallback(
@@ -390,19 +393,15 @@ class FilesTool(IToolWidget):
             self.setDrawUpdate()
 
     def _rowSpanY(self, row):
-        # The whole row rather than one widget in it: the name button is
-        # centered in a row the thumbnail makes taller, so its box alone
-        # sits low.
-        n = self._rowWidgets[row][0].geometry
-        t = self._rowWidgets[row][4].geometry
-        return (min(t.min.y, n.min.y), max(t.max.y, n.max.y))
+        g = self._rowWidgets[row][0].geometry
+        return (g.min.y, g.max.y)
 
     def _getDropIndex(self, pos):
         # Only over the rows themselves, with a little reach: the tool also
         # holds the comparison section, and a drop there should mean
         # nothing.
         out = -1
-        g = self._grid.geometry
+        g = self._fileList.geometry
         m = self._handle
         if self._rowWidgets and \
                 g.min.x - m <= pos.x <= g.max.x + m and \
@@ -427,7 +426,7 @@ class FilesTool(IToolWidget):
             y = (self._rowSpanY(index - 1)[1] + self._rowSpanY(index)[0]) // 2
         else:
             y = self._rowSpanY(count - 1)[1]
-        g = self._grid.geometry
+        g = self._fileList.geometry
         return ftk.Box2I(
             g.min.x, y - self._handle // 2, g.w, self._handle)
 
@@ -452,52 +451,62 @@ class FilesTool(IToolWidget):
                 reordered |= self._rowWidgets[i][5] is not item
             if len(widgets) == len(files) and reordered:
                 self._rowWidgets = widgets
-                self._aButtonGroup.clearButtons()
                 self._bButtonGroup.clearButtons()
                 for row, w in enumerate(self._rowWidgets):
-                    nameButton, bButton, layerComboBox, rangeButton, \
-                        thumbnail = w[:5]
-                    self._aButtonGroup.addButton(nameButton)
-                    self._bButtonGroup.addButton(bButton)
-                    self._grid.setGridPos(thumbnail, row, 0)
-                    self._grid.setGridPos(nameButton, row, 1)
-                    self._grid.setGridPos(bButton, row, 2)
-                    self._grid.setGridPos(layerComboBox, row, 3)
-                    if rangeButton is not None:
-                        self._grid.setGridPos(rangeButton, row, 4)
+                    self._bButtonGroup.addButton(w[1])
+                    self._fileList.moveToIndex(w[0], row)
                 return
 
         self._rowWidgets = []
-        self._aButtonGroup.clearButtons()
         self._bButtonGroup.clearButtons()
-        self._grid.clear()
+        self._fileList.clear()
         app = self._app()
         a = app.getFilesModel().a
         b = app.getFilesModel().b
         seqExts = tl.getExts(app.context, int(tl.FileType.Seq))
+        appWeak = self._app
         for row, item in enumerate(files):
+            # The row is one item: click or Return sets "A", and a press
+            # that moves drags the file to a new place in the list.
+            button = ftk.ItemButton(self.context, self._fileList)
+            button.acceptsKeyFocus = False
+            button.checked = item is a
+            button.tooltip = item.path.get() + "\n\nSet the A file."
+
+            rowLayout = ftk.HorizontalLayout(self.context)
+            rowLayout.spacingRole = ftk.SizeRole.SpacingSmall
+
             thumbnail = djv.ui.FileThumbnail(
                 self.context, item,
-                app.getSettingsModel().ioOptions, self._grid)
-            self._grid.setGridPos(thumbnail, row, 0)
+                app.getSettingsModel().ioOptions, rowLayout)
 
-            nameButton = ftk.ToolButton(
-                self.context, ftk.elide(item.path.fileName, 24), self._grid)
-            nameButton.checked = item is a
-            nameButton.hStretch = ftk.Stretch.Expanding
-            nameButton.vAlign = ftk.VAlign.Center
-            nameButton.tooltip = item.path.get() + "\n\nSet the A file."
-            self._aButtonGroup.addButton(nameButton)
-            self._grid.setGridPos(nameButton, row, 1)
+            nameLabel = ftk.Label(
+                self.context, ftk.elide(item.path.fileName, 24), rowLayout)
+            nameLabel.hStretch = ftk.Stretch.Expanding
+            nameLabel.vAlign = ftk.VAlign.Center
 
-            bButton = ftk.ToolButton(self.context, "B", self._grid)
+            def clicked(captured = item, appWeak = appWeak):
+                filesModel = appWeak().getFilesModel()
+                # By the item rather than a captured index: the rows move.
+                for i, f in enumerate(filesModel.files):
+                    if f is captured:
+                        filesModel.setA(i)
+                        break
+            button.setClickedCallback(clicked)
+
+            button.setDragDropDataCallback(
+                lambda captured = item: djv.ui.FileDragDropData(captured))
+            button.setDragDropCursorCallback(
+                lambda thumbnailWeak = weakref.ref(thumbnail):
+                    thumbnailWeak().thumbnail if thumbnailWeak() else None)
+
+            bButton = ftk.ToolButton(self.context, "B", rowLayout)
             bButton.checked = any(item is i for i in b)
             bButton.vAlign = ftk.VAlign.Center
             bButton.tooltip = "Set the B file(s)."
             self._bButtonGroup.addButton(bButton)
-            self._grid.setGridPos(bButton, row, 2)
 
-            layerComboBox = ftk.ComboBox(self.context, self._grid)
+            layerComboBox = ftk.ComboBox(self.context, rowLayout)
             layerComboBox.setItems(item.videoLayers)
             layerComboBox.currentIndex = item.videoLayer
             layerComboBox.vAlign = ftk.VAlign.Center
@@ -510,7 +519,6 @@ class FilesTool(IToolWidget):
             layerComboBox.setIndexCallback(
                 lambda value, captured = item, appWeak = self._app:
                     appWeak().getFilesModel().setLayer(captured, value))
-            self._grid.setGridPos(layerComboBox, row, 3)
 
             # Only an image sequence has a frame range to state. The range
             # is what the sequence is meant to cover, which need not be
@@ -527,19 +535,20 @@ class FilesTool(IToolWidget):
                 rangeButton = ftk.ToolButton(
                     self.context,
                     "{}-{}".format(frames.min, frames.max),
-                    self._grid)
+                    rowLayout)
                 rangeButton.vAlign = ftk.VAlign.Center
                 rangeButton.tooltip = "The frame range of the sequence."
                 rangeButton.setClickedCallback(
                     lambda captured = item, r = frames, index = row, \
                         f = Util.weak(self._showRangePopup):
                         f(captured, r, index))
-                self._grid.setGridPos(rangeButton, row, 4)
             else:
                 rangeButton = None
 
+            button.widget = rowLayout
+
             self._rowWidgets.append(
-                (nameButton, bButton, layerComboBox, rangeButton, thumbnail,
+                (button, bButton, layerComboBox, rangeButton, thumbnail,
                  item))
 
     def _showRangePopup(self, item, frames, row):
@@ -572,7 +581,11 @@ class FilesTool(IToolWidget):
             self._rangeItem = None
 
     def _aIndexUpdate(self, value):
-        self._aButtonGroup.setChecked(value, True)
+        for i, widgets in enumerate(self._rowWidgets):
+            widgets[0].checked = i == value
+        if 0 <= value < len(self._rowWidgets):
+            # The keyboard starts from "A".
+            self._fileList.current = value
 
     def _bUpdate(self, indexes):
         for i, widgets in enumerate(self._rowWidgets):
