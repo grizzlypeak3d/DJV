@@ -531,7 +531,19 @@ namespace djv
                                     nullptr;
                             });
 
-                        widget.layerComboBox = ftk::ComboBox::create(context, rowLayout);
+                        // The controls keep the mouse to themselves: the
+                        // gaps between them go quiet instead of flashing the
+                        // row's hover, and a click that misses a control
+                        // does nothing rather than setting "A".
+                        auto controls = ftk::ItemControls::create(
+                            context, rowLayout);
+                        auto controlsLayout =
+                            ftk::HorizontalLayout::create(context);
+                        controlsLayout->setSpacingRole(
+                            ftk::SizeRole::SpacingSmall);
+                        controls->setWidget(controlsLayout);
+
+                        widget.layerComboBox = ftk::ComboBox::create(context, controlsLayout);
                         widget.layerComboBox->setItems(item->videoLayers);
                         widget.layerComboBox->setCurrentIndex(item->videoLayer);
                         widget.layerComboBox->setVAlign(ftk::VAlign::Center);
@@ -583,7 +595,7 @@ namespace djv
                                 context,
                                 ftk::Format("{0}-{1}").
                                     arg(range.min()).arg(range.max()),
-                                rowLayout);
+                                controlsLayout);
                             widget.rangeButton->setVAlign(ftk::VAlign::Center);
                             widget.rangeButton->setTooltip(
                                 "The frame range of the sequence.");
@@ -600,7 +612,7 @@ namespace djv
                         // Last, so the one control every row has lines
                         // up at the right edge whatever else the row
                         // holds.
-                        widget.bButton = ftk::ToolButton::create(context, "B", rowLayout);
+                        widget.bButton = ftk::ToolButton::create(context, "B", controlsLayout);
                         // Its own color, not the row's: a checked "B" on the
                         // checked "A" row would vanish into it.
                         widget.bButton->setCheckedRole(ftk::ColorRole::Blue);
@@ -616,7 +628,7 @@ namespace djv
                         // Breathing room after the "B": the row's edge is
                         // the item's edge.
                         auto spacer = ftk::Spacer::create(
-                            context, ftk::Orientation::Horizontal, rowLayout);
+                            context, ftk::Orientation::Horizontal, controlsLayout);
                         spacer->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
                         widget.button->setWidget(rowLayout);

@@ -511,7 +511,16 @@ class FilesTool(IToolWidget):
                 lambda thumbnailWeak = weakref.ref(thumbnail):
                     thumbnailWeak().thumbnail if thumbnailWeak() else None)
 
-            layerComboBox = ftk.ComboBox(self.context, rowLayout)
+            # The controls keep the mouse to themselves: the gaps between
+            # them go quiet instead of flashing the row's hover, and a
+            # click that misses a control does nothing rather than
+            # setting "A".
+            controls = ftk.ItemControls(self.context, rowLayout)
+            controlsLayout = ftk.HorizontalLayout(self.context)
+            controlsLayout.spacingRole = ftk.SizeRole.SpacingSmall
+            controls.widget = controlsLayout
+
+            layerComboBox = ftk.ComboBox(self.context, controlsLayout)
             layerComboBox.setItems(item.videoLayers)
             layerComboBox.currentIndex = item.videoLayer
             layerComboBox.vAlign = ftk.VAlign.Center
@@ -540,7 +549,7 @@ class FilesTool(IToolWidget):
                 rangeButton = ftk.ToolButton(
                     self.context,
                     "{}-{}".format(frames.min, frames.max),
-                    rowLayout)
+                    controlsLayout)
                 rangeButton.vAlign = ftk.VAlign.Center
                 rangeButton.tooltip = "The frame range of the sequence."
                 rangeButton.setClickedCallback(
@@ -552,7 +561,7 @@ class FilesTool(IToolWidget):
 
             # Last, so the one control every row has lines up at the
             # right edge whatever else the row holds.
-            bButton = ftk.ToolButton(self.context, "B", rowLayout)
+            bButton = ftk.ToolButton(self.context, "B", controlsLayout)
             # Its own color, not the row's: a checked "B" on the checked
             # "A" row would vanish into it.
             bButton.checkedRole = ftk.ColorRole.Blue
@@ -563,7 +572,7 @@ class FilesTool(IToolWidget):
 
             # Breathing room after the "B": the row's edge is the item's
             # edge.
-            spacer = ftk.Spacer(self.context, ftk.Orientation.Horizontal, rowLayout)
+            spacer = ftk.Spacer(self.context, ftk.Orientation.Horizontal, controlsLayout)
             spacer.spacingRole = ftk.SizeRole.SpacingSmall
 
             button.widget = rowLayout
