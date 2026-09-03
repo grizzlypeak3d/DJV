@@ -561,6 +561,11 @@ class FilesTool(IToolWidget):
             bButton.tooltip = "Set the B file(s)."
             self._bButtonGroup.addButton(bButton)
 
+            # Breathing room after the "B": the row's edge is the item's
+            # edge.
+            spacer = ftk.Spacer(self.context, ftk.Orientation.Horizontal, rowLayout)
+            spacer.spacingRole = ftk.SizeRole.SpacingSmall
+
             button.widget = rowLayout
 
             self._rowWidgets.append(

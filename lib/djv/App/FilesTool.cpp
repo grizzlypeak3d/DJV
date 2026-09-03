@@ -613,6 +613,12 @@ namespace djv
                         widget.bButton->setTooltip("Set the B file(s).");
                         p.bButtonGroup->addButton(widget.bButton);
 
+                        // Breathing room after the "B": the row's edge is
+                        // the item's edge.
+                        auto spacer = ftk::Spacer::create(
+                            context, ftk::Orientation::Horizontal, rowLayout);
+                        spacer->setSpacingRole(ftk::SizeRole::SpacingSmall);
+
                         widget.button->setWidget(rowLayout);
 
                                                 p.widgets.push_back(widget);
