@@ -341,9 +341,10 @@ namespace djv
             };
             // The values line up in one column across the sections, so the
             // tool and the copied text read as one document (#37). Metadata
-            // is left out of the shared width: its keys are foreign and can
-            // be very long, and a single camera tag should not push every
-            // value to the right margin.
+            // joins the column while its keys fit, and pads by itself when
+            // they do not: the keys are foreign and can be very long, and a
+            // single camera tag should not push every value to the right
+            // margin.
             std::map<std::string, Pairs> kept;
             size_t sharedSize = 0;
             for (const auto& name : p.sectionNames)
@@ -374,10 +375,14 @@ namespace djv
                 size_t maxSize = sharedSize;
                 if ("Metadata" == name)
                 {
-                    maxSize = 0;
+                    size_t metadataSize = 0;
                     for (const auto& i : kept[name])
                     {
-                        maxSize = std::max(maxSize, i.first.size() + 2);
+                        metadataSize = std::max(metadataSize, i.first.size() + 2);
+                    }
+                    if (metadataSize > sharedSize)
+                    {
+                        maxSize = metadataSize;
                     }
                 }
 
