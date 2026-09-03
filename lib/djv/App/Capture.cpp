@@ -1245,6 +1245,18 @@ namespace djv
                         path, modifiers);
                 }
             }
+            else if (step.contains("text"))
+            {
+                // Type text, the way typing does after the key events:
+                // letters reach a widget as text input, not as key
+                // presses. e.g. { "text": "-0.50" }. Deferred like "click",
+                // so the field it lands in is laid out and focused.
+                if (auto mw = app->getMainWindow())
+                {
+                    std::static_pointer_cast<ftk::IWindow>(mw)->text(
+                        step.at("text").get<std::string>());
+                }
+            }
             else if (step.contains("key"))
             {
                 // Press and release a key through the window's dispatch,
