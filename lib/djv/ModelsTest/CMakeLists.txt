@@ -1,6 +1,7 @@
 set(HEADERS
     AnnotationsModelTest.h
     AudioModelTest.h
+    ColorModelTest.h
     FilesModelTest.h
     ModelsTestUtil.h
     MarkersModelTest.h
@@ -14,6 +15,7 @@ set(HEADERS
 set(SOURCE
     AnnotationsModelTest.cpp
     AudioModelTest.cpp
+    ColorModelTest.cpp
     FilesModelTest.cpp
     MarkersModelTest.cpp
     PlaylistTest.cpp
