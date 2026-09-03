@@ -11,6 +11,11 @@
 
 namespace djv
 {
+    namespace ui
+    {
+        class FileDragDropData;
+    }
+
     namespace app
     {
         //! Files tool.
@@ -45,6 +50,9 @@ namespace djv
 
         private:
             ftk::Box2I _getRowGeom(size_t) const;
+            int _dropIndex(
+                const ftk::V2I&,
+                const std::shared_ptr<ui::FileDragDropData>&) const;
             int _getDropIndex(const ftk::V2I&) const;
             ftk::Box2I _getDropGeom(int) const;
 

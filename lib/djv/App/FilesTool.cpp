@@ -743,10 +743,10 @@ namespace djv
         void FilesTool::dragEnterEvent(ftk::DragDropEvent& event)
         {
             FTK_P();
-            if (std::dynamic_pointer_cast<ui::FileDragDropData>(event.data))
+            if (auto data = std::dynamic_pointer_cast<ui::FileDragDropData>(event.data))
             {
                 event.accept = true;
-                p.dropTarget = _getDropIndex(event.pos);
+                p.dropTarget = _dropIndex(event.pos, data);
                 setDrawUpdate();
             }
         }
@@ -765,10 +765,10 @@ namespace djv
         void FilesTool::dragMoveEvent(ftk::DragDropEvent& event)
         {
             FTK_P();
-            if (std::dynamic_pointer_cast<ui::FileDragDropData>(event.data))
+            if (auto data = std::dynamic_pointer_cast<ui::FileDragDropData>(event.data))
             {
                 event.accept = true;
-                const int dropTarget = _getDropIndex(event.pos);
+                const int dropTarget = _dropIndex(event.pos, data);
                 if (dropTarget != p.dropTarget)
                 {
                     p.dropTarget = dropTarget;
@@ -811,6 +811,32 @@ namespace djv
         {
             FTK_P();
             return p.widgets[index].button->getGeometry();
+        }
+
+        int FilesTool::_dropIndex(
+            const ftk::V2I& pos,
+            const std::shared_ptr<ui::FileDragDropData>& data) const
+        {
+            FTK_P();
+            int out = _getDropIndex(pos);
+            // The gaps around the dragged row itself are where it already
+            // is: dropping there moves nothing, so nothing is shown.
+            const auto i = std::find_if(
+                p.widgets.begin(),
+                p.widgets.end(),
+                [&data](const FileWidget& w)
+                {
+                    return w.item == data->getItem();
+                });
+            if (i != p.widgets.end())
+            {
+                const int from = static_cast<int>(i - p.widgets.begin());
+                if (out == from || out == from + 1)
+                {
+                    out = -1;
+                }
+            }
+            return out;
         }
 
         int FilesTool::_getDropIndex(const ftk::V2I& pos) const

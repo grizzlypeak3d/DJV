@@ -360,7 +360,7 @@ class FilesTool(IToolWidget):
     def dragEnterEvent(self, event):
         if isinstance(event.data, djv.ui.FileDragDropData):
             event.accept = True
-            self._dropTarget = self._getDropIndex(event.pos)
+            self._dropTarget = self._dropIndex(event.pos, event.data)
             self.setDrawUpdate()
 
     def dragLeaveEvent(self, event):
@@ -372,7 +372,7 @@ class FilesTool(IToolWidget):
     def dragMoveEvent(self, event):
         if isinstance(event.data, djv.ui.FileDragDropData):
             event.accept = True
-            dropTarget = self._getDropIndex(event.pos)
+            dropTarget = self._dropIndex(event.pos, event.data)
             if dropTarget != self._dropTarget:
                 self._dropTarget = dropTarget
                 self.setDrawUpdate()
@@ -395,6 +395,17 @@ class FilesTool(IToolWidget):
     def _rowSpanY(self, row):
         g = self._rowWidgets[row][0].geometry
         return (g.min.y, g.max.y)
+
+    def _dropIndex(self, pos, data):
+        # The gaps around the dragged row itself are where it already is:
+        # dropping there moves nothing, so nothing is shown.
+        out = self._getDropIndex(pos)
+        for i, w in enumerate(self._rowWidgets):
+            if w[5] is data.item:
+                if out == i or out == i + 1:
+                    out = -1
+                break
+        return out
 
     def _getDropIndex(self, pos):
         # Only over the rows themselves, with a little reach: the tool also
