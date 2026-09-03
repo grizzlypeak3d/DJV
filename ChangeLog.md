@@ -49,6 +49,9 @@ Fixes:
 * A drawing made on a compared file bled onto the current file when the
   comparison was turned off. A drawing now shows only when, and where,
   its own file is shown. Reported by aberkl.
+* The slider reset was hard to find in a right-click menu; a popup
+  button on each slider now holds the reset and the range. Double
+  clicking a slider still resets it. Reported by aberkl.
 * Naming a review range and pressing Return crashed.
 * The frame cache reloaded continuously while the current frame sat
   outside the in/out points.
