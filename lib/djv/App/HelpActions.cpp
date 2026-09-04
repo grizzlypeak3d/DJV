@@ -103,8 +103,12 @@ namespace djv
             }
             if (!studioURL.empty())
             {
+                // Named rather than described -- "the commercial version" is
+                // not a thing anyone can look up afterwards -- and with a
+                // verb, so the item reads as somewhere to go rather than as
+                // a heading. The tooltip says what it is.
                 _actions["Studio"] = ftk::Action::create(
-                    "DJV Studio",
+                    "Get DJV Studio",
                     _command("Studio"));
                 _actions["Studio"]->setTooltip(
                     "Open the web site for DJV Studio,\n"
