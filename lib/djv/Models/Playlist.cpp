@@ -7,6 +7,7 @@
 
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
+#include <ftk/Core/Path.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/externalReference.h>
@@ -29,7 +30,7 @@ namespace djv
 
             std::string genericPath(const std::filesystem::path& value)
             {
-                return value.generic_u8string();
+                return ftk::fromFileSystemGeneric(value);
             }
 
             // The URL for a file as a playlist stores it: relative to the
@@ -44,19 +45,19 @@ namespace djv
             {
                 std::error_code ec;
                 const std::filesystem::path path = std::filesystem::absolute(
-                    std::filesystem::u8path(fileName), ec);
+                    ftk::toFileSystem(fileName), ec);
                 if (ec)
                 {
-                    return genericPath(std::filesystem::u8path(fileName));
+                    return genericPath(ftk::toFileSystem(fileName));
                 }
                 std::string out = genericPath(path);
                 if (!directory.empty())
                 {
                     const std::filesystem::path relative = std::filesystem::proximate(
-                        path, std::filesystem::u8path(directory), ec);
+                        path, ftk::toFileSystem(directory), ec);
                     if (!ec &&
                         !relative.empty() &&
-                        relative.begin()->u8string() != "..")
+                        ftk::fromFileSystem(*relative.begin()) != "..")
                     {
                         out = genericPath(relative);
                     }
@@ -210,9 +211,9 @@ namespace djv
                     // would look for it beside the playlist instead.
                     std::error_code ec;
                     const std::filesystem::path audioPath = std::filesystem::absolute(
-                        std::filesystem::u8path(item->audioPath.getFileName(true)), ec);
+                        ftk::toFileSystem(item->audioPath.getFileName(true)), ec);
                     djv["audioPath"] = ec ?
-                        genericPath(std::filesystem::u8path(item->audioPath.getFileName(true))) :
+                        genericPath(ftk::toFileSystem(item->audioPath.getFileName(true))) :
                         genericPath(audioPath);
                 }
                 if (item->videoLayer != 0)
@@ -469,8 +470,8 @@ namespace djv
             const Playlist& playlist,
             double defaultRate)
         {
-            const std::string directory = std::filesystem::u8path(fileName).
-                parent_path().u8string();
+            const std::string directory = ftk::fromFileSystem(
+                ftk::toFileSystem(fileName).parent_path());
             auto timeline = playlistToOTIO(playlist, directory, defaultRate);
             OTIO_NS::ErrorStatus errorStatus;
             if (!timeline->to_json_file(fileName, &errorStatus))
@@ -489,8 +490,8 @@ namespace djv
             // the archive, not at files -- so its clips cannot become a file
             // list. Refuse with the reason rather than the JSON parse error
             // that reading zip bytes as text produces.
-            if (".otioz" == ftk::toLower(
-                std::filesystem::u8path(fileName).extension().u8string()))
+            if (".otioz" == ftk::toLower(ftk::fromFileSystem(
+                ftk::toFileSystem(fileName).extension())))
             {
                 throw std::runtime_error(ftk::Format(
                     "Cannot open {0}: a \".otioz\" bundle's media lives "
@@ -507,8 +508,8 @@ namespace djv
                     arg(fileName).
                     arg(errorStatus.full_description));
             }
-            const std::string directory = std::filesystem::u8path(fileName).
-                parent_path().u8string();
+            const std::string directory = ftk::fromFileSystem(
+                ftk::toFileSystem(fileName).parent_path());
             return playlistFromOTIO(timeline, directory, report);
         }
     }

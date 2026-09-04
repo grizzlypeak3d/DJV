@@ -5,6 +5,7 @@
 
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
+#include <ftk/Core/Path.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/marker.h>
@@ -780,7 +781,7 @@ namespace djv
 
         Review reviewOpen(const std::string& fileName)
         {
-            std::ifstream f(std::filesystem::u8path(fileName));
+            std::ifstream f(ftk::toFileSystem(fileName));
             if (!f.is_open())
             {
                 throw std::runtime_error(ftk::Format(
@@ -815,7 +816,7 @@ namespace djv
         void reviewSave(const std::string& fileName, Review& review)
         {
             nlohmann::json json = review;
-            std::ofstream f(std::filesystem::u8path(fileName));
+            std::ofstream f(ftk::toFileSystem(fileName));
             if (!f.is_open())
             {
                 throw std::runtime_error(ftk::Format(
@@ -835,12 +836,12 @@ namespace djv
             }
             std::error_code ec;
             const std::filesystem::path rel = std::filesystem::relative(
-                std::filesystem::u8path(path), base, ec);
+                ftk::toFileSystem(path), base, ec);
             if (ec || rel.empty())
             {
                 return path;
             }
-            return rel.generic_u8string();
+            return ftk::fromFileSystemGeneric(rel);
         }
 
         std::string reviewGenericPath(const std::string& path)
@@ -849,7 +850,7 @@ namespace djv
             {
                 return path;
             }
-            return std::filesystem::u8path(path).generic_u8string();
+            return ftk::fromFileSystemGeneric(ftk::toFileSystem(path));
         }
 
         namespace
@@ -866,13 +867,13 @@ namespace djv
                 {
                     return true;
                 }
-                const ftk::Path ftkPath(p.u8string(), pathOptions);
+                const ftk::Path ftkPath(ftk::fromFileSystem(p), pathOptions);
                 if (ftkPath.getNum().empty())
                 {
                     // Single file: genuinely missing.
                     return false;
                 }
-                const std::filesystem::path dir = std::filesystem::u8path(ftkPath.getDir());
+                const std::filesystem::path dir = ftk::toFileSystem(ftkPath.getDir());
                 if (!std::filesystem::exists(dir, ec))
                 {
                     return false;
@@ -881,7 +882,7 @@ namespace djv
                 const std::string ext = ftkPath.getExt();
                 for (const auto& entry : std::filesystem::directory_iterator(dir, ec))
                 {
-                    const std::string name = entry.path().filename().u8string();
+                    const std::string name = ftk::fromFileSystem(entry.path().filename());
                     if (name.size() >= base.size() + ext.size() &&
                         0 == name.compare(0, base.size(), base) &&
                         0 == name.compare(name.size() - ext.size(), ext.size(), ext))
@@ -904,7 +905,7 @@ namespace djv
             if (!relative.empty())
             {
                 const std::filesystem::path rel =
-                    (base / std::filesystem::u8path(relative)).lexically_normal();
+                    (base / ftk::toFileSystem(relative)).lexically_normal();
                 if (reviewFilePresent(rel, pathOptions))
                 {
                     exists = true;
@@ -914,7 +915,7 @@ namespace djv
             if (!absolute.empty())
             {
                 const std::filesystem::path abs =
-                    std::filesystem::u8path(absolute);
+                    ftk::toFileSystem(absolute);
                 if (reviewFilePresent(abs, pathOptions))
                 {
                     exists = true;
@@ -926,11 +927,11 @@ namespace djv
                 std::filesystem::path fileName;
                 if (!relative.empty())
                 {
-                    fileName = std::filesystem::u8path(relative).filename();
+                    fileName = ftk::toFileSystem(relative).filename();
                 }
                 else if (!absolute.empty())
                 {
-                    fileName = std::filesystem::u8path(absolute).filename();
+                    fileName = ftk::toFileSystem(absolute).filename();
                 }
                 if (!fileName.empty())
                 {
@@ -945,9 +946,9 @@ namespace djv
             exists = false;
             if (!relative.empty())
             {
-                return (base / std::filesystem::u8path(relative)).lexically_normal();
+                return (base / ftk::toFileSystem(relative)).lexically_normal();
             }
-            return std::filesystem::u8path(absolute);
+            return ftk::toFileSystem(absolute);
         }
     }
 }

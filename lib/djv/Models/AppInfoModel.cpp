@@ -13,6 +13,7 @@
 
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
+#include <ftk/Core/Path.h>
 
 namespace djv
 {
@@ -126,7 +127,7 @@ namespace djv
                 return std::string();
             }
             const std::filesystem::path dir =
-                std::filesystem::u8path(searchPath);
+                ftk::toFileSystem(searchPath);
             // The install trees the packages make: bin/ beside share/ on
             // Linux, bin/ beside docs/ in the Windows package, and the
             // "Resources" of a macOS bundle.
@@ -151,7 +152,7 @@ namespace djv
                 {
                     page = docs / "index.html";
                 }
-                return "file://" + page.u8string();
+                return "file://" + ftk::fromFileSystem(page);
             }
             return std::string();
         }
@@ -168,7 +169,7 @@ namespace djv
             {
                 return std::string();
             }
-            return exe.parent_path().u8string();
+            return ftk::fromFileSystem(exe.parent_path());
         }
 
         std::string AppInfoModel::getLicensesURL() const

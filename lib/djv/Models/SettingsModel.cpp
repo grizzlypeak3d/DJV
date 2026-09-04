@@ -385,7 +385,7 @@ namespace djv
                 // application was started and is the root of the filesystem
                 // when it is launched from the Finder.
                 exportSettings.dir =
-                    ftk::getUserPath(ftk::UserPath::Home).u8string();
+                    ftk::fromFileSystem(ftk::getUserPath(ftk::UserPath::Home));
             }
             p.exportSettings = ftk::Observable<ExportSettings>::create(exportSettings);
 
@@ -425,7 +425,7 @@ namespace djv
             // are loading: a browsed-to Korean directory would take the
             // application down on startup. Issue #779.
             const std::filesystem::path fileBrowserPath =
-                std::filesystem::u8path(fileBrowser.path);
+                ftk::toFileSystem(fileBrowser.path);
             if (std::filesystem::exists(fileBrowserPath))
             {
                 fileBrowserSystem->getModel()->setPath(fileBrowserPath);
@@ -521,7 +521,7 @@ namespace djv
             FileBrowserSettings fileBrowser = p.fileBrowser->get();
             auto context = p.context.lock();
             auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
-            fileBrowser.path = fileBrowserSystem->getModel()->getPath().u8string();
+            fileBrowser.path = ftk::fromFileSystem(fileBrowserSystem->getModel()->getPath());
             fileBrowser.options = fileBrowserSystem->getModel()->getOptions();
             fileBrowser.ext = fileBrowserSystem->getModel()->getExt();
             // Changed from inside the browser, like the path above it.

@@ -52,9 +52,9 @@ namespace djv
             // addRecent() makes paths absolute, so use absolute paths (which need
             // not exist) to keep the comparisons independent of the working dir.
             const std::filesystem::path dir = std::filesystem::temp_directory_path();
-            const ftk::Path a(std::filesystem::absolute(dir / "djv-recent-a.txt").u8string());
-            const ftk::Path b(std::filesystem::absolute(dir / "djv-recent-b.txt").u8string());
-            const ftk::Path c(std::filesystem::absolute(dir / "djv-recent-c.txt").u8string());
+            const ftk::Path a(ftk::fromFileSystem(std::filesystem::absolute(dir / "djv-recent-a.txt")));
+            const ftk::Path b(ftk::fromFileSystem(std::filesystem::absolute(dir / "djv-recent-b.txt")));
+            const ftk::Path c(ftk::fromFileSystem(std::filesystem::absolute(dir / "djv-recent-c.txt")));
 
             // Empty by default; the default maximum is ten.
             FTK_CHECK(model->getRecent().empty());
@@ -92,14 +92,14 @@ namespace djv
             std::filesystem::remove(path);
 
             const std::filesystem::path dir = std::filesystem::temp_directory_path();
-            const ftk::Path a(std::filesystem::absolute(dir / "djv-recent-a.txt").u8string());
-            const ftk::Path b(std::filesystem::absolute(dir / "djv-recent-b.txt").u8string());
+            const ftk::Path a(ftk::fromFileSystem(std::filesystem::absolute(dir / "djv-recent-a.txt")));
+            const ftk::Path b(ftk::fromFileSystem(std::filesystem::absolute(dir / "djv-recent-b.txt")));
 
             // A sequence, to check the range survives the settings as well as
             // the path. Without it an entry cannot say whether it was one
             // frame or the sequence it sits in.
             ftk::Path seq(
-                std::filesystem::absolute(dir / "djv-recent-seq.0001.exr").u8string());
+                ftk::fromFileSystem(std::filesystem::absolute(dir / "djv-recent-seq.0001.exr")));
             seq.setFrames(ftk::RangeI64(1, 100));
 
             // Populate the list and maximum; the model writes them into the

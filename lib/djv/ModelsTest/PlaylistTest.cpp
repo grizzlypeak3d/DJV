@@ -7,6 +7,7 @@
 
 #include <ftk/Core/Assert.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/Path.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/externalReference.h>
@@ -26,8 +27,8 @@ namespace djv
         {
             std::string normalize(const std::string& fileName)
             {
-                return std::filesystem::u8path(fileName).
-                    lexically_normal().generic_u8string();
+                return ftk::fromFileSystemGeneric(
+                    ftk::toFileSystem(fileName).lexically_normal());
             }
         }
 
@@ -53,17 +54,17 @@ namespace djv
             // None of the media needs to exist: the playlist stores paths and
             // opens none of them.
             const std::string dir =
-                std::filesystem::temp_directory_path().u8string();
-            const std::string mediaDir = (std::filesystem::u8path(dir) /
-                "djv-PlaylistTest-media").u8string();
+                ftk::fromFileSystem(std::filesystem::temp_directory_path());
+            const std::string mediaDir = ftk::fromFileSystem(ftk::toFileSystem(dir) /
+                "djv-PlaylistTest-media");
 
             models::Playlist playlist;
 
             auto movie = std::make_shared<models::FilesModelItem>();
-            movie->path = ftk::Path((std::filesystem::u8path(mediaDir) /
-                "movie.mov").u8string());
-            movie->audioPath = ftk::Path((std::filesystem::u8path(mediaDir) /
-                "audio.wav").u8string());
+            movie->path = ftk::Path(ftk::fromFileSystem(ftk::toFileSystem(mediaDir) /
+                "movie.mov"));
+            movie->audioPath = ftk::Path(ftk::fromFileSystem(ftk::toFileSystem(mediaDir) /
+                "audio.wav"));
             movie->videoLayer = 2;
             movie->speed = 23.976;
             movie->currentTime = OTIO_NS::RationalTime(15.0, 24.0);
@@ -73,8 +74,8 @@ namespace djv
             playlist.items.push_back(movie);
 
             auto seq = std::make_shared<models::FilesModelItem>();
-            seq->path = ftk::Path((std::filesystem::u8path(mediaDir) /
-                "render.0001.exr").u8string());
+            seq->path = ftk::Path(ftk::fromFileSystem(ftk::toFileSystem(mediaDir) /
+                "render.0001.exr"));
             seq->path.setFrames(ftk::RangeI64(1, 48));
             seq->framesStated = true;
             playlist.items.push_back(seq);
@@ -85,8 +86,8 @@ namespace djv
             playlist.compareOptions.wipeCenter = ftk::V2F(.25F, .75F);
             playlist.compareTime = tl::CompareTime::Absolute;
 
-            const std::string fileName = (std::filesystem::u8path(dir) /
-                "djv-PlaylistTest.otio").u8string();
+            const std::string fileName = ftk::fromFileSystem(ftk::toFileSystem(dir) /
+                "djv-PlaylistTest.otio");
             models::playlistSave(fileName, playlist, 24.0);
             std::vector<std::string> report;
             const models::Playlist result =

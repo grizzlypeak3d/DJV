@@ -5,6 +5,7 @@
 
 #include <ftk/Core/Context.h>
 #include <ftk/Core/OS.h>
+#include <ftk/Core/Path.h>
 
 #if defined(TLRENDER_OCIO)
 #include <OpenColorIO/OpenColorIO.h>
@@ -248,11 +249,11 @@ namespace djv
                 out.name = p.ocioConfig->getName();
                 if (out.name.empty())
                 {
-                    const std::filesystem::path path = std::filesystem::u8path(options.fileName);
-                    out.name = path.filename().u8string();
+                    const std::filesystem::path path = ftk::toFileSystem(options.fileName);
+                    out.name = ftk::fromFileSystem(path.filename());
                     if ("config.ocio" == out.name)
                     {
-                        out.name = path.parent_path().filename().u8string();
+                        out.name = ftk::fromFileSystem(path.parent_path().filename());
                     }
                 }
                 // Not "None": an empty input means the color space is

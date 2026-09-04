@@ -819,7 +819,7 @@ namespace djv
             // A timeline imports rather than opens: it becomes the review's
             // "A" source by reference, and its markers copy into the
             // feedback.
-            const std::string ext = ftk::toLower(path.extension().u8string());
+            const std::string ext = ftk::toLower(ftk::fromFileSystem(path.extension()));
             if (".otio" == ext || ".otioz" == ext)
             {
                 _importReviewTimeline(path);
@@ -829,7 +829,7 @@ namespace djv
             models::Review review;
             try
             {
-                review = models::reviewOpen(path.u8string());
+                review = models::reviewOpen(ftk::fromFileSystem(path));
             }
             catch (const std::exception& e)
             {
@@ -853,7 +853,7 @@ namespace djv
                         "Review \"{0}\": the \"{1}\" section could not be read "
                         "and is left at its defaults. It is kept as it stands "
                         "when the review is saved, not overwritten.").
-                        arg(path.u8string()).
+                        arg(ftk::fromFileSystem(path)).
                         arg(section),
                     ftk::LogType::Warning);
             }
@@ -883,11 +883,11 @@ namespace djv
                     resolveReviewFile(rf, base, substituteRoot, pathOptions, exists);
                 if (!exists)
                 {
-                    missing.push_back(resolved.u8string());
+                    missing.push_back(ftk::fromFileSystem(resolved));
                 }
                 auto item = std::make_shared<models::FilesModelItem>();
                 item->id = rf.id.empty() ? models::generateId() : rf.id;
-                item->path = ftk::Path(resolved.u8string(), pathOptions);
+                item->path = ftk::Path(ftk::fromFileSystem(resolved), pathOptions);
                 // The review stores one frame's path, so the sequence is
                 // gathered from the disk the way opening the frame would
                 // gather it; without this the file restores as that one
@@ -908,9 +908,9 @@ namespace djv
                         audioExists);
                     if (!audioExists)
                     {
-                        missing.push_back(audio.u8string());
+                        missing.push_back(ftk::fromFileSystem(audio));
                     }
-                    item->audioPath = ftk::Path(audio.u8string(), pathOptions);
+                    item->audioPath = ftk::Path(ftk::fromFileSystem(audio), pathOptions);
                 }
                 item->videoLayer = static_cast<size_t>(std::max(0, rf.videoLayer));
                 item->speed = rf.speed;
@@ -988,7 +988,7 @@ namespace djv
             p.reviewRaw = review.raw;
             p.reviewUnreadSections = review.unreadSections;
             p.reviewUnreadItems = review.unreadItems;
-            p.recentReviewsModel->addRecent(ftk::Path(reviewPath.u8string()));
+            p.recentReviewsModel->addRecent(ftk::Path(ftk::fromFileSystem(reviewPath)));
             p.reviewModified = false;
             _updateWindowTitle();
             // A freshly loaded review supersedes any earlier autosave.
@@ -999,7 +999,7 @@ namespace djv
                 _context->log(
                     "djv::app::App",
                     ftk::Format("Review \"{0}\": {1} file(s) not found: {2}").
-                        arg(reviewPath.u8string()).
+                        arg(ftk::fromFileSystem(reviewPath)).
                         arg(missing.size()).
                         arg(ftk::join(missing, ", ")),
                     ftk::LogType::Warning);
@@ -1036,7 +1036,7 @@ namespace djv
                                             review,
                                             base,
                                             reviewPath,
-                                            std::filesystem::u8path(folder.get()));
+                                            ftk::toFileSystem(folder.get()));
                                     },
                                     options);
                             }
@@ -1069,7 +1069,7 @@ namespace djv
                 // playlists suggest "playlist.otio".
                 options.fileName = p.reviewPath.empty() ?
                     std::string("review") + models::reviewExtension() :
-                    p.reviewPath.filename().u8string();
+                    ftk::fromFileSystem(p.reviewPath.filename());
             }
             options.extensions = { models::reviewExtension() };
             options.extensionsLabel = "Review Session";
@@ -1077,7 +1077,7 @@ namespace djv
                 p.mainWindow,
                 [callback](const ftk::Path& value)
                 {
-                    callback(std::filesystem::u8path(value.get()));
+                    callback(ftk::toFileSystem(value.get()));
                 },
                 options);
         }
@@ -1202,7 +1202,7 @@ namespace djv
 
             try
             {
-                models::reviewSave(path.u8string(), review);
+                models::reviewSave(ftk::fromFileSystem(path), review);
             }
             catch (const std::exception& e)
             {
@@ -1212,7 +1212,7 @@ namespace djv
 
             p.reviewPath = path;
             p.reviewRaw = review.raw;
-            p.recentReviewsModel->addRecent(ftk::Path(path.u8string()));
+            p.recentReviewsModel->addRecent(ftk::Path(ftk::fromFileSystem(path)));
             p.reviewModified = false;
             _updateWindowTitle();
             // The work is safely on disk; drop any crash-recovery backup.
@@ -1255,7 +1255,7 @@ namespace djv
             // timeline references it, the same way a timeline references
             // its media.
             _closeReview();
-            open(ftk::Path(path.u8string()));
+            open(ftk::Path(ftk::fromFileSystem(path)));
             if (!p.timelines.empty() && p.timelines.front())
             {
                 p.markersModel->setMarkers(
@@ -1283,7 +1283,7 @@ namespace djv
                 [this](const ftk::Path& value)
                 {
                     _importReviewTimeline(
-                        std::filesystem::u8path(value.get()));
+                        ftk::toFileSystem(value.get()));
                 },
                 options);
         }
@@ -1299,7 +1299,7 @@ namespace djv
                 std::filesystem::path() : p.reviewPath.parent_path();
             options.fileName = p.reviewPath.empty() ?
                 std::string("markers.otio") :
-                p.reviewPath.stem().u8string() + ".otio";
+                ftk::fromFileSystem(p.reviewPath.stem()) + ".otio";
             options.extensions = { ".otio" };
             options.extensionsLabel = "Timeline";
             fileBrowserSystem->open(
@@ -1307,7 +1307,7 @@ namespace djv
                 [this](const ftk::Path& value)
                 {
                     std::filesystem::path path =
-                        std::filesystem::u8path(value.get());
+                        ftk::toFileSystem(value.get());
                     if (path.extension() != ".otio")
                     {
                         path.replace_extension(".otio");
@@ -1366,12 +1366,12 @@ namespace djv
             }
             models::reviewMarkersToTimeline(
                 p.markersModel->getMarkers(), timeline);
-            if (!timeline->to_json_file(path.u8string(), &errorStatus))
+            if (!timeline->to_json_file(ftk::fromFileSystem(path), &errorStatus))
             {
                 _context->log(
                     "djv::app::App",
                     ftk::Format("Cannot export markers \"{0}\": {1}").
-                        arg(path.u8string()).
+                        arg(ftk::fromFileSystem(path)).
                         arg(errorStatus.details),
                     ftk::LogType::Error);
             }
@@ -1588,7 +1588,7 @@ namespace djv
                 // open, with a trailing "*" while it has unsaved changes. The
                 // name rather than the path, the way document titles usually
                 // read; the Recent Reviews menu is where the whole paths are.
-                title += " - " + p.reviewPath.filename().u8string();
+                title += " - " + ftk::fromFileSystem(p.reviewPath.filename());
                 if (p.reviewModified)
                 {
                     title += " *";
@@ -1660,7 +1660,7 @@ namespace djv
             {
                 nlohmann::json json = _buildReview(p.reviewPath.parent_path());
                 // Remember which review this backs up, for recovery.
-                json["_autosaveReviewPath"] = p.reviewPath.u8string();
+                json["_autosaveReviewPath"] = ftk::fromFileSystem(p.reviewPath);
                 std::ofstream f(_autosavePath());
                 if (f.is_open())
                 {
@@ -1709,7 +1709,7 @@ namespace djv
                 std::filesystem::path reviewPath;
                 if (json.contains("_autosaveReviewPath"))
                 {
-                    reviewPath = std::filesystem::u8path(
+                    reviewPath = ftk::toFileSystem(
                         json.at("_autosaveReviewPath").get<std::string>());
                 }
                 // Keep the internal marker out of any later saved ".djvr".
@@ -2128,7 +2128,7 @@ namespace djv
                 std::string();
             if (!file.empty())
             {
-                std::ofstream f(std::filesystem::u8path(file));
+                std::ofstream f(ftk::toFileSystem(file));
                 f << out.dump(2) << std::endl;
             }
             else
@@ -2481,7 +2481,7 @@ namespace djv
                 // A review (".djvr") describes an entire session; open it and
                 // ignore any other inputs.
                 {
-                    const std::filesystem::path firstPath = std::filesystem::u8path(
+                    const std::filesystem::path firstPath = ftk::toFileSystem(
                         p.cmdLine.inputs->getList().front());
                     if (firstPath.extension() == models::reviewExtension())
                     {
