@@ -14,9 +14,9 @@
 #if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpegCmd.h>
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 #include <ftk/UI/App.h>
 #include <ftk/UI/FileBrowser.h>
@@ -500,7 +500,7 @@ namespace djv
             ///@}
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             //! \name FFmpeg Command
             ///@{
 
@@ -509,7 +509,7 @@ namespace djv
             DJV_MODELS_API void setFFmpegCmd(const tl::ffmpeg_cmd::Options&);
 
             ///@}
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 
             //! \name I/O Options

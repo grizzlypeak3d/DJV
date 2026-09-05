@@ -323,9 +323,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             std::shared_ptr<ftk::Observable<tl::ffmpeg::Options> > ffmpeg;
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             std::shared_ptr<ftk::Observable<tl::ffmpeg_cmd::Options> > ffmpegCmd;
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
         };
 
         namespace
@@ -482,11 +482,11 @@ namespace djv
             p.ffmpeg = ftk::Observable<tl::ffmpeg::Options>::create(ffmpeg);
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             tl::ffmpeg_cmd::Options ffmpegCmd;
             settings->getT(keys["FFmpegCmd"], ffmpegCmd);
             p.ffmpegCmd = ftk::Observable<tl::ffmpeg_cmd::Options>::create(ffmpegCmd);
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
 
         }
 
@@ -566,9 +566,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             p.settings->setT(keys["FFmpeg"], p.ffmpeg->get());
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             p.settings->setT(keys["FFmpegCmd"], p.ffmpegCmd->get());
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
 
             p.settings->save();
         }
@@ -597,9 +597,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             setFFmpeg(tl::ffmpeg::Options());
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             setFFmpegCmd(tl::ffmpeg_cmd::Options());
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
         }
 
         const AudioSettings& SettingsModel::getAudio() const
@@ -866,7 +866,7 @@ namespace djv
         }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
         const tl::ffmpeg_cmd::Options& SettingsModel::getFFmpegCmd() const
         {
             return _p->ffmpegCmd->get();
@@ -881,7 +881,7 @@ namespace djv
         {
             _p->ffmpegCmd->setIfChanged(value);
         }
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
 
 
         tl::IOOptions SettingsModel::getIOOptions() const
@@ -892,9 +892,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             out = tl::merge(out, tl::ffmpeg::getOptions(p.ffmpeg->get()));
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             out = tl::merge(out, p.ffmpegCmd->get().getIOOptions());
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
             return out;
         }
 

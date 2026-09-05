@@ -69,9 +69,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             settingsWidget<FFmpegSettingsWidget>(m, "FFmpegSettingsWidget");
 #endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             settingsWidget<FFmpegCmdSettingsWidget>(m, "FFmpegCmdSettingsWidget");
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
         }
     }
 }

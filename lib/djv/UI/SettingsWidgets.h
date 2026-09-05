@@ -405,7 +405,7 @@ namespace djv
         };
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
         //! FFmpeg command settings widget.
         class DJV_UI_API_TYPE FFmpegCmdSettingsWidget : public ISettingsWidget
         {
@@ -430,7 +430,7 @@ namespace djv
         private:
             FTK_PRIVATE();
         };
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
 
     }
 }

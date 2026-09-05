@@ -1290,7 +1290,7 @@ namespace djv
         }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_CMD)
+#if defined(TLRENDER_FFMPEG_PLUGIN)
         struct FFmpegCmdSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
@@ -1369,7 +1369,7 @@ namespace djv
             out->_init(context, settings, parent);
             return out;
         }
-#endif // TLRENDER_FFMPEG_CMD
+#endif // TLRENDER_FFMPEG_PLUGIN
 
     }
 }
