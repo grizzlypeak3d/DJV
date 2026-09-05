@@ -1214,9 +1214,7 @@ namespace djv
             {
                 p.hwAccelCheckBox->setEnabled(false);
                 p.hwAccelCheckBox->setTooltip(
-                    "This build of DJV has no hardware decoding; the download "
-                    "packages ship a minimal set of codecs. Building from source "
-                    "includes it.");
+                    "Hardware decoding is not available.");
             }
             ftk::setScreenshotTag(p.hwAccelCheckBox, "FFmpeg.HardwareDecoding");
 
