@@ -405,32 +405,5 @@ namespace djv
         };
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-        //! FFmpeg command settings widget.
-        class DJV_UI_API_TYPE FFmpegCmdSettingsWidget : public ISettingsWidget
-        {
-            FTK_NON_COPYABLE(FFmpegCmdSettingsWidget);
-
-        protected:
-            void _init(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::SettingsModel>&,
-                const std::shared_ptr<IWidget>& parent);
-
-            FFmpegCmdSettingsWidget();
-
-        public:
-            DJV_UI_API virtual ~FFmpegCmdSettingsWidget();
-
-            DJV_UI_API static std::shared_ptr<FFmpegCmdSettingsWidget> create(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::SettingsModel>&,
-                const std::shared_ptr<IWidget>& parent = nullptr);
-
-        private:
-            FTK_PRIVATE();
-        };
-#endif // TLRENDER_FFMPEG_PLUGIN
-
     }
 }

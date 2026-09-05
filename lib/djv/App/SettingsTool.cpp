@@ -127,18 +127,6 @@ namespace djv
             p.bellows["FFmpeg"]->setWidget(vLayout2);
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-            p.bellows["FFmpegCmd"] = ftk::Bellows::create(context, "FFmpeg Command", vLayout);
-            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
-            vLayout2->setMarginRole(ftk::SizeRole::Margin);
-            ftk::Label::create(
-                context,
-                "Changes are applied to new files.",
-                vLayout2);
-            ui::FFmpegCmdSettingsWidget::create(context, settingsModel, vLayout2);
-            p.bellows["FFmpegCmd"]->setWidget(vLayout2);
-#endif // TLRENDER_FFMPEG_PLUGIN
-
 
             p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);

@@ -182,17 +182,17 @@
         {
           "tool": "Settings",
           "expand": [
-            "FFmpegCmd"
+            "FFmpeg"
           ]
         }
       ],
       "annotate": [
         {
-          "id": "FFmpegCmd.FFmpeg",
+          "id": "FFmpeg.FFmpegPath",
           "caption": "ffmpeg"
         },
         {
-          "id": "FFmpegCmd.FFprobe",
+          "id": "FFmpeg.FFprobePath",
           "caption": "ffprobe"
         }
       ]

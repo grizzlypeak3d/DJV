@@ -137,8 +137,8 @@ namespace djv
 
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
-            ftk::Label::create(context, "Configure the FFmpeg command settings:", vLayout);
-            FFmpegCmdSettingsWidget::create(context, settings, vLayout);
+            ftk::Label::create(context, "Configure the FFmpeg settings:", vLayout);
+            FFmpegSettingsWidget::create(context, settings, vLayout);
 #endif // TLRENDER_FFMPEG_PLUGIN
 
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());

@@ -1175,9 +1175,12 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> yuvToRGBCheckBox;
             std::shared_ptr<ftk::CheckBox> hwAccelCheckBox;
             std::shared_ptr<ftk::IntEdit> threadsEdit;
+            std::shared_ptr<ftk::FileEdit> ffmpegEdit;
+            std::shared_ptr<ftk::FileEdit> ffprobeEdit;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::ffmpeg::Options> > optionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ffmpeg_cmd::Options> > cmdOptionsObserver;
         };
 
         void FFmpegSettingsWidget::_init(
@@ -1225,6 +1228,17 @@ namespace djv
                 "count automatically.");
             ftk::setScreenshotTag(p.threadsEdit, "FFmpeg.Threads");
 
+            p.ffmpegEdit = ftk::FileEdit::create(context);
+            p.ffmpegEdit->setTooltip(
+                "Location of the ffmpeg command, used for files the built-in "
+                "FFmpeg cannot decode and for exporting movies.");
+            ftk::setScreenshotTag(p.ffmpegEdit, "FFmpeg.FFmpegPath");
+
+            p.ffprobeEdit = ftk::FileEdit::create(context);
+            p.ffprobeEdit->setTooltip(
+                "Location of the ffprobe command.");
+            ftk::setScreenshotTag(p.ffprobeEdit, "FFmpeg.FFprobePath");
+
             p.layout = ftk::FormLayout::create(context);
 
             _setWidget(p.layout);
@@ -1232,6 +1246,8 @@ namespace djv
             p.layout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
             p.layout->addRow("Hardware decoding:", p.hwAccelCheckBox);
             p.layout->addRow("I/O threads:", p.threadsEdit);
+            p.layout->addRow("ffmpeg location:", p.ffmpegEdit);
+            p.layout->addRow("ffprobe location:", p.ffprobeEdit);
 
             p.optionsObserver = ftk::Observer<tl::ffmpeg::Options>::create(
                 settings->observeFFmpeg(),
@@ -1242,6 +1258,15 @@ namespace djv
                     p.hwAccelCheckBox->setChecked(
                         value.hwAccel && tl::ffmpeg::hasHWDecode());
                     p.threadsEdit->setValue(value.threadCount);
+                });
+
+            p.cmdOptionsObserver = ftk::Observer<tl::ffmpeg_cmd::Options>::create(
+                settings->observeFFmpegCmd(),
+                [this](const tl::ffmpeg_cmd::Options& value)
+                {
+                    FTK_P();
+                    p.ffmpegEdit->setPath(ftk::Path(value.ffmpegPath));
+                    p.ffprobeEdit->setPath(ftk::Path(value.ffprobePath));
                 });
 
             p.yuvToRGBCheckBox->setCheckedCallback(
@@ -1270,69 +1295,6 @@ namespace djv
                     options.threadCount = value;
                     p.settings->setFFmpeg(options);
                 });
-        }
-
-        FFmpegSettingsWidget::FFmpegSettingsWidget() :
-            _p(new Private)
-        {}
-
-        FFmpegSettingsWidget::~FFmpegSettingsWidget()
-        {}
-
-        std::shared_ptr<FFmpegSettingsWidget> FFmpegSettingsWidget::create(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::SettingsModel>& settings,
-            const std::shared_ptr<IWidget>& parent)
-        {
-            auto out = std::shared_ptr<FFmpegSettingsWidget>(new FFmpegSettingsWidget);
-            out->_init(context, settings, parent);
-            return out;
-        }
-#endif // TLRENDER_FFMPEG_PLUGIN
-
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-        struct FFmpegCmdSettingsWidget::Private
-        {
-            std::shared_ptr<models::SettingsModel> settings;
-
-            std::shared_ptr<ftk::FileEdit> ffmpegEdit;
-            std::shared_ptr<ftk::FileEdit> ffprobeEdit;
-            std::shared_ptr<ftk::FormLayout> layout;
-
-            std::shared_ptr<ftk::Observer<tl::ffmpeg_cmd::Options> > optionsObserver;
-        };
-
-        void FFmpegCmdSettingsWidget::_init(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::SettingsModel>& settings,
-            const std::shared_ptr<IWidget>& parent)
-        {
-            ISettingsWidget::_init(context, "djv::ui::FFmpegCmdSettingsWidget", parent);
-            FTK_P();
-
-            p.settings = settings;
-
-            p.ffmpegEdit = ftk::FileEdit::create(context);
-            ftk::setScreenshotTag(p.ffmpegEdit, "FFmpegCmd.FFmpeg");
-
-            p.ffprobeEdit = ftk::FileEdit::create(context);
-            ftk::setScreenshotTag(p.ffprobeEdit, "FFmpegCmd.FFprobe");
-
-            p.layout = ftk::FormLayout::create(context);
-
-            _setWidget(p.layout);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("ffmpeg location:", p.ffmpegEdit);
-            p.layout->addRow("ffprobe location:", p.ffprobeEdit);
-
-            p.optionsObserver = ftk::Observer<tl::ffmpeg_cmd::Options>::create(
-                settings->observeFFmpegCmd(),
-                [this](const tl::ffmpeg_cmd::Options& value)
-                {
-                    FTK_P();
-                    p.ffmpegEdit->setPath(ftk::Path(value.ffmpegPath));
-                    p.ffprobeEdit->setPath(ftk::Path(value.ffprobePath));
-                });
 
             p.ffmpegEdit->setCallback(
                 [this](const ftk::Path& value)
@@ -1353,19 +1315,19 @@ namespace djv
                 });
         }
 
-        FFmpegCmdSettingsWidget::FFmpegCmdSettingsWidget() :
+        FFmpegSettingsWidget::FFmpegSettingsWidget() :
             _p(new Private)
         {}
 
-        FFmpegCmdSettingsWidget::~FFmpegCmdSettingsWidget()
+        FFmpegSettingsWidget::~FFmpegSettingsWidget()
         {}
 
-        std::shared_ptr<FFmpegCmdSettingsWidget> FFmpegCmdSettingsWidget::create(
+        std::shared_ptr<FFmpegSettingsWidget> FFmpegSettingsWidget::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<IWidget>& parent)
         {
-            auto out = std::shared_ptr<FFmpegCmdSettingsWidget>(new FFmpegCmdSettingsWidget);
+            auto out = std::shared_ptr<FFmpegSettingsWidget>(new FFmpegSettingsWidget);
             out->_init(context, settings, parent);
             return out;
         }
