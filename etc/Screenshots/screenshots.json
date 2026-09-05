@@ -140,7 +140,7 @@
       ]
     },
     {
-      "id": "ffmpeg-plugin",
+      "id": "ffmpeg",
       "window": {
         "w": 900,
         "h": 600,
@@ -167,26 +167,7 @@
         {
           "id": "FFmpeg.Threads",
           "caption": "Threads"
-        }
-      ]
-    },
-    {
-      "id": "ffmpeg-command",
-      "window": {
-        "w": 900,
-        "h": 600,
-        "splitter2": 0.5
-      },
-      "crop": "MainWindow.Tools",
-      "setup": [
-        {
-          "tool": "Settings",
-          "expand": [
-            "FFmpeg"
-          ]
-        }
-      ],
-      "annotate": [
+        },
         {
           "id": "FFmpeg.FFmpegPath",
           "caption": "ffmpeg"
