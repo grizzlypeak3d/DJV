@@ -1199,10 +1199,25 @@ namespace djv
 
             p.hwAccelCheckBox = ftk::CheckBox::create(context);
             p.hwAccelCheckBox->setHStretch(ftk::Stretch::Expanding);
-            p.hwAccelCheckBox->setTooltip(
-                "Use the GPU to decode video when possible. Falls back to software "
-                "decoding automatically when hardware decoding is unavailable for a "
-                "file. Takes effect the next time a file is opened.");
+            // The minimal FFmpeg has no hardware decoders -- enabling one
+            // would pull in the software decoder it depends on -- so the
+            // option goes inert rather than promising what the build
+            // cannot do.
+            if (tl::ffmpeg::hasHWDecode())
+            {
+                p.hwAccelCheckBox->setTooltip(
+                    "Use the GPU to decode video when possible. Falls back to software "
+                    "decoding automatically when hardware decoding is unavailable for a "
+                    "file. Takes effect the next time a file is opened.");
+            }
+            else
+            {
+                p.hwAccelCheckBox->setEnabled(false);
+                p.hwAccelCheckBox->setTooltip(
+                    "This build of DJV has no hardware decoding; the download "
+                    "packages ship a minimal set of codecs. Building from source "
+                    "includes it.");
+            }
             ftk::setScreenshotTag(p.hwAccelCheckBox, "FFmpeg.HardwareDecoding");
 
             p.threadsEdit = ftk::IntEdit::create(context);
@@ -1226,7 +1241,8 @@ namespace djv
                 {
                     FTK_P();
                     p.yuvToRGBCheckBox->setChecked(value.yuvToRgb);
-                    p.hwAccelCheckBox->setChecked(value.hwAccel);
+                    p.hwAccelCheckBox->setChecked(
+                        value.hwAccel && tl::ffmpeg::hasHWDecode());
                     p.threadsEdit->setValue(value.threadCount);
                 });
 
