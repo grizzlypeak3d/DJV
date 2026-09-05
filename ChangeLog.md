@@ -1,40 +1,26 @@
 ## 3.6.0
 
 Changes:
-* Add review sessions, contributed by MattRM2: the whole session, with
-  drawn annotations and markers -- notes and frame ranges, unified --
-  saves as a ".djvr" file.
-* Review markers are standard OTIO markers: a review imports them from a
-  timeline and exports them to one.
-* Add playlists: the file list saves and opens as an OTIO file.
-* Directories can be opened with a wildcard filter and a depth, so a
-  whole shot tree opens as a playlist. Based on a proposal by NathanOtano.
-* Reloading an image sequence picks up frames rendered since it was
-  opened, so a render can be watched as it fills in. Based on a proposal
-  by atoav.
-* The file list can be reordered by dragging any part of a row, and
-  driven from the keyboard: the arrows browse it, Return sets the
-  current file, and Delete closes one.
-* Add Python bindings and a full Python version of DJV as an example, available
-  when building from source with DJV_PYTHON=ON.
+* Add review sessions and annotations, contributed by MattRM2.
+* Add playlists.
+* Directories can be opened with a wildcard filter and a depth.
+* Reloading an image sequence picks up new frames.
+* The file list can be reordered by dragging.
+* Add Python bindings and a full Python version of DJV as an example.
 * Add support for reading camera raw formats (CR3, NEF, ARW, DNG, and others).
 * Add support for reading OpenEXR files with HTJ2K compression.
-* Automatic OCIO input color spaces, including the OpenEXR
-  "colorInteropID" attribute. Thanks to SteffenDuenner for the feedback.
-* The LUT can be applied inverted, so an ICC monitor profile corrects
-  the display for wide gamut monitors.
-* The mouse wheel actions can be remapped, so the wheel can scrub
-  frames without the "Ctrl" key. Based on a request by hced.
+* Automatic OCIO input color spaces, including the OpenEXR "colorInteropID"
+  attribute.
+* The LUT can be applied inverted for ICC monitor profiles.
+* Mouse wheel actions can be remapped for zooming and scrubbing.
 * Movie and image sequence exports carry color information.
 * Add thumbnails to the file browser.
 * The file browser can be opened in a window of its own.
 * The file browser can be driven from the keyboard.
 * The FFmpegCmd plugin is merged into the FFmpeg plugin as a fallback.
-* Movie exports are chosen from a preset list: MJPEG, ProRes, FFV1, AV1,
-  and more.
-* Movies can be exported with the FFmpeg command line application, whose
-  encoders provide H.264, HEVC, and VP9.
-* AV1 support is now working on Windows.
+* Add presets for movie exports.
+* Movies can be exported with the FFmpeg command line application.
+* AV1 support now works on Windows.
 * The Information tool shows the file name and directory.
 * The color pickers gain a palette of preset colors, and remember which
   tab was used.
@@ -45,34 +31,13 @@ Changes:
     - libtiff 4.7.2
 
 Fixes:
-* Browsing directories ran memory up toward a gigabyte; the file browser
-  thumbnails no longer keep a GPU context of their own.
-* Closing the Review tool left drawing armed, so a later click in the
-  viewport painted a stroke. The cursor is now a crosshair while
-  drawing, so an armed pen can be seen.
-* Comparing files by timecode showed nothing, silently, when their
-  timecodes do not overlap; the viewport now says so.
-* Review drawings did not follow the image mirror.
-* The review tool's button tooltips follow the keyboard shortcut
-  bindings, like the toolbars.
-* A drawing made on a compared file bled onto the current file when the
-  comparison was turned off. A drawing now shows only when, and where,
-  its own file is shown.
-* The slider reset was hard to find in a right-click menu; a popup
-  button on each slider now holds the reset and the range. Double
-  clicking a slider still resets it.
-* Naming a review range and pressing Return crashed.
-* The frame cache reloaded continuously while the current frame sat
-  outside the in/out points.
-* Hardware decoding now reaches AV1: the software decoder was chosen even
-  when a hardware capable one was available.
+* A warning is shown when comparing files that do not overlap in time.
+* The color corrections are applied in linear when the OCIO configuration
+  names a scene_linear role.
 * The keypad's Enter key works like the Return key.
-* The color corrections are applied in linear, when the OCIO configuration
-  names a scene_linear role, rather than in the file's color space.
 * File information showed a frame rate of zero for movies whose container
-  declares it as "0/0", such as ARRI ProRes MXF.
-* An anamorphic QuickTime was shown squeezed, with a pixel aspect ratio of
-  one.
+  declares it as "0/0".
+* Fixes for anamorphic movies.
 
 ## 3.5.0
 
