@@ -178,7 +178,7 @@ namespace djv
 
         std::string AppInfoModel::getStudioURL() const
         {
-            return "https://grizzlypeak3d.com";
+            return "https://grizzlypeak3d.com/djv-studio";
         }
     }
 }
