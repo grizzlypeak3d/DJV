@@ -27,10 +27,10 @@ together and each keeps its own number.
       `deps/tlRender/lib/tlRender/Core/Version.h` and
       `lib/djv/Models/Version.h`. Every project regex parses its own header
       from its `CMakeLists.txt`, so those three files are the whole edit.
-- [ ] Clear `VERSION_DEV` (`"-dev"` -> `""`) **and** drop the suffix from
-      `VERSION_FULL`, which is a separate define rather than something
-      derived, and is what names the package files. Clearing `VERSION_DEV` is
-      also what drops the date and commit from the window title.
+- [ ] Clear `VERSION_DEV` (`"-dev"` -> `""`). `VERSION_FULL`, which names
+      the package files, derives from the numbers and the suffix, so those
+      four defines are the whole edit. Clearing `VERSION_DEV` is also what
+      drops the date and commit from the window title.
 - [ ] `ChangeLog.md`: "Changes" is for user visible changes; "Fixes" is for
       problems someone reported, not every bug fixed on the way.
 
@@ -56,9 +56,8 @@ together and each keeps its own number.
 - [ ] The configure log must **not** say "etc/Config/local.cmake is in use".
 - [ ] Check the FFmpeg split in the configure output. This decides what is
       shipped, so it is a licensing question rather than a build option:
-      `MINIMAL=ON PLUGIN=ON CMD=ON` -- the codecs that need no license, the
-      plugin for limited exports, and the command line tool for bringing your
-      own.
+      `MINIMAL=ON PLUGIN=ON` -- the codecs that need no license, with the
+      plugin's command line fallback for bringing your own.
 - [ ] macOS and Windows are built here, with `package-macos.sh` and
       `package-win.bat`. They take the source directory and build type, and
       choose the config themselves. Both are built locally because signing
