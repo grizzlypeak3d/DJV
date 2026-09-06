@@ -187,12 +187,18 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        const auto& a = app->getFilesModel()->getA();
                         auto player = app->observePlayer()->get();
-                        if (a && player)
+                        if (player)
                         {
+                            // Every active file, so a compared frame's "B"
+                            // strokes go with the "A" strokes.
+                            std::vector<std::string> ids;
+                            for (const auto& i : app->getFilesModel()->getActive())
+                            {
+                                ids.push_back(i->id);
+                            }
                             app->getAnnotationsModel()->clearFrame(
-                                a->id,
+                                ids,
                                 player->getCurrentTime());
                         }
                     }

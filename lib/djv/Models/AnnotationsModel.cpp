@@ -228,7 +228,7 @@ namespace djv
         }
 
         void AnnotationsModel::clearFrame(
-            const std::string& sourceId,
+            const std::vector<std::string>& sourceIds,
             const OTIO_NS::RationalTime& time)
         {
             FTK_P();
@@ -238,9 +238,13 @@ namespace djv
                 std::remove_if(
                     annotations.begin(),
                     annotations.end(),
-                    [&sourceId, &time](const ReviewAnnotation& value)
+                    [&sourceIds, &time](const ReviewAnnotation& value)
                     {
-                        return value.sourceId == sourceId && sameTime(value.time, time);
+                        return sameTime(value.time, time) &&
+                            std::find(
+                                sourceIds.begin(),
+                                sourceIds.end(),
+                                value.sourceId) != sourceIds.end();
                     }),
                 annotations.end());
             if (annotations.size() != before)

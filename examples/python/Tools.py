@@ -1251,10 +1251,10 @@ class ReviewTool(IToolWidget):
             app_ = appWeak()
             if app_ is None:
                 return
-            a = app_.getFilesModel().a
             player = app_.observePlayer().get()
-            if a and player:
-                app_.getAnnotationsModel().clearFrame(a.id, player.currentTime)
+            if player:
+                ids = [i.id for i in app_.getFilesModel().active]
+                app_.getAnnotationsModel().clearFrame(ids, player.currentTime)
         self._clearDrawingButton.setClickedCallback(clearFrame)
 
         self._toolObserver = djv.models.DrawToolObserver(

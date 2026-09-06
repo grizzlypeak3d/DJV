@@ -85,10 +85,12 @@ class Actions(IActions.IActions):
             app_ = appWeak()
             if app_ is None:
                 return
-            a = app_.getFilesModel().a
             player = app_.observePlayer().get()
-            if a and player:
-                app_.getAnnotationsModel().clearFrame(a.id, player.currentTime)
+            if player:
+                # Every active file, so a compared frame's "B" strokes go
+                # with the "A" strokes.
+                ids = [i.id for i in app_.getFilesModel().active]
+                app_.getAnnotationsModel().clearFrame(ids, player.currentTime)
         self._addCommand(
             "ClearDrawing",
             "Remove every stroke on the current frame.",

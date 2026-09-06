@@ -43,6 +43,7 @@ namespace djv
         {
             _strokes();
             _erase();
+            _clearFrame();
             _undo();
             _serialize();
         }
@@ -105,6 +106,32 @@ namespace djv
             {
                 _error("Annotation erase failed");
             }
+        }
+
+        void AnnotationsModelTest::_clearFrame()
+        {
+            auto model = models::AnnotationsModel::create();
+            model->addStroke("srcA", frame(100), makeStroke(0.F, 0.F, 10.F, 10.F));
+            model->addStroke("srcB", frame(100), makeStroke(20.F, 20.F, 30.F, 30.F));
+            model->addStroke("srcA", frame(101), makeStroke(40.F, 40.F, 50.F, 50.F));
+
+            // A compared frame clears both sources at once, and only that
+            // frame.
+            model->clearFrame({ "srcA", "srcB" }, frame(100));
+            FTK_CHECK(model->getStrokes("srcA", frame(100)).empty());
+            FTK_CHECK(model->getStrokes("srcB", frame(100)).empty());
+            FTK_CHECK(1 == model->getStrokes("srcA", frame(101)).size());
+
+            // One undo step brings both sources back.
+            model->undo();
+            FTK_CHECK(1 == model->getStrokes("srcA", frame(100)).size());
+            FTK_CHECK(1 == model->getStrokes("srcB", frame(100)).size());
+
+            // Clearing a frame with no strokes is not an undo step.
+            model->redo();
+            model->clearFrame({ "srcA", "srcB" }, frame(200));
+            model->undo();
+            FTK_CHECK(1 == model->getStrokes("srcA", frame(100)).size());
         }
 
         void AnnotationsModelTest::_undo()

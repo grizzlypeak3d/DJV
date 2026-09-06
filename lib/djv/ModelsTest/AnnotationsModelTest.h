@@ -23,6 +23,7 @@ namespace djv
         private:
             void _strokes();
             void _erase();
+            void _clearFrame();
             void _undo();
             void _serialize();
         };

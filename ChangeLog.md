@@ -1,3 +1,8 @@
+## 3.6.1
+
+Fixes:
+* Clearing the drawing on a compared frame also clears the "B" strokes.
+
 ## 3.6.0
 
 Changes:

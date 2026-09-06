@@ -50,7 +50,7 @@ namespace djv
                 .def("setAnnotations", &AnnotationsModel::setAnnotations, py::arg("annotations"))
                 .def("addStroke", &AnnotationsModel::addStroke, py::arg("sourceId"), py::arg("time"), py::arg("stroke"))
                 .def("eraseStrokes", &AnnotationsModel::eraseStrokes, py::arg("sourceId"), py::arg("time"), py::arg("pos"), py::arg("radius"))
-                .def("clearFrame", &AnnotationsModel::clearFrame, py::arg("sourceId"), py::arg("time"))
+                .def("clearFrame", &AnnotationsModel::clearFrame, py::arg("sourceIds"), py::arg("time"))
                 .def("clear", &AnnotationsModel::clear)
                 .def_property_readonly("observeHasUndo", &AnnotationsModel::observeHasUndo)
                 .def_property_readonly("observeHasRedo", &AnnotationsModel::observeHasRedo)

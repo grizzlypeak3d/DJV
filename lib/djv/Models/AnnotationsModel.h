@@ -70,9 +70,11 @@ namespace djv
                 const ftk::V2F& pos,
                 float radius);
 
-            //! Remove every stroke of the given source and frame.
+            //! Remove every stroke of the given sources and frame. One call
+            //! for all of the sources, so that clearing a compared frame is
+            //! a single undo step.
             DJV_MODELS_API void clearFrame(
-                const std::string& sourceId,
+                const std::vector<std::string>& sourceIds,
                 const OTIO_NS::RationalTime&);
 
             //! Remove all the annotations, clearing the undo history.
