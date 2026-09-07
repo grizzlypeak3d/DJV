@@ -129,7 +129,7 @@ namespace djv
                 const int64_t start = range.start_time().value();
                 const int64_t end = range.end_time_inclusive().value();
                 std::error_code ec;
-                // u8path and u8string throughout: everything else here is
+                // The Path helpers throughout: everything else here is
                 // UTF-8, and a plain conversion goes through the code page
                 // the system happens to be set to, which a name outside it
                 // has no mapping in.

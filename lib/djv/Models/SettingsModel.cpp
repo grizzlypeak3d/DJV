@@ -422,8 +422,9 @@ namespace djv
             {
                 fileBrowserSystem->setWindowSize(fileBrowser.windowSize);
             }
-            // u8path because the setting is stored as UTF-8 -- see the
-            // u8string() it is written with below. The implicit conversion
+            // toFileSystem because the setting is stored as UTF-8 -- see
+            // the fromFileSystem it is written with below. The implicit
+            // conversion
             // reads it as the Windows ANSI code page instead, which throws
             // for bytes that page cannot map, and this runs while settings
             // are loading: a browsed-to Korean directory would take the
