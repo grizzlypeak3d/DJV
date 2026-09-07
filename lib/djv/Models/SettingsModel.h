@@ -518,9 +518,9 @@ namespace djv
             //! \name USD
             ///@{
 
-            DJV_API const tl::usd::Options& getUSD() const;
-            DJV_API std::shared_ptr<ftk::IObservable<tl::usd::Options> > observeUSD() const;
-            DJV_API void setUSD(const tl::usd::Options&);
+            DJV_MODELS_API const tl::usd::Options& getUSD() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::usd::Options> > observeUSD() const;
+            DJV_MODELS_API void setUSD(const tl::usd::Options&);
 
             ///@}
 #endif // TLRENDER_USD
