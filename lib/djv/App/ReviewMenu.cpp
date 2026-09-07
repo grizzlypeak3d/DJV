@@ -3,6 +3,8 @@
 
 #include <djv/App/ReviewMenu.h>
 
+#include <ftk/Core/Path.h>
+
 #include <djv/App/App.h>
 #include <djv/App/ReviewActions.h>
 #include <djv/Models/RecentFilesModel.h>
@@ -99,7 +101,7 @@ namespace djv
                         {
                             if (auto app = widget->_p->app.lock())
                             {
-                                app->openReview(std::filesystem::u8path(path.get()));
+                                app->openReview(ftk::toFileSystem(path.get()));
                             }
                             widget->close();
                         }

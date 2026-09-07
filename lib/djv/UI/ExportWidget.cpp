@@ -35,6 +35,7 @@
 #include <ftk/GL/Util.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Timer.h>
+#include <ftk/Core/Path.h>
 
 #include <algorithm>
 #include <cmath>
@@ -573,7 +574,7 @@ namespace djv
                         throw std::runtime_error("No export directory");
                     }
                     if (!std::filesystem::is_directory(
-                        std::filesystem::u8path(options.dir)))
+                        ftk::toFileSystem(options.dir)))
                     {
                         throw std::runtime_error(
                             ftk::Format("Directory not found: \"{0}\"").

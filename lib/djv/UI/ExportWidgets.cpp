@@ -23,6 +23,7 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/Path.h>
 
 #include <algorithm>
 #include <cctype>
@@ -134,9 +135,9 @@ namespace djv
                 // has no mapping in.
                 for (const auto& entry :
                     std::filesystem::directory_iterator(
-                        std::filesystem::u8path(options.dir), ec))
+                        ftk::toFileSystem(options.dir), ec))
                 {
-                    const std::string fileName = entry.path().filename().u8string();
+                    const std::string fileName = ftk::fromFileSystem(entry.path().filename());
                     if (fileName.size() > options.seqBase.size() + options.seqExt.size() &&
                         0 == fileName.compare(0, options.seqBase.size(), options.seqBase) &&
                         0 == fileName.compare(
@@ -203,7 +204,7 @@ namespace djv
                     static_cast<int64_t>(range.start_time().value()));
                 if (!fileName.empty())
                 {
-                    out = std::filesystem::exists(std::filesystem::u8path(
+                    out = std::filesystem::exists(ftk::toFileSystem(
                         ftk::Path(options.dir, fileName).get()));
                 }
                 break;

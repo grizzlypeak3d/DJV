@@ -237,7 +237,7 @@ namespace djv
                 std::ifstream f(p.manifest);
                 if (!f.is_open())
                     throw std::runtime_error(ftk::Format(
-                        "cannot open manifest \"{0}\"").arg(p.manifest.u8string()));
+                        "cannot open manifest \"{0}\"").arg(ftk::fromFileSystem(p.manifest)));
                 nlohmann::json doc;
                 f >> doc;
                 bool found = false;
@@ -428,7 +428,7 @@ namespace djv
                 if (ok)
                 {
                     _writeMetadata(json);
-                    note(p.shotId, ftk::Format("captured {0}").arg(png.u8string()));
+                    note(p.shotId, ftk::Format("captured {0}").arg(ftk::fromFileSystem(png)));
                 }
                 _finish(ok);
             }
@@ -1080,13 +1080,13 @@ namespace djv
                         auto model = fbs->getModel();
                         if (v.contains("path"))
                         {
-                            const auto path = std::filesystem::u8path(
+                            const auto path = ftk::toFileSystem(
                                 v.at("path").get<std::string>());
                             if (std::filesystem::exists(path))
                                 model->setPath(path);
                             else
                                 note(p.shotId, "fileBrowser path does not exist: " +
-                                    path.u8string());
+                                    ftk::fromFileSystem(path));
                         }
                         if (v.contains("bellows") && v.at("bellows").is_object())
                         {
@@ -1507,7 +1507,7 @@ namespace djv
                 return false;
             if (!app->writeScreenshot(path))
             {
-                note(p.shotId, ftk::Format("cannot capture \"{0}\"").arg(path.u8string()));
+                note(p.shotId, ftk::Format("cannot capture \"{0}\"").arg(ftk::fromFileSystem(path)));
                 return false;
             }
             return true;
