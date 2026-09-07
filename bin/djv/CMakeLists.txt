@@ -16,6 +16,22 @@ if(APPLE AND DJV_MACOS_PACKAGE)
     # packaging: CMake lays out "djv.app/Contents" itself, so nothing
     # downstream installs into a directory above the prefix to reach it, and
     # the executable gets its install rpath rewritten on the way in.
+    # The USD document types appear only when this build reads them, so a
+    # package without USD does not claim files it cannot open.
+    set(DJV_MACOS_USD_DOCUMENT_TYPES)
+    if(TLRENDER_USD)
+        set(DJV_MACOS_USD_DOCUMENT_TYPES
+"        <dict>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>usd</string>
+                <string>usda</string>
+                <string>usdc</string>
+                <string>usdz</string>
+            </array>
+        </dict>
+")
+    endif()
     configure_file(
         ${PROJECT_SOURCE_DIR}/etc/macOS/Info.plist.in
         ${CMAKE_CURRENT_BINARY_DIR}/djv.plist)
