@@ -42,19 +42,21 @@ or build from source.
 ## Building
 
 A CMake "super build" is provided to build DJV and the main dependencies. The
-super build can be invoked with cripts as described below.
+super build is invoked with scripts as described below.
 
-The scripts contain a number of options that can be edited to configure the
-build, for example:
+Build options go in `etc/Config/local.cmake`, which is not tracked. For
+example:
 
-* Increase the number of jobs used for the build:
-    * JOBS=16
-* Enable full codec support:
-    * TLRENDER_FFMPEG_MINIMAL=OFF
-    * TLRENDER_FFMPEG_PLUGIN=ON
-    * TLRENDER_FFMPEG_CMD=OFF
-* Enable USD (Universal Scene Description) support:
-    * TLRENDER_USD=ON
+```cmake
+# Enable full codec support.
+set(TLRENDER_FFMPEG_MINIMAL OFF CACHE BOOL "")
+
+# Enable USD (Universal Scene Description) support. Building USD also
+# requires Python 3.
+set(TLRENDER_USD ON CACHE BOOL "")
+```
+
+For the number of build jobs, export `CMAKE_BUILD_PARALLEL_LEVEL`.
 
 ### Building on Linux
 
