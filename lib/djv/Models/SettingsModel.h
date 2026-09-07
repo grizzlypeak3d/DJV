@@ -17,6 +17,9 @@
 #if defined(TLRENDER_FFMPEG_PLUGIN)
 #include <tlRender/IO/FFmpegCmd.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_USD)
+#include <tlRender/IO/USD.h>
+#endif // TLRENDER_USD
 
 #include <ftk/UI/App.h>
 #include <ftk/UI/FileBrowser.h>
@@ -511,6 +514,16 @@ namespace djv
             ///@}
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#if defined(TLRENDER_USD)
+            //! \name USD
+            ///@{
+
+            DJV_API const tl::usd::Options& getUSD() const;
+            DJV_API std::shared_ptr<ftk::IObservable<tl::usd::Options> > observeUSD() const;
+            DJV_API void setUSD(const tl::usd::Options&);
+
+            ///@}
+#endif // TLRENDER_USD
 
             //! \name I/O Options
             ///@{

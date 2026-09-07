@@ -127,6 +127,21 @@ namespace djv
             p.bellows["FFmpeg"]->setWidget(vLayout2);
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#if defined(TLRENDER_USD)
+            p.bellows["USD"] = ftk::Bellows::create(context, "USD", vLayout);
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Label::create(
+                context,
+                "Universal scene description (USD) settings.",
+                vLayout2);
+            ftk::Label::create(
+                context,
+                "Changes are applied to new files.",
+                vLayout2);
+            ui::USDSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["USD"]->setWidget(vLayout2);
+#endif // TLRENDER_USD
 
             p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);

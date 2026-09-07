@@ -326,6 +326,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             std::shared_ptr<ftk::Observable<tl::ffmpeg_cmd::Options> > ffmpegCmd;
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_USD)
+            std::shared_ptr<ftk::Observable<tl::usd::Options> > usd;
+#endif // TLRENDER_USD
         };
 
         namespace
@@ -348,6 +351,7 @@ namespace djv
                 { "Window", "/Window" },
                 { "FFmpeg", "/FFmpeg" },
                 { "FFmpegCmd", "/FFmpegCmd" },
+                { "USD", "/USD.1" },
             };
         }
 
@@ -488,6 +492,11 @@ namespace djv
             p.ffmpegCmd = ftk::Observable<tl::ffmpeg_cmd::Options>::create(ffmpegCmd);
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#if defined(TLRENDER_USD)
+            tl::usd::Options usd;
+            settings->getT(keys["USD"], usd);
+            p.usd = ftk::Observable<tl::usd::Options>::create(usd);
+#endif // TLRENDER_USD
         }
 
         SettingsModel::SettingsModel() :
@@ -569,6 +578,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             p.settings->setT(keys["FFmpegCmd"], p.ffmpegCmd->get());
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_USD)
+            p.settings->setT(keys["USD"], p.usd->get());
+#endif // TLRENDER_USD
 
             p.settings->save();
         }
@@ -600,6 +612,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             setFFmpegCmd(tl::ffmpeg_cmd::Options());
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_USD)
+            setUSD(tl::usd::Options());
+#endif // TLRENDER_USD
         }
 
         const AudioSettings& SettingsModel::getAudio() const
@@ -883,6 +898,22 @@ namespace djv
         }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#if defined(TLRENDER_USD)
+        const tl::usd::Options& SettingsModel::getUSD() const
+        {
+            return _p->usd->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<tl::usd::Options> > SettingsModel::observeUSD() const
+        {
+            return _p->usd;
+        }
+
+        void SettingsModel::setUSD(const tl::usd::Options& value)
+        {
+            _p->usd->setIfChanged(value);
+        }
+#endif // TLRENDER_USD
 
         tl::IOOptions SettingsModel::getIOOptions() const
         {
@@ -895,6 +926,9 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             out = tl::merge(out, p.ffmpegCmd->get().getIOOptions());
 #endif // TLRENDER_FFMPEG_PLUGIN
+#if defined(TLRENDER_USD)
+            out = tl::merge(out, tl::usd::getOptions(p.usd->get()));
+#endif // TLRENDER_USD
             return out;
         }
 
