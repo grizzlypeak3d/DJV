@@ -42,22 +42,10 @@ namespace djv
                 .def(nanobind::self == nanobind::self)
                 .def(nanobind::self != nanobind::self);
 
-            nb::enum_<HUDItem>(m, "HUDItem")
-                .value("FileName", HUDItem::FileName)
-                .value("Info", HUDItem::Info)
-                .value("Cache", HUDItem::Cache)
-                .value("Time", HUDItem::Time)
-                .value("ViewZoom", HUDItem::ViewZoom)
-                .value("ColorPicker", HUDItem::ColorPicker)
-                .value("Render", HUDItem::Render);
+            FTK_ENUM_PY(m, HUDItem);
             FTK_ENUM_BIND(m, HUDItem);
 
-            nb::enum_<HUDPos>(m, "HUDPos")
-                .value("_None", HUDPos::None)
-                .value("TopLeft", HUDPos::TopLeft)
-                .value("TopRight", HUDPos::TopRight)
-                .value("BottomLeft", HUDPos::BottomLeft)
-                .value("BottomRight", HUDPos::BottomRight);
+            FTK_ENUM_PY(m, HUDPos);
             FTK_ENUM_BIND(m, HUDPos);
 
             nb::class_<HUDOptions>(m, "HUDOptions")

@@ -25,9 +25,9 @@ class Actions(IActions.IActions):
         for name, doc, timeAction in [
             ("Start", "Go to the start frame.", tl.TimeAction.Start),
             ("End", "Go to the end frame.", tl.TimeAction.End),
-            ("Prev", "Go to the previous frame.", tl.TimeAction.FramePrev),
-            ("PrevX10", "Go to the previous frame X10.", tl.TimeAction.FramePrevX10),
-            ("PrevX100", "Go to the previous frame X100.", tl.TimeAction.FramePrevX100),
+            ("Prev", "Go to the previous frame.", tl.TimeAction.FramePrevious),
+            ("PrevX10", "Go to the previous frame X10.", tl.TimeAction.FramePreviousX10),
+            ("PrevX100", "Go to the previous frame X100.", tl.TimeAction.FramePreviousX100),
             ("Next", "Go to the next frame.", tl.TimeAction.FrameNext),
             ("NextX10", "Go to the next frame X10.", tl.TimeAction.FrameNextX10),
             ("NextX100", "Go to the next frame X100.", tl.TimeAction.FrameNextX100)]:

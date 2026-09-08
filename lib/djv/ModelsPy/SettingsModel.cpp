@@ -41,20 +41,12 @@ namespace djv
                 .def(nanobind::self == nanobind::self)
                 .def(nanobind::self != nanobind::self);
 
-            nb::enum_<ExportRenderSize>(m, "ExportRenderSize")
-                .value("Default", ExportRenderSize::Default)
-                .value("_1920", ExportRenderSize::_1920)
-                .value("_3840", ExportRenderSize::_3840)
-                .value("_4096", ExportRenderSize::_4096)
-                .value("Custom", ExportRenderSize::Custom);
+            FTK_ENUM_PY(m, ExportRenderSize);
             FTK_ENUM_BIND(m, ExportRenderSize);
 
             m.def("getWidth", &getWidth, nb::arg("renderSize"));
 
-            nb::enum_<ExportFileType>(m, "ExportFileType")
-                .value("Image", ExportFileType::Image)
-                .value("Seq", ExportFileType::Seq)
-                .value("Movie", ExportFileType::Movie);
+            FTK_ENUM_PY(m, ExportFileType);
             FTK_ENUM_BIND(m, ExportFileType);
 
             nb::class_<ExportSettings>(m, "ExportSettings")
@@ -110,11 +102,7 @@ namespace djv
                 .def(nanobind::self == nanobind::self)
                 .def(nanobind::self != nanobind::self);
 
-            nb::enum_<MouseAction>(m, "MouseAction")
-                .value("PanView", MouseAction::PanView)
-                .value("CompareWipe", MouseAction::CompareWipe)
-                .value("Pick", MouseAction::Pick)
-                .value("FrameShuttle", MouseAction::FrameShuttle);
+            FTK_ENUM_PY(m, MouseAction);
             FTK_ENUM_BIND(m, MouseAction);
 
             nb::class_<MouseActionBinding>(m, "MouseActionBinding")
@@ -161,10 +149,7 @@ namespace djv
                 .def(nanobind::self == nanobind::self)
                 .def(nanobind::self != nanobind::self);
 
-            nb::enum_<TimelineThumbnailSize>(m, "TimelineThumbnailSize")
-                .value("Small", TimelineThumbnailSize::Small)
-                .value("Medium", TimelineThumbnailSize::Medium)
-                .value("Large", TimelineThumbnailSize::Large);
+            FTK_ENUM_PY(m, TimelineThumbnailSize);
             FTK_ENUM_BIND(m, TimelineThumbnailSize);
 
             m.def("getTimelineThumbnailSize", &getTimelineThumbnailSize, nb::arg("thumbnailSize"));
