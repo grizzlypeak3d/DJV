@@ -27,6 +27,8 @@ namespace djv
             const std::shared_ptr<models::AppInfoModel>&,
             const std::shared_ptr<models::SettingsModel>&,
             const std::vector<std::pair<std::string, std::string> >& windowInfo =
+                std::vector<std::pair<std::string, std::string> >(),
+            const std::vector<std::pair<std::string, std::string> >& files =
                 std::vector<std::pair<std::string, std::string> >());
 
         //! System information dialog.

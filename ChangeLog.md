@@ -1,6 +1,11 @@
 ## 3.7.0
 
 Changes:
+* Settings, the log, and the review autosave move from Documents/DJV to
+  the application support directory: ~/Library/Application Support/DJV
+  on macOS, %APPDATA%\DJV on Windows, ~/.config/DJV on Linux. Existing
+  settings are copied across on the first launch. System Information
+  shows the paths.
 * The HUD shows the file name of the current image of a sequence.
 * Opening one image of a sequence starts playback at that image.
 * Media stored in an OTIOZ bundle can be read with the FFmpeg command

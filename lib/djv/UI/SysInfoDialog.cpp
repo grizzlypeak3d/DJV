@@ -32,7 +32,8 @@ namespace djv
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<models::SettingsModel>& settingsModel,
-            const std::vector<std::pair<std::string, std::string> >& windowInfo)
+            const std::vector<std::pair<std::string, std::string> >& windowInfo,
+            const std::vector<std::pair<std::string, std::string> >& files)
         {
             std::vector<std::pair<std::string, std::string> > labels;
             labels.push_back(std::make_pair(
@@ -44,6 +45,20 @@ namespace djv
             labels.push_back(std::make_pair(
                 "Commit: ",
                 appInfoModel->getGitCommit()));
+
+            // Where the settings and the log are. The command line shows
+            // the defaults in its help; this shows what this run is using,
+            // which is what a support reply needs and the one thing about
+            // the files a person cannot otherwise find out from inside the
+            // application.
+            if (!files.empty())
+            {
+                labels.push_back(std::make_pair("", ""));
+                for (const auto& i : files)
+                {
+                    labels.push_back(std::make_pair(i.first + ": ", i.second));
+                }
+            }
 
             labels.push_back(std::make_pair("", ""));
             const auto sysInfo = ftk::getSysInfo();

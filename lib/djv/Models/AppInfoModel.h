@@ -34,10 +34,11 @@ namespace djv
             DJV_MODELS_API virtual std::string getFullName() const;
             DJV_MODELS_API virtual std::string getShortName() const;
 
-            //! Get the name of the directory under the user's documents where
-            //! the settings and log file are kept. Defaults to the full name;
-            //! a suite of applications built on DJV overrides it so that they
-            //! share one directory instead of scattering one apiece.
+            //! Get the name of the directory, under the user's application
+            //! support directory, where the settings and log file are kept.
+            //! Defaults to the full name; a suite of applications built on
+            //! DJV overrides it so that they share one directory instead of
+            //! scattering one apiece.
             DJV_MODELS_API virtual std::string getDocsDirName() const;
             
             ///@}
