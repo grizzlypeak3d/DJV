@@ -167,33 +167,35 @@ namespace djv
                     {
                         return name == value.name;
                     });
+                std::vector<std::string> tmp;
                 if (j != value.shortcuts.end())
                 {
                     i.second->setShortcuts({ j->primary, j->secondary });
-                    if (const auto k = _tooltips.find(i.first);
-                        k != _tooltips.end())
+                    if (j->primary != ftk::Key::Unknown)
                     {
-                        std::vector<std::string> tmp;
-                        if (j->primary != ftk::Key::Unknown)
-                        {
-                            tmp.push_back(ftk::getShortcutLabel(j->primary.key, j->primary.modifiers));
-                        }
-                        if (j->secondary != ftk::Key::Unknown)
-                        {
-                            tmp.push_back(ftk::getShortcutLabel(j->secondary.key, j->secondary.modifiers));
-                        }
-                        // With no key bound the tooltip is the text alone:
-                        // a trailing "Shortcut:" with nothing after it reads
-                        // as a mistake. Set either way, so unbinding a key
-                        // takes the suffix off again.
-                        i.second->setTooltip(tmp.empty() ? k->second :
-                            std::string(ftk::Format(
-                                "{0}\n"
-                                "\n"
-                                "Shortcut: {1}").
-                                arg(k->second).
-                                arg(ftk::join(tmp, ", "))));
+                        tmp.push_back(ftk::getShortcutLabel(j->primary.key, j->primary.modifiers));
                     }
+                    if (j->secondary != ftk::Key::Unknown)
+                    {
+                        tmp.push_back(ftk::getShortcutLabel(j->secondary.key, j->secondary.modifiers));
+                    }
+                }
+                // Applied whether or not the action has a shortcut: an
+                // action outside the shortcut settings -- About, say --
+                // still has a tooltip to show. With no key bound the
+                // tooltip is the text alone: a trailing "Shortcut:" with
+                // nothing after it reads as a mistake. Set either way, so
+                // unbinding a key takes the suffix off again.
+                if (const auto k = _tooltips.find(i.first);
+                    k != _tooltips.end())
+                {
+                    i.second->setTooltip(tmp.empty() ? k->second :
+                        std::string(ftk::Format(
+                            "{0}\n"
+                            "\n"
+                            "Shortcut: {1}").
+                            arg(k->second).
+                            arg(ftk::join(tmp, ", "))));
                 }
             }
         }

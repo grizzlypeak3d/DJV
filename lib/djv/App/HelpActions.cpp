@@ -97,9 +97,9 @@ namespace djv
                 // better than a menu item that does nothing when it is
                 // clicked.
                 _actions["Documentation"]->setEnabled(false);
-                _actions["Documentation"]->setTooltip(
+                _tooltips["Documentation"] =
                     "The documentation is installed with the application,\n"
-                    "and this build was not installed.");
+                    "and this build was not installed.";
             }
             if (!studioURL.empty())
             {
@@ -110,9 +110,12 @@ namespace djv
                 _actions["Studio"] = ftk::Action::create(
                     "Get DJV Studio",
                     _command("Studio"));
-                _actions["Studio"]->setTooltip(
+                // In the tooltips map rather than set on the action, so
+                // the shortcuts update does not put the command's plainer
+                // wording back over it.
+                _tooltips["Studio"] =
                     "Open the web site for DJV Studio,\n"
-                    "the commercial version of DJV.");
+                    "the commercial version of DJV.";
             }
             _actions["About"] = ftk::Action::create(
                 "About",
@@ -120,6 +123,10 @@ namespace djv
             _actions["SysInfo"] = ftk::Action::create(
                 "System Information",
                 _command("SysInfo"));
+
+            // Seed the tooltips, like the other action classes: the base
+            // class observer fired before these actions existed.
+            _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
         }
 
         HelpActions::HelpActions() :

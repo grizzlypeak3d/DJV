@@ -223,14 +223,17 @@ namespace djv
             _actions["OpenPlaylist"] = ftk::Action::create(
                 "Open Playlist",
                 _command("OpenPlaylist"));
-            _actions["OpenPlaylist"]->setTooltip(
+            // In the tooltips map rather than set on the action, so the
+            // shortcuts update does not put the command's plainer wording
+            // back over it.
+            _tooltips["OpenPlaylist"] =
                 "Open a playlist into the file list. Opening a \".otio\" "
-                "file normally plays it as a timeline.");
+                "file normally plays it as a timeline.";
             _actions["SavePlaylist"] = ftk::Action::create(
                 "Save Playlist",
                 _command("SavePlaylist"));
-            _actions["SavePlaylist"]->setTooltip(
-                "Save the file list as a \".otio\" playlist.");
+            _tooltips["SavePlaylist"] =
+                "Save the file list as a \".otio\" playlist.";
             _actions["Close"] = ftk::Action::create(
                 "Close",
                 "FileClose",
