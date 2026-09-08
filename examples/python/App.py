@@ -117,6 +117,10 @@ class App(ftk.App):
     """
     def __init__(self, context, argv):
 
+        # The last display scale applied from the style settings; see
+        # _styleUpdate.
+        self._styleDisplayScale = None
+
         self._cmdLineInputs = ftk.CmdLineListArgString(
             "input",
             "One or more timelines, movies, image sequences, or directories.",
@@ -1061,9 +1065,17 @@ class App(ftk.App):
         fileBrowserSystem.model.exts = tl.getExts(self.context)
         fileBrowserSystem.recentFilesModel = self._recentFilesModel
 
+        # Before the window: the style settings carry the default display
+        # scale, and the window corrects the scale from what the display
+        # actually reports when it is created -- the correction has to come
+        # second, the same order as the C++ application.
+        selfWeak = weakref.ref(self)
+        self._styleSettingsObserver = djv.models.StyleSettingsObserver(
+            self._settingsModel.observeStyle,
+            lambda value: selfWeak()._styleUpdate(value))
+
         self._window = MainWindow.MainWindow(self.context, self)
 
-        selfWeak = weakref.ref(self)
         self._filesObserver = djv.models.FilesModelItemListObserver(
             self._filesModel.observeFiles,
             lambda files: selfWeak()._filesUpdate(files))
@@ -1079,9 +1091,6 @@ class App(ftk.App):
         self._muteObserver = ftk.BoolObserver(
             self._audioModel.observeMute,
             lambda value: selfWeak()._muteUpdate(value))
-        self._styleSettingsObserver = djv.models.StyleSettingsObserver(
-            self._settingsModel.observeStyle,
-            lambda value: selfWeak()._styleUpdate(value))
         self._markersMarkersObserver = djv.models.ReviewMarkerListObserver(
             self._markersModel.observeMarkers,
             lambda value: selfWeak()._reviewMarkersUpdate())
@@ -1306,4 +1315,10 @@ class App(ftk.App):
         style.fonts = value.fonts
         self.colorStyle = value.colorStyle
         self.customColorRoles = value.customColorRoles
-        self.displayScale = value.displayScale
+        # Only apply the display scale when the setting itself changed: the
+        # style settings are redelivered whenever any of them change, and
+        # re-applying a stale value would undo the scale the window
+        # detected (ftk::App::setDisplayScaleFromWindow).
+        if value.displayScale != self._styleDisplayScale:
+            self._styleDisplayScale = value.displayScale
+            self.displayScale = value.displayScale
