@@ -41,6 +41,18 @@ class Widget(ftk.IContainer):
             lambda player: selfWeak()._infoUpdate(player))
 
         self._logTimer = ftk.Timer(context)
+        self._logText = ""
+        self._hint = ""
+
+    def setHint(self, value):
+        """
+        A transient line shown over the log message -- the highlighted
+        menu item's tooltip. The message comes back when the hint clears.
+        """
+        if value == self._hint:
+            return
+        self._hint = value
+        self._messagesUpdate()
 
     def _logUpdate(self, logItems):
         if logItems:
@@ -51,12 +63,17 @@ class Widget(ftk.IContainer):
                     pieces = item.message.split('\n')
                 if pieces:
                     text = pieces[0]
-            self._logLabel.text = text
+            self._logText = text
+            self._messagesUpdate()
             if text:
                 self._logTimer.start(5.0, Util.weak(self._clearLog))
 
     def _clearLog(self):
-        self._logLabel.text = ""
+        self._logText = ""
+        self._messagesUpdate()
+
+    def _messagesUpdate(self):
+        self._logLabel.text = self._hint if self._hint else self._logText
 
     def _infoUpdate(self, player):
         text = []

@@ -209,8 +209,10 @@ class Actions(IActions.IActions):
         # shortcuts editor, so any key can be bound today.
         self._addShortcut("Draw", "Draw strokes")
         self._addShortcut("Erase", "Erase strokes")
-        self._addShortcut("Undo", "Undo drawing")
-        self._addShortcut("Redo", "Redo drawing")
+        self._addShortcut("Undo", "Undo drawing", ftk.KeyShortcut(
+            ftk.Key.Z, ftk.commandKeyModifier))
+        self._addShortcut("Redo", "Redo drawing", ftk.KeyShortcut(
+            ftk.Key.Z, ftk.KeyModifier.Shift, ftk.commandKeyModifier))
         self._addShortcut("ClearDrawing", "Clear drawing")
         self._addShortcut("AddNote", "Add a marker")
         self._addShortcut("AddRange", "Add a range")

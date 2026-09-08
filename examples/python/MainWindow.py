@@ -115,6 +115,19 @@ class MainWindow(ftk.MainWindow):
         self._tabBar = TabBar.Widget(context, app)
         self._statusBar = StatusBar.Widget(context, app, self)
 
+        # The highlighted menu item's tooltip shows in the status bar,
+        # flattened to the one line there is.
+        statusBarWeak = weakref.ref(self._statusBar)
+        def menuHint(action):
+            statusBar = statusBarWeak()
+            if statusBar:
+                text = ""
+                if action:
+                    for line in action.tooltip.split("\n"):
+                        text += line if not text else (" " + line)
+                statusBar.setHint(text)
+        self._menuBar.setCurrentCallback(menuHint)
+
         # Layout widgets. The dividers are kept by name so that hiding a
         # tool bar can hide its divider with it.
         self._dividers = {}
