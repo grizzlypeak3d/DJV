@@ -1,6 +1,8 @@
 ## 3.7.0
 
 Changes:
+* Media stored in an OTIOZ bundle can be read with the FFmpeg command
+  line, so bundles play on the open source packages whatever they hold.
 * The status bar shows the highlighted menu item's tooltip.
 * The exposure control is a plain stop adjustment, so zero leaves the
   image unchanged. The defog, knee, and gamma controls are removed;
