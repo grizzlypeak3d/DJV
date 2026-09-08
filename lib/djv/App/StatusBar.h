@@ -40,6 +40,11 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Set a hint to show in place of the messages, e.g. the
+            //! highlighted menu item's tooltip. An empty hint gives the
+            //! messages back.
+            DJV_APP_API void setHint(const std::string&);
+
             DJV_APP_API ftk::Size2I getSizeHint() const override;
             DJV_APP_API void setGeometry(const ftk::Box2I&) override;
             DJV_APP_API void mousePressEvent(ftk::MouseClickEvent&) override;
@@ -47,6 +52,7 @@ namespace djv
 
         private:
             void _infoUpdate(const ftk::Path&, const tl::IOInfo&);
+            void _messagesUpdate();
 
             FTK_PRIVATE();
         };

@@ -26,6 +26,8 @@ namespace djv
 
             std::shared_ptr<ftk::Label> messagesLabel;
             std::shared_ptr<ftk::Label> infoLabel;
+            std::string message;
+            std::string hint;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             std::shared_ptr<ftk::Timer> messagesTimer;
@@ -88,16 +90,16 @@ namespace djv
                         // the timestamps.
                         text = ftk::getLabel(value.back(), ftk::LogLabel::Message);
                     }
-                    p.messagesLabel->setText(text);
-                    p.messagesLabel->setTooltip(text);
+                    p.message = text;
+                    _messagesUpdate();
                     if (!value.empty())
                     {
                         p.messagesTimer->start(
                             std::chrono::seconds(5),
                             [this]
                             {
-                                _p->messagesLabel->setText(std::string());
-                                _p->messagesLabel->setTooltip(std::string());
+                                _p->message = std::string();
+                                _messagesUpdate();
                             });
                     }
                 });
@@ -149,7 +151,24 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I StatusBar::getSizeHint() const
+            void StatusBar::setHint(const std::string& value)
+        {
+            FTK_P();
+            if (value == p.hint)
+                return;
+            p.hint = value;
+            _messagesUpdate();
+        }
+
+        void StatusBar::_messagesUpdate()
+        {
+            FTK_P();
+            const std::string& text = !p.hint.empty() ? p.hint : p.message;
+            p.messagesLabel->setText(text);
+            p.messagesLabel->setTooltip(text);
+        }
+
+    ftk::Size2I StatusBar::getSizeHint() const
         {
             return _p->layout->getSizeHint();
         }

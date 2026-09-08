@@ -1,6 +1,7 @@
 ## 3.7.0
 
 Changes:
+* The status bar shows the highlighted menu item's tooltip.
 * The exposure control is a plain stop adjustment, so zero leaves the
   image unchanged. The defog, knee, and gamma controls are removed;
   soft clip and levels cover them.

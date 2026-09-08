@@ -25,6 +25,8 @@
 #include <djv/App/ReviewTool.h>
 #include <djv/App/PlaybackMenu.h>
 #include <djv/App/StatusBar.h>
+
+#include <ftk/Core/String.h>
 #include <djv/App/TabBar.h>
 #include <djv/App/TimelineActions.h>
 #include <djv/App/TimelineMenu.h>
@@ -311,6 +313,27 @@ namespace djv
 
             p.statusBar = StatusBar::create(context, app);
             ftk::setScreenshotTag(p.statusBar, "MainWindow.StatusBar");
+
+            // The highlighted menu item's tooltip shows in the status bar,
+            // flattened to the one line there is.
+            auto statusBarWeak = std::weak_ptr<StatusBar>(p.statusBar);
+            p.menuBar->setCurrentCallback(
+                [statusBarWeak](const std::shared_ptr<ftk::Action>& action)
+                {
+                    if (auto statusBar = statusBarWeak.lock())
+                    {
+                        std::string text;
+                        if (action)
+                        {
+                            for (const auto& line :
+                                ftk::split(action->getTooltip(), '\n'))
+                            {
+                                text += text.empty() ? line : (" " + line);
+                            }
+                        }
+                        statusBar->setHint(text);
+                    }
+                });
 
             p.toolsWidget = ToolsWidget::create(
                 context,
