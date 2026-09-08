@@ -119,7 +119,7 @@ namespace djv
             return out;
         }
 
-        std::string AppInfoModel::getDocsURL() const
+        std::string AppInfoModel::_getDocsFileURL(const std::string& name) const
         {
             const std::string searchPath = getDocsSearchPath();
             if (searchPath.empty())
@@ -139,22 +139,30 @@ namespace djv
                 std::error_code ec;
                 const std::filesystem::path docs =
                     std::filesystem::weakly_canonical(dir / relative, ec);
-                // index.html is what says the documentation is there. The
-                // page to open is whatever the application asks for, and an
-                // application whose own page was left out of a package still
-                // has the rest of the set to open.
+                // index.html is what says the documentation is there, and
+                // the file asked for is what is returned: a caller that has
+                // somewhere else to go says so itself rather than being sent
+                // to a page it did not ask for.
                 if (ec || !std::filesystem::exists(docs / "index.html"))
                 {
                     continue;
                 }
-                std::filesystem::path page = docs / getDocsPage();
-                if (!std::filesystem::exists(page))
+                const std::filesystem::path file = docs / name;
+                if (!std::filesystem::exists(file))
                 {
-                    page = docs / "index.html";
+                    return std::string();
                 }
-                return "file://" + ftk::fromFileSystem(page);
+                return "file://" + ftk::fromFileSystem(file);
             }
             return std::string();
+        }
+
+        std::string AppInfoModel::getDocsURL() const
+        {
+            // An application whose own page was left out of a package still
+            // has the rest of the set to open.
+            const std::string page = _getDocsFileURL(getDocsPage());
+            return !page.empty() ? page : _getDocsFileURL("index.html");
         }
 
         std::string AppInfoModel::getDocsPage() const
@@ -174,7 +182,7 @@ namespace djv
 
         std::string AppInfoModel::getLicensesURL() const
         {
-            return "https://github.com/grizzlypeak3d/DJV/tree/main/etc/Legal";
+            return _getDocsFileURL("licenses.html");
         }
 
         std::string AppInfoModel::getStudioURL() const

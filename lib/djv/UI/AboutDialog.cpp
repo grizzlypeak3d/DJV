@@ -4,6 +4,7 @@
 #include <djv/UI/AboutDialog.h>
 
 #include <djv/Models/AppInfoModel.h>
+#include <djv/Models/Version.h>
 
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/Label.h>
@@ -51,6 +52,17 @@ namespace djv
                     arg(appInfoModel->getFullName()).
                     arg(appInfoModel->getVersion()),
                 vLayout);
+            // Which build this is, which is the question the dialog is
+            // usually open to answer. The library's own version is here as
+            // well: an application built on DJV has a version of its own,
+            // and a report that names only one of the two is half an answer.
+            ftk::Label::create(
+                context,
+                ftk::Format("Built {0}, {1}, on DJV {2}").
+                    arg(appInfoModel->getCommitDate()).
+                    arg(appInfoModel->getGitCommit()).
+                    arg(DJV_VERSION_FULL),
+                vLayout);
             ftk::Label::create(
                 context,
                 appInfoModel->getLicense(),
@@ -72,7 +84,18 @@ namespace djv
                     close();
                 });
 
+            // The notices are installed with the application, so a build
+            // that was not installed has none to show. The button says so
+            // rather than opening nothing; unlike a menu item, a button can
+            // carry a tooltip that is read.
             const std::string url = appInfoModel->getLicensesURL();
+            if (url.empty())
+            {
+                licensesButton->setEnabled(false);
+                licensesButton->setTooltip(
+                    "The licenses are installed with the application, and "
+                    "this build was not installed.");
+            }
             licensesButton->setClickedCallback(
                 [url]
                 {

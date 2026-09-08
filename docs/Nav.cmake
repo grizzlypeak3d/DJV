@@ -13,7 +13,7 @@
 #
 #   NAV_DIR    the directory of pages to write
 #   NAV_LIST   the list to write
-#   NAV_EXTRA  a further list, appended (optional)
+#   NAV_EXTRA  further lists, appended in order (optional)
 #   NAV_CHECK  report pages that would change and fail, writing nothing
 
 if(NOT NAV_DIR OR NOT NAV_LIST)
@@ -47,9 +47,9 @@ endfunction()
 
 set(ENTRIES)
 nav_read("${NAV_LIST}" ENTRIES)
-if(NAV_EXTRA)
-    nav_read("${NAV_EXTRA}" ENTRIES)
-endif()
+foreach(EXTRA ${NAV_EXTRA})
+    nav_read("${EXTRA}" ENTRIES)
+endforeach()
 
 # Between these the list is written; every page has them, and the first "<ul>"
 # is the navigation's because the navigation comes before the content.
