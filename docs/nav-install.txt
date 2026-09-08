@@ -1,0 +1,7 @@
+# The entries an installed copy of the documentation has and the repository
+# does not. See docs/CMakeLists.txt.
+#
+# The licenses page describes one build -- these notices, because this
+# configuration -- so it is written into the build tree rather than kept
+# here, and only an install has it to link to.
+licenses.html Licenses

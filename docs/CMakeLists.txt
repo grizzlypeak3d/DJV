@@ -19,10 +19,30 @@ install(
         PATTERN "*.svg"
         PATTERN "*.png")
 
-# Writing the navigation into the pages, from nav.txt, and the table of
-# contents into the pages that carry one, from their own headings. Not part
-# of the build: it edits the sources, and what is in the repository is what
-# is published.
+# The licenses page, written into the build tree by etc/Legal/CMakeLists.txt
+# because it describes this configuration rather than the repository. Before
+# the navigation below, which has to find it there to write the list into it.
+install(
+    FILES ${DJV_LICENSES_PAGE}
+    DESTINATION ${DEST}
+    COMPONENT docs)
+
+# The navigation, written into the installed copies, which have a page the
+# repository does not: the licenses. The repository's own pages cannot carry
+# that link, since the page it points at is made by a build.
+install(
+    CODE "
+        set(NAV_DIR \"\${CMAKE_INSTALL_PREFIX}/${DEST}\")
+        set(NAV_LIST \"${CMAKE_CURRENT_SOURCE_DIR}/nav.txt\")
+        set(NAV_EXTRA \"${CMAKE_CURRENT_SOURCE_DIR}/nav-install.txt\")"
+    COMPONENT docs)
+install(
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/Nav.cmake
+    COMPONENT docs)
+
+# The same, written into the pages in the repository, along with the table of
+# contents on the pages that carry one. Not part of the build: it edits the
+# sources, and what is in the repository is what is published.
 add_custom_target(djvDocsNav
     COMMAND ${CMAKE_COMMAND}
         -DNAV_DIR=${CMAKE_CURRENT_SOURCE_DIR}

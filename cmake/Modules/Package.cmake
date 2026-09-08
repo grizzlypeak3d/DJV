@@ -379,7 +379,7 @@ elseif(APPLE)
         # installs before it packages, and this way the install rules stay as
         # they are for every other platform. The documentation is found
         # relative to the executable, at "../Resources/docs".
-        foreach(RESOURCE docs Legal SampleData)
+        foreach(RESOURCE docs SampleData)
             install(DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/djv/${RESOURCE}/
                 DESTINATION "${DJV_BUNDLE_CONTENTS}/Resources/${RESOURCE}"
                 COMPONENT bundle

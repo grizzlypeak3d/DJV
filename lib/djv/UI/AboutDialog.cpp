@@ -51,6 +51,23 @@ namespace djv
                     arg(appInfoModel->getFullName()).
                     arg(appInfoModel->getVersion()),
                 vLayout);
+            // Which build this is, which is the question the dialog is
+            // usually open to answer.
+            std::string built = ftk::Format("Built {0}, {1}").
+                arg(appInfoModel->getCommitDate()).
+                arg(appInfoModel->getGitCommit());
+            // And which DJV it was built on, for an application that is not
+            // DJV: the two carry version numbers of their own and release on
+            // their own schedules, so a report naming one of them is half an
+            // answer.
+            if (appInfoModel->getGitCommit() != appInfoModel->getLibraryCommit())
+            {
+                built = ftk::Format("{0}, on DJV {1} {2}").
+                    arg(built).
+                    arg(appInfoModel->getLibraryVersion()).
+                    arg(appInfoModel->getLibraryCommit());
+            }
+            ftk::Label::create(context, built, vLayout);
             ftk::Label::create(
                 context,
                 appInfoModel->getLicense(),
@@ -72,7 +89,18 @@ namespace djv
                     close();
                 });
 
+            // The notices are installed with the application, so a build
+            // that was not installed has none to show. The button says so
+            // rather than opening nothing; unlike a menu item, a button can
+            // carry a tooltip that is read.
             const std::string url = appInfoModel->getLicensesURL();
+            if (url.empty())
+            {
+                licensesButton->setEnabled(false);
+                licensesButton->setTooltip(
+                    "The licenses are installed with the application, and "
+                    "this build was not installed.");
+            }
             licensesButton->setClickedCallback(
                 [url]
                 {

@@ -152,8 +152,9 @@ endif()
 if(DJV_TESTS)
     add_subdirectory(tests)
 endif()
-add_subdirectory(docs)
+# Before the documentation, which installs the licenses page this writes.
 add_subdirectory(etc/Legal)
+add_subdirectory(docs)
 add_subdirectory(etc/SampleData)
 
 include(CMakePackageConfigHelpers)

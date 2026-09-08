@@ -58,6 +58,17 @@ namespace djv
             //! anything was uncommitted.
             DJV_MODELS_API virtual std::string getGitCommit() const;
 
+            //! Get the version of DJV this was built on, and the commit it
+            //! was built from. Not virtual: an application overrides the
+            //! pair above to report itself, and these two stay the library's
+            //! own. In DJV they are the same values.
+            //!
+            //! The commit as well as the version, because a development
+            //! version names a line rather than a build: every commit
+            //! between two releases calls itself the same thing.
+            DJV_MODELS_API std::string getLibraryVersion() const;
+            DJV_MODELS_API std::string getLibraryCommit() const;
+
             ///@}
 
             //! \name Documentation
@@ -94,6 +105,15 @@ namespace djv
             ///@{
 
             DJV_MODELS_API virtual std::string getLicense() const;
+
+            //! Get the licenses page installed beside the application, as a
+            //! file URL, or empty when there is none.
+            //!
+            //! The notices ship with the build they describe, the way the
+            //! documentation does, so what is listed is what is installed.
+            //! A link to a repository is a list of what some other build
+            //! carries, which for an application built on this library is
+            //! the wrong list entirely.
             DJV_MODELS_API virtual std::string getLicensesURL() const;
 
             ///@}
@@ -108,6 +128,12 @@ namespace djv
             DJV_MODELS_API virtual std::string getStudioURL() const;
 
             ///@}
+
+        protected:
+            //! Get a file in the installed documentation, as a file URL, or
+            //! empty when the documentation is not there. The page to open
+            //! and the licenses are both found this way.
+            DJV_MODELS_API std::string _getDocsFileURL(const std::string&) const;
         };
     }
 }

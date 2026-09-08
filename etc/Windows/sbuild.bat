@@ -11,8 +11,16 @@ set CONFIG_FILE=%SOURCE_DIR%/etc/Config/%CONFIG%.cmake
 rem Build with every core unless told otherwise; cmake --build reads this.
 IF "%CMAKE_BUILD_PARALLEL_LEVEL%"=="" set CMAKE_BUILD_PARALLEL_LEVEL=%NUMBER_OF_PROCESSORS%
 
-git -C %SOURCE_DIR% submodule update --init --recursive
-if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
+rem Check out the submodules the first time, and never move them afterwards.
+rem A submodule you have work in is not this script's to reset: the build it
+rem would then make is not the source you have, and with changes in the way it
+rem stops on a git error about a checkout you did not ask for. Same rule and
+rem same test as CMakeLists.txt, which initialises only when there is nothing
+rem there to lose.
+IF NOT EXIST %SOURCE_DIR%/deps/tlRender/CMakeLists.txt (
+    git -C %SOURCE_DIR% submodule update --init --recursive
+    if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
+)
 
 cmake ^
     -S %SOURCE_DIR%/deps/tlRender/deps/ftk/etc/SuperBuild ^

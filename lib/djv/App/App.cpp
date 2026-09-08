@@ -1978,7 +1978,11 @@ namespace djv
 
             if (p.cmdLine.version->found())
             {
-                std::cout << DJV_VERSION_FULL << std::endl;
+                // The application's version, not this library's. They are
+                // the same number in DJV and are not in an application built
+                // on it, which then reported the version of the thing it was
+                // built with instead of its own.
+                std::cout << p.appInfoModel->getVersion() << std::endl;
                 return;
             }
             else if (p.cmdLine.sysInfo->found())

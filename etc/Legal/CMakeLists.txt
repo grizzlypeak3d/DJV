@@ -44,11 +44,28 @@ if(TLRENDER_USD)
         LICENSE_oneTBB.txt)
 endif()
 
-# The macOS package is not here: the bundle carries its own copy,
-# taken from the prefix by cmake/Modules/Package.cmake, so this stays
-# where every other build puts it.
-set(DEST share/djv/Legal)
-if(DJV_WINDOWS_PACKAGE)
-    set(DEST Legal)
-endif()
-install(FILES ${LEGAL} DESTINATION ${DEST})
+# Not installed. Every notice reaches the install inside the licenses page,
+# which is documentation, goes wherever the documentation goes, and reads as
+# one document rather than a directory of text files nobody opens.
+
+# The licenses page in the documentation, written from the list above: a
+# notice cannot reach a package without reaching the page.
+#
+# At configure time, into the build tree. The page is a description of one
+# build -- these notices, because this configuration -- so it is not a file
+# to keep in the repository, where it could only describe whoever generated
+# it last. The list is handed over as a file rather than a command line, the
+# way the navigation is, so a name the shell would take an interest in stays
+# one name.
+set(LEGAL_LIST ${CMAKE_CURRENT_BINARY_DIR}/legal.txt)
+string(REPLACE ";" "\n" LEGAL_LINES "${LEGAL}")
+file(WRITE ${LEGAL_LIST} "${LEGAL_LINES}\n")
+
+set(DJV_LICENSES_PAGE ${CMAKE_CURRENT_BINARY_DIR}/licenses.html PARENT_SCOPE)
+execute_process(
+    COMMAND ${CMAKE_COMMAND}
+        -DLICENSES_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DLICENSES_LIST=${LEGAL_LIST}
+        -DLICENSES_OUT=${CMAKE_CURRENT_BINARY_DIR}/licenses.html
+        -P ${PROJECT_SOURCE_DIR}/docs/Licenses.cmake
+    COMMAND_ERROR_IS_FATAL ANY)
