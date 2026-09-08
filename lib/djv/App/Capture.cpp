@@ -487,6 +487,7 @@ namespace djv
                     step.contains("click") ||
                     step.contains("scroll") ||
                     step.contains("drag") ||
+                    step.contains("hover") ||
                     step.contains("key") ||
                     step.contains("pick") ||
                     step.contains("zoom") ||
@@ -1275,6 +1276,48 @@ namespace djv
                 {
                     std::static_pointer_cast<ftk::IWindow>(mw)->click(
                         pos.value(), button, modifiers);
+                }
+            }
+            else if (step.contains("hover"))
+            {
+                // Move the cursor without pressing, aimed the way "click"
+                // is aimed, for what only shows on hover -- the status
+                // bar's menu hints, say. Deferred by _applyRest like
+                // "click", e.g.
+                // { "hover": "Files.CompareMode" },
+                // { "hover": [160, 90] }.
+                const auto& v = step.at("hover");
+                auto mw = app->getMainWindow();
+                std::optional<ftk::V2I> pos;
+                if (v.is_array() && v.size() >= 2)
+                {
+                    pos = ftk::V2I(v[0].get<int>(), v[1].get<int>());
+                }
+                else if (v.is_string() && mw)
+                {
+                    std::vector<std::shared_ptr<ftk::IWidget> > tagged;
+                    collect(mw, tagged);
+                    for (const auto& w : tagged)
+                    {
+                        if (ftk::getScreenshotTag(w) == v.get<std::string>())
+                        {
+                            const ftk::Box2I g = w->getGeometry();
+                            pos = ftk::V2I(
+                                g.x() + g.w() / 2,
+                                g.y() + g.h() / 2);
+                            break;
+                        }
+                    }
+                    if (!pos.has_value())
+                    {
+                        note(p.shotId,
+                            "hover: no visible widget tagged \"" +
+                            v.get<std::string>() + "\"");
+                    }
+                }
+                if (pos.has_value() && mw)
+                {
+                    std::static_pointer_cast<ftk::IWindow>(mw)->hover(pos.value());
                 }
             }
             else if (step.contains("drag"))
