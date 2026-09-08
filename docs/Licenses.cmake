@@ -29,11 +29,14 @@ foreach(FILE ${FILES})
         message(FATAL_ERROR "No such notice: ${PATH}")
     endif()
 
-    # "LICENSE_OpenColorIO.txt" is the notice for OpenColorIO. The file names
-    # are the component names, which is why they are worth keeping tidy.
+    # "LICENSE_OpenColorIO.txt" is the notice for OpenColorIO, and
+    # "LICENSE_DJV Studio.txt" the notice for DJV Studio: the file name is
+    # the component's name, spaces and all, rather than a name with a rule
+    # to undo. What a component calls itself is not this script's to guess.
     get_filename_component(NAME "${FILE}" NAME_WE)
     string(REGEX REPLACE "^LICENSE_" "" NAME "${NAME}")
     string(TOLOWER "${NAME}" ID)
+    string(REPLACE " " "-" ID "${ID}")
 
     file(READ "${PATH}" TEXT)
     # Ampersand first, or the escapes introduced below are escaped again.
