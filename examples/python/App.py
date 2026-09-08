@@ -304,6 +304,7 @@ class App(ftk.App):
             options.filter = self._cmdLineDirFilter.value
         if self._cmdLineDirDepth.found:
             options.depth = max(1, self._cmdLineDirDepth.value)
+        inputFrames = path.frames
         first = True
         for i in tl.getPaths(self.context, path, options):
             item = djv.models.FilesModelItem()
@@ -318,6 +319,23 @@ class App(ftk.App):
                 # only the first takes it.
                 item.path.frames = frames
                 item.framesStated = True
+            if (first and
+                    options.seq and
+                    inputFrames is not None and
+                    inputFrames.min == inputFrames.max and
+                    i.isSeq and
+                    i.frames is not None and
+                    i.frames.min <= inputFrames.min <= i.frames.max and
+                    i.frames != inputFrames):
+                # One image was named and the gather grew it into its
+                # sequence, so playback starts at the image that was
+                # named -- the frame someone double-clicked is the one
+                # they want to look at (#490). Sequence time is the
+                # frame number, at the sequence rate the player will
+                # use.
+                item.currentTime = otio.opentime.RationalTime(
+                    inputFrames.min,
+                    self._settingsModel.imageSeq.io.defaultSpeed)
             first = False
             if audioPath is not None:
                 item.audioPath = audioPath
