@@ -271,6 +271,11 @@ namespace djv
             DJV_APP_API virtual void _uiInit();
             DJV_APP_API virtual void _mainWindowInit();
 
+            DJV_APP_API std::shared_ptr<ftk::Capture> _createCapture(
+                const std::filesystem::path& manifest,
+                const std::string& shotId,
+                const std::filesystem::path& outputDir) override;
+
             void _setAudioDeviceMute(bool);
 
             DJV_APP_API virtual void _viewUpdate(const ftk::V2I& pos, double zoom, bool frame);

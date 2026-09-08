@@ -131,9 +131,6 @@ namespace djv
             std::shared_ptr<ftk::CmdLineListOption<std::string> > command;
             std::shared_ptr<ftk::CmdLineOption<int> > debugLoop;
             std::shared_ptr<ftk::CmdLineOption<double> > benchmark;
-            std::shared_ptr<ftk::CmdLineOption<std::string> > captureManifest;
-            std::shared_ptr<ftk::CmdLineOption<std::string> > captureShot;
-            std::shared_ptr<ftk::CmdLineOption<std::string> > captureOutput;
         };
 
         struct App::Private
@@ -420,18 +417,6 @@ namespace djv
                 "rate achieved.",
                 "Benchmark",
                 5.0);
-            p.cmdLine.captureManifest = ftk::CmdLineOption<std::string>::create(
-                { "-captureManifest" },
-                "Screenshot manifest (JSON).",
-                "Capture");
-            p.cmdLine.captureShot = ftk::CmdLineOption<std::string>::create(
-                { "-captureShot" },
-                "Id of the single shot to capture.",
-                "Capture");
-            p.cmdLine.captureOutput = ftk::CmdLineOption<std::string>::create(
-                { "-captureOutput" },
-                "Output directory for PNG + JSON.", "Capture",
-                std::string("."));
 
             std::vector<std::shared_ptr<ftk::ICmdLineOption> > cmdLineOptions =
             {
@@ -474,10 +459,7 @@ namespace djv
                 p.cmdLine.listCommands,
                 p.cmdLine.command,
                 p.cmdLine.debugLoop,
-                p.cmdLine.benchmark,
-                p.cmdLine.captureManifest,
-                p.cmdLine.captureShot,
-                p.cmdLine.captureOutput
+                p.cmdLine.benchmark
             };
             cmdLineOptions.insert(
                 cmdLineOptions.end(), options.begin(), options.end());
@@ -632,7 +614,7 @@ namespace djv
                 _p->cmdLine.hideSetup->found() ||
                 _p->cmdLine.listCommands->found() ||
                 _p->cmdLine.command->found() ||
-                _p->cmdLine.captureShot->found() ||
+                isCaptureRun() ||
                 _p->cmdLine.benchmark->found();
         }
 
@@ -2126,30 +2108,21 @@ namespace djv
                 return;
             }
 
-            if (p.cmdLine.captureShot->found())
-            {
-                auto capture = Capture::create(
-                    _context, std::dynamic_pointer_cast<App>(shared_from_this()),
-                    p.cmdLine.captureManifest->getValue(),
-                    p.cmdLine.captureShot->getValue(),
-                    p.cmdLine.captureOutput->getValue());
-                if (!capture->begin())
-                {
-                    throw std::runtime_error(ftk::Format(
-                        "Cannot set up capture: {0}").arg(p.cmdLine.captureShot->getValue()));
-                }
-                ftk::App::run();
-            _saveSettings();
-                if (!capture->succeeded())
-                {
-                    throw std::runtime_error(ftk::Format(
-                        "Cannot capture shot: {0}").arg(p.cmdLine.captureShot->getValue()));
-                }
-                return;
-            }
-
             ftk::App::run();
             _saveSettings();
+        }
+
+        std::shared_ptr<ftk::Capture> App::_createCapture(
+            const std::filesystem::path& manifest,
+            const std::string& shotId,
+            const std::filesystem::path& outputDir)
+        {
+            return Capture::create(
+                _context,
+                std::dynamic_pointer_cast<App>(shared_from_this()),
+                manifest,
+                shotId,
+                outputDir);
         }
 
         void App::_debugState(nlohmann::json& out)

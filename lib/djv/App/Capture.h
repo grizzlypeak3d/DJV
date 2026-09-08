@@ -4,20 +4,8 @@
 #pragma once
 
 #include <djv/App/Export.h>
-#include <djv/Models/Export.h>
 
-#include <ftk/UI/IWidget.h>
-
-#include <nlohmann/json.hpp>
-
-#include <filesystem>
-#include <memory>
-#include <string>
-
-namespace ftk
-{
-    class Context;
-}
+#include <ftk/UI/Capture.h>
 
 namespace djv
 {
@@ -27,10 +15,11 @@ namespace djv
 
         //! Automated screenshot capture for the documentation.
         //!
-        //! One shot per process. Capture is driven from a timer running inside
-        //! the normal event loop (ftk::App::run()), which is what realizes and
-        //! sizes the window and produces a valid offscreen buffer to read back.
-        class DJV_APP_API_TYPE Capture : public std::enable_shared_from_this<Capture>
+        //! The manifest machinery and the generic input steps (clicks, keys,
+        //! text, scrolling, tabs) live in ftk::Capture. This adds the DJV
+        //! steps -- opening media, playback, comparison, color, viewport,
+        //! and tool state -- and the media readiness checks that gate them.
+        class DJV_APP_API_TYPE Capture : public ftk::Capture
         {
         protected:
             void _init(
@@ -43,7 +32,7 @@ namespace djv
             Capture();
 
         public:
-            DJV_APP_API ~Capture();
+            DJV_APP_API virtual ~Capture();
 
             DJV_APP_API static std::shared_ptr<Capture> create(
                 const std::shared_ptr<ftk::Context>&,
@@ -52,32 +41,19 @@ namespace djv
                 const std::string& shotId,
                 const std::filesystem::path& outputDir);
 
-            //! Parse the manifest, set up deterministic window state, open the
-            //! shot's files, and arm the capture timer. Returns false on a
-            //! setup error (bad manifest, unknown shot, no window). After this
-            //! returns true, the caller runs the event loop.
-            DJV_APP_API bool begin();
-
-            //! Whether the capture completed and wrote its outputs.
-            DJV_APP_API bool succeeded() const;
+        protected:
+            DJV_APP_API void _setupWindow(const nlohmann::json&) override;
+            DJV_APP_API void _applyEarly(const nlohmann::json&) override;
+            DJV_APP_API bool _ready() const override;
+            DJV_APP_API bool _frameReady() const override;
+            DJV_APP_API std::string _mediaError() const override;
+            DJV_APP_API std::string _waitingFor() const override;
+            DJV_APP_API bool _isEarlyStep(const nlohmann::json&) const override;
+            DJV_APP_API bool _isLateStep(const nlohmann::json&) const override;
+            DJV_APP_API bool _applyStep(const nlohmann::json&) override;
 
         private:
-            void _onTick();
-            void _applyOpens(const nlohmann::json& setup);
-            void _applyRest(const nlohmann::json& setup);
-            void _applyStep(const nlohmann::json& step);
             int _fileIndex(const nlohmann::json& value) const;
-            bool _ready() const;
-            bool _frameReady() const;
-            // Why the media a shot opened cannot become ready, or an empty
-            // string while it still might.
-            std::string _mediaError() const;
-            // What the shot was waiting for, for the timeout message.
-            std::string _waitingFor() const;
-            void _finish(bool ok);
-
-            bool _writePNG(const std::filesystem::path&) const;
-            void _writeMetadata(const std::filesystem::path&) const;
 
             FTK_PRIVATE();
         };

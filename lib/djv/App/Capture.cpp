@@ -15,178 +15,25 @@
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/ViewportModel.h>
 
-#include <ftk/UI/App.h>
 #include <ftk/UI/FileBrowser.h>
-#include <ftk/UI/IWindow.h>
-#include <ftk/UI/ScreenshotTag.h>
-#include <ftk/UI/ComboBox.h>
-#include <ftk/UI/IButton.h>
-#include <ftk/UI/Label.h>
-#include <ftk/UI/LineEdit.h>
 #include <ftk/UI/Settings.h>
-#include <ftk/UI/TabWidget.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
-#include <ftk/Core/Image.h>
-#include <ftk/Core/ImageIO.h>
-#include <ftk/Core/Timer.h>
 #include <ftk/Core/Path.h>
-#include <ftk/Core/String.h>
 
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/Player.h>
 
 #include <algorithm>
-#include <fstream>
-#include <iostream>
-
 #include <optional>
 
 namespace djv
 {
     namespace app
     {
-        namespace
-        {
-            // Budgets in ticks of the timer below, which fires on the clock
-            // rather than once per drawn frame -- so these are durations, and
-            // the machine being fast or slow does not change them.
-            const std::chrono::milliseconds tickInterval(30);
-            const int settleTicks = 15;     // 450ms to settle before capturing
-            const int reloadGraceTicks = 4; // 120ms for a reload to begin
-            const int timeoutTicks = 400;   // 12s hard cap waiting for media
-
-            // Console diagnostics so failures are not silent.
-            void note(const std::string& shot, const std::string& msg)
-            {
-                std::cerr << "djv capture [" << shot << "]: " << msg << std::endl;
-            }
-
-            void collect(
-                const std::shared_ptr<ftk::IWidget>& widget,
-                std::vector<std::shared_ptr<ftk::IWidget> >& out)
-            {
-                if (!widget)
-                    return;
-                if (ftk::hasScreenshotTag(widget) && widget->isVisible(true))
-                    out.push_back(widget);
-                for (const auto& child : widget->getChildren())
-                    collect(child, out);
-            }
-
-            //! The text a widget is showing, for the kinds that show any. A
-            //! tagged widget is often a row or a container rather than the
-            //! label itself, so this looks down the tree and joins what it
-            //! finds: the point is to make what is on screen readable from the
-            //! sidecar instead of by cropping the image and looking at it.
-            std::string widgetText(const std::shared_ptr<ftk::IWidget>& widget)
-            {
-                std::vector<std::string> out;
-                // Only what is on screen. A hidden child still has its text,
-                // and reporting it would say the capture shows something it
-                // does not -- which is the one thing this must not do.
-                if (!widget->isVisible(true))
-                {
-                    return std::string();
-                }
-                if (auto label = std::dynamic_pointer_cast<ftk::Label>(widget))
-                {
-                    out.push_back(label->getText());
-                }
-                else if (auto lineEdit = std::dynamic_pointer_cast<ftk::LineEdit>(widget))
-                {
-                    out.push_back(lineEdit->getText());
-                }
-                else if (auto comboBox = std::dynamic_pointer_cast<ftk::ComboBox>(widget))
-                {
-                    const auto& items = comboBox->getItems();
-                    const int i = comboBox->getCurrentIndex();
-                    if (i >= 0 && i < static_cast<int>(items.size()))
-                    {
-                        out.push_back(items[i].text);
-                    }
-                }
-                else if (auto button = std::dynamic_pointer_cast<ftk::IButton>(widget))
-                {
-                    // A button reads as its label plus its state, since the
-                    // state is usually the thing under test. Most of the tool
-                    // bar has an icon and no label, and "[unchecked]" on its own
-                    // says nothing about which button it was, so fall back to
-                    // the icon name.
-                    std::string s = button->getText();
-                    if (s.empty())
-                    {
-                        s = button->getIcon();
-                    }
-                    if (button->isCheckable())
-                    {
-                        s += button->isChecked() ? " [checked]" : " [unchecked]";
-                    }
-                    out.push_back(s);
-                }
-                else
-                {
-                    for (const auto& child : widget->getChildren())
-                    {
-                        const std::string s = widgetText(child);
-                        if (!s.empty())
-                        {
-                            out.push_back(s);
-                        }
-                    }
-                }
-                out.erase(
-                    std::remove_if(
-                        out.begin(),
-                        out.end(),
-                        [](const std::string& value) { return value.empty(); }),
-                    out.end());
-                return ftk::join(out, " ");
-            }
-
-            std::shared_ptr<ftk::TabWidget> findTabWidget(
-                const std::shared_ptr<ftk::IWidget>& widget,
-                const std::string& tab)
-            {
-                if (auto tabWidget = std::dynamic_pointer_cast<ftk::TabWidget>(widget))
-                {
-                    const auto& tabs = tabWidget->getTabs();
-                    if (std::find(tabs.begin(), tabs.end(), tab) != tabs.end())
-                        return tabWidget;
-                }
-                for (const auto& child : widget->getChildren())
-                {
-                    if (auto found = findTabWidget(child, tab))
-                        return found;
-                }
-                return nullptr;
-            }
-
-            enum class Phase { WaitReady, ApplyRest, Reload, Settle, Done };
-        }
-
         struct Capture::Private
         {
-            std::weak_ptr<ftk::Context> context;
             std::weak_ptr<App> app;
-            std::filesystem::path manifest;
-            std::string shotId;
-            std::filesystem::path outputDir;
-
-            nlohmann::json shot;
-            bool expectMedia = false;
-
-            std::shared_ptr<ftk::Timer> timer;
-            Phase phase = Phase::WaitReady;
-            int ticks = 0;
-            int settleLeft = settleTicks;
-            int settleTicksShot = settleTicks; // per-shot, from the "settle" field
-            int reloadGrace = reloadGraceTicks;
-            std::vector<nlohmann::json> lateSteps;  // applied after first settle
-            size_t lateNext = 0;                   // next late step to apply
-            int waitTicks = 0;                     // from the "wait" step
-            bool done = false;
-            bool success = false;
         };
 
         void Capture::_init(
@@ -196,12 +43,8 @@ namespace djv
             const std::string& shotId,
             const std::filesystem::path& outputDir)
         {
-            FTK_P();
-            p.context = context;
-            p.app = app;
-            p.manifest = manifest;
-            p.shotId = shotId;
-            p.outputDir = outputDir;
+            ftk::Capture::_init(context, app, manifest, shotId, outputDir);
+            _p->app = app;
         }
 
         Capture::Capture() :
@@ -223,229 +66,33 @@ namespace djv
             return out;
         }
 
-        bool Capture::begin()
+        void Capture::_setupWindow(const nlohmann::json& w)
         {
             FTK_P();
-            auto context = p.context.lock();
             auto app = p.app.lock();
-            if (!context || !app)
-                return false;
-
-            // Resolve the requested shot from the manifest.
-            try
-            {
-                std::ifstream f(p.manifest);
-                if (!f.is_open())
-                    throw std::runtime_error(ftk::Format(
-                        "cannot open manifest \"{0}\"").arg(ftk::fromFileSystem(p.manifest)));
-                nlohmann::json doc;
-                f >> doc;
-                bool found = false;
-                for (const auto& shot : doc.at("shots"))
-                {
-                    if (shot.value("id", std::string()) == p.shotId)
-                    {
-                        p.shot = shot;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                    throw std::runtime_error("shot id not found in manifest");
-            }
-            catch (const std::exception& e)
-            {
-                note(p.shotId, e.what());
-                return false;
-            }
-
-            // A shot may widen the settle window (in seconds) to let slow async
-            // work finish before the capture -- e.g. timeline thumbnails, which
-            // stream in after the media is ready. Defaults to settleTicks.
-            const double settleSeconds = p.shot.value("settle", 0.0);
-            if (settleSeconds > 0.0)
-            {
-                int ticks = static_cast<int>(
-                    settleSeconds * 1000.0 / tickInterval.count());
-                if (ticks < settleTicks)
-                    ticks = settleTicks;
-                p.settleTicksShot = ticks;
-            }
-
-            if (app->getWindows().empty())
-            {
-                note(p.shotId, "no window was created");
-                return false;
-            }
-            auto window = app->getWindows().front();
-
-            // Deterministic presentation. Capture runs should also pass
-            // -resetSettings so saved window state can't override this.
-            app->setColorStyle(ftk::ColorStyle::Dark);
-            app->setTooltipsEnabled(false);
-            if (p.shot.contains("window"))
-            {
-                const auto& w = p.shot.at("window");
-                if (w.contains("w") && w.contains("h"))
-                    window->setSize(ftk::Size2I(w.at("w").get<int>(), w.at("h").get<int>()));
-                if (w.contains("scale"))
-                    app->setDisplayScale(w.at("scale").get<float>());
-                if (w.contains("splitter") || w.contains("splitter2"))
-                {
-                    // The splitter positions (0-1) live in the window settings
-                    // but are only applied to the widgets at construction, so
-                    // set them on the window directly. The vertical "splitter"
-                    // sizes the timeline (lower = taller); the horizontal
-                    // "splitter2" sizes the tools panel. The ratio persists
-                    // through the minimize reparent, so applying it here holds.
-                    auto settingsModel = app->getSettingsModel();
-                    auto win = settingsModel->getWindow();
-                    if (w.contains("splitter"))
-                        win.splitter = w.at("splitter").get<float>();
-                    if (w.contains("splitter2"))
-                        win.splitter2 = w.at("splitter2").get<float>();
-                    settingsModel->setWindow(win); // keep the settings consistent
-                    if (auto mw = app->getMainWindow())
-                        mw->setSplitters(win.splitter, win.splitter2);
-                }
-            }
-            // Nobody is watching a capture run, and a window on screen can be
-            // clicked or hovered while the shot is being taken, which puts a
-            // highlight or a tooltip into it.
-            app->setOffscreen(true);
-            window->show();
-
-            // Open the shot's files now; the rest of the setup waits until the
-            // player is ready (handled in the timer state machine).
-            _applyOpens(p.shot.value("setup", nlohmann::json::array()));
-
-            // Arm the capture timer. It fires from inside ftk::App::run(),
-            // after the window is realized and drawing.
-            p.timer = ftk::Timer::create(context);
-            p.timer->setRepeating(true);
-            auto weak = std::weak_ptr<Capture>(shared_from_this());
-            p.timer->start(tickInterval, [weak] {
-                if (auto self = weak.lock())
-                    self->_onTick();
-            });
-            return true;
-        }
-
-        bool Capture::succeeded() const
-        {
-            return _p->success;
-        }
-
-        void Capture::_onTick()
-        {
-            FTK_P();
-            if (p.done)
+            if (!app)
                 return;
-            ++p.ticks;
-            if (p.ticks > timeoutTicks + (p.settleTicksShot - settleTicks))
+            if (w.contains("splitter") || w.contains("splitter2"))
             {
-                note(p.shotId, ftk::Format("timed out waiting for {0}").
-                    arg(p.expectMedia ?
-                        _waitingFor() :
-                        std::string("the shot to become ready")));
-                _finish(false);
-                return;
-            }
-
-            switch (p.phase)
-            {
-            case Phase::WaitReady:
-                if (!p.expectMedia || _ready())
-                {
-                    p.phase = Phase::ApplyRest;
-                }
-                else
-                {
-                    const std::string error = _mediaError();
-                    if (!error.empty())
-                    {
-                        note(p.shotId, ftk::Format("cannot read the media: {0}").
-                            arg(error));
-                        _finish(false);
-                        return;
-                    }
-                }
-                break;
-            case Phase::ApplyRest:
-                _applyRest(p.shot.value("setup", nlohmann::json::array()));
-                p.phase = Phase::Reload;
-                p.reloadGrace = reloadGraceTicks;
-                break;
-            case Phase::Reload:
-                // Setup steps that change the active files (A/B, compare) make
-                // the player reload. Give the reload a moment to begin, then
-                // wait until the player is ready again before settling.
-                if (p.reloadGrace > 0)
-                    --p.reloadGrace;
-                else if (!p.expectMedia || (_ready() && _frameReady()))
-                {
-                    p.phase = Phase::Settle;
-                    p.settleLeft = p.settleTicksShot;
-                }
-                break;
-            case Phase::Settle:
-                if (--p.settleLeft <= 0)
-                {
-                    if (p.lateNext < p.lateSteps.size())
-                    {
-                        // Viewport is now sized and fit; apply the deferred
-                        // steps one per settle rather than in one go, so each
-                        // one is drawn before the next runs. A pick reads the
-                        // rendered image, so a comparison listed before it has
-                        // to have reached the screen first -- and a shot that
-                        // picks and then compares is testing what the sample
-                        // does when the image changes underneath it, which
-                        // cannot happen if both land in the same frame.
-                        //
-                        // Copied because applying a step can append another.
-                        const nlohmann::json step = p.lateSteps[p.lateNext++];
-                        _applyStep(step);
-                        p.settleLeft = std::max(p.settleTicksShot, p.waitTicks);
-                        p.waitTicks = 0;
-                    }
-                    else
-                    {
-                        p.phase = Phase::Done; // captured below this switch
-                    }
-                }
-                break;
-            default:
-                break;
-            }
-
-            if (Phase::Done == p.phase && !p.done)
-            {
-                std::error_code ec;
-                std::filesystem::create_directories(p.outputDir, ec);
-                const auto png = p.outputDir / (p.shotId + ".png");
-                const auto json = p.outputDir / (p.shotId + ".json");
-                bool ok = _writePNG(png);
-                if (ok)
-                {
-                    _writeMetadata(json);
-                    note(p.shotId, ftk::Format("captured {0}").arg(ftk::fromFileSystem(png)));
-                }
-                _finish(ok);
+                // The splitter positions (0-1) live in the window settings
+                // but are only applied to the widgets at construction, so
+                // set them on the window directly. The vertical "splitter"
+                // sizes the timeline (lower = taller); the horizontal
+                // "splitter2" sizes the tools panel. The ratio persists
+                // through the minimize reparent, so applying it here holds.
+                auto settingsModel = app->getSettingsModel();
+                auto win = settingsModel->getWindow();
+                if (w.contains("splitter"))
+                    win.splitter = w.at("splitter").get<float>();
+                if (w.contains("splitter2"))
+                    win.splitter2 = w.at("splitter2").get<float>();
+                settingsModel->setWindow(win); // keep the settings consistent
+                if (auto mw = app->getMainWindow())
+                    mw->setSplitters(win.splitter, win.splitter2);
             }
         }
 
-        void Capture::_finish(bool ok)
-        {
-            FTK_P();
-            p.success = ok;
-            p.done = true;
-            if (p.timer)
-                p.timer->stop();
-            if (auto app = p.app.lock())
-                app->exit();
-        }
-
-        void Capture::_applyOpens(const nlohmann::json& setup)
+        void Capture::_applyEarly(const nlohmann::json& setup)
         {
             FTK_P();
             auto app = p.app.lock();
@@ -459,55 +106,33 @@ namespace djv
                     if (path.hasSeqWildcard())
                         path = ftk::expandSeq(path);
                     app->open(path);
-                    p.expectMedia = true;
+                    _setExpectMedia(true);
                 }
             }
         }
 
-        void Capture::_applyRest(const nlohmann::json& setup)
+        bool Capture::_isEarlyStep(const nlohmann::json& step) const
         {
-            FTK_P();
-            // Everything after the first deferred step is deferred too. Only
-            // some steps have to wait, but applying the rest immediately would
-            // run them before the ones that waited, quietly turning a manifest
-            // that picks and then compares into one that compares and then
-            // picks -- which samples the settled result and can never catch a
-            // stale one.
-            bool late = false;
-            for (const auto& step : setup)
-            {
-                if (step.contains("open"))
-                    continue;
-                // A pick samples the rendered image and a zoom needs the
-                // viewport's laid-out geometry, so both must wait until the
-                // viewport is sized and fit-zoomed. A tab selection searches
-                // the widget tree, so it must wait until the tool from a
-                // preceding step has been created and laid out.
-                late = late ||
-                    step.contains("click") ||
-                    step.contains("scroll") ||
-                    step.contains("drag") ||
-                    step.contains("hover") ||
-                    step.contains("key") ||
-                    step.contains("pick") ||
-                    step.contains("zoom") ||
-                    step.contains("tab") ||
-                    step.contains("wait");
-                if (late)
-                {
-                    p.lateSteps.push_back(step);
-                    continue;
-                }
-                _applyStep(step);
-            }
+            return step.contains("open");
         }
 
-        void Capture::_applyStep(const nlohmann::json& step)
+        bool Capture::_isLateStep(const nlohmann::json& step) const
+        {
+            // A pick samples the rendered image and a zoom needs the
+            // viewport's laid-out geometry, so both must wait until the
+            // viewport is sized and fit-zoomed.
+            return
+                ftk::Capture::_isLateStep(step) ||
+                step.contains("pick") ||
+                step.contains("zoom");
+        }
+
+        bool Capture::_applyStep(const nlohmann::json& step)
         {
             FTK_P();
             auto app = p.app.lock();
             if (!app)
-                return;
+                return false;
             if (step.contains("tool"))
             {
                 const std::string toolStr = step.at("tool").get<std::string>();
@@ -539,36 +164,13 @@ namespace djv
                     else if (expand.is_array() && !expand.empty())
                         section = expand.back().get<std::string>();
                     if (!section.empty())
-                        p.lateSteps.push_back(
+                        _addLateStep(
                             { { "scrollTool",
                                 { { "tool", toolStr }, { "section", section } } } });
                 }
                 app->getCommandsModel()->exec(
                     ftk::Format("Tools/{0}").arg(toolStr),
                     { { "value", true } });
-            }
-            else if (step.contains("tab"))
-            {
-                // Select a tab by name, e.g. { "tab": "Movie" }. Searches the
-                // main window for a tab widget containing the given tab name.
-                // Deferred to the late phase so the tool from a preceding step
-                // has been created (see _applyRest).
-                const std::string name = step.at("tab").get<std::string>();
-                std::shared_ptr<ftk::TabWidget> tabWidget;
-                if (auto mainWindow = app->getMainWindow())
-                {
-                    tabWidget = findTabWidget(mainWindow, name);
-                }
-                if (tabWidget)
-                {
-                    const auto& tabs = tabWidget->getTabs();
-                    const auto i = std::find(tabs.begin(), tabs.end(), name);
-                    tabWidget->setCurrent(i - tabs.begin());
-                }
-                else
-                {
-                    note(p.shotId, ftk::Format("tab not found: \"{0}\"").arg(name));
-                }
             }
             else if (step.contains("scrollTool"))
             {
@@ -584,16 +186,6 @@ namespace djv
                         tool->scrollTo(v.at("section").get<std::string>());
                     }
                 }
-            }
-            else if (step.contains("wait"))
-            {
-                // Hold this many seconds before the next step, for the things
-                // that happen outside the app -- a render adding frames to a
-                // sequence the shot is about to reload. e.g. { "wait": 2.0 }.
-                // The wait spends the shot's overall timeout budget.
-                p.waitTicks = static_cast<int>(
-                    step.at("wait").get<double>() * 1000.0 /
-                    tickInterval.count());
             }
             else if (step.contains("command"))
             {
@@ -738,7 +330,7 @@ namespace djv
                 if (!app->getCommandsModel()->exec(
                     ftk::Format("Compare/{0}").arg(name), args))
                 {
-                    note(p.shotId, "unknown compare mode '" + name + "'");
+                    _note("unknown compare mode '" + name + "'");
                 }
             }
             else if (step.contains("layer"))
@@ -774,7 +366,7 @@ namespace djv
                     if (li >= 0 && li < static_cast<int>(item->videoLayers.size()))
                         model->setLayer(item, li);
                     else
-                        note(p.shotId, "no matching layer for the target file");
+                        _note("no matching layer for the target file");
                 }
             }
             else if (step.contains("mediaReference"))
@@ -794,7 +386,7 @@ namespace djv
                     }
                     else
                     {
-                        note(p.shotId, "no matching media reference key");
+                        _note("no matching media reference key");
                     }
                 }
             }
@@ -836,7 +428,7 @@ namespace djv
                             const std::string s =
                                 gv.at("cellMode").get<std::string>();
                             if (!from_string(s, fg.grid.cellMode))
-                                note(p.shotId,
+                                _note(
                                     "unrecognized grid cell mode '" + s + "'");
                         }
                         if (gv.contains("labels"))
@@ -847,7 +439,7 @@ namespace djv
                             const std::string s =
                                 gv.at("labels").get<std::string>();
                             if (!from_string(s, fg.grid.labels))
-                                note(p.shotId,
+                                _note(
                                     "unrecognized grid labels '" + s + "'");
                         }
                     }
@@ -879,10 +471,10 @@ namespace djv
                                 models::HUDItem item = models::HUDItem::First;
                                 models::HUDPos pos = models::HUDPos::First;
                                 if (!from_string(key, item))
-                                    note(p.shotId,
+                                    _note(
                                         "unrecognized HUD item '" + key + "'");
                                 else if (!from_string(value.get<std::string>(), pos))
-                                    note(p.shotId,
+                                    _note(
                                         "unrecognized HUD position '" +
                                         value.get<std::string>() + "'");
                                 else
@@ -926,7 +518,7 @@ namespace djv
                                 const std::string s =
                                     av.at("type").get<std::string>();
                                 if (!from_string(s, preset.type))
-                                    note(p.shotId,
+                                    _note(
                                         "unrecognized aspect ratio type '" + s + "'");
                             }
                         }
@@ -939,7 +531,7 @@ namespace djv
                     }
                     else
                     {
-                        note(p.shotId, ftk::Format(
+                        _note(ftk::Format(
                             "aspect ratio index {0} is out of range").arg(index));
                     }
                 }
@@ -953,14 +545,14 @@ namespace djv
                     {
                         const std::string s = v.at("magnify").get<std::string>();
                         if (!from_string(s, display.imageFilters.magnify))
-                            note(p.shotId,
+                            _note(
                                 "unrecognized magnify filter '" + s + "'");
                     }
                     if (v.contains("minify"))
                     {
                         const std::string s = v.at("minify").get<std::string>();
                         if (!from_string(s, display.imageFilters.minify))
-                            note(p.shotId,
+                            _note(
                                 "unrecognized minify filter '" + s + "'");
                     }
                     vp->setImageOptions(display);
@@ -984,7 +576,7 @@ namespace djv
                     const std::string s =
                         v.at("thumbnailSize").get<std::string>();
                     if (!from_string(s, settings.thumbnailSize))
-                        note(p.shotId,
+                        _note(
                             "unrecognized timeline thumbnailSize '" + s + "'");
                 }
                 settingsModel->setTimeline(settings);
@@ -1069,7 +661,7 @@ namespace djv
                 // These mirror the file-browser settings (path + options),
                 // applied straight to the model since the live settings only
                 // re-push them at startup.
-                if (auto context = p.context.lock())
+                if (auto context = _getContext())
                 {
                     auto fbs = context->getSystem<ftk::FileBrowserSystem>();
                     fbs->setNativeFileDialog(false);
@@ -1086,7 +678,7 @@ namespace djv
                             if (std::filesystem::exists(path))
                                 model->setPath(path);
                             else
-                                note(p.shotId, "fileBrowser path does not exist: " +
+                                _note("fileBrowser path does not exist: " +
                                     ftk::fromFileSystem(path));
                         }
                         if (v.contains("bellows") && v.at("bellows").is_object())
@@ -1153,285 +745,6 @@ namespace djv
                     }
                 }
             }
-            else if (step.contains("scroll"))
-            {
-                // Scroll the mouse wheel over a tagged widget or a window
-                // position, aimed the way "click" is aimed. e.g.
-                // { "scroll": "MainWindow.Viewport", "delta": [0, 1] },
-                // { "scroll": [160, 90], "delta": [0, -1], "modifier":
-                // "Control" }. Deferred by _applyRest like "click".
-                const auto& v = step.at("scroll");
-                int modifiers = 0;
-                if (step.contains("modifier"))
-                {
-                    ftk::KeyModifier modifier = ftk::KeyModifier::None;
-                    if (ftk::from_string(
-                        step.at("modifier").get<std::string>(), modifier))
-                    {
-                        modifiers = static_cast<int>(modifier);
-                    }
-                }
-                ftk::V2F delta(0.F, 1.F);
-                if (step.contains("delta") &&
-                    step.at("delta").is_array() &&
-                    step.at("delta").size() >= 2)
-                {
-                    delta.x = step.at("delta")[0].get<float>();
-                    delta.y = step.at("delta")[1].get<float>();
-                }
-                auto mw = app->getMainWindow();
-                std::optional<ftk::V2I> pos;
-                if (v.is_array() && v.size() >= 2)
-                {
-                    pos = ftk::V2I(v[0].get<int>(), v[1].get<int>());
-                }
-                else if (v.is_string() && mw)
-                {
-                    std::vector<std::shared_ptr<ftk::IWidget> > tagged;
-                    collect(mw, tagged);
-                    for (const auto& w : tagged)
-                    {
-                        if (ftk::getScreenshotTag(w) == v.get<std::string>())
-                        {
-                            const ftk::Box2I g = w->getGeometry();
-                            pos = ftk::V2I(
-                                g.x() + g.w() / 2,
-                                g.y() + g.h() / 2);
-                            break;
-                        }
-                    }
-                    if (!pos.has_value())
-                    {
-                        note(p.shotId,
-                            "scroll: no visible widget tagged \"" +
-                            v.get<std::string>() + "\"");
-                    }
-                }
-                if (pos.has_value() && mw)
-                {
-                    std::static_pointer_cast<ftk::IWindow>(mw)->scroll(
-                        pos.value(), delta, modifiers);
-                }
-            }
-            else if (step.contains("click"))
-            {
-                // Click on the widget with a screenshot tag, or at a window
-                // position in framebuffer pixels -- on a display with a scale
-                // of two the numbers are twice the requested window size, so
-                // the tag form is preferred where a tag exists. The button
-                // defaults to the left, e.g.
-                // { "click": "Files.CompareMode" },
-                // { "click": "MainWindow.Viewport", "button": "Right" },
-                // { "click": [160, 90], "modifier": "Ctrl" }. Unlike
-                // "pick", which calls the viewport directly, this goes through
-                // the window the way a real click does -- including the mouse
-                // bindings, so picking needs the modifier it is bound to.
-                // Deferred by _applyRest so the widget under it is laid out.
-                const auto& v = step.at("click");
-                int modifiers = 0;
-                if (step.contains("modifier"))
-                {
-                    ftk::KeyModifier modifier = ftk::KeyModifier::None;
-                    if (ftk::from_string(
-                        step.at("modifier").get<std::string>(), modifier))
-                    {
-                        modifiers = static_cast<int>(modifier);
-                    }
-                }
-                ftk::MouseButton button = ftk::MouseButton::Left;
-                if (step.contains("button"))
-                {
-                    ftk::from_string(
-                        step.at("button").get<std::string>(), button);
-                }
-                auto mw = app->getMainWindow();
-                std::optional<ftk::V2I> pos;
-                if (v.is_array() && v.size() >= 2)
-                {
-                    pos = ftk::V2I(v[0].get<int>(), v[1].get<int>());
-                }
-                else if (v.is_string() && mw)
-                {
-                    std::vector<std::shared_ptr<ftk::IWidget> > tagged;
-                    collect(mw, tagged);
-                    for (const auto& w : tagged)
-                    {
-                        if (ftk::getScreenshotTag(w) == v.get<std::string>())
-                        {
-                            const ftk::Box2I g = w->getGeometry();
-                            pos = ftk::V2I(
-                                g.x() + g.w() / 2,
-                                g.y() + g.h() / 2);
-                            break;
-                        }
-                    }
-                    if (!pos.has_value())
-                    {
-                        note(p.shotId,
-                            "click: no visible widget tagged \"" +
-                            v.get<std::string>() + "\"");
-                    }
-                }
-                if (pos.has_value() && mw)
-                {
-                    std::static_pointer_cast<ftk::IWindow>(mw)->click(
-                        pos.value(), button, modifiers);
-                }
-            }
-            else if (step.contains("hover"))
-            {
-                // Move the cursor without pressing, aimed the way "click"
-                // is aimed, for what only shows on hover -- the status
-                // bar's menu hints, say. Deferred by _applyRest like
-                // "click", e.g.
-                // { "hover": "Files.CompareMode" },
-                // { "hover": [160, 90] }.
-                const auto& v = step.at("hover");
-                auto mw = app->getMainWindow();
-                std::optional<ftk::V2I> pos;
-                if (v.is_array() && v.size() >= 2)
-                {
-                    pos = ftk::V2I(v[0].get<int>(), v[1].get<int>());
-                }
-                else if (v.is_string() && mw)
-                {
-                    std::vector<std::shared_ptr<ftk::IWidget> > tagged;
-                    collect(mw, tagged);
-                    for (const auto& w : tagged)
-                    {
-                        if (ftk::getScreenshotTag(w) == v.get<std::string>())
-                        {
-                            const ftk::Box2I g = w->getGeometry();
-                            pos = ftk::V2I(
-                                g.x() + g.w() / 2,
-                                g.y() + g.h() / 2);
-                            break;
-                        }
-                    }
-                    if (!pos.has_value())
-                    {
-                        note(p.shotId,
-                            "hover: no visible widget tagged \"" +
-                            v.get<std::string>() + "\"");
-                    }
-                }
-                if (pos.has_value() && mw)
-                {
-                    std::static_pointer_cast<ftk::IWindow>(mw)->hover(pos.value());
-                }
-            }
-            else if (step.contains("drag"))
-            {
-                // Press at the first point, move through the rest, release --
-                // the window's drag helper, aimed the way "click" is aimed.
-                // Each entry is a screenshot tag, whose widget's center is
-                // used, or a position in framebuffer pixels, e.g.
-                // { "drag": ["Files.Thumbnail", [160, 300]] },
-                // { "drag": [[100, 50], [100, 250]], "modifier": "Ctrl" }.
-                // Deferred by _applyRest like "click".
-                const auto& v = step.at("drag");
-                int modifiers = 0;
-                if (step.contains("modifier"))
-                {
-                    ftk::KeyModifier modifier = ftk::KeyModifier::None;
-                    if (ftk::from_string(
-                        step.at("modifier").get<std::string>(), modifier))
-                    {
-                        modifiers = static_cast<int>(modifier);
-                    }
-                }
-                auto mw = app->getMainWindow();
-                std::vector<ftk::V2I> path;
-                bool pathOK = v.is_array() && mw;
-                if (pathOK)
-                {
-                    std::vector<std::shared_ptr<ftk::IWidget> > tagged;
-                    collect(mw, tagged);
-                    for (const auto& entry : v)
-                    {
-                        if (entry.is_array() && entry.size() >= 2)
-                        {
-                            path.push_back(ftk::V2I(
-                                entry[0].get<int>(),
-                                entry[1].get<int>()));
-                        }
-                        else if (entry.is_string())
-                        {
-                            bool found = false;
-                            for (const auto& w : tagged)
-                            {
-                                if (ftk::getScreenshotTag(w) ==
-                                    entry.get<std::string>())
-                                {
-                                    const ftk::Box2I g = w->getGeometry();
-                                    path.push_back(ftk::V2I(
-                                        g.x() + g.w() / 2,
-                                        g.y() + g.h() / 2));
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found)
-                            {
-                                pathOK = false;
-                                note(p.shotId,
-                                    "drag: no visible widget tagged \"" +
-                                    entry.get<std::string>() + "\"");
-                            }
-                        }
-                    }
-                }
-                if (pathOK && path.size() >= 2)
-                {
-                    std::static_pointer_cast<ftk::IWindow>(mw)->drag(
-                        path, modifiers);
-                }
-            }
-            else if (step.contains("text"))
-            {
-                // Type text, the way typing does after the key events:
-                // letters reach a widget as text input, not as key
-                // presses. e.g. { "text": "-0.50" }. Deferred like "click",
-                // so the field it lands in is laid out and focused.
-                if (auto mw = app->getMainWindow())
-                {
-                    std::static_pointer_cast<ftk::IWindow>(mw)->text(
-                        step.at("text").get<std::string>());
-                }
-            }
-            else if (step.contains("key"))
-            {
-                // Press and release a key through the window's dispatch,
-                // e.g. { "key": "Escape" }, { "key": "M", "modifier":
-                // "Shift" }. Deferred like "click" so the focused widget
-                // exists.
-                ftk::Key key = ftk::Key::Unknown;
-                if (ftk::from_string(step.at("key").get<std::string>(), key) &&
-                    ftk::Key::Unknown != key)
-                {
-                    int modifiers = 0;
-                    if (step.contains("modifier"))
-                    {
-                        ftk::KeyModifier modifier = ftk::KeyModifier::None;
-                        if (ftk::from_string(
-                            step.at("modifier").get<std::string>(), modifier))
-                        {
-                            modifiers = static_cast<int>(modifier);
-                        }
-                    }
-                    if (auto mw = app->getMainWindow())
-                    {
-                        std::static_pointer_cast<ftk::IWindow>(mw)->keyPress(
-                            key, modifiers);
-                    }
-                }
-                else
-                {
-                    note(p.shotId,
-                        "key: unknown key \"" +
-                        step.at("key").get<std::string>() + "\"");
-                }
-            }
             else if (step.contains("pick"))
             {
                 // Sample the image at the given pixel for the Color Picker and
@@ -1446,6 +759,11 @@ namespace djv
                         mw->getViewport()->pick(imagePos);
                 }
             }
+            else
+            {
+                return ftk::Capture::_applyStep(step);
+            }
+            return true;
         }
 
         int Capture::_fileIndex(const nlohmann::json& value) const
@@ -1464,7 +782,7 @@ namespace djv
                 if (files[i]->path.get().find(s) != std::string::npos)
                     return static_cast<int>(i);
             }
-            note(p.shotId, "no file matches '" + s + "' for A/B");
+            _note("no file matches '" + s + "' for A/B");
             return -1;
         }
 
@@ -1540,73 +858,6 @@ namespace djv
             if (!_ready())
                 return "the media to report its video or audio information";
             return "the frame at the current time to be decoded";
-        }
-
-        bool Capture::_writePNG(const std::filesystem::path& path) const
-        {
-            FTK_P();
-            auto app = p.app.lock();
-            if (!app)
-                return false;
-            if (!app->writeScreenshot(path))
-            {
-                note(p.shotId, ftk::Format("cannot capture \"{0}\"").arg(ftk::fromFileSystem(path)));
-                return false;
-            }
-            return true;
-        }
-
-        void Capture::_writeMetadata(const std::filesystem::path& path) const
-        {
-            FTK_P();
-            auto app = p.app.lock();
-            if (!app || app->getWindows().empty())
-                return;
-            auto window = app->getWindows().front();
-
-            std::vector<std::shared_ptr<ftk::IWidget> > tagged;
-            collect(window, tagged);
-
-            nlohmann::json widgets = nlohmann::json::array();
-            for (const auto& w : tagged)
-            {
-                const ftk::Box2I g = w->getGeometry();
-                nlohmann::json widget = {
-                    { "id", ftk::getScreenshotTag(w) },
-                    { "box", { g.x(), g.y(), g.w(), g.h() } } };
-                const std::string text = widgetText(w);
-                if (!text.empty())
-                {
-                    widget["text"] = text;
-                }
-                widgets.push_back(widget);
-            }
-
-            // Boxes and the screenshot share the offscreen buffer's pixel space
-            // (window size x display scale), so they already line up regardless
-            // of scale. Record the display scale as "dpr" so make_svg can show a
-            // high-DPI capture at its logical size -- crisp, not enlarged.
-            const ftk::Size2I size = window->getGeometry().size();
-            nlohmann::json out = {
-                { "shot", p.shotId },
-                { "image", p.shotId + ".png" },
-                { "dpr", app->getDisplayScale() },
-                { "window", { { "w", size.w }, { "h", size.h } } },
-                { "widgets", widgets } };
-            if (p.shot.contains("annotate"))
-                out["annotate"] = p.shot.at("annotate");
-            // Per-shot make_svg options pass straight through to the sidecar so
-            // the SVG step is driven entirely by the sidecar -- build_screenshots
-            // never has to re-parse the manifest to forward them.
-            if (p.shot.contains("crop"))
-                out["crop"] = p.shot.at("crop");
-            if (p.shot.contains("layout"))
-                out["layout"] = p.shot.at("layout");
-            if (p.shot.contains("cropFit"))
-                out["cropFit"] = p.shot.at("cropFit");
-
-            std::ofstream f(path);
-            f << out.dump(2) << std::endl;
         }
     }
 }
