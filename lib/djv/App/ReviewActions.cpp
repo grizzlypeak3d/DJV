@@ -356,8 +356,17 @@ namespace djv
             // shortcuts editor, so any key can be bound today.
             _addShortcut("Draw", "Draw strokes");
             _addShortcut("Erase", "Erase strokes");
-            _addShortcut("Undo", "Undo drawing");
-            _addShortcut("Redo", "Redo drawing");
+            _addShortcut(
+                "Undo",
+                "Undo drawing",
+                ftk::KeyShortcut(ftk::Key::Z, static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut(
+                "Redo",
+                "Redo drawing",
+                ftk::KeyShortcut(
+                    ftk::Key::Z,
+                    static_cast<int>(ftk::KeyModifier::Shift) |
+                    static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("ClearDrawing", "Clear drawing");
             _addShortcut("AddNote", "Add a marker");
             _addShortcut("AddRange", "Add a range");
