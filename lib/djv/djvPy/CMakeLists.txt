@@ -2,6 +2,12 @@ nanobind_add_module(djvPy NB_STATIC Bindings.cpp)
 
 target_include_directories(djvPy PRIVATE ${PROJECT_SOURCE_DIR}/lib)
 
+# The binding objects go into the module directly rather than through
+# their archives. nanobind's own static library is first on the link line,
+# and GNU ld takes from an archive only what is wanted at the moment it is
+# scanned: a binding archive scanned after it finds the enum and datetime
+# helpers already passed over, and a Release build fails to link.
+target_sources(djvPy PRIVATE $<TARGET_OBJECTS:djvModelsPy> $<TARGET_OBJECTS:djvUIPy>)
 target_link_libraries(djvPy PRIVATE djvModelsPy djvUIPy)
 
 target_compile_options(djvPy PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
