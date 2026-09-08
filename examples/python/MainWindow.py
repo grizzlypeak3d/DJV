@@ -140,7 +140,13 @@ class MainWindow(ftk.MainWindow):
         self._dividers["ToolBars"] = ftk.Divider(
             context, ftk.Orientation.Vertical, self._layout)
         self._tabBar.parent = self._layout
-        self._splitter = ftk.Splitter(context, ftk.Orientation.Vertical, self._layout)
+        # The splitter's slot in the layout: minimizing the timeline swaps
+        # the splitter out for a plain stack (see _timelineSettingsUpdate),
+        # and the swap has to land in the same place.
+        self._splitterLayout = ftk.VerticalLayout(context, self._layout)
+        self._splitterLayout.spacingRole = ftk.SizeRole._None
+        self._splitterLayout.vStretch = ftk.Stretch.Expanding
+        self._splitter = ftk.Splitter(context, ftk.Orientation.Vertical, self._splitterLayout)
         self._splitter.split = window.splitter
         self._splitter2 = ftk.Splitter(context, ftk.Orientation.Horizontal, self._splitter)
         self._splitter2.split = window.splitter2
@@ -384,6 +390,21 @@ class MainWindow(ftk.MainWindow):
         display.waveforms = settings.trackMedia and settings.waveforms
         display.waveformHeight = djv.models.getTimelineWaveformSize(settings.waveformSize)
         self._timelineWidget.displayOptions = display
+
+        # Minimized, the timeline takes its natural height and there is
+        # nothing to drag: the splitter leaves the tree and the viewport
+        # and timeline stack directly. The split ratio persists through
+        # the reparent, so restoring puts the handle back where it was.
+        if settings.minimize:
+            if self._splitter.parent is not None:
+                self._splitter.parent = None
+                self._splitter2.parent = self._splitterLayout
+                self._timelineWidget.parent = self._splitterLayout
+        else:
+            if self._splitter.parent is None:
+                self._splitter.parent = self._splitterLayout
+                self._splitter2.parent = self._splitter
+                self._timelineWidget.parent = self._splitter
 
     def _timelineFrameViewUpdate(self, value):
         settings = self._settingsModel.timeline
