@@ -3,39 +3,51 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/Shortcuts.h>
 
-#include <pybind11/operators.h>
-#include <pybind11/stl.h>
+#include <nanobind/operators.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void shortcuts(py::module_& m)
+        void shortcuts(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<Shortcut>(m, "Shortcut")
-                .def(py::init())
+            nb::class_<Shortcut>(m, "Shortcut")
+                .def(nb::init())
                 .def(
-                    py::init<
+                    nb::init<
                         const std::string&,
                         const std::string&,
                         const ftk::KeyShortcut&,
                         const ftk::KeyShortcut&>(),
-                    py::arg("name"),
-                    py::arg("text"),
-                    py::arg("primary") = ftk::KeyShortcut(),
-                    py::arg("secondary") = ftk::KeyShortcut())
-                .def_readwrite("name", &Shortcut::name)
-                .def_readwrite("text", &Shortcut::text)
-                .def_readwrite("primary", &Shortcut::primary)
-                .def_readwrite("secondary", &Shortcut::secondary)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+                    nb::arg("name"),
+                    nb::arg("text"),
+                    nb::arg("primary") = ftk::KeyShortcut(),
+                    nb::arg("secondary") = ftk::KeyShortcut())
+                .def_rw("name", &Shortcut::name)
+                .def_rw("text", &Shortcut::text)
+                .def_rw("primary", &Shortcut::primary)
+                .def_rw("secondary", &Shortcut::secondary)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
         }
     }
 }

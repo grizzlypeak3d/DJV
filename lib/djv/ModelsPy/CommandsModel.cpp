@@ -3,34 +3,50 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/CommandsModel.h>
 
 #include <ftk/Core/Context.h>
 
-#include <pybind11/functional.h>
-#include <pybind11/stl.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void commandsModel(py::module_& m)
+        void commandsModel(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<CommandInfo>(m, "CommandInfo")
-                .def(py::init())
-                .def_readwrite("name", &CommandInfo::name)
-                .def_readwrite("doc", &CommandInfo::doc);
+            nb::class_<CommandInfo>(m, "CommandInfo")
+                .def(nb::init())
+                .def_rw("name", &CommandInfo::name)
+                .def_rw("doc", &CommandInfo::doc);
 
             // JSON crosses the language boundary as strings, following the
             // ftk::Settings bindings.
-            py::class_<CommandsModel, std::shared_ptr<CommandsModel> >(m, "CommandsModel")
+            nb::class_<CommandsModel>(
+                m, "CommandsModel",
+                // The Python examples hold this through weakref, which
+                // nanobind classes opt into.
+                nb::is_weak_referenceable())
                 .def(
-                    py::init(&CommandsModel::create),
-                    py::arg("context"))
+                    nb::new_(&CommandsModel::create),
+                    nb::arg("context"))
                 .def(
                     "add",
                     [](CommandsModel& model,
@@ -46,11 +62,11 @@ namespace djv
                                 func(args.dump());
                             });
                     },
-                    py::arg("name"),
-                    py::arg("doc"),
-                    py::arg("func"))
-                .def("remove", &CommandsModel::remove, py::arg("name"))
-                .def_property_readonly("commands", &CommandsModel::getCommands)
+                    nb::arg("name"),
+                    nb::arg("doc"),
+                    nb::arg("func"))
+                .def("remove", &CommandsModel::remove, nb::arg("name"))
+                .def_prop_ro("commands", &CommandsModel::getCommands)
                 .def(
                     "exec",
                     [](CommandsModel& model,
@@ -59,8 +75,8 @@ namespace djv
                     {
                         return model.exec(name, nlohmann::json::parse(args));
                     },
-                    py::arg("name"),
-                    py::arg("args") = std::string("null"));
+                    nb::arg("name"),
+                    nb::arg("args") = std::string("null"));
         }
     }
 }

@@ -3,75 +3,87 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/FilesModel.h>
 
 #include <ftk/UI/Settings.h>
 
 #include <ftk/CorePy/Bindings.h>
 
-#include <pybind11/stl.h>
-#include <pybind11/functional.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
+#include <nanobind/stl/function.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void filesModel(py::module_& m)
+        void filesModel(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<FilesModelItem, std::shared_ptr<FilesModelItem> >(m, "FilesModelItem")
-                .def(py::init<>())
-                .def_readwrite("id", &FilesModelItem::id)
-                .def_readwrite("path", &FilesModelItem::path)
-                .def_readwrite("audioPath", &FilesModelItem::audioPath)
-                .def_readwrite("videoLayers", &FilesModelItem::videoLayers)
-                .def_readwrite("videoLayer", &FilesModelItem::videoLayer)
-                .def_readwrite("speed", &FilesModelItem::speed)
-                .def_readwrite("currentTime", &FilesModelItem::currentTime)
-                .def_readwrite("inOutRange", &FilesModelItem::inOutRange)
-                .def_readwrite("timeRange", &FilesModelItem::timeRange)
-                .def_readwrite("framesStated", &FilesModelItem::framesStated)
-                .def_readwrite("newFile", &FilesModelItem::newFile);
+            nb::class_<FilesModelItem>(m, "FilesModelItem")
+                .def(nb::init<>())
+                .def_rw("id", &FilesModelItem::id)
+                .def_rw("path", &FilesModelItem::path)
+                .def_rw("audioPath", &FilesModelItem::audioPath)
+                .def_rw("videoLayers", &FilesModelItem::videoLayers)
+                .def_rw("videoLayer", &FilesModelItem::videoLayer)
+                .def_rw("speed", &FilesModelItem::speed)
+                .def_rw("currentTime", &FilesModelItem::currentTime)
+                .def_rw("inOutRange", &FilesModelItem::inOutRange)
+                .def_rw("timeRange", &FilesModelItem::timeRange)
+                .def_rw("framesStated", &FilesModelItem::framesStated)
+                .def_rw("newFile", &FilesModelItem::newFile);
 
             ftk::python::observable<std::shared_ptr<FilesModelItem> >(m, "FilesModelItem");
             ftk::python::observableList<std::shared_ptr<FilesModelItem> >(m, "FilesModelItem");
             ftk::python::observable<tl::CompareOptions>(m, "CompareOptions");
             ftk::python::observable<tl::CompareTime>(m, "CompareTime");
 
-            py::class_<FilesModel, std::shared_ptr<FilesModel> >(m, "FilesModel")
+            nb::class_<FilesModel>(m, "FilesModel")
                 .def(
-                    py::init(&FilesModel::create),
-                    py::arg("settings"))
+                    nb::new_(&FilesModel::create),
+                    nb::arg("settings"))
 
                 .def("save", &FilesModel::save)
 
-                .def_property_readonly("files", &FilesModel::getFiles)
-                .def_property_readonly("observeFiles", &FilesModel::observeFiles)
-                .def_property_readonly("a", &FilesModel::getA)
-                .def_property_readonly("observeA", &FilesModel::observeA)
-                .def_property_readonly("aIndex", &FilesModel::getAIndex)
-                .def_property_readonly("observeAIndex", &FilesModel::observeAIndex)
-                .def_property_readonly("b", &FilesModel::getB)
-                .def_property_readonly("observeB", &FilesModel::observeB)
-                .def_property_readonly("bIndexes", &FilesModel::getBIndexes)
-                .def_property_readonly("observeBIndexes", &FilesModel::observeBIndexes)
-                .def_property_readonly("active", &FilesModel::getActive)
-                .def_property_readonly("observeActive", &FilesModel::observeActive)
+                .def_prop_ro("files", &FilesModel::getFiles)
+                .def_prop_ro("observeFiles", &FilesModel::observeFiles)
+                .def_prop_ro("a", &FilesModel::getA)
+                .def_prop_ro("observeA", &FilesModel::observeA)
+                .def_prop_ro("aIndex", &FilesModel::getAIndex)
+                .def_prop_ro("observeAIndex", &FilesModel::observeAIndex)
+                .def_prop_ro("b", &FilesModel::getB)
+                .def_prop_ro("observeB", &FilesModel::observeB)
+                .def_prop_ro("bIndexes", &FilesModel::getBIndexes)
+                .def_prop_ro("observeBIndexes", &FilesModel::observeBIndexes)
+                .def_prop_ro("active", &FilesModel::getActive)
+                .def_prop_ro("observeActive", &FilesModel::observeActive)
 
-                .def("add", py::overload_cast<
+                .def("add", nb::overload_cast<
                     const std::shared_ptr<FilesModelItem>&>(&FilesModel::add))
-                .def("add", py::overload_cast<
+                .def("add", nb::overload_cast<
                     const std::vector<std::shared_ptr<FilesModelItem> >&>(&FilesModel::add))
-                .def("move", &FilesModel::move, py::arg("fromIndex"), py::arg("toIndex"))
-                .def("close", py::overload_cast<>(&FilesModel::close))
-                .def("close", py::overload_cast<int>(&FilesModel::close), py::arg("index"))
+                .def("move", &FilesModel::move, nb::arg("fromIndex"), nb::arg("toIndex"))
+                .def("close", nb::overload_cast<>(&FilesModel::close))
+                .def("close", nb::overload_cast<int>(&FilesModel::close), nb::arg("index"))
                 .def("closeAll", &FilesModel::closeAll)
-                .def("setA", &FilesModel::setA, py::arg("index"))
-                .def("setB", &FilesModel::setB, py::arg("index"), py::arg("value"))
-                .def("toggleB", &FilesModel::toggleB, py::arg("index"))
+                .def("setA", &FilesModel::setA, nb::arg("index"))
+                .def("setB", &FilesModel::setB, nb::arg("index"), nb::arg("value"))
+                .def("toggleB", &FilesModel::toggleB, nb::arg("index"))
                 .def("clearB", &FilesModel::clearB)
                 .def("first", &FilesModel::first)
                 .def("last", &FilesModel::last)
@@ -82,25 +94,25 @@ namespace djv
                 .def("nextB", &FilesModel::nextB)
                 .def("prevB", &FilesModel::prevB)
 
-                .def_property_readonly("observeLayers", &FilesModel::observeLayers)
-                .def("setLayer", &FilesModel::setLayer, py::arg("item"), py::arg("layer"))
-                .def("setFrames", &FilesModel::setFrames, py::arg("item"), py::arg("range"))
-                .def_property_readonly("observeReload", &FilesModel::observeReload)
+                .def_prop_ro("observeLayers", &FilesModel::observeLayers)
+                .def("setLayer", &FilesModel::setLayer, nb::arg("item"), nb::arg("layer"))
+                .def("setFrames", &FilesModel::setFrames, nb::arg("item"), nb::arg("range"))
+                .def_prop_ro("observeReload", &FilesModel::observeReload)
                 .def("refresh", &FilesModel::refresh)
                 .def("nextLayer", &FilesModel::nextLayer)
                 .def("prevLayer", &FilesModel::prevLayer)
 
-                .def_property(
+                .def_prop_rw(
                     "compareOptions",
                     &FilesModel::getCompareOptions,
                     &FilesModel::setCompareOptions,
-                    py::return_value_policy::copy)
-                .def_property_readonly("observeCompareOptions", &FilesModel::observeCompareOptions)
-                .def_property(
+                    nb::rv_policy::copy)
+                .def_prop_ro("observeCompareOptions", &FilesModel::observeCompareOptions)
+                .def_prop_rw(
                     "compareTime",
                     &FilesModel::getCompareTime,
                     &FilesModel::setCompareTime)
-                .def_property_readonly("observeCompareTime", &FilesModel::observeCompareTime);
+                .def_prop_ro("observeCompareTime", &FilesModel::observeCompareTime);
 
             m.def("getCompareTimeLabels", &getCompareTimeLabels);
         }

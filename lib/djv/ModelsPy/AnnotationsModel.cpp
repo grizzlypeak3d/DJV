@@ -3,57 +3,69 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/AnnotationsModel.h>
 
 #include <ftk/CorePy/Bindings.h>
 
-#include <pybind11/operators.h>
-#include <pybind11/stl.h>
-#include <pybind11/functional.h>
+#include <nanobind/operators.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
+#include <nanobind/stl/function.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void annotationsModel(py::module_& m)
+        void annotationsModel(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<ReviewStroke>(m, "ReviewStroke")
-                .def(py::init())
-                .def_readwrite("color", &ReviewStroke::color)
-                .def_readwrite("width", &ReviewStroke::width)
-                .def_readwrite("points", &ReviewStroke::points)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<ReviewStroke>(m, "ReviewStroke")
+                .def(nb::init())
+                .def_rw("color", &ReviewStroke::color)
+                .def_rw("width", &ReviewStroke::width)
+                .def_rw("points", &ReviewStroke::points)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::class_<ReviewAnnotation>(m, "ReviewAnnotation")
-                .def(py::init())
-                .def_readwrite("id", &ReviewAnnotation::id)
-                .def_readwrite("sourceId", &ReviewAnnotation::sourceId)
-                .def_readwrite("time", &ReviewAnnotation::time)
-                .def_readwrite("author", &ReviewAnnotation::author)
-                .def_readwrite("created", &ReviewAnnotation::created)
-                .def_readwrite("strokes", &ReviewAnnotation::strokes)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<ReviewAnnotation>(m, "ReviewAnnotation")
+                .def(nb::init())
+                .def_rw("id", &ReviewAnnotation::id)
+                .def_rw("sourceId", &ReviewAnnotation::sourceId)
+                .def_rw("time", &ReviewAnnotation::time)
+                .def_rw("author", &ReviewAnnotation::author)
+                .def_rw("created", &ReviewAnnotation::created)
+                .def_rw("strokes", &ReviewAnnotation::strokes)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
             ftk::python::observableList<ReviewAnnotation>(m, "ReviewAnnotation");
 
-            py::class_<AnnotationsModel, std::shared_ptr<AnnotationsModel> >(m, "AnnotationsModel")
-                .def(py::init(&AnnotationsModel::create))
-                .def_property_readonly("annotations", &AnnotationsModel::getAnnotations, py::return_value_policy::copy)
-                .def_property_readonly("observeAnnotations", &AnnotationsModel::observeAnnotations)
-                .def("getStrokes", &AnnotationsModel::getStrokes, py::arg("sourceId"), py::arg("time"))
-                .def("setAnnotations", &AnnotationsModel::setAnnotations, py::arg("annotations"))
-                .def("addStroke", &AnnotationsModel::addStroke, py::arg("sourceId"), py::arg("time"), py::arg("stroke"))
-                .def("eraseStrokes", &AnnotationsModel::eraseStrokes, py::arg("sourceId"), py::arg("time"), py::arg("pos"), py::arg("radius"))
-                .def("clearFrame", &AnnotationsModel::clearFrame, py::arg("sourceIds"), py::arg("time"))
+            nb::class_<AnnotationsModel>(m, "AnnotationsModel")
+                .def(nb::new_(&AnnotationsModel::create))
+                .def_prop_ro("annotations", &AnnotationsModel::getAnnotations, nb::rv_policy::copy)
+                .def_prop_ro("observeAnnotations", &AnnotationsModel::observeAnnotations)
+                .def("getStrokes", &AnnotationsModel::getStrokes, nb::arg("sourceId"), nb::arg("time"))
+                .def("setAnnotations", &AnnotationsModel::setAnnotations, nb::arg("annotations"))
+                .def("addStroke", &AnnotationsModel::addStroke, nb::arg("sourceId"), nb::arg("time"), nb::arg("stroke"))
+                .def("eraseStrokes", &AnnotationsModel::eraseStrokes, nb::arg("sourceId"), nb::arg("time"), nb::arg("pos"), nb::arg("radius"))
+                .def("clearFrame", &AnnotationsModel::clearFrame, nb::arg("sourceIds"), nb::arg("time"))
                 .def("clear", &AnnotationsModel::clear)
-                .def_property_readonly("observeHasUndo", &AnnotationsModel::observeHasUndo)
-                .def_property_readonly("observeHasRedo", &AnnotationsModel::observeHasRedo)
+                .def_prop_ro("observeHasUndo", &AnnotationsModel::observeHasUndo)
+                .def_prop_ro("observeHasRedo", &AnnotationsModel::observeHasRedo)
                 .def("undo", &AnnotationsModel::undo)
                 .def("redo", &AnnotationsModel::redo);
         }

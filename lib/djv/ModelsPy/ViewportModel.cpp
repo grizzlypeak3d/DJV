@@ -3,34 +3,46 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/CorePy/Bindings.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 
-#include <pybind11/functional.h>
-#include <pybind11/operators.h>
-#include <pybind11/stl.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/operators.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void viewportModel(py::module_& m)
+        void viewportModel(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<AspectRatioOptions>(m, "AspectRatioOptions")
-                .def(py::init())
-                .def_readwrite("index", &AspectRatioOptions::index)
-                .def_readwrite("options", &AspectRatioOptions::options)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<AspectRatioOptions>(m, "AspectRatioOptions")
+                .def(nb::init())
+                .def_rw("index", &AspectRatioOptions::index)
+                .def_rw("options", &AspectRatioOptions::options)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::enum_<HUDItem>(m, "HUDItem")
+            nb::enum_<HUDItem>(m, "HUDItem")
                 .value("FileName", HUDItem::FileName)
                 .value("Info", HUDItem::Info)
                 .value("Cache", HUDItem::Cache)
@@ -40,7 +52,7 @@ namespace djv
                 .value("Render", HUDItem::Render);
             FTK_ENUM_BIND(m, HUDItem);
 
-            py::enum_<HUDPos>(m, "HUDPos")
+            nb::enum_<HUDPos>(m, "HUDPos")
                 .value("_None", HUDPos::None)
                 .value("TopLeft", HUDPos::TopLeft)
                 .value("TopRight", HUDPos::TopRight)
@@ -48,12 +60,12 @@ namespace djv
                 .value("BottomRight", HUDPos::BottomRight);
             FTK_ENUM_BIND(m, HUDPos);
 
-            py::class_<HUDOptions>(m, "HUDOptions")
-                .def(py::init())
-                .def_readwrite("enabled", &HUDOptions::enabled)
-                .def_readwrite("items", &HUDOptions::items)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<HUDOptions>(m, "HUDOptions")
+                .def(nb::init())
+                .def_rw("enabled", &HUDOptions::enabled)
+                .def_rw("items", &HUDOptions::items)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
             ftk::python::observable<ftk::ImageOptions>(m, "ImageOptions");
             ftk::python::observable<tl::DisplayOptions>(m, "DisplayOptions");
@@ -62,24 +74,24 @@ namespace djv
             ftk::python::observable<tl::ForegroundOptions>(m, "ForegroundOptions");
             ftk::python::observable<HUDOptions>(m, "HUDOptions");
 
-            py::class_<ViewportModel, std::shared_ptr<ViewportModel> >(m, "ViewportModel")
+            nb::class_<ViewportModel>(m, "ViewportModel")
                 .def(
-                    py::init(&ViewportModel::create),
-                    py::arg("context"),
-                    py::arg("settings"))
+                    nb::new_(&ViewportModel::create),
+                    nb::arg("context"),
+                    nb::arg("settings"))
                 .def("save", &ViewportModel::save)
-                .def_property("imageOptions", &ViewportModel::getImageOptions, &ViewportModel::setImageOptions, py::return_value_policy::copy)
-                .def_property_readonly("observeImageOptions", &ViewportModel::observeImageOptions)
-                .def_property("displayOptions", &ViewportModel::getDisplayOptions, &ViewportModel::setDisplayOptions, py::return_value_policy::copy)
-                .def_property_readonly("observeDisplayOptions", &ViewportModel::observeDisplayOptions)
-                .def_property("aspectRatioOptions", &ViewportModel::getAspectRatioOptions, &ViewportModel::setAspectRatioOptions, py::return_value_policy::copy)
-                .def_property_readonly("observeAspectRatioOptions", &ViewportModel::observeAspectRatioOptions)
-                .def_property("backgroundOptions", &ViewportModel::getBackgroundOptions, &ViewportModel::setBackgroundOptions, py::return_value_policy::copy)
-                .def_property_readonly("observeBackgroundOptions", &ViewportModel::observeBackgroundOptions)
-                .def_property("foregroundOptions", &ViewportModel::getForegroundOptions, &ViewportModel::setForegroundOptions, py::return_value_policy::copy)
-                .def_property_readonly("observeForegroundOptions", &ViewportModel::observeForegroundOptions)
-                .def_property("hudOptions", &ViewportModel::getHUDOptions, &ViewportModel::setHUDOptions, py::return_value_policy::copy)
-                .def_property_readonly("observeHUDOptions", &ViewportModel::observeHUDOptions);
+                .def_prop_rw("imageOptions", &ViewportModel::getImageOptions, &ViewportModel::setImageOptions, nb::rv_policy::copy)
+                .def_prop_ro("observeImageOptions", &ViewportModel::observeImageOptions)
+                .def_prop_rw("displayOptions", &ViewportModel::getDisplayOptions, &ViewportModel::setDisplayOptions, nb::rv_policy::copy)
+                .def_prop_ro("observeDisplayOptions", &ViewportModel::observeDisplayOptions)
+                .def_prop_rw("aspectRatioOptions", &ViewportModel::getAspectRatioOptions, &ViewportModel::setAspectRatioOptions, nb::rv_policy::copy)
+                .def_prop_ro("observeAspectRatioOptions", &ViewportModel::observeAspectRatioOptions)
+                .def_prop_rw("backgroundOptions", &ViewportModel::getBackgroundOptions, &ViewportModel::setBackgroundOptions, nb::rv_policy::copy)
+                .def_prop_ro("observeBackgroundOptions", &ViewportModel::observeBackgroundOptions)
+                .def_prop_rw("foregroundOptions", &ViewportModel::getForegroundOptions, &ViewportModel::setForegroundOptions, nb::rv_policy::copy)
+                .def_prop_ro("observeForegroundOptions", &ViewportModel::observeForegroundOptions)
+                .def_prop_rw("hudOptions", &ViewportModel::getHUDOptions, &ViewportModel::setHUDOptions, nb::rv_policy::copy)
+                .def_prop_ro("observeHUDOptions", &ViewportModel::observeHUDOptions);
         }
     }
 }

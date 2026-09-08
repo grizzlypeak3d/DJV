@@ -3,22 +3,34 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/ColorModel.h>
 
 #include <ftk/CorePy/Bindings.h>
 #include <ftk/Core/Context.h>
 #include <ftk/UI/Settings.h>
 
-#include <pybind11/functional.h>
-#include <pybind11/stl.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void colorModel(py::module_& m)
+        void colorModel(nb::module_& m)
         {
             using namespace models;
 
@@ -27,25 +39,25 @@ namespace djv
             ftk::python::observable<std::vector<std::string> >(m, "StringVector");
             ftk::python::observable<ftk::ImageTags>(m, "ImageTags");
 
-            py::class_<ColorModel, std::shared_ptr<ColorModel> >(m, "ColorModel")
+            nb::class_<ColorModel>(m, "ColorModel")
                 .def(
-                    py::init(&ColorModel::create),
-                    py::arg("context"),
-                    py::arg("settings"))
+                    nb::new_(&ColorModel::create),
+                    nb::arg("context"),
+                    nb::arg("settings"))
                 .def("save", &ColorModel::save)
-                .def_property("ocioOptions", &ColorModel::getOCIOOptions, &ColorModel::setOCIOOptions, py::return_value_policy::copy)
-                .def_property_readonly("observeOCIOOptions", &ColorModel::observeOCIOOptions)
-                .def_property_readonly("observeResolvedOCIOOptions", &ColorModel::observeResolvedOCIOOptions)
+                .def_prop_rw("ocioOptions", &ColorModel::getOCIOOptions, &ColorModel::setOCIOOptions, nb::rv_policy::copy)
+                .def_prop_ro("observeOCIOOptions", &ColorModel::observeOCIOOptions)
+                .def_prop_ro("observeResolvedOCIOOptions", &ColorModel::observeResolvedOCIOOptions)
                 .def("setActiveFiles", &ColorModel::setActiveFiles)
                 .def("resolveInput", &ColorModel::resolveInput,
-                    py::arg("path"),
-                    py::arg("tags") = ftk::ImageTags())
-                .def_property_readonly("observeResolvedInputs", &ColorModel::observeResolvedInputs)
-                .def_property_readonly("observeResolvedInput", &ColorModel::observeResolvedInput)
-                .def_property("extColorSpaces", &ColorModel::getExtColorSpaces, &ColorModel::setExtColorSpaces)
-                .def_property_readonly("observeExtColorSpaces", &ColorModel::observeExtColorSpaces)
-                .def_property("lutOptions", &ColorModel::getLUTOptions, &ColorModel::setLUTOptions, py::return_value_policy::copy)
-                .def_property_readonly("observeLUTOptions", &ColorModel::observeLUTOptions);
+                    nb::arg("path"),
+                    nb::arg("tags") = ftk::ImageTags())
+                .def_prop_ro("observeResolvedInputs", &ColorModel::observeResolvedInputs)
+                .def_prop_ro("observeResolvedInput", &ColorModel::observeResolvedInput)
+                .def_prop_rw("extColorSpaces", &ColorModel::getExtColorSpaces, &ColorModel::setExtColorSpaces)
+                .def_prop_ro("observeExtColorSpaces", &ColorModel::observeExtColorSpaces)
+                .def_prop_rw("lutOptions", &ColorModel::getLUTOptions, &ColorModel::setLUTOptions, nb::rv_policy::copy)
+                .def_prop_ro("observeLUTOptions", &ColorModel::observeLUTOptions);
         }
     }
 }

@@ -1,4 +1,4 @@
-pybind11_add_module(djvPy Bindings.cpp)
+nanobind_add_module(djvPy NB_STATIC Bindings.cpp)
 
 target_include_directories(djvPy PRIVATE ${PROJECT_SOURCE_DIR}/lib)
 

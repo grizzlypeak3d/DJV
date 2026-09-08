@@ -3,41 +3,53 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/ToolsModel.h>
 
 #include <ftk/UI/Settings.h>
 
-#include <pybind11/stl.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void toolsModel(py::module_& m)
+        void toolsModel(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<ToolInfo>(m, "ToolInfo")
-                .def(py::init())
-                .def_readwrite("name", &ToolInfo::name)
-                .def_readwrite("icon", &ToolInfo::icon)
-                .def_readwrite("sort", &ToolInfo::sort)
-                .def_readwrite("toolBar", &ToolInfo::toolBar)
-                .def_readwrite("shortcut", &ToolInfo::shortcut);
+            nb::class_<ToolInfo>(m, "ToolInfo")
+                .def(nb::init())
+                .def_rw("name", &ToolInfo::name)
+                .def_rw("icon", &ToolInfo::icon)
+                .def_rw("sort", &ToolInfo::sort)
+                .def_rw("toolBar", &ToolInfo::toolBar)
+                .def_rw("shortcut", &ToolInfo::shortcut);
 
-            py::class_<ToolsModel, std::shared_ptr<ToolsModel> >(m, "ToolsModel")
+            nb::class_<ToolsModel>(m, "ToolsModel")
                 .def(
-                    py::init(&ToolsModel::create),
-                    py::arg("settings"))
+                    nb::new_(&ToolsModel::create),
+                    nb::arg("settings"))
                 .def("save", &ToolsModel::save)
-                .def_property_readonly("tools", &ToolsModel::getTools, py::return_value_policy::copy)
-                .def("addTool", &ToolsModel::addTool, py::arg("tool"))
-                .def_property_readonly("openTools", &ToolsModel::getOpenTools)
-                .def_property_readonly("observeOpenTools", &ToolsModel::observeOpenTools)
-                .def("isToolOpen", &ToolsModel::isToolOpen, py::arg("name"))
-                .def("setToolOpen", &ToolsModel::setToolOpen, py::arg("name"), py::arg("open"))
+                .def_prop_ro("tools", &ToolsModel::getTools, nb::rv_policy::copy)
+                .def("addTool", &ToolsModel::addTool, nb::arg("tool"))
+                .def_prop_ro("openTools", &ToolsModel::getOpenTools)
+                .def_prop_ro("observeOpenTools", &ToolsModel::observeOpenTools)
+                .def("isToolOpen", &ToolsModel::isToolOpen, nb::arg("name"))
+                .def("setToolOpen", &ToolsModel::setToolOpen, nb::arg("name"), nb::arg("open"))
                 .def("closeTools", &ToolsModel::closeTools);
         }
     }

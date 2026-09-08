@@ -3,44 +3,56 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/DrawModel.h>
 
 #include <ftk/UI/Settings.h>
 
 #include <ftk/CorePy/Bindings.h>
 
-#include <pybind11/stl.h>
-#include <pybind11/functional.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
+#include <nanobind/stl/function.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void drawModel(py::module_& m)
+        void drawModel(nb::module_& m)
         {
             using namespace models;
 
-            py::enum_<DrawTool>(m, "DrawTool")
+            nb::enum_<DrawTool>(m, "DrawTool")
                 .value("Pen", DrawTool::Pen)
                 .value("Eraser", DrawTool::Eraser);
 
             ftk::python::observable<DrawTool>(m, "DrawTool");
             ftk::python::observable<ftk::Color4F>(m, "Color4F");
 
-            py::class_<DrawModel, std::shared_ptr<DrawModel> >(m, "DrawModel")
+            nb::class_<DrawModel>(m, "DrawModel")
                 .def(
-                    py::init(&DrawModel::create),
-                    py::arg("settings"))
-                .def_property("enabled", &DrawModel::isEnabled, &DrawModel::setEnabled)
-                .def_property_readonly("observeEnabled", &DrawModel::observeEnabled)
-                .def_property("tool", &DrawModel::getTool, &DrawModel::setTool)
-                .def_property_readonly("observeTool", &DrawModel::observeTool)
-                .def_property("color", &DrawModel::getColor, &DrawModel::setColor, py::return_value_policy::copy)
-                .def_property_readonly("observeColor", &DrawModel::observeColor)
-                .def_property("size", &DrawModel::getSize, &DrawModel::setSize)
-                .def_property_readonly("observeSize", &DrawModel::observeSize);
+                    nb::new_(&DrawModel::create),
+                    nb::arg("settings"))
+                .def_prop_rw("enabled", &DrawModel::isEnabled, &DrawModel::setEnabled)
+                .def_prop_ro("observeEnabled", &DrawModel::observeEnabled)
+                .def_prop_rw("tool", &DrawModel::getTool, &DrawModel::setTool)
+                .def_prop_ro("observeTool", &DrawModel::observeTool)
+                .def_prop_rw("color", &DrawModel::getColor, &DrawModel::setColor, nb::rv_policy::copy)
+                .def_prop_ro("observeColor", &DrawModel::observeColor)
+                .def_prop_rw("size", &DrawModel::getSize, &DrawModel::setSize)
+                .def_prop_ro("observeSize", &DrawModel::observeSize);
         }
     }
 }

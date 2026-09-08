@@ -3,41 +3,56 @@
 
 #include <djv/UIPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/UI/FileThumbnail.h>
 
 #include <djv/Models/FilesModel.h>
 
 #include <ftk/Core/Context.h>
 
-#include <pybind11/stl.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void fileThumbnail(py::module_& m)
+        void fileThumbnail(nb::module_& m)
         {
             using namespace ui;
 
-            py::class_<
+            nb::class_<
                 FileDragDropData,
-                ftk::IDragDropData,
-                std::shared_ptr<FileDragDropData> >(m, "FileDragDropData")
+                ftk::IDragDropData>(m, "FileDragDropData")
                 .def(
-                    py::init<const std::shared_ptr<models::FilesModelItem>&>(),
-                    py::arg("item"))
-                .def_property_readonly("item", &FileDragDropData::getItem);
+                    nb::init<const std::shared_ptr<models::FilesModelItem>&>(),
+                    nb::arg("item"))
+                .def_prop_ro("item", &FileDragDropData::getItem);
 
-            py::class_<FileThumbnail, ftk::IWidget, std::shared_ptr<FileThumbnail> >(m, "FileThumbnail")
+            nb::class_<FileThumbnail, ftk::IWidget>(
+                m, "FileThumbnail",
+                // The Python examples hold this through weakref, which
+                // nanobind classes opt into.
+                nb::is_weak_referenceable())
                 .def(
-                    py::init(&FileThumbnail::create),
-                    py::arg("context"),
-                    py::arg("item"),
-                    py::arg("ioOptions"),
-                    py::arg("parent") = nullptr)
-                .def_property_readonly("thumbnail", &FileThumbnail::getThumbnail);
+                    nb::new_(&FileThumbnail::create),
+                    nb::arg("context"),
+                    nb::arg("item"),
+                    nb::arg("ioOptions"),
+                    nb::arg("parent") = nullptr)
+                .def_prop_ro("thumbnail", &FileThumbnail::getThumbnail);
         }
     }
 }

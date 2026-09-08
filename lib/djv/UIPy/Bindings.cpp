@@ -3,13 +3,18 @@
 
 #include <djv/UIPy/Bindings.h>
 
-namespace py = pybind11;
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void uiBind(py::module_& m)
+        void uiBind(nb::module_& m)
         {
             auto mUI = m.def_submodule("ui", "User interface widgets");
 

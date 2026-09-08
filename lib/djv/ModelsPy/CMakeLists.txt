@@ -31,6 +31,10 @@ target_include_directories(djvModelsPy
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/lib>
         $<INSTALL_INTERFACE:include>)
+target_include_directories(djvModelsPy
+    PRIVATE
+        ${NB_DIR}/include
+        ${NB_DIR}/ext/robin_map/include)
 
 # ftkUI directly: the bindings name ftk::Settings and ftk::RecentFilesModel,
 # which djvModels does not carry in its link interface.

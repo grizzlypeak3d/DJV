@@ -3,22 +3,27 @@
 
 #include <djv/UIPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/UI/Init.h>
 
 #include <ftk/Core/Context.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void uiInit(py::module_& m)
+        void uiInit(nb::module_& m)
         {
             m.def(
                 "initIcons",
                 &ui::initIcons,
-                py::arg("context"));
+                nb::arg("context"));
         }
     }
 }

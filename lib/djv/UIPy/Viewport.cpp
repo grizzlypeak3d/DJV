@@ -3,6 +3,11 @@
 
 #include <djv/UIPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/UI/Viewport.h>
 
 #include <djv/Models/AnnotationsModel.h>
@@ -17,31 +22,42 @@
 
 #include <ftk/Core/Context.h>
 
-#include <pybind11/stl.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void viewport(py::module_& m)
+        void viewport(nb::module_& m)
         {
             using namespace ui;
 
-            py::class_<Viewport, tl::ui::Viewport, std::shared_ptr<Viewport> >(m, "Viewport")
+            nb::class_<Viewport, tl::ui::Viewport>(
+                m, "Viewport",
+                // The Python examples hold this through weakref, which
+                // nanobind classes opt into.
+                nb::is_weak_referenceable())
                 .def(
-                    py::init(&Viewport::create),
-                    py::arg("context"),
-                    py::arg("filesModel"),
-                    py::arg("colorModel"),
-                    py::arg("viewportModel"),
-                    py::arg("timeUnitsModel"),
-                    py::arg("settingsModel"),
-                    py::arg("annotationsModel"),
-                    py::arg("drawModel"),
-                    py::arg("sysLogModel"),
-                    py::arg("parent") = nullptr)
+                    nb::new_(&Viewport::create),
+                    nb::arg("context"),
+                    nb::arg("filesModel"),
+                    nb::arg("colorModel"),
+                    nb::arg("viewportModel"),
+                    nb::arg("timeUnitsModel"),
+                    nb::arg("settingsModel"),
+                    nb::arg("annotationsModel"),
+                    nb::arg("drawModel"),
+                    nb::arg("sysLogModel"),
+                    nb::arg("parent") = nullptr)
                 .def("setToastActive", &Viewport::setToastActive)
                 .def("setHUDActive", &Viewport::setHUDActive);
         }

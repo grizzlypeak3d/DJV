@@ -2,17 +2,22 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/ModelsPy/Bindings.h>
+
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
 #include <djv/UIPy/Bindings.h>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
-PYBIND11_MODULE(djvPy, m)
+NB_MODULE(djvPy, m)
 {
     m.doc() = "DJV is an open source application for playback and review of image sequences.";
 
-    py::module_::import("tlRenderPy");
+    nb::module_::import_("tlRenderPy");
 
     djv::python::modelsBind(m);
     djv::python::uiBind(m);

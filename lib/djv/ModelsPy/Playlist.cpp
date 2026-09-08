@@ -3,27 +3,39 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/Playlist.h>
 
-#include <pybind11/stl.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void playlist(py::module_& m)
+        void playlist(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<Playlist>(m, "Playlist")
-                .def(py::init<>())
-                .def_readwrite("items", &Playlist::items)
-                .def_readwrite("aIndex", &Playlist::aIndex)
-                .def_readwrite("bIndexes", &Playlist::bIndexes)
-                .def_readwrite("compareOptions", &Playlist::compareOptions)
-                .def_readwrite("compareTime", &Playlist::compareTime);
+            nb::class_<Playlist>(m, "Playlist")
+                .def(nb::init<>())
+                .def_rw("items", &Playlist::items)
+                .def_rw("aIndex", &Playlist::aIndex)
+                .def_rw("bIndexes", &Playlist::bIndexes)
+                .def_rw("compareOptions", &Playlist::compareOptions)
+                .def_rw("compareTime", &Playlist::compareTime);
 
             m.def(
                 "playlistSave",
@@ -33,9 +45,9 @@ namespace djv
                 {
                     playlistSave(fileName, playlist, defaultRate);
                 },
-                py::arg("fileName"),
-                py::arg("playlist"),
-                py::arg("defaultRate") = 24.0);
+                nb::arg("fileName"),
+                nb::arg("playlist"),
+                nb::arg("defaultRate") = 24.0);
 
             // The report rides along as the second element of a tuple, the
             // way the settings getters return their values.
@@ -45,9 +57,9 @@ namespace djv
                 {
                     std::vector<std::string> report;
                     const Playlist playlist = playlistOpen(fileName, report);
-                    return py::make_tuple(playlist, report);
+                    return nb::make_tuple(playlist, report);
                 },
-                py::arg("fileName"));
+                nb::arg("fileName"));
         }
     }
 }

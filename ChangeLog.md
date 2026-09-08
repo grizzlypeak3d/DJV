@@ -3,8 +3,7 @@
 Changes:
 * The HUD shows the file name of the current image of a sequence.
 * Opening one image of a sequence starts playback at that image.
-* Media stored in an OTIOZ bundle can be read with the FFmpeg command
-  line, so bundles play on the open source packages whatever they hold.
+* Media stored in an OTIOZ bundle can be read with an external FFmpeg command.
 * The status bar shows the highlighted menu item's tooltip.
 * The exposure control is a plain stop adjustment, so zero leaves the
   image unchanged. The defog, knee, and gamma controls are removed;

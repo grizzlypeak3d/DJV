@@ -3,28 +3,40 @@
 
 #include <djv/UIPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/UI/SeparateAudioDialog.h>
 
 #include <ftk/Core/Context.h>
 
-#include <pybind11/functional.h>
-#include <pybind11/stl.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void separateAudioDialog(py::module_& m)
+        void separateAudioDialog(nb::module_& m)
         {
             using namespace ui;
 
-            py::class_<SeparateAudioDialog, ftk::IDialog, std::shared_ptr<SeparateAudioDialog> >(m, "SeparateAudioDialog")
+            nb::class_<SeparateAudioDialog, ftk::IDialog>(m, "SeparateAudioDialog")
                 .def(
-                    py::init(&SeparateAudioDialog::create),
-                    py::arg("context"),
-                    py::arg("parent") = nullptr)
+                    nb::new_(&SeparateAudioDialog::create),
+                    nb::arg("context"),
+                    nb::arg("parent") = nullptr)
                 .def("setCallback", &SeparateAudioDialog::setCallback);
         }
     }

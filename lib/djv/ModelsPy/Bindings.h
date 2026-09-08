@@ -4,31 +4,36 @@
 #pragma once
 
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
 
 namespace djv
 {
     namespace python
     {
-        void annotationsModel(pybind11::module_&);
-        void appInfoModel(pybind11::module_&);
-        void audioModel(pybind11::module_&);
-        void colorModel(pybind11::module_&);
-        void commandsModel(pybind11::module_&);
-        void drawModel(pybind11::module_&);
-        void filesModel(pybind11::module_&);
-        void markersModel(pybind11::module_&);
-        void ocioModel(pybind11::module_&);
-        void parse(pybind11::module_&);
-        void playlist(pybind11::module_&);
-        void recentFilesModel(pybind11::module_&);
-        void review(pybind11::module_&);
-        void settingsModel(pybind11::module_&);
-        void shortcuts(pybind11::module_&);
-        void timeUnitsModel(pybind11::module_&);
-        void toolsModel(pybind11::module_&);
-        void viewportModel(pybind11::module_&);
+        void annotationsModel(nanobind::module_&);
+        void appInfoModel(nanobind::module_&);
+        void audioModel(nanobind::module_&);
+        void colorModel(nanobind::module_&);
+        void commandsModel(nanobind::module_&);
+        void drawModel(nanobind::module_&);
+        void filesModel(nanobind::module_&);
+        void markersModel(nanobind::module_&);
+        void ocioModel(nanobind::module_&);
+        void parse(nanobind::module_&);
+        void playlist(nanobind::module_&);
+        void recentFilesModel(nanobind::module_&);
+        void review(nanobind::module_&);
+        void settingsModel(nanobind::module_&);
+        void shortcuts(nanobind::module_&);
+        void timeUnitsModel(nanobind::module_&);
+        void toolsModel(nanobind::module_&);
+        void viewportModel(nanobind::module_&);
 
-        void modelsBind(pybind11::module_&);
+        void modelsBind(nanobind::module_&);
     }
 }

@@ -3,28 +3,40 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/TimeUnitsModel.h>
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 
-#include <pybind11/stl.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void timeUnitsModel(py::module_& m)
+        void timeUnitsModel(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<TimeUnitsModel, tl::TimeUnitsModel, std::shared_ptr<TimeUnitsModel> >(m, "TimeUnitsModel")
+            nb::class_<TimeUnitsModel, tl::TimeUnitsModel>(m, "TimeUnitsModel")
                 .def(
-                    py::init(&TimeUnitsModel::create),
-                    py::arg("context"),
-                    py::arg("settings"))
+                    nb::new_(&TimeUnitsModel::create),
+                    nb::arg("context"),
+                    nb::arg("settings"))
                 .def("save", &TimeUnitsModel::save);
         }
     }

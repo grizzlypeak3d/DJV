@@ -3,33 +3,45 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/SettingsModel.h>
 
 #include <ftk/CorePy/Bindings.h>
 #include <ftk/Core/Context.h>
 #include <ftk/UI/Settings.h>
 
-#include <pybind11/functional.h>
-#include <pybind11/operators.h>
-#include <pybind11/stl.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/operators.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void settingsModel(py::module_& m)
+        void settingsModel(nb::module_& m)
         {
             using namespace models;
 
-            py::class_<AudioSettings>(m, "AudioSettings")
-                .def(py::init())
-                .def_readwrite("bufferFrameCount", &AudioSettings::bufferFrameCount)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<AudioSettings>(m, "AudioSettings")
+                .def(nb::init())
+                .def_rw("bufferFrameCount", &AudioSettings::bufferFrameCount)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::enum_<ExportRenderSize>(m, "ExportRenderSize")
+            nb::enum_<ExportRenderSize>(m, "ExportRenderSize")
                 .value("Default", ExportRenderSize::Default)
                 .value("_1920", ExportRenderSize::_1920)
                 .value("_3840", ExportRenderSize::_3840)
@@ -37,159 +49,159 @@ namespace djv
                 .value("Custom", ExportRenderSize::Custom);
             FTK_ENUM_BIND(m, ExportRenderSize);
 
-            m.def("getWidth", &getWidth, py::arg("renderSize"));
+            m.def("getWidth", &getWidth, nb::arg("renderSize"));
 
-            py::enum_<ExportFileType>(m, "ExportFileType")
+            nb::enum_<ExportFileType>(m, "ExportFileType")
                 .value("Image", ExportFileType::Image)
                 .value("Seq", ExportFileType::Seq)
                 .value("Movie", ExportFileType::Movie);
             FTK_ENUM_BIND(m, ExportFileType);
 
-            py::class_<ExportSettings>(m, "ExportSettings")
-                .def(py::init())
-                .def_readwrite("dir", &ExportSettings::dir)
-                .def_readwrite("renderSize", &ExportSettings::renderSize)
-                .def_readwrite("customWidth", &ExportSettings::customWidth)
-                .def_readwrite("fileType", &ExportSettings::fileType)
-                .def_readwrite("imageBase", &ExportSettings::imageBase)
-                .def_readwrite("imageZeroPad", &ExportSettings::imageZeroPad)
-                .def_readwrite("imageExt", &ExportSettings::imageExt)
-                .def_readwrite("seqBase", &ExportSettings::seqBase)
-                .def_readwrite("seqZeroPad", &ExportSettings::seqZeroPad)
-                .def_readwrite("seqExt", &ExportSettings::seqExt)
-                .def_readwrite("movieBase", &ExportSettings::movieBase)
-                .def_readwrite("movieExt", &ExportSettings::movieExt)
-                .def_readwrite("moviePreset", &ExportSettings::moviePreset)
-                .def_readwrite("movieAudioCodec", &ExportSettings::movieAudioCodec)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<ExportSettings>(m, "ExportSettings")
+                .def(nb::init())
+                .def_rw("dir", &ExportSettings::dir)
+                .def_rw("renderSize", &ExportSettings::renderSize)
+                .def_rw("customWidth", &ExportSettings::customWidth)
+                .def_rw("fileType", &ExportSettings::fileType)
+                .def_rw("imageBase", &ExportSettings::imageBase)
+                .def_rw("imageZeroPad", &ExportSettings::imageZeroPad)
+                .def_rw("imageExt", &ExportSettings::imageExt)
+                .def_rw("seqBase", &ExportSettings::seqBase)
+                .def_rw("seqZeroPad", &ExportSettings::seqZeroPad)
+                .def_rw("seqExt", &ExportSettings::seqExt)
+                .def_rw("movieBase", &ExportSettings::movieBase)
+                .def_rw("movieExt", &ExportSettings::movieExt)
+                .def_rw("moviePreset", &ExportSettings::moviePreset)
+                .def_rw("movieAudioCodec", &ExportSettings::movieAudioCodec)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::class_<FileBrowserSettings>(m, "FileBrowserSettings")
-                .def(py::init())
-                .def_readwrite("nativeFileDialog", &FileBrowserSettings::nativeFileDialog)
-                .def_readwrite("path", &FileBrowserSettings::path)
-                .def_readwrite("options", &FileBrowserSettings::options)
-                .def_readwrite("ext", &FileBrowserSettings::ext)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<FileBrowserSettings>(m, "FileBrowserSettings")
+                .def(nb::init())
+                .def_rw("nativeFileDialog", &FileBrowserSettings::nativeFileDialog)
+                .def_rw("path", &FileBrowserSettings::path)
+                .def_rw("options", &FileBrowserSettings::options)
+                .def_rw("ext", &FileBrowserSettings::ext)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::class_<ImageSeqSettings>(m, "ImageSeqSettings")
-                .def(py::init())
-                .def_readwrite("audio", &ImageSeqSettings::audio)
-                .def_readwrite("audioExts", &ImageSeqSettings::audioExts)
-                .def_readwrite("audioFileName", &ImageSeqSettings::audioFileName)
-                .def_readwrite("maxDigits", &ImageSeqSettings::maxDigits)
-                .def_readwrite("readThreadCount", &ImageSeqSettings::readThreadCount)
-                .def_readwrite("io", &ImageSeqSettings::io)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<ImageSeqSettings>(m, "ImageSeqSettings")
+                .def(nb::init())
+                .def_rw("audio", &ImageSeqSettings::audio)
+                .def_rw("audioExts", &ImageSeqSettings::audioExts)
+                .def_rw("audioFileName", &ImageSeqSettings::audioFileName)
+                .def_rw("maxDigits", &ImageSeqSettings::maxDigits)
+                .def_rw("readThreadCount", &ImageSeqSettings::readThreadCount)
+                .def_rw("io", &ImageSeqSettings::io)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
             // The "spatial" field is omitted: tl::Spatial is not bound.
-            py::class_<OTIOSettings>(m, "OTIOSettings")
-                .def(py::init())
-                .def_readwrite("compat", &OTIOSettings::compat)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<OTIOSettings>(m, "OTIOSettings")
+                .def(nb::init())
+                .def_rw("compat", &OTIOSettings::compat)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::class_<MiscSettings>(m, "MiscSettings")
-                .def(py::init())
-                .def_readwrite("tooltipsEnabled", &MiscSettings::tooltipsEnabled)
-                .def_readwrite("showSetup", &MiscSettings::showSetup)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<MiscSettings>(m, "MiscSettings")
+                .def(nb::init())
+                .def_rw("tooltipsEnabled", &MiscSettings::tooltipsEnabled)
+                .def_rw("showSetup", &MiscSettings::showSetup)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::enum_<MouseAction>(m, "MouseAction")
+            nb::enum_<MouseAction>(m, "MouseAction")
                 .value("PanView", MouseAction::PanView)
                 .value("CompareWipe", MouseAction::CompareWipe)
                 .value("Pick", MouseAction::Pick)
                 .value("FrameShuttle", MouseAction::FrameShuttle);
             FTK_ENUM_BIND(m, MouseAction);
 
-            py::class_<MouseActionBinding>(m, "MouseActionBinding")
-                .def(py::init())
+            nb::class_<MouseActionBinding>(m, "MouseActionBinding")
+                .def(nb::init())
                 .def(
-                    py::init<ftk::MouseButton, ftk::KeyModifier>(),
-                    py::arg("button"),
-                    py::arg("modifier") = ftk::KeyModifier::None)
-                .def_readwrite("button", &MouseActionBinding::button)
-                .def_readwrite("modifier", &MouseActionBinding::modifier)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+                    nb::init<ftk::MouseButton, ftk::KeyModifier>(),
+                    nb::arg("button"),
+                    nb::arg("modifier") = ftk::KeyModifier::None)
+                .def_rw("button", &MouseActionBinding::button)
+                .def_rw("modifier", &MouseActionBinding::modifier)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::class_<MouseSettings>(m, "MouseSettings")
-                .def(py::init())
-                .def_readwrite("bindings", &MouseSettings::bindings)
-                .def_readwrite("wheelScale", &MouseSettings::wheelScale)
-                .def_readwrite("frameShuttleScale", &MouseSettings::frameShuttleScale)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<MouseSettings>(m, "MouseSettings")
+                .def(nb::init())
+                .def_rw("bindings", &MouseSettings::bindings)
+                .def_rw("wheelScale", &MouseSettings::wheelScale)
+                .def_rw("frameShuttleScale", &MouseSettings::frameShuttleScale)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::class_<PlaybackSettings>(m, "PlaybackSettings")
-                .def(py::init())
-                .def_readwrite("startPlayback", &PlaybackSettings::startPlayback)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<PlaybackSettings>(m, "PlaybackSettings")
+                .def(nb::init())
+                .def_rw("startPlayback", &PlaybackSettings::startPlayback)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::class_<ShortcutsSettings>(m, "ShortcutsSettings")
-                .def(py::init())
-                .def_readwrite("shortcuts", &ShortcutsSettings::shortcuts)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<ShortcutsSettings>(m, "ShortcutsSettings")
+                .def(nb::init())
+                .def_rw("shortcuts", &ShortcutsSettings::shortcuts)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
             // The "colorControls" and "colorStyle" fields are omitted:
             // ftk::ColorControls and ftk::ColorStyle are not bound.
-            py::class_<StyleSettings>(m, "StyleSettings")
-                .def(py::init())
-                .def_readwrite("displayScale", &StyleSettings::displayScale)
-                .def_readwrite("colorControls", &StyleSettings::colorControls)
-                .def_readwrite("colorStyle", &StyleSettings::colorStyle)
-                .def_readwrite("customColorRoles", &StyleSettings::customColorRoles)
-                .def_readwrite("fonts", &StyleSettings::fonts)
-                .def_readwrite("fontFiles", &StyleSettings::fontFiles)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<StyleSettings>(m, "StyleSettings")
+                .def(nb::init())
+                .def_rw("displayScale", &StyleSettings::displayScale)
+                .def_rw("colorControls", &StyleSettings::colorControls)
+                .def_rw("colorStyle", &StyleSettings::colorStyle)
+                .def_rw("customColorRoles", &StyleSettings::customColorRoles)
+                .def_rw("fonts", &StyleSettings::fonts)
+                .def_rw("fontFiles", &StyleSettings::fontFiles)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::enum_<TimelineThumbnailSize>(m, "TimelineThumbnailSize")
+            nb::enum_<TimelineThumbnailSize>(m, "TimelineThumbnailSize")
                 .value("Small", TimelineThumbnailSize::Small)
                 .value("Medium", TimelineThumbnailSize::Medium)
                 .value("Large", TimelineThumbnailSize::Large);
             FTK_ENUM_BIND(m, TimelineThumbnailSize);
 
-            m.def("getTimelineThumbnailSize", &getTimelineThumbnailSize, py::arg("thumbnailSize"));
-            m.def("getTimelineWaveformSize", &getTimelineWaveformSize, py::arg("thumbnailSize"));
+            m.def("getTimelineThumbnailSize", &getTimelineThumbnailSize, nb::arg("thumbnailSize"));
+            m.def("getTimelineWaveformSize", &getTimelineWaveformSize, nb::arg("thumbnailSize"));
 
-            py::class_<TimelineSettings>(m, "TimelineSettings")
-                .def(py::init())
-                .def_readwrite("minimize", &TimelineSettings::minimize)
-                .def_readwrite("frameView", &TimelineSettings::frameView)
-                .def_readwrite("scrollBars", &TimelineSettings::scrollBars)
-                .def_readwrite("autoScroll", &TimelineSettings::autoScroll)
-                .def_readwrite("stopOnScrub", &TimelineSettings::stopOnScrub)
-                .def_readwrite("trackMedia", &TimelineSettings::trackMedia)
-                .def_readwrite("thumbnails", &TimelineSettings::thumbnails)
-                .def_readwrite("thumbnailSize", &TimelineSettings::thumbnailSize)
-                .def_readwrite("waveforms", &TimelineSettings::waveforms)
-                .def_readwrite("waveformSize", &TimelineSettings::waveformSize)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<TimelineSettings>(m, "TimelineSettings")
+                .def(nb::init())
+                .def_rw("minimize", &TimelineSettings::minimize)
+                .def_rw("frameView", &TimelineSettings::frameView)
+                .def_rw("scrollBars", &TimelineSettings::scrollBars)
+                .def_rw("autoScroll", &TimelineSettings::autoScroll)
+                .def_rw("stopOnScrub", &TimelineSettings::stopOnScrub)
+                .def_rw("trackMedia", &TimelineSettings::trackMedia)
+                .def_rw("thumbnails", &TimelineSettings::thumbnails)
+                .def_rw("thumbnailSize", &TimelineSettings::thumbnailSize)
+                .def_rw("waveforms", &TimelineSettings::waveforms)
+                .def_rw("waveformSize", &TimelineSettings::waveformSize)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
-            py::class_<WindowSettings>(m, "WindowSettings")
-                .def(py::init())
-                .def_readwrite("size", &WindowSettings::size)
-                .def_readwrite("fileToolBar", &WindowSettings::fileToolBar)
-                .def_readwrite("compareToolBar", &WindowSettings::compareToolBar)
-                .def_readwrite("windowToolBar", &WindowSettings::windowToolBar)
-                .def_readwrite("viewToolBar", &WindowSettings::viewToolBar)
-                .def_readwrite("toolsToolBar", &WindowSettings::toolsToolBar)
-                .def_readwrite("tabBar", &WindowSettings::tabBar)
-                .def_readwrite("timeline", &WindowSettings::timeline)
-                .def_readwrite("bottomToolBar", &WindowSettings::bottomToolBar)
-                .def_readwrite("statusToolBar", &WindowSettings::statusToolBar)
-                .def_readwrite("tools", &WindowSettings::tools)
-                .def_readwrite("splitter", &WindowSettings::splitter)
-                .def_readwrite("splitter2", &WindowSettings::splitter2)
-                .def(pybind11::self == pybind11::self)
-                .def(pybind11::self != pybind11::self);
+            nb::class_<WindowSettings>(m, "WindowSettings")
+                .def(nb::init())
+                .def_rw("size", &WindowSettings::size)
+                .def_rw("fileToolBar", &WindowSettings::fileToolBar)
+                .def_rw("compareToolBar", &WindowSettings::compareToolBar)
+                .def_rw("windowToolBar", &WindowSettings::windowToolBar)
+                .def_rw("viewToolBar", &WindowSettings::viewToolBar)
+                .def_rw("toolsToolBar", &WindowSettings::toolsToolBar)
+                .def_rw("tabBar", &WindowSettings::tabBar)
+                .def_rw("timeline", &WindowSettings::timeline)
+                .def_rw("bottomToolBar", &WindowSettings::bottomToolBar)
+                .def_rw("statusToolBar", &WindowSettings::statusToolBar)
+                .def_rw("tools", &WindowSettings::tools)
+                .def_rw("splitter", &WindowSettings::splitter)
+                .def_rw("splitter2", &WindowSettings::splitter2)
+                .def(nanobind::self == nanobind::self)
+                .def(nanobind::self != nanobind::self);
 
             ftk::python::observable<AudioSettings>(m, "AudioSettings");
             ftk::python::observable<ExportSettings>(m, "ExportSettings");
@@ -204,57 +216,57 @@ namespace djv
             ftk::python::observable<TimelineSettings>(m, "TimelineSettings");
             ftk::python::observable<WindowSettings>(m, "WindowSettings");
 
-            py::class_<SettingsModel, std::shared_ptr<SettingsModel> >(m, "SettingsModel")
+            nb::class_<SettingsModel>(m, "SettingsModel")
                 .def(
-                    py::init(&SettingsModel::create),
-                    py::arg("context"),
-                    py::arg("settings"),
-                    py::arg("displayScaleDefault"))
+                    nb::new_(&SettingsModel::create),
+                    nb::arg("context"),
+                    nb::arg("settings"),
+                    nb::arg("displayScaleDefault"))
 
                 .def("save", &SettingsModel::save)
                 .def("reset", &SettingsModel::reset)
 
-                .def_property("audio", &SettingsModel::getAudio, &SettingsModel::setAudio, py::return_value_policy::copy)
-                .def_property_readonly("observeAudio", &SettingsModel::observeAudio)
+                .def_prop_rw("audio", &SettingsModel::getAudio, &SettingsModel::setAudio, nb::rv_policy::copy)
+                .def_prop_ro("observeAudio", &SettingsModel::observeAudio)
 
-                .def_property("cache", &SettingsModel::getCache, &SettingsModel::setCache, py::return_value_policy::copy)
-                .def_property_readonly("observeCache", &SettingsModel::observeCache)
+                .def_prop_rw("cache", &SettingsModel::getCache, &SettingsModel::setCache, nb::rv_policy::copy)
+                .def_prop_ro("observeCache", &SettingsModel::observeCache)
 
-                .def_property("export", &SettingsModel::getExport, &SettingsModel::setExport, py::return_value_policy::copy)
-                .def_property_readonly("observeExport", &SettingsModel::observeExport)
+                .def_prop_rw("export", &SettingsModel::getExport, &SettingsModel::setExport, nb::rv_policy::copy)
+                .def_prop_ro("observeExport", &SettingsModel::observeExport)
 
-                .def_property("fileBrowser", &SettingsModel::getFileBrowser, &SettingsModel::setFileBrowser, py::return_value_policy::copy)
-                .def_property_readonly("observeFileBrowser", &SettingsModel::observeFileBrowser)
+                .def_prop_rw("fileBrowser", &SettingsModel::getFileBrowser, &SettingsModel::setFileBrowser, nb::rv_policy::copy)
+                .def_prop_ro("observeFileBrowser", &SettingsModel::observeFileBrowser)
 
-                .def_property("imageSeq", &SettingsModel::getImageSeq, &SettingsModel::setImageSeq, py::return_value_policy::copy)
-                .def_property_readonly("observeImageSeq", &SettingsModel::observeImageSeq)
+                .def_prop_rw("imageSeq", &SettingsModel::getImageSeq, &SettingsModel::setImageSeq, nb::rv_policy::copy)
+                .def_prop_ro("observeImageSeq", &SettingsModel::observeImageSeq)
 
-                .def_property("otio", &SettingsModel::getOTIO, &SettingsModel::setOTIO, py::return_value_policy::copy)
-                .def_property_readonly("observeOTIO", &SettingsModel::observeOTIO)
+                .def_prop_rw("otio", &SettingsModel::getOTIO, &SettingsModel::setOTIO, nb::rv_policy::copy)
+                .def_prop_ro("observeOTIO", &SettingsModel::observeOTIO)
 
-                .def_property("misc", &SettingsModel::getMisc, &SettingsModel::setMisc, py::return_value_policy::copy)
-                .def_property_readonly("observeMisc", &SettingsModel::observeMisc)
+                .def_prop_rw("misc", &SettingsModel::getMisc, &SettingsModel::setMisc, nb::rv_policy::copy)
+                .def_prop_ro("observeMisc", &SettingsModel::observeMisc)
 
-                .def_property("mouse", &SettingsModel::getMouse, &SettingsModel::setMouse, py::return_value_policy::copy)
-                .def_property_readonly("observeMouse", &SettingsModel::observeMouse)
+                .def_prop_rw("mouse", &SettingsModel::getMouse, &SettingsModel::setMouse, nb::rv_policy::copy)
+                .def_prop_ro("observeMouse", &SettingsModel::observeMouse)
 
-                .def_property("playback", &SettingsModel::getPlayback, &SettingsModel::setPlayback, py::return_value_policy::copy)
-                .def_property_readonly("observePlayback", &SettingsModel::observePlayback)
+                .def_prop_rw("playback", &SettingsModel::getPlayback, &SettingsModel::setPlayback, nb::rv_policy::copy)
+                .def_prop_ro("observePlayback", &SettingsModel::observePlayback)
 
-                .def_property("shortcuts", &SettingsModel::getShortcuts, &SettingsModel::setShortcuts, py::return_value_policy::copy)
-                .def_property_readonly("observeShortcuts", &SettingsModel::observeShortcuts)
-                .def("addShortcuts", &SettingsModel::addShortcuts, py::arg("shortcuts"))
+                .def_prop_rw("shortcuts", &SettingsModel::getShortcuts, &SettingsModel::setShortcuts, nb::rv_policy::copy)
+                .def_prop_ro("observeShortcuts", &SettingsModel::observeShortcuts)
+                .def("addShortcuts", &SettingsModel::addShortcuts, nb::arg("shortcuts"))
 
-                .def_property("style", &SettingsModel::getStyle, &SettingsModel::setStyle, py::return_value_policy::copy)
-                .def_property_readonly("observeStyle", &SettingsModel::observeStyle)
+                .def_prop_rw("style", &SettingsModel::getStyle, &SettingsModel::setStyle, nb::rv_policy::copy)
+                .def_prop_ro("observeStyle", &SettingsModel::observeStyle)
 
-                .def_property("timeline", &SettingsModel::getTimeline, &SettingsModel::setTimeline, py::return_value_policy::copy)
-                .def_property_readonly("observeTimeline", &SettingsModel::observeTimeline)
+                .def_prop_rw("timeline", &SettingsModel::getTimeline, &SettingsModel::setTimeline, nb::rv_policy::copy)
+                .def_prop_ro("observeTimeline", &SettingsModel::observeTimeline)
 
-                .def_property("window", &SettingsModel::getWindow, &SettingsModel::setWindow, py::return_value_policy::copy)
-                .def_property_readonly("observeWindow", &SettingsModel::observeWindow)
+                .def_prop_rw("window", &SettingsModel::getWindow, &SettingsModel::setWindow, nb::rv_policy::copy)
+                .def_prop_ro("observeWindow", &SettingsModel::observeWindow)
 
-                .def_property_readonly("ioOptions", &SettingsModel::getIOOptions);
+                .def_prop_ro("ioOptions", &SettingsModel::getIOOptions);
         }
     }
 }

@@ -3,48 +3,60 @@
 
 #include <djv/ModelsPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/Models/AudioModel.h>
 
 #include <ftk/CorePy/Bindings.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 
-#include <pybind11/functional.h>
-#include <pybind11/stl.h>
+#include <nanobind/stl/function.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void audioModel(py::module_& m)
+        void audioModel(nb::module_& m)
         {
             using namespace models;
 
             ftk::python::observable<tl::AudioDeviceID>(m, "AudioDeviceID");
             ftk::python::observableList<tl::AudioDeviceID>(m, "AudioDeviceID");
 
-            py::class_<AudioModel, std::shared_ptr<AudioModel> >(m, "AudioModel")
+            nb::class_<AudioModel>(m, "AudioModel")
                 .def(
-                    py::init(&AudioModel::create),
-                    py::arg("context"),
-                    py::arg("settings"))
-                .def_property_readonly("devices", &AudioModel::getDevices, py::return_value_policy::copy)
-                .def_property_readonly("observeDevices", &AudioModel::observeDevices)
-                .def_property("device", &AudioModel::getDevice, &AudioModel::setDevice, py::return_value_policy::copy)
-                .def_property_readonly("observeDevice", &AudioModel::observeDevice)
-                .def_property("volume", &AudioModel::getVolume, &AudioModel::setVolume)
-                .def_property_readonly("observeVolume", &AudioModel::observeVolume)
+                    nb::new_(&AudioModel::create),
+                    nb::arg("context"),
+                    nb::arg("settings"))
+                .def_prop_ro("devices", &AudioModel::getDevices, nb::rv_policy::copy)
+                .def_prop_ro("observeDevices", &AudioModel::observeDevices)
+                .def_prop_rw("device", &AudioModel::getDevice, &AudioModel::setDevice, nb::rv_policy::copy)
+                .def_prop_ro("observeDevice", &AudioModel::observeDevice)
+                .def_prop_rw("volume", &AudioModel::getVolume, &AudioModel::setVolume)
+                .def_prop_ro("observeVolume", &AudioModel::observeVolume)
                 .def("save", &AudioModel::save)
                 .def("volumeUp", &AudioModel::volumeUp)
                 .def("volumeDown", &AudioModel::volumeDown)
-                .def_property("mute", &AudioModel::isMuted, &AudioModel::setMute)
-                .def_property_readonly("observeMute", &AudioModel::observeMute)
-                .def_property("channelMute", &AudioModel::getChannelMute, &AudioModel::setChannelMute)
-                .def_property_readonly("observeChannelMute", &AudioModel::observeChannelMute)
-                .def_property("syncOffset", &AudioModel::getSyncOffset, &AudioModel::setSyncOffset)
-                .def_property_readonly("observeSyncOffset", &AudioModel::observeSyncOffset);
+                .def_prop_rw("mute", &AudioModel::isMuted, &AudioModel::setMute)
+                .def_prop_ro("observeMute", &AudioModel::observeMute)
+                .def_prop_rw("channelMute", &AudioModel::getChannelMute, &AudioModel::setChannelMute)
+                .def_prop_ro("observeChannelMute", &AudioModel::observeChannelMute)
+                .def_prop_rw("syncOffset", &AudioModel::getSyncOffset, &AudioModel::setSyncOffset)
+                .def_prop_ro("observeSyncOffset", &AudioModel::observeSyncOffset);
         }
     }
 }

@@ -4,28 +4,33 @@
 #pragma once
 
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
 
 namespace djv
 {
     namespace python
     {
-        void audioPopup(pybind11::module_&);
-        void uiInit(pybind11::module_&);
-        void colorWidgets(pybind11::module_&);
-        void viewWidgets(pybind11::module_&);
-        void viewport(pybind11::module_&);
-        void settingsWidgets(pybind11::module_&);
-        void fileThumbnail(pybind11::module_&);
-        void frameRangePopup(pybind11::module_&);
-        void infoWidget(pybind11::module_&);
-        void separateAudioDialog(pybind11::module_&);
-        void speedPopup(pybind11::module_&);
-        void statusIndicator(pybind11::module_&);
-        void sysInfoDialog(pybind11::module_&);
-        void magnifyWidget(pybind11::module_&);
-        void exportWidget(pybind11::module_&);
+        void audioPopup(nanobind::module_&);
+        void uiInit(nanobind::module_&);
+        void colorWidgets(nanobind::module_&);
+        void viewWidgets(nanobind::module_&);
+        void viewport(nanobind::module_&);
+        void settingsWidgets(nanobind::module_&);
+        void fileThumbnail(nanobind::module_&);
+        void frameRangePopup(nanobind::module_&);
+        void infoWidget(nanobind::module_&);
+        void separateAudioDialog(nanobind::module_&);
+        void speedPopup(nanobind::module_&);
+        void statusIndicator(nanobind::module_&);
+        void sysInfoDialog(nanobind::module_&);
+        void magnifyWidget(nanobind::module_&);
+        void exportWidget(nanobind::module_&);
 
-        void uiBind(pybind11::module_&);
+        void uiBind(nanobind::module_&);
     }
 }

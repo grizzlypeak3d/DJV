@@ -3,6 +3,11 @@
 
 #include <djv/UIPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/UI/ColorWidgets.h>
 
 #include <djv/Models/ColorModel.h>
@@ -13,66 +18,73 @@
 
 #include <ftk/Core/Context.h>
 
-#include <pybind11/stl.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
     namespace python
     {
-        void colorWidgets(py::module_& m)
+        void colorWidgets(nb::module_& m)
         {
             using namespace ui;
 
-            py::class_<OCIOWidget, ftk::IContainer, std::shared_ptr<OCIOWidget> >(m, "OCIOWidget")
+            nb::class_<OCIOWidget, ftk::IContainer>(m, "OCIOWidget")
                 .def(
-                    py::init(&OCIOWidget::create),
-                    py::arg("context"),
-                    py::arg("colorModel"),
-                    py::arg("parent") = nullptr)
-                .def_property_readonly("enabledCheckBox", &OCIOWidget::getEnabledCheckBox);
+                    nb::new_(&OCIOWidget::create),
+                    nb::arg("context"),
+                    nb::arg("colorModel"),
+                    nb::arg("parent") = nullptr)
+                .def_prop_ro("enabledCheckBox", &OCIOWidget::getEnabledCheckBox);
 
-            py::class_<LUTWidget, ftk::IContainer, std::shared_ptr<LUTWidget> >(m, "LUTWidget")
+            nb::class_<LUTWidget, ftk::IContainer>(m, "LUTWidget")
                 .def(
-                    py::init(&LUTWidget::create),
-                    py::arg("context"),
-                    py::arg("colorModel"),
-                    py::arg("parent") = nullptr)
-                .def_property_readonly("enabledCheckBox", &LUTWidget::getEnabledCheckBox);
+                    nb::new_(&LUTWidget::create),
+                    nb::arg("context"),
+                    nb::arg("colorModel"),
+                    nb::arg("parent") = nullptr)
+                .def_prop_ro("enabledCheckBox", &LUTWidget::getEnabledCheckBox);
 
-            py::class_<ColorWidget, ftk::IContainer, std::shared_ptr<ColorWidget> >(m, "ColorWidget")
+            nb::class_<ColorWidget, ftk::IContainer>(m, "ColorWidget")
                 .def(
-                    py::init(&ColorWidget::create),
-                    py::arg("context"),
-                    py::arg("viewportModel"),
-                    py::arg("parent") = nullptr)
-                .def_property_readonly("enabledCheckBox", &ColorWidget::getEnabledCheckBox);
+                    nb::new_(&ColorWidget::create),
+                    nb::arg("context"),
+                    nb::arg("viewportModel"),
+                    nb::arg("parent") = nullptr)
+                .def_prop_ro("enabledCheckBox", &ColorWidget::getEnabledCheckBox);
 
-            py::class_<LevelsWidget, ftk::IContainer, std::shared_ptr<LevelsWidget> >(m, "LevelsWidget")
+            nb::class_<LevelsWidget, ftk::IContainer>(m, "LevelsWidget")
                 .def(
-                    py::init(&LevelsWidget::create),
-                    py::arg("context"),
-                    py::arg("settings"),
-                    py::arg("viewportModel"),
-                    py::arg("parent") = nullptr)
-                .def_property_readonly("enabledCheckBox", &LevelsWidget::getEnabledCheckBox);
+                    nb::new_(&LevelsWidget::create),
+                    nb::arg("context"),
+                    nb::arg("settings"),
+                    nb::arg("viewportModel"),
+                    nb::arg("parent") = nullptr)
+                .def_prop_ro("enabledCheckBox", &LevelsWidget::getEnabledCheckBox);
 
-            py::class_<ExposureWidget, ftk::IContainer, std::shared_ptr<ExposureWidget> >(m, "ExposureWidget")
+            nb::class_<ExposureWidget, ftk::IContainer>(m, "ExposureWidget")
                 .def(
-                    py::init(&ExposureWidget::create),
-                    py::arg("context"),
-                    py::arg("viewportModel"),
-                    py::arg("parent") = nullptr)
-                .def_property_readonly("enabledCheckBox", &ExposureWidget::getEnabledCheckBox);
+                    nb::new_(&ExposureWidget::create),
+                    nb::arg("context"),
+                    nb::arg("viewportModel"),
+                    nb::arg("parent") = nullptr)
+                .def_prop_ro("enabledCheckBox", &ExposureWidget::getEnabledCheckBox);
 
-            py::class_<SoftClipWidget, ftk::IContainer, std::shared_ptr<SoftClipWidget> >(m, "SoftClipWidget")
+            nb::class_<SoftClipWidget, ftk::IContainer>(m, "SoftClipWidget")
                 .def(
-                    py::init(&SoftClipWidget::create),
-                    py::arg("context"),
-                    py::arg("viewportModel"),
-                    py::arg("parent") = nullptr)
-                .def_property_readonly("enabledCheckBox", &SoftClipWidget::getEnabledCheckBox);
+                    nb::new_(&SoftClipWidget::create),
+                    nb::arg("context"),
+                    nb::arg("viewportModel"),
+                    nb::arg("parent") = nullptr)
+                .def_prop_ro("enabledCheckBox", &SoftClipWidget::getEnabledCheckBox);
         }
     }
 }

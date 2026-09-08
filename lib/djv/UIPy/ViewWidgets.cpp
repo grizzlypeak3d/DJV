@@ -3,6 +3,11 @@
 
 #include <djv/UIPy/Bindings.h>
 
+#include <tlRender/TimelinePy/OTIOCasters.h>
+
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/string.h>
+
 #include <djv/UI/ViewWidgets.h>
 
 #include <djv/Models/ViewportModel.h>
@@ -10,9 +15,16 @@
 #include <ftk/UI/CheckBox.h>
 #include <ftk/Core/Context.h>
 
-#include <pybind11/stl.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/list.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
+#include <nanobind/stl/filesystem.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
 namespace djv
 {
@@ -23,32 +35,32 @@ namespace djv
             // The view widgets share one shape: created from the context
             // and the viewport model.
             template<typename T>
-            void viewWidget(py::module_& m, const char* name)
+            void viewWidget(nb::module_& m, const char* name)
             {
-                py::class_<T, ftk::IContainer, std::shared_ptr<T> >(m, name)
+                nb::class_<T, ftk::IContainer>(m, name)
                     .def(
-                        py::init(&T::create),
-                        py::arg("context"),
-                        py::arg("viewportModel"),
-                        py::arg("parent") = nullptr);
+                        nb::new_(&T::create),
+                        nb::arg("context"),
+                        nb::arg("viewportModel"),
+                        nb::arg("parent") = nullptr);
             }
 
             // The toggled view widgets also expose the enabled check box,
             // for placing on a bellows.
             template<typename T>
-            void viewToggleWidget(py::module_& m, const char* name)
+            void viewToggleWidget(nb::module_& m, const char* name)
             {
-                py::class_<T, ftk::IContainer, std::shared_ptr<T> >(m, name)
+                nb::class_<T, ftk::IContainer>(m, name)
                     .def(
-                        py::init(&T::create),
-                        py::arg("context"),
-                        py::arg("viewportModel"),
-                        py::arg("parent") = nullptr)
-                    .def_property_readonly("enabledCheckBox", &T::getEnabledCheckBox);
+                        nb::new_(&T::create),
+                        nb::arg("context"),
+                        nb::arg("viewportModel"),
+                        nb::arg("parent") = nullptr)
+                    .def_prop_ro("enabledCheckBox", &T::getEnabledCheckBox);
             }
         }
 
-        void viewWidgets(py::module_& m)
+        void viewWidgets(nb::module_& m)
         {
             using namespace ui;
 
