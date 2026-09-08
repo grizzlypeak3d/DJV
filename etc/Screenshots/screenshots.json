@@ -919,18 +919,6 @@
         {
           "id": "Color.Exposure.Exposure",
           "caption": "Exposure"
-        },
-        {
-          "id": "Color.Exposure.Defog",
-          "caption": "Defog"
-        },
-        {
-          "id": "Color.Exposure.KneeLow",
-          "caption": "Knee low"
-        },
-        {
-          "id": "Color.Exposure.KneeHigh",
-          "caption": "Knee high"
         }
       ]
     },

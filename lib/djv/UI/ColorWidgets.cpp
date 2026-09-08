@@ -924,40 +924,16 @@ namespace djv
             p.sliders["Exposure"]->setRange(-10.F, 10.F);
             p.sliders["Exposure"]->setDefault(0.F);
             p.sliders["Exposure"]->getModel()->setRangeSoft(true);
+            p.sliders["Exposure"]->setTooltip(
+                "Adjust the exposure in stops. Each stop doubles the "
+                "brightness, and zero leaves the image unchanged.");
             ftk::setScreenshotTag(p.sliders["Exposure"], "Color.Exposure.Exposure");
-
-            p.sliders["Defog"] = ftk::FloatEditSlider::create(context);
-            p.sliders["Defog"]->setDefault(0.F);
-            p.sliders["Defog"]->getModel()->setRangeSoft(true);
-            ftk::setScreenshotTag(p.sliders["Defog"], "Color.Exposure.Defog");
-
-            p.sliders["KneeLow"] = ftk::FloatEditSlider::create(context);
-            p.sliders["KneeLow"]->setRange(-3.F, 3.F);
-            p.sliders["KneeLow"]->setDefault(0.F);
-            p.sliders["KneeLow"]->getModel()->setRangeSoft(true);
-            ftk::setScreenshotTag(p.sliders["KneeLow"], "Color.Exposure.KneeLow");
-
-            p.sliders["KneeHigh"] = ftk::FloatEditSlider::create(context);
-            p.sliders["KneeHigh"]->setRange(3.5F, 7.5F);
-            p.sliders["KneeHigh"]->setDefault(5.F);
-            p.sliders["KneeHigh"]->getModel()->setRangeSoft(true);
-            ftk::setScreenshotTag(p.sliders["KneeHigh"], "Color.Exposure.KneeHigh");
-
-            p.sliders["Gamma"] = ftk::FloatEditSlider::create(context);
-            p.sliders["Gamma"]->setRange(.1F, 4.F);
-            p.sliders["Gamma"]->setDefault(1.F);
-            p.sliders["Gamma"]->getModel()->setRangeSoft(true);
-            ftk::setScreenshotTag(p.sliders["Gamma"], "Color.Exposure.Gamma");
 
             p.layout = ftk::FormLayout::create(context);
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Exposure:", p.sliders["Exposure"]);
-            p.layout->addRow("Defog:", p.sliders["Defog"]);
-            p.layout->addRow("Knee low:", p.sliders["KneeLow"]);
-            p.layout->addRow("Knee high:", p.sliders["KneeHigh"]);
-            p.layout->addRow("Gamma:", p.sliders["Gamma"]);
 
             p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
@@ -965,10 +941,6 @@ namespace djv
                 {
                     _p->enabledCheckBox->setChecked(value.exposure.enabled);
                     _p->sliders["Exposure"]->setValue(value.exposure.exposure);
-                    _p->sliders["Defog"]->setValue(value.exposure.defog);
-                    _p->sliders["KneeLow"]->setValue(value.exposure.kneeLow);
-                    _p->sliders["KneeHigh"]->setValue(value.exposure.kneeHigh);
-                    _p->sliders["Gamma"]->setValue(value.exposure.gamma);
                 });
 
             p.enabledCheckBox->setCheckedCallback(
@@ -989,58 +961,6 @@ namespace djv
                     }
                     options.exposure.enabled = true;
                     options.exposure.exposure = value;
-                    viewportModel->setDisplayOptions(options);
-                });
-
-            p.sliders["Defog"]->setCallback(
-                [viewportModel](float value)
-                {
-                    auto options = viewportModel->getDisplayOptions();
-                    if (value == options.exposure.defog)
-                    {
-                        return;
-                    }
-                    options.exposure.enabled = true;
-                    options.exposure.defog = value;
-                    viewportModel->setDisplayOptions(options);
-                });
-
-            p.sliders["KneeLow"]->setCallback(
-                [viewportModel](float value)
-                {
-                    auto options = viewportModel->getDisplayOptions();
-                    if (value == options.exposure.kneeLow)
-                    {
-                        return;
-                    }
-                    options.exposure.enabled = true;
-                    options.exposure.kneeLow = value;
-                    viewportModel->setDisplayOptions(options);
-                });
-
-            p.sliders["KneeHigh"]->setCallback(
-                [viewportModel](float value)
-                {
-                    auto options = viewportModel->getDisplayOptions();
-                    if (value == options.exposure.kneeHigh)
-                    {
-                        return;
-                    }
-                    options.exposure.enabled = true;
-                    options.exposure.kneeHigh = value;
-                    viewportModel->setDisplayOptions(options);
-                });
-
-            p.sliders["Gamma"]->setCallback(
-                [viewportModel](float value)
-                {
-                    auto options = viewportModel->getDisplayOptions();
-                    if (value == options.exposure.gamma)
-                    {
-                        return;
-                    }
-                    options.exposure.enabled = true;
-                    options.exposure.gamma = value;
                     viewportModel->setDisplayOptions(options);
                 });
         }

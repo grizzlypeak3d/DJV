@@ -1,4 +1,9 @@
-## 3.6.1
+## 3.7.0
+
+Changes:
+* The exposure control is a plain stop adjustment, so zero leaves the
+  image unchanged. The defog, knee, and gamma controls are removed;
+  soft clip and levels cover them.
 
 Fixes:
 * Clearing the drawing on a compared frame also clears the "B" strokes.
