@@ -4,7 +4,6 @@
 #include <djv/UI/AboutDialog.h>
 
 #include <djv/Models/AppInfoModel.h>
-#include <djv/Models/Version.h>
 
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/Label.h>
@@ -53,16 +52,22 @@ namespace djv
                     arg(appInfoModel->getVersion()),
                 vLayout);
             // Which build this is, which is the question the dialog is
-            // usually open to answer. The library's own version is here as
-            // well: an application built on DJV has a version of its own,
-            // and a report that names only one of the two is half an answer.
-            ftk::Label::create(
-                context,
-                ftk::Format("Built {0}, {1}, on DJV {2}").
-                    arg(appInfoModel->getCommitDate()).
-                    arg(appInfoModel->getGitCommit()).
-                    arg(DJV_VERSION_FULL),
-                vLayout);
+            // usually open to answer.
+            std::string built = ftk::Format("Built {0}, {1}").
+                arg(appInfoModel->getCommitDate()).
+                arg(appInfoModel->getGitCommit());
+            // And which DJV it was built on, for an application that is not
+            // DJV: the two carry version numbers of their own and release on
+            // their own schedules, so a report naming one of them is half an
+            // answer.
+            if (appInfoModel->getGitCommit() != appInfoModel->getLibraryCommit())
+            {
+                built = ftk::Format("{0}, on DJV {1} {2}").
+                    arg(built).
+                    arg(appInfoModel->getLibraryVersion()).
+                    arg(appInfoModel->getLibraryCommit());
+            }
+            ftk::Label::create(context, built, vLayout);
             ftk::Label::create(
                 context,
                 appInfoModel->getLicense(),

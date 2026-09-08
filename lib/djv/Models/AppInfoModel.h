@@ -58,6 +58,17 @@ namespace djv
             //! anything was uncommitted.
             DJV_MODELS_API virtual std::string getGitCommit() const;
 
+            //! Get the version of DJV this was built on, and the commit it
+            //! was built from. Not virtual: an application overrides the
+            //! pair above to report itself, and these two stay the library's
+            //! own. In DJV they are the same values.
+            //!
+            //! The commit as well as the version, because a development
+            //! version names a line rather than a build: every commit
+            //! between two releases calls itself the same thing.
+            DJV_MODELS_API std::string getLibraryVersion() const;
+            DJV_MODELS_API std::string getLibraryCommit() const;
+
             ///@}
 
             //! \name Documentation

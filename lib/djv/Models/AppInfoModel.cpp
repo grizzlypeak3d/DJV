@@ -74,6 +74,16 @@ namespace djv
             return DJV_GIT_COMMIT;
         }
 
+        std::string AppInfoModel::getLibraryVersion() const
+        {
+            return DJV_VERSION_FULL;
+        }
+
+        std::string AppInfoModel::getLibraryCommit() const
+        {
+            return DJV_GIT_COMMIT;
+        }
+
         std::string AppInfoModel::getLicense() const
         {
             return
