@@ -18,7 +18,15 @@ if [ -z "$CMAKE_BUILD_PARALLEL_LEVEL" ]; then
     export CMAKE_BUILD_PARALLEL_LEVEL
 fi
 
-git -C $SOURCE_DIR submodule update --init --recursive
+# Check out the submodules the first time, and never move them afterwards.
+# A submodule you have work in is not this script's to reset: the build it
+# would then make is not the source you have, and with changes in the way it
+# stops on a git error about a checkout you did not ask for. Same rule and
+# same test as CMakeLists.txt, which initialises only when there is nothing
+# there to lose.
+if [ ! -f $SOURCE_DIR/deps/tlRender/CMakeLists.txt ]; then
+    git -C $SOURCE_DIR submodule update --init --recursive
+fi
 
 for STAGE in "deps/tlRender/deps/ftk/etc/SuperBuild ftk" "deps/tlRender/etc/SuperBuild tl" ". build"; do
     set -- $STAGE
