@@ -118,7 +118,7 @@ namespace djv
             // the same as the review tool's own buttons.
             _addCheckCommand(
                 "Draw",
-                "Draw strokes on the frame; e.g., { \"value\": true }.",
+                "Draw strokes on the frame.",
                 [appWeak](const nlohmann::json& args)
                 {
                     const bool value = args.at("value").get<bool>();
@@ -139,7 +139,7 @@ namespace djv
 
             _addCheckCommand(
                 "Erase",
-                "Erase the strokes you touch; e.g., { \"value\": true }.",
+                "Erase the strokes you touch.",
                 [appWeak](const nlohmann::json& args)
                 {
                     const bool value = args.at("value").get<bool>();
