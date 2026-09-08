@@ -35,7 +35,6 @@ jobs:
     - name: Setup environment
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
-        echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
@@ -70,7 +69,6 @@ jobs:
     - name: Setup environment
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
-        echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
@@ -104,7 +102,6 @@ jobs:
     - name: Setup environment
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
-        echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
@@ -145,7 +142,6 @@ jobs:
     - name: Setup environment
       run: |
         echo "$PWD/install-Release/bin" >> $GITHUB_PATH
-        echo "LD_LIBRARY_PATH=$PWD/install-Release/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Release/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
@@ -186,24 +182,20 @@ jobs:
       with:
         python-version: '3.11'
 
-    # \bug DYLD_LIBRARY_PATH is not being set here?
     - name: Setup environment
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
-        echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
 
     - name: Build
       run: |
-        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
         sh djv/etc/macOS/sbuild.sh djv Debug ci-macos
 
     # The runner has no working OpenGL, which djv-test does not need.
     - name: Run tests
       run: |
-        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
         cd build-Debug
         ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
 
@@ -223,24 +215,20 @@ jobs:
       with:
         python-version: '3.11'
 
-    # \bug DYLD_LIBRARY_PATH is not being set here?
     - name: Setup environment
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
-        echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Debug/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
 
     - name: Build
       run: |
-        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
         sh djv/etc/macOS/sbuild.sh djv Debug ci-macos-python
 
     # The runner has no working OpenGL, which djv-test does not need.
     - name: Run tests
       run: |
-        export DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH
         cd build-Debug
         ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
   macos-package:
@@ -258,18 +246,15 @@ jobs:
       with:
         python-version: '3.11'
 
-    # \bug DYLD_LIBRARY_PATH is not being set here?
     - name: Setup environment
       run: |
         echo "$PWD/install-Release/bin" >> $GITHUB_PATH
-        echo "DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
         echo "PYTHONPATH=$PWD/install-Release/lib:$PYTHONPATH" >> $GITHUB_ENV
         cmake --version
         python --version
 
     - name: Build
       run: |
-        export DYLD_LIBRARY_PATH=$PWD/install-Release/lib:$DYLD_LIBRARY_PATH
         sh djv/etc/macOS/sbuild.sh djv Release package-macos
 
     - name: Package
