@@ -1455,7 +1455,14 @@ namespace djv
         {
             FTK_P();
 
-            std::string s = p.path.getFileName();
+            // For a sequence, the image on screen rather than the
+            // pattern: which frame a picture came from is the question a
+            // sequence of renders gets asked. Sequence time is the frame
+            // number, so the value is the name (#490).
+            std::string s =
+                p.path.isSeq() && p.currentTime.has_value() ?
+                p.path.getFrame(static_cast<int64_t>(p.currentTime->value())) :
+                p.path.getFileName();
             p.fileNameLabel->setText(!s.empty() ? s : "(No file)");
             ftk::setScreenshotTag(p.fileNameLabel, "View.HUD.FileName");
 

@@ -833,6 +833,7 @@ namespace djv
             // frame to name its sequence are the same thing said twice; a
             // stated range has already said what it wants.
             dirListOptions.seq = gatherSeq && !frames.has_value();
+            const std::optional<ftk::RangeI64> inputFrames = path.getFrames();
             bool first = true;
             for (const auto& i : tl::getPaths(_context, path, dirListOptions))
             {
@@ -849,6 +850,26 @@ namespace djv
                     // only the first takes it.
                     item->path.setFrames(frames.value());
                     item->framesStated = true;
+                }
+                if (first &&
+                    dirListOptions.seq &&
+                    inputFrames.has_value() &&
+                    inputFrames->min() == inputFrames->max() &&
+                    i.isSeq() &&
+                    i.getFrames().has_value() &&
+                    i.getFrames()->min() <= inputFrames->min() &&
+                    inputFrames->min() <= i.getFrames()->max() &&
+                    i.getFrames().value() != inputFrames.value())
+                {
+                    // One image was named and the gather grew it into its
+                    // sequence, so playback starts at the image that was
+                    // named -- the frame someone double-clicked is the one
+                    // they want to look at (#490). Sequence time is the
+                    // frame number, at the sequence rate the player will
+                    // use.
+                    item->currentTime = OTIO_NS::RationalTime(
+                        static_cast<double>(inputFrames->min()),
+                        p.settingsModel->getImageSeq().io.defaultSpeed);
                 }
                 first = false;
                 item->audioPath = audioPath;

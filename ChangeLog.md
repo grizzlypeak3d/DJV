@@ -1,6 +1,8 @@
 ## 3.7.0
 
 Changes:
+* The HUD shows the file name of the current image of a sequence.
+* Opening one image of a sequence starts playback at that image.
 * Media stored in an OTIOZ bundle can be read with the FFmpeg command
   line, so bundles play on the open source packages whatever they hold.
 * The status bar shows the highlighted menu item's tooltip.
