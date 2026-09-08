@@ -25,7 +25,13 @@ set(SOURCE
 # Static. The bindings are linked by djvPy and nothing else, so there is no
 # API here for anything to import -- the module absorbs them.
 add_library(djvModelsPy STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
-set_target_properties(djvModelsPy PROPERTIES POSITION_INDEPENDENT_CODE ON)
+# Hidden, as the module is: the binding classes hold nanobind's types,
+# which are hidden, and GCC warns about a class more visible than its
+# members. Nothing here is exported anyway.
+set_target_properties(djvModelsPy PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON)
 
 target_include_directories(djvModelsPy
     PUBLIC
