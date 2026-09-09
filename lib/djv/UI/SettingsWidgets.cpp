@@ -1200,8 +1200,9 @@ namespace djv
             p.yuvToRGBCheckBox = ftk::CheckBox::create(context);
             p.yuvToRGBCheckBox->setHStretch(ftk::Stretch::Expanding);
             p.yuvToRGBCheckBox->setTooltip(
-                "Convert YUV to RGB on the CPU when reading. When disabled, YUV "
-                "frames are kept and converted on the GPU.");
+                "Convert YUV to RGB on the CPU when reading.\n"
+                "\n"
+                "When disabled, YUV frames are kept and converted on the GPU.");
             ftk::setScreenshotTag(p.yuvToRGBCheckBox, "FFmpeg.YUVtoRGB");
 
             p.hwAccelCheckBox = ftk::CheckBox::create(context);
@@ -1213,9 +1214,12 @@ namespace djv
             if (tl::ffmpeg::hasHWDecode())
             {
                 p.hwAccelCheckBox->setTooltip(
-                    "Use the GPU to decode video when possible. Falls back to software "
-                    "decoding automatically when hardware decoding is unavailable for a "
-                    "file. Takes effect the next time a file is opened.");
+                    "Use the GPU to decode video when possible.\n"
+                    "\n"
+                    "Falls back to software decoding automatically when hardware\n"
+                    "decoding is unavailable for a file.\n"
+                    "\n"
+                    "Takes effect the next time a file is opened.");
             }
             else
             {
@@ -1228,10 +1232,13 @@ namespace djv
             p.audioMergeCheckBox = ftk::CheckBox::create(context);
             p.audioMergeCheckBox->setHStretch(ftk::Stretch::Expanding);
             p.audioMergeCheckBox->setTooltip(
-                "Play a file's mono audio streams as the channels of one track. "
-                "Broadcast files, such as XDCAM MXF, carry each channel as its "
-                "own stream. When disabled, only the first stream plays. Takes "
-                "effect the next time a file is opened.");
+                "Play a file's mono audio streams as the channels of one track.\n"
+                "Broadcast files, such as XDCAM MXF, carry each channel as its\n"
+                "own stream.\n"
+                "\n"
+                "When disabled, only the first stream plays.\n"
+                "\n"
+                "Takes effect the next time a file is opened.");
             ftk::setScreenshotTag(p.audioMergeCheckBox, "FFmpeg.AudioMerge");
 
             p.threadsEdit = ftk::IntEdit::create(context);
