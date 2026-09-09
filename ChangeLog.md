@@ -13,6 +13,7 @@ Changes:
 * A clipping warning marks pixels outside the display range.
 * Building requires C++20.
 * CineForm movies can be read and written.
+* AC-3 audio can be read.
 
 Fixes:
 * Clearing the drawing on a compared frame also clears the "B" strokes.
