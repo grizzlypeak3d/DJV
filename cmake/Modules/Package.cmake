@@ -154,14 +154,23 @@ if(WIN32)
     set(DJV_WINDOWS_SUPPORTED_TYPES_REG)
     foreach(extension ${DJV_WINDOWS_SUPPORTED_TYPES})
         string(APPEND DJV_WINDOWS_SUPPORTED_TYPES_REG
-            "        WriteRegStr HKCR 'Applications\\djv.exe\\SupportedTypes' '.${extension}' ''\n")
+            "        WriteRegStr HKLM 'Software\\Classes\\Applications\\djv.exe\\SupportedTypes' '.${extension}' ''\n")
     endforeach()
 
     # Associate review files (".djvr") with DJV so double-clicking one opens it.
     # The application already routes a ".djvr" argument to the review (see
     # App::_inputFilesInit); these registry entries tell Windows which command to
-    # run. The installer is elevated (Program Files), so HKCR resolves to the
-    # system-wide HKLM\Software\Classes. SHChangeNotify refreshes the icon cache.
+    # run. SHChangeNotify refreshes the icon cache.
+    #
+    # HKLM\Software\Classes by name, not HKCR. A write to HKCR does not always
+    # reach the machine: the rule is that it goes to HKCU\Software\Classes when
+    # the key already exists there, and only otherwise to HKLM. So an installer
+    # writing HKCR puts a key in one hive or the other depending on what the
+    # user running it happens to have, which is how this was first found -- the
+    # "Applications\djv.exe" command below went to HKCU, over the stale value
+    # that was the whole problem, while the keys beside it that did not exist
+    # in HKCU went to HKLM. It looked right until that user's HKCU was cleared
+    # and the registration went with it. Naming the hive removes the choice.
     #
     # "Applications\djv.exe" is claimed for a different reason. It is the key
     # Windows uses for "Open with", and it is named after the executable, which
@@ -182,22 +191,22 @@ if(WIN32)
     # both appear as "djv", and the one that flashes a console is the wrong
     # answer. NoOpenWith keeps it out of the list.
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-        WriteRegStr HKCR '.djvr' '' 'DJV.Review'
-        WriteRegStr HKCR 'DJV.Review' '' 'DJV Review Session'
-        WriteRegStr HKCR 'DJV.Review\\DefaultIcon' '' '\"$INSTDIR\\bin\\djv.exe\",0'
-        WriteRegStr HKCR 'DJV.Review\\shell\\open\\command' '' '\"$INSTDIR\\bin\\djv.exe\" \"%1\"'
-        WriteRegStr HKCR 'Applications\\djv.exe' 'FriendlyAppName' 'DJV'
-        WriteRegStr HKCR 'Applications\\djv.exe\\DefaultIcon' '' '\"$INSTDIR\\bin\\djv.exe\",0'
-        WriteRegStr HKCR 'Applications\\djv.exe\\shell\\open\\command' '' '\"$INSTDIR\\bin\\djv.exe\" \"%1\"'
-${DJV_WINDOWS_SUPPORTED_TYPES_REG}        WriteRegStr HKCR 'Applications\\djv.com' 'NoOpenWith' ''
+        WriteRegStr HKLM 'Software\\Classes\\.djvr' '' 'DJV.Review'
+        WriteRegStr HKLM 'Software\\Classes\\DJV.Review' '' 'DJV Review Session'
+        WriteRegStr HKLM 'Software\\Classes\\DJV.Review\\DefaultIcon' '' '\"$INSTDIR\\bin\\djv.exe\",0'
+        WriteRegStr HKLM 'Software\\Classes\\DJV.Review\\shell\\open\\command' '' '\"$INSTDIR\\bin\\djv.exe\" \"%1\"'
+        WriteRegStr HKLM 'Software\\Classes\\Applications\\djv.exe' 'FriendlyAppName' 'DJV'
+        WriteRegStr HKLM 'Software\\Classes\\Applications\\djv.exe\\DefaultIcon' '' '\"$INSTDIR\\bin\\djv.exe\",0'
+        WriteRegStr HKLM 'Software\\Classes\\Applications\\djv.exe\\shell\\open\\command' '' '\"$INSTDIR\\bin\\djv.exe\" \"%1\"'
+${DJV_WINDOWS_SUPPORTED_TYPES_REG}        WriteRegStr HKLM 'Software\\Classes\\Applications\\djv.com' 'NoOpenWith' ''
         System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, i 0, i 0)'
     ")
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-        DeleteRegKey HKCR 'DJV.Review'
-        DeleteRegValue HKCR '.djvr' ''
-        DeleteRegKey /ifempty HKCR '.djvr'
-        DeleteRegKey HKCR 'Applications\\djv.exe'
-        DeleteRegKey HKCR 'Applications\\djv.com'
+        DeleteRegKey HKLM 'Software\\Classes\\DJV.Review'
+        DeleteRegValue HKLM 'Software\\Classes\\.djvr' ''
+        DeleteRegKey /ifempty HKLM 'Software\\Classes\\.djvr'
+        DeleteRegKey HKLM 'Software\\Classes\\Applications\\djv.exe'
+        DeleteRegKey HKLM 'Software\\Classes\\Applications\\djv.com'
         System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, i 0, i 0)'
     ")
 
