@@ -211,7 +211,7 @@ namespace djv
 
         void ViewportModel::setForegroundOptions(const tl::ForegroundOptions& value)
         {
-            _p->settings->setT("/Viewport/Foreground", value);
+            _p->settings->setT("/Viewport/Foreground.1", value);
             _p->foregroundOptions->setIfChanged(value);
         }
 
