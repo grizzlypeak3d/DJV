@@ -13,6 +13,7 @@ Changes:
 
 Fixes:
 * Clearing the drawing on a compared frame also clears the "B" strokes.
+* The window is drawn while it is being resized on macOS and Windows.
 
 ## 3.6.0
 
