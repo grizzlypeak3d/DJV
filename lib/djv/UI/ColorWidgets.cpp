@@ -1093,10 +1093,12 @@ namespace djv
 
             p.sliders["Low"] = ftk::FloatEditSlider::create(context);
             p.sliders["Low"]->setDefault(0.F);
+            p.sliders["Low"]->getModel()->setRangeSoft(true);
             p.sliders["Low"]->setTooltip("Pixels with a channel below this are shown in blue.");
             ftk::setScreenshotTag(p.sliders["Low"], "Color.ClipWarning.Low");
             p.sliders["High"] = ftk::FloatEditSlider::create(context);
             p.sliders["High"]->setDefault(1.F);
+            p.sliders["High"]->getModel()->setRangeSoft(true);
             p.sliders["High"]->setTooltip("Pixels with a channel above this are shown in red.");
             ftk::setScreenshotTag(p.sliders["High"], "Color.ClipWarning.High");
 
