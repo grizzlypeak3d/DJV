@@ -12,6 +12,7 @@ Changes:
 * The Python bindings use nanobind.
 * A clip warning marks pixels outside the display range.
 * Building requires C++20.
+* CineForm movies can be read and written.
 
 Fixes:
 * Clearing the drawing on a compared frame also clears the "B" strokes.
