@@ -18,20 +18,6 @@ namespace djv
             secondary(secondary)
         {}
 
-        bool Shortcut::operator == (const Shortcut& other) const
-        {
-            return
-                name == other.name &&
-                text == other.text &&
-                primary == other.primary &&
-                secondary == other.secondary;
-        }
-
-        bool Shortcut::operator != (const Shortcut& other) const
-        {
-            return !(*this == other);
-        }
-
         void to_json(nlohmann::json& json, const Shortcut& in)
         {
             json["Name"] = in.name;

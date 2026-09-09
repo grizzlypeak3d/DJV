@@ -17,15 +17,6 @@ namespace djv
 {
     namespace models
     {
-        bool AudioSettings::operator == (const AudioSettings& other) const
-        {
-            return bufferFrameCount == other.bufferFrameCount;
-        }
-
-        bool AudioSettings::operator != (const AudioSettings& other) const
-        {
-            return !(*this == other);
-        }
 
         FTK_ENUM_IMPL(
             ExportRenderSize,
@@ -54,99 +45,8 @@ namespace djv
             "Seq",
             "Movie");
 
-        bool ExportSettings::operator == (const ExportSettings& other) const
-        {
-            return
-                dir == other.dir &&
-                renderSize == other.renderSize &&
-                customWidth == other.customWidth &&
-                fileType == other.fileType &&
-                imageBase == other.imageBase &&
-                imageZeroPad == other.imageZeroPad &&
-                imageExt == other.imageExt &&
-                seqBase == other.seqBase &&
-                seqZeroPad == other.seqZeroPad &&
-                seqExt == other.seqExt &&
-                movieBase == other.movieBase &&
-                movieExt == other.movieExt &&
-                moviePreset == other.moviePreset &&
-                movieAudioCodec == other.movieAudioCodec;
-        }
-
-        bool ExportSettings::operator != (const ExportSettings& other) const
-        {
-            return !(*this == other);
-        }
-
-        bool FileBrowserSettings::operator == (const FileBrowserSettings& other) const
-        {
-            return
-                nativeFileDialog == other.nativeFileDialog &&
-                floating == other.floating &&
-                pinned == other.pinned &&
-                windowSize == other.windowSize &&
-                path == other.path &&
-                options == other.options &&
-                ext == other.ext;
-        }
-
-        bool FileBrowserSettings::operator != (const FileBrowserSettings& other) const
-        {
-            return !(*this == other);
-        }
-
-        bool ImageSeqSettings::operator == (const ImageSeqSettings& other) const
-        {
-            return
-                audio == other.audio &&
-                audioExts == other.audioExts &&
-                audioFileName == other.audioFileName &&
-                maxDigits == other.maxDigits &&
-                readThreadCount == other.readThreadCount &&
-                io == other.io;
-        }
-
-        bool ImageSeqSettings::operator != (const ImageSeqSettings& other) const
-        {
-            return !(*this == other);
-        }
-
-        bool OTIOSettings::operator == (const OTIOSettings& other) const
-        {
-            return
-                spatial == other.spatial &&
-                compat == other.compat;
-        }
-
-        bool OTIOSettings::operator != (const OTIOSettings& other) const
-        {
-            return !(*this == other);
-        }
-
         ShortcutsSettings::ShortcutsSettings()
         {}
-
-        bool ShortcutsSettings::operator == (const ShortcutsSettings& other) const
-        {
-            return shortcuts == other.shortcuts;
-        }
-
-        bool ShortcutsSettings::operator != (const ShortcutsSettings& other) const
-        {
-            return !(*this == other);
-        }
-
-        bool MiscSettings::operator == (const MiscSettings& other) const
-        {
-            return
-                tooltipsEnabled == other.tooltipsEnabled &&
-                showSetup == other.showSetup;
-        }
-
-        bool MiscSettings::operator != (const MiscSettings& other) const
-        {
-            return !(*this == other);
-        }
 
         FTK_ENUM_IMPL(
             MouseAction,
@@ -167,64 +67,12 @@ namespace djv
             modifier(modifier)
         {}
 
-        bool MouseActionBinding::operator == (const MouseActionBinding& other) const
-        {
-            return
-                button == other.button &&
-                modifier == other.modifier;
-        }
-
-        bool MouseActionBinding::operator != (const MouseActionBinding& other) const
-        {
-            return !(*this == other);
-        }
-
-        bool MouseSettings::operator == (const MouseSettings& other) const
-        {
-            return
-                bindings == other.bindings &&
-                wheelBindings == other.wheelBindings &&
-                wheelScale == other.wheelScale &&
-                frameShuttleScale == other.frameShuttleScale;
-        }
-
-        bool MouseSettings::operator != (const MouseSettings& other) const
-        {
-            return !(*this == other);
-        }
-
-        bool PlaybackSettings::operator == (const PlaybackSettings& other) const
-        {
-            return startPlayback == other.startPlayback;
-        }
-
-        bool PlaybackSettings::operator != (const PlaybackSettings& other) const
-        {
-            return !(*this == other);
-        }
-
         StyleSettings::StyleSettings()
         {
             for (const auto font : ftk::getFontTypeEnums())
             {
                 fonts[font] = ftk::getDefaultFont(font);
             }
-        }
-
-        bool StyleSettings::operator == (const StyleSettings& other) const
-        {
-            return
-                displayScale == other.displayScale &&
-                colorControls == other.colorControls &&
-                colorStyle == other.colorStyle &&
-                customColorRoles == other.customColorRoles &&
-                fonts == other.fonts &&
-                fontFiles == other.fontFiles;
-        }
-
-        bool StyleSettings::operator != (const StyleSettings& other) const
-        {
-            return !(*this == other);
         }
 
         FTK_ENUM_IMPL(
@@ -253,49 +101,6 @@ namespace djv
                 200 / 2
             };
             return data[static_cast<size_t>(value)];
-        }
-
-        bool TimelineSettings::operator == (const TimelineSettings& other) const
-        {
-            return
-                minimize == other.minimize &&
-                frameView == other.frameView &&
-                scrollBars == other.scrollBars &&
-                autoScroll == other.autoScroll &&
-                stopOnScrub == other.stopOnScrub &&
-                trackMedia == other.trackMedia &&
-                thumbnails == other.thumbnails &&
-                thumbnailSize == other.thumbnailSize &&
-                waveforms == other.waveforms &&
-                waveformSize == other.waveformSize;
-        }
-
-        bool TimelineSettings::operator != (const TimelineSettings& other) const
-        {
-            return !(*this == other);
-        }
-
-        bool WindowSettings::operator == (const WindowSettings& other) const
-        {
-            return
-                size == other.size &&
-                fileToolBar == other.fileToolBar &&
-                compareToolBar == other.compareToolBar &&
-                windowToolBar == other.windowToolBar &&
-                viewToolBar == other.viewToolBar &&
-                toolsToolBar == other.toolsToolBar &&
-                tabBar == other.tabBar &&
-                timeline == other.timeline &&
-                bottomToolBar == other.bottomToolBar &&
-                statusToolBar == other.statusToolBar &&
-                tools == other.tools &&
-                splitter == other.splitter &&
-                splitter2 == other.splitter2;
-        }
-
-        bool WindowSettings::operator != (const WindowSettings& other) const
-        {
-            return !(*this == other);
         }
 
         struct SettingsModel::Private

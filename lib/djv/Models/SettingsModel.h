@@ -45,8 +45,7 @@ namespace djv
             //! smaller ones reduce latency.
             size_t bufferFrameCount = tl::PlayerOptions().audioBufferFrameCount;
 
-            DJV_MODELS_API bool operator == (const AudioSettings&) const;
-            DJV_MODELS_API bool operator != (const AudioSettings&) const;
+            bool operator == (const AudioSettings&) const = default;
         };
 
         //! Export render width. Only the width, because the height follows
@@ -107,8 +106,7 @@ namespace djv
             //! line writer's options are for.
             std::string moviePreset = "MJPEG";
 
-            DJV_MODELS_API bool operator == (const ExportSettings&) const;
-            DJV_MODELS_API bool operator != (const ExportSettings&) const;
+            bool operator == (const ExportSettings&) const = default;
         };
 
         //! File browser settings.
@@ -124,8 +122,7 @@ namespace djv
             ftk::FileBrowserOptions options;
             std::string ext;
 
-            DJV_MODELS_API bool operator == (const FileBrowserSettings&) const;
-            DJV_MODELS_API bool operator != (const FileBrowserSettings&) const;
+            bool operator == (const FileBrowserSettings&) const = default;
         };
 
         //! Image sequence settings.
@@ -143,8 +140,7 @@ namespace djv
 
             tl::SeqOptions io;
 
-            DJV_MODELS_API bool operator == (const ImageSeqSettings&) const;
-            DJV_MODELS_API bool operator != (const ImageSeqSettings&) const;
+            bool operator == (const ImageSeqSettings&) const = default;
         };
 
         //! OTIO settings.
@@ -153,8 +149,7 @@ namespace djv
             tl::Spatial spatial = tl::Options().spatial;
             bool compat = tl::Options().compat;
 
-            DJV_MODELS_API bool operator == (const OTIOSettings&) const;
-            DJV_MODELS_API bool operator != (const OTIOSettings&) const;
+            bool operator == (const OTIOSettings&) const = default;
         };
 
         //! Miscellaneous settings.
@@ -163,8 +158,7 @@ namespace djv
             bool tooltipsEnabled = true;
             bool showSetup = true;
 
-            DJV_MODELS_API bool operator == (const MiscSettings&) const;
-            DJV_MODELS_API bool operator != (const MiscSettings&) const;
+            bool operator == (const MiscSettings&) const = default;
         };
 
         //! Mouse actions.
@@ -203,8 +197,7 @@ namespace djv
             ftk::MouseButton button = ftk::MouseButton::None;
             ftk::KeyModifier modifier = ftk::KeyModifier::None;
 
-            DJV_MODELS_API bool operator == (const MouseActionBinding&) const;
-            DJV_MODELS_API bool operator != (const MouseActionBinding&) const;
+            bool operator == (const MouseActionBinding&) const = default;
         };
 
         //! Mouse settings.
@@ -239,8 +232,7 @@ namespace djv
             float wheelScale = 1.1F;
             float frameShuttleScale = 1.F;
 
-            DJV_MODELS_API bool operator == (const MouseSettings&) const;
-            DJV_MODELS_API bool operator != (const MouseSettings&) const;
+            bool operator == (const MouseSettings&) const = default;
         };
 
         //! Playback settings.
@@ -248,8 +240,7 @@ namespace djv
         {
             bool startPlayback = false;
 
-            DJV_MODELS_API bool operator == (const PlaybackSettings&) const;
-            DJV_MODELS_API bool operator != (const PlaybackSettings&) const;
+            bool operator == (const PlaybackSettings&) const = default;
         };
 
         //! Keyboard shortcuts settings.
@@ -259,8 +250,7 @@ namespace djv
 
             std::vector<Shortcut> shortcuts;
 
-            DJV_MODELS_API bool operator == (const ShortcutsSettings&) const;
-            DJV_MODELS_API bool operator != (const ShortcutsSettings&) const;
+            bool operator == (const ShortcutsSettings&) const = default;
         };
 
         //! Style settings.
@@ -275,8 +265,7 @@ namespace djv
             std::map<ftk::FontType, std::string> fonts;
             std::vector<std::string> fontFiles;
 
-            DJV_MODELS_API bool operator == (const StyleSettings&) const;
-            DJV_MODELS_API bool operator != (const StyleSettings&) const;
+            bool operator == (const StyleSettings&) const = default;
         };
 
         //! Timeline thumbnails.
@@ -314,8 +303,7 @@ namespace djv
             bool waveforms = true;
             TimelineThumbnailSize waveformSize = TimelineThumbnailSize::Small;
 
-            DJV_MODELS_API bool operator == (const TimelineSettings&) const;
-            DJV_MODELS_API bool operator != (const TimelineSettings&) const;
+            bool operator == (const TimelineSettings&) const = default;
         };
 
         //! Window settings.
@@ -335,8 +323,7 @@ namespace djv
             float splitter = .7F;
             float splitter2 = .7F;
 
-            DJV_MODELS_API bool operator == (const WindowSettings&) const;
-            DJV_MODELS_API bool operator != (const WindowSettings&) const;
+            bool operator == (const WindowSettings&) const = default;
         };
 
         //! Settings model.

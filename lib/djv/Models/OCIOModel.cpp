@@ -19,27 +19,6 @@ namespace djv
 {
     namespace models
     {
-        bool OCIOModelData::operator == (const OCIOModelData& other) const
-        {
-            return
-                enabled == other.enabled &&
-                config == other.config &&
-                fileName == other.fileName &&
-                inputs == other.inputs &&
-                inputIndex == other.inputIndex &&
-                displays == other.displays &&
-                displayIndex == other.displayIndex &&
-                views == other.views &&
-                viewIndex == other.viewIndex &&
-                looks == other.looks &&
-                lookIndex == other.lookIndex;
-        }
-
-        bool OCIOModelData::operator != (const OCIOModelData& other) const
-        {
-            return !(*this == other);
-        }
-
         struct OCIOModel::Private
         {
             std::weak_ptr<ftk::Context> context;

@@ -41,8 +41,7 @@ namespace djv
                     tl::AspectRatioType::Display)
             };
 
-            DJV_MODELS_API bool operator == (const AspectRatioOptions&) const;
-            DJV_MODELS_API bool operator != (const AspectRatioOptions&) const;
+            bool operator == (const AspectRatioOptions&) const = default;
         };
 
         //! HUD items.
@@ -83,8 +82,7 @@ namespace djv
             bool enabled = false;
             std::map<HUDItem, HUDPos> items;
 
-            DJV_MODELS_API bool operator == (const HUDOptions&) const;
-            DJV_MODELS_API bool operator != (const HUDOptions&) const;
+            bool operator == (const HUDOptions&) const = default;
         };
 
         //! Viewport model.

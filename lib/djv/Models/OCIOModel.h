@@ -34,8 +34,7 @@ namespace djv
             std::vector<std::string> looks;
             size_t lookIndex = 0;
 
-            DJV_MODELS_API bool operator == (const OCIOModelData&) const;
-            DJV_MODELS_API bool operator != (const OCIOModelData&) const;
+            bool operator == (const OCIOModelData&) const = default;
         };
 
         //! OpenColorIO model.

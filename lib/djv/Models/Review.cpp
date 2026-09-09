@@ -331,19 +331,6 @@ namespace djv
             if (json.contains("openTools")) json.at("openTools").get_to(out.openTools);
         }
 
-        bool ReviewStroke::operator == (const ReviewStroke& other) const
-        {
-            return
-                color == other.color &&
-                width == other.width &&
-                points == other.points;
-        }
-
-        bool ReviewStroke::operator != (const ReviewStroke& other) const
-        {
-            return !(*this == other);
-        }
-
         bool ReviewAnnotation::operator == (const ReviewAnnotation& other) const
         {
             return

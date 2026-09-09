@@ -150,8 +150,7 @@ namespace djv
             float                 width = 4.F;
             std::vector<ftk::V2F> points;
 
-            DJV_MODELS_API bool operator == (const ReviewStroke&) const;
-            DJV_MODELS_API bool operator != (const ReviewStroke&) const;
+            bool operator == (const ReviewStroke&) const = default;
         };
 
         //! The drawing on one frame of one source.

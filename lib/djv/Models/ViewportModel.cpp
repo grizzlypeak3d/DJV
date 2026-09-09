@@ -29,30 +29,6 @@ namespace djv
             "Bottom Left",
             "Bottom Right");
 
-        bool AspectRatioOptions::operator == (const AspectRatioOptions& other) const
-        {
-            return
-                index == other.index &&
-                options == other.options;
-        }
-
-        bool AspectRatioOptions::operator != (const AspectRatioOptions& other) const
-        {
-            return !(*this == other);
-        }
-
-        bool HUDOptions::operator == (const HUDOptions& other) const
-        {
-            return
-                enabled == other.enabled &&
-                items == other.items;
-        }
-
-        bool HUDOptions::operator != (const HUDOptions& other) const
-        {
-            return !(*this == other);
-        }
-
         struct ViewportModel::Private
         {
             std::weak_ptr<ftk::Context> context;

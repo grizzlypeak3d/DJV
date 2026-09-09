@@ -26,8 +26,7 @@ namespace djv
             ftk::KeyShortcut primary;
             ftk::KeyShortcut secondary;
 
-            DJV_MODELS_API bool operator == (const Shortcut&) const;
-            DJV_MODELS_API bool operator != (const Shortcut&) const;
+            bool operator == (const Shortcut&) const = default;
         };
 
         //! \name Serialize
