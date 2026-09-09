@@ -21,6 +21,17 @@ dnf install -y \
     glx-utils
 xvfb-run glxinfo
 
+# Wayland: SDL only builds its Wayland driver when these are present, and
+# loads the libraries at run time, so the package gains no dependency.
+# libdecor gives window decorations on GNOME; Rocky 8 may not carry it,
+# and the driver builds without it.
+dnf install -y \
+    wayland-devel \
+    wayland-protocols-devel \
+    libxkbcommon-devel \
+    mesa-libEGL-devel
+dnf install -y libdecor-devel || echo "libdecor-devel is not available"
+
 # Install ALSA and PulseAudio support
 dnf install -y \
     alsa-lib-devel \
