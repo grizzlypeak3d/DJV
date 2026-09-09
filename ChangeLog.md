@@ -17,6 +17,9 @@ Changes:
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.
+* Settings are not lost when one copy of the application starts as
+  another quits; a settings file that cannot be read is set aside as
+  ".bad" rather than overwritten.
 * Clearing the drawing on a compared frame also clears the "B" strokes.
 * A display scale set in the settings is kept across launches.
 * The window is drawn while it is being resized on macOS and Windows.
