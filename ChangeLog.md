@@ -9,6 +9,7 @@ Changes:
 * The status bar shows the highlighted menu item's tooltip.
 * The exposure control is a stop adjustment; defog, knee, and gamma are
   removed.
+* The Python bindings use nanobind.
 
 Fixes:
 * Clearing the drawing on a compared frame also clears the "B" strokes.
