@@ -49,6 +49,44 @@ jobs:
         cd build-Debug
         xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
 
+  # Against the distribution's packages rather than the super build: the
+  # build docs/building.html describes under "System packages", and the one
+  # a distribution package would make. Ubuntu 26.04, the first release with
+  # the C++ OpenTimelineIO package, in a container because the runner images
+  # lag the releases. lunasvg has no package and the script builds it.
+  linux-system-build:
+    runs-on: ubuntu-latest
+    container: ubuntu:26.04
+
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+
+    steps:
+    # The checkout needs git for the submodules, and a bare container has
+    # none.
+    - name: Install git
+      run: |
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get install -y git
+    - uses: actions/checkout@v6
+      with:
+        path: djv
+        submodules: recursive
+
+    - name: Setup environment
+      run: |
+        cmake --version || true
+        sh djv/etc/Linux/setup-gha-system.sh
+
+    - name: Build
+      run: |
+        sh djv/etc/Linux/build-system.sh djv Release ci-linux
+
+    - name: Run tests
+      run: |
+        cd build-Release
+        xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Release
+
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
 
   linux-build-python:
