@@ -139,22 +139,65 @@ if(WIN32)
     set(CPACK_NSIS_MUI_UNIICON ${PROJECT_SOURCE_DIR}/etc/Windows/DJV_Icon.ico)
     set(CPACK_NSIS_INSTALLED_ICON_NAME bin/djv.exe)
 
+    # The file types DJV offers to open. The same set the macOS bundle claims,
+    # kept in step with etc/macOS/Info.plist.in, with USD appearing only when
+    # this build reads it for the reason given there. Windows offers an
+    # application for a type it says it supports; without this DJV is reached
+    # only by browsing for the executable.
+    set(DJV_WINDOWS_SUPPORTED_TYPES
+        aac aiff bmp bw cin djvr dpx exr flac jpeg jpg m4a m4v mov mp3 mp4
+        mxf opus otio otioz png ppm psd rgb rgba sgi tga tif tiff wav webm
+        y4m)
+    if(TLRENDER_USD)
+        list(APPEND DJV_WINDOWS_SUPPORTED_TYPES usd usda usdc usdz)
+    endif()
+    set(DJV_WINDOWS_SUPPORTED_TYPES_REG)
+    foreach(extension ${DJV_WINDOWS_SUPPORTED_TYPES})
+        string(APPEND DJV_WINDOWS_SUPPORTED_TYPES_REG
+            "        WriteRegStr HKCR 'Applications\\djv.exe\\SupportedTypes' '.${extension}' ''\n")
+    endforeach()
+
     # Associate review files (".djvr") with DJV so double-clicking one opens it.
     # The application already routes a ".djvr" argument to the review (see
     # App::_inputFilesInit); these registry entries tell Windows which command to
     # run. The installer is elevated (Program Files), so HKCR resolves to the
     # system-wide HKLM\Software\Classes. SHChangeNotify refreshes the icon cache.
+    #
+    # "Applications\djv.exe" is claimed for a different reason. It is the key
+    # Windows uses for "Open with", and it is named after the executable, which
+    # does not change between versions, while the install directory does ("DJV
+    # 3.6.0"). Windows writes that key itself the first time a file is opened
+    # with DJV, capturing whatever path was current, and never revisits it: after
+    # an upgrade it names a directory that has been removed, the launch fails,
+    # and Explorer falls back to the same "Open with" dialog the user just came
+    # from. Writing it here means every install puts the path right.
+    #
+    # That does not rescue a user already in this state. The copy Windows wrote
+    # is in HKCU\Software\Classes, which shadows the HKLM one this writes, and
+    # the installer has no business editing another account's hive. Clearing it
+    # is the user's to do, or the application's on startup.
+    #
+    # ".com" is the console build of the same program, sitting beside the ".exe"
+    # so that "djv -h" can print. It is not something to offer in a file dialog:
+    # both appear as "djv", and the one that flashes a console is the wrong
+    # answer. NoOpenWith keeps it out of the list.
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
         WriteRegStr HKCR '.djvr' '' 'DJV.Review'
         WriteRegStr HKCR 'DJV.Review' '' 'DJV Review Session'
         WriteRegStr HKCR 'DJV.Review\\DefaultIcon' '' '\"$INSTDIR\\bin\\djv.exe\",0'
         WriteRegStr HKCR 'DJV.Review\\shell\\open\\command' '' '\"$INSTDIR\\bin\\djv.exe\" \"%1\"'
+        WriteRegStr HKCR 'Applications\\djv.exe' 'FriendlyAppName' 'DJV'
+        WriteRegStr HKCR 'Applications\\djv.exe\\DefaultIcon' '' '\"$INSTDIR\\bin\\djv.exe\",0'
+        WriteRegStr HKCR 'Applications\\djv.exe\\shell\\open\\command' '' '\"$INSTDIR\\bin\\djv.exe\" \"%1\"'
+${DJV_WINDOWS_SUPPORTED_TYPES_REG}        WriteRegStr HKCR 'Applications\\djv.com' 'NoOpenWith' ''
         System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, i 0, i 0)'
     ")
     set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
         DeleteRegKey HKCR 'DJV.Review'
         DeleteRegValue HKCR '.djvr' ''
         DeleteRegKey /ifempty HKCR '.djvr'
+        DeleteRegKey HKCR 'Applications\\djv.exe'
+        DeleteRegKey HKCR 'Applications\\djv.com'
         System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, i 0, i 0)'
     ")
 

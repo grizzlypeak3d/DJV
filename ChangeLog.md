@@ -22,6 +22,8 @@ Fixes:
 * Clearing the drawing on a compared frame also clears the "B" strokes.
 * A display scale set in the settings is kept across launches.
 * The window is drawn while it is being resized on macOS and Windows.
+* DJV is offered for the file types it reads in the Windows "Open with"
+  list, and goes on working there after an upgrade.
 
 ## 3.6.0
 
