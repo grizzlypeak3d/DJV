@@ -174,20 +174,6 @@ namespace djv
                 });
 
             _addCheckCommand(
-                "ClipWarning",
-                "Show pixels outside the display range in a warning color: red above, blue below.",
-                [appWeak](const nlohmann::json& args)
-                {
-                    const bool value = args.at("value").get<bool>();
-                    if (auto app = appWeak.lock())
-                    {
-                        auto options = app->getViewportModel()->getDisplayOptions();
-                        options.clipWarning.enabled = value;
-                        app->getViewportModel()->setDisplayOptions(options);
-                    }
-                });
-
-            _addCheckCommand(
                 "MirrorHorizontal",
                 "Mirror the image horizontally.",
                 [appWeak](const nlohmann::json& args)
@@ -271,6 +257,20 @@ namespace djv
                 });
 
             _addCheckCommand(
+                "ClippingWarning",
+                "Cover pixels outside the display range with a warning color: red above, magenta below.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getForegroundOptions();
+                        options.clippingWarning.enabled = value;
+                        app->getViewportModel()->setForegroundOptions(options);
+                    }
+                });
+
+            _addCheckCommand(
                 "HUD",
                 "Toggle the HUD / information display.",
                 [appWeak](const nlohmann::json& args)
@@ -345,9 +345,6 @@ namespace djv
             _actions["Negative"] = ftk::Action::create(
                 "Negative",
                 _checkCommand("Negative"));
-            _actions["ClipWarning"] = ftk::Action::create(
-                "Clip Warning",
-                _checkCommand("ClipWarning"));
             _actions["MirrorHorizontal"] = ftk::Action::create(
                 "Mirror Horizontal",
                 _checkCommand("MirrorHorizontal"));
@@ -366,6 +363,9 @@ namespace djv
             _actions["CenterMarker"] = ftk::Action::create(
                 "Center Marker",
                 _checkCommand("CenterMarker"));
+            _actions["ClippingWarning"] = ftk::Action::create(
+                "Clipping Warning",
+                _checkCommand("ClippingWarning"));
             _actions["HUD"] = ftk::Action::create(
                 "HUD / Information Display",
                 _checkCommand("HUD"));
@@ -387,6 +387,7 @@ namespace djv
             _addShortcut("Grid", ftk::KeyShortcut(ftk::Key::G, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("Outline");
             _addShortcut("CenterMarker");
+            _addShortcut("ClippingWarning");
             _addShortcut("HUD", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control)));
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
@@ -408,8 +409,6 @@ namespace djv
                     _actions["Alpha"]->setChecked(ftk::ChannelDisplay::Alpha == value.channels);
 
                     _actions["Negative"]->setChecked(value.negative);
-                    _actions["ClipWarning"]->setChecked(value.clipWarning.enabled);
-
                     _actions["MirrorHorizontal"]->setChecked(value.mirror.x);
                     _actions["MirrorVertical"]->setChecked(value.mirror.y);
                 });
@@ -440,6 +439,7 @@ namespace djv
                 {
                     _actions["Grid"]->setChecked(value.grid.enabled);
                     _actions["CenterMarker"]->setChecked(value.centerMarker.enabled);
+                    _actions["ClippingWarning"]->setChecked(value.clippingWarning.enabled);
                 });
 
             p.hudOptionsObserver = ftk::Observer<models::HUDOptions>::create(

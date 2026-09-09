@@ -67,11 +67,6 @@ class Actions(IActions.IActions):
                 f("negative", value))
 
         self._addCheckCommand(
-            "ClipWarning",
-            "Show pixels outside the display range in a warning color: red above, blue below.",
-            lambda value, f = Util.weak(self._clipWarningCallback): f(value))
-
-        self._addCheckCommand(
             "MirrorHorizontal",
             "Mirror the image horizontally.",
             lambda value, f = Util.weak(self._mirrorCallback): f("x", value))
@@ -100,6 +95,11 @@ class Actions(IActions.IActions):
             "CenterMarker",
             "Toggle the center marker.",
             lambda value, f = Util.weak(self._centerMarkerCallback): f(value))
+
+        self._addCheckCommand(
+            "ClippingWarning",
+            "Cover pixels outside the display range with a warning color: red above, magenta below.",
+            lambda value, f = Util.weak(self._clippingWarningCallback): f(value))
 
         self._addCheckCommand(
             "HUD",
@@ -156,9 +156,6 @@ class Actions(IActions.IActions):
         self.actions["Negative"] = ftk.Action(
             "Negative",
             checkedCallback = self._checkCommand("Negative"))
-        self.actions["ClipWarning"] = ftk.Action(
-            "Clip Warning",
-            checkedCallback = self._checkCommand("ClipWarning"))
         self.actions["MirrorHorizontal"] = ftk.Action(
             "Mirror Horizontal",
             checkedCallback = self._checkCommand("MirrorHorizontal"))
@@ -177,6 +174,9 @@ class Actions(IActions.IActions):
         self.actions["CenterMarker"] = ftk.Action(
             "Center Marker",
             checkedCallback = self._checkCommand("CenterMarker"))
+        self.actions["ClippingWarning"] = ftk.Action(
+            "Clipping Warning",
+            checkedCallback = self._checkCommand("ClippingWarning"))
         self.actions["HUD"] = ftk.Action(
             "HUD / Information Display",
             checkedCallback = self._checkCommand("HUD"))
@@ -198,6 +198,7 @@ class Actions(IActions.IActions):
         self._addShortcut("Grid", ftk.KeyShortcut(ftk.Key.G, ftk.KeyModifier.Control))
         self._addShortcut("Outline")
         self._addShortcut("CenterMarker")
+        self._addShortcut("ClippingWarning")
         self._addShortcut("HUD", ftk.KeyShortcut(ftk.Key.H, ftk.KeyModifier.Control))
 
         self._shortcutsUpdate(self._settingsModel.shortcuts)
@@ -240,14 +241,6 @@ class Actions(IActions.IActions):
         setattr(options, field, value)
         model.displayOptions = options
 
-    def _clipWarningCallback(self, value):
-        model = self._app().getViewportModel()
-        options = model.displayOptions
-        clipWarning = options.clipWarning
-        clipWarning.enabled = value
-        options.clipWarning = clipWarning
-        model.displayOptions = options
-
     def _mirrorCallback(self, axis, value):
         model = self._app().getViewportModel()
         options = model.displayOptions
@@ -286,6 +279,14 @@ class Actions(IActions.IActions):
         options.centerMarker = marker
         model.foregroundOptions = options
 
+    def _clippingWarningCallback(self, value):
+        model = self._app().getViewportModel()
+        options = model.foregroundOptions
+        warning = options.clippingWarning
+        warning.enabled = value
+        options.clippingWarning = warning
+        model.foregroundOptions = options
+
     def _hudCallback(self, value):
         model = self._app().getViewportModel()
         options = model.hudOptions
@@ -298,7 +299,6 @@ class Actions(IActions.IActions):
         self.actions["Blue"].checked = ftk.ChannelDisplay.Blue == value.channels
         self.actions["Alpha"].checked = ftk.ChannelDisplay.Alpha == value.channels
         self.actions["Negative"].checked = value.negative
-        self.actions["ClipWarning"].checked = value.clipWarning.enabled
         self.actions["MirrorHorizontal"].checked = value.mirror.x
         self.actions["MirrorVertical"].checked = value.mirror.y
 
@@ -312,6 +312,7 @@ class Actions(IActions.IActions):
     def _fgOptionsUpdate(self, value):
         self.actions["Grid"].checked = value.grid.enabled
         self.actions["CenterMarker"].checked = value.centerMarker.enabled
+        self.actions["ClippingWarning"].checked = value.clippingWarning.enabled
 
     def _playerUpdate(self, player):
         # Framing, zooming and centering all describe where an image sits

@@ -19,7 +19,7 @@ namespace djv
         {
             bool channelsEnabled = false;
             bool negativeEnabled = false;
-            bool clipWarningEnabled = false;
+            bool clippingWarningEnabled = false;
             bool mirrorEnabled = false;
             bool aspectRatioEnabled = false;
             bool ocioEnabled = false;
@@ -31,6 +31,7 @@ namespace djv
             std::shared_ptr<StatusIndicatorPopup> popup;
 
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
@@ -67,7 +68,6 @@ namespace djv
                     p.channelsEnabled =
                         value.channels != ftk::ChannelDisplay::Color;
                     p.negativeEnabled = value.negative;
-                    p.clipWarningEnabled = value.clipWarning.enabled;
                     p.mirrorEnabled =
                         value.mirror.x ||
                         value.mirror.y;
@@ -76,6 +76,14 @@ namespace djv
                         value.levels.enabled   ||
                         value.exposure.enabled ||
                         value.softClip.enabled;
+                    _indicatorUpdate();
+                });
+
+            p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
+                viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions& value)
+                {
+                    _p->clippingWarningEnabled = value.clippingWarning.enabled;
                     _indicatorUpdate();
                 });
 
@@ -144,7 +152,7 @@ namespace djv
             return
                 p.channelsEnabled    ||
                 p.negativeEnabled    ||
-                p.clipWarningEnabled ||
+                p.clippingWarningEnabled ||
                 p.mirrorEnabled      ||
                 p.aspectRatioEnabled ||
                 p.ocioEnabled        ||
@@ -159,7 +167,7 @@ namespace djv
             {
                 { "Channels", "Image channels" },
                 { "Negative", "Negative" },
-                { "ClipWarning", "Clip warning" },
+                { "ClippingWarning", "Clipping warning" },
                 { "Mirror", "Mirror" },
                 { "AspectRatio", "Aspect ratio" },
                 { "OCIO", "OCIO" },
@@ -176,7 +184,7 @@ namespace djv
             {
                 { "Channels", p.channelsEnabled },
                 { "Negative", p.negativeEnabled },
-                { "ClipWarning", p.clipWarningEnabled },
+                { "ClippingWarning", p.clippingWarningEnabled },
                 { "Mirror", p.mirrorEnabled },
                 { "AspectRatio", p.aspectRatioEnabled },
                 { "OCIO", p.ocioEnabled },

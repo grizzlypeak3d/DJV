@@ -39,13 +39,13 @@
 <li><a href="#framing-and-zoom">Framing and zoom</a></li>
 <li><a href="#color-channels">Color channels</a></li>
 <li><a href="#mirror">Mirror</a></li>
-<li><a href="#clip-warning">Clip warning</a></li>
 <li><a href="#options">Options</a></li>
 <li><a href="#aspect-ratio">Aspect ratio</a></li>
 <li><a href="#background">Background</a></li>
 <li><a href="#grid">Grid</a></li>
 <li><a href="#outline">Outline</a></li>
 <li><a href="#center-marker">Center marker</a></li>
+<li><a href="#clipping-warning">Clipping warning</a></li>
 <li><a href="#hud">HUD</a></li>
 </ul>
 </div>
@@ -66,9 +66,6 @@
 <p>Locations: <strong>View</strong> menu</p>
 <p>Shortcuts:</p>
 <ul><li><strong>Mirror horizontal</strong> — <kbd>H</kbd></li><li><strong>Mirror vertical</strong> — <kbd>V</kbd></li></ul>
-<h2 id="clip-warning">Clip warning</h2>
-<p>Pixels outside the display range are shown in a warning color: red above, blue below. The range is set in the <a href="color.html#clip-warning">Color tool</a>.</p>
-<p>Locations: <strong>View</strong> menu, <strong>Color</strong> tool</p>
 <h2 id="options">Options</h2>
 <p><img src="assets/view-options.svg" alt="Options"></p>
 <ul><li><strong>Minify</strong> — Filter used when the image is scaled down (<strong>Nearest</strong>, <strong>Linear</strong> or <strong>High Quality</strong>).</li><li><strong>Magnify</strong> — Filter used when the image is scaled up (<strong>Nearest</strong>, <strong>Linear</strong> or <strong>High Quality</strong>). Use <strong>Nearest</strong> to see individual pixels without smoothing.</li><li><strong>Video levels</strong> — How video levels are interpreted: from the file, full range, or legal range.</li><li><strong>Alpha blend</strong> — How the alpha channel is blended: none, straight, or pre-multiplied.</li><li><strong>Color buffer</strong> — The view's bit depth. The default, <strong>RGBA F32</strong>, is recommended because it preserves the full range of color values without clamping. Lower bit-depth options can be faster, but they can clamp colors — choose them only when performance is more important than precision.</li></ul>
@@ -103,6 +100,10 @@
 <p>A marker can be shown at the center of the view to help with alignment and framing. Its size, line width, and color can be customized.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p><img src="assets/view-center-marker.svg" alt="Center marker"></p>
+<h2 id="clipping-warning">Clipping warning</h2>
+<p><strong>Clipping warning</strong> covers every pixel with a channel outside a range in a warning color: red above the range, magenta below it. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.</p>
+<p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
+<p>A shortcut can be assigned in the <strong>Settings</strong> tool.</p>
 <h2 id="hud">HUD</h2>
 <p>The heads-up display (HUD) overlays useful information on top of the view.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>

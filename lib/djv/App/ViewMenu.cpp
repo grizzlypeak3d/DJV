@@ -39,7 +39,6 @@ namespace djv
             addAction(actions["Alpha"]);
             addDivider();
             addAction(actions["Negative"]);
-            addAction(actions["ClipWarning"]);
             addDivider();
             addAction(actions["MirrorHorizontal"]);
             addAction(actions["MirrorVertical"]);
@@ -54,6 +53,7 @@ namespace djv
             addAction(actions["Grid"]);
             addAction(actions["Outline"]);
             addAction(actions["CenterMarker"]);
+            addAction(actions["ClippingWarning"]);
             addAction(actions["HUD"]);
         }
 

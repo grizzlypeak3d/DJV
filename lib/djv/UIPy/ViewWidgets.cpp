@@ -70,6 +70,7 @@ namespace djv
             viewToggleWidget<ViewOutlineWidget>(m, "ViewOutlineWidget");
             viewToggleWidget<ViewGridWidget>(m, "ViewGridWidget");
             viewToggleWidget<ViewCenterMarkerWidget>(m, "ViewCenterMarkerWidget");
+            viewToggleWidget<ViewClippingWarningWidget>(m, "ViewClippingWarningWidget");
             viewToggleWidget<ViewHUDWidget>(m, "ViewHUDWidget");
         }
     }

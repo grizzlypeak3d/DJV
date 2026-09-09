@@ -185,31 +185,5 @@ namespace djv
         private:
             FTK_PRIVATE();
         };
-
-        class DJV_UI_API_TYPE ClipWarningWidget : public ftk::IContainer
-        {
-            FTK_NON_COPYABLE(ClipWarningWidget);
-
-        protected:
-            void _init(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::ViewportModel>&,
-                const std::shared_ptr<IWidget>& parent);
-
-            ClipWarningWidget();
-
-        public:
-            DJV_UI_API virtual ~ClipWarningWidget();
-
-            DJV_UI_API static std::shared_ptr<ClipWarningWidget> create(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::ViewportModel>&,
-                const std::shared_ptr<IWidget>& parent = nullptr);
-
-            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
-
-        private:
-            FTK_PRIVATE();
-        };
     }
 }

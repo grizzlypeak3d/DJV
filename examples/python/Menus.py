@@ -405,7 +405,6 @@ class View(ftk.Menu):
         self.addAction(actions.actions["Alpha"])
         self.addDivider();
         self.addAction(actions.actions["Negative"])
-        self.addAction(actions.actions["ClipWarning"])
         self.addDivider();
         self.addAction(actions.actions["MirrorHorizontal"])
         self.addAction(actions.actions["MirrorVertical"])
@@ -419,6 +418,7 @@ class View(ftk.Menu):
         self.addAction(actions.actions["Grid"])
         self.addAction(actions.actions["Outline"])
         self.addAction(actions.actions["CenterMarker"])
+        self.addAction(actions.actions["ClippingWarning"])
         self.addAction(actions.actions["HUD"])
 
 class ToolsMenu(ftk.Menu):

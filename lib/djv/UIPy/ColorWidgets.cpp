@@ -85,14 +85,6 @@ namespace djv
                     nb::arg("viewportModel"),
                     nb::arg("parent") = nullptr)
                 .def_prop_ro("enabledCheckBox", &SoftClipWidget::getEnabledCheckBox);
-
-            nb::class_<ClipWarningWidget, ftk::IContainer>(m, "ClipWarningWidget")
-                .def(
-                    nb::new_(&ClipWarningWidget::create),
-                    nb::arg("context"),
-                    nb::arg("viewportModel"),
-                    nb::arg("parent") = nullptr)
-                .def_prop_ro("enabledCheckBox", &ClipWarningWidget::getEnabledCheckBox);
         }
     }
 }

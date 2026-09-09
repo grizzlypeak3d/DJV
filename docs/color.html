@@ -42,13 +42,12 @@
 <li><a href="#levels">Levels</a></li>
 <li><a href="#exposure">Exposure</a></li>
 <li><a href="#soft-clip">Soft clip</a></li>
-<li><a href="#clip-warning">Clip warning</a></li>
 </ul>
 </div>
 <p>The <strong>Color</strong> tool covers everything color-related: OpenColorIO settings, LUTs (look-up tables), and image adjustments such as brightness, contrast, levels, and exposure.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
 <p>Shortcut: <kbd>F4</kbd></p>
-<p>The tool is divided into collapsible sections — <strong>OCIO</strong>, <strong>LUT</strong>, <strong>Color</strong>, <strong>Levels</strong>, <strong>Exposure</strong>, <strong>Soft Clip</strong>, and <strong>Clip Warning</strong> — and each can be turned on or off independently using the checkbox in its header. This makes it easy to compare the image with and without a given adjustment.</p>
+<p>The tool is divided into collapsible sections — <strong>OCIO</strong>, <strong>LUT</strong>, <strong>Color</strong>, <strong>Levels</strong>, <strong>Exposure</strong>, and <strong>Soft Clip</strong> — and each can be turned on or off independently using the checkbox in its header. This makes it easy to compare the image with and without a given adjustment.</p>
 <div class="note">When any of the color controls are active, a status bar indicator is shown so the adjustment isn't forgotten about.</div>
 <p>A slider marks its default value with a vertical line. Double click the slider to reset it. The triangle at the end of the slider opens a popup with the reset and the range.</p>
 <h2 id="opencolorio-ocio">OpenColorIO (OCIO)</h2>
@@ -85,8 +84,6 @@
 <h2 id="soft-clip">Soft clip</h2>
 <p><img src="assets/color-soft-clip.svg" alt="Soft clip"></p>
 <p><strong>Soft clip</strong> gently rolls off values approaching white instead of clipping them hard, which helps preserve detail in bright highlights.</p>
-<h2 id="clip-warning">Clip warning</h2>
-<p><strong>Clip warning</strong> shows every pixel with a channel outside a range in a warning color: red above the range, blue below it. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range.</p>
 <p>Locations: <strong>View</strong> menu, <strong>Color</strong> tool</p>
 </main>
 </body>

@@ -10,7 +10,7 @@ Changes:
 * The exposure control is a stop adjustment; defog, knee, and gamma are
   removed.
 * The Python bindings use nanobind.
-* A clip warning marks pixels outside the display range.
+* A clipping warning marks pixels outside the display range.
 * Building requires C++20.
 * CineForm movies can be read and written.
 

@@ -12,6 +12,7 @@
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DoubleEdit.h>
 #include <ftk/UI/FloatEdit.h>
+#include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/GridLayout.h>
 #include <ftk/UI/GroupBox.h>
@@ -981,6 +982,111 @@ namespace djv
         }
 
         std::shared_ptr<ftk::CheckBox> ViewCenterMarkerWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
+        struct ViewClippingWarningWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
+        };
+
+        void ViewClippingWarningWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IContainer::_init(context, "djv::app::ViewClippingWarningWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setTooltip("Toggle whether the clipping warning is enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.ClippingWarning.Enabled");
+
+            p.sliders["Low"] = ftk::FloatEditSlider::create(context);
+            p.sliders["Low"]->setDefault(0.F);
+            p.sliders["Low"]->getModel()->setRangeSoft(true);
+            p.sliders["Low"]->setTooltip("Pixels with a channel below this are covered in magenta.");
+            ftk::setScreenshotTag(p.sliders["Low"], "View.ClippingWarning.Low");
+            p.sliders["High"] = ftk::FloatEditSlider::create(context);
+            p.sliders["High"]->setDefault(1.F);
+            p.sliders["High"]->getModel()->setRangeSoft(true);
+            p.sliders["High"]->setTooltip("Pixels with a channel above this are covered in red.");
+            ftk::setScreenshotTag(p.sliders["High"], "View.ClippingWarning.High");
+
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Low:", p.sliders["Low"]);
+            p.layout->addRow("High:", p.sliders["High"]);
+
+            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
+                viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions& value)
+                {
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.clippingWarning.enabled);
+                    p.sliders["Low"]->setValue(value.clippingWarning.low);
+                    p.sliders["High"]->setValue(value.clippingWarning.high);
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.clippingWarning.enabled = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.sliders["Low"]->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    if (value == options.clippingWarning.low)
+                    {
+                        return;
+                    }
+                    options.clippingWarning.enabled = true;
+                    options.clippingWarning.low = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+            p.sliders["High"]->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    if (value == options.clippingWarning.high)
+                    {
+                        return;
+                    }
+                    options.clippingWarning.enabled = true;
+                    options.clippingWarning.high = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+        }
+
+        ViewClippingWarningWidget::ViewClippingWarningWidget() :
+            _p(new Private)
+        {}
+
+        ViewClippingWarningWidget::~ViewClippingWarningWidget()
+        {}
+
+        std::shared_ptr<ViewClippingWarningWidget> ViewClippingWarningWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewClippingWarningWidget>(new ViewClippingWarningWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        std::shared_ptr<ftk::CheckBox> ViewClippingWarningWidget::getEnabledCheckBox() const
         {
             return _p->enabledCheckBox;
         }

@@ -673,6 +673,7 @@ class ViewTool(IToolWidget):
             ("Outline", djv.ui.ViewOutlineWidget(context, viewportModel)),
             ("Grid", djv.ui.ViewGridWidget(context, viewportModel)),
             ("Center Marker", djv.ui.ViewCenterMarkerWidget(context, viewportModel)),
+            ("Clipping Warning", djv.ui.ViewClippingWarningWidget(context, viewportModel)),
             ("HUD", djv.ui.ViewHUDWidget(context, viewportModel)),
         ]:
             bellows = ftk.Bellows(context, title, layout)
@@ -702,7 +703,6 @@ class ColorTool(IToolWidget):
             ("Levels", djv.ui.LevelsWidget(context, app.settings, viewportModel)),
             ("Exposure", djv.ui.ExposureWidget(context, viewportModel)),
             ("Soft Clip", djv.ui.SoftClipWidget(context, viewportModel)),
-            ("Clip Warning", djv.ui.ClipWarningWidget(context, viewportModel)),
         ]:
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget

@@ -211,6 +211,33 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! View clipping warning widget.
+        class DJV_UI_API_TYPE ViewClippingWarningWidget : public ftk::IContainer
+        {
+            FTK_NON_COPYABLE(ViewClippingWarningWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            ViewClippingWarningWidget();
+
+        public:
+            DJV_UI_API virtual ~ViewClippingWarningWidget();
+
+            DJV_UI_API static std::shared_ptr<ViewClippingWarningWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
+        private:
+            FTK_PRIVATE();
+        };
+
         //! View HUD widget.
         class DJV_UI_API_TYPE ViewHUDWidget : public ftk::IContainer
         {

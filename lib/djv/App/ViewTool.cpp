@@ -24,6 +24,7 @@ namespace djv
             std::shared_ptr<ui::ViewOutlineWidget> outlineWidget;
             std::shared_ptr<ui::ViewGridWidget> gridWidget;
             std::shared_ptr<ui::ViewCenterMarkerWidget> centerMarkerWidget;
+            std::shared_ptr<ui::ViewClippingWarningWidget> clippingWarningWidget;
             std::shared_ptr<ui::ViewHUDWidget> hudWidget;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
 
@@ -52,6 +53,7 @@ namespace djv
             p.outlineWidget = ui::ViewOutlineWidget::create(context, viewportModel);
             p.gridWidget = ui::ViewGridWidget::create(context, viewportModel);
             p.centerMarkerWidget = ui::ViewCenterMarkerWidget::create(context, viewportModel);
+            p.clippingWarningWidget = ui::ViewClippingWarningWidget::create(context, viewportModel);
             p.hudWidget = ui::ViewHUDWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
@@ -71,6 +73,9 @@ namespace djv
             p.bellows["CenterMarker"] = ftk::Bellows::create(context, "Center Marker", layout);
             p.bellows["CenterMarker"]->setWidget(p.centerMarkerWidget);
             p.bellows["CenterMarker"]->setToolWidget(p.centerMarkerWidget->getEnabledCheckBox());
+            p.bellows["ClippingWarning"] = ftk::Bellows::create(context, "Clipping Warning", layout);
+            p.bellows["ClippingWarning"]->setWidget(p.clippingWarningWidget);
+            p.bellows["ClippingWarning"]->setToolWidget(p.clippingWarningWidget->getEnabledCheckBox());
             p.bellows["HUD"] = ftk::Bellows::create(context, "HUD", layout);
             p.bellows["HUD"]->setWidget(p.hudWidget);
             p.bellows["HUD"]->setToolWidget(p.hudWidget->getEnabledCheckBox());
