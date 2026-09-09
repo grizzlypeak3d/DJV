@@ -4,6 +4,7 @@
 #include <djv/UI/SysInfoDialog.h>
 
 #include <djv/Models/AppInfoModel.h>
+#include <djv/Models/OCIOModel.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <tlRender/Timeline/AudioSystem.h>
@@ -24,6 +25,11 @@
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
 #include <ftk/Core/String.h>
+#include <ftk/Core/Version.h>
+
+#include <tlRender/Core/Version.h>
+
+#include <opentimelineio/version.h>
 
 namespace djv
 {
@@ -110,6 +116,28 @@ namespace djv
                 labels.push_back(std::make_pair(
                     "Video driver: ",
                     glSystem->getVideoDriver()));
+            }
+            // The libraries this build was made with. The plugins below
+            // name the I/O libraries; these are the rest, and they are what
+            // tells a build against system packages from a packaged one.
+            labels.push_back(std::make_pair("", ""));
+            labels.push_back(std::make_pair("Libraries:", ""));
+            labels.push_back(std::make_pair("ftk: ", FTK_VERSION_FULL));
+            labels.push_back(std::make_pair("tlRender: ", TLRENDER_VERSION_FULL));
+            if (auto glSystem = context->getSystem<ftk::gl::System>())
+            {
+                labels.push_back(std::make_pair("SDL: ", glSystem->getSDLVersion()));
+            }
+            labels.push_back(std::make_pair(
+                "OpenTimelineIO: ",
+                ftk::Format("{0}.{1}.{2}").
+                    arg(OPENTIMELINEIO_VERSION_MAJOR).
+                    arg(OPENTIMELINEIO_VERSION_MINOR).
+                    arg(OPENTIMELINEIO_VERSION_PATCH)));
+            const std::string ocioVersion = models::getOCIOVersion();
+            if (!ocioVersion.empty())
+            {
+                labels.push_back(std::make_pair("OpenColorIO: ", ocioVersion));
             }
 
             if (auto audioSystem = context->getSystem<tl::AudioSystem>())

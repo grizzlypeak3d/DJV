@@ -38,6 +38,10 @@ namespace djv
         };
 
         //! OpenColorIO model.
+        //! Get the OpenColorIO version, or an empty string when OpenColorIO
+        //! is not built in.
+        DJV_MODELS_API std::string getOCIOVersion();
+
         class DJV_MODELS_API_TYPE OCIOModel : public std::enable_shared_from_this<OCIOModel>
         {
             FTK_NON_COPYABLE(OCIOModel);

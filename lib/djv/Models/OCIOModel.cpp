@@ -19,6 +19,15 @@ namespace djv
 {
     namespace models
     {
+        std::string getOCIOVersion()
+        {
+#if defined(TLRENDER_OCIO)
+            return OCIO::GetVersion();
+#else // TLRENDER_OCIO
+            return std::string();
+#endif // TLRENDER_OCIO
+        }
+
         struct OCIOModel::Private
         {
             std::weak_ptr<ftk::Context> context;
