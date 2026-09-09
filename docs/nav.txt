@@ -8,6 +8,7 @@
 # navigation by hand is undone the next time that runs.
 index.html Home
 install.html Download and install
+building.html Building from source
 main-window.html Main window
 files.html Files
 view.html View

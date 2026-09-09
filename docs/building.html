@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Building from source - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a class="current" href="building.html">Building from source</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="reviews.html">Review</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a href="python.html">Python</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Building from source</h1>
+<div class="toc">
+<ul>
+<li><a href="#linux">Linux</a></li>
+<li><a href="#macos">macOS</a></li>
+<li><a href="#windows">Windows</a></li>
+<li><a href="#system-packages">System packages</a></li>
+</ul>
+</div>
+<p>DJV is built with CMake. A <em>super build</em> is provided that builds the dependencies and then DJV, driven by a script per platform; it is how the packages are made. The dependencies can also come from the system's packages, on the distributions that carry them.</p>
+<p>Build options go in <code>etc/Config/local.cmake</code>, which is not tracked. For example:</p>
+<pre><code># Enable full codec support.
+set(TLRENDER_FFMPEG_MINIMAL OFF CACHE BOOL "")
+
+# Enable USD (Universal Scene Description) support. Building USD also
+# requires Python 3.
+set(TLRENDER_USD ON CACHE BOOL "")</code></pre>
+<p>For the number of build jobs, export <code>CMAKE_BUILD_PARALLEL_LEVEL</code>.</p>
+<h2 id="linux">Linux</h2>
+<p>Requirements: Git and CMake 3.31.</p>
+<h3>Debian and Ubuntu</h3>
+<p>Install the system packages:</p>
+<pre><code>sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev</code></pre>
+<p>The Wayland packages are optional; without them SDL is built with X11 only and runs through XWayland on a Wayland desktop.</p>
+<h3>Rocky 9</h3>
+<pre><code>sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel libdecor-devel</code></pre>
+<h3>Rocky 8</h3>
+<pre><code>sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel</code></pre>
+<p>Rocky 8 also needs a newer compiler, installed and then enabled for the shell that builds:</p>
+<pre><code>sudo dnf install gcc-toolset-13
+scl enable gcc-toolset-13 bash</code></pre>
+<p>NVIDIA hardware decoding loads the driver's CUDA library at run time. On RHEL family systems that is a separate package:</p>
+<pre><code>sudo dnf install nvidia-driver-cuda-libs</code></pre>
+<h3>Build</h3>
+<p>Clone the repository and run the super build script:</p>
+<pre><code>git clone https://github.com/grizzlypeak3d/DJV.git
+sh DJV/sbuild-linux.sh</code></pre>
+<p>Run the application:</p>
+<pre><code>build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg</code></pre>
+<h2 id="macos">macOS</h2>
+<p>Requirements: Git, Xcode, and CMake 3.31.</p>
+<p>Clone the repository and run the super build script:</p>
+<pre><code>git clone https://github.com/grizzlypeak3d/DJV.git
+sh DJV/sbuild-macos.sh</code></pre>
+<p>Run the application:</p>
+<pre><code>build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg</code></pre>
+<p>These aliases are convenient for switching between architectures:</p>
+<pre><code>alias arm="env /usr/bin/arch -arm64 /bin/zsh --login"
+alias intel="env /usr/bin/arch -x86_64 /bin/zsh --login"</code></pre>
+<h2 id="windows">Windows</h2>
+<p>Requirements:</p>
+<ul>
+<li>Git (<a target="_blank" href="https://git-scm.com">git-scm.com</a>)</li>
+<li>Visual Studio 2022</li>
+<li>CMake 3.31</li>
+<li>NASM (<a target="_blank" href="https://www.nasm.us">nasm.us</a>) for compiling FFmpeg and libjpeg-turbo</li>
+<li>MSYS2 (<a target="_blank" href="https://www.msys2.org">msys2.org</a>) for compiling FFmpeg</li>
+<li>Strawberry Perl (<a target="_blank" href="https://strawberryperl.com/">strawberryperl.com</a>) for compiling network support</li>
+<li>Python 3.11 for compiling USD</li>
+<li>NSIS (<a target="_blank" href="https://nsis.sourceforge.io/Main_Page">nsis.sourceforge.io</a>) for packaging</li>
+</ul>
+<p>Open the Visual Studio command console "x64 Native Tools Command Prompt for VS 2022", found in the Start menu in the "Visual Studio 2022" folder.</p>
+<p>Clone the repository and run the super build script:</p>
+<pre><code>git clone https://github.com/grizzlypeak3d/DJV.git
+DJV\sbuild-win.bat</code></pre>
+<p>Run the application:</p>
+<pre><code>set PATH=%CD%\install-Release\bin;%PATH%
+build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg</code></pre>
+<h2 id="system-packages">System packages</h2>
+<p>On Linux the dependencies can come from the distribution instead of the super build. This is the build a distribution package would make. Ubuntu 26.04 is the first release with every package it needs, and it is the configuration continuous integration builds, so what follows is kept true there.</p>
+<p>Install the system packages:</p>
+<pre><code>sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev pkg-config zlib1g-dev libpng-dev libfreetype-dev nlohmann-json3-dev libsdl3-dev libimath-dev libopenexr-dev libopencolorio-dev libopenimageio-dev libopentimelineio-dev libminizip-ng-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev</code></pre>
+<p>lunasvg has no package and is built from source, into a prefix beside the build:</p>
+<pre><code>git clone --branch v3.4.0 https://github.com/sammycage/lunasvg.git
+cmake -S lunasvg -B lunasvg-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install-Release -DLUNASVG_BUILD_EXAMPLES=OFF
+cmake --build lunasvg-build --target install</code></pre>
+<p>Then DJV is configured directly, with its default options and that prefix on the search path, and built:</p>
+<pre><code>git clone --recursive https://github.com/grizzlypeak3d/DJV.git
+cmake -S DJV -B build-Release -C DJV/etc/Config/default.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install-Release -DCMAKE_PREFIX_PATH=$PWD/install-Release
+cmake --build build-Release</code></pre>
+<p>The script <code>etc/Linux/build-system.sh</code> does the same, and is what continuous integration runs.</p>
+<p>What differs from the super build:</p>
+<ul>
+<li>The distribution's OpenTimelineIO is 0.18.1. Markers carry an RGBA color from 0.19, so a review saved by this build writes marker colors as the default named color, and reads named colors.</li>
+<li>The super build patches FFmpeg so that media past 2 GB inside an OTIOZ bundle can be read; the distribution's FFmpeg is unpatched, and such an entry does not open.</li>
+<li>The codecs are whatever the distribution's FFmpeg carries, rather than the packages' minimal set.</li>
+</ul>
+</main>
+</body>
+</html>

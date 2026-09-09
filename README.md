@@ -41,141 +41,15 @@ or build from source.
 
 ## Building
 
-A CMake "super build" is provided to build DJV and the main dependencies. The
-super build is invoked with scripts as described below.
+DJV is built with CMake. A super build is provided that builds the
+dependencies and then DJV, driven by a script per platform:
 
-Build options go in `etc/Config/local.cmake`, which is not tracked. For
-example:
-
-```cmake
-# Enable full codec support.
-set(TLRENDER_FFMPEG_MINIMAL OFF CACHE BOOL "")
-
-# Enable USD (Universal Scene Description) support. Building USD also
-# requires Python 3.
-set(TLRENDER_USD ON CACHE BOOL "")
-```
-
-For the number of build jobs, export `CMAKE_BUILD_PARALLEL_LEVEL`.
-
-### Building on Linux
-
-Requirements:
-* Git
-* CMake 3.31
-
-#### Debian
-
-Install system packages:
-```
-sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev
-```
-The Wayland packages are optional; without them SDL is built with X11 only and runs through XWayland on a Wayland desktop.
-
-#### Rocky 9
-
-Install system packages:
-```
-sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel libdecor-devel
-```
-
-#### Rocky 8
-
-Install system packages:
-```
-sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel
-```
-Install newer compiler:
-```
-sudo dnf install gcc-toolset-13
-```
-Enable newer compiler:
-```
-scl enable gcc-toolset-13 bash
-```
-
-NVIDIA hardware decoding loads the driver's CUDA library at run time. On
-RHEL family systems that is a separate package:
-```
-sudo dnf install nvidia-driver-cuda-libs
-```
-
-#### Build
-
-Clone the repository:
-```
-git clone https://github.com/grizzlypeak3d/DJV.git
-```
-
-Run the super build script:
 ```
 sh DJV/sbuild-linux.sh
-```
-
-Run the application:
-```
-build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg
-```
-
-
-### Building on macOS
-
-Requirements:
-* Git
-* Xcode
-* CMake 3.31
-
-Clone the repository:
-```
-git clone https://github.com/grizzlypeak3d/DJV.git
-```
-
-Run the super build script:
-```
 sh DJV/sbuild-macos.sh
-```
-
-Run the application:
-```
-build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg
-```
-
-These aliases are convenient for switching between architectures:
-```
-alias arm="env /usr/bin/arch -arm64 /bin/zsh --login"
-alias intel="env /usr/bin/arch -x86_64 /bin/zsh --login"
-```
-
-
-### Building on Windows
-
-Requirements:
-* Git (https://git-scm.com)
-* Visual Studio 2022
-* CMake 3.31
-* NASM (https://www.nasm.us) for compiling FFmpeg and libjpeg-turbo.
-* MSYS2 (https://www.msys2.org) for compiling FFmpeg.
-* Strawberry Perl (https://strawberryperl.com/) for compiling network support.
-* Python 3.11 for compiling USD.
-* NSIS (https://nsis.sourceforge.io/Main_Page) for packaging.
-
-Open the Visual Studio command console "x64 Native Tools Command Prompt for VS 2022".
-This can be found in the Start menu, in the "Visual Studio 2022" folder.
-
-Clone the repository:
-```
-git clone https://github.com/grizzlypeak3d/DJV.git
-```
-
-Run the super build script:
-```
 DJV\sbuild-win.bat
 ```
 
-Run the application:
-```
-set PATH=%CD%\install-Release\bin;%PATH%
-```
-```
-build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg
-```
+The system packages each platform needs, the options, and building against
+a distribution's own packages are in the documentation:
+https://grizzlypeak3d.github.io/DJV/building.html
