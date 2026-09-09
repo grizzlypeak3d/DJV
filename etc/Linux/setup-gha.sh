@@ -6,7 +6,7 @@ set -x
 sudo apt-get update
 
 # Install OpenGL support
-sudo apt-get install xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils xvfb
+sudo apt-get install xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils xvfb libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev
 xvfb-run glxinfo
 
 # Install ALSA and PulseAudio support

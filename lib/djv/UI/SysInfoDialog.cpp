@@ -18,6 +18,7 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/TextEdit.h>
 
+#include <ftk/GL/System.h>
 #include <ftk/GL/Window.h>
 
 #include <ftk/Core/Format.h>
@@ -103,6 +104,12 @@ namespace djv
                 {
                     labels.push_back(std::make_pair("OpenGL: ", e.what()));
                 }
+            }
+            if (auto glSystem = context->getSystem<ftk::gl::System>())
+            {
+                labels.push_back(std::make_pair(
+                    "Video driver: ",
+                    glSystem->getVideoDriver()));
             }
 
             if (auto audioSystem = context->getSystem<tl::AudioSystem>())
