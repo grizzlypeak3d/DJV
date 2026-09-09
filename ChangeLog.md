@@ -1,13 +1,14 @@
 ## 3.7.0
 
 Changes:
+* Settings and logs move to the application support directory.
+* System Information shows the settings and log paths.
 * The HUD shows the file name of the current image of a sequence.
 * Opening one image of a sequence starts playback at that image.
-* Media stored in an OTIOZ bundle can be read with an external FFmpeg command.
+* OTIOZ bundle media can be read with the FFmpeg command line.
 * The status bar shows the highlighted menu item's tooltip.
-* The exposure control is a plain stop adjustment, so zero leaves the
-  image unchanged. The defog, knee, and gamma controls are removed;
-  soft clip and levels cover them.
+* The exposure control is a stop adjustment; defog, knee, and gamma are
+  removed.
 
 Fixes:
 * Clearing the drawing on a compared frame also clears the "B" strokes.

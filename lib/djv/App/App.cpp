@@ -1699,9 +1699,11 @@ namespace djv
         std::filesystem::path App::_autosavePath()
         {
             FTK_P();
-            // The same directory the settings and log live in.
-            return ftk::getUserPath(ftk::UserPath::Documents) /
-                p.appInfoModel->getShortName() /
+            // The directory the settings live in, taken from the settings
+            // path rather than built again: built separately it used the
+            // short name where the settings used the directory name, which
+            // agree only on a file system that ignores case.
+            return getSettingsPath().parent_path() /
                 ftk::Format("{0}.{1}.autosave.djvr").
                 arg(p.appInfoModel->getShortName()).
                 arg(p.appInfoModel->getVersionMajor()).
@@ -1945,7 +1947,11 @@ namespace djv
                 p.settingsModel,
                 p.mainWindow ?
                     p.mainWindow->getWindowInfo() :
-                    std::vector<std::pair<std::string, std::string> >());
+                    std::vector<std::pair<std::string, std::string> >(),
+                {
+                    { "Settings", ftk::fromFileSystem(getSettingsPath()) },
+                    { "Log", ftk::fromFileSystem(getLogFilePath()) }
+                });
         }
 
         void App::run()
