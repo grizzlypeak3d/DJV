@@ -95,11 +95,7 @@ class Actions(IActions.IActions):
     def _sysInfo(self):
         app = self._app()
         mainWindow = self._mainWindowWeak()
-        text = djv.ui.getSysInfo(
-            app.context,
-            app.getAppInfoModel(),
-            app.getSettingsModel(),
-            mainWindow.getWindowInfo())
+        text = app.getSysInfo()
         selfWeak = weakref.ref(self)
         self._sysInfoDialog = djv.ui.SysInfoDialog(app.context, text)
         self._sysInfoDialog.open(mainWindow)

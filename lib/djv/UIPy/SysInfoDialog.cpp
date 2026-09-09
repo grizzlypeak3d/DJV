@@ -41,6 +41,8 @@ namespace djv
                 nb::arg("appInfoModel"),
                 nb::arg("settingsModel"),
                 nb::arg("windowInfo") =
+                    std::vector<std::pair<std::string, std::string> >(),
+                nb::arg("files") =
                     std::vector<std::pair<std::string, std::string> >());
 
             nb::class_<SysInfoDialog, ftk::IDialog>(m, "SysInfoDialog")

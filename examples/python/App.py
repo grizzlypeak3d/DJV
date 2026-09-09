@@ -279,6 +279,16 @@ class App(ftk.App):
     def getAppInfoModel(self):
         return self._appInfoModel
 
+    def getSysInfo(self):
+        window = getattr(self, "_window", None)
+        return djv.ui.getSysInfo(
+            self.context,
+            self._appInfoModel,
+            self._settingsModel,
+            window.getWindowInfo() if window else [],
+            [("Settings", str(self.settingsPath)),
+             ("Log", str(self.logFilePath))])
+
     def observePlayer(self):
         """
         Observe the player for the current file.
@@ -1126,8 +1136,7 @@ class App(ftk.App):
             self._toolsModel.observeOpenTools, drawToolsUpdate)
 
         if self._cmdLineSysInfo.found:
-            print("\n".join(djv.ui.getSysInfo(
-                self.context, self._appInfoModel, self._settingsModel)))
+            print("\n".join(self.getSysInfo()))
             return
 
         # Color options apply to the session whether or not a file was
