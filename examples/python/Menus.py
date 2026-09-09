@@ -405,6 +405,7 @@ class View(ftk.Menu):
         self.addAction(actions.actions["Alpha"])
         self.addDivider();
         self.addAction(actions.actions["Negative"])
+        self.addAction(actions.actions["ClipWarning"])
         self.addDivider();
         self.addAction(actions.actions["MirrorHorizontal"])
         self.addAction(actions.actions["MirrorVertical"])

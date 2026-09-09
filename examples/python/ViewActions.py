@@ -67,6 +67,11 @@ class Actions(IActions.IActions):
                 f("negative", value))
 
         self._addCheckCommand(
+            "ClipWarning",
+            "Show pixels outside the display range in a warning color: red above, blue below.",
+            lambda value, f = Util.weak(self._clipWarningCallback): f(value))
+
+        self._addCheckCommand(
             "MirrorHorizontal",
             "Mirror the image horizontally.",
             lambda value, f = Util.weak(self._mirrorCallback): f("x", value))
@@ -151,6 +156,9 @@ class Actions(IActions.IActions):
         self.actions["Negative"] = ftk.Action(
             "Negative",
             checkedCallback = self._checkCommand("Negative"))
+        self.actions["ClipWarning"] = ftk.Action(
+            "Clip Warning",
+            checkedCallback = self._checkCommand("ClipWarning"))
         self.actions["MirrorHorizontal"] = ftk.Action(
             "Mirror Horizontal",
             checkedCallback = self._checkCommand("MirrorHorizontal"))
@@ -232,6 +240,14 @@ class Actions(IActions.IActions):
         setattr(options, field, value)
         model.displayOptions = options
 
+    def _clipWarningCallback(self, value):
+        model = self._app().getViewportModel()
+        options = model.displayOptions
+        clipWarning = options.clipWarning
+        clipWarning.enabled = value
+        options.clipWarning = clipWarning
+        model.displayOptions = options
+
     def _mirrorCallback(self, axis, value):
         model = self._app().getViewportModel()
         options = model.displayOptions
@@ -282,6 +298,7 @@ class Actions(IActions.IActions):
         self.actions["Blue"].checked = ftk.ChannelDisplay.Blue == value.channels
         self.actions["Alpha"].checked = ftk.ChannelDisplay.Alpha == value.channels
         self.actions["Negative"].checked = value.negative
+        self.actions["ClipWarning"].checked = value.clipWarning.enabled
         self.actions["MirrorHorizontal"].checked = value.mirror.x
         self.actions["MirrorVertical"].checked = value.mirror.y
 

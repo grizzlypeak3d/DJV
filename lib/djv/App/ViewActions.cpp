@@ -174,6 +174,20 @@ namespace djv
                 });
 
             _addCheckCommand(
+                "ClipWarning",
+                "Show pixels outside the display range in a warning color: red above, blue below.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getDisplayOptions();
+                        options.clipWarning.enabled = value;
+                        app->getViewportModel()->setDisplayOptions(options);
+                    }
+                });
+
+            _addCheckCommand(
                 "MirrorHorizontal",
                 "Mirror the image horizontally.",
                 [appWeak](const nlohmann::json& args)
@@ -331,6 +345,9 @@ namespace djv
             _actions["Negative"] = ftk::Action::create(
                 "Negative",
                 _checkCommand("Negative"));
+            _actions["ClipWarning"] = ftk::Action::create(
+                "Clip Warning",
+                _checkCommand("ClipWarning"));
             _actions["MirrorHorizontal"] = ftk::Action::create(
                 "Mirror Horizontal",
                 _checkCommand("MirrorHorizontal"));
@@ -391,6 +408,7 @@ namespace djv
                     _actions["Alpha"]->setChecked(ftk::ChannelDisplay::Alpha == value.channels);
 
                     _actions["Negative"]->setChecked(value.negative);
+                    _actions["ClipWarning"]->setChecked(value.clipWarning.enabled);
 
                     _actions["MirrorHorizontal"]->setChecked(value.mirror.x);
                     _actions["MirrorVertical"]->setChecked(value.mirror.y);

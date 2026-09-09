@@ -39,6 +39,7 @@ namespace djv
             addAction(actions["Alpha"]);
             addDivider();
             addAction(actions["Negative"]);
+            addAction(actions["ClipWarning"]);
             addDivider();
             addAction(actions["MirrorHorizontal"]);
             addAction(actions["MirrorVertical"]);

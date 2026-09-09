@@ -1069,5 +1069,107 @@ namespace djv
         {
             return _p->enabledCheckBox;
         }
+
+        struct ClipWarningWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
+        };
+
+        void ClipWarningWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IContainer::_init(context, "djv::ui::ClipWarningWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setTooltip("Toggle whether the clip warning is enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "Color.ClipWarning.Enabled");
+
+            p.sliders["Low"] = ftk::FloatEditSlider::create(context);
+            p.sliders["Low"]->setDefault(0.F);
+            p.sliders["Low"]->setTooltip("Pixels with a channel below this are shown in blue.");
+            ftk::setScreenshotTag(p.sliders["Low"], "Color.ClipWarning.Low");
+            p.sliders["High"] = ftk::FloatEditSlider::create(context);
+            p.sliders["High"]->setDefault(1.F);
+            p.sliders["High"]->setTooltip("Pixels with a channel above this are shown in red.");
+            ftk::setScreenshotTag(p.sliders["High"], "Color.ClipWarning.High");
+
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Low:", p.sliders["Low"]);
+            p.layout->addRow("High:", p.sliders["High"]);
+
+            p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
+                viewportModel->observeDisplayOptions(),
+                [this](const tl::DisplayOptions& value)
+                {
+                    _p->enabledCheckBox->setChecked(value.clipWarning.enabled);
+                    _p->sliders["Low"]->setValue(value.clipWarning.low);
+                    _p->sliders["High"]->setValue(value.clipWarning.high);
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    options.clipWarning.enabled = value;
+                    viewportModel->setDisplayOptions(options);
+                });
+
+            p.sliders["Low"]->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    if (value == options.clipWarning.low)
+                    {
+                        return;
+                    }
+                    options.clipWarning.enabled = true;
+                    options.clipWarning.low = value;
+                    viewportModel->setDisplayOptions(options);
+                });
+            p.sliders["High"]->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    if (value == options.clipWarning.high)
+                    {
+                        return;
+                    }
+                    options.clipWarning.enabled = true;
+                    options.clipWarning.high = value;
+                    viewportModel->setDisplayOptions(options);
+                });
+        }
+
+        ClipWarningWidget::ClipWarningWidget() :
+            _p(new Private)
+        {}
+
+        ClipWarningWidget::~ClipWarningWidget()
+        {}
+
+        std::shared_ptr<ClipWarningWidget> ClipWarningWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ClipWarningWidget>(new ClipWarningWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        std::shared_ptr<ftk::CheckBox> ClipWarningWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
     }
 }

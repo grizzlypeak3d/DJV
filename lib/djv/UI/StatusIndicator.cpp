@@ -19,6 +19,7 @@ namespace djv
         {
             bool channelsEnabled = false;
             bool negativeEnabled = false;
+            bool clipWarningEnabled = false;
             bool mirrorEnabled = false;
             bool aspectRatioEnabled = false;
             bool ocioEnabled = false;
@@ -66,6 +67,7 @@ namespace djv
                     p.channelsEnabled =
                         value.channels != ftk::ChannelDisplay::Color;
                     p.negativeEnabled = value.negative;
+                    p.clipWarningEnabled = value.clipWarning.enabled;
                     p.mirrorEnabled =
                         value.mirror.x ||
                         value.mirror.y;
@@ -142,6 +144,7 @@ namespace djv
             return
                 p.channelsEnabled    ||
                 p.negativeEnabled    ||
+                p.clipWarningEnabled ||
                 p.mirrorEnabled      ||
                 p.aspectRatioEnabled ||
                 p.ocioEnabled        ||
@@ -156,6 +159,7 @@ namespace djv
             {
                 { "Channels", "Image channels" },
                 { "Negative", "Negative" },
+                { "ClipWarning", "Clip warning" },
                 { "Mirror", "Mirror" },
                 { "AspectRatio", "Aspect ratio" },
                 { "OCIO", "OCIO" },
@@ -172,6 +176,7 @@ namespace djv
             {
                 { "Channels", p.channelsEnabled },
                 { "Negative", p.negativeEnabled },
+                { "ClipWarning", p.clipWarningEnabled },
                 { "Mirror", p.mirrorEnabled },
                 { "AspectRatio", p.aspectRatioEnabled },
                 { "OCIO", p.ocioEnabled },

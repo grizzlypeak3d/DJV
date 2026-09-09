@@ -10,6 +10,7 @@ Changes:
 * The exposure control is a stop adjustment; defog, knee, and gamma are
   removed.
 * The Python bindings use nanobind.
+* A clip warning marks pixels outside the display range.
 
 Fixes:
 * Clearing the drawing on a compared frame also clears the "B" strokes.
