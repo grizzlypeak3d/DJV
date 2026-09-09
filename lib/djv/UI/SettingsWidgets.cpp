@@ -1177,6 +1177,7 @@ namespace djv
 
             std::shared_ptr<ftk::CheckBox> yuvToRGBCheckBox;
             std::shared_ptr<ftk::CheckBox> hwAccelCheckBox;
+            std::shared_ptr<ftk::CheckBox> audioMergeCheckBox;
             std::shared_ptr<ftk::IntEdit> threadsEdit;
             std::shared_ptr<ftk::FileEdit> ffmpegEdit;
             std::shared_ptr<ftk::FileEdit> ffprobeEdit;
@@ -1224,6 +1225,15 @@ namespace djv
             }
             ftk::setScreenshotTag(p.hwAccelCheckBox, "FFmpeg.HardwareDecoding");
 
+            p.audioMergeCheckBox = ftk::CheckBox::create(context);
+            p.audioMergeCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.audioMergeCheckBox->setTooltip(
+                "Play a file's mono audio streams as the channels of one track. "
+                "Broadcast files, such as XDCAM MXF, carry each channel as its "
+                "own stream. When disabled, only the first stream plays. Takes "
+                "effect the next time a file is opened.");
+            ftk::setScreenshotTag(p.audioMergeCheckBox, "FFmpeg.AudioMerge");
+
             p.threadsEdit = ftk::IntEdit::create(context);
             p.threadsEdit->setRange(0, 64);
             p.threadsEdit->setTooltip(
@@ -1248,6 +1258,7 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
             p.layout->addRow("Hardware decoding:", p.hwAccelCheckBox);
+            p.layout->addRow("Merge mono audio:", p.audioMergeCheckBox);
             p.layout->addRow("I/O threads:", p.threadsEdit);
             p.layout->addRow("ffmpeg location:", p.ffmpegEdit);
             p.layout->addRow("ffprobe location:", p.ffprobeEdit);
@@ -1260,6 +1271,7 @@ namespace djv
                     p.yuvToRGBCheckBox->setChecked(value.yuvToRgb);
                     p.hwAccelCheckBox->setChecked(
                         value.hwAccel && tl::ffmpeg::hasHWDecode());
+                    p.audioMergeCheckBox->setChecked(value.audioMerge);
                     p.threadsEdit->setValue(value.threadCount);
                 });
 
@@ -1287,6 +1299,15 @@ namespace djv
                     FTK_P();
                     tl::ffmpeg::Options options = p.settings->getFFmpeg();
                     options.hwAccel = value;
+                    p.settings->setFFmpeg(options);
+                });
+
+            p.audioMergeCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    tl::ffmpeg::Options options = p.settings->getFFmpeg();
+                    options.audioMerge = value;
                     p.settings->setFFmpeg(options);
                 });
 

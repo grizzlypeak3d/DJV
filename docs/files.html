@@ -93,6 +93,7 @@
 <h2 id="ffmpeg">FFmpeg</h2>
 <p>The FFmpeg plugin provides support for movie and audio files. Only a limited set of codecs is enabled in the open source packages; anything the packaged FFmpeg cannot decode is read with an external FFmpeg command instead, or you can build from source.</p>
 <p>The command is not something to turn on. The plugin decides per file: when the packaged FFmpeg has no decoder for what the file holds, or cannot open the file at all, FFmpeg runs as a sub-process and streams decoded video and audio to DJV; otherwise the file is read by the FFmpeg libraries. So bringing your own FFmpeg is a matter of installing one, and files that the packaged build reads perfectly well go on being read by it.</p>
+<p>A file that carries each audio channel as its own mono stream, as broadcast MXF does, is read as one track with a channel per stream. The <strong>Merge mono audio</strong> setting in the <strong>FFmpeg</strong> section of the <strong>Settings</strong> tool turns this off, so only the first stream plays.</p>
 <p>Which of the two read a file is written to the log, since it is otherwise not visible from the outside.</p>
 <p><img src="assets/ffmpeg.svg" alt="FFmpeg"></p>
 <p>Changes take effect on newly opened files; reload (<kbd>Ctrl+R</kbd>) to apply them to the current file.</p>
