@@ -1,0 +1,4 @@
+# The entries the published site has and the repository does not. See
+# .github/workflows/pages.yml, which writes the change log page before
+# deploying; the licenses page describes one build, and the site has none.
+changelog.html Change log

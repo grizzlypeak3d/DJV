@@ -1,14 +1,17 @@
 name: Deploy docs to GitHub Pages
 
-# The documentation is plain HTML, so there is nothing to build: what is
-# deployed is what is in the repository, and the same files are installed with
-# the application and read from disk.
+# The documentation is plain HTML, so there is almost nothing to build: what
+# is deployed is what is in the repository, and the same files are installed
+# with the application and read from disk. The one page made here is the
+# change log, from ChangeLog.md, with the navigation written over the pages
+# to list it -- the same two scripts an install runs.
 
 on:
   push:
     branches: ["main"]
     paths:
       - "docs/**"
+      - "ChangeLog.md"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -30,6 +33,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Change log page
+        run: |
+          cmake -DCHANGELOG_IN=ChangeLog.md -DCHANGELOG_OUT=docs/changelog.html -P docs/Changelog.cmake
+          cmake -DNAV_DIR=docs -DNAV_LIST=docs/nav.txt -DNAV_EXTRA=docs/nav-pages.txt -P docs/Nav.cmake
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

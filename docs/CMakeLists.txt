@@ -27,6 +27,25 @@ install(
     DESTINATION ${DEST}
     COMPONENT docs)
 
+# The change log page, written from ChangeLog.md at configure time so the
+# Markdown stays the one copy. Into the build tree, like the licenses:
+# generated pages are not kept in the repository. Configuring again when the
+# change log changes keeps the page current.
+set(DJV_CHANGELOG_PAGE ${CMAKE_CURRENT_BINARY_DIR}/changelog.html)
+execute_process(
+    COMMAND ${CMAKE_COMMAND}
+        -DCHANGELOG_IN=${PROJECT_SOURCE_DIR}/ChangeLog.md
+        -DCHANGELOG_OUT=${DJV_CHANGELOG_PAGE}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/Changelog.cmake
+    COMMAND_ERROR_IS_FATAL ANY)
+set_property(
+    DIRECTORY APPEND PROPERTY
+    CMAKE_CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/ChangeLog.md)
+install(
+    FILES ${DJV_CHANGELOG_PAGE}
+    DESTINATION ${DEST}
+    COMPONENT docs)
+
 # The navigation, written into the installed copies, which have a page the
 # repository does not: the licenses. The repository's own pages cannot carry
 # that link, since the page it points at is made by a build.
