@@ -11,11 +11,15 @@
 # The navigation and the table of contents are left as one empty item
 # each, for Nav.cmake to fill the way it fills every other page.
 #
-#   CHANGELOG_IN    ChangeLog.md
-#   CHANGELOG_OUT   the page to write
+#   CHANGELOG_IN     ChangeLog.md
+#   CHANGELOG_OUT    the page to write
+#   CHANGELOG_TITLE  the page's title (optional; "Change log")
 
 if(NOT CHANGELOG_IN OR NOT CHANGELOG_OUT)
     message(FATAL_ERROR "CHANGELOG_IN and CHANGELOG_OUT are required")
+endif()
+if(NOT CHANGELOG_TITLE)
+    set(CHANGELOG_TITLE "Change log")
 endif()
 
 file(STRINGS "${CHANGELOG_IN}" LINES)
@@ -82,7 +86,7 @@ set(PAGE "<!DOCTYPE html>
 <head>
 <meta charset=\"utf-8\">
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-<title>Change log - DJV</title>
+<title>${CHANGELOG_TITLE} - DJV</title>
 <link rel=\"stylesheet\" href=\"assets/docs.css\">
 <link rel=\"icon\" href=\"assets/DJV_Icon_32.svg\">
 </head>
@@ -96,7 +100,7 @@ set(PAGE "<!DOCTYPE html>
 </ul>
 </nav>
 <main>
-<h1>Change log</h1>
+<h1>${CHANGELOG_TITLE}</h1>
 <div class=\"toc\">
 <ul>
 <li></li>
