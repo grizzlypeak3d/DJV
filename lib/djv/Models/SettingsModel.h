@@ -258,7 +258,8 @@ namespace djv
         {
             DJV_MODELS_API StyleSettings();
 
-            float displayScale = 1.F;
+            //! Zero follows the display.
+            float displayScale = 0.F;
             ftk::ColorControls colorControls;
             ftk::ColorStyle colorStyle = ftk::ColorStyle::Dark;
             std::map<ftk::ColorRole, ftk::Color4F> customColorRoles = ftk::getCustomColorRoles();
@@ -334,8 +335,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<ftk::Settings>&,
-                float displayScaleDefault);
+                const std::shared_ptr<ftk::Settings>&);
 
             SettingsModel();
 
@@ -345,8 +345,7 @@ namespace djv
             //! Create a new model.
             DJV_MODELS_API static std::shared_ptr<SettingsModel> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<ftk::Settings>&,
-                float displayScaleDefault);
+                const std::shared_ptr<ftk::Settings>&);
 
             //! Save the settings. Settings are also saved on exit.
             DJV_MODELS_API void save();

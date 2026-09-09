@@ -20,7 +20,7 @@ class SettingsModelTest(unittest.TestCase):
         self.settings = ftk.Settings(self.context, self.settingsPath)
 
     def test_window(self):
-        model = djv.models.SettingsModel(self.context, self.settings, 1.0)
+        model = djv.models.SettingsModel(self.context, self.settings)
         sizes = []
         observer = djv.models.WindowSettingsObserver(
             model.observeWindow,
@@ -38,28 +38,28 @@ class SettingsModelTest(unittest.TestCase):
         self.assertEqual(2, len(sizes))
 
     def test_playback(self):
-        model = djv.models.SettingsModel(self.context, self.settings, 1.0)
+        model = djv.models.SettingsModel(self.context, self.settings)
         playback = model.playback
         playback.startPlayback = not playback.startPlayback
         model.playback = playback
         self.assertEqual(playback, model.playback)
 
     def test_timeline(self):
-        model = djv.models.SettingsModel(self.context, self.settings, 1.0)
+        model = djv.models.SettingsModel(self.context, self.settings)
         timeline = model.timeline
         timeline.frameView = not timeline.frameView
         model.timeline = timeline
         self.assertEqual(timeline, model.timeline)
 
     def test_style(self):
-        model = djv.models.SettingsModel(self.context, self.settings, 1.0)
+        model = djv.models.SettingsModel(self.context, self.settings)
         style = model.style
         style.displayScale = 2.0
         model.style = style
         self.assertEqual(2.0, model.style.displayScale)
 
     def test_save(self):
-        model = djv.models.SettingsModel(self.context, self.settings, 1.0)
+        model = djv.models.SettingsModel(self.context, self.settings)
         model.save()
         self.settings.save()
         self.assertTrue(os.path.exists(self.settingsPath))

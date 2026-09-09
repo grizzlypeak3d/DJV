@@ -57,7 +57,8 @@ namespace djv
             p.contrastSlider->setRange(.5F, 1.5F);
             p.contrastSlider->setDefault(1.F);
 
-            std::vector<std::string> labels;
+            // The first entry is automatic: zero in the setting.
+            std::vector<std::string> labels = { "Auto" };
             for (auto d : p.displayScales)
             {
                 labels.push_back(ftk::Format("{0}").arg(d).operator std::string());
@@ -156,9 +157,13 @@ namespace djv
                 {
                     FTK_P();
                     auto settings = p.settings->getStyle();
-                    if (value >= 0 && value < static_cast<int>(p.displayScales.size()))
+                    if (0 == value)
                     {
-                        settings.displayScale = p.displayScales[value];
+                        settings.displayScale = 0.F;
+                    }
+                    else if (value > 0 && value <= static_cast<int>(p.displayScales.size()))
+                    {
+                        settings.displayScale = p.displayScales[value - 1];
                     }
                     p.settings->setStyle(settings);
                 });
@@ -220,8 +225,10 @@ namespace djv
                 p.displayScales.end(),
                 value.displayScale);
             p.displayScaleComboBox->setCurrentIndex(
+                value.displayScale <= 0.F ?
+                0 :
                 i != p.displayScales.end() ?
-                (i - p.displayScales.begin()) :
+                (i - p.displayScales.begin()) + 1 :
                 -1);
 
             for (const auto& i : value.fonts)

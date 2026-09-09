@@ -1057,7 +1057,7 @@ class App(ftk.App):
         self._settings = self.settings
 
         self._settingsModel = djv.models.SettingsModel(
-            self.context, self._settings, self.defaultDisplayScale)
+            self.context, self._settings)
         self._filesModel = djv.models.FilesModel(self._settings)
         self._recentFilesModel = djv.models.RecentFilesModel(
             self.context, self._settings)

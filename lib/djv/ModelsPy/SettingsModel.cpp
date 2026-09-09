@@ -205,8 +205,7 @@ namespace djv
                 .def(
                     nb::new_(&SettingsModel::create),
                     nb::arg("context"),
-                    nb::arg("settings"),
-                    nb::arg("displayScaleDefault"))
+                    nb::arg("settings"))
 
                 .def("save", &SettingsModel::save)
                 .def("reset", &SettingsModel::reset)
