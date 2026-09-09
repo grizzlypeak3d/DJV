@@ -5,6 +5,8 @@
 
 #include <djv/Models/Review.h>
 
+#include <tlRender/Timeline/OTIOVersion.h>
+
 #include <opentimelineio/clip.h>
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/marker.h>
@@ -309,7 +311,11 @@ namespace djv
                         OTIO_NS::TimeRange(
                             OTIO_NS::RationalTime(5.0, 24.0),
                             OTIO_NS::RationalTime(1.0, 24.0)),
+#if TLRENDER_OTIO_MARKER_COLOR
                         OTIO_NS::Color::red,
+#else // TLRENDER_OTIO_MARKER_COLOR
+                        OTIO_NS::Marker::Color::red,
+#endif // TLRENDER_OTIO_MARKER_COLOR
                         metadata,
                         "From the editor.")));
             const auto out2 = models::reviewMarkersFromTimeline(timeline);

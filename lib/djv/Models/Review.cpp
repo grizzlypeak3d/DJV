@@ -3,6 +3,9 @@
 
 #include <djv/Models/Review.h>
 
+#include <tlRender/Timeline/OTIOVersion.h>
+#include <tlRender/UI/ItemOptions.h>
+
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
 #include <ftk/Core/Path.h>
@@ -606,6 +609,7 @@ namespace djv
 
         namespace
         {
+#if TLRENDER_OTIO_MARKER_COLOR
             ftk::Color4F fromOTIOColor(const std::optional<OTIO_NS::Color>& value)
             {
                 // OTIO gives markers green by default, the same default the
@@ -618,6 +622,14 @@ namespace djv
                         static_cast<float>(value->a())) :
                     reviewMarkerColor();
             }
+#else // TLRENDER_OTIO_MARKER_COLOR
+            ftk::Color4F fromOTIOColor(const std::string& value)
+            {
+                // Older OpenTimelineIO names a marker's color; the timeline
+                // widget knows the names.
+                return tl::ui::getMarkerColor(value);
+            }
+#endif // TLRENDER_OTIO_MARKER_COLOR
 
             std::string getMeta(
                 const OTIO_NS::AnyDictionary& dict,
@@ -755,11 +767,18 @@ namespace djv
                                 OTIO_NS::TimeRange(
                                     OTIO_NS::RationalTime(0.0, rate),
                                     OTIO_NS::RationalTime(0.0, rate)),
+#if TLRENDER_OTIO_MARKER_COLOR
                             OTIO_NS::Color(
                                 marker.color.r,
                                 marker.color.g,
                                 marker.color.b,
                                 marker.color.a),
+#else // TLRENDER_OTIO_MARKER_COLOR
+                            // Older OpenTimelineIO names a marker's color;
+                            // the default name is the closest thing to
+                            // leaving it unsaid.
+                            OTIO_NS::Marker::Color::green,
+#endif // TLRENDER_OTIO_MARKER_COLOR
                             metadata,
                             marker.text));
                 stack->markers().push_back(otioMarker);
