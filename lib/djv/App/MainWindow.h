@@ -115,6 +115,7 @@ namespace djv
 
             DJV_APP_API void close() override;
             DJV_APP_API void setGeometry(const ftk::Box2I&) override;
+            DJV_APP_API void tickEvent(bool, bool, const ftk::TickEvent&) override;
             DJV_APP_API void keyPressEvent(ftk::KeyEvent&) override;
             DJV_APP_API void keyReleaseEvent(ftk::KeyEvent&) override;
             DJV_APP_API void dropEvent(ftk::DragDropEvent&) override;
@@ -123,6 +124,7 @@ namespace djv
             void _settingsUpdate(const models::MouseSettings&);
             void _settingsUpdate(const models::TimelineSettings&);
             void _timelinePreviewUpdate(const std::optional<OTIO_NS::RationalTime>&);
+            void _timelinePreviewOpen(const OTIO_NS::RationalTime&);
             void _timelinePreviewClose();
             void _windowUpdate();
 

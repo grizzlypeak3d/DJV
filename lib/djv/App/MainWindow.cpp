@@ -27,6 +27,7 @@
 #include <djv/App/StatusBar.h>
 
 #include <ftk/Core/String.h>
+#include <ftk/UI/Tooltip.h>
 #include <djv/App/TabBar.h>
 #include <djv/App/TimelineActions.h>
 #include <djv/App/TimelineMenu.h>
@@ -171,6 +172,10 @@ namespace djv
             std::shared_ptr<tl::Player> player;
             bool timelinePreview = true;
             std::shared_ptr<ui::TimelinePreview> preview;
+            //! The hover waiting out the tooltip delay before the preview
+            //! opens; once open it follows the cursor without one.
+            std::optional<OTIO_NS::RationalTime> previewPending;
+            std::chrono::steady_clock::time_point previewTimer;
             std::shared_ptr<ftk::Observer<std::optional<OTIO_NS::RationalTime> > > timeHoverObserver;
             std::shared_ptr<ftk::Observer<models::WindowSettings> > windowSettingsObserver;
         };
@@ -792,18 +797,59 @@ namespace djv
             p.viewport->setMouseWheelScale(settings.wheelScale);
         }
 
+        void MainWindow::tickEvent(
+            bool parentsVisible,
+            bool parentsEnabled,
+            const ftk::TickEvent& event)
+        {
+            Window::tickEvent(parentsVisible, parentsEnabled, event);
+            FTK_P();
+            if (p.previewPending.has_value() && !p.preview)
+            {
+                const auto now = std::chrono::steady_clock::now();
+                if (now - p.previewTimer > ftk::tooltipTimeout)
+                {
+                    _timelinePreviewOpen(p.previewPending.value());
+                }
+            }
+        }
+
         void MainWindow::_timelinePreviewUpdate(const std::optional<OTIO_NS::RationalTime>& value)
         {
             FTK_P();
-            auto app = p.app.lock();
             // Only while stopped: a preview is a seek through the readers
             // the player is using, and during playback that is a stall for
             // a picture nobody is looking at.
             if (value.has_value() &&
                 p.timelinePreview &&
                 p.player &&
-                tl::Playback::Stop == p.player->getPlayback() &&
-                app)
+                tl::Playback::Stop == p.player->getPlayback())
+            {
+                if (p.preview)
+                {
+                    _timelinePreviewOpen(value.value());
+                }
+                else
+                {
+                    // The delay is the tooltip's, so that a click to seek
+                    // and a move off the timeline do not bring it back.
+                    if (!p.previewPending.has_value())
+                    {
+                        p.previewTimer = std::chrono::steady_clock::now();
+                    }
+                    p.previewPending = value;
+                }
+            }
+            else
+            {
+                _timelinePreviewClose();
+            }
+        }
+
+        void MainWindow::_timelinePreviewOpen(const OTIO_NS::RationalTime& value)
+        {
+            FTK_P();
+            if (auto app = p.app.lock())
             {
                 if (!p.preview)
                 {
@@ -834,18 +880,15 @@ namespace djv
                     p.preview->setPos(ftk::V2I(
                         getCursorPos().x,
                         p.timelineWidget->getGeometry().min.y));
-                    p.preview->setTime(value.value());
+                    p.preview->setTime(value);
                 }
-            }
-            else
-            {
-                _timelinePreviewClose();
             }
         }
 
         void MainWindow::_timelinePreviewClose()
         {
             FTK_P();
+            p.previewPending.reset();
             if (p.preview)
             {
                 p.preview->close();
