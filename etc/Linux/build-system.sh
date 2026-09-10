@@ -38,12 +38,16 @@ cmake \
     -DLUNASVG_BUILD_EXAMPLES=OFF
 cmake --build lunasvg-$BUILD_TYPE --config $BUILD_TYPE --target install
 
+# Ubuntu installs OpenColorIO's CMake configuration in /usr/share/cmake
+# itself rather than a directory of its own there, which is not a place
+# find_package() looks, so it is named.
 cmake \
     -S $SOURCE_DIR \
     -B build-$BUILD_TYPE \
     -C $CONFIG_FILE \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
     -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE \
-    -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE
+    -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE \
+    -DOpenColorIO_DIR=/usr/share/cmake
 cmake --build build-$BUILD_TYPE --config $BUILD_TYPE
 cmake --build build-$BUILD_TYPE --config $BUILD_TYPE --target install
