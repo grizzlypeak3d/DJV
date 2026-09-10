@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # Build DJV against the system's packages rather than the super build, the
-# way docs/building.html describes: lunasvg, which has no package, from
-# source into a prefix beside the build, then DJV configured directly with
-# that prefix on the search path. What to build is in etc/Config/*.cmake, as
+# way docs/building.html describes: lunasvg and subprocess.h, which have no
+# packages, from source into a prefix beside the build, then DJV configured
+# directly with that prefix on the search path. What to build is in etc/Config/*.cmake, as
 # it is for the super build.
 #
 # Usage: sh build-system.sh <source directory> <build type> [config]
@@ -37,6 +37,15 @@ cmake \
     -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE \
     -DLUNASVG_BUILD_EXAMPLES=OFF
 cmake --build lunasvg-$BUILD_TYPE --config $BUILD_TYPE --target install
+
+# A single header, at the commit the super build pins: see
+# deps/tlRender/etc/SuperBuild/cmake/Modules/Buildsubprocess.cmake.
+if [ ! -d subprocess ]; then
+    git clone https://github.com/sheredom/subprocess.h.git subprocess
+    git -C subprocess checkout 0d76f78ff8b56d1240ffe6571d689c5e26299527
+fi
+mkdir -p install-$BUILD_TYPE/include
+cp subprocess/subprocess.h install-$BUILD_TYPE/include
 
 # Ubuntu installs OpenColorIO's CMake configuration in /usr/share/cmake
 # itself rather than a directory of its own there, which is not a place

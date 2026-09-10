@@ -111,6 +111,11 @@ build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg</c
 <pre><code>git clone --branch v3.4.0 https://github.com/sammycage/lunasvg.git
 cmake -S lunasvg -B lunasvg-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install-Release -DLUNASVG_BUILD_EXAMPLES=OFF
 cmake --build lunasvg-build --target install</code></pre>
+<p>subprocess.h, which runs the FFmpeg command line tool, is a single header with no package, copied into the same prefix at the commit the super build uses:</p>
+<pre><code>git clone https://github.com/sheredom/subprocess.h.git subprocess
+git -C subprocess checkout 0d76f78ff8b56d1240ffe6571d689c5e26299527
+mkdir -p install-Release/include
+cp subprocess/subprocess.h install-Release/include</code></pre>
 <p>Then DJV is configured directly, with its default options and that prefix on the search path, and built. Ubuntu installs OpenColorIO's CMake configuration in <code>/usr/share/cmake</code> itself, which CMake does not search, so that directory is named:</p>
 <pre><code>git clone --recursive https://github.com/grizzlypeak3d/DJV.git
 cmake -S DJV -B build-Release -C DJV/etc/Config/default.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install-Release -DCMAKE_PREFIX_PATH=$PWD/install-Release -DOpenColorIO_DIR=/usr/share/cmake
