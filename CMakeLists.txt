@@ -27,6 +27,9 @@ project(
 #-------------------------------------------------------------------------------
 # Options
 
+# Packaging gathers the dependencies out of the install prefix, where the
+# super build put them; a build against system packages has none there.
+set(DJV_PACKAGE_DEPS ON CACHE BOOL "Package the super build's dependencies with the install")
 set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
 set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
 set(DJV_PROGRAMS ON CACHE BOOL "Build programs")
@@ -172,6 +175,8 @@ install(
 #-------------------------------------------------------------------------------
 # Packaging
 
-include(Package)
-include(CPack)
-include(InstallRequiredSystemLibraries)
+if(DJV_PACKAGE_DEPS)
+    include(Package)
+    include(CPack)
+    include(InstallRequiredSystemLibraries)
+endif()

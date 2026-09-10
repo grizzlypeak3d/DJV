@@ -116,9 +116,9 @@ cmake --build lunasvg-build --target install</code></pre>
 git -C subprocess checkout 0d76f78ff8b56d1240ffe6571d689c5e26299527
 mkdir -p install-Release/include
 cp subprocess/subprocess.h install-Release/include</code></pre>
-<p>Then DJV is configured directly, with its default options and that prefix on the search path, and built. Ubuntu installs OpenColorIO's CMake configuration in <code>/usr/share/cmake</code> itself, which CMake does not search, so that directory is named:</p>
+<p>Then DJV is configured directly, with its default options and that prefix on the search path, and built. Ubuntu installs OpenColorIO's CMake configuration in <code>/usr/share/cmake</code> itself, which CMake does not search, so that directory is named. Packaging is turned off, since it gathers the super build's libraries out of the install prefix:</p>
 <pre><code>git clone --recursive https://github.com/grizzlypeak3d/DJV.git
-cmake -S DJV -B build-Release -C DJV/etc/Config/default.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install-Release -DCMAKE_PREFIX_PATH=$PWD/install-Release -DOpenColorIO_DIR=/usr/share/cmake
+cmake -S DJV -B build-Release -C DJV/etc/Config/default.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install-Release -DCMAKE_PREFIX_PATH=$PWD/install-Release -DOpenColorIO_DIR=/usr/share/cmake -DDJV_PACKAGE_DEPS=OFF
 cmake --build build-Release</code></pre>
 <p>The script <code>etc/Linux/build-system.sh</code> does the same, and is what continuous integration runs.</p>
 <p>What differs from the super build:</p>

@@ -49,7 +49,8 @@ cp subprocess/subprocess.h install-$BUILD_TYPE/include
 
 # Ubuntu installs OpenColorIO's CMake configuration in /usr/share/cmake
 # itself rather than a directory of its own there, which is not a place
-# find_package() looks, so it is named.
+# find_package() looks, so it is named. Packaging is off: it gathers the
+# super build's libraries out of the install prefix.
 cmake \
     -S $SOURCE_DIR \
     -B build-$BUILD_TYPE \
@@ -57,6 +58,7 @@ cmake \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
     -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE \
     -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE \
-    -DOpenColorIO_DIR=/usr/share/cmake
+    -DOpenColorIO_DIR=/usr/share/cmake \
+    -DDJV_PACKAGE_DEPS=OFF
 cmake --build build-$BUILD_TYPE --config $BUILD_TYPE
 cmake --build build-$BUILD_TYPE --config $BUILD_TYPE --target install
