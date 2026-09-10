@@ -25,6 +25,7 @@ Fixes:
 * A display scale set in the settings is kept across launches.
 * A tilt wheel no longer zooms the view.
 * The mouse wheel scrolls three lines per notch on Windows and Linux.
+* The command line help prints without a display.
 * The window is drawn while it is being resized on macOS and Windows.
 * DJV is offered for the file types it reads in the Windows "Open with"
   list, and goes on working there after an upgrade.

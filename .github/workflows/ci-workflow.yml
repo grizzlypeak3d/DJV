@@ -46,11 +46,9 @@ jobs:
 
     # The command line page in the documentation is made from the
     # application's help and committed; this is where a stale one is caught.
-    # Under xvfb because the application opens the video subsystem before it
-    # reads its command line, so even printing the help needs a display.
     - name: Documentation check
       run: |
-        xvfb-run cmake --build build-Debug --target djvDocsHelpCheck
+        cmake --build build-Debug --target djvDocsHelpCheck
 
     - name: Run tests
       run: |
