@@ -56,6 +56,13 @@
 <div class="note">Download packages include only a minimal set of video and audio codecs. To support additional codecs, install FFmpeg and DJV will use it for the files it cannot decode itself (see <a href="files.html">Files</a>), or build from source.</div>
 <h2 id="linux">Linux</h2>
 <p>Packages are distributed as tar archives. Uncompress the archive and move the DJV folder to a convenient location.</p>
+<p>The archive has a desktop entry and icons under <code>share</code>, for the applications menu and for opening files from the file manager. The entry runs the application from the path; to install it for the current user, point it at the copy and put it where the desktop looks:</p>
+<pre><code>cd DJV
+for entry in share/applications/*.desktop; do
+    sed "s|^Exec=|Exec=$PWD/bin/|" $entry &gt; ~/.local/share/applications/$(basename $entry)
+done
+cp -r share/icons ~/.local/share/
+update-desktop-database ~/.local/share/applications</code></pre>
 <h2 id="windows">Windows</h2>
 <p>Packages are distributed as NSIS installers or ZIP archives. Double-click the NSIS <code>.exe</code> file to start the installer, or, for ZIP archives, uncompress the archive and move the DJV folder to a convenient location.</p>
 <h2 id="macos">macOS</h2>

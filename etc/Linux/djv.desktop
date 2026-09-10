@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=DJV
+Comment=Media playback and review
+Exec=djv %F
+Icon=djv
+Terminal=false
+Categories=AudioVideo;Video;Graphics;Viewer;
+MimeType=image/png;image/jpeg;image/tiff;image/bmp;image/x-exr;image/x-sgi;image/x-tga;image/vnd.adobe.photoshop;image/x-portable-pixmap;video/mp4;video/quicktime;video/webm;video/x-matroska;application/mxf;audio/aac;audio/x-aiff;audio/flac;audio/mp4;audio/mpeg;audio/x-wav;
