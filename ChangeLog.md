@@ -19,6 +19,7 @@ Changes:
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.
 * The audio cache covers the whole in/out range.
+* Looping audio plays every sample at the loop point.
 * Settings are not lost when one copy of the application starts as
   another quits; a settings file that cannot be read is set aside as
   ".bad" rather than overwritten.
