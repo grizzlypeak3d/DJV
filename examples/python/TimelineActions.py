@@ -29,6 +29,8 @@ class Actions(IActions.IActions):
              "Automatically scroll the timeline to the current frame."),
             ("StopOnScrub", "Stop When Scrubbing", "stopOnScrub",
              "Stop playback when scrubbing the timeline."),
+            ("Preview", "Hover Preview", "preview",
+             "Show a preview of the frame under the cursor when hovering the timeline."),
             ("TrackMedia", "Track Media", "trackMedia",
              "Toggle the timeline video thumbnails and audio waveforms."),
             ("Thumbnails", "Thumbnails", "thumbnails",

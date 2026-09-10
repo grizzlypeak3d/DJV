@@ -162,6 +162,7 @@ namespace djv
                 .def_rw("scrollBars", &TimelineSettings::scrollBars)
                 .def_rw("autoScroll", &TimelineSettings::autoScroll)
                 .def_rw("stopOnScrub", &TimelineSettings::stopOnScrub)
+                .def_rw("preview", &TimelineSettings::preview)
                 .def_rw("trackMedia", &TimelineSettings::trackMedia)
                 .def_rw("thumbnails", &TimelineSettings::thumbnails)
                 .def_rw("thumbnailSize", &TimelineSettings::thumbnailSize)

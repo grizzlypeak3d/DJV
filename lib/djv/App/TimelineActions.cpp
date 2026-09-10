@@ -102,6 +102,20 @@ namespace djv
                 });
 
             _addCheckCommand(
+                "Preview",
+                "Show a preview of the frame under the cursor when hovering the timeline.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settings = app->getSettingsModel()->getTimeline();
+                        settings.preview = value;
+                        app->getSettingsModel()->setTimeline(settings);
+                    }
+                });
+
+            _addCheckCommand(
                 "Thumbnails",
                 "Toggle the timeline video thumbnails.",
                 [appWeak](const nlohmann::json& args)
@@ -237,6 +251,9 @@ namespace djv
             _actions["StopOnScrub"] = ftk::Action::create(
                 "Stop Playback When Scrubbing",
                 _checkCommand("StopOnScrub"));
+            _actions["Preview"] = ftk::Action::create(
+                "Hover Preview",
+                _checkCommand("Preview"));
             _actions["Thumbnails"] = ftk::Action::create(
                 "Video Thumbnails",
                 _checkCommand("Thumbnails"));
@@ -271,6 +288,7 @@ namespace djv
             _addShortcut("ScrollBars");
             _addShortcut("AutoScroll");
             _addShortcut("StopOnScrub", "Stop On Scrub");
+            _addShortcut("Preview", "Hover Preview");
             _addShortcut("Thumbnails");
             _addShortcut("ThumbnailSizeSmall", "Small Video Thumbnails");
             _addShortcut("ThumbnailSizeMedium", "Medium Video Thumbnails");
@@ -292,6 +310,7 @@ namespace djv
                     _actions["ScrollBars"]->setChecked(value.scrollBars);
                     _actions["AutoScroll"]->setChecked(value.autoScroll);
                     _actions["StopOnScrub"]->setChecked(value.stopOnScrub);
+                    _actions["Preview"]->setChecked(value.preview);
                     _actions["TrackMedia"]->setChecked(value.trackMedia);
                     _actions["Thumbnails"]->setChecked(value.thumbnails);
                     _actions["Thumbnails"]->setEnabled(value.trackMedia);

@@ -290,6 +290,7 @@ class Timeline(ftk.Menu):
         self.addAction(actions.actions["ScrollBars"])
         self.addAction(actions.actions["AutoScroll"])
         self.addAction(actions.actions["StopOnScrub"])
+        self.addAction(actions.actions["Preview"])
         self.addDivider();
         self.addAction(actions.actions["TrackMedia"])
         self.addAction(actions.actions["Thumbnails"])

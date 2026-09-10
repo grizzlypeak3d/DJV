@@ -843,6 +843,7 @@ namespace djv
             json["ScrollBars"] = value.scrollBars;
             json["AutoScroll"] = value.autoScroll;
             json["StopOnScrub"] = value.stopOnScrub;
+            json["Preview"] = value.preview;
             json["TrackMedia"] = value.trackMedia;
             json["Thumbnails"] = value.thumbnails;
             json["ThumbnailSize"] = to_string(value.thumbnailSize);
@@ -1064,6 +1065,10 @@ namespace djv
             json.at("ScrollBars").get_to(value.scrollBars);
             json.at("AutoScroll").get_to(value.autoScroll);
             json.at("StopOnScrub").get_to(value.stopOnScrub);
+            if (json.contains("Preview"))
+            {
+                json.at("Preview").get_to(value.preview);
+            }
             // Asked for rather than required, so settings written before this
             // still load the rest of the timeline.
             if (json.contains("TrackMedia"))

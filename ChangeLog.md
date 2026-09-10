@@ -13,6 +13,7 @@ Changes:
 * A clipping warning marks pixels outside the display range.
 * Building requires C++20.
 * CineForm movies can be read and written.
+* Hovering the timeline shows a preview of the frame under the cursor.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.

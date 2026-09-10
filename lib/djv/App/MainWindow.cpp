@@ -37,6 +37,7 @@
 #include <djv/App/ViewActions.h>
 #include <djv/App/ViewMenu.h>
 #include <djv/App/ViewToolBar.h>
+#include <djv/UI/TimelinePreview.h>
 #include <djv/UI/Viewport.h>
 #include <djv/App/WindowActions.h>
 #include <djv/App/WindowMenu.h>
@@ -164,6 +165,13 @@ namespace djv
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
             std::shared_ptr<ftk::Observer<models::TimelineSettings> > timelineSettingsObserver;
             std::shared_ptr<ftk::Observer<bool> > timelineFrameViewObserver;
+
+            //! The player the timeline shows, and the preview of it that
+            //! hovering the timeline opens.
+            std::shared_ptr<tl::Player> player;
+            bool timelinePreview = true;
+            std::shared_ptr<ui::TimelinePreview> preview;
+            std::shared_ptr<ftk::Observer<std::optional<OTIO_NS::RationalTime> > > timeHoverObserver;
             std::shared_ptr<ftk::Observer<models::WindowSettings> > windowSettingsObserver;
         };
 
@@ -457,8 +465,17 @@ namespace djv
                 [this](const std::shared_ptr<tl::Player>& player)
                 {
                     FTK_P();
+                    p.player = player;
+                    _timelinePreviewClose();
                     p.viewport->setPlayer(player);
                     p.timelineWidget->setPlayer(player);
+                });
+
+            p.timeHoverObserver = ftk::Observer<std::optional<OTIO_NS::RationalTime> >::create(
+                p.timelineWidget->observeTimeHover(),
+                [this](const std::optional<OTIO_NS::RationalTime>& value)
+                {
+                    _timelinePreviewUpdate(value);
                 });
 
             p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
@@ -775,6 +792,65 @@ namespace djv
             p.viewport->setMouseWheelScale(settings.wheelScale);
         }
 
+        void MainWindow::_timelinePreviewUpdate(const std::optional<OTIO_NS::RationalTime>& value)
+        {
+            FTK_P();
+            auto app = p.app.lock();
+            // Only while stopped: a preview is a seek through the readers
+            // the player is using, and during playback that is a stall for
+            // a picture nobody is looking at.
+            if (value.has_value() &&
+                p.timelinePreview &&
+                p.player &&
+                tl::Playback::Stop == p.player->getPlayback() &&
+                app)
+            {
+                if (!p.preview)
+                {
+                    if (auto context = getContext())
+                    {
+                        p.preview = ui::TimelinePreview::create(
+                            context,
+                            p.player,
+                            app->getTimeUnitsModel(),
+                            std::dynamic_pointer_cast<IWidget>(shared_from_this()));
+                    }
+                }
+                if (p.preview)
+                {
+                    auto colorModel = app->getColorModel();
+                    auto viewportModel = app->getViewportModel();
+                    p.preview->setImageOptions(viewportModel->getImageOptions());
+                    p.preview->setDisplayOptions(viewportModel->getDisplayOptions());
+                    p.preview->setOCIOOptions(colorModel->getOCIOOptions());
+                    p.preview->setOCIOInputResolver(
+                        [colorModel](const std::string& path, const ftk::ImageTags& tags)
+                        {
+                            return colorModel->getOCIOOptions().input.empty() ?
+                                colorModel->resolveInput(path, tags) :
+                                std::string();
+                        });
+                    p.preview->setLUTOptions(colorModel->getLUTOptions());
+                    p.preview->setPos(getCursorPos());
+                    p.preview->setTime(value.value());
+                }
+            }
+            else
+            {
+                _timelinePreviewClose();
+            }
+        }
+
+        void MainWindow::_timelinePreviewClose()
+        {
+            FTK_P();
+            if (p.preview)
+            {
+                p.preview->close();
+                p.preview.reset();
+            }
+        }
+
         void MainWindow::_settingsUpdate(const models::TimelineSettings& settings)
         {
             FTK_P();
@@ -783,6 +859,11 @@ namespace djv
             p.timelineWidget->setScrollBarsVisible(settings.scrollBars);
             p.timelineWidget->setAutoScroll(settings.autoScroll);
             p.timelineWidget->setStopOnScrub(settings.stopOnScrub);
+            p.timelinePreview = settings.preview;
+            if (!p.timelinePreview)
+            {
+                _timelinePreviewClose();
+            }
 
             auto display = p.timelineWidget->getDisplayOptions();
 

@@ -122,6 +122,8 @@ namespace djv
         private:
             void _settingsUpdate(const models::MouseSettings&);
             void _settingsUpdate(const models::TimelineSettings&);
+            void _timelinePreviewUpdate(const std::optional<OTIO_NS::RationalTime>&);
+            void _timelinePreviewClose();
             void _windowUpdate();
 
             FTK_PRIVATE();

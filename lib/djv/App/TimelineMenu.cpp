@@ -30,6 +30,7 @@ namespace djv
             addAction(actions["ScrollBars"]);
             addAction(actions["AutoScroll"]);
             addAction(actions["StopOnScrub"]);
+            addAction(actions["Preview"]);
             addDivider();
             addAction(actions["TrackMedia"]);
             addAction(actions["Thumbnails"]);

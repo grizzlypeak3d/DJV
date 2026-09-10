@@ -11,6 +11,7 @@ set(HEADERS
     SpeedPopup.h
     StatusIndicator.h
     StatusIndicatorPopup.h
+    TimelinePreview.h
     SysInfoDialog.h
     ExportWidget.h
     ExportWidgets.h
@@ -34,6 +35,7 @@ set(SOURCE
     SpeedPopup.cpp
     StatusIndicator.cpp
     StatusIndicatorPopup.cpp
+    TimelinePreview.cpp
     StyleWidget.cpp
     SysInfoDialog.cpp
     ExportWidget.cpp
