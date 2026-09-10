@@ -61,6 +61,9 @@ set(TLRENDER_USD ON CACHE BOOL "")</code></pre>
 <p>The Wayland packages are optional; without them SDL is built with X11 only and runs through XWayland on a Wayland desktop.</p>
 <h3>Rocky 9</h3>
 <pre><code>sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel libdecor-devel</code></pre>
+<p>Rocky 9 packages CMake 3.26, and OpenTimelineIO needs 3.31. A newer one can be installed with pip; the cmake.org <code>.sh</code> file is an installer that takes a prefix, and either way the result has to be on the path ahead of the system's:</p>
+<pre><code>pip3 install --user "cmake&lt;4"
+export PATH=$HOME/.local/bin:$PATH</code></pre>
 <h3>Rocky 8</h3>
 <pre><code>sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel</code></pre>
 <p>Rocky 8 also needs a newer compiler, installed and then enabled for the shell that builds:</p>
