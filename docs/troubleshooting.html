@@ -40,7 +40,7 @@
 <p>If DJV fails to start, run it from the command line to see startup errors:</p>
 <pre><code>djv -log</code></pre>
 <p>If the application is misbehaving, try resetting the settings:</p>
-<ul><li>Delete the directory <strong>Documents/DJV</strong></li><li>Or pass the <strong>-resetSettings</strong> flag on the command line</li></ul>
+<ul><li>Delete the settings file in the application support directory; <strong>Help &gt; System Information</strong> shows the path</li><li>Or pass the <strong>-resetSettings</strong> flag on the command line</li></ul>
 <h2 id="open-with-on-windows">"Open with" on Windows</h2>
 <p>If choosing DJV in the <strong>Open with</strong> dialog brings the dialog straight back instead of opening the file, the entry Windows keeps for DJV is naming a version that has been removed. Windows writes that entry itself the first time a file is opened with DJV and never revisits it, so it outlives the install it was written for. Clearing it lets the entry the installer writes take over:</p>
 <pre><code>powershell -NoProfile -Command "Remove-Item -Recurse -Force 'HKCU:\Software\Classes\Applications\djv.exe'"</code></pre>
