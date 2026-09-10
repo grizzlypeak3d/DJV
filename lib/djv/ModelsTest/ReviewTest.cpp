@@ -6,6 +6,7 @@
 #include <djv/Models/Review.h>
 
 #include <tlRender/Timeline/OTIOVersion.h>
+#include <tlRender/UI/ItemOptions.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/externalReference.h>
@@ -297,6 +298,13 @@ namespace djv
 
             const auto out = models::reviewMarkersFromTimeline(timeline);
             FTK_CHECK(2 == out.size());
+#if !TLRENDER_OTIO_MARKER_COLOR
+            // Older OpenTimelineIO names a marker's color, and the review
+            // writes the default name, so the color that comes back is that
+            // name's rather than the one written.
+            span.color = tl::ui::getMarkerColor(OTIO_NS::Marker::Color::green);
+            rangeless.color = span.color;
+#endif // TLRENDER_OTIO_MARKER_COLOR
             FTK_CHECK(span == out[0]);
             FTK_CHECK(rangeless == out[1]);
 
