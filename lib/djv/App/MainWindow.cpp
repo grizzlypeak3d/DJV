@@ -831,7 +831,9 @@ namespace djv
                                 std::string();
                         });
                     p.preview->setLUTOptions(colorModel->getLUTOptions());
-                    p.preview->setPos(getCursorPos());
+                    p.preview->setPos(ftk::V2I(
+                        getCursorPos().x,
+                        p.timelineWidget->getGeometry().min.y));
                     p.preview->setTime(value.value());
                 }
             }

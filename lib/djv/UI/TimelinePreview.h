@@ -45,7 +45,9 @@ namespace djv
                 const std::shared_ptr<tl::ITimeUnitsModel>&,
                 const std::shared_ptr<IWidget>& window);
 
-            //! Set the cursor position the preview is shown above.
+            //! Set the position the preview is shown above: the cursor's X
+            //! and the top of the timeline, so it does not ride up and down
+            //! with the cursor.
             DJV_UI_API void setPos(const ftk::V2I&);
 
             //! Set the time to preview. The frame is asked for and shown when

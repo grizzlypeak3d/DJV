@@ -276,11 +276,11 @@ namespace djv
                 event.style->getColorRole(ftk::ColorRole::TooltipWindow));
 
             // Drawn the way the view draws its buffer, with the same render
-            // state; the frame that has not arrived yet leaves the box empty
-            // rather than showing a stale one from another time.
+            // state. The last frame that arrived stays up until the next one
+            // does: a cursor moving along the timeline would otherwise show
+            // an empty box between every two frames.
             if (auto render = std::dynamic_pointer_cast<tl::IRender>(event.render);
-                render && !p.frame.layers.empty() && p.time.has_value() &&
-                p.frame.time == p.time.value())
+                render && !p.frame.layers.empty())
             {
                 render->setOCIOOptions(p.ocioOptions);
                 render->setOCIOInputResolver(p.ocioInputResolver);
