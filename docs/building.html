@@ -106,8 +106,8 @@ build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg</c
 <h2 id="system-packages">System packages</h2>
 <p>On Linux the dependencies can come from the distribution instead of the super build. This is the build a distribution package would make. Ubuntu 26.04 is the first release with every package it needs, and it is the configuration continuous integration builds, so what follows is kept true there.</p>
 <p>Install the system packages:</p>
-<pre><code>sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev pkg-config zlib1g-dev libpng-dev libfreetype-dev nlohmann-json3-dev libsdl3-dev libimath-dev libopenexr-dev libopencolorio-dev libopenimageio-dev libopentimelineio-dev libminizip-ng-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev</code></pre>
-<p>lunasvg has no package and is built from source, into a prefix beside the build:</p>
+<pre><code>sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev pkg-config zlib1g-dev libpng-dev libfreetype-dev nlohmann-json3-dev libsdl3-dev libimath-dev libopenexr-dev libopencolorio-dev libopenimageio-dev openimageio-tools libopentimelineio-dev libminizip-ng-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev</code></pre>
+<p>The OpenImageIO tools are listed because the library's CMake configuration names them, and configuring fails without them. lunasvg has no package and is built from source, into a prefix beside the build:</p>
 <pre><code>git clone --branch v3.4.0 https://github.com/sammycage/lunasvg.git
 cmake -S lunasvg -B lunasvg-build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install-Release -DLUNASVG_BUILD_EXAMPLES=OFF
 cmake --build lunasvg-build --target install</code></pre>
