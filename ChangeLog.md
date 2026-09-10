@@ -21,8 +21,8 @@ Fixes:
 * The audio cache covers the whole in/out range.
 * Looping audio plays every sample at the loop point.
 * A still image paired with an audio file lasts as long as the audio.
-* The audio waveform leaves headroom, so a loud track no longer looks
-  clipped.
+* The audio waveform is drawn at the level of the file, and leaves
+  headroom, so a loud track no longer looks clipped.
 * Settings are not lost when one copy of the application starts as
   another quits; a settings file that cannot be read is set aside as
   ".bad" rather than overwritten.
