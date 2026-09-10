@@ -70,6 +70,38 @@ add_custom_target(djvDocsNav
     COMMENT "Documentation navigation")
 set_target_properties(djvDocsNav PROPERTIES FOLDER docs)
 
+# The command line page, from the application's own help, into the
+# repository: written here, then the navigation over every page so the new
+# one is listed and has its table of contents. Not part of the build: it
+# edits the sources. The check is what continuous integration runs, so an
+# option added without regenerating the page is a failed build rather than
+# a page that quietly went stale.
+if(DJV_PROGRAMS)
+    add_custom_target(djvDocsHelp
+        COMMAND ${CMAKE_COMMAND}
+            -DHELP_EXE=$<TARGET_FILE:djv>
+            -DHELP_OUT=${CMAKE_CURRENT_SOURCE_DIR}/command-line.html
+            -DHELP_TMP=${CMAKE_CURRENT_BINARY_DIR}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/Help.cmake
+        COMMAND ${CMAKE_COMMAND}
+            -DNAV_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DNAV_LIST=${CMAKE_CURRENT_SOURCE_DIR}/nav.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/Nav.cmake
+        DEPENDS djv
+        COMMENT "Documentation command line page")
+    set_target_properties(djvDocsHelp PROPERTIES FOLDER docs)
+    add_custom_target(djvDocsHelpCheck
+        COMMAND ${CMAKE_COMMAND}
+            -DHELP_EXE=$<TARGET_FILE:djv>
+            -DHELP_OUT=${CMAKE_CURRENT_SOURCE_DIR}/command-line.html
+            -DHELP_TMP=${CMAKE_CURRENT_BINARY_DIR}
+            -DHELP_CHECK=ON
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/Help.cmake
+        DEPENDS djv
+        COMMENT "Documentation command line page check")
+    set_target_properties(djvDocsHelpCheck PROPERTIES FOLDER docs)
+endif()
+
 # The same, reporting rather than writing, for a build that wants to know
 # whether anyone has edited a page's navigation or table of contents by
 # hand.

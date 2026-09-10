@@ -22,5 +22,6 @@ tools.html Tools
 export.html Exporting files
 settings.html Settings
 automation.html Automation
+command-line.html Command line
 python.html Python
 troubleshooting.html Troubleshooting

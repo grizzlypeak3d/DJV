@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command line - DJV</title>
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="icon" href="assets/DJV_Icon_32.svg">
+</head>
+<body>
+<input type="checkbox" id="nav-toggle">
+<label for="nav-toggle" id="nav-button">Menu</label>
+<nav>
+<a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="install.html">Download and install</a></li>
+<li><a href="building.html">Building from source</a></li>
+<li><a href="main-window.html">Main window</a></li>
+<li><a href="files.html">Files</a></li>
+<li><a href="view.html">View</a></li>
+<li><a href="playback.html">Playback and frame control</a></li>
+<li><a href="timeline.html">Timeline</a></li>
+<li><a href="compare.html">A/B comparison</a></li>
+<li><a href="reviews.html">Review</a></li>
+<li><a href="color.html">Color</a></li>
+<li><a href="audio.html">Audio</a></li>
+<li><a href="tools.html">Tools</a></li>
+<li><a href="export.html">Exporting files</a></li>
+<li><a href="settings.html">Settings</a></li>
+<li><a href="automation.html">Automation</a></li>
+<li><a class="current" href="command-line.html">Command line</a></li>
+<li><a href="python.html">Python</a></li>
+<li><a href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</nav>
+<main>
+<h1>Command line</h1>
+<div class="toc">
+<ul>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#arguments">Arguments</a></li>
+<li><a href="#audio-options">Audio options</a></li>
+<li><a href="#compare-options">Compare options</a></li>
+<li><a href="#playback-options">Playback options</a></li>
+<li><a href="#directories-options">Directories options</a></li>
+<li><a href="#color-options">Color options</a></li>
+<li><a href="#commands-options">Commands options</a></li>
+<li><a href="#testing-options">Testing options</a></li>
+<li><a href="#benchmark-options">Benchmark options</a></li>
+<li><a href="#style-options">Style options</a></li>
+<li><a href="#capture-options">Capture options</a></li>
+<li><a href="#files-options">Files options</a></li>
+<li><a href="#options">Options</a></li>
+</ul>
+</div>
+<p>The options the application takes, as <code>djv -h</code> prints them. The Python version of DJV takes the same options. Commands, which can be given on the command line as well, are described under <a href="automation.html">Automation</a>.</p>
+<h2 id="usage">Usage</h2>
+<pre><code>djv [input] [option],...</code></pre>
+<h2 id="arguments">Arguments</h2>
+<dl>
+<dt><code>input</code></dt>
+<dd>One or more timelines, movies, image sequences, or directories.</dd>
+</dl>
+<h2 id="audio-options">Audio options</h2>
+<dl>
+<dt><code>-audio, -a (value)</code></dt>
+<dd>Audio file name.</dd>
+</dl>
+<h2 id="compare-options">Compare options</h2>
+<dl>
+<dt><code>-compare, -b (value)</code></dt>
+<dd>Compare "B" file name.</dd>
+<dt><code>-compareMode, -c (value)</code></dt>
+<dd>Compare mode. Options: "None", "B", "Wipe", "Butterfly", "Overlay", "Difference", "Horizontal", "Vertical", "Tile".</dd>
+<dt><code>-wipeCenter, -wc (value)</code></dt>
+<dd>Wipe center. Default: "0.5 0.5".</dd>
+<dt><code>-wipeRotation, -wr (value)</code></dt>
+<dd>Wipe rotation. Default: "0".</dd>
+</dl>
+<h2 id="playback-options">Playback options</h2>
+<dl>
+<dt><code>-speed (value)</code></dt>
+<dd>Playback speed.</dd>
+<dt><code>-playback, -p (value)</code></dt>
+<dd>Playback mode. Options: "Stop", "Forward", "Reverse".</dd>
+<dt><code>-loop (value)</code></dt>
+<dd>Loop mode. Options: "Loop", "Once", "Ping-Pong".</dd>
+<dt><code>-timeUnits, -tu (value)</code></dt>
+<dd>Set the time units. Options: "Frames", "Seconds", "Timecode".</dd>
+<dt><code>-seek (value)</code></dt>
+<dd>Seek to the given time.</dd>
+<dt><code>-frameRange, -fr (value)</code></dt>
+<dd>Frame range of an image sequence (e.g., 1-100). This is the range the sequence is meant to cover, which need not be the frames on disk: a render in progress can be watched over the range it will end up with, the frames that are not there yet following the missing frames setting. Applies to the first file opened.</dd>
+<dt><code>-inPoint, -in (value)</code></dt>
+<dd>Set the in point.</dd>
+<dt><code>-outPoint, -out (value)</code></dt>
+<dd>Set the out point.</dd>
+</dl>
+<h2 id="directories-options">Directories options</h2>
+<dl>
+<dt><code>-dirFilter (value)</code></dt>
+<dd>Filter the files when opening a directory: a case-insensitive substring, or a wildcard pattern with "*" and "?" (e.g., "*.mov").</dd>
+<dt><code>-dirDepth (value)</code></dt>
+<dd>How many directory levels to open: 1 opens the directory alone. Default: "1".</dd>
+</dl>
+<h2 id="color-options">Color options</h2>
+<dl>
+<dt><code>-ocio (value)</code></dt>
+<dd>OCIO configuration file name (e.g., config.ocio).</dd>
+<dt><code>-ocioInput (value)</code></dt>
+<dd>OCIO input name.</dd>
+<dt><code>-ocioDisplay (value)</code></dt>
+<dd>OCIO display name.</dd>
+<dt><code>-ocioView (value)</code></dt>
+<dd>OCIO view name.</dd>
+<dt><code>-ocioLook (value)</code></dt>
+<dd>OCIO look name.</dd>
+<dt><code>-lut (value)</code></dt>
+<dd>LUT file name.</dd>
+<dt><code>-lutOrder (value)</code></dt>
+<dd>LUT operation order. Options: "Post-Config", "Pre-Config".</dd>
+</dl>
+<h2 id="commands-options">Commands options</h2>
+<dl>
+<dt><code>-command (value)</code></dt>
+<dd>Execute a command after startup. The command name may be followed by JSON arguments; e.g., "Playback/Forward" or "Playback/Seek { \"frame\": 100 }". This option may be repeated to execute multiple commands in order. Use -listCommands to see the available commands.</dd>
+</dl>
+<h2 id="testing-options">Testing options</h2>
+<dl>
+<dt><code>-debugLoop (value)</code></dt>
+<dd>Load the command line inputs in a loop. This value is the number of seconds for each cycle. Default: "10".</dd>
+<dt><code>-exit</code></dt>
+<dd>Start the user interface and then exit. The windows are not shown: there is nobody to show them to, and a window that appears for a few frames in the middle of a test run is one that can be clicked into by accident.</dd>
+<dt><code>-screenshot (value)</code></dt>
+<dd>Write a screenshot of the window to this file and then exit.</dd>
+<dt><code>-widgetDump (value)</code></dt>
+<dd>Write the window's widget tree as JSON to this file and then exit.</dd>
+</dl>
+<h2 id="benchmark-options">Benchmark options</h2>
+<dl>
+<dt><code>-benchmark (value)</code></dt>
+<dd>Play headlessly for this many seconds and report the frame rate achieved. Default: "5".</dd>
+</dl>
+<h2 id="style-options">Style options</h2>
+<dl>
+<dt><code>-displayScale, -ds (value)</code></dt>
+<dd>Set the display scale.</dd>
+<dt><code>-colorStyle, -cs (value)</code></dt>
+<dd>Set the color style. Options: "Dark", "Light", "Custom".</dd>
+</dl>
+<h2 id="capture-options">Capture options</h2>
+<dl>
+<dt><code>-captureManifest (value)</code></dt>
+<dd>Screenshot manifest (JSON).</dd>
+<dt><code>-captureShot (value)</code></dt>
+<dd>Id of the single shot to capture.</dd>
+<dt><code>-captureOutput (value)</code></dt>
+<dd>Output directory for PNG + JSON. Default: ".".</dd>
+</dl>
+<h2 id="files-options">Files options</h2>
+<dl>
+<dt><code>-settingsFile (value)</code></dt>
+<dd>Settings file name. Default: "/Users/darby/Library/Application Support/DJV/djv.3.json".</dd>
+<dt><code>-logFile (value)</code></dt>
+<dd>Log file name. Default: "/Users/darby/Library/Application Support/DJV/djv.3.log".</dd>
+<dt><code>-resetSettings</code></dt>
+<dd>Reset the settings to their defaults.</dd>
+</dl>
+<h2 id="options">Options</h2>
+<dl>
+<dt><code>-hideSetup</code></dt>
+<dd>Hide the setup dialog that is shown on the first run.</dd>
+<dt><code>-version</code></dt>
+<dd>Print the version and exit.</dd>
+<dt><code>-sysInfo</code></dt>
+<dd>Print the system information and exit.</dd>
+<dt><code>-listCommands</code></dt>
+<dd>Print the list of commands and exit.</dd>
+<dt><code>-log</code></dt>
+<dd>Print the log to the console.</dd>
+<dt><code>-help, -h, --help, --h</code></dt>
+<dd>Show this message.</dd>
+<dt><code>-helpJSON</code></dt>
+<dd>Print the command line arguments and options as JSON and exit.</dd>
+</dl>
+</main>
+</body>
+</html>
