@@ -22,6 +22,7 @@ Fixes:
   ".bad" rather than overwritten.
 * Clearing the drawing on a compared frame also clears the "B" strokes.
 * A display scale set in the settings is kept across launches.
+* A tilt wheel no longer zooms the view.
 * The window is drawn while it is being resized on macOS and Windows.
 * DJV is offered for the file types it reads in the Windows "Open with"
   list, and goes on working there after an upgrade.
