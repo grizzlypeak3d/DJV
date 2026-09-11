@@ -16,7 +16,6 @@
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/FormLayout.h>
-#include <ftk/UI/IntEdit.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/LineEdit.h>
 #include <ftk/UI/PushButton.h>
@@ -24,6 +23,7 @@
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Path.h>
+#include <ftk/Core/String.h>
 
 #include <algorithm>
 #include <cctype>
@@ -78,6 +78,105 @@ namespace djv
                 }
                 return out;
             }
+
+            std::vector<std::string> getMovieExts(const std::shared_ptr<ftk::Context>& context)
+            {
+                std::vector<std::string> out;
+                auto ioSystem = context->getSystem<tl::WriteSystem>();
+                for (const auto& ext : ioSystem->getExts(static_cast<int>(tl::FileType::Media)))
+                {
+                    if (std::find(movieExts.begin(), movieExts.end(), ext) != movieExts.end())
+                    {
+                        out.push_back(ext);
+                    }
+                }
+                return out;
+            }
+
+            // Whether the number in a file name is a run of '#'. Only that is
+            // replaced by the frame number: the path reads trailing digits as
+            // a frame number too, and replacing those would write
+            // "shot_v002.exr" as "shot_v023.exr".
+            bool isFrameTemplate(const ftk::Path& path)
+            {
+                const std::string num = path.getNum();
+                return !num.empty() &&
+                    std::string::npos == num.find_first_not_of('#');
+            }
+
+            // A name typed or pasted with one of the extensions on it takes
+            // that extension, rather than being written as "shot.exr.tif".
+            bool splitExt(
+                std::string& name,
+                std::string& ext,
+                const std::vector<std::string>& exts)
+            {
+                const std::string lower = ftk::toLower(name);
+                for (const auto& i : exts)
+                {
+                    if (lower.size() > i.size() &&
+                        0 == lower.compare(lower.size() - i.size(), i.size(), i))
+                    {
+                        name.resize(name.size() - i.size());
+                        ext = i;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // What is wrong with an export file name, or nothing.
+            std::string getFileNameError(
+                const std::string& fileName,
+                const std::string& ext,
+                models::ExportFileType fileType,
+                const std::vector<std::string>& exts)
+            {
+                std::string out;
+                const ftk::Path path(fileName + ext);
+                if (fileName.empty())
+                {
+                    out = "No file name";
+                }
+                else if (path.hasDir())
+                {
+                    out = "No directory; that is set above";
+                }
+                else if (std::find(exts.begin(), exts.end(), ext) == exts.end())
+                {
+                    out = "No extension";
+                }
+                else if (models::ExportFileType::Seq == fileType &&
+                    !isFrameTemplate(path))
+                {
+                    out = "Needs # where the frame number goes";
+                }
+                else if (models::ExportFileType::Movie == fileType &&
+                    isFrameTemplate(path))
+                {
+                    out = "A movie has no frame number";
+                }
+                return out;
+            }
+
+            std::string getFileNameTooltip(models::ExportFileType fileType)
+            {
+                std::string out = "The output file name.";
+                switch (fileType)
+                {
+                case models::ExportFileType::Image:
+                    out +=
+                        "\nFrame numbers are specified with # characters (e.g., render.####.tif).\n"
+                        "Digits are part of the name (e.g., shot_v001.jpg).";
+                    break;
+                case models::ExportFileType::Seq:
+                    out +=
+                        "\nFrame numbers are specified with # characters (e.g., render.####.tif).";
+                    break;
+                default: break;
+                }
+                return out;
+            }
         }
 
         std::string getExportFileName(
@@ -89,31 +188,20 @@ namespace djv
             switch (fileType)
             {
             case models::ExportFileType::Image:
-            {
-                std::stringstream ss;
-                ss << options.imageBase;
-                ss << std::setfill('0') << std::setw(options.imageZeroPad) << frame;
-                ss << options.imageExt;
-                out = ss.str();
+                out = options.imageFileName + options.imageExt;
                 break;
-            }
             case models::ExportFileType::Seq:
-            {
-                std::stringstream ss;
-                ss << options.seqBase;
-                ss << std::setfill('0') << std::setw(options.seqZeroPad) << frame;
-                ss << options.seqExt;
-                out = ss.str();
+                out = options.seqFileName + options.seqExt;
                 break;
-            }
             case models::ExportFileType::Movie:
-            {
-                std::stringstream ss;
-                ss << options.movieBase << options.movieExt;
-                out = ss.str();
+                out = options.movieFileName + options.movieExt;
                 break;
-            }
             default: break;
+            }
+            const ftk::Path path(out);
+            if (isFrameTemplate(path))
+            {
+                out = path.getFrame(frame, true);
             }
             return out;
         }
@@ -128,6 +216,9 @@ namespace djv
                 bool out = false;
                 const int64_t start = range.start_time().value();
                 const int64_t end = range.end_time_inclusive().value();
+                const ftk::Path path(options.seqFileName + options.seqExt);
+                const std::string base = path.getBase();
+                const std::string ext = path.getExt();
                 std::error_code ec;
                 // The Path helpers throughout: everything else here is
                 // UTF-8, and a plain conversion goes through the code page
@@ -138,16 +229,16 @@ namespace djv
                         ftk::toFileSystem(options.dir), ec))
                 {
                     const std::string fileName = ftk::fromFileSystem(entry.path().filename());
-                    if (fileName.size() > options.seqBase.size() + options.seqExt.size() &&
-                        0 == fileName.compare(0, options.seqBase.size(), options.seqBase) &&
+                    if (fileName.size() > base.size() + ext.size() &&
+                        0 == fileName.compare(0, base.size(), base) &&
                         0 == fileName.compare(
-                            fileName.size() - options.seqExt.size(),
-                            options.seqExt.size(),
-                            options.seqExt))
+                            fileName.size() - ext.size(),
+                            ext.size(),
+                            ext))
                     {
                         const std::string digits = fileName.substr(
-                            options.seqBase.size(),
-                            fileName.size() - options.seqBase.size() - options.seqExt.size());
+                            base.size(),
+                            fileName.size() - base.size() - ext.size());
                         const bool isDigits = !digits.empty() && std::all_of(
                             digits.begin(),
                             digits.end(),
@@ -222,8 +313,7 @@ namespace djv
             std::shared_ptr<models::SettingsModel> settings;
             std::vector<std::string> exts;
 
-            std::shared_ptr<ftk::LineEdit> baseEdit;
-            std::shared_ptr<ftk::IntEdit> zeroPadEdit;
+            std::shared_ptr<ftk::LineEdit> fileNameEdit;
             std::shared_ptr<ftk::ComboBox> extComboBox;
             std::shared_ptr<ftk::Label> fileLabel;
             std::shared_ptr<ftk::PushButton> exportButton;
@@ -244,12 +334,11 @@ namespace djv
             p.settings = settingsModel;
             p.exts = getImageExts(context);
 
-            p.baseEdit = ftk::LineEdit::create(context);
-            p.baseEdit->setHStretch(ftk::Stretch::Expanding);
-            ftk::setScreenshotTag(p.baseEdit, "Export.ImageBaseName");
-            p.zeroPadEdit = ftk::IntEdit::create(context);
-            p.zeroPadEdit->setRange(0, 16);
-            ftk::setScreenshotTag(p.zeroPadEdit, "Export.ImageZeroPad");
+            p.fileNameEdit = ftk::LineEdit::create(context);
+            p.fileNameEdit->setHStretch(ftk::Stretch::Expanding);
+            p.fileNameEdit->setTooltip(getFileNameTooltip(
+                models::ExportFileType::Image));
+            ftk::setScreenshotTag(p.fileNameEdit, "Export.ImageFileName");
             p.extComboBox = ftk::ComboBox::create(context, p.exts);
             p.extComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.extComboBox, "Export.ImageExt");
@@ -266,11 +355,10 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            formLayout->addRow("Base name:", p.baseEdit);
-            formLayout->addRow("Zero padding:", p.zeroPadEdit);
+            formLayout->addRow("File name:", p.fileNameEdit);
             formLayout->addRow("Extension:", p.extComboBox);
             ftk::setScreenshotTag(p.fileLabel, "Export.ImageFile");
-            formLayout->addRow("File:", p.fileLabel);
+            formLayout->addRow("Output:", p.fileLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
             p.exportButton->setParent(p.layout);
 
@@ -279,29 +367,33 @@ namespace djv
                 [this](const models::ExportSettings& value)
                 {
                     FTK_P();
-                    p.baseEdit->setText(value.imageBase);
-                    p.zeroPadEdit->setValue(value.imageZeroPad);
-                    auto i = std::find(p.exts.begin(), p.exts.end(), value.imageExt);
-                    p.extComboBox->setCurrentIndex(i != p.exts.end() ? (i - p.exts.begin()) : -1);
+                    auto options = value;
+                    if (splitExt(options.imageFileName, options.imageExt, p.exts))
+                    {
+                        p.settings->setExport(options);
+                        return;
+                    }
+                    if (p.fileNameEdit->getText() != value.imageFileName)
+                    {
+                        p.fileNameEdit->setText(value.imageFileName);
+                    }
+                    const auto j = std::find(p.exts.begin(), p.exts.end(), value.imageExt);
+                    p.extComboBox->setCurrentIndex(j != p.exts.end() ? (j - p.exts.begin()) : -1);
                     _infoUpdate();
                 });
 
-            p.baseEdit->setCallback(
+            p.fileNameEdit->setCallback(
                 [this](const std::string& value)
                 {
                     FTK_P();
                     auto options = p.settings->getExport();
-                    options.imageBase = value;
+                    options.imageFileName = value;
+                    splitExt(options.imageFileName, options.imageExt, p.exts);
                     p.settings->setExport(options);
-                });
-
-            p.zeroPadEdit->setCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    auto options = p.settings->getExport();
-                    options.imageZeroPad = value;
-                    p.settings->setExport(options);
+                    if (p.fileNameEdit->getText() != options.imageFileName)
+                    {
+                        p.fileNameEdit->setText(options.imageFileName);
+                    }
                 });
 
             p.extComboBox->setIndexCallback(
@@ -314,6 +406,12 @@ namespace djv
                         options.imageExt = p.exts[value];
                         p.settings->setExport(options);
                     }
+                });
+
+            p.fileNameEdit->setTextChangedCallback(
+                [this](const std::string&)
+                {
+                    _infoUpdate();
                 });
         }
 
@@ -338,7 +436,7 @@ namespace djv
         {
                 FTK_P();
                 p.player = value;
-                p.exportButton->setEnabled(value.get());
+                _infoUpdate();
                 if (value)
                 {
                     p.currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
@@ -363,21 +461,30 @@ namespace djv
         void ImageExportWidget::_infoUpdate()
         {
             FTK_P();
-            std::string fileText = "-";
-            if (p.player)
+            // From the text being typed rather than the setting, which only
+            // changes once the edit is committed, so that what is wrong with
+            // a name shows while it is being typed.
+            auto options = p.settings->getExport();
+            options.imageFileName = p.fileNameEdit->getText();
+            splitExt(options.imageFileName, options.imageExt, p.exts);
+            const std::string error = getFileNameError(
+                options.imageFileName,
+                options.imageExt,
+                models::ExportFileType::Image,
+                p.exts);
+            std::string fileText = error.empty() ? "-" : error;
+            if (p.player && error.empty())
             {
-                const auto options = p.settings->getExport();
-                const OTIO_NS::RationalTime time = p.player->getCurrentTime();
-                const std::string fileName = getExportFileName(
+                fileText = getExportFileName(
                     options,
                     models::ExportFileType::Image,
-                    static_cast<int64_t>(time.value()));
-                if (!fileName.empty())
-                {
-                    fileText = fileName;
-                }
+                    static_cast<int64_t>(p.player->getCurrentTime().value()));
             }
             p.fileLabel->setText(fileText);
+            p.fileLabel->setTextRole(error.empty() ?
+                ftk::ColorRole::Text :
+                ftk::ColorRole::Red);
+            p.exportButton->setEnabled(p.player && error.empty());
         }
 
         struct SeqExportWidget::Private
@@ -387,8 +494,7 @@ namespace djv
             std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
             std::vector<std::string> exts;
 
-            std::shared_ptr<ftk::LineEdit> baseEdit;
-            std::shared_ptr<ftk::IntEdit> zeroPadEdit;
+            std::shared_ptr<ftk::LineEdit> fileNameEdit;
             std::shared_ptr<ftk::ComboBox> extComboBox;
             std::shared_ptr<ftk::Label> fileLabel;
             std::shared_ptr<ftk::Label> rangeLabel;
@@ -413,12 +519,11 @@ namespace djv
             p.timeUnitsModel = timeUnitsModel;
             p.exts = getImageExts(context);
 
-            p.baseEdit = ftk::LineEdit::create(context);
-            p.baseEdit->setHStretch(ftk::Stretch::Expanding);
-            ftk::setScreenshotTag(p.baseEdit, "Export.SeqBaseName");
-            p.zeroPadEdit = ftk::IntEdit::create(context);
-            p.zeroPadEdit->setRange(0, 16);
-            ftk::setScreenshotTag(p.zeroPadEdit, "Export.SeqZeroPad");
+            p.fileNameEdit = ftk::LineEdit::create(context);
+            p.fileNameEdit->setHStretch(ftk::Stretch::Expanding);
+            p.fileNameEdit->setTooltip(getFileNameTooltip(
+                models::ExportFileType::Seq));
+            ftk::setScreenshotTag(p.fileNameEdit, "Export.SeqFileName");
             p.extComboBox = ftk::ComboBox::create(context, p.exts);
             p.extComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.extComboBox, "Export.SeqExt");
@@ -436,11 +541,10 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            formLayout->addRow("Base name:", p.baseEdit);
-            formLayout->addRow("Zero padding:", p.zeroPadEdit);
+            formLayout->addRow("File name:", p.fileNameEdit);
             formLayout->addRow("Extension:", p.extComboBox);
             ftk::setScreenshotTag(p.fileLabel, "Export.SeqFile");
-            formLayout->addRow("File:", p.fileLabel);
+            formLayout->addRow("Output:", p.fileLabel);
             ftk::setScreenshotTag(p.rangeLabel, "Export.SeqRange");
             formLayout->addRow("Range:", p.rangeLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
@@ -451,10 +555,18 @@ namespace djv
                 [this](const models::ExportSettings& value)
                 {
                     FTK_P();
-                    p.baseEdit->setText(value.seqBase);
-                    p.zeroPadEdit->setValue(value.seqZeroPad);
-                    auto i = std::find(p.exts.begin(), p.exts.end(), value.seqExt);
-                    p.extComboBox->setCurrentIndex(i != p.exts.end() ? (i - p.exts.begin()) : -1);
+                    auto options = value;
+                    if (splitExt(options.seqFileName, options.seqExt, p.exts))
+                    {
+                        p.settings->setExport(options);
+                        return;
+                    }
+                    if (p.fileNameEdit->getText() != value.seqFileName)
+                    {
+                        p.fileNameEdit->setText(value.seqFileName);
+                    }
+                    const auto j = std::find(p.exts.begin(), p.exts.end(), value.seqExt);
+                    p.extComboBox->setCurrentIndex(j != p.exts.end() ? (j - p.exts.begin()) : -1);
                     _infoUpdate();
                 });
 
@@ -465,22 +577,18 @@ namespace djv
                     _infoUpdate();
                 });
 
-            p.baseEdit->setCallback(
+            p.fileNameEdit->setCallback(
                 [this](const std::string& value)
                 {
                     FTK_P();
                     auto options = p.settings->getExport();
-                    options.seqBase = value;
+                    options.seqFileName = value;
+                    splitExt(options.seqFileName, options.seqExt, p.exts);
                     p.settings->setExport(options);
-                });
-
-            p.zeroPadEdit->setCallback(
-                [this](int value)
-                {
-                    FTK_P();
-                    auto options = p.settings->getExport();
-                    options.seqZeroPad = value;
-                    p.settings->setExport(options);
+                    if (p.fileNameEdit->getText() != options.seqFileName)
+                    {
+                        p.fileNameEdit->setText(options.seqFileName);
+                    }
                 });
 
             p.extComboBox->setIndexCallback(
@@ -493,6 +601,12 @@ namespace djv
                         options.seqExt = p.exts[value];
                         p.settings->setExport(options);
                     }
+                });
+
+            p.fileNameEdit->setTextChangedCallback(
+                [this](const std::string&)
+                {
+                    _infoUpdate();
                 });
         }
 
@@ -518,7 +632,7 @@ namespace djv
         {
                 FTK_P();
                 p.player = value;
-                p.exportButton->setEnabled(value.get());
+                _infoUpdate();
                 if (value)
                 {
                     p.inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
@@ -543,30 +657,42 @@ namespace djv
         void SeqExportWidget::_infoUpdate()
         {
             FTK_P();
-            std::string fileText = "-";
+            // From the text being typed rather than the setting, which only
+            // changes once the edit is committed, so that what is wrong with
+            // a name shows while it is being typed.
+            auto options = p.settings->getExport();
+            options.seqFileName = p.fileNameEdit->getText();
+            splitExt(options.seqFileName, options.seqExt, p.exts);
+            const std::string error = getFileNameError(
+                options.seqFileName,
+                options.seqExt,
+                models::ExportFileType::Seq,
+                p.exts);
+            std::string fileText = error.empty() ? "-" : error;
             std::string rangeText = "-";
             if (p.player)
             {
-                const auto options = p.settings->getExport();
                 const OTIO_NS::TimeRange range = p.player->getInOutRange();
-                const std::string firstName = getExportFileName(
-                    options,
-                    models::ExportFileType::Seq,
-                    static_cast<int64_t>(range.start_time().value()));
-                const std::string lastName = getExportFileName(
-                    options,
-                    models::ExportFileType::Seq,
-                    static_cast<int64_t>(range.end_time_inclusive().value()));
-                if (!firstName.empty())
+                if (error.empty())
                 {
                     fileText = ftk::Format("{0} - {1}").
-                        arg(firstName).
-                        arg(lastName);
+                        arg(getExportFileName(
+                            options,
+                            models::ExportFileType::Seq,
+                            static_cast<int64_t>(range.start_time().value()))).
+                        arg(getExportFileName(
+                            options,
+                            models::ExportFileType::Seq,
+                            static_cast<int64_t>(range.end_time_inclusive().value())));
                 }
                 rangeText = getRangeText(range, p.timeUnitsModel);
             }
             p.fileLabel->setText(fileText);
+            p.fileLabel->setTextRole(error.empty() ?
+                ftk::ColorRole::Text :
+                ftk::ColorRole::Red);
             p.rangeLabel->setText(rangeText);
+            p.exportButton->setEnabled(p.player && error.empty());
         }
 
         struct MovieExportWidget::Private
@@ -578,7 +704,7 @@ namespace djv
             std::vector<std::string> audioCodecs;
             std::vector<std::string> presets;
 
-            std::shared_ptr<ftk::LineEdit> baseEdit;
+            std::shared_ptr<ftk::LineEdit> fileNameEdit;
             std::shared_ptr<ftk::ComboBox> extComboBox;
             std::shared_ptr<ftk::ComboBox> audioCodecComboBox;
             std::shared_ptr<ftk::ComboBox> presetComboBox;
@@ -604,15 +730,9 @@ namespace djv
             p.settings = settingsModel;
             p.timeUnitsModel = timeUnitsModel;
 
-            auto ioSystem = context->getSystem<tl::WriteSystem>();
-            for (const auto& ext : ioSystem->getExts(static_cast<int>(tl::FileType::Media)))
-            {
-                if (std::find(movieExts.begin(), movieExts.end(), ext) != movieExts.end())
-                {
-                    p.exts.push_back(ext);
-                }
-            }
+            p.exts = getMovieExts(context);
 #if defined(TLRENDER_FFMPEG_PLUGIN)
+            auto ioSystem = context->getSystem<tl::WriteSystem>();
             auto ffmpegPlugin = ioSystem->getPlugin<tl::ffmpeg::WritePlugin>();
             p.audioCodecs.push_back("Auto");
             for (const auto& codec : ffmpegPlugin->getAudioCodecs())
@@ -624,9 +744,11 @@ namespace djv
             }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-            p.baseEdit = ftk::LineEdit::create(context);
-            p.baseEdit->setHStretch(ftk::Stretch::Expanding);
-            ftk::setScreenshotTag(p.baseEdit, "Export.MovieBaseName");
+            p.fileNameEdit = ftk::LineEdit::create(context);
+            p.fileNameEdit->setHStretch(ftk::Stretch::Expanding);
+            p.fileNameEdit->setTooltip(getFileNameTooltip(
+                models::ExportFileType::Movie));
+            ftk::setScreenshotTag(p.fileNameEdit, "Export.MovieFileName");
             p.extComboBox = ftk::ComboBox::create(context, p.exts);
             p.extComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.extComboBox, "Export.MovieExt");
@@ -662,12 +784,12 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            formLayout->addRow("Base name:", p.baseEdit);
+            formLayout->addRow("File name:", p.fileNameEdit);
             formLayout->addRow("Extension:", p.extComboBox);
             formLayout->addRow("Preset:", p.presetComboBox);
             formLayout->addRow("Audio codec:", p.audioCodecComboBox);
             ftk::setScreenshotTag(p.fileLabel, "Export.MovieFile");
-            formLayout->addRow("File:", p.fileLabel);
+            formLayout->addRow("Output:", p.fileLabel);
             ftk::setScreenshotTag(p.rangeLabel, "Export.MovieRange");
             formLayout->addRow("Range:", p.rangeLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
@@ -678,10 +800,19 @@ namespace djv
                 [this](const models::ExportSettings& value)
                 {
                     FTK_P();
-                    p.baseEdit->setText(value.movieBase);
-                    auto i = std::find(p.exts.begin(), p.exts.end(), value.movieExt);
-                    p.extComboBox->setCurrentIndex(i != p.exts.end() ? (i - p.exts.begin()) : -1);
-                    i = std::find(p.audioCodecs.begin(), p.audioCodecs.end(), value.movieAudioCodec);
+                    auto options = value;
+                    if (splitExt(options.movieFileName, options.movieExt, p.exts))
+                    {
+                        p.settings->setExport(options);
+                        return;
+                    }
+                    if (p.fileNameEdit->getText() != value.movieFileName)
+                    {
+                        p.fileNameEdit->setText(value.movieFileName);
+                    }
+                    const auto j = std::find(p.exts.begin(), p.exts.end(), value.movieExt);
+                    p.extComboBox->setCurrentIndex(j != p.exts.end() ? (j - p.exts.begin()) : -1);
+                    auto i = std::find(p.audioCodecs.begin(), p.audioCodecs.end(), value.movieAudioCodec);
                     p.audioCodecComboBox->setCurrentIndex(i != p.audioCodecs.end() ? (i - p.audioCodecs.begin()) : -1);
                     i = std::find(p.presets.begin(), p.presets.end(), value.moviePreset);
                     p.presetComboBox->setCurrentIndex(i != p.presets.end() ? (i - p.presets.begin()) : -1);
@@ -696,13 +827,18 @@ namespace djv
                     _infoUpdate();
                 });
 
-            p.baseEdit->setCallback(
+            p.fileNameEdit->setCallback(
                 [this](const std::string& value)
                 {
                     FTK_P();
                     auto options = p.settings->getExport();
-                    options.movieBase = value;
+                    options.movieFileName = value;
+                    splitExt(options.movieFileName, options.movieExt, p.exts);
                     p.settings->setExport(options);
+                    if (p.fileNameEdit->getText() != options.movieFileName)
+                    {
+                        p.fileNameEdit->setText(options.movieFileName);
+                    }
                 });
 
             p.extComboBox->setIndexCallback(
@@ -715,6 +851,12 @@ namespace djv
                         options.movieExt = p.exts[value];
                         p.settings->setExport(options);
                     }
+                });
+
+            p.fileNameEdit->setTextChangedCallback(
+                [this](const std::string&)
+                {
+                    _infoUpdate();
                 });
 
             p.audioCodecComboBox->setIndexCallback(
@@ -788,7 +930,7 @@ namespace djv
         {
                 FTK_P();
                 p.player = value;
-                p.exportButton->setEnabled(value.get());
+                _infoUpdate();
                 _audioUpdate();
                 if (value)
                 {
@@ -814,24 +956,37 @@ namespace djv
         void MovieExportWidget::_infoUpdate()
         {
             FTK_P();
-            std::string fileText = "-";
+            // From the text being typed rather than the setting, which only
+            // changes once the edit is committed, so that what is wrong with
+            // a name shows while it is being typed.
+            auto options = p.settings->getExport();
+            options.movieFileName = p.fileNameEdit->getText();
+            splitExt(options.movieFileName, options.movieExt, p.exts);
+            const std::string error = getFileNameError(
+                options.movieFileName,
+                options.movieExt,
+                models::ExportFileType::Movie,
+                p.exts);
+            std::string fileText = error.empty() ? "-" : error;
             std::string rangeText = "-";
             if (p.player)
             {
-                const auto options = p.settings->getExport();
                 const OTIO_NS::TimeRange range = p.player->getInOutRange();
-                const std::string fileName = getExportFileName(
-                    options,
-                    models::ExportFileType::Movie,
-                    static_cast<int64_t>(range.start_time().value()));
-                if (!fileName.empty())
+                if (error.empty())
                 {
-                    fileText = fileName;
+                    fileText = getExportFileName(
+                        options,
+                        models::ExportFileType::Movie,
+                        static_cast<int64_t>(range.start_time().value()));
                 }
                 rangeText = getRangeText(range, p.timeUnitsModel);
             }
             p.fileLabel->setText(fileText);
+            p.fileLabel->setTextRole(error.empty() ?
+                ftk::ColorRole::Text :
+                ftk::ColorRole::Red);
             p.rangeLabel->setText(rangeText);
+            p.exportButton->setEnabled(p.player && error.empty());
         }
     }
 }

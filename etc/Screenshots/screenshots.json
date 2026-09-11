@@ -1175,12 +1175,8 @@
           "caption": "Image, sequence, and movie export"
         },
         {
-          "id": "Export.ImageBaseName",
-          "caption": "Base output name"
-        },
-        {
-          "id": "Export.ImageZeroPad",
-          "caption": "Zero padding"
+          "id": "Export.ImageFileName",
+          "caption": "Output file name"
         },
         {
           "id": "Export.ImageExt",
@@ -1223,12 +1219,8 @@
       ],
       "annotate": [
         {
-          "id": "Export.SeqBaseName",
-          "caption": "Base output name"
-        },
-        {
-          "id": "Export.SeqZeroPad",
-          "caption": "Zero padding"
+          "id": "Export.SeqFileName",
+          "caption": "Output file names, # for the frame number"
         },
         {
           "id": "Export.SeqExt",
@@ -1275,8 +1267,8 @@
       ],
       "annotate": [
         {
-          "id": "Export.MovieBaseName",
-          "caption": "Base output name"
+          "id": "Export.MovieFileName",
+          "caption": "Output file name"
         },
         {
           "id": "Export.MovieExt",

@@ -15,6 +15,8 @@ Changes:
 * Building requires C++20.
 * CineForm movies can be read and written.
 * Hovering the timeline shows a preview of the frame under the cursor.
+* Export file names are typed, with `#` where the frame number goes, so
+  a single image can be written without one.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.

@@ -90,15 +90,14 @@ namespace djv
             int customWidth = 1920;
             ExportFileType fileType = ExportFileType::Image;
 
-            std::string imageBase = "render.";
-            size_t imageZeroPad = 0;
+            //! The output file names, without their extensions. A run of '#'
+            //! is where the frame number goes, as many digits wide as there
+            //! are '#'; digits are always part of the name.
+            std::string imageFileName = "render";
             std::string imageExt = ".tif";
-
-            std::string seqBase = "render.";
-            size_t seqZeroPad = 4;
+            std::string seqFileName = "render.####";
             std::string seqExt = ".tif";
-
-            std::string movieBase = "render";
+            std::string movieFileName = "render";
             std::string movieExt = ".mov";
             std::string movieAudioCodec = "Auto";
             //! The movie export preset. Presets are the whole surface:

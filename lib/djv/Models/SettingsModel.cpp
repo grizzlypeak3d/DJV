@@ -10,6 +10,7 @@
 #include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
 
+#include <algorithm>
 #include <filesystem>
 #include <sstream>
 
@@ -742,15 +743,13 @@ namespace djv
             json["RenderSize"] = to_string(value.renderSize);
             json["CustomWidth"] = value.customWidth;
             json["FileType"] = to_string(value.fileType);
-            json["ImageBase"] = value.imageBase;
-            json["ImageZeroPad"] = value.imageZeroPad;
+            json["ImageFileName"] = value.imageFileName;
             json["ImageExt"] = value.imageExt;
-            json["MovieBase"] = value.movieBase;
+            json["MovieFileName"] = value.movieFileName;
             json["MovieExt"] = value.movieExt;
             json["MoviePreset"] = value.moviePreset;
             json["MovieAudioCodec"] = value.movieAudioCodec;
-            json["SeqBase"] = value.seqBase;
-            json["SeqZeroPad"] = value.seqZeroPad;
+            json["SeqFileName"] = value.seqFileName;
             json["SeqExt"] = value.seqExt;
         }
 
@@ -912,19 +911,52 @@ namespace djv
                 value.customWidth = customSize.w;
             }
             from_string(json.at("FileType").get<std::string>(), value.fileType);
-            json.at("ImageBase").get_to(value.imageBase);
-            json.at("ImageZeroPad").get_to(value.imageZeroPad);
-            json.at("ImageExt").get_to(value.imageExt);
-            json.at("MovieBase").get_to(value.movieBase);
-            json.at("MovieExt").get_to(value.movieExt);
+            // The names used to be kept as a base and a zero padding. A file
+            // written that way keeps its names: the padding becomes that
+            // many '#', and an image, which always carried the frame number,
+            // keeps one.
+            const auto readName = [&json](
+                const std::string& name,
+                const std::string& base,
+                const std::string& pad,
+                size_t minPad,
+                std::string& out)
+            {
+                if (json.contains(name))
+                {
+                    json.at(name).get_to(out);
+                }
+                else if (json.contains(base))
+                {
+                    json.at(base).get_to(out);
+                    if (!pad.empty() && json.contains(pad))
+                    {
+                        out += std::string(
+                            std::max(json.at(pad).get<size_t>(), minPad),
+                            '#');
+                    }
+                }
+            };
+            readName("ImageFileName", "ImageBase", "ImageZeroPad", 1, value.imageFileName);
+            readName("SeqFileName", "SeqBase", "SeqZeroPad", 1, value.seqFileName);
+            readName("MovieFileName", "MovieBase", "", 0, value.movieFileName);
+            if (json.contains("ImageExt"))
+            {
+                json.at("ImageExt").get_to(value.imageExt);
+            }
+            if (json.contains("SeqExt"))
+            {
+                json.at("SeqExt").get_to(value.seqExt);
+            }
+            if (json.contains("MovieExt"))
+            {
+                json.at("MovieExt").get_to(value.movieExt);
+            }
             if (json.contains("MoviePreset"))
             {
                 json.at("MoviePreset").get_to(value.moviePreset);
             }
             json.at("MovieAudioCodec").get_to(value.movieAudioCodec);
-            json.at("SeqBase").get_to(value.seqBase);
-            json.at("SeqZeroPad").get_to(value.seqZeroPad);
-            json.at("SeqExt").get_to(value.seqExt);
         }
 
         void from_json(const nlohmann::json& json, FileBrowserSettings& value)
