@@ -18,6 +18,7 @@ Changes:
 * Export file names are typed, with `#` where the frame number goes, so
   a single image can be written without one.
 * The Custom color style is removed.
+* The light style's checked color is light blue.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.
@@ -40,6 +41,8 @@ Fixes:
 * DJV launched from a shell is in the macOS application switcher and dock.
 * The HUD shows a single dash for a color it has no sample of.
 * The window's right-click menu includes the Tools panel.
+* Text on checked buttons and timeline clips is black or white to suit
+  the color behind it.
 
 ## 3.6.0
 

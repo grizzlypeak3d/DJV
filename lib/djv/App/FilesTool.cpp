@@ -614,7 +614,10 @@ namespace djv
                         // holds.
                         widget.bButton = ftk::ToolButton::create(context, "B", controlsLayout);
                         // Its own color, not the row's: a checked "B" on the
-                        // checked "A" row would vanish into it.
+                        // checked "A" row would vanish into it. A mid-dark
+                        // blue stays apart from the checked color of either
+                        // style, by hue from the dark style's amber and by
+                        // lightness from the light style's light blue.
                         widget.bButton->setCheckedRole(ftk::ColorRole::Blue);
                         const auto i = std::find(b.begin(), b.end(), item);
                         widget.bButton->setChecked(i != b.end());
