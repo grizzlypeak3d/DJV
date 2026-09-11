@@ -824,10 +824,6 @@ namespace djv
             json["DisplayScale"] = value.displayScale;
             json["ColorControls"] = value.colorControls;
             json["ColorStyle"] = to_string(value.colorStyle);
-            for (auto i : value.customColorRoles)
-            {
-                json["CustomColorRoles"][ftk::getLabel(i.first)] = i.second;
-            }
             for (auto i : value.fonts)
             {
                 json["Fonts"][ftk::getLabel(i.first)] = i.second;
@@ -1069,14 +1065,10 @@ namespace djv
         void from_json(const nlohmann::json& json, StyleSettings& value)
         {
             json.at("DisplayScale").get_to(value.displayScale);
+            // A style that is no longer offered, such as the Custom one
+            // there used to be, is left at the default.
             from_string(json.at("ColorStyle").get<std::string>(), value.colorStyle);
             json.at("ColorControls").get_to(value.colorControls);
-            for (auto i = json.at("CustomColorRoles").begin(); i != json.at("CustomColorRoles").end(); ++i)
-            {
-                ftk::ColorRole colorRole = ftk::ColorRole::None;
-                from_string(i.key(), colorRole);
-                i.value().get_to(value.customColorRoles[colorRole]);
-            }
             for (auto i = json.at("Fonts").begin(); i != json.at("Fonts").end(); ++i)
             {
                 ftk::FontType font = ftk::FontType::Regular;

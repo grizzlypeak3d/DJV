@@ -261,7 +261,6 @@ namespace djv
             float displayScale = 0.F;
             ftk::ColorControls colorControls;
             ftk::ColorStyle colorStyle = ftk::ColorStyle::Dark;
-            std::map<ftk::ColorRole, ftk::Color4F> customColorRoles = ftk::getCustomColorRoles();
             std::map<ftk::FontType, std::string> fonts;
             std::vector<std::string> fontFiles;
 

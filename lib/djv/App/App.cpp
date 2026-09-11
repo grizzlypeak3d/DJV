@@ -2566,7 +2566,6 @@ namespace djv
                     style->setColorControls(value.colorControls);
                     style->setFonts(value.fonts);
                     setColorStyle(value.colorStyle);
-                    setCustomColorRoles(value.customColorRoles);
                     setDisplayScale(value.displayScale);
                 });
 

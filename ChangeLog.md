@@ -17,6 +17,7 @@ Changes:
 * Hovering the timeline shows a preview of the frame under the cursor.
 * Export file names are typed, with `#` where the frame number goes, so
   a single image can be written without one.
+* The Custom color style is removed.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.

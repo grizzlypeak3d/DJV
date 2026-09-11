@@ -1341,7 +1341,6 @@ class App(ftk.App):
         style.colorControls = value.colorControls
         style.fonts = value.fonts
         self.colorStyle = value.colorStyle
-        self.customColorRoles = value.customColorRoles
         # Only apply the display scale when the setting itself changed: the
         # style settings are redelivered whenever any of them change, and
         # re-applying a stale value would undo the scale the window

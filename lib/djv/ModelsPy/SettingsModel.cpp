@@ -141,7 +141,6 @@ namespace djv
                 .def_rw("displayScale", &StyleSettings::displayScale)
                 .def_rw("colorControls", &StyleSettings::colorControls)
                 .def_rw("colorStyle", &StyleSettings::colorStyle)
-                .def_rw("customColorRoles", &StyleSettings::customColorRoles)
                 .def_rw("fonts", &StyleSettings::fonts)
                 .def_rw("fontFiles", &StyleSettings::fontFiles)
                 .def(nanobind::self == nanobind::self)
