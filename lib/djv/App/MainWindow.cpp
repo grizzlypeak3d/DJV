@@ -435,7 +435,8 @@ namespace djv
                     "TabBar",
                     "Timeline",
                     "BottomToolBar",
-                    "StatusToolBar"
+                    "StatusToolBar",
+                    "Tools"
                 });
             setContextMenuCallback(
                 [this, chromeMenu]() -> std::shared_ptr<ftk::Menu>

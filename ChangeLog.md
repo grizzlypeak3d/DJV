@@ -39,6 +39,7 @@ Fixes:
   list, and goes on working there after an upgrade.
 * DJV launched from a shell is in the macOS application switcher and dock.
 * The HUD shows a single dash for a color it has no sample of.
+* The window's right-click menu includes the Tools panel.
 
 ## 3.6.0
 
