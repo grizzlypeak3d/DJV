@@ -36,6 +36,8 @@ Fixes:
 * The window is drawn while it is being resized on macOS and Windows.
 * DJV is offered for the file types it reads in the Windows "Open with"
   list, and goes on working there after an upgrade.
+* DJV launched from a shell is in the macOS application switcher and dock.
+* The HUD shows a single dash for a color it has no sample of.
 
 ## 3.6.0
 

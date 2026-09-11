@@ -1555,25 +1555,31 @@ namespace djv
             p.colorPickerSwatch->setColor(
                 colorSample.has_value() ? colorSample.value() : ftk::Color4F());
             // The HUD sits under the pointer, so a line that changes width
-            // as values come and go moves exactly where the eye is. Both
-            // forms are built from the same layout and field widths, so the
-            // line keeps its size whether or not there is a sample -- which
-            // is what happens every time the pointer leaves the image. The
+            // as values come and go moves exactly where the eye is. The
             // widths hold a sign and two digits, so the ordinary zero to one
-            // range and a little either side of it do not move the line
-            // either; beyond that the field grows, as it did before.
+            // range and a little either side of it do not move the line;
+            // beyond that the field grows, as it did before. Without a
+            // sample -- every time the pointer leaves the image -- the line
+            // is a dash for each part and then spaces out to the width of a
+            // sample: the HUD font is monospaced, so the same number of
+            // characters is the same width. A dash in every field kept the
+            // width too, but read as four missing values rather than none.
             const int colorWidth = 5;
             const int pickWidth = 4;
             const std::string colorPickerFormat =
                 "Color: {0} {1} {2} {3}, Pixel: {4}, {5}";
-            std::string colorPickerText =
+            const size_t colorPickerWidth =
                 ftk::Format(colorPickerFormat).
-                arg("-", colorWidth).
-                arg("-", colorWidth).
-                arg("-", colorWidth).
-                arg("-", colorWidth).
-                arg("-", pickWidth).
-                arg("-", pickWidth);
+                arg(0.F, 2, colorWidth).
+                arg(0.F, 2, colorWidth).
+                arg(0.F, 2, colorWidth).
+                arg(0.F, 2, colorWidth).
+                arg(0, pickWidth).
+                arg(0, pickWidth).str().size();
+            std::string colorPickerText = "Color: -, Pixel: -";
+            colorPickerText.resize(
+                std::max(colorPickerText.size(), colorPickerWidth),
+                ' ');
             if (colorSample.has_value() && pick.has_value())
             {
                 colorPickerText =
