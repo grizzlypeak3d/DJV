@@ -42,6 +42,8 @@ Fixes:
 * DJV launched from a shell is in the macOS application switcher and dock.
 * The HUD shows a single dash for a color it has no sample of.
 * The window's right-click menu includes the Tools panel.
+* A movie's start timecode is found when a subtitle or other data track
+  comes before its timecode track.
 * Text on checked buttons and timeline clips is black or white to suit
   the color behind it.
 
