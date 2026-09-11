@@ -989,6 +989,7 @@ namespace djv
         struct ViewClippingWarningWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::shared_ptr<ftk::ComboBox> modeComboBox;
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
             std::shared_ptr<ftk::FormLayout> layout;
 
@@ -1007,21 +1008,31 @@ namespace djv
             p.enabledCheckBox->setTooltip("Toggle whether the clipping warning is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.ClippingWarning.Enabled");
 
+            p.modeComboBox = ftk::ComboBox::create(context, tl::getClippingWarningModeLabels());
+            p.modeComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.modeComboBox->setTooltip(
+                "What is compared with the range.\n"
+                "Any Channel flags a pixel when any of red, green, and blue is outside it.\n"
+                "All Channels flags it only when all three are.\n"
+                "Luminance compares the brightness of the pixel.");
+            ftk::setScreenshotTag(p.modeComboBox, "View.ClippingWarning.Mode");
+
             p.sliders["Low"] = ftk::FloatEditSlider::create(context);
             p.sliders["Low"]->setDefault(0.F);
             p.sliders["Low"]->getModel()->setRangeSoft(true);
-            p.sliders["Low"]->setTooltip("Pixels with a channel below this are covered in magenta.");
+            p.sliders["Low"]->setTooltip("Pixels below this are covered in magenta.");
             ftk::setScreenshotTag(p.sliders["Low"], "View.ClippingWarning.Low");
             p.sliders["High"] = ftk::FloatEditSlider::create(context);
             p.sliders["High"]->setDefault(1.F);
             p.sliders["High"]->getModel()->setRangeSoft(true);
-            p.sliders["High"]->setTooltip("Pixels with a channel above this are covered in red.");
+            p.sliders["High"]->setTooltip("Pixels above this are covered in red.");
             ftk::setScreenshotTag(p.sliders["High"], "View.ClippingWarning.High");
 
             p.layout = ftk::FormLayout::create(context);
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Mode:", p.modeComboBox);
             p.layout->addRow("Low:", p.sliders["Low"]);
             p.layout->addRow("High:", p.sliders["High"]);
 
@@ -1031,6 +1042,7 @@ namespace djv
                 {
                     FTK_P();
                     p.enabledCheckBox->setChecked(value.clippingWarning.enabled);
+                    p.modeComboBox->setCurrentIndex(static_cast<int>(value.clippingWarning.mode));
                     p.sliders["Low"]->setValue(value.clippingWarning.low);
                     p.sliders["High"]->setValue(value.clippingWarning.high);
                 });
@@ -1040,6 +1052,20 @@ namespace djv
                 {
                     auto options = viewportModel->getForegroundOptions();
                     options.clippingWarning.enabled = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.modeComboBox->setIndexCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    const auto mode = static_cast<tl::ClippingWarningMode>(value);
+                    if (mode == options.clippingWarning.mode)
+                    {
+                        return;
+                    }
+                    options.clippingWarning.enabled = true;
+                    options.clippingWarning.mode = mode;
                     viewportModel->setForegroundOptions(options);
                 });
 

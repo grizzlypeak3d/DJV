@@ -103,7 +103,7 @@
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p><img src="assets/view-center-marker.svg" alt="Center marker"></p>
 <h2 id="clipping-warning">Clipping warning</h2>
-<p><strong>Clipping warning</strong> covers every pixel with a channel outside a range in a warning color: red above the range, magenta below it. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.</p>
+<p><strong>Clipping warning</strong> covers pixels outside a range in a warning color: red above the range, magenta below it. <strong>Mode</strong> sets what is compared: <strong>Any Channel</strong> flags a pixel when any of red, green, and blue is outside the range, <strong>All Channels</strong> only when all three are, and <strong>Luminance</strong> compares the brightness of the pixel, with the Rec. 709 weights. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p>A shortcut can be assigned in the <strong>Settings</strong> tool.</p>
 <h2 id="hud">HUD</h2>
