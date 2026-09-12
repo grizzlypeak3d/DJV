@@ -419,10 +419,11 @@ namespace djv
             p.statusBar->setContextMenuCallback(
                 chromeMenuCallback(context, p.windowActions, bottomChrome));
 
-            // Anywhere the click is not claimed, offer every toggle. The
-            // window itself is consulted last, so a band keeps its own
-            // menu; and because the viewport can never be hidden, this is
-            // the one door that cannot be closed by hiding chrome.
+            // The viewport, and the tab bar over it, offer every toggle:
+            // the viewport can never be hidden, so this is the one door that
+            // cannot be closed by hiding chrome. On the window as a whole it
+            // also answered a click in the Tools panel, which looked like a
+            // menu about the tool rather than the window's.
             auto chromeMenu = chromeMenuCallback(
                 context,
                 p.windowActions,
@@ -438,14 +439,20 @@ namespace djv
                     "StatusToolBar",
                     "Tools"
                 });
-            setContextMenuCallback(
+            const auto viewportMenu =
                 [this, chromeMenu]() -> std::shared_ptr<ftk::Menu>
                 {
                     // Presentation mode hides every piece of chrome
                     // regardless of these settings, so the toggles would
                     // do nothing you could see. Escape leaves the mode.
                     return _p->presentMode->get() ? nullptr : chromeMenu();
-                });
+                };
+            p.viewport->setContextMenuCallback(viewportMenu);
+            p.tabBar->setContextMenuCallback(viewportMenu);
+
+            // The Tools panel is a band of its own.
+            p.toolsWidget->setContextMenuCallback(
+                chromeMenuCallback(context, p.windowActions, { "Tools" }));
 
             auto miscSettings = app->getSettingsModel()->getMisc();
             if (miscSettings.showSetup && !app->getHideSetup())

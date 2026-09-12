@@ -23,6 +23,8 @@ Changes:
 * The file list scrolls to the current file.
 * Browsing a list with the keyboard keeps the item in view.
 * Exported files are named for the file being exported.
+* Right clicking the Tools panel offers the panel itself; the menu of every
+  tool bar and panel is on the viewport.
 * Soft clip is in the Exposure section of the Color tool.
 
 Fixes:
