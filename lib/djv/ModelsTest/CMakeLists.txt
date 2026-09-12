@@ -8,6 +8,7 @@ set(HEADERS
     PlaylistTest.h
     RecentFilesModelTest.h
     ReviewTest.h
+    SettingsModelTest.h
     TimeUnitsModelTest.h
     ToolsModelTest.h
     ViewportModelTest.h)
@@ -21,6 +22,7 @@ set(SOURCE
     PlaylistTest.cpp
     RecentFilesModelTest.cpp
     ReviewTest.cpp
+    SettingsModelTest.cpp
     TimeUnitsModelTest.cpp
     ToolsModelTest.cpp
     ViewportModelTest.cpp)

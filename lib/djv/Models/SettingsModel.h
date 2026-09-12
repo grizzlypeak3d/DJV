@@ -21,6 +21,8 @@
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
+#include <ftk/Core/Path.h>
+
 #include <ftk/UI/App.h>
 #include <ftk/UI/FileBrowser.h>
 #include <ftk/Core/Observable.h>
@@ -78,6 +80,21 @@ namespace djv
             First = Image
         };
         FTK_ENUM(DJV_MODELS_API, ExportFileType);
+
+        //! What to name the output of a file, without the extension: the
+        //! name for a single file, and the name for a sequence with a run
+        //! of '#' where the frame number goes.
+        //!
+        //! Trailing digits are a frame number only in an image sequence,
+        //! which is what the extensions say: "Wide_169.mov" is a movie whose
+        //! name ends in digits and is written as "Wide_169". A sequence keeps
+        //! the shape it had, since the base carries whatever separator came
+        //! before the frame number.
+        DJV_MODELS_API void getExportNames(
+            const ftk::Path& path,
+            const std::vector<std::string>& seqExts,
+            std::string& name,
+            std::string& seqName);
 
         //! Export settings.
         struct DJV_MODELS_API_TYPE ExportSettings

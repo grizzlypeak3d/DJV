@@ -321,56 +321,6 @@ namespace djv
             return out;
         }
 
-        namespace
-        {
-            // What to name the output of a file. A sequence keeps the shape
-            // it had -- "shot.0001.exr" gives "shot.####" and "shot0001.exr"
-            // gives "shot####" -- since the base carries whatever separator
-            // came before the frame number.
-            void getExportNames(
-                const ftk::Path& path,
-                const std::vector<std::string>& seqExts,
-                std::string& name,
-                std::string& seqName)
-            {
-                const std::string base = path.getBase();
-                const std::string num = path.getNum();
-                // Trailing digits are a frame number only in an image
-                // sequence. A path that names one file carries the frame
-                // parsed out of its name whatever the file is, so it is the
-                // extension that says which this is: "Wide_169.mov" is a
-                // movie whose name ends in digits, and is written as
-                // "Wide_169".
-                if (!(path.hasNum() && path.testExt(seqExts)))
-                {
-                    name = base + num;
-                    seqName = name + ".####";
-                    return;
-                }
-                // Without the separator: it belongs to the frame number that
-                // a single file does not have.
-                name = base;
-                if (!name.empty() &&
-                    !std::isalnum(static_cast<unsigned char>(name.back())))
-                {
-                    name.resize(name.size() - 1);
-                }
-                // From the padding rather than the length of the number: a
-                // negative frame carries its sign in the number.
-                size_t digits = 0;
-                for (char c : num)
-                {
-                    if (std::isdigit(static_cast<unsigned char>(c)))
-                    {
-                        ++digits;
-                    }
-                }
-                const int pad = path.getPad();
-                seqName = base + std::string(
-                    std::max<size_t>(pad > 0 ? pad : digits, 1), '#');
-            }
-        }
-
         void ExportWidget::setPlayer(const std::shared_ptr<tl::Player>& value)
         {
             FTK_P();
@@ -385,7 +335,7 @@ namespace djv
                     const std::vector<std::string> seqExts = tl::getExts(
                         context, static_cast<int>(tl::FileType::Seq));
                     models::ExportSettings options = p.settings->getExport();
-                    getExportNames(
+                    models::getExportNames(
                         p.player->getPath(),
                         seqExts,
                         options.imageFileName,
