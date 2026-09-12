@@ -172,19 +172,24 @@ namespace djv
             IPopup::setGeometry(value);
             FTK_P();
 
-            // The frame's width follows the video's aspect ratio, and a
-            // player with no video gets a wide frame to hold the time.
-            float aspect = 16.F / 9.F;
+            // The frame's width follows the video's aspect ratio. A file
+            // with no video -- an audio file -- has no frame to show, so the
+            // preview is the time by itself rather than an empty box above
+            // it.
             const auto& ioInfo = p.player->getIOInfo();
+            ftk::Size2I imageSize;
             if (!ioInfo.video.empty())
             {
-                aspect = ftk::aspectRatio(ioInfo.video.front().size);
+                imageSize = ftk::Size2I(
+                    p.size.height * ftk::aspectRatio(ioInfo.video.front().size),
+                    p.size.height);
             }
-            const ftk::Size2I imageSize(p.size.height * aspect, p.size.height);
+            // No frame, nothing to separate the time from.
+            const int spacing = imageSize.h > 0 ? p.size.spacing : 0;
             const ftk::Size2I labelSize = p.label->getSizeHint();
             const ftk::Size2I size(
                 std::max(imageSize.w, labelSize.w) + p.size.margin * 2,
-                imageSize.h + p.size.spacing + labelSize.h + p.size.margin * 2);
+                imageSize.h + spacing + labelSize.h + p.size.margin * 2);
 
             // Above the cursor and centered on it, kept inside the window.
             ftk::Box2I g(
@@ -216,7 +221,7 @@ namespace djv
                 imageSize.h);
             p.label->setGeometry(ftk::Box2I(
                 g.min.x + p.size.margin,
-                image.max.y + 1 + p.size.spacing,
+                image.max.y + 1 + spacing,
                 g.w() - p.size.margin * 2,
                 labelSize.h));
 
