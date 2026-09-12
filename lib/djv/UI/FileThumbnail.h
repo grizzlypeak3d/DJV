@@ -11,6 +11,8 @@
 
 #include <ftk/UI/IMouseWidget.h>
 
+#include <functional>
+
 namespace djv
 {
     namespace ui
@@ -56,15 +58,28 @@ namespace djv
             //! the thumbnail has loaded.
             DJV_UI_API const std::shared_ptr<ftk::Image>& getThumbnail() const;
 
+            //! Set the callback for when the file's information arrives. It
+            //! is read alongside the thumbnail, so a row states what the file
+            //! holds without the file being opened.
+            DJV_UI_API void setInfoCallback(
+                const std::function<void(const tl::IOInfo&)>&);
+
             DJV_UI_API ftk::Size2I getSizeHint() const override;
             DJV_UI_API void tickEvent(
                 bool,
                 bool,
                 const ftk::TickEvent&) override;
             DJV_UI_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
+            DJV_UI_API void clipEvent(const ftk::Box2I&, bool) override;
             DJV_UI_API void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
 
         private:
+            // Asked for only while the row can be seen, and dropped when it
+            // scrolls away: a list of a hundred files would otherwise read
+            // every one of them to fill rows nobody is looking at.
+            void _request();
+            void _cancelRequests();
+
             FTK_PRIVATE();
         };
     }

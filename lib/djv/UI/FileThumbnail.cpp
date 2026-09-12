@@ -42,13 +42,17 @@ namespace djv
 
             struct ThumbnailData
             {
-                bool init = true;
                 float scale = 1.F;
                 int height = 40;
                 tl::ui::ThumbnailRequest request;
+                bool requestDone = false;
+                tl::ui::InfoRequest infoRequest;
+                bool infoDone = false;
                 std::shared_ptr<ftk::Image> image;
             };
             ThumbnailData thumbnail;
+
+            std::function<void(const tl::IOInfo&)> infoCallback;
         };
 
         void FileThumbnail::_init(
@@ -71,6 +75,12 @@ namespace djv
         const std::shared_ptr<ftk::Image>& FileThumbnail::getThumbnail() const
         {
             return _p->thumbnail.image;
+        }
+
+        void FileThumbnail::setInfoCallback(
+            const std::function<void(const tl::IOInfo&)>& value)
+        {
+            _p->infoCallback = value;
         }
 
         FileThumbnail::FileThumbnail() :
@@ -109,12 +119,32 @@ namespace djv
         {
             IMouseWidget::tickEvent(parentsVisible, parentsEnabled, event);
             FTK_P();
+            if (!isClipped())
+            {
+                _request();
+            }
             if (p.thumbnail.request.future.valid() &&
                 p.thumbnail.request.future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
             {
                 p.thumbnail.image = p.thumbnail.request.future.get();
+                // Asked once, answered once, even when the answer is
+                // nothing: a file with no picture in it -- audio only, or
+                // one that cannot be read -- would otherwise be asked about
+                // again on every tick.
+                p.thumbnail.requestDone = true;
                 setSizeUpdate();
                 setDrawUpdate();
+            }
+            if (p.thumbnail.infoRequest.future.valid() &&
+                p.thumbnail.infoRequest.future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+            {
+                const tl::IOInfo info = p.thumbnail.infoRequest.future.get();
+                p.thumbnail.infoRequest = tl::ui::InfoRequest();
+                p.thumbnail.infoDone = true;
+                if (p.infoCallback)
+                {
+                    p.infoCallback(info);
+                }
             }
         }
 
@@ -131,21 +161,73 @@ namespace djv
 
             if (event.displayScale != p.thumbnail.scale)
             {
-                p.thumbnail.init = true;
+                // A different size is a different thumbnail; the next tick
+                // asks for it, if the row is in view.
                 p.thumbnail.scale = event.displayScale;
                 p.thumbnail.height = 40 * event.displayScale;
+                _cancelRequests();
+                p.thumbnail.image.reset();
+                p.thumbnail.requestDone = false;
             }
-            if (p.thumbnail.init)
+        }
+
+        void FileThumbnail::clipEvent(const ftk::Box2I& clipRect, bool clipped)
+        {
+            IMouseWidget::clipEvent(clipRect, clipped);
+            if (clipped)
             {
-                p.thumbnail.init = false;
+                // Scrolled out of view: what has not been answered yet is no
+                // longer worth reading the file for. What did arrive is kept,
+                // so scrolling back does not read it again.
+                _cancelRequests();
+            }
+        }
+
+        void FileThumbnail::_request()
+        {
+            FTK_P();
+            auto context = getContext();
+            if (!context || p.thumbnail.height <= 0)
+            {
+                return;
+            }
+            auto thumbnailSystem = context->getSystem<tl::ui::ThumbnailSystem>();
+            if (!p.thumbnail.requestDone && !p.thumbnail.request.future.valid())
+            {
+                p.thumbnail.request = thumbnailSystem->getThumbnail(
+                    p.item->path,
+                    p.thumbnail.height,
+                    std::nullopt,
+                    p.ioOptions);
+            }
+            if (!p.thumbnail.infoDone && !p.thumbnail.infoRequest.future.valid())
+            {
+                p.thumbnail.infoRequest = thumbnailSystem->getInfo(
+                    p.item->path,
+                    p.ioOptions);
+            }
+        }
+
+        void FileThumbnail::_cancelRequests()
+        {
+            FTK_P();
+            std::vector<uint64_t> ids;
+            if (p.thumbnail.request.future.valid())
+            {
+                ids.push_back(p.thumbnail.request.id);
+                p.thumbnail.request = tl::ui::ThumbnailRequest();
+            }
+            if (p.thumbnail.infoRequest.future.valid())
+            {
+                ids.push_back(p.thumbnail.infoRequest.id);
+                p.thumbnail.infoRequest = tl::ui::InfoRequest();
+            }
+            if (!ids.empty())
+            {
                 if (auto context = getContext())
                 {
-                    auto thumbnailSystem = context->getSystem<tl::ui::ThumbnailSystem>();
-                    p.thumbnail.request = thumbnailSystem->getThumbnail(
-                        p.item->path,
-                        p.thumbnail.height,
-                        std::nullopt,
-                        p.ioOptions);
+                    context->getSystem<tl::ui::ThumbnailSystem>()->
+                        cancelRequests(ids);
                 }
             }
         }

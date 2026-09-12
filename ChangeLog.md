@@ -48,6 +48,7 @@ Fixes:
   the color behind it.
 * A thumbnail wider than 16:9 is fit to the file list instead of drawing
   over the file name.
+* Opening many files at once no longer reads every one of them.
 
 ## 3.6.0
 

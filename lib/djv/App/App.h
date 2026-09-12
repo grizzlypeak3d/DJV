@@ -151,7 +151,6 @@ namespace djv
             //! in progress is watched over the range it will have when it
             //! finishes. It applies to the first file opened, since a
             //! directory holds sequences that each have their own.
-            //! Open a file.
             //!
             //! Set gatherSeq to false to open the file named rather than the
             //! sequence it belongs to. A path cannot say which is meant -- a
@@ -160,6 +159,15 @@ namespace djv
             //! frames one by one, or a recent file, is naming the file.
             DJV_APP_API void open(
                 const ftk::Path& path,
+                const ftk::Path& audioPath = ftk::Path(),
+                const std::optional<ftk::RangeI64>& frames = std::optional<ftk::RangeI64>(),
+                bool gatherSeq = true);
+
+            //! Open several files as one change. Opening them one at a time
+            //! would make each of them the current file on the way to the
+            //! last, and the current file is what gets read.
+            DJV_APP_API void open(
+                const std::vector<ftk::Path>& paths,
                 const ftk::Path& audioPath = ftk::Path(),
                 const std::optional<ftk::RangeI64>& frames = std::optional<ftk::RangeI64>(),
                 bool gatherSeq = true);
@@ -291,6 +299,19 @@ namespace djv
             void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
+            // The timeline for a file in the list, opened the first time
+            // it is asked for: only the current file and the files compared
+            // with it need one.
+            std::shared_ptr<tl::Timeline> _getTimeline(size_t index);
+            // The files a path names, without adding them to the model, so
+            // that several paths can be added together.
+            std::vector<std::shared_ptr<models::FilesModelItem> > _openItems(
+                const ftk::Path& path,
+                const ftk::Path& audioPath,
+                const std::optional<ftk::RangeI64>& frames,
+                bool gatherSeq);
+            // Close the files that could not be read, on a later tick.
+            void _closeFailedLater();
             void _colorModelUpdate();
             // Reopen the active files. When the timeline is about to be a
             // different shape, the position and the in/out range cannot be

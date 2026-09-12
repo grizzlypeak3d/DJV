@@ -637,10 +637,7 @@ namespace djv
                     // that file rather than the sequence it belongs to.
                     const bool gatherSeq =
                         fileBrowserSystem->getModel()->getOptions().dirList.seq;
-                    for (const auto& i : value)
-                    {
-                        open(i, ftk::Path(), std::optional<ftk::RangeI64>(), gatherSeq);
-                    }
+                    open(value, ftk::Path(), std::optional<ftk::RangeI64>(), gatherSeq);
                 },
                 options);
         }
@@ -791,7 +788,7 @@ namespace djv
                 });
         }
 
-        void App::open(
+        std::vector<std::shared_ptr<models::FilesModelItem> > App::_openItems(
             const ftk::Path& path,
             const ftk::Path& audioPath,
             const std::optional<ftk::RangeI64>& frames,
@@ -817,6 +814,7 @@ namespace djv
             dirListOptions.seq = gatherSeq && !frames.has_value();
             const std::optional<ftk::RangeI64> inputFrames = path.getFrames();
             bool first = true;
+            std::vector<std::shared_ptr<models::FilesModelItem> > items;
             for (const auto& i : tl::getPaths(_context, path, dirListOptions))
             {
                 auto item = std::make_shared<models::FilesModelItem>();
@@ -855,8 +853,43 @@ namespace djv
                 }
                 first = false;
                 item->audioPath = audioPath;
-                p.filesModel->add(item);
+                items.push_back(item);
             }
+
+            return items;
+        }
+
+        void App::open(
+            const ftk::Path& path,
+            const ftk::Path& audioPath,
+            const std::optional<ftk::RangeI64>& frames,
+            bool gatherSeq)
+        {
+            FTK_P();
+            // Added together rather than one at a time: each add makes its
+            // file the current one, so a directory would be opened file by
+            // file on the way to the last of them.
+            p.filesModel->add(_openItems(path, audioPath, frames, gatherSeq));
+        }
+
+        void App::open(
+            const std::vector<ftk::Path>& paths,
+            const ftk::Path& audioPath,
+            const std::optional<ftk::RangeI64>& frames,
+            bool gatherSeq)
+        {
+            FTK_P();
+            std::vector<std::shared_ptr<models::FilesModelItem> > items;
+            std::optional<ftk::RangeI64> itemFrames = frames;
+            for (const auto& path : paths)
+            {
+                const auto i = _openItems(path, audioPath, itemFrames, gatherSeq);
+                // The range describes one sequence, so it belongs to the
+                // first file named rather than to each of them.
+                itemFrames.reset();
+                items.insert(items.end(), i.begin(), i.end());
+            }
+            p.filesModel->add(items);
         }
 
         namespace
@@ -2634,6 +2667,7 @@ namespace djv
                     frameRange = models::parseFrameRange(p.cmdLine.frameRange->getValue());
                 }
 
+                std::vector<ftk::Path> paths;
                 for (const auto& input : p.cmdLine.inputs->getList())
                 {
                     ftk::Path path(input);
@@ -2641,63 +2675,67 @@ namespace djv
                     {
                         path = ftk::expandSeq(path, pathOptions);
                     }
-                    open(path, ftk::Path(audioFileName), frameRange);
-                    // Only the first file opened takes the range.
-                    frameRange.reset();
+                    paths.push_back(path);
+                }
 
-                    if (auto player = p.player->get())
+                // Opened as one change: a file becomes the current one
+                // as it is added, and the current file is the one that
+                // gets read, so opening them one at a time would read
+                // every one of them on the way to the last.
+                open(paths, ftk::Path(audioFileName), frameRange);
+
+                if (auto player = p.player->get())
+                {
+                    if (p.cmdLine.speed->found())
                     {
-                        if (p.cmdLine.speed->found())
-                        {
-                            player->setSpeed(p.cmdLine.speed->getValue());
-                        }
-                        if (p.cmdLine.timeUnits->found())
-                        {
-                            p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
-                        }
-                        const double speed = player->getSpeed();
-                        const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
+                        player->setSpeed(p.cmdLine.speed->getValue());
+                    }
+                    if (p.cmdLine.timeUnits->found())
+                    {
+                        p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
+                    }
+                    const double speed = player->getSpeed();
+                    const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
 
-                        if (p.cmdLine.inPoint->found())
-                        {
-                            const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                models::parseTime(
-                                    "in point",
-                                    p.cmdLine.inPoint->getValue(),
-                                    speed,
-                                    timeUnits),
-                                player->getInOutRange().end_time_inclusive());
-                            player->setInOutRange(inOutRange);
-                            player->seek(inOutRange.start_time());
-                        }
-                        if (p.cmdLine.outPoint->found())
-                        {
-                            const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                                player->getInOutRange().start_time(),
-                                models::parseTime(
-                                    "out point",
-                                    p.cmdLine.outPoint->getValue(),
-                                    speed,
-                                    timeUnits));
-                            player->setInOutRange(inOutRange);
-                            player->seek(inOutRange.start_time());
-                        }
-                        if (p.cmdLine.seek->found())
-                        {
-                            player->seek(models::parseTime(
-                                "seek time",
-                                p.cmdLine.seek->getValue(),
+                    if (p.cmdLine.inPoint->found())
+                    {
+                        const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                            models::parseTime(
+                                "in point",
+                                p.cmdLine.inPoint->getValue(),
+                                speed,
+                                timeUnits),
+                            player->getInOutRange().end_time_inclusive());
+                        player->setInOutRange(inOutRange);
+                        player->seek(inOutRange.start_time());
+                    }
+                    if (p.cmdLine.outPoint->found())
+                    {
+                        const auto inOutRange = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                            player->getInOutRange().start_time(),
+                            models::parseTime(
+                                "out point",
+                                p.cmdLine.outPoint->getValue(),
                                 speed,
                                 timeUnits));
-                        }
-                        if (p.cmdLine.loop->found())
-                        {
-                            player->setLoop(p.cmdLine.loop->getValue());
-                        }
-                        if (p.cmdLine.playback->found())
-                        {
-                            player->setPlayback(p.cmdLine.playback->getValue());
-                        }
+                        player->setInOutRange(inOutRange);
+                        player->seek(inOutRange.start_time());
+                    }
+                    if (p.cmdLine.seek->found())
+                    {
+                        player->seek(models::parseTime(
+                            "seek time",
+                            p.cmdLine.seek->getValue(),
+                            speed,
+                            timeUnits));
+                    }
+                    if (p.cmdLine.loop->found())
+                    {
+                        player->setLoop(p.cmdLine.loop->getValue());
+                    }
+                    if (p.cmdLine.playback->found())
+                    {
+                        player->setPlayback(p.cmdLine.playback->getValue());
                     }
                 }
             }
@@ -2845,111 +2883,6 @@ namespace djv
                 }
             }
 
-            for (size_t i = 0; i < files.size(); ++i)
-            {
-                if (!timelines[i])
-                {
-                    try
-                    {
-                        tl::Options options;
-                        const models::ImageSeqSettings imageSeq = p.settingsModel->getImageSeq();
-                        options.imageSeqAudio = imageSeq.audio;
-                        options.imageSeqAudioExts = imageSeq.audioExts;
-                        options.imageSeqAudioFileName = imageSeq.audioFileName;
-                        const models::OTIOSettings otio = p.settingsModel->getOTIO();
-                        options.spatial = otio.spatial;
-                        options.compat = otio.compat;
-                        options.ioOptions = p.settingsModel->getIOOptions();
-                        options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
-                        options.readThreadCount = imageSeq.readThreadCount;
-
-                        // A range that was asked for is used as it is. One
-                        // that was not is looked for on disk again here, so
-                        // that reopening picks up frames rendered since --
-                        // the path holds the frames that were there when it
-                        // was opened, and findSeq() is what goes and looks.
-                        ftk::Path path = files[i]->path;
-                        if (!files[i]->framesStated && path.isSeq())
-                        {
-                            const auto seq = ftk::findSeq(path, options.pathOptions);
-                            if (!seq.empty())
-                            {
-                                // Only when something was found: a sequence
-                                // that has gone from disk keeps the range it
-                                // had rather than becoming a timeline of
-                                // nothing.
-                                path.setSeq(seq);
-                            }
-                        }
-                        timelines[i] = tl::Timeline::create(
-                            _context,
-                            path,
-                            files[i]->audioPath,
-                            options);
-
-                        // Opening a sequence finds the frames on disk, which
-                        // the path does not know about when it names one
-                        // file. Kept beside the path rather than folded into
-                        // it: a path carrying a range is taken as a range
-                        // that was asked for, and reopening would stop
-                        // looking for frames that have arrived since.
-                        const std::optional<OTIO_NS::TimeRange> prevTimeRange =
-                            files[i]->timeRange;
-                        files[i]->timeRange = timelines[i]->getTimeRange();
-
-                        // An in/out range that was the whole file follows the
-                        // file: it was never narrowed, only saved when the
-                        // file last lost focus. Restoring it as it is would
-                        // stop a reloaded sequence at where it used to end,
-                        // which reads as the reload not finding the new
-                        // frames at all. A narrowed range is kept; those are
-                        // the user's marks.
-                        if (files[i]->inOutRange.has_value() &&
-                            prevTimeRange.has_value() &&
-                            tl::compareExact(
-                                files[i]->inOutRange.value(),
-                                prevTimeRange.value()) &&
-                            !tl::compareExact(
-                                prevTimeRange.value(),
-                                files[i]->timeRange.value()))
-                        {
-                            files[i]->inOutRange.reset();
-                        }
-
-                        // Replaced rather than added to: a file that is
-                        // reopened comes back through here with its layers
-                        // already listed from the time before.
-                        files[i]->videoLayers.clear();
-                        for (const auto& video : timelines[i]->getIOInfo().video)
-                        {
-                            files[i]->videoLayers.push_back(video.name);
-                        }
-                        if (files[i]->videoLayer >= files[i]->videoLayers.size())
-                        {
-                            files[i]->videoLayer = 0;
-                        }
-
-                        // Recorded here rather than when the file is opened:
-                        // one that cannot be read should not be offered back
-                        // in the recent files.
-                        p.recentFilesModel->addRecent(files[i]->path);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        _context->log("djv::app::App", e.what(), ftk::LogType::Error);
-                        // Only a file that has just been opened is taken
-                        // back out. Reloading runs through here too, and a
-                        // file that has become unreadable since it was opened
-                        // -- a share that went away, say -- should stay put
-                        // rather than disappear from the session.
-                        if (files[i]->newFile)
-                        {
-                            p.failedFiles.push_back(files[i]);
-                        }
-                    }
-                }
-            }
-
 #if defined(__GLIBC__)
             // Closing a file frees its memory, but glibc keeps what was
             // freed in the allocator rather than returning it to the
@@ -2976,16 +2909,134 @@ namespace djv
 
             // A file that could not be opened should not sit in the tab bar
             // and the files tool as though it had.
-            if (!p.failedFiles.empty())
+            _closeFailedLater();
+        }
+
+        std::shared_ptr<tl::Timeline> App::_getTimeline(size_t index)
+        {
+            FTK_P();
+            if (index >= p.files.size() || index >= p.timelines.size())
             {
-                if (!p.closeFailedTimer)
-                {
-                    p.closeFailedTimer = ftk::Timer::create(_context);
-                }
-                p.closeFailedTimer->start(
-                    std::chrono::milliseconds(0),
-                    [this] { _closeFailed(); });
+                return nullptr;
             }
+            if (p.timelines[index])
+            {
+                return p.timelines[index];
+            }
+            const auto& item = p.files[index];
+            try
+            {
+                tl::Options options;
+                const models::ImageSeqSettings imageSeq = p.settingsModel->getImageSeq();
+                options.imageSeqAudio = imageSeq.audio;
+                options.imageSeqAudioExts = imageSeq.audioExts;
+                options.imageSeqAudioFileName = imageSeq.audioFileName;
+                const models::OTIOSettings otio = p.settingsModel->getOTIO();
+                options.spatial = otio.spatial;
+                options.compat = otio.compat;
+                options.ioOptions = p.settingsModel->getIOOptions();
+                options.pathOptions.seqMaxDigits = imageSeq.maxDigits;
+                options.readThreadCount = imageSeq.readThreadCount;
+
+                // A range that was asked for is used as it is. One that was
+                // not is looked for on disk again here, so that reopening
+                // picks up frames rendered since -- the path holds the frames
+                // that were there when it was opened, and findSeq() is what
+                // goes and looks.
+                ftk::Path path = item->path;
+                if (!item->framesStated && path.isSeq())
+                {
+                    const auto seq = ftk::findSeq(path, options.pathOptions);
+                    if (!seq.empty())
+                    {
+                        // Only when something was found: a sequence that has
+                        // gone from disk keeps the range it had rather than
+                        // becoming a timeline of nothing.
+                        path.setSeq(seq);
+                    }
+                }
+                auto timeline = tl::Timeline::create(
+                    _context,
+                    path,
+                    item->audioPath,
+                    options);
+                p.timelines[index] = timeline;
+
+                // What the file turned out to be, which is worth more than
+                // the information request's answer: the range here is the
+                // one the timeline composed, so a still paired with an audio
+                // file lasts as long as the audio.
+                const std::optional<OTIO_NS::TimeRange> prevTimeRange =
+                    item->timeRange;
+                item->timeRange = timeline->getTimeRange();
+
+                // An in/out range that was the whole file follows the file:
+                // it was never narrowed, only saved when the file last lost
+                // focus. Restoring it as it is would stop a reloaded sequence
+                // at where it used to end, which reads as the reload not
+                // finding the new frames at all. A narrowed range is kept;
+                // those are the user's marks.
+                if (item->inOutRange.has_value() &&
+                    prevTimeRange.has_value() &&
+                    tl::compareExact(
+                        item->inOutRange.value(),
+                        prevTimeRange.value()) &&
+                    !tl::compareExact(
+                        prevTimeRange.value(),
+                        item->timeRange.value()))
+                {
+                    item->inOutRange.reset();
+                }
+
+                // Replaced rather than added to: a file that is reopened
+                // comes back through here with its layers already listed
+                // from the time before.
+                item->videoLayers.clear();
+                for (const auto& video : timeline->getIOInfo().video)
+                {
+                    item->videoLayers.push_back(video.name);
+                }
+                if (item->videoLayer >= item->videoLayers.size())
+                {
+                    item->videoLayer = 0;
+                }
+
+                // Recorded here rather than when the file is opened: one
+                // that cannot be read should not be offered back in the
+                // recent files.
+                p.recentFilesModel->addRecent(item->path);
+            }
+            catch (const std::exception& e)
+            {
+                _context->log("djv::app::App", e.what(), ftk::LogType::Error);
+                // Only a file that has just been opened is taken back out.
+                // Reloading runs through here too, and a file that has become
+                // unreadable since it was opened -- a share that went away,
+                // say -- should stay put rather than disappear from the
+                // session.
+                if (item->newFile)
+                {
+                    p.failedFiles.push_back(item);
+                    _closeFailedLater();
+                }
+            }
+            return p.timelines[index];
+        }
+
+        void App::_closeFailedLater()
+        {
+            FTK_P();
+            if (p.failedFiles.empty())
+            {
+                return;
+            }
+            if (!p.closeFailedTimer)
+            {
+                p.closeFailedTimer = ftk::Timer::create(_context);
+            }
+            p.closeFailedTimer->start(
+                std::chrono::milliseconds(0),
+                [this] { _closeFailed(); });
         }
 
         void App::_closeFailed()
@@ -3080,7 +3131,7 @@ namespace djv
                     auto i = std::find(p.files.begin(), p.files.end(), activeFiles[0]);
                     if (i != p.files.end())
                     {
-                        if (auto timeline = p.timelines[i - p.files.begin()])
+                        if (auto timeline = _getTimeline(i - p.files.begin()))
                         {
                             try
                             {
@@ -3126,8 +3177,10 @@ namespace djv
                     auto j = std::find(p.files.begin(), p.files.end(), activeFiles[i]);
                     if (j != p.files.end())
                     {
-                        auto timeline = p.timelines[j - p.files.begin()];
-                        compare.push_back(timeline);
+                        if (auto timeline = _getTimeline(j - p.files.begin()))
+                        {
+                            compare.push_back(timeline);
+                        }
                     }
                 }
                 player->setCompare(compare);

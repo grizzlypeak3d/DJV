@@ -783,10 +783,16 @@ namespace djv
             {
                 if (auto app = p.app.lock())
                 {
+                    // Opened as one change: a file becomes the current one as
+                    // it is added, and the current file is the one that gets
+                    // read, so a dropped selection would read every file in it
+                    // on the way to the last.
+                    std::vector<ftk::Path> paths;
                     for (const auto& i : textData->getText())
                     {
-                        app->open(ftk::Path(i));
+                        paths.push_back(ftk::Path(i));
                     }
+                    app->open(paths);
                 }
             }
         }

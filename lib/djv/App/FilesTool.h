@@ -59,6 +59,14 @@ namespace djv
             void _rangeUpdate(
                 const std::shared_ptr<models::FilesModelItem>&,
                 const ftk::RangeI64&);
+            // What the file turned out to hold, which arrives with the row's
+            // thumbnail rather than by opening the file. Takes what it needs
+            // rather than the I/O information itself, to keep the readers out
+            // of this header.
+            void _infoUpdate(
+                const std::shared_ptr<models::FilesModelItem>&,
+                const std::optional<OTIO_NS::TimeRange>&,
+                const std::vector<std::string>&);
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _showRangePopup(
                 const std::shared_ptr<models::FilesModelItem>&,

@@ -489,6 +489,26 @@ namespace djv
                             widget.thumbnail,
                             ftk::Format("Files.FileThumbnail{0}").arg(row));
 
+                        // The row states what the file holds as soon as that
+                        // is known, and only this row changes: publishing the
+                        // file list again would rebuild every row and start
+                        // every thumbnail over.
+                        widget.thumbnail->setInfoCallback(
+                            [this, item](const tl::IOInfo& info)
+                            {
+                                std::vector<std::string> layers;
+                                for (const auto& video : info.video)
+                                {
+                                    layers.push_back(video.name);
+                                }
+                                _infoUpdate(
+                                    item,
+                                    info.videoTime.has_value() ?
+                                        info.videoTime :
+                                        info.audioTime,
+                                    layers);
+                            });
+
                         auto nameLabel = ftk::Label::create(
                             context,
                             ftk::elide(item->path.getFileName(), 24),
@@ -719,6 +739,75 @@ namespace djv
                 const auto j = std::find(value.begin(), value.end(), i.item);
                 i.bButton->setChecked(j != value.end());
                 ftk::setScreenshotTag(i.bButton, j != value.end() ? "Files.BFile" : "");
+            }
+        }
+
+        void FilesTool::_infoUpdate(
+            const std::shared_ptr<models::FilesModelItem>& item,
+            const std::optional<OTIO_NS::TimeRange>& timeRange,
+            const std::vector<std::string>& layers)
+        {
+            FTK_P();
+
+            // Only what is not known already. A file that has been opened
+            // has these from its timeline, which composes what the media
+            // alone does not say -- a still paired with an audio file lasts
+            // as long as the audio -- and the information request answers
+            // for the media.
+            if (!item->timeRange.has_value())
+            {
+                item->timeRange = timeRange;
+            }
+            if (item->videoLayers.empty())
+            {
+                item->videoLayers = layers;
+            }
+            if (item->videoLayer >= item->videoLayers.size())
+            {
+                item->videoLayer = 0;
+            }
+
+            const auto i = std::find_if(
+                p.widgets.begin(),
+                p.widgets.end(),
+                [item](const FileWidget& value)
+                {
+                    return value.item == item;
+                });
+            if (i == p.widgets.end())
+            {
+                return;
+            }
+
+            if (i->layerComboBox)
+            {
+                i->layerComboBox->setItems(item->videoLayers);
+                i->layerComboBox->setCurrentIndex(
+                    static_cast<int>(item->videoLayer));
+                // A file with one layer has nothing to choose.
+                i->layerComboBox->setVisible(item->videoLayers.size() > 1);
+            }
+
+            // Only a sequence has one; a movie's row has no range button.
+            if (i->rangeButton && item->timeRange.has_value())
+            {
+                const int64_t start = static_cast<int64_t>(
+                    item->timeRange->start_time().value());
+                const ftk::RangeI64 range(
+                    start,
+                    start + static_cast<int64_t>(
+                        item->timeRange->duration().value()) - 1);
+                i->rangeButton->setText(
+                    ftk::Format("{0}-{1}").arg(range.min()).arg(range.max()));
+                // The callback carries the range it was made with, so it is
+                // made again for the range that has just arrived.
+                auto buttonWeak =
+                    std::weak_ptr<ftk::ToolButton>(i->rangeButton);
+                i->rangeButton->setClickedCallback(
+                    [this, item, range, buttonWeak]
+                    {
+                        _showRangePopup(item, range, buttonWeak.lock());
+                    });
             }
         }
 
