@@ -8,6 +8,7 @@
 #include <ftk/UI/DrawUtil.h>
 #include <ftk/Core/Context.h>
 
+#include <algorithm>
 #include <optional>
 
 namespace djv
@@ -158,7 +159,24 @@ namespace djv
             {
                 const ftk::Box2I& g = getGeometry();
                 const ftk::Size2I& size = p.thumbnail.image->getSize();
-                const ftk::Size2I thumbnailSize(size.w * p.thumbnail.image->getInfo().pixelAspectRatio, size.h);
+                const ftk::Size2I imageSize(
+                    size.w * p.thumbnail.image->getInfo().pixelAspectRatio,
+                    size.h);
+                // As large as the image fits in the slot. A thumbnail
+                // arrives at the height it was asked for but at whatever
+                // width the file's aspect gives, which is wider than the
+                // slot for anything wider than 16:9; drawn at that width it
+                // would spill over the file name.
+                ftk::Size2I thumbnailSize = imageSize;
+                if (imageSize.w > 0 && imageSize.h > 0)
+                {
+                    const float scale = std::min(
+                        (g.w() - p.size.margin * 2) / static_cast<float>(imageSize.w),
+                        (g.h() - p.size.margin * 2) / static_cast<float>(imageSize.h));
+                    thumbnailSize = ftk::Size2I(
+                        imageSize.w * scale,
+                        imageSize.h * scale);
+                }
                 ftk::ImageOptions imageOptions;
                 imageOptions.cache = false;
                 // Centered in the slot; see getSizeHint().

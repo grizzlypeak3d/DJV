@@ -46,6 +46,8 @@ Fixes:
   comes before its timecode track.
 * Text on checked buttons and timeline clips is black or white to suit
   the color behind it.
+* A thumbnail wider than 16:9 is fit to the file list instead of drawing
+  over the file name.
 
 ## 3.6.0
 
