@@ -743,13 +743,14 @@ namespace djv
             json["RenderSize"] = to_string(value.renderSize);
             json["CustomWidth"] = value.customWidth;
             json["FileType"] = to_string(value.fileType);
-            json["ImageFileName"] = value.imageFileName;
+            // The names are not kept: an output is named for the file being
+            // exported, which the export widget works out each time. The
+            // extensions are kept, being a choice about how to write rather
+            // than about what.
             json["ImageExt"] = value.imageExt;
-            json["MovieFileName"] = value.movieFileName;
             json["MovieExt"] = value.movieExt;
             json["MoviePreset"] = value.moviePreset;
             json["MovieAudioCodec"] = value.movieAudioCodec;
-            json["SeqFileName"] = value.seqFileName;
             json["SeqExt"] = value.seqExt;
         }
 
@@ -907,35 +908,6 @@ namespace djv
                 value.customWidth = customSize.w;
             }
             from_string(json.at("FileType").get<std::string>(), value.fileType);
-            // The names used to be kept as a base and a zero padding. A file
-            // written that way keeps its names: the padding becomes that
-            // many '#', and an image, which always carried the frame number,
-            // keeps one.
-            const auto readName = [&json](
-                const std::string& name,
-                const std::string& base,
-                const std::string& pad,
-                size_t minPad,
-                std::string& out)
-            {
-                if (json.contains(name))
-                {
-                    json.at(name).get_to(out);
-                }
-                else if (json.contains(base))
-                {
-                    json.at(base).get_to(out);
-                    if (!pad.empty() && json.contains(pad))
-                    {
-                        out += std::string(
-                            std::max(json.at(pad).get<size_t>(), minPad),
-                            '#');
-                    }
-                }
-            };
-            readName("ImageFileName", "ImageBase", "ImageZeroPad", 1, value.imageFileName);
-            readName("SeqFileName", "SeqBase", "SeqZeroPad", 1, value.seqFileName);
-            readName("MovieFileName", "MovieBase", "", 0, value.movieFileName);
             if (json.contains("ImageExt"))
             {
                 json.at("ImageExt").get_to(value.imageExt);

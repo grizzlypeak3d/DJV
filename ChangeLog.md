@@ -22,6 +22,7 @@ Changes:
 * The light style's checked color is light blue.
 * The file list scrolls to the current file.
 * Browsing a list with the keyboard keeps the item in view.
+* Exported files are named for the file being exported.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.
