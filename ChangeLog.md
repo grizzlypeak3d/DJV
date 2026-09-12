@@ -21,6 +21,7 @@ Changes:
 * The Custom color style is removed.
 * The light style's checked color is light blue.
 * The file list scrolls to the current file.
+* Browsing a list with the keyboard keeps the item in view.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.
