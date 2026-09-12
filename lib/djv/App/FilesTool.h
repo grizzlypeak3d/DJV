@@ -41,6 +41,7 @@ namespace djv
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            DJV_APP_API void setGeometry(const ftk::Box2I&) override;
             DJV_APP_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
             DJV_APP_API void drawOverlayEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
             DJV_APP_API void dragEnterEvent(ftk::DragDropEvent&) override;

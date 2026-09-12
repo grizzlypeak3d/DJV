@@ -20,6 +20,7 @@ Changes:
   a single image can be written without one.
 * The Custom color style is removed.
 * The light style's checked color is light blue.
+* The file list scrolls to the current file.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.

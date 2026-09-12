@@ -26,6 +26,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
+#include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/Spacer.h>
 
 #include <ftk/Core/Timer.h>
@@ -54,6 +55,11 @@ namespace djv
         struct FilesTool::Private
         {
             std::shared_ptr<ftk::Settings> settings;
+
+            // The row to bring into view, once it has a geometry to bring:
+            // the current file changes while the rows are being rebuilt, and
+            // it has no place on screen until the layout has run.
+            std::shared_ptr<models::FilesModelItem> scrollToItem;
 
             std::shared_ptr<ui::FrameRangePopup> rangePopup;
             std::shared_ptr<ftk::ButtonGroup> bButtonGroup;
@@ -727,6 +733,7 @@ namespace djv
                 {
                     // The keyboard starts from "A".
                     p.fileList->setCurrent(static_cast<int>(i));
+                    p.scrollToItem = value;
                 }
             }
         }
@@ -837,6 +844,43 @@ namespace djv
             p.compareLayout->setRowVisible(p.overlaySlider, value.compare == tl::Compare::Overlay);
             p.compareLayout->setRowVisible(
                 p.differenceGainSlider, value.compare == tl::Compare::Difference);
+        }
+
+        void FilesTool::setGeometry(const ftk::Box2I& value)
+        {
+            IToolWidget::setGeometry(value);
+            FTK_P();
+            if (!p.scrollToItem)
+            {
+                return;
+            }
+            const auto i = std::find_if(
+                p.widgets.begin(),
+                p.widgets.end(),
+                [&p](const FileWidget& widget)
+                {
+                    return widget.item == p.scrollToItem;
+                });
+            if (i == p.widgets.end() || !i->button)
+            {
+                return;
+            }
+            p.scrollToItem.reset();
+            // The tools share one scroll area, which belongs to the widget
+            // holding them rather than to any one tool.
+            if (auto scrollWidget = getParentT<ftk::ScrollWidget>())
+            {
+                if (const auto& content = scrollWidget->getWidget())
+                {
+                    // scrollTo() takes the box in the scrolled content's
+                    // space, and a geometry is in the window's. It does
+                    // nothing when the row is already in view.
+                    const ftk::Box2I& g = i->button->getGeometry();
+                    scrollWidget->scrollTo(ftk::Box2I(
+                        g.min - content->getGeometry().min,
+                        g.size()));
+                }
+            }
         }
 
         void FilesTool::sizeHintEvent(const ftk::SizeHintEvent& event)
