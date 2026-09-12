@@ -71,6 +71,8 @@ Fixes:
   drawings of the A file, rather than the drawings of every file at once.
 * The secondary window zooms with the mouse wheel at the zoom scale set in the
   settings.
+* The status bar indicator lights for color adjustments that change the
+  picture, not for ones enabled at their defaults or a LUT with no file.
 * New default keyboard shortcuts are not hidden by the settings of an earlier
   version; only the shortcuts changed from their defaults are saved. Ctrl+Z
   undoes drawing again, and Ctrl+Y also redoes it on Windows and Linux.

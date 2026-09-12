@@ -57,8 +57,8 @@ namespace djv
             p.button->setIcon("MenuChecked");
             p.button->setPopupIcon(true);
             p.button->setTooltip(
-                "This indicator shows options that can affect video, audio, or performance.\n"
-                "Click to show which options are enabled.");
+                "This indicator shows options that affect video, audio, or performance.\n"
+                "Click to show which options are in use.");
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
@@ -71,11 +71,18 @@ namespace djv
                     p.mirrorEnabled =
                         value.mirror.x ||
                         value.mirror.y;
+                    // Only an adjustment that changes the picture: enabled at
+                    // its defaults it is neutral, and the renderer skips it or
+                    // nearly so, so there is nothing to be reminded of.
+                    tl::Color color = value.color;
+                    color.enabled = false;
+                    tl::Levels levels = value.levels;
+                    levels.enabled = false;
                     p.colorEnabled =
-                        value.color.enabled    ||
-                        value.levels.enabled   ||
-                        value.exposure.enabled ||
-                        value.softClip.enabled;
+                        (value.color.enabled && color != tl::Color()) ||
+                        (value.levels.enabled && levels != tl::Levels()) ||
+                        (value.exposure.enabled && value.exposure.exposure != 0.F) ||
+                        (value.softClip.enabled && value.softClip.value > 0.F);
                     _indicatorUpdate();
                 });
 
@@ -100,7 +107,12 @@ namespace djv
                 colorModel->observeOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
-                    _p->ocioEnabled = value.enabled;
+                    // As the renderer decides: a display and a view to
+                    // transform to.
+                    _p->ocioEnabled =
+                        value.enabled &&
+                        !value.display.empty() &&
+                        !value.view.empty();
                     _indicatorUpdate();
                 });
 
@@ -108,7 +120,7 @@ namespace djv
                 colorModel->observeLUTOptions(),
                 [this](const tl::LUTOptions& value)
                 {
-                    _p->lutEnabled = value.enabled;
+                    _p->lutEnabled = value.enabled && !value.fileName.empty();
                     _indicatorUpdate();
                 });
 
