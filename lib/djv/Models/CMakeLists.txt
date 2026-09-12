@@ -13,6 +13,7 @@ set(HEADERS
     Playlist.h
     RecentFilesModel.h
     Review.h
+    Stroke.h
     SettingsModel.h
     Shortcuts.h
     TimeUnitsModel.h
@@ -35,6 +36,7 @@ set(SOURCE
     Playlist.cpp
     RecentFilesModel.cpp
     Review.cpp
+    Stroke.cpp
     SettingsModel.cpp
     Shortcuts.cpp
     TimeUnitsModel.cpp
