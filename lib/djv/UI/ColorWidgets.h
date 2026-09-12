@@ -159,31 +159,5 @@ namespace djv
         private:
             FTK_PRIVATE();
         };
-
-        class DJV_UI_API_TYPE SoftClipWidget : public ftk::IContainer
-        {
-            FTK_NON_COPYABLE(SoftClipWidget);
-
-        protected:
-            void _init(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::ViewportModel>&,
-                const std::shared_ptr<IWidget>& parent);
-
-            SoftClipWidget();
-
-        public:
-            DJV_UI_API virtual ~SoftClipWidget();
-
-            DJV_UI_API static std::shared_ptr<SoftClipWidget> create(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::ViewportModel>&,
-                const std::shared_ptr<IWidget>& parent = nullptr);
-
-            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
-
-        private:
-            FTK_PRIVATE();
-        };
     }
 }

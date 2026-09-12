@@ -23,6 +23,7 @@ Changes:
 * The file list scrolls to the current file.
 * Browsing a list with the keyboard keeps the item in view.
 * Exported files are named for the file being exported.
+* Soft clip is in the Exposure section of the Color tool.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.

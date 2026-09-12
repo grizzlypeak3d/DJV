@@ -43,7 +43,6 @@ namespace djv
             auto colorWidget = ui::ColorWidget::create(context, viewportModel);
             auto levelsWidget = ui::LevelsWidget::create(context, app->getSettings(), viewportModel);
             auto exposureWidget = ui::ExposureWidget::create(context, viewportModel);
-            auto softClipWidget = ui::SoftClipWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
@@ -64,9 +63,6 @@ namespace djv
             p.bellows["Exposure"] = ftk::Bellows::create(context, "Exposure", layout);
             p.bellows["Exposure"]->setWidget(exposureWidget);
             p.bellows["Exposure"]->setToolWidget(exposureWidget->getEnabledCheckBox());
-            p.bellows["SoftClip"] = ftk::Bellows::create(context, "Soft Clip", layout);
-            p.bellows["SoftClip"]->setWidget(softClipWidget);
-            p.bellows["SoftClip"]->setToolWidget(softClipWidget->getEnabledCheckBox());
             _setWidget(layout);
 
             _loadSettings(p.bellows);

@@ -702,7 +702,6 @@ class ColorTool(IToolWidget):
             ("Color", djv.ui.ColorWidget(context, viewportModel)),
             ("Levels", djv.ui.LevelsWidget(context, app.settings, viewportModel)),
             ("Exposure", djv.ui.ExposureWidget(context, viewportModel)),
-            ("Soft Clip", djv.ui.SoftClipWidget(context, viewportModel)),
         ]:
             bellows = ftk.Bellows(context, title, layout)
             bellows.widget = widget

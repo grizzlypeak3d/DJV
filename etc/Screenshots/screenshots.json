@@ -919,32 +919,9 @@
         {
           "id": "Color.Exposure.Exposure",
           "caption": "Exposure"
-        }
-      ]
-    },
-    {
-      "id": "color-soft-clip",
-      "window": {
-        "w": 900,
-        "h": 600,
-        "splitter2": 0.5
-      },
-      "crop": "MainWindow.Tools",
-      "setup": [
-        {
-          "tool": "Color",
-          "expand": [
-            "SoftClip"
-          ]
-        }
-      ],
-      "annotate": [
-        {
-          "id": "Color.SoftClip.Enabled",
-          "caption": "Enable"
         },
         {
-          "id": "Color.SoftClip.Value",
+          "id": "Color.Exposure.SoftClip",
           "caption": "Soft clip"
         }
       ]
