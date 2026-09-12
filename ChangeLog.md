@@ -49,6 +49,8 @@ Fixes:
   comes before its timecode track.
 * Text on checked buttons and timeline clips is black or white to suit
   the color behind it.
+* The clipping warning no longer marks edges and flat areas of a picture
+  viewed with High Quality filtering.
 * A thumbnail wider than 16:9 is fit to the file list instead of drawing
   over the file name.
 * A file opened with a separate audio file shows the audio's waveform.
