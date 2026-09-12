@@ -520,6 +520,10 @@ namespace djv
                     i = value.bindings.find(models::MouseAction::FrameShuttle);
                     p.frameShuttleBinding = i != value.bindings.end() ? i->second : models::MouseActionBinding();
                     p.frameShuttleScale = value.frameShuttleScale;
+                    // Here with the other mouse settings rather than set by the
+                    // main window, which left a secondary window's viewport
+                    // zooming at the default scale.
+                    setMouseWheelScale(value.wheelScale);
                     auto j = value.wheelBindings.find(models::WheelAction::Zoom);
                     setWheelZoomBinding(j != value.wheelBindings.end() ?
                         j->second :

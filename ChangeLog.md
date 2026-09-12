@@ -69,6 +69,8 @@ Fixes:
 * On Linux, memory stays near the cache size when changing between files.
 * Wipe, Butterfly, Overlay, and Difference comparisons show and take the
   drawings of the A file, rather than the drawings of every file at once.
+* The secondary window zooms with the mouse wheel at the zoom scale set in the
+  settings.
 * New default keyboard shortcuts are not hidden by the settings of an earlier
   version; only the shortcuts changed from their defaults are saved. Ctrl+Z
   undoes drawing again, and Ctrl+Y also redoes it on Windows and Linux.

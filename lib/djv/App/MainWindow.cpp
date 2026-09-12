@@ -808,7 +808,6 @@ namespace djv
         {
             FTK_P();
             p.timelineWidget->setMouseWheelScale(settings.wheelScale);
-            p.viewport->setMouseWheelScale(settings.wheelScale);
         }
 
         void MainWindow::tickEvent(
