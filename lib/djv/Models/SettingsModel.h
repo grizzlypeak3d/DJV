@@ -81,6 +81,27 @@ namespace djv
         };
         FTK_ENUM(DJV_MODELS_API, ExportFileType);
 
+        //! Whether the number in a file name is a run of '#', which is
+        //! what the frame number replaces. Trailing digits are read as a
+        //! frame number too, and replacing those would write "shot_v002.exr"
+        //! as "shot_v023.exr".
+        DJV_MODELS_API bool isFrameTemplate(const ftk::Path&);
+
+        //! Take one of the given extensions off the end of a name, so that a
+        //! name typed or pasted with an extension is not written as
+        //! "shot.exr.tif". Returns whether one was taken.
+        DJV_MODELS_API bool splitExt(
+            std::string& name,
+            std::string& ext,
+            const std::vector<std::string>& exts);
+
+        //! What is wrong with an export file name, or nothing.
+        DJV_MODELS_API std::string getFileNameError(
+            const std::string& fileName,
+            const std::string& ext,
+            ExportFileType,
+            const std::vector<std::string>& exts);
+
         //! What to name the output of a file, without the extension: the
         //! name for a single file, and the name for a sequence with a run
         //! of '#' where the frame number goes.

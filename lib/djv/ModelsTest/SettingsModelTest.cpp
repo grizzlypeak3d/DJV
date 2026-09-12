@@ -27,6 +27,7 @@ namespace djv
         void SettingsModelTest::run()
         {
             _exportNames();
+            _fileNameRules();
         }
 
         void SettingsModelTest::_exportNames()
@@ -72,6 +73,63 @@ namespace djv
                 FTK_CHECK(name == i.name);
                 FTK_CHECK(seqName == i.seqName);
             }
+        }
+
+        void SettingsModelTest::_fileNameRules()
+        {
+            const std::vector<std::string> exts = { ".exr", ".jpg", ".tif" };
+
+            // Only a run of '#' is the frame slot. Digits are literal, or
+            // "shot_v002" would be written as "shot_v023".
+            FTK_CHECK(models::isFrameTemplate(ftk::Path("shot.####.tif")));
+            FTK_CHECK(models::isFrameTemplate(ftk::Path("shot.#.tif")));
+            FTK_CHECK(!models::isFrameTemplate(ftk::Path("shot_v002.tif")));
+            FTK_CHECK(!models::isFrameTemplate(ftk::Path("shot.tif")));
+
+            // An extension typed onto the name is taken off it, whatever
+            // case it was typed in.
+            {
+                std::string name = "shot.exr";
+                std::string ext = ".tif";
+                FTK_CHECK(models::splitExt(name, ext, exts));
+                FTK_CHECK("shot" == name);
+                FTK_CHECK(".exr" == ext);
+            }
+            {
+                std::string name = "shot.EXR";
+                std::string ext = ".tif";
+                FTK_CHECK(models::splitExt(name, ext, exts));
+                FTK_CHECK("shot" == name);
+                FTK_CHECK(".exr" == ext);
+            }
+            {
+                // Not one of them: left as it was typed.
+                std::string name = "shot.xyz";
+                std::string ext = ".tif";
+                FTK_CHECK(!models::splitExt(name, ext, exts));
+                FTK_CHECK("shot.xyz" == name);
+                FTK_CHECK(".tif" == ext);
+            }
+
+            // What the Export button reports, and refuses to write on.
+            FTK_CHECK(!models::getFileNameError(
+                "", ".tif", models::ExportFileType::Image, exts).empty());
+            FTK_CHECK(!models::getFileNameError(
+                "a/shot", ".tif", models::ExportFileType::Image, exts).empty());
+            FTK_CHECK(!models::getFileNameError(
+                "shot", ".xyz", models::ExportFileType::Image, exts).empty());
+            // A sequence needs the frame slot; a movie has no frame number.
+            FTK_CHECK(!models::getFileNameError(
+                "shot", ".tif", models::ExportFileType::Seq, exts).empty());
+            FTK_CHECK(models::getFileNameError(
+                "shot.####", ".tif", models::ExportFileType::Seq, exts).empty());
+            FTK_CHECK(models::getFileNameError(
+                "shot", ".tif", models::ExportFileType::Movie, exts).empty());
+            FTK_CHECK(!models::getFileNameError(
+                "shot.####", ".tif", models::ExportFileType::Movie, exts).empty());
+            // A version number is a name, not a frame slot.
+            FTK_CHECK(models::getFileNameError(
+                "shot_v002", ".tif", models::ExportFileType::Image, exts).empty());
         }
     }
 }

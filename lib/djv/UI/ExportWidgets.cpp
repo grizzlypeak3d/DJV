@@ -93,72 +93,6 @@ namespace djv
                 return out;
             }
 
-            // Whether the number in a file name is a run of '#'. Only that is
-            // replaced by the frame number: the path reads trailing digits as
-            // a frame number too, and replacing those would write
-            // "shot_v002.exr" as "shot_v023.exr".
-            bool isFrameTemplate(const ftk::Path& path)
-            {
-                const std::string num = path.getNum();
-                return !num.empty() &&
-                    std::string::npos == num.find_first_not_of('#');
-            }
-
-            // A name typed or pasted with one of the extensions on it takes
-            // that extension, rather than being written as "shot.exr.tif".
-            bool splitExt(
-                std::string& name,
-                std::string& ext,
-                const std::vector<std::string>& exts)
-            {
-                const std::string lower = ftk::toLower(name);
-                for (const auto& i : exts)
-                {
-                    if (lower.size() > i.size() &&
-                        0 == lower.compare(lower.size() - i.size(), i.size(), i))
-                    {
-                        name.resize(name.size() - i.size());
-                        ext = i;
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            // What is wrong with an export file name, or nothing.
-            std::string getFileNameError(
-                const std::string& fileName,
-                const std::string& ext,
-                models::ExportFileType fileType,
-                const std::vector<std::string>& exts)
-            {
-                std::string out;
-                const ftk::Path path(fileName + ext);
-                if (fileName.empty())
-                {
-                    out = "No file name";
-                }
-                else if (path.hasDir())
-                {
-                    out = "No directory; that is set above";
-                }
-                else if (std::find(exts.begin(), exts.end(), ext) == exts.end())
-                {
-                    out = "No extension";
-                }
-                else if (models::ExportFileType::Seq == fileType &&
-                    !isFrameTemplate(path))
-                {
-                    out = "Needs # where the frame number goes";
-                }
-                else if (models::ExportFileType::Movie == fileType &&
-                    isFrameTemplate(path))
-                {
-                    out = "A movie has no frame number";
-                }
-                return out;
-            }
-
             std::string getFileNameTooltip(models::ExportFileType fileType)
             {
                 std::string out = "The output file name.";
@@ -199,7 +133,7 @@ namespace djv
             default: break;
             }
             const ftk::Path path(out);
-            if (isFrameTemplate(path))
+            if (models::isFrameTemplate(path))
             {
                 out = path.getFrame(frame, true);
             }
@@ -368,7 +302,7 @@ namespace djv
                 {
                     FTK_P();
                     auto options = value;
-                    if (splitExt(options.imageFileName, options.imageExt, p.exts))
+                    if (models::splitExt(options.imageFileName, options.imageExt, p.exts))
                     {
                         p.settings->setExport(options);
                         return;
@@ -388,7 +322,7 @@ namespace djv
                     FTK_P();
                     auto options = p.settings->getExport();
                     options.imageFileName = value;
-                    splitExt(options.imageFileName, options.imageExt, p.exts);
+                    models::splitExt(options.imageFileName, options.imageExt, p.exts);
                     p.settings->setExport(options);
                     if (p.fileNameEdit->getText() != options.imageFileName)
                     {
@@ -466,8 +400,8 @@ namespace djv
             // a name shows while it is being typed.
             auto options = p.settings->getExport();
             options.imageFileName = p.fileNameEdit->getText();
-            splitExt(options.imageFileName, options.imageExt, p.exts);
-            const std::string error = getFileNameError(
+            models::splitExt(options.imageFileName, options.imageExt, p.exts);
+            const std::string error = models::getFileNameError(
                 options.imageFileName,
                 options.imageExt,
                 models::ExportFileType::Image,
@@ -556,7 +490,7 @@ namespace djv
                 {
                     FTK_P();
                     auto options = value;
-                    if (splitExt(options.seqFileName, options.seqExt, p.exts))
+                    if (models::splitExt(options.seqFileName, options.seqExt, p.exts))
                     {
                         p.settings->setExport(options);
                         return;
@@ -583,7 +517,7 @@ namespace djv
                     FTK_P();
                     auto options = p.settings->getExport();
                     options.seqFileName = value;
-                    splitExt(options.seqFileName, options.seqExt, p.exts);
+                    models::splitExt(options.seqFileName, options.seqExt, p.exts);
                     p.settings->setExport(options);
                     if (p.fileNameEdit->getText() != options.seqFileName)
                     {
@@ -662,8 +596,8 @@ namespace djv
             // a name shows while it is being typed.
             auto options = p.settings->getExport();
             options.seqFileName = p.fileNameEdit->getText();
-            splitExt(options.seqFileName, options.seqExt, p.exts);
-            const std::string error = getFileNameError(
+            models::splitExt(options.seqFileName, options.seqExt, p.exts);
+            const std::string error = models::getFileNameError(
                 options.seqFileName,
                 options.seqExt,
                 models::ExportFileType::Seq,
@@ -801,7 +735,7 @@ namespace djv
                 {
                     FTK_P();
                     auto options = value;
-                    if (splitExt(options.movieFileName, options.movieExt, p.exts))
+                    if (models::splitExt(options.movieFileName, options.movieExt, p.exts))
                     {
                         p.settings->setExport(options);
                         return;
@@ -833,7 +767,7 @@ namespace djv
                     FTK_P();
                     auto options = p.settings->getExport();
                     options.movieFileName = value;
-                    splitExt(options.movieFileName, options.movieExt, p.exts);
+                    models::splitExt(options.movieFileName, options.movieExt, p.exts);
                     p.settings->setExport(options);
                     if (p.fileNameEdit->getText() != options.movieFileName)
                     {
@@ -961,8 +895,8 @@ namespace djv
             // a name shows while it is being typed.
             auto options = p.settings->getExport();
             options.movieFileName = p.fileNameEdit->getText();
-            splitExt(options.movieFileName, options.movieExt, p.exts);
-            const std::string error = getFileNameError(
+            models::splitExt(options.movieFileName, options.movieExt, p.exts);
+            const std::string error = models::getFileNameError(
                 options.movieFileName,
                 options.movieExt,
                 models::ExportFileType::Movie,

@@ -738,6 +738,72 @@ namespace djv
             json["BufferFrameCount"] = value.bufferFrameCount;
         }
 
+        // Whether the number in a file name is a run of '#'. Only that is
+        // replaced by the frame number: the path reads trailing digits as
+        // a frame number too, and replacing those would write
+        // "shot_v002.exr" as "shot_v023.exr".
+        bool isFrameTemplate(const ftk::Path& path)
+        {
+            const std::string num = path.getNum();
+            return !num.empty() &&
+                std::string::npos == num.find_first_not_of('#');
+        }
+
+        // A name typed or pasted with one of the extensions on it takes
+        // that extension, rather than being written as "shot.exr.tif".
+        bool splitExt(
+            std::string& name,
+            std::string& ext,
+            const std::vector<std::string>& exts)
+        {
+            const std::string lower = ftk::toLower(name);
+            for (const auto& i : exts)
+            {
+                if (lower.size() > i.size() &&
+                    0 == lower.compare(lower.size() - i.size(), i.size(), i))
+                {
+                    name.resize(name.size() - i.size());
+                    ext = i;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // What is wrong with an export file name, or nothing.
+        std::string getFileNameError(
+            const std::string& fileName,
+            const std::string& ext,
+            ExportFileType fileType,
+            const std::vector<std::string>& exts)
+        {
+            std::string out;
+            const ftk::Path path(fileName + ext);
+            if (fileName.empty())
+            {
+                out = "No file name";
+            }
+            else if (path.hasDir())
+            {
+                out = "No directory; that is set above";
+            }
+            else if (std::find(exts.begin(), exts.end(), ext) == exts.end())
+            {
+                out = "No extension";
+            }
+            else if (ExportFileType::Seq == fileType &&
+                !isFrameTemplate(path))
+            {
+                out = "Needs # where the frame number goes";
+            }
+            else if (ExportFileType::Movie == fileType &&
+                isFrameTemplate(path))
+            {
+                out = "A movie has no frame number";
+            }
+            return out;
+        }
+
         void getExportNames(
             const ftk::Path& path,
             const std::vector<std::string>& seqExts,
