@@ -56,6 +56,14 @@ Fixes:
   first, and above and below it is as wide, whatever their aspect ratios.
 * The keys for framing and zooming the view can be assigned to other
   commands; the view no longer handles 0, =, -, and Backspace itself.
+* Exported movies have the colors of the images they were made from, and
+  movies are read with the color matrix they name, or the one taken for
+  their size.
+* MJPEG movies show their full range of blacks and whites.
+* FFV1 exports are lossless, and ProRes 4444 exports keep full resolution
+  color.
+* Exporting a movie at a size its pixel format cannot hold is refused with
+  the size to change, rather than writing a damaged file.
 * A thumbnail wider than 16:9 is fit to the file list instead of drawing
   over the file name.
 * A file opened with a separate audio file shows the audio's waveform.
