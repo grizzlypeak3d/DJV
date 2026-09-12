@@ -67,6 +67,9 @@ Fixes:
 * On Linux, memory stays near the cache size when changing between files.
 * Wipe, Butterfly, Overlay, and Difference comparisons show and take the
   drawings of the A file, rather than the drawings of every file at once.
+* New default keyboard shortcuts are not hidden by the settings of an earlier
+  version; only the shortcuts changed from their defaults are saved. Ctrl+Z
+  undoes drawing again, and Ctrl+Y also redoes it on Windows and Linux.
 * A thumbnail wider than 16:9 is fit to the file list instead of drawing
   over the file name.
 * A file opened with a separate audio file shows the audio's waveform.

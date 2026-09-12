@@ -360,13 +360,23 @@ namespace djv
                 "Undo",
                 "Undo drawing",
                 ftk::KeyShortcut(ftk::Key::Z, static_cast<int>(ftk::commandKeyModifier)));
+            // Ctrl+Y as well where that is the convention; macOS has only the
+            // one.
+#if defined(__APPLE__)
+            const ftk::KeyShortcut redoSecondary;
+#else // __APPLE__
+            const ftk::KeyShortcut redoSecondary(
+                ftk::Key::Y,
+                static_cast<int>(ftk::KeyModifier::Control));
+#endif // __APPLE__
             _addShortcut(
                 "Redo",
                 "Redo drawing",
                 ftk::KeyShortcut(
                     ftk::Key::Z,
                     static_cast<int>(ftk::KeyModifier::Shift) |
-                    static_cast<int>(ftk::commandKeyModifier)));
+                    static_cast<int>(ftk::commandKeyModifier)),
+                redoSecondary);
             _addShortcut("ClearDrawing", "Clear drawing");
             _addShortcut("AddNote", "Add a marker");
             _addShortcut("AddRange", "Add a range");

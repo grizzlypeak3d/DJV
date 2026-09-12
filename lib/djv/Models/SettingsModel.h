@@ -290,6 +290,16 @@ namespace djv
             bool operator == (const ShortcutsSettings&) const = default;
         };
 
+        //! Get the shortcuts that differ from their defaults, which are the
+        //! ones saved. A shortcut without a default counts as changed.
+        DJV_MODELS_API std::vector<Shortcut> getChangedShortcuts(
+            const std::vector<Shortcut>&,
+            const std::vector<Shortcut>& defaults);
+
+        //! Get the shortcuts that have a key.
+        DJV_MODELS_API std::vector<Shortcut> getBoundShortcuts(
+            const std::vector<Shortcut>&);
+
         //! Style settings.
         struct DJV_MODELS_API_TYPE StyleSettings
         {

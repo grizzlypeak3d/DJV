@@ -23,6 +23,7 @@ namespace djv
         private:
             void _exportNames();
             void _fileNameRules();
+            void _shortcuts();
         };
     }
 }

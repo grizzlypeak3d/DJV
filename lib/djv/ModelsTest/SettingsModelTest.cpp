@@ -28,6 +28,7 @@ namespace djv
         {
             _exportNames();
             _fileNameRules();
+            _shortcuts();
         }
 
         void SettingsModelTest::_exportNames()
@@ -130,6 +131,59 @@ namespace djv
             // A version number is a name, not a frame slot.
             FTK_CHECK(models::getFileNameError(
                 "shot_v002", ".tif", models::ExportFileType::Image, exts).empty());
+        }
+
+        void SettingsModelTest::_shortcuts()
+        {
+            const std::vector<models::Shortcut> defaults =
+            {
+                models::Shortcut(
+                    "Review/Undo",
+                    "Undo drawing",
+                    ftk::KeyShortcut(ftk::Key::Z, static_cast<int>(ftk::KeyModifier::Control))),
+                models::Shortcut("Review/Draw", "Draw strokes")
+            };
+            {
+                // Shortcuts left at their defaults are not saved, so a default
+                // changed later reaches everyone.
+                FTK_CHECK(models::getChangedShortcuts(defaults, defaults).empty());
+            }
+            {
+                auto value = defaults;
+                value[1].primary = ftk::KeyShortcut(ftk::Key::D);
+                const auto changed = models::getChangedShortcuts(value, defaults);
+                FTK_CHECK(1 == changed.size());
+                FTK_CHECK("Review/Draw" == changed[0].name);
+            }
+            {
+                // A default cleared on purpose is a change, and is kept.
+                auto value = defaults;
+                value[0].primary = ftk::KeyShortcut();
+                const auto changed = models::getChangedShortcuts(value, defaults);
+                FTK_CHECK(1 == changed.size());
+                FTK_CHECK("Review/Undo" == changed[0].name);
+            }
+            {
+                // A shortcut with no default counts as changed.
+                const auto changed = models::getChangedShortcuts(
+                    { models::Shortcut("Other", "Other") },
+                    defaults);
+                FTK_CHECK(1 == changed.size());
+            }
+            {
+                // Settings from before saved every shortcut: one saved without
+                // a key is dropped, so its default applies.
+                const std::vector<models::Shortcut> saved =
+                {
+                    models::Shortcut("Review/Undo", "Undo drawing"),
+                    models::Shortcut("Review/Draw", "Draw strokes", ftk::KeyShortcut(ftk::Key::D)),
+                    models::Shortcut("Other", "Other", ftk::KeyShortcut(), ftk::KeyShortcut(ftk::Key::X))
+                };
+                const auto bound = models::getBoundShortcuts(saved);
+                FTK_CHECK(2 == bound.size());
+                FTK_CHECK("Review/Draw" == bound[0].name);
+                FTK_CHECK("Other" == bound[1].name);
+            }
         }
     }
 }

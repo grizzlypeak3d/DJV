@@ -137,6 +137,44 @@ namespace djv
 #endif // TLRENDER_USD
         };
 
+        std::vector<Shortcut> getChangedShortcuts(
+            const std::vector<Shortcut>& value,
+            const std::vector<Shortcut>& defaults)
+        {
+            std::vector<Shortcut> out;
+            for (const auto& shortcut : value)
+            {
+                const auto i = std::find_if(
+                    defaults.begin(),
+                    defaults.end(),
+                    [&shortcut](const Shortcut& other)
+                    {
+                        return shortcut.name == other.name;
+                    });
+                if (i == defaults.end() ||
+                    i->primary != shortcut.primary ||
+                    i->secondary != shortcut.secondary)
+                {
+                    out.push_back(shortcut);
+                }
+            }
+            return out;
+        }
+
+        std::vector<Shortcut> getBoundShortcuts(const std::vector<Shortcut>& value)
+        {
+            std::vector<Shortcut> out;
+            for (const auto& shortcut : value)
+            {
+                if (shortcut.primary.key != ftk::Key::Unknown ||
+                    shortcut.secondary.key != ftk::Key::Unknown)
+                {
+                    out.push_back(shortcut);
+                }
+            }
+            return out;
+        }
+
         namespace
         {
             std::map<std::string, std::string> keys =
@@ -148,7 +186,7 @@ namespace djv
                 { "FileBrowser", "/FileBrowser" },
                 { "ImageSeq", "/ImageSeq.1" },
                 { "OTIO", "/OTIO.2" },
-                { "Shortcuts", "/Shortcuts.3" },
+                { "Shortcuts", "/Shortcuts.4" },
                 { "Misc", "/Misc.2" },
                 { "Mouse", "/Mouse.1" },
                 { "Playback", "/Playback.1" },
@@ -251,9 +289,21 @@ namespace djv
             p.otio = ftk::Observable<OTIOSettings>::create(otio);
 
             // The saved keyboard shortcuts are applied as the shortcuts are
-            // registered with addShortcuts().
+            // registered with addShortcuts(). Only the ones changed from their
+            // defaults are saved, so a default added or changed later reaches
+            // everyone. The settings before that saved every shortcut, and a
+            // shortcut saved there without a key is taken for the default it
+            // predates rather than a key cleared on purpose: kept, it hid the
+            // Ctrl+Z that Review/Undo was given after it was saved.
             ShortcutsSettings shortcutsSaved;
-            settings->getT(keys["Shortcuts"], shortcutsSaved);
+            if (settings->contains(keys["Shortcuts"]))
+            {
+                settings->getT(keys["Shortcuts"], shortcutsSaved);
+            }
+            else if (settings->getT("/Shortcuts.3", shortcutsSaved))
+            {
+                shortcutsSaved.shortcuts = getBoundShortcuts(shortcutsSaved.shortcuts);
+            }
             for (const auto& shortcut : shortcutsSaved.shortcuts)
             {
                 p.savedShortcuts[shortcut.name] = shortcut;
@@ -350,19 +400,25 @@ namespace djv
 
             p.settings->setT(keys["OTIO"], p.otio->get());
 
-            // Preserve saved shortcuts that were not registered, for example
-            // shortcuts for features that are only sometimes available.
-            ShortcutsSettings shortcuts = p.shortcuts->get();
+            // Only the shortcuts changed from their defaults, so a default
+            // added or changed later is not hidden by a saved copy of the old
+            // one. Saved shortcuts that were not registered are preserved, for
+            // example shortcuts for features that are only sometimes available.
+            const auto& registered = p.shortcuts->get().shortcuts;
+            ShortcutsSettings shortcuts;
+            shortcuts.shortcuts = getChangedShortcuts(
+                registered,
+                p.shortcutsDefault.shortcuts);
             for (const auto& i : p.savedShortcuts)
             {
                 const auto j = std::find_if(
-                    shortcuts.shortcuts.begin(),
-                    shortcuts.shortcuts.end(),
+                    registered.begin(),
+                    registered.end(),
                     [i](const Shortcut& value)
                     {
                         return i.first == value.name;
                     });
-                if (j == shortcuts.shortcuts.end())
+                if (j == registered.end())
                 {
                     shortcuts.shortcuts.push_back(i.second);
                 }
