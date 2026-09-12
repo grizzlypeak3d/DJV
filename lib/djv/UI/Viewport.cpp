@@ -844,6 +844,19 @@ namespace djv
         bool Viewport::_sourceShown(int index) const
         {
             FTK_P();
+            // The comparisons that put the files over each other give them all
+            // the same box, so drawings of B landed on A's picture, and a new
+            // stroke could only ever reach A, the first box hit. Only A is
+            // drawn on there; B's drawings return side by side or on their own.
+            switch (p.compare)
+            {
+            case tl::Compare::Wipe:
+            case tl::Compare::Overlay:
+            case tl::Compare::Difference:
+            case tl::Compare::Butterfly:
+                return 0 == index;
+            default: break;
+            }
             return tl::isShown(p.compare, static_cast<size_t>(index));
         }
 

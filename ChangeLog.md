@@ -65,6 +65,8 @@ Fixes:
 * Exporting a movie at a size its pixel format cannot hold is refused with
   the size to change, rather than writing a damaged file.
 * On Linux, memory stays near the cache size when changing between files.
+* Wipe, Butterfly, Overlay, and Difference comparisons show and take the
+  drawings of the A file, rather than the drawings of every file at once.
 * A thumbnail wider than 16:9 is fit to the file list instead of drawing
   over the file name.
 * A file opened with a separate audio file shows the audio's waveform.
