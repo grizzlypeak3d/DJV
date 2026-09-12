@@ -54,6 +54,8 @@ Fixes:
   viewed with High Quality filtering.
 * Comparing side by side with Same Size, the second file is as tall as the
   first, and above and below it is as wide, whatever their aspect ratios.
+* The keys for framing and zooming the view can be assigned to other
+  commands; the view no longer handles 0, =, -, and Backspace itself.
 * A thumbnail wider than 16:9 is fit to the file list instead of drawing
   over the file name.
 * A file opened with a separate audio file shows the audio's waveform.
