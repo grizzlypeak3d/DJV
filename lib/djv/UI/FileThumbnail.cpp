@@ -198,13 +198,16 @@ namespace djv
                     p.item->path,
                     p.thumbnail.height,
                     std::nullopt,
-                    p.ioOptions);
+                    p.ioOptions,
+                    tl::ui::ThumbnailType::Timeline,
+                    p.item->audioPath);
             }
             if (!p.thumbnail.infoDone && !p.thumbnail.infoRequest.future.valid())
             {
                 p.thumbnail.infoRequest = thumbnailSystem->getInfo(
                     p.item->path,
-                    p.ioOptions);
+                    p.ioOptions,
+                    p.item->audioPath);
             }
         }
 
