@@ -341,7 +341,12 @@ namespace djv
                         });
                     p.menu->addAction(action);
                     const auto j = values.find(name);
-                    p.menu->setChecked(action, j != values.end() && j->second);
+                    const bool inUse = j != values.end() && j->second;
+                    p.menu->setChecked(action, inUse);
+                    // Only what is in use: the menu is for finding the
+                    // controls of what is changing the picture, not for
+                    // getting to the tools in general.
+                    p.menu->setEnabled(action, inUse);
                 }
                 p.menu->open(getWindow(), p.button->getGeometry());
                 p.menu->setCloseCallback(

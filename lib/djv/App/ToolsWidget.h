@@ -44,6 +44,8 @@ namespace djv
             //! Get an open tool by name, or null when it is not open.
             DJV_APP_API std::shared_ptr<IToolWidget> getToolWidget(const std::string&) const;
 
+            DJV_APP_API void tickEvent(bool, bool, const ftk::TickEvent&) override;
+
         private:
             void _widgetUpdate(const std::vector<std::string>&);
 

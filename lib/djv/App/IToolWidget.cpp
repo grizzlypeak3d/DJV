@@ -116,6 +116,19 @@ namespace djv
             }
         }
 
+        ftk::Box2I IToolWidget::getSectionGeometry(const std::string& section) const
+        {
+            FTK_P();
+            if (const auto i = p.bellows.find(section); i != p.bellows.end())
+            {
+                if (auto bellows = i->second.lock())
+                {
+                    return bellows->getGeometry();
+                }
+            }
+            return getGeometry();
+        }
+
         ftk::Size2I IToolWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();

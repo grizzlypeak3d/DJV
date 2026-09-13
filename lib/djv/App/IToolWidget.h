@@ -46,6 +46,10 @@ namespace djv
             //! Open the named section and scroll to it.
             DJV_APP_API void openSection(const std::string& section);
 
+            //! Get the geometry of the named section, or of the tool when it
+            //! has no such section.
+            DJV_APP_API ftk::Box2I getSectionGeometry(const std::string& section) const;
+
             DJV_APP_API ftk::Size2I getSizeHint() const override;
             DJV_APP_API void setGeometry(const ftk::Box2I&) override;
 

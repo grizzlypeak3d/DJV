@@ -8,6 +8,7 @@
 #include <djv/Models/ToolsModel.h>
 
 #include <algorithm>
+#include <optional>
 
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScrollWidget.h>
@@ -27,6 +28,11 @@ namespace djv
             std::shared_ptr<ftk::ScrollWidget> scrollWidget;
             std::shared_ptr<ftk::ListObserver<std::string> > openObserver;
             std::shared_ptr<ftk::Observer<std::pair<std::string, std::string> > > showSectionObserver;
+
+            // The section to scroll to, and the ticks left to wait for the
+            // layout to place it.
+            std::optional<std::pair<std::string, std::string> > scrollSection;
+            int scrollTicks = 0;
         };
 
         void ToolsWidget::_init(
@@ -80,6 +86,12 @@ namespace djv
                     if (auto toolWidget = getToolWidget(value.first))
                     {
                         toolWidget->openSection(value.second);
+                        // A tool just opened, or a section just expanded,
+                        // has not been laid out yet; two ticks leave room
+                        // for a layout between the request and the scroll
+                        // whichever comes first in the frame.
+                        _p->scrollSection = value;
+                        _p->scrollTicks = 2;
                     }
                 },
                 ftk::ObserverAction::Suppress);
@@ -109,6 +121,31 @@ namespace djv
             FTK_P();
             const auto i = p.toolWidgets.find(name);
             return i != p.toolWidgets.end() ? i->second : nullptr;
+        }
+
+        void ToolsWidget::tickEvent(
+            bool parentsVisible,
+            bool parentsEnabled,
+            const ftk::TickEvent& event)
+        {
+            IContainer::tickEvent(parentsVisible, parentsEnabled, event);
+            FTK_P();
+            if (p.scrollSection.has_value())
+            {
+                if (--p.scrollTicks <= 0)
+                {
+                    if (auto toolWidget = getToolWidget(p.scrollSection->first))
+                    {
+                        // In the scrolled content's coordinates rather than
+                        // the window's.
+                        const ftk::Box2I g = ftk::move(
+                            toolWidget->getSectionGeometry(p.scrollSection->second),
+                            -p.layout->getGeometry().min);
+                        p.scrollWidget->scrollTo(g);
+                    }
+                    p.scrollSection.reset();
+                }
+            }
         }
 
         void ToolsWidget::_widgetUpdate(const std::vector<std::string>& open)
