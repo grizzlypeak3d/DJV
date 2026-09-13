@@ -264,6 +264,53 @@ namespace djv
             return out;
         }
 
+        std::string StatusIndicator::_getIndicatorSection(const std::string& name) const
+        {
+            FTK_P();
+            std::string out;
+            if ("Channels" == name ||
+                "Negative" == name ||
+                "Mirror" == name)
+            {
+                out = "Options";
+            }
+            else if (
+                "ClippingWarning" == name ||
+                "AspectRatio" == name ||
+                "OCIO" == name ||
+                "LUT" == name)
+            {
+                out = name;
+            }
+            else if ("Color" == name)
+            {
+                // The first of the adjustments that is changing the picture.
+                out = "Color";
+                if (auto viewportModel = p.viewportModel.lock())
+                {
+                    const tl::DisplayOptions& options = viewportModel->getDisplayOptions();
+                    tl::Color color = options.color;
+                    color.enabled = false;
+                    tl::Levels levels = options.levels;
+                    levels.enabled = false;
+                    if (!(options.color.enabled && color != tl::Color()))
+                    {
+                        if (options.levels.enabled && levels != tl::Levels())
+                        {
+                            out = "Levels";
+                        }
+                        else if (
+                            (options.exposure.enabled && options.exposure.exposure != 0.F) ||
+                            (options.softClip.enabled && options.softClip.value > 0.F))
+                        {
+                            out = "Exposure";
+                        }
+                    }
+                }
+            }
+            return out;
+        }
+
         void StatusIndicator::_indicatorOff(const std::string& name)
         {
             FTK_P();
@@ -374,7 +421,7 @@ namespace djv
                         auto toolsModel = _p->toolsModel.lock();
                         if (!tool.empty() && toolsModel)
                         {
-                            toolsModel->setToolOpen(tool, true);
+                            toolsModel->showSection(tool, _getIndicatorSection(name));
                         }
                     });
                 _indicatorUpdate();

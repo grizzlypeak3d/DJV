@@ -21,6 +21,7 @@ namespace djv
             std::shared_ptr<ftk::Settings> settings;
             std::vector<ToolInfo> tools;
             std::shared_ptr<ftk::ObservableList<std::string> > openTools;
+            std::shared_ptr<ftk::Observable<std::pair<std::string, std::string> > > showSection;
         };
 
         void ToolsModel::_init(const std::shared_ptr<ftk::Settings>& settings)
@@ -49,6 +50,7 @@ namespace djv
             std::vector<std::string> open;
             p.settings->get("/Tools/Open.1", open);
             p.openTools = ftk::ObservableList<std::string>::create(_sorted(open));
+            p.showSection = ftk::Observable<std::pair<std::string, std::string> >::create();
         }
 
         ToolsModel::ToolsModel() :
@@ -119,6 +121,20 @@ namespace djv
         void ToolsModel::closeTools()
         {
             _p->openTools->setIfChanged(std::vector<std::string>());
+        }
+
+        void ToolsModel::showSection(const std::string& tool, const std::string& section)
+        {
+            FTK_P();
+            setToolOpen(tool, true);
+            // Always, since the same section is asked for again after the
+            // user has closed it.
+            p.showSection->setAlways(std::make_pair(tool, section));
+        }
+
+        std::shared_ptr<ftk::IObservable<std::pair<std::string, std::string> > > ToolsModel::observeShowSection() const
+        {
+            return _p->showSection;
         }
 
         std::vector<std::string> ToolsModel::_sorted(

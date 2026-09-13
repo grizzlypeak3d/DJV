@@ -43,6 +43,9 @@ namespace djv
             //! does nothing.
             DJV_APP_API virtual void scrollTo(const std::string& section);
 
+            //! Open the named section and scroll to it.
+            DJV_APP_API void openSection(const std::string& section);
+
             DJV_APP_API ftk::Size2I getSizeHint() const override;
             DJV_APP_API void setGeometry(const ftk::Box2I&) override;
 

@@ -75,6 +75,25 @@ namespace djv
             model->closeTools();
             FTK_CHECK(model->getOpenTools().empty());
             FTK_CHECK(tools.empty());
+
+            // Showing a section opens the tool, and is announced every time,
+            // even when it is the same section again.
+            std::pair<std::string, std::string> section;
+            size_t sectionCount = 0;
+            auto sectionObserver = ftk::Observer<std::pair<std::string, std::string> >::create(
+                model->observeShowSection(),
+                [&section, &sectionCount](const std::pair<std::string, std::string>& value)
+                {
+                    section = value;
+                    ++sectionCount;
+                },
+                ftk::ObserverAction::Suppress);
+            model->showSection("View", "Options");
+            FTK_CHECK(model->isToolOpen("View"));
+            FTK_CHECK(std::make_pair(std::string("View"), std::string("Options")) == section);
+            FTK_CHECK(1 == sectionCount);
+            model->showSection("View", "Options");
+            FTK_CHECK(2 == sectionCount);
         }
 
         void ToolsModelTest::_persistence()

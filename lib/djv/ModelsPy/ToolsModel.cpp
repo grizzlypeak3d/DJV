@@ -50,7 +50,8 @@ namespace djv
                 .def_prop_ro("observeOpenTools", &ToolsModel::observeOpenTools)
                 .def("isToolOpen", &ToolsModel::isToolOpen, nb::arg("name"))
                 .def("setToolOpen", &ToolsModel::setToolOpen, nb::arg("name"), nb::arg("open"))
-                .def("closeTools", &ToolsModel::closeTools);
+                .def("closeTools", &ToolsModel::closeTools)
+                .def("showSection", &ToolsModel::showSection, nb::arg("tool"), nb::arg("section"));
         }
     }
 }

@@ -103,6 +103,19 @@ namespace djv
         void IToolWidget::scrollTo(const std::string&)
         {}
 
+        void IToolWidget::openSection(const std::string& section)
+        {
+            FTK_P();
+            if (const auto i = p.bellows.find(section); i != p.bellows.end())
+            {
+                if (auto bellows = i->second.lock())
+                {
+                    bellows->setOpen(true);
+                    scrollTo(section);
+                }
+            }
+        }
+
         ftk::Size2I IToolWidget::getSizeHint() const
         {
             return _p->layout->getSizeHint();

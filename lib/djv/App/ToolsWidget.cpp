@@ -26,6 +26,7 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> layout;
             std::shared_ptr<ftk::ScrollWidget> scrollWidget;
             std::shared_ptr<ftk::ListObserver<std::string> > openObserver;
+            std::shared_ptr<ftk::Observer<std::pair<std::string, std::string> > > showSectionObserver;
         };
 
         void ToolsWidget::_init(
@@ -69,6 +70,19 @@ namespace djv
                 {
                     _widgetUpdate(value);
                 });
+
+            // The tool is opened before the section is asked for, so its
+            // widget has already been made by the observer above.
+            p.showSectionObserver = ftk::Observer<std::pair<std::string, std::string> >::create(
+                app->getToolsModel()->observeShowSection(),
+                [this](const std::pair<std::string, std::string>& value)
+                {
+                    if (auto toolWidget = getToolWidget(value.first))
+                    {
+                        toolWidget->openSection(value.second);
+                    }
+                },
+                ftk::ObserverAction::Suppress);
         }
 
         ToolsWidget::ToolsWidget() :

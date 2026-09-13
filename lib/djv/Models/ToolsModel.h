@@ -72,6 +72,12 @@ namespace djv
             //! Close every tool.
             DJV_MODELS_API void closeTools();
 
+            //! Open a tool and one of its sections.
+            DJV_MODELS_API void showSection(const std::string& tool, const std::string& section);
+
+            //! Observe requests to show a section, as the tool and the section.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::pair<std::string, std::string> > > observeShowSection() const;
+
         private:
             // Kept in the order the tools are listed, and anything not in that
             // list dropped: a settings file can name a tool that no longer
