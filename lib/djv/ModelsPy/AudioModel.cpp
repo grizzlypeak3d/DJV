@@ -53,8 +53,8 @@ namespace djv
                 .def("volumeDown", &AudioModel::volumeDown)
                 .def_prop_rw("mute", &AudioModel::isMuted, &AudioModel::setMute)
                 .def_prop_ro("observeMute", &AudioModel::observeMute)
-                .def_prop_rw("channelMute", &AudioModel::getChannelMute, &AudioModel::setChannelMute)
-                .def_prop_ro("observeChannelMute", &AudioModel::observeChannelMute)
+                .def_prop_rw("channel", &AudioModel::getChannel, &AudioModel::setChannel)
+                .def_prop_ro("observeChannel", &AudioModel::observeChannel)
                 .def_prop_rw("syncOffset", &AudioModel::getSyncOffset, &AudioModel::setSyncOffset)
                 .def_prop_ro("observeSyncOffset", &AudioModel::observeSyncOffset);
         }

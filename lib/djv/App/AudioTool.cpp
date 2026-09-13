@@ -7,7 +7,6 @@
 #include <djv/Models/AudioModel.h>
 
 #include <ftk/UI/Bellows.h>
-#include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DoubleEditSlider.h>
@@ -25,23 +24,20 @@ namespace djv
         {
             std::vector<tl::AudioDeviceID> devices;
             tl::AudioInfo info;
-            std::vector<bool> channelMute;
+            int channel = -1;
 
             std::shared_ptr<ftk::ComboBox> deviceComboBox;
             std::shared_ptr<ftk::IntEditSlider> volumeSlider;
             std::shared_ptr<ftk::CheckBox> muteCheckBox;
-            std::vector<std::shared_ptr<ftk::CheckBox> > channelMuteCheckBoxes;
-            std::shared_ptr<ftk::ButtonGroup> channelMuteButtonGroup;
+            std::shared_ptr<ftk::ComboBox> channelComboBox;
             std::shared_ptr<ftk::DoubleEditSlider> syncOffsetSlider;
-
-            std::shared_ptr<ftk::HorizontalLayout> channelMuteLayout;
 
             std::shared_ptr<ftk::ListObserver<tl::AudioDeviceID> > devicesObserver;
             std::shared_ptr<ftk::Observer<tl::AudioDeviceID> > deviceObserver;
             std::shared_ptr<ftk::Observer<float> > volumeObserver;
             std::shared_ptr<ftk::Observer<bool> > muteObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
-            std::shared_ptr<ftk::ListObserver<bool> > channelMuteObserver;
+            std::shared_ptr<ftk::Observer<int> > channelObserver;
             std::shared_ptr<ftk::Observer<double> > syncOffsetObserver;
         };
 
@@ -74,9 +70,9 @@ namespace djv
             p.muteCheckBox = ftk::CheckBox::create(context);
             ftk::setScreenshotTag(p.muteCheckBox, "Audio.Mute");
 
-            p.channelMuteButtonGroup = ftk::ButtonGroup::create(
-                context,
-                ftk::ButtonGroupType::Toggle);
+            p.channelComboBox = ftk::ComboBox::create(context);
+            p.channelComboBox->setTooltip("Audio channel to play");
+            ftk::setScreenshotTag(p.channelComboBox, "Audio.Channel");
 
             p.syncOffsetSlider = ftk::DoubleEditSlider::create(context);
             p.syncOffsetSlider->setRange(-1.0, 1.0);
@@ -90,10 +86,7 @@ namespace djv
             formLayout->addRow("Device:", p.deviceComboBox);
             formLayout->addRow("Volume:", p.volumeSlider);
             formLayout->addRow("Mute:", p.muteCheckBox);
-            p.channelMuteLayout = ftk::HorizontalLayout::create(context);
-            p.channelMuteLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
-            ftk::setScreenshotTag(p.channelMuteLayout, "Audio.ChannelMute");
-            formLayout->addRow("Channel mute:", p.channelMuteLayout);
+            formLayout->addRow("Channel:", p.channelComboBox);
             formLayout->addRow("Sync offset (seconds):", p.syncOffsetSlider);
 
             _setWidget(formLayout);
@@ -130,18 +123,13 @@ namespace djv
                     }
                 });
 
-            p.channelMuteButtonGroup->setCheckedCallback(
-                [this, appWeak](int index, bool value)
+            p.channelComboBox->setIndexCallback(
+                [appWeak](int value)
                 {
                     if (auto app = appWeak.lock())
                     {
-                        std::vector<bool> channelMute = _p->channelMute;
-                        if (index >= static_cast<int>(channelMute.size()))
-                        {
-                            channelMute.resize(index + 1);
-                        }
-                        channelMute[index] = value;
-                        app->getAudioModel()->setChannelMute(channelMute);
+                        // The first item is "All".
+                        app->getAudioModel()->setChannel(value - 1);
                     }
                 });
 
@@ -205,11 +193,11 @@ namespace djv
                     _widgetUpdate();
                 });
 
-            p.channelMuteObserver = ftk::ListObserver<bool>::create(
-                app->getAudioModel()->observeChannelMute(),
-                [this](const std::vector<bool>& value)
+            p.channelObserver = ftk::Observer<int>::create(
+                app->getAudioModel()->observeChannel(),
+                [this](int value)
                 {
-                    _p->channelMute = value;
+                    _p->channel = value;
                     _widgetUpdate();
                 });
 
@@ -242,41 +230,21 @@ namespace djv
         void AudioTool::_widgetUpdate()
         {
             FTK_P();
-            if (static_cast<int>(p.channelMuteCheckBoxes.size()) != p.info.channelCount)
+            std::vector<std::string> items;
+            items.push_back("All");
+            for (int i = 0; i < p.info.channelCount; ++i)
             {
-                for (const auto& checkBox : p.channelMuteCheckBoxes)
-                {
-                    checkBox->setParent(nullptr);
-                }
-                p.channelMuteCheckBoxes.clear();
-                p.channelMuteButtonGroup->clearButtons();
-                if (auto context = getContext())
-                {
-                    std::vector<std::string> text;
-                    for (int i = 0; i < p.info.channelCount; ++i)
-                    {
-                        text.push_back(ftk::Format("{0}").arg(1 + i));
-                    }
-                    if (p.info.channelCount >= 2)
-                    {
-                        text[0] = "L";
-                        text[1] = "R";
-                    }
-                    for (int i = 0; i < p.info.channelCount; ++i)
-                    {
-                        auto checkBox = ftk::CheckBox::create(
-                            context,
-                            text[i],
-                            p.channelMuteLayout);
-                        p.channelMuteCheckBoxes.push_back(checkBox);
-                        p.channelMuteButtonGroup->addButton(checkBox);
-                    }
-                }
+                items.push_back(ftk::Format("{0}").arg(1 + i));
             }
-            for (size_t i = 0; i < p.channelMute.size() && i < p.channelMuteCheckBoxes.size(); ++i)
+            if (p.info.channelCount >= 2)
             {
-                p.channelMuteCheckBoxes[i]->setChecked(p.channelMute[i]);
+                items[1] = "L";
+                items[2] = "R";
             }
+            p.channelComboBox->setItems(items);
+            p.channelComboBox->setCurrentIndex(
+                p.channel < p.info.channelCount ? p.channel + 1 : 0);
+            p.channelComboBox->setEnabled(p.info.channelCount >= 2);
         }
     }
 }

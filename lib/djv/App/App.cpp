@@ -199,7 +199,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::AudioDeviceID> > audioDeviceObserver;
             std::shared_ptr<ftk::Observer<float> > volumeObserver;
             std::shared_ptr<ftk::Observer<bool> > muteObserver;
-            std::shared_ptr<ftk::ListObserver<bool> > channelMuteObserver;
+            std::shared_ptr<ftk::Observer<int> > channelObserver;
             std::shared_ptr<ftk::Observer<double> > syncOffsetObserver;
             std::shared_ptr<ftk::Observer<models::StyleSettings> > styleSettingsObserver;
             std::shared_ptr<ftk::Observer<models::MiscSettings> > miscSettingsObserver;
@@ -2563,9 +2563,9 @@ namespace djv
                 {
                     _audioUpdate();
                 });
-            p.channelMuteObserver = ftk::ListObserver<bool>::create(
-                p.audioModel->observeChannelMute(),
-                [this](const std::vector<bool>&)
+            p.channelObserver = ftk::Observer<int>::create(
+                p.audioModel->observeChannel(),
+                [this](int)
                 {
                     _audioUpdate();
                 });
@@ -3282,7 +3282,22 @@ namespace djv
             {
                 player->setVolume(p.audioModel->getVolume());
                 player->setMute(p.audioModel->isMuted() || p.audioDeviceMute);
-                player->setChannelMute(p.audioModel->getChannelMute());
+                const int channelCount = player->getIOInfo().audio.channelCount;
+                const int channel = p.audioModel->getChannel();
+                std::vector<bool> channelMute;
+                if (channel >= channelCount)
+                {
+                    // Go back to all channels rather than keep a channel this
+                    // file doesn't have, which would silently pick a channel
+                    // in the next file that does.
+                    p.audioModel->setChannel(-1);
+                }
+                else if (channel >= 0)
+                {
+                    channelMute.resize(channelCount, true);
+                    channelMute[channel] = false;
+                }
+                player->setChannelMute(channelMute);
                 player->setAudioOffset(p.audioModel->getSyncOffset());
             }
         }

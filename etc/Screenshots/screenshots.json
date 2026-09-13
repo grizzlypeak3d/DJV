@@ -956,8 +956,8 @@
           "caption": "Mute"
         },
         {
-          "id": "Audio.ChannelMute",
-          "caption": "Channel mute"
+          "id": "Audio.Channel",
+          "caption": "Channel"
         },
         {
           "id": "Audio.SyncOffset",
