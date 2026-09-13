@@ -500,6 +500,8 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
             std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
             std::shared_ptr<ftk::IntEditSlider> hueSlider;
+            std::shared_ptr<ftk::FloatEditSlider> exposureSlider;
+            std::shared_ptr<ftk::FloatEditSlider> softClipSlider;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
@@ -514,7 +516,7 @@ namespace djv
             FTK_P();
 
             p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setTooltip("Toggle whether color controls are enabled.");
+            p.enabledCheckBox->setTooltip("Toggle whether the color controls, exposure, and soft clip are enabled.");
 
             p.sliders["Add"] = ftk::FloatEditSlider::create(context);
             p.sliders["Add"]->setRange(-1.F, 1.F);
@@ -547,6 +549,21 @@ namespace djv
             p.hueSlider->setDefault(0);
             ftk::setScreenshotTag(p.hueSlider, "Color.Controls.Hue");
 
+            p.exposureSlider = ftk::FloatEditSlider::create(context);
+            p.exposureSlider->setRange(-10.F, 10.F);
+            p.exposureSlider->setDefault(0.F);
+            p.exposureSlider->getModel()->setRangeSoft(true);
+            p.exposureSlider->setTooltip(
+                "Adjust the exposure in stops. Each stop doubles the "
+                "brightness, and zero leaves the image unchanged.");
+            ftk::setScreenshotTag(p.exposureSlider, "Color.Controls.Exposure");
+
+            p.softClipSlider = ftk::FloatEditSlider::create(context);
+            p.softClipSlider->setDefault(0.F);
+            p.softClipSlider->setTooltip(
+                "Roll off values approaching white instead of clipping them.");
+            ftk::setScreenshotTag(p.softClipSlider, "Color.Controls.SoftClip");
+
             p.layout = ftk::FormLayout::create(context);
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -556,18 +573,27 @@ namespace djv
             p.layout->addRow("Contrast:", p.sliders["Contrast"]);
             p.layout->addRow("Saturation:", p.sliders["Saturation"]);
             p.layout->addRow("Hue:", p.hueSlider);
+            p.layout->addRow("Exposure:", p.exposureSlider);
+            p.layout->addRow("Soft clip:", p.softClipSlider);
 
+            // One check box for adjustments the display options keep apart:
+            // checked when any is on, and turning it on or off turns all.
             p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
                     FTK_P();
-                    p.enabledCheckBox->setChecked(value.color.enabled);
+                    p.enabledCheckBox->setChecked(
+                        value.color.enabled ||
+                        value.exposure.enabled ||
+                        value.softClip.enabled);
                     p.sliders["Add"]->setValue(value.color.add.x);
                     p.sliders["Brightness"]->setValue(value.color.brightness.x);
                     p.sliders["Contrast"]->setValue(value.color.contrast.x);
                     p.sliders["Saturation"]->setValue(value.color.saturation.x);
                     p.hueSlider->setValue(std::round(value.color.hue * 360.F));
+                    p.exposureSlider->setValue(value.exposure.exposure);
+                    p.softClipSlider->setValue(value.softClip.value);
                 });
 
             p.enabledCheckBox->setCheckedCallback(
@@ -575,6 +601,34 @@ namespace djv
                 {
                     auto options = viewportModel->getDisplayOptions();
                     options.color.enabled = value;
+                    options.exposure.enabled = value;
+                    options.softClip.enabled = value;
+                    viewportModel->setDisplayOptions(options);
+                });
+
+            p.exposureSlider->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    if (value == options.exposure.exposure)
+                    {
+                        return;
+                    }
+                    options.exposure.enabled = true;
+                    options.exposure.exposure = value;
+                    viewportModel->setDisplayOptions(options);
+                });
+
+            p.softClipSlider->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    if (value == options.softClip.value)
+                    {
+                        return;
+                    }
+                    options.softClip.enabled = true;
+                    options.softClip.value = value;
                     viewportModel->setDisplayOptions(options);
                 });
 
@@ -899,119 +953,5 @@ namespace djv
             return _p->enabledCheckBox;
         }
 
-        struct ExposureWidget::Private
-        {
-            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
-            std::map<std::string, std::shared_ptr<ftk::FloatEditSlider> > sliders;
-            std::shared_ptr<ftk::FormLayout> layout;
-
-            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > optionsObservers;
-        };
-
-        void ExposureWidget::_init(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::ViewportModel>& viewportModel,
-            const std::shared_ptr<ftk::IWidget>& parent)
-        {
-            ftk::IContainer::_init(context, "djv::ui::ExposureWidget", parent);
-            FTK_P();
-
-            p.enabledCheckBox = ftk::CheckBox::create(context);
-            p.enabledCheckBox->setTooltip("Toggle whether exposure and soft clip are enabled.");
-            ftk::setScreenshotTag(p.enabledCheckBox, "Color.Exposure.Enabled");
-
-            p.sliders["Exposure"] = ftk::FloatEditSlider::create(context);
-            p.sliders["Exposure"]->setRange(-10.F, 10.F);
-            p.sliders["Exposure"]->setDefault(0.F);
-            p.sliders["Exposure"]->getModel()->setRangeSoft(true);
-            p.sliders["Exposure"]->setTooltip(
-                "Adjust the exposure in stops. Each stop doubles the "
-                "brightness, and zero leaves the image unchanged.");
-            ftk::setScreenshotTag(p.sliders["Exposure"], "Color.Exposure.Exposure");
-
-            p.sliders["SoftClip"] = ftk::FloatEditSlider::create(context);
-            p.sliders["SoftClip"]->setDefault(0.F);
-            p.sliders["SoftClip"]->setTooltip(
-                "Roll off values approaching white instead of clipping them.");
-            ftk::setScreenshotTag(p.sliders["SoftClip"], "Color.Exposure.SoftClip");
-
-            p.layout = ftk::FormLayout::create(context);
-            _setWidget(p.layout);
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Exposure:", p.sliders["Exposure"]);
-            p.layout->addRow("Soft clip:", p.sliders["SoftClip"]);
-
-            // One check box for the two adjustments, which the display
-            // options keep apart: checked when either is on, and turning it
-            // on or off turns both.
-            p.optionsObservers = ftk::Observer<tl::DisplayOptions>::create(
-                viewportModel->observeDisplayOptions(),
-                [this](const tl::DisplayOptions& value)
-                {
-                    _p->enabledCheckBox->setChecked(
-                        value.exposure.enabled ||
-                        value.softClip.enabled);
-                    _p->sliders["Exposure"]->setValue(value.exposure.exposure);
-                    _p->sliders["SoftClip"]->setValue(value.softClip.value);
-                });
-
-            p.enabledCheckBox->setCheckedCallback(
-                [viewportModel](bool value)
-                {
-                    auto options = viewportModel->getDisplayOptions();
-                    options.exposure.enabled = value;
-                    options.softClip.enabled = value;
-                    viewportModel->setDisplayOptions(options);
-                });
-
-            p.sliders["Exposure"]->setCallback(
-                [viewportModel](float value)
-                {
-                    auto options = viewportModel->getDisplayOptions();
-                    if (value == options.exposure.exposure)
-                    {
-                        return;
-                    }
-                    options.exposure.enabled = true;
-                    options.exposure.exposure = value;
-                    viewportModel->setDisplayOptions(options);
-                });
-
-            p.sliders["SoftClip"]->setCallback(
-                [viewportModel](float value)
-                {
-                    auto options = viewportModel->getDisplayOptions();
-                    if (value == options.softClip.value)
-                    {
-                        return;
-                    }
-                    options.softClip.enabled = true;
-                    options.softClip.value = value;
-                    viewportModel->setDisplayOptions(options);
-                });
-        }
-
-        ExposureWidget::ExposureWidget() :
-            _p(new Private)
-        {}
-
-        ExposureWidget::~ExposureWidget()
-        {}
-
-        std::shared_ptr<ExposureWidget> ExposureWidget::create(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<models::ViewportModel>& viewportModel,
-            const std::shared_ptr<IWidget>& parent)
-        {
-            auto out = std::shared_ptr<ExposureWidget>(new ExposureWidget);
-            out->_init(context, viewportModel, parent);
-            return out;
-        }
-
-        std::shared_ptr<ftk::CheckBox> ExposureWidget::getEnabledCheckBox() const
-        {
-            return _p->enabledCheckBox;
-        }
     }
 }

@@ -42,7 +42,6 @@ namespace djv
             auto viewportModel = app->getViewportModel();
             auto colorWidget = ui::ColorWidget::create(context, viewportModel);
             auto levelsWidget = ui::LevelsWidget::create(context, app->getSettings(), viewportModel);
-            auto exposureWidget = ui::ExposureWidget::create(context, viewportModel);
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::Border);
@@ -60,9 +59,6 @@ namespace djv
             p.bellows["Levels"] = ftk::Bellows::create(context, "Levels", layout);
             p.bellows["Levels"]->setWidget(levelsWidget);
             p.bellows["Levels"]->setToolWidget(levelsWidget->getEnabledCheckBox());
-            p.bellows["Exposure"] = ftk::Bellows::create(context, "Exposure", layout);
-            p.bellows["Exposure"]->setWidget(exposureWidget);
-            p.bellows["Exposure"]->setToolWidget(exposureWidget->getEnabledCheckBox());
             _setWidget(layout);
 
             _loadSettings(p.bellows);

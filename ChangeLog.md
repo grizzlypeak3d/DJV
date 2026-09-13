@@ -25,7 +25,7 @@ Changes:
 * Exported files are named for the file being exported.
 * Right clicking the Tools panel offers the panel itself; the menu of every
   tool bar and panel is on the viewport.
-* Soft clip is in the Exposure section of the Color tool.
+* Exposure and soft clip are in the Color section of the Color tool.
 * The Audio tool plays all channels or a chosen one for each file, in
   place of the channel mute check boxes. The status indicator lights
   when a channel is chosen.

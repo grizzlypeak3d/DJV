@@ -133,31 +133,5 @@ namespace djv
         private:
             FTK_PRIVATE();
         };
-
-        class DJV_UI_API_TYPE ExposureWidget : public ftk::IContainer
-        {
-            FTK_NON_COPYABLE(ExposureWidget);
-
-        protected:
-            void _init(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::ViewportModel>&,
-                const std::shared_ptr<IWidget>& parent);
-
-            ExposureWidget();
-
-        public:
-            DJV_UI_API virtual ~ExposureWidget();
-
-            DJV_UI_API static std::shared_ptr<ExposureWidget> create(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::ViewportModel>&,
-                const std::shared_ptr<IWidget>& parent = nullptr);
-
-            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
-
-        private:
-            FTK_PRIVATE();
-        };
     }
 }

@@ -42,13 +42,12 @@
 <li><a href="#lut">LUT</a></li>
 <li><a href="#color">Color</a></li>
 <li><a href="#levels">Levels</a></li>
-<li><a href="#exposure">Exposure</a></li>
 </ul>
 </div>
 <p>The <strong>Color</strong> tool covers everything color-related: OpenColorIO settings, LUTs (look-up tables), and image adjustments such as brightness, contrast, levels, and exposure.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
 <p>Shortcut: <kbd>F4</kbd></p>
-<p>The tool is divided into collapsible sections — <strong>OCIO</strong>, <strong>LUT</strong>, <strong>Color</strong>, <strong>Levels</strong>, and <strong>Exposure</strong> — and each can be turned on or off independently using the checkbox in its header. This makes it easy to compare the image with and without a given adjustment.</p>
+<p>The tool is divided into collapsible sections — <strong>OCIO</strong>, <strong>LUT</strong>, <strong>Color</strong>, and <strong>Levels</strong> — and each can be turned on or off independently using the checkbox in its header. This makes it easy to compare the image with and without a given adjustment.</p>
 <div class="note">When any of the color controls are active, a status bar indicator is shown so the adjustment isn't forgotten about.</div>
 <p>A slider marks its default value with a vertical line. Double click the slider to reset it. The triangle at the end of the slider opens a popup with the reset and the range.</p>
 <h2 id="opencolorio-ocio">OpenColorIO (OCIO)</h2>
@@ -74,15 +73,11 @@
 <h2 id="color">Color</h2>
 <p><img src="assets/color-controls.svg" alt="Color controls"></p>
 <p>Basic color adjustments:</p>
-<ul><li><strong>Add</strong> — Add a constant value to each channel.</li><li><strong>Brightness</strong> — Scale the overall brightness.</li><li><strong>Contrast</strong> — Increase or decrease contrast around the midpoint.</li><li><strong>Saturation</strong> — Adjust color intensity, from grayscale up to oversaturated.</li><li><strong>Hue</strong> — Rotate the hue.</li><li><strong>Invert</strong> — Invert the image colors.</li></ul>
+<ul><li><strong>Add</strong> — Add a constant value to each channel.</li><li><strong>Brightness</strong> — Scale the overall brightness.</li><li><strong>Contrast</strong> — Increase or decrease contrast around the midpoint.</li><li><strong>Saturation</strong> — Adjust color intensity, from grayscale up to oversaturated.</li><li><strong>Hue</strong> — Rotate the hue.</li><li><strong>Invert</strong> — Invert the image colors.</li><li><strong>Exposure</strong> — Adjust the image in stops; each stop doubles the brightness, and zero leaves the image unchanged.</li><li><strong>Soft clip</strong> — Roll off values approaching white instead of clipping them hard, which helps preserve detail in bright highlights.</li></ul>
+<p>The check box in the header turns all of them on or off. For gamma see <a href="#levels">Levels</a>.</p>
 <h2 id="levels">Levels</h2>
 <p><img src="assets/color-levels.svg" alt="Levels"></p>
 <p>Levels remap the input tonal range to an output range, similar to the levels control in an image editor:</p>
-<ul><li><strong>In low</strong> / <strong>In high</strong> — The black and white points of the input.</li><li><strong>Gamma</strong> — A midtone adjustment applied between the input and output ranges.</li><li><strong>Out low</strong> / <strong>Out high</strong> — The black and white points of the output.</li></ul>
-<h2 id="exposure">Exposure</h2>
-<p><img src="assets/color-exposure.svg" alt="Exposure"></p>
-<ul><li><strong>Exposure</strong> — Adjust the image in stops; each stop doubles the brightness, and zero leaves the image unchanged.</li><li><strong>Soft clip</strong> — Roll off values approaching white instead of clipping them hard, which helps preserve detail in bright highlights.</li></ul>
-<p>The check box in the header turns both on or off. For gamma see <a href="#levels">Levels</a>.</p>
-</main>
+<ul><li><strong>In low</strong> / <strong>In high</strong> — The black and white points of the input.</li><li><strong>Gamma</strong> — A midtone adjustment applied between the input and output ranges.</li><li><strong>Out low</strong> / <strong>Out high</strong> — The black and white points of the output.</li></ul></main>
 </body>
 </html>

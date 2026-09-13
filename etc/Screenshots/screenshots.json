@@ -869,6 +869,14 @@
         {
           "id": "Color.Controls.Hue",
           "caption": "Hue"
+        },
+        {
+          "id": "Color.Controls.Exposure",
+          "caption": "Exposure"
+        },
+        {
+          "id": "Color.Controls.SoftClip",
+          "caption": "Soft clip"
         }
       ]
     },
@@ -904,37 +912,6 @@
         {
           "id": "Color.Levels.Out",
           "caption": "Out low/high"
-        }
-      ]
-    },
-    {
-      "id": "color-exposure",
-      "window": {
-        "w": 900,
-        "h": 600,
-        "splitter2": 0.5
-      },
-      "crop": "MainWindow.Tools",
-      "setup": [
-        {
-          "tool": "Color",
-          "expand": [
-            "Exposure"
-          ]
-        }
-      ],
-      "annotate": [
-        {
-          "id": "Color.Exposure.Enabled",
-          "caption": "Enable"
-        },
-        {
-          "id": "Color.Exposure.Exposure",
-          "caption": "Exposure"
-        },
-        {
-          "id": "Color.Exposure.SoftClip",
-          "caption": "Soft clip"
         }
       ]
     },

@@ -69,14 +69,6 @@ namespace djv
                     nb::arg("viewportModel"),
                     nb::arg("parent") = nullptr)
                 .def_prop_ro("enabledCheckBox", &LevelsWidget::getEnabledCheckBox);
-
-            nb::class_<ExposureWidget, ftk::IContainer>(m, "ExposureWidget")
-                .def(
-                    nb::new_(&ExposureWidget::create),
-                    nb::arg("context"),
-                    nb::arg("viewportModel"),
-                    nb::arg("parent") = nullptr)
-                .def_prop_ro("enabledCheckBox", &ExposureWidget::getEnabledCheckBox);
         }
     }
 }

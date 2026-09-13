@@ -284,7 +284,8 @@ namespace djv
             }
             else if ("Color" == name)
             {
-                // The first of the adjustments that is changing the picture.
+                // Levels has a section of its own; everything else the
+                // indicator covers is in the Color section.
                 out = "Color";
                 if (auto viewportModel = p.viewportModel.lock())
                 {
@@ -293,18 +294,12 @@ namespace djv
                     color.enabled = false;
                     tl::Levels levels = options.levels;
                     levels.enabled = false;
-                    if (!(options.color.enabled && color != tl::Color()))
+                    if (options.levels.enabled && levels != tl::Levels() &&
+                        !(options.color.enabled && color != tl::Color()) &&
+                        !(options.exposure.enabled && options.exposure.exposure != 0.F) &&
+                        !(options.softClip.enabled && options.softClip.value > 0.F))
                     {
-                        if (options.levels.enabled && levels != tl::Levels())
-                        {
-                            out = "Levels";
-                        }
-                        else if (
-                            (options.exposure.enabled && options.exposure.exposure != 0.F) ||
-                            (options.softClip.enabled && options.softClip.value > 0.F))
-                        {
-                            out = "Exposure";
-                        }
+                        out = "Levels";
                     }
                 }
             }
