@@ -31,9 +31,6 @@ namespace djv
             bool audioChannelEnabled = false;
 
             std::weak_ptr<models::ViewportModel> viewportModel;
-            std::weak_ptr<models::ColorModel> colorModel;
-            std::weak_ptr<models::AudioModel> audioModel;
-            std::weak_ptr<models::FilesModel> filesModel;
             std::weak_ptr<models::ToolsModel> toolsModel;
 
             std::shared_ptr<ftk::ToolButton> button;
@@ -64,9 +61,6 @@ namespace djv
             FTK_P();
 
             p.viewportModel = viewportModel;
-            p.colorModel = colorModel;
-            p.audioModel = audioModel;
-            p.filesModel = filesModel;
             p.toolsModel = toolsModel;
 
             p.button = ftk::ToolButton::create(context);
@@ -76,7 +70,7 @@ namespace djv
             p.button->setPopupIcon(true);
             p.button->setTooltip(
                 "This indicator shows options that affect video, audio, or performance.\n"
-                "Click to show which options are in use, turn them off, or show their tools.");
+                "Click to show which options are in use, and their tools.");
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
@@ -306,82 +300,6 @@ namespace djv
             return out;
         }
 
-        void StatusIndicator::_indicatorOff(const std::string& name)
-        {
-            FTK_P();
-            if (auto viewportModel = p.viewportModel.lock())
-            {
-                if ("Channels" == name ||
-                    "Negative" == name ||
-                    "Mirror" == name ||
-                    "Color" == name)
-                {
-                    tl::DisplayOptions options = viewportModel->getDisplayOptions();
-                    if ("Channels" == name)
-                    {
-                        options.channels = ftk::ChannelDisplay::Color;
-                    }
-                    else if ("Negative" == name)
-                    {
-                        options.negative = false;
-                    }
-                    else if ("Mirror" == name)
-                    {
-                        options.mirror.x = false;
-                        options.mirror.y = false;
-                    }
-                    else
-                    {
-                        options.color.enabled = false;
-                        options.levels.enabled = false;
-                        options.exposure.enabled = false;
-                        options.softClip.enabled = false;
-                    }
-                    viewportModel->setDisplayOptions(options);
-                }
-                else if ("ClippingWarning" == name)
-                {
-                    tl::ForegroundOptions options = viewportModel->getForegroundOptions();
-                    options.clippingWarning.enabled = false;
-                    viewportModel->setForegroundOptions(options);
-                }
-                else if ("AspectRatio" == name)
-                {
-                    models::AspectRatioOptions options = viewportModel->getAspectRatioOptions();
-                    options.index = 0;
-                    viewportModel->setAspectRatioOptions(options);
-                }
-            }
-            if (auto colorModel = p.colorModel.lock())
-            {
-                if ("OCIO" == name)
-                {
-                    tl::OCIOOptions options = colorModel->getOCIOOptions();
-                    options.enabled = false;
-                    colorModel->setOCIOOptions(options);
-                }
-                else if ("LUT" == name)
-                {
-                    tl::LUTOptions options = colorModel->getLUTOptions();
-                    options.enabled = false;
-                    colorModel->setLUTOptions(options);
-                }
-            }
-            if ("AudioOffset" == name)
-            {
-                if (auto audioModel = p.audioModel.lock())
-                {
-                    audioModel->setSyncOffset(0.0);
-                }
-            }
-            else if ("AudioChannel" == name)
-            {
-                if (auto filesModel = p.filesModel.lock())
-                {
-                    filesModel->setAudioChannel(filesModel->getA(), -1);
-                }
-            }
-        }
 
         void StatusIndicator::_indicatorUpdate()
         {
@@ -404,11 +322,6 @@ namespace djv
                 p.popup = StatusIndicatorPopup::create(
                     getContext(),
                     _getIndicators());
-                p.popup->setOffCallback(
-                    [this](const std::string& name)
-                    {
-                        _indicatorOff(name);
-                    });
                 p.popup->setToolCallback(
                     [this](const std::string& name)
                     {

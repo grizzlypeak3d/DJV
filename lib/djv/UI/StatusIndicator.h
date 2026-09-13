@@ -70,10 +70,6 @@ namespace djv
             //! Get the section of the tool that has an option's controls.
             DJV_UI_API virtual std::string _getIndicatorSection(const std::string&) const;
 
-            //! Turn an option off. Options that are values rather than
-            //! switches are set back to their defaults.
-            DJV_UI_API virtual void _indicatorOff(const std::string&);
-
             DJV_UI_API void _indicatorUpdate();
 
         private:

@@ -4,6 +4,7 @@
 #include <djv/UI/StatusIndicatorPopup.h>
 
 #include <ftk/UI/GridLayout.h>
+#include <ftk/UI/Icon.h>
 #include <ftk/UI/ToolButton.h>
 
 namespace djv
@@ -12,9 +13,8 @@ namespace djv
     {
         struct StatusIndicatorPopup::Private
         {
-            std::map<std::string, std::shared_ptr<ftk::ToolButton> > offButtons;
+            std::map<std::string, std::shared_ptr<ftk::Icon> > icons;
             std::map<std::string, std::shared_ptr<ftk::ToolButton> > toolButtons;
-            std::function<void(const std::string&)> offCallback;
             std::function<void(const std::string&)> toolCallback;
         };
 
@@ -39,18 +39,8 @@ namespace djv
             {
                 const std::string name = i.first;
 
-                auto offButton = ftk::ToolButton::create(context, layout);
-                offButton->setIcon(std::string("MenuChecked"));
-                offButton->setTooltip("Turn off");
-                offButton->setClickedCallback(
-                    [this, name]
-                    {
-                        if (_p->offCallback)
-                        {
-                            _p->offCallback(name);
-                        }
-                    });
-                p.offButtons[name] = offButton;
+                auto icon = ftk::Icon::create(context, "MenuChecked", layout);
+                p.icons[name] = icon;
 
                 auto toolButton = ftk::ToolButton::create(context, i.second, layout);
                 toolButton->setTooltip("Show the tool");
@@ -64,7 +54,7 @@ namespace djv
                     });
                 p.toolButtons[name] = toolButton;
 
-                layout->setGridPos(offButton, row, 0);
+                layout->setGridPos(icon, row, 0);
                 layout->setGridPos(toolButton, row, 1);
                 ++row;
             }
@@ -92,7 +82,7 @@ namespace djv
             FTK_P();
             for (const auto& i : values)
             {
-                if (const auto j = p.offButtons.find(i.first); j != p.offButtons.end())
+                if (const auto j = p.icons.find(i.first); j != p.icons.end())
                 {
                     j->second->setEnabled(i.second);
                     j->second->setBackgroundRole(i.second ?
@@ -104,11 +94,6 @@ namespace djv
                     k->second->setEnabled(i.second);
                 }
             }
-        }
-
-        void StatusIndicatorPopup::setOffCallback(const std::function<void(const std::string&)>& value)
-        {
-            _p->offCallback = value;
         }
 
         void StatusIndicatorPopup::setToolCallback(const std::function<void(const std::string&)>& value)
