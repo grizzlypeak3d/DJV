@@ -217,6 +217,18 @@
       ],
       "annotate": [
         {
+          "id": "View.Options.Channels",
+          "caption": "Channels"
+        },
+        {
+          "id": "View.Options.Negative",
+          "caption": "Negative"
+        },
+        {
+          "id": "View.Options.Mirror",
+          "caption": "Mirror"
+        },
+        {
           "id": "View.Options.Minify",
           "caption": "Minify"
         },

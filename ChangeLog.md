@@ -29,6 +29,8 @@ Changes:
 * The Audio tool plays all channels or a chosen one for each file, in
   place of the channel mute check boxes. The status indicator lights
   when a channel is chosen.
+* The View tool has controls for the color channels, negative, and
+  mirror.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.

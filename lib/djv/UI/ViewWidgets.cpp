@@ -37,6 +37,10 @@ namespace djv
         {
             std::vector<ftk::gl::TextureType> colorBuffers;
 
+            std::shared_ptr<ftk::ComboBox> channelsComboBox;
+            std::shared_ptr<ftk::CheckBox> negativeCheckBox;
+            std::shared_ptr<ftk::CheckBox> mirrorXCheckBox;
+            std::shared_ptr<ftk::CheckBox> mirrorYCheckBox;
             std::shared_ptr<ftk::ComboBox> minifyComboBox;
             std::shared_ptr<ftk::ComboBox> magnifyComboBox;
             std::shared_ptr<ftk::ComboBox> videoLevelsComboBox;
@@ -56,6 +60,23 @@ namespace djv
         {
             ftk::IContainer::_init(context, "djv::app::ViewOptionsWidget", parent);
             FTK_P();
+
+            p.channelsComboBox = ftk::ComboBox::create(
+                context,
+                ftk::getChannelDisplayLabels());
+            p.channelsComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.channelsComboBox, "View.Options.Channels");
+
+            p.negativeCheckBox = ftk::CheckBox::create(context);
+            ftk::setScreenshotTag(p.negativeCheckBox, "View.Options.Negative");
+
+            p.mirrorXCheckBox = ftk::CheckBox::create(context, "Horizontal");
+            p.mirrorYCheckBox = ftk::CheckBox::create(context, "Vertical");
+            auto mirrorLayout = ftk::HorizontalLayout::create(context);
+            mirrorLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.mirrorXCheckBox->setParent(mirrorLayout);
+            p.mirrorYCheckBox->setParent(mirrorLayout);
+            ftk::setScreenshotTag(mirrorLayout, "View.Options.Mirror");
 
             p.minifyComboBox = ftk::ComboBox::create(
                 context,
@@ -101,6 +122,9 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Channels:", p.channelsComboBox);
+            p.layout->addRow("Negative:", p.negativeCheckBox);
+            p.layout->addRow("Mirror:", mirrorLayout);
             p.layout->addRow("Minify:", p.minifyComboBox);
             p.layout->addRow("Magnify:", p.magnifyComboBox);
             p.layout->addRow("Video levels:", p.videoLevelsComboBox);
@@ -120,8 +144,14 @@ namespace djv
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
-                [this](const tl::DisplayOptions&)
-                {});
+                [this](const tl::DisplayOptions& value)
+                {
+                    FTK_P();
+                    p.channelsComboBox->setCurrentIndex(static_cast<int>(value.channels));
+                    p.negativeCheckBox->setChecked(value.negative);
+                    p.mirrorXCheckBox->setChecked(value.mirror.x);
+                    p.mirrorYCheckBox->setChecked(value.mirror.y);
+                });
 
             p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
                 viewportModel->observeColorBuffer(),
@@ -135,6 +165,38 @@ namespace djv
                         index = i - p.colorBuffers.begin();
                     }
                     _p->colorBufferComboBox->setCurrentIndex(index);
+                });
+
+            p.channelsComboBox->setIndexCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    options.channels = static_cast<ftk::ChannelDisplay>(value);
+                    viewportModel->setDisplayOptions(options);
+                });
+
+            p.negativeCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    options.negative = value;
+                    viewportModel->setDisplayOptions(options);
+                });
+
+            p.mirrorXCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    options.mirror.x = value;
+                    viewportModel->setDisplayOptions(options);
+                });
+
+            p.mirrorYCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getDisplayOptions();
+                    options.mirror.y = value;
+                    viewportModel->setDisplayOptions(options);
                 });
 
             p.minifyComboBox->setIndexCallback(
