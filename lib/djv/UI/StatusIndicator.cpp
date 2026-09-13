@@ -7,6 +7,7 @@
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/ToolsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/ToolButton.h>
@@ -29,6 +30,12 @@ namespace djv
             bool audioOffsetEnabled = false;
             bool audioChannelEnabled = false;
 
+            std::weak_ptr<models::ViewportModel> viewportModel;
+            std::weak_ptr<models::ColorModel> colorModel;
+            std::weak_ptr<models::AudioModel> audioModel;
+            std::weak_ptr<models::FilesModel> filesModel;
+            std::weak_ptr<models::ToolsModel> toolsModel;
+
             std::shared_ptr<ftk::ToolButton> button;
             std::shared_ptr<StatusIndicatorPopup> popup;
 
@@ -47,6 +54,7 @@ namespace djv
             const std::shared_ptr<models::ColorModel>& colorModel,
             const std::shared_ptr<models::AudioModel>& audioModel,
             const std::shared_ptr<models::FilesModel>& filesModel,
+            const std::shared_ptr<models::ToolsModel>& toolsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             IWidget::_init(
@@ -55,6 +63,12 @@ namespace djv
                 parent);
             FTK_P();
 
+            p.viewportModel = viewportModel;
+            p.colorModel = colorModel;
+            p.audioModel = audioModel;
+            p.filesModel = filesModel;
+            p.toolsModel = toolsModel;
+
             p.button = ftk::ToolButton::create(context);
 
             _setWidget(p.button);
@@ -62,7 +76,7 @@ namespace djv
             p.button->setPopupIcon(true);
             p.button->setTooltip(
                 "This indicator shows options that affect video, audio, or performance.\n"
-                "Click to show which options are in use.");
+                "Click to show which options are in use, turn them off, or show their tools.");
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
@@ -164,10 +178,11 @@ namespace djv
             const std::shared_ptr<models::ColorModel>& colorModel,
             const std::shared_ptr<models::AudioModel>& audioModel,
             const std::shared_ptr<models::FilesModel>& filesModel,
+            const std::shared_ptr<models::ToolsModel>& toolsModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<StatusIndicator>(new StatusIndicator);
-            out->_init(context, viewportModel, colorModel, audioModel, filesModel, parent);
+            out->_init(context, viewportModel, colorModel, audioModel, filesModel, toolsModel, parent);
             return out;
         }
 
@@ -222,6 +237,110 @@ namespace djv
             };
         }
 
+        std::string StatusIndicator::_getIndicatorTool(const std::string& name) const
+        {
+            std::string out;
+            if ("Channels" == name ||
+                "Negative" == name ||
+                "ClippingWarning" == name ||
+                "Mirror" == name ||
+                "AspectRatio" == name)
+            {
+                out = "View";
+            }
+            else if (
+                "OCIO" == name ||
+                "LUT" == name ||
+                "Color" == name)
+            {
+                out = "Color";
+            }
+            else if (
+                "AudioOffset" == name ||
+                "AudioChannel" == name)
+            {
+                out = "Audio";
+            }
+            return out;
+        }
+
+        void StatusIndicator::_indicatorOff(const std::string& name)
+        {
+            FTK_P();
+            if (auto viewportModel = p.viewportModel.lock())
+            {
+                if ("Channels" == name ||
+                    "Negative" == name ||
+                    "Mirror" == name ||
+                    "Color" == name)
+                {
+                    tl::DisplayOptions options = viewportModel->getDisplayOptions();
+                    if ("Channels" == name)
+                    {
+                        options.channels = ftk::ChannelDisplay::Color;
+                    }
+                    else if ("Negative" == name)
+                    {
+                        options.negative = false;
+                    }
+                    else if ("Mirror" == name)
+                    {
+                        options.mirror.x = false;
+                        options.mirror.y = false;
+                    }
+                    else
+                    {
+                        options.color.enabled = false;
+                        options.levels.enabled = false;
+                        options.exposure.enabled = false;
+                        options.softClip.enabled = false;
+                    }
+                    viewportModel->setDisplayOptions(options);
+                }
+                else if ("ClippingWarning" == name)
+                {
+                    tl::ForegroundOptions options = viewportModel->getForegroundOptions();
+                    options.clippingWarning.enabled = false;
+                    viewportModel->setForegroundOptions(options);
+                }
+                else if ("AspectRatio" == name)
+                {
+                    models::AspectRatioOptions options = viewportModel->getAspectRatioOptions();
+                    options.index = 0;
+                    viewportModel->setAspectRatioOptions(options);
+                }
+            }
+            if (auto colorModel = p.colorModel.lock())
+            {
+                if ("OCIO" == name)
+                {
+                    tl::OCIOOptions options = colorModel->getOCIOOptions();
+                    options.enabled = false;
+                    colorModel->setOCIOOptions(options);
+                }
+                else if ("LUT" == name)
+                {
+                    tl::LUTOptions options = colorModel->getLUTOptions();
+                    options.enabled = false;
+                    colorModel->setLUTOptions(options);
+                }
+            }
+            if ("AudioOffset" == name)
+            {
+                if (auto audioModel = p.audioModel.lock())
+                {
+                    audioModel->setSyncOffset(0.0);
+                }
+            }
+            else if ("AudioChannel" == name)
+            {
+                if (auto filesModel = p.filesModel.lock())
+                {
+                    filesModel->setAudioChannel(filesModel->getA(), -1);
+                }
+            }
+        }
+
         void StatusIndicator::_indicatorUpdate()
         {
             FTK_P();
@@ -243,6 +362,21 @@ namespace djv
                 p.popup = StatusIndicatorPopup::create(
                     getContext(),
                     _getIndicators());
+                p.popup->setOffCallback(
+                    [this](const std::string& name)
+                    {
+                        _indicatorOff(name);
+                    });
+                p.popup->setToolCallback(
+                    [this](const std::string& name)
+                    {
+                        const std::string tool = _getIndicatorTool(name);
+                        auto toolsModel = _p->toolsModel.lock();
+                        if (!tool.empty() && toolsModel)
+                        {
+                            toolsModel->setToolOpen(tool, true);
+                        }
+                    });
                 _indicatorUpdate();
                 p.popup->open(getWindow(), p.button->getGeometry());
                 std::weak_ptr<StatusIndicator> weak(std::dynamic_pointer_cast<StatusIndicator>(shared_from_this()));

@@ -4,8 +4,7 @@
 #include <djv/UI/StatusIndicatorPopup.h>
 
 #include <ftk/UI/GridLayout.h>
-#include <ftk/UI/Icon.h>
-#include <ftk/UI/Label.h>
+#include <ftk/UI/ToolButton.h>
 
 namespace djv
 {
@@ -13,8 +12,10 @@ namespace djv
     {
         struct StatusIndicatorPopup::Private
         {
-            std::map<std::string, std::shared_ptr<ftk::Icon> > icons;
-            std::map<std::string, std::shared_ptr<ftk::Label> > labels;
+            std::map<std::string, std::shared_ptr<ftk::ToolButton> > offButtons;
+            std::map<std::string, std::shared_ptr<ftk::ToolButton> > toolButtons;
+            std::function<void(const std::string&)> offCallback;
+            std::function<void(const std::string&)> toolCallback;
         };
 
         void StatusIndicatorPopup::_init(
@@ -36,10 +37,35 @@ namespace djv
             int row = 0;
             for (const auto& i : indicators)
             {
-                p.icons[i.first] = ftk::Icon::create(context, "MenuChecked", layout);
-                p.labels[i.first] = ftk::Label::create(context, i.second, layout);
-                layout->setGridPos(p.icons[i.first], row, 0);
-                layout->setGridPos(p.labels[i.first], row, 1);
+                const std::string name = i.first;
+
+                auto offButton = ftk::ToolButton::create(context, layout);
+                offButton->setIcon(std::string("MenuChecked"));
+                offButton->setTooltip("Turn off");
+                offButton->setClickedCallback(
+                    [this, name]
+                    {
+                        if (_p->offCallback)
+                        {
+                            _p->offCallback(name);
+                        }
+                    });
+                p.offButtons[name] = offButton;
+
+                auto toolButton = ftk::ToolButton::create(context, i.second, layout);
+                toolButton->setTooltip("Show the tool");
+                toolButton->setClickedCallback(
+                    [this, name]
+                    {
+                        if (_p->toolCallback)
+                        {
+                            _p->toolCallback(name);
+                        }
+                    });
+                p.toolButtons[name] = toolButton;
+
+                layout->setGridPos(offButton, row, 0);
+                layout->setGridPos(toolButton, row, 1);
                 ++row;
             }
         }
@@ -66,18 +92,28 @@ namespace djv
             FTK_P();
             for (const auto& i : values)
             {
-                if (const auto j = p.icons.find(i.first); j != p.icons.end())
+                if (const auto j = p.offButtons.find(i.first); j != p.offButtons.end())
                 {
                     j->second->setEnabled(i.second);
                     j->second->setBackgroundRole(i.second ?
                         ftk::ColorRole::Checked :
                         ftk::ColorRole::None);
                 }
-                if (const auto k = p.labels.find(i.first); k != p.labels.end())
+                if (const auto k = p.toolButtons.find(i.first); k != p.toolButtons.end())
                 {
                     k->second->setEnabled(i.second);
                 }
             }
+        }
+
+        void StatusIndicatorPopup::setOffCallback(const std::function<void(const std::string&)>& value)
+        {
+            _p->offCallback = value;
+        }
+
+        void StatusIndicatorPopup::setToolCallback(const std::function<void(const std::string&)>& value)
+        {
+            _p->toolCallback = value;
         }
     }
 }

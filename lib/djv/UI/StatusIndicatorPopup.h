@@ -35,6 +35,12 @@ namespace djv
 
             DJV_UI_API void setIndicators(const std::map<std::string, bool>&);
 
+            //! Set the callback for turning an option off.
+            DJV_UI_API void setOffCallback(const std::function<void(const std::string&)>&);
+
+            //! Set the callback for showing an option's tool.
+            DJV_UI_API void setToolCallback(const std::function<void(const std::string&)>&);
+
         private:
             FTK_PRIVATE();
         };

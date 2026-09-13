@@ -31,6 +31,8 @@ Changes:
   when a channel is chosen.
 * The View tool has controls for the color channels, negative, and
   mirror.
+* The status indicator's options can be turned off, or their tools
+  shown, from its popup.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.

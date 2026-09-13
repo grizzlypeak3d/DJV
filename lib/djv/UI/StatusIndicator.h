@@ -20,6 +20,7 @@ namespace djv
         class AudioModel;
         class ColorModel;
         class FilesModel;
+        class ToolsModel;
         class ViewportModel;
     }
 
@@ -40,6 +41,7 @@ namespace djv
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<models::AudioModel>&,
                 const std::shared_ptr<models::FilesModel>&,
+                const std::shared_ptr<models::ToolsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             DJV_UI_API StatusIndicator();
@@ -54,12 +56,21 @@ namespace djv
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<models::AudioModel>&,
                 const std::shared_ptr<models::FilesModel>&,
+                const std::shared_ptr<models::ToolsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         protected:
             DJV_UI_API virtual bool _hasIndicator() const;
             DJV_UI_API virtual std::vector<std::pair<std::string, std::string> > _getIndicators() const;
             DJV_UI_API virtual std::map<std::string, bool> _getIndicatorValues() const;
+
+            //! Get the tool that has an option's controls.
+            DJV_UI_API virtual std::string _getIndicatorTool(const std::string&) const;
+
+            //! Turn an option off. Options that are values rather than
+            //! switches are set back to their defaults.
+            DJV_UI_API virtual void _indicatorOff(const std::string&);
+
             DJV_UI_API void _indicatorUpdate();
 
         private:

@@ -13,6 +13,7 @@
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/ToolsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/Core/Context.h>
@@ -44,6 +45,7 @@ namespace djv
                     nb::arg("colorModel"),
                     nb::arg("audioModel"),
                     nb::arg("filesModel"),
+                    nb::arg("toolsModel"),
                     nb::arg("parent") = nullptr);
         }
     }
