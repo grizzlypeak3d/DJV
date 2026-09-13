@@ -163,6 +163,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
             std::shared_ptr<ftk::ListObserver<std::string> > openToolsObserver;
+            std::shared_ptr<ftk::Observer<std::pair<std::string, std::string> > > showSectionObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
             std::shared_ptr<ftk::Observer<models::TimelineSettings> > timelineSettingsObserver;
             std::shared_ptr<ftk::Observer<bool> > timelineFrameViewObserver;
@@ -532,6 +533,22 @@ namespace djv
                 {
                     _windowUpdate();
                 });
+
+            // A section asked for is one to be looked at, so the tools
+            // panel comes back if it was hidden.
+            p.showSectionObserver = ftk::Observer<std::pair<std::string, std::string> >::create(
+                app->getToolsModel()->observeShowSection(),
+                [this](const std::pair<std::string, std::string>&)
+                {
+                    FTK_P();
+                    models::WindowSettings settings = p.settingsModel->getWindow();
+                    if (!settings.tools)
+                    {
+                        settings.tools = true;
+                        p.settingsModel->setWindow(settings);
+                    }
+                },
+                ftk::ObserverAction::Suppress);
 
             p.mouseSettingsObserver = ftk::Observer<models::MouseSettings>::create(
                 p.settingsModel->observeMouse(),
