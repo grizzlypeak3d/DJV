@@ -82,15 +82,6 @@ namespace djv
             //! Set the audio mute.
             DJV_MODELS_API void setMute(bool);
 
-            //! Get the audio channel to play, or -1 for all channels.
-            DJV_MODELS_API int getChannel() const;
-
-            //! Observe the audio channel to play.
-            DJV_MODELS_API std::shared_ptr<ftk::IObservable<int> > observeChannel() const;
-
-            //! Set the audio channel to play, or -1 for all channels.
-            DJV_MODELS_API void setChannel(int);
-
             //! Get the audio sync offset.
             DJV_MODELS_API double getSyncOffset() const;
 

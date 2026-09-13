@@ -7,8 +7,6 @@
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Math.h>
 
-#include <algorithm>
-
 namespace djv
 {
     namespace models
@@ -20,7 +18,6 @@ namespace djv
             std::shared_ptr<ftk::Observable<tl::AudioDeviceID> > device;
             std::shared_ptr<ftk::Observable<float> > volume;
             std::shared_ptr<ftk::Observable<bool> > mute;
-            std::shared_ptr<ftk::Observable<int> > channel;
             std::shared_ptr<ftk::Observable<double> > syncOffset;
             std::shared_ptr<ftk::ListObserver<tl::AudioDeviceInfo> > devicesObserver;
         };
@@ -43,8 +40,6 @@ namespace djv
             bool mute = false;
             p.settings->get("/Audio/Mute", mute);
             p.mute = ftk::Observable<bool>::create(mute);
-
-            p.channel = ftk::Observable<int>::create(-1);
 
             p.syncOffset = ftk::Observable<double>::create(0.0);
 
@@ -151,21 +146,6 @@ namespace djv
         void AudioModel::setMute(bool value)
         {
             _p->mute->setIfChanged(value);
-        }
-
-        int AudioModel::getChannel() const
-        {
-            return _p->channel->get();
-        }
-
-        std::shared_ptr<ftk::IObservable<int> > AudioModel::observeChannel() const
-        {
-            return _p->channel;
-        }
-
-        void AudioModel::setChannel(int value)
-        {
-            _p->channel->setIfChanged(std::max(-1, value));
         }
 
         double AudioModel::getSyncOffset() const

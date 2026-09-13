@@ -41,6 +41,7 @@ namespace djv
                 .def_rw("audioPath", &FilesModelItem::audioPath)
                 .def_rw("videoLayers", &FilesModelItem::videoLayers)
                 .def_rw("videoLayer", &FilesModelItem::videoLayer)
+                .def_rw("audioChannel", &FilesModelItem::audioChannel)
                 .def_rw("speed", &FilesModelItem::speed)
                 .def_rw("currentTime", &FilesModelItem::currentTime)
                 .def_rw("inOutRange", &FilesModelItem::inOutRange)
@@ -101,6 +102,9 @@ namespace djv
                 .def("refresh", &FilesModel::refresh)
                 .def("nextLayer", &FilesModel::nextLayer)
                 .def("prevLayer", &FilesModel::prevLayer)
+                .def_prop_ro("audioChannel", &FilesModel::getAudioChannel)
+                .def_prop_ro("observeAudioChannel", &FilesModel::observeAudioChannel)
+                .def("setAudioChannel", &FilesModel::setAudioChannel, nb::arg("item"), nb::arg("channel"))
 
                 .def_prop_rw(
                     "compareOptions",

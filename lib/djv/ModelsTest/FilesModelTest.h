@@ -23,6 +23,7 @@ namespace djv
         private:
             void _files();
             void _navigation();
+            void _audioChannel();
             void _compare();
             void _tileCompare();
             void _reviewRestore();

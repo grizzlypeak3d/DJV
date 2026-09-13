@@ -21,7 +21,9 @@ namespace djv
             std::shared_ptr<ftk::ObservableList<int> > bIndexes;
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > active;
             std::shared_ptr<ftk::ObservableList<int> > layers;
+            std::shared_ptr<ftk::Observable<int> > audioChannel;
             std::shared_ptr<ftk::Observable<std::shared_ptr<FilesModelItem> > > reload;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::Observable<tl::CompareOptions> > compareOptions;
             std::shared_ptr<ftk::Observable<tl::CompareTime> > compareTime;
         };
@@ -43,6 +45,15 @@ namespace djv
             p.bIndexes = ftk::ObservableList<int>::create();
             p.active = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.layers = ftk::ObservableList<int>::create();
+            p.audioChannel = ftk::Observable<int>::create(-1);
+            // Followed from the "A" file itself rather than set alongside it,
+            // since every way of changing the "A" file has to carry it along.
+            p.aObserver = ftk::Observer<std::shared_ptr<FilesModelItem> >::create(
+                p.a,
+                [this](const std::shared_ptr<FilesModelItem>& value)
+                {
+                    _p->audioChannel->setIfChanged(value ? value->audioChannel : -1);
+                });
             tl::CompareOptions compareOptions;
             p.settings->getT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
             p.settings->getT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
@@ -609,6 +620,31 @@ namespace djv
                 }
                 item->videoLayer = std::max(layer, 0);
                 p.layers->setIfChanged(_getLayers());
+            }
+        }
+
+        int FilesModel::getAudioChannel() const
+        {
+            return _p->audioChannel->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<int> > FilesModel::observeAudioChannel() const
+        {
+            return _p->audioChannel;
+        }
+
+        void FilesModel::setAudioChannel(const std::shared_ptr<FilesModelItem>& item, int value)
+        {
+            FTK_P();
+            const int index = _getIndex(item);
+            if (index != -1)
+            {
+                const auto& file = p.files->getItem(index);
+                file->audioChannel = std::max(-1, value);
+                if (file == p.a->get())
+                {
+                    p.audioChannel->setIfChanged(file->audioChannel);
+                }
             }
         }
 

@@ -2564,7 +2564,7 @@ namespace djv
                     _audioUpdate();
                 });
             p.channelObserver = ftk::Observer<int>::create(
-                p.audioModel->observeChannel(),
+                p.filesModel->observeAudioChannel(),
                 [this](int)
                 {
                     _audioUpdate();
@@ -3282,17 +3282,14 @@ namespace djv
             {
                 player->setVolume(p.audioModel->getVolume());
                 player->setMute(p.audioModel->isMuted() || p.audioDeviceMute);
+                // From the file the player is showing, which the "A" file
+                // runs ahead of while a new one opens.
                 const int channelCount = player->getIOInfo().audio.channelCount;
-                const int channel = p.audioModel->getChannel();
+                const int channel = !p.activeFiles.empty() ?
+                    p.activeFiles.front()->audioChannel :
+                    -1;
                 std::vector<bool> channelMute;
-                if (channel >= channelCount)
-                {
-                    // Go back to all channels rather than keep a channel this
-                    // file doesn't have, which would silently pick a channel
-                    // in the next file that does.
-                    p.audioModel->setChannel(-1);
-                }
-                else if (channel >= 0)
+                if (channel >= 0 && channel < channelCount)
                 {
                     channelMute.resize(channelCount, true);
                     channelMute[channel] = false;

@@ -50,6 +50,7 @@ namespace djv
         {
             _files();
             _navigation();
+            _audioChannel();
             _compare();
             _tileCompare();
             _reviewRestore();
@@ -184,6 +185,51 @@ namespace djv
             FTK_CHECK(!model->getBIndexes().empty());
             model->clearB();
             FTK_CHECK(model->getBIndexes().empty());
+        }
+
+        void FilesModelTest::_audioChannel()
+        {
+            auto settings = createTestSettings(_context);
+            auto model = models::FilesModel::create(settings);
+
+            int channel = 0;
+            auto channelObserver = ftk::Observer<int>::create(
+                model->observeAudioChannel(),
+                [&channel](int value) { channel = value; });
+            FTK_CHECK(-1 == channel);
+
+            // Each file keeps its own channel, and the observable follows the
+            // "A" file.
+            auto item0 = makeItem("file0.mov");
+            auto item1 = makeItem("file1.mov");
+            model->add(item0);
+            model->add(item1);
+            model->setAudioChannel(item1, 5);
+            FTK_CHECK(5 == item1->audioChannel);
+            FTK_CHECK(5 == model->getAudioChannel());
+            FTK_CHECK(5 == channel);
+            model->setA(0);
+            FTK_CHECK(-1 == channel);
+            model->setAudioChannel(item0, 1);
+            FTK_CHECK(1 == channel);
+            model->setA(1);
+            FTK_CHECK(5 == channel);
+
+            // Setting a file other than "A" leaves the observable alone.
+            model->setAudioChannel(item0, 0);
+            FTK_CHECK(0 == item0->audioChannel);
+            FTK_CHECK(5 == channel);
+
+            // Below -1 is all of the channels.
+            model->setAudioChannel(item1, -5);
+            FTK_CHECK(-1 == channel);
+
+            // A file opened again is a new item, with all of the channels.
+            model->setAudioChannel(item1, 5);
+            model->closeAll();
+            FTK_CHECK(-1 == channel);
+            model->add(makeItem("file1.mov"));
+            FTK_CHECK(-1 == channel);
         }
 
         void FilesModelTest::_compare()

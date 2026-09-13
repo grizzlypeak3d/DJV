@@ -36,6 +36,9 @@ namespace djv
             std::vector<std::string> videoLayers;
             size_t                   videoLayer  = 0;
 
+            //! The audio channel to play, or -1 for all of the channels.
+            int                      audioChannel = -1;
+
             double                   speed       = -1.0;
 
             //! Where playback had got to, and the in/out points, when the
@@ -211,6 +214,15 @@ namespace djv
 
             //! Set the "A" file to the previous layer.
             DJV_MODELS_API void prevLayer();
+
+            //! Get the "A" file's audio channel, or -1 for all of the channels.
+            DJV_MODELS_API int getAudioChannel() const;
+
+            //! Observe the "A" file's audio channel.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<int> > observeAudioChannel() const;
+
+            //! Set a file's audio channel, or -1 for all of the channels.
+            DJV_MODELS_API void setAudioChannel(const std::shared_ptr<FilesModelItem>&, int);
 
             //! Get the compare options.
             DJV_MODELS_API const tl::CompareOptions& getCompareOptions() const;

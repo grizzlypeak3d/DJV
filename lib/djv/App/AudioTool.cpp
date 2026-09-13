@@ -5,6 +5,7 @@
 
 #include <djv/App/App.h>
 #include <djv/Models/AudioModel.h>
+#include <djv/Models/FilesModel.h>
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/CheckBox.h>
@@ -129,7 +130,8 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         // The first item is "All".
-                        app->getAudioModel()->setChannel(value - 1);
+                        auto filesModel = app->getFilesModel();
+                        filesModel->setAudioChannel(filesModel->getA(), value - 1);
                     }
                 });
 
@@ -194,7 +196,7 @@ namespace djv
                 });
 
             p.channelObserver = ftk::Observer<int>::create(
-                app->getAudioModel()->observeChannel(),
+                app->getFilesModel()->observeAudioChannel(),
                 [this](int value)
                 {
                     _p->channel = value;

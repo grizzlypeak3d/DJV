@@ -82,19 +82,6 @@ namespace djv
             FTK_CHECK(mute);
             model->setMute(false);
             FTK_CHECK(!model->isMuted());
-
-            // The channel defaults to all channels (-1).
-            int channel = 0;
-            auto channelObserver = ftk::Observer<int>::create(
-                model->observeChannel(),
-                [&channel](const int& value) { channel = value; });
-            FTK_CHECK(-1 == model->getChannel());
-            FTK_CHECK(-1 == channel);
-            model->setChannel(1);
-            FTK_CHECK(1 == model->getChannel());
-            FTK_CHECK(1 == channel);
-            model->setChannel(-5);
-            FTK_CHECK(-1 == model->getChannel());
         }
 
         void AudioModelTest::_persistence()
