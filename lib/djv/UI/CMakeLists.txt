@@ -10,6 +10,7 @@ set(HEADERS
     SetupDialog.h
     SpeedPopup.h
     StatusIndicator.h
+    StatusIndicatorPopup.h
     TimelinePreview.h
     SysInfoDialog.h
     ExportWidget.h
@@ -33,6 +34,7 @@ set(SOURCE
     ShortcutsWidget.cpp
     SpeedPopup.cpp
     StatusIndicator.cpp
+    StatusIndicatorPopup.cpp
     TimelinePreview.cpp
     StyleWidget.cpp
     SysInfoDialog.cpp

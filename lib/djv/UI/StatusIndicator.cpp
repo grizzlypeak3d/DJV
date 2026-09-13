@@ -9,7 +9,8 @@
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/ViewportModel.h>
 
-#include <ftk/UI/Menu.h>
+#include <djv/UI/StatusIndicatorPopup.h>
+
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Context.h>
 
@@ -34,7 +35,7 @@ namespace djv
             std::weak_ptr<models::ToolsModel> toolsModel;
 
             std::shared_ptr<ftk::ToolButton> button;
-            std::shared_ptr<ftk::Menu> menu;
+            std::shared_ptr<StatusIndicatorPopup> popup;
 
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
@@ -70,7 +71,7 @@ namespace djv
             p.button->setPopupIcon(true);
             p.button->setTooltip(
                 "This indicator shows options that affect video, audio, or performance.\n"
-                "Click for a menu of the options, with those in use checked.");
+                "Click to show the options in use, and go to their controls.");
 
             p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
                 viewportModel->observeDisplayOptions(),
@@ -307,61 +308,55 @@ namespace djv
                 _hasIndicator() ?
                 ftk::ColorRole::Checked :
                 ftk::ColorRole::None);
+            if (p.popup)
+            {
+                p.popup->setIndicators(_getIndicatorValues());
+            }
         }
 
         void StatusIndicator::_showIndicatorPopup()
         {
             FTK_P();
-            if (!p.menu)
+            if (!p.popup)
             {
                 std::weak_ptr<StatusIndicator> weak(std::dynamic_pointer_cast<StatusIndicator>(shared_from_this()));
-                p.menu = ftk::Menu::create(getContext());
-                const auto values = _getIndicatorValues();
-                for (const auto& i : _getIndicators())
-                {
-                    const std::string name = i.first;
-                    // Checkable only to show what is in use: choosing an
-                    // option goes to its controls, and whatever the menu
-                    // does to the check is gone when it closes.
-                    auto action = ftk::Action::create(
-                        i.second,
-                        [weak, name](bool)
+                p.popup = StatusIndicatorPopup::create(getContext(), _getIndicators());
+                p.popup->setIndicators(_getIndicatorValues());
+                p.popup->setCallback(
+                    [weak](const std::string& name)
+                    {
+                        if (auto widget = weak.lock())
                         {
-                            if (auto widget = weak.lock())
+                            const std::string tool = widget->_getIndicatorTool(name);
+                            auto toolsModel = widget->_p->toolsModel.lock();
+                            if (!tool.empty() && toolsModel)
                             {
-                                const std::string tool = widget->_getIndicatorTool(name);
-                                auto toolsModel = widget->_p->toolsModel.lock();
-                                if (!tool.empty() && toolsModel)
-                                {
-                                    toolsModel->showSection(
-                                        tool,
-                                        widget->_getIndicatorSection(name));
-                                }
+                                toolsModel->showSection(
+                                    tool,
+                                    widget->_getIndicatorSection(name));
                             }
-                        });
-                    p.menu->addAction(action);
-                    const auto j = values.find(name);
-                    const bool inUse = j != values.end() && j->second;
-                    p.menu->setChecked(action, inUse);
-                    // Only what is in use: the menu is for finding the
-                    // controls of what is changing the picture, not for
-                    // getting to the tools in general.
-                    p.menu->setEnabled(action, inUse);
-                }
-                p.menu->open(getWindow(), p.button->getGeometry());
-                p.menu->setCloseCallback(
+                            // Last: closing lets go of the popup this
+                            // callback belongs to.
+                            if (widget->_p->popup)
+                            {
+                                widget->_p->popup->close();
+                            }
+                        }
+                    });
+                p.popup->open(getWindow(), p.button->getGeometry());
+                p.popup->setCloseCallback(
                     [weak]
                     {
                         if (auto widget = weak.lock())
                         {
-                            widget->_p->menu.reset();
+                            widget->_p->popup.reset();
                         }
                     });
             }
             else
             {
-                p.menu->close();
-                p.menu.reset();
+                p.popup->close();
+                p.popup.reset();
             }
         }
     }
