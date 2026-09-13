@@ -1931,7 +1931,8 @@ namespace djv
                 _context,
                 p.viewportModel,
                 p.colorModel,
-                p.audioModel);
+                p.audioModel,
+                p.filesModel);
         }
 
         const std::shared_ptr<MainWindow>& App::getMainWindow() const

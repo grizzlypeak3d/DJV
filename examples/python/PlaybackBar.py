@@ -84,7 +84,8 @@ class Widget(ftk.IContainer):
             context,
             app.getViewportModel(),
             app.getColorModel(),
-            app.getAudioModel())
+            app.getAudioModel(),
+            app.getFilesModel())
 
         # Grouped like the top tool bar: the groups separated by
         # dividers, with the tool bar's spacing between them.

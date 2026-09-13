@@ -6,6 +6,7 @@
 #include <djv/UI/StatusIndicatorPopup.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/FilesModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/ToolButton.h>
@@ -26,6 +27,7 @@ namespace djv
             bool lutEnabled = false;
             bool colorEnabled = false;
             bool audioOffsetEnabled = false;
+            bool audioChannelEnabled = false;
 
             std::shared_ptr<ftk::ToolButton> button;
             std::shared_ptr<StatusIndicatorPopup> popup;
@@ -36,6 +38,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
+            std::shared_ptr<ftk::Observer<int> > audioChannelObserver;
         };
 
         void StatusIndicator::_init(
@@ -43,6 +46,7 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<models::ColorModel>& colorModel,
             const std::shared_ptr<models::AudioModel>& audioModel,
+            const std::shared_ptr<models::FilesModel>& filesModel,
             const std::shared_ptr<IWidget>& parent)
         {
             IWidget::_init(
@@ -132,6 +136,14 @@ namespace djv
                     _indicatorUpdate();
                 });
 
+            p.audioChannelObserver = ftk::Observer<int>::create(
+                filesModel->observeAudioChannel(),
+                [this](int value)
+                {
+                    _p->audioChannelEnabled = value != -1;
+                    _indicatorUpdate();
+                });
+
             p.button->setPressedCallback(
                 [this]
                 {
@@ -151,10 +163,11 @@ namespace djv
             const std::shared_ptr<models::ViewportModel>& viewportModel,
             const std::shared_ptr<models::ColorModel>& colorModel,
             const std::shared_ptr<models::AudioModel>& audioModel,
+            const std::shared_ptr<models::FilesModel>& filesModel,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<StatusIndicator>(new StatusIndicator);
-            out->_init(context, viewportModel, colorModel, audioModel, parent);
+            out->_init(context, viewportModel, colorModel, audioModel, filesModel, parent);
             return out;
         }
 
@@ -170,7 +183,8 @@ namespace djv
                 p.ocioEnabled        ||
                 p.lutEnabled         ||
                 p.colorEnabled       ||
-                p.audioOffsetEnabled;
+                p.audioOffsetEnabled ||
+                p.audioChannelEnabled;
         }
 
         std::vector<std::pair<std::string, std::string> > StatusIndicator::_getIndicators() const
@@ -185,7 +199,8 @@ namespace djv
                 { "OCIO", "OCIO" },
                 { "LUT", "LUT" },
                 { "Color", "Color controls" },
-                { "AudioOffset", "Audio offset" }
+                { "AudioOffset", "Audio offset" },
+                { "AudioChannel", "Audio channel" }
             };
         }
 
@@ -202,7 +217,8 @@ namespace djv
                 { "OCIO", p.ocioEnabled },
                 { "LUT", p.lutEnabled },
                 { "Color", p.colorEnabled },
-                { "AudioOffset", p.audioOffsetEnabled }
+                { "AudioOffset", p.audioOffsetEnabled },
+                { "AudioChannel", p.audioChannelEnabled }
             };
         }
 

@@ -27,7 +27,8 @@ Changes:
   tool bar and panel is on the viewport.
 * Soft clip is in the Exposure section of the Color tool.
 * The Audio tool plays all channels or a chosen one for each file, in
-  place of the channel mute check boxes.
+  place of the channel mute check boxes. The status indicator lights
+  when a channel is chosen.
 
 Fixes:
 * A file with a mono audio stream per channel plays all of the channels.

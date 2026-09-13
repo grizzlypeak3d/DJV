@@ -19,6 +19,7 @@ namespace djv
     {
         class AudioModel;
         class ColorModel;
+        class FilesModel;
         class ViewportModel;
     }
 
@@ -38,6 +39,7 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<models::AudioModel>&,
+                const std::shared_ptr<models::FilesModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             DJV_UI_API StatusIndicator();
@@ -51,6 +53,7 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<models::AudioModel>&,
+                const std::shared_ptr<models::FilesModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         protected:
