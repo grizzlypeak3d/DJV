@@ -35,6 +35,7 @@ Changes:
   its controls.
 
 Fixes:
+* Exporting with the FFmpeg command line no longer hangs.
 * A file with a mono audio stream per channel plays all of the channels.
 * The audio cache covers the whole in/out range.
 * Looping audio plays every sample at the loop point.
