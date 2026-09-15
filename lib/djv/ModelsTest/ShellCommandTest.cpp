@@ -32,21 +32,24 @@ namespace djv
             {
                 const auto c = models::parseShellCommand(
                     "\"C:/Program Files/DJV 3.4.2/bin/djv.exe\" \"%1\"");
-                FTK_ASSERT(c);
-                FTK_CHECK("C:/Program Files/DJV 3.4.2/bin/djv.exe" == c->program);
-                FTK_CHECK("\"%1\"" == c->arguments);
+                // FTK_CHECK rather than FTK_ASSERT, which is compiled out of
+                // Release; and each use guarded, so a failed parse is
+                // counted instead of reading an empty optional.
+                FTK_CHECK(c);
+                FTK_CHECK(c && "C:/Program Files/DJV 3.4.2/bin/djv.exe" == c->program);
+                FTK_CHECK(c && "\"%1\"" == c->arguments);
             }
             {
                 const auto c = models::parseShellCommand("  djv.exe   %1");
-                FTK_ASSERT(c);
-                FTK_CHECK("djv.exe" == c->program);
-                FTK_CHECK("%1" == c->arguments);
+                FTK_CHECK(c);
+                FTK_CHECK(c && "djv.exe" == c->program);
+                FTK_CHECK(c && "%1" == c->arguments);
             }
             {
                 const auto c = models::parseShellCommand("\"C:/DJV/djv.exe\"");
-                FTK_ASSERT(c);
-                FTK_CHECK("C:/DJV/djv.exe" == c->program);
-                FTK_CHECK(c->arguments.empty());
+                FTK_CHECK(c);
+                FTK_CHECK(c && "C:/DJV/djv.exe" == c->program);
+                FTK_CHECK(c && c->arguments.empty());
             }
             FTK_CHECK(!models::parseShellCommand(""));
             FTK_CHECK(!models::parseShellCommand("   "));
@@ -65,8 +68,8 @@ namespace djv
             {
                 const auto r = models::repairShellCommand(
                     "\"C:/Program Files/DJV 3.4.2/bin/djv.exe\" \"%1\"", exe, missing);
-                FTK_ASSERT(r);
-                FTK_CHECK("\"C:/Program Files/DJV 3.7.0/bin/djv.exe\" \"%1\"" == *r);
+                FTK_CHECK(r);
+                FTK_CHECK(r && "\"C:/Program Files/DJV 3.7.0/bin/djv.exe\" \"%1\"" == *r);
             }
 
             // The file name is compared without regard to case, as Windows
