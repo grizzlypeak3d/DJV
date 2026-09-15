@@ -37,8 +37,9 @@ Changes:
   line.
 
 Fixes:
-* Thumbnails keep only the current file open, which used a lot of memory
-  with several movies open.
+* Less memory is used with several movies open: files that are not being
+  shown close their decoders, and thumbnails keep only the current file
+  open.
 * Exporting with the FFmpeg command line no longer hangs.
 * A file with a mono audio stream per channel plays all of the channels.
 * The audio cache covers the whole in/out range.

@@ -3252,6 +3252,19 @@ namespace djv
 
             p.activeFiles = activeFiles;
             p.player->setIfChanged(player);
+
+            // A file that is not being shown keeps its timeline, so coming
+            // back to it does not open it again, but not its readers: each
+            // holds a decoder, about half a gigabyte for a UHD movie. After
+            // the player change, so the player that was reading them is gone.
+            for (size_t i = 0; i < p.files.size() && i < p.timelines.size(); ++i)
+            {
+                if (p.timelines[i] &&
+                    std::find(activeFiles.begin(), activeFiles.end(), p.files[i]) == activeFiles.end())
+                {
+                    p.timelines[i]->closeReaders();
+                }
+            }
             _colorModelUpdate();
 
             _layersUpdate(p.filesModel->observeLayers()->get());
