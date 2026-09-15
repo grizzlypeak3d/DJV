@@ -9,6 +9,7 @@ set(HEADERS
     RecentFilesModelTest.h
     ReviewTest.h
     SettingsModelTest.h
+    ShellCommandTest.h
     StrokeTest.h
     TimeUnitsModelTest.h
     ToolsModelTest.h
@@ -24,6 +25,7 @@ set(SOURCE
     RecentFilesModelTest.cpp
     ReviewTest.cpp
     SettingsModelTest.cpp
+    ShellCommandTest.cpp
     StrokeTest.cpp
     TimeUnitsModelTest.cpp
     ToolsModelTest.cpp

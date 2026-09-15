@@ -18,6 +18,7 @@
 #include <djv/App/ReviewTool.h>
 #include <djv/App/SecondaryWindow.h>
 #include <djv/App/SettingsTool.h>
+#include <djv/App/ShellAssociations.h>
 #include <djv/App/SysLogTool.h>
 #include <djv/App/ViewTool.h>
 #include <djv/UI/Viewport.h>
@@ -2031,7 +2032,11 @@ namespace djv
                 std::cout << ftk::join(getSysInfo(), '\n') << std::endl;
                 return;
             }
-            
+
+            // Here rather than first: a run that only prints something and
+            // exits has no business changing the user's file associations.
+            repairShellAssociations(_context);
+
             _mainWindowInit();
 
             if (p.cmdLine.listCommands->found())

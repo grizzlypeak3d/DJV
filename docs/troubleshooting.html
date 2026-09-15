@@ -44,7 +44,7 @@
 <h2 id="open-with-on-windows">"Open with" on Windows</h2>
 <p>If choosing DJV in the <strong>Open with</strong> dialog brings the dialog straight back instead of opening the file, the entry Windows keeps for DJV is naming a version that has been removed. Windows writes that entry itself the first time a file is opened with DJV and never revisits it, so it outlives the install it was written for. Clearing it lets the entry the installer writes take over:</p>
 <pre><code>powershell -NoProfile -Command "Remove-Item -Recurse -Force 'HKCU:\Software\Classes\Applications\djv.exe'"</code></pre>
-<p>Then choose DJV from <strong>Open with</strong> again. Only an installation upgraded from a version before 3.7.0 can be in this state; the installer has written the entry itself since then.</p>
+<p>Then choose DJV from <strong>Open with</strong> again. DJV 3.7.0 and later puts these entries right itself each time it starts, including the ones <strong>Always use this app</strong> leaves, so starting DJV once from the Start menu is usually enough. The command is for when it is not.</p>
 </main>
 </body>
 </html>

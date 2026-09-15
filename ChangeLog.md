@@ -52,7 +52,9 @@ Fixes:
 * The command line help prints without a display.
 * The window is drawn while it is being resized on macOS and Windows.
 * DJV is offered for the file types it reads in the Windows "Open with"
-  list, and goes on working there after an upgrade.
+  list, and goes on working there after an upgrade. On starting, it also
+  points the "Open with" and "Always use this app" entries Windows kept
+  for a removed copy of DJV at the running one.
 * DJV launched from a shell is in the macOS application switcher and dock.
 * The HUD shows a single dash for a color it has no sample of.
 * The window's right-click menu includes the Tools panel.

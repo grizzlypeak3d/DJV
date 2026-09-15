@@ -52,7 +52,8 @@ set(HEADERS
     WindowMenu.h
     WindowToolBar.h
     ViewTool.h)
-set(HEADERS_PRIVATE)
+set(HEADERS_PRIVATE
+    ShellAssociations.h)
 
 set(SOURCE
     App.cpp
@@ -92,6 +93,7 @@ set(SOURCE
     ReviewTool.cpp
     SecondaryWindow.cpp
     SettingsTool.cpp
+    ShellAssociations.cpp
     StatusBar.cpp
     SysLogTool.cpp
     TabBar.cpp

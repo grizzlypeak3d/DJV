@@ -15,6 +15,7 @@ set(HEADERS
     Review.h
     Stroke.h
     SettingsModel.h
+    ShellCommand.h
     Shortcuts.h
     TimeUnitsModel.h
     ToolsModel.h
@@ -38,6 +39,7 @@ set(SOURCE
     Review.cpp
     Stroke.cpp
     SettingsModel.cpp
+    ShellCommand.cpp
     Shortcuts.cpp
     TimeUnitsModel.cpp
     ToolsModel.cpp
