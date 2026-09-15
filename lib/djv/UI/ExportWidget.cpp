@@ -707,11 +707,13 @@ namespace djv
                     }
 
                     // The preset carries the options and which writer does
-                    // the work; an unknown name falls back to the first
-                    // preset rather than exporting with nothing set.
+                    // the work; an unknown name, or one this build cannot
+                    // write, falls back to the first preset rather than
+                    // exporting with nothing set.
                     tl::IOOptions ioOptions;
 #if defined(TLRENDER_FFMPEG_PLUGIN)
-                    const auto& presets = tl::ffmpeg::getWritePresets();
+                    const auto presets =
+                        ioSystem->getPlugin<tl::ffmpeg::WritePlugin>()->getWritePresets();
                     const tl::ffmpeg::WritePreset* preset = &presets.front();
                     for (const auto& i : presets)
                     {

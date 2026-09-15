@@ -278,6 +278,10 @@ namespace djv
             ftk::setScreenshotTag(p.extComboBox, "Export.ImageExt");
 
             p.fileLabel = ftk::Label::create(context);
+            // A long name, or the two a sequence shows, would otherwise widen
+            // the whole tools panel. The full text is in the tooltip.
+            p.fileLabel->setElide(true, ftk::ElideMode::Middle);
+            p.fileLabel->setHStretch(ftk::Stretch::Expanding);
 
             p.exportButton = ftk::PushButton::create(context, "Export Image");
             ftk::setScreenshotTag(p.exportButton, "Export.ImageExport");
@@ -415,6 +419,7 @@ namespace djv
                     static_cast<int64_t>(p.player->getCurrentTime().value()));
             }
             p.fileLabel->setText(fileText);
+            p.fileLabel->setTooltip(fileText);
             p.fileLabel->setTextRole(error.empty() ?
                 ftk::ColorRole::Text :
                 ftk::ColorRole::Red);
@@ -463,6 +468,10 @@ namespace djv
             ftk::setScreenshotTag(p.extComboBox, "Export.SeqExt");
 
             p.fileLabel = ftk::Label::create(context);
+            // A long name, or the two a sequence shows, would otherwise widen
+            // the whole tools panel. The full text is in the tooltip.
+            p.fileLabel->setElide(true, ftk::ElideMode::Middle);
+            p.fileLabel->setHStretch(ftk::Stretch::Expanding);
             p.rangeLabel = ftk::Label::create(context);
 
             p.exportButton = ftk::PushButton::create(context, "Export Sequence");
@@ -622,6 +631,7 @@ namespace djv
                 rangeText = getRangeText(range, p.timeUnitsModel);
             }
             p.fileLabel->setText(fileText);
+            p.fileLabel->setTooltip(fileText);
             p.fileLabel->setTextRole(error.empty() ?
                 ftk::ColorRole::Text :
                 ftk::ColorRole::Red);
@@ -692,8 +702,10 @@ namespace djv
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             // The presets are the whole surface, so choosing an output does
             // not mean picking through every encoder FFmpeg has; what they
-            // cannot express is what tlbake is for.
-            for (const auto& preset : tl::ffmpeg::getWritePresets())
+            // cannot express is what tlbake is for. Only the ones this build
+            // can write: a minimal FFmpeg has no ProRes or FFV1 encoder, and
+            // offering them would only fail when the export starts.
+            for (const auto& preset : ffmpegPlugin->getWritePresets())
             {
                 p.presets.push_back(preset.name);
             }
@@ -706,6 +718,10 @@ namespace djv
             ftk::setScreenshotTag(p.presetComboBox, "Export.MoviePreset");
 
             p.fileLabel = ftk::Label::create(context);
+            // A long name, or the two a sequence shows, would otherwise widen
+            // the whole tools panel. The full text is in the tooltip.
+            p.fileLabel->setElide(true, ftk::ElideMode::Middle);
+            p.fileLabel->setHStretch(ftk::Stretch::Expanding);
             p.rangeLabel = ftk::Label::create(context);
 
             p.exportButton = ftk::PushButton::create(context, "Export Movie");
@@ -737,6 +753,18 @@ namespace djv
                     auto options = value;
                     if (models::splitExt(options.movieFileName, options.movieExt, p.exts))
                     {
+                        p.settings->setExport(options);
+                        return;
+                    }
+                    if (!p.presets.empty() &&
+                        std::find(p.presets.begin(), p.presets.end(), options.moviePreset) ==
+                            p.presets.end())
+                    {
+                        // Saved by a build that could write it, or by an
+                        // older version; the combo box would otherwise show
+                        // nothing selected and the export would fall back
+                        // without saying so.
+                        options.moviePreset = p.presets.front();
                         p.settings->setExport(options);
                         return;
                     }
@@ -916,6 +944,7 @@ namespace djv
                 rangeText = getRangeText(range, p.timeUnitsModel);
             }
             p.fileLabel->setText(fileText);
+            p.fileLabel->setTooltip(fileText);
             p.fileLabel->setTextRole(error.empty() ?
                 ftk::ColorRole::Text :
                 ftk::ColorRole::Red);
