@@ -199,7 +199,8 @@ namespace djv
                     p.thumbnail.height,
                     std::nullopt,
                     p.ioOptions,
-                    tl::ui::ThumbnailType::Timeline,
+                    // One frame per file, so the timeline is not kept.
+                    tl::ui::ThumbnailType::Browser,
                     p.item->audioPath);
             }
             if (!p.thumbnail.infoDone && !p.thumbnail.infoRequest.future.valid())
