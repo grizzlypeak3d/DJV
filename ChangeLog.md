@@ -33,6 +33,8 @@ Changes:
   mirror.
 * The status indicator shows the options in use, and clicking one shows
   its controls.
+* The cache sizes and the FFmpeg thread count can be set from the command
+  line.
 
 Fixes:
 * Exporting with the FFmpeg command line no longer hangs.

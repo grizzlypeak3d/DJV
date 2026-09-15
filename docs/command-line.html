@@ -44,6 +44,8 @@
 <li><a href="#compare-options">Compare options</a></li>
 <li><a href="#playback-options">Playback options</a></li>
 <li><a href="#directories-options">Directories options</a></li>
+<li><a href="#cache-options">Cache options</a></li>
+<li><a href="#ffmpeg-options">FFmpeg options</a></li>
 <li><a href="#color-options">Color options</a></li>
 <li><a href="#commands-options">Commands options</a></li>
 <li><a href="#testing-options">Testing options</a></li>
@@ -103,6 +105,18 @@
 <dd>Filter the files when opening a directory: a case-insensitive substring, or a wildcard pattern with "*" and "?" (e.g., "*.mov").</dd>
 <dt><code>-dirDepth (value)</code></dt>
 <dd>How many directory levels to open: 1 opens the directory alone. Default: "1".</dd>
+</dl>
+<h2 id="cache-options">Cache options</h2>
+<dl>
+<dt><code>-cacheVideoGB (value)</code></dt>
+<dd>Video cache size in gigabytes.</dd>
+<dt><code>-cacheAudioGB (value)</code></dt>
+<dd>Audio cache size in gigabytes.</dd>
+</dl>
+<h2 id="ffmpeg-options">FFmpeg options</h2>
+<dl>
+<dt><code>-ffmpegThreadCount (value)</code></dt>
+<dd>Number of FFmpeg decoding threads. Zero lets FFmpeg choose.</dd>
 </dl>
 <h2 id="color-options">Color options</h2>
 <dl>

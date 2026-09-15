@@ -107,6 +107,11 @@ namespace djv
             std::shared_ptr<ftk::CmdLineOption<std::string> > seek;
             std::shared_ptr<ftk::CmdLineOption<std::string> > inPoint;
             std::shared_ptr<ftk::CmdLineOption<std::string> > outPoint;
+            std::shared_ptr<ftk::CmdLineOption<float> > cacheVideoGB;
+            std::shared_ptr<ftk::CmdLineOption<float> > cacheAudioGB;
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            std::shared_ptr<ftk::CmdLineOption<int> > ffmpegThreadCount;
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_OCIO)
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioFileName;
             std::shared_ptr<ftk::CmdLineOption<std::string> > ocioInput;
@@ -313,6 +318,20 @@ namespace djv
                 { "-outPoint", "-out" },
                 "Set the out point.",
                 "Playback");
+            p.cmdLine.cacheVideoGB = ftk::CmdLineOption<float>::create(
+                { "-cacheVideoGB" },
+                "Video cache size in gigabytes.",
+                "Cache");
+            p.cmdLine.cacheAudioGB = ftk::CmdLineOption<float>::create(
+                { "-cacheAudioGB" },
+                "Audio cache size in gigabytes.",
+                "Cache");
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            p.cmdLine.ffmpegThreadCount = ftk::CmdLineOption<int>::create(
+                { "-ffmpegThreadCount" },
+                "Number of FFmpeg decoding threads. Zero lets FFmpeg choose.",
+                "FFmpeg");
+#endif // TLRENDER_FFMPEG_PLUGIN
             // Offered only where there is something behind them: without
             // OCIO the color options are accepted and then quietly do
             // nothing, which reads as a broken build rather than one made
@@ -436,6 +455,11 @@ namespace djv
                 p.cmdLine.outPoint,
                 p.cmdLine.dirFilter,
                 p.cmdLine.dirDepth,
+                p.cmdLine.cacheVideoGB,
+                p.cmdLine.cacheAudioGB,
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+                p.cmdLine.ffmpegThreadCount,
+#endif // TLRENDER_FFMPEG_PLUGIN
 #if defined(TLRENDER_OCIO)
                 p.cmdLine.ocioFileName,
                 p.cmdLine.ocioInput,
@@ -2329,6 +2353,28 @@ namespace djv
                 p.settingsModel->setUSD(options);
             }
 #endif // TLRENDER_USD
+            if (p.cmdLine.cacheVideoGB->found() ||
+                p.cmdLine.cacheAudioGB->found())
+            {
+                tl::PlayerCacheOptions options = p.settingsModel->getCache();
+                if (p.cmdLine.cacheVideoGB->found())
+                {
+                    options.videoGB = std::max(0.F, p.cmdLine.cacheVideoGB->getValue());
+                }
+                if (p.cmdLine.cacheAudioGB->found())
+                {
+                    options.audioGB = std::max(0.F, p.cmdLine.cacheAudioGB->getValue());
+                }
+                p.settingsModel->setCache(options);
+            }
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            if (p.cmdLine.ffmpegThreadCount->found())
+            {
+                tl::ffmpeg::Options options = p.settingsModel->getFFmpeg();
+                options.threadCount = std::max(0, p.cmdLine.ffmpegThreadCount->getValue());
+                p.settingsModel->setFFmpeg(options);
+            }
+#endif // TLRENDER_FFMPEG_PLUGIN
 
             p.sysLogModel = ftk::SysLogModel::create(_context);
 
