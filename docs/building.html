@@ -41,6 +41,7 @@
 <li><a href="#linux">Linux</a></li>
 <li><a href="#macos">macOS</a></li>
 <li><a href="#windows">Windows</a></li>
+<li><a href="#updating">Updating a checkout</a></li>
 <li><a href="#system-packages">System packages</a></li>
 </ul>
 </div>
@@ -106,6 +107,17 @@ DJV\sbuild-win.bat</code></pre>
 <p>Run the application:</p>
 <pre><code>set PATH=%CD%\install-Release\bin;%PATH%
 build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg</code></pre>
+<h2 id="updating">Updating a checkout</h2>
+<p>The super build script checks out the submodules the first time it runs and does not move them afterwards. After pulling, update them to the commits DJV uses:</p>
+<pre><code>git -C DJV pull
+git -C DJV submodule update --init --recursive</code></pre>
+<p>Then run the super build script again. Dependencies that are already built are not built again, and DJV is built from where it left off.</p>
+<p>A clean build is needed only in some cases:</p>
+<ul>
+<li>When a dependency changes, for example a new version of FFmpeg, or when the compiler is updated: remove <code>ftk-Release</code>, <code>tl-Release</code>, <code>build-Release</code>, and <code>install-Release</code>, and build again.</li>
+<li>When an option in <code>etc/Config/local.cmake</code> changes: the same, since the options apply to the dependencies as well as to DJV.</li>
+<li>When a build that was working fails to link, or the application misbehaves after an update: remove <code>build-Release</code> and build again. feather-tk, tlRender, and DJV are all built there, so this takes much less time than the dependencies.</li>
+</ul>
 <h2 id="system-packages">System packages</h2>
 <p>On Linux the dependencies can come from the distribution instead of the super build. This is the build a distribution package would make. Ubuntu 26.04 is the first release with every package it needs, and it is the configuration continuous integration builds, so what follows is kept true there.</p>
 <p>Install the system packages:</p>
