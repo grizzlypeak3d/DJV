@@ -18,12 +18,12 @@ if(WIN32)
 
     if(TLRENDER_FFMPEG)
         set(FFMPEG_DLLS
-            ${CMAKE_INSTALL_PREFIX}/bin/avcodec-62.dll
-            ${CMAKE_INSTALL_PREFIX}/bin/avdevice-62.dll
-            ${CMAKE_INSTALL_PREFIX}/bin/avformat-62.dll
-            ${CMAKE_INSTALL_PREFIX}/bin/avutil-60.dll
-            ${CMAKE_INSTALL_PREFIX}/bin/swresample-6.dll
-            ${CMAKE_INSTALL_PREFIX}/bin/swscale-9.dll)
+            ${CMAKE_INSTALL_PREFIX}/bin/avcodec-63.dll
+            ${CMAKE_INSTALL_PREFIX}/bin/avdevice-63.dll
+            ${CMAKE_INSTALL_PREFIX}/bin/avformat-63.dll
+            ${CMAKE_INSTALL_PREFIX}/bin/avutil-61.dll
+            ${CMAKE_INSTALL_PREFIX}/bin/swresample-7.dll
+            ${CMAKE_INSTALL_PREFIX}/bin/swscale-10.dll)
         list(APPEND INSTALL_DLLS ${FFMPEG_DLLS})
     endif()
 
@@ -228,23 +228,23 @@ elseif(APPLE)
     
     if(TLRENDER_FFMPEG)
         set(FFMPEG_DYLIBS
-            ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.62.28.102.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.62.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.63.1.101.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.63.dylib
             ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.62.3.102.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.62.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.63.1.101.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.63.dylib
             ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libavformat.62.12.102.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libavformat.62.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libavformat.63.1.101.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libavformat.63.dylib
             ${CMAKE_INSTALL_PREFIX}/lib/libavformat.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libavutil.60.26.102.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libavutil.60.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libavutil.61.1.101.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libavutil.61.dylib
             ${CMAKE_INSTALL_PREFIX}/lib/libavutil.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libswresample.6.3.102.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libswresample.6.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libswresample.7.1.101.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libswresample.7.dylib
             ${CMAKE_INSTALL_PREFIX}/lib/libswresample.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libswscale.9.5.102.dylib
-            ${CMAKE_INSTALL_PREFIX}/lib/libswscale.9.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libswscale.10.1.101.dylib
+            ${CMAKE_INSTALL_PREFIX}/lib/libswscale.10.dylib
             ${CMAKE_INSTALL_PREFIX}/lib/libswscale.dylib)
         list(APPEND INSTALL_DYLIBS ${FFMPEG_DYLIBS})
     endif()
@@ -462,23 +462,23 @@ else()
     if(TLRENDER_FFMPEG)
         set(FFMPEG_LIBS
             ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.so.62
-            ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.so.62.28.102
+            ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.so.63
+            ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.so.63.1.101
             ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.so.62
-            ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.so.62.3.102
+            ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.so.63
+            ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.so.63.1.101
             ${CMAKE_INSTALL_PREFIX}/lib/libavformat.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libavformat.so.62
-            ${CMAKE_INSTALL_PREFIX}/lib/libavformat.so.62.12.102
+            ${CMAKE_INSTALL_PREFIX}/lib/libavformat.so.63
+            ${CMAKE_INSTALL_PREFIX}/lib/libavformat.so.63.1.101
             ${CMAKE_INSTALL_PREFIX}/lib/libavutil.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libavutil.so.60
-            ${CMAKE_INSTALL_PREFIX}/lib/libavutil.so.60.26.102
+            ${CMAKE_INSTALL_PREFIX}/lib/libavutil.so.61
+            ${CMAKE_INSTALL_PREFIX}/lib/libavutil.so.61.1.101
             ${CMAKE_INSTALL_PREFIX}/lib/libswresample.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libswresample.so.6
-            ${CMAKE_INSTALL_PREFIX}/lib/libswresample.so.6.3.102
+            ${CMAKE_INSTALL_PREFIX}/lib/libswresample.so.7
+            ${CMAKE_INSTALL_PREFIX}/lib/libswresample.so.7.1.101
             ${CMAKE_INSTALL_PREFIX}/lib/libswscale.so
-            ${CMAKE_INSTALL_PREFIX}/lib/libswscale.so.9
-            ${CMAKE_INSTALL_PREFIX}/lib/libswscale.so.9.5.102)
+            ${CMAKE_INSTALL_PREFIX}/lib/libswscale.so.10
+            ${CMAKE_INSTALL_PREFIX}/lib/libswscale.so.10.1.101)
         list(APPEND INSTALL_LIBS ${FFMPEG_LIBS})
     endif()
 
