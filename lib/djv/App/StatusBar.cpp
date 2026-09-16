@@ -37,6 +37,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<ftk::LogItem> > messagesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
+            std::shared_ptr<ftk::Observer<int> > videoLayerObserver;
         };
 
         void StatusBar::_init(
@@ -111,6 +112,7 @@ namespace djv
                     FTK_P();
                     p.player = player;
                     p.mediaReferenceKeyObserver.reset();
+                    p.videoLayerObserver.reset();
                     if (player)
                     {
                         // The information describes the media reference being
@@ -124,12 +126,27 @@ namespace djv
                                 FTK_P();
                                 _infoUpdate(
                                     p.player->getPath(),
-                                    p.player->getIOInfo());
+                                    p.player->getIOInfo(),
+                                    p.player->getVideoLayer());
+                            });
+
+                        // And on the layer: what is reported is the layer
+                        // being shown, and a file can hold layers of
+                        // different types.
+                        p.videoLayerObserver = ftk::Observer<int>::create(
+                            player->observeVideoLayer(),
+                            [this](int value)
+                            {
+                                FTK_P();
+                                _infoUpdate(
+                                    p.player->getPath(),
+                                    p.player->getIOInfo(),
+                                    value);
                             });
                     }
                     else
                     {
-                        _infoUpdate(ftk::Path(), tl::IOInfo());
+                        _infoUpdate(ftk::Path(), tl::IOInfo(), 0);
                     }
                 });
         }
@@ -221,7 +238,10 @@ namespace djv
             }
         }
 
-        void StatusBar::_infoUpdate(const ftk::Path& path, const tl::IOInfo& info)
+        void StatusBar::_infoUpdate(
+            const ftk::Path& path,
+            const tl::IOInfo& info,
+            int videoLayer)
         {
             FTK_P();
             const std::string tooltipFormat =
@@ -237,7 +257,7 @@ namespace djv
             {
                 s.push_back(std::string(
                     ftk::Format("V: {0}").
-                    arg(ftk::getLabel(info.video[0]))));
+                    arg(ftk::getLabel(tl::getVideoInfo(info, videoLayer)))));
             }
             if (info.audio.isValid())
             {
@@ -253,7 +273,7 @@ namespace djv
             {
                 s.push_back(std::string(
                     ftk::Format("Video: {0}").
-                    arg(ftk::getLabel(info.video[0]))));
+                    arg(ftk::getLabel(tl::getVideoInfo(info, videoLayer)))));
             }
             if (info.audio.isValid())
             {

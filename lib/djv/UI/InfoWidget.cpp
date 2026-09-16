@@ -26,6 +26,7 @@ namespace djv
             std::shared_ptr<ftk::Settings> settings;
 
             tl::IOInfo info;
+            int videoLayer = 0;
             ftk::Path path;
             std::string search;
 
@@ -38,6 +39,7 @@ namespace djv
             std::shared_ptr<tl::Player> player;
 
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
+            std::shared_ptr<ftk::Observer<int> > videoLayerObserver;
         };
 
         void InfoWidget::_init(
@@ -174,6 +176,7 @@ namespace djv
             p.player = value;
             p.path = value ? value->getPath() : ftk::Path();
             p.mediaReferenceKeyObserver.reset();
+            p.videoLayerObserver.reset();
             if (value)
             {
                 // The information describes the media reference being
@@ -188,9 +191,21 @@ namespace djv
                         p.info = p.player->getIOInfo();
                         _widgetUpdate();
                     });
+
+                // And on the layer: what is described is the layer being
+                // shown, and a file can hold layers of different types.
+                p.videoLayerObserver = ftk::Observer<int>::create(
+                    value->observeVideoLayer(),
+                    [this](int layer)
+                    {
+                        FTK_P();
+                        p.videoLayer = layer;
+                        _widgetUpdate();
+                    });
             }
             else
             {
+                p.videoLayer = 0;
                 p.info = tl::IOInfo();
                 _widgetUpdate();
             }
@@ -253,12 +268,12 @@ namespace djv
             //! The video the file holds, and the video it is decoded to. The
             //! two are not always the same and the difference is the point:
             //! what the rest of the application reports is the decoded one.
-            Pairs videoPairs(const tl::IOInfo& info)
+            Pairs videoPairs(const tl::IOInfo& info, int videoLayer)
             {
                 Pairs out;
                 if (info.video.empty())
                     return out;
-                const ftk::ImageInfo& video = info.video[0];
+                const ftk::ImageInfo& video = tl::getVideoInfo(info, videoLayer);
                 if (!info.videoSource.codec.empty())
                 {
                     out.push_back({ "Codec", info.videoSource.codec });
@@ -269,7 +284,10 @@ namespace djv
                 }
                 out.push_back({ "Resolution",
                     str(video.size.w) + " " + str(video.size.h) });
-                out.push_back({ "Pixel Type", str(video.type) });
+                // The interleaved name: whether this renderer holds the
+                // channels in planes is not something the file said.
+                out.push_back({ "Pixel Type",
+                    str(ftk::getInterleavedType(video.type)) });
                 {
                     std::stringstream ss;
                     ss.precision(2);
@@ -335,7 +353,7 @@ namespace djv
             const std::map<std::string, Pairs> sections =
             {
                 { "File", filePairs(p.path) },
-                { "Video", videoPairs(p.info) },
+                { "Video", videoPairs(p.info, p.videoLayer) },
                 { "Audio", audioPairs(p.info) },
                 { "Metadata", Pairs(p.info.tags.begin(), p.info.tags.end()) }
             };

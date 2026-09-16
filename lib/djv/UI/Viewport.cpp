@@ -52,6 +52,10 @@ namespace djv
             models::HUDOptions hudOptions;
             ftk::Path path;
             tl::IOInfo ioInfo;
+            //! Which layer of the file is being shown. The HUD reports that
+            //! layer, not the first one: a file can hold layers of different
+            //! types.
+            int videoLayer = 0;
             std::optional<OTIO_NS::RationalTime> currentTime;
             double fps = 0.0;
             size_t droppedFrames = 0;
@@ -96,6 +100,7 @@ namespace djv
 
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
+            std::shared_ptr<ftk::Observer<int> > videoLayerObserver;
             std::shared_ptr<ftk::ListObserver<tl::VideoFrame> > videoObserver;
             std::shared_ptr<ftk::Observer<tl::PlayerCacheInfo> > cacheObserver;
             std::shared_ptr<ftk::Observer<double> > fpsObserver;
@@ -604,6 +609,14 @@ namespace djv
                         // nothing to move and the wheel would change a zoom
                         // that shows nothing.
                         setInputEnabled(!_p->ioInfo.video.empty());
+                        _hudUpdate();
+                    });
+
+                p.videoLayerObserver = ftk::Observer<int>::create(
+                    player->observeVideoLayer(),
+                    [this](int value)
+                    {
+                        _p->videoLayer = value;
                         _hudUpdate();
                     });
 
@@ -1271,7 +1284,8 @@ namespace djv
             if (!p.ioInfo.video.empty())
             {
                 info.push_back(std::string(ftk::Format("V: {0}").
-                    arg(ftk::getLabel(p.ioInfo.video[0]))));
+                    arg(ftk::getLabel(
+                        tl::getVideoInfo(p.ioInfo, p.videoLayer)))));
             }
             if (p.ioInfo.audio.isValid())
             {

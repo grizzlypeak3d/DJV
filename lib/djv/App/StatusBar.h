@@ -51,7 +51,7 @@ namespace djv
             DJV_APP_API void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
         private:
-            void _infoUpdate(const ftk::Path&, const tl::IOInfo&);
+            void _infoUpdate(const ftk::Path&, const tl::IOInfo&, int videoLayer);
             void _messagesUpdate();
 
             FTK_PRIVATE();
