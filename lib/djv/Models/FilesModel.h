@@ -207,6 +207,9 @@ namespace djv
             //! written to in place -- the frame range and the layers are
             //! filled in once the file has been opened -- and the list itself
             //! does not change when they are, so nothing else says so.
+            //!
+            //! The "A" file is announced again too, for the observers that
+            //! take it directly rather than through the list.
             DJV_MODELS_API void refresh();
 
             //! Set the "A" file to the next layer.

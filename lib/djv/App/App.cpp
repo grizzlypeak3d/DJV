@@ -166,6 +166,9 @@ namespace djv
             std::shared_ptr<ftk::Timer> autosaveTimer;
             std::optional<nlohmann::json> recoveredAutosave;
             std::vector<std::shared_ptr<tl::Timeline> > timelines;
+            //! Whether opening a timeline has filled in what an item holds
+            //! since the files were last announced.
+            bool filesChanged = false;
             std::shared_ptr<ftk::Observable<std::shared_ptr<tl::Player> > > player;
             std::shared_ptr<models::ColorModel> colorModel;
             std::shared_ptr<models::ViewportModel> viewportModel;
@@ -3053,6 +3056,11 @@ namespace djv
                 {
                     item->videoLayer = 0;
                 }
+                // The item became the current file before it was opened, so
+                // whatever was shown of it was shown without these. Say so
+                // once the caller is done: from here is inside the update
+                // that asked for the timeline.
+                p.filesChanged = true;
 
                 // Recorded here rather than when the file is opened: one
                 // that cannot be read should not be offered back in the
@@ -3269,6 +3277,17 @@ namespace djv
 
             _layersUpdate(p.filesModel->observeLayers()->get());
             _audioUpdate();
+
+            // Opening a timeline above filled in what its item holds -- the
+            // frame range and the layers -- and the list of items did not
+            // change, so nothing else says so. Announced from here rather
+            // than from where it was filled in, which is partway through
+            // this update.
+            if (p.filesChanged)
+            {
+                p.filesChanged = false;
+                p.filesModel->refresh();
+            }
         }
 
         void App::_colorModelUpdate()

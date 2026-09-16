@@ -566,6 +566,15 @@ namespace djv
         {
             FTK_P();
             p.files->setAlways(p.files->get());
+
+            // The "A" file is one of those items, and the observers that take
+            // it directly rather than through the list need saying to as
+            // well. It is only ever set when it changes, and this is the case
+            // where it has not: the same item holding different things. The
+            // layers menu is built from what the item holds, and the layers
+            // are not known until the file has been opened, which is after
+            // the item became the "A" one.
+            p.a->setAlways(p.a->get());
         }
 
         std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > FilesModel::observeReload() const
