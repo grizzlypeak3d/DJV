@@ -11,30 +11,28 @@ Changes:
 * The exposure control is a stop adjustment; defog, knee, and gamma are
   removed.
 * The Python bindings use nanobind.
-* A clipping warning marks pixels outside a range, by any channel, all
-  channels, or luminance.
+* Add a clipping warning.
 * Building requires C++20.
 * CineForm movies can be read and written.
 * Hovering the timeline shows a preview of the frame under the cursor.
-* Export file names are typed, with `#` where the frame number goes, so
-  a single image can be written without one.
+* Export file names are typed, with `#` for the frame number.
 * The Custom color style is removed.
 * The light style's checked color is light blue.
 * The file list scrolls to the current file.
 * Browsing a list with the keyboard keeps the item in view.
 * Exported files are named for the file being exported.
-* Right clicking the Tools panel offers the panel itself; the menu of every
-  tool bar and panel is on the viewport.
 * Exposure and soft clip are in the Color section of the Color tool.
-* The Audio tool plays all channels or a chosen one for each file, in
-  place of the channel mute check boxes. The status indicator lights
-  when a channel is chosen.
+* The Audio tool plays all channels or a chosen one for each file.
 * The View tool has controls for the color channels, negative, and
   mirror.
 * The status indicator shows the options in use, and clicking one shows
   its controls.
 * The cache sizes and the FFmpeg thread count can be set from the command
   line.
+* FFmpeg is updated to 9.0.1.
+* The file types offered are trimmed to the ones a review tool opens.
+* Three channel half OpenEXR files play faster.
+* Large OTIOZ bundles open faster.
 
 Fixes:
 * Less memory is used with several movies open: files that are not being
@@ -95,6 +93,14 @@ Fixes:
   over the file name.
 * A file opened with a separate audio file shows the audio's waveform.
 * Opening many files at once no longer reads every one of them.
+* Color management no longer costs ten times the frame time when the
+  timeline shows thumbnails; a regression in 3.6.0.
+* Enlarging with High Quality no longer shows resize artefacts.
+* Media stored past 2 GB in an OTIOZ bundle can be read.
+* The movie export presets offered are the ones the build can write.
+* RGBA float images get thumbnails.
+* The File > Layers menu fills in for a file opened after startup.
+* The layer that is shown is the layer whose format is reported.
 
 ## 3.6.0
 
