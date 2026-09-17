@@ -3,7 +3,7 @@
 
 import sys
 import opentimelineio as otio
-import ftkPy as ftk
+import feather_tk as ftk
 import tlRenderPy as tl
 import djvPy as djv
 

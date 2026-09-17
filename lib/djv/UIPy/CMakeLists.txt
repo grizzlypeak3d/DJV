@@ -39,7 +39,7 @@ target_include_directories(djvUIPy
         ${NB_DIR}/include
         ${NB_DIR}/ext/robin_map/include)
 
-target_link_libraries(djvUIPy djvUI Python3::Python)
+target_link_libraries(djvUIPy PUBLIC djvUI PRIVATE ${DJV_NANOBIND_LIBRARY})
 
 target_compile_options(djvUIPy PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
 

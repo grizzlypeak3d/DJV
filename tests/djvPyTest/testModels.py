@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright Contributors to the DJV project.
 
-import ftkPy as ftk
+import feather_tk as ftk
 import tlRenderPy as tl
 import djvPy as djv
 

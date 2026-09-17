@@ -14,7 +14,7 @@ if(DJV_PYTHON)
     #     The specified module could not be found.
     add_test(
         NAME djvPy-test
-        COMMAND ${Python3_EXECUTABLE}
+        COMMAND ${Python_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/run-python-tests.py
             ${CMAKE_INSTALL_PREFIX}/bin
             ${CMAKE_INSTALL_PREFIX}/python/opentimelineio)
@@ -23,7 +23,7 @@ if(DJV_PYTHON)
     # superbuild. The flag crosses to Python as an environment variable,
     # where the tests that need OpenGL read it and skip.
     set(PYTHON_TEST_ENV
-        "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:ftkPy>"
+        "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:_feather_tk>/.."
         "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:tlRenderPy>"
         "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:djvPy>"
         "PYTHONPATH=path_list_append:${CMAKE_INSTALL_PREFIX}/python")

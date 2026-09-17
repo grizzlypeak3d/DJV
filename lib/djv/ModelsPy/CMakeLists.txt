@@ -44,7 +44,7 @@ target_include_directories(djvModelsPy
 
 # ftkUI directly: the bindings name ftk::Settings and ftk::RecentFilesModel,
 # which djvModels does not carry in its link interface.
-target_link_libraries(djvModelsPy djvModels ftkUI Python3::Python)
+target_link_libraries(djvModelsPy PUBLIC djvModels ftkUI PRIVATE ${DJV_NANOBIND_LIBRARY})
 
 # The settings bindings alone go past what a COFF object can hold, which is
 # what pybind11 does to a translation unit that names a lot of types:

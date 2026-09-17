@@ -1,4 +1,8 @@
-nanobind_add_module(djvPy NB_STATIC Bindings.cpp)
+set(STABLE_ABI)
+if(ftk_PYTHON_STABLE_ABI)
+    set(STABLE_ABI STABLE_ABI)
+endif()
+nanobind_add_module(djvPy ${STABLE_ABI} NB_STATIC Bindings.cpp)
 
 target_include_directories(djvPy PRIVATE ${PROJECT_SOURCE_DIR}/lib)
 
@@ -66,7 +70,7 @@ for directory in [
 
 app = r\"${PROJECT_SOURCE_DIR}/examples/python\"
 sys.path[0:0] = [
-    r\"$<TARGET_FILE_DIR:ftkPy>\",
+    r\"$<TARGET_FILE_DIR:_feather_tk>/..\",
     r\"$<TARGET_FILE_DIR:tlRenderPy>\",
     r\"$<TARGET_FILE_DIR:djvPy>\",
     r\"${CMAKE_INSTALL_PREFIX}/python\",
@@ -77,7 +81,7 @@ runpy.run_path(os.path.join(app, \"djv.py\"), run_name=\"__main__\")
     file(GENERATE
         OUTPUT ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/djv-python.cmd
         CONTENT "@echo off
-\"${Python3_EXECUTABLE}\" \"%~dp0djv-python-bootstrap.py\" %*
+\"${Python_EXECUTABLE}\" \"%~dp0djv-python-bootstrap.py\" %*
 ")
 
     file(GENERATE
@@ -105,7 +109,7 @@ runpy.run_path(os.path.join(app, \"djv.py\"), run_name=\"__main__\")
     file(GENERATE
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/djv-python-install.cmd
         CONTENT "@echo off
-\"${Python3_EXECUTABLE}\" \"%~dp0djv-python-bootstrap.py\" %*
+\"${Python_EXECUTABLE}\" \"%~dp0djv-python-bootstrap.py\" %*
 ")
     install(
         PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/djv-python-install.cmd
@@ -119,8 +123,8 @@ else()
     file(GENERATE
         OUTPUT ${CMAKE_BINARY_DIR}/bin/djv-python
         CONTENT "#!/bin/sh
-PYTHONPATH=\"$<TARGET_FILE_DIR:ftkPy>:$<TARGET_FILE_DIR:tlRenderPy>:$<TARGET_FILE_DIR:djvPy>:${CMAKE_INSTALL_PREFIX}/python:$PYTHONPATH\" \\
-exec \"${Python3_EXECUTABLE}\" \"${PROJECT_SOURCE_DIR}/examples/python/djv.py\" \"$@\"
+PYTHONPATH=\"$<TARGET_FILE_DIR:_feather_tk>/..:$<TARGET_FILE_DIR:tlRenderPy>:$<TARGET_FILE_DIR:djvPy>:${CMAKE_INSTALL_PREFIX}/python:$PYTHONPATH\" \\
+exec \"${Python_EXECUTABLE}\" \"${PROJECT_SOURCE_DIR}/examples/python/djv.py\" \"$@\"
 "
         FILE_PERMISSIONS
             OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -131,7 +135,7 @@ exec \"${Python3_EXECUTABLE}\" \"${PROJECT_SOURCE_DIR}/examples/python/djv.py\" 
         CONTENT "#!/bin/sh
 dir=$(CDPATH= cd -- \"$(dirname -- \"$0\")\" && pwd)
 PYTHONPATH=\"$dir/../lib:$dir/../python:$PYTHONPATH\" \\
-exec \"${Python3_EXECUTABLE}\" \"$dir/../examples/python/djv.py\" \"$@\"
+exec \"${Python_EXECUTABLE}\" \"$dir/../examples/python/djv.py\" \"$@\"
 "
         FILE_PERMISSIONS
             OWNER_READ OWNER_WRITE OWNER_EXECUTE
