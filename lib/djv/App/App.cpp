@@ -188,8 +188,29 @@ namespace djv
             std::shared_ptr<SecondaryWindow> secondaryWindow;
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
 
+            //! What marks the review modified. Everything the document holds
+            //! and a person would call a change to it: the files, what is
+            //! being compared, how the image is shown, and the feedback. Not
+            //! the playhead, the view or the open panels, which move
+            //! constantly and belong to whoever is looking rather than to
+            //! the review. Every one of them suppresses its first callback:
+            //! the state the models start in is the session as it was
+            //! opened, not an edit to it.
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsModifiedObserver;
             std::shared_ptr<ftk::ListObserver<int> > bIndexesModifiedObserver;
+            std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesModifiedObserver;
+            std::shared_ptr<ftk::Observer<int> > aIndexModifiedObserver;
+            std::shared_ptr<ftk::ListObserver<int> > layersModifiedObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeModifiedObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioModifiedObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutModifiedObserver;
+            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayModifiedObserver;
+            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > backgroundModifiedObserver;
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > foregroundModifiedObserver;
+            std::shared_ptr<ftk::Observer<models::AspectRatioOptions> > aspectRatioModifiedObserver;
+            std::shared_ptr<ftk::Observer<models::HUDOptions> > hudModifiedObserver;
+            std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markersModifiedObserver;
+            std::shared_ptr<ftk::ListObserver<models::ReviewAnnotation> > annotationsModifiedObserver;
             std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markersObserver;
             std::shared_ptr<ftk::ListObserver<models::ReviewAnnotation> > annotationsObserver;
             std::shared_ptr<ftk::ListObserver<std::string> > drawToolsObserver;
@@ -2259,6 +2280,16 @@ namespace djv
             out["files"] = files;
             out["aIndex"] = p.filesModel->getAIndex();
 
+            // Whether the session would ask before closing, which is
+            // otherwise only visible as a "*" in the window title and a
+            // dialog that a scripted run never sees.
+            nlohmann::json review;
+            review["path"] = ftk::fromFileSystem(p.reviewPath);
+            review["modified"] = p.reviewModified;
+            review["markers"] = p.markersModel->getMarkers().size();
+            review["annotations"] = p.annotationsModel->getAnnotations().size();
+            out["review"] = review;
+
             if (auto player = p.player->get())
             {
                 nlohmann::json j;
@@ -2584,8 +2615,14 @@ namespace djv
                 [this](const std::vector<models::ReviewMarker>&)
                 {
                     _markersUpdate();
-                    _markModified();
                 });
+            p.markersModifiedObserver = ftk::ListObserver<models::ReviewMarker>::create(
+                p.markersModel->observeMarkers(),
+                [this](const std::vector<models::ReviewMarker>&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
             // Drawing lives with the Review tool: closing the tool disarms
             // the pen, or an invisible mode is left painting over playback
             // and the color picker.
@@ -2605,20 +2642,111 @@ namespace djv
                 [this](const std::vector<models::ReviewAnnotation>&)
                 {
                     _markersUpdate();
-                    _markModified();
                 });
+            p.annotationsModifiedObserver = ftk::ListObserver<models::ReviewAnnotation>::create(
+                p.annotationsModel->observeAnnotations(),
+                [this](const std::vector<models::ReviewAnnotation>&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            // What the review document holds, so that closing it asks
+            // before dropping any of it. The open files above all: a review
+            // with the wrong ones in it is not the review that was written.
             p.compareOptionsModifiedObserver = ftk::Observer<tl::CompareOptions>::create(
                 p.filesModel->observeCompareOptions(),
                 [this](const tl::CompareOptions&)
                 {
                     _markModified();
-                });
+                },
+                ftk::ObserverAction::Suppress);
             p.bIndexesModifiedObserver = ftk::ListObserver<int>::create(
                 p.filesModel->observeBIndexes(),
                 [this](const std::vector<int>&)
                 {
                     _markModified();
-                });
+                },
+                ftk::ObserverAction::Suppress);
+            p.filesModifiedObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
+                p.filesModel->observeFiles(),
+                [this](const std::vector<std::shared_ptr<models::FilesModelItem> >&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.aIndexModifiedObserver = ftk::Observer<int>::create(
+                p.filesModel->observeAIndex(),
+                [this](int)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.layersModifiedObserver = ftk::ListObserver<int>::create(
+                p.filesModel->observeLayers(),
+                [this](const std::vector<int>&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.compareTimeModifiedObserver = ftk::Observer<tl::CompareTime>::create(
+                p.filesModel->observeCompareTime(),
+                [this](tl::CompareTime)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            // How the image is shown. A LUT turned off is a change to the
+            // review in the same way a note is: the document carries it, so
+            // closing without it asks first.
+            p.ocioModifiedObserver = ftk::Observer<tl::OCIOOptions>::create(
+                p.colorModel->observeOCIOOptions(),
+                [this](const tl::OCIOOptions&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.lutModifiedObserver = ftk::Observer<tl::LUTOptions>::create(
+                p.colorModel->observeLUTOptions(),
+                [this](const tl::LUTOptions&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.displayModifiedObserver = ftk::Observer<tl::DisplayOptions>::create(
+                p.viewportModel->observeDisplayOptions(),
+                [this](const tl::DisplayOptions&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.backgroundModifiedObserver = ftk::Observer<tl::BackgroundOptions>::create(
+                p.viewportModel->observeBackgroundOptions(),
+                [this](const tl::BackgroundOptions&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.foregroundModifiedObserver = ftk::Observer<tl::ForegroundOptions>::create(
+                p.viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.aspectRatioModifiedObserver = ftk::Observer<models::AspectRatioOptions>::create(
+                p.viewportModel->observeAspectRatioOptions(),
+                [this](const models::AspectRatioOptions&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            p.hudModifiedObserver = ftk::Observer<models::HUDOptions>::create(
+                p.viewportModel->observeHUDOptions(),
+                [this](const models::HUDOptions&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
             p.layersObserver = ftk::ListObserver<int>::create(
                 p.filesModel->observeLayers(),
                 [this](const std::vector<int>& value)

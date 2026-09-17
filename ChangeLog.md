@@ -48,6 +48,8 @@ Fixes:
 * A review marker opens for editing on a double click, rather than opening
   on some clicks and not others.
 * Closing the last file closes the review with it.
+* Closing a review prompts to save after a change to the files or to the
+  color and image display, such as adding or removing a LUT.
 
 ## 3.6.0
 
