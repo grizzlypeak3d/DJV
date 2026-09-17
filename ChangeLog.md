@@ -29,10 +29,9 @@ Changes:
   its controls.
 * The cache sizes and the FFmpeg thread count can be set from the command
   line.
-* FFmpeg is updated to 9.0.1.
 * The file types offered are trimmed to the ones a review tool opens.
-* Three channel half OpenEXR files play faster.
-* Large OTIOZ bundles open faster.
+* Library updates:
+    - FFmpeg 9.0.1
 
 Fixes:
 * Less memory is used with several movies open: files that are not being
@@ -93,8 +92,8 @@ Fixes:
   over the file name.
 * A file opened with a separate audio file shows the audio's waveform.
 * Opening many files at once no longer reads every one of them.
-* Color management no longer costs ten times the frame time when the
-  timeline shows thumbnails; a regression in 3.6.0.
+* Color management no longer slows playback when the timeline shows
+  thumbnails; a regression in 3.6.0.
 * Enlarging with High Quality no longer shows resize artefacts.
 * Media stored past 2 GB in an OTIOZ bundle can be read.
 * The movie export presets offered are the ones the build can write.
