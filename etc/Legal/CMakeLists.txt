@@ -24,6 +24,7 @@ set(LEGAL
     LICENSE_OpenImageIO.md
     LICENSE_OpenJPH.txt
     LICENSE_OpenTimelineIO.txt
+    LICENSE_openapv.txt
     LICENSE_plutovg.txt
     LICENSE_pystring.txt
     LICENSE_SDL2.txt

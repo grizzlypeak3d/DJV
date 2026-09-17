@@ -21,8 +21,10 @@ Changes:
   line.
 * Automatic OCIO input color spaces follow all of the configuration's file
   rules, including the default rule.
+* Movies can be exported as APV.
 * Library updates:
     - FFmpeg 9.0.1
+    - OpenAPV 0.3.0.0
 
 Fixes:
 * Exporting with the FFmpeg command line no longer hangs.
