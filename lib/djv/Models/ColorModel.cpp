@@ -254,6 +254,13 @@ namespace djv
             const std::string ext = ftk::toLower(ftk::Path(path).getExt());
             if (".otio" == ext || ".otioz" == ext)
             {
+                // Said rather than left blank, so that the resolved row does
+                // not simply vanish for a timeline. No one clip can be named
+                // instead: several tracks can make up the frame at once.
+                if (label)
+                {
+                    *label = "Per clip";
+                }
                 return out;
             }
 

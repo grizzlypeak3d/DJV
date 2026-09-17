@@ -144,6 +144,12 @@ namespace djv
                 "not_a_color_space (not in the configuration)" ==
                 model->observeResolvedInput()->get());
 
+            // A timeline has no input of its own; the label says why,
+            // rather than being empty.
+            model->setActiveFiles({ { "timeline.otioz", {} } });
+            FTK_CHECK("Per clip" == model->observeResolvedInput()->get());
+            FTK_CHECK(model->resolveInput("timeline.otioz").empty());
+
             model->setExtColorSpaces({ { ".exr", rec709 } });
             model->setActiveFiles({ { "render.0001.exr", {} } });
             FTK_CHECK(
