@@ -271,14 +271,12 @@ namespace djv
             else if (bool declaredUnmatched = false; true)
             {
                 std::string declaredName;
-                std::string declaredSource;
                 const std::string declared = _declaredColorSpace(
-                    ext, tags, declaredUnmatched, declaredName,
-                    declaredSource);
+                    tags, declaredUnmatched, declaredName);
                 if (!declared.empty())
                 {
                     out = declared;
-                    source = declaredSource;
+                    source = "file";
                 }
                 else if (declaredUnmatched)
                 {
@@ -296,21 +294,30 @@ namespace djv
                 }
                 else if (p.ocioConfig)
                 {
-                // Only a rule the configuration author wrote is taken;
-                // every path matches the default rule, so taking that too
-                // would replace "no input transform" with the default
-                // rule's space for everyone, whether their configuration
-                // has rules or not.
+                // A file that says nothing is what the configuration says it
+                // is. Its file rules are taken whole, the default rule
+                // included: that rule is the configuration's own answer for
+                // everything else -- and, in a configuration without rules,
+                // its default role -- so DJV agrees with the other
+                // applications using the same configuration. Anyone who
+                // wants another answer for an extension assigns one above.
+                //
+                // A name the configuration cannot resolve is not taken: a
+                // version 1 configuration with no default role has a default
+                // rule naming a role that is not there.
                 try
                 {
                     const char* colorSpace =
                         p.ocioConfig->getColorSpaceFromFilepath(path.c_str());
                     if (colorSpace &&
                         colorSpace[0] &&
-                        !p.ocioConfig->filepathOnlyMatchesDefaultRule(path.c_str()))
+                        p.ocioConfig->getColorSpace(colorSpace))
                     {
                         out = colorSpace;
-                        source = "file rules";
+                        source =
+                            p.ocioConfig->filepathOnlyMatchesDefaultRule(path.c_str()) ?
+                            "default rule" :
+                            "file rules";
                     }
                 }
                 catch (const std::exception&)
@@ -326,17 +333,14 @@ namespace djv
         }
 
         std::string ColorModel::_declaredColorSpace(
-            const std::string& ext,
             const ftk::ImageTags& tags,
             bool& declaredUnmatched,
-            std::string& declaredName,
-            std::string& declaredSource) const
+            std::string& declaredName) const
         {
             FTK_P();
             std::string out;
             declaredUnmatched = false;
             declaredName = std::string();
-            declaredSource = "file";
 #if defined(TLRENDER_OCIO)
             // What the file was flagged with, matched against the color
             // spaces the configuration has. The names tried are the
@@ -419,25 +423,11 @@ namespace djv
                     }
                 }
 
-                // An OpenEXR with no declaration at all still has one,
-                // by the format's own rules: absent chromaticities mean
-                // Rec.709 primaries, and the encoding is scene linear.
-                // The specification's default outranks a configuration's
-                // file rules, which are written for paths, not formats --
-                // Blender's map ".exr" to sRGB.
-                if (".exr" == ext && !declared && candidates.empty())
-                {
-                    declared = true;
-                    declaredName = "Rec.709 primaries";
-                    declaredSource = "EXR default";
-                    candidates =
-                    {
-                        "lin_rec709",
-                        "lin_srgb",
-                        "Linear Rec.709 (sRGB)",
-                        "Linear Rec.709"
-                    };
-                }
+                // An OpenEXR that declares nothing is not given the format's
+                // default, linear Rec.709, here: that would outrank the
+                // configuration, which knows the pipeline the file came from
+                // where the format can only guess. It falls through to the
+                // file rules instead.
 
                 std::string primaries;
                 std::string transfer;

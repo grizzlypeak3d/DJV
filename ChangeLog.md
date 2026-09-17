@@ -19,6 +19,8 @@ Changes:
   its controls.
 * The cache sizes and the FFmpeg thread count can be set from the command
   line.
+* Automatic OCIO input color spaces follow all of the configuration's file
+  rules, including the default rule.
 * Library updates:
     - FFmpeg 9.0.1
 

@@ -118,11 +118,9 @@ namespace djv
             //! honoured must not be papered over by an extension rule.
             //! declaredName is what the file declared, for saying so.
             std::string _declaredColorSpace(
-                const std::string& ext,
                 const ftk::ImageTags&,
                 bool& declaredUnmatched,
-                std::string& declaredName,
-                std::string& declaredSource) const;
+                std::string& declaredName) const;
             void _ocioConfigUpdate(const tl::OCIOOptions&);
 
             FTK_PRIVATE();

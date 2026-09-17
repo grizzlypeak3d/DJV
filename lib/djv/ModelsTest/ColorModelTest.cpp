@@ -61,9 +61,11 @@ namespace djv
             FTK_CHECK(!acescg.empty());
             FTK_CHECK(acescg != rec709);
 
-            // An OpenEXR that declares nothing is taken at the format's own
-            // default: linear with Rec.709 primaries.
-            FTK_CHECK(rec709 == model->resolveInput("render.0001.exr"));
+            // An OpenEXR that declares nothing is what the configuration's
+            // rules say, not the format's default: the built-in
+            // configuration has a rule for the extension.
+            const std::string exrRule = model->resolveInput("render.0001.exr");
+            FTK_CHECK(!exrRule.empty());
 
             // A declaration the configuration cannot match resolves nothing,
             // even for an OpenEXR: the file said what it is, and neither the
@@ -79,10 +81,9 @@ namespace djv
                 { { "Color Primaries", "bt709" },
                   { "Color Transfer", "iec61966-2-1" } }).empty());
 
-            // A file that declares nothing only resolves through a rule the
-            // configuration author wrote; the default rule matches every
-            // path and is refused.
-            FTK_CHECK(model->resolveInput("image.png").empty());
+            // A file that declares nothing and matches no other rule takes
+            // the configuration's default rule.
+            FTK_CHECK(!model->resolveInput("image.png").empty());
 
             // A timeline is a container of media in their own color spaces,
             // not an image with one of its own.
@@ -90,7 +91,7 @@ namespace djv
             FTK_CHECK(model->resolveInput("timeline.otioz").empty());
 
             // The user's extension assignments outrank everything the file
-            // says, including the OpenEXR default.
+            // says and the configuration's rules.
             model->setExtColorSpaces({ { ".exr", acescg } });
             FTK_CHECK(acescg == model->resolveInput("render.0001.exr"));
 #else // TLRENDER_OCIO
@@ -115,10 +116,18 @@ namespace djv
             model->setOCIOOptions(options);
 
 #if defined(TLRENDER_OCIO)
-            const std::string rec709 = model->resolveInput("render.0001.exr");
+            const std::string rec709 = model->resolveInput(
+                "render.0001.exr", { { "colorInteropID", "lin_rec709" } });
             model->setActiveFiles({ { "render.0001.exr", {} } });
             FTK_CHECK(
-                rec709 + " (EXR default)" ==
+                model->resolveInput("render.0001.exr") + " (file rules)" ==
+                model->observeResolvedInput()->get());
+
+            // Matching only the default rule says so, since that is the
+            // configuration's answer for everything it names no rule for.
+            model->setActiveFiles({ { "image.png", {} } });
+            FTK_CHECK(
+                model->resolveInput("image.png") + " (default rule)" ==
                 model->observeResolvedInput()->get());
 
             model->setActiveFiles({ {
