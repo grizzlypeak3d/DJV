@@ -100,6 +100,7 @@ Fixes:
 * RGBA float images get thumbnails.
 * The File > Layers menu fills in for a file opened after startup.
 * The layer that is shown is the layer whose format is reported.
+* USD support, removed in 3.6.0, is back in source builds.
 
 ## 3.6.0
 
