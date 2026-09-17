@@ -153,6 +153,7 @@ namespace djv
             std::shared_ptr<models::RecentFilesModel> recentFilesModel;
             std::shared_ptr<models::RecentFilesModel> recentReviewsModel;
             std::shared_ptr<models::RecentFilesModel> recentPlaylistsModel;
+            std::shared_ptr<models::RecentFilesModel> recentDirsModel;
             std::filesystem::path reviewPath;
             nlohmann::json reviewRaw;
             //! What the open review could not be read from, carried alongside
@@ -2285,6 +2286,9 @@ namespace djv
             p.timeUnitsModel->save();
             p.filesModel->save();
             p.recentFilesModel->save();
+            p.recentReviewsModel->save();
+            p.recentPlaylistsModel->save();
+            p.recentDirsModel->save();
             p.viewportModel->save();
             p.colorModel->save();
             p.audioModel->save();
@@ -2390,6 +2394,12 @@ namespace djv
             // one does not push its media into the recent files.
             p.recentReviewsModel = models::RecentFilesModel::create(_context, getSettings(), "Review");
             p.recentPlaylistsModel = models::RecentFilesModel::create(_context, getSettings(), "Playlist");
+            // The directories chosen in with the file browser, for anything --
+            // a LUT, an export directory -- so the browser offers them again
+            // without those choices joining the recent files. A group of its
+            // own: "/FileBrowser" is written whole, and would take a list
+            // kept inside it along.
+            p.recentDirsModel = models::RecentFilesModel::create(_context, getSettings(), "FileBrowserDirs");
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
             // From what the settings restored rather than from a fresh set:
@@ -2401,6 +2411,7 @@ namespace djv
             fileBrowserOptions.dirList.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
             fileBrowserSystem->getModel()->setOptions(fileBrowserOptions);
             fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
+            fileBrowserSystem->setRecentDirsModel(p.recentDirsModel);
 
             p.colorModel = models::ColorModel::create(_context, getSettings());
 #if defined(TLRENDER_OCIO)
