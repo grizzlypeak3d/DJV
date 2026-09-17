@@ -181,7 +181,10 @@ namespace djv
         {
             FTK_P();
             const std::string& text = !p.hint.empty() ? p.hint : p.message;
-            p.messagesLabel->setText(text);
+            // The first line only: the bar is one line tall, and a message
+            // of several made it grow and the whole window resize with it.
+            // The tooltip keeps all of it.
+            p.messagesLabel->setText(text.substr(0, text.find_first_of("\r\n")));
             p.messagesLabel->setTooltip(text);
         }
 
