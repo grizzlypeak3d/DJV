@@ -48,7 +48,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getFilesModel()->close(value);
+                        app->closeFile(value);
                     }
                 });
 

@@ -99,7 +99,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getFilesModel()->close();
+                        app->closeFile();
                     }
                 });
 
@@ -110,7 +110,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getFilesModel()->closeAll();
+                        app->closeAllFiles();
                     }
                 });
 

@@ -211,7 +211,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getFilesModel()->close(index);
+                        app->closeFile(index);
                     }
                 });
 

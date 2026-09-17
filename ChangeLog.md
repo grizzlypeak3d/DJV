@@ -47,6 +47,7 @@ Fixes:
   with an error, rather than no picture.
 * A review marker opens for editing on a double click, rather than opening
   on some clicks and not others.
+* Closing the last file closes the review with it.
 
 ## 3.6.0
 

@@ -922,6 +922,32 @@ namespace djv
             p.filesModel->add(items);
         }
 
+        void App::closeFile(int index)
+        {
+            FTK_P();
+            if (p.filesModel->getFiles().size() <= 1)
+            {
+                // The last one out closes the review: what is left otherwise
+                // is a session with no files and a panel still full of
+                // feedback about frames that are no longer open.
+                closeAllFiles();
+                return;
+            }
+            if (index >= 0)
+            {
+                p.filesModel->close(index);
+            }
+            else
+            {
+                p.filesModel->close();
+            }
+        }
+
+        void App::closeAllFiles()
+        {
+            closeReview();
+        }
+
         namespace
         {
             //! Resolve a review file entry to a path on disk.

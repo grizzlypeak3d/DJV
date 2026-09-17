@@ -193,6 +193,19 @@ namespace djv
             //! Save a playlist dialog.
             DJV_APP_API void savePlaylistDialog();
 
+            //! Close a file: the one given, or the current one.
+            //!
+            //! The last file takes the review with it. A review is about its
+            //! files, so one with none left has nothing to be about, and its
+            //! notes and drawings would otherwise sit in the document
+            //! pointing at frames that are no longer there. Unsaved feedback
+            //! is asked about first, the same as closing the review from the
+            //! menu; the file itself stays in the recent list either way.
+            DJV_APP_API void closeFile(int index = -1);
+
+            //! Close every file, which is to say close the review.
+            DJV_APP_API void closeAllFiles();
+
             //! \name Reviews
             //! A review (".djvr") is a saved session: the open files, the active
             //! tab, the comparison setup, and the viewport, color and interface
@@ -215,8 +228,6 @@ namespace djv
             //! Save the current session to a new review, always prompting.
             void saveReviewAs();
 
-            //! Close the current review and reset to the empty startup state,
-            //! prompting to save first if there are unsaved changes.
             //! Import a timeline as a review, asking which: it becomes the
             //! review's "A" by reference and its markers become feedback.
             void importReviewDialog();
@@ -224,6 +235,8 @@ namespace djv
             //! Export the review's markers to an OTIO file, asking where.
             void exportReviewMarkers();
 
+            //! Close the current review and reset to the empty startup state,
+            //! prompting to save first if there are unsaved changes.
             void closeReview();
 
             //! Get the path of the active review, or empty if none.
