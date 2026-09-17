@@ -45,6 +45,8 @@ Fixes:
   frame's picture in place of an earlier one.
 * A LUT or OCIO configuration that cannot be read shows the picture unaltered,
   with an error, rather than no picture.
+* A review marker opens for editing on a double click, rather than opening
+  on some clicks and not others.
 
 ## 3.6.0
 

@@ -552,16 +552,20 @@ namespace djv
                     }
                     _deleteButtonUpdate();
                 });
-            p.markerListLayout->setActivateCallback(
-                [this](int value)
+            // Return and the double click are the same gesture: open the
+            // marker for editing. The arrows and a single click already go
+            // to its frames.
+            auto editItem = [this](int value)
                 {
                     FTK_P();
                     if (value >= 0 &&
                         value < static_cast<int>(p.itemOrder.size()))
                     {
-                        _markerClicked(p.itemOrder[value].id);
+                        _editMarker(p.itemOrder[value].id);
                     }
-                });
+                };
+            p.markerListLayout->setActivateCallback(editItem);
+            p.markerListLayout->setDoubleClickCallback(editItem);
             p.markerListLayout->setDeleteCallback(
                 [this](int value)
                 {
@@ -1001,15 +1005,11 @@ namespace djv
                     break;
                 }
             }
-            // The first click goes to the marker's frames -- a span narrows
-            // the timeline to itself on the way; a click on the marker
-            // already showing -- or on one about no frame in particular --
-            // opens it for editing.
-            if (!i->range.has_value() || markerShowing(*i, p.currentTime))
-            {
-                _editMarker(id);
-            }
-            else if (p.player)
+            // A click goes to the marker's frames -- a span narrows the
+            // timeline to itself on the way. Nowhere to go for a marker
+            // about no frame in particular, which still becomes the current
+            // item. Editing is the double click.
+            if (i->range.has_value() && p.player)
             {
                 _goToRange(*i->range);
                 // The keyboard continues from here: the arrows walk on
@@ -1085,12 +1085,12 @@ namespace djv
                 {
                     button->setTooltip(hasRange ?
                         (isSingleFrame(*marker.range) ?
-                            "Go to the marker's frame.\n\nClick the marker "
-                            "already showing to edit it." :
+                            "Go to the marker's frame.\n\nDouble click to "
+                            "edit the marker." :
                             "Go to the marker's frames, setting the timeline "
-                            "in/out points to them.\n\nClick the marker "
-                            "already showing to edit it.") :
-                        "Edit the marker.");
+                            "in/out points to them.\n\nDouble click to edit "
+                            "the marker.") :
+                        "Double click to edit the marker.");
                 }
                 const std::string id = marker.id;
                 button->setClickedCallback(

@@ -68,6 +68,10 @@ namespace djv
             void _editMarker(const std::string& id);
             void _commitMarker();
             void _editFocus(const std::shared_ptr<ftk::TextEdit>&, bool);
+            //! A click on a marker: go to the frames it is about. Editing
+            //! is the double click, so that walking the feedback -- which
+            //! is one click after another -- does not keep opening the
+            //! editor on the way past.
             void _markerClicked(const std::string& id);
             //! Seek to a marker's frames; a span narrows the timeline
             //! in/out points to itself on the way.
