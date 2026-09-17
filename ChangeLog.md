@@ -41,6 +41,8 @@ Fixes:
 * USD support, removed in 3.6.0, is back in source builds.
 * High Quality filtering no longer softens pictures shown or exported at
   their own size.
+* Exported ProRes, PNG, and QuickTime Animation movies no longer show a later
+  frame's picture in place of an earlier one.
 
 ## 3.6.0
 
