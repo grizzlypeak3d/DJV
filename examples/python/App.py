@@ -1091,7 +1091,11 @@ class App(ftk.App):
         # Initialize the file browser.
         fileBrowserSystem = self.context.getSystemByName("ftk::FileBrowserSystem")
         fileBrowserSystem.model.exts = tl.getExts(self.context)
-        fileBrowserSystem.recentFilesModel = self._recentFilesModel
+        # What the file browser's recent list shows, kept between runs in a
+        # group of its own, as the C++ application does.
+        self._recentDirsModel = djv.models.RecentFilesModel(
+            self.context, self._settings, "FileBrowserDirs")
+        fileBrowserSystem.recentDirsModel = self._recentDirsModel
 
         # Before the window: the style settings carry the default display
         # scale, and the window corrects the scale from what the display
@@ -1203,6 +1207,7 @@ class App(ftk.App):
         self._recentFilesModel.save()
         self._recentReviewsModel.save()
         self._recentPlaylistsModel.save()
+        self._recentDirsModel.save()
         self._viewportModel.save()
         self._colorModel.save()
         self._audioModel.save()
@@ -1256,6 +1261,10 @@ class App(ftk.App):
             if timeline is None:
                 timeline = self._createTimeline(item)
                 self._recentFilesModel.addRecent(item.path)
+                # Its directory as well, which is what the file browser
+                # offers: a file opened from the command line never went
+                # through the browser.
+                self._recentDirsModel.addRecent(ftk.Path(item.path.dir))
             timelines.append(timeline)
         self._files = list(files)
         self._timelines = timelines

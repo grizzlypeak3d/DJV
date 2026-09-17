@@ -699,6 +699,7 @@ namespace djv
                 p.filesModel->setCompareOptions(playlist.compareOptions);
                 p.filesModel->setCompareTime(playlist.compareTime);
                 p.recentFilesModel->addRecent(path);
+                p.recentDirsModel->addRecent(ftk::Path(path.getDir()));
 
                 if (!report.empty())
                 {
@@ -2394,11 +2395,11 @@ namespace djv
             // one does not push its media into the recent files.
             p.recentReviewsModel = models::RecentFilesModel::create(_context, getSettings(), "Review");
             p.recentPlaylistsModel = models::RecentFilesModel::create(_context, getSettings(), "Playlist");
-            // The directories chosen in with the file browser, for anything --
-            // a LUT, an export directory -- so the browser offers them again
-            // without those choices joining the recent files. A group of its
-            // own: "/FileBrowser" is written whole, and would take a list
-            // kept inside it along.
+            // What the file browser's recent list shows: the directories of
+            // everything opened, and of anything chosen in the browser -- a
+            // LUT, an export directory -- without those choices joining the
+            // recent files. A group of its own: "/FileBrowser" is written
+            // whole, and would take a list kept inside it along.
             p.recentDirsModel = models::RecentFilesModel::create(_context, getSettings(), "FileBrowserDirs");
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
@@ -2410,7 +2411,6 @@ namespace djv
                 fileBrowserSystem->getModel()->getOptions();
             fileBrowserOptions.dirList.seqExts = tl::getExts(_context, static_cast<int>(tl::FileType::Seq));
             fileBrowserSystem->getModel()->setOptions(fileBrowserOptions);
-            fileBrowserSystem->setRecentFilesModel(p.recentFilesModel);
             fileBrowserSystem->setRecentDirsModel(p.recentDirsModel);
 
             p.colorModel = models::ColorModel::create(_context, getSettings());
@@ -3077,6 +3077,10 @@ namespace djv
                 // that cannot be read should not be offered back in the
                 // recent files.
                 p.recentFilesModel->addRecent(item->path);
+                // Its directory as well, which is what the file browser
+                // offers: a file opened from the command line or dropped on
+                // the window never went through the browser.
+                p.recentDirsModel->addRecent(ftk::Path(item->path.getDir()));
             }
             catch (const std::exception& e)
             {
