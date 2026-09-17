@@ -8,98 +8,34 @@ Changes:
 * Opening one image of a sequence starts playback at that image.
 * OTIOZ bundle media can be read with the FFmpeg command line.
 * The status bar shows the highlighted menu item's tooltip.
-* The exposure control is a stop adjustment; defog, knee, and gamma are
-  removed.
 * The Python bindings use nanobind.
 * Add a clipping warning.
 * Building requires C++20.
 * CineForm movies can be read and written.
 * Hovering the timeline shows a preview of the frame under the cursor.
-* Export file names are typed, with `#` for the frame number.
-* The Custom color style is removed.
-* The light style's checked color is light blue.
-* The file list scrolls to the current file.
-* Browsing a list with the keyboard keeps the item in view.
-* Exported files are named for the file being exported.
 * Exposure and soft clip are in the Color section of the Color tool.
-* The Audio tool plays all channels or a chosen one for each file.
-* The View tool has controls for the color channels, negative, and
-  mirror.
+* Individual audio channels can be played.
 * The status indicator shows the options in use, and clicking one shows
   its controls.
 * The cache sizes and the FFmpeg thread count can be set from the command
   line.
-* The file types offered are trimmed to the ones a review tool opens.
 * Library updates:
     - FFmpeg 9.0.1
 
 Fixes:
-* Less memory is used with several movies open: files that are not being
-  shown close their decoders, and thumbnails keep only the current file
-  open.
 * Exporting with the FFmpeg command line no longer hangs.
 * A file with a mono audio stream per channel plays all of the channels.
-* The audio cache covers the whole in/out range.
-* Looping audio plays every sample at the loop point.
 * A still image paired with an audio file lasts as long as the audio.
-* The audio waveform is drawn at the level of the file, and leaves
-  headroom, so a loud track no longer looks clipped.
-* Settings are not lost when one copy of the application starts as
-  another quits; a settings file that cannot be read is set aside as
-  ".bad" rather than overwritten.
+* Settings fixes for running multiple application instances.
 * Clearing the drawing on a compared frame also clears the "B" strokes.
-* A display scale set in the settings is kept across launches.
 * A tilt wheel no longer zooms the view.
-* The mouse wheel scrolls three lines per notch on Windows and Linux.
-* The command line help prints without a display.
 * The window is drawn while it is being resized on macOS and Windows.
-* DJV is offered for the file types it reads in the Windows "Open with"
-  list, and goes on working there after an upgrade. On starting, it also
-  points the "Open with" and "Always use this app" entries Windows kept
-  for a removed copy of DJV at the running one.
-* DJV launched from a shell is in the macOS application switcher and dock.
-* The HUD shows a single dash for a color it has no sample of.
-* The window's right-click menu includes the Tools panel.
 * A movie's start timecode is found when a subtitle or other data track
   comes before its timecode track.
-* Text on checked buttons and timeline clips is black or white to suit
-  the color behind it.
-* The clipping warning no longer marks edges and flat areas of a picture
-  viewed with High Quality filtering.
-* Comparing side by side with Same Size, the second file is as tall as the
-  first, and above and below it is as wide, whatever their aspect ratios.
-* The keys for framing and zooming the view can be assigned to other
-  commands; the view no longer handles 0, =, -, and Backspace itself.
-* Exported movies have the colors of the images they were made from, and
-  movies are read with the color matrix they name, or the one taken for
-  their size.
-* MJPEG movies show their full range of blacks and whites.
-* FFV1 exports are lossless, and ProRes 4444 exports keep full resolution
-  color.
-* Exporting a movie at a size its pixel format cannot hold is refused with
-  the size to change, rather than writing a damaged file.
-* On Linux, memory stays near the cache size when changing between files.
-* Wipe, Butterfly, Overlay, and Difference comparisons show and take the
-  drawings of the A file, rather than the drawings of every file at once.
-* The secondary window zooms with the mouse wheel at the zoom scale set in the
-  settings.
-* The status bar indicator lights for color adjustments that change the
-  picture, not for ones enabled at their defaults or a LUT with no file.
-* New default keyboard shortcuts are not hidden by the settings of an earlier
-  version; only the shortcuts changed from their defaults are saved. Ctrl+Z
-  undoes drawing again, and Ctrl+Y also redoes it on Windows and Linux.
-* A thumbnail wider than 16:9 is fit to the file list instead of drawing
-  over the file name.
-* A file opened with a separate audio file shows the audio's waveform.
 * Opening many files at once no longer reads every one of them.
 * Color management no longer slows playback when the timeline shows
   thumbnails; a regression in 3.6.0.
 * Enlarging with High Quality no longer shows resize artefacts.
-* Media stored past 2 GB in an OTIOZ bundle can be read.
-* The movie export presets offered are the ones the build can write.
-* RGBA float images get thumbnails.
-* The File > Layers menu fills in for a file opened after startup.
-* The layer that is shown is the layer whose format is reported.
 * USD support, removed in 3.6.0, is back in source builds.
 
 ## 3.6.0
