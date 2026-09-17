@@ -39,6 +39,8 @@ Fixes:
   thumbnails; a regression in 3.6.0.
 * Enlarging with High Quality no longer shows resize artefacts.
 * USD support, removed in 3.6.0, is back in source builds.
+* High Quality filtering no longer softens pictures shown or exported at
+  their own size.
 
 ## 3.6.0
 
