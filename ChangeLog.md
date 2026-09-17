@@ -43,6 +43,8 @@ Fixes:
   their own size.
 * Exported ProRes, PNG, and QuickTime Animation movies no longer show a later
   frame's picture in place of an earlier one.
+* A LUT or OCIO configuration that cannot be read shows the picture unaltered,
+  with an error, rather than no picture.
 
 ## 3.6.0
 

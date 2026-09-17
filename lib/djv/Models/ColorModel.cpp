@@ -4,6 +4,9 @@
 #include <djv/Models/ColorModel.h>
 
 #include <ftk/UI/Settings.h>
+#include <ftk/Core/Context.h>
+#include <ftk/Core/Format.h>
+#include <ftk/Core/LogSystem.h>
 #include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
 
@@ -24,6 +27,7 @@ namespace djv
     {
         struct ColorModel::Private
         {
+            std::weak_ptr<ftk::LogSystem> logSystem;
             std::shared_ptr<ftk::Settings> settings;
             std::shared_ptr<ftk::Observable<tl::OCIOOptions> > ocioOptions;
             std::shared_ptr<ftk::Observable<tl::OCIOOptions> > resolvedOCIOOptions;
@@ -46,6 +50,7 @@ namespace djv
         {
             FTK_P();
 
+            p.logSystem = context->getLogSystem();
             p.settings = settings;
 
             tl::OCIOOptions ocioOptions;
@@ -513,8 +518,24 @@ namespace djv
                 default: break;
                 }
             }
-            catch (const std::exception&)
-            {}
+            catch (const std::exception& e)
+            {
+                // Said rather than swallowed: without the configuration
+                // nothing resolves and the picture is shown unmanaged, which
+                // otherwise looks like color management quietly doing
+                // nothing. A configuration moved away, or one a review names
+                // on another machine, is the usual cause.
+                if (options.enabled)
+                {
+                    if (auto logSystem = p.logSystem.lock())
+                    {
+                        logSystem->print(
+                            "djv::models::ColorModel",
+                            ftk::Format("Cannot read the OCIO configuration: {0}").arg(e.what()),
+                            ftk::LogType::Error);
+                    }
+                }
+            }
 #endif // TLRENDER_OCIO
         }
     }
