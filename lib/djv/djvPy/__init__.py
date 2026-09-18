@@ -65,11 +65,18 @@ def main():
         import feather_tk
         tl = _package_dir(_tlrender)
         ftk = _package_dir(feather_tk)
+        # The .libs directories are where the wheels' repair put the C++
+        # runtime, beside each package.
+        site = _os.path.dirname(_here)
         path = [
             bin_dir,
             _os.path.join(tl, "bin"),
             _os.path.join(tl, "lib"),
-            _os.path.join(ftk, "bin")]
+            _os.path.join(ftk, "bin"),
+            _os.path.join(site, "djv_player.libs"),
+            _os.path.join(site, "tlrender.libs"),
+            _os.path.join(site, "feather_tk.libs")]
+        path = [p for p in path if _os.path.isdir(p)]
         env = dict(_os.environ)
         env["PATH"] = _os.pathsep.join(path + [env.get("PATH", "")])
         return subprocess.call([exe] + _sys.argv[1:], env=env)
