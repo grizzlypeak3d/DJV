@@ -8,7 +8,7 @@ directories, and whatever os.add_dll_directory() has been told about, and
 nothing else. The bindings link FFmpeg and LibRaw, which install to bin, so
 importing them without this fails with
 
-    ImportError: DLL load failed while importing tlRenderPy:
+    ImportError: DLL load failed while importing _tlrender:
     The specified module could not be found.
 
 and no amount of PATH helps. Any directories given on the command line are

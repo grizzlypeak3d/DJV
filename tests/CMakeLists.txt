@@ -10,7 +10,7 @@ if(DJV_PYTHON)
     # else looks. The bindings link opentimelineio directly, so the directory
     # has to be named here too or the import fails on Windows with
     #
-    #     ImportError: DLL load failed while importing tlRenderPy:
+    #     ImportError: DLL load failed while importing _tlrender:
     #     The specified module could not be found.
     add_test(
         NAME djvPy-test
@@ -24,7 +24,7 @@ if(DJV_PYTHON)
     # where the tests that need OpenGL read it and skip.
     set(PYTHON_TEST_ENV
         "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:_feather_tk>/.."
-        "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:tlRenderPy>"
+        "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:_tlrender>/.."
         "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:djvPy>"
         "PYTHONPATH=path_list_append:${CMAKE_INSTALL_PREFIX}/python")
     if(DJV_TESTS_NO_GL)
