@@ -162,6 +162,9 @@ namespace djv
             std::vector<std::string> reviewUnreadSections;
             nlohmann::json reviewUnreadItems;
             bool reviewModified = false;
+            //! What the session summary reports at exit.
+            size_t filesOpened = 0;
+            size_t droppedFrames = 0;
             std::optional<models::ReviewView> pendingReviewView;
             std::shared_ptr<ftk::Timer> reviewViewTimer;
             std::shared_ptr<ftk::Timer> autosaveTimer;
@@ -202,6 +205,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<int> > aIndexModifiedObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeModifiedObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioLogObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutLogObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayModifiedObserver;
@@ -2276,7 +2281,8 @@ namespace djv
                     throw std::runtime_error("Cannot set up the benchmark");
                 }
                 ftk::App::run();
-            _saveSettings();
+                _logSessionSummary();
+                _saveSettings();
                 if (!benchmark->succeeded())
                 {
                     throw std::runtime_error("The benchmark produced no measurement");
@@ -2285,7 +2291,54 @@ namespace djv
             }
 
             ftk::App::run();
+            _logSessionSummary();
             _saveSettings();
+        }
+
+        void App::_logSessionSummary()
+        {
+            FTK_P();
+
+            // What the session amounted to, at the one point where it is all
+            // known. Read errors are counted by the timelines and were not
+            // shown anywhere; dropped frames are the playback complaint
+            // people report and could not be answered from the log.
+            size_t readErrorCount = 0;
+            std::string readError;
+            std::string readErrorPath;
+            for (const auto& timeline : p.timelines)
+            {
+                if (timeline)
+                {
+                    readErrorCount += timeline->getReadErrorCount();
+                    if (readError.empty())
+                    {
+                        readError = timeline->getReadError();
+                        if (!readError.empty())
+                        {
+                            readErrorPath = timeline->getPath().get();
+                        }
+                    }
+                }
+            }
+            size_t droppedFrames = p.droppedFrames;
+            if (auto player = p.player->get())
+            {
+                droppedFrames += player->getDroppedFrames();
+            }
+
+            std::vector<std::string> lines;
+            lines.push_back(std::string());
+            lines.push_back(ftk::Format("    * Files opened: {0}").arg(p.filesOpened));
+            lines.push_back(readErrorCount > 0 ?
+                ftk::Format("    * Read errors: {0}, first \"{1}\" in \"{2}\"").
+                    arg(readErrorCount).
+                    arg(readError).
+                    arg(readErrorPath).
+                    str() :
+                std::string("    * Read errors: none"));
+            lines.push_back(ftk::Format("    * Dropped frames: {0}").arg(droppedFrames));
+            _context->log("djv::app::App session", ftk::join(lines, "\n"));
         }
 
         std::shared_ptr<ftk::Capture> App::_createCapture(
@@ -2745,6 +2798,48 @@ namespace djv
                     _markModified();
                 },
                 ftk::ObserverAction::Suppress);
+            // The color pipeline, which the log said nothing about: "why
+            // does this look wrong" is the commonest report there is, and it
+            // could not be answered from the file. The resolved options
+            // rather than the settings as written, so the line says the
+            // input color space the active file actually rendered through;
+            // it only fires when something changes, so switching between
+            // files that resolve the same way says nothing.
+            p.ocioLogObserver = ftk::Observer<tl::OCIOOptions>::create(
+                p.colorModel->observeResolvedOCIOOptions(),
+                [this](const tl::OCIOOptions& value)
+                {
+                    _context->log(
+                        "djv::app::App",
+                        value.enabled ?
+                            ftk::Format(
+                                "OCIO: {0}, input \"{1}\", display \"{2}\", "
+                                "view \"{3}\", look \"{4}\"").
+                                arg(tl::OCIOConfig::BuiltIn == value.config ?
+                                    std::string("built-in configuration") :
+                                    ftk::Format("\"{0}\"").arg(value.fileName).str()).
+                                arg(value.input).
+                                arg(value.display).
+                                arg(value.view).
+                                arg(value.look).
+                                str() :
+                            std::string("OCIO: off"));
+                });
+            p.lutLogObserver = ftk::Observer<tl::LUTOptions>::create(
+                p.colorModel->observeLUTOptions(),
+                [this](const tl::LUTOptions& value)
+                {
+                    _context->log(
+                        "djv::app::App",
+                        value.enabled && !value.fileName.empty() ?
+                            ftk::Format("LUT: \"{0}\", {1}, {2}").
+                                arg(value.fileName).
+                                arg(value.direction).
+                                arg(value.order).
+                                str() :
+                            std::string("LUT: off"));
+                });
+
             // How the image is shown. A LUT turned off is a change to the
             // review in the same way a note is: the document carries it, so
             // closing without it asks first.
@@ -3309,6 +3404,8 @@ namespace djv
                                 std::string("no time range")));
                 }
 
+                ++p.filesOpened;
+
                 // A timeline can be read perfectly and still have nothing to
                 // show for some of its frames.
                 if (const auto missing = missingMedia(timeline->getOTIOTimeline());
@@ -3525,6 +3622,13 @@ namespace djv
             }
 
             p.activeFiles = activeFiles;
+            // Before the old one goes: dropped frames are counted by the
+            // player, and a session that switched files would otherwise end
+            // reporting only the last one's.
+            if (auto previous = p.player->get(); previous && previous != player)
+            {
+                p.droppedFrames += previous->getDroppedFrames();
+            }
             p.player->setIfChanged(player);
 
             // A file that is not being shown keeps its timeline, so coming

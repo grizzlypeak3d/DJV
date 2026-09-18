@@ -351,6 +351,8 @@ namespace djv
             void _closeReview();
             //! Where the previous run's log was moved to; see ftk::App.
             std::filesystem::path _previousLogPath() const;
+            //! What the session amounted to, written to the log as it ends.
+            void _logSessionSummary();
             void _importReviewTimeline(const std::filesystem::path&);
             void _exportReviewMarkers(const std::filesystem::path&);
             void _applyReviewView();
