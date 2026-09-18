@@ -53,6 +53,8 @@ Fixes:
   instead of smearing them.
 * A LUT or OCIO configuration that cannot be read shows the picture unaltered,
   with an error, rather than no picture.
+* The -ocio command line option uses the given configuration file, rather
+  than the one chosen in the settings.
 * A review marker opens for editing on a double click, rather than opening
   on some clicks and not others.
 * Closing the last file closes the review with it.

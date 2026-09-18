@@ -2585,6 +2585,10 @@ namespace djv
                 options.enabled = true;
                 if (p.cmdLine.ocioFileName->found())
                 {
+                    // The file only counts with the File source; otherwise
+                    // the saved source (the built-in config by default)
+                    // wins and the option is quietly ignored.
+                    options.config = tl::OCIOConfig::File;
                     options.fileName = p.cmdLine.ocioFileName->getValue();
                 }
                 if (p.cmdLine.ocioInput->found())
