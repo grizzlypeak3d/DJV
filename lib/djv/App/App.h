@@ -308,6 +308,7 @@ namespace djv
 
         private:
             void _debugStateCommand(const nlohmann::json&);
+            void _exportMovieCommand(const nlohmann::json&);
             void _saveSettings();
             void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);

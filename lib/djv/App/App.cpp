@@ -2646,6 +2646,106 @@ namespace djv
                 {
                     _debugStateCommand(args);
                 });
+            p.commandsModel->add(
+                "Export/Movie",
+                "Export the current file as a movie with the Export tool's "
+                "settings, changing any given first; e.g., { \"dir\": "
+                "\"/tmp\", \"fileName\": \"out\", \"ext\": \".mov\", "
+                "\"preset\": \"ProRes 4444\", \"audioCodec\": \"Auto\", "
+                "\"overwrite\": true, \"exit\": true }. \"exit\" quits once "
+                "the movie is written or has failed.",
+                [this](const nlohmann::json& args)
+                {
+                    _exportMovieCommand(args);
+                });
+        }
+
+        void App::_exportMovieCommand(const nlohmann::json& args)
+        {
+            FTK_P();
+            const auto get = [&args](const std::string& key, std::string& value)
+            {
+                if (args.is_object() && args.contains(key) && args.at(key).is_string())
+                {
+                    value = args.at(key).get<std::string>();
+                }
+            };
+            const auto getBool = [&args](const std::string& key)
+            {
+                return
+                    args.is_object() &&
+                    args.contains(key) &&
+                    args.at(key).is_boolean() &&
+                    args.at(key).get<bool>();
+            };
+
+            // The tool first: opening it names the output after the file
+            // being exported, which would otherwise undo a name given here.
+            if (p.mainWindow)
+            {
+                p.toolsModel->setToolOpen("Export", true);
+            }
+            auto settings = p.settingsModel->getExport();
+            settings.fileType = models::ExportFileType::Movie;
+            get("dir", settings.dir);
+            get("fileName", settings.movieFileName);
+            get("ext", settings.movieExt);
+            get("preset", settings.moviePreset);
+            get("audioCodec", settings.movieAudioCodec);
+
+            const std::string path = ftk::Path(
+                settings.dir,
+                settings.movieFileName + settings.movieExt).get();
+            const bool exitWhenDone = getBool("exit");
+            const auto done = [this, path, exitWhenDone](bool value)
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Export/Movie: {0} \"{1}\"").
+                        arg(value ? "wrote" : "did not write").
+                        arg(path),
+                    value ? ftk::LogType::Message : ftk::LogType::Error);
+                if (exitWhenDone)
+                {
+                    exit();
+                }
+            };
+            if (!p.mainWindow)
+            {
+                done(false);
+                return;
+            }
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            // The tool falls back to the first preset for a name it does not
+            // know, which is right for a setting carried over from another
+            // build and wrong for one a script just asked for.
+            {
+                std::vector<std::string> names;
+                if (auto plugin = _context->getSystem<tl::WriteSystem>()->
+                    getPlugin<tl::ffmpeg::WritePlugin>())
+                {
+                    for (const auto& preset : plugin->getWritePresets())
+                    {
+                        names.push_back(preset.name);
+                    }
+                }
+                if (std::find(names.begin(), names.end(), settings.moviePreset) ==
+                    names.end())
+                {
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format("Export/Movie: no preset \"{0}\"; this build "
+                            "has: {1}").
+                            arg(settings.moviePreset).
+                            arg(ftk::join(names, ", ")),
+                        ftk::LogType::Error);
+                    done(false);
+                    return;
+                }
+            }
+#endif // TLRENDER_FFMPEG_PLUGIN
+            p.settingsModel->setExport(settings);
+            p.mainWindow->exportMovie(getBool("overwrite"), done);
         }
 
         void App::_observersInit()

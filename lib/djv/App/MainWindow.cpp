@@ -3,6 +3,8 @@
 
 #include <djv/App/MainWindow.h>
 
+#include <djv/App/ExportTool.h>
+
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
 #include <djv/App/AudioMenu.h>
@@ -705,6 +707,26 @@ namespace djv
                 p.toolsWidget->getToolWidget("Review")))
             {
                 reviewTool->addNote();
+            }
+        }
+
+        void MainWindow::exportMovie(
+            bool overwrite,
+            const std::function<void(bool)>& callback)
+        {
+            FTK_P();
+            if (auto app = p.app.lock())
+            {
+                app->getToolsModel()->setToolOpen("Export", true);
+            }
+            if (auto exportTool = std::dynamic_pointer_cast<ExportTool>(
+                p.toolsWidget->getToolWidget("Export")))
+            {
+                exportTool->exportMovie(overwrite, callback);
+            }
+            else if (callback)
+            {
+                callback(false);
             }
         }
 

@@ -8,6 +8,8 @@
 
 #include <ftk/UI/IContainer.h>
 
+#include <functional>
+
 namespace tl
 {
     class Player;
@@ -57,6 +59,15 @@ namespace djv
             //! Set the player.
             DJV_UI_API void setPlayer(const std::shared_ptr<tl::Player>&);
 
+            //! Export a movie with the current settings, as the Export Movie
+            //! button does. An existing file is written over only when asked
+            //! to: there is no one to answer the question a script would
+            //! otherwise be asked. The callback is called once with whether
+            //! the movie was written, including when it could not start.
+            DJV_UI_API void exportMovie(
+                bool overwrite,
+                const std::function<void(bool)>&);
+
         private:
             std::vector<ftk::ImageInfo> _getInfos() const;
             ftk::Size2I _getDefaultSize() const;
@@ -65,6 +76,7 @@ namespace djv
             void _sizeUpdate();
             void _widgetUpdate(const models::ExportSettings&);
             OTIO_NS::TimeRange _getExportRange(models::ExportFileType) const;
+            void _error(const std::string&);
             void _export(models::ExportFileType);
             void _exportStart(models::ExportFileType);
             bool _exportFrame();

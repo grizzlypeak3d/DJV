@@ -104,6 +104,12 @@ namespace djv
             //! in/out points.
             DJV_APP_API void addReviewRange();
 
+            //! Open the export tool and export a movie with the current
+            //! settings; see ui::ExportWidget::exportMovie().
+            DJV_APP_API void exportMovie(
+                bool overwrite,
+                const std::function<void(bool)>&);
+
             //! Save the window settings.
             DJV_APP_API void saveSettings();
 

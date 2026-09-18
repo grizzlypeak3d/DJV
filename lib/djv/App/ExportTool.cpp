@@ -60,6 +60,13 @@ namespace djv
         ExportTool::~ExportTool()
         {}
 
+        void ExportTool::exportMovie(
+            bool overwrite,
+            const std::function<void(bool)>& callback)
+        {
+            _p->widget->exportMovie(overwrite, callback);
+        }
+
         std::shared_ptr<ExportTool> ExportTool::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
