@@ -47,6 +47,8 @@ Fixes:
   their own size.
 * Exported ProRes, PNG, and QuickTime Animation movies no longer show a later
   frame's picture in place of an earlier one.
+* 4:4:4 movie exports, such as ProRes 4444, keep one pixel color edges
+  instead of smearing them.
 * A LUT or OCIO configuration that cannot be read shows the picture unaltered,
   with an error, rather than no picture.
 * A review marker opens for editing on a double click, rather than opening
