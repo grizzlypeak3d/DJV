@@ -349,6 +349,8 @@ namespace djv
                 const models::Review&,
                 const std::filesystem::path& reviewPath);
             void _closeReview();
+            //! Where the previous run's log was moved to; see ftk::App.
+            std::filesystem::path _previousLogPath() const;
             void _importReviewTimeline(const std::filesystem::path&);
             void _exportReviewMarkers(const std::filesystem::path&);
             void _applyReviewView();

@@ -971,6 +971,41 @@ namespace djv
 
         namespace
         {
+            //! The clips a timeline cannot show: no media reference at all,
+            //! or one naming nothing. Those frames play as black, and
+            //! nothing else in the application says why.
+            std::vector<std::string> missingMedia(
+                const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& otio)
+            {
+                std::vector<std::string> out;
+                if (!otio)
+                {
+                    return out;
+                }
+                for (const auto& clip : otio->find_children<OTIO_NS::Clip>())
+                {
+                    bool missing = false;
+                    if (const auto* reference = clip->media_reference())
+                    {
+                        if (const auto* external =
+                            dynamic_cast<const OTIO_NS::ExternalReference*>(reference))
+                        {
+                            missing = external->target_url().empty();
+                        }
+                    }
+                    else
+                    {
+                        missing = true;
+                    }
+                    if (missing)
+                    {
+                        const std::string& name = clip->name();
+                        out.push_back(!name.empty() ? name : std::string("unnamed clip"));
+                    }
+                }
+                return out;
+            }
+
             //! Resolve a review file entry to a path on disk.
             std::filesystem::path resolveReviewFile(
                 const models::ReviewFile& rf,
@@ -1806,6 +1841,16 @@ namespace djv
             }
         }
 
+        std::filesystem::path App::_previousLogPath() const
+        {
+            std::filesystem::path out = getLogFilePath();
+            if (!out.empty())
+            {
+                out.replace_extension("prev.log");
+            }
+            return out;
+        }
+
         std::filesystem::path App::_autosavePath()
         {
             FTK_P();
@@ -2062,7 +2107,12 @@ namespace djv
                     std::vector<std::pair<std::string, std::string> >(),
                 {
                     { "Settings", ftk::fromFileSystem(getSettingsPath()) },
-                    { "Log", ftk::fromFileSystem(getLogFilePath()) }
+                    { "Log", ftk::fromFileSystem(getLogFilePath()) },
+                    // The run before this one, which is the file to ask for
+                    // after a crash: the log is written from the start each
+                    // time, so the interesting one is not the one named
+                    // above.
+                    { "Previous log", ftk::fromFileSystem(_previousLogPath()) }
                 });
         }
 
@@ -3226,6 +3276,53 @@ namespace djv
                 // once the caller is done: from here is inside the update
                 // that asked for the timeline.
                 p.filesChanged = true;
+
+                // What was opened and what it turned out to be. The log
+                // otherwise records the systems that were created and not a
+                // single thing the person at the keyboard did, so a report
+                // of "it went wrong after I opened the third one" has
+                // nothing to match against.
+                {
+                    const auto& ioInfo = timeline->getIOInfo();
+                    std::string what;
+                    if (!ioInfo.video.empty())
+                    {
+                        what = ftk::Format("{0} {1}").
+                            arg(ioInfo.video[0].size).
+                            arg(ioInfo.video[0].type);
+                    }
+                    if (ioInfo.audio.isValid())
+                    {
+                        what += ftk::Format("{0}{1} channels {2} {3}Hz").
+                            arg(what.empty() ? "" : ", ").
+                            arg(ioInfo.audio.channelCount).
+                            arg(ioInfo.audio.type).
+                            arg(ioInfo.audio.sampleRate);
+                    }
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format("Opened \"{0}\": {1}, {2}").
+                            arg(item->path.get()).
+                            arg(what.empty() ? "no video or audio" : what).
+                            arg(item->timeRange.has_value() ?
+                                ftk::Format("{0}").arg(*item->timeRange).str() :
+                                std::string("no time range")));
+                }
+
+                // A timeline can be read perfectly and still have nothing to
+                // show for some of its frames.
+                if (const auto missing = missingMedia(timeline->getOTIOTimeline());
+                    !missing.empty())
+                {
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format("\"{0}\": {1} of {2} clips have no media and play as black: {3}").
+                            arg(item->path.get()).
+                            arg(missing.size()).
+                            arg(timeline->getOTIOTimeline()->find_children<OTIO_NS::Clip>().size()).
+                            arg(ftk::join(missing, ", ")),
+                        ftk::LogType::Warning);
+                }
 
                 // Recorded here rather than when the file is opened: one
                 // that cannot be read should not be offered back in the

@@ -204,7 +204,14 @@ namespace djv
             std::vector<std::string> out;
             for (const auto& i : labels)
             {
-                out.push_back(i.first + i.second);
+                // A section heading has no value, and the padding that lines
+                // the values up would leave it with a tail of spaces: this
+                // text is pasted into bug reports, where trailing whitespace
+                // reads as something having gone missing.
+                std::string line = i.first + i.second;
+                const size_t end = line.find_last_not_of(' ');
+                line.resize(std::string::npos == end ? 0 : (end + 1));
+                out.push_back(line);
             }
             return out;
         }
