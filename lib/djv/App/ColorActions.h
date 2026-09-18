@@ -31,6 +31,8 @@ namespace djv
                 const std::shared_ptr<App>&);
 
         private:
+            void _enabledUpdate(const std::shared_ptr<App>&);
+
             FTK_PRIVATE();
         };
     }

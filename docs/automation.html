@@ -41,6 +41,8 @@
 <li><a href="#listing-the-commands">Listing the commands</a></li>
 <li><a href="#executing-commands">Executing commands</a></li>
 <li><a href="#exiting">Exiting</a></li>
+<li><a href="#exporting">Exporting</a></li>
+<li><a href="#color-settings">Color settings</a></li>
 <li><a href="#command-line-basics">Command line basics</a></li>
 <li><a href="#debugging">Debugging and introspection</a></li>
 <li><a href="#widgets-from-json">Widgets from JSON</a></li>
@@ -81,6 +83,12 @@ Tools/Export - Toggle the Export tool; e.g., { "value": true }.
 <pre><code>djv render.#.exr -offscreen \
     -command 'Export/Movie { "dir": "/tmp", "fileName": "review", "preset": "ProRes 422", "exit": true }'</code></pre>
 <p>The arguments are all optional: <strong>dir</strong>, <strong>fileName</strong>, <strong>ext</strong>, <strong>preset</strong> (as the <strong>Preset</strong> menu names it) and <strong>audioCodec</strong>. An existing file is written over only with <strong>"overwrite": true</strong>, since there is nobody to answer the question. The export takes as long as it takes, so <strong>File/Exit</strong> after it would stop it part way; <strong>"exit": true</strong> quits once the movie is written or has failed, and the log says which. <strong>-offscreen</strong> keeps the window from being shown while it runs.</p>
+<h2 id="color-settings">Color settings</h2>
+<p>Settings changed from the command line are saved like any others, so a later run starts from them. A script that wants the same color every time, whatever the user changed last, resets them first and then sets its own:</p>
+<pre><code>djv "$@" \
+    -command 'Color/Reset' \
+    -command 'Color/OCIO { "config": "Environment Variable", "display": "sRGB", "view": "ACES 1.0 - SDR Video" }'</code></pre>
+<p><strong>Color/OCIO</strong> takes <strong>config</strong> (<strong>Built In</strong>, <strong>Environment Variable</strong>, or <strong>File</strong>), <strong>fileName</strong>, <strong>input</strong>, <strong>display</strong>, <strong>view</strong>, and <strong>look</strong>, and <strong>Color/LUT</strong> takes <strong>fileName</strong> and <strong>order</strong>; either turns its section on unless <strong>"value": false</strong> is given. The <strong>-ocio</strong> and <strong>-lut</strong> options are applied before any command, so a <strong>Color/Reset</strong> would undo them; use the commands after it instead. The user can change the settings during the session, and the next run of the script starts from its own again.</p>
 <h2 id="command-line-basics">Command line basics</h2>
 <p>One or more files, directories, or timelines can be given on the command line:</p>
 <pre><code>djv render.mov</code></pre>

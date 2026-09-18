@@ -19,6 +19,9 @@ namespace djv
             auto actions = colorActions->getActions();
             addAction(actions["OCIO"]);
             addAction(actions["LUT"]);
+            addDivider();
+            addAction(actions["Enabled"]);
+            addAction(actions["Reset"]);
         }
 
         ColorMenu::~ColorMenu()
