@@ -646,6 +646,41 @@ namespace djv
             return _p->reviewActions;
         }
 
+        std::shared_ptr<ftk::Action> MainWindow::getAction(const std::string& value) const
+        {
+            FTK_P();
+            const auto i = value.find('/');
+            if (std::string::npos == i)
+            {
+                return nullptr;
+            }
+            const std::string group = value.substr(0, i);
+            const std::string name = value.substr(i + 1);
+            const std::map<std::string, std::shared_ptr<IActions> > groups =
+            {
+                { "File", p.fileActions },
+                { "Review", p.reviewActions },
+                { "Compare", p.compareActions },
+                { "Playback", p.playbackActions },
+                { "Frame", p.frameActions },
+                { "Timeline", p.timelineActions },
+                { "Audio", p.audioActions },
+                { "View", p.viewActions },
+                { "Window", p.windowActions },
+                { "Color", p.colorActions },
+                { "Tools", p.toolsActions },
+                { "Help", p.helpActions }
+            };
+            const auto j = groups.find(group);
+            if (j == groups.end() || !j->second)
+            {
+                return nullptr;
+            }
+            const auto& actions = j->second->getActions();
+            const auto k = actions.find(name);
+            return k != actions.end() ? k->second : nullptr;
+        }
+
         const std::shared_ptr<tl::ui::TimelineWidget>& MainWindow::getTimelineWidget() const
         {
             return _p->timelineWidget;

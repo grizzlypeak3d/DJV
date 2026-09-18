@@ -5,6 +5,7 @@ set(HEADERS
     FileThumbnail.h
     FrameRangePopup.h
     Init.h
+    ColorResetDialog.h
     SeparateAudioDialog.h
     SettingsWidgets.h
     SetupDialog.h
@@ -28,6 +29,7 @@ set(SOURCE
     FileThumbnail.cpp
     FrameRangePopup.cpp
     Init.cpp
+    ColorResetDialog.cpp
     SeparateAudioDialog.cpp
     SettingsWidgets.cpp
     SetupDialog.cpp

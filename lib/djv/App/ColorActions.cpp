@@ -8,8 +8,8 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <djv/App/MainWindow.h>
+#include <djv/UI/ColorResetDialog.h>
 
-#include <ftk/UI/DialogSystem.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
 
@@ -35,6 +35,12 @@ namespace djv
                     return ocio || lut || color || levels || exposure || softClip;
                 }
             };
+
+            // A command given no arguments has none to look in.
+            bool getBool(const nlohmann::json& args, const std::string& key, bool defaultValue)
+            {
+                return args.is_object() ? args.value(key, defaultValue) : defaultValue;
+            }
 
             Enables getEnables(const std::shared_ptr<App>& app)
             {
@@ -73,6 +79,8 @@ namespace djv
             // settings are no longer the ones that were set aside.
             std::optional<Enables> bypassed;
             bool switching = false;
+
+            std::shared_ptr<ui::ColorResetDialog> resetDialog;
 
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutObserver;
@@ -134,7 +142,7 @@ namespace djv
                         {
                             options.look = args.at("look").get<std::string>();
                         }
-                        options.enabled = args.value("value", true);
+                        options.enabled = getBool(args, "value", true);
                         app->getColorModel()->setOCIOOptions(options);
                     }
                 });
@@ -162,7 +170,7 @@ namespace djv
                                     "or \"Pre-Config\"").arg(s));
                             }
                         }
-                        options.enabled = args.value("value", true);
+                        options.enabled = getBool(args, "value", true);
                         app->getColorModel()->setLUTOptions(options);
                     }
                 });
@@ -201,25 +209,42 @@ namespace djv
 
             _addCommand(
                 "Reset",
-                "Reset the color settings -- OCIO, the LUT, the color controls, "
-                "and the levels -- to their defaults.",
-                [this, appWeak](const nlohmann::json&)
+                "Reset the color settings to their defaults. Takes \"ocio\", \"lut\", "
+                "\"color\", and \"levels\" to leave a section as it is with false; "
+                "e.g., { \"lut\": false }.",
+                [this, appWeak](const nlohmann::json& args)
                 {
                     FTK_P();
                     if (auto app = appWeak.lock())
                     {
+                        const bool ocio = getBool(args, "ocio", true);
+                        const bool lut = getBool(args, "lut", true);
+                        const bool color = getBool(args, "color", true);
+                        const bool levels = getBool(args, "levels", true);
                         p.bypassed.reset();
-                        app->getColorModel()->setOCIOOptions(tl::OCIOOptions());
-                        app->getColorModel()->setExtColorSpaces({});
-                        app->getColorModel()->setLUTOptions(tl::LUTOptions());
+                        if (ocio)
+                        {
+                            app->getColorModel()->setOCIOOptions(tl::OCIOOptions());
+                            app->getColorModel()->setExtColorSpaces({});
+                        }
+                        if (lut)
+                        {
+                            app->getColorModel()->setLUTOptions(tl::LUTOptions());
+                        }
                         // The view options beside them, the channels and
                         // the mirroring, belong to the view tool.
                         auto display = app->getViewportModel()->getDisplayOptions();
                         const tl::DisplayOptions defaults;
-                        display.color = defaults.color;
-                        display.levels = defaults.levels;
-                        display.exposure = defaults.exposure;
-                        display.softClip = defaults.softClip;
+                        if (color)
+                        {
+                            display.color = defaults.color;
+                            display.exposure = defaults.exposure;
+                            display.softClip = defaults.softClip;
+                        }
+                        if (levels)
+                        {
+                            display.levels = defaults.levels;
+                        }
                         app->getViewportModel()->setDisplayOptions(display);
                         _enabledUpdate(app);
                     }
@@ -236,30 +261,40 @@ namespace djv
                 "Enable Color",
                 _checkCommand("Enabled"));
             // Asked from the menu, where it is one click from losing the
-            // settings; not from the command, which a script runs with
-            // nobody there to answer.
+            // settings, with the sections to reset; not from the command,
+            // which a script runs with nobody there to answer.
             _actions["Reset"] = ftk::Action::create(
                 "Reset Color",
                 [this, appWeak]
                 {
+                    FTK_P();
                     auto app = appWeak.lock();
-                    auto context = app ? app->getContext() : nullptr;
-                    if (!context)
+                    if (!app || p.resetDialog)
                     {
                         return;
                     }
-                    auto dialogSystem = context->getSystem<ftk::DialogSystem>();
-                    auto command = _command("Reset");
-                    dialogSystem->confirm(
-                        "Reset Color",
-                        "Reset the color settings to their defaults?",
-                        app->getMainWindow(),
-                        [command](bool value)
+                    p.resetDialog = ui::ColorResetDialog::create(app->getContext());
+                    p.resetDialog->open(app->getMainWindow());
+                    std::weak_ptr<models::CommandsModel> commandsWeak = app->getCommandsModel();
+                    p.resetDialog->setCallback(
+                        [commandsWeak](const ui::ColorResetGroups& value)
                         {
-                            if (value)
+                            if (auto commandsModel = commandsWeak.lock())
                             {
-                                command();
+                                commandsModel->exec(
+                                    "Color/Reset",
+                                    {
+                                        { "ocio", value.ocio },
+                                        { "lut", value.lut },
+                                        { "color", value.color },
+                                        { "levels", value.levels }
+                                    });
                             }
+                        });
+                    p.resetDialog->setCloseCallback(
+                        [this]
+                        {
+                            _p->resetDialog.reset();
                         });
                 });
 

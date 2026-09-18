@@ -25,7 +25,8 @@ Changes:
 * Movies can be exported from the command line with the Export/Movie
   command, and -offscreen runs without showing the window.
 * Color > Enable Color turns all of the color settings off and back on
-  again, and Color > Reset Color returns them to their defaults.
+  again, and Color > Reset Color returns the chosen sections to their
+  defaults.
 * The Color/OCIO and Color/LUT commands take the configuration, color
   spaces, and LUT file, for scripts that set up the color.
 * The view's color buffer defaults to RGBA F16, at half the memory of F32.
