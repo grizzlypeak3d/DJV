@@ -63,6 +63,8 @@ Fixes:
 * The -ocio command line option uses the given configuration file, rather
   than the one chosen in the settings.
 * The -timeUnits command line option works without a file.
+* 10-bit video shows white as white rather than a light grey, and 8-bit
+  full range video shows black without a magenta cast.
 * A review marker opens for editing on a double click, rather than opening
   on some clicks and not others.
 * Closing the last file closes the review with it.
