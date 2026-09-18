@@ -112,7 +112,15 @@ namespace djv
                 std::vector<tl::DisplayOptions> displayOptions;
                 tl::CompareOptions compareOptions;
                 std::vector<ftk::Box2I> boxes;
-                ftk::gl::TextureType colorBuffer = ftk::gl::TextureType::RGBA_U8;
+                //! What the picture is rendered into on the way to the file.
+                //!
+                //! Not the viewport's buffer, which is a choice about
+                //! showing: a viewport trades precision for memory because
+                //! several buffers are live at once and a display has
+                //! nowhere to put the difference. An export renders one
+                //! frame at a time into a file that may well be asked to
+                //! hold it, so it takes the most this build has.
+                ftk::gl::TextureType colorBuffer = ftk::gl::offscreenColorDefault;
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
                 std::shared_ptr<tl::IRender> render;
                 GLenum glFormat = 0;
@@ -763,7 +771,6 @@ namespace djv
                     {
                         p.exportData->displayOptions[i].ocioInput = resolvedInputs[i];
                     }
-                    p.exportData->colorBuffer = p.viewportModel.lock()->getColorBuffer();
                     p.exportData->render = tl::gl::Render::create(
                         context->getLogSystem(),
                         context->getSystem<ftk::FontSystem>());

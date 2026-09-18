@@ -76,7 +76,18 @@ namespace djv
             p.foregroundOptions = ftk::Observable<tl::ForegroundOptions>::create(
                 foregroundOptions);
 
+            // Half rather than full float. The viewport is display referred,
+            // where half's eleven bits of mantissa are ample and its range
+            // past 1.0 and below zero is what a fixed point buffer lacks --
+            // and it halves what every buffer costs, 66 MB rather than 132
+            // for one at 4K, with several of them live in a comparison.
+            // Exporting keeps full float: see ExportWidget, where the
+            // picture is written rather than shown.
+#if defined(FTK_API_GL_4_1)
+            ftk::gl::TextureType colorBuffer = ftk::gl::TextureType::RGBA_F16;
+#else // FTK_API_GL_4_1
             ftk::gl::TextureType colorBuffer = ftk::gl::offscreenColorDefault;
+#endif // FTK_API_GL_4_1
             std::string s = ftk::gl::to_string(colorBuffer);
             p.settings->get("/Viewport/ColorBuffer", s);
             ftk::gl::from_string(s, colorBuffer);

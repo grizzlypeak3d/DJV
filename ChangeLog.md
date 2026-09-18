@@ -22,6 +22,8 @@ Changes:
 * Automatic OCIO input color spaces follow all of the configuration's file
   rules, including the default rule.
 * Movies can be exported as APV.
+* The view's color buffer defaults to RGBA F16, at half the memory of F32.
+  Exports are unaffected and always render at the highest precision available.
 * Library updates:
     - FFmpeg 9.0.1
     - OpenAPV 1.1.1.0
