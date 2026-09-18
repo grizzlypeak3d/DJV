@@ -137,11 +137,25 @@ namespace djv
             p.videoEdit->setRange(0.F, 1024.F);
             p.videoEdit->setStep(1.0);
             p.videoEdit->setLargeStep(10.0);
+            // What the number is, because it reads as a limit on DJV's
+            // memory and is not one (DJV #873).
+            p.videoEdit->setTooltip(
+                "Memory for decoded video frames.\n"
+                "\n"
+                "DJV uses more than this in total: the audio cache, the\n"
+                "decoders, the thumbnails and waveforms, the GPU, and the\n"
+                "application itself come on top. That is roughly a fixed\n"
+                "amount rather than a share of the cache.");
 
             p.audioEdit = ftk::FloatEdit::create(context);
             p.audioEdit->setRange(0.F, 1024.F);
             p.audioEdit->setStep(1.0);
             p.audioEdit->setLargeStep(10.0);
+            p.audioEdit->setTooltip(
+                "Memory for decoded audio, separate from the video cache.\n"
+                "\n"
+                "It fills with as much of the in/out range as fits, so a\n"
+                "long file uses all of it.");
 
             p.readBehindEdit = ftk::FloatEdit::create(context);
             p.readBehindEdit->setRange(0.F, 10.F);
