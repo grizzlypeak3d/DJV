@@ -28,14 +28,8 @@ set(TLRENDER_EXR ON CACHE BOOL "")
 # asks for it already, so the codecs find it on PATH either way.
 set(TLRENDER_AOM ON CACHE BOOL "")
 set(TLRENDER_SVTAV1 ON CACHE BOOL "")
-# OpenAPV writes APV, which FFmpeg has no encoder of its own for. It does not
-# build with MSVC, so Windows reads APV without writing it; the export preset
-# follows the encoders the build has, so nothing offers what is not there.
-if(WIN32)
-    set(TLRENDER_OPENAPV OFF CACHE BOOL "")
-else()
-    set(TLRENDER_OPENAPV ON CACHE BOOL "")
-endif()
+# OpenAPV writes APV, which FFmpeg has no encoder of its own for.
+set(TLRENDER_OPENAPV ON CACHE BOOL "")
 if(WIN32)
     set(TLRENDER_NASM OFF CACHE BOOL "")
 else()
