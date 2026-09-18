@@ -22,7 +22,7 @@ set(SOURCE
     ToolsModel.cpp
     ViewportModel.cpp)
 
-# Static. The bindings are linked by djvPy and nothing else, so there is no
+# Static. The bindings are linked by the djv module and nothing else, so there is no
 # API here for anything to import -- the module absorbs them.
 add_library(djvModelsPy STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 # Hidden, as the module is: the binding classes hold nanobind's types,
@@ -44,7 +44,7 @@ target_include_directories(djvModelsPy
 
 # ftkUI directly: the bindings name ftk::Settings and ftk::RecentFilesModel,
 # which djvModels does not carry in its link interface.
-target_link_libraries(djvModelsPy PUBLIC djvModels ftkUI PRIVATE ${DJV_NANOBIND_LIBRARY})
+target_link_libraries(djvModelsPy PUBLIC djvModels ftk::ftkUI PRIVATE ${DJV_NANOBIND_LIBRARY})
 
 # The settings bindings alone go past what a COFF object can hold, which is
 # what pybind11 does to a translation unit that names a lot of types:

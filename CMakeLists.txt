@@ -24,6 +24,14 @@ project(
     HOMEPAGE_URL "https://github.com/grizzlypeak3d/DJV"
     LANGUAGES CXX)
 
+# A Python wheel build: scikit-build-core sets SKBUILD. The wheel settings
+# are read before the options below, the way "cmake -C" would read them, so
+# they win.
+if(SKBUILD)
+    include(etc/Config/wheel.cmake)
+    include(etc/Python/djvWheel.cmake)
+endif()
+
 #-------------------------------------------------------------------------------
 # Options
 
@@ -34,6 +42,11 @@ set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
 set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
 set(DJV_PROGRAMS ON CACHE BOOL "Build programs")
 set(DJV_PYTHON OFF CACHE BOOL "Enable support for Python")
+# Where the djv package goes, relative to the install prefix. The default
+# keeps "PYTHONPATH=<prefix>/lib" working; a wheel puts the package at the
+# top of its install.
+set(DJV_PYTHON_INSTALL_DIR "lib/djv" CACHE STRING "Python package install directory")
+set(DJV_TLRENDER_PACKAGE OFF CACHE BOOL "Use an installed tlRender rather than deps/tlRender")
 set(DJV_TESTS OFF CACHE BOOL "Build tests")
 set(DJV_TESTS_NO_GL OFF CACHE BOOL "Run only the tests that do not need OpenGL")
 set(DJV_GCOV OFF CACHE BOOL "Enable gcov code coverage")
@@ -108,6 +121,22 @@ elseif(APPLE)
 else()
     set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 endif()
+# The rest of an rpath, relative to <prefix>/lib: a wheel names the libraries
+# of the tlrender and feather_tk packages beside it. The libraries are loaded
+# by Python as well as by the executable there, so on macOS the search starts
+# from the library rather than the executable.
+if(DJV_INSTALL_RPATH_EXTRA)
+    if(APPLE)
+        set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
+        foreach(path ${DJV_INSTALL_RPATH_EXTRA})
+            list(APPEND CMAKE_INSTALL_RPATH "@loader_path/${path}")
+        endforeach()
+    elseif(UNIX)
+        foreach(path ${DJV_INSTALL_RPATH_EXTRA})
+            list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN/${path}")
+        endforeach()
+    endif()
+endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -118,9 +147,9 @@ find_package(ZLIB REQUIRED)
 
 # Python dependencies
 #
-# djvPy is built the way feather-tk's module is, the stable ABI or not and
+# The djv module is built the way feather-tk's is, the stable ABI or not and
 # against the same nanobind library, since nanobind shares types only
-# between modules built alike and djvPy takes its types from feather_tk and
+# between modules built alike and djv takes its types from feather_tk and
 # tlrender. So this is feather-tk's own option, declared here too because
 # feather-tk is not added until below.
 set(ftk_PYTHON_STABLE_ABI ON CACHE BOOL "Build the Python module against the stable ABI")
@@ -141,28 +170,46 @@ if(DJV_PYTHON)
 endif()
 
 #-------------------------------------------------------------------------------
-# Git submodules
+# tlRender
 
-find_package(Git REQUIRED)
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/tlRender/CMakeLists.txt")
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        RESULT_VARIABLE GIT_SUBMODULE_RESULT)
-    if(NOT GIT_SUBMODULE_RESULT EQUAL 0)
-        message(FATAL_ERROR "git submodule update failed with ${GIT_SUBMODULE_RESULT}")
+if(DJV_TLRENDER_PACKAGE)
+    # tlRender's package finds feather-tk's.
+    find_package(tlRender REQUIRED)
+    # The resource tool is the feather-tk package's imported target; the
+    # name ftk_icon_resources() falls back on is the one inside feather-tk's
+    # own tree.
+    set(ftk_RESOURCE_COMMAND ftk::ftk-resource)
+    if(DJV_PYTHON)
+        # feather-tk builds this library when it is added with tlRender; an
+        # installed one leaves it to us. Built the same way, since the
+        # binding libraries are compiled into the module against it.
+        nanobind_build_library(${DJV_NANOBIND_LIBRARY})
+        if(ftk_PYTHON_STABLE_ABI)
+            target_compile_definitions(${DJV_NANOBIND_LIBRARY} PUBLIC Py_LIMITED_API=0x030C0000)
+        endif()
     endif()
+else()
+    find_package(Git REQUIRED)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/deps/tlRender/CMakeLists.txt")
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            RESULT_VARIABLE GIT_SUBMODULE_RESULT)
+        if(NOT GIT_SUBMODULE_RESULT EQUAL 0)
+            message(FATAL_ERROR "git submodule update failed with ${GIT_SUBMODULE_RESULT}")
+        endif()
+    endif()
+
+    add_subdirectory(deps/tlRender)
+    add_library(tlRender::tlCore ALIAS tlCore)
+    add_library(tlRender::tlGL ALIAS tlGL)
+    add_library(tlRender::tlIO ALIAS tlIO)
+    add_library(tlRender::tlTimeline ALIAS tlTimeline)
+    add_library(tlRender::tlUI ALIAS tlUI)
 endif()
 
 #-------------------------------------------------------------------------------
 # Sub-directories
-
-add_subdirectory(deps/tlRender)
-add_library(tlRender::tlCore ALIAS tlCore)
-add_library(tlRender::tlGL ALIAS tlGL)
-add_library(tlRender::tlIO ALIAS tlIO)
-add_library(tlRender::tlTimeline ALIAS tlTimeline)
-add_library(tlRender::tlUI ALIAS tlUI)
 
 add_subdirectory(lib/djv)
 if(DJV_PROGRAMS)
@@ -174,9 +221,13 @@ endif()
 # Before the documentation, which installs the licenses page this writes.
 add_subdirectory(etc/Legal)
 add_subdirectory(docs)
-add_subdirectory(etc/SampleData)
-if(UNIX AND NOT APPLE)
-    add_subdirectory(etc/Linux)
+# A wheel is the application and its documentation: the sample media and the
+# desktop integration are for the packages.
+if(NOT SKBUILD)
+    add_subdirectory(etc/SampleData)
+    if(UNIX AND NOT APPLE)
+        add_subdirectory(etc/Linux)
+    endif()
 endif()
 
 include(CMakePackageConfigHelpers)

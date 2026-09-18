@@ -1,37 +1,71 @@
+# The module is private to the djv package, whose __init__.py gathers its
+# API; the build tree lays the package out the way an install does, so
+# PYTHONPATH can name either.
+set(DJV_PYTHON_PACKAGE_DIR ${CMAKE_BINARY_DIR}/python/djv)
+
 set(STABLE_ABI)
 if(ftk_PYTHON_STABLE_ABI)
     set(STABLE_ABI STABLE_ABI)
 endif()
-nanobind_add_module(djvPy ${STABLE_ABI} NB_STATIC Bindings.cpp)
+nanobind_add_module(_djv ${STABLE_ABI} NB_STATIC Bindings.cpp)
 
-target_include_directories(djvPy PRIVATE ${PROJECT_SOURCE_DIR}/lib)
+target_include_directories(_djv PRIVATE ${PROJECT_SOURCE_DIR}/lib)
 
 # The binding objects go into the module directly rather than through
 # their archives. nanobind's own static library is first on the link line,
 # and GNU ld takes from an archive only what is wanted at the moment it is
 # scanned: a binding archive scanned after it finds the enum and datetime
 # helpers already passed over, and a Release build fails to link.
-target_sources(djvPy PRIVATE $<TARGET_OBJECTS:djvModelsPy> $<TARGET_OBJECTS:djvUIPy>)
-target_link_libraries(djvPy PRIVATE djvModelsPy djvUIPy)
+target_sources(_djv PRIVATE $<TARGET_OBJECTS:djvModelsPy> $<TARGET_OBJECTS:djvUIPy>)
+target_link_libraries(_djv PRIVATE djvModelsPy djvUIPy)
 
-target_compile_options(djvPy PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
+target_compile_options(_djv PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
 
-set_target_properties(djvPy PROPERTIES FOLDER lib)
+# The generator expression keeps multi-config generators from adding a
+# directory per configuration, which would leave the module outside the
+# package.
+set_target_properties(_djv PROPERTIES
+    FOLDER lib
+    LIBRARY_OUTPUT_DIRECTORY $<1:${DJV_PYTHON_PACKAGE_DIR}>)
+configure_file(__init__.py ${DJV_PYTHON_PACKAGE_DIR}/__init__.py COPYONLY)
+configure_file(__main__.py ${DJV_PYTHON_PACKAGE_DIR}/__main__.py COPYONLY)
 
 # The rpath convention of the executables names the interpreter's
 # directory here, since the "executable" loading a Python module is
-# Python itself: the module finds the libraries beside it instead.
+# Python itself: the module finds the libraries from where it is instead.
+# That is <prefix>/lib from <prefix>/lib/djv, and lib inside the package in
+# a wheel, where tlRender's and feather-tk's libraries are in the packages
+# beside it (DJV_INSTALL_RPATH_EXTRA, relative to lib).
+file(RELATIVE_PATH DJV_PYTHON_LIB_RPATH
+    /prefix/${DJV_PYTHON_INSTALL_DIR} /prefix/lib)
+set(RPATH_ORIGIN)
 if(APPLE)
-    set_target_properties(djvPy PROPERTIES INSTALL_RPATH "@loader_path")
+    set(RPATH_ORIGIN "@loader_path")
 elseif(UNIX)
-    set_target_properties(djvPy PROPERTIES INSTALL_RPATH "$ORIGIN")
+    set(RPATH_ORIGIN "$ORIGIN")
+endif()
+if(RPATH_ORIGIN)
+    set(RPATHS "${RPATH_ORIGIN}/${DJV_PYTHON_LIB_RPATH}")
+    foreach(path ${DJV_INSTALL_RPATH_EXTRA})
+        file(RELATIVE_PATH path_from_module
+            /prefix/${DJV_PYTHON_INSTALL_DIR} /prefix/lib/${path})
+        list(APPEND RPATHS "${RPATH_ORIGIN}/${path_from_module}")
+    endforeach()
+    set_target_properties(_djv PROPERTIES INSTALL_RPATH "${RPATHS}")
 endif()
 
+install(TARGETS _djv
+    LIBRARY DESTINATION ${DJV_PYTHON_INSTALL_DIR}
+    RUNTIME DESTINATION ${DJV_PYTHON_INSTALL_DIR})
+install(
+    FILES __init__.py __main__.py
+    DESTINATION ${DJV_PYTHON_INSTALL_DIR})
 
-install(TARGETS djvPy
-    ARCHIVE DESTINATION lib COMPONENT dev
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin)
+# The rest is for a source build: a wheel runs the C++ application with the
+# djv command, and its bindings are imported from where pip put them.
+if(SKBUILD)
+    return()
+endif()
 
 # A launcher that knows where the modules and the interpreter are, so
 # running the Python application is one command rather than an
@@ -41,7 +75,7 @@ if(WIN32)
     # Two files rather than one: since Python 3.8 an extension module's
     # dependencies are not found through PATH on Windows, only through
     # os.add_dll_directory(), so a batch file that sets an environment and
-    # calls djv.py is not enough. The batch file is the name on PATH and the
+    # calls main.py is not enough. The batch file is the name on PATH and the
     # bootstrap beside it is the part that has to be Python. Same reason
     # tests/run-python-tests.py exists.
     #
@@ -72,11 +106,11 @@ app = r\"${PROJECT_SOURCE_DIR}/examples/python\"
 sys.path[0:0] = [
     r\"$<TARGET_FILE_DIR:_feather_tk>/..\",
     r\"$<TARGET_FILE_DIR:_tlrender>/..\",
-    r\"$<TARGET_FILE_DIR:djvPy>\",
+    r\"$<TARGET_FILE_DIR:_djv>/..\",
     r\"${CMAKE_INSTALL_PREFIX}/python\",
     app]
 
-runpy.run_path(os.path.join(app, \"djv.py\"), run_name=\"__main__\")
+runpy.run_path(os.path.join(app, \"main.py\"), run_name=\"__main__\")
 ")
     file(GENERATE
         OUTPUT ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/djv-python.cmd
@@ -104,7 +138,7 @@ sys.path[0:0] = [
     os.path.join(prefix, \"python\"),
     app]
 
-runpy.run_path(os.path.join(app, \"djv.py\"), run_name=\"__main__\")
+runpy.run_path(os.path.join(app, \"main.py\"), run_name=\"__main__\")
 ")
     file(GENERATE
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/djv-python-install.cmd
@@ -123,8 +157,8 @@ else()
     file(GENERATE
         OUTPUT ${CMAKE_BINARY_DIR}/bin/djv-python
         CONTENT "#!/bin/sh
-PYTHONPATH=\"$<TARGET_FILE_DIR:_feather_tk>/..:$<TARGET_FILE_DIR:_tlrender>/..:$<TARGET_FILE_DIR:djvPy>:${CMAKE_INSTALL_PREFIX}/python:$PYTHONPATH\" \\
-exec \"${Python_EXECUTABLE}\" \"${PROJECT_SOURCE_DIR}/examples/python/djv.py\" \"$@\"
+PYTHONPATH=\"$<TARGET_FILE_DIR:_feather_tk>/..:$<TARGET_FILE_DIR:_tlrender>/..:$<TARGET_FILE_DIR:_djv>/..:${CMAKE_INSTALL_PREFIX}/python:$PYTHONPATH\" \\
+exec \"${Python_EXECUTABLE}\" \"${PROJECT_SOURCE_DIR}/examples/python/main.py\" \"$@\"
 "
         FILE_PERMISSIONS
             OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -135,7 +169,7 @@ exec \"${Python_EXECUTABLE}\" \"${PROJECT_SOURCE_DIR}/examples/python/djv.py\" \
         CONTENT "#!/bin/sh
 dir=$(CDPATH= cd -- \"$(dirname -- \"$0\")\" && pwd)
 PYTHONPATH=\"$dir/../lib:$dir/../python:$PYTHONPATH\" \\
-exec \"${Python_EXECUTABLE}\" \"$dir/../examples/python/djv.py\" \"$@\"
+exec \"${Python_EXECUTABLE}\" \"$dir/../examples/python/main.py\" \"$@\"
 "
         FILE_PERMISSIONS
             OWNER_READ OWNER_WRITE OWNER_EXECUTE

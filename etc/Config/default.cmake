@@ -47,7 +47,7 @@ set(TLRENDER_FFMPEG_PLUGIN ON CACHE BOOL "")
 set(TLRENDER_OIIO ON CACHE BOOL "")
 set(TLRENDER_USD OFF CACHE BOOL "")
 # The Python bindings, derived down the stack the way the dependencies run:
-# djvPy imports tlrender, which needs feather_tk. Setting the outermost one is
+# djv imports tlrender, which needs feather_tk. Setting the outermost one is
 # enough, and because local.cmake is read first, any level can still be named
 # on its own to turn that one on without the ones above it.
 set(DJV_PYTHON OFF CACHE BOOL "")
