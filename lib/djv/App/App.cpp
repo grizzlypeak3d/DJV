@@ -2547,6 +2547,13 @@ namespace djv
             p.sysLogModel = ftk::SysLogModel::create(_context);
 
             p.timeUnitsModel = models::TimeUnitsModel::create(_context, getSettings());
+            // Applied here rather than with the files: the units are a
+            // setting, not something of the file's, and without a file the
+            // option was quietly ignored.
+            if (p.cmdLine.timeUnits->found())
+            {
+                p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
+            }
             
             p.filesModel = models::FilesModel::create(getSettings());
 
@@ -3159,10 +3166,6 @@ namespace djv
                     if (p.cmdLine.speed->found())
                     {
                         player->setSpeed(p.cmdLine.speed->getValue());
-                    }
-                    if (p.cmdLine.timeUnits->found())
-                    {
-                        p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
                     }
                     const double speed = player->getSpeed();
                     const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();

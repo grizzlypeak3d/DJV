@@ -224,7 +224,7 @@ namespace djv
                         p.bypassed.reset();
                         if (ocio)
                         {
-                            app->getColorModel()->setOCIOOptions(tl::OCIOOptions());
+                            app->getColorModel()->setOCIOOptions(models::ColorModel::getDefaultOCIOOptions());
                             app->getColorModel()->setExtColorSpaces({});
                         }
                         if (lut)

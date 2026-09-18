@@ -47,6 +47,11 @@ namespace djv
             //! Save the settings.
             DJV_MODELS_API void save();
 
+            //! Get the default OpenColorIO options: the configuration in
+            //! the OCIO environment variable when it is set, otherwise
+            //! OCIO turned off.
+            DJV_MODELS_API static tl::OCIOOptions getDefaultOCIOOptions();
+
             //! Get the OpenColorIO options.
             DJV_MODELS_API const tl::OCIOOptions& getOCIOOptions() const;
 

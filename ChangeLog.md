@@ -27,6 +27,8 @@ Changes:
 * Color > Enable Color turns all of the color settings off and back on
   again, and Color > Reset Color returns the chosen sections to their
   defaults.
+* OCIO is turned on with the configuration in the OCIO environment variable
+  when there are no color settings yet.
 * The Color/OCIO and Color/LUT commands take the configuration, color
   spaces, and LUT file, for scripts that set up the color.
 * The view's color buffer defaults to RGBA F16, at half the memory of F32.
@@ -60,6 +62,7 @@ Fixes:
   with an error, rather than no picture.
 * The -ocio command line option uses the given configuration file, rather
   than the one chosen in the settings.
+* The -timeUnits command line option works without a file.
 * A review marker opens for editing on a double click, rather than opening
   on some clicks and not others.
 * Closing the last file closes the review with it.
