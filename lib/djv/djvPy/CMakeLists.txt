@@ -71,7 +71,7 @@ for directory in [
 app = r\"${PROJECT_SOURCE_DIR}/examples/python\"
 sys.path[0:0] = [
     r\"$<TARGET_FILE_DIR:_feather_tk>/..\",
-    r\"$<TARGET_FILE_DIR:tlRenderPy>\",
+    r\"$<TARGET_FILE_DIR:_tlrender>/..\",
     r\"$<TARGET_FILE_DIR:djvPy>\",
     r\"${CMAKE_INSTALL_PREFIX}/python\",
     app]
@@ -123,7 +123,7 @@ else()
     file(GENERATE
         OUTPUT ${CMAKE_BINARY_DIR}/bin/djv-python
         CONTENT "#!/bin/sh
-PYTHONPATH=\"$<TARGET_FILE_DIR:_feather_tk>/..:$<TARGET_FILE_DIR:tlRenderPy>:$<TARGET_FILE_DIR:djvPy>:${CMAKE_INSTALL_PREFIX}/python:$PYTHONPATH\" \\
+PYTHONPATH=\"$<TARGET_FILE_DIR:_feather_tk>/..:$<TARGET_FILE_DIR:_tlrender>/..:$<TARGET_FILE_DIR:djvPy>:${CMAKE_INSTALL_PREFIX}/python:$PYTHONPATH\" \\
 exec \"${Python_EXECUTABLE}\" \"${PROJECT_SOURCE_DIR}/examples/python/djv.py\" \"$@\"
 "
         FILE_PERMISSIONS

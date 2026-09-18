@@ -121,7 +121,7 @@ find_package(ZLIB REQUIRED)
 # djvPy is built the way feather-tk's module is, the stable ABI or not and
 # against the same nanobind library, since nanobind shares types only
 # between modules built alike and djvPy takes its types from feather_tk and
-# tlRenderPy. So this is feather-tk's own option, declared here too because
+# tlrender. So this is feather-tk's own option, declared here too because
 # feather-tk is not added until below.
 set(ftk_PYTHON_STABLE_ABI ON CACHE BOOL "Build the Python module against the stable ABI")
 if(DJV_PYTHON)

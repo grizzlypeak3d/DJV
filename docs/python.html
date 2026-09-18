@@ -48,11 +48,11 @@
 <p>The libraries DJV is built from have Python bindings, and there is a version of the DJV application written in Python on top of them. This page describes what is there, how to run it, and how to modify it. It is not an API reference — the bindings follow the C++ headers closely, so the headers and the Python examples are the reference.</p>
 <h2 id="the-modules">The modules</h2>
 <p>Four modules make up the stack:</p>
-<ul><li><strong>feather_tk</strong> — the <a href="https://github.com/darbyjohnston/feather-tk">feather-tk</a> user interface toolkit: widgets, layouts, observables, and the application classes.</li><li><strong>tlRenderPy</strong> — timelines, players, and file I/O, with the timeline and viewport widgets in the <code>tl.ui</code> submodule.</li><li><strong>djvPy</strong> — DJV itself: the data models in the <code>djv.models</code> submodule — files, settings, color, audio, viewport, and tools — and the application's widgets in the <code>djv.ui</code> submodule — the viewport with its HUD and color picking, and the color, view, settings, export, and magnify widgets.</li><li><strong>opentimelineio</strong> — the standard OTIO package. Its time types pass directly through the tlRender bindings, so a <code>RationalTime</code> from OTIO seeks a player.</li></ul>
+<ul><li><strong>feather_tk</strong> — the <a href="https://github.com/darbyjohnston/feather-tk">feather-tk</a> user interface toolkit: widgets, layouts, observables, and the application classes.</li><li><strong>tlrender</strong> — timelines, players, and file I/O, with the timeline and viewport widgets in the <code>tl.ui</code> submodule.</li><li><strong>djvPy</strong> — DJV itself: the data models in the <code>djv.models</code> submodule — files, settings, color, audio, viewport, and tools — and the application's widgets in the <code>djv.ui</code> submodule — the viewport with its HUD and color picking, and the color, view, settings, export, and magnify widgets.</li><li><strong>opentimelineio</strong> — the standard OTIO package. Its time types pass directly through the tlRender bindings, so a <code>RationalTime</code> from OTIO seeks a player.</li></ul>
 <p>The conventional imports:</p>
 <pre><code>import opentimelineio as otio
 import feather_tk as ftk
-import tlRenderPy as tl
+import tlrender as tl
 import djvPy as djv</code></pre>
 <h2 id="building">Building</h2>
 <p>One switch builds all of it. In <code>etc/Config/local.cmake</code>:</p>
@@ -81,7 +81,7 @@ options.compare = tl.Compare.Wipe
 filesModel.compareOptions = options</code></pre>
 <h2 id="modifying">Modifying it</h2>
 <p>To add a tool, write a class in <code>Tools.py</code> deriving from <code>IToolWidget</code> and add it to the <code>FACTORY</code> dictionary; the tools model already lists the tool names, icons, and shortcuts, and the actions, menu, and tool bar offer whatever the factory implements. To add an action, follow any of the <code>*Actions.py</code> files: create an <code>ftk.Action</code>, add it to a menu in <code>Menus.py</code> or a tool bar in <code>ToolBars.py</code>. <code>checkedCallback</code> must be passed as a keyword argument — passed positionally it binds to the plain callback and fails when clicked.</p>
-<p>Smaller examples are in feather-tk's and tlRender's own <code>examples/python</code> directories, and the Python test suites — <code>tests/CorePyTest</code> and <code>tests/UIPyTest</code> in feather-tk, <code>tests/tlRenderPyTest</code> in tlRender, and <code>tests/djvPyTest</code> here — double as working usage of most of the bound API. They run with <code>python -m unittest discover tests</code>, or through CTest as <code>feather_tk-test</code>, <code>tlRenderPy-test</code>, and <code>djvPy-test</code>.</p>
+<p>Smaller examples are in feather-tk's and tlRender's own <code>examples/python</code> directories, and the Python test suites — <code>tests/CorePyTest</code> and <code>tests/UIPyTest</code> in feather-tk, <code>tests/tlRenderPyTest</code> in tlRender, and <code>tests/djvPyTest</code> here — double as working usage of most of the bound API. They run with <code>python -m unittest discover tests</code>, or through CTest as <code>feather_tk-test</code>, <code>tlrender-test</code>, and <code>djvPy-test</code>.</p>
 </main>
 </body>
 </html>

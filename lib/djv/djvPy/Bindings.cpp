@@ -17,7 +17,7 @@ NB_MODULE(djvPy, m)
 {
     m.doc() = "DJV is an open source application for playback and review of image sequences.";
 
-    nb::module_::import_("tlRenderPy");
+    nb::module_::import_("tlrender");
 
     djv::python::modelsBind(m);
     djv::python::uiBind(m);
