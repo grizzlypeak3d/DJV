@@ -12,7 +12,7 @@
 
 #include <ftk/Core/Context.h>
 
-#include <ftk/CorePy/Function.h>
+#include <djv/ModelsPy/Function.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 #include <nanobind/stl/list.h>

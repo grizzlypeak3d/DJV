@@ -1,5 +1,6 @@
 set(HEADERS
-    Bindings.h)
+    Bindings.h
+    Function.h)
 set(HEADERS_PRIVATE)
 set(SOURCE
     AnnotationsModel.cpp
