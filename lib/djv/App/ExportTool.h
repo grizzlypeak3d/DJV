@@ -6,6 +6,8 @@
 #include <djv/App/Export.h>
 #include <djv/App/IToolWidget.h>
 
+#include <functional>
+
 namespace djv
 {
     namespace app
@@ -32,6 +34,12 @@ namespace djv
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
+
+            //! Export a movie with the current settings; see
+            //! ui::ExportWidget::exportMovie().
+            DJV_APP_API void exportMovie(
+                bool overwrite,
+                const std::function<void(bool)>&);
 
         private:
             FTK_PRIVATE();

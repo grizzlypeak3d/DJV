@@ -308,6 +308,7 @@ namespace djv
 
         private:
             void _debugStateCommand(const nlohmann::json&);
+            void _exportMovieCommand(const nlohmann::json&);
             void _saveSettings();
             void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
@@ -349,6 +350,10 @@ namespace djv
                 const models::Review&,
                 const std::filesystem::path& reviewPath);
             void _closeReview();
+            //! Where the previous run's log was moved to; see ftk::App.
+            std::filesystem::path _previousLogPath() const;
+            //! What the session amounted to, written to the log as it ends.
+            void _logSessionSummary();
             void _importReviewTimeline(const std::filesystem::path&);
             void _exportReviewMarkers(const std::filesystem::path&);
             void _applyReviewView();

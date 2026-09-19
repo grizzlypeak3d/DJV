@@ -67,6 +67,12 @@ namespace djv
             //! follow the shortcut bindings.
             DJV_APP_API const std::shared_ptr<ReviewActions>& getReviewActions() const;
 
+            //! Get a menu action by the name of its command, e.g.
+            //! "Color/Reset"; null when there is none. For the capture
+            //! harness: an action can do more than its command, such as
+            //! asking first.
+            DJV_APP_API std::shared_ptr<ftk::Action> getAction(const std::string&) const;
+
             //! Send a mouse click at the given window position. For the
             //! capture harness: a click routed the way a real one is, through
             //! hit testing and the widget's own handlers, rather than by
@@ -103,6 +109,12 @@ namespace djv
             //! Open the review tool and add a marker for the timeline
             //! in/out points.
             DJV_APP_API void addReviewRange();
+
+            //! Open the export tool and export a movie with the current
+            //! settings; see ui::ExportWidget::exportMovie().
+            DJV_APP_API void exportMovie(
+                bool overwrite,
+                const std::function<void(bool)>&);
 
             //! Save the window settings.
             DJV_APP_API void saveSettings();

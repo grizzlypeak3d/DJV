@@ -162,6 +162,9 @@ namespace djv
             std::vector<std::string> reviewUnreadSections;
             nlohmann::json reviewUnreadItems;
             bool reviewModified = false;
+            //! What the session summary reports at exit.
+            size_t filesOpened = 0;
+            size_t droppedFrames = 0;
             std::optional<models::ReviewView> pendingReviewView;
             std::shared_ptr<ftk::Timer> reviewViewTimer;
             std::shared_ptr<ftk::Timer> autosaveTimer;
@@ -202,6 +205,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<int> > aIndexModifiedObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeModifiedObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioLogObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutLogObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayModifiedObserver;
@@ -971,6 +976,41 @@ namespace djv
 
         namespace
         {
+            //! The clips a timeline cannot show: no media reference at all,
+            //! or one naming nothing. Those frames play as black, and
+            //! nothing else in the application says why.
+            std::vector<std::string> missingMedia(
+                const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& otio)
+            {
+                std::vector<std::string> out;
+                if (!otio)
+                {
+                    return out;
+                }
+                for (const auto& clip : otio->find_children<OTIO_NS::Clip>())
+                {
+                    bool missing = false;
+                    if (const auto* reference = clip->media_reference())
+                    {
+                        if (const auto* external =
+                            dynamic_cast<const OTIO_NS::ExternalReference*>(reference))
+                        {
+                            missing = external->target_url().empty();
+                        }
+                    }
+                    else
+                    {
+                        missing = true;
+                    }
+                    if (missing)
+                    {
+                        const std::string& name = clip->name();
+                        out.push_back(!name.empty() ? name : std::string("unnamed clip"));
+                    }
+                }
+                return out;
+            }
+
             //! Resolve a review file entry to a path on disk.
             std::filesystem::path resolveReviewFile(
                 const models::ReviewFile& rf,
@@ -1806,6 +1846,16 @@ namespace djv
             }
         }
 
+        std::filesystem::path App::_previousLogPath() const
+        {
+            std::filesystem::path out = getLogFilePath();
+            if (!out.empty())
+            {
+                out.replace_extension("prev.log");
+            }
+            return out;
+        }
+
         std::filesystem::path App::_autosavePath()
         {
             FTK_P();
@@ -2062,7 +2112,12 @@ namespace djv
                     std::vector<std::pair<std::string, std::string> >(),
                 {
                     { "Settings", ftk::fromFileSystem(getSettingsPath()) },
-                    { "Log", ftk::fromFileSystem(getLogFilePath()) }
+                    { "Log", ftk::fromFileSystem(getLogFilePath()) },
+                    // The run before this one, which is the file to ask for
+                    // after a crash: the log is written from the start each
+                    // time, so the interesting one is not the one named
+                    // above.
+                    { "Previous log", ftk::fromFileSystem(_previousLogPath()) }
                 });
         }
 
@@ -2226,7 +2281,8 @@ namespace djv
                     throw std::runtime_error("Cannot set up the benchmark");
                 }
                 ftk::App::run();
-            _saveSettings();
+                _logSessionSummary();
+                _saveSettings();
                 if (!benchmark->succeeded())
                 {
                     throw std::runtime_error("The benchmark produced no measurement");
@@ -2235,7 +2291,54 @@ namespace djv
             }
 
             ftk::App::run();
+            _logSessionSummary();
             _saveSettings();
+        }
+
+        void App::_logSessionSummary()
+        {
+            FTK_P();
+
+            // What the session amounted to, at the one point where it is all
+            // known. Read errors are counted by the timelines and were not
+            // shown anywhere; dropped frames are the playback complaint
+            // people report and could not be answered from the log.
+            size_t readErrorCount = 0;
+            std::string readError;
+            std::string readErrorPath;
+            for (const auto& timeline : p.timelines)
+            {
+                if (timeline)
+                {
+                    readErrorCount += timeline->getReadErrorCount();
+                    if (readError.empty())
+                    {
+                        readError = timeline->getReadError();
+                        if (!readError.empty())
+                        {
+                            readErrorPath = timeline->getPath().get();
+                        }
+                    }
+                }
+            }
+            size_t droppedFrames = p.droppedFrames;
+            if (auto player = p.player->get())
+            {
+                droppedFrames += player->getDroppedFrames();
+            }
+
+            std::vector<std::string> lines;
+            lines.push_back(std::string());
+            lines.push_back(ftk::Format("    * Files opened: {0}").arg(p.filesOpened));
+            lines.push_back(readErrorCount > 0 ?
+                ftk::Format("    * Read errors: {0}, first \"{1}\" in \"{2}\"").
+                    arg(readErrorCount).
+                    arg(readError).
+                    arg(readErrorPath).
+                    str() :
+                std::string("    * Read errors: none"));
+            lines.push_back(ftk::Format("    * Dropped frames: {0}").arg(droppedFrames));
+            _context->log("djv::app::App session", ftk::join(lines, "\n"));
         }
 
         std::shared_ptr<ftk::Capture> App::_createCapture(
@@ -2444,6 +2547,13 @@ namespace djv
             p.sysLogModel = ftk::SysLogModel::create(_context);
 
             p.timeUnitsModel = models::TimeUnitsModel::create(_context, getSettings());
+            // Applied here rather than with the files: the units are a
+            // setting, not something of the file's, and without a file the
+            // option was quietly ignored.
+            if (p.cmdLine.timeUnits->found())
+            {
+                p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
+            }
             
             p.filesModel = models::FilesModel::create(getSettings());
 
@@ -2482,6 +2592,10 @@ namespace djv
                 options.enabled = true;
                 if (p.cmdLine.ocioFileName->found())
                 {
+                    // The file only counts with the File source; otherwise
+                    // the saved source (the built-in config by default)
+                    // wins and the option is quietly ignored.
+                    options.config = tl::OCIOConfig::File;
                     options.fileName = p.cmdLine.ocioFileName->getValue();
                 }
                 if (p.cmdLine.ocioInput->found())
@@ -2543,6 +2657,106 @@ namespace djv
                 {
                     _debugStateCommand(args);
                 });
+            p.commandsModel->add(
+                "Export/Movie",
+                "Export the current file as a movie with the Export tool's "
+                "settings, changing any given first; e.g., { \"dir\": "
+                "\"/tmp\", \"fileName\": \"out\", \"ext\": \".mov\", "
+                "\"preset\": \"ProRes 4444\", \"audioCodec\": \"Auto\", "
+                "\"overwrite\": true, \"exit\": true }. \"exit\" quits once "
+                "the movie is written or has failed.",
+                [this](const nlohmann::json& args)
+                {
+                    _exportMovieCommand(args);
+                });
+        }
+
+        void App::_exportMovieCommand(const nlohmann::json& args)
+        {
+            FTK_P();
+            const auto get = [&args](const std::string& key, std::string& value)
+            {
+                if (args.is_object() && args.contains(key) && args.at(key).is_string())
+                {
+                    value = args.at(key).get<std::string>();
+                }
+            };
+            const auto getBool = [&args](const std::string& key)
+            {
+                return
+                    args.is_object() &&
+                    args.contains(key) &&
+                    args.at(key).is_boolean() &&
+                    args.at(key).get<bool>();
+            };
+
+            // The tool first: opening it names the output after the file
+            // being exported, which would otherwise undo a name given here.
+            if (p.mainWindow)
+            {
+                p.toolsModel->setToolOpen("Export", true);
+            }
+            auto settings = p.settingsModel->getExport();
+            settings.fileType = models::ExportFileType::Movie;
+            get("dir", settings.dir);
+            get("fileName", settings.movieFileName);
+            get("ext", settings.movieExt);
+            get("preset", settings.moviePreset);
+            get("audioCodec", settings.movieAudioCodec);
+
+            const std::string path = ftk::Path(
+                settings.dir,
+                settings.movieFileName + settings.movieExt).get();
+            const bool exitWhenDone = getBool("exit");
+            const auto done = [this, path, exitWhenDone](bool value)
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Export/Movie: {0} \"{1}\"").
+                        arg(value ? "wrote" : "did not write").
+                        arg(path),
+                    value ? ftk::LogType::Message : ftk::LogType::Error);
+                if (exitWhenDone)
+                {
+                    exit();
+                }
+            };
+            if (!p.mainWindow)
+            {
+                done(false);
+                return;
+            }
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            // The tool falls back to the first preset for a name it does not
+            // know, which is right for a setting carried over from another
+            // build and wrong for one a script just asked for.
+            {
+                std::vector<std::string> names;
+                if (auto plugin = _context->getSystem<tl::WriteSystem>()->
+                    getPlugin<tl::ffmpeg::WritePlugin>())
+                {
+                    for (const auto& preset : plugin->getWritePresets())
+                    {
+                        names.push_back(preset.name);
+                    }
+                }
+                if (std::find(names.begin(), names.end(), settings.moviePreset) ==
+                    names.end())
+                {
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format("Export/Movie: no preset \"{0}\"; this build "
+                            "has: {1}").
+                            arg(settings.moviePreset).
+                            arg(ftk::join(names, ", ")),
+                        ftk::LogType::Error);
+                    done(false);
+                    return;
+                }
+            }
+#endif // TLRENDER_FFMPEG_PLUGIN
+            p.settingsModel->setExport(settings);
+            p.mainWindow->exportMovie(getBool("overwrite"), done);
         }
 
         void App::_observersInit()
@@ -2695,6 +2909,48 @@ namespace djv
                     _markModified();
                 },
                 ftk::ObserverAction::Suppress);
+            // The color pipeline, which the log said nothing about: "why
+            // does this look wrong" is the commonest report there is, and it
+            // could not be answered from the file. The resolved options
+            // rather than the settings as written, so the line says the
+            // input color space the active file actually rendered through;
+            // it only fires when something changes, so switching between
+            // files that resolve the same way says nothing.
+            p.ocioLogObserver = ftk::Observer<tl::OCIOOptions>::create(
+                p.colorModel->observeResolvedOCIOOptions(),
+                [this](const tl::OCIOOptions& value)
+                {
+                    _context->log(
+                        "djv::app::App",
+                        value.enabled ?
+                            ftk::Format(
+                                "OCIO: {0}, input \"{1}\", display \"{2}\", "
+                                "view \"{3}\", look \"{4}\"").
+                                arg(tl::OCIOConfig::BuiltIn == value.config ?
+                                    std::string("built-in configuration") :
+                                    ftk::Format("\"{0}\"").arg(value.fileName).str()).
+                                arg(value.input).
+                                arg(value.display).
+                                arg(value.view).
+                                arg(value.look).
+                                str() :
+                            std::string("OCIO: off"));
+                });
+            p.lutLogObserver = ftk::Observer<tl::LUTOptions>::create(
+                p.colorModel->observeLUTOptions(),
+                [this](const tl::LUTOptions& value)
+                {
+                    _context->log(
+                        "djv::app::App",
+                        value.enabled && !value.fileName.empty() ?
+                            ftk::Format("LUT: \"{0}\", {1}, {2}").
+                                arg(value.fileName).
+                                arg(value.direction).
+                                arg(value.order).
+                                str() :
+                            std::string("LUT: off"));
+                });
+
             // How the image is shown. A LUT turned off is a change to the
             // review in the same way a note is: the document carries it, so
             // closing without it asks first.
@@ -2910,10 +3166,6 @@ namespace djv
                     if (p.cmdLine.speed->found())
                     {
                         player->setSpeed(p.cmdLine.speed->getValue());
-                    }
-                    if (p.cmdLine.timeUnits->found())
-                    {
-                        p.timeUnitsModel->setTimeUnits(p.cmdLine.timeUnits->getValue());
                     }
                     const double speed = player->getSpeed();
                     const tl::TimeUnits timeUnits = p.timeUnitsModel->getTimeUnits();
@@ -3227,6 +3479,55 @@ namespace djv
                 // that asked for the timeline.
                 p.filesChanged = true;
 
+                // What was opened and what it turned out to be. The log
+                // otherwise records the systems that were created and not a
+                // single thing the person at the keyboard did, so a report
+                // of "it went wrong after I opened the third one" has
+                // nothing to match against.
+                {
+                    const auto& ioInfo = timeline->getIOInfo();
+                    std::string what;
+                    if (!ioInfo.video.empty())
+                    {
+                        what = ftk::Format("{0} {1}").
+                            arg(ioInfo.video[0].size).
+                            arg(ioInfo.video[0].type);
+                    }
+                    if (ioInfo.audio.isValid())
+                    {
+                        what += ftk::Format("{0}{1} channels {2} {3}Hz").
+                            arg(what.empty() ? "" : ", ").
+                            arg(ioInfo.audio.channelCount).
+                            arg(ioInfo.audio.type).
+                            arg(ioInfo.audio.sampleRate);
+                    }
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format("Opened \"{0}\": {1}, {2}").
+                            arg(item->path.get()).
+                            arg(what.empty() ? "no video or audio" : what).
+                            arg(item->timeRange.has_value() ?
+                                ftk::Format("{0}").arg(*item->timeRange).str() :
+                                std::string("no time range")));
+                }
+
+                ++p.filesOpened;
+
+                // A timeline can be read perfectly and still have nothing to
+                // show for some of its frames.
+                if (const auto missing = missingMedia(timeline->getOTIOTimeline());
+                    !missing.empty())
+                {
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format("\"{0}\": {1} of {2} clips have no media and play as black: {3}").
+                            arg(item->path.get()).
+                            arg(missing.size()).
+                            arg(timeline->getOTIOTimeline()->find_children<OTIO_NS::Clip>().size()).
+                            arg(ftk::join(missing, ", ")),
+                        ftk::LogType::Warning);
+                }
+
                 // Recorded here rather than when the file is opened: one
                 // that cannot be read should not be offered back in the
                 // recent files.
@@ -3428,6 +3729,13 @@ namespace djv
             }
 
             p.activeFiles = activeFiles;
+            // Before the old one goes: dropped frames are counted by the
+            // player, and a session that switched files would otherwise end
+            // reporting only the last one's.
+            if (auto previous = p.player->get(); previous && previous != player)
+            {
+                p.droppedFrames += previous->getDroppedFrames();
+            }
             p.player->setIfChanged(player);
 
             // A file that is not being shown keeps its timeline, so coming

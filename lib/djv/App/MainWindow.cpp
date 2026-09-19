@@ -3,6 +3,8 @@
 
 #include <djv/App/MainWindow.h>
 
+#include <djv/App/ExportTool.h>
+
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
 #include <djv/App/AudioMenu.h>
@@ -644,6 +646,41 @@ namespace djv
             return _p->reviewActions;
         }
 
+        std::shared_ptr<ftk::Action> MainWindow::getAction(const std::string& value) const
+        {
+            FTK_P();
+            const auto i = value.find('/');
+            if (std::string::npos == i)
+            {
+                return nullptr;
+            }
+            const std::string group = value.substr(0, i);
+            const std::string name = value.substr(i + 1);
+            const std::map<std::string, std::shared_ptr<IActions> > groups =
+            {
+                { "File", p.fileActions },
+                { "Review", p.reviewActions },
+                { "Compare", p.compareActions },
+                { "Playback", p.playbackActions },
+                { "Frame", p.frameActions },
+                { "Timeline", p.timelineActions },
+                { "Audio", p.audioActions },
+                { "View", p.viewActions },
+                { "Window", p.windowActions },
+                { "Color", p.colorActions },
+                { "Tools", p.toolsActions },
+                { "Help", p.helpActions }
+            };
+            const auto j = groups.find(group);
+            if (j == groups.end() || !j->second)
+            {
+                return nullptr;
+            }
+            const auto& actions = j->second->getActions();
+            const auto k = actions.find(name);
+            return k != actions.end() ? k->second : nullptr;
+        }
+
         const std::shared_ptr<tl::ui::TimelineWidget>& MainWindow::getTimelineWidget() const
         {
             return _p->timelineWidget;
@@ -705,6 +742,26 @@ namespace djv
                 p.toolsWidget->getToolWidget("Review")))
             {
                 reviewTool->addNote();
+            }
+        }
+
+        void MainWindow::exportMovie(
+            bool overwrite,
+            const std::function<void(bool)>& callback)
+        {
+            FTK_P();
+            if (auto app = p.app.lock())
+            {
+                app->getToolsModel()->setToolOpen("Export", true);
+            }
+            if (auto exportTool = std::dynamic_pointer_cast<ExportTool>(
+                p.toolsWidget->getToolWidget("Export")))
+            {
+                exportTool->exportMovie(overwrite, callback);
+            }
+            else if (callback)
+            {
+                callback(false);
             }
         }
 

@@ -22,9 +22,20 @@ Changes:
 * Automatic OCIO input color spaces follow all of the configuration's file
   rules, including the default rule.
 * Movies can be exported as APV.
+* Movies can be exported from the command line with the Export/Movie
+  command, and -offscreen runs without showing the window.
+* Color > Enable Color turns all of the color settings off and back on
+  again, and Color > Reset Color returns the chosen sections to their
+  defaults.
+* OCIO is turned on with the configuration in the OCIO environment variable
+  when there are no color settings yet.
+* The Color/OCIO and Color/LUT commands take the configuration, color
+  spaces, and LUT file, for scripts that set up the color.
+* The view's color buffer defaults to RGBA F16, at half the memory of F32.
+  Exports are unaffected and always render at the highest precision available.
 * Library updates:
     - FFmpeg 9.0.1
-    - OpenAPV 0.3.0.0
+    - OpenAPV 1.1.1.0
 
 Fixes:
 * Exporting with the FFmpeg command line no longer hangs.
@@ -45,8 +56,15 @@ Fixes:
   their own size.
 * Exported ProRes, PNG, and QuickTime Animation movies no longer show a later
   frame's picture in place of an earlier one.
+* 4:4:4 movie exports, such as ProRes 4444, keep one pixel color edges
+  instead of smearing them.
 * A LUT or OCIO configuration that cannot be read shows the picture unaltered,
   with an error, rather than no picture.
+* The -ocio command line option uses the given configuration file, rather
+  than the one chosen in the settings.
+* The -timeUnits command line option works without a file.
+* 10-bit video shows white as white rather than a light grey, and 8-bit
+  full range video shows black without a magenta cast.
 * A review marker opens for editing on a double click, rather than opening
   on some clicks and not others.
 * Closing the last file closes the review with it.

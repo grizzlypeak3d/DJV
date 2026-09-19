@@ -19,6 +19,7 @@
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/LogSystem.h>
 #include <ftk/Core/Path.h>
 
 #include <tlRender/Timeline/CompareOptions.h>
@@ -198,6 +199,25 @@ namespace djv
                 app->getCommandsModel()->exec(
                     step.at("command").get<std::string>(),
                     step.contains("args") ? step.at("args") : nlohmann::json::object());
+            }
+            else if (step.contains("action"))
+            {
+                // Trigger a menu action by the name of its command, for
+                // what the action does beyond the command, such as the
+                // dialog it asks with, e.g.
+                //   { "action": "Color/Reset" }
+                const std::string name = step.at("action").get<std::string>();
+                if (auto action = app->getMainWindow()->getAction(name))
+                {
+                    action->doCallback();
+                }
+                else
+                {
+                    app->getContext()->getLogSystem()->print(
+                        "djv::app::Capture",
+                        ftk::Format("No action \"{0}\"").arg(name),
+                        ftk::LogType::Error);
+                }
             }
             else if (step.contains("exportDir"))
             {

@@ -87,7 +87,7 @@ namespace djv
             formLayout->addRow("Device:", p.deviceComboBox);
             formLayout->addRow("Volume:", p.volumeSlider);
             formLayout->addRow("Mute:", p.muteCheckBox);
-            formLayout->addRow("Channel:", p.channelComboBox);
+            formLayout->addRow("Play channel:", p.channelComboBox);
             formLayout->addRow("Sync offset (seconds):", p.syncOffsetSlider);
 
             _setWidget(formLayout);

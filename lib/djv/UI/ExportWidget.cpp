@@ -112,7 +112,15 @@ namespace djv
                 std::vector<tl::DisplayOptions> displayOptions;
                 tl::CompareOptions compareOptions;
                 std::vector<ftk::Box2I> boxes;
-                ftk::gl::TextureType colorBuffer = ftk::gl::TextureType::RGBA_U8;
+                //! What the picture is rendered into on the way to the file.
+                //!
+                //! Not the viewport's buffer, which is a choice about
+                //! showing: a viewport trades precision for memory because
+                //! several buffers are live at once and a display has
+                //! nowhere to put the difference. An export renders one
+                //! frame at a time into a file that may well be asked to
+                //! hold it, so it takes the most this build has.
+                ftk::gl::TextureType colorBuffer = ftk::gl::offscreenColorDefault;
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
                 std::shared_ptr<tl::IRender> render;
                 GLenum glFormat = 0;
@@ -140,6 +148,8 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<tl::Timeline> > > compareObserver;
 
             std::shared_ptr<ftk::Timer> progressTimer;
+            //! Told how an export requested by exportMovie() ended.
+            std::function<void(bool)> doneCallback;
         };
 
         void ExportWidget::_init(
@@ -503,6 +513,59 @@ namespace djv
             return out;
         }
 
+        void ExportWidget::exportMovie(
+            bool overwrite,
+            const std::function<void(bool)>& callback)
+        {
+            FTK_P();
+            const auto done = [this, callback](bool value)
+            {
+                // Copied out first: this runs from inside the function it
+                // is about to clear, and clearing it destroys what it
+                // captured.
+                const auto callbackCopy = callback;
+                _p->doneCallback = nullptr;
+                if (callbackCopy)
+                {
+                    callbackCopy(value);
+                }
+            };
+            if (!p.player || p.exportData)
+            {
+                _error(!p.player ? "No file to export" : "An export is already running");
+                done(false);
+                return;
+            }
+            const auto options = p.settings->getExport();
+            const auto fileType = models::ExportFileType::Movie;
+            if (!overwrite &&
+                getExportExists(options, fileType, _getExportRange(fileType)))
+            {
+                _error(ftk::Format("Output file already exists: \"{0}\"").
+                    arg(ftk::Path(options.dir, options.movieFileName + options.movieExt).get()));
+                done(false);
+                return;
+            }
+            p.doneCallback = done;
+            _exportStart(fileType);
+            // A start that failed has reported already and left nothing
+            // running to finish.
+            if (!p.exportData && p.doneCallback)
+            {
+                p.doneCallback(false);
+            }
+        }
+
+        void ExportWidget::_error(const std::string& value)
+        {
+            // Logged as well as shown: a scripted export has nobody watching
+            // the dialog, and the log is where it would look.
+            if (auto context = getContext())
+            {
+                context->log("djv::ui::ExportWidget", value, ftk::LogType::Error);
+            }
+        }
+
         void ExportWidget::_export(models::ExportFileType fileType)
         {
             FTK_P();
@@ -763,7 +826,6 @@ namespace djv
                     {
                         p.exportData->displayOptions[i].ocioInput = resolvedInputs[i];
                     }
-                    p.exportData->colorBuffer = p.viewportModel.lock()->getColorBuffer();
                     p.exportData->render = tl::gl::Render::create(
                         context->getLogSystem(),
                         context->getSystem<ftk::FontSystem>());
@@ -809,8 +871,18 @@ namespace djv
                         {
                             FTK_P();
                             p.progressTimer->stop();
+                            // Finished only when every frame was written;
+                            // closing early is cancelling, and a failed frame
+                            // closes it too.
+                            const bool finished =
+                                p.exportData &&
+                                p.exportData->frame > p.exportData->range.end_time_inclusive().value();
                             p.exportData.reset();
                             p.progressDialog.reset();
+                            if (p.doneCallback)
+                            {
+                                p.doneCallback(finished);
+                            }
                         });
                     p.progressDialog->open(getWindow());
                     p.progressTimer->start(
@@ -846,10 +918,18 @@ namespace djv
                     {
                         p.progressDialog->close();
                     }
+                    // Nothing is left running: an export that failed to
+                    // start would otherwise read as one in progress.
+                    p.exportData.reset();
+                    _error(e.what());
                     context->getSystem<ftk::DialogSystem>()->message(
                         "ERROR",
                         ftk::Format("Error: {0}").arg(e.what()),
                         getWindow());
+                    if (p.doneCallback)
+                    {
+                        p.doneCallback(false);
+                    }
                 }
             }
         }
@@ -951,6 +1031,7 @@ namespace djv
             }
             catch (const std::exception& e)
             {
+                _error(e.what());
                 if (p.progressDialog)
                 {
                     p.progressDialog->close();

@@ -11,6 +11,7 @@
 #include <ftk/Core/String.h>
 
 #include <cmath>
+#include <cstdlib>
 #include <sstream>
 
 #if defined(TLRENDER_OCIO)
@@ -54,7 +55,14 @@ namespace djv
             p.settings = settings;
 
             tl::OCIOOptions ocioOptions;
-            p.settings->getT("/Color/OCIO", ocioOptions);
+            if (p.settings->contains("/Color/OCIO"))
+            {
+                p.settings->getT("/Color/OCIO", ocioOptions);
+            }
+            else
+            {
+                ocioOptions = getDefaultOCIOOptions();
+            }
             p.ocioOptions = ftk::Observable<tl::OCIOOptions>::create(ocioOptions);
             _ocioConfigUpdate(ocioOptions);
             std::map<std::string, std::string> extColorSpaces;
@@ -70,6 +78,22 @@ namespace djv
             tl::LUTOptions lutOptions;
             p.settings->getT("/Color/LUT", lutOptions);
             p.lutOptions = ftk::Observable<tl::LUTOptions>::create(lutOptions);
+        }
+
+        tl::OCIOOptions ColorModel::getDefaultOCIOOptions()
+        {
+            tl::OCIOOptions out;
+            // The OCIO environment variable is taken as the configuration
+            // to use, as other applications do. It is only a default: once
+            // there are color settings they are the user's choice, and the
+            // variable does not override them.
+            const char* env = std::getenv("OCIO");
+            if (env && env[0])
+            {
+                out.enabled = true;
+                out.config = tl::OCIOConfig::EnvVar;
+            }
+            return out;
         }
 
         ColorModel::ColorModel() :
