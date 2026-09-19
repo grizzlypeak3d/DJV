@@ -73,7 +73,7 @@ def main():
             _os.path.join(tl, "bin"),
             _os.path.join(tl, "lib"),
             _os.path.join(ftk, "bin"),
-            _os.path.join(site, "djv_player.libs"),
+            _os.path.join(site, "djv_viewer.libs"),
             _os.path.join(site, "tlrender.libs"),
             _os.path.join(site, "feather_tk.libs")]
         path = [p for p in path if _os.path.isdir(p)]

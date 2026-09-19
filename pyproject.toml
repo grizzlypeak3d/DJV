@@ -13,9 +13,10 @@ requires = [
 build-backend = "scikit_build_core.build"
 
 [project]
-# "djv" on PyPI belongs to another project; the package imports as djv and
-# the command is djv all the same.
-name = "djv-player"
+# "djv" on PyPI belongs to another project; this is the name of the
+# subreddit, r/DJV_viewer. The package imports as djv and the command is djv
+# all the same.
+name = "DJV_viewer"
 dynamic = ["version"]
 description = "An open source application for media playback and review, for film, VFX, and animation"
 readme = "README.md"

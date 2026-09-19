@@ -42,7 +42,7 @@ DJV can also be installed with pip, for Python 3.12 or newer on Linux, macOS,
 and Windows:
 
 ```
-pip install djv-player
+pip install DJV_viewer
 djv
 ```
 

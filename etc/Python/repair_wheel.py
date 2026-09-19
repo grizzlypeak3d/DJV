@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright Contributors to the DJV project.
 
-"""Repair a djv-player wheel, leaving tlRender's and feather-tk's libraries
+"""Repair a DJV_viewer wheel, leaving tlRender's and feather-tk's libraries
 in their own wheels.
 
 Usage: repair_wheel.py <wheel> <dest_dir> [<delocate_archs>]

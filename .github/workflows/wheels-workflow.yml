@@ -82,7 +82,7 @@ jobs:
     - name: Check the version
       if: github.ref_type == 'tag'
       run: |
-        test -f "dist/djv_player-${GITHUB_REF_NAME}.tar.gz" || {
+        test -f "dist/djv_viewer-${GITHUB_REF_NAME}.tar.gz" || {
           echo "The tag ${GITHUB_REF_NAME} does not match the version built:"
           ls dist
           exit 1
