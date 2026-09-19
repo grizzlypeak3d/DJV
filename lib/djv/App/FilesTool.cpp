@@ -543,12 +543,14 @@ namespace djv
                         // Elided to the room the row leaves it rather than
                         // to a count of characters, so the controls after it
                         // stay in view however narrow the tool is; the row's
-                        // tooltip has the whole path.
+                        // tooltip has the whole path. From the middle, since
+                        // file names differ at both ends: the shot at the
+                        // start, the version, frame, and extension at the end.
                         auto nameLabel = ftk::Label::create(
                             context,
                             item->path.getFileName(),
                             rowLayout);
-                        nameLabel->setElide(true);
+                        nameLabel->setElide(true, ftk::ElideMode::Middle);
                         nameLabel->setHStretch(ftk::Stretch::Expanding);
                         nameLabel->setVAlign(ftk::VAlign::Center);
 
