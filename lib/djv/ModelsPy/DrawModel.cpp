@@ -22,7 +22,7 @@
 #include <nanobind/stl/optional.h>
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/filesystem.h>
-#include <ftk/CorePy/Function.h>
+#include <djv/ModelsPy/Function.h>
 
 namespace nb = nanobind;
 

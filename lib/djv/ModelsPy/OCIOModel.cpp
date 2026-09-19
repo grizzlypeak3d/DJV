@@ -13,7 +13,7 @@
 #include <ftk/CorePy/Bindings.h>
 #include <ftk/Core/Context.h>
 
-#include <ftk/CorePy/Function.h>
+#include <djv/ModelsPy/Function.h>
 #include <nanobind/operators.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
