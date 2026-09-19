@@ -540,10 +540,15 @@ namespace djv
                                     layers);
                             });
 
+                        // Elided to the room the row leaves it rather than
+                        // to a count of characters, so the controls after it
+                        // stay in view however narrow the tool is; the row's
+                        // tooltip has the whole path.
                         auto nameLabel = ftk::Label::create(
                             context,
-                            ftk::elide(item->path.getFileName(), 24),
+                            item->path.getFileName(),
                             rowLayout);
+                        nameLabel->setElide(true);
                         nameLabel->setHStretch(ftk::Stretch::Expanding);
                         nameLabel->setVAlign(ftk::VAlign::Center);
 
