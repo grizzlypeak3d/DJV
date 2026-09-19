@@ -4,7 +4,7 @@
 import opentimelineio as otio
 import feather_tk as ftk
 import tlrender as tl
-import djvPy as djv
+import djv
 
 import MainWindow
 

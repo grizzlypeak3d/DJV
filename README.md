@@ -1,7 +1,7 @@
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Build Status](https://github.com/grizzlypeak3d/DJV/actions/workflows/ci-workflow.yml/badge.svg)](https://github.com/grizzlypeak3d/DJV/actions/workflows/ci-workflow.yml)
 
-# ![DJV Icon](etc/Icons/DJV_Icon_32.png)&nbsp;DJV
+# ![DJV Icon](https://raw.githubusercontent.com/grizzlypeak3d/DJV/main/etc/Icons/DJV_Icon_32.png)&nbsp;DJV
 
 DJV is a free, open source media player built for professional image review. Real-time, high bit-depth EXR playback, A/B comparison, OTIO color management and more. 
 Never compromise on your renders again.
@@ -22,11 +22,11 @@ DJV is built with the [tlRender](https://github.com/grizzlypeak3d/tlRender) and
 
 Example of two images being compared with a wipe:
 
-![Screenshot](etc/Images/djv_screenshot1.png)
+![Screenshot](https://raw.githubusercontent.com/grizzlypeak3d/DJV/main/etc/Images/djv_screenshot1.png)
 
 Example of two images being compared with a horizontal layout:
 
-![Screenshot](etc/Images/djv_screenshot2.png)
+![Screenshot](https://raw.githubusercontent.com/grizzlypeak3d/DJV/main/etc/Images/djv_screenshot2.png)
 
 
 ## Downloads
@@ -37,6 +37,18 @@ https://github.com/grizzlypeak3d/DJV/releases
 codecs. To support additional codecs, point DJV at an external FFmpeg
 command (see [documentation](https://grizzlypeak3d.github.io/DJV/index.html#files))
 or build from source.
+
+DJV can also be installed with pip, for Python 3.12 or newer on Linux, macOS,
+and Windows:
+
+```
+pip install djv-player
+djv
+```
+
+The `djv` command runs the application, and the bindings DJV is built from
+are importable as `djv`, alongside `tlrender` and `feather_tk`
+(see [documentation](https://grizzlypeak3d.github.io/DJV/python.html)).
 
 
 ## Building

@@ -13,7 +13,7 @@ if(DJV_PYTHON)
     #     ImportError: DLL load failed while importing _tlrender:
     #     The specified module could not be found.
     add_test(
-        NAME djvPy-test
+        NAME djv-python-test
         COMMAND ${Python_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/run-python-tests.py
             ${CMAKE_INSTALL_PREFIX}/bin
@@ -25,11 +25,11 @@ if(DJV_PYTHON)
     set(PYTHON_TEST_ENV
         "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:_feather_tk>/.."
         "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:_tlrender>/.."
-        "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:djvPy>"
+        "PYTHONPATH=path_list_append:$<TARGET_FILE_DIR:_djv>/.."
         "PYTHONPATH=path_list_append:${CMAKE_INSTALL_PREFIX}/python")
     if(DJV_TESTS_NO_GL)
         list(APPEND PYTHON_TEST_ENV "DJV_TESTS_NO_GL=set:1")
     endif()
-    set_tests_properties(djvPy-test PROPERTIES
+    set_tests_properties(djv-python-test PROPERTIES
         ENVIRONMENT_MODIFICATION "${PYTHON_TEST_ENV}")
 endif()

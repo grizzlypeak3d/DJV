@@ -19,7 +19,7 @@ set(SOURCE
     ViewWidgets.cpp
     Viewport.cpp)
 
-# Static. The bindings are linked by djvPy and nothing else, so there is no
+# Static. The bindings are linked by the djv module and nothing else, so there is no
 # API here for anything to import -- the module absorbs them.
 add_library(djvUIPy STATIC ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 # Hidden, as the module is: the binding classes hold nanobind's types,

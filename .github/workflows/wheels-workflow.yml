@@ -1,0 +1,119 @@
+name: Wheels
+
+# Build the Python wheels and the source distribution, and publish them.
+#
+# A version tag ("1.2.3") publishes to PyPI; running the workflow by hand
+# can publish to TestPyPI first. Both use trusted publishing, so no tokens
+# are stored here: add this repository, this workflow file and the
+# environment ("pypi" or "testpypi") as a trusted publisher in the project's
+# settings on each index.
+#
+# The wheels are built against the tlRender wheel named in pyproject.toml,
+# which has to be on PyPI already. There are no dependencies to build: they
+# are in the tlRender and feather-tk wheels.
+
+on:
+  push:
+    tags: ['[0-9]+.[0-9]+.[0-9]+*']
+  pull_request:
+    paths:
+      - pyproject.toml
+      - etc/Config/wheel.cmake
+      - etc/Python/**
+      - lib/djv/djvPy/**
+      - .github/workflows/wheels-workflow.yml
+  workflow_dispatch:
+    inputs:
+      testpypi:
+        description: Publish to TestPyPI
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# A new push to a pull request replaces the build of the one before it.
+concurrency:
+  group: wheels-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  wheels:
+    name: Wheel ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-x86_64, os: ubuntu-latest }
+          - { name: linux-aarch64, os: ubuntu-24.04-arm }
+          - { name: macos-x86_64, os: macos-15-intel }
+          - { name: macos-arm64, os: macos-latest }
+          - { name: windows-amd64, os: windows-latest }
+
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+
+    steps:
+    # The submodule is not needed: the wheel builds against tlRender's.
+    - uses: actions/checkout@v6
+
+    # One stable ABI wheel per platform; the configuration is in
+    # pyproject.toml.
+    - uses: pypa/cibuildwheel@v4.2.1
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: wheel-${{ matrix.name }}
+        path: wheelhouse/*.whl
+
+  sdist:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Build
+      run: pipx run build --sdist
+
+    # The version comes from lib/djv/Models/Version.h; a tag that disagrees
+    # with it would publish the wrong version, or a development one.
+    - name: Check the version
+      if: github.ref_type == 'tag'
+      run: |
+        test -f "dist/djv_player-${GITHUB_REF_NAME}.tar.gz" || {
+          echo "The tag ${GITHUB_REF_NAME} does not match the version built:"
+          ls dist
+          exit 1
+        }
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: sdist
+        path: dist/*.tar.gz
+
+  publish:
+    needs: [wheels, sdist]
+    if: github.ref_type == 'tag' || inputs.testpypi
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_type == 'tag' && 'pypi' || 'testpypi' }}
+    permissions:
+      id-token: write
+
+    steps:
+    - uses: actions/download-artifact@v8
+      with:
+        path: dist
+        merge-multiple: true
+
+    - name: Publish to PyPI
+      if: github.ref_type == 'tag'
+      uses: pypa/gh-action-pypi-publish@release/v1
+
+    - name: Publish to TestPyPI
+      if: github.ref_type != 'tag'
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/

@@ -2,7 +2,7 @@
 # Copyright Contributors to the feather-tk project.
 
 import feather_tk
-import djvPy as djv
+import djv
 
 import unittest
 
@@ -30,7 +30,7 @@ class EnumsTest(unittest.TestCase):
                         values,
                         list(range(len(values))),
                         f"{prefix}.{name} has gaps: {values}")
-                elif isinstance(obj, type(djv)) and obj.__name__.startswith("djvPy"):
+                elif isinstance(obj, type(djv)) and obj.__name__.startswith("djv."):
                     walk(obj, f"{prefix}.{name}")
         walk(djv, "djv")
         self.assertGreater(len(seen), 0)
