@@ -94,6 +94,8 @@
 <dd>Seek to the given time.</dd>
 <dt><code>-frameRange, -fr (value)</code></dt>
 <dd>Frame range of an image sequence (e.g., 1-100). This is the range the sequence is meant to cover, which need not be the frames on disk: a render in progress can be watched over the range it will end up with, the frames that are not there yet following the missing frames setting. Applies to the first file opened.</dd>
+<dt><code>-mediaReference, -mr (value)</code></dt>
+<dd>Media reference to open OTIO timelines with, for clips that carry several versions of their media (e.g., "Proxy" or "Full"). Applies to the files opened, not the "B" file.</dd>
 <dt><code>-inPoint, -in (value)</code></dt>
 <dd>Set the in point.</dd>
 <dt><code>-outPoint, -out (value)</code></dt>

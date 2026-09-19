@@ -34,6 +34,9 @@ Changes:
 * The Files tool can switch a file's media reference, and each file keeps
   its own, so a comparison can put a proxy against the full resolution
   version. The choice is saved with reviews and playlists.
+* The -mediaReference command line option opens files on a media
+  reference, and the File/MediaReference and File/Layer commands choose one
+  by name.
 * The view's color buffer defaults to RGBA F16, at half the memory of F32.
   Exports are unaffected and always render at the highest precision available.
 * Library updates:

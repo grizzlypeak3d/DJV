@@ -93,6 +93,7 @@ namespace djv
         {
             std::shared_ptr<ftk::CmdLineListArg<std::string> > inputs;
             std::shared_ptr<ftk::CmdLineOption<std::string> > audioFileName;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > mediaReference;
             std::shared_ptr<ftk::CmdLineOption<std::string> > compareFileName;
             std::shared_ptr<ftk::CmdLineOption<tl::Compare> > compare;
             std::shared_ptr<ftk::CmdLineOption<ftk::V2F> > wipeCenter;
@@ -304,6 +305,12 @@ namespace djv
                 "following the missing frames setting. Applies to the first "
                 "file opened.",
                 "Playback");
+            p.cmdLine.mediaReference = ftk::CmdLineOption<std::string>::create(
+                { "-mediaReference", "-mr" },
+                "Media reference to open OTIO timelines with, for clips that "
+                "carry several versions of their media (e.g., \"Proxy\" or "
+                "\"Full\"). Applies to the files opened, not the \"B\" file.",
+                "Playback");
             p.cmdLine.dirFilter = ftk::CmdLineOption<std::string>::create(
                 { "-dirFilter" },
                 "Filter the files when opening a directory: a "
@@ -483,6 +490,7 @@ namespace djv
                 p.cmdLine.timeUnits,
                 p.cmdLine.seek,
                 p.cmdLine.frameRange,
+                p.cmdLine.mediaReference,
                 p.cmdLine.inPoint,
                 p.cmdLine.outPoint,
                 p.cmdLine.dirFilter,
@@ -3178,7 +3186,32 @@ namespace djv
                 // as it is added, and the current file is the one that
                 // gets read, so opening them one at a time would read
                 // every one of them on the way to the last.
+                const size_t filesBefore = p.filesModel->getFiles().size();
                 open(paths, ftk::Path(audioFileName), frameRange);
+                if (p.cmdLine.mediaReference->found())
+                {
+                    // Set on each file rather than on the player, so that it
+                    // stays with the file. One that has not been opened yet
+                    // is checked when it is.
+                    const std::string key = p.cmdLine.mediaReference->getValue();
+                    const auto& files = p.filesModel->getFiles();
+                    for (size_t i = filesBefore; i < files.size(); ++i)
+                    {
+                        const auto& item = files[i];
+                        if (!item->mediaReferenceKeysKnown)
+                        {
+                            p.filesModel->setMediaReferenceKey(item, key);
+                        }
+                        else if (const auto found = models::findMediaReferenceKey(*item, key))
+                        {
+                            p.filesModel->setMediaReferenceKey(item, found.value());
+                        }
+                        else
+                        {
+                            _mediaReferenceWarning(*item, key);
+                        }
+                    }
+                }
 
                 if (auto player = p.player->get())
                 {
@@ -3493,6 +3526,7 @@ namespace djv
                     item->videoLayer = 0;
                 }
                 item->mediaReferenceKeys = timeline->getMediaReferenceKeys();
+                item->mediaReferenceKeysKnown = true;
                 // Only a timeline with a choice to make has keys worth
                 // listing: one whose clips all use the one reference lists
                 // that reference's key, which is no choice at all.
@@ -3500,14 +3534,19 @@ namespace djv
                 {
                     item->mediaReferenceKeys.clear();
                 }
-                // A key from a review or a playlist the file no longer uses.
-                if (!item->mediaReferenceKey.empty() &&
-                    std::find(
-                        item->mediaReferenceKeys.begin(),
-                        item->mediaReferenceKeys.end(),
-                        item->mediaReferenceKey) == item->mediaReferenceKeys.end())
+                // A key from a review, a playlist, or the command line
+                // that the file does not use.
+                if (!item->mediaReferenceKey.empty())
                 {
-                    item->mediaReferenceKey.clear();
+                    if (const auto found = models::findMediaReferenceKey(*item, item->mediaReferenceKey))
+                    {
+                        item->mediaReferenceKey = found.value();
+                    }
+                    else
+                    {
+                        _mediaReferenceWarning(*item, item->mediaReferenceKey);
+                        item->mediaReferenceKey.clear();
+                    }
                 }
                 // The item became the current file before it was opened, so
                 // whatever was shown of it was shown without these. Say so
@@ -3856,6 +3895,30 @@ namespace djv
                 player->setVideoLayer(videoLayer);
                 player->setCompareVideoLayers(compareVideoLayers);
             }
+        }
+
+        void App::_mediaReferenceWarning(
+            const models::FilesModelItem& item,
+            const std::string& key)
+        {
+            // A warning so the status bar shows it: the file is shown as
+            // authored, which is not what was asked for.
+            std::vector<std::string> names;
+            for (const auto& i : item.mediaReferenceKeys)
+            {
+                names.push_back(models::getMediaReferenceLabel(i));
+            }
+            _context->log(
+                "djv::app::App",
+                names.empty() ?
+                    ftk::Format("{0}: no media reference \"{1}\"; it has only the one").
+                        arg(item.path.getFileName()).
+                        arg(key).str() :
+                    ftk::Format("{0}: no media reference \"{1}\"; it has {2}").
+                        arg(item.path.getFileName()).
+                        arg(key).
+                        arg(ftk::join(names, ", ")).str(),
+                ftk::LogType::Warning);
         }
 
         void App::_mediaReferenceKeysUpdate(const std::vector<std::string>& value)

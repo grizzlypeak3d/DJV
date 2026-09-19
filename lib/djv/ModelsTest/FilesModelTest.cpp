@@ -246,8 +246,10 @@ namespace djv
             // Each file keeps its own key, as authored to begin with.
             auto item0 = makeItem("shot.otio");
             item0->mediaReferenceKeys = { "Full", "Proxy" };
+            item0->mediaReferenceKeysKnown = true;
             auto item1 = makeItem("shot.otioz");
             item1->mediaReferenceKeys = { "Full", "Proxy" };
+            item1->mediaReferenceKeysKnown = true;
             model->add(item0);
             model->add(item1);
             FTK_CHECK(std::vector<std::string>({ "", "" }) == keys);
@@ -271,9 +273,15 @@ namespace djv
             FTK_CHECK("Full" == item1->mediaReferenceKey);
             FTK_CHECK("Proxy" == item0->mediaReferenceKey);
 
+            // A file not opened yet takes any key, to be checked when it is.
+            auto item2 = makeItem("other.otio");
+            model->add(item2);
+            model->setMediaReferenceKey(item2, "Half");
+            FTK_CHECK("Half" == item2->mediaReferenceKey);
+
             // Back to the authored references.
             model->setMediaReferenceKey(item1, "");
-            FTK_CHECK(std::vector<std::string>({ "Proxy", "" }) == keys);
+            FTK_CHECK(std::vector<std::string>({ "Proxy", "", "Half" }) == keys);
         }
 
         void FilesModelTest::_compare()

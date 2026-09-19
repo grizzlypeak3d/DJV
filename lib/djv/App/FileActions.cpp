@@ -6,6 +6,9 @@
 #include <djv/App/App.h>
 #include <djv/Models/FilesModel.h>
 
+#include <ftk/Core/Format.h>
+#include <ftk/Core/String.h>
+
 
 #include <algorithm>
 
@@ -13,6 +16,34 @@ namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            // The file a command acts on: the "A" file, or the one at the
+            // index given as "file".
+            std::shared_ptr<models::FilesModelItem> commandFile(
+                const std::shared_ptr<App>& app,
+                const nlohmann::json& args)
+            {
+                const auto& files = app->getFilesModel()->getFiles();
+                if (args.is_object() && args.contains("file"))
+                {
+                    const int index = args.at("file").get<int>();
+                    if (index < 0 || index >= static_cast<int>(files.size()))
+                    {
+                        throw std::invalid_argument(ftk::Format(
+                            "No file {0}; there are {1}").arg(index).arg(files.size()));
+                    }
+                    return files[index];
+                }
+                auto a = app->getFilesModel()->getA();
+                if (!a)
+                {
+                    throw std::invalid_argument("No file is open");
+                }
+                return a;
+            }
+        }
+
         struct FileActions::Private
         {
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
@@ -153,6 +184,84 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         app->getFilesModel()->nextMediaReferenceKey();
+                    }
+                });
+
+            // By name, for scripts: the cycle above depends on which keys a
+            // timeline happens to use.
+            _addCommand(
+                "MediaReference",
+                "Set a file's media reference by name, e.g., { \"key\": \"Proxy\" }; "
+                "\"As Authored\" or an empty key is the references the clips were "
+                "authored with. It is the \"A\" file's unless \"file\" gives the "
+                "index of another in the file list.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto item = commandFile(app, args);
+                        const std::string key = args.is_object() && args.contains("key") ?
+                            args.at("key").get<std::string>() :
+                            std::string();
+                        // A file that has not been opened yet takes the key
+                        // as it is, and checks it when it opens.
+                        if (!item->mediaReferenceKeysKnown)
+                        {
+                            app->getFilesModel()->setMediaReferenceKey(item, key);
+                            return;
+                        }
+                        if (item->mediaReferenceKeys.empty() && !key.empty())
+                        {
+                            throw std::invalid_argument(ftk::Format(
+                                "{0} has only the one media reference").
+                                arg(item->path.getFileName()));
+                        }
+                        const auto found = models::findMediaReferenceKey(*item, key);
+                        if (!found.has_value())
+                        {
+                            std::vector<std::string> names;
+                            for (const auto& i : item->mediaReferenceKeys)
+                            {
+                                names.push_back(models::getMediaReferenceLabel(i));
+                            }
+                            throw std::invalid_argument(ftk::Format(
+                                "{0} has no media reference \"{1}\"; it has {2}").
+                                arg(item->path.getFileName()).
+                                arg(key).
+                                arg(ftk::join(names, ", ")));
+                        }
+                        app->getFilesModel()->setMediaReferenceKey(item, found.value());
+                    }
+                });
+
+            _addCommand(
+                "Layer",
+                "Set a file's layer by name or index, e.g., { \"layer\": \"diffuse\" }. "
+                "It is the \"A\" file's unless \"file\" gives the index of another "
+                "in the file list.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto item = commandFile(app, args);
+                        if (!args.is_object() || !args.contains("layer"))
+                        {
+                            throw std::invalid_argument("No \"layer\" given");
+                        }
+                        const auto& value = args.at("layer");
+                        const std::string layer = value.is_number_integer() ?
+                            std::to_string(value.get<int64_t>()) :
+                            value.get<std::string>();
+                        const auto found = models::findLayer(*item, layer);
+                        if (!found.has_value())
+                        {
+                            throw std::invalid_argument(ftk::Format(
+                                "{0} has no layer \"{1}\"; it has {2}").
+                                arg(item->path.getFileName()).
+                                arg(layer).
+                                arg(ftk::join(item->videoLayers, ", ")));
+                        }
+                        app->getFilesModel()->setLayer(item, static_cast<int>(found.value()));
                     }
                 });
 

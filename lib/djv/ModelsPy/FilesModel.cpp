@@ -43,6 +43,7 @@ namespace djv
                 .def_rw("videoLayer", &FilesModelItem::videoLayer)
                 .def_rw("mediaReferenceKeys", &FilesModelItem::mediaReferenceKeys)
                 .def_rw("mediaReferenceKey", &FilesModelItem::mediaReferenceKey)
+                .def_rw("mediaReferenceKeysKnown", &FilesModelItem::mediaReferenceKeysKnown)
                 .def_rw("audioChannel", &FilesModelItem::audioChannel)
                 .def_rw("speed", &FilesModelItem::speed)
                 .def_rw("currentTime", &FilesModelItem::currentTime)

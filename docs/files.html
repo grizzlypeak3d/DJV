@@ -86,7 +86,7 @@
 <p>Shortcuts:</p>
 <ul><li>Next file: <kbd>Ctrl+Page Down</kbd></li><li>Previous file: <kbd>Ctrl+Page Up</kbd></li></ul>
 <h2 id="playlists">Playlists</h2>
-<p><strong>File/Save Playlist</strong> saves the list of open files as an OTIO file: the order, each file's in/out points, position, speed, and layer, and the A/B comparison. <strong>File/Open Playlist</strong> opens one back into the file list.</p>
+<p><strong>File/Save Playlist</strong> saves the list of open files as an OTIO file: the order, each file's in/out points, position, speed, layer, and media reference, and the A/B comparison. <strong>File/Open Playlist</strong> opens one back into the file list.</p>
 <p>Locations: <strong>File</strong> menu</p>
 <p>A playlist is a plain OTIO timeline — a single video track with one clip per file — so other applications can open it, and DJV's own state rides in metadata they ignore. Opening a <code>.otio</code> file with <strong>File/Open</strong> plays it as a timeline in one tab; <strong>Open Playlist</strong> is what expands it into the file list. Any timeline can be opened as a playlist: multiple video tracks are flattened, and whatever the file list cannot carry — transitions, effects, markers, audio tracks — is dropped and reported in the log. A timeline of only audio opens its first audio track. A clip with a range but no saved position starts at its in point. The file being opened is never modified.</p>
 <p>A <code>.otioz</code> bundle opens as a timeline only: its media lives inside the bundle, so its clips cannot become entries in the file list.</p>
@@ -109,6 +109,7 @@
 <p>Locations: <strong>File</strong> menu, <strong>Files</strong> tool</p>
 <p>Shortcuts:</p>
 <ul><li>Next layer: <kbd>Ctrl+Equals</kbd></li><li>Previous layer: <kbd>Ctrl+Minus</kbd></li></ul>
+<p>From a script, <strong>File/Layer</strong> chooses one by name or index, e.g., <code>-command 'File/Layer { "layer": "diffuse" }'</code>, for the A file or, with <strong>"file"</strong>, the one at that index in the file list (see <a href="automation.html">Automation</a>).</p>
 <h2 id="files-tool">Files tool</h2>
 <p>The <strong>Files</strong> tool is the central place for managing open files: it sets the current file, picks active layers, and configures comparison.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
@@ -148,6 +149,7 @@
 <p>Locations: <strong>File</strong> menu, <strong>Files</strong> tool</p>
 <p>Shortcuts:</p>
 <ul><li>Next media reference: <kbd>Shift+M</kbd></li></ul>
+<p>To open with a media reference, give it on the command line, e.g., <code>djv shot.otio -mediaReference Proxy</code>; it applies to the files opened, not the B file. From a script, <strong>File/MediaReference</strong> chooses one by name, e.g., <code>-command 'File/MediaReference { "key": "Full" }'</code>, for the A file or, with <strong>"file"</strong>, the one at that index in the file list. A name a file does not have is reported in the log with the ones it does. OTIO's default reference is shown as <strong>Default</strong>, and either name works.</p>
 <h2 id="reviews">Reviews</h2>
 <p id="markers">Reviews — saved sessions with markers and drawn feedback — have a page of their own: <a href="reviews.html">Review</a>.</p>
 <h2 id="otio-spatial-coordinates">OTIO spatial coordinates</h2>

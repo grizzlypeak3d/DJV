@@ -13,6 +13,8 @@
 #include <ftk/Core/Observable.h>
 #include <ftk/Core/Path.h>
 
+#include <optional>
+
 namespace ftk
 {
     class Settings;
@@ -40,6 +42,10 @@ namespace djv
             //! timeline whose clips carry several versions of their media
             //! (e.g., "Full" and "Proxy"). Filled in when the file is opened.
             std::vector<std::string> mediaReferenceKeys;
+
+            //! Whether the keys above are known, which is once the file has
+            //! been opened. Until then a key cannot be checked.
+            bool                     mediaReferenceKeysKnown = false;
 
             //! The media reference key the file is read with. Empty, the
             //! default, leaves each clip on the reference it was authored
@@ -205,7 +211,9 @@ namespace djv
 
             //! Set a file's media reference key; empty for the references the
             //! clips were authored with. A key the file does not use is
-            //! ignored.
+            //! ignored. A file that has not been opened yet has no keys to
+            //! check against, so any key is taken, and checked when it opens
+            //! (see FilesModelItem::mediaReferenceKeysKnown).
             DJV_MODELS_API void setMediaReferenceKey(
                 const std::shared_ptr<FilesModelItem>&,
                 const std::string&);
@@ -289,6 +297,19 @@ namespace djv
         //! for the empty key, "Default" for OTIO's default key, and the key
         //! itself otherwise.
         DJV_MODELS_API std::string getMediaReferenceLabel(const std::string&);
+
+        //! Find the media reference key a file uses by the key itself or the
+        //! name it is shown with; "" or "As Authored" is the empty key.
+        //! Nothing when the file does not use it.
+        DJV_MODELS_API std::optional<std::string> findMediaReferenceKey(
+            const FilesModelItem&,
+            const std::string&);
+
+        //! Find a layer of a file by its name or its index as a number.
+        //! Nothing when the file does not have it.
+        DJV_MODELS_API std::optional<size_t> findLayer(
+            const FilesModelItem&,
+            const std::string&);
 
     }
 }

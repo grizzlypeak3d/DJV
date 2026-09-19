@@ -641,6 +641,7 @@ namespace djv
                 const auto& file = p.files->getItem(index);
                 if (key != file->mediaReferenceKey &&
                     (key.empty() ||
+                     !file->mediaReferenceKeysKnown ||
                      std::find(
                          file->mediaReferenceKeys.begin(),
                          file->mediaReferenceKeys.end(),
@@ -911,6 +912,51 @@ namespace djv
             else if (OTIO_NS::Clip::default_media_key == key)
             {
                 out = "Default";
+            }
+            return out;
+        }
+
+        std::optional<std::string> findMediaReferenceKey(
+            const FilesModelItem& item,
+            const std::string& value)
+        {
+            std::optional<std::string> out;
+            if (value.empty() || getMediaReferenceLabel(std::string()) == value)
+            {
+                out = std::string();
+            }
+            else
+            {
+                for (const auto& key : item.mediaReferenceKeys)
+                {
+                    if (key == value || getMediaReferenceLabel(key) == value)
+                    {
+                        out = key;
+                        break;
+                    }
+                }
+            }
+            return out;
+        }
+
+        std::optional<size_t> findLayer(
+            const FilesModelItem& item,
+            const std::string& value)
+        {
+            std::optional<size_t> out;
+            const auto i = std::find(item.videoLayers.begin(), item.videoLayers.end(), value);
+            if (i != item.videoLayers.end())
+            {
+                out = i - item.videoLayers.begin();
+            }
+            else if (!value.empty() && value.size() < 10 &&
+                std::all_of(value.begin(), value.end(), [](char c) { return c >= '0' && c <= '9'; }))
+            {
+                const size_t index = std::stoul(value);
+                if (index < item.videoLayers.size())
+                {
+                    out = index;
+                }
             }
             return out;
         }
