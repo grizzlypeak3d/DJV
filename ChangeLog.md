@@ -76,6 +76,9 @@ Fixes:
 * A review marker opens for editing on a double click, rather than opening
   on some clicks and not others.
 * Closing the last file closes the review with it.
+* Timecode typed or given on the command line with one digit fields, such as
+  1:00:40:00, is read correctly rather than silently losing the later fields,
+  and malformed timecode is reported as an error.
 * Closing a review prompts to save after a change to the files or to the
   color and image display, such as adding or removing a LUT.
 
