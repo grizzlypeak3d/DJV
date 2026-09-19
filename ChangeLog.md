@@ -79,6 +79,8 @@ Fixes:
 * Timecode typed or given on the command line with one digit fields, such as
   1:00:40:00, is read correctly rather than silently losing the later fields,
   and malformed timecode is reported as an error.
+* Turning off Timeline > Frame View holds, rather than switching itself back
+  on at the next layout, which also kept a timeline zoom from being applied.
 * Closing a review prompts to save after a change to the files or to the
   color and image display, such as adding or removing a LUT.
 
