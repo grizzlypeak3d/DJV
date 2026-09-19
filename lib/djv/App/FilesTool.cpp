@@ -56,8 +56,11 @@ namespace djv
             // first, then the keys.
             std::vector<std::string> mediaReferenceItems(const models::FilesModelItem& item)
             {
-                std::vector<std::string> out = { "As Authored" };
-                out.insert(out.end(), item.mediaReferenceKeys.begin(), item.mediaReferenceKeys.end());
+                std::vector<std::string> out = { models::getMediaReferenceLabel(std::string()) };
+                for (const auto& key : item.mediaReferenceKeys)
+                {
+                    out.push_back(models::getMediaReferenceLabel(key));
+                }
                 return out;
             }
 

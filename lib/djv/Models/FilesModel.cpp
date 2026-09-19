@@ -3,6 +3,8 @@
 
 #include <djv/Models/FilesModel.h>
 
+#include <opentimelineio/clip.h>
+
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Math.h>
 
@@ -893,6 +895,22 @@ namespace djv
             for (const auto& f : p.files->get())
             {
                 out.push_back(f->mediaReferenceKey);
+            }
+            return out;
+        }
+
+        std::string getMediaReferenceLabel(const std::string& key)
+        {
+            std::string out = key;
+            if (key.empty())
+            {
+                out = "As Authored";
+            }
+            // OTIO's name for a clip's only reference, spelled like a
+            // constant; it is the widest thing in a menu of short names.
+            else if (OTIO_NS::Clip::default_media_key == key)
+            {
+                out = "Default";
             }
             return out;
         }

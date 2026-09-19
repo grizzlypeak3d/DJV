@@ -252,7 +252,7 @@ namespace djv
                     // The empty key leaves each clip on the media reference it
                     // was authored with, which is where a timeline starts.
                     auto action = ftk::Action::create(
-                        !key.empty() ? key : "As Authored",
+                        models::getMediaReferenceLabel(key),
                         [this, value, key]
                         {
                             close();

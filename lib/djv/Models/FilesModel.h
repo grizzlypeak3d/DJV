@@ -285,5 +285,10 @@ namespace djv
         //! what they do, and are not these.
         DJV_MODELS_API std::vector<std::string> getCompareTimeLabels();
 
+        //! Get the name a media reference key is shown with: "As Authored"
+        //! for the empty key, "Default" for OTIO's default key, and the key
+        //! itself otherwise.
+        DJV_MODELS_API std::string getMediaReferenceLabel(const std::string&);
+
     }
 }
