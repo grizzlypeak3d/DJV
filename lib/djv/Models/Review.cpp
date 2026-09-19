@@ -236,6 +236,10 @@ namespace djv
                 json["audioPathAbsolute"] = in.audioPathAbsolute;
             }
             json["videoLayer"] = in.videoLayer;
+            if (!in.mediaReferenceKey.empty())
+            {
+                json["mediaReferenceKey"] = in.mediaReferenceKey;
+            }
             if (in.speed >= 0.0)
             {
                 json["speed"] = in.speed;
@@ -258,6 +262,7 @@ namespace djv
             if (json.contains("audioPath")) json.at("audioPath").get_to(out.audioPath);
             if (json.contains("audioPathAbsolute")) json.at("audioPathAbsolute").get_to(out.audioPathAbsolute);
             if (json.contains("videoLayer")) json.at("videoLayer").get_to(out.videoLayer);
+            if (json.contains("mediaReferenceKey")) json.at("mediaReferenceKey").get_to(out.mediaReferenceKey);
             if (json.contains("speed")) json.at("speed").get_to(out.speed);
             if (json.contains("currentTime")) out.currentTime = jsonToTime(json.at("currentTime"));
             if (json.contains("inOutRange")) out.inOutRange = jsonToRange(json.at("inOutRange"));

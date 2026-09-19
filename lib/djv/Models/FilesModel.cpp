@@ -6,6 +6,8 @@
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Math.h>
 
+#include <algorithm>
+
 namespace djv
 {
     namespace models
@@ -21,6 +23,7 @@ namespace djv
             std::shared_ptr<ftk::ObservableList<int> > bIndexes;
             std::shared_ptr<ftk::ObservableList<std::shared_ptr<FilesModelItem> > > active;
             std::shared_ptr<ftk::ObservableList<int> > layers;
+            std::shared_ptr<ftk::ObservableList<std::string> > mediaReferenceKeys;
             std::shared_ptr<ftk::Observable<int> > audioChannel;
             std::shared_ptr<ftk::Observable<std::shared_ptr<FilesModelItem> > > reload;
             std::shared_ptr<ftk::Observer<std::shared_ptr<FilesModelItem> > > aObserver;
@@ -45,6 +48,7 @@ namespace djv
             p.bIndexes = ftk::ObservableList<int>::create();
             p.active = ftk::ObservableList<std::shared_ptr<FilesModelItem> >::create();
             p.layers = ftk::ObservableList<int>::create();
+            p.mediaReferenceKeys = ftk::ObservableList<std::string>::create();
             p.audioChannel = ftk::Observable<int>::create(-1);
             // Followed from the "A" file itself rather than set alongside it,
             // since every way of changing the "A" file has to carry it along.
@@ -169,6 +173,7 @@ namespace djv
 
             p.active->setIfChanged(_getActive());
             p.layers->setIfChanged(_getLayers());
+            p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
         }
 
         void FilesModel::add(const std::vector<std::shared_ptr<FilesModelItem> >& items)
@@ -188,6 +193,7 @@ namespace djv
 
             p.active->setIfChanged(_getActive());
             p.layers->setIfChanged(_getLayers());
+            p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
         }
 
         void FilesModel::close()
@@ -218,6 +224,7 @@ namespace djv
                 p.aIndex->setIfChanged(_getIndex(p.a->get()));
                 p.bIndexes->setIfChanged(_getBIndexes());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -258,6 +265,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
 
                 if (files.size() <= 1)
                 {
@@ -282,6 +290,7 @@ namespace djv
 
             p.active->setIfChanged(_getActive());
             p.layers->setIfChanged(_getLayers());
+            p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
         }
 
         void FilesModel::setA(int index)
@@ -295,6 +304,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -336,6 +346,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -359,6 +370,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -373,6 +385,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -388,6 +401,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -407,6 +421,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -426,6 +441,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -442,6 +458,7 @@ namespace djv
 
             p.active->setIfChanged(_getActive());
             p.layers->setIfChanged(_getLayers());
+            p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
         }
 
         void FilesModel::lastB()
@@ -457,6 +474,7 @@ namespace djv
 
             p.active->setIfChanged(_getActive());
             p.layers->setIfChanged(_getLayers());
+            p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
         }
 
         void FilesModel::nextB()
@@ -483,6 +501,7 @@ namespace djv
 
             p.active->setIfChanged(_getActive());
             p.layers->setIfChanged(_getLayers());
+            p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
         }
 
         void FilesModel::prevB()
@@ -509,6 +528,7 @@ namespace djv
 
             p.active->setIfChanged(_getActive());
             p.layers->setIfChanged(_getLayers());
+            p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
         }
 
         std::shared_ptr<ftk::IObservableList<int> > FilesModel::observeLayers() const
@@ -575,6 +595,10 @@ namespace djv
             // are not known until the file has been opened, which is after
             // the item became the "A" one.
             p.a->setAlways(p.a->get());
+
+            // Opening a file can drop a media reference key it turns out not
+            // to use, which came from a review or a playlist.
+            p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
         }
 
         std::shared_ptr<ftk::IObservable<std::shared_ptr<FilesModelItem> > > FilesModel::observeReload() const
@@ -594,6 +618,56 @@ namespace djv
                 {
                     file->videoLayer = layer;
                     p.layers->setIfChanged(_getLayers());
+                    p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
+                }
+            }
+        }
+
+        std::shared_ptr<ftk::IObservableList<std::string> > FilesModel::observeMediaReferenceKeys() const
+        {
+            return _p->mediaReferenceKeys;
+        }
+
+        void FilesModel::setMediaReferenceKey(
+            const std::shared_ptr<FilesModelItem>& item,
+            const std::string& key)
+        {
+            FTK_P();
+            const int index = _getIndex(item);
+            if (index != -1)
+            {
+                const auto& file = p.files->getItem(index);
+                if (key != file->mediaReferenceKey &&
+                    (key.empty() ||
+                     std::find(
+                         file->mediaReferenceKeys.begin(),
+                         file->mediaReferenceKeys.end(),
+                         key) != file->mediaReferenceKeys.end()))
+                {
+                    file->mediaReferenceKey = key;
+                    p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
+                }
+            }
+        }
+
+        void FilesModel::nextMediaReferenceKey()
+        {
+            FTK_P();
+            const int index = _getIndex(p.a->get());
+            if (index != -1)
+            {
+                const auto& file = p.files->getItem(index);
+                const auto& keys = file->mediaReferenceKeys;
+                if (!keys.empty())
+                {
+                    // Starting from the one in use; from the authored
+                    // references, which are not in the list, that is the
+                    // first key.
+                    const auto i = std::find(keys.begin(), keys.end(), file->mediaReferenceKey);
+                    const size_t next = i != keys.end() ?
+                        ((i - keys.begin()) + 1) % keys.size() :
+                        0;
+                    setMediaReferenceKey(file, keys[next]);
                 }
             }
         }
@@ -612,6 +686,7 @@ namespace djv
                 }
                 item->videoLayer = layer;
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -629,6 +704,7 @@ namespace djv
                 }
                 item->videoLayer = std::max(layer, 0);
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -727,6 +803,7 @@ namespace djv
 
                 p.active->setIfChanged(_getActive());
                 p.layers->setIfChanged(_getLayers());
+                p.mediaReferenceKeys->setIfChanged(_getMediaReferenceKeys());
             }
         }
 
@@ -805,6 +882,17 @@ namespace djv
             for (const auto& f : p.files->get())
             {
                 out.push_back(f->videoLayer);
+            }
+            return out;
+        }
+
+        std::vector<std::string> FilesModel::_getMediaReferenceKeys() const
+        {
+            FTK_P();
+            std::vector<std::string> out;
+            for (const auto& f : p.files->get())
+            {
+                out.push_back(f->mediaReferenceKey);
             }
             return out;
         }

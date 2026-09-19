@@ -7,7 +7,6 @@
 #include <djv/App/FileActions.h>
 #include <djv/Models/RecentFilesModel.h>
 
-#include <tlRender/Timeline/Player.h>
 #include <tlRender/Timeline/Util.h>
 #include <tlRender/IO/System.h>
 
@@ -28,7 +27,6 @@ namespace djv
             // The first is empty, for leaving the clips as authored.
             std::vector<std::string> mediaReferenceKeys;
             std::map<std::string, std::shared_ptr<ftk::Menu> > menus;
-            std::shared_ptr<tl::Player> player;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
@@ -36,8 +34,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
             std::shared_ptr<ftk::ListObserver<ftk::Path> > recentObserver;
             std::shared_ptr<ftk::ListObserver<ftk::Path> > recentPlaylistsObserver;
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
-            std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > mediaReferenceKeysObserver;
         };
 
         void FileMenu::_init(
@@ -111,11 +108,11 @@ namespace djv
                     _layersUpdate(value);
                 });
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
-                app->observePlayer(),
-                [this](const std::shared_ptr<tl::Player>& value)
+            p.mediaReferenceKeysObserver = ftk::ListObserver<std::string>::create(
+                app->getFilesModel()->observeMediaReferenceKeys(),
+                [this](const std::vector<std::string>&)
                 {
-                    _setPlayer(value);
+                    _mediaReferenceKeyUpdate();
                 });
 
             p.recentObserver = ftk::ListObserver<ftk::Path>::create(
@@ -208,6 +205,8 @@ namespace djv
                     p.layersActions.push_back(action);
                 }
             }
+
+            _mediaReferencesUpdate(value);
         }
 
         void FileMenu::_aIndexUpdate(int value)
@@ -235,38 +234,16 @@ namespace djv
             }
         }
 
-        void FileMenu::_setPlayer(const std::shared_ptr<tl::Player>& value)
-        {
-            FTK_P();
-            p.player = value;
-
-            // The list of keys is rebuilt first, so that the observer below
-            // has actions to check when it reports the current key.
-            p.mediaReferenceKeyObserver.reset();
-            _mediaReferencesUpdate();
-            if (p.player)
-            {
-                p.mediaReferenceKeyObserver = ftk::Observer<std::string>::create(
-                    p.player->observeMediaReferenceKey(),
-                    [this](const std::string& value)
-                    {
-                        _mediaReferenceKeyUpdate(value);
-                    });
-            }
-        }
-
-        void FileMenu::_mediaReferencesUpdate()
+        void FileMenu::_mediaReferencesUpdate(const std::shared_ptr<models::FilesModelItem>& value)
         {
             FTK_P();
             p.menus["MediaReferences"]->clear();
             p.mediaReferencesActions.clear();
             p.mediaReferenceKeys.clear();
-            if (p.player)
+            if (value)
             {
-                // The keys a timeline uses are not observable, so the list is
-                // rebuilt when the player changes.
                 std::vector<std::string> keys = { std::string() };
-                for (const auto& key : p.player->getMediaReferenceKeys())
+                for (const auto& key : value->mediaReferenceKeys)
                 {
                     keys.push_back(key);
                 }
@@ -276,30 +253,34 @@ namespace djv
                     // was authored with, which is where a timeline starts.
                     auto action = ftk::Action::create(
                         !key.empty() ? key : "As Authored",
-                        [this, key]
+                        [this, value, key]
                         {
                             close();
-                            if (_p->player)
+                            if (auto app = _p->app.lock())
                             {
-                                _p->player->setMediaReferenceKey(key);
+                                app->getFilesModel()->setMediaReferenceKey(value, key);
                             }
                         });
                     p.menus["MediaReferences"]->addAction(action);
                     p.mediaReferencesActions.push_back(action);
                     p.mediaReferenceKeys.push_back(key);
                 }
-                _mediaReferenceKeyUpdate(p.player->getMediaReferenceKey());
+                _mediaReferenceKeyUpdate();
             }
         }
 
-        void FileMenu::_mediaReferenceKeyUpdate(const std::string& value)
+        void FileMenu::_mediaReferenceKeyUpdate()
         {
             FTK_P();
-            for (size_t i = 0; i < p.mediaReferencesActions.size(); ++i)
+            if (auto app = p.app.lock())
             {
-                p.menus["MediaReferences"]->setChecked(
-                    p.mediaReferencesActions[i],
-                    p.mediaReferenceKeys[i] == value);
+                const auto a = app->getFilesModel()->getA();
+                for (size_t i = 0; i < p.mediaReferencesActions.size(); ++i)
+                {
+                    p.menus["MediaReferences"]->setChecked(
+                        p.mediaReferencesActions[i],
+                        a && p.mediaReferenceKeys[i] == a->mediaReferenceKey);
+                }
             }
         }
 

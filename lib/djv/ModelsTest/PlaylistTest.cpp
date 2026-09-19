@@ -66,6 +66,7 @@ namespace djv
             movie->audioPath = ftk::Path(ftk::fromFileSystem(ftk::toFileSystem(mediaDir) /
                 "audio.wav"));
             movie->videoLayer = 2;
+            movie->mediaReferenceKey = "Proxy";
             movie->speed = 23.976;
             movie->currentTime = OTIO_NS::RationalTime(15.0, 24.0);
             movie->inOutRange = OTIO_NS::TimeRange(
@@ -108,6 +109,7 @@ namespace djv
                 normalize(movie->audioPath.getFileName(true)) ==
                 normalize(result.items[0]->audioPath.getFileName(true)));
             FTK_CHECK(2 == result.items[0]->videoLayer);
+            FTK_CHECK("Proxy" == result.items[0]->mediaReferenceKey);
             FTK_CHECK(23.976 == result.items[0]->speed);
             FTK_CHECK(movie->currentTime == result.items[0]->currentTime);
             FTK_CHECK(movie->inOutRange == result.items[0]->inOutRange);

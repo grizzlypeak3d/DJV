@@ -31,6 +31,9 @@ Changes:
   when there are no color settings yet.
 * The Color/OCIO and Color/LUT commands take the configuration, color
   spaces, and LUT file, for scripts that set up the color.
+* The Files tool can switch a file's media reference, and each file keeps
+  its own, so a comparison can put a proxy against the full resolution
+  version. The choice is saved with reviews and playlists.
 * The view's color buffer defaults to RGBA F16, at half the memory of F32.
   Exports are unaffected and always render at the highest precision available.
 * Library updates:

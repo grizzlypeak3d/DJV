@@ -48,8 +48,25 @@ namespace djv
                 std::shared_ptr<ui::FileThumbnail> thumbnail;
                 std::shared_ptr<ftk::ToolButton> bButton;
                 std::shared_ptr<ftk::ComboBox> layerComboBox;
+                std::shared_ptr<ftk::ComboBox> mediaReferenceComboBox;
                 std::shared_ptr<ftk::ToolButton> rangeButton;
             };
+
+            // The media reference combo box's items: the authored references
+            // first, then the keys.
+            std::vector<std::string> mediaReferenceItems(const models::FilesModelItem& item)
+            {
+                std::vector<std::string> out = { "As Authored" };
+                out.insert(out.end(), item.mediaReferenceKeys.begin(), item.mediaReferenceKeys.end());
+                return out;
+            }
+
+            int mediaReferenceIndex(const models::FilesModelItem& item)
+            {
+                const auto& keys = item.mediaReferenceKeys;
+                const auto i = std::find(keys.begin(), keys.end(), item.mediaReferenceKey);
+                return i != keys.end() ? static_cast<int>(i - keys.begin()) + 1 : 0;
+            }
         }
 
         struct FilesTool::Private
@@ -92,6 +109,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > mediaReferenceKeysObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
         };
@@ -337,6 +355,13 @@ namespace djv
                 [this](const std::vector<int>& value)
                 {
                     _layersUpdate(value);
+                });
+
+            p.mediaReferenceKeysObserver = ftk::ListObserver<std::string>::create(
+                app->getFilesModel()->observeMediaReferenceKeys(),
+                [this](const std::vector<std::string>&)
+                {
+                    _mediaReferenceKeysUpdate();
                 });
 
             p.compareObserver = ftk::Observer<tl::CompareOptions>::create(
@@ -592,6 +617,29 @@ namespace djv
                                 }
                             });
 
+                        // For an OTIO timeline whose clips carry several
+                        // versions of their media, e.g. "Full" and "Proxy".
+                        // The keys are known once the file has been opened.
+                        widget.mediaReferenceComboBox = ftk::ComboBox::create(context, controlsLayout);
+                        widget.mediaReferenceComboBox->setItems(mediaReferenceItems(*item));
+                        widget.mediaReferenceComboBox->setCurrentIndex(mediaReferenceIndex(*item));
+                        widget.mediaReferenceComboBox->setVAlign(ftk::VAlign::Center);
+                        widget.mediaReferenceComboBox->setTooltip("Set the media reference.");
+                        widget.mediaReferenceComboBox->setElide(12, ftk::ElideMode::Right);
+                        widget.mediaReferenceComboBox->setVisible(!item->mediaReferenceKeys.empty());
+                        widget.mediaReferenceComboBox->setIndexCallback(
+                            [appWeak, item](int value)
+                            {
+                                if (auto app = appWeak.lock())
+                                {
+                                    app->getFilesModel()->setMediaReferenceKey(
+                                        item,
+                                        value > 0 && value <= static_cast<int>(item->mediaReferenceKeys.size()) ?
+                                            item->mediaReferenceKeys[value - 1] :
+                                            std::string());
+                                }
+                            });
+
                         // Only an image sequence has a frame range to state.
                         // The range is what the sequence is meant to cover,
                         // which need not be what is on disk yet. It is set
@@ -672,6 +720,9 @@ namespace djv
                             ftk::setScreenshotTag(
                                 widget.rangeButton,
                                 "Files.FrameRange");
+                            ftk::setScreenshotTag(
+                                widget.mediaReferenceComboBox,
+                                "Files.MediaReference");
                         }
                         ++row;
                     }
@@ -824,6 +875,19 @@ namespace djv
             for (size_t i = 0; i < value.size() && i < p.widgets.size(); ++i)
             {
                 p.widgets[i].layerComboBox->setCurrentIndex(value[i]);
+            }
+        }
+
+        void FilesTool::_mediaReferenceKeysUpdate()
+        {
+            FTK_P();
+            for (auto& widget : p.widgets)
+            {
+                if (widget.mediaReferenceComboBox)
+                {
+                    widget.mediaReferenceComboBox->setCurrentIndex(
+                        mediaReferenceIndex(*widget.item));
+                }
             }
         }
 

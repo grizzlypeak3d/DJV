@@ -204,6 +204,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesModifiedObserver;
             std::shared_ptr<ftk::Observer<int> > aIndexModifiedObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersModifiedObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > mediaReferenceKeysModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioLogObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutLogObserver;
@@ -229,6 +230,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > reloadObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > activeObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersObserver;
+            std::shared_ptr<ftk::ListObserver<std::string> > mediaReferenceKeysObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
             std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosZoomObserver;
             std::shared_ptr<ftk::Observer<bool> > viewFramedObserver;
@@ -1125,6 +1127,7 @@ namespace djv
                     item->audioPath = ftk::Path(ftk::fromFileSystem(audio), pathOptions);
                 }
                 item->videoLayer = static_cast<size_t>(std::max(0, rf.videoLayer));
+                item->mediaReferenceKey = rf.mediaReferenceKey;
                 item->speed = rf.speed;
                 item->currentTime = rf.currentTime;
                 item->inOutRange = rf.inOutRange;
@@ -1347,6 +1350,7 @@ namespace djv
                 rf.audioPath = models::reviewRelativePath(file->audioPath.get(), base);
                 rf.audioPathAbsolute = models::reviewGenericPath(file->audioPath.get());
                 rf.videoLayer = static_cast<int>(file->videoLayer);
+                rf.mediaReferenceKey = file->mediaReferenceKey;
                 rf.speed = file->speed;
                 rf.currentTime = file->currentTime;
                 rf.inOutRange = file->inOutRange;
@@ -2409,6 +2413,8 @@ namespace djv
                     range.duration().value(),
                     range.duration().rate() };
                 j["videoLayer"] = player->getVideoLayer();
+                j["mediaReferenceKey"] = player->getMediaReferenceKey();
+                j["compareMediaReferenceKeys"] = player->getCompareMediaReferenceKeys();
                 j["audioOffset"] = player->getAudioOffset();
                 out["player"] = j;
             }
@@ -2902,6 +2908,13 @@ namespace djv
                     _markModified();
                 },
                 ftk::ObserverAction::Suppress);
+            p.mediaReferenceKeysModifiedObserver = ftk::ListObserver<std::string>::create(
+                p.filesModel->observeMediaReferenceKeys(),
+                [this](const std::vector<std::string>&)
+                {
+                    _markModified();
+                },
+                ftk::ObserverAction::Suppress);
             p.compareTimeModifiedObserver = ftk::Observer<tl::CompareTime>::create(
                 p.filesModel->observeCompareTime(),
                 [this](tl::CompareTime)
@@ -3008,6 +3021,12 @@ namespace djv
                 [this](const std::vector<int>& value)
                 {
                     _layersUpdate(value);
+                });
+            p.mediaReferenceKeysObserver = ftk::ListObserver<std::string>::create(
+                p.filesModel->observeMediaReferenceKeys(),
+                [this](const std::vector<std::string>& value)
+                {
+                    _mediaReferenceKeysUpdate(value);
                 });
             p.compareTimeObserver = ftk::Observer<tl::CompareTime>::create(
                 p.filesModel->observeCompareTime(),
@@ -3473,6 +3492,23 @@ namespace djv
                 {
                     item->videoLayer = 0;
                 }
+                item->mediaReferenceKeys = timeline->getMediaReferenceKeys();
+                // Only a timeline with a choice to make has keys worth
+                // listing: one whose clips all use the one reference lists
+                // that reference's key, which is no choice at all.
+                if (item->mediaReferenceKeys.size() < 2)
+                {
+                    item->mediaReferenceKeys.clear();
+                }
+                // A key from a review or a playlist the file no longer uses.
+                if (!item->mediaReferenceKey.empty() &&
+                    std::find(
+                        item->mediaReferenceKeys.begin(),
+                        item->mediaReferenceKeys.end(),
+                        item->mediaReferenceKey) == item->mediaReferenceKeys.end())
+                {
+                    item->mediaReferenceKey.clear();
+                }
                 // The item became the current file before it was opened, so
                 // whatever was shown of it was shown without these. Say so
                 // once the caller is done: from here is inside the update
@@ -3753,6 +3789,7 @@ namespace djv
             _colorModelUpdate();
 
             _layersUpdate(p.filesModel->observeLayers()->get());
+            _mediaReferenceKeysUpdate(p.filesModel->observeMediaReferenceKeys()->get());
             _audioUpdate();
 
             // Opening a timeline above filled in what its item holds -- the
@@ -3818,6 +3855,36 @@ namespace djv
                 }
                 player->setVideoLayer(videoLayer);
                 player->setCompareVideoLayers(compareVideoLayers);
+            }
+        }
+
+        void App::_mediaReferenceKeysUpdate(const std::vector<std::string>& value)
+        {
+            FTK_P();
+            if (auto player = p.player->get())
+            {
+                // The same way as the layers: the "A" file's key for the
+                // player, and each "B" file's own for its comparison.
+                std::string key;
+                std::vector<std::string> compareKeys;
+                if (value.size() == p.files.size() && !p.activeFiles.empty())
+                {
+                    auto i = std::find(p.files.begin(), p.files.end(), p.activeFiles.front());
+                    if (i != p.files.end())
+                    {
+                        key = value[i - p.files.begin()];
+                    }
+                    for (size_t j = 1; j < p.activeFiles.size(); ++j)
+                    {
+                        i = std::find(p.files.begin(), p.files.end(), p.activeFiles[j]);
+                        if (i != p.files.end())
+                        {
+                            compareKeys.push_back(value[i - p.files.begin()]);
+                        }
+                    }
+                }
+                player->setMediaReferenceKey(key);
+                player->setCompareMediaReferenceKeys(compareKeys);
             }
         }
 

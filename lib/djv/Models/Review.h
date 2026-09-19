@@ -95,6 +95,8 @@ namespace djv
             std::string audioPath;
             std::string audioPathAbsolute;
             int         videoLayer = 0;
+            //! The media reference key; empty for the authored references.
+            std::string mediaReferenceKey;
             double      speed = -1.0;
             std::optional<OTIO_NS::RationalTime> currentTime;
             std::optional<OTIO_NS::TimeRange>    inOutRange;

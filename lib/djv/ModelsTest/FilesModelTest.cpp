@@ -51,6 +51,7 @@ namespace djv
             _files();
             _navigation();
             _audioChannel();
+            _mediaReferences();
             _compare();
             _tileCompare();
             _reviewRestore();
@@ -230,6 +231,49 @@ namespace djv
             FTK_CHECK(-1 == channel);
             model->add(makeItem("file1.mov"));
             FTK_CHECK(-1 == channel);
+        }
+
+        void FilesModelTest::_mediaReferences()
+        {
+            auto settings = createTestSettings(_context);
+            auto model = models::FilesModel::create(settings);
+
+            std::vector<std::string> keys;
+            auto keysObserver = ftk::ListObserver<std::string>::create(
+                model->observeMediaReferenceKeys(),
+                [&keys](const std::vector<std::string>& value) { keys = value; });
+
+            // Each file keeps its own key, as authored to begin with.
+            auto item0 = makeItem("shot.otio");
+            item0->mediaReferenceKeys = { "Full", "Proxy" };
+            auto item1 = makeItem("shot.otioz");
+            item1->mediaReferenceKeys = { "Full", "Proxy" };
+            model->add(item0);
+            model->add(item1);
+            FTK_CHECK(std::vector<std::string>({ "", "" }) == keys);
+
+            model->setMediaReferenceKey(item0, "Proxy");
+            FTK_CHECK("Proxy" == item0->mediaReferenceKey);
+            FTK_CHECK(std::vector<std::string>({ "Proxy", "" }) == keys);
+
+            // A key the file does not use is ignored.
+            model->setMediaReferenceKey(item1, "Half");
+            FTK_CHECK(item1->mediaReferenceKey.empty());
+
+            // The cycle is the "A" file's, and goes from the authored
+            // references to the first key and around.
+            model->setA(1);
+            model->nextMediaReferenceKey();
+            FTK_CHECK("Full" == item1->mediaReferenceKey);
+            model->nextMediaReferenceKey();
+            FTK_CHECK("Proxy" == item1->mediaReferenceKey);
+            model->nextMediaReferenceKey();
+            FTK_CHECK("Full" == item1->mediaReferenceKey);
+            FTK_CHECK("Proxy" == item0->mediaReferenceKey);
+
+            // Back to the authored references.
+            model->setMediaReferenceKey(item1, "");
+            FTK_CHECK(std::vector<std::string>({ "Proxy", "" }) == keys);
         }
 
         void FilesModelTest::_compare()

@@ -55,9 +55,8 @@ namespace djv
             void _layersUpdate(const std::vector<int>&);
             void _recentUpdate(const std::vector<ftk::Path>&);
             void _recentPlaylistsUpdate(const std::vector<ftk::Path>&);
-            void _setPlayer(const std::shared_ptr<tl::Player>&);
-            void _mediaReferencesUpdate();
-            void _mediaReferenceKeyUpdate(const std::string&);
+            void _mediaReferencesUpdate(const std::shared_ptr<models::FilesModelItem>&);
+            void _mediaReferenceKeyUpdate();
 
             FTK_PRIVATE();
         };

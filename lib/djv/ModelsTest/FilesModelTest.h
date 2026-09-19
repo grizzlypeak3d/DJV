@@ -24,6 +24,7 @@ namespace djv
             void _files();
             void _navigation();
             void _audioChannel();
+            void _mediaReferences();
             void _compare();
             void _tileCompare();
             void _reviewRestore();

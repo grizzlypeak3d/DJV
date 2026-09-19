@@ -220,6 +220,10 @@ namespace djv
                 {
                     djv["videoLayer"] = static_cast<int64_t>(item->videoLayer);
                 }
+                if (!item->mediaReferenceKey.empty())
+                {
+                    djv["mediaReferenceKey"] = item->mediaReferenceKey;
+                }
                 if (item->speed > 0.0)
                 {
                     djv["speed"] = item->speed;
@@ -377,6 +381,8 @@ namespace djv
                         }
                         item->videoLayer = static_cast<size_t>(
                             getMeta(djvC, "videoLayer", int64_t(0)));
+                        item->mediaReferenceKey = getMeta(
+                            djvC, "mediaReferenceKey", std::string());
                         item->speed = getMetaDouble(djvC, "speed", -1.0);
                         const auto i = djvC.find("currentTime");
                         if (i != djvC.end() &&

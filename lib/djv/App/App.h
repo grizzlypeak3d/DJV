@@ -333,6 +333,7 @@ namespace djv
             void _reload(bool restructured);
             void _reloadUpdate(const std::shared_ptr<models::FilesModelItem>&);
             void _layersUpdate(const std::vector<int>&);
+            void _mediaReferenceKeysUpdate(const std::vector<std::string>&);
             void _audioUpdate();
 
             void _reviewFileDialog(

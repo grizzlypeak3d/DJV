@@ -89,10 +89,21 @@ namespace djv
                 OTIO_NS::RationalTime(48.0, 24.0));
             review.markers.push_back(span);
 
+            // A file on one of several media references.
+            models::ReviewFile file;
+            file.id = "f0";
+            file.path = "shot.otio";
+            file.videoLayer = 1;
+            file.mediaReferenceKey = "Proxy";
+            review.files.push_back(file);
+
             const nlohmann::json json = review;
             const auto out = json.get<models::Review>();
 
             FTK_CHECK(out.unreadSections.empty());
+            FTK_CHECK(1 == out.files.size());
+            FTK_CHECK(1 == out.files[0].videoLayer);
+            FTK_CHECK("Proxy" == out.files[0].mediaReferenceKey);
             FTK_CHECK(2 == out.markers.size());
             FTK_CHECK(marker == out.markers[0]);
             FTK_CHECK(span == out.markers[1]);

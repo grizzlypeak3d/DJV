@@ -41,6 +41,8 @@ namespace djv
                 .def_rw("audioPath", &FilesModelItem::audioPath)
                 .def_rw("videoLayers", &FilesModelItem::videoLayers)
                 .def_rw("videoLayer", &FilesModelItem::videoLayer)
+                .def_rw("mediaReferenceKeys", &FilesModelItem::mediaReferenceKeys)
+                .def_rw("mediaReferenceKey", &FilesModelItem::mediaReferenceKey)
                 .def_rw("audioChannel", &FilesModelItem::audioChannel)
                 .def_rw("speed", &FilesModelItem::speed)
                 .def_rw("currentTime", &FilesModelItem::currentTime)
@@ -97,6 +99,9 @@ namespace djv
 
                 .def_prop_ro("observeLayers", &FilesModel::observeLayers)
                 .def("setLayer", &FilesModel::setLayer, nb::arg("item"), nb::arg("layer"))
+                .def_prop_ro("observeMediaReferenceKeys", &FilesModel::observeMediaReferenceKeys)
+                .def("setMediaReferenceKey", &FilesModel::setMediaReferenceKey, nb::arg("item"), nb::arg("key"))
+                .def("nextMediaReferenceKey", &FilesModel::nextMediaReferenceKey)
                 .def("setFrames", &FilesModel::setFrames, nb::arg("item"), nb::arg("range"))
                 .def_prop_ro("observeReload", &FilesModel::observeReload)
                 .def("refresh", &FilesModel::refresh)

@@ -396,13 +396,13 @@ namespace djv
                 // resolution version of the same media). An empty key leaves
                 // each clip on the media reference it was authored with.
                 const std::string key = step.at("mediaReference").get<std::string>();
-                if (auto player = app->observePlayer()->get())
+                if (auto a = app->getFilesModel()->getA())
                 {
-                    const auto keys = player->getMediaReferenceKeys();
+                    const auto& keys = a->mediaReferenceKeys;
                     if (key.empty() ||
                         std::find(keys.begin(), keys.end(), key) != keys.end())
                     {
-                        player->setMediaReferenceKey(key);
+                        app->getFilesModel()->setMediaReferenceKey(a, key);
                     }
                     else
                     {

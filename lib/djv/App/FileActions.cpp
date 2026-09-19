@@ -6,7 +6,6 @@
 #include <djv/App/App.h>
 #include <djv/Models/FilesModel.h>
 
-#include <tlRender/Timeline/Player.h>
 
 #include <algorithm>
 
@@ -18,7 +17,6 @@ namespace djv
         {
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
-            std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
         };
 
         void FileActions::_init(
@@ -154,25 +152,7 @@ namespace djv
                 {
                     if (auto app = appWeak.lock())
                     {
-                        if (auto player = app->observePlayer()->get())
-                        {
-                            // Cycle through the keys used by the timeline,
-                            // starting from the one in use. An unset key, which
-                            // leaves the clips as they were authored, is not
-                            // part of the cycle; it can be chosen from the menu.
-                            const auto keys = player->getMediaReferenceKeys();
-                            if (!keys.empty())
-                            {
-                                const auto i = std::find(
-                                    keys.begin(),
-                                    keys.end(),
-                                    player->getMediaReferenceKey());
-                                const size_t next = i != keys.end() ?
-                                    ((i - keys.begin()) + 1) % keys.size() :
-                                    0;
-                                player->setMediaReferenceKey(keys[next]);
-                            }
-                        }
+                        app->getFilesModel()->nextMediaReferenceKey();
                     }
                 });
 
@@ -317,17 +297,11 @@ namespace djv
                 {
                     _actions["NextLayer"]->setEnabled(value ? value->videoLayers.size() > 1 : false);
                     _actions["PrevLayer"]->setEnabled(value ? value->videoLayers.size() > 1 : false);
+                    // The keys are only listed when there is a choice.
+                    _actions["NextMediaReference"]->setEnabled(
+                        value ? !value->mediaReferenceKeys.empty() : false);
                 });
 
-            p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
-                app->observePlayer(),
-                [this](const std::shared_ptr<tl::Player>& value)
-                {
-                    // There is nothing to cycle through unless the timeline
-                    // uses more than one media reference key.
-                    _actions["NextMediaReference"]->setEnabled(
-                        value ? value->getMediaReferenceKeys().size() > 1 : false);
-                });
         }
 
         FileActions::FileActions() :

@@ -36,6 +36,16 @@ namespace djv
             std::vector<std::string> videoLayers;
             size_t                   videoLayer  = 0;
 
+            //! The media reference keys the file's clips use, from an OTIO
+            //! timeline whose clips carry several versions of their media
+            //! (e.g., "Full" and "Proxy"). Filled in when the file is opened.
+            std::vector<std::string> mediaReferenceKeys;
+
+            //! The media reference key the file is read with. Empty, the
+            //! default, leaves each clip on the reference it was authored
+            //! with.
+            std::string              mediaReferenceKey;
+
             //! The audio channel to play, or -1 for all of the channels.
             int                      audioChannel = -1;
 
@@ -190,6 +200,20 @@ namespace djv
             //! Set a layer.
             DJV_MODELS_API void setLayer(const std::shared_ptr<FilesModelItem>&, int layer);
 
+            //! Observe the media reference key of each file, in order.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservableList<std::string> > observeMediaReferenceKeys() const;
+
+            //! Set a file's media reference key; empty for the references the
+            //! clips were authored with. A key the file does not use is
+            //! ignored.
+            DJV_MODELS_API void setMediaReferenceKey(
+                const std::shared_ptr<FilesModelItem>&,
+                const std::string&);
+
+            //! Set the "A" file to its next media reference key. The empty
+            //! key is not part of the cycle; it is chosen from the menu.
+            DJV_MODELS_API void nextMediaReferenceKey();
+
             //! Set the frame range of an image sequence. This is the range the
             //! sequence is meant to cover, which need not be the frames that
             //! are on disk: a render in progress is watched over the range it
@@ -250,6 +274,7 @@ namespace djv
             std::vector<int> _getBIndexes() const;
             std::vector<std::shared_ptr<FilesModelItem> > _getActive() const;
             std::vector<int> _getLayers() const;
+            std::vector<std::string> _getMediaReferenceKeys() const;
 
             FTK_PRIVATE();
         };
