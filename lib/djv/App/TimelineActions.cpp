@@ -235,6 +235,21 @@ namespace djv
                     }
                 });
 
+            // Commands without menu actions, for scripting and automation.
+            auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
+            _addCommand(
+                "Zoom",
+                "Zoom the timeline, in pixels per second, keeping the current "
+                "frame in place; e.g., { \"value\": 100 }.",
+                [mainWindowWeak](const nlohmann::json& args)
+                {
+                    const double value = args.at("value").get<double>();
+                    if (auto mainWindow = mainWindowWeak.lock())
+                    {
+                        mainWindow->getTimelineWidget()->setViewZoomAtCurrentTime(value);
+                    }
+                });
+
             // Create the actions.
             _actions["Minimize"] = ftk::Action::create(
                 "Minimize",

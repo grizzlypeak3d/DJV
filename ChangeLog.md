@@ -39,6 +39,8 @@ Changes:
   by name.
 * The view's color buffer defaults to RGBA F16, at half the memory of F32.
   Exports are unaffected and always render at the highest precision available.
+* The Timeline/Zoom command zooms the timeline around the current frame,
+  for scripts that set up a view.
 * Library updates:
     - FFmpeg 9.0.1
     - OpenAPV 1.1.1.0
