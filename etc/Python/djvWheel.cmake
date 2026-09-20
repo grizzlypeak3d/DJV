@@ -20,17 +20,3 @@ message(STATUS "Using feather-tk from ${DJV_WHEEL_FTK}")
 # feather-tk as well, since zlib is found before tlRender's package is, and
 # the feather-tk wheel's is the one to link.
 list(PREPEND CMAKE_PREFIX_PATH ${DJV_WHEEL_TLRENDER} ${DJV_WHEEL_FTK})
-
-# tlRender 0.21.2 and earlier install their binding headers under
-# include/tlRender/tlTimelinePy and the like, where nothing includes them
-# from; they are copied to where they are included from. Remove when the
-# pinned tlRender installs them there itself.
-if(NOT EXISTS "${DJV_WHEEL_TLRENDER}/include/tlRender/TimelinePy")
-    foreach(name Core IO Timeline UI)
-        set(dir "${DJV_WHEEL_TLRENDER}/include/tlRender/tl${name}Py")
-        if(EXISTS "${dir}")
-            file(COPY "${dir}/" DESTINATION "${CMAKE_BINARY_DIR}/tlrender-include/tlRender/${name}Py")
-        endif()
-    endforeach()
-    include_directories(BEFORE "${CMAKE_BINARY_DIR}/tlrender-include")
-endif()

@@ -7,8 +7,8 @@
 requires = [
     "scikit-build-core>=0.11",
     "nanobind==3.0.1",
-    "tlRender==0.21.2",
-    "feather-tk==0.13.1",
+    "tlRender==0.22.0",
+    "feather-tk==0.14.0",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -41,7 +41,7 @@ classifiers = [
     "Topic :: Multimedia :: Video :: Display",
 ]
 dependencies = [
-    "tlRender==0.21.2",
+    "tlRender==0.22.0",
 ]
 
 [project.scripts]
