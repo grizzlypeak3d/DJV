@@ -34,14 +34,28 @@ def main():
         raise SystemExit("make_stub.py: no stubgen script given")
 
     handles = []
+    searched = []
     if hasattr(os, "add_dll_directory"):
         for directory in dll_dirs:
             if os.path.isdir(directory):
                 # Kept: closing a handle takes its directory away again.
                 handles.append(os.add_dll_directory(directory))
+                searched.append(directory)
 
     stubgen, sys.argv = argv[0], argv
-    runpy.run_path(stubgen, run_name="__main__")
+    try:
+        runpy.run_path(stubgen, run_name="__main__")
+    except ImportError as e:
+        # A missing DLL on Windows says only that something could not be
+        # found, never what: the directories that were searched are the
+        # place to start, so they are printed rather than guessed at.
+        print(f"make_stub.py: {e}", file=sys.stderr)
+        for directory in searched:
+            print(f"  searched: {directory}", file=sys.stderr)
+        for directory in dll_dirs:
+            if directory not in searched:
+                print(f"  not there: {directory}", file=sys.stderr)
+        raise
 
 
 if __name__ == "__main__":
