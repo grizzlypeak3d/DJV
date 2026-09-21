@@ -87,6 +87,12 @@ Fixes:
 * Clicking a window that is not active presses the button under the pointer,
   rather than only bringing the window forward.
 * Escape leaves the menu bar when a click put the focus there.
+* Clicking a combo box or a slider shows the keyboard focus, since the
+  arrow keys then change it.
+* OpenColorIO's own messages go to the log rather than standard output, and
+  a configuration set to the OCIO environment variable with the variable
+  unset says so once rather than OpenColorIO saying it for each place that
+  reads the configuration.
 * Turning off Timeline > Frame View holds, rather than switching itself back
   on at the next layout, which also kept a timeline zoom from being applied.
 * Closing a review prompts to save after a change to the files or to the

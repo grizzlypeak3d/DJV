@@ -40,7 +40,13 @@ namespace djv
                     out = OCIO::Config::CreateFromFile("ocio://default");
                     break;
                 case tl::OCIOConfig::EnvVar:
-                    out = OCIO::Config::CreateFromEnv();
+                    // Without the variable there is no configuration to
+                    // read; OpenColorIO would answer with one that manages
+                    // nothing. See the warning below.
+                    if (tl::hasOCIOEnvVar())
+                    {
+                        out = OCIO::Config::CreateFromEnv();
+                    }
                     break;
                 case tl::OCIOConfig::File:
                     if (!options.fileName.empty())
@@ -601,6 +607,24 @@ namespace djv
             {
                 p.ocioConfig.reset();
                 p.ocioConfig = readOCIOConfig(options);
+                if (options.enabled &&
+                    tl::OCIOConfig::EnvVar == options.config &&
+                    !tl::hasOCIOEnvVar())
+                {
+                    // The setting outlives the environment it was made in:
+                    // a session started without the variable, or with it
+                    // emptied, shows the picture unmanaged and says why.
+                    if (auto logSystem = p.logSystem.lock())
+                    {
+                        logSystem->print(
+                            "djv::models::ColorModel",
+                            "The OCIO environment variable is not set; the "
+                            "picture is shown unmanaged. Choose another "
+                            "configuration in the Color tool, or set the "
+                            "variable.",
+                            ftk::LogType::Warning);
+                    }
+                }
             }
             catch (const std::exception& e)
             {

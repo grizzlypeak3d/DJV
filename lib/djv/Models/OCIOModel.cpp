@@ -321,7 +321,12 @@ namespace djv
                     p.ocioConfig = OCIO::Config::CreateFromFile("ocio://default");
                     break;
                 case tl::OCIOConfig::EnvVar:
-                    p.ocioConfig = OCIO::Config::CreateFromEnv();
+                    // Without the variable there is nothing to read; the
+                    // color model says so once.
+                    if (tl::hasOCIOEnvVar())
+                    {
+                        p.ocioConfig = OCIO::Config::CreateFromEnv();
+                    }
                     break;
                 case tl::OCIOConfig::File:
                     p.ocioConfig = OCIO::Config::CreateFromFile(options.fileName.c_str());
