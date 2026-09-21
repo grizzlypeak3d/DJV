@@ -88,7 +88,14 @@ add_custom_command(
         # in the build environment instead.
         -i ${CMAKE_INSTALL_PREFIX}/python
         -O ${DJV_PYTHON_PACKAGE_DIR}
-    DEPENDS _djv ${DJV_STUBGEN} ${PROJECT_SOURCE_DIR}/etc/Python/make_stub.py
+    # The modules this one imports, where they are built here rather
+    # than installed: they have to exist by the time it is imported.
+    DEPENDS
+        _djv
+        $<TARGET_NAME_IF_EXISTS:_tlrender>
+        $<TARGET_NAME_IF_EXISTS:_feather_tk>
+        ${DJV_STUBGEN}
+        ${PROJECT_SOURCE_DIR}/etc/Python/make_stub.py
     COMMENT "Generating the djv type stubs")
 add_custom_target(_djv_stub ALL DEPENDS ${DJV_PYTHON_STUB})
 file(TOUCH ${DJV_PYTHON_PACKAGE_DIR}/py.typed)
