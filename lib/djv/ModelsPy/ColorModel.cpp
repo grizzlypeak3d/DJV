@@ -34,10 +34,7 @@ namespace djv
         {
             using namespace models;
 
-            ftk::python::observable<tl::OCIOOptions>(m, "OCIOOptions");
-            ftk::python::observable<tl::LUTOptions>(m, "LUTOptions");
             ftk::python::observable<std::vector<std::string> >(m, "StringVector");
-            ftk::python::observable<ftk::ImageTags>(m, "ImageTags");
 
             nb::class_<ColorModel>(m, "ColorModel")
                 .def(

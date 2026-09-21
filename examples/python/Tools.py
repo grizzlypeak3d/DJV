@@ -146,7 +146,7 @@ class AudioTool(IToolWidget):
         self._devicesObserver = djv.models.AudioDeviceIDListObserver(
             audioModel.observeDevices,
             lambda devices: selfWeak()._devicesUpdate(devices))
-        self._deviceObserver = djv.models.AudioDeviceIDObserver(
+        self._deviceObserver = tl.AudioDeviceIDObserver(
             audioModel.observeDevice,
             lambda device: selfWeak()._deviceUpdate(device))
         self._volumeObserver = ftk.FloatObserver(
@@ -322,10 +322,10 @@ class FilesTool(IToolWidget):
         self._layersObserver = ftk.IntListObserver(
             app.getFilesModel().observeLayers,
             lambda layers: selfWeak()._layersUpdate(layers))
-        self._compareObserver = djv.models.CompareOptionsObserver(
+        self._compareObserver = tl.CompareOptionsObserver(
             app.getFilesModel().observeCompareOptions,
             lambda value: selfWeak()._compareUpdate(value))
-        self._compareTimeObserver = djv.models.CompareTimeObserver(
+        self._compareTimeObserver = tl.CompareTimeObserver(
             app.getFilesModel().observeCompareTime,
             lambda value: selfWeak()._compareTimeUpdate(value))
 

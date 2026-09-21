@@ -115,10 +115,10 @@ class Actions(IActions.IActions):
         self._shortcutsUpdate(self._settingsModel.shortcuts)
 
         selfWeak = weakref.ref(self)
-        self._compareObserver = djv.models.CompareOptionsObserver(
+        self._compareObserver = tl.CompareOptionsObserver(
             app.getFilesModel().observeCompareOptions,
             lambda value: selfWeak()._compareUpdate(value))
-        self._compareTimeObserver = djv.models.CompareTimeObserver(
+        self._compareTimeObserver = tl.CompareTimeObserver(
             app.getFilesModel().observeCompareTime,
             lambda value: selfWeak()._compareTimeUpdate(value))
         self._filesObserver = djv.models.FilesModelItemListObserver(

@@ -211,17 +211,17 @@ class Actions(IActions.IActions):
             mainWindow.getViewport().observeFrameView,
             lambda value: setattr(
                 selfWeak().actions["Frame"], "checked", value))
-        self._displayOptionsObserver = djv.models.DisplayOptionsObserver(
+        self._displayOptionsObserver = tl.DisplayOptionsObserver(
             app.getViewportModel().observeDisplayOptions,
             lambda value: selfWeak()._displayOptionsUpdate(value))
         self._aspectRatioObserver = djv.models.AspectRatioOptionsObserver(
             app.getViewportModel().observeAspectRatioOptions,
             lambda value: selfWeak()._aspectRatioUpdate(value))
-        self._bgOptionsObserver = djv.models.BackgroundOptionsObserver(
+        self._bgOptionsObserver = tl.BackgroundOptionsObserver(
             app.getViewportModel().observeBackgroundOptions,
             lambda value: setattr(
                 selfWeak().actions["Outline"], "checked", value.outline.enabled))
-        self._fgOptionsObserver = djv.models.ForegroundOptionsObserver(
+        self._fgOptionsObserver = tl.ForegroundOptionsObserver(
             app.getViewportModel().observeForegroundOptions,
             lambda value: selfWeak()._fgOptionsUpdate(value))
         self._hudObserver = djv.models.HUDOptionsObserver(

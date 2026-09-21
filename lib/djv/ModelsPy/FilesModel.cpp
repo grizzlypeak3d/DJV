@@ -54,8 +54,6 @@ namespace djv
 
             ftk::python::observable<std::shared_ptr<FilesModelItem> >(m, "FilesModelItem");
             ftk::python::observableList<std::shared_ptr<FilesModelItem> >(m, "FilesModelItem");
-            ftk::python::observable<tl::CompareOptions>(m, "CompareOptions");
-            ftk::python::observable<tl::CompareTime>(m, "CompareTime");
 
             nb::class_<FilesModel>(m, "FilesModel")
                 .def(

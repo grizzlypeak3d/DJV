@@ -208,7 +208,7 @@ class MainWindow(ftk.MainWindow):
             app.observePlayer(),
             lambda player: selfWeak()._playerUpdate(player))
         appWeak = weakref.ref(app)
-        self._compareObserver = djv.models.CompareOptionsObserver(
+        self._compareObserver = tl.CompareOptionsObserver(
             self._viewport.observeCompareOptions,
             lambda value: setattr(
                 appWeak().getFilesModel(), "compareOptions", value))
@@ -222,10 +222,10 @@ class MainWindow(ftk.MainWindow):
             self._timelineWidget.observeFrameView,
             lambda value: selfWeak()._timelineFrameViewUpdate(value))
         colorModel = app.getColorModel()
-        self._ocioObserver = djv.models.OCIOOptionsObserver(
+        self._ocioObserver = tl.OCIOOptionsObserver(
             colorModel.observeResolvedOCIOOptions,
             lambda value: selfWeak()._ocioUpdate(value))
-        self._lutObserver = djv.models.LUTOptionsObserver(
+        self._lutObserver = tl.LUTOptionsObserver(
             colorModel.observeLUTOptions,
             lambda value: selfWeak()._lutUpdate(value))
 

@@ -56,10 +56,7 @@ namespace djv
                 .def(nanobind::self != nanobind::self);
 
             ftk::python::observable<ftk::ImageOptions>(m, "ImageOptions");
-            ftk::python::observable<tl::DisplayOptions>(m, "DisplayOptions");
             ftk::python::observable<AspectRatioOptions>(m, "AspectRatioOptions");
-            ftk::python::observable<tl::BackgroundOptions>(m, "BackgroundOptions");
-            ftk::python::observable<tl::ForegroundOptions>(m, "ForegroundOptions");
             ftk::python::observable<HUDOptions>(m, "HUDOptions");
 
             nb::class_<ViewportModel>(m, "ViewportModel")

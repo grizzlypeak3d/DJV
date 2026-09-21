@@ -41,7 +41,7 @@ class ModelsTest(unittest.TestCase):
         self.assertEqual([], self.files)
 
         self.compareOptions = []
-        observer2 = djv.models.CompareOptionsObserver(
+        observer2 = tl.CompareOptionsObserver(
             model.observeCompareOptions,
             self.compareOptionsCallback)
         options = tl.CompareOptions()
@@ -70,7 +70,7 @@ class ModelsTest(unittest.TestCase):
         self.assertFalse(model.lutOptions.enabled)
 
         self.lutOptions = []
-        observer = djv.models.LUTOptionsObserver(
+        observer = tl.LUTOptionsObserver(
             model.observeLUTOptions,
             self.lutOptionsCallback)
         model.lutOptions = options
@@ -82,7 +82,7 @@ class ModelsTest(unittest.TestCase):
         self.assertFalse(model.ocioOptions.enabled)
 
         self.ocioOptions = []
-        observer2 = djv.models.OCIOOptionsObserver(
+        observer2 = tl.OCIOOptionsObserver(
             model.observeOCIOOptions,
             self.ocioOptionsCallback)
         model.ocioOptions = options
@@ -172,7 +172,7 @@ class ModelsTest(unittest.TestCase):
         options = model.backgroundOptions
         options.type = tl.Background.Checkers
         self.backgroundOptions = []
-        observer3 = djv.models.BackgroundOptionsObserver(
+        observer3 = tl.BackgroundOptionsObserver(
             model.observeBackgroundOptions,
             self.backgroundOptionsCallback)
         model.backgroundOptions = options

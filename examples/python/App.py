@@ -1114,7 +1114,7 @@ class App(ftk.App):
         self._activeObserver = djv.models.FilesModelItemListObserver(
             self._filesModel.observeActive,
             lambda files: selfWeak()._activeUpdate(files))
-        self._compareTimeObserver = djv.models.CompareTimeObserver(
+        self._compareTimeObserver = tl.CompareTimeObserver(
             self._filesModel.observeCompareTime,
             lambda value: selfWeak()._compareTimeUpdate(value))
         self._volumeObserver = ftk.FloatObserver(

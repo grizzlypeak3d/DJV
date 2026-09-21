@@ -34,8 +34,6 @@ namespace djv
         {
             using namespace models;
 
-            ftk::python::observable<tl::AudioDeviceID>(m, "AudioDeviceID");
-            ftk::python::observableList<tl::AudioDeviceID>(m, "AudioDeviceID");
 
             nb::class_<AudioModel>(m, "AudioModel")
                 .def(

@@ -46,11 +46,11 @@ class Actions(IActions.IActions):
         self._shortcutsUpdate(self._settingsModel.shortcuts)
 
         selfWeak = weakref.ref(self)
-        self._ocioObserver = djv.models.OCIOOptionsObserver(
+        self._ocioObserver = tl.OCIOOptionsObserver(
             app.getColorModel().observeOCIOOptions,
             lambda value: setattr(
                 selfWeak().actions["OCIO"], "checked", value.enabled))
-        self._lutObserver = djv.models.LUTOptionsObserver(
+        self._lutObserver = tl.LUTOptionsObserver(
             app.getColorModel().observeLUTOptions,
             lambda value: setattr(
                 selfWeak().actions["LUT"], "checked", value.enabled))
