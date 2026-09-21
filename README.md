@@ -33,10 +33,15 @@ Example of two images being compared with a horizontal layout:
 
 https://github.com/grizzlypeak3d/DJV/releases
 
-**Note:** Download packages include only a minimal set of video and audio
-codecs. To support additional codecs, point DJV at an external FFmpeg
-command (see [documentation](https://grizzlypeak3d.github.io/DJV/index.html#files))
-or build from source.
+**Note:** Download packages and the pip install include only the video and
+audio codecs that need no patent license: AV1, APV, VP8 and VP9, MPEG-2 and
+MPEG-4, MJPEG, FFV1, CineForm, UT Video, HuffYUV, MagicYUV, Dirac, PNG,
+v210, and FLAC, Opus, Vorbis, ALAC, MP3 and PCM audio. **H.264, HEVC,
+ProRes, DNxHD, DV and AAC are not among them**, so a camera movie does not
+open out of the box. To play those, either install FFmpeg yourself and point
+DJV at the external FFmpeg command
+(see [documentation](https://grizzlypeak3d.github.io/DJV/index.html#files)),
+or build from source, where the codecs are compiled in.
 
 DJV can also be installed with pip, for Python 3.12 or newer on Linux, macOS,
 and Windows:
