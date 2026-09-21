@@ -76,6 +76,17 @@ add_custom_command(
         --dll-dir $<TARGET_FILE_DIR:djvModels>
         --dll-dir $<TARGET_FILE_DIR:djvUI>
         --dll-dir $<TARGET_FILE_DIR:djvApp>
+        # tlRender's and feather-tk's libraries too: built here as
+        # sub-projects, or in their packages in a wheel build. The
+        # namespaced names are both.
+        --dll-dir $<TARGET_FILE_DIR:tlRender::tlCore>
+        --dll-dir $<TARGET_FILE_DIR:tlRender::tlGL>
+        --dll-dir $<TARGET_FILE_DIR:tlRender::tlIO>
+        --dll-dir $<TARGET_FILE_DIR:tlRender::tlTimeline>
+        --dll-dir $<TARGET_FILE_DIR:tlRender::tlUI>
+        --dll-dir $<TARGET_FILE_DIR:ftk::ftkCore>
+        --dll-dir $<TARGET_FILE_DIR:ftk::ftkGL>
+        --dll-dir $<TARGET_FILE_DIR:ftk::ftkUI>
         --dll-dir ${CMAKE_INSTALL_PREFIX}/bin
         --
         ${DJV_STUBGEN}
