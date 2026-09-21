@@ -26,6 +26,67 @@ namespace djv
 {
     namespace models
     {
+        namespace
+        {
+#if defined(TLRENDER_OCIO)
+            // The configuration the options name, or nothing when it cannot
+            // be read; the caller says what a failure means.
+            OCIO::ConstConfigRcPtr readOCIOConfig(const tl::OCIOOptions& options)
+            {
+                OCIO::ConstConfigRcPtr out;
+                switch (options.config)
+                {
+                case tl::OCIOConfig::BuiltIn:
+                    out = OCIO::Config::CreateFromFile("ocio://default");
+                    break;
+                case tl::OCIOConfig::EnvVar:
+                    out = OCIO::Config::CreateFromEnv();
+                    break;
+                case tl::OCIOConfig::File:
+                    if (!options.fileName.empty())
+                    {
+                        out = OCIO::Config::CreateFromFile(options.fileName.c_str());
+                    }
+                    break;
+                default: break;
+                }
+                return out;
+            }
+#endif // TLRENDER_OCIO
+
+            // The display and view the configuration leads with, which is
+            // what it is showing when nothing else says. Only filled in when
+            // there is nothing there: an empty display is "None" in the color
+            // tool, and that is the user's to choose.
+            void defaultDisplayView(tl::OCIOOptions& options)
+            {
+#if defined(TLRENDER_OCIO)
+                if (!options.display.empty() || !options.view.empty())
+                {
+                    return;
+                }
+                try
+                {
+                    if (auto config = readOCIOConfig(options))
+                    {
+                        const char* display = config->getDefaultDisplay();
+                        if (display && display[0])
+                        {
+                            options.display = display;
+                            const char* view = config->getDefaultView(display);
+                            options.view = view ? view : std::string();
+                        }
+                    }
+                }
+                catch (const std::exception&)
+                {
+                    // Said where the configuration is read for rendering;
+                    // here it only means there are no defaults to take.
+                }
+#endif // TLRENDER_OCIO
+            }
+        }
+
         struct ColorModel::Private
         {
             std::weak_ptr<ftk::LogSystem> logSystem;
@@ -63,6 +124,9 @@ namespace djv
             {
                 ocioOptions = getDefaultOCIOOptions();
             }
+            // Settings from a version that had "None" for the display and
+            // the view, where OCIO was on and did nothing.
+            defaultDisplayView(ocioOptions);
             p.ocioOptions = ftk::Observable<tl::OCIOOptions>::create(ocioOptions);
             _ocioConfigUpdate(ocioOptions);
             std::map<std::string, std::string> extColorSpaces;
@@ -93,6 +157,10 @@ namespace djv
                 out.enabled = true;
                 out.config = tl::OCIOConfig::EnvVar;
             }
+            // The configuration's own default display and view, so that a
+            // reset shows the picture the way the configuration says rather
+            // than leaving the display transform out.
+            defaultDisplayView(out);
             return out;
         }
 
@@ -138,10 +206,17 @@ namespace djv
             const bool configChanged =
                 value.config != p.ocioOptions->get().config ||
                 value.fileName != p.ocioOptions->get().fileName;
-            p.ocioOptions->setIfChanged(value);
+            auto options = value;
             if (configChanged)
             {
-                _ocioConfigUpdate(value);
+                // A configuration arriving without a display or a view, as
+                // from the command line, is shown the way it says to.
+                defaultDisplayView(options);
+            }
+            p.ocioOptions->setIfChanged(options);
+            if (configChanged)
+            {
+                _ocioConfigUpdate(options);
             }
             _resolvedUpdate();
         }
@@ -525,22 +600,7 @@ namespace djv
             try
             {
                 p.ocioConfig.reset();
-                switch (options.config)
-                {
-                case tl::OCIOConfig::BuiltIn:
-                    p.ocioConfig = OCIO::Config::CreateFromFile("ocio://default");
-                    break;
-                case tl::OCIOConfig::EnvVar:
-                    p.ocioConfig = OCIO::Config::CreateFromEnv();
-                    break;
-                case tl::OCIOConfig::File:
-                    if (!options.fileName.empty())
-                    {
-                        p.ocioConfig = OCIO::Config::CreateFromFile(options.fileName.c_str());
-                    }
-                    break;
-                default: break;
-                }
+                p.ocioConfig = readOCIOConfig(options);
             }
             catch (const std::exception& e)
             {

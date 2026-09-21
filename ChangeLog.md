@@ -29,6 +29,11 @@ Changes:
   defaults.
 * OCIO is turned on with the configuration in the OCIO environment variable
   when there are no color settings yet.
+* An OCIO configuration is shown through its own default display and view
+  until others are chosen, whether it arrives from the environment variable,
+  the command line, or Color > Reset Color. The display and view no longer
+  have a "None": without them OCIO does nothing, which is what the section's
+  check box is for.
 * The Color/OCIO and Color/LUT commands take the configuration, color
   spaces, and LUT file, for scripts that set up the color.
 * The Files tool can switch a file's media reference, and each file keeps

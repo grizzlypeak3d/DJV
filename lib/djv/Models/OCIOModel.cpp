@@ -179,11 +179,21 @@ namespace djv
             {
                 auto options = p.options->get();
                 options.enabled = true;
-                options.display = value > 0 ? data.displays[value] : std::string();
+                options.display = data.displays[value];
                 data = _getData(options);
-                if (data.views[data.viewIndex] != options.view)
+                if (data.views.empty() || data.views[data.viewIndex] != options.view)
                 {
+                    // The view of the display that was showing may not be
+                    // one of this display's; it shows what it leads with.
                     options.view = std::string();
+#if defined(TLRENDER_OCIO)
+                    if (p.ocioConfig)
+                    {
+                        const char* view = p.ocioConfig->getDefaultView(options.display.c_str());
+                        options.view = view ? view : std::string();
+                    }
+#endif // TLRENDER_OCIO
+                    data = _getData(options);
                 }
                 if (data.looks[data.lookIndex] != options.look)
                 {
@@ -201,7 +211,7 @@ namespace djv
             {
                 auto options = p.options->get();
                 options.enabled = true;
-                options.view = value > 0 ? data.views[value] : std::string();
+                options.view = data.views[value];
                 data = _getData(options);
                 if (data.looks[data.lookIndex] != options.look)
                 {
@@ -258,7 +268,9 @@ namespace djv
                     out.inputIndex = j - out.inputs.begin();
                 }
 
-                out.displays.push_back("None");
+                // No "None": a display and a view are what OCIO shows the
+                // picture through, and without them it does nothing at all,
+                // which is what the enabled check box is for.
                 for (int i = 0; i < p.ocioConfig->getNumDisplays(); ++i)
                 {
                     out.displays.push_back(p.ocioConfig->getDisplay(i));
@@ -269,7 +281,7 @@ namespace djv
                     out.displayIndex = j - out.displays.begin();
                 }
 
-                out.views.push_back("None");
+
                 const std::string display = options.display;
                 for (int i = 0; i < p.ocioConfig->getNumViews(display.c_str()); ++i)
                 {
