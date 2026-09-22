@@ -714,7 +714,8 @@ namespace djv
             p.presetComboBox->setHStretch(ftk::Stretch::Expanding);
             p.presetComboBox->setTooltip(
                 "What to export. The command line presets use the FFmpeg "
-                "application, with its encoders, and write video only.");
+                "application, with its encoders, and write video only: the "
+                "movie they write has no audio, whatever the file had.");
             ftk::setScreenshotTag(p.presetComboBox, "Export.MoviePreset");
 
             p.fileLabel = ftk::Label::create(context);
@@ -886,6 +887,18 @@ namespace djv
             const bool hasAudio =
                 !p.player || p.player->getIOInfo().audio.isValid();
             p.audioCodecComboBox->setEnabled(hasAudio && !presetCmd);
+            // Why it is disabled, where it is: a preset that writes no audio
+            // reads as a setting that does not apply, and a file that has no
+            // audio reads the same way (DJV #885).
+            p.audioCodecComboBox->setTooltip(
+                presetCmd ?
+                "The command line presets write video only; the exported "
+                "movie has no audio. The presets above them, which use the "
+                "encoders built in, write the audio with it." :
+                (hasAudio ?
+                    "How to encode the audio; \"Auto\" leaves it to the "
+                    "format." :
+                    "The file being exported has no audio."));
         }
 
         void MovieExportWidget::setPlayer(const std::shared_ptr<tl::Player>& value)
