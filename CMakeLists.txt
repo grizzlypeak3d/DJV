@@ -37,6 +37,7 @@ endif()
 
 # Packaging gathers the dependencies out of the install prefix, where the
 # super build put them; a build against system packages has none there.
+# The package is made either way, with or without them in it.
 set(DJV_PACKAGE_DEPS ON CACHE BOOL "Package the super build's dependencies with the install")
 set(DJV_MACOS_PACKAGE OFF CACHE BOOL "Enable packaging for macOS")
 set(DJV_WINDOWS_PACKAGE OFF CACHE BOOL "Enable packaging for Windows")
@@ -245,8 +246,10 @@ install(
 #-------------------------------------------------------------------------------
 # Packaging
 
-if(DJV_PACKAGE_DEPS)
-    include(Package)
-    include(CPack)
-    include(InstallRequiredSystemLibraries)
-endif()
+# Always: the package target is how a build is turned into an archive, and
+# a build against the system's packages wants one as much as a super build
+# does -- it holds DJV alone. DJV_PACKAGE_DEPS decides whether the super
+# build's libraries are gathered into it; see cmake/Modules/Package.cmake.
+include(Package)
+include(CPack)
+include(InstallRequiredSystemLibraries)

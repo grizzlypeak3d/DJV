@@ -1,3 +1,15 @@
+# The libraries of the super build, gathered out of the install prefix and
+# added to the package. A build against the system's packages has none of
+# them there -- DJV_PACKAGE_DEPS is off for it -- and the package then holds
+# DJV alone, which is what the system it is installed on already expects.
+# The package itself is made either way: see the packaging section of
+# CMakeLists.txt.
+macro(djv_install_dep)
+    if(DJV_PACKAGE_DEPS)
+        install(${ARGN})
+    endif()
+endmacro()
+
 set(SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
 if(Darwin STREQUAL SYSTEM_NAME)
     set(SYSTEM_NAME macos)
@@ -125,15 +137,15 @@ if(WIN32)
             ${CMAKE_INSTALL_PREFIX}/bin/usd_work.dll)
         list(APPEND INSTALL_DLLS ${MATERIALX_DLLS} ${TBB_DLLS} ${USD_DLLS})
 
-        install(
+        djv_install_dep(
             DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin/usd
             DESTINATION bin)
-        install(
+        djv_install_dep(
             DIRECTORY ${CMAKE_INSTALL_PREFIX}/plugin
             DESTINATION ".")
     endif()
     
-    install(FILES ${INSTALL_DLLS} DESTINATION bin)
+    djv_install_dep(FILES ${INSTALL_DLLS} DESTINATION bin)
 
     set(CPACK_NSIS_MUI_ICON ${PROJECT_SOURCE_DIR}/etc/Windows/DJV_Icon.ico)
     set(CPACK_NSIS_MUI_UNIICON ${PROJECT_SOURCE_DIR}/etc/Windows/DJV_Icon.ico)
@@ -387,17 +399,17 @@ elseif(APPLE)
         if(DJV_MACOS_PACKAGE)
             # \bug Why do we need to use ".." to avoid installing into the
             # "Resources" directory in the bundle?
-            install(
+            djv_install_dep(
                 DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/usd
                 DESTINATION ../Frameworks)
-            install(
+            djv_install_dep(
                 DIRECTORY ${CMAKE_INSTALL_PREFIX}/plugin/usd
                 DESTINATION ../PlugIns)
         else()
-            install(
+            djv_install_dep(
                 DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/usd
                 DESTINATION lib)
-            install(
+            djv_install_dep(
                 DIRECTORY ${CMAKE_INSTALL_PREFIX}/plugin
                 DESTINATION ".")
         endif()
@@ -411,12 +423,12 @@ elseif(APPLE)
         # Every destination here is inside the install prefix. These rules are
         # their own component so an ordinary install stays an ordinary Unix
         # prefix, and packaging asks for the component by name below.
-        install(FILES ${INSTALL_DYLIBS}
+        djv_install_dep(FILES ${INSTALL_DYLIBS}
             DESTINATION "${DJV_BUNDLE_CONTENTS}/Frameworks"
             COMPONENT bundle
             EXCLUDE_FROM_ALL)
     else()
-        install(FILES ${INSTALL_DYLIBS} DESTINATION lib)
+        djv_install_dep(FILES ${INSTALL_DYLIBS} DESTINATION lib)
     endif()
 
     if(DJV_MACOS_PACKAGE)
@@ -614,15 +626,15 @@ else()
             ${CMAKE_INSTALL_PREFIX}/lib/libusd_work.so)
         list(APPEND INSTALL_LIBS ${MATERIALX_LIBS} ${TBB_LIBS} ${OSD_LIBS} ${USD_LIBS})
 
-        install(
+        djv_install_dep(
             DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib/usd
             DESTINATION lib)
-        install(
+        djv_install_dep(
             DIRECTORY ${CMAKE_INSTALL_PREFIX}/plugin
             DESTINATION ".")
     endif()
     
-    install(FILES ${INSTALL_LIBS} DESTINATION lib)
+    djv_install_dep(FILES ${INSTALL_LIBS} DESTINATION lib)
 
 endif()
 
