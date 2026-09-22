@@ -93,6 +93,14 @@ jobs:
         cd build-Release
         xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Release
 
+    # This build packages without the super build's libraries, which is the
+    # part of packaging nothing else here covers: the package target went
+    # missing from it for a fortnight before anyone noticed (#889).
+    - name: Package
+      run: |
+        cmake --build build-Release --target package
+        ls build-Release/djv-*.tar.gz
+
   # \bug Disable building OIIO; it seems there is an error when OCIO is disabled.
 
   linux-build-python:
