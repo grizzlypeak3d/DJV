@@ -133,8 +133,13 @@ namespace djv
 
             p.settings = settings;
 
+            // No further than the machine itself: a cache larger than the
+            // memory there is takes the machine down with it when a file
+            // fills it (DJV #664).
+            const float maxCacheGB = models::SettingsModel::getMaxCacheGB();
+
             p.videoEdit = ftk::FloatEdit::create(context);
-            p.videoEdit->setRange(0.F, 1024.F);
+            p.videoEdit->setRange(0.F, maxCacheGB);
             p.videoEdit->setStep(1.0);
             p.videoEdit->setLargeStep(10.0);
             // What the number is, because it reads as a limit on DJV's
@@ -148,7 +153,7 @@ namespace djv
                 "amount rather than a share of the cache.");
 
             p.audioEdit = ftk::FloatEdit::create(context);
-            p.audioEdit->setRange(0.F, 1024.F);
+            p.audioEdit->setRange(0.F, maxCacheGB);
             p.audioEdit->setStep(1.0);
             p.audioEdit->setLargeStep(10.0);
             p.audioEdit->setTooltip(
@@ -179,12 +184,18 @@ namespace djv
             auto hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.videoEdit->setParent(hLayout);
-            ftk::Label::create(context, "GB", hLayout);
+            ftk::Label::create(
+                context,
+                ftk::Format("GB of {0}").arg(maxCacheGB, 0),
+                hLayout);
             p.layout->addRow("Video cache:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.audioEdit->setParent(hLayout);
-            ftk::Label::create(context, "GB", hLayout);
+            ftk::Label::create(
+                context,
+                ftk::Format("GB of {0}").arg(maxCacheGB, 0),
+                hLayout);
             p.layout->addRow("Audio cache:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);

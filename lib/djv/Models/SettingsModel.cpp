@@ -5,6 +5,7 @@
 
 #include <ftk/UI/ColorWidgetSystem.h>
 
+#include <ftk/Core/OS.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Error.h>
 #include <ftk/Core/Path.h>
@@ -212,8 +213,12 @@ namespace djv
             settings->getT(keys["Audio"], audio);
             p.audio = ftk::Observable<AudioSettings>::create(audio);
 
-            tl::PlayerCacheOptions cache;
+            tl::PlayerCacheOptions cache = getDefaultCache();
             settings->getT(keys["Cache"], cache);
+            // A size from a settings file written on a larger machine, or
+            // from a machine that has since lost memory.
+            cache.videoGB = std::min(cache.videoGB, getMaxCacheGB());
+            cache.audioGB = std::min(cache.audioGB, getMaxCacheGB());
             p.cache = ftk::Observable<tl::PlayerCacheOptions>::create(cache);
             tl::ui::ThumbnailCacheOptions thumbnailCache;
             settings->getT(keys["ThumbnailCache"], thumbnailCache);
@@ -473,6 +478,27 @@ namespace djv
             setUSD(tl::usd::Options());
 #endif // TLRENDER_USD
         }
+        float SettingsModel::getMaxCacheGB()
+        {
+            // What the machine has, less what DJV takes to run: the
+            // decoders, the display, the thumbnails and the application
+            // itself come to about two gigabytes, and that is before the
+            // operating system and whatever else is open. A cache larger
+            // than this can only end with the machine swapping.
+            const float ramGB = static_cast<float>(ftk::getSysInfo().ramGB);
+            return std::max(ramGB - 2.F, 1.F);
+        }
+
+        tl::PlayerCacheOptions SettingsModel::getDefaultCache()
+        {
+            tl::PlayerCacheOptions out;
+            // A quarter of what is there for it, which is a cache worth
+            // having on a workstation and not a problem on a laptop; the
+            // default was the same four gigabytes whatever the machine had.
+            out.videoGB = std::max(getMaxCacheGB() / 4.F, 1.F);
+            return out;
+        }
+
 
         const AudioSettings& SettingsModel::getAudio() const
         {

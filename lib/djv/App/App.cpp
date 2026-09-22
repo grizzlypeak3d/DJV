@@ -2539,13 +2539,30 @@ namespace djv
                 p.cmdLine.cacheAudioGB->found())
             {
                 tl::PlayerCacheOptions options = p.settingsModel->getCache();
+                // No further than the machine has, as the settings are
+                // held to; a cache larger than that takes the machine down
+                // with it when a file fills it.
+                const float maxGB = models::SettingsModel::getMaxCacheGB();
+                const auto clamp = [this, maxGB](const std::string& name, float value)
+                {
+                    const float out = std::min(std::max(0.F, value), maxGB);
+                    if (out != value)
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            ftk::Format("{0}: {1} is more than this machine has; "
+                                "using {2}").arg(name).arg(value).arg(out),
+                            ftk::LogType::Warning);
+                    }
+                    return out;
+                };
                 if (p.cmdLine.cacheVideoGB->found())
                 {
-                    options.videoGB = std::max(0.F, p.cmdLine.cacheVideoGB->getValue());
+                    options.videoGB = clamp("-cacheVideoGB", p.cmdLine.cacheVideoGB->getValue());
                 }
                 if (p.cmdLine.cacheAudioGB->found())
                 {
-                    options.audioGB = std::max(0.F, p.cmdLine.cacheAudioGB->getValue());
+                    options.audioGB = clamp("-cacheAudioGB", p.cmdLine.cacheAudioGB->getValue());
                 }
                 p.settingsModel->setCache(options);
             }

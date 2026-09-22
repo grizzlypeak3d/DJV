@@ -413,6 +413,17 @@ namespace djv
             //! \name Cache
             ///@{
 
+            //! Get the cache size the machine can hold: what it has of RAM,
+            //! in gigabytes, and at least one. Nothing else is allowed for
+            //! here -- the decoders, the display, and whatever else is
+            //! running want their share too -- but a cache larger than the
+            //! machine itself can only end one way.
+            DJV_MODELS_API static float getMaxCacheGB();
+
+            //! Get the cache sizes a machine of this size starts with: a
+            //! quarter of RAM for the video.
+            DJV_MODELS_API static tl::PlayerCacheOptions getDefaultCache();
+
             DJV_MODELS_API const tl::PlayerCacheOptions& getCache() const;
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::PlayerCacheOptions> > observeCache() const;
             DJV_MODELS_API void setCache(const tl::PlayerCacheOptions&);

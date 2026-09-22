@@ -51,6 +51,9 @@ Changes:
     - OpenAPV 1.1.1.0
 
 Fixes:
+* The video and audio cache sizes start at a quarter of the memory the
+  machine has, rather than the same four gigabytes whatever it has, and
+  cannot be set past what it has.
 * Exporting with the FFmpeg command line no longer hangs.
 * A file with a mono audio stream per channel plays all of the channels.
 * A still image paired with an audio file lasts as long as the audio.
