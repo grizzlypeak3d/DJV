@@ -51,6 +51,11 @@ Changes:
     - OpenAPV 1.1.1.0
 
 Fixes:
+* A file written again under the same name shows the thumbnail of what is
+  there now, rather than what used to be.
+* A movie export to a container that cannot hold the codec, such as AV1 in
+  a ".mov", says so instead of "Invalid argument", and leaves no empty file
+  behind.
 * The video and audio cache sizes start at a quarter of the memory the
   machine has, rather than the same four gigabytes whatever it has, and
   cannot be set past what it has.
