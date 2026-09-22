@@ -2784,6 +2784,32 @@ namespace djv
                     done(false);
                     return;
                 }
+
+                // The extension likewise: the export tool offers the ones
+                // the preset is written to, and a script asking for another
+                // is told rather than quietly given one of them.
+                for (const auto& preset : _context->getSystem<tl::WriteSystem>()->
+                    getPlugin<tl::ffmpeg::WritePlugin>()->getWritePresets())
+                {
+                    if (preset.name == settings.moviePreset &&
+                        !preset.exts.empty() &&
+                        std::find(
+                            preset.exts.begin(),
+                            preset.exts.end(),
+                            settings.movieExt) == preset.exts.end())
+                    {
+                        _context->log(
+                            "djv::app::App",
+                            ftk::Format("Export/Movie: \"{0}\" is not written to "
+                                "\"{1}\"; it is written to: {2}").
+                                arg(settings.moviePreset).
+                                arg(settings.movieExt).
+                                arg(ftk::join(preset.exts, ", ")),
+                            ftk::LogType::Error);
+                        done(false);
+                        return;
+                    }
+                }
             }
 #endif // TLRENDER_FFMPEG_PLUGIN
             p.settingsModel->setExport(settings);

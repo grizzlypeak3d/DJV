@@ -645,6 +645,7 @@ namespace djv
             std::shared_ptr<models::SettingsModel> settings;
             std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
             std::vector<std::string> exts;
+            std::vector<std::string> presetExts;
             std::vector<std::string> audioCodecs;
             std::vector<std::string> presets;
 
@@ -693,8 +694,12 @@ namespace djv
             p.fileNameEdit->setTooltip(getFileNameTooltip(
                 models::ExportFileType::Movie));
             ftk::setScreenshotTag(p.fileNameEdit, "Export.MovieFileName");
-            p.extComboBox = ftk::ComboBox::create(context, p.exts);
+            p.presetExts = p.exts;
+            p.extComboBox = ftk::ComboBox::create(context, p.presetExts);
             p.extComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.extComboBox->setTooltip(
+                "The file type to write. Only the ones the preset is "
+                "written to are listed.");
             ftk::setScreenshotTag(p.extComboBox, "Export.MovieExt");
             p.audioCodecComboBox = ftk::ComboBox::create(context, p.audioCodecs);
             p.audioCodecComboBox->setHStretch(ftk::Stretch::Expanding);
@@ -773,8 +778,7 @@ namespace djv
                     {
                         p.fileNameEdit->setText(value.movieFileName);
                     }
-                    const auto j = std::find(p.exts.begin(), p.exts.end(), value.movieExt);
-                    p.extComboBox->setCurrentIndex(j != p.exts.end() ? (j - p.exts.begin()) : -1);
+                    _extsUpdate();
                     auto i = std::find(p.audioCodecs.begin(), p.audioCodecs.end(), value.movieAudioCodec);
                     p.audioCodecComboBox->setCurrentIndex(i != p.audioCodecs.end() ? (i - p.audioCodecs.begin()) : -1);
                     i = std::find(p.presets.begin(), p.presets.end(), value.moviePreset);
@@ -808,10 +812,10 @@ namespace djv
                 [this](int value)
                 {
                     FTK_P();
-                    if (value >= 0 && value < static_cast<int>(p.exts.size()))
+                    if (value >= 0 && value < static_cast<int>(p.presetExts.size()))
                     {
                         auto options = p.settings->getExport();
-                        options.movieExt = p.exts[value];
+                        options.movieExt = p.presetExts[value];
                         p.settings->setExport(options);
                     }
                 });
@@ -864,6 +868,62 @@ namespace djv
             auto out = std::shared_ptr<MovieExportWidget>(new MovieExportWidget);
             out->_init(context, settingsModel, timeUnitsModel, parent);
             return out;
+        }
+
+        void MovieExportWidget::_extsUpdate()
+        {
+            FTK_P();
+            // Only the containers the preset is written to: every other
+            // pairing is one the export would have to refuse, and some of
+            // them only when it reached the end (DJV #886).
+            std::vector<std::string> exts = p.exts;
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            const std::string presetName = p.settings->getExport().moviePreset;
+            for (const auto& preset : tl::ffmpeg::getWritePresets())
+            {
+                if (preset.name == presetName && !preset.exts.empty())
+                {
+                    exts.clear();
+                    for (const auto& ext : preset.exts)
+                    {
+                        // What this build writes, of what the preset names.
+                        if (std::find(p.exts.begin(), p.exts.end(), ext) != p.exts.end())
+                        {
+                            exts.push_back(ext);
+                        }
+                    }
+                    break;
+                }
+            }
+#endif // TLRENDER_FFMPEG_PLUGIN
+            if (exts.empty())
+            {
+                exts = p.exts;
+            }
+            if (exts != p.presetExts)
+            {
+                p.presetExts = exts;
+                p.extComboBox->setItems(p.presetExts);
+            }
+
+            // The extension the preset was left with may not be one of
+            // these; it is moved to the first, which is what the preset is
+            // written to unless another is chosen.
+            auto options = p.settings->getExport();
+            const auto i = std::find(
+                p.presetExts.begin(), p.presetExts.end(), options.movieExt);
+            if (i == p.presetExts.end() && !p.presetExts.empty())
+            {
+                options.movieExt = p.presetExts.front();
+                p.settings->setExport(options);
+            }
+            else
+            {
+                p.extComboBox->setCurrentIndex(
+                    i != p.presetExts.end() ?
+                        static_cast<int>(i - p.presetExts.begin()) :
+                        -1);
+            }
         }
 
         void MovieExportWidget::_audioUpdate()

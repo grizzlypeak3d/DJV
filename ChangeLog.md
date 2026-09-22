@@ -53,9 +53,15 @@ Changes:
 Fixes:
 * A file written again under the same name shows the thumbnail of what is
   there now, rather than what used to be.
+* A movie export offers the file types the chosen preset is written to,
+  rather than every type and a failure at the end. A preset and type that do
+  not go together, asked for from a script, is reported with the ones that
+  do.
 * A movie export to a container that cannot hold the codec, such as AV1 in
-  a ".mov", says so instead of "Invalid argument", and leaves no empty file
-  behind.
+  a ".mov", says so instead of "Invalid argument", leaves no empty file
+  behind, and is reported as a failure rather than as written.
+* SVT-AV1 no longer writes twenty lines about itself to the console for each
+  AV1 export.
 * The video and audio cache sizes start at a quarter of the memory the
   machine has, rather than the same four gigabytes whatever it has, and
   cannot be set past what it has.

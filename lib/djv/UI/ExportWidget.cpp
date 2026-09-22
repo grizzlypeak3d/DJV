@@ -150,6 +150,10 @@ namespace djv
             std::shared_ptr<ftk::Timer> progressTimer;
             //! Told how an export requested by exportMovie() ended.
             std::function<void(bool)> doneCallback;
+            // Set when a frame, or the writer finishing, reported an error:
+            // the last frame can be written and the file still fail to
+            // close, which otherwise read as an export that worked.
+            bool exportFailed = false;
         };
 
         void ExportWidget::_init(
@@ -546,6 +550,7 @@ namespace djv
                 done(false);
                 return;
             }
+            p.exportFailed = false;
             p.doneCallback = done;
             _exportStart(fileType);
             // A start that failed has reported already and left nothing
@@ -558,6 +563,8 @@ namespace djv
 
         void ExportWidget::_error(const std::string& value)
         {
+            FTK_P();
+            p.exportFailed = true;
             // Logged as well as shown: a scripted export has nobody watching
             // the dialog, and the log is where it would look.
             if (auto context = getContext())
@@ -876,6 +883,7 @@ namespace djv
                             // closes it too.
                             const bool finished =
                                 p.exportData &&
+                                !p.exportFailed &&
                                 p.exportData->frame > p.exportData->range.end_time_inclusive().value();
                             p.exportData.reset();
                             p.progressDialog.reset();
