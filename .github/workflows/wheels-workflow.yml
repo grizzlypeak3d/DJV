@@ -15,6 +15,18 @@ name: Wheels
 on:
   push:
     tags: ['[0-9]+.[0-9]+.[0-9]+*']
+    # The wheels are built by the tag that publishes them and by nothing
+    # else, so a change to how they are built is first tried when it is
+    # too late to fix quietly. main builds them too, without publishing,
+    # whenever what decides them changes -- as feather-tk's and
+    # tlRender's workflows do.
+    branches: [main]
+    paths:
+      - pyproject.toml
+      - etc/Config/wheel.cmake
+      - etc/Python/**
+      - lib/djv/djvPy/**
+      - .github/workflows/wheels-workflow.yml
   pull_request:
     paths:
       - pyproject.toml
