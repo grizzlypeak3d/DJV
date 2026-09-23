@@ -741,9 +741,12 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            // The preset before the file type it is written to, since it
+            // decides which types are offered and can change the one that
+            // is chosen.
             formLayout->addRow("File name:", p.fileNameEdit);
-            formLayout->addRow("Extension:", p.extComboBox);
             formLayout->addRow("Preset:", p.presetComboBox);
+            formLayout->addRow("Extension:", p.extComboBox);
             formLayout->addRow("Audio codec:", p.audioCodecComboBox);
             ftk::setScreenshotTag(p.fileLabel, "Export.MovieFile");
             formLayout->addRow("Output:", p.fileLabel);

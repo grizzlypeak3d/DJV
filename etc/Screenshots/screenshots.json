@@ -1237,12 +1237,12 @@
           "caption": "Output file name"
         },
         {
-          "id": "Export.MovieExt",
-          "caption": "Output file extension"
-        },
-        {
           "id": "Export.MoviePreset",
           "caption": "Export preset"
+        },
+        {
+          "id": "Export.MovieExt",
+          "caption": "Output file extension"
         },
         {
           "id": "Export.MovieAudioCodec",
