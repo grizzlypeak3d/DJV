@@ -46,6 +46,9 @@ Changes:
   Exports are unaffected and always render at the highest precision available.
 * The Timeline/Zoom command zooms the timeline around the current frame,
   for scripts that set up a view.
+* The movie export says what it will do with the audio: a preset that
+  writes video only says so under the audio codec, rather than leaving it
+  to the tooltip of a control that is greyed out.
 * Movies can be exported to Matroska files: FFV1, AV1, H.264, HEVC, and VP9
   are written to ".mkv", with FFV1 in Matroska the pairing an archive asks
   for.

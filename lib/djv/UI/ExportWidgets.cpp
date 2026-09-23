@@ -654,9 +654,11 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> extComboBox;
             std::shared_ptr<ftk::ComboBox> audioCodecComboBox;
             std::shared_ptr<ftk::ComboBox> presetComboBox;
+            std::shared_ptr<ftk::Label> audioNoteLabel;
             std::shared_ptr<ftk::Label> fileLabel;
             std::shared_ptr<ftk::Label> rangeLabel;
             std::shared_ptr<ftk::PushButton> exportButton;
+            std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
             std::shared_ptr<ftk::Observer<models::ExportSettings> > settingsObserver;
@@ -724,6 +726,13 @@ namespace djv
                 "movie they write has no audio, whatever the file had.");
             ftk::setScreenshotTag(p.presetComboBox, "Export.MoviePreset");
 
+            p.audioNoteLabel = ftk::Label::create(context);
+            // Elided like the output name above: a sentence of its own would
+            // otherwise set how wide the tools panel has to be. The whole of
+            // it is in the tooltip.
+            p.audioNoteLabel->setElide(true, ftk::ElideMode::Right);
+            p.audioNoteLabel->setHStretch(ftk::Stretch::Expanding);
+
             p.fileLabel = ftk::Label::create(context);
             // A long name, or the two a sequence shows, would otherwise widen
             // the whole tools panel. The full text is in the tooltip.
@@ -739,7 +748,8 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            auto formLayout = ftk::FormLayout::create(context, p.layout);
+            p.formLayout = ftk::FormLayout::create(context, p.layout);
+            auto formLayout = p.formLayout;
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             // The preset before the file type it is written to, since it
             // decides which types are offered and can change the one that
@@ -748,6 +758,11 @@ namespace djv
             formLayout->addRow("Preset:", p.presetComboBox);
             formLayout->addRow("Extension:", p.extComboBox);
             formLayout->addRow("Audio codec:", p.audioCodecComboBox);
+            // What the export will do with the audio, written where the
+            // export is set up rather than left to the tooltip of a control
+            // that is greyed out (DJV #885).
+            ftk::setScreenshotTag(p.audioNoteLabel, "Export.MovieAudioNote");
+            formLayout->addRow("", p.audioNoteLabel);
             ftk::setScreenshotTag(p.fileLabel, "Export.MovieFile");
             formLayout->addRow("Output:", p.fileLabel);
             ftk::setScreenshotTag(p.rangeLabel, "Export.MovieRange");
@@ -963,6 +978,25 @@ namespace djv
                     "How to encode the audio; \"Auto\" leaves it to the "
                     "format." :
                     "The file being exported has no audio."));
+
+            // Said in the tool rather than only in the tooltip of the
+            // control that is greyed out: audio that the file has and the
+            // export will not write is the case worth seeing without
+            // hovering anything, so it is the one in red.
+            std::string note;
+            if (presetCmd)
+            {
+                note = "This preset does not support audio export.";
+            }
+            else if (!hasAudio)
+            {
+                note = "The file has no audio.";
+            }
+            p.audioNoteLabel->setText(note);
+            p.audioNoteLabel->setTextRole(presetCmd && hasAudio ?
+                ftk::ColorRole::Red :
+                ftk::ColorRole::TextDisabled);
+            p.formLayout->setRowVisible(p.audioNoteLabel, !note.empty());
         }
 
         void MovieExportWidget::setPlayer(const std::shared_ptr<tl::Player>& value)
