@@ -184,18 +184,26 @@ namespace djv
             auto hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.videoEdit->setParent(hLayout);
-            ftk::Label::create(
-                context,
-                ftk::Format("GB of {0}").arg(maxCacheGB, 0),
-                hLayout);
+            // Read as a sentence with the number in the edit: "8 of 14 GB".
+            // What the second number is goes in the tooltip, since it is
+            // the largest cache this machine allows rather than the memory
+            // it has (DJV #664).
+            const std::string cacheMaxText =
+                ftk::Format("of {0} GB").arg(maxCacheGB, 0).str();
+            const std::string cacheMaxTooltip =
+                "The largest cache this machine allows: the memory it has,\n"
+                "less the couple of gigabytes DJV itself takes to run.\n"
+                "\n"
+                "Not a promise of free memory: whatever else is open has\n"
+                "its own share.";
+            auto label = ftk::Label::create(context, cacheMaxText, hLayout);
+            label->setTooltip(cacheMaxTooltip);
             p.layout->addRow("Video cache:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.audioEdit->setParent(hLayout);
-            ftk::Label::create(
-                context,
-                ftk::Format("GB of {0}").arg(maxCacheGB, 0),
-                hLayout);
+            label = ftk::Label::create(context, cacheMaxText, hLayout);
+            label->setTooltip(cacheMaxTooltip);
             p.layout->addRow("Audio cache:", hLayout);
             hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
