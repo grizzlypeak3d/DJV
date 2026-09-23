@@ -454,7 +454,7 @@ namespace djv
             ftk::Size2I out;
             switch (settings.renderSize)
             {
-            case models::ExportRenderSize::Default:
+            case models::ExportRenderSize::Source:
                 out = _getDefaultSize();
                 break;
             case models::ExportRenderSize::Custom:

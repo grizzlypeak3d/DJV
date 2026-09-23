@@ -46,6 +46,10 @@ Changes:
   Exports are unaffected and always render at the highest precision available.
 * The Timeline/Zoom command zooms the timeline around the current frame,
   for scripts that set up a view.
+* The export render width is called "Source" rather than "Default", which
+  said nothing about what it was the default for.
+* Messages have a Copy button, so what a dialog says can be sent to
+  somebody without retyping it.
 * The FFmpeg settings show where the ffmpeg and ffprobe commands were
   found, or that there are none: the name on its own read as an
   installation that had been found.
@@ -60,6 +64,12 @@ Changes:
     - OpenAPV 1.1.1.0
 
 Fixes:
+* Exporting no longer takes DJV down with it when the FFmpeg command line
+  exits early -- writing to the pipe it left behind killed the application
+  where it stood, with nothing said. What the command was unhappy about is
+  now reported, and the file of no bytes it left is removed. Exporting at a
+  size the encoder cannot take, such as a height that is not even, is one
+  way to have seen this.
 * A file written again under the same name shows the thumbnail of what is
   there now, rather than what used to be.
 * A movie export offers the file types the chosen preset is written to,

@@ -23,7 +23,7 @@ namespace djv
 
         FTK_ENUM_IMPL(
             ExportRenderSize,
-            "Default",
+            "Source",
             "1920",
             "3840",
             "4096",
@@ -1075,6 +1075,9 @@ namespace djv
                 // silently drop to the default; carry the width over instead.
                 const std::map<std::string, ExportRenderSize> old =
                 {
+                    // "Default" said nothing about what it was the default
+                    // for; it is the source's own width (DJV #894).
+                    { "Default", ExportRenderSize::Source },
                     { "1920x1080", ExportRenderSize::_1920 },
                     { "3840x2160", ExportRenderSize::_3840 },
                     { "4096x2160", ExportRenderSize::_4096 }

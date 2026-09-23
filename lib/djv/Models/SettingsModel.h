@@ -54,14 +54,14 @@ namespace djv
         //! the aspect ratio of what is being exported.
         enum class DJV_MODELS_API_TYPE ExportRenderSize
         {
-            Default,
+            Source,
             _1920,
             _3840,
             _4096,
             Custom,
 
             Count,
-            First = Default
+            First = Source
         };
         FTK_ENUM(DJV_MODELS_API, ExportRenderSize);
 
@@ -121,7 +121,7 @@ namespace djv
         struct DJV_MODELS_API_TYPE ExportSettings
         {
             std::string dir;
-            ExportRenderSize renderSize = ExportRenderSize::Default;
+            ExportRenderSize renderSize = ExportRenderSize::Source;
             // Only the width: the height follows from the aspect ratio of
             // what is being exported, which is known whenever there is
             // anything to export.
