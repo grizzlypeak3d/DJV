@@ -936,6 +936,7 @@ namespace djv
             // file the current one, so a directory would be opened file by
             // file on the way to the last of them.
             p.filesModel->add(_openItems(path, audioPath, frames, gatherSeq));
+            _updateWindowTitle();
         }
 
         void App::open(
@@ -956,6 +957,7 @@ namespace djv
                 items.insert(items.end(), i.begin(), i.end());
             }
             p.filesModel->add(items);
+            _updateWindowTitle();
         }
 
         void App::closeFile(int index)
@@ -1818,6 +1820,9 @@ namespace djv
                     title += " *";
                 }
             }
+            else if (p.filesModel->getAIndex() != -1)
+                title = ((p.filesModel->getA())->path).getFileName() + " - " + title;
+
             p.mainWindow->setTitle(title);
         }
 
