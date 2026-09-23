@@ -46,6 +46,9 @@ Changes:
   Exports are unaffected and always render at the highest precision available.
 * The Timeline/Zoom command zooms the timeline around the current frame,
   for scripts that set up a view.
+* Movies can be exported to Matroska files: FFV1, AV1, H.264, HEVC, and VP9
+  are written to ".mkv", with FFV1 in Matroska the pairing an archive asks
+  for.
 * Library updates:
     - FFmpeg 9.0.1
     - OpenAPV 1.1.1.0

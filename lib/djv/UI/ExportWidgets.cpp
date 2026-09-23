@@ -50,6 +50,7 @@ namespace djv
             {
                 ".mov",
                 ".mp4",
+                ".mkv",
                 ".m4v"
             };
 
