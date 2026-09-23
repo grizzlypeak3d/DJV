@@ -1213,7 +1213,9 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> audioMergeCheckBox;
             std::shared_ptr<ftk::IntEdit> threadsEdit;
             std::shared_ptr<ftk::FileEdit> ffmpegEdit;
+            std::shared_ptr<ftk::Label> ffmpegFoundLabel;
             std::shared_ptr<ftk::FileEdit> ffprobeEdit;
+            std::shared_ptr<ftk::Label> ffprobeFoundLabel;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::ffmpeg::Options> > optionsObserver;
@@ -1292,6 +1294,20 @@ namespace djv
                 "Location of the ffprobe command.");
             ftk::setScreenshotTag(p.ffprobeEdit, "FFmpeg.FFprobePath");
 
+            // Whether the command above is there at all, and which one it
+            // is where more than one is installed. A name on its own is a
+            // name to look for, which reads as an installation that was
+            // found (DJV #893).
+            const auto foundLabel = [&context]
+            {
+                auto out = ftk::Label::create(context);
+                out->setElide(true, ftk::ElideMode::Middle);
+                out->setHStretch(ftk::Stretch::Expanding);
+                return out;
+            };
+            p.ffmpegFoundLabel = foundLabel();
+            p.ffprobeFoundLabel = foundLabel();
+
             p.layout = ftk::FormLayout::create(context);
 
             _setWidget(p.layout);
@@ -1301,7 +1317,9 @@ namespace djv
             p.layout->addRow("Merge mono audio:", p.audioMergeCheckBox);
             p.layout->addRow("I/O threads:", p.threadsEdit);
             p.layout->addRow("ffmpeg location:", p.ffmpegEdit);
+            p.layout->addRow("", p.ffmpegFoundLabel);
             p.layout->addRow("ffprobe location:", p.ffprobeEdit);
+            p.layout->addRow("", p.ffprobeFoundLabel);
 
             p.optionsObserver = ftk::Observer<tl::ffmpeg::Options>::create(
                 settings->observeFFmpeg(),
@@ -1322,6 +1340,7 @@ namespace djv
                     FTK_P();
                     p.ffmpegEdit->setPath(ftk::Path(value.ffmpegPath));
                     p.ffprobeEdit->setPath(ftk::Path(value.ffprobePath));
+                    _foundUpdate();
                 });
 
             p.yuvToRGBCheckBox->setCheckedCallback(
@@ -1382,6 +1401,36 @@ namespace djv
         FFmpegSettingsWidget::FFmpegSettingsWidget() :
             _p(new Private)
         {}
+
+        void FFmpegSettingsWidget::_foundUpdate()
+        {
+            FTK_P();
+            const auto update =
+                [](const std::shared_ptr<ftk::Label>& label,
+                    const std::string& command,
+                    const std::string& name)
+            {
+                const std::string found =
+                    tl::ffmpeg_cmd::findCommand(command);
+                label->setText(found.empty() ?
+                    ftk::Format("No {0} found.").arg(name).str() :
+                    found);
+                label->setTooltip(found.empty() ?
+                    ftk::Format(
+                        "DJV did not find \"{0}\". A name on its own is "
+                        "looked for on the system path; give the location "
+                        "of the command to use one that is not there.").
+                        arg(command).str() :
+                    ftk::Format("Where DJV found \"{0}\".").
+                        arg(command).str());
+                label->setTextRole(found.empty() ?
+                    ftk::ColorRole::Red :
+                    ftk::ColorRole::TextDisabled);
+            };
+            const auto options = p.settings->getFFmpegCmd();
+            update(p.ffmpegFoundLabel, options.ffmpegPath, "ffmpeg");
+            update(p.ffprobeFoundLabel, options.ffprobePath, "ffprobe");
+        }
 
         FFmpegSettingsWidget::~FFmpegSettingsWidget()
         {}

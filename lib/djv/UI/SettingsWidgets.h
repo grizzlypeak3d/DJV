@@ -401,6 +401,8 @@ namespace djv
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
         private:
+            void _foundUpdate();
+
             FTK_PRIVATE();
         };
 #endif // TLRENDER_FFMPEG_PLUGIN

@@ -46,6 +46,9 @@ Changes:
   Exports are unaffected and always render at the highest precision available.
 * The Timeline/Zoom command zooms the timeline around the current frame,
   for scripts that set up a view.
+* The FFmpeg settings show where the ffmpeg and ffprobe commands were
+  found, or that there are none: the name on its own read as an
+  installation that had been found.
 * The movie export says what it will do with the audio: a preset that
   writes video only says so under the audio codec, rather than leaving it
   to the tooltip of a control that is greyed out.
