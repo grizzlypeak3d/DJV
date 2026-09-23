@@ -58,7 +58,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: linux-x86_64, os: ubuntu-latest }
+          - { name: linux-x86_64, os: ubuntu-24.04 }
           - { name: linux-aarch64, os: ubuntu-24.04-arm }
           - { name: macos-x86_64, os: macos-15-intel }
           - { name: macos-arm64, os: macos-latest }
@@ -81,7 +81,7 @@ jobs:
         path: wheelhouse/*.whl
 
   sdist:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v6
@@ -108,7 +108,7 @@ jobs:
   publish:
     needs: [wheels, sdist]
     if: github.ref_type == 'tag' || inputs.testpypi
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: ${{ github.ref_type == 'tag' && 'pypi' || 'testpypi' }}
     permissions:

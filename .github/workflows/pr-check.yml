@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     # Kept the same as the CI workflow's linux-build job: the cache key covers
     # this file, so these have to match for the cache to be shared.
