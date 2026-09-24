@@ -204,6 +204,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<int> > bIndexesModifiedObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesModifiedObserver;
             std::shared_ptr<ftk::Observer<int> > aIndexModifiedObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > windowTitleObserver;
             std::shared_ptr<ftk::ListObserver<int> > layersModifiedObserver;
             std::shared_ptr<ftk::ListObserver<std::string> > mediaReferenceKeysModifiedObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeModifiedObserver;
@@ -936,7 +937,6 @@ namespace djv
             // file the current one, so a directory would be opened file by
             // file on the way to the last of them.
             p.filesModel->add(_openItems(path, audioPath, frames, gatherSeq));
-            _updateWindowTitle();
         }
 
         void App::open(
@@ -957,7 +957,6 @@ namespace djv
                 items.insert(items.end(), i.begin(), i.end());
             }
             p.filesModel->add(items);
-            _updateWindowTitle();
         }
 
         void App::closeFile(int index)
@@ -1808,21 +1807,27 @@ namespace djv
                 return;
             }
             std::string title = p.appInfoModel->getTitle();
+            // What this window is showing, ahead of the application: several
+            // players on a desktop are told apart by their titles, and a task
+            // bar has room for the start of one. The review when there is one,
+            // since that is what the session is, and otherwise the "A" file.
+            // The name rather than the path, the way document titles usually
+            // read; the Recent Reviews menu is where the whole paths are.
             if (!p.reviewPath.empty())
             {
-                // Show the active review so the user can tell which one is
-                // open, with a trailing "*" while it has unsaved changes. The
-                // name rather than the path, the way document titles usually
-                // read; the Recent Reviews menu is where the whole paths are.
-                title += " - " + ftk::fromFileSystem(p.reviewPath.filename());
+                std::string review = ftk::fromFileSystem(p.reviewPath.filename());
                 if (p.reviewModified)
                 {
-                    title += " *";
+                    // Beside the name rather than at the end, where the
+                    // application title would push it out of sight.
+                    review += " *";
                 }
+                title = review + " - " + title;
             }
-            else if (p.filesModel->getAIndex() != -1)
-                title = ((p.filesModel->getA())->path).getFileName() + " - " + title;
-
+            else if (auto a = p.filesModel->getA())
+            {
+                title = a->path.getFileName() + " - " + title;
+            }
             p.mainWindow->setTitle(title);
         }
 
@@ -2955,6 +2960,16 @@ namespace djv
                 [this](int)
                 {
                     _markModified();
+                },
+                ftk::ObserverAction::Suppress);
+            // Which file is showing, rather than which index it sits at: a
+            // file closed while another takes its place leaves the index
+            // where it was, and the title named the file that had gone.
+            p.windowTitleObserver = ftk::Observer<std::shared_ptr<models::FilesModelItem> >::create(
+                p.filesModel->observeA(),
+                [this](const std::shared_ptr<models::FilesModelItem>&)
+                {
+                    _updateWindowTitle();
                 },
                 ftk::ObserverAction::Suppress);
             p.layersModifiedObserver = ftk::ListObserver<int>::create(

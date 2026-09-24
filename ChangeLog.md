@@ -46,33 +46,23 @@ Changes:
   Exports are unaffected and always render at the highest precision available.
 * The Timeline/Zoom command zooms the timeline around the current frame,
   for scripts that set up a view.
-* The export render width is called "Source" rather than "Default", which
-  said nothing about what it was the default for.
-* Messages have a Copy button, so what a dialog says can be sent to
-  somebody without retyping it.
+* The window title shows the review or file name. Contributed by timurhai.
+* The export render width is called "Source" rather than "Default".
+* Messages have a Copy button.
 * The FFmpeg settings show where the ffmpeg and ffprobe commands were
-  found, or that there are none: the name on its own read as an
-  installation that had been found.
-* The movie export says what it will do with the audio: a preset that
-  writes video only says so under the audio codec, rather than leaving it
-  to the tooltip of a control that is greyed out.
-* Movies can be exported to Matroska files: FFV1, AV1, H.264, HEVC, and VP9
-  are written to ".mkv", with FFV1 in Matroska the pairing an archive asks
-  for.
+  found, or that there are none.
+* The movie export says when a preset writes no audio.
+* Movies can be exported to Matroska files: FFV1, AV1, H.264, HEVC, and
+  VP9 are written to ".mkv".
 * Library updates:
     - FFmpeg 9.0.1
     - OpenAPV 1.1.1.0
 
 Fixes:
-* The libraries packaged with the application are found in the build's own
-  prefix rather than named one by one, so a package no longer quietly loses
-  a library when a dependency changes its version.
-* Exporting no longer takes DJV down with it when the FFmpeg command line
-  exits early -- writing to the pipe it left behind killed the application
-  where it stood, with nothing said. What the command was unhappy about is
-  now reported, and the file of no bytes it left is removed. Exporting at a
-  size the encoder cannot take, such as a height that is not even, is one
-  way to have seen this.
+* Packages no longer lose a library when a dependency changes its
+  version.
+* Exporting no longer crashes when the FFmpeg command line fails, such as
+  at a size the encoder cannot take.
 * A file written again under the same name shows the thumbnail of what is
   there now, rather than what used to be.
 * A movie export offers the file types the chosen preset is written to,
