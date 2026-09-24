@@ -711,8 +711,9 @@ namespace djv
             // The presets are the whole surface, so choosing an output does
             // not mean picking through every encoder FFmpeg has; what they
             // cannot express is what tlbake is for. Only the ones this build
-            // can write: a minimal FFmpeg has no ProRes or FFV1 encoder, and
-            // offering them would only fail when the export starts.
+            // can write: a minimal FFmpeg has no ProRes encoder, nor does a
+            // build that leaves it out, and offering one would only fail
+            // when the export starts.
             for (const auto& preset : ffmpegPlugin->getWritePresets())
             {
                 p.presets.push_back(preset.name);

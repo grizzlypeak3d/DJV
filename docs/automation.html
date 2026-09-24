@@ -81,7 +81,7 @@ Tools/Export - Toggle the Export tool; e.g., { "value": true }.
 <h2 id="exporting">Exporting</h2>
 <p><strong>Export/Movie</strong> exports the current file as a movie with the <strong>Export</strong> tool's settings, changing any that are given first:</p>
 <pre><code>djv render.#.exr -offscreen \
-    -command 'Export/Movie { "dir": "/tmp", "fileName": "review", "preset": "ProRes 422", "exit": true }'</code></pre>
+    -command 'Export/Movie { "dir": "/tmp", "fileName": "review", "preset": "APV 422", "exit": true }'</code></pre>
 <p>The arguments are all optional: <strong>dir</strong>, <strong>fileName</strong>, <strong>ext</strong>, <strong>preset</strong> (as the <strong>Preset</strong> menu names it) and <strong>audioCodec</strong>. An existing file is written over only with <strong>"overwrite": true</strong>, since there is nobody to answer the question. The export takes as long as it takes, so <strong>File/Exit</strong> after it would stop it part way; <strong>"exit": true</strong> quits once the movie is written or has failed, and the log says which. <strong>-offscreen</strong> keeps the window from being shown while it runs.</p>
 <h2 id="color-settings">Color settings</h2>
 <p>Settings changed from the command line are saved like any others, so a later run starts from them. A script that wants the same color every time, whatever the user changed last, resets them first. With the <strong>OCIO</strong> environment variable set, a reset turns OCIO on with that configuration, so this is a clean start with the site's configuration:</p>

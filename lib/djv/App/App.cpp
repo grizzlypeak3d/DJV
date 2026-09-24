@@ -2693,7 +2693,7 @@ namespace djv
                 "Export the current file as a movie with the Export tool's "
                 "settings, changing any given first; e.g., { \"dir\": "
                 "\"/tmp\", \"fileName\": \"out\", \"ext\": \".mov\", "
-                "\"preset\": \"ProRes 4444\", \"audioCodec\": \"Auto\", "
+                "\"preset\": \"APV 422\", \"audioCodec\": \"Auto\", "
                 "\"overwrite\": true, \"exit\": true }. \"exit\" quits once "
                 "the movie is written or has failed.",
                 [this](const nlohmann::json& args)
