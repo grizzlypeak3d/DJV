@@ -24,33 +24,12 @@ Changes:
 * Movies can be exported as APV.
 * Movies can be exported from the command line with the Export/Movie
   command, and -offscreen runs without showing the window.
-* Color > Enable Color turns all of the color settings off and back on
-  again, and Color > Reset Color returns the chosen sections to their
-  defaults.
-* OCIO is turned on with the configuration in the OCIO environment variable
-  when there are no color settings yet.
-* An OCIO configuration is shown through its own default display and view
-  until others are chosen, whether it arrives from the environment variable,
-  the command line, or Color > Reset Color. The display and view no longer
-  have a "None": without them OCIO does nothing, which is what the section's
-  check box is for.
-* The Color/OCIO and Color/LUT commands take the configuration, color
-  spaces, and LUT file, for scripts that set up the color.
-* The Files tool can switch a file's media reference, and each file keeps
-  its own, so a comparison can put a proxy against the full resolution
-  version. The choice is saved with reviews and playlists.
-* The -mediaReference command line option opens files on a media
-  reference, and the File/MediaReference and File/Layer commands choose one
-  by name.
-* The view's color buffer defaults to RGBA F16, at half the memory of F32.
-  Exports are unaffected and always render at the highest precision available.
-* The Timeline/Zoom command zooms the timeline around the current frame,
-  for scripts that set up a view.
+* Added global toggle and reset for color controls.
+* The OCIO environment variable is used to initialize the OCIO settings.
+* Add a -mediaReference command line option.
+* The view's color buffer defaults to RGBA F16.
 * The window title shows the review or file name. Contributed by timurhai.
-* The export render width is called "Source" rather than "Default".
-* Messages have a Copy button.
-* The FFmpeg settings show where the ffmpeg and ffprobe commands were
-  found, or that there are none.
+* The FFmpeg settings show the ffmpeg and ffprobe commands.
 * The movie export says when a preset writes no audio.
 * Movies can be exported to Matroska files: FFV1, AV1, H.264, HEVC, and
   VP9 are written to ".mkv".
@@ -59,25 +38,6 @@ Changes:
     - OpenAPV 1.1.1.0
 
 Fixes:
-* Packages no longer lose a library when a dependency changes its
-  version.
-* Exporting no longer crashes when the FFmpeg command line fails, such as
-  at a size the encoder cannot take.
-* A file written again under the same name shows the thumbnail of what is
-  there now, rather than what used to be.
-* A movie export offers the file types the chosen preset is written to,
-  rather than every type and a failure at the end. A preset and type that do
-  not go together, asked for from a script, is reported with the ones that
-  do.
-* A movie export to a container that cannot hold the codec, such as AV1 in
-  a ".mov", says so instead of "Invalid argument", leaves no empty file
-  behind, and is reported as a failure rather than as written.
-* SVT-AV1 no longer writes twenty lines about itself to the console for each
-  AV1 export.
-* The video and audio cache sizes start at a quarter of the memory the
-  machine has, rather than the same four gigabytes whatever it has, and
-  cannot be set past what it has.
-* Exporting with the FFmpeg command line no longer hangs.
 * A file with a mono audio stream per channel plays all of the channels.
 * A still image paired with an audio file lasts as long as the audio.
 * Settings fixes for running multiple application instances.
@@ -89,40 +49,10 @@ Fixes:
 * Opening many files at once no longer reads every one of them.
 * Color management no longer slows playback when the timeline shows
   thumbnails; a regression in 3.6.0.
-* Enlarging with High Quality no longer shows resize artefacts.
+* Enlarging with High Quality no longer shows resize artifacts.
 * USD support, removed in 3.6.0, is back in source builds.
 * High Quality filtering no longer softens pictures shown or exported at
   their own size.
-* Exported ProRes, PNG, and QuickTime Animation movies no longer show a later
-  frame's picture in place of an earlier one.
-* 4:4:4 movie exports, such as ProRes 4444, keep one pixel color edges
-  instead of smearing them.
-* A LUT or OCIO configuration that cannot be read shows the picture unaltered,
-  with an error, rather than no picture.
-* The -ocio command line option uses the given configuration file, rather
-  than the one chosen in the settings.
-* The -timeUnits command line option works without a file.
-* 10-bit video shows white as white rather than a light grey, and 8-bit
-  full range video shows black without a magenta cast.
-* A review marker opens for editing on a double click, rather than opening
-  on some clicks and not others.
-* Closing the last file closes the review with it.
-* Timecode typed or given on the command line with one digit fields, such as
-  1:00:40:00, is read correctly rather than silently losing the later fields,
-  and malformed timecode is reported as an error.
-* Clicking a window that is not active presses the button under the pointer,
-  rather than only bringing the window forward.
-* Escape leaves the menu bar when a click put the focus there.
-* Clicking a combo box or a slider shows the keyboard focus, since the
-  arrow keys then change it.
-* OpenColorIO's own messages go to the log rather than standard output, and
-  a configuration set to the OCIO environment variable with the variable
-  unset says so once rather than OpenColorIO saying it for each place that
-  reads the configuration.
-* Turning off Timeline > Frame View holds, rather than switching itself back
-  on at the next layout, which also kept a timeline zoom from being applied.
-* Closing a review prompts to save after a change to the files or to the
-  color and image display, such as adding or removing a LUT.
 
 ## 3.6.0
 
