@@ -64,6 +64,9 @@ Changes:
     - OpenAPV 1.1.1.0
 
 Fixes:
+* The libraries packaged with the application are found in the build's own
+  prefix rather than named one by one, so a package no longer quietly loses
+  a library when a dependency changes its version.
 * Exporting no longer takes DJV down with it when the FFmpeg command line
   exits early -- writing to the pipe it left behind killed the application
   where it stood, with nothing said. What the command was unhappy about is
