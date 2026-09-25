@@ -28,6 +28,8 @@ Changes:
 * The OCIO environment variable is used to initialize the OCIO settings.
 * Add a -mediaReference command line option.
 * The view's color buffer defaults to RGBA F16.
+* The Color tool has a Reset button, and the reset dialog offers only the
+  sections that have something to reset.
 * The window title shows the review or file name. Contributed by timurhai.
 * The FFmpeg settings show the ffmpeg and ffprobe commands.
 * The movie export says when a preset writes no audio.

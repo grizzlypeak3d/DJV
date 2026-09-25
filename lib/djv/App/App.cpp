@@ -22,6 +22,7 @@
 #include <djv/App/SysLogTool.h>
 #include <djv/App/ViewTool.h>
 #include <djv/UI/Viewport.h>
+#include <djv/UI/ColorResetDialog.h>
 #include <djv/UI/SeparateAudioDialog.h>
 #include <djv/UI/StatusIndicator.h>
 #include <djv/UI/SysInfoDialog.h>
@@ -176,6 +177,7 @@ namespace djv
             bool filesChanged = false;
             std::shared_ptr<ftk::Observable<std::shared_ptr<tl::Player> > > player;
             std::shared_ptr<models::ColorModel> colorModel;
+            std::shared_ptr<ui::ColorResetDialog> colorResetDialog;
             std::shared_ptr<models::ViewportModel> viewportModel;
             std::shared_ptr<models::AudioModel> audioModel;
             bool audioDeviceMute = false;
@@ -1304,6 +1306,57 @@ namespace djv
                     callback(ftk::toFileSystem(value.get()));
                 },
                 options);
+        }
+
+        void App::colorResetDialog()
+        {
+            FTK_P();
+            if (p.colorResetDialog)
+            {
+                return;
+            }
+
+            // What there is to reset. A section already at its defaults is
+            // shown in the dialog but cannot be chosen, so what is offered
+            // is what resetting would change (DJV #687).
+            ui::ColorResetGroups set;
+            const tl::DisplayOptions defaults;
+            const tl::DisplayOptions display = p.viewportModel->getDisplayOptions();
+#if defined(TLRENDER_OCIO)
+            set.ocio =
+                p.colorModel->getOCIOOptions() != models::ColorModel::getDefaultOCIOOptions() ||
+                !p.colorModel->getExtColorSpaces().empty();
+            set.lut = p.colorModel->getLUTOptions() != tl::LUTOptions();
+#endif // TLRENDER_OCIO
+            set.color =
+                display.color != defaults.color ||
+                display.exposure != defaults.exposure ||
+                display.softClip != defaults.softClip;
+            set.levels = display.levels != defaults.levels;
+
+            p.colorResetDialog = ui::ColorResetDialog::create(_context, set);
+            p.colorResetDialog->open(p.mainWindow);
+            std::weak_ptr<models::CommandsModel> commandsWeak = p.commandsModel;
+            p.colorResetDialog->setCallback(
+                [commandsWeak](const ui::ColorResetGroups& value)
+                {
+                    if (auto commandsModel = commandsWeak.lock())
+                    {
+                        commandsModel->exec(
+                            "Color/Reset",
+                            {
+                                { "ocio", value.ocio },
+                                { "lut", value.lut },
+                                { "color", value.color },
+                                { "levels", value.levels }
+                            });
+                    }
+                });
+            p.colorResetDialog->setCloseCallback(
+                [this]
+                {
+                    _p->colorResetDialog.reset();
+                });
         }
 
         void App::openReviewDialog()

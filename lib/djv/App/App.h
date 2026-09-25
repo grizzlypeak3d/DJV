@@ -218,6 +218,10 @@ namespace djv
             //! Open a review file dialog.
             void openReviewDialog();
 
+            //! Open the color reset dialog: which sections of the color
+            //! settings to return to their defaults.
+            DJV_APP_API void colorResetDialog();
+
             //! Save the current session to the active review, prompting for a
             //! location if none is set.
             void saveReview();

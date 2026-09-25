@@ -4,6 +4,8 @@
 #include <djv/UI/ColorResetDialog.h>
 
 #include <ftk/UI/CheckBox.h>
+
+#include <array>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
@@ -21,6 +23,7 @@ namespace djv
             protected:
                 void _init(
                     const std::shared_ptr<ftk::Context>& context,
+                    const ColorResetGroups& set,
                     const std::shared_ptr<IWidget>& parent)
                 {
                     IMouseWidget::_init(context, "djv::ui::ColorResetWidget", parent);
@@ -53,10 +56,26 @@ namespace djv
                     vLayout->setMarginRole(ftk::SizeRole::Margin);
                     vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     label->setParent(vLayout);
-                    for (const auto& checkBox : _checkBoxes)
+                    // Ticked where there is something to reset. A section
+                    // already at its default cannot be ticked: resetting it
+                    // would do nothing, and leaving it ticked said the
+                    // opposite (DJV #687).
+                    const std::array<bool, 4> setGroups =
                     {
-                        checkBox->setChecked(true);
-                        checkBox->setParent(vLayout);
+                        set.ocio,
+                        set.lut,
+                        set.color,
+                        set.levels
+                    };
+                    for (size_t i = 0; i < _checkBoxes.size(); ++i)
+                    {
+                        _checkBoxes[i]->setChecked(setGroups[i]);
+                        _checkBoxes[i]->setEnabled(setGroups[i]);
+                        if (!setGroups[i])
+                        {
+                            _checkBoxes[i]->setTooltip("Already at its defaults.");
+                        }
+                        _checkBoxes[i]->setParent(vLayout);
                     }
                     ftk::Divider::create(context, ftk::Orientation::Vertical, _layout);
                     auto hLayout = ftk::HorizontalLayout::create(context, _layout);
@@ -106,10 +125,11 @@ namespace djv
             public:
                 static std::shared_ptr<ColorResetWidget> create(
                     const std::shared_ptr<ftk::Context>& context,
+                    const ColorResetGroups& set,
                     const std::shared_ptr<IWidget>& parent)
                 {
                     auto out = std::shared_ptr<ColorResetWidget>(new ColorResetWidget);
-                    out->_init(context, parent);
+                    out->_init(context, set, parent);
                     return out;
                 }
 
@@ -167,6 +187,7 @@ namespace djv
 
         void ColorResetDialog::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const ColorResetGroups& set,
             const std::shared_ptr<IWidget>& parent)
         {
             IDialog::_init(context, "djv::ui::ColorResetDialog", parent);
@@ -174,7 +195,7 @@ namespace djv
 
             setTitle("Reset Color");
 
-            p.widget = ColorResetWidget::create(context, shared_from_this());
+            p.widget = ColorResetWidget::create(context, set, shared_from_this());
 
             p.widget->setCallback(
                 [this](const ColorResetGroups& value)
@@ -204,10 +225,11 @@ namespace djv
 
         std::shared_ptr<ColorResetDialog> ColorResetDialog::create(
             const std::shared_ptr<ftk::Context>& context,
+            const ColorResetGroups& set,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ColorResetDialog>(new ColorResetDialog);
-            out->_init(context, parent);
+            out->_init(context, set, parent);
             return out;
         }
 

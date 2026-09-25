@@ -8,7 +8,6 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <djv/App/MainWindow.h>
-#include <djv/UI/ColorResetDialog.h>
 
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
@@ -80,7 +79,6 @@ namespace djv
             std::optional<Enables> bypassed;
             bool switching = false;
 
-            std::shared_ptr<ui::ColorResetDialog> resetDialog;
 
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutObserver;
@@ -265,37 +263,15 @@ namespace djv
             // which a script runs with nobody there to answer.
             _actions["Reset"] = ftk::Action::create(
                 "Reset Color",
-                [this, appWeak]
+                [appWeak]
                 {
-                    FTK_P();
-                    auto app = appWeak.lock();
-                    if (!app || p.resetDialog)
+                    if (auto app = appWeak.lock())
                     {
-                        return;
+                        // The dialog belongs to the application: the color
+                        // tool offers it as well, which is where somebody
+                        // looks for it first (DJV #687).
+                        app->colorResetDialog();
                     }
-                    p.resetDialog = ui::ColorResetDialog::create(app->getContext());
-                    p.resetDialog->open(app->getMainWindow());
-                    std::weak_ptr<models::CommandsModel> commandsWeak = app->getCommandsModel();
-                    p.resetDialog->setCallback(
-                        [commandsWeak](const ui::ColorResetGroups& value)
-                        {
-                            if (auto commandsModel = commandsWeak.lock())
-                            {
-                                commandsModel->exec(
-                                    "Color/Reset",
-                                    {
-                                        { "ocio", value.ocio },
-                                        { "lut", value.lut },
-                                        { "color", value.color },
-                                        { "levels", value.levels }
-                                    });
-                            }
-                        });
-                    p.resetDialog->setCloseCallback(
-                        [this]
-                        {
-                            _p->resetDialog.reset();
-                        });
                 });
 
             // Register the shortcuts.

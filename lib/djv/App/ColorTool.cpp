@@ -7,6 +7,8 @@
 #include <djv/UI/ColorWidgets.h>
 
 #include <ftk/UI/CheckBox.h>
+#include <ftk/UI/Divider.h>
+#include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 
 namespace djv
@@ -16,6 +18,7 @@ namespace djv
         struct ColorTool::Private
         {
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
+            std::shared_ptr<ftk::PushButton> resetButton;
         };
 
         void ColorTool::_init(
@@ -59,7 +62,36 @@ namespace djv
             p.bellows["Levels"] = ftk::Bellows::create(context, "Levels", layout);
             p.bellows["Levels"]->setWidget(levelsWidget);
             p.bellows["Levels"]->setToolWidget(levelsWidget->getEnabledCheckBox());
-            _setWidget(layout);
+            // Reset where the settings being reset are, as well as in the
+            // menu: the tool is where somebody looks for it (DJV #687). The
+            // same dialog either way.
+            p.resetButton = ftk::PushButton::create(context, "Reset");
+            p.resetButton->setTooltip(
+                "Reset the color settings to their defaults, choosing which "
+                "sections to reset.");
+
+            // No scroll area of its own, so the tool stays the height of
+            // its sections rather than taking the panel; the panel scrolls.
+            auto toolLayout = ftk::VerticalLayout::create(context);
+            toolLayout->setSpacingRole(ftk::SizeRole::None);
+            layout->setParent(toolLayout);
+            ftk::Divider::create(context, ftk::Orientation::Vertical, toolLayout);
+            auto hLayout = ftk::HorizontalLayout::create(context, toolLayout);
+            hLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            hLayout->addSpacer(ftk::Stretch::Expanding);
+            p.resetButton->setParent(hLayout);
+            _setWidget(toolLayout);
+
+            std::weak_ptr<App> appWeak(app);
+            p.resetButton->setClickedCallback(
+                [appWeak]
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->colorResetDialog();
+                    }
+                });
 
             _loadSettings(p.bellows);
         }
