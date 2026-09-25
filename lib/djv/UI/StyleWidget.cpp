@@ -6,7 +6,6 @@
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/ColorSwatch.h>
-#include <ftk/UI/FileEdit.h>
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/PushButton.h>
@@ -21,7 +20,6 @@ namespace djv
         struct StyleSettingsWidget::Private
         {
             std::shared_ptr<models::SettingsModel> settings;
-            std::vector<std::string> fonts;
 
             const std::vector<float> displayScales = ftk::getDisplayScales();
 
@@ -29,12 +27,9 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> brightnessSlider;
             std::shared_ptr<ftk::FloatEditSlider> contrastSlider;
             std::shared_ptr<ftk::ComboBox> displayScaleComboBox;
-            std::map<ftk::FontType, std::shared_ptr<ftk::ComboBox> > fontComboBoxes;
-            std::vector<std::shared_ptr<ftk::FileEdit> > fontFileEdits;
             std::shared_ptr<ftk::CheckBox> tooltipsCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
-            std::shared_ptr<ftk::ListObserver<std::string> > fontsObserver;
             std::shared_ptr<ftk::Observer<models::StyleSettings> > styleObserver;
             std::shared_ptr<ftk::Observer<models::MiscSettings> > miscObserver;
         };
@@ -69,25 +64,6 @@ namespace djv
             p.displayScaleComboBox = ftk::ComboBox::create(context, labels);
             p.displayScaleComboBox->setHStretch(ftk::Stretch::Expanding);
 
-            const auto fontEnums = ftk::getFontTypeEnums();
-            for (size_t i = 0; i < fontEnums.size(); ++i)
-            {
-                auto comboBox = ftk::ComboBox::create(context);
-                if (0 == i)
-                {
-                    setScreenshotTag(comboBox, "Style.Font");
-                }
-                p.fontComboBoxes[fontEnums[i]] = comboBox;
-            }
-            for (size_t i = 0; i < 4; ++i)
-            {
-                auto fontFileEdit = ftk::FileEdit::create(context);
-                if (0 == i)
-                {
-                    setScreenshotTag(fontFileEdit, "Style.FontFile");
-                }
-                p.fontFileEdits.push_back(fontFileEdit);
-            }
 
             // Whether the interface explains itself is of a piece with how
             // it looks; it was the last thing in a section called
@@ -104,30 +80,7 @@ namespace djv
             p.layout->addRow("Brightness:", p.brightnessSlider);
             p.layout->addRow("Contrast:", p.contrastSlider);
             p.layout->addRow("Display scale:", p.displayScaleComboBox);
-            const auto fontLabels = ftk::getFontTypeLabels();
-            for (const auto font : fontEnums)
-            {
-                p.layout->addRow(ftk::Format("{0} font:").arg(
-                    fontLabels[static_cast<int>(font)]), p.fontComboBoxes[font]);
-            }
-            for (size_t i = 0; i < p.fontFileEdits.size(); ++i)
-            {
-                p.layout->addRow("Font file:", p.fontFileEdits[i]);
-            }
             p.layout->addRow("Enable tooltips:", p.tooltipsCheckBox);
-
-            auto fontSystem = context->getSystem<ftk::FontSystem>();
-            p.fontsObserver = ftk:: ListObserver<std::string>::create(
-                fontSystem->observeFonts(),
-                [this](const std::vector<std::string>& value)
-                {
-                    FTK_P();
-                    p.fonts = value;
-                    for (const auto font : ftk::getFontTypeEnums())
-                    {
-                        p.fontComboBoxes[font]->setItems(value);
-                    }
-                });
 
             p.miscObserver = ftk::Observer<models::MiscSettings>::create(
                 settings->observeMisc(),
@@ -195,30 +148,6 @@ namespace djv
                     p.settings->setStyle(settings);
                 });
 
-            for (const auto font : fontEnums)
-            {
-                p.fontComboBoxes[font]->setIndexCallback(
-                    [this, font](int index)
-                    {
-                        FTK_P();
-                        auto settings = p.settings->getStyle();
-                        settings.fonts[font] = p.fonts[index];
-                        p.settings->setStyle(settings);
-                    });
-            }
-
-            for (int i = 0; i < static_cast<int>(p.fontFileEdits.size()); ++i)
-            {
-                p.fontFileEdits[i]->setCallback(
-                    [this, i](const ftk::Path& value)
-                    {
-                        FTK_P();
-                        auto settings = p.settings->getStyle();
-                        settings.fontFiles.resize(i + 1);
-                        settings.fontFiles[i] = value.get();
-                        p.settings->setStyle(settings);
-                    });
-            }
         }
 
         StyleSettingsWidget::StyleSettingsWidget() :
@@ -258,17 +187,6 @@ namespace djv
                 (i - p.displayScales.begin()) + 1 :
                 -1);
 
-            for (const auto& i : value.fonts)
-            {
-                const auto j = std::find(p.fonts.begin(), p.fonts.end(), i.second);
-                p.fontComboBoxes[i.first]->setCurrentIndex(j != p.fonts.end() ? (j - p.fonts.begin()) : -1);
-            }
-            for (size_t i = 0; i < p.fontFileEdits.size(); ++i)
-            {
-                p.fontFileEdits[i]->setPath(i < value.fontFiles.size() ?
-                    ftk::Path(value.fontFiles[i]) :
-                    ftk::Path());
-            }
         }
     }
 }

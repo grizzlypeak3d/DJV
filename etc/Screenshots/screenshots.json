@@ -1338,40 +1338,6 @@
       ]
     },
     {
-      "id": "custom-fonts",
-      "window": {
-        "w": 900,
-        "h": 600,
-        "splitter2": 0.5
-      },
-      "setup": [
-        {
-          "open": "etc/SampleData/\u5927\u5e73\u539f.jpg"
-        },
-        {
-          "view": {
-            "hud": true
-          }
-        },
-        {
-          "tool": "Settings",
-          "expand": [
-            "Style"
-          ]
-        }
-      ],
-      "annotate": [
-        {
-          "id": "Style.Font",
-          "caption": "Select font"
-        },
-        {
-          "id": "Style.FontFile",
-          "caption": "Font file"
-        }
-      ]
-    },
-    {
       "id": "review-tool",
       "window": {
         "w": 1000,

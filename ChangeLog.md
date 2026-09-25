@@ -28,6 +28,8 @@ Changes:
 * The OCIO environment variable is used to initialize the OCIO settings.
 * Add a -mediaReference command line option.
 * The view's color buffer defaults to RGBA F16.
+* Custom fonts are gone: the interface uses the fonts DJV ships, and the
+  bundled pan-CJK font renders CJK file names without any setting up.
 * "Enable tooltips" moved to the Style settings; the Miscellaneous
   settings are gone, along with the setup dialog check box that only
   showed the dialog once.
@@ -43,6 +45,8 @@ Changes:
     - OpenAPV 1.1.1.0
 
 Fixes:
+* The heads up display no longer reports the color and pixel of a file
+  that has been closed.
 * A file with a mono audio stream per channel plays all of the channels.
 * A still image paired with an audio file lasts as long as the audio.
 * Settings fixes for running multiple application instances.

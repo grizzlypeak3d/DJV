@@ -70,14 +70,6 @@ namespace djv
             modifier(modifier)
         {}
 
-        StyleSettings::StyleSettings()
-        {
-            for (const auto font : ftk::getFontTypeEnums())
-            {
-                fonts[font] = ftk::getDefaultFont(font);
-            }
-        }
-
         FTK_ENUM_IMPL(
             TimelineThumbnailSize,
             "Small",
@@ -1017,11 +1009,6 @@ namespace djv
             json["DisplayScale"] = value.displayScale;
             json["ColorControls"] = value.colorControls;
             json["ColorStyle"] = to_string(value.colorStyle);
-            for (auto i : value.fonts)
-            {
-                json["Fonts"][ftk::getLabel(i.first)] = i.second;
-            }
-            json["FontFiles"] = value.fontFiles;
         }
 
         void to_json(nlohmann::json& json, const TimelineSettings& value)
@@ -1236,17 +1223,10 @@ namespace djv
             // there used to be, is left at the default.
             from_string(json.at("ColorStyle").get<std::string>(), value.colorStyle);
             json.at("ColorControls").get_to(value.colorControls);
-            for (auto i = json.at("Fonts").begin(); i != json.at("Fonts").end(); ++i)
-            {
-                ftk::FontType font = ftk::FontType::Regular;
-                from_string(i.key(), font);
-                i.value().get_to(value.fonts[font]);
-            }
-            value.fontFiles.clear();
-            for (auto i = json.at("FontFiles").begin(); i != json.at("FontFiles").end(); ++i)
-            {
-                value.fontFiles.push_back(*i);
-            }
+            // "Fonts" and "FontFiles" are read by nothing now: the fonts are
+            // the ones the application ships, and a settings file written
+            // when they could be chosen keeps the keys until it is saved
+            // again (DJV #898, #901).
         }
 
         void from_json(const nlohmann::json& json, TimelineSettings& value)

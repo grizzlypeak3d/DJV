@@ -303,14 +303,10 @@ namespace djv
         //! Style settings.
         struct DJV_MODELS_API_TYPE StyleSettings
         {
-            DJV_MODELS_API StyleSettings();
-
             //! Zero follows the display.
             float displayScale = 0.F;
             ftk::ColorControls colorControls;
             ftk::ColorStyle colorStyle = ftk::ColorStyle::Dark;
-            std::map<ftk::FontType, std::string> fonts;
-            std::vector<std::string> fontFiles;
 
             bool operator == (const StyleSettings&) const = default;
         };
