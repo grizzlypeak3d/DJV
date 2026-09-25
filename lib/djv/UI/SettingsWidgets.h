@@ -152,30 +152,6 @@ namespace djv
             FTK_PRIVATE();
         };
 
-        //! Miscellaneous settings widget.
-        class DJV_UI_API_TYPE MiscSettingsWidget : public ISettingsWidget
-        {
-            FTK_NON_COPYABLE(MiscSettingsWidget);
-
-        protected:
-            void _init(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::SettingsModel>&,
-                const std::shared_ptr<IWidget>& parent);
-
-            MiscSettingsWidget();
-
-        public:
-            DJV_UI_API virtual ~MiscSettingsWidget();
-
-            DJV_UI_API static std::shared_ptr<MiscSettingsWidget> create(
-                const std::shared_ptr<ftk::Context>&,
-                const std::shared_ptr<models::SettingsModel>&,
-                const std::shared_ptr<IWidget>& parent = nullptr);
-
-        private:
-            FTK_PRIVATE();
-        };
 
         //! Mouse settings widget.
         class DJV_UI_API_TYPE MouseSettingsWidget : public ISettingsWidget

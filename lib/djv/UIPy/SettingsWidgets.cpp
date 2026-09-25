@@ -57,7 +57,6 @@ namespace djv
             settingsWidget<CacheSettingsWidget>(m, "CacheSettingsWidget");
             settingsWidget<FileBrowserSettingsWidget>(m, "FileBrowserSettingsWidget");
             settingsWidget<OTIOSettingsWidget>(m, "OTIOSettingsWidget");
-            settingsWidget<MiscSettingsWidget>(m, "MiscSettingsWidget");
             settingsWidget<MouseSettingsWidget>(m, "MouseSettingsWidget");
             settingsWidget<PlaybackSettingsWidget>(m, "PlaybackSettingsWidget");
             settingsWidget<ShortcutsSettingsWidget>(m, "ShortcutsSettingsWidget");

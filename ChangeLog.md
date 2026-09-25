@@ -28,6 +28,9 @@ Changes:
 * The OCIO environment variable is used to initialize the OCIO settings.
 * Add a -mediaReference command line option.
 * The view's color buffer defaults to RGBA F16.
+* "Enable tooltips" moved to the Style settings; the Miscellaneous
+  settings are gone, along with the setup dialog check box that only
+  showed the dialog once.
 * The Color tool has a Reset button, and the reset dialog offers only the
   sections that have something to reset.
 * The window title shows the review or file name. Contributed by timurhai.

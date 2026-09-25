@@ -143,11 +143,6 @@ namespace djv
             p.bellows["USD"]->setWidget(vLayout2);
 #endif // TLRENDER_USD
 
-            p.bellows["Misc"] = ftk::Bellows::create(context, "Miscellaneous", vLayout);
-            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
-            vLayout2->setMarginRole(ftk::SizeRole::Margin);
-            ui::MiscSettingsWidget::create(context, settingsModel, vLayout2);
-            p.bellows["Misc"]->setWidget(vLayout2);
 
             p.saveButton = ftk::PushButton::create(context, "Save");
             p.saveButton->setTooltip("Save the settings. Settings are also saved on exit.");

@@ -3,6 +3,7 @@
 
 #include <djv/UI/SettingsWidgets.h>
 
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/FileEdit.h>
@@ -30,10 +31,12 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> displayScaleComboBox;
             std::map<ftk::FontType, std::shared_ptr<ftk::ComboBox> > fontComboBoxes;
             std::vector<std::shared_ptr<ftk::FileEdit> > fontFileEdits;
+            std::shared_ptr<ftk::CheckBox> tooltipsCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::ListObserver<std::string> > fontsObserver;
             std::shared_ptr<ftk::Observer<models::StyleSettings> > styleObserver;
+            std::shared_ptr<ftk::Observer<models::MiscSettings> > miscObserver;
         };
 
         void StyleSettingsWidget::_init(
@@ -86,6 +89,13 @@ namespace djv
                 p.fontFileEdits.push_back(fontFileEdit);
             }
 
+            // Whether the interface explains itself is of a piece with how
+            // it looks; it was the last thing in a section called
+            // "Miscellaneous", which is where a setting goes to hide
+            // (DJV #899). The setting is stored where it always was.
+            p.tooltipsCheckBox = ftk::CheckBox::create(context);
+            p.tooltipsCheckBox->setHStretch(ftk::Stretch::Expanding);
+
             p.layout = ftk::FormLayout::create(context);
 
             _setWidget(p.layout);
@@ -104,6 +114,7 @@ namespace djv
             {
                 p.layout->addRow("Font file:", p.fontFileEdits[i]);
             }
+            p.layout->addRow("Enable tooltips:", p.tooltipsCheckBox);
 
             auto fontSystem = context->getSystem<ftk::FontSystem>();
             p.fontsObserver = ftk:: ListObserver<std::string>::create(
@@ -116,6 +127,22 @@ namespace djv
                     {
                         p.fontComboBoxes[font]->setItems(value);
                     }
+                });
+
+            p.miscObserver = ftk::Observer<models::MiscSettings>::create(
+                settings->observeMisc(),
+                [this](const models::MiscSettings& value)
+                {
+                    _p->tooltipsCheckBox->setChecked(value.tooltipsEnabled);
+                });
+
+            p.tooltipsCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    auto settings = p.settings->getMisc();
+                    settings.tooltipsEnabled = value;
+                    p.settings->setMisc(settings);
                 });
 
             p.styleObserver = ftk::Observer<models::StyleSettings>::create(
