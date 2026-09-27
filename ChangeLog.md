@@ -3,6 +3,7 @@
 Changes:
 * Settings and logs move to the application support directory.
 * System Information shows the settings and log paths.
+* System Information shows the desktop on Linux.
 * The Linux package has a desktop entry and icons.
 * The HUD shows the file name of the current image of a sequence.
 * Opening one image of a sequence starts playback at that image.

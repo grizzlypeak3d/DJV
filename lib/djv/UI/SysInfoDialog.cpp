@@ -117,6 +117,12 @@ namespace djv
                     "Video driver: ",
                     glSystem->getVideoDriver()));
             }
+            // Beside the video driver, which it explains: x11 on a Wayland
+            // desktop is XWayland.
+            if (!sysInfo.desktop.empty())
+            {
+                labels.push_back(std::make_pair("Desktop: ", sysInfo.desktop));
+            }
             // The libraries this build was made with. The plugins below
             // name the I/O libraries; these are the rest, and they are what
             // tells a build against system packages from a packaged one.
