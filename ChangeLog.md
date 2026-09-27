@@ -44,6 +44,9 @@ Changes:
 * The left and right arrow keys move between the menus.
 * The file browser filters by kind of file: images, movies, audio, and so
   on.
+* On a touch screen two fingers pan and pinch zoom the view and the
+  timeline.
+* Building on the Raspberry Pi is documented.
 * Library updates:
     - FFmpeg 9.0.1
     - OpenAPV 1.1.1.0

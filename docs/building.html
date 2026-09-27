@@ -78,6 +78,22 @@ scl enable gcc-toolset-13 bash</code></pre>
 sh DJV/sbuild-linux.sh</code></pre>
 <p>Run the application:</p>
 <pre><code>build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg</code></pre>
+<h3 id="raspberry-pi">Raspberry Pi</h3>
+<p>The Raspberry Pi 5 builds with the Debian packages above. Its graphics driver offers OpenGL ES 3.1 but only OpenGL 3.1 on the desktop, and DJV's desktop build needs 4.1, so the OpenGL ES build is selected in <code>etc/Config/local.cmake</code>:</p>
+<pre><code>set(ftk_API "GLES_3" CACHE STRING "")</code></pre>
+<p>Some of the largest files take close to 1 GB of memory each to compile, so on an 8 GB board the build is limited to three jobs:</p>
+<pre><code>CMAKE_BUILD_PARALLEL_LEVEL=3 sh DJV/sbuild-linux.sh</code></pre>
+<p>The AV1 and APV libraries are among the slowest dependencies to build, and can be left out to save time. Without libaom there is no AV1 playback: FFmpeg's own AV1 decoder works only with hardware decoding.</p>
+<pre><code>set(TLRENDER_AOM OFF CACHE BOOL "")
+set(TLRENDER_SVTAV1 OFF CACHE BOOL "")
+set(TLRENDER_OPENAPV OFF CACHE BOOL "")</code></pre>
+<p>What differs from a desktop:</p>
+<ul>
+<li>OpenGL ES has no 16-bit textures, so images with 16 bits per channel, and video with more than 8, are not displayed.</li>
+<li>There is no hardware decoding: the Pi's only video decoder is for HEVC, and FFmpeg does not support it without Raspberry Pi's patches. Video is decoded on the CPU.</li>
+<li>The display scale is set from the monitor's size and resolution. On the Raspberry Pi Touch Display 2 it comes out at 2; <code>-displayScale</code> sets it on the command line.</li>
+<li>On a touch screen one finger acts as the mouse, and two fingers pan and pinch to zoom the view and the timeline.</li>
+</ul>
 <h2 id="macos">macOS</h2>
 <p>Requirements: Git, Xcode, and CMake 3.31.</p>
 <p>Clone the repository and run the super build script:</p>
