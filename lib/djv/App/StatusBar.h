@@ -47,10 +47,17 @@ namespace djv
 
             DJV_APP_API ftk::Size2I getSizeHint() const override;
             DJV_APP_API void setGeometry(const ftk::Box2I&) override;
+            DJV_APP_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
+            DJV_APP_API void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
+            DJV_APP_API void mouseLeaveEvent() override;
+            DJV_APP_API void mouseMoveEvent(ftk::MouseMoveEvent&) override;
             DJV_APP_API void mousePressEvent(ftk::MouseClickEvent&) override;
             DJV_APP_API void mouseReleaseEvent(ftk::MouseClickEvent&) override;
 
         private:
+            std::string _getTool(const ftk::V2I&) const;
+            ftk::Box2I _getToolBox(const std::string&) const;
+
             void _infoUpdate(const ftk::Path&, const tl::IOInfo&, int videoLayer);
             void _messagesUpdate();
 

@@ -181,6 +181,16 @@ namespace djv
             return out;
         }
 
+        bool StatusIndicator::isSegment() const
+        {
+            return true;
+        }
+
+        void StatusIndicator::setSegment(ftk::ColorRole background, const std::array<bool, 4>& value)
+        {
+            _p->button->setSegment(background, value);
+        }
+
         bool StatusIndicator::_hasIndicator() const
         {
             FTK_P();
@@ -304,10 +314,9 @@ namespace djv
         void StatusIndicator::_indicatorUpdate()
         {
             FTK_P();
-            p.button->setBackgroundRole(
-                _hasIndicator() ?
-                ftk::ColorRole::Checked :
-                ftk::ColorRole::None);
+            // Checked, for the tint the other buttons use: the button is not
+            // checkable, so clicking it still only opens the popup.
+            p.button->setChecked(_hasIndicator());
             if (p.popup)
             {
                 p.popup->setIndicators(_getIndicatorValues());

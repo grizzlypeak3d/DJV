@@ -1105,6 +1105,10 @@ class App(ftk.App):
         self._styleSettingsObserver = djv.models.StyleSettingsObserver(
             self._settingsModel.observeStyle,
             lambda value: selfWeak()._styleUpdate(value))
+        self._miscSettingsObserver = djv.models.MiscSettingsObserver(
+            self._settingsModel.observeMisc,
+            lambda value: setattr(
+                selfWeak(), "tooltipsEnabled", value.tooltipsEnabled))
 
         self._window = MainWindow.MainWindow(self.context, self)
 
@@ -1338,17 +1342,8 @@ class App(ftk.App):
             self._player.get().mute = value
 
     def _styleUpdate(self, value):
-        fontSystem = self.fontSystem
-        fonts = fontSystem.fonts
-        for font in value.fontFiles:
-            if font:
-                path = ftk.Path(font)
-                fontName = path.base + path.num
-                if fontName not in fonts:
-                    fontSystem.addFont(fontName, font)
         style = self.style
         style.colorControls = value.colorControls
-        style.fonts = value.fonts
         self.colorStyle = value.colorStyle
         # Only apply the display scale when the setting itself changed: the
         # style settings are redelivered whenever any of them change, and

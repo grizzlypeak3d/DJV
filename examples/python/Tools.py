@@ -143,7 +143,7 @@ class AudioTool(IToolWidget):
             lambda value: setattr(appWeak().getAudioModel(), "syncOffset", value))
 
         selfWeak = weakref.ref(self)
-        self._devicesObserver = djv.models.AudioDeviceIDListObserver(
+        self._devicesObserver = tl.AudioDeviceIDListObserver(
             audioModel.observeDevices,
             lambda devices: selfWeak()._devicesUpdate(devices))
         self._deviceObserver = tl.AudioDeviceIDObserver(
@@ -821,9 +821,6 @@ class SettingsTool(IToolWidget):
             sections.append(("FFmpeg Command", [
                 newFileNote,
                 djv.ui.FFmpegCmdSettingsWidget(context, settingsModel)]))
-        sections.append(
-            ("Miscellaneous",
-             [djv.ui.MiscSettingsWidget(context, settingsModel)]))
         self._bellows = {}
         for title, widgets in sections:
             vLayout = ftk.VerticalLayout(context)
@@ -1132,20 +1129,32 @@ class ReviewTool(IToolWidget):
         self._colorSwatch.sizeRole = ftk.SizeRole.MarginLarge
         self._colorSwatch.color = drawModel.color
         self._colorSwatch.tooltip = "The stroke colour."
-        self._penButton = ftk.ToolButton(context, toolLayout)
+        # Grouped: the draw tools, the history, and the clear.
+        drawToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, toolLayout)
+        drawToolBar.grouped = True
+        self._penButton = ftk.ToolButton(context)
         self._penButton.icon = "DrawTool"
+        drawToolBar.addWidget(self._penButton)
         # Deliberately not checkable: a checkable button flips its own
         # state after the callback, which would invert whatever the
         # model observer had just set. The model stays the only source
         # of truth and the observer drives the highlight.
-        self._eraserButton = ftk.ToolButton(context, toolLayout)
+        self._eraserButton = ftk.ToolButton(context)
         self._eraserButton.icon = "Eraser"
+        drawToolBar.addWidget(self._eraserButton)
         toolLayout.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
-        self._undoButton = ftk.ToolButton(context, toolLayout)
+        historyToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, toolLayout)
+        historyToolBar.grouped = True
+        self._undoButton = ftk.ToolButton(context)
         self._undoButton.icon = "Undo"
-        self._redoButton = ftk.ToolButton(context, toolLayout)
+        historyToolBar.addWidget(self._undoButton)
+        self._redoButton = ftk.ToolButton(context)
         self._redoButton.icon = "Redo"
-        self._clearDrawingButton = ftk.ToolButton(context, "Clear", toolLayout)
+        historyToolBar.addWidget(self._redoButton)
+        clearToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, toolLayout)
+        clearToolBar.grouped = True
+        self._clearDrawingButton = ftk.ToolButton(context, "Clear")
+        clearToolBar.addWidget(self._clearDrawingButton)
         sizeLayout = ftk.HorizontalLayout(context, drawingWidget)
         sizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
         sizeLabel = ftk.Label(context, "Size:", sizeLayout)

@@ -59,7 +59,7 @@ class Widget(ftk.IContainer):
         self._currentTimeEdit.tooltip = "Current time."
 
         self._durationLabel = tl.ui.TimeLabel(context, app.getTimeUnitsModel())
-        self._durationLabel.setMarginRole(ftk.SizeRole.MarginInside)
+        self._durationLabel.setMarginRole(ftk.SizeRole.MarginSmall)
         self._durationLabel.tooltip = \
             "Duration of the timeline or the in/out range if set."
 
@@ -70,15 +70,12 @@ class Widget(ftk.IContainer):
         self._speedButton.popupIcon = True
         self._speedButton.tooltip = "Playback speed."
 
-        self._audioLabel = ftk.Label(context)
-        self._audioLabel.font = ftk.FontType.Mono
-        self._audioLabel.hMarginRole = ftk.SizeRole.MarginInside
-        self._audioLabel.tooltip = "Audio volume."
-
+        # The volume is the button's text, beside the icon.
         self._audioButton = ftk.ToolButton(context)
         self._audioButton.icon = "Volume"
+        self._audioButton.font = ftk.FontType.Mono
         self._audioButton.popupIcon = True
-        self._audioButton.tooltip = "Audio controls."
+        self._audioButton.tooltip = "Audio volume and controls."
 
         self._indicator = djv.ui.StatusIndicator(
             context,
@@ -88,50 +85,48 @@ class Widget(ftk.IContainer):
             app.getFilesModel(),
             app.getToolsModel())
 
-        # Grouped like the top tool bar: the groups separated by
-        # dividers, with the tool bar's spacing between them.
+        # Grouped like the top tool bar: the groups draw rounded
+        # backgrounds in place of dividers between them.
         self._layout = ftk.HorizontalLayout(context)
-        self._layout.marginRole = ftk.SizeRole.MarginInside
+        self._layout.marginRole = ftk.SizeRole.MarginSmall
+        self._layout.spacingRole = ftk.SizeRole.SpacingSmall
         hLayout = ftk.HorizontalLayout(context, self._layout)
-        hLayout.spacingRole = ftk.SizeRole.Spacing
-        hLayout2 = ftk.HorizontalLayout(context, hLayout)
-        hLayout2.spacingRole = ftk.SizeRole._None
-        self._buttons["Reverse"].parent = hLayout2
-        self._buttons["Stop"].parent = hLayout2
-        self._buttons["Forward"].parent = hLayout2
-        self._loopWidget.parent = hLayout2
-        self._playbackShuttle.parent = hLayout2
-        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
-        hLayout2 = ftk.HorizontalLayout(context, hLayout)
-        hLayout2.spacingRole = ftk.SizeRole._None
-        self._buttons["Start"].parent = hLayout2
-        self._buttons["Prev"].parent = hLayout2
-        self._buttons["Next"].parent = hLayout2
-        self._buttons["End"].parent = hLayout2
-        self._frameShuttle.parent = hLayout2
-        self._reviewDivider = ftk.Divider(
-            context, ftk.Orientation.Horizontal, hLayout)
+        hLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        transport = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
+        transport.grouped = True
+        transport.addWidget(self._buttons["Reverse"])
+        transport.addWidget(self._buttons["Stop"])
+        transport.addWidget(self._buttons["Forward"])
+        transport.addWidget(self._loopWidget)
+        transport.addWidget(self._playbackShuttle)
+        frames = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
+        frames.grouped = True
+        frames.addWidget(self._buttons["Start"])
+        frames.addWidget(self._buttons["Prev"])
+        frames.addWidget(self._buttons["Next"])
+        frames.addWidget(self._buttons["End"])
+        frames.addWidget(self._frameShuttle)
         # The review jumps sit with the frame navigation: they are the
         # same gesture, on the frames that carry a note or a drawing --
         # and the group is only there when such a frame exists.
-        self._reviewLayout = ftk.HorizontalLayout(context, hLayout)
-        self._reviewLayout.spacingRole = ftk.SizeRole._None
-        self._buttons["PrevFrame"].parent = self._reviewLayout
-        self._buttons["NextFrame"].parent = self._reviewLayout
-        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
-        hLayout2 = ftk.HorizontalLayout(context, hLayout)
-        hLayout2.spacingRole = ftk.SizeRole.SpacingSmall
-        self._currentTimeEdit.parent = hLayout2
-        self._durationLabel.parent = hLayout2
-        self._timeUnitsWidget.parent = hLayout2
-        self._speedButton.parent = hLayout2
+        self._reviewToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
+        self._reviewToolBar.grouped = True
+        self._reviewToolBar.addWidget(self._buttons["PrevFrame"])
+        self._reviewToolBar.addWidget(self._buttons["NextFrame"])
+        time = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
+        time.grouped = True
+        time.addWidget(self._currentTimeEdit)
+        time.addWidget(self._durationLabel)
+        time.addWidget(self._timeUnitsWidget)
+        time.addWidget(self._speedButton)
         spacer = ftk.Spacer(context, ftk.Orientation.Horizontal, self._layout)
         spacer.hStretch = ftk.Stretch.Expanding
-        hLayout2 = ftk.HorizontalLayout(context, self._layout)
-        hLayout2.spacingRole = ftk.SizeRole.SpacingSmall
-        self._audioLabel.parent = hLayout2
-        self._audioButton.parent = hLayout2
-        self._indicator.parent = self._layout
+        audio = ftk.ToolBar(context, ftk.Orientation.Horizontal, self._layout)
+        audio.grouped = True
+        audio.addWidget(self._audioButton)
+        indicator = ftk.ToolBar(context, ftk.Orientation.Horizontal, self._layout)
+        indicator.grouped = True
+        indicator.addWidget(self._indicator)
         self._setWidget(self._layout)
 
         self._loopWidget.setCallback(Util.weak(self._loopCallback))
@@ -162,9 +157,7 @@ class Widget(ftk.IContainer):
             lambda value: selfWeak()._muteUpdate(value))
 
     def _reviewMarkersUpdate(self, markers):
-        visible = len(markers) > 0
-        self._reviewDivider.setVisible(visible)
-        self._reviewLayout.setVisible(visible)
+        self._reviewToolBar.setVisible(len(markers) > 0)
 
     def focusCurrentFrame(self):
         if self._currentTimeEdit.enabled:
@@ -291,7 +284,7 @@ class Widget(ftk.IContainer):
         self._durationLabel.value = self._mediaDuration(value)
 
     def _volumeUpdate(self, value):
-        self._audioLabel.text = "{:3d}%".format(int(value * 100.0))
+        self._audioButton.text = "{:3d}%".format(int(value * 100.0))
 
     def _muteUpdate(self, value):
         self._audioButton.icon = "Mute" if value else "Volume"

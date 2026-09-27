@@ -74,11 +74,9 @@ namespace djv
             {
                 const auto j = values.find(i.first);
                 const bool inUse = j != values.end() && j->second;
-                // Lit rather than checked: clicking goes to the controls,
-                // and a checked button would promise to turn the option off.
-                i.second->setButtonRole(inUse ?
-                    ftk::ColorRole::Checked :
-                    ftk::ColorRole::None);
+                // Checked for the tint, but not checkable: clicking goes to
+                // the controls rather than turning the option off.
+                i.second->setChecked(inUse);
                 i.second->setEnabled(inUse);
             }
         }

@@ -40,6 +40,8 @@ Changes:
 * The movie export says when a preset writes no audio.
 * Movies can be exported to Matroska files: FFV1, AV1, H.264, HEVC, and
   VP9 are written to ".mkv".
+* Style updates.
+* The left and right arrow keys move between the menus.
 * Library updates:
     - FFmpeg 9.0.1
     - OpenAPV 1.1.1.0

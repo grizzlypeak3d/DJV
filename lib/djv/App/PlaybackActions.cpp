@@ -395,7 +395,9 @@ namespace djv
         void PlaybackActions::_playbackUpdate(tl::Playback value)
         {
             FTK_P();
-            _actions["Stop"]->setChecked(tl::Playback::Stop == value);
+            // Stopped is the idle state, so nothing is lit for it; the
+            // direction lights while playing.
+            _actions["Stop"]->setChecked(false);
             _actions["Forward"]->setChecked(tl::Playback::Forward == value);
             _actions["Reverse"]->setChecked(tl::Playback::Reverse == value);
         }

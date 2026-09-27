@@ -59,7 +59,6 @@
 #include <tlRender/GL/Render.h>
 
 #include <ftk/UI/ButtonGroup.h>
-#include <ftk/UI/Divider.h>
 #include <ftk/UI/IconSystem.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/Menu.h>
@@ -153,7 +152,7 @@ namespace djv
             std::shared_ptr<ui::SetupDialog> setupDialog;
             std::shared_ptr<ui::AboutDialog> aboutDialog;
             std::shared_ptr<ui::SysInfoDialog> sysInfoDialog;
-            std::map<std::string, std::shared_ptr<ftk::Divider> > dividers;
+            std::shared_ptr<ftk::HorizontalLayout> toolBarLayout;
             std::shared_ptr<ftk::Splitter> splitter;
             std::shared_ptr<ftk::Splitter> splitter2;
             std::shared_ptr<ftk::VerticalLayout> splitterLayout;
@@ -273,6 +272,9 @@ namespace djv
             p.toolsMenu = ToolsMenu::create(context, app, p.toolsActions);
             p.helpMenu = HelpMenu::create(context, p.helpActions);
             p.menuBar = ftk::MenuBar::create(context);
+            // A tone rather than a line between the menu bar and the tool
+            // bars below it.
+            p.menuBar->setBackgroundRole(ftk::ColorRole::Header);
             ftk::setScreenshotTag(p.menuBar, "MainWindow.MenuBar");
             p.menuBar->addMenu("File", p.fileMenu);
             p.menuBar->addMenu("Review", p.reviewMenu);
@@ -360,42 +362,45 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
             p.menuBar->setParent(p.layout);
-            p.dividers["MenuBar"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
-            auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::Spacing);
-            ftk::setScreenshotTag(hLayout, "MainWindow.ToolBar");
-            p.fileToolBar->setParent(hLayout);
-            p.dividers["File"] = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
-            p.compareToolBar->setParent(hLayout);
-            p.dividers["Compare"] = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
-            p.windowToolBar->setParent(hLayout);
-            p.dividers["Window"] = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
-            p.viewToolBar->setParent(hLayout);
-            p.dividers["View"] = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
-            p.toolsToolBar->setParent(hLayout);
-            p.dividers["ToolBars"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
+            p.toolBarLayout = ftk::HorizontalLayout::create(context, p.layout);
+            p.toolBarLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.toolBarLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            ftk::setScreenshotTag(p.toolBarLayout, "MainWindow.ToolBar");
+            // The groups of buttons, and the tones of the regions around
+            // them, separate things rather than dividers.
+            for (const std::shared_ptr<ftk::ToolBar>& toolBar :
+                std::vector<std::shared_ptr<ftk::ToolBar> >{
+                    p.fileToolBar,
+                    p.compareToolBar,
+                    p.windowToolBar,
+                    p.viewToolBar,
+                    p.toolsToolBar })
+            {
+                toolBar->setGrouped(true);
+                toolBar->setParent(p.toolBarLayout);
+            }
             p.splitterLayout = ftk::VerticalLayout::create(context, p.layout);
             p.splitterLayout->setSpacingRole(ftk::SizeRole::None);
             p.splitterLayout->setVStretch(ftk::Stretch::Expanding);
             p.splitter = ftk::Splitter::create(context, ftk::Orientation::Vertical, p.splitterLayout);
             p.splitter->setSplit(settings.splitter);
+            p.splitter->setBorder(false);
             p.splitter2 = ftk::Splitter::create(context, ftk::Orientation::Horizontal, p.splitter);
             p.splitter2->setSplit(settings.splitter2);
+            p.splitter2->setBorder(false);
             auto vLayout = ftk::VerticalLayout::create(context, p.splitter2);
             vLayout->setSpacingRole(ftk::SizeRole::None);
             p.tabBar->setParent(vLayout);
             p.viewport->setParent(vLayout);
             p.toolsWidget->setParent(p.splitter2);
             p.timelineWidget->setParent(p.splitter);
-            p.dividers["Bottom"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             p.bottomToolBar->setParent(p.layout);
-            p.dividers["Status"] = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             p.statusBar->setParent(p.layout);
 
             // Each context menu offers the band it belongs to, and only
             // that band; the Window menu remains the one place that lists
             // every piece of chrome together.
-            hLayout->setContextMenuCallback(chromeMenuCallback(
+            p.toolBarLayout->setContextMenuCallback(chromeMenuCallback(
                 context,
                 p.windowActions,
                 {
@@ -485,6 +490,12 @@ namespace djv
                     _timelinePreviewClose();
                     p.viewport->setPlayer(player);
                     p.timelineWidget->setPlayer(player);
+                    // Whether there is a file decides the timeline layout.
+                    if (auto settingsModel = p.settingsModel)
+                    {
+                        _settingsUpdate(settingsModel->getTimeline());
+                    }
+                    _windowUpdate();
                 });
 
             p.timeHoverObserver = ftk::Observer<std::optional<OTIO_NS::RationalTime> >::create(
@@ -997,9 +1008,13 @@ namespace djv
                 _timelinePreviewClose();
             }
 
+            // With nothing open the timeline is hidden, so it takes the
+            // minimized layout to drop the splitter.
+            const bool minimize = settings.minimize || !p.player;
+
             auto display = p.timelineWidget->getDisplayOptions();
 
-            display.minimize = settings.minimize;
+            display.minimize = minimize;
             // Track media gates the two rather than replacing them, so that
             // turning it off and on leaves the choice below it alone.
             display.thumbnails = settings.trackMedia && settings.thumbnails;
@@ -1008,7 +1023,7 @@ namespace djv
             display.waveformHeight = getTimelineWaveformSize(settings.waveformSize);
             p.timelineWidget->setDisplayOptions(display);
 
-            if (settings.minimize)
+            if (minimize)
             {
                 if (p.splitter->getParent())
                 {
@@ -1037,23 +1052,20 @@ namespace djv
                 const bool presentMode = p.presentMode->get();
 
                 p.menuBar->setVisible(!presentMode);
-                p.dividers["MenuBar"]->setVisible(!presentMode);
 
                 p.fileToolBar->setVisible(settings.fileToolBar && !presentMode);
-                p.dividers["File"]->setVisible(settings.fileToolBar && !presentMode);
 
                 p.compareToolBar->setVisible(settings.compareToolBar && !presentMode);
-                p.dividers["Compare"]->setVisible(settings.compareToolBar && !presentMode);
 
                 p.windowToolBar->setVisible(settings.windowToolBar && !presentMode);
-                p.dividers["Window"]->setVisible(settings.windowToolBar && !presentMode);
 
                 p.viewToolBar->setVisible(settings.viewToolBar && !presentMode);
-                p.dividers["View"]->setVisible(settings.viewToolBar && !presentMode);
 
                 p.toolsToolBar->setVisible(settings.toolsToolBar && !presentMode);
 
-                p.dividers["ToolBars"]->setVisible(
+                // The row goes when all of its tool bars do, rather than
+                // leaving its margin behind.
+                p.toolBarLayout->setVisible(
                     (settings.fileToolBar ||
                     settings.compareToolBar ||
                     settings.windowToolBar ||
@@ -1067,10 +1079,13 @@ namespace djv
                     !app->getToolsModel()->getOpenTools().empty() &&
                     !presentMode);
 
-                p.timelineWidget->setVisible(settings.timeline && !presentMode);
+                // With nothing open the timeline has nothing to show.
+                p.timelineWidget->setVisible(
+                    settings.timeline &&
+                    p.player &&
+                    !presentMode);
 
                 p.bottomToolBar->setVisible(settings.bottomToolBar && !presentMode);
-                p.dividers["Bottom"]->setVisible(settings.bottomToolBar && !presentMode);
 
                 p.statusBar->setVisible(settings.statusToolBar && !presentMode);
 
@@ -1085,7 +1100,6 @@ namespace djv
                 // Hidden rather than turned off, so that what was being shown
                 // is still being shown on the way back out.
                 p.viewport->setHUDActive(!presentMode);
-                p.dividers["Status"]->setVisible(settings.statusToolBar && !presentMode);
             }
         }
     }

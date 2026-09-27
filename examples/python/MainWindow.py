@@ -43,6 +43,9 @@ class MainWindow(ftk.MainWindow):
         # Created before the actions; the window actions observe it.
         self._presentMode = ftk.ObservableBool(False)
 
+        # The current player, which decides the timeline layout.
+        self._player = None
+
         # Every icon compiled into the resource library, the application
         # icon included.
         djv.ui.initIcons(context)
@@ -128,30 +131,23 @@ class MainWindow(ftk.MainWindow):
                 statusBar.setHint(text)
         self._menuBar.setCurrentCallback(menuHint)
 
-        # Layout widgets. The dividers are kept by name so that hiding a
-        # tool bar can hide its divider with it.
-        self._dividers = {}
+        # Layout widgets. The groups of buttons, and the tones of the
+        # regions around them, separate things rather than dividers.
         self._layout = ftk.VerticalLayout(context)
         self._layout.spacingRole = ftk.SizeRole._None
         self.widget = self._layout
         hLayout = ftk.HorizontalLayout(context, self._layout)
-        hLayout.spacingRole = ftk.SizeRole.Spacing
+        hLayout.marginRole = ftk.SizeRole.MarginSmall
+        hLayout.spacingRole = ftk.SizeRole.SpacingSmall
         self._toolBarLayout = hLayout
-        self._fileToolBar.parent = hLayout
-        self._dividers["File"] = ftk.Divider(
-            context, ftk.Orientation.Horizontal, hLayout)
-        self._compareToolBar.parent = hLayout
-        self._dividers["Compare"] = ftk.Divider(
-            context, ftk.Orientation.Horizontal, hLayout)
-        self._windowToolBar.parent = hLayout
-        self._dividers["Window"] = ftk.Divider(
-            context, ftk.Orientation.Horizontal, hLayout)
-        self._viewToolBar.parent = hLayout
-        self._dividers["View"] = ftk.Divider(
-            context, ftk.Orientation.Horizontal, hLayout)
-        self._toolsToolBar.parent = hLayout
-        self._dividers["ToolBars"] = ftk.Divider(
-            context, ftk.Orientation.Vertical, self._layout)
+        for toolBar in [
+            self._fileToolBar,
+            self._compareToolBar,
+            self._windowToolBar,
+            self._viewToolBar,
+            self._toolsToolBar]:
+            toolBar.grouped = True
+            toolBar.parent = hLayout
         self._tabBar.parent = self._layout
         # The splitter's slot in the layout: minimizing the timeline swaps
         # the splitter out for a plain stack (see _timelineSettingsUpdate),
@@ -161,17 +157,15 @@ class MainWindow(ftk.MainWindow):
         self._splitterLayout.vStretch = ftk.Stretch.Expanding
         self._splitter = ftk.Splitter(context, ftk.Orientation.Vertical, self._splitterLayout)
         self._splitter.split = window.splitter
+        self._splitter.border = False
         self._splitter2 = ftk.Splitter(context, ftk.Orientation.Horizontal, self._splitter)
         self._splitter2.split = window.splitter2
+        self._splitter2.border = False
         self._viewport.parent = self._splitter2
         self._toolsWidget = Tools.ToolsWidget(context, app, self)
         self._toolsWidget.parent = self._splitter2
         self._timelineWidget.parent = self._splitter
-        self._dividers["Bottom"] = ftk.Divider(
-            context, ftk.Orientation.Vertical, self._layout)
         self._playbackBar.parent = self._layout
-        self._dividers["Status"] = ftk.Divider(
-            context, ftk.Orientation.Vertical, self._layout)
         self._statusBar.parent = self._layout
 
         # Each context menu offers the band it belongs to, and only that
@@ -330,8 +324,12 @@ class MainWindow(ftk.MainWindow):
             "StatusToolBar"])
 
     def _playerUpdate(self, player):
+        self._player = player
         self._viewport.player = player
         self._timelineWidget.player = player
+        # Whether there is a file decides the timeline layout.
+        self._timelineSettingsUpdate(self._settingsModel.timeline)
+        self._windowUpdate()
 
     def _windowSettingsUpdate(self, settings):
         self._windowUpdate()
@@ -341,28 +339,21 @@ class MainWindow(ftk.MainWindow):
         presentMode = self._presentMode.get()
 
         # The menu bar is removed rather than hidden: the base class owns
-        # the divider under it, and setting the menu bar is what hides
-        # both.
+        # its place in the layout.
         if presentMode:
             self.menuBar = None
         elif self.menuBar is None:
             self.menuBar = self._menuBar
 
         self._fileToolBar.setVisible(settings.fileToolBar and not presentMode)
-        self._dividers["File"].setVisible(settings.fileToolBar and not presentMode)
-
         self._compareToolBar.setVisible(settings.compareToolBar and not presentMode)
-        self._dividers["Compare"].setVisible(settings.compareToolBar and not presentMode)
-
         self._windowToolBar.setVisible(settings.windowToolBar and not presentMode)
-        self._dividers["Window"].setVisible(settings.windowToolBar and not presentMode)
-
         self._viewToolBar.setVisible(settings.viewToolBar and not presentMode)
-        self._dividers["View"].setVisible(settings.viewToolBar and not presentMode)
-
         self._toolsToolBar.setVisible(settings.toolsToolBar and not presentMode)
 
-        self._dividers["ToolBars"].setVisible(
+        # The row goes when all of its tool bars do, rather than leaving
+        # its margin behind.
+        self._toolBarLayout.setVisible(
             (settings.fileToolBar or
                 settings.compareToolBar or
                 settings.windowToolBar or
@@ -373,13 +364,15 @@ class MainWindow(ftk.MainWindow):
 
         self._toolsWidget.setDisplayed(settings.tools and not presentMode)
 
-        self._timelineWidget.setVisible(settings.timeline and not presentMode)
+        # With nothing open the timeline has nothing to show.
+        self._timelineWidget.setVisible(
+            settings.timeline and
+            self._player is not None and
+            not presentMode)
 
         self._playbackBar.setVisible(settings.bottomToolBar and not presentMode)
-        self._dividers["Bottom"].setVisible(settings.bottomToolBar and not presentMode)
 
         self._statusBar.setVisible(settings.statusToolBar and not presentMode)
-        self._dividers["Status"].setVisible(settings.statusToolBar and not presentMode)
 
         # Not in presentation mode: an error balloon over someone else's
         # review is worse than a missed message, and the messages tool
@@ -394,8 +387,11 @@ class MainWindow(ftk.MainWindow):
         self._timelineWidget.scrollBarsVisible = settings.scrollBars
         self._timelineWidget.autoScroll = settings.autoScroll
         self._timelineWidget.stopOnScrub = settings.stopOnScrub
+        # With nothing open the timeline is hidden, so it takes the
+        # minimized layout to drop the splitter.
+        minimize = settings.minimize or self._player is None
         display = self._timelineWidget.displayOptions
-        display.minimize = settings.minimize
+        display.minimize = minimize
         # Track media gates the two rather than replacing them, so that
         # turning it off and on leaves the choice below it alone.
         display.thumbnails = settings.trackMedia and settings.thumbnails
@@ -408,7 +404,7 @@ class MainWindow(ftk.MainWindow):
         # nothing to drag: the splitter leaves the tree and the viewport
         # and timeline stack directly. The split ratio persists through
         # the reparent, so restoring puts the handle back where it was.
-        if settings.minimize:
+        if minimize:
             if self._splitter.parent is not None:
                 self._splitter.parent = None
                 self._splitter2.parent = self._splitterLayout

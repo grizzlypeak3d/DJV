@@ -20,13 +20,13 @@
 #include <tlRender/UI/TimeUnitsWidget.h>
 #include <tlRender/Timeline/Player.h>
 
-#include <ftk/UI/Divider.h>
 #include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ShuttleWidget.h>
 #include <ftk/UI/Spacer.h>
+#include <ftk/UI/ToolBar.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
 
@@ -51,12 +51,10 @@ namespace djv
             std::shared_ptr<tl::ui::TimeUnitsWidget> timeUnitsWidget;
             std::shared_ptr<ftk::ToolButton> speedButton;
             std::shared_ptr<ui::SpeedPopup> speedPopup;
-            std::shared_ptr<ftk::Label> audioLabel;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<ui::AudioPopup> audioPopup;
             std::shared_ptr<ui::StatusIndicator> indicator;
-            std::shared_ptr<ftk::Divider> reviewDivider;
-            std::shared_ptr<ftk::HorizontalLayout> reviewLayout;
+            std::shared_ptr<ftk::ToolBar> reviewToolBar;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             // Whether media time means anything across the whole timeline,
@@ -131,7 +129,7 @@ namespace djv
             ftk::setScreenshotTag(p.currentTimeEdit, "Playback.CurrentFrame");
 
             p.durationLabel = tl::ui::TimeLabel::create(context, timeUnitsModel);
-            p.durationLabel->setMarginRole(ftk::SizeRole::MarginInside);
+            p.durationLabel->setMarginRole(ftk::SizeRole::MarginSmall);
             p.durationLabel->setTooltip("Duration of the timeline or the in/out range if set.");
             ftk::setScreenshotTag(p.durationLabel, "Playback.Duration");
 
@@ -144,67 +142,68 @@ namespace djv
             p.speedButton->setTooltip("Playback speed.");
             ftk::setScreenshotTag(p.speedButton, "Playback.Speed");
 
-            p.audioLabel = ftk::Label::create(context);
-            p.audioLabel->setFont(ftk::FontType::Mono);
-            p.audioLabel->setHMarginRole(ftk::SizeRole::MarginInside);
-            p.audioLabel->setTooltip("Audio volume.");
+            // The volume is the button's text rather than a label beside it:
+            // one control, and all of it opens the audio controls. Monospace,
+            // so that the button keeps its width as the volume changes.
             p.audioButton = ftk::ToolButton::create(context);
             p.audioButton->setIcon("Volume");
+            p.audioButton->setFont(ftk::FontType::Mono);
             p.audioButton->setPopupIcon(true);
-            p.audioButton->setTooltip("Audio controls.");
+            p.audioButton->setTooltip("Audio volume and controls.");
 
             p.indicator = app->createIndicator();
 
             p.layout = ftk::HorizontalLayout::create(context);
 
             _setWidget(p.layout);
-            p.layout->setMarginRole(ftk::SizeRole::MarginInside);
-            // Grouped like the top tool bar: the groups separated by
-            // dividers, with the tool bar's spacing between them.
+            p.layout->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            // Grouped like the top tool bar: the groups draw rounded
+            // backgrounds in place of dividers between them.
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::Spacing);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             ftk::setScreenshotTag(hLayout, "Playback.Controls");
-            auto hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
-            hLayout2->setSpacingRole(ftk::SizeRole::None);
-            ftk::setScreenshotTag(hLayout2, "Playback.PlaybackControls");
-            p.buttons["Reverse"]->setParent(hLayout2);
-            p.buttons["Stop"]->setParent(hLayout2);
-            p.buttons["Forward"]->setParent(hLayout2);
-            p.loopWidget->setParent(hLayout2);
-            p.playbackShuttle->setParent(hLayout2);
-            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
-            hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
-            hLayout2->setSpacingRole(ftk::SizeRole::None);
-            ftk::setScreenshotTag(hLayout2, "Playback.FrameControls");
-            p.buttons["Start"]->setParent(hLayout2);
-            p.buttons["Prev"]->setParent(hLayout2);
-            p.buttons["Next"]->setParent(hLayout2);
-            p.buttons["End"]->setParent(hLayout2);
-            p.frameShuttle->setParent(hLayout2);
-            p.reviewDivider = ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
+            auto transport = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
+            transport->setSpacingRole(ftk::SizeRole::None);
+            transport->setGrouped(true);
+            ftk::setScreenshotTag(transport, "Playback.PlaybackControls");
+            transport->addWidget(p.buttons["Reverse"]);
+            transport->addWidget(p.buttons["Stop"]);
+            transport->addWidget(p.buttons["Forward"]);
+            transport->addWidget(p.loopWidget);
+            transport->addWidget(p.playbackShuttle);
+            auto frames = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
+            frames->setSpacingRole(ftk::SizeRole::None);
+            frames->setGrouped(true);
+            ftk::setScreenshotTag(frames, "Playback.FrameControls");
+            frames->addWidget(p.buttons["Start"]);
+            frames->addWidget(p.buttons["Prev"]);
+            frames->addWidget(p.buttons["Next"]);
+            frames->addWidget(p.buttons["End"]);
+            frames->addWidget(p.frameShuttle);
             // The review jumps sit with the frame navigation: they are the same
             // gesture, on the frames that carry a note or a drawing -- and the
             // group is only there when such a frame exists.
-            p.reviewLayout = ftk::HorizontalLayout::create(context, hLayout);
-            p.reviewLayout->setSpacingRole(ftk::SizeRole::None);
-            ftk::setScreenshotTag(p.reviewLayout, "Playback.ReviewControls");
-            p.buttons["PrevReview"]->setParent(p.reviewLayout);
-            p.buttons["NextReview"]->setParent(p.reviewLayout);
-            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
-            hLayout2 = ftk::HorizontalLayout::create(context, hLayout);
-            hLayout2->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            ftk::setScreenshotTag(hLayout2, "Playback.TimeControls");
-            p.currentTimeEdit->setParent(hLayout2);
-            p.durationLabel->setParent(hLayout2);
-            p.timeUnitsWidget->setParent(hLayout2);
-            p.speedButton->setParent(hLayout2);
+            p.reviewToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
+            p.reviewToolBar->setGrouped(true);
+            ftk::setScreenshotTag(p.reviewToolBar, "Playback.ReviewControls");
+            p.reviewToolBar->addWidget(p.buttons["PrevReview"]);
+            p.reviewToolBar->addWidget(p.buttons["NextReview"]);
+            auto time = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
+            time->setGrouped(true);
+            ftk::setScreenshotTag(time, "Playback.TimeControls");
+            time->addWidget(p.currentTimeEdit);
+            time->addWidget(p.durationLabel);
+            time->addWidget(p.timeUnitsWidget);
+            time->addWidget(p.speedButton);
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
             spacer->setHStretch(ftk::Stretch::Expanding);
-            hLayout2 = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout2->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.audioLabel->setParent(hLayout2);
-            p.audioButton->setParent(hLayout2);
-            p.indicator->setParent(p.layout);
+            auto audio = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, p.layout);
+            audio->setGrouped(true);
+            audio->addWidget(p.audioButton);
+            auto indicator = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, p.layout);
+            indicator->setGrouped(true);
+            indicator->addWidget(p.indicator);
 
             p.loopWidget->setCallback(
                 [this](tl::Loop value)
@@ -296,8 +295,7 @@ namespace djv
                 [this](const std::vector<int>& value)
                 {
                     FTK_P();
-                    p.reviewDivider->setVisible(!value.empty());
-                    p.reviewLayout->setVisible(!value.empty());
+                    p.reviewToolBar->setVisible(!value.empty());
                 });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
@@ -323,7 +321,7 @@ namespace djv
                 [this](float value)
                 {
                     FTK_P();
-                    p.audioLabel->setText(ftk::Format("{0}%").
+                    p.audioButton->setText(ftk::Format("{0}%").
                         arg(static_cast<int>(value * 100.F), 3));
                 });
 

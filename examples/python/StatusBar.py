@@ -26,8 +26,9 @@ class Widget(ftk.IContainer):
 
         self._layout = ftk.HorizontalLayout(context)
         self._layout.spacingRole = ftk.SizeRole.SpacingSmall
+        # The space between the message and the file information
+        # separates them, rather than a divider.
         self._logLabel.parent = self._layout
-        ftk.Divider(context, ftk.Orientation.Horizontal, self._layout)
         self._infoLabel.parent = self._layout
         self._setWidget(self._layout)
 

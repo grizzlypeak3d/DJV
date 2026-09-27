@@ -226,7 +226,9 @@ class Actions(IActions.IActions):
             self.actions[name].enabled = player != None
 
     def _playbackUpdate(self, playback):
-        self.actions["Stop"].checked = tl.Playback.Stop == playback
+        # Stopped is the idle state, so nothing is lit for it; the
+        # direction lights while playing.
+        self.actions["Stop"].checked = False
         self.actions["Forward"].checked = tl.Playback.Forward == playback
         self.actions["Reverse"].checked = tl.Playback.Reverse == playback
 

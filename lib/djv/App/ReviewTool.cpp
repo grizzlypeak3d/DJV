@@ -28,6 +28,7 @@
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/TextEdit.h>
+#include <ftk/UI/ToolBar.h>
 #include <ftk/UI/ToolButton.h>
 
 #include <ftk/Core/Format.h>
@@ -321,25 +322,37 @@ namespace djv
             p.colorSwatch->setColor(drawModel->getColor());
             p.colorSwatch->setTooltip("The stroke colour.");
 
-            p.penButton = ftk::ToolButton::create(context, toolLayout);
+            // Grouped: the draw tools, the history, and the clear.
+            auto drawToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, toolLayout);
+            drawToolBar->setGrouped(true);
+            p.penButton = ftk::ToolButton::create(context);
+            drawToolBar->addWidget(p.penButton);
             p.penButton->setIcon("DrawTool");
             // Deliberately not checkable: IButton::click() flips its own checked
             // state *after* running the callback, which would invert whatever
             // the model observer had just set. The model stays the only source
             // of truth and the observer drives the highlight.
 
-            p.eraserButton = ftk::ToolButton::create(context, toolLayout);
+            p.eraserButton = ftk::ToolButton::create(context);
+            drawToolBar->addWidget(p.eraserButton);
             p.eraserButton->setIcon("Eraser");
 
             toolLayout->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
 
-            p.undoButton = ftk::ToolButton::create(context, toolLayout);
+            auto historyToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, toolLayout);
+            historyToolBar->setGrouped(true);
+            p.undoButton = ftk::ToolButton::create(context);
+            historyToolBar->addWidget(p.undoButton);
             p.undoButton->setIcon("Undo");
 
-            p.redoButton = ftk::ToolButton::create(context, toolLayout);
+            p.redoButton = ftk::ToolButton::create(context);
+            historyToolBar->addWidget(p.redoButton);
             p.redoButton->setIcon("Redo");
 
-            p.clearDrawingButton = ftk::ToolButton::create(context, "Clear", toolLayout);
+            auto clearToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, toolLayout);
+            clearToolBar->setGrouped(true);
+            p.clearDrawingButton = ftk::ToolButton::create(context, "Clear");
+            clearToolBar->addWidget(p.clearDrawingButton);
 
             auto sizeLayout = ftk::HorizontalLayout::create(context, drawingWidget);
             sizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);

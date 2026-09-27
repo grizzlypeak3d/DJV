@@ -9,6 +9,8 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/ScreenshotTag.h>
 
+#include <algorithm>
+
 namespace djv
 {
     namespace ui
@@ -36,6 +38,8 @@ namespace djv
                 int spacing = 0;
                 int border = 0;
                 int handle = 0;
+                int shadow = 0;
+                int cornerRadius = 0;
                 //! The height of the frame; its width follows the video.
                 int height = 0;
             };
@@ -45,7 +49,9 @@ namespace djv
             {
                 ftk::Box2I g;
                 ftk::Box2I image;
+                ftk::TriMesh2F shadow;
                 ftk::TriMesh2F border;
+                ftk::TriMesh2F bgMesh;
             };
             std::optional<DrawData> draw;
         };
@@ -61,8 +67,8 @@ namespace djv
             p.player = player;
             p.timeUnitsModel = timeUnitsModel;
             p.label = ftk::Label::create(context, shared_from_this());
-            p.label->setTextRole(ftk::ColorRole::TooltipText);
-            p.label->setHAlign(ftk::HAlign::Center);
+            // Centered under the picture, which is centered on the cursor.
+            p.label->setTextAlign(ftk::HAlign::Center);
             ftk::setScreenshotTag(shared_from_this(), "Timeline.Preview");
             ftk::setScreenshotTag(p.label, "Timeline.PreviewTime");
             setParent(window);
@@ -230,7 +236,20 @@ namespace djv
                 p.draw = Private::DrawData();
                 p.draw->g = g;
                 p.draw->image = image;
-                p.draw->border = ftk::border(g, p.size.border);
+                // Rounded with a shadow, like the tooltips and the other
+                // popups; the picture is inset by the margin, clear of the
+                // corners.
+                p.draw->shadow = ftk::shadow(
+                    ftk::Box2I(
+                        g.min.x - p.size.shadow,
+                        g.min.y,
+                        g.w() + p.size.shadow * 2,
+                        g.h() + p.size.shadow),
+                    p.size.shadow);
+                p.draw->border = ftk::border(g, p.size.border, p.size.cornerRadius);
+                p.draw->bgMesh = ftk::rect(
+                    ftk::margin(g, -p.size.border),
+                    std::max(0, p.size.cornerRadius - p.size.border));
             }
         }
 
@@ -246,6 +265,8 @@ namespace djv
                 p.size.spacing = event.style->getSizeRole(ftk::SizeRole::SpacingSmall, event.displayScale);
                 p.size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);
                 p.size.handle = event.style->getSizeRole(ftk::SizeRole::Handle, event.displayScale);
+                p.size.shadow = event.style->getSizeRole(ftk::SizeRole::Shadow, event.displayScale);
+                p.size.cornerRadius = event.style->getSizeRole(ftk::SizeRole::CornerRadius, event.displayScale);
                 p.size.height = 180 * event.displayScale;
                 p.draw.reset();
             }
@@ -273,12 +294,15 @@ namespace djv
             if (!p.draw.has_value())
                 return;
 
+            event.render->drawColorMesh(p.draw->shadow);
             event.render->drawMesh(
                 p.draw->border,
                 event.style->getColorRole(ftk::ColorRole::Border));
-            event.render->drawRect(
-                ftk::margin(p.draw->g, -p.size.border),
-                event.style->getColorRole(ftk::ColorRole::TooltipWindow));
+            // The popups' background rather than the tooltips': it frames
+            // a picture, which the tooltip color would tint.
+            event.render->drawMesh(
+                p.draw->bgMesh,
+                event.style->getColorRole(ftk::ColorRole::Window));
 
             // Drawn the way the view draws its buffer, with the same render
             // state. The last frame that arrived stays up until the next one

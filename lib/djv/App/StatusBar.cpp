@@ -7,7 +7,7 @@
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/ToolsModel.h>
 
-#include <ftk/UI/Divider.h>
+#include <ftk/UI/DrawUtil.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/SysLogModel.h>
@@ -29,6 +29,8 @@ namespace djv
             std::string message;
             std::string hint;
             std::shared_ptr<ftk::HorizontalLayout> layout;
+            std::string hoverTool;
+            int cornerRadius = 0;
 
             std::shared_ptr<ftk::Timer> messagesTimer;
 
@@ -73,7 +75,6 @@ namespace djv
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.messagesLabel->setParent(p.layout);
-            ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.infoLabel->setParent(p.layout);
 
             p.messagesTimer = ftk::Timer::create(context);
@@ -199,10 +200,61 @@ namespace djv
             _p->layout->setGeometry(value);
         }
 
+        void StatusBar::sizeHintEvent(const ftk::SizeHintEvent& event)
+        {
+            IMouseWidget::sizeHintEvent(event);
+            _p->cornerRadius = event.style->getSizeRole(
+                ftk::SizeRole::CornerRadius,
+                event.displayScale);
+        }
+
+        void StatusBar::drawEvent(
+            const ftk::Box2I& drawRect,
+            const ftk::DrawEvent& event)
+        {
+            IMouseWidget::drawEvent(drawRect, event);
+            FTK_P();
+            // The message and the file information open their tools, so
+            // they light up like flat buttons: nothing else in the bar says
+            // they can be clicked.
+            if (!p.hoverTool.empty())
+            {
+                event.render->drawMesh(
+                    ftk::rect(_getToolBox(p.hoverTool), p.cornerRadius),
+                    event.style->getColorRole(_isMousePressed() ?
+                        ftk::ColorRole::Pressed :
+                        ftk::ColorRole::Hover));
+            }
+        }
+
+        void StatusBar::mouseLeaveEvent()
+        {
+            IMouseWidget::mouseLeaveEvent();
+            FTK_P();
+            if (!p.hoverTool.empty())
+            {
+                p.hoverTool = std::string();
+                setDrawUpdate();
+            }
+        }
+
+        void StatusBar::mouseMoveEvent(ftk::MouseMoveEvent& event)
+        {
+            IMouseWidget::mouseMoveEvent(event);
+            FTK_P();
+            const std::string tool = _getTool(event.pos);
+            if (tool != p.hoverTool)
+            {
+                p.hoverTool = tool;
+                setDrawUpdate();
+            }
+        }
+
         void StatusBar::mousePressEvent(ftk::MouseClickEvent& event)
         {
             IMouseWidget::mousePressEvent(event);
             event.accept = true;
+            setDrawUpdate();
         }
 
         void StatusBar::mouseReleaseEvent(ftk::MouseClickEvent& event)
@@ -210,15 +262,8 @@ namespace djv
             IMouseWidget::mouseReleaseEvent(event);
             FTK_P();
             event.accept = true;
-            std::string tool;
-            if (ftk::contains(p.messagesLabel->getGeometry(), event.pos))
-            {
-                tool = "Messages";
-            }
-            else if (ftk::contains(p.infoLabel->getGeometry(), event.pos))
-            {
-                tool = "Information";
-            }
+            setDrawUpdate();
+            const std::string tool = _getTool(event.pos);
             if (!tool.empty())
             {
                 if (auto app = p.app.lock())
@@ -289,5 +334,41 @@ namespace djv
                 arg(!tooltip.empty() ? tooltip : tooltipDefault));
         }
 
+
+        std::string StatusBar::_getTool(const ftk::V2I& pos) const
+        {
+            std::string out;
+            for (const std::string& tool : { "Messages", "Information" })
+            {
+                const ftk::Box2I box = _getToolBox(tool);
+                if (box.isValid() && ftk::contains(box, pos))
+                {
+                    out = tool;
+                    break;
+                }
+            }
+            return out;
+        }
+
+        ftk::Box2I StatusBar::_getToolBox(const std::string& tool) const
+        {
+            // Only the text: the message label stretches across the bar,
+            // and an empty stretch of it is not something to click.
+            FTK_P();
+            ftk::Box2I out;
+            const auto& label = "Messages" == tool ? p.messagesLabel : p.infoLabel;
+            if (!label->getText().empty())
+            {
+                const ftk::Box2I& g = label->getGeometry();
+                const ftk::Size2I hint = label->getSizeHint();
+                const int w = std::min(hint.w, g.w());
+                out = ftk::Box2I(
+                    ftk::HAlign::Right == label->getHAlign() ? g.max.x + 1 - w : g.min.x,
+                    g.min.y,
+                    w,
+                    g.h());
+            }
+            return out;
+        }
     }
 }
