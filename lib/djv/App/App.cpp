@@ -2664,6 +2664,14 @@ namespace djv
             p.recentDirsModel = models::RecentFilesModel::create(_context, getSettings(), "FileBrowserDirs");
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
+            // Offered by kind: one at a time there are too many to choose
+            // from.
+            std::vector<ftk::FileBrowserExtGroup> extGroups;
+            for (const auto& group : tl::getExtGroups(_context))
+            {
+                extGroups.push_back({ group.label, group.exts });
+            }
+            fileBrowserSystem->getModel()->setExtGroups(extGroups);
             // From what the settings restored rather than from a fresh set:
             // the sequence extensions are the build's to say and cannot come
             // from a settings file, but everything else in there is the

@@ -1091,6 +1091,10 @@ class App(ftk.App):
         # Initialize the file browser.
         fileBrowserSystem = self.context.getSystemByName("ftk::FileBrowserSystem")
         fileBrowserSystem.model.exts = tl.getExts(self.context)
+        # Offered by kind: one at a time there are too many to choose from.
+        fileBrowserSystem.model.extGroups = [
+            ftk.FileBrowserExtGroup(group.label, group.exts)
+            for group in tl.getExtGroups(self.context)]
         # What the file browser's recent list shows, kept between runs in a
         # group of its own, as the C++ application does.
         self._recentDirsModel = djv.models.RecentFilesModel(

@@ -42,6 +42,8 @@ Changes:
   VP9 are written to ".mkv".
 * Style updates.
 * The left and right arrow keys move between the menus.
+* The file browser filters by kind of file: images, movies, audio, and so
+  on.
 * Library updates:
     - FFmpeg 9.0.1
     - OpenAPV 1.1.1.0
