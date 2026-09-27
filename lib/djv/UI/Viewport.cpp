@@ -138,6 +138,7 @@ namespace djv
             {
                 MouseMode mode = MouseMode::None;
                 std::optional<OTIO_NS::RationalTime> shuttleStart;
+                tl::Playback shuttlePlayback = tl::Playback::Stop;
             };
             MouseData mouse;
 
@@ -805,6 +806,7 @@ namespace djv
                 p.mouse.mode = Private::MouseMode::Shuttle;
                 if (auto player = getPlayer())
                 {
+                    p.mouse.shuttlePlayback = player->getPlayback();
                     player->stop();
                     p.mouse.shuttleStart = player->getCurrentTime();
                 }
@@ -829,6 +831,19 @@ namespace djv
                 else
                 {
                     _drawEnd();
+                }
+            }
+            else if (Private::MouseMode::Shuttle == p.mouse.mode && event.cancel)
+            {
+                // Back to the frame, and playing if it was: the first
+                // finger of a gesture was not shuttling.
+                if (auto player = getPlayer())
+                {
+                    if (p.mouse.shuttleStart.has_value())
+                    {
+                        player->seek(p.mouse.shuttleStart.value());
+                    }
+                    player->setPlayback(p.mouse.shuttlePlayback);
                 }
             }
             p.mouse = Private::MouseData();
