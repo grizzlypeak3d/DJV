@@ -263,7 +263,8 @@ namespace djv
             FTK_P();
             event.accept = true;
             setDrawUpdate();
-            const std::string tool = _getTool(event.pos);
+            // A cancelled press (a touch gesture took it) opens nothing.
+            const std::string tool = event.cancel ? std::string() : _getTool(event.pos);
             if (!tool.empty())
             {
                 if (auto app = p.app.lock())

@@ -817,8 +817,19 @@ namespace djv
             FTK_P();
             if (Private::MouseMode::Draw == p.mouse.mode)
             {
-                // Commit the stroke as one undoable step.
-                _drawEnd();
+                // Commit the stroke as one undoable step, unless the press
+                // was cancelled: the first finger of a pinch is not a
+                // stroke.
+                if (event.cancel)
+                {
+                    p.stroke = models::ReviewStroke();
+                    p.strokeSource = -1;
+                    setDrawUpdate();
+                }
+                else
+                {
+                    _drawEnd();
+                }
             }
             p.mouse = Private::MouseData();
         }
