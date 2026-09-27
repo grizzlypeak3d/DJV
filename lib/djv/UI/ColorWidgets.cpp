@@ -27,6 +27,7 @@
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
 
+#include <algorithm>
 #include <cmath>
 
 namespace djv
@@ -131,6 +132,13 @@ namespace djv
                     }),
                 p.exts.end());
             p.extAddExtComboBox = ftk::ComboBox::create(context, p.exts);
+            // The list is sorted; the extension offered first is the one most
+            // likely to want a color space of its own.
+            const auto exr = std::find(p.exts.begin(), p.exts.end(), ".exr");
+            if (exr != p.exts.end())
+            {
+                p.extAddExtComboBox->setCurrentIndex(static_cast<int>(exr - p.exts.begin()));
+            }
             p.extAddExtComboBox->setHStretch(ftk::Stretch::Expanding);
             p.extAddExtComboBox->setTooltip(
                 "File name extension to assign a color space to.");
