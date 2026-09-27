@@ -69,6 +69,9 @@ Fixes:
 * USD support, removed in 3.6.0, is back in source builds.
 * High Quality filtering no longer softens pictures shown or exported at
   their own size.
+* Playback no longer drops frames with audio devices that take large
+  blocks, such as on the Raspberry Pi.
+* Audio no longer crackles when playing faster or slower.
 
 ## 3.6.0
 
