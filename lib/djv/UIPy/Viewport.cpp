@@ -59,6 +59,7 @@ namespace djv
                     nb::arg("sysLogModel"),
                     nb::arg("parent") = nullptr)
                 .def("setToastActive", &Viewport::setToastActive)
+                .def("showHint", &Viewport::showHint, nb::arg("text"))
                 .def("setHUDActive", &Viewport::setHUDActive);
         }
     }

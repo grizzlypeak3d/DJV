@@ -47,6 +47,7 @@ Changes:
   on.
 * On a touch screen two fingers pan and pinch zoom the view and the
   timeline.
+* Entering presentation mode shows how to leave it.
 * Building on the Raspberry Pi is documented.
 * Library updates:
     - FFmpeg 9.0.1

@@ -67,6 +67,11 @@ namespace djv
             //! Set whether the toast stands in for the status bar.
             DJV_UI_API void setToastActive(bool);
 
+            //! Show a short message in the toast's place, for a few seconds.
+            //! Unlike the errors it shows even when the toast is not active:
+            //! it is what to do next, e.g., how to leave presentation mode.
+            DJV_UI_API void showHint(const std::string&);
+
             //! Set whether the heads up display is shown at all. Separate from
             //! the display's own options so that turning it off for
             //! presentation does not forget what was being shown.

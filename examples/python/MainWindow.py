@@ -42,6 +42,20 @@ class MainWindow(ftk.MainWindow):
 
         # Created before the actions; the window actions observe it.
         self._presentMode = ftk.ObservableBool(False)
+        # The presentation hint waits for full screen: on macOS going full
+        # screen animates, and a hint shown at the start was stretched with
+        # the window for the length of it. Not for ever, though: a window
+        # that is refused full screen is still showing nothing but the view.
+        self._presentHint = False
+        self._presentHintTimer = ftk.Timer(context)
+        selfWeak = weakref.ref(self)
+        def fullScreenCallback(value):
+            self = selfWeak()
+            if self and value and self._presentHint:
+                self._presentHint = False
+                self._presentHintTimer.stop()
+                self._showPresentHint()
+        self.setFullScreenCallback(fullScreenCallback)
 
         # The current player, which decides the timeline layout.
         self._player = None
@@ -274,8 +288,26 @@ class MainWindow(ftk.MainWindow):
 
     def setPresentMode(self, value):
         if self._presentMode.setIfChanged(value):
+            wasFullScreen = self.fullScreen
+            self._presentHint = value and not wasFullScreen
+            self._presentHintTimer.stop()
+            if self._presentHint:
+                selfWeak = weakref.ref(self)
+                def timeout():
+                    self = selfWeak()
+                    if self and self._presentHint:
+                        self._presentHint = False
+                        self._showPresentHint()
+                self._presentHintTimer.start(1.0, timeout)
             self.fullScreen = value
             self._windowUpdate()
+            if value and wasFullScreen:
+                self._showPresentHint()
+
+    def _showPresentHint(self):
+        # Nothing else on the screen says how to get back, and with no file
+        # open the screen is only black (DJV #905).
+        self._viewport.showHint("Press Esc to exit presentation mode")
 
     def dropEvent(self, event):
         event.accept = True

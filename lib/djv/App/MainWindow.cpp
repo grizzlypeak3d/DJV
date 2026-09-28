@@ -69,6 +69,7 @@
 #include <ftk/UI/Splitter.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
+#include <ftk/Core/Timer.h>
 
 namespace djv
 {
@@ -112,6 +113,8 @@ namespace djv
             std::weak_ptr<App> app;
             std::shared_ptr<models::SettingsModel> settingsModel;
             std::shared_ptr<ftk::Observable<bool> > presentMode;
+            bool presentHint = false;
+            std::shared_ptr<ftk::Timer> presentHintTimer;
             bool shown = false;
 
             std::shared_ptr<ui::Viewport> viewport;
@@ -203,6 +206,23 @@ namespace djv
             p.app = app;
             p.settingsModel = app->getSettingsModel();
             p.presentMode = ftk::Observable<bool>::create(false);
+            // The presentation hint waits for full screen: on macOS going
+            // full screen animates, and a hint shown at the start was
+            // stretched with the window for the length of it. Not for ever,
+            // though: a window that is refused full screen is still showing
+            // nothing but the view.
+            p.presentHintTimer = ftk::Timer::create(context);
+            setFullScreenCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    if (value && p.presentHint)
+                    {
+                        p.presentHint = false;
+                        p.presentHintTimer->stop();
+                        _presentHint();
+                    }
+                });
 
             p.viewport = ui::Viewport::create(
                 context,
@@ -732,9 +752,37 @@ namespace djv
             FTK_P();
             if (p.presentMode->setIfChanged(value))
             {
+                const bool wasFullScreen = isFullScreen();
+                p.presentHint = value && !wasFullScreen;
+                p.presentHintTimer->stop();
+                if (p.presentHint)
+                {
+                    p.presentHintTimer->start(
+                        std::chrono::seconds(1),
+                        [this]
+                        {
+                            FTK_P();
+                            if (p.presentHint)
+                            {
+                                p.presentHint = false;
+                                _presentHint();
+                            }
+                        });
+                }
                 setFullScreen(value);
                 _windowUpdate();
+                if (value && wasFullScreen)
+                {
+                    _presentHint();
+                }
             }
+        }
+
+        void MainWindow::_presentHint()
+        {
+            // Nothing else on the screen says how to get back, and with no
+            // file open the screen is only black (DJV #905).
+            _p->viewport->showHint("Press Esc to exit presentation mode");
         }
 
         void MainWindow::focusCurrentFrame()

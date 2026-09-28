@@ -43,6 +43,7 @@ namespace djv
             const size_t toastTextLength = 80;
 
             const std::chrono::seconds toastTimeout(5);
+            const std::chrono::seconds hintTimeout(3);
         }
 
         struct Viewport::Private
@@ -92,6 +93,7 @@ namespace djv
             std::shared_ptr<ftk::Label> compareLabel;
 
             bool toastActive = false;
+            bool toastHint = false;
             bool hudActive = true;
             std::shared_ptr<ftk::Label> toastLabel;
             std::shared_ptr<ftk::Timer> toastTimer;
@@ -460,7 +462,10 @@ namespace djv
                         return;
                     }
                     // The message alone: it has just appeared, and the space
-                    // over the image is better spent on what went wrong.
+                    // over the image is better spent on what went wrong. It
+                    // takes the place of a hint, and is shown or not the way
+                    // errors are.
+                    p.toastHint = false;
                     p.toastLabel->setText(
                         ftk::elide(
                             ftk::getLabel(value.back(), ftk::LogLabel::Message),
@@ -701,6 +706,22 @@ namespace djv
                 return;
             p.toastActive = value;
             _toastUpdate();
+        }
+
+        void Viewport::showHint(const std::string& value)
+        {
+            FTK_P();
+            p.toastHint = true;
+            p.toastLabel->setText(value);
+            _toastUpdate();
+            p.toastTimer->start(
+                hintTimeout,
+                [this]
+                {
+                    _p->toastHint = false;
+                    _p->toastLabel->setText(std::string());
+                    _toastUpdate();
+                });
         }
 
         ftk::Size2I Viewport::getSizeHint() const
@@ -1459,7 +1480,7 @@ namespace djv
         {
             FTK_P();
             const bool visible =
-                p.toastActive && !p.toastLabel->getText().empty();
+                (p.toastActive || p.toastHint) && !p.toastLabel->getText().empty();
             p.toastLabel->setVisible(visible);
             // Tagged only while it is up, the same as the compare label, so
             // that a capture says whether anything was drawn over the image

@@ -139,6 +139,7 @@ namespace djv
             void _timelinePreviewOpen(const OTIO_NS::RationalTime&);
             void _timelinePreviewClose();
             void _windowUpdate();
+            void _presentHint();
 
             FTK_PRIVATE();
         };
