@@ -49,6 +49,12 @@ namespace djv
                 nb::arg("playlist"),
                 nb::arg("defaultRate") = 24.0);
 
+            m.def(
+                "playlistApply",
+                &playlistApply,
+                nb::arg("playlist"),
+                nb::arg("filesModel"));
+
             // The report rides along as the second element of a tuple, the
             // way the settings getters return their values.
             m.def(

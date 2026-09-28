@@ -73,6 +73,8 @@ Fixes:
 * Playback no longer drops frames with audio devices that take large
   blocks, such as on the Raspberry Pi.
 * Audio no longer crackles when playing faster or slower.
+* A playlist restores a tiled comparison with all of its files.
+* Recent Playlists lists each playlist once, as the file it was saved to.
 
 ## 3.6.0
 

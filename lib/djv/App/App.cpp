@@ -720,23 +720,8 @@ namespace djv
                     path.getFileName(true),
                     report);
 
-                // Added to what is open rather than replacing it, the same
-                // as opening anything else; the playlist's own A/B indexes
-                // are offsets into what it added.
-                const int offset = static_cast<int>(
-                    p.filesModel->getFiles().size());
-                p.filesModel->add(playlist.items);
+                models::playlistApply(playlist, p.filesModel);
                 p.recentPlaylistsModel->addRecent(path);
-                if (playlist.aIndex >= 0)
-                {
-                    p.filesModel->setA(offset + playlist.aIndex);
-                }
-                for (int b : playlist.bIndexes)
-                {
-                    p.filesModel->setB(offset + b, true);
-                }
-                p.filesModel->setCompareOptions(playlist.compareOptions);
-                p.filesModel->setCompareTime(playlist.compareTime);
                 p.recentFilesModel->addRecent(path);
                 p.recentDirsModel->addRecent(ftk::Path(path.getDir()));
 
@@ -816,8 +801,11 @@ namespace djv
             catch (const std::exception& e)
             {
                 _context->log("djv::app::App", e.what(), ftk::LogType::Error);
+                return;
             }
-            p.recentPlaylistsModel->addRecent(path);
+            // The file as saved, with the extension it was given: the name
+            // as typed was listed too, and opening it failed.
+            p.recentPlaylistsModel->addRecent(ftk::Path(fileName));
         }
 
         void App::savePlaylistDialog()
@@ -2656,6 +2644,23 @@ namespace djv
             // one does not push its media into the recent files.
             p.recentReviewsModel = models::RecentFilesModel::create(_context, getSettings(), "Review");
             p.recentPlaylistsModel = models::RecentFilesModel::create(_context, getSettings(), "Playlist");
+            {
+                // A playlist is always saved as ".otio", but saving one
+                // under a name typed without the extension listed that name
+                // as well, and it cannot be opened: drop those.
+                std::vector<ftk::Path> recent;
+                for (const auto& path : p.recentPlaylistsModel->getRecent())
+                {
+                    if (".otio" == ftk::toLower(path.getExt()))
+                    {
+                        recent.push_back(path);
+                    }
+                }
+                if (recent.size() != p.recentPlaylistsModel->getRecent().size())
+                {
+                    p.recentPlaylistsModel->setRecent(recent);
+                }
+            }
             // What the file browser's recent list shows: the directories of
             // everything opened, and of anything chosen in the browser -- a
             // LUT, an export directory -- without those choices joining the

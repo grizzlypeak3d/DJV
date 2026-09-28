@@ -24,6 +24,7 @@ namespace djv
             void _roundTrip();
             void _foreign();
             void _version();
+            void _apply();
         };
     }
 }

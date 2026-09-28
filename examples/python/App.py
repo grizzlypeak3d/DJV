@@ -359,14 +359,7 @@ class App(ftk.App):
         """
         path = path if isinstance(path, ftk.Path) else ftk.Path(str(path))
         playlist, report = djv.models.playlistOpen(path.getFileName(True))
-        offset = len(self._filesModel.files)
-        self._filesModel.add(playlist.items)
-        if playlist.aIndex >= 0:
-            self._filesModel.setA(offset + playlist.aIndex)
-        for b in playlist.bIndexes:
-            self._filesModel.setB(offset + b, True)
-        self._filesModel.compareOptions = playlist.compareOptions
-        self._filesModel.compareTime = playlist.compareTime
+        djv.models.playlistApply(playlist, self._filesModel)
         if report:
             self.context.getSystemByName("ftk::LogSystem").print(
                 "djv.App",
@@ -1075,6 +1068,13 @@ class App(ftk.App):
             self.context, self._settings, "Review")
         self._recentPlaylistsModel = djv.models.RecentFilesModel(
             self.context, self._settings, "Playlist")
+        # A playlist is always saved as ".otio", but saving one under a
+        # name typed without the extension once listed that name as well,
+        # and it cannot be opened: drop those.
+        recent = [i for i in self._recentPlaylistsModel.recent
+            if i.lower().endswith(".otio")]
+        if len(recent) != len(self._recentPlaylistsModel.recent):
+            self._recentPlaylistsModel.recent = recent
         self._sysLogModel = ftk.SysLogModel(self.context)
         self._commandsModel = djv.models.CommandsModel(self.context)
 

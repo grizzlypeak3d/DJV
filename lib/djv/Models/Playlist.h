@@ -64,6 +64,19 @@ namespace djv
             const std::string& directory,
             std::vector<std::string>& report);
 
+        //! Open a playlist's files in the file list, after what is already
+        //! open, with its "A" and "B" files and its compare state.
+        //!
+        //! The comparison replaces the one in the file list, and is rebuilt
+        //! in the order the review does it: the compare state first, since
+        //! in a mode that shows one "B" file each new "B" replaces the last
+        //! -- a tiled comparison set before its mode came back as one "B" --
+        //! then the "B" files, cleared first of the one the mode picks for
+        //! itself, then the "A" file.
+        DJV_MODELS_API void playlistApply(
+            const Playlist&,
+            const std::shared_ptr<FilesModel>&);
+
         //! Save a playlist to an ".otio" file.
         DJV_MODELS_API void playlistSave(
             const std::string& fileName,

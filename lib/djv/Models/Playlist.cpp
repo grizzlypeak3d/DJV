@@ -488,6 +488,28 @@ namespace djv
             }
         }
 
+        void playlistApply(
+            const Playlist& playlist,
+            const std::shared_ptr<FilesModel>& filesModel)
+        {
+            // Added to what is open rather than replacing it, the same as
+            // opening anything else; the playlist's own A/B indexes are
+            // offsets into what it added.
+            const int offset = static_cast<int>(filesModel->getFiles().size());
+            filesModel->add(playlist.items);
+            filesModel->setCompareOptions(playlist.compareOptions);
+            filesModel->setCompareTime(playlist.compareTime);
+            filesModel->clearB();
+            for (int b : playlist.bIndexes)
+            {
+                filesModel->setB(offset + b, true);
+            }
+            if (playlist.aIndex >= 0)
+            {
+                filesModel->setA(offset + playlist.aIndex);
+            }
+        }
+
         Playlist playlistOpen(
             const std::string& fileName,
             std::vector<std::string>& report)

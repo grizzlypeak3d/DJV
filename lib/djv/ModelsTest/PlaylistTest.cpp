@@ -3,11 +3,14 @@
 
 #include <djv/ModelsTest/PlaylistTest.h>
 
+#include <djv/ModelsTest/ModelsTestUtil.h>
+
 #include <djv/Models/Playlist.h>
 
 #include <ftk/Core/Assert.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Path.h>
+#include <ftk/Core/String.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/externalReference.h>
@@ -47,6 +50,45 @@ namespace djv
             _roundTrip();
             _foreign();
             _version();
+            _apply();
+        }
+
+        void PlaylistTest::_apply()
+        {
+            // A tiled comparison of four files comes back as four: the
+            // compare mode goes in before the "B" files, which a mode that
+            // shows one "B" file would otherwise have replaced one by one.
+            auto settings = createTestSettings(_context);
+            auto filesModel = models::FilesModel::create(settings);
+
+            // Something already open, so the playlist's indexes are offsets.
+            auto open = std::make_shared<models::FilesModelItem>();
+            open->path = ftk::Path("open.png");
+            filesModel->add(open);
+
+            models::Playlist playlist;
+            for (const std::string& name : { "a.png", "b.png", "c.png", "d.png" })
+            {
+                auto item = std::make_shared<models::FilesModelItem>();
+                item->path = ftk::Path(name);
+                playlist.items.push_back(item);
+            }
+            playlist.aIndex = 0;
+            playlist.bIndexes = { 1, 2, 3 };
+            playlist.compareOptions.compare = tl::Compare::Tile;
+            models::playlistApply(playlist, filesModel);
+
+            FTK_CHECK(5 == filesModel->getFiles().size());
+            FTK_CHECK(1 == filesModel->getAIndex());
+            FTK_CHECK(tl::Compare::Tile == filesModel->getCompareOptions().compare);
+            const std::vector<int> bIndexes = filesModel->getBIndexes();
+            std::vector<std::string> bText;
+            for (int b : bIndexes)
+            {
+                bText.push_back(ftk::Format("{0}").arg(b).str());
+            }
+            _print(ftk::Format("B indexes: {0}").arg(ftk::join(bText, ", ")));
+            FTK_CHECK(std::vector<int>({ 2, 3, 4 }) == bIndexes);
         }
 
         void PlaylistTest::_roundTrip()
