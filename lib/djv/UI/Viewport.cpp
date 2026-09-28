@@ -688,6 +688,8 @@ namespace djv
                 p.cacheObserver.reset();
                 _hudUpdate();
             }
+            // A file arriving or going changes which items there are.
+            _hudLayout();
         }
 
         void Viewport::setHUDActive(bool value)
@@ -1493,9 +1495,18 @@ namespace djv
             FTK_P();
             auto viewportModel = p.viewportModel.lock();
             const auto options = viewportModel->getHUDOptions();
+            // With no file there is nothing for the items to be about but
+            // that there is no file: a placeholder for each, a black color
+            // swatch, an empty cache bar, a zoom of an image that is not
+            // there, reads as information (DJV #900). The options stay as
+            // they are, and the items come back with the next file.
+            const bool file = getPlayer() != nullptr;
             for (const auto& i : options.items)
             {
-                p.hudWidgets[i.first]->setParent(i.second != models::HUDPos::None ?
+                const bool visible =
+                    i.second != models::HUDPos::None &&
+                    (file || models::HUDItem::FileName == i.first);
+                p.hudWidgets[i.first]->setParent(visible ?
                     p.hudLayouts[i.second] :
                     nullptr);
             }
