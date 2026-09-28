@@ -131,14 +131,16 @@ class MainWindow(ftk.MainWindow):
                 statusBar.setHint(text)
         self._menuBar.setCurrentCallback(menuHint)
 
-        # Layout widgets. The groups of buttons, and the tones of the
-        # regions around them, separate things rather than dividers.
+        # Layout widgets. Groups of buttons, set apart by space alone: the
+        # buttons of a group touch, and nothing is drawn behind them but
+        # what a button draws for itself, hovered or checked.
         self._layout = ftk.VerticalLayout(context)
         self._layout.spacingRole = ftk.SizeRole._None
         self.widget = self._layout
+        self._menuBarDivider = ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
         hLayout = ftk.HorizontalLayout(context, self._layout)
         hLayout.marginRole = ftk.SizeRole.MarginSmall
-        hLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        hLayout.spacingRole = ftk.SizeRole.SpacingLarge
         self._toolBarLayout = hLayout
         for toolBar in [
             self._fileToolBar,
@@ -146,7 +148,7 @@ class MainWindow(ftk.MainWindow):
             self._windowToolBar,
             self._viewToolBar,
             self._toolsToolBar]:
-            toolBar.grouped = True
+            toolBar.spacingRole = ftk.SizeRole._None
             toolBar.parent = hLayout
         self._tabBar.parent = self._layout
         # The splitter's slot in the layout: minimizing the timeline swaps
@@ -344,6 +346,7 @@ class MainWindow(ftk.MainWindow):
             self.menuBar = None
         elif self.menuBar is None:
             self.menuBar = self._menuBar
+        self._menuBarDivider.setVisible(not presentMode)
 
         self._fileToolBar.setVisible(settings.fileToolBar and not presentMode)
         self._compareToolBar.setVisible(settings.compareToolBar and not presentMode)

@@ -29,6 +29,7 @@
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/TextEdit.h>
 #include <ftk/UI/ToolBar.h>
+#include <ftk/UI/PushButton.h>
 #include <ftk/UI/ToolButton.h>
 
 #include <ftk/Core/Format.h>
@@ -213,7 +214,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> sizeSlider;
             std::shared_ptr<ftk::ToolButton> undoButton;
             std::shared_ptr<ftk::ToolButton> redoButton;
-            std::shared_ptr<ftk::ToolButton> clearDrawingButton;
+            std::shared_ptr<ftk::PushButton> clearDrawingButton;
 
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::ScrollWidget> scrollWidget;
@@ -311,7 +312,7 @@ namespace djv
             auto drawModel = app->getDrawModel();
 
             auto toolLayout = ftk::HorizontalLayout::create(context, drawingWidget);
-            toolLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            toolLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
 
             p.colorSwatch = ftk::ColorSwatch::create(context, toolLayout);
             p.colorSwatch->setEditable(true);
@@ -322,9 +323,10 @@ namespace djv
             p.colorSwatch->setColor(drawModel->getColor());
             p.colorSwatch->setTooltip("The stroke colour.");
 
-            // Grouped: the draw tools, the history, and the clear.
+            // Grouped by space, like the main tool bars: the draw tools, the
+            // history, and the clear.
             auto drawToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, toolLayout);
-            drawToolBar->setGrouped(true);
+            drawToolBar->setSpacingRole(ftk::SizeRole::None);
             p.penButton = ftk::ToolButton::create(context);
             drawToolBar->addWidget(p.penButton);
             p.penButton->setIcon("DrawTool");
@@ -340,7 +342,7 @@ namespace djv
             toolLayout->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
 
             auto historyToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, toolLayout);
-            historyToolBar->setGrouped(true);
+            historyToolBar->setSpacingRole(ftk::SizeRole::None);
             p.undoButton = ftk::ToolButton::create(context);
             historyToolBar->addWidget(p.undoButton);
             p.undoButton->setIcon("Undo");
@@ -349,10 +351,9 @@ namespace djv
             historyToolBar->addWidget(p.redoButton);
             p.redoButton->setIcon("Redo");
 
-            auto clearToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, toolLayout);
-            clearToolBar->setGrouped(true);
-            p.clearDrawingButton = ftk::ToolButton::create(context, "Clear");
-            clearToolBar->addWidget(p.clearDrawingButton);
+            // A push button: with no group behind it, a flat button with
+            // only text reads as a label.
+            p.clearDrawingButton = ftk::PushButton::create(context, "Clear", toolLayout);
 
             auto sizeLayout = ftk::HorizontalLayout::create(context, drawingWidget);
             sizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);

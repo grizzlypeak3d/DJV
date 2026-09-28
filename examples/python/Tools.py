@@ -1120,7 +1120,7 @@ class ReviewTool(IToolWidget):
         drawingWidget.marginRole = ftk.SizeRole.MarginSmall
         drawingWidget.spacingRole = ftk.SizeRole.SpacingSmall
         toolLayout = ftk.HorizontalLayout(context, drawingWidget)
-        toolLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        toolLayout.spacingRole = ftk.SizeRole.SpacingLarge
         self._colorSwatch = ftk.ColorSwatch(context, toolLayout)
         self._colorSwatch.editable = True
         # Centered rather than filling the row: the buttons beside it
@@ -1129,9 +1129,10 @@ class ReviewTool(IToolWidget):
         self._colorSwatch.sizeRole = ftk.SizeRole.MarginLarge
         self._colorSwatch.color = drawModel.color
         self._colorSwatch.tooltip = "The stroke colour."
-        # Grouped: the draw tools, the history, and the clear.
+        # Grouped by space, like the main tool bars: the draw tools, the
+        # history, and the clear.
         drawToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, toolLayout)
-        drawToolBar.grouped = True
+        drawToolBar.spacingRole = ftk.SizeRole._None
         self._penButton = ftk.ToolButton(context)
         self._penButton.icon = "DrawTool"
         drawToolBar.addWidget(self._penButton)
@@ -1144,17 +1145,16 @@ class ReviewTool(IToolWidget):
         drawToolBar.addWidget(self._eraserButton)
         toolLayout.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
         historyToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, toolLayout)
-        historyToolBar.grouped = True
+        historyToolBar.spacingRole = ftk.SizeRole._None
         self._undoButton = ftk.ToolButton(context)
         self._undoButton.icon = "Undo"
         historyToolBar.addWidget(self._undoButton)
         self._redoButton = ftk.ToolButton(context)
         self._redoButton.icon = "Redo"
         historyToolBar.addWidget(self._redoButton)
-        clearToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, toolLayout)
-        clearToolBar.grouped = True
-        self._clearDrawingButton = ftk.ToolButton(context, "Clear")
-        clearToolBar.addWidget(self._clearDrawingButton)
+        # A push button: with no group behind it, a flat button with only
+        # text reads as a label.
+        self._clearDrawingButton = ftk.PushButton(context, "Clear", toolLayout)
         sizeLayout = ftk.HorizontalLayout(context, drawingWidget)
         sizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
         sizeLabel = ftk.Label(context, "Size:", sizeLayout)

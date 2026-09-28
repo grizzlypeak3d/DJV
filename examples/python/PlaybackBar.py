@@ -85,22 +85,21 @@ class Widget(ftk.IContainer):
             app.getFilesModel(),
             app.getToolsModel())
 
-        # Grouped like the top tool bar: the groups draw rounded
-        # backgrounds in place of dividers between them.
+        # Grouped like the top tool bar, by space alone.
         self._layout = ftk.HorizontalLayout(context)
         self._layout.marginRole = ftk.SizeRole.MarginSmall
-        self._layout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._layout.spacingRole = ftk.SizeRole.SpacingLarge
         hLayout = ftk.HorizontalLayout(context, self._layout)
-        hLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        hLayout.spacingRole = ftk.SizeRole.SpacingLarge
         transport = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
-        transport.grouped = True
+        transport.spacingRole = ftk.SizeRole._None
         transport.addWidget(self._buttons["Reverse"])
         transport.addWidget(self._buttons["Stop"])
         transport.addWidget(self._buttons["Forward"])
         transport.addWidget(self._loopWidget)
         transport.addWidget(self._playbackShuttle)
         frames = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
-        frames.grouped = True
+        frames.spacingRole = ftk.SizeRole._None
         frames.addWidget(self._buttons["Start"])
         frames.addWidget(self._buttons["Prev"])
         frames.addWidget(self._buttons["Next"])
@@ -110,11 +109,11 @@ class Widget(ftk.IContainer):
         # same gesture, on the frames that carry a note or a drawing --
         # and the group is only there when such a frame exists.
         self._reviewToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
-        self._reviewToolBar.grouped = True
+        self._reviewToolBar.spacingRole = ftk.SizeRole._None
         self._reviewToolBar.addWidget(self._buttons["PrevFrame"])
         self._reviewToolBar.addWidget(self._buttons["NextFrame"])
         time = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
-        time.grouped = True
+        time.spacingRole = ftk.SizeRole._None
         time.addWidget(self._currentTimeEdit)
         time.addWidget(self._durationLabel)
         time.addWidget(self._timeUnitsWidget)
@@ -122,10 +121,10 @@ class Widget(ftk.IContainer):
         spacer = ftk.Spacer(context, ftk.Orientation.Horizontal, self._layout)
         spacer.hStretch = ftk.Stretch.Expanding
         audio = ftk.ToolBar(context, ftk.Orientation.Horizontal, self._layout)
-        audio.grouped = True
+        audio.spacingRole = ftk.SizeRole._None
         audio.addWidget(self._audioButton)
         indicator = ftk.ToolBar(context, ftk.Orientation.Horizontal, self._layout)
-        indicator.grouped = True
+        indicator.spacingRole = ftk.SizeRole._None
         indicator.addWidget(self._indicator)
         self._setWidget(self._layout)
 

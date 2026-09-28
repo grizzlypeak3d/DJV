@@ -59,6 +59,7 @@
 #include <tlRender/GL/Render.h>
 
 #include <ftk/UI/ButtonGroup.h>
+#include <ftk/UI/Divider.h>
 #include <ftk/UI/IconSystem.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/Menu.h>
@@ -140,6 +141,7 @@ namespace djv
             std::shared_ptr<ToolsMenu> toolsMenu;
             std::shared_ptr<HelpMenu> helpMenu;
             std::shared_ptr<ftk::MenuBar> menuBar;
+            std::shared_ptr<ftk::Divider> menuBarDivider;
             std::shared_ptr<FileToolBar> fileToolBar;
             std::shared_ptr<CompareToolBar> compareToolBar;
             std::shared_ptr<ViewToolBar> viewToolBar;
@@ -272,9 +274,6 @@ namespace djv
             p.toolsMenu = ToolsMenu::create(context, app, p.toolsActions);
             p.helpMenu = HelpMenu::create(context, p.helpActions);
             p.menuBar = ftk::MenuBar::create(context);
-            // A tone rather than a line between the menu bar and the tool
-            // bars below it.
-            p.menuBar->setBackgroundRole(ftk::ColorRole::Header);
             ftk::setScreenshotTag(p.menuBar, "MainWindow.MenuBar");
             p.menuBar->addMenu("File", p.fileMenu);
             p.menuBar->addMenu("Review", p.reviewMenu);
@@ -362,12 +361,14 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::None);
             p.menuBar->setParent(p.layout);
+            p.menuBarDivider = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             p.toolBarLayout = ftk::HorizontalLayout::create(context, p.layout);
             p.toolBarLayout->setMarginRole(ftk::SizeRole::MarginSmall);
-            p.toolBarLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.toolBarLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
             ftk::setScreenshotTag(p.toolBarLayout, "MainWindow.ToolBar");
-            // The groups of buttons, and the tones of the regions around
-            // them, separate things rather than dividers.
+            // Groups of buttons, set apart by space alone: the buttons of a
+            // group touch, and nothing is drawn behind them but what a
+            // button draws for itself, hovered or checked.
             for (const std::shared_ptr<ftk::ToolBar>& toolBar :
                 std::vector<std::shared_ptr<ftk::ToolBar> >{
                     p.fileToolBar,
@@ -376,7 +377,7 @@ namespace djv
                     p.viewToolBar,
                     p.toolsToolBar })
             {
-                toolBar->setGrouped(true);
+                toolBar->setSpacingRole(ftk::SizeRole::None);
                 toolBar->setParent(p.toolBarLayout);
             }
             p.splitterLayout = ftk::VerticalLayout::create(context, p.layout);
@@ -1052,6 +1053,7 @@ namespace djv
                 const bool presentMode = p.presentMode->get();
 
                 p.menuBar->setVisible(!presentMode);
+                p.menuBarDivider->setVisible(!presentMode);
 
                 p.fileToolBar->setVisible(settings.fileToolBar && !presentMode);
 

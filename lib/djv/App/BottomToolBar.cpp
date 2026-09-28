@@ -157,15 +157,13 @@ namespace djv
 
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::MarginSmall);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            // Grouped like the top tool bar: the groups draw rounded
-            // backgrounds in place of dividers between them.
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingLarge);
+            // Grouped like the top tool bar, by space alone.
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
             ftk::setScreenshotTag(hLayout, "Playback.Controls");
             auto transport = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
             transport->setSpacingRole(ftk::SizeRole::None);
-            transport->setGrouped(true);
             ftk::setScreenshotTag(transport, "Playback.PlaybackControls");
             transport->addWidget(p.buttons["Reverse"]);
             transport->addWidget(p.buttons["Stop"]);
@@ -174,7 +172,6 @@ namespace djv
             transport->addWidget(p.playbackShuttle);
             auto frames = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
             frames->setSpacingRole(ftk::SizeRole::None);
-            frames->setGrouped(true);
             ftk::setScreenshotTag(frames, "Playback.FrameControls");
             frames->addWidget(p.buttons["Start"]);
             frames->addWidget(p.buttons["Prev"]);
@@ -185,12 +182,12 @@ namespace djv
             // gesture, on the frames that carry a note or a drawing -- and the
             // group is only there when such a frame exists.
             p.reviewToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
-            p.reviewToolBar->setGrouped(true);
+            p.reviewToolBar->setSpacingRole(ftk::SizeRole::None);
             ftk::setScreenshotTag(p.reviewToolBar, "Playback.ReviewControls");
             p.reviewToolBar->addWidget(p.buttons["PrevReview"]);
             p.reviewToolBar->addWidget(p.buttons["NextReview"]);
             auto time = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
-            time->setGrouped(true);
+            time->setSpacingRole(ftk::SizeRole::None);
             ftk::setScreenshotTag(time, "Playback.TimeControls");
             time->addWidget(p.currentTimeEdit);
             time->addWidget(p.durationLabel);
@@ -199,10 +196,10 @@ namespace djv
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, p.layout);
             spacer->setHStretch(ftk::Stretch::Expanding);
             auto audio = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, p.layout);
-            audio->setGrouped(true);
+            audio->setSpacingRole(ftk::SizeRole::None);
             audio->addWidget(p.audioButton);
             auto indicator = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, p.layout);
-            indicator->setGrouped(true);
+            indicator->setSpacingRole(ftk::SizeRole::None);
             indicator->addWidget(p.indicator);
 
             p.loopWidget->setCallback(
