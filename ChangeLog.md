@@ -75,6 +75,7 @@ Fixes:
 * Playback no longer drops frames with audio devices that take large
   blocks, such as on the Raspberry Pi.
 * Audio no longer crackles when playing faster or slower.
+* Audio no longer breaks up when the video cannot keep up.
 * A playlist restores a tiled comparison with all of its files.
 * Recent Playlists lists each playlist once, as the file it was saved to.
 * With no file open the HUD shows only that there is no file.
