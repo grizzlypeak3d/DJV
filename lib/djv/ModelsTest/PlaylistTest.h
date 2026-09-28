@@ -25,6 +25,7 @@ namespace djv
             void _foreign();
             void _version();
             void _apply();
+            void _durations();
         };
     }
 }

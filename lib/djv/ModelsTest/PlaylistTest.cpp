@@ -51,6 +51,53 @@ namespace djv
             _foreign();
             _version();
             _apply();
+            _durations();
+        }
+
+        void PlaylistTest::_durations()
+        {
+            // Every clip has a length another application can read: an
+            // editor putting the clips on a timeline has nothing to place for
+            // a clip with neither a source range nor an available range
+            // (DJV #904). A file whose range is known gives its own; in/out
+            // points narrow it.
+            models::Playlist playlist;
+            auto movie = std::make_shared<models::FilesModelItem>();
+            movie->path = ftk::Path("/media/movie.mov");
+            movie->timeRange = OTIO_NS::TimeRange(
+                OTIO_NS::RationalTime(0.0, 24.0),
+                OTIO_NS::RationalTime(48.0, 24.0));
+            playlist.items.push_back(movie);
+            auto still = std::make_shared<models::FilesModelItem>();
+            still->path = ftk::Path("/media/still.png");
+            still->timeRange = OTIO_NS::TimeRange(
+                OTIO_NS::RationalTime(0.0, 24.0),
+                OTIO_NS::RationalTime(1.0, 24.0));
+            playlist.items.push_back(still);
+            auto trimmed = std::make_shared<models::FilesModelItem>();
+            trimmed->path = ftk::Path("/media/trimmed.mov");
+            trimmed->timeRange = OTIO_NS::TimeRange(
+                OTIO_NS::RationalTime(0.0, 24.0),
+                OTIO_NS::RationalTime(100.0, 24.0));
+            trimmed->inOutRange = OTIO_NS::TimeRange(
+                OTIO_NS::RationalTime(10.0, 24.0),
+                OTIO_NS::RationalTime(20.0, 24.0));
+            playlist.items.push_back(trimmed);
+
+            const auto timeline = models::playlistToOTIO(playlist, "/", 24.0);
+            const auto clips = timeline->find_clips();
+            FTK_CHECK(3 == clips.size());
+            const std::vector<double> durations = { 48.0, 1.0, 20.0 };
+            for (size_t i = 0; i < clips.size() && i < durations.size(); ++i)
+            {
+                OTIO_NS::ErrorStatus error;
+                const OTIO_NS::RationalTime duration = clips[i]->duration(&error);
+                _print(ftk::Format("{0}: {1}").
+                    arg(clips[i]->name()).
+                    arg(OTIO_NS::is_error(error) ? error.details : ftk::Format("{0}").arg(duration.value()).str()));
+                FTK_CHECK(!OTIO_NS::is_error(error));
+                FTK_CHECK(durations[i] == duration.value());
+            }
         }
 
         void PlaylistTest::_apply()

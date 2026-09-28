@@ -78,6 +78,8 @@ Fixes:
 * A playlist restores a tiled comparison with all of its files.
 * Recent Playlists lists each playlist once, as the file it was saved to.
 * With no file open the HUD shows only that there is no file.
+* Playlists give each file's length, so editors such as Kdenlive can place
+  the clips.
 
 ## 3.6.0
 

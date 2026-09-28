@@ -190,8 +190,14 @@ namespace djv
                 }
                 else
                 {
+                    // With the file's range when it is known. A clip with
+                    // neither a source range nor an available range has no
+                    // length, and an application that puts clips on a
+                    // timeline, as an editor does, has nothing to put there
+                    // (DJV #904).
                     clip->set_media_reference(new OTIO_NS::ExternalReference(
-                        fileUrl(item->path.getFileName(true), directory)));
+                        fileUrl(item->path.getFileName(true), directory),
+                        item->timeRange));
                 }
 
                 if (item->inOutRange.has_value())
