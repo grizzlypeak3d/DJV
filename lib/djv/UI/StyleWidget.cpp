@@ -3,11 +3,13 @@
 
 #include <djv/UI/SettingsWidgets.h>
 
+#include <ftk/UI/App.h>
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
+#include <ftk/UI/IWindow.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
@@ -22,6 +24,7 @@ namespace djv
             std::shared_ptr<models::SettingsModel> settings;
 
             const std::vector<float> displayScales = ftk::getDisplayScales();
+            float autoDisplayScale = 0.F;
 
             std::shared_ptr<ftk::ComboBox> colorStyleComboBox;
             std::shared_ptr<ftk::FloatEditSlider> brightnessSlider;
@@ -55,13 +58,7 @@ namespace djv
             p.contrastSlider->setRange(.5F, 1.5F);
             p.contrastSlider->setDefault(1.F);
 
-            // The first entry is automatic: zero in the setting.
-            std::vector<std::string> labels = { "Auto" };
-            for (auto d : p.displayScales)
-            {
-                labels.push_back(ftk::Format("{0}").arg(d).operator std::string());
-            }
-            p.displayScaleComboBox = ftk::ComboBox::create(context, labels);
+            p.displayScaleComboBox = ftk::ComboBox::create(context, _getDisplayScaleLabels());
             p.displayScaleComboBox->setHStretch(ftk::Stretch::Expanding);
 
 
@@ -164,6 +161,47 @@ namespace djv
         {
             auto out = std::shared_ptr<StyleSettingsWidget>(new StyleSettingsWidget);
             out->_init(context, settings, parent);
+            return out;
+        }
+
+        void StyleSettingsWidget::tickEvent(
+            bool parentsVisible,
+            bool parentsEnabled,
+            const ftk::TickEvent& event)
+        {
+            ISettingsWidget::tickEvent(parentsVisible, parentsEnabled, event);
+            FTK_P();
+            // What "Auto" comes to follows the window, which a move to
+            // another display can change.
+            if (auto window = getWindow())
+            {
+                if (auto app = window->getApp())
+                {
+                    const float value = app->getAutoDisplayScale();
+                    if (value != p.autoDisplayScale)
+                    {
+                        p.autoDisplayScale = value;
+                        p.displayScaleComboBox->setItems(_getDisplayScaleLabels());
+                    }
+                }
+            }
+        }
+
+        std::vector<std::string> StyleSettingsWidget::_getDisplayScaleLabels() const
+        {
+            FTK_P();
+            // The first entry is automatic: zero in the setting. It says
+            // what it comes to, so that the others read as the absolute
+            // scales they are: on a high DPI display "Auto (2)" is the
+            // normal size, and 2.5 is a little larger (DJV #572).
+            std::vector<std::string> out;
+            out.push_back(p.autoDisplayScale > 0.F ?
+                ftk::Format("Auto ({0})").arg(p.autoDisplayScale).str() :
+                std::string("Auto"));
+            for (auto d : p.displayScales)
+            {
+                out.push_back(ftk::Format("{0}").arg(d).str());
+            }
             return out;
         }
 

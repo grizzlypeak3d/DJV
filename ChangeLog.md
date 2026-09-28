@@ -48,6 +48,7 @@ Changes:
 * On a touch screen two fingers pan and pinch zoom the view and the
   timeline.
 * Entering presentation mode shows how to leave it.
+* The display scale's "Auto" setting shows the scale it comes to.
 * Building on the Raspberry Pi is documented.
 * Library updates:
     - FFmpeg 9.0.1

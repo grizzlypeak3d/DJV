@@ -323,8 +323,14 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            DJV_UI_API void tickEvent(
+                bool parentsVisible,
+                bool parentsEnabled,
+                const ftk::TickEvent&) override;
+
         private:
             void _widgetUpdate(const models::StyleSettings&);
+            std::vector<std::string> _getDisplayScaleLabels() const;
 
             FTK_PRIVATE();
         };
