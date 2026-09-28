@@ -181,16 +181,6 @@ namespace djv
             return out;
         }
 
-        bool StatusIndicator::isSegment() const
-        {
-            return true;
-        }
-
-        void StatusIndicator::setSegment(ftk::ColorRole background, const std::array<bool, 4>& value)
-        {
-            _p->button->setSegment(background, value);
-        }
-
         bool StatusIndicator::_hasIndicator() const
         {
             FTK_P();

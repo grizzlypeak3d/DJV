@@ -59,8 +59,6 @@ namespace djv
                 const std::shared_ptr<models::ToolsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
-            DJV_UI_API bool isSegment() const override;
-            DJV_UI_API void setSegment(ftk::ColorRole, const std::array<bool, 4>&) override;
 
         protected:
             DJV_UI_API virtual bool _hasIndicator() const;
