@@ -85,12 +85,13 @@ class Widget(ftk.IContainer):
             app.getFilesModel(),
             app.getToolsModel())
 
-        # Grouped like the top tool bar, by space alone.
+        # Grouped like the top tool bar, with dividers.
         self._layout = ftk.HorizontalLayout(context)
         self._layout.marginRole = ftk.SizeRole.MarginSmall
-        self._layout.spacingRole = ftk.SizeRole.SpacingLarge
+        self._layout.spacingRole = ftk.SizeRole.SpacingSmall
         hLayout = ftk.HorizontalLayout(context, self._layout)
-        hLayout.spacingRole = ftk.SizeRole.SpacingLarge
+        hLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        self._groupsLayout = hLayout
         transport = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
         transport.spacingRole = ftk.SizeRole._None
         transport.addWidget(self._buttons["Reverse"])
@@ -98,6 +99,7 @@ class Widget(ftk.IContainer):
         transport.addWidget(self._buttons["Forward"])
         transport.addWidget(self._loopWidget)
         transport.addWidget(self._playbackShuttle)
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         frames = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
         frames.spacingRole = ftk.SizeRole._None
         frames.addWidget(self._buttons["Start"])
@@ -108,10 +110,12 @@ class Widget(ftk.IContainer):
         # The review jumps sit with the frame navigation: they are the
         # same gesture, on the frames that carry a note or a drawing --
         # and the group is only there when such a frame exists.
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         self._reviewToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
         self._reviewToolBar.spacingRole = ftk.SizeRole._None
         self._reviewToolBar.addWidget(self._buttons["PrevFrame"])
         self._reviewToolBar.addWidget(self._buttons["NextFrame"])
+        ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
         time = ftk.ToolBar(context, ftk.Orientation.Horizontal, hLayout)
         time.spacingRole = ftk.SizeRole._None
         time.addWidget(self._currentTimeEdit)
@@ -123,6 +127,7 @@ class Widget(ftk.IContainer):
         audio = ftk.ToolBar(context, ftk.Orientation.Horizontal, self._layout)
         audio.spacingRole = ftk.SizeRole._None
         audio.addWidget(self._audioButton)
+        ftk.Divider(context, ftk.Orientation.Horizontal, self._layout)
         indicator = ftk.ToolBar(context, ftk.Orientation.Horizontal, self._layout)
         indicator.spacingRole = ftk.SizeRole._None
         indicator.addWidget(self._indicator)
@@ -157,6 +162,7 @@ class Widget(ftk.IContainer):
 
     def _reviewMarkersUpdate(self, markers):
         self._reviewToolBar.setVisible(len(markers) > 0)
+        ftk.updateDividers(self._groupsLayout)
 
     def focusCurrentFrame(self):
         if self._currentTimeEdit.enabled:

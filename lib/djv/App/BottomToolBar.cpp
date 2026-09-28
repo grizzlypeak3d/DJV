@@ -20,6 +20,7 @@
 #include <tlRender/UI/TimeUnitsWidget.h>
 #include <tlRender/Timeline/Player.h>
 
+#include <ftk/UI/Divider.h>
 #include <ftk/UI/DoubleModel.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
@@ -55,6 +56,7 @@ namespace djv
             std::shared_ptr<ui::AudioPopup> audioPopup;
             std::shared_ptr<ui::StatusIndicator> indicator;
             std::shared_ptr<ftk::ToolBar> reviewToolBar;
+            std::shared_ptr<ftk::HorizontalLayout> groupsLayout;
             std::shared_ptr<ftk::HorizontalLayout> layout;
 
             // Whether media time means anything across the whole timeline,
@@ -157,10 +159,11 @@ namespace djv
 
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::MarginSmall);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingLarge);
-            // Grouped like the top tool bar, by space alone.
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            // Grouped like the top tool bar, with dividers.
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.groupsLayout = hLayout;
             ftk::setScreenshotTag(hLayout, "Playback.Controls");
             auto transport = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
             transport->setSpacingRole(ftk::SizeRole::None);
@@ -170,6 +173,7 @@ namespace djv
             transport->addWidget(p.buttons["Forward"]);
             transport->addWidget(p.loopWidget);
             transport->addWidget(p.playbackShuttle);
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             auto frames = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
             frames->setSpacingRole(ftk::SizeRole::None);
             ftk::setScreenshotTag(frames, "Playback.FrameControls");
@@ -181,11 +185,13 @@ namespace djv
             // The review jumps sit with the frame navigation: they are the same
             // gesture, on the frames that carry a note or a drawing -- and the
             // group is only there when such a frame exists.
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             p.reviewToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
             p.reviewToolBar->setSpacingRole(ftk::SizeRole::None);
             ftk::setScreenshotTag(p.reviewToolBar, "Playback.ReviewControls");
             p.reviewToolBar->addWidget(p.buttons["PrevReview"]);
             p.reviewToolBar->addWidget(p.buttons["NextReview"]);
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
             auto time = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, hLayout);
             time->setSpacingRole(ftk::SizeRole::None);
             ftk::setScreenshotTag(time, "Playback.TimeControls");
@@ -198,6 +204,7 @@ namespace djv
             auto audio = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, p.layout);
             audio->setSpacingRole(ftk::SizeRole::None);
             audio->addWidget(p.audioButton);
+            ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             auto indicator = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, p.layout);
             indicator->setSpacingRole(ftk::SizeRole::None);
             indicator->addWidget(p.indicator);
@@ -293,6 +300,7 @@ namespace djv
                 {
                     FTK_P();
                     p.reviewToolBar->setVisible(!value.empty());
+                    ftk::updateDividers(p.groupsLayout);
                 });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(

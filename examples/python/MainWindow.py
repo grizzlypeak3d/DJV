@@ -145,7 +145,7 @@ class MainWindow(ftk.MainWindow):
                 statusBar.setHint(text)
         self._menuBar.setCurrentCallback(menuHint)
 
-        # Layout widgets. Groups of buttons, set apart by space alone: the
+        # Layout widgets. Groups of buttons with a divider between them: the
         # buttons of a group touch, and nothing is drawn behind them but
         # what a button draws for itself, hovered or checked.
         self._layout = ftk.VerticalLayout(context)
@@ -154,14 +154,16 @@ class MainWindow(ftk.MainWindow):
         self._menuBarDivider = ftk.Divider(context, ftk.Orientation.Vertical, self._layout)
         hLayout = ftk.HorizontalLayout(context, self._layout)
         hLayout.marginRole = ftk.SizeRole.MarginSmall
-        hLayout.spacingRole = ftk.SizeRole.SpacingLarge
+        hLayout.spacingRole = ftk.SizeRole.SpacingSmall
         self._toolBarLayout = hLayout
-        for toolBar in [
+        for i, toolBar in enumerate([
             self._fileToolBar,
             self._compareToolBar,
             self._windowToolBar,
             self._viewToolBar,
-            self._toolsToolBar]:
+            self._toolsToolBar]):
+            if i > 0:
+                ftk.Divider(context, ftk.Orientation.Horizontal, hLayout)
             toolBar.spacingRole = ftk.SizeRole._None
             toolBar.parent = hLayout
         self._tabBar.parent = self._layout
@@ -385,6 +387,7 @@ class MainWindow(ftk.MainWindow):
         self._windowToolBar.setVisible(settings.windowToolBar and not presentMode)
         self._viewToolBar.setVisible(settings.viewToolBar and not presentMode)
         self._toolsToolBar.setVisible(settings.toolsToolBar and not presentMode)
+        ftk.updateDividers(self._toolBarLayout)
 
         # The row goes when all of its tool bars do, rather than leaving
         # its margin behind.

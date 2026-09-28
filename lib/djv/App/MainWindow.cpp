@@ -384,11 +384,14 @@ namespace djv
             p.menuBarDivider = ftk::Divider::create(context, ftk::Orientation::Vertical, p.layout);
             p.toolBarLayout = ftk::HorizontalLayout::create(context, p.layout);
             p.toolBarLayout->setMarginRole(ftk::SizeRole::MarginSmall);
-            p.toolBarLayout->setSpacingRole(ftk::SizeRole::SpacingLarge);
+            p.toolBarLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             ftk::setScreenshotTag(p.toolBarLayout, "MainWindow.ToolBar");
-            // Groups of buttons, set apart by space alone: the buttons of a
-            // group touch, and nothing is drawn behind them but what a
-            // button draws for itself, hovered or checked.
+            // Groups of buttons with a divider between them: the buttons of
+            // a group touch, and nothing is drawn behind them but what a
+            // button draws for itself, hovered or checked. Space alone
+            // either left the groups hard to tell apart or, wide enough to
+            // tell, no longer fit a small window.
+            bool first = true;
             for (const std::shared_ptr<ftk::ToolBar>& toolBar :
                 std::vector<std::shared_ptr<ftk::ToolBar> >{
                     p.fileToolBar,
@@ -397,6 +400,11 @@ namespace djv
                     p.viewToolBar,
                     p.toolsToolBar })
             {
+                if (!first)
+                {
+                    ftk::Divider::create(context, ftk::Orientation::Horizontal, p.toolBarLayout);
+                }
+                first = false;
                 toolBar->setSpacingRole(ftk::SizeRole::None);
                 toolBar->setParent(p.toolBarLayout);
             }
@@ -1112,6 +1120,8 @@ namespace djv
                 p.viewToolBar->setVisible(settings.viewToolBar && !presentMode);
 
                 p.toolsToolBar->setVisible(settings.toolsToolBar && !presentMode);
+
+                ftk::updateDividers(p.toolBarLayout);
 
                 // The row goes when all of its tool bars do, rather than
                 // leaving its margin behind.
