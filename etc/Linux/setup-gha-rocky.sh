@@ -36,3 +36,9 @@ dnf install -y libdecor-devel || echo "libdecor-devel is not available"
 dnf install -y \
     alsa-lib-devel \
     pulseaudio-libs-devel
+
+# And PipeWire, which SDL also loads at run time. Without it SDL plays through
+# PulseAudio on a PipeWire system, whose relay adds two threads that are not
+# real time between the player and the device, and the audio drops out under
+# load. Rocky 8 may not carry a new enough version, and SDL builds without it.
+dnf install -y pipewire-devel || echo "pipewire-devel is not available"
