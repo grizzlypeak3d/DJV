@@ -2,15 +2,13 @@
 
 Changes:
 * Settings and logs move to the application support directory.
-* System Information shows the settings and log paths.
-* System Information shows the desktop on Linux.
+* System Information shows the settings path, log path, and Linux desktop.
 * The Linux package has a desktop entry and icons.
 * The HUD shows the file name of the current image of a sequence.
 * Opening one image of a sequence starts playback at that image.
 * OTIOZ bundle media can be read with the FFmpeg command line.
 * The status bar shows the highlighted menu item's tooltip.
 * The Python bindings use nanobind.
-* Add a clipping warning.
 * Building requires C++20.
 * CineForm movies can be read and written.
 * Hovering the timeline shows a preview of the frame under the cursor.
@@ -29,27 +27,16 @@ Changes:
 * The OCIO environment variable is used to initialize the OCIO settings.
 * Add a -mediaReference command line option.
 * The view's color buffer defaults to RGBA F16.
-* Custom fonts are gone: the interface uses the fonts DJV ships, and the
-  bundled pan-CJK font renders CJK file names without any setting up.
-* "Enable tooltips" moved to the Style settings; the Miscellaneous
-  settings are gone, along with the setup dialog check box that only
-  showed the dialog once.
-* The Color tool has a Reset button, and the reset dialog offers only the
-  sections that have something to reset.
+* Removed custom font settings, a CJK font is now bundled with the application.
 * The window title shows the review or file name. Contributed by timurhai.
 * The FFmpeg settings show the ffmpeg and ffprobe commands.
-* The movie export says when a preset writes no audio.
 * Movies can be exported to Matroska files: FFV1, AV1, H.264, HEVC, and
   VP9 are written to ".mkv".
 * Style updates.
 * The left and right arrow keys move between the menus.
 * The file browser filters by kind of file: images, movies, audio, and so
   on.
-* On a touch screen two fingers pan and pinch zoom the view and the
-  timeline.
-* Entering presentation mode shows how to leave it.
-* The display scale's "Auto" setting shows the scale it comes to.
-* Building on the Raspberry Pi is documented.
+* Gestures are supported on touch screens.
 * Library updates:
     - FFmpeg 9.0.1
     - OpenAPV 1.1.1.0
@@ -72,16 +59,8 @@ Fixes:
 * USD support, removed in 3.6.0, is back in source builds.
 * High Quality filtering no longer softens pictures shown or exported at
   their own size.
-* Playback no longer drops frames with audio devices that take large
-  blocks, such as on the Raspberry Pi.
 * Audio no longer crackles when playing faster or slower.
-* Audio no longer breaks up when the video cannot keep up.
-* The dropped frame count is kept at playback speeds above the file's own.
 * A playlist restores a tiled comparison with all of its files.
-* Recent Playlists lists each playlist once, as the file it was saved to.
-* With no file open the HUD shows only that there is no file.
-* Playlists give each file's length, so editors such as Kdenlive can place
-  the clips.
 
 ## 3.6.0
 
