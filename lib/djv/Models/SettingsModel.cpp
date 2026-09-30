@@ -180,7 +180,7 @@ namespace djv
                 { "ImageSeq", "/ImageSeq.1" },
                 { "OTIO", "/OTIO.2" },
                 { "Shortcuts", "/Shortcuts.4" },
-                { "Misc", "/Misc.2" },
+                { "Misc", "/Misc.3" },
                 { "Mouse", "/Mouse.1" },
                 { "Playback", "/Playback.1" },
                 { "Style", "/Style.2" },
