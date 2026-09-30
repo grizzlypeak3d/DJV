@@ -93,6 +93,34 @@ together and each keeps its own number.
       and the FFmpeg pin together; ftk and tlRender are tagged with their own
       version numbers.
 
+## PyPI
+
+Pushing a version tag builds that repository's wheels and publishes them
+(feather-tk, tlRender, DJV_viewer), once the publish job is approved in the
+`pypi` environment on GitHub.
+
+- [ ] Move the pins with the versions: tlRender's `pyproject.toml` pins
+      feather-tk, and DJV's pins tlRender and feather-tk, each to an exact
+      version. They go in with the `Version.h` edits (the "builds against"
+      commits), so that the tags name what was released.
+- [ ] Expect the wheel builds on main to fail once the pins are pushed: a
+      change to `pyproject.toml` builds the wheels, and the versions they pin
+      are not on PyPI until the tags are. The tag's build is the one that
+      counts; "CI green" above means the CI workflow.
+- [ ] Tag innermost first, one at a time, since a wheel build fetches the
+      wheels it pins from PyPI: ftk, then tlRender, then DJV. Before each
+      next tag, wait until `https://pypi.org/simple/<name>/` lists the new
+      files. The index lags the release by minutes, and a tlRender tag pushed
+      three minutes after feather-tk published failed a wheel job.
+- [ ] Should only the publish job fail, say from a publisher set up wrongly
+      on PyPI, fix it there and use "Re-run failed jobs": the wheels already
+      built are kept.
+
+## After the release
+
+- [ ] Start the next version in all three: the next minor number and
+      `VERSION_DEV` back to `"-dev"` ("Version X.Y.Z-dev").
+
 ## Worth knowing
 
 - Editing `.github/workflows/ci-workflow.yml` busts the dependency cache and
