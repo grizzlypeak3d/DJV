@@ -31,6 +31,8 @@
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
 
+#include <algorithm>
+
 namespace djv
 {
     namespace app
@@ -244,7 +246,9 @@ namespace djv
                     FTK_P();
                     if (p.player)
                     {
-                        p.player->setSpeedMult(1.0 + value / 10.0);
+                        // Not to zero or below: dragged that far, the audio
+                        // played at full speed, and the playback with it.
+                        p.player->setSpeedMult(std::max(0.1, 1.0 + value / 10.0));
                     }
                 });
 
