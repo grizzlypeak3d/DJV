@@ -275,6 +275,11 @@ namespace djv
             //! Create the status indicator.
             DJV_APP_API virtual std::shared_ptr<ui::StatusIndicator> createIndicator();
 
+            //! Create pages of the application's own for the setup dialog,
+            //! which shows them after its welcome page, in order. None by
+            //! default. Called only when the dialog is shown, on the first run.
+            DJV_APP_API virtual std::vector<std::shared_ptr<ftk::IWidget> > createSetupPages();
+
             //! Get the main window.
             DJV_APP_API const std::shared_ptr<MainWindow>& getMainWindow() const;
 

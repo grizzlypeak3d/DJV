@@ -2114,6 +2114,11 @@ namespace djv
             return _p->toolWidgetFactory;
         }
 
+        std::vector<std::shared_ptr<ftk::IWidget> > App::createSetupPages()
+        {
+            return {};
+        }
+
         std::shared_ptr<ui::StatusIndicator> App::createIndicator()
         {
             FTK_P();

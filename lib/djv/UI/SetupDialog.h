@@ -9,6 +9,8 @@
 #include <ftk/UI/IContainer.h>
 #include <ftk/UI/IDialog.h>
 
+#include <vector>
+
 namespace djv
 {
     namespace models
@@ -55,6 +57,7 @@ namespace djv
                 const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
+                const std::vector<std::shared_ptr<IWidget> >& pages,
                 const std::shared_ptr<IWidget>& parent);
 
             SetupDialog();
@@ -62,11 +65,15 @@ namespace djv
         public:
             DJV_UI_API virtual ~SetupDialog();
 
+            //! Create a new dialog. The pages are an application's own,
+            //! shown after the welcome page and before the settings, in
+            //! order.
             DJV_UI_API static std::shared_ptr<SetupDialog> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<models::AppInfoModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
+                const std::vector<std::shared_ptr<IWidget> >& pages = {},
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             DJV_UI_API std::shared_ptr<ftk::IWidget> getKeyFocus() const override;

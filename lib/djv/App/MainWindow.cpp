@@ -501,7 +501,8 @@ namespace djv
                     context,
                     app->getAppInfoModel(),
                     settingsModel,
-                    app->getTimeUnitsModel());
+                    app->getTimeUnitsModel(),
+                    app->createSetupPages());
                 p.setupDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
                 p.setupDialog->setCloseCallback(
                     [this]

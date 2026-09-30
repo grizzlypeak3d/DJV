@@ -103,6 +103,7 @@ namespace djv
             const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
+            const std::vector<std::shared_ptr<IWidget> >& pages,
             const std::shared_ptr<IWidget>& parent)
         {
             IDialog::_init(
@@ -122,6 +123,10 @@ namespace djv
             p.stackLayout->setMarginRole(ftk::SizeRole::Margin);
 
             SetupStartWidget::create(context, appInfoModel, p.stackLayout);
+            for (const auto& page : pages)
+            {
+                page->setParent(p.stackLayout);
+            }
 
             auto vLayout = ftk::VerticalLayout::create(context, p.stackLayout);
             ftk::Label::create(context, "Configure the memory cache:", vLayout);
@@ -199,10 +204,11 @@ namespace djv
             const std::shared_ptr<models::AppInfoModel>& appInfoModel,
             const std::shared_ptr<models::SettingsModel>& settings,
             const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
+            const std::vector<std::shared_ptr<IWidget> >& pages,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<SetupDialog>(new SetupDialog);
-            out->_init(context, appInfoModel, settings, timeUnitsModel, parent);
+            out->_init(context, appInfoModel, settings, timeUnitsModel, pages, parent);
             return out;
         }
 
