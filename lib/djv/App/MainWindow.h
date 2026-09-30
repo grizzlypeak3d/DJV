@@ -120,6 +120,13 @@ namespace djv
             DJV_APP_API void saveSettings();
 
             //! Show the about dialog.
+            //! Show the setup dialog, if it is due: the first run, and not
+            //! hidden by -hideSetup or a scripted run. Nothing otherwise.
+            //! Shown when the window is made unless the application says it
+            //! is not ready (App::isSetupReady()), in which case the
+            //! application calls this when it is.
+            DJV_APP_API void showSetupDialog();
+
             DJV_APP_API void showAboutDialog();
 
             //! Show the system information dialog.

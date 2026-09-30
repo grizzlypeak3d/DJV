@@ -491,24 +491,11 @@ namespace djv
             p.toolsWidget->setContextMenuCallback(
                 chromeMenuCallback(context, p.windowActions, { "Tools" }));
 
-            auto miscSettings = app->getSettingsModel()->getMisc();
-            if (miscSettings.showSetup && !app->getHideSetup())
+            // Unless the application has something to settle first, which
+            // then shows it itself (App::isSetupReady()).
+            if (app->isSetupReady())
             {
-                miscSettings.showSetup = false;
-                auto settingsModel = app->getSettingsModel();
-                settingsModel->setMisc(miscSettings);
-                p.setupDialog = ui::SetupDialog::create(
-                    context,
-                    app->getAppInfoModel(),
-                    settingsModel,
-                    app->getTimeUnitsModel(),
-                    app->createSetupPages());
-                p.setupDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
-                p.setupDialog->setCloseCallback(
-                    [this]
-                    {
-                        _p->setupDialog.reset();
-                    });
+                showSetupDialog();
             }
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
@@ -846,6 +833,34 @@ namespace djv
             {
                 reviewTool->addRange();
             }
+        }
+
+        void MainWindow::showSetupDialog()
+        {
+            FTK_P();
+            auto app = p.app.lock();
+            if (!app || p.setupDialog)
+                return;
+            auto miscSettings = app->getSettingsModel()->getMisc();
+            if (!miscSettings.showSetup || app->getHideSetup())
+                return;
+            // Cleared when it is shown, not when it is closed: a first run
+            // is shown the setup once, however it ends.
+            miscSettings.showSetup = false;
+            auto settingsModel = app->getSettingsModel();
+            settingsModel->setMisc(miscSettings);
+            p.setupDialog = ui::SetupDialog::create(
+                getContext(),
+                app->getAppInfoModel(),
+                settingsModel,
+                app->getTimeUnitsModel(),
+                app->createSetupPages());
+            p.setupDialog->open(std::dynamic_pointer_cast<IWindow>(shared_from_this()));
+            p.setupDialog->setCloseCallback(
+                [this]
+                {
+                    _p->setupDialog.reset();
+                });
         }
 
         void MainWindow::showAboutDialog()

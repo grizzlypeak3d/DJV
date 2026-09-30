@@ -2114,6 +2114,11 @@ namespace djv
             return _p->toolWidgetFactory;
         }
 
+        bool App::isSetupReady() const
+        {
+            return true;
+        }
+
         std::vector<std::shared_ptr<ftk::IWidget> > App::createSetupPages()
         {
             return {};

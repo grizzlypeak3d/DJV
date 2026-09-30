@@ -275,6 +275,15 @@ namespace djv
             //! Create the status indicator.
             DJV_APP_API virtual std::shared_ptr<ui::StatusIndicator> createIndicator();
 
+            //! Whether the setup dialog may be shown when the main window is
+            //! made. True by default. An application with something to
+            //! settle first -- a question that has to be answered before
+            //! anything else -- returns false and calls
+            //! MainWindow::showSetupDialog() once it is settled, so the two
+            //! are not on screen together, and a first run that ends before
+            //! then still has its setup to come.
+            DJV_APP_API virtual bool isSetupReady() const;
+
             //! Create pages of the application's own for the setup dialog,
             //! which shows them after its welcome page, in order. None by
             //! default. Called only when the dialog is shown, on the first run.
