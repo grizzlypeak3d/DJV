@@ -23,14 +23,32 @@ xvfb-run glxinfo
 
 # Wayland: SDL only builds its Wayland driver when these are present, and
 # loads the libraries at run time, so the package gains no dependency.
-# libdecor gives window decorations on GNOME; Rocky 8 may not carry it,
-# and the driver builds without it.
 dnf install -y \
     wayland-devel \
     wayland-protocols-devel \
     libxkbcommon-devel \
     mesa-libEGL-devel
-dnf install -y libdecor-devel || echo "libdecor-devel is not available"
+
+# libdecor, which SDL draws the window decorations with where the compositor
+# leaves them to the application, as GNOME does: built without it, the
+# package's windows there have no title bar or border. Rocky 8 has no
+# libdecor, and going on without it is how the package came to be built that
+# way, so it is built here, for its headers. It is not in the package: SDL
+# loads the system's, and treats what is newer than libdecor 0.1 as optional.
+# cairo and pango are for libdecor's own plugin, which its build requires.
+if ! dnf install -y libdecor-devel; then
+    dnf install -y cairo-devel pango-devel
+    python -m pip install meson ninja
+    export PATH="$(python -c 'import sysconfig; print(sysconfig.get_path("scripts"))'):$PATH"
+    curl --fail --location --retry 3 --output /tmp/libdecor.tar.gz \
+        https://gitlab.freedesktop.org/libdecor/libdecor/-/archive/0.2.2/libdecor-0.2.2.tar.gz
+    tar -xzf /tmp/libdecor.tar.gz -C /tmp
+    meson setup /tmp/libdecor-build /tmp/libdecor-0.2.2 \
+        --prefix=/usr --libdir=lib64 --buildtype=release \
+        -Ddemo=false -Ddbus=disabled -Dgtk=disabled
+    ninja -C /tmp/libdecor-build install
+fi
+pkg-config --modversion libdecor-0
 
 # Install ALSA and PulseAudio support
 dnf install -y \
