@@ -1,3 +1,9 @@
+## 3.7.1
+
+Fixes:
+* Fix for ffmpeg/ffprobe error messages in the file browser.
+* Fixes for PyPI audio and Wayland support.
+
 ## 3.7.0
 
 Changes:
