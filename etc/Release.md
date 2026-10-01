@@ -110,8 +110,14 @@ Pushing a version tag builds that repository's wheels and publishes them
 - [ ] Tag innermost first, one at a time, since a wheel build fetches the
       wheels it pins from PyPI: ftk, then tlRender, then DJV. Before each
       next tag, wait until `https://pypi.org/simple/<name>/` lists the new
-      files. The index lags the release by minutes, and a tlRender tag pushed
-      three minutes after feather-tk published failed a wheel job.
+      files -- the wheels and the sdist, not their provenance entries -- and
+      then a few minutes more. The index lags the release by minutes and its
+      servers do not catch up together: a tlRender tag pushed three minutes
+      after feather-tk published failed a wheel job, and one pushed a minute
+      after the index listed every file here failed the sdist, which needs
+      the pinned wheel in its first seconds.
+- [ ] Should a job fail that way, wait for the rest of the run to finish and
+      use "Re-run failed jobs".
 - [ ] Should only the publish job fail, say from a publisher set up wrongly
       on PyPI, fix it there and use "Re-run failed jobs": the wheels already
       built are kept.
