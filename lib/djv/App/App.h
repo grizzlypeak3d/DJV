@@ -330,6 +330,7 @@ namespace djv
             void _saveSettings();
             void _closeFailed();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
+            void _fileBrowserThumbnailsUpdate();
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             // The timeline for a file in the list, opened the first time
             // it is asked for: only the current file and the files compared
