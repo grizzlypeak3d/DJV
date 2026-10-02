@@ -1,3 +1,15 @@
+## 3.7.2
+
+Changes:
+* The audio buffer size setting sets the device's buffer size. The default
+  is the device's own size.
+* The Linux package and Python wheel play audio through PipeWire.
+
+Fixes:
+* Fix for audio CPU use that grew the longer the application was open.
+* Fix for tools added by an application built on DJV not reopening on
+  restart.
+
 ## 3.7.1
 
 Fixes:
