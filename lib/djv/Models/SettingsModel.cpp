@@ -128,6 +128,7 @@ namespace djv
 #if defined(TLRENDER_USD)
             std::shared_ptr<ftk::Observable<tl::usd::Options> > usd;
 #endif // TLRENDER_USD
+            std::shared_ptr<ftk::Observable<tl::IOOptions> > ioOptions;
         };
 
         std::vector<Shortcut> getChangedShortcuts(
@@ -348,6 +349,8 @@ namespace djv
             settings->getT(keys["USD"], usd);
             p.usd = ftk::Observable<tl::usd::Options>::create(usd);
 #endif // TLRENDER_USD
+
+            p.ioOptions = ftk::Observable<tl::IOOptions>::create(getIOOptions());
         }
 
         SettingsModel::SettingsModel() :
@@ -595,7 +598,9 @@ namespace djv
 
         void SettingsModel::setImageSeq(const ImageSeqSettings& value)
         {
-            _p->imageSeq->setIfChanged(value);
+            FTK_P();
+            p.imageSeq->setIfChanged(value);
+            p.ioOptions->setIfChanged(getIOOptions());
         }
 
         const OTIOSettings& SettingsModel::getOTIO() const
@@ -752,7 +757,9 @@ namespace djv
 
         void SettingsModel::setFFmpeg(const tl::ffmpeg::Options& value)
         {
-            _p->ffmpeg->setIfChanged(value);
+            FTK_P();
+            p.ffmpeg->setIfChanged(value);
+            p.ioOptions->setIfChanged(getIOOptions());
         }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
@@ -769,7 +776,9 @@ namespace djv
 
         void SettingsModel::setFFmpegCmd(const tl::ffmpeg_cmd::Options& value)
         {
-            _p->ffmpegCmd->setIfChanged(value);
+            FTK_P();
+            p.ffmpegCmd->setIfChanged(value);
+            p.ioOptions->setIfChanged(getIOOptions());
         }
 #endif // TLRENDER_FFMPEG_PLUGIN
 
@@ -786,9 +795,16 @@ namespace djv
 
         void SettingsModel::setUSD(const tl::usd::Options& value)
         {
-            _p->usd->setIfChanged(value);
+            FTK_P();
+            p.usd->setIfChanged(value);
+            p.ioOptions->setIfChanged(getIOOptions());
         }
 #endif // TLRENDER_USD
+
+        std::shared_ptr<ftk::IObservable<tl::IOOptions> > SettingsModel::observeIOOptions() const
+        {
+            return _p->ioOptions;
+        }
 
         tl::IOOptions SettingsModel::getIOOptions() const
         {

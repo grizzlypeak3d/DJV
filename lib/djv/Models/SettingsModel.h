@@ -572,6 +572,10 @@ namespace djv
 
             DJV_MODELS_API tl::IOOptions getIOOptions() const;
 
+            //! Observe the I/O options: the image sequence, FFmpeg and USD
+            //! settings together, as they are given to what reads files.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::IOOptions> > observeIOOptions() const;
+
             ///@}
 
         private:

@@ -246,7 +246,8 @@ namespace djv
                 .def_prop_rw("window", &SettingsModel::getWindow, &SettingsModel::setWindow, nb::rv_policy::copy)
                 .def_prop_ro("observeWindow", &SettingsModel::observeWindow)
 
-                .def_prop_ro("ioOptions", &SettingsModel::getIOOptions);
+                .def_prop_ro("ioOptions", &SettingsModel::getIOOptions)
+                .def_prop_ro("observeIOOptions", &SettingsModel::observeIOOptions);
         }
     }
 }

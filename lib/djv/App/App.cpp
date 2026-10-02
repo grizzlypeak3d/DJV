@@ -230,13 +230,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
             std::shared_ptr<ftk::Observer<models::AudioSettings> > audioSettingsObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-            std::shared_ptr<ftk::Observer<tl::ffmpeg::Options> > ffmpegObserver;
-            std::shared_ptr<ftk::Observer<tl::ffmpeg_cmd::Options> > ffmpegCmdObserver;
-#endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_USD)
-            std::shared_ptr<ftk::Observer<tl::usd::Options> > usdObserver;
-#endif // TLRENDER_USD
+            std::shared_ptr<ftk::Observer<tl::IOOptions> > ioOptionsObserver;
             // The policy the open files were built with, so that a change to
             // or from Skip can be told apart from the rest.
             tl::MissingFrames missingFrames = tl::MissingFrames::First;
@@ -2912,6 +2906,12 @@ namespace djv
             p.mainWindow->exportMovie(getBool("overwrite"), done);
         }
 
+        void App::_observersInit()
+        {
+            FTK_P();
+
+            p.player = ftk::Observable<std::shared_ptr<tl::Player> >::create();
+
             // The audio device's buffer size is the audio system's to give
             // the device, when it opens it: a player has no say in it.
             p.audioSettingsObserver = ftk::Observer<models::AudioSettings>::create(
@@ -2921,12 +2921,6 @@ namespace djv
                     _context->getSystem<tl::AudioSystem>()->setBufferFrameCount(
                         value.bufferFrameCount);
                 });
-
-        void App::_observersInit()
-        {
-            FTK_P();
-
-            p.player = ftk::Observable<std::shared_ptr<tl::Player> >::create();
 
             p.cacheObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
                 p.settingsModel->observeCache(),
@@ -2958,7 +2952,6 @@ namespace djv
                         (tl::isStructural(value.io.missingFrames) ||
                             tl::isStructural(p.missingFrames));
                     p.missingFrames = value.io.missingFrames;
-                    _fileBrowserThumbnailsUpdate();
                     if (reopen)
                     {
                         _reload(true);
@@ -2973,28 +2966,17 @@ namespace djv
             // settings the files are opened with. It read them with the
             // defaults, so with FFmpeg set to somewhere it is not otherwise
             // found the movies that need it opened and had no thumbnails.
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-            p.ffmpegObserver = ftk::Observer<tl::ffmpeg::Options>::create(
-                p.settingsModel->observeFFmpeg(),
-                [this](const tl::ffmpeg::Options&)
+            p.ioOptionsObserver = ftk::Observer<tl::IOOptions>::create(
+                p.settingsModel->observeIOOptions(),
+                [this](const tl::IOOptions& value)
                 {
-                    _fileBrowserThumbnailsUpdate();
+                    auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+                    if (auto thumbnails = std::dynamic_pointer_cast<tl::ui::FileBrowserThumbnails>(
+                        fileBrowserSystem->getThumbnails()))
+                    {
+                        thumbnails->setIOOptions(value);
+                    }
                 });
-            p.ffmpegCmdObserver = ftk::Observer<tl::ffmpeg_cmd::Options>::create(
-                p.settingsModel->observeFFmpegCmd(),
-                [this](const tl::ffmpeg_cmd::Options&)
-                {
-                    _fileBrowserThumbnailsUpdate();
-                });
-#endif // TLRENDER_FFMPEG_PLUGIN
-#if defined(TLRENDER_USD)
-            p.usdObserver = ftk::Observer<tl::usd::Options>::create(
-                p.settingsModel->observeUSD(),
-                [this](const tl::usd::Options&)
-                {
-                    _fileBrowserThumbnailsUpdate();
-                });
-#endif // TLRENDER_USD
 
             p.filesObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
                 p.filesModel->observeFiles(),
@@ -3564,17 +3546,6 @@ namespace djv
             _audioUpdate();
         }
 
-
-        void App::_fileBrowserThumbnailsUpdate()
-        {
-            FTK_P();
-            auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
-            if (auto thumbnails = std::dynamic_pointer_cast<tl::ui::FileBrowserThumbnails>(
-                fileBrowserSystem->getThumbnails()))
-            {
-                thumbnails->setIOOptions(p.settingsModel->getIOOptions());
-            }
-        }
 
         void App::_filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& files)
         {
