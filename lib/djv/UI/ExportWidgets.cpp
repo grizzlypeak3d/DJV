@@ -51,7 +51,8 @@ namespace djv
                 ".mov",
                 ".mp4",
                 ".mkv",
-                ".m4v"
+                ".m4v",
+                ".gif"
             };
 
             const std::vector<std::string> movieAudioCodecs =
@@ -953,6 +954,8 @@ namespace djv
             // audio and the preset is not a command line one, which writes
             // video only.
             bool presetCmd = false;
+            // Or one whose format has nowhere to put audio: a GIF.
+            bool presetSilent = false;
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             const std::string presetName = p.settings->getExport().moviePreset;
             for (const auto& preset : tl::ffmpeg::getWritePresets())
@@ -960,17 +963,22 @@ namespace djv
                 if (preset.name == presetName)
                 {
                     presetCmd = preset.command;
+                    presetSilent = !preset.audio;
                     break;
                 }
             }
 #endif // TLRENDER_FFMPEG_PLUGIN
+            const bool presetNoAudio = presetCmd || presetSilent;
             const bool hasAudio =
                 !p.player || p.player->getIOInfo().audio.isValid();
-            p.audioCodecComboBox->setEnabled(hasAudio && !presetCmd);
+            p.audioCodecComboBox->setEnabled(hasAudio && !presetNoAudio);
             // Why it is disabled, where it is: a preset that writes no audio
             // reads as a setting that does not apply, and a file that has no
             // audio reads the same way (DJV #885).
             p.audioCodecComboBox->setTooltip(
+                presetSilent ?
+                "This preset's format has no audio; what is exported is "
+                "the picture only." :
                 presetCmd ?
                 "The command line presets write video only; the exported "
                 "movie has no audio. The presets above them, which use the "
@@ -985,7 +993,7 @@ namespace djv
             // export will not write is the case worth seeing without
             // hovering anything, so it is the one in red.
             std::string note;
-            if (presetCmd)
+            if (presetNoAudio)
             {
                 note = "This preset does not support audio export.";
             }
@@ -994,7 +1002,7 @@ namespace djv
                 note = "The file has no audio.";
             }
             p.audioNoteLabel->setText(note);
-            p.audioNoteLabel->setTextRole(presetCmd && hasAudio ?
+            p.audioNoteLabel->setTextRole(presetNoAudio && hasAudio ?
                 ftk::ColorRole::Red :
                 ftk::ColorRole::TextDisabled);
             p.formLayout->setRowVisible(p.audioNoteLabel, !note.empty());
