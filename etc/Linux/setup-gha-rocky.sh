@@ -58,5 +58,23 @@ dnf install -y \
 # And PipeWire, which SDL also loads at run time. Without it SDL plays through
 # PulseAudio on a PipeWire system, whose relay adds two threads that are not
 # real time between the player and the device, and the audio drops out under
-# load. Rocky 8 may not carry a new enough version, and SDL builds without it.
+# load. SDL needs 0.3.44 to build against and Rocky 8's is older; going on
+# without it is how the package came to be built that way, so it is built
+# here, for its headers, with everything that needs another library turned
+# off. It is not in the package: SDL loads the system's.
 dnf install -y pipewire-devel || echo "pipewire-devel is not available"
+if ! pkg-config --atleast-version=0.3.44 libpipewire-0.3; then
+    dnf remove -y pipewire-devel || true
+    python -m pip install meson ninja
+    export PATH="$(python -c 'import sysconfig; print(sysconfig.get_path("scripts"))'):$PATH"
+    curl --fail --location --retry 3 --output /tmp/pipewire.tar.gz \
+        https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/0.3.48/pipewire-0.3.48.tar.gz
+    tar -xzf /tmp/pipewire.tar.gz -C /tmp
+    meson setup /tmp/pipewire-build /tmp/pipewire-0.3.48 \
+        --prefix=/usr --libdir=lib64 --buildtype=release --auto-features=disabled \
+        -Dexamples=disabled -Dtests=disabled -Dpipewire-jack=disabled \
+        -Dpipewire-v4l2=disabled -Ddbus=disabled -Dsystemd-user-service=disabled \
+        '-Dsession-managers=[]'
+    ninja -C /tmp/pipewire-build install
+fi
+pkg-config --atleast-version=0.3.44 libpipewire-0.3
