@@ -59,14 +59,19 @@ namespace djv
             p.settings = settings;
 
             p.bufferFramesEdit = ftk::IntEdit::create(context);
-            p.bufferFramesEdit->setRange(1, 1000000);
+            p.bufferFramesEdit->setRange(0, 1000000);
             p.bufferFramesEdit->setStep(256);
             p.bufferFramesEdit->setLargeStep(1024);
             p.bufferFramesEdit->setTooltip(
-                "The size of the buffer the audio device is given.\n"
+                "The size of the buffer the audio device is asked for, in\n"
+                "sample frames. Zero is the device's own default.\n"
                 "\n"
                 "Increase this if the audio breaks up or crackles during\n"
-                "playback. Smaller values reduce the audio latency.");
+                "playback. Smaller values reduce the audio latency.\n"
+                "\n"
+                "A change is applied the next time the audio device is\n"
+                "opened: with every file closed, or when the application\n"
+                "starts.");
 
             p.layout = ftk::FormLayout::create(context);
 

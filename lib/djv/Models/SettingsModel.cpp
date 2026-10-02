@@ -809,7 +809,7 @@ namespace djv
 
         void to_json(nlohmann::json& json, const AudioSettings& value)
         {
-            json["BufferFrameCount"] = value.bufferFrameCount;
+            json["BufferFrames"] = value.bufferFrameCount;
         }
 
         // Whether the number in a file name is a run of '#'. Only that is
@@ -1048,7 +1048,15 @@ namespace djv
 
         void from_json(const nlohmann::json& json, AudioSettings& value)
         {
-            json.at("BufferFrameCount").get_to(value.bufferFrameCount);
+            // Not "BufferFrameCount", which older settings hold: that value
+            // was never given to the device, and its default of 500 is
+            // smaller than what the device chooses for itself, so taking it
+            // up now would shrink the buffer of everyone who has run an
+            // older version.
+            if (json.contains("BufferFrames"))
+            {
+                json.at("BufferFrames").get_to(value.bufferFrameCount);
+            }
         }
 
         void from_json(const nlohmann::json& json, ExportSettings& value)

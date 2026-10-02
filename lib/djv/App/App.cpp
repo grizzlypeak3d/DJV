@@ -51,6 +51,7 @@
 #include <tlRender/UI/FileBrowserThumbnails.h>
 #include <tlRender/UI/ThumbnailSystem.h>
 #include <tlRender/UI/TimelineWidget.h>
+#include <tlRender/Timeline/AudioSystem.h>
 #include <tlRender/Timeline/ColorOptions.h>
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/Util.h>
@@ -227,6 +228,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::string> > drawToolsObserver;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
+            std::shared_ptr<ftk::Observer<models::AudioSettings> > audioSettingsObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
 #if defined(TLRENDER_FFMPEG_PLUGIN)
             std::shared_ptr<ftk::Observer<tl::ffmpeg::Options> > ffmpegObserver;
@@ -2909,6 +2911,16 @@ namespace djv
             p.settingsModel->setExport(settings);
             p.mainWindow->exportMovie(getBool("overwrite"), done);
         }
+
+            // The audio device's buffer size is the audio system's to give
+            // the device, when it opens it: a player has no say in it.
+            p.audioSettingsObserver = ftk::Observer<models::AudioSettings>::create(
+                p.settingsModel->observeAudio(),
+                [this](const models::AudioSettings& value)
+                {
+                    _context->getSystem<tl::AudioSystem>()->setBufferFrameCount(
+                        value.bufferFrameCount);
+                });
 
         void App::_observersInit()
         {
