@@ -55,6 +55,12 @@ The `djv` command runs the application, and the bindings DJV is built from
 are importable as `djv`, alongside `tlrender` and `feather_tk`
 (see [documentation](https://grizzlypeak3d.github.io/DJV/python.html)).
 
+**Note:** Python 3.12 or 3.13 is the easy choice for now. The bindings depend
+on [OpenTimelineIO](https://pypi.org/project/opentimelineio/), which has no
+prebuilt wheels yet for Python 3.14, or for Intel macOS: there pip builds it
+from source, which needs a C++ compiler and the Python development files
+(`python3-dev` on Debian and Ubuntu, `python3-devel` on Fedora and Rocky).
+
 
 ## Building
 
