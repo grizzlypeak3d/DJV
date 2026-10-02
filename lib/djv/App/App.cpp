@@ -48,8 +48,10 @@
 #include <djv/Models/Version.h>
 #include <djv/Models/ViewportModel.h>
 
+#include <tlRender/UI/FileBrowserThumbnails.h>
 #include <tlRender/UI/ThumbnailSystem.h>
 #include <tlRender/UI/TimelineWidget.h>
+#include <tlRender/Timeline/AudioSystem.h>
 #include <tlRender/Timeline/ColorOptions.h>
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/Util.h>
@@ -226,7 +228,9 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::string> > drawToolsObserver;
 
             std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
+            std::shared_ptr<ftk::Observer<models::AudioSettings> > audioSettingsObserver;
             std::shared_ptr<ftk::Observer<models::ImageSeqSettings> > imageSeqObserver;
+            std::shared_ptr<ftk::Observer<tl::IOOptions> > ioOptionsObserver;
             // The policy the open files were built with, so that a change to
             // or from Skip can be told apart from the rest.
             tl::MissingFrames missingFrames = tl::MissingFrames::First;
@@ -2908,6 +2912,16 @@ namespace djv
 
             p.player = ftk::Observable<std::shared_ptr<tl::Player> >::create();
 
+            // The audio device's buffer size is the audio system's to give
+            // the device, when it opens it: a player has no say in it.
+            p.audioSettingsObserver = ftk::Observer<models::AudioSettings>::create(
+                p.settingsModel->observeAudio(),
+                [this](const models::AudioSettings& value)
+                {
+                    _context->getSystem<tl::AudioSystem>()->setBufferFrameCount(
+                        value.bufferFrameCount);
+                });
+
             p.cacheObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
                 p.settingsModel->observeCache(),
                 [this](const tl::PlayerCacheOptions& value)
@@ -2945,6 +2959,22 @@ namespace djv
                     else if (auto player = p.player->get())
                     {
                         player->setIOOptions(p.settingsModel->getIOOptions());
+                    }
+                });
+
+            // The file browser reads its thumbnails with the same I/O
+            // settings the files are opened with. It read them with the
+            // defaults, so with FFmpeg set to somewhere it is not otherwise
+            // found the movies that need it opened and had no thumbnails.
+            p.ioOptionsObserver = ftk::Observer<tl::IOOptions>::create(
+                p.settingsModel->observeIOOptions(),
+                [this](const tl::IOOptions& value)
+                {
+                    auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
+                    if (auto thumbnails = std::dynamic_pointer_cast<tl::ui::FileBrowserThumbnails>(
+                        fileBrowserSystem->getThumbnails()))
+                    {
+                        thumbnails->setIOOptions(value);
                     }
                 });
 

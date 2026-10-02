@@ -1101,10 +1101,27 @@ class App(ftk.App):
             self.context, self._settings, "FileBrowserDirs")
         fileBrowserSystem.recentDirsModel = self._recentDirsModel
 
+        # The file browser reads its thumbnails with the I/O settings files
+        # are opened with: where FFmpeg is, among them.
+        appWeak = weakref.ref(self)
+        self._ioOptionsObserver = ftk.StringMapObserver(
+            self._settingsModel.observeIOOptions,
+            lambda value: appWeak() and tl.ui.setFileBrowserIOOptions(
+                appWeak().context, value))
+
         # Before the window: the style settings carry the default display
         # scale, and the window corrects the scale from what the display
         # actually reports when it is created -- the correction has to come
         # second, the same order as the C++ application.
+        # The audio device's buffer size is the audio system's to give the
+        # device, when it opens it.
+        self._audioSettingsObserver = djv.models.AudioSettingsObserver(
+            self._settingsModel.observeAudio,
+            lambda value: appWeak() and setattr(
+                appWeak().context.getSystemByName("tl::AudioSystem"),
+                "bufferFrameCount",
+                value.bufferFrameCount))
+
         selfWeak = weakref.ref(self)
         self._styleSettingsObserver = djv.models.StyleSettingsObserver(
             self._settingsModel.observeStyle,

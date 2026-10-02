@@ -4,7 +4,7 @@
 #pragma once
 
 #define DJV_VERSION_MAJOR 3
-#define DJV_VERSION_MINOR 7
+#define DJV_VERSION_MINOR 8
 #define DJV_VERSION_PATCH 0
 #define DJV_VERSION_DEV "-dev"
 

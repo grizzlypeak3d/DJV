@@ -42,10 +42,11 @@ namespace djv
         //! Audio settings.
         struct DJV_MODELS_API_TYPE AudioSettings
         {
-            //! The size of the buffer the audio device is given. Larger
+            //! The size of the buffer the audio device is asked for, in
+            //! sample frames; zero is the device's own default. Larger
             //! buffers are less likely to underrun and produce glitches;
             //! smaller ones reduce latency.
-            size_t bufferFrameCount = tl::PlayerOptions().audioBufferFrameCount;
+            size_t bufferFrameCount = 0;
 
             bool operator == (const AudioSettings&) const = default;
         };
@@ -570,6 +571,10 @@ namespace djv
             ///@{
 
             DJV_MODELS_API tl::IOOptions getIOOptions() const;
+
+            //! Observe the I/O options: the image sequence, FFmpeg and USD
+            //! settings together, as they are given to what reads files.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::IOOptions> > observeIOOptions() const;
 
             ///@}
 
