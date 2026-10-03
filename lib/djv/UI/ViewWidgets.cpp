@@ -25,6 +25,7 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
+#include <ftk/GL/Init.h>
 #include <ftk/Core/Format.h>
 
 #include <sstream>
@@ -103,10 +104,11 @@ namespace djv
             ftk::setScreenshotTag(p.alphaBlendComboBox, "View.Options.AlphaBlend");
 
             p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_U8);
-#if defined(FTK_API_GL_4_1)
-            p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_F16);
-            p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_F32);
-#endif // FTK_API_GL_4_1
+            if (!ftk::gl::isGLES())
+            {
+                p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_F16);
+                p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_F32);
+            }
             std::vector<std::string> items;
             for (size_t i = 0; i < p.colorBuffers.size(); ++i)
             {

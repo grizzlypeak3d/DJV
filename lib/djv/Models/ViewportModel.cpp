@@ -4,6 +4,7 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/UI/Settings.h>
+#include <ftk/GL/Init.h>
 #include <ftk/GL/OffscreenBuffer.h>
 #include <ftk/Core/String.h>
 
@@ -83,11 +84,9 @@ namespace djv
             // for one at 4K, with several of them live in a comparison.
             // Exporting keeps full float: see ExportWidget, where the
             // picture is written rather than shown.
-#if defined(FTK_API_GL_4_1)
-            ftk::gl::TextureType colorBuffer = ftk::gl::TextureType::RGBA_F16;
-#else // FTK_API_GL_4_1
-            ftk::gl::TextureType colorBuffer = ftk::gl::offscreenColorDefault;
-#endif // FTK_API_GL_4_1
+            ftk::gl::TextureType colorBuffer = ftk::gl::isGLES() ?
+                ftk::gl::getOffscreenColorDefault() :
+                ftk::gl::TextureType::RGBA_F16;
             std::string s = ftk::gl::to_string(colorBuffer);
             p.settings->get("/Viewport/ColorBuffer", s);
             ftk::gl::from_string(s, colorBuffer);

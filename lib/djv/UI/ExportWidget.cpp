@@ -30,6 +30,7 @@
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/TabBar.h>
 #include <ftk/UI/TabWidget.h>
+#include <ftk/GL/Init.h>
 #include <ftk/GL/GL.h>
 #include <ftk/GL/OffscreenBuffer.h>
 #include <ftk/GL/Util.h>
@@ -120,7 +121,7 @@ namespace djv
                 //! nowhere to put the difference. An export renders one
                 //! frame at a time into a file that may well be asked to
                 //! hold it, so it takes the most this build has.
-                ftk::gl::TextureType colorBuffer = ftk::gl::offscreenColorDefault;
+                ftk::gl::TextureType colorBuffer = ftk::gl::getOffscreenColorDefault();
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
                 std::shared_ptr<tl::IRender> render;
                 GLenum glFormat = 0;
@@ -853,12 +854,11 @@ namespace djv
                     // the buffer needs one. Paired with depth, as the
                     // viewport does, for the combined format rather than a
                     // stencil-only attachment.
-#if defined(FTK_API_GL_4_1)
-                    offscreenBufferOptions.depth = ftk::gl::OffscreenDepth::_24;
+                    if (!ftk::gl::isGLES())
+                    {
+                        offscreenBufferOptions.depth = ftk::gl::OffscreenDepth::_24;
+                    }
                     offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
-#elif defined(FTK_API_GLES_3)
-                    offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
-#endif // FTK_API_GL_4_1
                     p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
                         p.exportData->info.size,
                         p.exportData->colorBuffer,
@@ -998,9 +998,10 @@ namespace djv
                 // Write the output image.
                 auto image = ftk::Image::create(p.exportData->info);
                 glPixelStorei(GL_PACK_ALIGNMENT, p.exportData->info.layout.alignment);
-#if defined(FTK_API_GL_4_1)
-                glPixelStorei(GL_PACK_SWAP_BYTES, p.exportData->info.layout.endian != ftk::getEndian());
-#endif // FTK_API_GL_4_1
+                if (!ftk::gl::isGLES())
+                {
+                    glPixelStorei(GL_PACK_SWAP_BYTES, p.exportData->info.layout.endian != ftk::getEndian());
+                }
                 glReadPixels(
                     0,
                     0,

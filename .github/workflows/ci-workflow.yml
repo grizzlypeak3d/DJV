@@ -141,6 +141,10 @@ jobs:
 
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
+      # The graphics API is chosen when the program starts, and falls back
+      # to OpenGL where OpenGL ES cannot be had. Asking for it by name
+      # leaves no fallback, so this job fails rather than test the other.
+      FTK_GL_API: GLES_3
 
     steps:
     - uses: actions/checkout@v6
