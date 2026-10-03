@@ -79,8 +79,11 @@ sh DJV/sbuild-linux.sh</code></pre>
 <p>Run the application:</p>
 <pre><code>build-Release/bin/djv/djv DJV/etc/SampleData/BART_2021-02-07.0000.jpg</code></pre>
 <h3 id="raspberry-pi">Raspberry Pi</h3>
-<p>The Raspberry Pi 5 builds with the Debian packages above. Its graphics driver offers OpenGL ES 3.1 but only OpenGL 3.1 on the desktop, and DJV's desktop build needs 4.1, so the OpenGL ES build is selected in <code>etc/Config/local.cmake</code>:</p>
+<p>The Raspberry Pi 5 builds with the Debian packages above. Its graphics driver offers OpenGL ES 3.1 but only OpenGL 3.1 on the desktop, and DJV on OpenGL needs 4.1. The same build holds both: DJV tries OpenGL 4.1 when it starts and uses OpenGL ES 3.0 where that is not to be had, so nothing needs setting. The log, shown with <code>-log</code>, says which is in use.</p>
+<p>The one tried first can be changed in <code>etc/Config/local.cmake</code>, which saves the attempt at the other:</p>
 <pre><code>set(ftk_API "GLES_3" CACHE STRING "")</code></pre>
+<p>The <code>FTK_GL_API</code> environment variable asks for one by name, <code>GL_4_1</code> or <code>GLES_3</code>, and the other is then not tried. It is how OpenGL ES is tested on a desktop:</p>
+<pre><code>FTK_GL_API=GLES_3 build-Release/bin/djv/djv</code></pre>
 <p>Some of the largest files take close to 1 GB of memory each to compile, so on an 8 GB board the build is limited to three jobs:</p>
 <pre><code>CMAKE_BUILD_PARALLEL_LEVEL=3 sh DJV/sbuild-linux.sh</code></pre>
 <p>The AV1 and APV libraries are among the slowest dependencies to build, and can be left out to save time. Without libaom there is no AV1 playback: FFmpeg's own AV1 decoder works only with hardware decoding.</p>
