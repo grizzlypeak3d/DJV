@@ -39,6 +39,12 @@ class MainWindow(ftk.MainWindow):
         self._settingsModel = app.getSettingsModel()
         window = self._settingsModel.window
         ftk.MainWindow.__init__(self, context, app, window.size)
+        # Where it was, and maximized if it was; the size is the one it had
+        # before it was maximized, as in the C++ application.
+        if window.hasPos:
+            self.pos = window.pos
+        if window.maximized:
+            self.maximized = True
 
         # Created before the actions; the window actions observe it.
         self._presentMode = ftk.ObservableBool(False)
@@ -246,7 +252,11 @@ class MainWindow(ftk.MainWindow):
 
     def saveSettings(self):
         window = self._settingsModel.window
-        window.size = self.size
+        geometry = self.normalGeometry
+        window.size = geometry.size
+        window.pos = geometry.min
+        window.hasPos = True
+        window.maximized = self.maximized
         window.splitter = self._splitter.split
         window.splitter2 = self._splitter2.split
         self._settingsModel.window = window

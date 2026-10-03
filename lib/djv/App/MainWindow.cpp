@@ -199,6 +199,20 @@ namespace djv
                 settings.size);
             FTK_P();
 
+            // Where it was, and maximized if it was. The size above is the
+            // one it had before it was maximized, so that is what it goes
+            // back to; opened at its maximized size instead, it came back
+            // filling the screen without being maximized, wherever the
+            // platform chose to put it.
+            if (settings.hasPos)
+            {
+                setPos(settings.pos);
+            }
+            if (settings.maximized)
+            {
+                setMaximized(true);
+            }
+
             ui::initIcons(context);
             auto iconSystem = context->getSystem<ftk::IconSystem>();
             setIcon(iconSystem->get("DJV_Icon", 1.0));
@@ -635,7 +649,11 @@ namespace djv
             if (p.shown)
             {
                 models::WindowSettings settings = p.settingsModel->getWindow();
-                settings.size = getSize();
+                const ftk::Box2I geometry = getNormalGeometry();
+                settings.size = geometry.size();
+                settings.pos = geometry.min;
+                settings.hasPos = true;
+                settings.maximized = isMaximized();
                 settings.splitter = p.splitter->getSplit();
                 settings.splitter2 = p.splitter2->getSplit();
                 p.settingsModel->setWindow(settings);

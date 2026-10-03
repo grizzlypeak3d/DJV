@@ -1047,6 +1047,9 @@ namespace djv
             json = nlohmann::json
             {
                 { "Size", in.size },
+                { "Pos", in.pos },
+                { "HasPos", in.hasPos },
+                { "Maximized", in.maximized },
                 { "FileToolBar", in.fileToolBar },
                 { "CompareToolBar", in.compareToolBar },
                 { "WindowToolBar", in.windowToolBar },
@@ -1279,6 +1282,16 @@ namespace djv
         void from_json(const nlohmann::json& json, WindowSettings& value)
         {
             json.at("Size").get_to(value.size);
+            // Not in the settings of older versions.
+            if (json.contains("Pos") && json.contains("HasPos"))
+            {
+                json.at("Pos").get_to(value.pos);
+                json.at("HasPos").get_to(value.hasPos);
+            }
+            if (json.contains("Maximized"))
+            {
+                json.at("Maximized").get_to(value.maximized);
+            }
             json.at("FileToolBar").get_to(value.fileToolBar);
             json.at("CompareToolBar").get_to(value.compareToolBar);
             json.at("WindowToolBar").get_to(value.windowToolBar);

@@ -355,7 +355,13 @@ namespace djv
         //! Window settings.
         struct DJV_MODELS_API_TYPE WindowSettings
         {
+            //! The size the window has when it is not maximized.
             ftk::Size2I size = ftk::Size2I(1600, 960);
+            //! Where the window was, once it has been somewhere: until then
+            //! the platform places it.
+            ftk::V2I pos;
+            bool hasPos = false;
+            bool maximized = false;
             bool fileToolBar = true;
             bool compareToolBar = true;
             bool windowToolBar = true;
