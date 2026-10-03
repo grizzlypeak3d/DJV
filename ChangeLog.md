@@ -1,9 +1,12 @@
-## 3.8.0
+## 3.7.3
 
 Changes:
 * Add GIF export.
 * Save window size and position.
 * Runtime OpenGL detection.
+
+Fixes:
+* Fix for slow movie playback on Macs with AMD graphics.
 
 ## 3.7.2
 
