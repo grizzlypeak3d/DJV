@@ -1,3 +1,10 @@
+## 3.8.0
+
+Changes:
+* Add GIF export.
+* Save window size and position.
+* Runtime OpenGL detection.
+
 ## 3.7.2
 
 Changes:
