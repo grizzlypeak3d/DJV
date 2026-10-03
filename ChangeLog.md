@@ -1,3 +1,11 @@
+## 3.7.2
+
+Changes:
+* Add PipeWire to the Linux package and Python wheel.
+
+Fixes:
+* Fix for the audio buffer size setting.
+
 ## 3.7.1
 
 Fixes:

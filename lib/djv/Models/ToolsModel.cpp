@@ -20,6 +20,9 @@ namespace djv
         {
             std::shared_ptr<ftk::Settings> settings;
             std::vector<ToolInfo> tools;
+            //! What the settings said was open, a tool an application adds
+            //! later included.
+            std::vector<std::string> openSaved;
             std::shared_ptr<ftk::ObservableList<std::string> > openTools;
             std::shared_ptr<ftk::Observable<std::pair<std::string, std::string> > > showSection;
         };
@@ -47,9 +50,8 @@ namespace djv
             // More than one tool can be open now, so what was written before
             // says nothing about which; the key moves rather than trying to
             // read the old one as a list of one.
-            std::vector<std::string> open;
-            p.settings->get("/Tools/Open.1", open);
-            p.openTools = ftk::ObservableList<std::string>::create(_sorted(open));
+            p.settings->get("/Tools/Open.1", p.openSaved);
+            p.openTools = ftk::ObservableList<std::string>::create(_sorted(p.openSaved));
             p.showSection = ftk::Observable<std::pair<std::string, std::string> >::create();
         }
 
@@ -82,7 +84,16 @@ namespace djv
         
         void ToolsModel::addTool(const ToolInfo& value)
         {
-            _p->tools.push_back(value);
+            FTK_P();
+            p.tools.push_back(value);
+            // A tool that was open when the settings were saved is opened
+            // again. The settings are read before an application has added
+            // its tools, when the name meant nothing yet and was passed over.
+            if (std::find(p.openSaved.begin(), p.openSaved.end(), value.name) !=
+                p.openSaved.end())
+            {
+                setToolOpen(value.name, true);
+            }
         }
 
         const std::vector<std::string>& ToolsModel::getOpenTools() const
