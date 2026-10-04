@@ -86,6 +86,12 @@ and `Swapchain:`.
   languages, and glslang).
 - `ftk/UI/WindowGL.cpp`: `_updateGPU()`, and a window with no OpenGL context.
 - `tlRender/GPU`: `tl::gpu::Render`, a port of `tl::gl::Render`.
+- `tlRender/Timeline`: what the two timeline renderers do the same way is
+  here once. `IRender::_drawBackground()` and `_drawForeground()` are the
+  background and foreground, drawn through `ftk::IRender`, and
+  `RenderPrivate.h` has the OpenColorIO configuration, the processors a set
+  of options or a LUT comes to, and the keys they are kept by. What a
+  renderer makes of a processor, its shader and textures, is its own.
 - `tlRender/UI/Viewport.cpp`: `_drawGPU()`.
 - `djv/UI/ExportWidget.cpp` and `tlRender/BakeApp`: the export and `tlbake`
   draw with the GPU renderer when the windows do, which is `FTK_RENDER=gpu`
@@ -273,6 +279,4 @@ window now makes it current for an export it is asked for.
 
 ## Not done
 
-- The OCIO configuration code, and the background and foreground drawing,
-  are copies of the OpenGL renderer's and want to be shared.
 - Direct3D 12, which SDL also has, and which would want HLSL.
