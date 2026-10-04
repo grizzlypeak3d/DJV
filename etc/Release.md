@@ -101,7 +101,7 @@ together and each keeps its own number.
 ## PyPI
 
 Pushing a version tag builds that repository's wheels and publishes them
-(feather-tk, tlRender, DJV_viewer), once the publish job is approved in the
+(feather-tk, tlRender, DJV-viewer), once the publish job is approved in the
 `pypi` environment on GitHub.
 
 - [ ] Move the pins with the versions: tlRender's `pyproject.toml` pins
