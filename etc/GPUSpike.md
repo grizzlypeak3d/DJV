@@ -209,9 +209,22 @@ On Linux, as found on the machine above:
 - `FTK_GPU_HDR_TEST=1`: four patches, each visibly brighter than the last,
   the first the white of the interface. Not yet looked at.
 
+The export writes a PQ picture's code values as they are, and says what
+they are: the description of the OCIO display where it has a name for it, or
+the source's without color management, and where neither says, Rec. 2020 and
+PQ when **HDR picture** is PQ. Sol Levante exported to ProRes 4444 reads back
+within a couple of percent of the source's luminance, which is the codec.
+
 Not done: HLG, HDR metadata for the swapchain, anything for the display's
-own limits (what is brighter than the display goes is left to it), and the
-export knows nothing of it.
+own limits (what is brighter than the display goes is left to it). In the
+export: the matrix of a Rec. 2020 picture is written as the writer's guess
+from its size, Rec. 709 or 601, where HDR10 wants Rec. 2020's, and mastering
+display and light level metadata are not carried from the source.
+
+`Export/Movie` from the command line fails with the OpenGL renderer on Linux,
+"Cannot create color texture", whatever the picture: nothing has made the
+window's context current. It works with the GPU renderer, where the export
+has a context of its own.
 
 ## Not done
 
