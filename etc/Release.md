@@ -58,6 +58,11 @@ together and each keeps its own number.
       shipped, so it is a licensing question rather than a build option:
       `MINIMAL=ON PLUGIN=ON` -- the codecs that need no license, with the
       plugin's command line fallback for bringing your own.
+- [ ] The Intel Mac package is a second run of `package-macos.sh`, with
+      `x64` as its third argument, in a directory of its own
+      (`etc/Config/package-macos-x64.cmake`). It is cross-compiled, so it
+      runs here under Rosetta, which is a check that it starts and not a
+      test on an Intel Mac. It is signed and notarized as the other is.
 - [ ] macOS and Windows are built here, with `package-macos.sh` and
       `package-win.bat`. They take the source directory and build type, and
       choose the config themselves. Both are built locally because signing

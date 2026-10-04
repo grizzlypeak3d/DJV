@@ -20,8 +20,14 @@ set(SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
 if(Darwin STREQUAL SYSTEM_NAME)
     set(SYSTEM_NAME macos)
 endif()
+# The architecture the package is for, which on macOS is not always the one
+# that built it: an Intel package is made on an Apple silicon Mac.
+set(SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR})
+if(APPLE AND CMAKE_OSX_ARCHITECTURES)
+    set(SYSTEM_PROCESSOR ${CMAKE_OSX_ARCHITECTURES})
+endif()
 string(TOLOWER
-    djv-${DJV_VERSION_FULL}-${SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}
+    djv-${DJV_VERSION_FULL}-${SYSTEM_NAME}-${SYSTEM_PROCESSOR}
     CPACK_PACKAGE_FILE_NAME)
 set(CPACK_PACKAGE_DESCRIPTION "DJV is an open source application for media playback and review.")
 set(CPACK_RESOURCE_FILE_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.txt)
