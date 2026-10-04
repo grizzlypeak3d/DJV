@@ -90,6 +90,8 @@ and `Swapchain:`.
 - `djv/UI/ExportWidget.cpp` and `tlRender/BakeApp`: the export and `tlbake`
   draw with the GPU renderer when the windows do, which is `FTK_RENDER=gpu`
   for both, and with OpenGL otherwise.
+- `tlplay` needed nothing: it is feather-tk's windows and tlRender's
+  viewport, and with `FTK_RENDER=gpu` it draws as it does with OpenGL.
 
 ## How it differs from the OpenGL renderer
 
@@ -249,7 +251,8 @@ A movie is written from sixteen bits where the picture has more than eight.
 The FFmpeg writer takes eight and sixteen bit RGB, and any other picture,
 which is every YUV one and every floating point one, was written from eight
 bit RGBA whatever it held: Sol Levante's twelve bits went to APV through
-eight. And sixteen bit RGB is brought down by 255/256 on its way to YUV,
+eight. The PNG and OpenImageIO writers did the same with what they do not
+take, and now do as it does (`tl::getWriteType()`). And sixteen bit RGB is brought down by 255/256 on its way to YUV,
 since FFmpeg's scaler takes its white for 65280: it came out 0.39% high in
 code value, about 3% in luminance for PQ, with white over the top of the
 range. One frame of Sol Levante written losslessly at ten bits is now 30 of
@@ -270,7 +273,6 @@ window now makes it current for an export it is asked for.
 
 ## Not done
 
-- `tlplay` on the GPU renderer.
 - The OCIO configuration code, and the background and foreground drawing,
   are copies of the OpenGL renderer's and want to be shared.
 - Direct3D 12, which SDL also has, and which would want HLSL.
