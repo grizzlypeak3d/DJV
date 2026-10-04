@@ -66,19 +66,34 @@ pushes and tags nothing. The change log is still written by hand.
       shipped, so it is a licensing question rather than a build option:
       `MINIMAL=ON PLUGIN=ON` -- the codecs that need no license, with the
       plugin's command line fallback for bringing your own.
-- [ ] The Intel Mac package is a second run of `package-macos.sh`, with
-      `x64` as its third argument, in a directory of its own
-      (`etc/Config/package-macos-x64.cmake`). It is cross-compiled, so it
-      runs here under Rosetta, which is a check that it starts and not a
-      test on an Intel Mac. It is signed and notarized as the other is.
-- [ ] macOS and Windows are built here, with `package-macos.sh` and
-      `package-win.bat`. They take the source directory and build type, and
-      choose the config themselves. Both are built locally because signing
-      needs credentials that are not in CI.
-- [ ] Linux comes from the CI artifact, which is built in a Rocky Linux
-      container so that it starts on the distributions people run. Building
-      it here with `package-linux.sh` produces something linked against
-      whatever this machine has.
+- [ ] Continuous integration builds every package, on every push: Linux,
+      Windows (installer and zip), and macOS for both architectures, the
+      Intel one cross compiled. They are the artifacts of the CI workflow's
+      `*-package` jobs. Linux is built in a Rocky Linux container so that
+      it starts on the distributions people run; building it here with
+      `package-linux.sh` produces something linked against whatever this
+      machine has.
+- [ ] A tag's CI run also makes a **draft release** on GitHub, with the
+      Linux and Windows packages attached and the change log's entry for
+      the version as its notes. Nothing is published until the draft is.
+- [ ] The macOS packages are built unsigned, since the signing identity is
+      not in CI. Download the two `.dmg` artifacts of the tag's run, and
+      sign and notarize them here:
+
+      sh etc/macOS/sign-release.sh --upload <tag> djv-<tag>-macos-arm64.dmg djv-<tag>-macos-x86_64.dmg
+
+      It takes the application out of each, signs it, makes the disk image
+      again under the same name, notarizes and staples it, asks Gatekeeper,
+      and adds the result to the draft (`--upload` needs the GitHub CLI;
+      without it the signed images are in `signed/`). It needs
+      `DJV_MACOS_TEAM_ID`, and for notarization either
+      `DJV_MACOS_NOTARY_PROFILE` or `DJV_MACOS_USER_ID` and
+      `DJV_MACOS_USER_PASSWORD`.
+- [ ] To build a package here all the same: `package-macos.sh` and
+      `package-win.bat` take the source directory and build type, and
+      choose the config themselves. The Intel Mac package is a second run
+      of `package-macos.sh`, with `x64` as its third argument, in a
+      directory of its own (`etc/Config/package-macos-x64.cmake`).
 - [ ] Confirm the **expected** artifact appeared, not merely that one did:
       `.dmg` on macOS, an `.exe` installer on Windows, `.tar.gz` on Linux.
       With the platform packaging off a package build still succeeds and
@@ -94,7 +109,8 @@ pushes and tags nothing. The change log is still written by hand.
 ## Tags
 
 - [ ] **Last, once the packages are built and one has been installed and
-      checked.** Nothing in the build reads a tag -- `BuildInfo.cmake` asks
+      checked** -- the packages of the release commit's own CI run, which a
+      push to main builds before any tag exists. Nothing in the build reads a tag -- `BuildInfo.cmake` asks
       for `git rev-parse HEAD` and the versions come from `Version.h` -- so
       tagging earlier buys nothing, while a package build is the first time
       the release configuration runs end to end. Whatever it turns up means

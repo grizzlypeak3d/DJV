@@ -287,8 +287,20 @@ jobs:
       run: |
         cd build-Debug
         ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
+  # Both architectures on the one kind of runner: the Intel package is cross
+  # compiled, as it is in a release made by hand. Neither is signed. The
+  # signing identity is not kept here; etc/macOS/sign-release.sh signs and
+  # notarizes these on the machine that has it.
   macos-package:
+    name: macos-package (${{ matrix.arch }})
     runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: arm64, config: package-macos }
+          - { arch: x86_64, config: package-macos-x64 }
 
     env:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
@@ -311,15 +323,21 @@ jobs:
 
     - name: Build
       run: |
-        sh djv/etc/macOS/sbuild.sh djv Release package-macos
+        sh djv/etc/macOS/sbuild.sh djv Release ${{ matrix.config }}
 
     - name: Package
       run: |
         cmake --build build-Release --config Release --target package
 
+    # Named for the architecture it is for, which the Intel one is not
+    # built on.
+    - name: Check the package
+      run: |
+        ls build-Release/djv-*-macos-${{ matrix.arch }}.dmg
+
     - uses: actions/upload-artifact@v7
       with:
-        name: DJV-macOS-Packages
+        name: DJV-macOS-${{ matrix.arch }}-Packages
         path: build-Release/djv-*.dmg
         archive: false
 
@@ -476,3 +494,44 @@ jobs:
           build-Release\djv-*.exe
           build-Release\djv-*.zip
         archive: true
+
+  # A tag starts a release: a draft, with the packages that need nothing more
+  # done to them and the change log's entry for the version. The macOS
+  # packages are added by etc/macOS/sign-release.sh once they are signed, and
+  # the draft is published by hand.
+  release:
+    if: github.ref_type == 'tag'
+    needs: [linux-package, macos-package, windows-package]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v6
+
+    # Every package of this run, the unsigned macOS ones among them, which
+    # are left out below.
+    - uses: actions/download-artifact@v8
+      with:
+        path: packages
+        merge-multiple: true
+
+    - name: Draft the release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        ls -l packages
+        # The entry between this version's heading and the next one.
+        awk -v v="## $GITHUB_REF_NAME" '
+          $0 == v { on = 1; next }
+          /^## / { on = 0 }
+          on' ChangeLog.md > notes.md
+        cat notes.md
+        if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+          gh release upload "$GITHUB_REF_NAME" \
+            packages/djv-*.tar.gz packages/djv-*.exe packages/djv-*.zip --clobber
+        else
+          gh release create "$GITHUB_REF_NAME" \
+            packages/djv-*.tar.gz packages/djv-*.exe packages/djv-*.zip \
+            --draft --verify-tag --title "$GITHUB_REF_NAME" --notes-file notes.md
+        fi
