@@ -41,6 +41,7 @@
 <li><a href="#linux">Linux</a></li>
 <li><a href="#windows">Windows</a></li>
 <li><a href="#macos">macOS</a></li>
+<li><a href="#pip">pip</a></li>
 </ul>
 </div>
 <p><a target="_blank" href="https://github.com/grizzlypeak3d/DJV/releases/">Download the latest release</a></p>
@@ -48,8 +49,8 @@
 <ul>
 <li><strong>Linux</strong> &mdash; Rocky Linux 8 or newer (glibc 2.28), x86-64</li>
 <li><strong>Windows</strong> &mdash; Windows 10 or newer, 64-bit</li>
-<li><strong>macOS</strong> &mdash; macOS 11 or newer, Apple silicon</li>
-<li>A graphics driver with OpenGL 4.1</li>
+<li><strong>macOS</strong> &mdash; macOS 11 or newer on Apple silicon, or macOS 10.15 or newer on Intel</li>
+<li>A graphics driver with OpenGL 4.1, or OpenGL ES 3</li>
 </ul>
 <p>Other systems can build from source; see the
 <a target="_blank" href="https://github.com/grizzlypeak3d/DJV">README</a>.</p>
@@ -66,7 +67,14 @@ update-desktop-database ~/.local/share/applications</code></pre>
 <h2 id="windows">Windows</h2>
 <p>Packages are distributed as NSIS installers or ZIP archives. Double-click the NSIS <code>.exe</code> file to start the installer, or, for ZIP archives, uncompress the archive and move the DJV folder to a convenient location.</p>
 <h2 id="macos">macOS</h2>
-<p>Packages are distributed as macOS disk images. Open the disk image and copy DJV to the <strong>Applications</strong> folder.</p>
+<p>Packages are distributed as macOS disk images, one for Apple silicon (<code>arm64</code>) and one for Intel (<code>x86_64</code>). Open the disk image and copy DJV to the <strong>Applications</strong> folder.</p>
+<h2 id="pip">pip</h2>
+<p>DJV can also be installed with pip, for Python 3.12 or newer on Linux, macOS, and Windows:</p>
+<pre><code>pip install DJV-viewer
+djv</code></pre>
+<p>The <code>djv</code> command runs the application. This is also the way to install on systems the packages are not built for, such as Linux on ARM, a Raspberry Pi 5 among them. The same codecs are included as in the packages.</p>
+<p>The bindings DJV is built from are importable as <code>djv</code>, alongside <code>tlrender</code> and <code>feather_tk</code>; see <a href="python.html">Python</a>.</p>
+<div class="note">Python 3.12 or 3.13 is the easy choice for now. The bindings depend on OpenTimelineIO, which has no prebuilt wheels yet for Python 3.14, or for Intel macOS: there pip builds it from source, which needs a C++ compiler and the Python development files (<code>python3-dev</code> on Debian and Ubuntu, <code>python3-devel</code> on Fedora and Rocky).</div>
 </main>
 </body>
 </html>
