@@ -142,6 +142,25 @@ nits, the reference white, by default.
 and presented into an HDR10 swapchain come out as they went in, colors
 outside Rec. 709 included. **Nobody has yet looked at it on an HDR display.**
 
+On Linux, none of which has been tried:
+
+- HDR is the desktop's to give, and only a Wayland session gives it: the
+  log's `Video driver:` has to say `wayland` (`SDL_VIDEO_DRIVER=wayland`
+  asks for it), not `x11`.
+- The swapchain follows `SDL_PROP_WINDOW_HDR_ENABLED_BOOLEAN`. If SDL does
+  not report that for a Wayland window, `Swapchain:` will say SDR on an HDR
+  desktop: `FTK_GPU_SWAPCHAIN=hdr10` or `hdr` asks by name, and whether that
+  is supported is the driver's answer, which wants a recent Mesa or NVIDIA
+  driver.
+- White: off macOS the window's white is taken from SDL's SDR white level,
+  in units of eighty nits. A PQ picture goes through an HDR10 swapchain
+  unchanged whatever that says, since it is divided by it and multiplied
+  back, but the user interface is drawn at it, so if SDL has no answer and
+  says one the interface is at eighty nits and looks dim.
+- `FTK_GPU_HDR_TEST=1` with any ftk example is the first thing to look at:
+  four patches, each visibly brighter than the last, the first the white of
+  the interface.
+
 Not done: HLG, HDR metadata for the swapchain, anything for the display's
 own limits (what is brighter than the display goes is left to it), and the
 color picker and export know nothing of it.
