@@ -220,17 +220,19 @@ On Linux, as found on the machine above:
 - `FTK_GPU_HDR_TEST=1`: four patches, each visibly brighter than the last,
   the first the white of the interface. Not yet looked at.
 
-The export writes a PQ picture's code values as they are, and says what
-they are: the description of the OCIO display where it has a name for it, or
-the source's without color management, and where neither says, Rec. 2020 and
-PQ when **HDR picture** is PQ. Sol Levante exported to ProRes 4444 reads back
-within a couple of percent of the source's luminance, which is the codec.
+The export writes a PQ picture's code values as they are, and says what they
+are: the description of the OCIO display where it has a name for it, or the
+source's without color management. Sol Levante exported to ProRes 4444 reads
+back within a couple of percent of the source's luminance, which is the codec.
 
-Not done: HLG, HDR metadata for the swapchain, anything for the display's
-own limits (what is brighter than the display goes is left to it). In the
-export: the matrix of a Rec. 2020 picture is written as the writer's guess
-from its size, Rec. 709 or 601, where HDR10 wants Rec. 2020's, and mastering
-display and light level metadata are not carried from the source.
+Not done: HLG, HDR metadata for the swapchain, anything for the display's own
+limits (what is brighter than the display goes is left to it). In the export,
+which is waiting: nothing is taken from **HDR picture**, so a PQ picture whose
+source describes nothing, or whose OCIO display has no name here, is written
+without a description; the matrix of a Rec. 2020 picture is written as the
+writer's guess from its size, Rec. 709 or 601, where HDR10 wants Rec. 2020's,
+and mastering display and light level metadata are not carried from the
+source.
 
 ## Writing files
 

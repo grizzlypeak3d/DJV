@@ -810,29 +810,6 @@ namespace djv
                         }
                     }
 
-                    // Where neither says, the person may have: a picture
-                    // said to be PQ in the View tool is one with Rec. 2020
-                    // primaries, PQ encoded, and is written as that. It
-                    // comes after the others, which know and need not be
-                    // told: a display OpenColorIO has no name for here, or
-                    // a source that describes nothing, is what is left.
-                    if (tl::HDR_EOTF::ST2084 == p.viewportModel.lock()->getHDRTransfer())
-                    {
-                        if (models::ExportFileType::Movie == fileType)
-                        {
-                            if (outputInfo.tags.find("Color Transfer") == outputInfo.tags.end())
-                            {
-                                outputInfo.tags["Color Primaries"] = "bt2020";
-                                outputInfo.tags["Color Transfer"] = "smpte2084";
-                            }
-                        }
-                        else if (outputInfo.tags.find("Chromaticities") == outputInfo.tags.end())
-                        {
-                            outputInfo.tags["Chromaticities"] =
-                                "0.708 0.292 0.17 0.797 0.131 0.046 0.3127 0.329";
-                        }
-                    }
-
                     // The preset carries the options and which writer does
                     // the work; an unknown name, or one this build cannot
                     // write, falls back to the first preset rather than
