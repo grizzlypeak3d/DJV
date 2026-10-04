@@ -60,7 +60,8 @@ and `Swapchain:`.
 
 - `ftk-gpu-test [dir]` draws one scene with both renderers and compares them,
   checks the presenter's HDR arithmetic, and presents into each kind of
-  swapchain the desktop offers, on a hidden window (a shown one on Vulkan). `ftk-gpu-test -compare a.png b.png [diff.png]`
+  swapchain the desktop offers, on a hidden window (a shown one on Vulkan,
+  where it also says how fast frames are presented). `ftk-gpu-test -compare a.png b.png [diff.png]`
   compares two screenshots.
 - `tl-gpu-ocio-test` runs OCIO through a pipeline against OCIO's CPU
   processor: Metal's shader on Metal, and OCIO's Vulkan GLSL through glslang
@@ -111,6 +112,16 @@ What was found on the machine above.
 
 - The window is claimed, and what is drawn is the right way up with the
   right faces. The uniform blocks agree, and so do OCIO's texture bindings.
+- Compared with OpenGL by screenshot, beyond what State lists: dissolves, the
+  clipping warning, the magnifier, the color picker's tool, the backgrounds,
+  the grid and center marker, the HUD, the channels, mirroring, negative,
+  exposure, levels, soft clip and the color controls, video levels, alpha
+  blending, each color buffer, and each image filter. One thing was wrong
+  and is fixed: a picture enlarged with Nearest was drawn with Linear unless
+  the filter for reducing was Nearest as well. What is left is in Known
+  differences, below.
+- Presenting waits for the display: `ftk-gpu-test` presents sixty frames to
+  each kind of swapchain at about 62 a second on a 60 Hz display.
 - SDL's Vulkan driver has no swapchain texture for a hidden window, so
   `ftk-gpu-test` shows its window there, and a kind of swapchain the desktop
   does not offer is not a failure.
@@ -121,7 +132,6 @@ What was found on the machine above.
 
 Still to look at:
 
-- Whether presenting waits for the display as it should.
 - Texture formats that Vulkan leaves optional: sixteen bit normalized
   (`R16_UNORM` and its siblings, which video over eight bits uses), and
   linear filtering of thirty-two bit float, which OCIO's tables want. RADV
@@ -138,7 +148,13 @@ Still to look at:
   other way around, since OpenGL's buffers are the other way up. Framing a
   picture to the view can put its bottom edge there, and the picture is then
   one row shorter than OpenGL draws it. Vulkan does as Metal does: stacked
-  vertically, the two pictures of a comparison meet one row away.
+  vertically, the two pictures of a comparison meet one row away, and the
+  center marker is one row higher.
+- The same with Nearest: where the center of a pixel falls exactly between
+  two texels the two renderers take different ones, which shows as single
+  rows and columns a regular distance apart.
+- The clipping warning's outline is a pixel away in places. It is a
+  threshold, which makes a whole color of a difference too small to see.
 
 ## HDR
 
