@@ -835,7 +835,7 @@ namespace djv
                 // which is current once the window has been drawn and not
                 // before: a command given at startup can get here first,
                 // and nothing can then be made. With the GPU renderer the
-                // window has no context and the export makes its own.
+                // window has no context and the export needs none.
                 _makeCurrent();
                 exportTool->exportMovie(overwrite, callback);
             }

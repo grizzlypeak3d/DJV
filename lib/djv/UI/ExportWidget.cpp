@@ -9,6 +9,9 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/GL/Render.h>
+#if defined(TLRENDER_GPU)
+#include <tlRender/GPU/Render.h>
+#endif // TLRENDER_GPU
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/IRender.h>
 #include <tlRender/Timeline/Util.h>
@@ -34,10 +37,11 @@
 #include <ftk/GL/GL.h>
 #include <ftk/GL/OffscreenBuffer.h>
 #include <ftk/GL/Util.h>
-#include <ftk/GL/Window.h>
-#if defined(FTK_GPU)
+#if defined(TLRENDER_GPU)
+#include <ftk/GPU/OffscreenBuffer.h>
+#include <ftk/GPU/Render.h>
 #include <ftk/GPU/System.h>
-#endif // FTK_GPU
+#endif // TLRENDER_GPU
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Timer.h>
 #include <ftk/Core/Path.h>
@@ -126,27 +130,17 @@ namespace djv
                 //! frame at a time into a file that may well be asked to
                 //! hold it, so it takes the most this build has.
                 ftk::gl::TextureType colorBuffer = ftk::gl::getOffscreenColorDefault();
-                //! An OpenGL context of the export's own, for when the
-                //! window is drawn with the GPU renderer and has none: the
-                //! export draws with OpenGL either way, which reads back
-                //! into the file's own pixel type.
-                std::shared_ptr<ftk::gl::Window> glWindow;
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
+#if defined(TLRENDER_GPU)
+                //! What is drawn into instead when the windows are drawn
+                //! with the GPU renderer: the export draws with the
+                //! renderer the viewport does, and there is then no OpenGL
+                //! context to draw in.
+                std::shared_ptr<ftk::gpu::OffscreenBuffer> gpuBuffer;
+#endif // TLRENDER_GPU
                 std::shared_ptr<tl::IRender> render;
                 GLenum glFormat = 0;
                 GLenum glType = 0;
-
-                ~ExportData()
-                {
-                    if (glWindow)
-                    {
-                        // What was made in the context goes while it is
-                        // the current one.
-                        glWindow->makeCurrent();
-                        render.reset();
-                        buffer.reset();
-                    }
-                }
             };
             std::unique_ptr<ExportData> exportData;
 
@@ -720,9 +714,27 @@ namespace djv
                             infos),
                         compareSize,
                         p.exportData->info.size);
-                    p.exportData->glFormat = ftk::gl::getReadPixelsFormat(p.exportData->info.type);
-                    p.exportData->glType = ftk::gl::getReadPixelsType(p.exportData->info.type);
-                    if (GL_NONE == p.exportData->glFormat || GL_NONE == p.exportData->glType)
+                    // Whether the picture can be read back as the type the
+                    // file is written from, by the renderer that draws it.
+#if defined(TLRENDER_GPU)
+                    const bool gpu = ftk::gpu::isEnabled();
+#else // TLRENDER_GPU
+                    const bool gpu = false;
+#endif // TLRENDER_GPU
+                    bool canRead = false;
+#if defined(TLRENDER_GPU)
+                    if (gpu)
+                    {
+                        canRead = ftk::gpu::OffscreenBuffer::canRead(p.exportData->info.type);
+                    }
+#endif // TLRENDER_GPU
+                    if (!gpu)
+                    {
+                        p.exportData->glFormat = ftk::gl::getReadPixelsFormat(p.exportData->info.type);
+                        p.exportData->glType = ftk::gl::getReadPixelsType(p.exportData->info.type);
+                        canRead = p.exportData->glFormat != GL_NONE && p.exportData->glType != GL_NONE;
+                    }
+                    if (!canRead)
                     {
                         throw std::runtime_error(
                             ftk::Format("Cannot open: \"{0}\"").arg(p.exportData->path.get()));
@@ -878,19 +890,33 @@ namespace djv
                     {
                         p.exportData->displayOptions[i].ocioInput = resolvedInputs[i];
                     }
-#if defined(FTK_GPU)
-                    if (ftk::gpu::isEnabled())
+#if defined(TLRENDER_GPU)
+                    if (gpu)
                     {
-                        p.exportData->glWindow = ftk::gl::Window::create(
-                            context,
-                            "djv::ui::ExportWidget",
-                            ftk::Size2I(100, 100),
-                            static_cast<int>(ftk::gl::WindowOptions::MakeCurrent));
+                        auto gpuSystem = context->getSystem<ftk::gpu::System>();
+                        p.exportData->render = tl::gpu::Render::create(
+                            gpuSystem,
+                            context->getLogSystem(),
+                            context->getSystem<ftk::FontSystem>());
+                        ftk::gpu::BufferType bufferType = ftk::gpu::BufferType::RGBA_F32;
+                        switch (p.exportData->colorBuffer)
+                        {
+                        case ftk::gl::TextureType::RGBA_U8: bufferType = ftk::gpu::BufferType::RGBA_U8; break;
+                        case ftk::gl::TextureType::RGBA_F16: bufferType = ftk::gpu::BufferType::RGBA_F16; break;
+                        default: break;
+                        }
+                        p.exportData->gpuBuffer = ftk::gpu::OffscreenBuffer::create(
+                            gpuSystem,
+                            p.exportData->info.size,
+                            bufferType);
                     }
-#endif // FTK_GPU
-                    p.exportData->render = tl::gl::Render::create(
-                        context->getLogSystem(),
-                        context->getSystem<ftk::FontSystem>());
+#endif // TLRENDER_GPU
+                    if (!p.exportData->render)
+                    {
+                        p.exportData->render = tl::gl::Render::create(
+                            context->getLogSystem(),
+                            context->getSystem<ftk::FontSystem>());
+                    }
                     {
                         // The same per layer resolution as the viewport, so
                         // the export bakes what the viewport shows.
@@ -903,20 +929,23 @@ namespace djv
                                     std::string();
                             });
                     }
-                    ftk::gl::OffscreenBufferOptions offscreenBufferOptions;
-                    // The wipe comparison masks with the stencil buffer, so
-                    // the buffer needs one. Paired with depth, as the
-                    // viewport does, for the combined format rather than a
-                    // stencil-only attachment.
-                    if (!ftk::gl::isGLES())
+                    if (!gpu)
                     {
-                        offscreenBufferOptions.depth = ftk::gl::OffscreenDepth::_24;
+                        ftk::gl::OffscreenBufferOptions offscreenBufferOptions;
+                        // The wipe comparison masks with the stencil buffer,
+                        // so the buffer needs one. Paired with depth, as the
+                        // viewport does, for the combined format rather than
+                        // a stencil-only attachment.
+                        if (!ftk::gl::isGLES())
+                        {
+                            offscreenBufferOptions.depth = ftk::gl::OffscreenDepth::_24;
+                        }
+                        offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
+                        p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
+                            p.exportData->info.size,
+                            p.exportData->colorBuffer,
+                            offscreenBufferOptions);
                     }
-                    offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
-                    p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
-                        p.exportData->info.size,
-                        p.exportData->colorBuffer,
-                        offscreenBufferOptions);
 
                     // Create the progress dialog.
                     p.progressDialog = ftk::ProgressDialog::create(
@@ -1035,39 +1064,50 @@ namespace djv
                     videoFrame.push_back(request.future.get());
                 }
 
-                // Render the video.
-                if (p.exportData->glWindow)
+                // Render the video and read it back as the file's own
+                // pixel type, with the renderer the windows are drawn with.
+                std::shared_ptr<ftk::Image> image;
+                const auto draw = [&p, &videoFrame]
                 {
-                    p.exportData->glWindow->makeCurrent();
-                }
-                ftk::gl::OffscreenBufferBinding binding(p.exportData->buffer);
-                p.exportData->render->begin(p.exportData->info.size);
-                p.exportData->render->setOCIOOptions(p.exportData->ocioOptions);
-                p.exportData->render->setLUTOptions(p.exportData->lutOptions);
-                p.exportData->render->drawVideo(
-                    videoFrame,
-                    p.exportData->boxes,
-                    p.exportData->imageOptions,
-                    p.exportData->displayOptions,
-                    p.exportData->compareOptions,
-                    p.exportData->colorBuffer);
-                p.exportData->render->end();
-
-                // Write the output image.
-                auto image = ftk::Image::create(p.exportData->info);
-                glPixelStorei(GL_PACK_ALIGNMENT, p.exportData->info.layout.alignment);
-                if (!ftk::gl::isGLES())
+                    p.exportData->render->begin(p.exportData->info.size);
+                    p.exportData->render->setOCIOOptions(p.exportData->ocioOptions);
+                    p.exportData->render->setLUTOptions(p.exportData->lutOptions);
+                    p.exportData->render->drawVideo(
+                        videoFrame,
+                        p.exportData->boxes,
+                        p.exportData->imageOptions,
+                        p.exportData->displayOptions,
+                        p.exportData->compareOptions,
+                        p.exportData->colorBuffer);
+                    p.exportData->render->end();
+                };
+#if defined(TLRENDER_GPU)
+                if (p.exportData->gpuBuffer)
                 {
-                    glPixelStorei(GL_PACK_SWAP_BYTES, p.exportData->info.layout.endian != ftk::getEndian());
+                    ftk::gpu::getRender(p.exportData->render)->setTarget(p.exportData->gpuBuffer);
+                    draw();
+                    image = p.exportData->gpuBuffer->read(p.exportData->info);
                 }
-                glReadPixels(
-                    0,
-                    0,
-                    p.exportData->info.size.w,
-                    p.exportData->info.size.h,
-                    p.exportData->glFormat,
-                    p.exportData->glType,
-                    image->getData());
+#endif // TLRENDER_GPU
+                if (p.exportData->buffer)
+                {
+                    ftk::gl::OffscreenBufferBinding binding(p.exportData->buffer);
+                    draw();
+                    image = ftk::Image::create(p.exportData->info);
+                    glPixelStorei(GL_PACK_ALIGNMENT, p.exportData->info.layout.alignment);
+                    if (!ftk::gl::isGLES())
+                    {
+                        glPixelStorei(GL_PACK_SWAP_BYTES, p.exportData->info.layout.endian != ftk::getEndian());
+                    }
+                    glReadPixels(
+                        0,
+                        0,
+                        p.exportData->info.size.w,
+                        p.exportData->info.size.h,
+                        p.exportData->glFormat,
+                        p.exportData->glType,
+                        image->getData());
+                }
 
                 // The sequence writers name each file from the time it is
                 // written at, so those keep the frame numbers of the timeline

@@ -36,7 +36,8 @@ OFF, and `local.cmake` does not overwrite what is there. Say them to it once:
 
     cmake -S DJV -B build-Debug -Dftk_GPU=ON -DTLRENDER_GPU=ON
 
-`ftk_TESTS` and `TLRENDER_TESTS` build the test programs below.
+`ftk_TESTS` and `TLRENDER_TESTS` build the test programs below, and
+`TLRENDER_PROGRAMS` builds `tlbake`.
 
 At run time Vulkan wants the system's loader, `libvulkan.so.1`, and a driver.
 
@@ -61,8 +62,9 @@ and `Swapchain:`.
 - `ftk-gpu-test [dir]` draws one scene with both renderers and compares them,
   checks the presenter's HDR arithmetic, and presents into each kind of
   swapchain the desktop offers, on a hidden window (a shown one on Vulkan,
-  where it also says how fast frames are presented). `ftk-gpu-test -compare a.png b.png [diff.png]`
-  compares two screenshots.
+  where it also says how fast frames are presented). It reads a buffer back
+  as every type of image a file is written from, in every layout.
+  `ftk-gpu-test -compare a.png b.png [diff.png]` compares two screenshots.
 - `tl-gpu-ocio-test` runs OCIO through a pipeline against OCIO's CPU
   processor: Metal's shader on Metal, and OCIO's Vulkan GLSL through glslang
   elsewhere.
@@ -85,8 +87,9 @@ and `Swapchain:`.
 - `ftk/UI/WindowGL.cpp`: `_updateGPU()`, and a window with no OpenGL context.
 - `tlRender/GPU`: `tl::gpu::Render`, a port of `tl::gl::Render`.
 - `tlRender/UI/Viewport.cpp`: `_drawGPU()`.
-- `djv/UI/ExportWidget.cpp`: the export keeps drawing with OpenGL, in a
-  context of its own when the window has none.
+- `djv/UI/ExportWidget.cpp` and `tlRender/BakeApp`: the export and `tlbake`
+  draw with the GPU renderer when the windows do, which is `FTK_RENDER=gpu`
+  for both, and with OpenGL otherwise.
 
 ## How it differs from the OpenGL renderer
 
@@ -221,16 +224,35 @@ export: the matrix of a Rec. 2020 picture is written as the writer's guess
 from its size, Rec. 709 or 601, where HDR10 wants Rec. 2020's, and mastering
 display and light level metadata are not carried from the source.
 
-The export draws with OpenGL whichever renderer the windows have, so what it
-writes is the same file, byte for byte, with either. `Export/Movie` from the
-command line used to fail with the OpenGL renderer, "Cannot create color
-texture": the window's context is current once the window has been drawn,
-and a command given at startup can come first. The window now makes it
-current for an export it is asked for.
+## Writing files
+
+The export and `tlbake` draw with the renderer the windows are drawn with,
+so with `FTK_RENDER=gpu` there is no OpenGL in either: no hidden window, and
+no context. What OpenGL's `glReadPixels` did for the writers,
+`ftk::gpu::OffscreenBuffer::read(const ImageInfo&)` does: the buffer is
+drawn into a texture with the components wanted and read back, then laid
+out as the file's image is, three channels of four, ten bits packed, rows
+from the bottom, aligned, and in the byte order asked for.
+
+Against OpenGL, with `tlbake` and with `Export/Movie`: a picture that was
+RGB to begin with is written as the same file, byte for byte, in eight, ten
+and sixteen bits, half and float, with OCIO and with a LUT. A TIFF or DPX
+differs in the time or the file name it carries and nowhere else. Where the
+renderers do arithmetic, they round apart by one code value in places: a YUV
+source, a dissolve, a picture that is scaled. Sol Levante to sixteen bit
+PNG differs by one in 65535 in 0.05% of components.
+
+Without a desktop both renderers want `SDL_VIDEODRIVER=offscreen`, and both
+then work.
+
+`Export/Movie` from the command line used to fail with the OpenGL renderer,
+"Cannot create color texture": the window's context is current once the
+window has been drawn, and a command given at startup can come first. The
+window now makes it current for an export it is asked for.
 
 ## Not done
 
-- `tlbake` and `tlplay`, and the export on the GPU renderer itself.
+- `tlplay` on the GPU renderer.
 - The OCIO configuration code, and the background and foreground drawing,
   are copies of the OpenGL renderer's and want to be shared.
 - Direct3D 12, which SDL also has, and which would want HLSL.
