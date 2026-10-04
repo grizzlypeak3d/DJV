@@ -256,9 +256,12 @@ range. One frame of Sol Levante written losslessly at ten bits is now 30 of
 65535 from the source on average, where it was 70 from eight bits and 86,
 all of it one way, from sixteen uncorrected.
 
-The same scaler reads YUV with alpha, and ten bit and deeper YUV when the
-conversion is asked for on the CPU, to sixteen bit RGB that is 0.39% low.
-That is as it was.
+The same scaler read YUV with alpha, and ten bit and deeper YUV when the
+conversion is asked for on the CPU, to sixteen bit RGB that was 0.39% low,
+and widened ten and twelve bit alpha by shifting it, so that opaque was
+65472. The reader brings both up to where they belong. A picture written
+from sixteen bits with alpha used to read back as it was written only
+because the two were wrong by the same amount.
 
 `Export/Movie` from the command line used to fail with the OpenGL renderer,
 "Cannot create color texture": the window's context is current once the
