@@ -11,9 +11,14 @@ Works on macOS/Metal, checked against the OpenGL renderer by screenshot:
 the feather-tk user interface, and DJV with images, EXR, video, timelines,
 every compare mode, OCIO, LUTs, playback and export.
 
-**Vulkan has never run.** Every shader has a GLSL version and all of them
-compile to SPIR-V with glslang, OpenColorIO's included. Nothing past that has
-been tried: there is no Vulkan on the machine this was written on.
+Works on Linux/Vulkan, on one machine: Mesa 26.0's RADV on a Radeon RX 480,
+GNOME 50 on Wayland, an LG C2 with HDR on. `ftk-gpu-test` and
+`tl-gpu-hdr-test` pass, and DJV matches the OpenGL renderer by screenshot
+with images, EXR, video, timelines, every compare mode, OCIO and a LUT: the
+same 0.2% of channels at the edges of glyphs as on macOS. The user interface
+and video look right on the display, in an HDR10 swapchain. The API's
+validation (`vulkan-validationlayers`) has nothing to say of any of it but
+one warning, below.
 
 ## Building
 
@@ -26,6 +31,13 @@ and the super build as usual. On this branch it builds SDL with its Vulkan
 and Metal drivers, and glslang (not on macOS, where nothing needs it; set
 `ftk_glslang` to check the GLSL there). An existing build tree rebuilds SDL.
 
+An existing build tree also has the two options in its cache already, as
+OFF, and `local.cmake` does not overwrite what is there. Say them to it once:
+
+    cmake -S DJV -B build-Debug -Dftk_GPU=ON -DTLRENDER_GPU=ON
+
+`ftk_TESTS` and `TLRENDER_TESTS` build the test programs below.
+
 At run time Vulkan wants the system's loader, `libvulkan.so.1`, and a driver.
 
 ## Running
@@ -35,7 +47,7 @@ Nothing changes unless asked for by name:
 | Variable | |
 |---|---|
 | `FTK_RENDER=gpu` | Draw windows with the GPU renderer. |
-| `FTK_GPU_SWAPCHAIN=sdr`, `hdr` or `hdr10` | Ask for a swapchain by name: SDR, extended linear or HDR10. Without it the swapchain follows the display, extended linear where the display is showing HDR. The log says what was got. |
+| `FTK_GPU_SWAPCHAIN=sdr`, `hdr` or `hdr10` | Ask for a swapchain by name: SDR, extended linear or HDR10. Without it the swapchain follows the display: where the display is showing HDR, extended linear if the window can have it and HDR10 if it cannot. The log says what was got. |
 | `FTK_GPU_HDR_TEST=1` | Draw patches at one, two, four and eight times white along the top. |
 | `FTK_GPU_DEBUG=1` | Turn on the API's validation. |
 | `FTK_GPU_VALIDATE=1` | Compile every shader's GLSL as it is made, whatever the driver. |
@@ -47,10 +59,11 @@ With `-log`, look for `GPU driver:`, `GLSL compiler:` and `Swapchain:`.
 
 - `ftk-gpu-test [dir]` draws one scene with both renderers and compares them,
   checks the presenter's HDR arithmetic, and presents into each kind of
-  swapchain on a hidden window. `ftk-gpu-test -compare a.png b.png [diff.png]`
+  swapchain the desktop offers, on a hidden window (a shown one on Vulkan). `ftk-gpu-test -compare a.png b.png [diff.png]`
   compares two screenshots.
 - `tl-gpu-ocio-test` runs OCIO through a pipeline against OCIO's CPU
-  processor. It is Metal only as written.
+  processor. It is Metal only as written: on Vulkan it stops with "No
+  supported SDL_GPU backend found".
 - `tl-gpu-hdr-test`: see HDR, below.
 - The Diagnostics tool has `ftk GPU Objects` and `ftk GPU Memory`, beside
   the OpenGL ones, which read zero while the GPU renderer draws.
@@ -91,25 +104,29 @@ With `-log`, look for `GPU driver:`, `GLSL compiler:` and `Swapchain:`.
   written from its signature. Its Vulkan GLSL declares them itself, in the
   set and at the bindings asked for.
 
-## What to look at first on Vulkan
+## Vulkan
 
-None of these has been seen to work or to fail.
+What was found on the machine above.
 
-- Whether a window is claimed: it is made with `SDL_WINDOW_VULKAN` when the
-  driver is Vulkan, on the expectation that SDL wants it.
-- Which way up, and which faces are culled. SDL says the conventions are the
-  same on every driver; the pipelines cull back faces, counter clockwise
-  being the front.
-- The uniform blocks, which are C structs laid out for Metal and declared
-  std140 in the GLSL. They should agree; `DisplayUniforms` is the one with
-  the most in it.
+- The window is claimed, and what is drawn is the right way up with the
+  right faces. The uniform blocks agree, and so do OCIO's texture bindings.
+- SDL's Vulkan driver has no swapchain texture for a hidden window, so
+  `ftk-gpu-test` shows its window there, and a kind of swapchain the desktop
+  does not offer is not a failure.
+- With `FTK_GPU_DEBUG=1`, one warning, once, when OCIO or a LUT has a three
+  dimensional table: `WARNING-VkImageSubresourceRange-layerCount-compatibility`,
+  of a barrier SDL's driver makes for the texture. It is SDL's, and about a
+  Vulkan feature that is not turned on.
+
+Still to look at:
+
+- Whether presenting waits for the display as it should.
 - Texture formats that Vulkan leaves optional: sixteen bit normalized
   (`R16_UNORM` and its siblings, which video over eight bits uses), and
-  linear filtering of thirty-two bit float, which OCIO's tables want.
-- OCIO's texture bindings: the display shader has up to three stages, each
-  numbered on from the last.
-- The swapchain: what `Swapchain:` says the desktop offers, and whether
-  presenting waits for the display as it should.
+  linear filtering of thirty-two bit float, which OCIO's tables want. RADV
+  has them all; nothing asks before using them, so a driver without one
+  fails rather than falls back.
+- Other drivers: NVIDIA, Intel, and Windows.
 
 ## Known differences from OpenGL
 
@@ -118,7 +135,8 @@ None of these has been seen to work or to fail.
   that row at the bottom of a rectangle and not at the top, and Metal the
   other way around, since OpenGL's buffers are the other way up. Framing a
   picture to the view can put its bottom edge there, and the picture is then
-  one row shorter than OpenGL draws it.
+  one row shorter than OpenGL draws it. Vulkan does as Metal does: stacked
+  vertically, the two pictures of a comparison meet one row away.
 
 ## HDR
 
@@ -140,26 +158,28 @@ nits, the reference white, by default.
 
 `tl-gpu-hdr-test` checks the arithmetic: PQ code values drawn into a window
 and presented into an HDR10 swapchain come out as they went in, colors
-outside Rec. 709 included. **Nobody has yet looked at it on an HDR display.**
+outside Rec. 709 included. It passes on Vulkan. **Nobody has yet looked at a
+PQ picture on an HDR display**, nor measured anything.
 
-On Linux, none of which has been tried:
+On Linux, as found on the machine above:
 
 - HDR is the desktop's to give, and only a Wayland session gives it: the
   log's `Video driver:` has to say `wayland` (`SDL_VIDEO_DRIVER=wayland`
-  asks for it), not `x11`.
-- The swapchain follows `SDL_PROP_WINDOW_HDR_ENABLED_BOOLEAN`. If SDL does
-  not report that for a Wayland window, `Swapchain:` will say SDR on an HDR
-  desktop: `FTK_GPU_SWAPCHAIN=hdr10` or `hdr` asks by name, and whether that
-  is supported is the driver's answer, which wants a recent Mesa or NVIDIA
-  driver.
-- White: off macOS the window's white is taken from SDL's SDR white level,
-  in units of eighty nits. A PQ picture goes through an HDR10 swapchain
-  unchanged whatever that says, since it is divided by it and multiplied
-  back, but the user interface is drawn at it, so if SDL has no answer and
-  says one the interface is at eighty nits and looks dim.
-- `FTK_GPU_HDR_TEST=1` with any ftk example is the first thing to look at:
-  four patches, each visibly brighter than the last, the first the white of
-  the interface.
+  asks for it), not `x11`. XWayland offers no HDR swapchain of either kind.
+- SDL does report `SDL_PROP_WINDOW_HDR_ENABLED_BOOLEAN` for a Wayland window
+  on an HDR display. What Wayland offers is an HDR10 swapchain and no
+  extended linear one, so a window that follows the display takes extended
+  linear where it can and HDR10 where it cannot. It used to ask for extended
+  linear alone, be given SDR, and ask again every frame.
+- White: SDL has no answer on Wayland, and says one for every window, which
+  is eighty nits. A PQ surface there has its white at 203 nits, which the
+  compositor takes to the white of everything else on the display, so that
+  is where the presenter puts it: `ftk::gpu::getSDRWhiteLevel()`. The user
+  interface is then as bright as the windows beside it.
+- The HDR headroom SDL reports there is the compositor's 10000 nits over its
+  reference white, about 49: the range of PQ, not what the display can do.
+- `FTK_GPU_HDR_TEST=1`: four patches, each visibly brighter than the last,
+  the first the white of the interface. Not yet looked at.
 
 Not done: HLG, HDR metadata for the swapchain, anything for the display's
 own limits (what is brighter than the display goes is left to it), and the
