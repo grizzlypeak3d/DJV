@@ -22,6 +22,14 @@ always >= DJV's, so a DJV release is also a deadline for one there.
 DJV drives feather-tk and tlRender releases, so all three are versioned
 together and each keeps its own number.
 
+`etc/release.py` makes the commits the next items and the pins under PyPI
+describe, in all three repositories, and prints what to push and tag:
+
+    etc/release.py release 0.17.0 0.25.0 3.8.0
+
+It refuses unless all three are on main, clean and up to date, and it
+pushes and tags nothing. The change log is still written by hand.
+
 - [ ] Set `VERSION_MAJOR` / `MINOR` / `PATCH` in each `Version.h`:
       `deps/tlRender/deps/ftk/lib/ftk/Core/Version.h`,
       `deps/tlRender/lib/tlRender/Core/Version.h` and
@@ -112,15 +120,15 @@ Pushing a version tag builds that repository's wheels and publishes them
       change to `pyproject.toml` builds the wheels, and the versions they pin
       are not on PyPI until the tags are. The tag's build is the one that
       counts; "CI green" above means the CI workflow.
-- [ ] Tag innermost first, one at a time, since a wheel build fetches the
-      wheels it pins from PyPI: ftk, then tlRender, then DJV. Before each
-      next tag, wait until `https://pypi.org/simple/<name>/` lists the new
-      files -- the wheels and the sdist, not their provenance entries -- and
-      then a few minutes more. The index lags the release by minutes and its
-      servers do not catch up together: a tlRender tag pushed three minutes
-      after feather-tk published failed a wheel job, and one pushed a minute
-      after the index listed every file here failed the sdist, which needs
-      the pinned wheel in its first seconds.
+- [ ] The three tags can be pushed together. A wheel build fetches the
+      wheels it pins from PyPI, so tlRender's needs feather-tk's published
+      and DJV's needs tlRender's; each build asks for them first
+      (`etc/Python/wait_for_pins.py`) and a tag waits up to an hour. Each
+      publish job still needs approving in turn, and the next build goes
+      on once the one before is published. This replaced tagging one at a
+      time and watching the index, which lags the release by minutes and
+      whose servers do not catch up together: tags pushed minutes too soon
+      failed a wheel job, and the sdist.
 - [ ] Should a job fail that way, wait for the rest of the run to finish and
       use "Re-run failed jobs".
 - [ ] Should only the publish job fail, say from a publisher set up wrongly
@@ -130,7 +138,8 @@ Pushing a version tag builds that repository's wheels and publishes them
 ## After the release
 
 - [ ] Start the next version in all three: the next minor number and
-      `VERSION_DEV` back to `"-dev"` ("Version X.Y.Z-dev").
+      `VERSION_DEV` back to `"-dev"` ("Version X.Y.Z-dev"), with
+      `etc/release.py dev 0.18.0 0.26.0 3.9.0`.
 
 ## Worth knowing
 
