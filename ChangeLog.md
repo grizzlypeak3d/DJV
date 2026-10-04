@@ -1,3 +1,8 @@
+## 3.7.4
+
+Changes:
+* Add a macOS package for Intel.
+
 ## 3.7.3
 
 Changes:
