@@ -35,7 +35,7 @@ Nothing changes unless asked for by name:
 | Variable | |
 |---|---|
 | `FTK_RENDER=gpu` | Draw windows with the GPU renderer. |
-| `FTK_GPU_SWAPCHAIN=hdr` or `hdr10` | Ask for an extended linear or an HDR10 swapchain. The log says what was got. |
+| `FTK_GPU_SWAPCHAIN=sdr`, `hdr` or `hdr10` | Ask for a swapchain by name: SDR, extended linear or HDR10. Without it the swapchain follows the display, extended linear where the display is showing HDR. The log says what was got. |
 | `FTK_GPU_HDR_TEST=1` | Draw patches at one, two, four and eight times white along the top. |
 | `FTK_GPU_DEBUG=1` | Turn on the API's validation. |
 | `FTK_GPU_VALIDATE=1` | Compile every shader's GLSL as it is made, whatever the driver. |
@@ -51,6 +51,7 @@ With `-log`, look for `GPU driver:`, `GLSL compiler:` and `Swapchain:`.
   compares two screenshots.
 - `tl-gpu-ocio-test` runs OCIO through a pipeline against OCIO's CPU
   processor. It is Metal only as written.
+- `tl-gpu-hdr-test`: see HDR, below.
 - The Diagnostics tool has `ftk GPU Objects` and `ftk GPU Memory`, beside
   the OpenGL ones, which read zero while the GPU renderer draws.
 - Any application, with and without `FTK_RENDER=gpu`, `-screenshot` each,
@@ -119,10 +120,34 @@ None of these has been seen to work or to fail.
   picture to the view can put its bottom edge there, and the picture is then
   one row shorter than OpenGL draws it.
 
+## HDR
+
+A window holds what it always has: display encoded for sRGB, with one as
+the white of the user interface. Where its swapchain is HDR, what is drawn
+above one is brighter than white by the same curve, and `ftk::gpu::Present`
+writes it into the swapchain in the swapchain's terms. `ftk::IWindow::getHDR()`
+says whether, how far above white the display goes, and what white is in
+nits where the system says (macOS does not).
+
+A picture is HDR when it is said to be: **HDR picture** in the View tool,
+SDR or PQ, for when the OCIO display is an HDR one. Nothing in OCIO says a
+display is PQ, so it is a setting, as the Blackmagic output's is. A PQ
+picture is taken into what the window holds as it is drawn there
+(`tl::gpu::Render::drawTextureHDR`), so the viewport's buffer keeps the
+picture's own code values for the color picker. **HDR white** is the
+luminance the window's white stands for where the system does not say; 203
+nits, the reference white, by default.
+
+`tl-gpu-hdr-test` checks the arithmetic: PQ code values drawn into a window
+and presented into an HDR10 swapchain come out as they went in, colors
+outside Rec. 709 included. **Nobody has yet looked at it on an HDR display.**
+
+Not done: HLG, HDR metadata for the swapchain, anything for the display's
+own limits (what is brighter than the display goes is left to it), and the
+color picker and export know nothing of it.
+
 ## Not done
 
-- HDR as more than a swapchain: the presenter takes what was drawn for sRGB
-  and re-encodes it. A picture that is already PQ wants to go straight through.
 - `tlbake` and `tlplay`, and the export on the GPU renderer itself.
 - The OCIO configuration code, and the background and foreground drawing,
   are copies of the OpenGL renderer's and want to be shared.

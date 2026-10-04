@@ -120,6 +120,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<tl::HDR_EOTF> > hdrTransferObserver;
+            std::shared_ptr<ftk::Observer<float> > hdrWhiteObserver;
             std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
             std::shared_ptr<ftk::ListObserver<ftk::LogItem> > messagesObserver;
             std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
@@ -430,6 +432,20 @@ namespace djv
                 {
                     setColorBuffer(value);
                     _hudUpdate();
+                });
+
+            p.hdrTransferObserver = ftk::Observer<tl::HDR_EOTF>::create(
+                viewportModel->observeHDRTransfer(),
+                [this](tl::HDR_EOTF value)
+                {
+                    setHDRTransfer(value);
+                });
+
+            p.hdrWhiteObserver = ftk::Observer<float>::create(
+                viewportModel->observeHDRWhite(),
+                [this](float value)
+                {
+                    setHDRWhite(value);
                 });
 
             p.viewZoomObserver = ftk::Observer<double>::create(

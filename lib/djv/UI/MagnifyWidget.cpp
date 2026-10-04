@@ -76,6 +76,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<tl::HDR_EOTF> > hdrTransferObserver;
+            std::shared_ptr<ftk::Observer<float> > hdrWhiteObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > settingsObserver;
         };
 
@@ -257,6 +259,20 @@ namespace djv
                 [this](ftk::gl::TextureType value)
                 {
                     _p->viewport->setColorBuffer(value);
+                });
+
+            p.hdrTransferObserver = ftk::Observer<tl::HDR_EOTF>::create(
+                viewportModel->observeHDRTransfer(),
+                [this](tl::HDR_EOTF value)
+                {
+                    _p->viewport->setHDRTransfer(value);
+                });
+
+            p.hdrWhiteObserver = ftk::Observer<float>::create(
+                viewportModel->observeHDRWhite(),
+                [this](float value)
+                {
+                    _p->viewport->setHDRWhite(value);
                 });
 
             p.settingsObserver = ftk::Observer<models::MouseSettings>::create(

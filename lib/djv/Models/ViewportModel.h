@@ -8,6 +8,7 @@
 #include <tlRender/Timeline/BackgroundOptions.h>
 #include <tlRender/Timeline/DisplayOptions.h>
 #include <tlRender/Timeline/ForegroundOptions.h>
+#include <tlRender/Core/HDR.h>
 
 #include <ftk/GL/Texture.h>
 #include <ftk/Core/Observable.h>
@@ -158,6 +159,24 @@ namespace djv
             DJV_MODELS_API ftk::gl::TextureType getColorBuffer() const;
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<ftk::gl::TextureType> > observeColorBuffer() const;
             DJV_MODELS_API void setColorBuffer(ftk::gl::TextureType);
+
+            ///@}
+
+            //! \name HDR
+            //! What the picture is display encoded for, which nothing says
+            //! but the person who chose the display it is transformed to:
+            //! SDR, or PQ. And the luminance the window's white stands for
+            //! when a PQ picture is drawn into it, where the system does
+            //! not say. A window is HDR only with the GPU renderer.
+            ///@{
+
+            DJV_MODELS_API tl::HDR_EOTF getHDRTransfer() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::HDR_EOTF> > observeHDRTransfer() const;
+            DJV_MODELS_API void setHDRTransfer(tl::HDR_EOTF);
+
+            DJV_MODELS_API float getHDRWhite() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<float> > observeHDRWhite() const;
+            DJV_MODELS_API void setHDRWhite(float);
 
             ///@}
 
