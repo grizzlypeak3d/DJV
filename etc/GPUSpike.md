@@ -12,13 +12,13 @@ the feather-tk user interface, and DJV with images, EXR, video, timelines,
 every compare mode, OCIO, LUTs, playback and export.
 
 Works on Linux/Vulkan, on one machine: Mesa 26.0's RADV on a Radeon RX 480,
-GNOME 50 on Wayland, an LG C2 with HDR on. `ftk-gpu-test` and
-`tl-gpu-hdr-test` pass, and DJV matches the OpenGL renderer by screenshot
-with images, EXR, video, timelines, every compare mode, OCIO and a LUT: the
-same 0.2% of channels at the edges of glyphs as on macOS. The user interface
-and video look right on the display, in an HDR10 swapchain. The API's
-validation (`vulkan-validationlayers`) has nothing to say of any of it but
-one warning, below.
+GNOME 50 on Wayland, an LG C2 with HDR on. `ftk-gpu-test`, `tl-gpu-ocio-test`
+and `tl-gpu-hdr-test` pass, and DJV matches the OpenGL renderer by screenshot
+with images, EXR, video (sixteen bit included), timelines, every compare mode,
+OCIO and a LUT: the same 0.2% of channels at the edges of glyphs as on macOS.
+The user interface and video look right on the display, in an HDR10 swapchain.
+The API's validation (`vulkan-validationlayers`) has nothing to say of any of
+it but one warning, below.
 
 ## Building
 
@@ -53,7 +53,8 @@ Nothing changes unless asked for by name:
 | `FTK_GPU_VALIDATE=1` | Compile every shader's GLSL as it is made, whatever the driver. |
 | `SDL_GPU_DRIVER=vulkan` | SDL's own: which driver. |
 
-With `-log`, look for `GPU driver:`, `GLSL compiler:` and `Swapchain:`.
+With `-log`, look for `GPU driver:`, `GLSL compiler:`, `Texture formats:`
+and `Swapchain:`.
 
 ## Checking it
 
@@ -62,8 +63,8 @@ With `-log`, look for `GPU driver:`, `GLSL compiler:` and `Swapchain:`.
   swapchain the desktop offers, on a hidden window (a shown one on Vulkan). `ftk-gpu-test -compare a.png b.png [diff.png]`
   compares two screenshots.
 - `tl-gpu-ocio-test` runs OCIO through a pipeline against OCIO's CPU
-  processor. It is Metal only as written: on Vulkan it stops with "No
-  supported SDL_GPU backend found".
+  processor: Metal's shader on Metal, and OCIO's Vulkan GLSL through glslang
+  elsewhere.
 - `tl-gpu-hdr-test`: see HDR, below.
 - The Diagnostics tool has `ftk GPU Objects` and `ftk GPU Memory`, beside
   the OpenGL ones, which read zero while the GPU renderer draws.
@@ -124,8 +125,9 @@ Still to look at:
 - Texture formats that Vulkan leaves optional: sixteen bit normalized
   (`R16_UNORM` and its siblings, which video over eight bits uses), and
   linear filtering of thirty-two bit float, which OCIO's tables want. RADV
-  has them all; nothing asks before using them, so a driver without one
-  fails rather than falls back.
+  has them all. `Texture formats:` in the log says which a device lacks;
+  nothing falls back from one, so a driver without it fails. SDL has no way
+  to ask about the filtering.
 - Other drivers: NVIDIA, Intel, and Windows.
 
 ## Known differences from OpenGL
@@ -158,8 +160,10 @@ nits, the reference white, by default.
 
 `tl-gpu-hdr-test` checks the arithmetic: PQ code values drawn into a window
 and presented into an HDR10 swapchain come out as they went in, colors
-outside Rec. 709 included. It passes on Vulkan. **Nobody has yet looked at a
-PQ picture on an HDR display**, nor measured anything.
+outside Rec. 709 included. It passes on Vulkan. A PQ picture has been looked
+at on an HDR display, the LG C2 above in an HDR10 swapchain: Sol Levante,
+which is sixteen bit 4:4:4 PQ at 1000 nits, looks as HDR should. **Nothing
+has been measured.**
 
 On Linux, as found on the machine above:
 
