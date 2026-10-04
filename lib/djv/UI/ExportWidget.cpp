@@ -34,6 +34,10 @@
 #include <ftk/GL/GL.h>
 #include <ftk/GL/OffscreenBuffer.h>
 #include <ftk/GL/Util.h>
+#include <ftk/GL/Window.h>
+#if defined(FTK_GPU)
+#include <ftk/GPU/System.h>
+#endif // FTK_GPU
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Timer.h>
 #include <ftk/Core/Path.h>
@@ -122,10 +126,27 @@ namespace djv
                 //! frame at a time into a file that may well be asked to
                 //! hold it, so it takes the most this build has.
                 ftk::gl::TextureType colorBuffer = ftk::gl::getOffscreenColorDefault();
+                //! An OpenGL context of the export's own, for when the
+                //! window is drawn with the GPU renderer and has none: the
+                //! export draws with OpenGL either way, which reads back
+                //! into the file's own pixel type.
+                std::shared_ptr<ftk::gl::Window> glWindow;
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
                 std::shared_ptr<tl::IRender> render;
                 GLenum glFormat = 0;
                 GLenum glType = 0;
+
+                ~ExportData()
+                {
+                    if (glWindow)
+                    {
+                        // What was made in the context goes while it is
+                        // the current one.
+                        glWindow->makeCurrent();
+                        render.reset();
+                        buffer.reset();
+                    }
+                }
             };
             std::unique_ptr<ExportData> exportData;
 
@@ -834,6 +855,16 @@ namespace djv
                     {
                         p.exportData->displayOptions[i].ocioInput = resolvedInputs[i];
                     }
+#if defined(FTK_GPU)
+                    if (ftk::gpu::isEnabled())
+                    {
+                        p.exportData->glWindow = ftk::gl::Window::create(
+                            context,
+                            "djv::ui::ExportWidget",
+                            ftk::Size2I(100, 100),
+                            static_cast<int>(ftk::gl::WindowOptions::MakeCurrent));
+                    }
+#endif // FTK_GPU
                     p.exportData->render = tl::gl::Render::create(
                         context->getLogSystem(),
                         context->getSystem<ftk::FontSystem>());
@@ -982,6 +1013,10 @@ namespace djv
                 }
 
                 // Render the video.
+                if (p.exportData->glWindow)
+                {
+                    p.exportData->glWindow->makeCurrent();
+                }
                 ftk::gl::OffscreenBufferBinding binding(p.exportData->buffer);
                 p.exportData->render->begin(p.exportData->info.size);
                 p.exportData->render->setOCIOOptions(p.exportData->ocioOptions);
