@@ -174,6 +174,14 @@ picture's own code values for the color picker. **HDR white** is the
 luminance the window's white stands for where the system does not say; 203
 nits, the reference white, by default.
 
+The Color Picker says what a color stands for: **Luminance**, in nits, is
+what a PQ picture's code values say, or what an HDR window makes of an SDR
+picture, and is a dash for an SDR picture in an SDR window. Its swatch, and
+the HUD's, is the color as the picture shows it
+(`tl::ui::Viewport::getColorSampleNits()` and `getColorSampleDisplay()`). The
+color is read from the viewport's buffer, so with the half float color buffer
+a luminance is within about a third of a percent of the code value's.
+
 `tl-gpu-hdr-test` checks the arithmetic: PQ code values drawn into a window
 and presented into an HDR10 swapchain come out as they went in, colors
 outside Rec. 709 included. It passes on Vulkan. A PQ picture has been looked
@@ -203,7 +211,7 @@ On Linux, as found on the machine above:
 
 Not done: HLG, HDR metadata for the swapchain, anything for the display's
 own limits (what is brighter than the display goes is left to it), and the
-color picker and export know nothing of it.
+export knows nothing of it.
 
 ## Not done
 
