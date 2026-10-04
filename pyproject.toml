@@ -14,9 +14,9 @@ build-backend = "scikit_build_core.build"
 
 [project]
 # "djv" on PyPI belongs to another project; this is the name of the
-# subreddit, r/DJV_viewer. The package imports as djv and the command is djv
-# all the same.
-name = "DJV_viewer"
+# subreddit, r/DJV_viewer, with the hyphen PyPI shows it with. The package
+# imports as djv and the command is djv all the same.
+name = "DJV-viewer"
 dynamic = ["version"]
 description = "An open source application for media playback and review, for film, VFX, and animation"
 readme = "README.md"
