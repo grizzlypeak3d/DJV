@@ -245,6 +245,21 @@ PNG differs by one in 65535 in 0.05% of components.
 Without a desktop both renderers want `SDL_VIDEODRIVER=offscreen`, and both
 then work.
 
+A movie is written from sixteen bits where the picture has more than eight.
+The FFmpeg writer takes eight and sixteen bit RGB, and any other picture,
+which is every YUV one and every floating point one, was written from eight
+bit RGBA whatever it held: Sol Levante's twelve bits went to APV through
+eight. And sixteen bit RGB is brought down by 255/256 on its way to YUV,
+since FFmpeg's scaler takes its white for 65280: it came out 0.39% high in
+code value, about 3% in luminance for PQ, with white over the top of the
+range. One frame of Sol Levante written losslessly at ten bits is now 30 of
+65535 from the source on average, where it was 70 from eight bits and 86,
+all of it one way, from sixteen uncorrected.
+
+The same scaler reads YUV with alpha, and ten bit and deeper YUV when the
+conversion is asked for on the CPU, to sixteen bit RGB that is 0.39% low.
+That is as it was.
+
 `Export/Movie` from the command line used to fail with the OpenGL renderer,
 "Cannot create color texture": the window's context is current once the
 window has been drawn, and a command given at startup can come first. The
