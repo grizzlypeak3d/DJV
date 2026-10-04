@@ -51,6 +51,8 @@ With `-log`, look for `GPU driver:`, `GLSL compiler:` and `Swapchain:`.
   compares two screenshots.
 - `tl-gpu-ocio-test` runs OCIO through a pipeline against OCIO's CPU
   processor. It is Metal only as written.
+- The Diagnostics tool has `ftk GPU Objects` and `ftk GPU Memory`, beside
+  the OpenGL ones, which read zero while the GPU renderer draws.
 - Any application, with and without `FTK_RENDER=gpu`, `-screenshot` each,
   and compare. The two are the same but for the edges of glyphs, where
   OpenGL's sixteen bit texture coordinates show: about 0.2% of channels off
@@ -108,14 +110,19 @@ None of these has been seen to work or to fail.
 - The swapchain: what `Swapchain:` says the desktop offers, and whether
   presenting waits for the display as it should.
 
+## Known differences from OpenGL
+
+- The edges of glyphs, as above.
+- An edge that falls exactly on the centers of a row of pixels: OpenGL draws
+  that row at the bottom of a rectangle and not at the top, and Metal the
+  other way around, since OpenGL's buffers are the other way up. Framing a
+  picture to the view can put its bottom edge there, and the picture is then
+  one row shorter than OpenGL draws it.
+
 ## Not done
 
-- The two pass reduction filter: a reduced picture is sampled linearly.
 - HDR as more than a swapchain: the presenter takes what was drawn for sRGB
   and re-encodes it. A picture that is already PQ wants to go straight through.
-- Diagnostics: the GPU renderer reports nothing of its textures or memory.
-- Untried: dissolves, the color picker, the clipping warning, the magnifier,
-  the backgrounds and the grid.
 - `tlbake` and `tlplay`, and the export on the GPU renderer itself.
 - The OCIO configuration code, and the background and foreground drawing,
   are copies of the OpenGL renderer's and want to be shared.
