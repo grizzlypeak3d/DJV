@@ -1106,6 +1106,10 @@ namespace djv
             auto display = p.timelineWidget->getDisplayOptions();
 
             display.minimize = minimize;
+            // The color of an edit field rather than the window's: the
+            // timeline is where things are worked on, and the ruler above it
+            // is already that color.
+            display.background = ftk::ColorRole::Base;
             // Track media gates the two rather than replacing them, so that
             // turning it off and on leaves the choice below it alone.
             display.thumbnails = settings.trackMedia && settings.thumbnails;
