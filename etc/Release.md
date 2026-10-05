@@ -22,6 +22,14 @@ always >= DJV's, so a DJV release is also a deadline for one there.
 DJV drives feather-tk and tlRender releases, so all three are versioned
 together and each keeps its own number.
 
+`etc/release.py` makes the commits the next items and the pins under PyPI
+describe, in all three repositories, and prints what to push and tag:
+
+    etc/release.py release 0.17.0 0.25.0 3.8.0
+
+It refuses unless all three are on main, clean and up to date, and it
+pushes and tags nothing. The change log is still written by hand.
+
 - [ ] Set `VERSION_MAJOR` / `MINOR` / `PATCH` in each `Version.h`:
       `deps/tlRender/deps/ftk/lib/ftk/Core/Version.h`,
       `deps/tlRender/lib/tlRender/Core/Version.h` and
@@ -58,19 +66,34 @@ together and each keeps its own number.
       shipped, so it is a licensing question rather than a build option:
       `MINIMAL=ON PLUGIN=ON` -- the codecs that need no license, with the
       plugin's command line fallback for bringing your own.
-- [ ] The Intel Mac package is a second run of `package-macos.sh`, with
-      `x64` as its third argument, in a directory of its own
-      (`etc/Config/package-macos-x64.cmake`). It is cross-compiled, so it
-      runs here under Rosetta, which is a check that it starts and not a
-      test on an Intel Mac. It is signed and notarized as the other is.
-- [ ] macOS and Windows are built here, with `package-macos.sh` and
-      `package-win.bat`. They take the source directory and build type, and
-      choose the config themselves. Both are built locally because signing
-      needs credentials that are not in CI.
-- [ ] Linux comes from the CI artifact, which is built in a Rocky Linux
-      container so that it starts on the distributions people run. Building
-      it here with `package-linux.sh` produces something linked against
-      whatever this machine has.
+- [ ] Continuous integration builds every package, on every push: Linux,
+      Windows (installer and zip), and macOS for both architectures, the
+      Intel one cross compiled. They are the artifacts of the CI workflow's
+      `*-package` jobs. Linux is built in a Rocky Linux container so that
+      it starts on the distributions people run; building it here with
+      `package-linux.sh` produces something linked against whatever this
+      machine has.
+- [ ] A tag's CI run also makes a **draft release** on GitHub, with the
+      Linux and Windows packages attached and the change log's entry for
+      the version as its notes. Nothing is published until the draft is.
+- [ ] The macOS packages are built unsigned, since the signing identity is
+      not in CI. Download the two `.dmg` artifacts of the tag's run, and
+      sign and notarize them here:
+
+      sh etc/macOS/sign-release.sh --upload <tag> djv-<tag>-macos-arm64.dmg djv-<tag>-macos-x86_64.dmg
+
+      It takes the application out of each, signs it, makes the disk image
+      again under the same name, notarizes and staples it, asks Gatekeeper,
+      and adds the result to the draft (`--upload` needs the GitHub CLI;
+      without it the signed images are in `signed/`). It needs
+      `DJV_MACOS_TEAM_ID`, and for notarization either
+      `DJV_MACOS_NOTARY_PROFILE` or `DJV_MACOS_USER_ID` and
+      `DJV_MACOS_USER_PASSWORD`.
+- [ ] To build a package here all the same: `package-macos.sh` and
+      `package-win.bat` take the source directory and build type, and
+      choose the config themselves. The Intel Mac package is a second run
+      of `package-macos.sh`, with `x64` as its third argument, in a
+      directory of its own (`etc/Config/package-macos-x64.cmake`).
 - [ ] Confirm the **expected** artifact appeared, not merely that one did:
       `.dmg` on macOS, an `.exe` installer on Windows, `.tar.gz` on Linux.
       With the platform packaging off a package build still succeeds and
@@ -86,7 +109,8 @@ together and each keeps its own number.
 ## Tags
 
 - [ ] **Last, once the packages are built and one has been installed and
-      checked.** Nothing in the build reads a tag -- `BuildInfo.cmake` asks
+      checked** -- the packages of the release commit's own CI run, which a
+      push to main builds before any tag exists. Nothing in the build reads a tag -- `BuildInfo.cmake` asks
       for `git rev-parse HEAD` and the versions come from `Version.h` -- so
       tagging earlier buys nothing, while a package build is the first time
       the release configuration runs end to end. Whatever it turns up means
@@ -112,15 +136,15 @@ Pushing a version tag builds that repository's wheels and publishes them
       change to `pyproject.toml` builds the wheels, and the versions they pin
       are not on PyPI until the tags are. The tag's build is the one that
       counts; "CI green" above means the CI workflow.
-- [ ] Tag innermost first, one at a time, since a wheel build fetches the
-      wheels it pins from PyPI: ftk, then tlRender, then DJV. Before each
-      next tag, wait until `https://pypi.org/simple/<name>/` lists the new
-      files -- the wheels and the sdist, not their provenance entries -- and
-      then a few minutes more. The index lags the release by minutes and its
-      servers do not catch up together: a tlRender tag pushed three minutes
-      after feather-tk published failed a wheel job, and one pushed a minute
-      after the index listed every file here failed the sdist, which needs
-      the pinned wheel in its first seconds.
+- [ ] The three tags can be pushed together. A wheel build fetches the
+      wheels it pins from PyPI, so tlRender's needs feather-tk's published
+      and DJV's needs tlRender's; each build asks for them first
+      (`etc/Python/wait_for_pins.py`) and a tag waits up to an hour. Each
+      publish job still needs approving in turn, and the next build goes
+      on once the one before is published. This replaced tagging one at a
+      time and watching the index, which lags the release by minutes and
+      whose servers do not catch up together: tags pushed minutes too soon
+      failed a wheel job, and the sdist.
 - [ ] Should a job fail that way, wait for the rest of the run to finish and
       use "Re-run failed jobs".
 - [ ] Should only the publish job fail, say from a publisher set up wrongly
@@ -130,7 +154,8 @@ Pushing a version tag builds that repository's wheels and publishes them
 ## After the release
 
 - [ ] Start the next version in all three: the next minor number and
-      `VERSION_DEV` back to `"-dev"` ("Version X.Y.Z-dev").
+      `VERSION_DEV` back to `"-dev"` ("Version X.Y.Z-dev"), with
+      `etc/release.py dev 0.18.0 0.26.0 3.9.0`.
 
 ## Worth knowing
 
