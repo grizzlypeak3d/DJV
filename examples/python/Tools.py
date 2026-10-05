@@ -814,6 +814,7 @@ class SettingsTool(IToolWidget):
         # application.
         if hasattr(djv.ui, "GraphicsSettingsWidget"):
             sections.append(("Graphics", [
+                "Changes are applied when the application is restarted.",
                 djv.ui.GraphicsSettingsWidget(context)]))
         sections.append(("Time", [
             djv.ui.TimeSettingsWidget(context, app.getTimeUnitsModel())]))

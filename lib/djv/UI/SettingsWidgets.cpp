@@ -348,7 +348,6 @@ namespace djv
                 "new, and is what HDR needs; where it cannot draw, OpenGL\n"
                 "does.\n"
                 "\n"
-                "Takes effect the next time the application is started.\n"
                 "Starting with \"-renderer OpenGL\" draws with OpenGL\n"
                 "whatever is set here.");
 

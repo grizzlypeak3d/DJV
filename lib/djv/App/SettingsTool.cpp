@@ -114,6 +114,10 @@ namespace djv
             p.bellows["Graphics"] = ftk::Bellows::create(context, "Graphics", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
             vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ftk::Label::create(
+                context,
+                "Changes are applied when the application is restarted.",
+                vLayout2);
             ui::GraphicsSettingsWidget::create(context, vLayout2);
             p.bellows["Graphics"]->setWidget(vLayout2);
 #endif // FTK_GPU
