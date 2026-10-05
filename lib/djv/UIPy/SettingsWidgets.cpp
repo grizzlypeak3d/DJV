@@ -62,6 +62,17 @@ namespace djv
             settingsWidget<ShortcutsSettingsWidget>(m, "ShortcutsSettingsWidget");
             settingsWidget<StyleSettingsWidget>(m, "StyleSettingsWidget");
 
+#if defined(FTK_GPU)
+            // Where there is a renderer to choose, as the Settings tool has
+            // the section. The setting is the application's, so there is
+            // no settings model to give it.
+            nb::class_<GraphicsSettingsWidget, ISettingsWidget>(m, "GraphicsSettingsWidget")
+                .def(
+                    nb::new_(&GraphicsSettingsWidget::create),
+                    nb::arg("context"),
+                    nb::arg("parent") = nullptr);
+#endif // FTK_GPU
+
             nb::class_<ImageSeqSettingsWidget, ISettingsWidget>(m, "ImageSeqSettingsWidget")
                 .def(
                     nb::new_(&ImageSeqSettingsWidget::create),

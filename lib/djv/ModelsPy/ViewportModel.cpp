@@ -76,7 +76,10 @@ namespace djv
                 .def_prop_rw("foregroundOptions", &ViewportModel::getForegroundOptions, &ViewportModel::setForegroundOptions, nb::rv_policy::copy)
                 .def_prop_ro("observeForegroundOptions", &ViewportModel::observeForegroundOptions)
                 .def_prop_rw("hudOptions", &ViewportModel::getHUDOptions, &ViewportModel::setHUDOptions, nb::rv_policy::copy)
-                .def_prop_ro("observeHUDOptions", &ViewportModel::observeHUDOptions);
+                .def_prop_ro("observeHUDOptions", &ViewportModel::observeHUDOptions)
+                .def_prop_rw("hdrTransfer", &ViewportModel::getHDRTransfer, &ViewportModel::setHDRTransfer)
+                .def_prop_rw("hdrWhite", &ViewportModel::getHDRWhite, &ViewportModel::setHDRWhite)
+                .def_prop_ro("observeHDRWhite", &ViewportModel::observeHDRWhite);
         }
     }
 }

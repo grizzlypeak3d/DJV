@@ -809,9 +809,14 @@ class SettingsTool(IToolWidget):
             ("Keyboard Shortcuts",
              [djv.ui.ShortcutsSettingsWidget(context, settingsModel)]),
             ("Style", [djv.ui.StyleSettingsWidget(context, settingsModel)]),
-            ("Time",
-             [djv.ui.TimeSettingsWidget(context, app.getTimeUnitsModel())]),
         ]
+        # The renderer, where the build has one to choose, like the C++
+        # application.
+        if hasattr(djv.ui, "GraphicsSettingsWidget"):
+            sections.append(("Graphics", [
+                djv.ui.GraphicsSettingsWidget(context)]))
+        sections.append(("Time", [
+            djv.ui.TimeSettingsWidget(context, app.getTimeUnitsModel())]))
         # The FFmpeg widgets follow the build, like the C++ application.
         if hasattr(djv.ui, "FFmpegSettingsWidget"):
             sections.append(("FFmpeg", [
@@ -882,6 +887,12 @@ class ColorPickerTool(IToolWidget):
 
         self._colorLabel = ftk.Label(context)
         self._colorLabel.font = ftk.FontType.Mono
+        self._luminanceLabel = ftk.Label(context)
+        self._luminanceLabel.font = ftk.FontType.Mono
+        self._luminanceLabel.tooltip = (
+            "The luminance the color stands for: what a PQ picture's "
+            "code values say, or what an HDR window makes of an SDR "
+            "picture.")
         self._pixelLabel = ftk.Label(context)
         self._pixelLabel.font = ftk.FontType.Mono
         self._mouseLabel = ftk.Label(context)
@@ -893,11 +904,13 @@ class ColorPickerTool(IToolWidget):
         form.marginRole = ftk.SizeRole.Margin
         form.spacingRole = ftk.SizeRole.SpacingSmall
         form.addRow("Color:", self._colorLabel)
+        form.addRow("Luminance:", self._luminanceLabel)
         form.addRow("Pixel:", self._pixelLabel)
         form.addRow("Mouse:", self._mouseLabel)
         self._setContent(layout)
 
         viewport = mainWindow.getViewport()
+        self._viewport = weakref.ref(viewport)
         selfWeak = weakref.ref(self)
         self._pickObserver = tl.ui.OptionalV2IObserver(
             viewport.observePick,
@@ -914,11 +927,23 @@ class ColorPickerTool(IToolWidget):
             "{} {}".format(value.x, value.y) if value is not None else "-"
 
     def _colorSampleUpdate(self, value):
-        self._colorSwatch.color = value if value is not None else ftk.Color4F()
+        swatch = ftk.Color4F()
+        luminance = "-"
+        if value is not None:
+            swatch = value
+            viewport = self._viewport()
+            if viewport is not None:
+                # The swatch is the color as the picture shows it.
+                swatch = viewport.getColorSampleDisplay(value)
+                nits = viewport.getColorSampleNits(value)
+                if nits is not None:
+                    luminance = "{:.2f} nits".format(nits)
+        self._colorSwatch.color = swatch
         self._colorLabel.text = \
             "{:.2f} {:.2f} {:.2f} {:.2f}".format(
                 value.r, value.g, value.b, value.a) \
             if value is not None else "-"
+        self._luminanceLabel.text = luminance
 
     def _mouseSettingsUpdate(self, settings):
         s = []

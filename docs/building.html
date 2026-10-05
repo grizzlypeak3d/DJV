@@ -41,6 +41,7 @@
 <li><a href="#linux">Linux</a></li>
 <li><a href="#macos">macOS</a></li>
 <li><a href="#windows">Windows</a></li>
+<li><a href="#gpu-renderer">The GPU renderer</a></li>
 <li><a href="#updating">Updating a checkout</a></li>
 <li><a href="#system-packages">System packages</a></li>
 </ul>
@@ -126,6 +127,12 @@ DJV\sbuild-win.bat</code></pre>
 <p>Run the application:</p>
 <pre><code>set PATH=%CD%\install-Release\bin;%PATH%
 build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg</code></pre>
+<h2 id="gpu-renderer">The GPU renderer</h2>
+<p>Besides OpenGL, DJV is built with a second renderer, on Metal on macOS and Vulkan on Linux and Windows, which is what HDR needs. OpenGL draws unless the other is chosen: in the <strong>Graphics</strong> section of the <strong>Settings</strong> tool, or with <code>-renderer GPU</code> on the command line.</p>
+<p>The build options are <code>ftk_GPU</code> and <code>TLRENDER_GPU</code>, which <code>etc/Config/default.cmake</code> turns on except for OpenGL ES. A build directory from before they existed has them in its cache as off, and a configuration file does not overwrite what is there; say them to it once:</p>
+<pre><code>cmake -S DJV -B build-Release -Dftk_GPU=ON -DTLRENDER_GPU=ON</code></pre>
+<p>The super build builds SDL with its Metal and Vulkan drivers and, for Vulkan, glslang, which compiles the shaders. At run time Vulkan needs the system's loader and a driver: on Debian and Ubuntu, <code>libvulkan1</code> and <code>mesa-vulkan-drivers</code>. Where it is chosen and cannot draw, the log says why and OpenGL draws.</p>
+<p>How it works, its environment variables and its test programs are described beside the code: <code>lib/ftk/GPU/README.md</code> in feather-tk and <code>lib/tlRender/GPU/README.md</code> in tlRender.</p>
 <h2 id="updating">Updating a checkout</h2>
 <p>The super build script checks out the submodules the first time it runs and does not move them afterwards. After pulling, update them to the commits DJV uses:</p>
 <pre><code>git -C DJV pull
