@@ -21,6 +21,9 @@
 
 #include <ftk/GL/System.h>
 #include <ftk/GL/Window.h>
+#if defined(FTK_GPU)
+#include <ftk/GPU/System.h>
+#endif // FTK_GPU
 
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
@@ -81,13 +84,23 @@ namespace djv
                 "Memory: ",
                 ftk::Format("{0}GB").arg(sysInfo.ramGB)));
 
-            // -sysInfo prints this and exits before the window is made. The
-            // OpenGL strings are the most useful part of the report, so ask a
-            // hidden one pixel window for them rather than leave them out.
+            // -sysInfo prints this and exits before the window is made. What
+            // draws is the most useful part of the report, so it is asked
+            // for rather than left out: the GPU renderer's device where
+            // that draws, and otherwise the OpenGL strings, of a hidden one
+            // pixel window. Not both: OpenGL is not loaded where it does
+            // not draw.
             labels.push_back(std::make_pair("", ""));
-            if (!windowInfo.empty())
+            std::vector<std::pair<std::string, std::string> > renderInfo = windowInfo;
+#if defined(FTK_GPU)
+            if (renderInfo.empty() && ftk::gpu::isEnabled())
             {
-                for (const auto& i : windowInfo)
+                renderInfo = context->getSystem<ftk::gpu::System>()->getInfo();
+            }
+#endif // FTK_GPU
+            if (!renderInfo.empty())
+            {
+                for (const auto& i : renderInfo)
                 {
                     labels.push_back(std::make_pair(i.first + ": ", i.second));
                 }

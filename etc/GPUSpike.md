@@ -62,6 +62,14 @@ by name:
 With `-log`, look for `GPU driver:`, `GLSL compiler:`, `Texture formats:`
 and `Swapchain:`.
 
+OpenGL is chosen and loaded only where it draws: `Graphics API:` is in the
+log when it does and not otherwise, and **Help > System Information** and
+`-sysInfo` say the GPU renderer's driver and device in place of the OpenGL
+strings. `ftk::gl::System::init()` starts SDL's video subsystem and
+`initGL()` the rest; `ftk::gpu::start()` decides whether the GPU renderer
+draws, which an application does once it knows it will run, after the video
+subsystem is started and not for `-h`.
+
 ## Checking it
 
 - `ftk-gpu-test [dir]` draws one scene with both renderers and compares them,
