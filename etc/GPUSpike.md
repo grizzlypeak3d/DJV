@@ -52,6 +52,7 @@ Nothing changes unless asked for by name:
 | `FTK_GPU_HDR_TEST=1` | Draw patches at one, two, four and eight times white along the top. |
 | `FTK_GPU_DEBUG=1` | Turn on the API's validation. |
 | `FTK_GPU_VALIDATE=1` | Compile every shader's GLSL as it is made, whatever the driver. |
+| `FTK_GPU_NO_UNORM16=1` | Say the device has no sixteen bit normalized textures, to try what a driver without them gets: they are kept as half float. |
 | `SDL_GPU_DRIVER=vulkan` | SDL's own: which driver. |
 
 With `-log`, look for `GPU driver:`, `GLSL compiler:`, `Texture formats:`
@@ -143,12 +144,16 @@ What was found on the machine above.
 
 Still to look at:
 
-- Texture formats that Vulkan leaves optional: sixteen bit normalized
-  (`R16_UNORM` and its siblings, which video over eight bits uses), and
-  linear filtering of thirty-two bit float, which OCIO's tables want. RADV
-  has them all. `Texture formats:` in the log says which a device lacks;
-  nothing falls back from one, so a driver without it fails. SDL has no way
-  to ask about the filtering.
+- Texture formats that Vulkan leaves optional. Sixteen bit normalized
+  (`R16_UNORM` and its siblings, which video over eight bits uses) are kept
+  as half float where a device has none, which every driver has and filters:
+  tried with `FTK_GPU_NO_UNORM16=1`, where `ftk-gpu-test` passes as it does
+  without and Sol Levante comes out 8 of 65535 away on average and 45 at
+  most, a half holding eleven bits or so near one. Linear filtering of
+  thirty-two bit float, which OCIO's tables want, is the other: SDL has no
+  way to ask about it and nothing falls back from it. `Texture formats:` in
+  the log says what a device lacks and what is done about it. RADV has
+  everything.
 - Other drivers: NVIDIA, Intel, and Windows.
 
 ## Known differences from OpenGL
@@ -255,6 +260,14 @@ PNG differs by one in 65535 in 0.05% of components.
 Without a desktop both renderers want `SDL_VIDEODRIVER=offscreen`, and both
 then work.
 
+Reading back costs more than `glReadPixels` does. The texture a buffer is
+converted into and the transfer buffer it comes back through are kept from
+one read to the next, and the image is laid out straight from what was
+mapped. In an optimized build `tlbake` writes Sol Levante to APV at 4.5
+frames a second with the GPU renderer and 5.1 with OpenGL; it was 2.9 and
+4.2 in a debug build before, and is 3.6 there now. What is left is the wait
+for each frame to come back before the next is drawn.
+
 A movie is written from sixteen bits where the picture has more than eight.
 The FFmpeg writer takes eight and sixteen bit RGB, and any other picture,
 which is every YUV one and every floating point one, was written from eight
@@ -282,3 +295,5 @@ window now makes it current for an export it is asked for.
 ## Not done
 
 - Direct3D 12, which SDL also has, and which would want HLSL.
+- The documentation says nothing of the GPU renderer or of HDR but for the
+  Color Picker's Luminance, which is a dash without them.
