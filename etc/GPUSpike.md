@@ -24,7 +24,10 @@ it but one warning, below.
 
 The super build as usual. On this branch `etc/Config/default.cmake` turns
 `ftk_GPU` and `TLRENDER_GPU` on, but for OpenGL ES, which is for where there
-is nothing else to draw with. It builds SDL with its Vulkan and Metal
+is nothing else to draw with. tlRender's and feather-tk's own do the same,
+and not with SDL2 either, the renderer being SDL3's: feather-tk's had still
+asked for SDL2 since SDL3 became the default, and no longer says which. The
+wheel configurations are apart from these and do not build it. It builds SDL with its Vulkan and Metal
 drivers, and glslang (not on macOS, where nothing needs it; set
 `ftk_glslang` to check the GLSL there). An existing build tree rebuilds SDL.
 
