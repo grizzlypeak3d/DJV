@@ -22,17 +22,15 @@ it but one warning, below.
 
 ## Building
 
-In `etc/Config/local.cmake`:
-
-    set(ftk_GPU ON CACHE BOOL "")
-    set(TLRENDER_GPU ON CACHE BOOL "")
-
-and the super build as usual. On this branch it builds SDL with its Vulkan
-and Metal drivers, and glslang (not on macOS, where nothing needs it; set
+The super build as usual. On this branch `etc/Config/default.cmake` turns
+`ftk_GPU` and `TLRENDER_GPU` on, but for OpenGL ES, which is for where there
+is nothing else to draw with. It builds SDL with its Vulkan and Metal
+drivers, and glslang (not on macOS, where nothing needs it; set
 `ftk_glslang` to check the GLSL there). An existing build tree rebuilds SDL.
 
-An existing build tree also has the two options in its cache already, as
-OFF, and `local.cmake` does not overwrite what is there. Say them to it once:
+A build tree from before has the two options in its cache already, as OFF,
+and a configuration file does not overwrite what is there. Say them to it
+once:
 
     cmake -S DJV -B build-Debug -Dftk_GPU=ON -DTLRENDER_GPU=ON
 
@@ -43,11 +41,14 @@ At run time Vulkan wants the system's loader, `libvulkan.so.1`, and a driver.
 
 ## Running
 
-Nothing changes unless asked for by name:
+On this branch the GPU renderer draws where it is built and a device can be
+made for it. Where none can, on a machine with no driver for Vulkan say,
+the log says why and OpenGL draws: it used to crash. The rest is asked for
+by name:
 
 | Variable | |
 |---|---|
-| `FTK_RENDER=gpu` | Draw windows with the GPU renderer. |
+| `FTK_RENDER=gl` | Draw with the OpenGL renderer. `gpu` asks for the GPU renderer by name, which it is anyway: not getting it is then an error in the log, where it is otherwise a warning. |
 | `FTK_GPU_SWAPCHAIN=sdr`, `hdr` or `hdr10` | Ask for a swapchain by name: SDR, extended linear or HDR10. Without it the swapchain follows the display: where the display is showing HDR, extended linear if the window can have it and HDR10 if it cannot. The log says what was got. |
 | `FTK_GPU_HDR_TEST=1` | Draw patches at one, two, four and eight times white along the top. |
 | `FTK_GPU_DEBUG=1` | Turn on the API's validation. |
@@ -72,13 +73,13 @@ and `Swapchain:`.
 - `tl-gpu-hdr-test`: see HDR, below.
 - The Diagnostics tool has `ftk GPU Objects` and `ftk GPU Memory`, beside
   the OpenGL ones, which read zero while the GPU renderer draws.
-- Any application, with and without `FTK_RENDER=gpu`, `-screenshot` each,
+- Any application, with and without `FTK_RENDER=gl`, `-screenshot` each,
   and compare. The two are the same but for the edges of glyphs, where
   OpenGL's sixteen bit texture coordinates show: about 0.2% of channels off
   by more than two, none by more than about 32.
 
-      djv file.exr -hideSetup -settingsFile /tmp/a.json -screenshot gl.png
-      FTK_RENDER=gpu djv file.exr -hideSetup -settingsFile /tmp/b.json -screenshot gpu.png
+      FTK_RENDER=gl djv file.exr -hideSetup -settingsFile /tmp/a.json -screenshot gl.png
+      djv file.exr -hideSetup -settingsFile /tmp/b.json -screenshot gpu.png
 
 ## Where it is
 
@@ -95,10 +96,10 @@ and `Swapchain:`.
   renderer makes of a processor, its shader and textures, is its own.
 - `tlRender/UI/Viewport.cpp`: `_drawGPU()`.
 - `djv/UI/ExportWidget.cpp` and `tlRender/BakeApp`: the export and `tlbake`
-  draw with the GPU renderer when the windows do, which is `FTK_RENDER=gpu`
-  for both, and with OpenGL otherwise.
+  draw with the GPU renderer when the windows do, and with OpenGL
+  otherwise.
 - `tlplay` needed nothing: it is feather-tk's windows and tlRender's
-  viewport, and with `FTK_RENDER=gpu` it draws as it does with OpenGL.
+  viewport, and draws with the GPU renderer as it does with OpenGL.
 
 ## How it differs from the OpenGL renderer
 
@@ -242,7 +243,7 @@ source.
 ## Writing files
 
 The export and `tlbake` draw with the renderer the windows are drawn with,
-so with `FTK_RENDER=gpu` there is no OpenGL in either: no hidden window, and
+so with the GPU renderer there is no OpenGL in either: no hidden window, and
 no context. What OpenGL's `glReadPixels` did for the writers,
 `ftk::gpu::OffscreenBuffer::read(const ImageInfo&)` does: the buffer is
 drawn into a texture with the components wanted and read back, then laid
