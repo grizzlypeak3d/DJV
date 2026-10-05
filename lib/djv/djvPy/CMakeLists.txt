@@ -68,6 +68,16 @@ else()
     set(DJV_STUBGEN ${NB_DIR}/stubgen.py)
 endif()
 set(DJV_PYTHON_STUB ${DJV_PYTHON_PACKAGE_DIR}/_djv/__init__.pyi)
+# The GPU renderers' libraries as well, where they are built: the UI
+# libraries load them, and the module could not be imported without their
+# being found.
+set(DJV_STUB_GPU_DIRS)
+if(TARGET tlGPU)
+    list(APPEND DJV_STUB_GPU_DIRS --dll-dir $<TARGET_FILE_DIR:tlGPU>)
+endif()
+if(TARGET ftk::ftkGPU)
+    list(APPEND DJV_STUB_GPU_DIRS --dll-dir $<TARGET_FILE_DIR:ftk::ftkGPU>)
+endif()
 add_custom_command(
     OUTPUT ${DJV_PYTHON_STUB}
     COMMAND ${CMAKE_COMMAND} -E rm -rf ${DJV_PYTHON_PACKAGE_DIR}/_djv
@@ -87,6 +97,7 @@ add_custom_command(
         --dll-dir $<TARGET_FILE_DIR:ftk::ftkCore>
         --dll-dir $<TARGET_FILE_DIR:ftk::ftkGL>
         --dll-dir $<TARGET_FILE_DIR:ftk::ftkUI>
+        ${DJV_STUB_GPU_DIRS}
         --dll-dir ${CMAKE_INSTALL_PREFIX}/bin
         --
         ${DJV_STUBGEN}
