@@ -2247,6 +2247,24 @@ namespace djv
 
             _mainWindowInit();
 
+            // What Help > System Information shows, in the log as well: the
+            // log is what gets sent, and it had neither the version nor
+            // what was drawing. After the window is made, which is what
+            // knows the renderer.
+            {
+                std::vector<std::string> lines;
+                for (const auto& line : getSysInfo())
+                {
+                    if (!line.empty())
+                    {
+                        lines.push_back("    " + line);
+                    }
+                }
+                _context->getLogSystem()->print(
+                    "djv::app::App",
+                    "System information:\n" + ftk::join(lines, '\n'));
+            }
+
             if (p.cmdLine.listCommands->found())
             {
                 for (const auto& command : p.commandsModel->getCommands())
