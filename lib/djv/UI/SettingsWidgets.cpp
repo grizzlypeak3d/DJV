@@ -330,20 +330,31 @@ namespace djv
             ISettingsWidget::_init(context, "djv::ui::GraphicsSettingsWidget", parent);
             FTK_P();
 
+            // In the order of ftk::Renderer. The other renderer is named
+            // for what it is here, which is one thing on each system.
             p.rendererComboBox = ftk::ComboBox::create(
                 context,
-                std::vector<std::string>({ "Automatic", "OpenGL" }));
+                std::vector<std::string>({
+                    "OpenGL",
+#if defined(__APPLE__)
+                    "Metal (experimental)"
+#else // __APPLE__
+                    "Vulkan (experimental)"
+#endif // __APPLE__
+                    }));
             p.rendererComboBox->setHStretch(ftk::Stretch::Expanding);
             p.rendererComboBox->setTooltip(
-                "What the windows are drawn with. Automatic is the GPU\n"
-                "renderer, Metal or Vulkan, where it can draw, and OpenGL\n"
-                "where it cannot. HDR needs the GPU renderer.\n"
+                "What the windows are drawn with. The other renderer is\n"
+                "new, and is what HDR needs; where it cannot draw, OpenGL\n"
+                "does.\n"
                 "\n"
-                "Takes effect the next time the application is started.");
+                "Takes effect the next time the application is started.\n"
+                "Starting with \"-renderer OpenGL\" draws with OpenGL\n"
+                "whatever is set here.");
 
             // What is drawing now, which is not always what is asked for:
-            // the setting is for the next start, and Automatic is OpenGL
-            // where there is no device for the other.
+            // the setting is for the next start, and OpenGL draws where
+            // there is no device for the other.
             std::string current = "OpenGL";
 #if defined(FTK_GPU)
             if (ftk::gpu::isEnabled())

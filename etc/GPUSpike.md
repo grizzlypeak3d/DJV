@@ -44,20 +44,26 @@ At run time Vulkan wants the system's loader, `libvulkan.so.1`, and a driver.
 
 ## Running
 
-On this branch the GPU renderer draws where it is built and a device can be
-made for it. Where none can, on a machine with no driver for Vulkan say,
-the log says why and OpenGL draws: it used to crash. A device that draws on
-the CPU, Mesa's where there is no other, is not taken: OpenGL draws there.
+The GPU renderer is built by default on this branch and draws only where it
+is asked for: OpenGL is what draws otherwise, as it always has. Asked for and
+with no device to be made for it, on a machine with no driver for Vulkan say,
+the log says why and OpenGL draws. A device that draws on the CPU, Mesa's
+where there is no other, is not taken either.
 
-**Settings > Graphics > Renderer** is Automatic, which is that, or OpenGL. It is
-feather-tk's to keep (`ftk::App::setRenderer()`, `/Renderer` in the settings)
-since the renderer is chosen before an application reads its own, and it is
-for the next start. The rest is asked for by name, and the environment is
-asked before the setting:
+It is asked for, in the order they are asked:
+
+- `-renderer GPU` on the command line, for that run; `-renderer OpenGL` is
+  the way back from a renderer that cannot draw the Settings tool.
+- `FTK_RENDER=gpu` in the environment, which is also how `tlbake` is asked.
+- **Settings > Graphics > Renderer**, for the next start. It is feather-tk's
+  to keep (`ftk::App::setRenderer()`, `/Renderer` in the settings) since the
+  renderer is chosen before an application reads its own.
+
+The rest is asked for by name:
 
 | Variable | |
 |---|---|
-| `FTK_RENDER=gl` | Draw with the OpenGL renderer. `gpu` asks for the GPU renderer by name, which it is anyway: not getting it is then an error in the log, where it is otherwise a warning. |
+| `FTK_RENDER=gpu` | Draw with the GPU renderer; `gl`, or anything else, with OpenGL whatever is set. |
 | `FTK_GPU_SWAPCHAIN=sdr`, `hdr` or `hdr10` | Ask for a swapchain by name: SDR, extended linear or HDR10. Without it the swapchain follows the display: where the display is showing HDR, extended linear if the window can have it and HDR10 if it cannot. The log says what was got. |
 | `FTK_GPU_HDR_TEST=1` | Draw patches at one, two, four and eight times white along the top. |
 | `FTK_GPU_DEBUG=1` | Turn on the API's validation. |
@@ -92,13 +98,13 @@ subsystem is started and not for `-h`.
 - `tl-gpu-hdr-test`: see HDR, below.
 - The Diagnostics tool has `ftk GPU Objects` and `ftk GPU Memory`, beside
   the OpenGL ones, which read zero while the GPU renderer draws.
-- Any application, with and without `FTK_RENDER=gl`, `-screenshot` each,
+- Any application, with and without `-renderer GPU`, `-screenshot` each,
   and compare. The two are the same but for the edges of glyphs, where
   OpenGL's sixteen bit texture coordinates show: about 0.2% of channels off
   by more than two, none by more than about 32.
 
-      FTK_RENDER=gl djv file.exr -hideSetup -settingsFile /tmp/a.json -screenshot gl.png
-      djv file.exr -hideSetup -settingsFile /tmp/b.json -screenshot gpu.png
+      djv file.exr -hideSetup -settingsFile /tmp/a.json -screenshot gl.png
+      djv file.exr -renderer GPU -hideSetup -settingsFile /tmp/b.json -screenshot gpu.png
 
 ## Where it is
 
