@@ -51,6 +51,16 @@ set(TLRENDER_PROGRAMS OFF CACHE BOOL "")
 set(TLRENDER_EXAMPLES OFF CACHE BOOL "")
 set(TLRENDER_TESTS OFF CACHE BOOL "")
 set(ftk_API "GL_4_1" CACHE STRING "")
+# The renderer on SDL's GPU API, built beside the OpenGL one on this branch;
+# see etc/GPUSpike.md. Not with OpenGL ES, which is for where there is
+# nothing else to draw with: a configuration for it names the API before it
+# gets here.
+if(ftk_API MATCHES "^GLES")
+    set(ftk_GPU OFF CACHE BOOL "")
+else()
+    set(ftk_GPU ON CACHE BOOL "")
+endif()
+set(TLRENDER_GPU ${ftk_GPU} CACHE BOOL "")
 set(ftk_EXAMPLES OFF CACHE BOOL "")
 set(ftk_TESTS OFF CACHE BOOL "")
 # Shared when Python is on: each binding module would otherwise carry its

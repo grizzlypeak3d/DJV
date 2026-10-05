@@ -71,6 +71,14 @@ jobs:
     # The submodule is not needed: the wheel builds against tlRender's.
     - uses: actions/checkout@v6
 
+    # The wheels pyproject.toml pins have to be on PyPI. A tag waits for
+    # them, so the tags of a release can be pushed together; see the script.
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+    - name: Wait for the pinned wheels
+      run: python etc/Python/wait_for_pins.py
+
     # One stable ABI wheel per platform; the configuration is in
     # pyproject.toml.
     - uses: pypa/cibuildwheel@v4.2.1
@@ -85,6 +93,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
+
+    # The wheels pyproject.toml pins have to be on PyPI. A tag waits for
+    # them, so the tags of a release can be pushed together; see the script.
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+    - name: Wait for the pinned wheels
+      run: python etc/Python/wait_for_pins.py
 
     - name: Build
       run: pipx run build --sdist
