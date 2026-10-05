@@ -831,6 +831,11 @@ namespace djv
             if (auto exportTool = std::dynamic_pointer_cast<ExportTool>(
                 p.toolsWidget->getToolWidget("Export")))
             {
+                // The export draws with OpenGL in this window's context,
+                // which is current once the window has been drawn and not
+                // before: a command given at startup can get here first,
+                // and nothing can then be made.
+                _makeCurrent();
                 exportTool->exportMovie(overwrite, callback);
             }
             else if (callback)
