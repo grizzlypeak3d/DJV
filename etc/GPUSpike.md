@@ -46,8 +46,14 @@ At run time Vulkan wants the system's loader, `libvulkan.so.1`, and a driver.
 
 On this branch the GPU renderer draws where it is built and a device can be
 made for it. Where none can, on a machine with no driver for Vulkan say,
-the log says why and OpenGL draws: it used to crash. The rest is asked for
-by name:
+the log says why and OpenGL draws: it used to crash. A device that draws on
+the CPU, Mesa's where there is no other, is not taken: OpenGL draws there.
+
+**Settings > Graphics > Renderer** is Automatic, which is that, or OpenGL. It is
+feather-tk's to keep (`ftk::App::setRenderer()`, `/Renderer` in the settings)
+since the renderer is chosen before an application reads its own, and it is
+for the next start. The rest is asked for by name, and the environment is
+asked before the setting:
 
 | Variable | |
 |---|---|
@@ -57,10 +63,12 @@ by name:
 | `FTK_GPU_DEBUG=1` | Turn on the API's validation. |
 | `FTK_GPU_VALIDATE=1` | Compile every shader's GLSL as it is made, whatever the driver. |
 | `FTK_GPU_NO_UNORM16=1` | Say the device has no sixteen bit normalized textures, to try what a driver without them gets: they are kept as half float. |
+| `FTK_GPU_NO_FLOAT_FILTER=1` | Say the device does not filter thirty-two bit float textures, as the log would of one that does not. Nothing is done about it yet. |
+| `FTK_GPU_SOFTWARE=1` | Take a device that draws on the CPU, to test on a machine without a GPU. |
 | `SDL_GPU_DRIVER=vulkan` | SDL's own: which driver. |
 
-With `-log`, look for `GPU driver:`, `GLSL compiler:`, `Texture formats:`
-and `Swapchain:`.
+With `-log`, look for `GPU driver:`, `GPU device:`, `GLSL compiler:`,
+`Texture formats:`, `Float texture filtering:` and `Swapchain:`.
 
 OpenGL is chosen and loaded only where it draws: `Graphics API:` is in the
 log when it does and not otherwise, and **Help > System Information** and
@@ -132,6 +140,17 @@ subsystem is started and not for `-h`.
 
 ## Vulkan
 
+Also run, by eye and by log and not by the tests or by screenshot: Mesa's
+Intel driver on a UHD 620 (a Dell Latitude 5300, Ubuntu on Wayland), and
+NVIDIA's on Windows on an RTX A4000, where a window on an HDR display has an
+extended linear swapchain without being asked. Each has every texture format.
+
+The device is made with what the renderer uses and no more. SDL asks a
+Vulkan device for depth clamping, clip distances, anisotropic filtering and
+indirect draws' first instance unless told not to, and a small device
+without one would be refused for it; every pipeline clips by depth, which is
+what not having depth clamping asks for.
+
 What was found on the machine above.
 
 - The window is claimed, and what is drawn is the right way up with the
@@ -163,10 +182,13 @@ Still to look at:
   without and Sol Levante comes out 8 of 65535 away on average and 45 at
   most, a half holding eleven bits or so near one. Linear filtering of
   thirty-two bit float, which OCIO's tables want, is the other: SDL has no
-  way to ask about it and nothing falls back from it. `Texture formats:` in
-  the log says what a device lacks and what is done about it. RADV has
-  everything.
-- Other drivers: NVIDIA, Intel, and Windows.
+  way to ask about it, so it is tried, by drawing two texels into one pixel
+  (`ftk::gpu::hasFloatFilter()`), and the log says. Nothing falls back from
+  it yet. `Texture formats:` in the log says what a device lacks and what is
+  done about it. RADV has everything.
+- The tests and the comparisons by screenshot on NVIDIA, Intel and Windows.
+- Which device draws where there are two: SDL takes the first of the best
+  kind, and there is nothing to choose with.
 
 ## Known differences from OpenGL
 

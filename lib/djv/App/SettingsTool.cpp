@@ -109,6 +109,15 @@ namespace djv
             ui::StyleSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["Style"]->setWidget(vLayout2);
 
+#if defined(FTK_GPU)
+            // Only where there is a choice of renderer to make.
+            p.bellows["Graphics"] = ftk::Bellows::create(context, "Graphics", vLayout);
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::GraphicsSettingsWidget::create(context, vLayout2);
+            p.bellows["Graphics"]->setWidget(vLayout2);
+#endif // FTK_GPU
+
             p.bellows["Time"] = ftk::Bellows::create(context, "Time", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
             vLayout2->setMarginRole(ftk::SizeRole::Margin);

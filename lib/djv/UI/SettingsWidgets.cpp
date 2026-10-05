@@ -9,6 +9,7 @@
 #include <tlRender/IO/USD.h>
 #endif // TLRENDER_USD
 
+#include <ftk/UI/App.h>
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ColorSwatch.h>
@@ -29,7 +30,14 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/IWindow.h>
+#if defined(FTK_GPU)
+#include <ftk/GPU/System.h>
+#endif // FTK_GPU
 #include <ftk/Core/Format.h>
+#include <ftk/Core/String.h>
+
+#include <cctype>
 
 namespace djv
 {
@@ -306,6 +314,114 @@ namespace djv
             auto out = std::shared_ptr<CacheSettingsWidget>(new CacheSettingsWidget);
             out->_init(context, settings, parent);
             return out;
+        }
+
+        struct GraphicsSettingsWidget::Private
+        {
+            std::shared_ptr<ftk::ComboBox> rendererComboBox;
+            std::shared_ptr<ftk::Label> currentLabel;
+            std::shared_ptr<ftk::FormLayout> layout;
+        };
+
+        void GraphicsSettingsWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            ISettingsWidget::_init(context, "djv::ui::GraphicsSettingsWidget", parent);
+            FTK_P();
+
+            p.rendererComboBox = ftk::ComboBox::create(
+                context,
+                std::vector<std::string>({ "Automatic", "OpenGL" }));
+            p.rendererComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.rendererComboBox->setTooltip(
+                "What the windows are drawn with. Automatic is the GPU\n"
+                "renderer, Metal or Vulkan, where it can draw, and OpenGL\n"
+                "where it cannot. HDR needs the GPU renderer.\n"
+                "\n"
+                "Takes effect the next time the application is started.");
+
+            // What is drawing now, which is not always what is asked for:
+            // the setting is for the next start, and Automatic is OpenGL
+            // where there is no device for the other.
+            std::string current = "OpenGL";
+#if defined(FTK_GPU)
+            if (ftk::gpu::isEnabled())
+            {
+                if (auto gpuSystem = context->getSystem<ftk::gpu::System>())
+                {
+                    std::vector<std::string> pieces;
+                    for (const auto& i : gpuSystem->getInfo())
+                    {
+                        if ("GPU driver" == i.first || "GPU device" == i.first)
+                        {
+                            pieces.push_back(i.second);
+                        }
+                    }
+                    if (!pieces.empty() && !pieces.front().empty())
+                    {
+                        pieces.front()[0] = std::toupper(pieces.front()[0]);
+                    }
+                    current = ftk::join(pieces, ", ");
+                }
+            }
+#endif // FTK_GPU
+            p.currentLabel = ftk::Label::create(context, current);
+            p.currentLabel->setHStretch(ftk::Stretch::Expanding);
+
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Renderer:", p.rendererComboBox);
+            p.layout->addRow("Drawing with:", p.currentLabel);
+
+            p.rendererComboBox->setIndexCallback(
+                [this](int value)
+                {
+                    if (auto window = getWindow())
+                    {
+                        if (auto app = window->getApp())
+                        {
+                            app->setRenderer(static_cast<ftk::Renderer>(value));
+                        }
+                    }
+                });
+        }
+
+        GraphicsSettingsWidget::GraphicsSettingsWidget() :
+            _p(new Private)
+        {}
+
+        GraphicsSettingsWidget::~GraphicsSettingsWidget()
+        {}
+
+        std::shared_ptr<GraphicsSettingsWidget> GraphicsSettingsWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<GraphicsSettingsWidget>(new GraphicsSettingsWidget);
+            out->_init(context, parent);
+            return out;
+        }
+
+        void GraphicsSettingsWidget::tickEvent(
+            bool parentsVisible,
+            bool parentsEnabled,
+            const ftk::TickEvent& event)
+        {
+            ISettingsWidget::tickEvent(parentsVisible, parentsEnabled, event);
+            FTK_P();
+            // The application keeps the setting, and is reached through
+            // the window, which there is not yet when this is made.
+            if (auto window = getWindow())
+            {
+                if (auto app = window->getApp())
+                {
+                    p.rendererComboBox->setCurrentIndex(
+                        static_cast<int>(app->getRenderer()));
+                }
+            }
         }
 
         struct FileBrowserSettingsWidget::Private

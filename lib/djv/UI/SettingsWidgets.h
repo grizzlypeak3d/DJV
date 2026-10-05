@@ -302,6 +302,36 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! Graphics settings widget: what the windows are drawn with. The
+        //! setting is the application's rather than one of the settings
+        //! model's, since the renderer is chosen before those are read.
+        class DJV_UI_API_TYPE GraphicsSettingsWidget : public ISettingsWidget
+        {
+            FTK_NON_COPYABLE(GraphicsSettingsWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            GraphicsSettingsWidget();
+
+        public:
+            DJV_UI_API virtual ~GraphicsSettingsWidget();
+
+            DJV_UI_API static std::shared_ptr<GraphicsSettingsWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            DJV_UI_API void tickEvent(
+                bool parentsVisible,
+                bool parentsEnabled,
+                const ftk::TickEvent&) override;
+
+        private:
+            FTK_PRIVATE();
+        };
+
         //! Style settings widget.
         class DJV_UI_API_TYPE StyleSettingsWidget : public ISettingsWidget
         {
