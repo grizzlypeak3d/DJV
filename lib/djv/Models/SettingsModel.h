@@ -340,6 +340,9 @@ namespace djv
             bool stopOnScrub = false;
             //! A preview of the frame under the cursor.
             bool preview = true;
+            //! The timeline of each file being compared, under the current
+            //! file's.
+            bool compareTimelines = false;
             // Whether media is shown in the timeline at all. Separate from
             // the two below rather than setting them, so that turning it off
             // and on again does not forget which of them was wanted.

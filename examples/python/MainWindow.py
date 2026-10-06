@@ -433,6 +433,10 @@ class MainWindow(ftk.MainWindow):
     def _timelineSettingsUpdate(self, settings):
         self._timelineWidget.frameView = settings.frameView
         self._timelineWidget.scrollBarsVisible = settings.scrollBars
+        # Unset, the widget draws a timeline for each file being compared;
+        # an empty list is the current file's and no other.
+        self._timelineWidget.setTimelines(
+            None if settings.compareTimelines else [])
         self._timelineWidget.autoScroll = settings.autoScroll
         self._timelineWidget.stopOnScrub = settings.stopOnScrub
         # With nothing open the timeline is hidden, so it takes the

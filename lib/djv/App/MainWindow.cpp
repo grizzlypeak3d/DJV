@@ -252,13 +252,6 @@ namespace djv
 
             auto timeUnitsModel = app->getTimeUnitsModel();
             p.timelineWidget = tl::ui::TimelineWidget::create(context, timeUnitsModel);
-            // The current file's timeline and no other. Left unset the widget
-            // draws one for each file being compared as well, which is what
-            // an application built around comparing wants; here the timeline
-            // belongs to the file being played and a comparison is something
-            // done to the picture.
-            p.timelineWidget->setTimelines(
-                std::vector<std::shared_ptr<tl::Timeline> >());
             ftk::setScreenshotTag(p.timelineWidget, "MainWindow.Timeline");
 
             p.fileActions = FileActions::create(context, app);
@@ -1096,6 +1089,15 @@ namespace djv
 
             p.timelineWidget->setFrameView(settings.frameView);
             p.timelineWidget->setScrollBarsVisible(settings.scrollBars);
+            // Unset, the widget draws a timeline for each file being
+            // compared, under the current file's; an empty list is the
+            // current file's and no other. Off until asked for: a comparison
+            // is usually something done to the picture, and the timelines
+            // are what is compared when the files are two cuts.
+            p.timelineWidget->setTimelines(
+                settings.compareTimelines ?
+                std::optional<std::vector<std::shared_ptr<tl::Timeline> > >() :
+                std::vector<std::shared_ptr<tl::Timeline> >());
             p.timelineWidget->setAutoScroll(settings.autoScroll);
             p.timelineWidget->setStopOnScrub(settings.stopOnScrub);
             p.timelinePreview = settings.preview;

@@ -1035,6 +1035,7 @@ namespace djv
             json["AutoScroll"] = value.autoScroll;
             json["StopOnScrub"] = value.stopOnScrub;
             json["Preview"] = value.preview;
+            json["CompareTimelines"] = value.compareTimelines;
             json["TrackMedia"] = value.trackMedia;
             json["Thumbnails"] = value.thumbnails;
             json["ThumbnailSize"] = to_string(value.thumbnailSize);
@@ -1266,6 +1267,10 @@ namespace djv
             if (json.contains("Preview"))
             {
                 json.at("Preview").get_to(value.preview);
+            }
+            if (json.contains("CompareTimelines"))
+            {
+                json.at("CompareTimelines").get_to(value.compareTimelines);
             }
             // Asked for rather than required, so settings written before this
             // still load the rest of the timeline.

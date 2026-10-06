@@ -25,6 +25,8 @@ class Actions(IActions.IActions):
             ("Minimize", "Minimize", "minimize", "Minimize the timeline."),
             ("FrameView", "Frame View", "frameView", "Frame the timeline view."),
             ("ScrollBars", "Scroll Bars", "scrollBars", "Toggle the scroll bars."),
+            ("CompareTimelines", "Compare Timelines", "compareTimelines",
+             "Show the timeline of each file being compared, under the current file's."),
             ("AutoScroll", "Auto Scroll", "autoScroll",
              "Automatically scroll the timeline to the current frame."),
             ("StopOnScrub", "Stop When Scrubbing", "stopOnScrub",
@@ -81,6 +83,7 @@ class Actions(IActions.IActions):
         self._addShortcut("FrameView")
         self._addShortcut("ScrollBars")
         self._addShortcut("AutoScroll")
+        self._addShortcut("CompareTimelines", "Compare Timelines")
         self._addShortcut("StopOnScrub", "Stop On Scrub")
         self._addShortcut("Thumbnails")
         self._addShortcut("ThumbnailSizeSmall", "Small Video Thumbnails")
@@ -110,6 +113,7 @@ class Actions(IActions.IActions):
         self.actions["FrameView"].checked = settings.frameView
         self.actions["ScrollBars"].checked = settings.scrollBars
         self.actions["AutoScroll"].checked = settings.autoScroll
+        self.actions["CompareTimelines"].checked = settings.compareTimelines
         self.actions["StopOnScrub"].checked = settings.stopOnScrub
         self.actions["TrackMedia"].checked = settings.trackMedia
         self.actions["Thumbnails"].checked = settings.thumbnails

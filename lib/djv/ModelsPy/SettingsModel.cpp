@@ -155,6 +155,7 @@ namespace djv
                 .def_rw("minimize", &TimelineSettings::minimize)
                 .def_rw("frameView", &TimelineSettings::frameView)
                 .def_rw("scrollBars", &TimelineSettings::scrollBars)
+                .def_rw("compareTimelines", &TimelineSettings::compareTimelines)
                 .def_rw("autoScroll", &TimelineSettings::autoScroll)
                 .def_rw("stopOnScrub", &TimelineSettings::stopOnScrub)
                 .def_rw("preview", &TimelineSettings::preview)

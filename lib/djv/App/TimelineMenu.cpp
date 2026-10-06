@@ -31,6 +31,7 @@ namespace djv
             addAction(actions["AutoScroll"]);
             addAction(actions["StopOnScrub"]);
             addAction(actions["Preview"]);
+            addAction(actions["CompareTimelines"]);
             addDivider();
             addAction(actions["TrackMedia"]);
             addAction(actions["Thumbnails"]);
