@@ -1374,6 +1374,57 @@
           ]
         },
         {
+          "click": "Review.Arrow"
+        },
+        {
+          "drag": [
+            [
+              140,
+              800
+            ],
+            [
+              330,
+              640
+            ]
+          ]
+        },
+        {
+          "click": "Review.Rectangle"
+        },
+        {
+          "drag": [
+            [
+              700,
+              300
+            ],
+            [
+              960,
+              480
+            ]
+          ]
+        },
+        {
+          "click": "Review.Text"
+        },
+        {
+          "drag": [
+            [
+              320,
+              330
+            ],
+            [
+              320,
+              330
+            ]
+          ]
+        },
+        {
+          "text": "Soft here"
+        },
+        {
+          "key": "Return"
+        },
+        {
           "click": "Review.Pen"
         },
         {

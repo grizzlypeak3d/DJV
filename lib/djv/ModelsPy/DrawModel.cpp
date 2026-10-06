@@ -36,7 +36,13 @@ namespace djv
 
             nb::enum_<DrawTool>(m, "DrawTool")
                 .value("Pen", DrawTool::Pen)
-                .value("Eraser", DrawTool::Eraser);
+                .value("Eraser", DrawTool::Eraser)
+                .value("Line", DrawTool::Line)
+                .value("Arrow", DrawTool::Arrow)
+                .value("Rectangle", DrawTool::Rectangle)
+                .value("Ellipse", DrawTool::Ellipse)
+                .value("Text", DrawTool::Text);
+            m.def("getStrokeKind", &getStrokeKind, nb::arg("tool"));
 
             ftk::python::observable<DrawTool>(m, "DrawTool");
             ftk::python::observable<ftk::Color4F>(m, "Color4F");
@@ -52,7 +58,11 @@ namespace djv
                 .def_prop_rw("color", &DrawModel::getColor, &DrawModel::setColor, nb::rv_policy::copy)
                 .def_prop_ro("observeColor", &DrawModel::observeColor)
                 .def_prop_rw("size", &DrawModel::getSize, &DrawModel::setSize)
-                .def_prop_ro("observeSize", &DrawModel::observeSize);
+                .def_prop_ro("observeSize", &DrawModel::observeSize)
+                .def_prop_rw("textSize", &DrawModel::getTextSize, &DrawModel::setTextSize)
+                .def_prop_ro("observeTextSize", &DrawModel::observeTextSize)
+                .def_prop_rw("onionSkin", &DrawModel::isOnionSkin, &DrawModel::setOnionSkin)
+                .def_prop_ro("observeOnionSkin", &DrawModel::observeOnionSkin);
         }
     }
 }

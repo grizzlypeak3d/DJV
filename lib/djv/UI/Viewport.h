@@ -23,6 +23,7 @@ namespace djv
         class SettingsModel;
         class TimeUnitsModel;
         class ViewportModel;
+        struct ReviewStroke;
     }
 
     namespace ui
@@ -83,6 +84,9 @@ namespace djv
             DJV_UI_API void mouseMoveEvent(ftk::MouseMoveEvent&) override;
             DJV_UI_API void mousePressEvent(ftk::MouseClickEvent&) override;
             DJV_UI_API void mouseReleaseEvent(ftk::MouseClickEvent&) override;
+            DJV_UI_API void keyPressEvent(ftk::KeyEvent&) override;
+            DJV_UI_API void textEvent(ftk::TextEvent&) override;
+            DJV_UI_API void keyFocusEvent(bool) override;
             DJV_UI_API void mouseEnterEvent(ftk::MouseEnterEvent&) override;
             DJV_UI_API void mouseLeaveEvent() override;
 
@@ -117,9 +121,24 @@ namespace djv
             bool _sourceShown(int index) const;
 
             void _drawBegin(const ftk::V2I& widgetPos);
-            void _drawContinue(const ftk::V2I& widgetPos);
+            void _drawContinue(const ftk::V2I& widgetPos, int modifiers);
             void _drawEnd();
             void _erase(const ftk::V2I& widgetPos);
+
+            //! Text is typed into the viewport where it was clicked, until
+            //! Return commits it or Escape lets it go.
+            void _textBegin(const ftk::V2I& widgetPos);
+            void _textEnd(bool commit);
+
+            //! Draw one stroke of a source, with the alpha the onion skin
+            //! asks for.
+            void _drawStroke(
+                const ftk::DrawEvent&,
+                int index,
+                const models::ReviewStroke&,
+                float scale,
+                float alpha,
+                bool caret);
 
             //! The cursor follows the drawing mode: a crosshair while the
             //! pointer is inside and drawing is enabled.

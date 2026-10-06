@@ -9,6 +9,7 @@
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/Stroke.h>
+#include <djv/UI/StrokeDraw.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ViewportModel.h>
 
@@ -144,9 +145,14 @@ namespace djv
             };
             MouseData mouse;
 
-            //! The stroke being drawn, in the image pixels of its source.
+            //! The stroke being drawn, in the image pixels of its source,
+            //! and the frame it started on: the frame can change under a
+            //! text being typed, and the text belongs where it was begun.
             models::ReviewStroke stroke;
             int strokeSource = -1;
+            std::optional<OTIO_NS::RationalTime> strokeTime;
+            //! Whether the stroke is text being typed.
+            bool textEditing = false;
 
             std::shared_ptr<models::FilesModel> filesModel;
             std::shared_ptr<models::AnnotationsModel> annotationsModel;
@@ -336,8 +342,13 @@ namespace djv
 
             p.drawEnabledObserver = ftk::Observer<bool>::create(
                 drawModel->observeEnabled(),
-                [this](bool)
+                [this](bool value)
                 {
+                    // Turning drawing off keeps what was typed so far.
+                    if (!value && _p->textEditing)
+                    {
+                        _textEnd(true);
+                    }
                     _cursorUpdate();
                 });
 
@@ -745,7 +756,7 @@ namespace djv
             switch (p.mouse.mode)
             {
             case Private::MouseMode::Draw:
-                _drawContinue(event.pos - getGeometry().min);
+                _drawContinue(event.pos - getGeometry().min, event.modifiers);
                 break;
             case Private::MouseMode::Erase:
                 _erase(event.pos - getGeometry().min);
@@ -805,15 +816,24 @@ namespace djv
                 takeKeyFocus();
                 const ftk::Box2I& g = getGeometry();
                 const ftk::V2I pos = event.pos - g.min;
-                if (models::DrawTool::Eraser == p.drawModel->getTool())
+                // A click elsewhere finishes the text being typed.
+                if (p.textEditing)
                 {
+                    _textEnd(true);
+                }
+                switch (p.drawModel->getTool())
+                {
+                case models::DrawTool::Eraser:
                     p.mouse.mode = Private::MouseMode::Erase;
                     _erase(pos);
-                }
-                else
-                {
+                    break;
+                case models::DrawTool::Text:
+                    _textBegin(pos);
+                    break;
+                default:
                     p.mouse.mode = Private::MouseMode::Draw;
                     _drawBegin(pos);
+                    break;
                 }
                 return;
             }
@@ -1029,6 +1049,66 @@ namespace djv
                 static_cast<float>(viewPos.y + renderY * zoom));
         }
 
+        void Viewport::keyPressEvent(ftk::KeyEvent& event)
+        {
+            FTK_P();
+            if (p.textEditing)
+            {
+                // Every key is the text's while it is being typed, so that
+                // a letter bound to a shortcut goes into the text and not to
+                // the application.
+                event.accept = true;
+                switch (event.key)
+                {
+                case ftk::Key::Return:
+                    _textEnd(true);
+                    break;
+                case ftk::Key::Escape:
+                    _textEnd(false);
+                    break;
+                case ftk::Key::Backspace:
+                    if (!p.stroke.text.empty())
+                    {
+                        // The last character, however many bytes it is.
+                        size_t i = p.stroke.text.size() - 1;
+                        while (i > 0 && (static_cast<uint8_t>(p.stroke.text[i]) & 0xC0) == 0x80)
+                        {
+                            --i;
+                        }
+                        p.stroke.text.erase(i);
+                        setDrawUpdate();
+                    }
+                    break;
+                default: break;
+                }
+                return;
+            }
+            tl::ui::Viewport::keyPressEvent(event);
+        }
+
+        void Viewport::keyFocusEvent(bool value)
+        {
+            tl::ui::Viewport::keyFocusEvent(value);
+            // The keyboard went elsewhere: what was typed is kept.
+            if (!value && _p->textEditing)
+            {
+                _textEnd(true);
+            }
+        }
+
+        void Viewport::textEvent(ftk::TextEvent& event)
+        {
+            FTK_P();
+            if (p.textEditing)
+            {
+                event.accept = true;
+                p.stroke.text += event.text;
+                setDrawUpdate();
+                return;
+            }
+            tl::ui::Viewport::textEvent(event);
+        }
+
         void Viewport::_drawBegin(const ftk::V2I& widgetPos)
         {
             FTK_P();
@@ -1040,7 +1120,9 @@ namespace djv
             {
                 const auto& drawModel = p.drawModel;
                 p.strokeSource = hit.index;
+                p.strokeTime = p.currentTime;
                 p.stroke = models::ReviewStroke();
+                p.stroke.kind = models::getStrokeKind(drawModel->getTool());
                 p.stroke.color = drawModel->getColor();
                 p.stroke.width = drawModel->getSize();
                 p.stroke.points.push_back(hit.pos);
@@ -1048,7 +1130,7 @@ namespace djv
             }
         }
 
-        void Viewport::_drawContinue(const ftk::V2I& widgetPos)
+        void Viewport::_drawContinue(const ftk::V2I& widgetPos, int modifiers)
         {
             FTK_P();
             if (p.strokeSource < 0)
@@ -1060,6 +1142,46 @@ namespace djv
             // comparison boundary does not tear it in two.
             if (hit.index != p.strokeSource)
             {
+                return;
+            }
+            if (p.stroke.kind != models::ReviewStrokeKind::Freehand)
+            {
+                // A shape is its first point and wherever the mouse is now.
+                // With Shift it is held square, or round, or to a line at a
+                // multiple of forty-five degrees.
+                ftk::V2F pos = hit.pos;
+                const ftk::V2F& a = p.stroke.points.front();
+                if (modifiers & static_cast<int>(ftk::KeyModifier::Shift))
+                {
+                    const float dx = pos.x - a.x;
+                    const float dy = pos.y - a.y;
+                    switch (p.stroke.kind)
+                    {
+                    case models::ReviewStrokeKind::Rectangle:
+                    case models::ReviewStrokeKind::Ellipse:
+                    {
+                        const float d = std::max(std::abs(dx), std::abs(dy));
+                        pos.x = a.x + (dx < 0.F ? -d : d);
+                        pos.y = a.y + (dy < 0.F ? -d : d);
+                        break;
+                    }
+                    default:
+                    {
+                        const float length = std::sqrt(dx * dx + dy * dy);
+                        if (length > 0.F)
+                        {
+                            const float step = 3.14159265F / 4.F;
+                            const float angle = std::round(std::atan2(dy, dx) / step) * step;
+                            pos.x = a.x + std::cos(angle) * length;
+                            pos.y = a.y + std::sin(angle) * length;
+                        }
+                        break;
+                    }
+                    }
+                }
+                p.stroke.points.resize(2);
+                p.stroke.points[1] = pos;
+                setDrawUpdate();
                 return;
             }
             if (!p.stroke.points.empty())
@@ -1080,22 +1202,89 @@ namespace djv
         void Viewport::_drawEnd()
         {
             FTK_P();
-            if (p.strokeSource >= 0 && !p.stroke.points.empty())
+            // A shape wants its second point: a click with no drag is nothing.
+            // Ink and text want one.
+            const bool shape =
+                p.stroke.kind != models::ReviewStrokeKind::Freehand &&
+                p.stroke.kind != models::ReviewStrokeKind::Text;
+            if (p.strokeSource >= 0 &&
+                p.strokeTime.has_value() &&
+                (shape ? p.stroke.points.size() > 1 : !p.stroke.points.empty()))
             {
+                const auto& active = p.filesModel->getActive();
+                if (p.strokeSource < static_cast<int>(active.size()))
                 {
-                    const auto& active = p.filesModel->getActive();
-                    if (p.strokeSource < static_cast<int>(active.size()))
-                    {
-                        p.annotationsModel->addStroke(
-                            active[p.strokeSource]->id,
-                            *p.currentTime,
-                            p.stroke);
-                    }
+                    p.annotationsModel->addStroke(
+                        active[p.strokeSource]->id,
+                        *p.strokeTime,
+                        p.stroke);
                 }
             }
             p.stroke = models::ReviewStroke();
             p.strokeSource = -1;
+            p.strokeTime.reset();
             setDrawUpdate();
+        }
+
+        void Viewport::_textBegin(const ftk::V2I& widgetPos)
+        {
+            FTK_P();
+            const SourceHit hit = _hitTest(widgetPos);
+            if (hit.index < 0)
+            {
+                return;
+            }
+            const auto& drawModel = p.drawModel;
+            p.strokeSource = hit.index;
+            p.strokeTime = p.currentTime;
+            p.stroke = models::ReviewStroke();
+            p.stroke.kind = models::ReviewStrokeKind::Text;
+            p.stroke.color = drawModel->getColor();
+            p.stroke.width = drawModel->getSize();
+            p.stroke.textSize = drawModel->getTextSize();
+            p.stroke.points.push_back(hit.pos);
+            p.textEditing = true;
+            // The viewport takes the keyboard only while text is typed into
+            // it: the rest of the time the keys are the application's. The
+            // window has to be told text input is wanted, as a line edit
+            // tells it, or the keys arrive and the characters never do.
+            setAcceptsKeyFocus(true);
+            takeKeyFocus();
+            if (auto window = getWindow())
+            {
+                window->setTextInput(true);
+                const ftk::Box2I& g = getGeometry();
+                window->setTextInputArea(ftk::Box2I(
+                    g.min.x + widgetPos.x,
+                    g.min.y + widgetPos.y,
+                    1,
+                    static_cast<int>(drawModel->getTextSize() * hit.scale * getZoom())));
+            }
+            setDrawUpdate();
+        }
+
+        void Viewport::_textEnd(bool commit)
+        {
+            FTK_P();
+            if (!p.textEditing)
+            {
+                return;
+            }
+            p.textEditing = false;
+            setAcceptsKeyFocus(false);
+            if (auto window = getWindow())
+            {
+                window->setTextInput(false);
+            }
+            if (!commit || p.stroke.text.empty())
+            {
+                p.stroke = models::ReviewStroke();
+                p.strokeSource = -1;
+                p.strokeTime.reset();
+                setDrawUpdate();
+                return;
+            }
+            _drawEnd();
         }
 
         void Viewport::_erase(const ftk::V2I& widgetPos)
@@ -1127,7 +1316,6 @@ namespace djv
             FTK_P();
 
             const ftk::Box2I& g = getGeometry();
-            const double zoom = getZoom();
             const auto& active = p.filesModel->getActive();
 
             // Keep the overlay inside the viewport: a stroke zoomed past the
@@ -1136,36 +1324,6 @@ namespace djv
             const ftk::Box2I clipRectPrev = event.render->getClipRect();
             event.render->setClipRectEnabled(true);
             event.render->setClipRect(ftk::intersect(g, clipRectPrev));
-
-            // Draw a stroke, converting the stored image pixels back to the
-            // screen so it tracks the zoom, the pan and the comparison mode.
-            auto drawStroke = [this, &event, &g, zoom](
-                int index,
-                const models::ReviewStroke& stroke,
-                float scale)
-            {
-                if (stroke.points.empty())
-                {
-                    return;
-                }
-                // To the screen first, then smooth and thicken there, so the
-                // curve stays smooth at any zoom.
-                std::vector<ftk::V2F> path;
-                path.reserve(stroke.points.size());
-                for (const auto& point : stroke.points)
-                {
-                    ftk::V2F p = _imageToWidget(index, point);
-                    p.x += g.min.x;
-                    p.y += g.min.y;
-                    path.push_back(p);
-                }
-                const float width = std::max(1.F, stroke.width * scale * static_cast<float>(zoom));
-                // Thin the captured points before smoothing, then subdivide:
-                // clustered controls are what make the spline overshoot.
-                event.render->drawMesh(
-                    models::strokeMesh(models::smoothPath(models::simplifyPath(path, 3.F), 12), width),
-                    stroke.color);
-            };
 
             const auto boxes = _sourceBoxes();
             auto sourceScale = [this, &boxes](int index) -> float
@@ -1185,24 +1343,47 @@ namespace djv
                 const int w = video.layers[0].image->getSize().w;
                 return w > 0 ? boxes[index].w() / static_cast<float>(w) : 1.F;
             };
+            auto sourceIndex = [&active](const std::string& id) -> int
+            {
+                for (size_t i = 0; i < active.size(); ++i)
+                {
+                    if (active[i]->id == id)
+                    {
+                        return static_cast<int>(i);
+                    }
+                }
+                return -1;
+            };
 
-            // The strokes already committed on this frame.
+            // The strokes already committed: this frame's, and faded, the
+            // frames' on either side where the onion skin is on.
             const auto& annotations = p.annotationsModel->getAnnotations();
+            std::optional<OTIO_NS::RationalTime> prev;
+            std::optional<OTIO_NS::RationalTime> next;
+            if (p.currentTime.has_value() && p.drawModel->isOnionSkin())
+            {
+                const OTIO_NS::RationalTime one(1.0, p.currentTime->rate());
+                prev = *p.currentTime - one;
+                next = *p.currentTime + one;
+            }
             for (const auto& annotation : annotations)
             {
-                if (!models::sameTime(annotation.time, p.currentTime))
+                float alpha = 1.F;
+                if (models::sameTime(annotation.time, p.currentTime))
+                {
+                    alpha = 1.F;
+                }
+                else if (
+                    models::sameTime(annotation.time, prev) ||
+                    models::sameTime(annotation.time, next))
+                {
+                    alpha = .35F;
+                }
+                else
                 {
                     continue;
                 }
-                int index = -1;
-                for (size_t i = 0; i < active.size(); ++i)
-                {
-                    if (active[i]->id == annotation.sourceId)
-                    {
-                        index = static_cast<int>(i);
-                        break;
-                    }
-                }
+                const int index = sourceIndex(annotation.sourceId);
                 if (index < 0 || !_sourceShown(index))
                 {
                     continue;
@@ -1210,18 +1391,43 @@ namespace djv
                 const float scale = sourceScale(index);
                 for (const auto& stroke : annotation.strokes)
                 {
-                    drawStroke(index, stroke, scale);
+                    _drawStroke(event, index, stroke, scale, alpha, false);
                 }
             }
 
-            // The stroke currently under the cursor.
+            // The stroke under the cursor, or the text being typed.
             if (p.strokeSource >= 0)
             {
-                drawStroke(p.strokeSource, p.stroke, sourceScale(p.strokeSource));
+                _drawStroke(event, p.strokeSource, p.stroke, sourceScale(p.strokeSource), 1.F, p.textEditing);
             }
 
             event.render->setClipRectEnabled(clipRectEnabledPrev);
             event.render->setClipRect(clipRectPrev);
+        }
+
+        void Viewport::_drawStroke(
+            const ftk::DrawEvent& event,
+            int index,
+            const models::ReviewStroke& stroke,
+            float scale,
+            float alpha,
+            bool caret)
+        {
+            const ftk::Box2I& g = getGeometry();
+            drawStroke(
+                event.render,
+                event.fontSystem,
+                stroke,
+                [this, index, &g](const ftk::V2F& point)
+                {
+                    ftk::V2F out = _imageToWidget(index, point);
+                    out.x += g.min.x;
+                    out.y += g.min.y;
+                    return out;
+                },
+                scale * static_cast<float>(getZoom()),
+                alpha,
+                caret);
         }
 
         void Viewport::_videoUpdate()

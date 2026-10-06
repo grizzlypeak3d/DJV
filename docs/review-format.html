@@ -50,6 +50,7 @@
 <pre><code>{ "djvReview": 1 }
 </code></pre>
 <p>The version is incremented <strong>only</strong> when a document can no longer be read correctly by an older DJV. Adding a key, or a whole new section, does not change it: a reader ignores what it does not recognize, so those changes are already safe.</p>
+<p>A document is written as the lowest version that reads everything in it, so it stays open to older versions until it holds something they would get wrong. Version 2 is strokes that are shapes or text, which a version 1 reader would draw as ink between their points; a document of freehand ink alone is written as version 1 whatever wrote it.</p>
 <p>A reader that finds a version higher than the one it knows <strong>refuses the document</strong> and says so. It does not read what it can and leave the rest: the next save would write that loss back over the author's own file. DJV reports this in the <strong>Messages</strong> tool and leaves the current session untouched.</p>
 <p>A document with no <code>djvReview</code> key is read as version 1.</p>
 <h2 id="what-a-reader-must-do">What a reader must do</h2>
@@ -105,11 +106,28 @@
       "width": 4.0,
       "widthSpace": "image",
       "points": [120.5, 340.0, 121.0, 341.5]
+    },
+    {
+      "kind": "Arrow",
+      "color": [1.0, 0.365, 0.02, 1.0],
+      "width": 4.0,
+      "widthSpace": "image",
+      "points": [40.0, 150.0, 150.0, 90.0]
+    },
+    {
+      "kind": "Text",
+      "text": "Too dark",
+      "textSize": 24.0,
+      "color": [1.0, 0.365, 0.02, 1.0],
+      "width": 4.0,
+      "widthSpace": "image",
+      "points": [20.0, 20.0]
     }
   ]
 }
 </code></pre>
 <p>An annotation belongs to one source and is visible on one frame only.</p>
+<p><code>kind</code> says what a stroke is, and what its points are: absent or <code>"Freehand"</code>, ink along the points; <code>"Line"</code> and <code>"Arrow"</code>, the two ends, the head at the second; <code>"Rectangle"</code> and <code>"Ellipse"</code>, two opposite corners of the shape or of the box it fills; <code>"Text"</code>, the top left of the text, with the text in <code>text</code> and its height in image pixels in <code>textSize</code>. A kind the reader does not know is refused like a space it does not know: the annotation is kept verbatim, not drawn as something else. Any stroke with a kind other than freehand makes the document version 2.</p>
 <p><code>space</code> and <code>widthSpace</code> are both <code>"image"</code> in version 1: points and widths are expressed in the pixels of the source image, so a drawing keeps its position and its weight whatever the zoom, the pan or the comparison mode. A reader that meets any other value must not draw the item — the coordinates would land somewhere else entirely — and must keep it, per the rules above. An absent space means <code>"image"</code>.</p>
 <p><code>points</code> is a flat <code>[x, y, x, y, ...]</code> array, which keeps long strokes compact. A trailing odd value is ignored.</p>
 <h3 id="markers">Markers</h3>
@@ -128,7 +146,7 @@
 </code></pre>
 <p>A marker belongs to the review rather than to a source: the frames locate it. One type covers a comment on a frame (a one-frame <code>range</code> with <code>text</code>), a named span of frames (a wider <code>range</code> with a <code>name</code>), and both at once. <code>name</code>, <code>range</code>, <code>text</code>, <code>author</code> and <code>created</code> are each optional; a marker with no <code>range</code> speaks about the whole review. The fields map one to one onto OpenTimelineIO markers.</p>
 <h3 id="attribution">Attribution</h3>
-<p><code>author</code> is optional on both markers and annotations, and is empty when it is not known. DJV has no accounts: it fills the field from the environment — <code>USERNAME</code> on Windows, <code>USER</code> elsewhere — when the item is created. Treat it as a label saying who wrote something when a session comes back from someone else, not as an identity, and never as a permission.</p>
+<p><code>author</code> is optional on both markers and annotations, and is empty when it is not known. DJV has no accounts: it fills the field from the <strong>Author</strong> setting, or where that is empty from the environment — <code>USERNAME</code> on Windows, <code>USER</code> elsewhere — when the item is created. Treat it as a label saying who wrote something when a session comes back from someone else, not as an identity, and never as a permission.</p>
 <p>Identifiers are 64 random bits plus a counter, so items written independently by two people do not collide.</p>
 <h2 id="what-is-not-stored">What is not stored</h2>
 <p>Keyboard shortcuts, style, cache size and the audio device are deliberately absent: opening a review someone sends you must not reconfigure your installation.</p>

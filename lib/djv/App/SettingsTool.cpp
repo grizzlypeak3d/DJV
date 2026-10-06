@@ -87,6 +87,12 @@ namespace djv
             ui::PlaybackSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["Playback"]->setWidget(vLayout2);
 
+            p.bellows["Review"] = ftk::Bellows::create(context, "Review", vLayout);
+            vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
+            ui::ReviewSettingsWidget::create(context, settingsModel, vLayout2);
+            p.bellows["Review"]->setWidget(vLayout2);
+
             p.bellows["Audio"] = ftk::Bellows::create(context, "Audio", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
             vLayout2->setMarginRole(ftk::SizeRole::Margin);

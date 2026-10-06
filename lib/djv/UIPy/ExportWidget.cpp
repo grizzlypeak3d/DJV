@@ -10,6 +10,8 @@
 
 #include <djv/UI/ExportWidget.h>
 
+#include <djv/Models/AnnotationsModel.h>
+
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
@@ -46,6 +48,7 @@ namespace djv
                     nb::arg("viewportModel"),
                     nb::arg("settingsModel"),
                     nb::arg("timeUnitsModel"),
+                    nb::arg("annotationsModel"),
                     nb::arg("parent") = nullptr)
                 .def("setPlayer", &ExportWidget::setPlayer, nb::arg("player"));
         }

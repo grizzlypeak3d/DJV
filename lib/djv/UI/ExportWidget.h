@@ -19,6 +19,7 @@ namespace djv
 {
     namespace models
     {
+        class AnnotationsModel;
         class ColorModel;
         class FilesModel;
         class TimeUnitsModel;
@@ -40,6 +41,7 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
+                const std::shared_ptr<models::AnnotationsModel>&,
                 const std::shared_ptr<IWidget>& parent);
 
             ExportWidget();
@@ -54,6 +56,7 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
+                const std::shared_ptr<models::AnnotationsModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the player.
@@ -69,6 +72,7 @@ namespace djv
                 const std::function<void(bool)>&);
 
         private:
+            void _drawAnnotations(const OTIO_NS::RationalTime&);
             std::vector<ftk::ImageInfo> _getInfos() const;
             ftk::Size2I _getDefaultSize() const;
             ftk::Size2I _getWidthSize(int width) const;

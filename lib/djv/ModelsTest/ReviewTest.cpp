@@ -34,6 +34,7 @@ namespace djv
         void ReviewTest::run()
         {
             _version();
+            _kinds();
             _roundTrip();
             _unreadableSection();
             _unknownSpace();
@@ -51,6 +52,59 @@ namespace djv
             // a best-effort read followed by a save would write the loss back
             // over the author's own file.
             FTK_CHECK(!models::reviewVersionSupported(models::reviewVersion + 1));
+        }
+
+        void ReviewTest::_kinds()
+        {
+            // A document of freehand ink alone is written as version 1, for
+            // the readers that know nothing else; a shape or text makes it
+            // version 2, which they refuse rather than draw as ink.
+            models::Review review;
+            models::ReviewAnnotation annotation;
+            annotation.id = "a0";
+            annotation.sourceId = "s0";
+            annotation.time = OTIO_NS::RationalTime(48.0, 24.0);
+            models::ReviewStroke ink;
+            ink.points = { ftk::V2F(1.F, 2.F), ftk::V2F(3.F, 4.F) };
+            annotation.strokes.push_back(ink);
+            review.annotations.push_back(annotation);
+            FTK_CHECK(1 == models::reviewVersionFor(review));
+            {
+                const nlohmann::json json = review;
+                FTK_CHECK(1 == json.at("djvReview").get<int>());
+                FTK_CHECK(!json.at("annotations")[0].at("strokes")[0].contains("kind"));
+            }
+
+            models::ReviewStroke arrow;
+            arrow.kind = models::ReviewStrokeKind::Arrow;
+            arrow.points = { ftk::V2F(10.F, 10.F), ftk::V2F(90.F, 50.F) };
+            models::ReviewStroke text;
+            text.kind = models::ReviewStrokeKind::Text;
+            text.text = "Brighter";
+            text.textSize = 32.F;
+            text.points = { ftk::V2F(20.F, 20.F) };
+            review.annotations[0].strokes.push_back(arrow);
+            review.annotations[0].strokes.push_back(text);
+            FTK_CHECK(2 == models::reviewVersionFor(review));
+
+            const nlohmann::json json = review;
+            FTK_CHECK(2 == json.at("djvReview").get<int>());
+            const auto out = json.get<models::Review>();
+            FTK_CHECK(2 == out.version);
+            FTK_CHECK(1 == out.annotations.size());
+            FTK_CHECK(3 == out.annotations[0].strokes.size());
+            FTK_CHECK(ink == out.annotations[0].strokes[0]);
+            FTK_CHECK(arrow == out.annotations[0].strokes[1]);
+            FTK_CHECK(text == out.annotations[0].strokes[2]);
+
+            // A kind this version does not know keeps the annotation verbatim
+            // rather than drawing it as something else.
+            nlohmann::json foreign = json;
+            foreign["annotations"][0]["strokes"][1]["kind"] = "Hologram";
+            const auto kept = foreign.get<models::Review>();
+            FTK_CHECK(kept.annotations.empty());
+            FTK_CHECK(kept.unreadItems.contains("annotations"));
+            FTK_CHECK(1 == kept.unreadItems.at("annotations").size());
         }
 
         void ReviewTest::_roundTrip()

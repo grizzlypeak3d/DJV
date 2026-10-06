@@ -28,6 +28,8 @@ namespace djv
             _simplify();
             _smooth();
             _mesh();
+            _shapes();
+            _hit();
         }
 
         // Every index is one-based and inside the mesh, or the renderer
@@ -205,6 +207,109 @@ namespace djv
                     }
                 }
             }
+        }
+
+        void StrokeTest::_shapes()
+        {
+            const std::vector<ftk::V2F> corners =
+            {
+                ftk::V2F(10.F, 20.F),
+                ftk::V2F(50.F, 40.F)
+            };
+            // A rectangle is its four sides, closed.
+            {
+                const auto path = models::shapePath(models::ReviewStrokeKind::Rectangle, corners);
+                FTK_CHECK(5 == path.size());
+                FTK_CHECK(path.front().x == path.back().x && path.front().y == path.back().y);
+                FTK_CHECK(50.F == path[1].x && 20.F == path[1].y);
+                FTK_CHECK(10.F == path[3].x && 40.F == path[3].y);
+            }
+            // An ellipse fills the box its corners give, and is closed.
+            {
+                const auto path = models::shapePath(models::ReviewStrokeKind::Ellipse, corners);
+                FTK_CHECK(path.size() > 16);
+                FTK_CHECK(path.front().x == path.back().x && path.front().y == path.back().y);
+                for (const auto& p : path)
+                {
+                    FTK_CHECK(p.x >= 10.F - .01F && p.x <= 50.F + .01F);
+                    FTK_CHECK(p.y >= 20.F - .01F && p.y <= 40.F + .01F);
+                }
+                _checkFinite(path);
+            }
+            // A line is its two ends; with one point so far it is a dot.
+            {
+                FTK_CHECK(2 == models::shapePath(models::ReviewStrokeKind::Line, corners).size());
+                FTK_CHECK(1 == models::shapePath(models::ReviewStrokeKind::Line, { corners[0] }).size());
+            }
+            // Freehand ink comes back as it is.
+            {
+                const auto path = models::shapePath(models::ReviewStrokeKind::Freehand, corners);
+                FTK_CHECK(corners.size() == path.size());
+            }
+            // Every shape has a mesh the renderer can draw; the arrow's has
+            // its head over the ribbon, text has none.
+            for (const auto kind : {
+                models::ReviewStrokeKind::Line,
+                models::ReviewStrokeKind::Arrow,
+                models::ReviewStrokeKind::Rectangle,
+                models::ReviewStrokeKind::Ellipse })
+            {
+                const auto mesh = models::shapeMesh(kind, corners, 4.F);
+                FTK_CHECK(!mesh.triangles.empty());
+                _checkIndices(mesh);
+                _checkFinite(mesh.v);
+            }
+            {
+                const auto line = models::shapeMesh(models::ReviewStrokeKind::Line, corners, 4.F);
+                const auto arrow = models::shapeMesh(models::ReviewStrokeKind::Arrow, corners, 4.F);
+                FTK_CHECK(arrow.triangles.size() == line.triangles.size() + 1);
+                // The tip of the head is the second point.
+                bool tip = false;
+                for (const auto& v : arrow.v)
+                {
+                    tip = tip || (v.x == corners[1].x && v.y == corners[1].y);
+                }
+                FTK_CHECK(tip);
+            }
+            FTK_CHECK(models::shapeMesh(models::ReviewStrokeKind::Text, corners, 4.F).triangles.empty());
+            // An arrow of no length is a dot, not a division by zero.
+            {
+                const auto mesh = models::shapeMesh(
+                    models::ReviewStrokeKind::Arrow,
+                    { corners[0], corners[0] },
+                    4.F);
+                FTK_CHECK(!mesh.triangles.empty());
+                _checkFinite(mesh.v);
+            }
+        }
+
+        void StrokeTest::_hit()
+        {
+            models::ReviewStroke stroke;
+            stroke.width = 4.F;
+            stroke.points = { ftk::V2F(10.F, 20.F), ftk::V2F(50.F, 40.F) };
+            // A rectangle is hit on its sides and not in its middle.
+            stroke.kind = models::ReviewStrokeKind::Rectangle;
+            FTK_CHECK(models::strokeHit(stroke, ftk::V2F(30.F, 20.F), 1.F));
+            FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(30.F, 30.F), 1.F));
+            // A line is hit along it and not across the box's other corner.
+            stroke.kind = models::ReviewStrokeKind::Line;
+            FTK_CHECK(models::strokeHit(stroke, ftk::V2F(30.F, 30.F), 1.F));
+            FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(50.F, 20.F), 1.F));
+            // The width counts.
+            FTK_CHECK(models::strokeHit(stroke, ftk::V2F(30.F, 32.5F), 1.F));
+            FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(30.F, 40.F), 1.F));
+            // Text is hit in its box.
+            stroke.kind = models::ReviewStrokeKind::Text;
+            stroke.text = "Note";
+            stroke.textSize = 20.F;
+            stroke.points = { ftk::V2F(10.F, 20.F) };
+            FTK_CHECK(models::strokeHit(stroke, ftk::V2F(30.F, 30.F), 1.F));
+            FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(30.F, 60.F), 1.F));
+            FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(200.F, 30.F), 1.F));
+            // Nothing is hit on nothing.
+            stroke.points.clear();
+            FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(10.F, 20.F), 100.F));
         }
     }
 }

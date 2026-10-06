@@ -33,11 +33,22 @@ namespace djv
         {
             using namespace models;
 
+            nb::enum_<ReviewStrokeKind>(m, "ReviewStrokeKind")
+                .value("Freehand", ReviewStrokeKind::Freehand)
+                .value("Line", ReviewStrokeKind::Line)
+                .value("Arrow", ReviewStrokeKind::Arrow)
+                .value("Rectangle", ReviewStrokeKind::Rectangle)
+                .value("Ellipse", ReviewStrokeKind::Ellipse)
+                .value("Text", ReviewStrokeKind::Text);
+
             nb::class_<ReviewStroke>(m, "ReviewStroke")
                 .def(nb::init())
+                .def_rw("kind", &ReviewStroke::kind)
                 .def_rw("color", &ReviewStroke::color)
                 .def_rw("width", &ReviewStroke::width)
                 .def_rw("points", &ReviewStroke::points)
+                .def_rw("text", &ReviewStroke::text)
+                .def_rw("textSize", &ReviewStroke::textSize)
                 .def(nanobind::self == nanobind::self)
                 .def(nanobind::self != nanobind::self);
 

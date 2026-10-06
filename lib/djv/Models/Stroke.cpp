@@ -224,5 +224,183 @@ namespace djv
             addDisc(out, points.back(), radius);
             return out;
         }
+
+        std::vector<ftk::V2F> shapePath(ReviewStrokeKind kind, const std::vector<ftk::V2F>& points)
+        {
+            std::vector<ftk::V2F> out;
+            switch (kind)
+            {
+            case ReviewStrokeKind::Line:
+            case ReviewStrokeKind::Arrow:
+                // Its two ends; with one point so far, a dot.
+                if (!points.empty())
+                {
+                    out.push_back(points.front());
+                }
+                if (points.size() > 1)
+                {
+                    out.push_back(points[1]);
+                }
+                break;
+            case ReviewStrokeKind::Rectangle:
+                if (points.size() > 1)
+                {
+                    const ftk::V2F& a = points[0];
+                    const ftk::V2F& b = points[1];
+                    out.push_back(a);
+                    out.push_back(ftk::V2F(b.x, a.y));
+                    out.push_back(b);
+                    out.push_back(ftk::V2F(a.x, b.y));
+                    out.push_back(a);
+                }
+                else if (!points.empty())
+                {
+                    out.push_back(points.front());
+                }
+                break;
+            case ReviewStrokeKind::Ellipse:
+                if (points.size() > 1)
+                {
+                    const ftk::V2F center(
+                        (points[0].x + points[1].x) / 2.F,
+                        (points[0].y + points[1].y) / 2.F);
+                    const float rx = std::abs(points[1].x - points[0].x) / 2.F;
+                    const float ry = std::abs(points[1].y - points[0].y) / 2.F;
+                    // Enough sides that a large ellipse shows no facets, few
+                    // enough that a small one is cheap.
+                    const int segments = std::max(32, std::min(128, static_cast<int>((rx + ry) / 2.F)));
+                    for (int i = 0; i <= segments; ++i)
+                    {
+                        const float a = (i % segments) / static_cast<float>(segments) * 2.F * 3.14159265F;
+                        out.push_back(ftk::V2F(
+                            center.x + std::cos(a) * rx,
+                            center.y + std::sin(a) * ry));
+                    }
+                }
+                else if (!points.empty())
+                {
+                    out.push_back(points.front());
+                }
+                break;
+            default:
+                out = points;
+                break;
+            }
+            return out;
+        }
+
+        namespace
+        {
+            //! Append a triangle wound the way the ribbon quads are: the
+            //! renderer culls back faces, so the order is settled from the
+            //! signed area rather than left to the caller.
+            void addTriangle(ftk::TriMesh2F& mesh, const ftk::V2F& a, const ftk::V2F& b, const ftk::V2F& c)
+            {
+                const float area = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+                const size_t index = mesh.v.size() + 1;
+                mesh.v.push_back(a);
+                mesh.v.push_back(area < 0.F ? b : c);
+                mesh.v.push_back(area < 0.F ? c : b);
+                ftk::Triangle2 triangle;
+                triangle.v[0].v = index;
+                triangle.v[1].v = index + 1;
+                triangle.v[2].v = index + 2;
+                mesh.triangles.push_back(triangle);
+            }
+        }
+
+        ftk::TriMesh2F shapeMesh(ReviewStrokeKind kind, const std::vector<ftk::V2F>& points, float width)
+        {
+            ftk::TriMesh2F out;
+            if (ReviewStrokeKind::Arrow == kind && points.size() > 1)
+            {
+                // The head is a triangle at the second point, four widths
+                // long or as long as the arrow where that is shorter, and the
+                // shaft stops under it rather than poking through.
+                const ftk::V2F& a = points[0];
+                const ftk::V2F& b = points[1];
+                const float dx = b.x - a.x;
+                const float dy = b.y - a.y;
+                const float length = std::sqrt(dx * dx + dy * dy);
+                if (length <= 0.F)
+                {
+                    return strokeMesh({ a }, width);
+                }
+                const ftk::V2F dir(dx / length, dy / length);
+                const float head = std::min(length, std::max(width * 4.F, 8.F));
+                const ftk::V2F base(b.x - dir.x * head, b.y - dir.y * head);
+                const ftk::V2F shaftEnd(b.x - dir.x * head * .75F, b.y - dir.y * head * .75F);
+                out = strokeMesh({ a, shaftEnd }, width);
+                const float half = head * .5F;
+                addTriangle(
+                    out,
+                    b,
+                    ftk::V2F(base.x - dir.y * half, base.y + dir.x * half),
+                    ftk::V2F(base.x + dir.y * half, base.y - dir.x * half));
+                return out;
+            }
+            if (ReviewStrokeKind::Text == kind)
+            {
+                return out;
+            }
+            return strokeMesh(shapePath(kind, points), width);
+        }
+
+        namespace
+        {
+            //! The distance from a point to a segment.
+            float distanceToSegment(
+                const ftk::V2F& p,
+                const ftk::V2F& a,
+                const ftk::V2F& b)
+            {
+                const float dx = b.x - a.x;
+                const float dy = b.y - a.y;
+                const float lengthSquared = dx * dx + dy * dy;
+                float t = 0.F;
+                if (lengthSquared > 0.F)
+                {
+                    t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / lengthSquared;
+                    t = std::max(0.F, std::min(1.F, t));
+                }
+                const float x = a.x + t * dx;
+                const float y = a.y + t * dy;
+                return std::sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y));
+            }
+        }
+
+        bool strokeHit(const ReviewStroke& stroke, const ftk::V2F& pos, float radius)
+        {
+            if (stroke.points.empty())
+            {
+                return false;
+            }
+            if (ReviewStrokeKind::Text == stroke.kind)
+            {
+                // The box the text is drawn in, with the glyphs taken as
+                // somewhat narrower than they are tall.
+                const ftk::V2F& a = stroke.points.front();
+                const float w = std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
+                return
+                    pos.x >= a.x - radius && pos.x <= a.x + w + radius &&
+                    pos.y >= a.y - radius && pos.y <= a.y + stroke.textSize + radius;
+            }
+            // Include the stroke's own width, so a thick stroke is as easy to
+            // hit as it looks.
+            const float threshold = radius + stroke.width / 2.F;
+            const std::vector<ftk::V2F> path = shapePath(stroke.kind, stroke.points);
+            if (1 == path.size())
+            {
+                return distanceToSegment(pos, path[0], path[0]) <= threshold;
+            }
+            for (size_t i = 0; i + 1 < path.size(); ++i)
+            {
+                if (distanceToSegment(pos, path[i], path[i + 1]) <= threshold)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

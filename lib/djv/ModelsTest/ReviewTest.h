@@ -23,6 +23,7 @@ namespace djv
         private:
             void _version();
             void _roundTrip();
+            void _kinds();
             void _unreadableSection();
             void _unknownSpace();
             void _unknownKeys();

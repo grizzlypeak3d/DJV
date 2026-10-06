@@ -42,7 +42,13 @@ namespace djv
             p.recentMenu = addSubMenu("Recent");
             addDivider();
             addAction(actions["Draw"]);
+            addAction(actions["Line"]);
+            addAction(actions["Arrow"]);
+            addAction(actions["Rectangle"]);
+            addAction(actions["Ellipse"]);
+            addAction(actions["Text"]);
             addAction(actions["Erase"]);
+            addAction(actions["OnionSkin"]);
             addAction(actions["Undo"]);
             addAction(actions["Redo"]);
             addAction(actions["ClearDrawing"]);

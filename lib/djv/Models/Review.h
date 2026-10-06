@@ -38,7 +38,11 @@ namespace djv
         //! section -- keep the version, because the reader ignores what it does
         //! not recognize. A reader that meets a higher version refuses the
         //! document rather than guess at it. See docs/review-format.md.
-        constexpr int reviewVersion = 1;
+        //! The newest document version this DJV reads and writes. Version 2
+        //! added strokes that are shapes or text; a document with only
+        //! freehand strokes is written as version 1, which older versions
+        //! read. See reviewVersionFor().
+        constexpr int reviewVersion = 2;
 
         //! Whether this build can read a review document of the given version.
         //!
@@ -81,7 +85,14 @@ namespace djv
         //! and empty when neither is set. DJV has no accounts and reviews are
         //! passed from hand to hand, so this is a label rather than an identity:
         //! it says who wrote a note when a session comes back from someone else.
+        //! Who is making the markers and the drawings: the author set with
+        //! setReviewAuthor(), and the user name the system gives where none
+        //! is set.
         DJV_MODELS_API std::string reviewAuthor();
+
+        //! Set the author, from the settings. Empty goes back to the user
+        //! name the system gives.
+        DJV_MODELS_API void setReviewAuthor(const std::string&);
 
         //! A single file entry in a review.
         struct DJV_MODELS_API_TYPE ReviewFile
@@ -139,18 +150,46 @@ namespace djv
             std::vector<std::string> openTools;
         };
 
-        //! A single freehand stroke of an annotation.
+        //! What a stroke is: freehand ink along its points, a shape between
+        //! them, or text at one of them.
+        enum class ReviewStrokeKind
+        {
+            Freehand,
+            Line,
+            Arrow,
+            Rectangle,
+            Ellipse,
+            Text,
+
+            Count,
+            First = Freehand
+        };
+        FTK_ENUM(DJV_MODELS_API, ReviewStrokeKind);
+
+        //! A single stroke of an annotation: freehand ink, a shape, or text.
         //!
         //! The points and the width are expressed in the pixels of the source
         //! image, so a stroke keeps its position and its weight whatever the
         //! zoom, the pan or the comparison mode. Both are written with the space
         //! they are expressed in, and a stroke in a space this version does not
         //! know is skipped rather than misplaced. See docs/review-format.md.
+        //!
+        //! What the points are depends on the kind: the path of freehand ink;
+        //! the two ends of a line or an arrow, the head at the second; two
+        //! opposite corners of a rectangle or of the box an ellipse fills; the
+        //! top left of text. A stroke of a kind other than freehand makes the
+        //! document version 2; see reviewVersionFor().
         struct DJV_MODELS_API_TYPE ReviewStroke
         {
+            ReviewStrokeKind      kind = ReviewStrokeKind::Freehand;
             ftk::Color4F          color = ftk::Color4F(1.F, .365F, .02F, 1.F);
             float                 width = 4.F;
             std::vector<ftk::V2F> points;
+
+            //! The text, for a text stroke, and its height in the pixels of
+            //! the source image.
+            std::string           text;
+            float                 textSize = 48.F;
 
             bool operator == (const ReviewStroke&) const = default;
         };
@@ -222,6 +261,8 @@ namespace djv
         //! Serialized to a versioned JSON document with the ".djvr" extension.
         struct DJV_MODELS_API_TYPE Review
         {
+            //! The version the document was read as. It is written as
+            //! reviewVersionFor() says.
             int         version = reviewVersion;
             std::string app;
             std::string created;
@@ -260,6 +301,11 @@ namespace djv
             //! destroyed by an older one opening the review and saving it.
             nlohmann::json unreadItems;
         };
+
+        //! The version a review is written as: the lowest one that reads
+        //! everything in it, so that a document stays open to older versions
+        //! until it holds something they would get wrong.
+        DJV_MODELS_API int reviewVersionFor(const Review&);
 
         //! \name Serialize
         ///@{

@@ -1052,6 +1052,73 @@ namespace djv
                 });
         }
 
+        struct ReviewSettingsWidget::Private
+        {
+            std::shared_ptr<models::SettingsModel> settings;
+
+            std::shared_ptr<ftk::LineEdit> authorEdit;
+
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<models::ReviewSettings> > settingsObserver;
+        };
+
+        void ReviewSettingsWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            ISettingsWidget::_init(context, "djv::ui::ReviewSettingsWidget", parent);
+            FTK_P();
+
+            p.settings = settings;
+
+            p.authorEdit = ftk::LineEdit::create(context);
+            p.authorEdit->setTooltip(
+                "Who the markers and drawings are by. Leave it empty for "
+                "the user name of the account.");
+
+            p.layout = ftk::FormLayout::create(context);
+
+            _setWidget(p.layout);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Author:", p.authorEdit);
+
+            p.settingsObserver = ftk::Observer<models::ReviewSettings>::create(
+                settings->observeReview(),
+                [this](const models::ReviewSettings& value)
+                {
+                    FTK_P();
+                    p.authorEdit->setText(value.author);
+                });
+
+            p.authorEdit->setTextChangedCallback(
+                [this](const std::string& value)
+                {
+                    FTK_P();
+                    auto settings = p.settings->getReview();
+                    settings.author = value;
+                    p.settings->setReview(settings);
+                });
+        }
+
+        ReviewSettingsWidget::ReviewSettingsWidget() :
+            _p(new Private)
+        {}
+
+        ReviewSettingsWidget::~ReviewSettingsWidget()
+        {}
+
+        std::shared_ptr<ReviewSettingsWidget> ReviewSettingsWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::SettingsModel>& settings,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ReviewSettingsWidget>(new ReviewSettingsWidget);
+            out->_init(context, settings, parent);
+            return out;
+        }
+
         PlaybackSettingsWidget::PlaybackSettingsWidget() :
             _p(new Private)
         {}

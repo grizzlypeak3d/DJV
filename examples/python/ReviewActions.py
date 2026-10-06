@@ -65,11 +65,32 @@ class Actions(IActions.IActions):
             lambda value, f = Util.weak(self._drawTool):
                 f(djv.models.DrawTool.Pen, value))
 
+        # The shapes and text work as the pen does.
+        for name, tool, doc in [
+            ("Line", djv.models.DrawTool.Line, "Draw lines on the frame"),
+            ("Arrow", djv.models.DrawTool.Arrow, "Draw arrows on the frame"),
+            ("Rectangle", djv.models.DrawTool.Rectangle, "Draw rectangles on the frame"),
+            ("Ellipse", djv.models.DrawTool.Ellipse, "Draw ellipses on the frame"),
+            ("Text", djv.models.DrawTool.Text, "Write text on the frame"),
+        ]:
+            self._addCheckCommand(
+                name,
+                doc + "; e.g., { \"value\": true }.",
+                lambda value, f = Util.weak(self._drawTool), tool = tool:
+                    f(tool, value))
+
         self._addCheckCommand(
             "Erase",
             "Erase the strokes you touch; e.g., { \"value\": true }.",
             lambda value, f = Util.weak(self._drawTool):
                 f(djv.models.DrawTool.Eraser, value))
+
+        self._addCheckCommand(
+            "OnionSkin",
+            "Show the drawings on the frames before and after, faded; "
+            "e.g., { \"value\": true }.",
+            lambda value: appWeak() and
+                setattr(appWeak().getDrawModel(), "onionSkin", value))
 
         self._addCommand(
             "Undo",
@@ -146,10 +167,24 @@ class Actions(IActions.IActions):
             "Draw",
             "DrawTool",
             checkedCallback = self._checkCommand("Draw"))
+        for name, icon in [
+            ("Line", "DrawLine"),
+            ("Arrow", "DrawArrow"),
+            ("Rectangle", "DrawRectangle"),
+            ("Ellipse", "DrawEllipse"),
+            ("Text", "DrawText"),
+        ]:
+            self.actions[name] = ftk.Action(
+                name,
+                icon,
+                checkedCallback = self._checkCommand(name))
         self.actions["Erase"] = ftk.Action(
             "Erase",
             "Eraser",
             checkedCallback = self._checkCommand("Erase"))
+        self.actions["OnionSkin"] = ftk.Action(
+            "Onion Skin",
+            checkedCallback = self._checkCommand("OnionSkin"))
         self.actions["Undo"] = ftk.Action(
             "Undo Drawing",
             "Undo",
@@ -208,7 +243,13 @@ class Actions(IActions.IActions):
         # being worked out with the users (#838). The actions are in the
         # shortcuts editor, so any key can be bound today.
         self._addShortcut("Draw", "Draw strokes")
+        self._addShortcut("Line", "Draw lines")
+        self._addShortcut("Arrow", "Draw arrows")
+        self._addShortcut("Rectangle", "Draw rectangles")
+        self._addShortcut("Ellipse", "Draw ellipses")
+        self._addShortcut("Text", "Write text")
         self._addShortcut("Erase", "Erase strokes")
+        self._addShortcut("OnionSkin", "Onion skin")
         self._addShortcut("Undo", "Undo drawing", ftk.KeyShortcut(
             ftk.Key.Z, ftk.commandKeyModifier))
         self._addShortcut("Redo", "Redo drawing", ftk.KeyShortcut(

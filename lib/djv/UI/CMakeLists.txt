@@ -19,6 +19,7 @@ set(HEADERS
     InfoWidget.h
     MagnifyWidget.h
     ViewWidgets.h
+    StrokeDraw.h
     Viewport.h)
 set(HEADERS_PRIVATE)
 
@@ -45,6 +46,7 @@ set(SOURCE
     InfoWidget.cpp
     MagnifyWidget.cpp
     ViewWidgets.cpp
+    StrokeDraw.cpp
     Viewport.cpp)
 
 add_library(djvUI ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})

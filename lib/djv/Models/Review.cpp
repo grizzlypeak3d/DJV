@@ -193,15 +193,46 @@ namespace djv
             return version <= reviewVersion;
         }
 
+        int reviewVersionFor(const Review& review)
+        {
+            // Version 2 is strokes that are shapes or text; a version 1 reader
+            // would draw those as ink between their points.
+            int out = 1;
+            for (const auto& annotation : review.annotations)
+            {
+                for (const auto& stroke : annotation.strokes)
+                {
+                    if (stroke.kind != ReviewStrokeKind::Freehand)
+                    {
+                        out = std::max(out, 2);
+                    }
+                }
+            }
+            return out;
+        }
+
+        namespace
+        {
+            std::string author;
+        }
+
         std::string reviewAuthor()
         {
-            std::string out;
+            std::string out = author;
+            if (out.empty())
+            {
 #if defined(_WIN32)
-            ftk::getEnv("USERNAME", out);
+                ftk::getEnv("USERNAME", out);
 #else
-            ftk::getEnv("USER", out);
+                ftk::getEnv("USER", out);
 #endif
+            }
             return out;
+        }
+
+        void setReviewAuthor(const std::string& value)
+        {
+            author = value;
         }
 
         std::string timestamp()
@@ -339,6 +370,15 @@ namespace djv
             if (json.contains("openTools")) json.at("openTools").get_to(out.openTools);
         }
 
+        FTK_ENUM_IMPL(
+            ReviewStrokeKind,
+            "Freehand",
+            "Line",
+            "Arrow",
+            "Rectangle",
+            "Ellipse",
+            "Text");
+
         bool ReviewAnnotation::operator == (const ReviewAnnotation& other) const
         {
             return
@@ -358,6 +398,18 @@ namespace djv
         void to_json(nlohmann::json& json, const ReviewStroke& in)
         {
             json = nlohmann::json::object();
+            // Freehand ink is written as it always was, with no kind, so a
+            // document of nothing else is the same document version 1
+            // readers know.
+            if (in.kind != ReviewStrokeKind::Freehand)
+            {
+                json["kind"] = to_string(in.kind);
+            }
+            if (ReviewStrokeKind::Text == in.kind)
+            {
+                json["text"] = in.text;
+                json["textSize"] = in.textSize;
+            }
             json["color"] = in.color;
             json["width"] = in.width;
             json["widthSpace"] = "image";
@@ -374,6 +426,20 @@ namespace djv
         void from_json(const nlohmann::json& json, ReviewStroke& out)
         {
             requireSpace(json, "widthSpace");
+            // A kind this version does not know is refused like a space it
+            // does not know: the annotation is kept verbatim, not drawn wrong.
+            out.kind = ReviewStrokeKind::Freehand;
+            if (json.contains("kind"))
+            {
+                const std::string kind = json.at("kind").get<std::string>();
+                if (!from_string(kind, out.kind))
+                {
+                    throw std::runtime_error("unknown kind: " + kind);
+                }
+            }
+            out.text.clear();
+            if (json.contains("text")) json.at("text").get_to(out.text);
+            if (json.contains("textSize")) json.at("textSize").get_to(out.textSize);
             if (json.contains("color")) json.at("color").get_to(out.color);
             if (json.contains("width")) json.at("width").get_to(out.width);
             out.points.clear();
@@ -520,7 +586,7 @@ namespace djv
                 write(key, std::move(value));
             };
 
-            json["djvReview"] = in.version;
+            json["djvReview"] = reviewVersionFor(in);
             json["app"] = in.app;
             json["created"] = in.created;
             writeList("files", in.files);

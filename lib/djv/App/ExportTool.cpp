@@ -41,7 +41,8 @@ namespace djv
                 app->getColorModel(),
                 app->getViewportModel(),
                 app->getSettingsModel(),
-                app->getTimeUnitsModel());
+                app->getTimeUnitsModel(),
+                app->getAnnotationsModel());
 
             _setWidget(p.widget);
 

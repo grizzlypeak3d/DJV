@@ -204,7 +204,10 @@ class Review(ftk.Menu):
         self.recentMenu = self.addSubMenu("Recent")
         self.addDivider();
         self.addAction(actions.actions["Draw"])
+        for name in ["Line", "Arrow", "Rectangle", "Ellipse", "Text"]:
+            self.addAction(actions.actions[name])
         self.addAction(actions.actions["Erase"])
+        self.addAction(actions.actions["OnionSkin"])
         self.addAction(actions.actions["Undo"])
         self.addAction(actions.actions["Redo"])
         self.addAction(actions.actions["ClearDrawing"])

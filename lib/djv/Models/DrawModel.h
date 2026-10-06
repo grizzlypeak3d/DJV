@@ -5,6 +5,8 @@
 
 #include <djv/Models/Export.h>
 
+#include <djv/Models/Review.h>
+
 #include <ftk/Core/Observable.h>
 #include <ftk/Core/Color.h>
 
@@ -21,8 +23,21 @@ namespace djv
         enum class DrawTool
         {
             Pen,
-            Eraser
+            Eraser,
+            Line,
+            Arrow,
+            Rectangle,
+            Ellipse,
+            Text,
+
+            Count,
+            First = Pen
         };
+        FTK_ENUM(DJV_MODELS_API, DrawTool);
+
+        //! The kind of stroke a tool makes. The eraser makes none and gives
+        //! freehand.
+        DJV_MODELS_API ReviewStrokeKind getStrokeKind(DrawTool);
 
         //! The drawing state: whether drawing is active, and with what.
         //!
@@ -64,6 +79,18 @@ namespace djv
             DJV_MODELS_API float getSize() const;
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<float> > observeSize() const;
             DJV_MODELS_API void setSize(float);
+
+            //! The height of text, in the pixels of the source image.
+            DJV_MODELS_API float getTextSize() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<float> > observeTextSize() const;
+            DJV_MODELS_API void setTextSize(float);
+
+            //! Whether the drawings on the frames before and after are shown,
+            //! faded, behind this frame's: where the last frame's note was is
+            //! what a note about motion is drawn against.
+            DJV_MODELS_API bool isOnionSkin() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeOnionSkin() const;
+            DJV_MODELS_API void setOnionSkin(bool);
 
         private:
             FTK_PRIVATE();

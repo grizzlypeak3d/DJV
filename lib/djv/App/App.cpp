@@ -248,6 +248,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<int> > channelObserver;
             std::shared_ptr<ftk::Observer<double> > syncOffsetObserver;
             std::shared_ptr<ftk::Observer<models::StyleSettings> > styleSettingsObserver;
+            std::shared_ptr<ftk::Observer<models::ReviewSettings> > reviewSettingsObserver;
             std::shared_ptr<ftk::Observer<models::MiscSettings> > miscSettingsObserver;
 
             std::shared_ptr<ftk::Timer> debugTimer;
@@ -2765,6 +2766,14 @@ namespace djv
             p.markersModel = models::MarkersModel::create();
             p.annotationsModel = models::AnnotationsModel::create();
             p.drawModel = models::DrawModel::create(getSettings());
+            // The markers and drawings are signed with the author from the
+            // settings, or the user name where that is empty.
+            p.reviewSettingsObserver = ftk::Observer<models::ReviewSettings>::create(
+                p.settingsModel->observeReview(),
+                [](const models::ReviewSettings& value)
+                {
+                    models::setReviewAuthor(value.author);
+                });
             p.reviewMarkers = ftk::ObservableList<int>::create();
             // Introspection: what the models hold right now, as opposed to
             // the settings file, which holds what survived to the last
@@ -2784,8 +2793,10 @@ namespace djv
                 "settings, changing any given first; e.g., { \"dir\": "
                 "\"/tmp\", \"fileName\": \"out\", \"ext\": \".mov\", "
                 "\"preset\": \"APV 422\", \"audioCodec\": \"Auto\", "
-                "\"overwrite\": true, \"exit\": true }. \"exit\" quits once "
-                "the movie is written or has failed.",
+                "\"burnAnnotations\": true, \"overwrite\": true, "
+                "\"exit\": true }. \"burnAnnotations\" writes the drawings "
+                "into the picture; \"exit\" quits once the movie is written "
+                "or has failed.",
                 [this](const nlohmann::json& args)
                 {
                     _exportMovieCommand(args);
@@ -2824,6 +2835,10 @@ namespace djv
             get("ext", settings.movieExt);
             get("preset", settings.moviePreset);
             get("audioCodec", settings.movieAudioCodec);
+            if (args.is_object() && args.contains("burnAnnotations"))
+            {
+                settings.burnAnnotations = getBool("burnAnnotations");
+            }
 
             const std::string path = ftk::Path(
                 settings.dir,

@@ -15,11 +15,13 @@
 #include <tlRender/Timeline/Player.h>
 
 #include <ftk/UI/Bellows.h>
+#include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ColorDot.h>
 #include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
+#include <ftk/UI/IntEditSlider.h>
 #include <ftk/UI/IWindow.h>
 #include <ftk/UI/ItemButton.h>
 #include <ftk/UI/ItemButtonList.h>
@@ -39,6 +41,7 @@
 #include <algorithm>
 #include <ctime>
 #include <stdexcept>
+#include <cmath>
 
 namespace djv
 {
@@ -210,8 +213,15 @@ namespace djv
 
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
             std::shared_ptr<ftk::ToolButton> penButton;
+            std::shared_ptr<ftk::ToolButton> lineButton;
+            std::shared_ptr<ftk::ToolButton> arrowButton;
+            std::shared_ptr<ftk::ToolButton> rectangleButton;
+            std::shared_ptr<ftk::ToolButton> ellipseButton;
+            std::shared_ptr<ftk::ToolButton> textButton;
             std::shared_ptr<ftk::ToolButton> eraserButton;
-            std::shared_ptr<ftk::FloatEditSlider> sizeSlider;
+            std::shared_ptr<ftk::IntEditSlider> sizeSlider;
+            std::shared_ptr<ftk::IntEditSlider> textSizeSlider;
+            std::shared_ptr<ftk::CheckBox> onionSkinCheckBox;
             std::shared_ptr<ftk::ToolButton> undoButton;
             std::shared_ptr<ftk::ToolButton> redoButton;
             std::shared_ptr<ftk::PushButton> clearDrawingButton;
@@ -249,6 +259,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<bool> > enabledObserver;
             std::shared_ptr<ftk::Observer<ftk::Color4F> > colorObserver;
             std::shared_ptr<ftk::Observer<float> > sizeObserver;
+            std::shared_ptr<ftk::Observer<float> > textSizeObserver;
+            std::shared_ptr<ftk::Observer<bool> > onionSkinObserver;
             std::shared_ptr<ftk::Observer<bool> > hasUndoObserver;
             std::shared_ptr<ftk::Observer<bool> > hasRedoObserver;
         };
@@ -335,6 +347,26 @@ namespace djv
             // the model observer had just set. The model stays the only source
             // of truth and the observer drives the highlight.
 
+            p.lineButton = ftk::ToolButton::create(context);
+            drawToolBar->addWidget(p.lineButton);
+            p.lineButton->setIcon("DrawLine");
+
+            p.arrowButton = ftk::ToolButton::create(context);
+            drawToolBar->addWidget(p.arrowButton);
+            p.arrowButton->setIcon("DrawArrow");
+
+            p.rectangleButton = ftk::ToolButton::create(context);
+            drawToolBar->addWidget(p.rectangleButton);
+            p.rectangleButton->setIcon("DrawRectangle");
+
+            p.ellipseButton = ftk::ToolButton::create(context);
+            drawToolBar->addWidget(p.ellipseButton);
+            p.ellipseButton->setIcon("DrawEllipse");
+
+            p.textButton = ftk::ToolButton::create(context);
+            drawToolBar->addWidget(p.textButton);
+            p.textButton->setIcon("DrawText");
+
             p.eraserButton = ftk::ToolButton::create(context);
             drawToolBar->addWidget(p.eraserButton);
             p.eraserButton->setIcon("Eraser");
@@ -359,16 +391,36 @@ namespace djv
             sizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto sizeLabel = ftk::Label::create(context, "Size:", sizeLayout);
             sizeLabel->setVAlign(ftk::VAlign::Center);
-            p.sizeSlider = ftk::FloatEditSlider::create(context, sizeLayout);
-            p.sizeSlider->setRange(1.F, 50.F);
-            p.sizeSlider->setValue(drawModel->getSize());
+            // Whole pixels: the sizes are in source pixels, where a
+            // fraction is nothing anyone can see.
+            p.sizeSlider = ftk::IntEditSlider::create(context, sizeLayout);
+            p.sizeSlider->setRange(1, 50);
+            p.sizeSlider->setValue(static_cast<int>(std::round(drawModel->getSize())));
             p.sizeSlider->setTooltip("The stroke width, in source pixels.");
+
+            auto textSizeLayout = ftk::HorizontalLayout::create(context, drawingWidget);
+            textSizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            auto textSizeLabel = ftk::Label::create(context, "Text size:", textSizeLayout);
+            textSizeLabel->setVAlign(ftk::VAlign::Center);
+            p.textSizeSlider = ftk::IntEditSlider::create(context, textSizeLayout);
+            p.textSizeSlider->setRange(8, 400);
+            p.textSizeSlider->setValue(static_cast<int>(std::round(drawModel->getTextSize())));
+            p.textSizeSlider->setTooltip("The height of text, in source pixels.");
+
+            p.onionSkinCheckBox = ftk::CheckBox::create(context, "Onion skin", drawingWidget);
+            p.onionSkinCheckBox->setChecked(drawModel->isOnionSkin());
 
             ftk::setScreenshotTag(p.addNoteButton, "Review.AddNote");
             ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
             ftk::setScreenshotTag(p.deleteButton, "Review.Delete");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
+            ftk::setScreenshotTag(p.lineButton, "Review.Line");
+            ftk::setScreenshotTag(p.arrowButton, "Review.Arrow");
+            ftk::setScreenshotTag(p.rectangleButton, "Review.Rectangle");
+            ftk::setScreenshotTag(p.ellipseButton, "Review.Ellipse");
+            ftk::setScreenshotTag(p.textButton, "Review.Text");
             ftk::setScreenshotTag(p.eraserButton, "Review.Eraser");
+            ftk::setScreenshotTag(p.onionSkinCheckBox, "Review.OnionSkin");
             ftk::setScreenshotTag(p.clearDrawingButton, "Review.ClearDrawing");
 
             auto layout = ftk::VerticalLayout::create(context);
@@ -411,7 +463,13 @@ namespace djv
             bindTooltip(p.addNoteButton, reviewActions.at("AddNote"));
             bindTooltip(p.addRangeButton, reviewActions.at("AddRange"));
             bindTooltip(p.penButton, reviewActions.at("Draw"));
+            bindTooltip(p.lineButton, reviewActions.at("Line"));
+            bindTooltip(p.arrowButton, reviewActions.at("Arrow"));
+            bindTooltip(p.rectangleButton, reviewActions.at("Rectangle"));
+            bindTooltip(p.ellipseButton, reviewActions.at("Ellipse"));
+            bindTooltip(p.textButton, reviewActions.at("Text"));
             bindTooltip(p.eraserButton, reviewActions.at("Erase"));
+            bindTooltip(p.onionSkinCheckBox, reviewActions.at("OnionSkin"));
             bindTooltip(p.undoButton, reviewActions.at("Undo"));
             bindTooltip(p.redoButton, reviewActions.at("Redo"));
             bindTooltip(p.clearDrawingButton, reviewActions.at("ClearDrawing"));
@@ -443,11 +501,39 @@ namespace djv
             };
             p.penButton->setClickedCallback(
                 [toolClicked] { toolClicked(models::DrawTool::Pen); });
+            p.lineButton->setClickedCallback(
+                [toolClicked] { toolClicked(models::DrawTool::Line); });
+            p.arrowButton->setClickedCallback(
+                [toolClicked] { toolClicked(models::DrawTool::Arrow); });
+            p.rectangleButton->setClickedCallback(
+                [toolClicked] { toolClicked(models::DrawTool::Rectangle); });
+            p.ellipseButton->setClickedCallback(
+                [toolClicked] { toolClicked(models::DrawTool::Ellipse); });
+            p.textButton->setClickedCallback(
+                [toolClicked] { toolClicked(models::DrawTool::Text); });
             p.eraserButton->setClickedCallback(
                 [toolClicked] { toolClicked(models::DrawTool::Eraser); });
 
+            p.textSizeSlider->setCallback(
+                [appWeak](int value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getDrawModel()->setTextSize(value);
+                    }
+                });
+
+            p.onionSkinCheckBox->setCheckedCallback(
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getDrawModel()->setOnionSkin(value);
+                    }
+                });
+
             p.sizeSlider->setCallback(
-                [appWeak](float value)
+                [appWeak](int value)
                 {
                     if (auto app = appWeak.lock())
                     {
@@ -517,7 +603,21 @@ namespace djv
                 drawModel->observeSize(),
                 [this](float value)
                 {
-                    _p->sizeSlider->setValue(value);
+                    _p->sizeSlider->setValue(static_cast<int>(std::round(value)));
+                });
+
+            p.textSizeObserver = ftk::Observer<float>::create(
+                drawModel->observeTextSize(),
+                [this](float value)
+                {
+                    _p->textSizeSlider->setValue(static_cast<int>(std::round(value)));
+                });
+
+            p.onionSkinObserver = ftk::Observer<bool>::create(
+                drawModel->observeOnionSkin(),
+                [this](bool value)
+                {
+                    _p->onionSkinCheckBox->setChecked(value);
                 });
 
             p.hasUndoObserver = ftk::Observer<bool>::create(
@@ -707,6 +807,11 @@ namespace djv
                 const bool enabled = drawModel->isEnabled();
                 const models::DrawTool tool = drawModel->getTool();
                 p.penButton->setChecked(enabled && models::DrawTool::Pen == tool);
+                p.lineButton->setChecked(enabled && models::DrawTool::Line == tool);
+                p.arrowButton->setChecked(enabled && models::DrawTool::Arrow == tool);
+                p.rectangleButton->setChecked(enabled && models::DrawTool::Rectangle == tool);
+                p.ellipseButton->setChecked(enabled && models::DrawTool::Ellipse == tool);
+                p.textButton->setChecked(enabled && models::DrawTool::Text == tool);
                 p.eraserButton->setChecked(enabled && models::DrawTool::Eraser == tool);
             }
         }

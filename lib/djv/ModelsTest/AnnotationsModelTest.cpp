@@ -97,6 +97,17 @@ namespace djv
             model->eraseStrokes("srcA", frame(100), ftk::V2F(5.F, 100.F), 2.F);
             const bool dropped = model->getAnnotations().empty();
 
+            // A shape is erased on its outline and not from its middle.
+            models::ReviewStroke rect;
+            rect.kind = models::ReviewStrokeKind::Rectangle;
+            rect.width = 2.F;
+            rect.points = { ftk::V2F(0.F, 0.F), ftk::V2F(100.F, 50.F) };
+            model->addStroke("srcA", frame(100), rect);
+            model->eraseStrokes("srcA", frame(100), ftk::V2F(50.F, 25.F), 2.F);
+            FTK_CHECK(1 == model->getStrokes("srcA", frame(100)).size());
+            model->eraseStrokes("srcA", frame(100), ftk::V2F(50.F, 0.F), 2.F);
+            FTK_CHECK(model->getAnnotations().empty());
+
             FTK_CHECK(erasedOne);
             FTK_CHECK(untouched);
             FTK_CHECK(dropped);

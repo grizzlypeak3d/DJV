@@ -969,7 +969,8 @@ class ExportTool(IToolWidget):
             app.getColorModel(),
             app.getViewportModel(),
             app.getSettingsModel(),
-            app.getTimeUnitsModel())
+            app.getTimeUnitsModel(),
+            app.getAnnotationsModel())
         self._setContent(self._widget)
 
         selfWeak = weakref.ref(self)
@@ -1140,6 +1141,18 @@ class ReviewTool(IToolWidget):
         # state after the callback, which would invert whatever the
         # model observer had just set. The model stays the only source
         # of truth and the observer drives the highlight.
+        self._shapeButtons = {}
+        for tool, icon in [
+            (djv.models.DrawTool.Line, "DrawLine"),
+            (djv.models.DrawTool.Arrow, "DrawArrow"),
+            (djv.models.DrawTool.Rectangle, "DrawRectangle"),
+            (djv.models.DrawTool.Ellipse, "DrawEllipse"),
+            (djv.models.DrawTool.Text, "DrawText"),
+        ]:
+            button = ftk.ToolButton(context)
+            button.icon = icon
+            drawToolBar.addWidget(button)
+            self._shapeButtons[tool] = button
         self._eraserButton = ftk.ToolButton(context)
         self._eraserButton.icon = "Eraser"
         drawToolBar.addWidget(self._eraserButton)
@@ -1159,10 +1172,20 @@ class ReviewTool(IToolWidget):
         sizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
         sizeLabel = ftk.Label(context, "Size:", sizeLayout)
         sizeLabel.vAlign = ftk.VAlign.Center
-        self._sizeSlider = ftk.FloatEditSlider(context, sizeLayout)
-        self._sizeSlider.setRange(1.0, 50.0)
-        self._sizeSlider.value = drawModel.size
+        self._sizeSlider = ftk.IntEditSlider(context, sizeLayout)
+        self._sizeSlider.setRange(1, 50)
+        self._sizeSlider.value = int(round(drawModel.size))
         self._sizeSlider.tooltip = "The stroke width, in source pixels."
+        textSizeLayout = ftk.HorizontalLayout(context, drawingWidget)
+        textSizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
+        textSizeLabel = ftk.Label(context, "Text size:", textSizeLayout)
+        textSizeLabel.vAlign = ftk.VAlign.Center
+        self._textSizeSlider = ftk.IntEditSlider(context, textSizeLayout)
+        self._textSizeSlider.setRange(8, 400)
+        self._textSizeSlider.value = int(round(drawModel.textSize))
+        self._textSizeSlider.tooltip = "The height of text, in source pixels."
+        self._onionSkinCheckBox = ftk.CheckBox(context, "Onion skin", drawingWidget)
+        self._onionSkinCheckBox.checked = drawModel.onionSkin
 
         self._itemOrder = []
 
@@ -1179,7 +1202,16 @@ class ReviewTool(IToolWidget):
         bindTooltip(self._addNoteButton, reviewActions["AddNote"])
         bindTooltip(self._addRangeButton, reviewActions["AddRange"])
         bindTooltip(self._penButton, reviewActions["Draw"])
+        for tool, name in [
+            (djv.models.DrawTool.Line, "Line"),
+            (djv.models.DrawTool.Arrow, "Arrow"),
+            (djv.models.DrawTool.Rectangle, "Rectangle"),
+            (djv.models.DrawTool.Ellipse, "Ellipse"),
+            (djv.models.DrawTool.Text, "Text"),
+        ]:
+            bindTooltip(self._shapeButtons[tool], reviewActions[name])
         bindTooltip(self._eraserButton, reviewActions["Erase"])
+        bindTooltip(self._onionSkinCheckBox, reviewActions["OnionSkin"])
         bindTooltip(self._undoButton, reviewActions["Undo"])
         bindTooltip(self._redoButton, reviewActions["Redo"])
         bindTooltip(self._clearDrawingButton, reviewActions["ClearDrawing"])
@@ -1244,8 +1276,17 @@ class ReviewTool(IToolWidget):
             drawModel.enabled = not active
         self._penButton.setClickedCallback(
             lambda: toolClicked(djv.models.DrawTool.Pen))
+        for tool, button in self._shapeButtons.items():
+            button.setClickedCallback(
+                lambda tool = tool: toolClicked(tool))
         self._eraserButton.setClickedCallback(
             lambda: toolClicked(djv.models.DrawTool.Eraser))
+        self._textSizeSlider.setCallback(
+            lambda value: appWeak() and
+                setattr(appWeak().getDrawModel(), "textSize", value))
+        self._onionSkinCheckBox.setCheckedCallback(
+            lambda value: appWeak() and
+                setattr(appWeak().getDrawModel(), "onionSkin", value))
 
         self._sizeSlider.setCallback(
             lambda value: appWeak() and
@@ -1278,7 +1319,15 @@ class ReviewTool(IToolWidget):
         self._sizeObserver = ftk.FloatObserver(
             drawModel.observeSize,
             lambda value: selfWeak() and setattr(
-                selfWeak()._sizeSlider, "value", value))
+                selfWeak()._sizeSlider, "value", int(round(value))))
+        self._textSizeObserver = ftk.FloatObserver(
+            drawModel.observeTextSize,
+            lambda value: selfWeak() and setattr(
+                selfWeak()._textSizeSlider, "value", int(round(value))))
+        self._onionSkinObserver = ftk.BoolObserver(
+            drawModel.observeOnionSkin,
+            lambda value: selfWeak() and setattr(
+                selfWeak()._onionSkinCheckBox, "checked", value))
         self._hasUndoObserver = ftk.BoolObserver(
             app.getAnnotationsModel().observeHasUndo,
             lambda value: selfWeak() and setattr(
@@ -1519,6 +1568,8 @@ class ReviewTool(IToolWidget):
             tool = drawModel.tool
             self._penButton.checked = \
                 enabled and djv.models.DrawTool.Pen == tool
+            for shapeTool, button in self._shapeButtons.items():
+                button.checked = enabled and shapeTool == tool
             self._eraserButton.checked = \
                 enabled and djv.models.DrawTool.Eraser == tool
 

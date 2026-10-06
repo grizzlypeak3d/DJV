@@ -137,6 +137,61 @@ namespace djv
                     }
                 });
 
+            // The shapes and text work as the pen does: selecting one turns
+            // drawing on with it, and turning the active one off gives the
+            // mouse back.
+            const std::vector<std::pair<std::string, models::DrawTool> > tools =
+            {
+                { "Line", models::DrawTool::Line },
+                { "Arrow", models::DrawTool::Arrow },
+                { "Rectangle", models::DrawTool::Rectangle },
+                { "Ellipse", models::DrawTool::Ellipse },
+                { "Text", models::DrawTool::Text }
+            };
+            const std::map<std::string, std::string> toolDocs =
+            {
+                { "Line", "Draw lines on the frame." },
+                { "Arrow", "Draw arrows on the frame." },
+                { "Rectangle", "Draw rectangles on the frame." },
+                { "Ellipse", "Draw ellipses on the frame." },
+                { "Text", "Write text on the frame." }
+            };
+            for (const auto& i : tools)
+            {
+                const models::DrawTool tool = i.second;
+                _addCheckCommand(
+                    i.first,
+                    toolDocs.at(i.first),
+                    [appWeak, tool](const nlohmann::json& args)
+                    {
+                        const bool value = args.at("value").get<bool>();
+                        if (auto app = appWeak.lock())
+                        {
+                            auto drawModel = app->getDrawModel();
+                            if (value)
+                            {
+                                drawModel->setTool(tool);
+                                drawModel->setEnabled(true);
+                            }
+                            else if (tool == drawModel->getTool())
+                            {
+                                drawModel->setEnabled(false);
+                            }
+                        }
+                    });
+            }
+
+            _addCheckCommand(
+                "OnionSkin",
+                "Show the drawings on the frames before and after, faded.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getDrawModel()->setOnionSkin(args.at("value").get<bool>());
+                    }
+                });
+
             _addCheckCommand(
                 "Erase",
                 "Erase the strokes you touch.",
@@ -279,10 +334,33 @@ namespace djv
                 "Draw",
                 "DrawTool",
                 _checkCommand("Draw"));
+            _actions["Line"] = ftk::Action::create(
+                "Line",
+                "DrawLine",
+                _checkCommand("Line"));
+            _actions["Arrow"] = ftk::Action::create(
+                "Arrow",
+                "DrawArrow",
+                _checkCommand("Arrow"));
+            _actions["Rectangle"] = ftk::Action::create(
+                "Rectangle",
+                "DrawRectangle",
+                _checkCommand("Rectangle"));
+            _actions["Ellipse"] = ftk::Action::create(
+                "Ellipse",
+                "DrawEllipse",
+                _checkCommand("Ellipse"));
+            _actions["Text"] = ftk::Action::create(
+                "Text",
+                "DrawText",
+                _checkCommand("Text"));
             _actions["Erase"] = ftk::Action::create(
                 "Erase",
                 "Eraser",
                 _checkCommand("Erase"));
+            _actions["OnionSkin"] = ftk::Action::create(
+                "Onion Skin",
+                _checkCommand("OnionSkin"));
             _actions["Undo"] = ftk::Action::create(
                 "Undo Drawing",
                 "Undo",
@@ -318,10 +396,35 @@ namespace djv
                 "Draw strokes.\n"
                 "\n"
                 "Click again to stop drawing.";
+            _tooltips["Line"] =
+                "Draw lines.\n"
+                "\n"
+                "Hold Shift for a line at a multiple of forty-five degrees. "
+                "Click again to stop drawing.";
+            _tooltips["Arrow"] =
+                "Draw arrows, the head where the drag ends.\n"
+                "\n"
+                "Hold Shift for an arrow at a multiple of forty-five degrees. "
+                "Click again to stop drawing.";
+            _tooltips["Rectangle"] =
+                "Draw rectangles.\n"
+                "\n"
+                "Hold Shift for a square. Click again to stop drawing.";
+            _tooltips["Ellipse"] =
+                "Draw ellipses.\n"
+                "\n"
+                "Hold Shift for a circle. Click again to stop drawing.";
+            _tooltips["Text"] =
+                "Write text: click where it starts and type.\n"
+                "\n"
+                "Return keeps it, Escape lets it go. Click again to stop.";
             _tooltips["Erase"] =
                 "Erase the strokes you touch.\n"
                 "\n"
                 "Click again to stop.";
+            _tooltips["OnionSkin"] =
+                "Show the drawings on the frames before and after, faded, "
+                "behind this frame's.";
             _tooltips["ClearDrawing"] = "Remove every stroke on this frame.";
             _tooltips["AddNote"] =
                 "Add a marker about the current frame, written in place.";
@@ -355,7 +458,13 @@ namespace djv
             // being worked out with the users (#838). The actions are in the
             // shortcuts editor, so any key can be bound today.
             _addShortcut("Draw", "Draw strokes");
+            _addShortcut("Line", "Draw lines");
+            _addShortcut("Arrow", "Draw arrows");
+            _addShortcut("Rectangle", "Draw rectangles");
+            _addShortcut("Ellipse", "Draw ellipses");
+            _addShortcut("Text", "Write text");
             _addShortcut("Erase", "Erase strokes");
+            _addShortcut("OnionSkin", "Onion skin");
             _addShortcut(
                 "Undo",
                 "Undo drawing",

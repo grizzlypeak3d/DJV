@@ -28,6 +28,8 @@ namespace djv
             void _simplify();
             void _smooth();
             void _mesh();
+            void _shapes();
+            void _hit();
 
             // FTK_CHECK reports through the test, so the helpers are part of
             // it rather than free functions.
