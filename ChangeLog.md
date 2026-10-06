@@ -10,6 +10,7 @@ Fixes:
 * Fix for playback with audio starting one frame early.
 * Fix for thumbnails of files that are overwritten.
 * Fix for a crash when a Python script exits on Linux.
+* Fix for slow playback and export on Linux when the window is covered.
 
 ## 3.7.4
 
