@@ -2,6 +2,14 @@
 
 Changes:
 * Add an option for showing multiple timelines in compare mode.
+* Movies, PNG, and OpenImageIO files are written as 8-bit or 16-bit depending
+  on the image type.
+
+Fixes:
+* Fix for the levels of 10-bit and deeper YUV movies read as RGB.
+* Fix for playback with audio starting one frame early.
+* Fix for thumbnails of files that are overwritten.
+* Fix for a crash when a Python script exits on Linux.
 
 ## 3.7.4
 
