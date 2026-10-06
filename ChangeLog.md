@@ -1,3 +1,8 @@
+## 3.7.5
+
+Changes:
+* Add an option for showing multiple timelines in compare mode.
+
 ## 3.7.4
 
 Changes:
