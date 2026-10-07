@@ -1465,6 +1465,135 @@
         }
       ],
       "annotate": []
+    },
+    {
+      "id": "review-handles",
+      "window": {
+        "w": 1000,
+        "h": 600,
+        "splitter2": 0.55
+      },
+      "crop": "MainWindow.Viewport",
+      "setup": [
+        {
+          "open": "etc/SampleData/BART_2021-02-07.#.jpg"
+        },
+        {
+          "frame": 40
+        },
+        {
+          "tool": "Review"
+        },
+        {
+          "click": "Review.Arrow"
+        },
+        {
+          "drag": [
+            [
+              300,
+              700
+            ],
+            [
+              640,
+              560
+            ]
+          ]
+        },
+        {
+          "click": "Review.Select"
+        },
+        {
+          "drag": [
+            [
+              470,
+              630
+            ],
+            [
+              470,
+              630
+            ]
+          ]
+        }
+      ],
+      "annotate": []
+    },
+    {
+      "id": "review-onion-skin",
+      "window": {
+        "w": 1000,
+        "h": 600,
+        "splitter2": 0.55
+      },
+      "crop": "MainWindow.Viewport",
+      "setup": [
+        {
+          "open": "etc/SampleData/BART_2021-02-07.#.jpg"
+        },
+        {
+          "frame": 40
+        },
+        {
+          "tool": "Review"
+        },
+        {
+          "click": "Review.Arrow"
+        },
+        {
+          "drag": [
+            [
+              300,
+              700
+            ],
+            [
+              640,
+              560
+            ]
+          ]
+        },
+        {
+          "click": "Review.Text"
+        },
+        {
+          "drag": [
+            [
+              60,
+              300
+            ],
+            [
+              60,
+              300
+            ]
+          ]
+        },
+        {
+          "text": "Frame 40"
+        },
+        {
+          "key": "Return"
+        },
+        {
+          "click": "Review.OnionSkin"
+        },
+        {
+          "frame": 41
+        },
+        {
+          "click": "Review.Rectangle"
+        },
+        {
+          "drag": [
+            [
+              700,
+              560
+            ],
+            [
+              980,
+              760
+            ]
+          ]
+        }
+      ],
+      "annotate": []
     }
   ]
 }
