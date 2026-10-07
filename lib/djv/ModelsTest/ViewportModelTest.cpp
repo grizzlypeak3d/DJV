@@ -7,7 +7,6 @@
 
 #include <djv/Models/ViewportModel.h>
 
-#include <ftk/GL/Texture.h>
 
 #include <ftk/UI/Settings.h>
 
@@ -44,10 +43,10 @@ namespace djv
 
             // Observe the color buffer type. With ObserverAction::Trigger (the
             // default) the callback fires immediately with the current value.
-            ftk::gl::TextureType colorBuffer = ftk::gl::TextureType::None;
-            auto observer = ftk::Observer<ftk::gl::TextureType>::create(
+            ftk::ImageType colorBuffer = ftk::ImageType::None;
+            auto observer = ftk::Observer<ftk::ImageType>::create(
                 model->observeColorBuffer(),
-                [&colorBuffer](const ftk::gl::TextureType& value) { colorBuffer = value; });
+                [&colorBuffer](const ftk::ImageType& value) { colorBuffer = value; });
 
             // The observer should see the current (default) value. The default is
             // platform-dependent, so compare against the model rather than a
@@ -55,9 +54,9 @@ namespace djv
             FTK_CHECK(model->getColorBuffer() == colorBuffer);
 
             // Set the color buffer; the observer should see the change.
-            model->setColorBuffer(ftk::gl::TextureType::RGBA_U16);
-            FTK_CHECK(ftk::gl::TextureType::RGBA_U16 == model->getColorBuffer());
-            FTK_CHECK(ftk::gl::TextureType::RGBA_U16 == colorBuffer);
+            model->setColorBuffer(ftk::ImageType::RGBA_U16);
+            FTK_CHECK(ftk::ImageType::RGBA_U16 == model->getColorBuffer());
+            FTK_CHECK(ftk::ImageType::RGBA_U16 == colorBuffer);
         }
 
         void ViewportModelTest::_persistence()
@@ -73,14 +72,14 @@ namespace djv
             {
                 auto settings = ftk::Settings::create(_context, path, true);
                 auto model = models::ViewportModel::create(_context, settings);
-                model->setColorBuffer(ftk::gl::TextureType::RGBA_U16);
+                model->setColorBuffer(ftk::ImageType::RGBA_U16);
             }
 
             // Recreate from the same file (reset=false loads it) and verify.
             {
                 auto settings = ftk::Settings::create(_context, path, false);
                 auto model = models::ViewportModel::create(_context, settings);
-                FTK_CHECK(ftk::gl::TextureType::RGBA_U16 == model->getColorBuffer());
+                FTK_CHECK(ftk::ImageType::RGBA_U16 == model->getColorBuffer());
             }
 
             std::filesystem::remove(path);

@@ -3,6 +3,8 @@
 
 #include <djv/Models/ViewportModel.h>
 
+#include <tlRender/UI/Viewport.h>
+
 #include <ftk/UI/Settings.h>
 #include <ftk/GL/Init.h>
 #include <ftk/GL/OffscreenBuffer.h>
@@ -39,7 +41,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<AspectRatioOptions> > aspectRatioOptions;
             std::shared_ptr<ftk::Observable<tl::BackgroundOptions> > backgroundOptions;
             std::shared_ptr<ftk::Observable<tl::ForegroundOptions> > foregroundOptions;
-            std::shared_ptr<ftk::Observable<ftk::gl::TextureType> > colorBuffer;
+            std::shared_ptr<ftk::Observable<ftk::ImageType> > colorBuffer;
             std::shared_ptr<ftk::Observable<HUDOptions> > hudOptions;
         };
 
@@ -84,13 +86,13 @@ namespace djv
             // for one at 4K, with several of them live in a comparison.
             // Exporting keeps full float: see ExportWidget, where the
             // picture is written rather than shown.
-            ftk::gl::TextureType colorBuffer = ftk::gl::isGLES() ?
-                ftk::gl::getOffscreenColorDefault() :
-                ftk::gl::TextureType::RGBA_F16;
-            std::string s = ftk::gl::to_string(colorBuffer);
+            // The labels are the ones the renderer's texture type had, so a
+            // settings file from before reads as it did.
+            ftk::ImageType colorBuffer = tl::ui::getViewportColorBufferDefault();
+            std::string s = ftk::to_string(colorBuffer);
             p.settings->get("/Viewport/ColorBuffer", s);
-            ftk::gl::from_string(s, colorBuffer);
-            p.colorBuffer = ftk::Observable<ftk::gl::TextureType>::create(colorBuffer);
+            ftk::from_string(s, colorBuffer);
+            p.colorBuffer = ftk::Observable<ftk::ImageType>::create(colorBuffer);
 
             HUDOptions hudOptions;
             hudOptions.items[HUDItem::FileName] = HUDPos::TopLeft;
@@ -118,7 +120,7 @@ namespace djv
             p.settings->setT("/Viewport/AspectRatio.1", p.aspectRatioOptions->get());
             p.settings->setT("/Viewport/Background", p.backgroundOptions->get());
             p.settings->setT("/Viewport/Foreground.1", p.foregroundOptions->get());
-            p.settings->set("/Viewport/ColorBuffer", ftk::gl::to_string(p.colorBuffer->get()));
+            p.settings->set("/Viewport/ColorBuffer", ftk::to_string(p.colorBuffer->get()));
             p.settings->setT("/Viewport/HUD.2", p.hudOptions->get());
         }
 
@@ -225,17 +227,17 @@ namespace djv
             _p->foregroundOptions->setIfChanged(value);
         }
 
-        ftk::gl::TextureType ViewportModel::getColorBuffer() const
+        ftk::ImageType ViewportModel::getColorBuffer() const
         {
             return _p->colorBuffer->get();
         }
 
-        std::shared_ptr<ftk::IObservable<ftk::gl::TextureType> > ViewportModel::observeColorBuffer() const
+        std::shared_ptr<ftk::IObservable<ftk::ImageType> > ViewportModel::observeColorBuffer() const
         {
             return _p->colorBuffer;
         }
 
-        void ViewportModel::setColorBuffer(ftk::gl::TextureType value)
+        void ViewportModel::setColorBuffer(ftk::ImageType value)
         {
             _p->colorBuffer->setIfChanged(value);
         }

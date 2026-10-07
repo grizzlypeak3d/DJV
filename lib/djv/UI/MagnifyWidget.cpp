@@ -75,7 +75,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > settingsObserver;
         };
 
@@ -252,9 +252,9 @@ namespace djv
                     _p->viewport->setBackgroundOptions(value);
                 });
 
-            p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
                 viewportModel->observeColorBuffer(),
-                [this](ftk::gl::TextureType value)
+                [this](ftk::ImageType value)
                 {
                     _p->viewport->setColorBuffer(value);
                 });
