@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/DrawModel.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <ftk/UI/Settings.h>
 
@@ -31,11 +32,11 @@ namespace djv
             // A warm orange reads on both dark and bright footage; a dark
             // default would be invisible on dark shots.
             ftk::Color4F color(1.F, .365F, .02F, 1.F);
-            p.settings->getT("/Draw/Color", color);
+            p.settings->getT(settingsKeys::drawColor, color);
             p.color = ftk::Observable<ftk::Color4F>::create(color);
 
             float size = 4.F;
-            p.settings->get("/Draw/Size", size);
+            p.settings->get(settingsKeys::drawSize, size);
             p.size = ftk::Observable<float>::create(size > 0.F ? size : 4.F);
         }
 
@@ -46,8 +47,8 @@ namespace djv
         DrawModel::~DrawModel()
         {
             FTK_P();
-            p.settings->setT("/Draw/Color", p.color->get());
-            p.settings->set("/Draw/Size", p.size->get());
+            p.settings->setT(settingsKeys::drawColor, p.color->get());
+            p.settings->set(settingsKeys::drawSize, p.size->get());
         }
 
         std::shared_ptr<DrawModel> DrawModel::create(

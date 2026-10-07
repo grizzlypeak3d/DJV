@@ -12,6 +12,7 @@
 #if defined(TLRENDER_GPU)
 #include <tlRender/GPU/Render.h>
 #endif // TLRENDER_GPU
+#include <tlRender/UI/Viewport.h>
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/IRender.h>
 #include <tlRender/Timeline/Util.h>
@@ -129,7 +130,7 @@ namespace djv
                 //! nowhere to put the difference. An export renders one
                 //! frame at a time into a file that may well be asked to
                 //! hold it, so it takes the most this build has.
-                ftk::gl::TextureType colorBuffer = ftk::gl::getOffscreenColorDefault();
+                ftk::ImageType colorBuffer = tl::ui::getViewportColorBufferDefault();
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
 #if defined(TLRENDER_GPU)
                 //! What is drawn into instead when the windows are drawn
@@ -139,8 +140,6 @@ namespace djv
                 std::shared_ptr<ftk::gpu::OffscreenBuffer> gpuBuffer;
 #endif // TLRENDER_GPU
                 std::shared_ptr<tl::IRender> render;
-                GLenum glFormat = 0;
-                GLenum glType = 0;
             };
             std::unique_ptr<ExportData> exportData;
 
@@ -730,9 +729,7 @@ namespace djv
 #endif // TLRENDER_GPU
                     if (!gpu)
                     {
-                        p.exportData->glFormat = ftk::gl::getReadPixelsFormat(p.exportData->info.type);
-                        p.exportData->glType = ftk::gl::getReadPixelsType(p.exportData->info.type);
-                        canRead = p.exportData->glFormat != GL_NONE && p.exportData->glType != GL_NONE;
+                        canRead = ftk::gl::OffscreenBuffer::canRead(p.exportData->info.type);
                     }
                     if (!canRead)
                     {
@@ -878,8 +875,8 @@ namespace djv
                         ftk::gpu::BufferType bufferType = ftk::gpu::BufferType::RGBA_F32;
                         switch (p.exportData->colorBuffer)
                         {
-                        case ftk::gl::TextureType::RGBA_U8: bufferType = ftk::gpu::BufferType::RGBA_U8; break;
-                        case ftk::gl::TextureType::RGBA_F16: bufferType = ftk::gpu::BufferType::RGBA_F16; break;
+                        case ftk::ImageType::RGBA_U8: bufferType = ftk::gpu::BufferType::RGBA_U8; break;
+                        case ftk::ImageType::RGBA_F16: bufferType = ftk::gpu::BufferType::RGBA_F16; break;
                         default: break;
                         }
                         p.exportData->gpuBuffer = ftk::gpu::OffscreenBuffer::create(
@@ -920,7 +917,7 @@ namespace djv
                         offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
                         p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
                             p.exportData->info.size,
-                            p.exportData->colorBuffer,
+                            ftk::gl::getRenderableType(ftk::gl::getTextureType(p.exportData->colorBuffer)),
                             offscreenBufferOptions);
                     }
 
@@ -1070,20 +1067,7 @@ namespace djv
                 {
                     ftk::gl::OffscreenBufferBinding binding(p.exportData->buffer);
                     draw();
-                    image = ftk::Image::create(p.exportData->info);
-                    glPixelStorei(GL_PACK_ALIGNMENT, p.exportData->info.layout.alignment);
-                    if (!ftk::gl::isGLES())
-                    {
-                        glPixelStorei(GL_PACK_SWAP_BYTES, p.exportData->info.layout.endian != ftk::getEndian());
-                    }
-                    glReadPixels(
-                        0,
-                        0,
-                        p.exportData->info.size.w,
-                        p.exportData->info.size.h,
-                        p.exportData->glFormat,
-                        p.exportData->glType,
-                        image->getData());
+                    image = p.exportData->buffer->read(p.exportData->info);
                 }
 
                 // The sequence writers name each file from the time it is

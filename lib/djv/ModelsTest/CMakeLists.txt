@@ -8,6 +8,7 @@ set(HEADERS
     PlaylistTest.h
     RecentFilesModelTest.h
     ReviewTest.h
+    SettingsKeysTest.h
     SettingsModelTest.h
     ShellCommandTest.h
     StrokeTest.h
@@ -24,6 +25,7 @@ set(SOURCE
     PlaylistTest.cpp
     RecentFilesModelTest.cpp
     ReviewTest.cpp
+    SettingsKeysTest.cpp
     SettingsModelTest.cpp
     ShellCommandTest.cpp
     StrokeTest.cpp

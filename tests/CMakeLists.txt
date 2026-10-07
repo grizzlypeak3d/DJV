@@ -1,5 +1,41 @@
 add_subdirectory(djv-test)
 
+# Scripted sessions: each shot in capture/capture.json is a test that drives
+# the application through the capture tool -- clicks, drags, keys, typed
+# text -- and must end with its expectations met and nothing marked as an
+# error in the log (see ftk::Capture and etc/Screenshots/notes.txt). The
+# window is drawn offscreen, so no display is needed beyond what OpenGL
+# needs; the Linux jobs run under xvfb. The screenshots land in the build
+# tree, for looking at a failure.
+if(NOT DJV_TESTS_NO_GL)
+    set(DJV_CAPTURE_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/capture/capture.json)
+    set(DJV_CAPTURE_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/capture)
+    file(MAKE_DIRECTORY ${DJV_CAPTURE_OUTPUT})
+    file(READ ${DJV_CAPTURE_MANIFEST} DJV_CAPTURE_JSON)
+    string(JSON DJV_CAPTURE_COUNT LENGTH ${DJV_CAPTURE_JSON} shots)
+    math(EXPR DJV_CAPTURE_LAST "${DJV_CAPTURE_COUNT} - 1")
+    foreach(i RANGE ${DJV_CAPTURE_LAST})
+        string(JSON shot GET ${DJV_CAPTURE_JSON} shots ${i} id)
+        add_test(
+            NAME djv-capture-${shot}
+            COMMAND djv
+                -resetSettings
+                -settingsFile ${DJV_CAPTURE_OUTPUT}/settings.json
+                -captureManifest ${DJV_CAPTURE_MANIFEST}
+                -captureShot ${shot}
+                -captureOutput ${DJV_CAPTURE_OUTPUT}
+                -log
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+        # See djv-test/CMakeLists.txt for why.
+        set_tests_properties(djv-capture-${shot} PROPERTIES
+            ENVIRONMENT_MODIFICATION
+            "PATH=path_list_prepend:${CMAKE_INSTALL_PREFIX}/python/opentimelineio")
+    endforeach()
+    # A shot added to the manifest is a test added, so configure again.
+    set_property(DIRECTORY APPEND PROPERTY
+        CMAKE_CONFIGURE_DEPENDS ${DJV_CAPTURE_MANIFEST})
+endif()
+
 if(DJV_PYTHON)
     # Through the runner rather than "-m unittest" directly: on Windows the
     # bindings' dependencies live in bin, and since Python 3.8 only

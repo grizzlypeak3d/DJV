@@ -12,6 +12,32 @@ Setup verbs for interaction, in addition to open/tool/expand/tab/pick/zoom:
   "name": "Sky", "color": [.3, .5, .9] }] } replaces the review markers,
   bypassing the editor. Frames are 0-based from the timeline start; the
   out frame is inclusive.
+* { "click": "Review.Marker1", "count": 2 } double clicks.
+* { "press": "Review.Pen" } presses and holds; { "release": "Review.Pen" }
+  lets go. Hovers in between move the pressed widget as a drag, so this
+  is how a drag is captured while it is in progress.
+* { "hover": "Files.CompareMode" } moves the cursor without pressing.
+* { "tooltip": "Review.Pen" } hovers and waits for the tooltip (tooltips
+  are otherwise off during a capture).
+* A target can also be [tag, fx, fy]: a point at those fractions of the
+  tagged widget, e.g. ["MainWindow.Viewport", 0.3, 0.6]. Framebuffer
+  positions depend on the display scale, so a shot that must run the same
+  everywhere aims by tag.
+* { "expect": "Review.Pen", "checked": true } asserts a widget's state;
+  also "enabled", "visible", "text" (exactly what the widget shows) and
+  "contains" (part of it). A tag with no widget counts as not visible.
+* A key goes to the focused widget, else to the widgets under the cursor;
+  the cursor is parked at the window's center for the first key when no
+  step has placed it.
+
+A shot fails -- exit status 1 -- when a step cannot do what it says (an
+unknown step, a tag with no visible widget) or an expectation does not
+hold; with "strict": true an error in the log fails it too. The outputs
+are still written. This is what makes tests/capture/capture.json a test
+suite: each shot there is a ctest (djv-capture-<id>, Linux CI under xvfb),
+a scripted session that must end with its expectations met. Add a shot,
+reconfigure, and it is a test. Run one by hand the way the test does:
+% djv -resetSettings -settingsFile /tmp/s.json -captureManifest tests/capture/capture.json -captureShot review-pen -captureOutput /tmp/capture -log
 
 Configuration:
 

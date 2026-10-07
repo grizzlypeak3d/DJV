@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/AudioModel.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
@@ -34,11 +35,11 @@ namespace djv
             p.device = ftk::Observable<tl::AudioDeviceID>::create();
 
             float volume = 1.F;
-            p.settings->get("/Audio/Volume", volume);
+            p.settings->get(settingsKeys::audioVolume, volume);
             p.volume = ftk::Observable<float>::create(volume);
 
             bool mute = false;
-            p.settings->get("/Audio/Mute", mute);
+            p.settings->get(settingsKeys::audioMute, mute);
             p.mute = ftk::Observable<bool>::create(mute);
 
             p.syncOffset = ftk::Observable<double>::create(0.0);
@@ -69,8 +70,8 @@ namespace djv
         void AudioModel::save()
         {
             FTK_P();
-            p.settings->set("/Audio/Volume", p.volume->get());
-            p.settings->set("/Audio/Mute", p.mute->get());
+            p.settings->set(settingsKeys::audioVolume, p.volume->get());
+            p.settings->set(settingsKeys::audioMute, p.mute->get());
         }
 
         std::shared_ptr<AudioModel> AudioModel::create(

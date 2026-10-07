@@ -1,5 +1,6 @@
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Build Status](https://github.com/grizzlypeak3d/DJV/actions/workflows/ci-workflow.yml/badge.svg)](https://github.com/grizzlypeak3d/DJV/actions/workflows/ci-workflow.yml)
+[![PyPI](https://img.shields.io/pypi/v/DJV-viewer.svg)](https://pypi.org/project/DJV-viewer/)
 
 # ![DJV Icon](https://raw.githubusercontent.com/grizzlypeak3d/DJV/main/etc/Icons/DJV_Icon_32.png)&nbsp;DJV
 

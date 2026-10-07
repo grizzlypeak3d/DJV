@@ -29,6 +29,7 @@
 #if defined(FTK_GPU)
 #include <ftk/GPU/System.h>
 #endif // FTK_GPU
+#include <tlRender/UI/Viewport.h>
 #include <ftk/Core/Format.h>
 
 #include <sstream>
@@ -39,7 +40,7 @@ namespace djv
     {
         struct ViewOptionsWidget::Private
         {
-            std::vector<ftk::gl::TextureType> colorBuffers;
+            std::vector<ftk::ImageType> colorBuffers;
 
             std::shared_ptr<ftk::ComboBox> channelsComboBox;
             std::shared_ptr<ftk::CheckBox> negativeCheckBox;
@@ -57,7 +58,7 @@ namespace djv
 
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<tl::HDR_EOTF> > hdrTransferObserver;
             std::shared_ptr<ftk::Observer<float> > hdrWhiteObserver;
         };
@@ -111,12 +112,7 @@ namespace djv
             p.alphaBlendComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.alphaBlendComboBox, "View.Options.AlphaBlend");
 
-            p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_U8);
-            if (!ftk::gl::isGLES())
-            {
-                p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_F16);
-                p.colorBuffers.push_back(ftk::gl::TextureType::RGBA_F32);
-            }
+            p.colorBuffers = tl::ui::getViewportColorBuffers();
             std::vector<std::string> items;
             for (size_t i = 0; i < p.colorBuffers.size(); ++i)
             {
@@ -198,9 +194,9 @@ namespace djv
                     p.mirrorYCheckBox->setChecked(value.mirror.y);
                 });
 
-            p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
                 viewportModel->observeColorBuffer(),
-                [this](ftk::gl::TextureType value)
+                [this](ftk::ImageType value)
                 {
                     FTK_P();
                     int index = -1;

@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/ToolsModel.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Error.h>
@@ -50,7 +51,7 @@ namespace djv
             // More than one tool can be open now, so what was written before
             // says nothing about which; the key moves rather than trying to
             // read the old one as a list of one.
-            p.settings->get("/Tools/Open.1", p.openSaved);
+            p.settings->get(settingsKeys::toolsOpen, p.openSaved);
             p.openTools = ftk::ObservableList<std::string>::create(_sorted(p.openSaved));
             p.showSection = ftk::Observable<std::pair<std::string, std::string> >::create();
         }
@@ -67,7 +68,7 @@ namespace djv
         void ToolsModel::save()
         {
             FTK_P();
-            p.settings->set("/Tools/Open.1", p.openTools->get());
+            p.settings->set(settingsKeys::toolsOpen, p.openTools->get());
         }
 
         std::shared_ptr<ToolsModel> ToolsModel::create(const std::shared_ptr<ftk::Settings>& settings)

@@ -74,6 +74,20 @@ namespace djv
                 });
 
             _addCheckCommand(
+                "CompareTimelines",
+                "Show the timeline of each file being compared, under the current file's.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settings = app->getSettingsModel()->getTimeline();
+                        settings.compareTimelines = value;
+                        app->getSettingsModel()->setTimeline(settings);
+                    }
+                });
+
+            _addCheckCommand(
                 "AutoScroll",
                 "Automatically scroll the timeline to the current frame.",
                 [appWeak](const nlohmann::json& args)
@@ -260,6 +274,9 @@ namespace djv
             _actions["ScrollBars"] = ftk::Action::create(
                 "Scroll Bars",
                 _checkCommand("ScrollBars"));
+            _actions["CompareTimelines"] = ftk::Action::create(
+                "Compare Timelines",
+                _checkCommand("CompareTimelines"));
             _actions["AutoScroll"] = ftk::Action::create(
                 "Auto Scroll",
                 _checkCommand("AutoScroll"));
@@ -302,6 +319,7 @@ namespace djv
             _addShortcut("FrameView");
             _addShortcut("ScrollBars");
             _addShortcut("AutoScroll");
+            _addShortcut("CompareTimelines", "Compare Timelines");
             _addShortcut("StopOnScrub", "Stop On Scrub");
             _addShortcut("Preview", "Hover Preview");
             _addShortcut("Thumbnails");
@@ -326,6 +344,7 @@ namespace djv
                     _actions["AutoScroll"]->setChecked(value.autoScroll);
                     _actions["StopOnScrub"]->setChecked(value.stopOnScrub);
                     _actions["Preview"]->setChecked(value.preview);
+                    _actions["CompareTimelines"]->setChecked(value.compareTimelines);
                     _actions["TrackMedia"]->setChecked(value.trackMedia);
                     _actions["Thumbnails"]->setChecked(value.thumbnails);
                     _actions["Thumbnails"]->setEnabled(value.trackMedia);

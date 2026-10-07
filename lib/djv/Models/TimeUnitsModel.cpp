@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/TimeUnitsModel.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <ftk/UI/Settings.h>
 
@@ -25,7 +26,7 @@ namespace djv
 
             tl::TimeUnits units = tl::TimeUnits::Timecode;
             std::string s = tl::to_string(units);
-            p.settings->get("/TimeUnits", s);
+            p.settings->get(settingsKeys::timeUnits, s);
             tl::from_string(s, units);
             setTimeUnits(units);
         }
@@ -42,7 +43,7 @@ namespace djv
         void TimeUnitsModel::save()
         {
             FTK_P();
-            p.settings->set("/TimeUnits", tl::to_string(getTimeUnits()));
+            p.settings->set(settingsKeys::timeUnits, tl::to_string(getTimeUnits()));
         }
 
         std::shared_ptr<TimeUnitsModel> TimeUnitsModel::create(

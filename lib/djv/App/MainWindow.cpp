@@ -167,7 +167,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::ListObserver<std::string> > openToolsObserver;
             std::shared_ptr<ftk::Observer<std::pair<std::string, std::string> > > showSectionObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
@@ -252,13 +252,6 @@ namespace djv
 
             auto timeUnitsModel = app->getTimeUnitsModel();
             p.timelineWidget = tl::ui::TimelineWidget::create(context, timeUnitsModel);
-            // The current file's timeline and no other. Left unset the widget
-            // draws one for each file being compared as well, which is what
-            // an application built around comparing wants; here the timeline
-            // belongs to the file being played and a comparison is something
-            // done to the picture.
-            p.timelineWidget->setTimelines(
-                std::vector<std::shared_ptr<tl::Timeline> >());
             ftk::setScreenshotTag(p.timelineWidget, "MainWindow.Timeline");
 
             p.fileActions = FileActions::create(context, app);
@@ -562,11 +555,11 @@ namespace djv
                     _p->timelineWidget->setDisplayOptions(options);
                 });
 
-            p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
                 app->getViewportModel()->observeColorBuffer(),
-                [this](ftk::gl::TextureType value)
+                [this](ftk::ImageType value)
                 {
-                    setBufferType(ftk::gl::TextureType::RGBA_U8 == value ?
+                    setBufferType(ftk::ImageType::RGBA_U8 == value ?
                         ftk::WindowBufferType::U8 :
                         ftk::WindowBufferType::F16);
                 });
@@ -1097,6 +1090,15 @@ namespace djv
 
             p.timelineWidget->setFrameView(settings.frameView);
             p.timelineWidget->setScrollBarsVisible(settings.scrollBars);
+            // Unset, the widget draws a timeline for each file being
+            // compared, under the current file's; an empty list is the
+            // current file's and no other. Off until asked for: a comparison
+            // is usually something done to the picture, and the timelines
+            // are what is compared when the files are two cuts.
+            p.timelineWidget->setTimelines(
+                settings.compareTimelines ?
+                std::optional<std::vector<std::shared_ptr<tl::Timeline> > >() :
+                std::vector<std::shared_ptr<tl::Timeline> >());
             p.timelineWidget->setAutoScroll(settings.autoScroll);
             p.timelineWidget->setStopOnScrub(settings.stopOnScrub);
             p.timelinePreview = settings.preview;

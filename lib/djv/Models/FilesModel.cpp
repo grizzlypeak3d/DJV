@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <opentimelineio/clip.h>
 
@@ -61,15 +62,15 @@ namespace djv
                     _p->audioChannel->setIfChanged(value ? value->audioChannel : -1);
                 });
             tl::CompareOptions compareOptions;
-            p.settings->getT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
-            p.settings->getT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
-            p.settings->getT("/Files/Compare/Overlay", compareOptions.overlay);
+            p.settings->getT(settingsKeys::filesCompareWipeCenter, compareOptions.wipeCenter);
+            p.settings->getT(settingsKeys::filesCompareWipeRotation, compareOptions.wipeRotation);
+            p.settings->getT(settingsKeys::filesCompareOverlay, compareOptions.overlay);
             p.settings->getT(
-                "/Files/Compare/DifferenceGain", compareOptions.differenceGain);
-            p.settings->getT("/Files/Compare/SameSize", compareOptions.sameSize);
+                settingsKeys::filesCompareDifferenceGain, compareOptions.differenceGain);
+            p.settings->getT(settingsKeys::filesCompareSameSize, compareOptions.sameSize);
             p.compareOptions = ftk::Observable<tl::CompareOptions>::create(compareOptions);
             std::string s;
-            p.settings->get("/Files/Compare/Time", s);
+            p.settings->get(settingsKeys::filesCompareTime, s);
             tl::CompareTime compareTime = tl::CompareTime::First;
             from_string(s, compareTime);
             p.compareTime = ftk::Observable<tl::CompareTime>::create(compareTime);
@@ -88,13 +89,13 @@ namespace djv
         {
             FTK_P();
             auto compareOptions = p.compareOptions->get();
-            p.settings->setT("/Files/Compare/WipeCenter", compareOptions.wipeCenter);
-            p.settings->setT("/Files/Compare/WipeRotation", compareOptions.wipeRotation);
-            p.settings->setT("/Files/Compare/Overlay", compareOptions.overlay);
+            p.settings->setT(settingsKeys::filesCompareWipeCenter, compareOptions.wipeCenter);
+            p.settings->setT(settingsKeys::filesCompareWipeRotation, compareOptions.wipeRotation);
+            p.settings->setT(settingsKeys::filesCompareOverlay, compareOptions.overlay);
             p.settings->setT(
-                "/Files/Compare/DifferenceGain", compareOptions.differenceGain);
-            p.settings->setT("/Files/Compare/SameSize", compareOptions.sameSize);
-            p.settings->set("/Files/Compare/Time", to_string(p.compareTime->get()));
+                settingsKeys::filesCompareDifferenceGain, compareOptions.differenceGain);
+            p.settings->setT(settingsKeys::filesCompareSameSize, compareOptions.sameSize);
+            p.settings->set(settingsKeys::filesCompareTime, to_string(p.compareTime->get()));
         }
 
         std::shared_ptr<FilesModel> FilesModel::create(const std::shared_ptr<ftk::Settings>& settings)
