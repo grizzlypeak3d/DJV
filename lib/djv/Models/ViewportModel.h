@@ -9,7 +9,7 @@
 #include <tlRender/Timeline/DisplayOptions.h>
 #include <tlRender/Timeline/ForegroundOptions.h>
 
-#include <ftk/GL/Texture.h>
+#include <ftk/Core/Image.h>
 #include <ftk/Core/Observable.h>
 
 namespace ftk
@@ -155,9 +155,9 @@ namespace djv
             //! \name Color Buffer
             ///@{
 
-            DJV_MODELS_API ftk::gl::TextureType getColorBuffer() const;
-            DJV_MODELS_API std::shared_ptr<ftk::IObservable<ftk::gl::TextureType> > observeColorBuffer() const;
-            DJV_MODELS_API void setColorBuffer(ftk::gl::TextureType);
+            DJV_MODELS_API ftk::ImageType getColorBuffer() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<ftk::ImageType> > observeColorBuffer() const;
+            DJV_MODELS_API void setColorBuffer(ftk::ImageType);
 
             ///@}
 

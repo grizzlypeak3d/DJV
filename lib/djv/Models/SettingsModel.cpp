@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/SettingsModel.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <ftk/UI/ColorWidgetSystem.h>
 
@@ -174,26 +175,26 @@ namespace djv
         {
             std::map<std::string, std::string> keys =
             {
-                { "Audio", "/Audio.1" },
-                { "Cache", "/Cache" },
-                { "ThumbnailCache", "/ThumbnailCache" },
-                { "Export", "/Export" },
-                { "FileBrowser", "/FileBrowser" },
-                { "ImageSeq", "/ImageSeq.1" },
-                { "OTIO", "/OTIO.2" },
-                { "Shortcuts", "/Shortcuts.4" },
-                { "Misc", "/Misc.3" },
-                { "Mouse", "/Mouse.1" },
-                { "Playback", "/Playback.1" },
+                { "Audio", settingsKeys::audio },
+                { "Cache", settingsKeys::cache },
+                { "ThumbnailCache", settingsKeys::thumbnailCache },
+                { "Export", settingsKeys::exportSettings },
+                { "FileBrowser", settingsKeys::fileBrowser },
+                { "ImageSeq", settingsKeys::imageSeq },
+                { "OTIO", settingsKeys::otio },
+                { "Shortcuts", settingsKeys::shortcuts },
+                { "Misc", settingsKeys::misc },
+                { "Mouse", settingsKeys::mouse },
+                { "Playback", settingsKeys::playback },
                 // Not "/Review": the recent reviews already live under it,
                 // and a group written there as a whole took them with it.
-                { "Review", "/ReviewSettings" },
-                { "Style", "/Style.2" },
-                { "Timeline", "/Timeline" },
-                { "Window", "/Window" },
-                { "FFmpeg", "/FFmpeg" },
-                { "FFmpegCmd", "/FFmpegCmd" },
-                { "USD", "/USD.1" },
+                { "Review", settingsKeys::reviewSettings },
+                { "Style", settingsKeys::style },
+                { "Timeline", settingsKeys::timeline },
+                { "Window", settingsKeys::window },
+                { "FFmpeg", settingsKeys::ffmpeg },
+                { "FFmpegCmd", settingsKeys::ffmpegCmd },
+                { "USD", settingsKeys::usd },
             };
         }
 
@@ -242,7 +243,7 @@ namespace djv
                 auto colorWidgetSystem =
                     context->getSystem<ftk::ColorWidgetSystem>();
                 int mode = static_cast<int>(colorWidgetSystem->getMode());
-                settings->get("/ColorWidget/Mode", mode);
+                settings->get(settingsKeys::colorWidgetMode, mode);
                 if (mode >= 0 &&
                     mode < static_cast<int>(ftk::ColorWidgetMode::Count))
                 {
@@ -302,7 +303,7 @@ namespace djv
             {
                 settings->getT(keys["Shortcuts"], shortcutsSaved);
             }
-            else if (settings->getT("/Shortcuts.3", shortcutsSaved))
+            else if (settings->getT(settingsKeys::shortcutsPrevious, shortcutsSaved))
             {
                 shortcutsSaved.shortcuts = getBoundShortcuts(shortcutsSaved.shortcuts);
             }
@@ -399,7 +400,7 @@ namespace djv
             p.settings->setT(keys["FileBrowser"], fileBrowser);
 
             p.settings->set(
-                "/ColorWidget/Mode",
+                settingsKeys::colorWidgetMode,
                 static_cast<int>(
                     context->getSystem<ftk::ColorWidgetSystem>()->getMode()));
 

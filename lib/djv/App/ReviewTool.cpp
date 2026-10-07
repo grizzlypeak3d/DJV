@@ -423,6 +423,8 @@ namespace djv
             ftk::setScreenshotTag(p.textButton, "Review.Text");
             ftk::setScreenshotTag(p.eraserButton, "Review.Eraser");
             ftk::setScreenshotTag(p.onionSkinCheckBox, "Review.OnionSkin");
+            ftk::setScreenshotTag(p.undoButton, "Review.Undo");
+            ftk::setScreenshotTag(p.redoButton, "Review.Redo");
             ftk::setScreenshotTag(p.clearDrawingButton, "Review.ClearDrawing");
 
             auto layout = ftk::VerticalLayout::create(context);
@@ -1229,6 +1231,11 @@ namespace djv
                     });
                 if (!marker.id.empty())
                 {
+                    // Tagged by position in the list, the order a capture
+                    // step sees them in.
+                    ftk::setScreenshotTag(
+                        button,
+                        ftk::Format("Review.Marker{0}").arg(p.itemOrder.size()));
                     p.markerButtons[marker.id] = button;
                     p.itemOrder.push_back({ button, marker.id, marker.range });
                 }

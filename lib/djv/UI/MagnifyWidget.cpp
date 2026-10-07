@@ -4,6 +4,7 @@
 #include <djv/UI/MagnifyWidget.h>
 
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/SettingsKeys.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/ViewportModel.h>
@@ -75,7 +76,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::gl::TextureType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > settingsObserver;
         };
 
@@ -94,9 +95,9 @@ namespace djv
 
             p.settings = settings;
             std::string s;
-            p.settings->get("/Magnify/Level", s);
+            p.settings->get(models::settingsKeys::magnifyLevel, s);
             from_string(s, p.level);
-            p.settings->get("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
+            p.settings->get(models::settingsKeys::magnifyViewPosAndZoom, p.viewPosAndZoom);
 
             p.viewport = tl::ui::Viewport::create(context);
             p.viewport->setInputEnabled(false);
@@ -140,7 +141,7 @@ namespace djv
                     FTK_P();
                     p.level = static_cast<MagnifyLevel>(value);
                     // Written when it changes; the destructor is a backstop.
-                    p.settings->set("/Magnify/Level", to_string(p.level));
+                    p.settings->set(models::settingsKeys::magnifyLevel, to_string(p.level));
                     _widgetUpdate();
                 });
 
@@ -149,7 +150,7 @@ namespace djv
                 {
                     FTK_P();
                     p.viewPosAndZoom = value;
-                    p.settings->set("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
+                    p.settings->set(models::settingsKeys::magnifyViewPosAndZoom, p.viewPosAndZoom);
                     if (value)
                     {
                         _widgetUpdate();
@@ -252,9 +253,9 @@ namespace djv
                     _p->viewport->setBackgroundOptions(value);
                 });
 
-            p.colorBufferObserver = ftk::Observer<ftk::gl::TextureType>::create(
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
                 viewportModel->observeColorBuffer(),
-                [this](ftk::gl::TextureType value)
+                [this](ftk::ImageType value)
                 {
                     _p->viewport->setColorBuffer(value);
                 });
@@ -288,8 +289,8 @@ namespace djv
         MagnifyWidget::~MagnifyWidget()
         {
             FTK_P();
-            p.settings->set("/Magnify/Level", to_string(p.level));
-            p.settings->set("/Magnify/ViewPosAndZoom", p.viewPosAndZoom);
+            p.settings->set(models::settingsKeys::magnifyLevel, to_string(p.level));
+            p.settings->set(models::settingsKeys::magnifyViewPosAndZoom, p.viewPosAndZoom);
         }
 
         std::shared_ptr<MagnifyWidget> MagnifyWidget::create(

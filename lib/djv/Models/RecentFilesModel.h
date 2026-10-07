@@ -5,6 +5,8 @@
 
 #include <djv/Models/Export.h>
 
+#include <djv/Models/SettingsKeys.h>
+
 #include <ftk/UI/RecentFilesModel.h>
 
 namespace ftk
@@ -37,7 +39,7 @@ namespace djv
             DJV_MODELS_API static std::shared_ptr<RecentFilesModel> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<ftk::Settings>&,
-                const std::string& settingsGroup = "Files");
+                const std::string& settingsGroup = settingsKeys::recentFilesGroup);
 
             //! Save the settings.
             DJV_MODELS_API void save();

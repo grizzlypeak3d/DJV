@@ -1,0 +1,122 @@
+{
+  "shots": [
+    {
+      "id": "review-pen",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 40 },
+        { "tool": "Review" },
+        { "expect": "Review.Pen", "checked": false },
+        { "expect": "Review.Undo", "enabled": false },
+        { "click": "Review.Pen" },
+        { "expect": "Review.Pen", "checked": true },
+        { "expect": "Review.Eraser", "checked": false },
+        { "drag": [
+            ["MainWindow.Viewport", 0.3, 0.6],
+            ["MainWindow.Viewport", 0.4, 0.4],
+            ["MainWindow.Viewport", 0.5, 0.6],
+            ["MainWindow.Viewport", 0.6, 0.4] ] },
+        { "expect": "Review.Undo", "enabled": true },
+        { "expect": "Review.Redo", "enabled": false },
+        { "click": "Review.Undo" },
+        { "expect": "Review.Undo", "enabled": false },
+        { "expect": "Review.Redo", "enabled": true },
+        { "click": "Review.Redo" },
+        { "expect": "Review.Undo", "enabled": true },
+        { "click": "Review.Eraser" },
+        { "expect": "Review.Pen", "checked": false },
+        { "expect": "Review.Eraser", "checked": true },
+        { "click": "Review.Eraser" },
+        { "expect": "Review.Eraser", "checked": false }
+      ]
+    },
+    {
+      "id": "press-release",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "tool": "Review" },
+        { "press": "Review.Pen" },
+        { "expect": "Review.Pen", "checked": false },
+        { "release": "Review.Pen" },
+        { "expect": "Review.Pen", "checked": true }
+      ]
+    },
+    {
+      "id": "marker-edit",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 40 },
+        { "tool": "Review" },
+        { "markers": [
+            { "frame": 12, "text": "Exposure jumps between these frames." },
+            { "range": [30, 55], "name": "Train pass", "text": "Hold the timing through the platform." } ] },
+        { "expect": "Review.MarkerEdit", "visible": false },
+        { "click": "Review.Marker1", "count": 2 },
+        { "expect": "Review.MarkerEdit", "visible": true },
+        { "key": "Escape" },
+        { "expect": "Review.MarkerEdit", "visible": false }
+      ]
+    },
+    {
+      "id": "shortcuts-search",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "tool": "Settings", "expand": ["Shortcuts"] },
+        { "click": "Shortcuts.Search" },
+        { "text": "Playback" },
+        { "expect": "Shortcuts.Search", "contains": "Playback" }
+      ]
+    },
+    {
+      "id": "playback-keys",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 10 },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:10" },
+        { "key": "Right" },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:11" },
+        { "key": "Right", "modifier": "Shift" },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:21" },
+        { "key": "Home" },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:00" },
+        { "key": "End" },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:03:17" }
+      ]
+    },
+    {
+      "id": "compare-mode",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Charlie.jpg" },
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "tool": "Files", "expand": ["Compare"] },
+        { "expect": "Files.CompareMode", "text": "None" },
+        { "click": "Files.CompareMode" },
+        { "key": "Down" },
+        { "key": "Return" },
+        { "expect": "Files.CompareMode", "text": "B" }
+      ]
+    },
+    {
+      "id": "tooltip",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "tool": "Review" },
+        { "tooltip": "Review.Pen" }
+      ]
+    }
+  ]
+}

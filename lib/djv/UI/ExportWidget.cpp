@@ -13,6 +13,7 @@
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/GL/Render.h>
+#include <tlRender/UI/Viewport.h>
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/IRender.h>
 #include <tlRender/Timeline/Util.h>
@@ -127,11 +128,9 @@ namespace djv
                 //! nowhere to put the difference. An export renders one
                 //! frame at a time into a file that may well be asked to
                 //! hold it, so it takes the most this build has.
-                ftk::gl::TextureType colorBuffer = ftk::gl::getOffscreenColorDefault();
+                ftk::ImageType colorBuffer = tl::ui::getViewportColorBufferDefault();
                 std::shared_ptr<ftk::gl::OffscreenBuffer> buffer;
                 std::shared_ptr<tl::IRender> render;
-                GLenum glFormat = 0;
-                GLenum glType = 0;
                 //! The drawings written into the picture, with the sources
                 //! they are on, in the order of the boxes, and the sizes
                 //! their points are in. Taken once, like the layout.
@@ -813,9 +812,7 @@ namespace djv
                             infos),
                         compareSize,
                         p.exportData->info.size);
-                    p.exportData->glFormat = ftk::gl::getReadPixelsFormat(p.exportData->info.type);
-                    p.exportData->glType = ftk::gl::getReadPixelsType(p.exportData->info.type);
-                    if (GL_NONE == p.exportData->glFormat || GL_NONE == p.exportData->glType)
+                    if (!ftk::gl::OffscreenBuffer::canRead(p.exportData->info.type))
                     {
                         throw std::runtime_error(
                             ftk::Format("Cannot open: \"{0}\"").arg(p.exportData->path.get()));
@@ -975,7 +972,7 @@ namespace djv
                     offscreenBufferOptions.stencil = ftk::gl::OffscreenStencil::_8;
                     p.exportData->buffer = ftk::gl::OffscreenBuffer::create(
                         p.exportData->info.size,
-                        p.exportData->colorBuffer,
+                        ftk::gl::getRenderableType(ftk::gl::getTextureType(p.exportData->colorBuffer)),
                         offscreenBufferOptions);
 
                     // Create the progress dialog.
@@ -1114,20 +1111,7 @@ namespace djv
                 p.exportData->render->end();
 
                 // Write the output image.
-                auto image = ftk::Image::create(p.exportData->info);
-                glPixelStorei(GL_PACK_ALIGNMENT, p.exportData->info.layout.alignment);
-                if (!ftk::gl::isGLES())
-                {
-                    glPixelStorei(GL_PACK_SWAP_BYTES, p.exportData->info.layout.endian != ftk::getEndian());
-                }
-                glReadPixels(
-                    0,
-                    0,
-                    p.exportData->info.size.w,
-                    p.exportData->info.size.h,
-                    p.exportData->glFormat,
-                    p.exportData->glType,
-                    image->getData());
+                auto image = p.exportData->buffer->read(p.exportData->info);
 
                 // The sequence writers name each file from the time it is
                 // written at, so those keep the frame numbers of the timeline

@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/DrawModel.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <ftk/UI/Settings.h>
 
@@ -59,17 +60,17 @@ namespace djv
             // A warm orange reads on both dark and bright footage; a dark
             // default would be invisible on dark shots.
             ftk::Color4F color(1.F, .365F, .02F, 1.F);
-            p.settings->getT("/Draw/Color", color);
+            p.settings->getT(settingsKeys::drawColor, color);
             p.color = ftk::Observable<ftk::Color4F>::create(color);
 
             float size = 4.F;
-            p.settings->get("/Draw/Size", size);
+            p.settings->get(settingsKeys::drawSize, size);
             p.size = ftk::Observable<float>::create(size > 0.F ? size : 4.F);
             float textSize = 48.F;
-            p.settings->get("/Draw/TextSize", textSize);
+            p.settings->get(settingsKeys::drawTextSize, textSize);
             p.textSize = ftk::Observable<float>::create(textSize > 0.F ? textSize : 48.F);
             bool onionSkin = false;
-            p.settings->get("/Draw/OnionSkin", onionSkin);
+            p.settings->get(settingsKeys::drawOnionSkin, onionSkin);
             p.onionSkin = ftk::Observable<bool>::create(onionSkin);
         }
 
@@ -80,10 +81,10 @@ namespace djv
         DrawModel::~DrawModel()
         {
             FTK_P();
-            p.settings->setT("/Draw/Color", p.color->get());
-            p.settings->set("/Draw/Size", p.size->get());
-            p.settings->set("/Draw/TextSize", p.textSize->get());
-            p.settings->set("/Draw/OnionSkin", p.onionSkin->get());
+            p.settings->setT(settingsKeys::drawColor, p.color->get());
+            p.settings->set(settingsKeys::drawSize, p.size->get());
+            p.settings->set(settingsKeys::drawTextSize, p.textSize->get());
+            p.settings->set(settingsKeys::drawOnionSkin, p.onionSkin->get());
         }
 
         std::shared_ptr<DrawModel> DrawModel::create(
