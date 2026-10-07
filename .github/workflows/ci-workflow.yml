@@ -93,6 +93,20 @@ jobs:
         cd build-Release
         xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Release
 
+    # A crash in a capture test prints nothing, the log being flushed only
+    # once the application has started, so this says where it crashed: the
+    # version alone, which starts no window, and then one shot under gdb.
+    - name: Backtrace
+      if: failure()
+      env:
+        SDL_AUDIODRIVER: dummy
+        SDL_VIDEODRIVER: x11
+      run: |
+        mkdir -p /tmp/capture
+        cd djv
+        xvfb-run ../build-Release/bin/djv/djv -version || true
+        xvfb-run gdb -batch -ex run -ex bt --args ../build-Release/bin/djv/djv -resetSettings -settingsFile /tmp/capture/settings.json -captureManifest tests/capture/capture.json -captureShot shortcuts-search -captureOutput /tmp/capture -log
+
     # This build packages without the super build's libraries, which is the
     # part of packaging nothing else here covers: the package target went
     # missing from it for a fortnight before anyone noticed (#889).
