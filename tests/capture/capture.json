@@ -33,6 +33,35 @@
       ]
     },
     {
+      "id": "review-shapes",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "frame": 40 },
+        { "tool": "Review" },
+        { "click": "Review.Rectangle" },
+        { "expect": "Review.Rectangle", "checked": true },
+        { "drag": [["MainWindow.Viewport", 0.2, 0.3], ["MainWindow.Viewport", 0.45, 0.6]] },
+        { "expect": "Review.Undo", "enabled": true },
+        { "click": "Review.Arrow" },
+        { "expect": "Review.Rectangle", "checked": false },
+        { "expect": "Review.Arrow", "checked": true },
+        { "drag": [["MainWindow.Viewport", 0.55, 0.7], ["MainWindow.Viewport", 0.75, 0.4]] },
+        { "click": "Review.Text" },
+        { "expect": "Review.Text", "checked": true },
+        { "click": ["MainWindow.Viewport", 0.5, 0.2] },
+        { "text": "Check the sky" },
+        { "key": "Return" },
+        { "click": "Review.Select" },
+        { "expect": "Review.Text", "checked": false },
+        { "expect": "Review.Select", "checked": true },
+        { "click": ["MainWindow.Viewport", 0.2, 0.45] },
+        { "key": "Delete" },
+        { "expect": "Review.Undo", "enabled": true }
+      ]
+    },
+    {
       "id": "press-release",
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
