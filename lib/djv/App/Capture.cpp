@@ -853,7 +853,17 @@ namespace djv
             if (!app)
                 return std::string();
             auto player = app->observePlayer()->get();
-            if (!player || _ready())
+            if (!player)
+            {
+                // A file whose timeline cannot be created -- a format this
+                // build has no reader for, say -- is closed again on the
+                // next tick, so an open with nothing left in the files model
+                // is one that failed; the reason went to the log.
+                return app->getFilesModel()->getFiles().empty() ?
+                    std::string("the file could not be opened; see the log") :
+                    std::string();
+            }
+            if (_ready())
                 return std::string();
             // A player's information is worked out when its timeline is read,
             // so a player with neither video nor audio will never gain them:
