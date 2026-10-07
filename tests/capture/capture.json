@@ -5,8 +5,8 @@
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 40 },
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "frame": 5 },
         { "tool": "Review" },
         { "expect": "Review.Pen", "checked": false },
         { "expect": "Review.Undo", "enabled": false },
@@ -37,7 +37,7 @@
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "open": "etc/SampleData/Counter.#.png" },
         { "tool": "Review" },
         { "press": "Review.Pen" },
         { "expect": "Review.Pen", "checked": false },
@@ -50,12 +50,12 @@
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 40 },
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "frame": 5 },
         { "tool": "Review" },
         { "markers": [
-            { "frame": 12, "text": "Exposure jumps between these frames." },
-            { "range": [30, 55], "name": "Train pass", "text": "Hold the timing through the platform." } ] },
+            { "frame": 1, "text": "Exposure jumps between these frames." },
+            { "range": [3, 7], "name": "Train pass", "text": "Hold the timing through the platform." } ] },
         { "expect": "Review.MarkerEdit", "visible": false },
         { "click": "Review.Marker1", "count": 2 },
         { "expect": "Review.MarkerEdit", "visible": true },
@@ -79,17 +79,18 @@
       "strict": true,
       "window": { "w": 1000, "h": 600 },
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
-        { "frame": 10 },
-        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:10" },
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "frame": 2 },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:02" },
         { "key": "Right" },
-        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:11" },
-        { "key": "Right", "modifier": "Shift" },
-        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:21" },
-        { "key": "Home" },
-        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:00" },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:03" },
+        { "key": "Left" },
+        { "key": "Left" },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:01" },
         { "key": "End" },
-        { "expect": "Playback.CurrentFrame", "contains": "00:00:03:17" }
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:09" },
+        { "key": "Home" },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:00" }
       ]
     },
     {
@@ -97,8 +98,8 @@
       "strict": true,
       "window": { "w": 1000, "h": 600 },
       "setup": [
-        { "open": "etc/SampleData/Charlie.jpg" },
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "open": "etc/SampleData/ColorPattern.png" },
+        { "open": "etc/SampleData/Counter.#.png" },
         { "tool": "Files", "expand": ["Compare"] },
         { "expect": "Files.CompareMode", "text": "None" },
         { "click": "Files.CompareMode" },
@@ -113,7 +114,7 @@
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
       "crop": "MainWindow.Tools",
       "setup": [
-        { "open": "etc/SampleData/BART_2021-02-07.#.jpg" },
+        { "open": "etc/SampleData/Counter.#.png" },
         { "tool": "Review" },
         { "tooltip": "Review.Pen" }
       ]
