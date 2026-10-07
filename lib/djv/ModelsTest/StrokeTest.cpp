@@ -260,9 +260,14 @@ namespace djv
                 _checkFinite(mesh.v);
             }
             {
-                const auto line = models::shapeMesh(models::ReviewStrokeKind::Line, corners, 4.F);
+                // A cap is left off where asked; an arrow is a shaft with no
+                // cap at the head, plus the head.
+                const auto capped = models::strokeMesh(corners, 4.F);
+                const auto uncapped = models::strokeMesh(corners, 4.F, true, false);
+                FTK_CHECK(uncapped.triangles.size() < capped.triangles.size());
+                FTK_CHECK(models::strokeMesh(corners, 4.F, false, false).triangles.size() < uncapped.triangles.size());
                 const auto arrow = models::shapeMesh(models::ReviewStrokeKind::Arrow, corners, 4.F);
-                FTK_CHECK(arrow.triangles.size() == line.triangles.size() + 1);
+                FTK_CHECK(arrow.triangles.size() == uncapped.triangles.size() + 1);
                 // The tip of the head is the second point.
                 bool tip = false;
                 for (const auto& v : arrow.v)

@@ -146,7 +146,8 @@ namespace djv
                 { "Arrow", models::DrawTool::Arrow },
                 { "Rectangle", models::DrawTool::Rectangle },
                 { "Ellipse", models::DrawTool::Ellipse },
-                { "Text", models::DrawTool::Text }
+                { "Text", models::DrawTool::Text },
+                { "Select", models::DrawTool::Select }
             };
             const std::map<std::string, std::string> toolDocs =
             {
@@ -154,7 +155,8 @@ namespace djv
                 { "Arrow", "Draw arrows on the frame." },
                 { "Rectangle", "Draw rectangles on the frame." },
                 { "Ellipse", "Draw ellipses on the frame." },
-                { "Text", "Write text on the frame." }
+                { "Text", "Write text on the frame." },
+                { "Select", "Select a stroke on the frame, to move, change, or remove it." }
             };
             for (const auto& i : tools)
             {
@@ -358,6 +360,10 @@ namespace djv
                 "Erase",
                 "Eraser",
                 _checkCommand("Erase"));
+            _actions["Select"] = ftk::Action::create(
+                "Select",
+                "DrawSelect",
+                _checkCommand("Select"));
             _actions["OnionSkin"] = ftk::Action::create(
                 "Onion Skin",
                 _checkCommand("OnionSkin"));
@@ -399,27 +405,45 @@ namespace djv
             _tooltips["Line"] =
                 "Draw lines.\n"
                 "\n"
-                "Hold Shift for a line at a multiple of forty-five degrees. "
+                "Shift: a line at a multiple of forty-five degrees.\n"
+                "\n"
                 "Click again to stop drawing.";
             _tooltips["Arrow"] =
                 "Draw arrows, the head where the drag ends.\n"
                 "\n"
-                "Hold Shift for an arrow at a multiple of forty-five degrees. "
+                "Shift: an arrow at a multiple of forty-five degrees.\n"
+                "\n"
                 "Click again to stop drawing.";
             _tooltips["Rectangle"] =
                 "Draw rectangles.\n"
                 "\n"
-                "Hold Shift for a square. Click again to stop drawing.";
+                "Shift: a square.\n"
+                "\n"
+                "Click again to stop drawing.";
             _tooltips["Ellipse"] =
                 "Draw ellipses.\n"
                 "\n"
-                "Hold Shift for a circle. Click again to stop drawing.";
+                "Shift: a circle.\n"
+                "\n"
+                "Click again to stop drawing.";
             _tooltips["Text"] =
                 "Write text: click where it starts and type.\n"
                 "\n"
-                "Return keeps it, Escape lets it go. Click again to stop.";
+                "Return: keep it.\n"
+                "Escape: let it go.\n"
+                "\n"
+                "Click again to stop.";
             _tooltips["Erase"] =
                 "Erase the strokes you touch.\n"
+                "\n"
+                "Click again to stop.";
+            _tooltips["Select"] =
+                "Select a stroke: click it, and drag to move it.\n"
+                "\n"
+                "Handles: move a point of a shape.\n"
+                "Color and sizes: change it.\n"
+                "Delete: remove it.\n"
+                "Double click or Return: write text again.\n"
                 "\n"
                 "Click again to stop.";
             _tooltips["OnionSkin"] =
@@ -464,6 +488,7 @@ namespace djv
             _addShortcut("Ellipse", "Draw ellipses");
             _addShortcut("Text", "Write text");
             _addShortcut("Erase", "Erase strokes");
+            _addShortcut("Select", "Select strokes");
             _addShortcut("OnionSkin", "Onion skin");
             _addShortcut(
                 "Undo",

@@ -41,6 +41,7 @@ namespace djv
             addAction(actions["Close"]);
             p.recentMenu = addSubMenu("Recent");
             addDivider();
+            addAction(actions["Select"]);
             addAction(actions["Draw"]);
             addAction(actions["Line"]);
             addAction(actions["Arrow"]);

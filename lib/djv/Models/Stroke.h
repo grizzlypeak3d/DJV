@@ -35,10 +35,15 @@ namespace djv
             int subdivisions);
 
         //! Build the mesh for a stroke of the given width along a path, with
-        //! round caps at the ends. Mesh vertex indices are one-based.
+        //! round caps at the ends unless told to leave one off, as the shaft
+        //! of an arrow does at its head. Nothing in the mesh overlaps, so a
+        //! translucent stroke blends once everywhere. Mesh vertex indices
+        //! are one-based.
         DJV_MODELS_API ftk::TriMesh2F strokeMesh(
             const std::vector<ftk::V2F>& points,
-            float width);
+            float width,
+            bool capStart = true,
+            bool capEnd = true);
 
         //! The path a shape is drawn along, from the points a stroke of
         //! that kind holds: the four sides of a rectangle, the circumference

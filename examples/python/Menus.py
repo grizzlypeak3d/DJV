@@ -203,6 +203,7 @@ class Review(ftk.Menu):
         self.addAction(actions.actions["Close"])
         self.recentMenu = self.addSubMenu("Recent")
         self.addDivider();
+        self.addAction(actions.actions["Select"])
         self.addAction(actions.actions["Draw"])
         for name in ["Line", "Arrow", "Rectangle", "Ellipse", "Text"]:
             self.addAction(actions.actions[name])

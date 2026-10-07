@@ -10,6 +10,8 @@
 #include <ftk/Core/ObservableList.h>
 #include <ftk/Core/Observable.h>
 
+#include <optional>
+
 namespace ftk
 {
     class CommandStack;
@@ -69,6 +71,32 @@ namespace djv
                 const OTIO_NS::RationalTime&,
                 const ftk::V2F& pos,
                 float radius);
+
+            //! Find the stroke of the given source and frame that passes
+            //! within the radius of the position, the one on top where there
+            //! are several: its index in getStrokes(), or none. The position
+            //! and the radius are in the pixels of the source image.
+            DJV_MODELS_API std::optional<size_t> findStroke(
+                const std::string& sourceId,
+                const OTIO_NS::RationalTime&,
+                const ftk::V2F& pos,
+                float radius) const;
+
+            //! Replace a stroke of the given source and frame, by its index
+            //! in getStrokes(): moved, recolored, resized, or text written
+            //! again. One undo step.
+            DJV_MODELS_API void setStroke(
+                const std::string& sourceId,
+                const OTIO_NS::RationalTime&,
+                size_t index,
+                const ReviewStroke&);
+
+            //! Remove a stroke of the given source and frame, by its index
+            //! in getStrokes().
+            DJV_MODELS_API void removeStroke(
+                const std::string& sourceId,
+                const OTIO_NS::RationalTime&,
+                size_t index);
 
             //! Remove every stroke of the given sources and frame. One call
             //! for all of the sources, so that clearing a compared frame is

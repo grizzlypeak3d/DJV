@@ -43,6 +43,7 @@ namespace djv
         {
             _strokes();
             _erase();
+            _pick();
             _clearFrame();
             _undo();
             _serialize();
@@ -117,6 +118,46 @@ namespace djv
             {
                 _error("Annotation erase failed");
             }
+        }
+
+        void AnnotationsModelTest::_pick()
+        {
+            auto model = models::AnnotationsModel::create();
+            model->addStroke("srcA", frame(100), makeStroke(0.F, 0.F, 100.F, 0.F));
+            model->addStroke("srcA", frame(100), makeStroke(0.F, 0.F, 100.F, 0.F));
+            model->addStroke("srcA", frame(100), makeStroke(0.F, 50.F, 100.F, 50.F));
+
+            // The stroke on top is found where two overlap; nothing is found
+            // away from any; a frame with no drawing finds nothing.
+            FTK_CHECK(1 == model->findStroke("srcA", frame(100), ftk::V2F(50.F, 0.F), 2.F).value_or(99));
+            FTK_CHECK(2 == model->findStroke("srcA", frame(100), ftk::V2F(50.F, 50.F), 2.F).value_or(99));
+            FTK_CHECK(!model->findStroke("srcA", frame(100), ftk::V2F(50.F, 25.F), 2.F).has_value());
+            FTK_CHECK(!model->findStroke("srcA", frame(101), ftk::V2F(50.F, 0.F), 2.F).has_value());
+
+            // A stroke replaced is one undo step; one that is the same is
+            // nothing.
+            models::ReviewStroke moved = makeStroke(0.F, 80.F, 100.F, 80.F);
+            model->setStroke("srcA", frame(100), 2, moved);
+            FTK_CHECK(moved == model->getStrokes("srcA", frame(100))[2]);
+            FTK_CHECK(2 == model->findStroke("srcA", frame(100), ftk::V2F(50.F, 80.F), 2.F).value_or(99));
+            model->setStroke("srcA", frame(100), 2, moved);
+            model->undo();
+            FTK_CHECK(2 == model->findStroke("srcA", frame(100), ftk::V2F(50.F, 50.F), 2.F).value_or(99));
+            model->redo();
+            FTK_CHECK(2 == model->findStroke("srcA", frame(100), ftk::V2F(50.F, 80.F), 2.F).value_or(99));
+
+            // An index past the end does nothing.
+            model->setStroke("srcA", frame(100), 5, moved);
+            model->removeStroke("srcA", frame(100), 5);
+            FTK_CHECK(3 == model->getStrokes("srcA", frame(100)).size());
+
+            // Removing takes the one asked for, and the last one takes the
+            // annotation with it.
+            model->removeStroke("srcA", frame(100), 0);
+            FTK_CHECK(2 == model->getStrokes("srcA", frame(100)).size());
+            model->removeStroke("srcA", frame(100), 0);
+            model->removeStroke("srcA", frame(100), 0);
+            FTK_CHECK(model->getAnnotations().empty());
         }
 
         void AnnotationsModelTest::_clearFrame()

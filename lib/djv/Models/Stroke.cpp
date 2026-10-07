@@ -107,19 +107,33 @@ namespace djv
             return out;
         }
 
-        //! Append a filled disc to a mesh, used for the two end caps.
+        //! Append a fan of a disc to a mesh: the whole of it for a dot, or
+        //! the half that lies past the end of a ribbon as its cap. Only the
+        //! outside half, so that a translucent stroke is not blended twice
+        //! where a cap would lie under the ribbon: the onion skin showed a
+        //! denser dot at every end.
         //!
         //! The number of sides follows the radius: a fixed count would show flat
         //! facets once a stroke is thick or zoomed in. Mesh vertex indices are
         //! one-based.
-        void addDisc(ftk::TriMesh2F& mesh, const ftk::V2F& center, float radius)
+        void addDisc(
+            ftk::TriMesh2F& mesh,
+            const ftk::V2F& center,
+            float radius,
+            float startAngle = 0.F,
+            float span = 2.F * 3.14159265F)
         {
-            const int segments = std::max(16, std::min(96, static_cast<int>(radius * 2.F)));
+            const bool whole = span >= 2.F * 3.14159265F - .001F;
+            const int segments = std::max(
+                whole ? 16 : 8,
+                std::min(96, static_cast<int>(radius * 2.F * span / (2.F * 3.14159265F))));
             const size_t centerIndex = mesh.v.size() + 1;
             mesh.v.push_back(center);
-            for (int i = 0; i < segments; ++i)
+            // A whole disc closes on itself; a part has both of its ends.
+            const int rim = whole ? segments : segments + 1;
+            for (int i = 0; i < rim; ++i)
             {
-                const float a = i / static_cast<float>(segments) * 2.F * 3.14159265F;
+                const float a = startAngle + i / static_cast<float>(segments) * span;
                 mesh.v.push_back(ftk::V2F(
                     center.x + std::cos(a) * radius,
                     center.y + std::sin(a) * radius));
@@ -130,7 +144,7 @@ namespace djv
                 // faces, so a disc wound the other way is simply never drawn.
                 ftk::Triangle2 triangle;
                 triangle.v[0].v = centerIndex;
-                triangle.v[1].v = centerIndex + 1 + ((i + 1) % segments);
+                triangle.v[1].v = centerIndex + 1 + ((i + 1) % rim);
                 triangle.v[2].v = centerIndex + 1 + i;
                 mesh.triangles.push_back(triangle);
             }
@@ -144,7 +158,7 @@ namespace djv
         //! is offset along the averaged normal of its two neighbouring segments (a
         //! mitre), lengthened by 1/cos to hold the width through a turn and clamped
         //! so a sharp corner cannot spike. Round caps close the two ends.
-        ftk::TriMesh2F strokeMesh(const std::vector<ftk::V2F>& points, float width)
+        ftk::TriMesh2F strokeMesh(const std::vector<ftk::V2F>& points, float width, bool capStart, bool capEnd)
         {
             ftk::TriMesh2F out;
             const float radius = std::max(.5F, width / 2.F);
@@ -220,8 +234,21 @@ namespace djv
                 out.triangles.push_back(triangle);
             }
 
-            addDisc(out, points.front(), radius);
-            addDisc(out, points.back(), radius);
+            // The caps: the half of a disc that lies beyond each end, from
+            // one side of the ribbon round to the other.
+            {
+                const ftk::V2F d0 = direction(points[1], points[0]);
+                const ftk::V2F d1 = direction(points[size - 2], points[size - 1]);
+                const float pi = 3.14159265F;
+                if (capStart && (d0.x != 0.F || d0.y != 0.F))
+                {
+                    addDisc(out, points.front(), radius, std::atan2(d0.y, d0.x) - pi / 2.F, pi);
+                }
+                if (capEnd && (d1.x != 0.F || d1.y != 0.F))
+                {
+                    addDisc(out, points.back(), radius, std::atan2(d1.y, d1.x) - pi / 2.F, pi);
+                }
+            }
             return out;
         }
 
@@ -328,9 +355,12 @@ namespace djv
                 }
                 const ftk::V2F dir(dx / length, dy / length);
                 const float head = std::min(length, std::max(width * 4.F, 8.F));
+                // The shaft stops square at the head's base, with no cap,
+                // rather than running under the head: a translucent arrow
+                // would blend twice there. The head is wider than the shaft,
+                // so the join is covered.
                 const ftk::V2F base(b.x - dir.x * head, b.y - dir.y * head);
-                const ftk::V2F shaftEnd(b.x - dir.x * head * .75F, b.y - dir.y * head * .75F);
-                out = strokeMesh({ a, shaftEnd }, width);
+                out = strokeMesh({ a, base }, width, true, false);
                 const float half = head * .5F;
                 addTriangle(
                     out,

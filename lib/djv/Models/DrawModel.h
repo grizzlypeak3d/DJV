@@ -29,14 +29,15 @@ namespace djv
             Rectangle,
             Ellipse,
             Text,
+            Select,
 
             Count,
             First = Pen
         };
         FTK_ENUM(DJV_MODELS_API, DrawTool);
 
-        //! The kind of stroke a tool makes. The eraser makes none and gives
-        //! freehand.
+        //! The kind of stroke a tool makes. The eraser and the select tool
+        //! make none and give freehand.
         DJV_MODELS_API ReviewStrokeKind getStrokeKind(DrawTool);
 
         //! The drawing state: whether drawing is active, and with what.

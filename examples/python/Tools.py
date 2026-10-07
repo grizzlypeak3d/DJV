@@ -1134,6 +1134,9 @@ class ReviewTool(IToolWidget):
         # history, and the clear.
         drawToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, toolLayout)
         drawToolBar.spacingRole = ftk.SizeRole._None
+        self._selectButton = ftk.ToolButton(context)
+        self._selectButton.icon = "DrawSelect"
+        drawToolBar.addWidget(self._selectButton)
         self._penButton = ftk.ToolButton(context)
         self._penButton.icon = "DrawTool"
         drawToolBar.addWidget(self._penButton)
@@ -1156,18 +1159,16 @@ class ReviewTool(IToolWidget):
         self._eraserButton = ftk.ToolButton(context)
         self._eraserButton.icon = "Eraser"
         drawToolBar.addWidget(self._eraserButton)
-        toolLayout.addSpacer(ftk.SizeRole._None, ftk.Stretch.Expanding)
-        historyToolBar = ftk.ToolBar(context, ftk.Orientation.Horizontal, toolLayout)
-        historyToolBar.spacingRole = ftk.SizeRole._None
-        self._undoButton = ftk.ToolButton(context)
+        # The history and the clear go in the section's title row, as the
+        # markers' buttons do, which keeps the tool row to the tools.
+        drawingToolLayout = ftk.HorizontalLayout(context)
+        drawingToolLayout.spacingRole = ftk.SizeRole._None
+        self._undoButton = ftk.ToolButton(context, drawingToolLayout)
         self._undoButton.icon = "Undo"
-        historyToolBar.addWidget(self._undoButton)
-        self._redoButton = ftk.ToolButton(context)
+        self._redoButton = ftk.ToolButton(context, drawingToolLayout)
         self._redoButton.icon = "Redo"
-        historyToolBar.addWidget(self._redoButton)
-        # A push button: with no group behind it, a flat button with only
-        # text reads as a label.
-        self._clearDrawingButton = ftk.PushButton(context, "Clear", toolLayout)
+        self._clearDrawingButton = ftk.ToolButton(context, drawingToolLayout)
+        self._clearDrawingButton.icon = "Remove"
         sizeLayout = ftk.HorizontalLayout(context, drawingWidget)
         sizeLayout.spacingRole = ftk.SizeRole.SpacingSmall
         sizeLabel = ftk.Label(context, "Size:", sizeLayout)
@@ -1201,6 +1202,7 @@ class ReviewTool(IToolWidget):
                 ftk.StringObserver(action.observeTooltip, update))
         bindTooltip(self._addNoteButton, reviewActions["AddNote"])
         bindTooltip(self._addRangeButton, reviewActions["AddRange"])
+        bindTooltip(self._selectButton, reviewActions["Select"])
         bindTooltip(self._penButton, reviewActions["Draw"])
         for tool, name in [
             (djv.models.DrawTool.Line, "Line"),
@@ -1234,7 +1236,7 @@ class ReviewTool(IToolWidget):
         self._scrollLayout = layout
         self._bellows = {}
         for title, widget, toolWidget in [
-            ("Drawing", drawingWidget, None),
+            ("Drawing", drawingWidget, drawingToolLayout),
             ("Markers", self._markerListLayout, markerToolLayout),
         ]:
             bellows = ftk.Bellows(context, title, layout)
@@ -1274,6 +1276,8 @@ class ReviewTool(IToolWidget):
             active = drawModel.enabled and drawModel.tool == tool
             drawModel.tool = tool
             drawModel.enabled = not active
+        self._selectButton.setClickedCallback(
+            lambda: toolClicked(djv.models.DrawTool.Select))
         self._penButton.setClickedCallback(
             lambda: toolClicked(djv.models.DrawTool.Pen))
         for tool, button in self._shapeButtons.items():
@@ -1566,6 +1570,8 @@ class ReviewTool(IToolWidget):
             drawModel = self._app().getDrawModel()
             enabled = drawModel.enabled
             tool = drawModel.tool
+            self._selectButton.checked = \
+                enabled and djv.models.DrawTool.Select == tool
             self._penButton.checked = \
                 enabled and djv.models.DrawTool.Pen == tool
             for shapeTool, button in self._shapeButtons.items():

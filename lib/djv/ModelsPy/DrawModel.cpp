@@ -41,7 +41,8 @@ namespace djv
                 .value("Arrow", DrawTool::Arrow)
                 .value("Rectangle", DrawTool::Rectangle)
                 .value("Ellipse", DrawTool::Ellipse)
-                .value("Text", DrawTool::Text);
+                .value("Text", DrawTool::Text)
+                .value("Select", DrawTool::Select);
             m.def("getStrokeKind", &getStrokeKind, nb::arg("tool"));
 
             ftk::python::observable<DrawTool>(m, "DrawTool");

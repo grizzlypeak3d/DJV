@@ -185,7 +185,9 @@ namespace djv
                 { "Misc", "/Misc.3" },
                 { "Mouse", "/Mouse.1" },
                 { "Playback", "/Playback.1" },
-                { "Review", "/Review" },
+                // Not "/Review": the recent reviews already live under it,
+                // and a group written there as a whole took them with it.
+                { "Review", "/ReviewSettings" },
                 { "Style", "/Style.2" },
                 { "Timeline", "/Timeline" },
                 { "Window", "/Window" },

@@ -17,7 +17,8 @@ namespace djv
             "Arrow",
             "Rectangle",
             "Ellipse",
-            "Text");
+            "Text",
+            "Select");
 
         ReviewStrokeKind getStrokeKind(DrawTool value)
         {

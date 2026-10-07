@@ -185,6 +185,78 @@ namespace djv
             }
         }
 
+        std::optional<size_t> AnnotationsModel::findStroke(
+            const std::string& sourceId,
+            const OTIO_NS::RationalTime& time,
+            const ftk::V2F& pos,
+            float radius) const
+        {
+            std::optional<size_t> out;
+            const std::vector<ReviewStroke> strokes = getStrokes(sourceId, time);
+            // Back to front: the last drawn is on top, and is what a click
+            // on two strokes means.
+            for (size_t i = strokes.size(); i > 0; --i)
+            {
+                if (strokeHit(strokes[i - 1], pos, radius))
+                {
+                    out = i - 1;
+                    break;
+                }
+            }
+            return out;
+        }
+
+        void AnnotationsModel::setStroke(
+            const std::string& sourceId,
+            const OTIO_NS::RationalTime& time,
+            size_t index,
+            const ReviewStroke& stroke)
+        {
+            FTK_P();
+            auto annotations = p.annotations->get();
+            for (auto& annotation : annotations)
+            {
+                if (annotation.sourceId == sourceId &&
+                    sameTime(annotation.time, time) &&
+                    index < annotation.strokes.size())
+                {
+                    if (annotation.strokes[index] == stroke)
+                    {
+                        return;
+                    }
+                    annotation.strokes[index] = stroke;
+                    _push(annotations);
+                    return;
+                }
+            }
+        }
+
+        void AnnotationsModel::removeStroke(
+            const std::string& sourceId,
+            const OTIO_NS::RationalTime& time,
+            size_t index)
+        {
+            FTK_P();
+            auto annotations = p.annotations->get();
+            for (auto i = annotations.begin(); i != annotations.end(); ++i)
+            {
+                if (i->sourceId == sourceId &&
+                    sameTime(i->time, time) &&
+                    index < i->strokes.size())
+                {
+                    i->strokes.erase(i->strokes.begin() + index);
+                    // The last stroke takes the annotation with it, as the
+                    // eraser does.
+                    if (i->strokes.empty())
+                    {
+                        annotations.erase(i);
+                    }
+                    _push(annotations);
+                    return;
+                }
+            }
+        }
+
         void AnnotationsModel::clearFrame(
             const std::vector<std::string>& sourceIds,
             const OTIO_NS::RationalTime& time)

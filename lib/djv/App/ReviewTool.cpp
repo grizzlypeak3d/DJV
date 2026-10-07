@@ -212,6 +212,7 @@ namespace djv
             std::vector<models::ReviewMarker> markers;
 
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::ToolButton> selectButton;
             std::shared_ptr<ftk::ToolButton> penButton;
             std::shared_ptr<ftk::ToolButton> lineButton;
             std::shared_ptr<ftk::ToolButton> arrowButton;
@@ -224,7 +225,7 @@ namespace djv
             std::shared_ptr<ftk::CheckBox> onionSkinCheckBox;
             std::shared_ptr<ftk::ToolButton> undoButton;
             std::shared_ptr<ftk::ToolButton> redoButton;
-            std::shared_ptr<ftk::PushButton> clearDrawingButton;
+            std::shared_ptr<ftk::ToolButton> clearDrawingButton;
 
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::ScrollWidget> scrollWidget;
@@ -339,6 +340,10 @@ namespace djv
             // history, and the clear.
             auto drawToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, toolLayout);
             drawToolBar->setSpacingRole(ftk::SizeRole::None);
+            p.selectButton = ftk::ToolButton::create(context);
+            drawToolBar->addWidget(p.selectButton);
+            p.selectButton->setIcon("DrawSelect");
+
             p.penButton = ftk::ToolButton::create(context);
             drawToolBar->addWidget(p.penButton);
             p.penButton->setIcon("DrawTool");
@@ -371,21 +376,17 @@ namespace djv
             drawToolBar->addWidget(p.eraserButton);
             p.eraserButton->setIcon("Eraser");
 
-            toolLayout->addSpacer(ftk::SizeRole::None, ftk::Stretch::Expanding);
-
-            auto historyToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, toolLayout);
-            historyToolBar->setSpacingRole(ftk::SizeRole::None);
-            p.undoButton = ftk::ToolButton::create(context);
-            historyToolBar->addWidget(p.undoButton);
+            // The history and the clear go in the section's title row, as
+            // the markers' buttons do, which keeps the tool row to the
+            // tools.
+            auto drawingToolLayout = ftk::HorizontalLayout::create(context);
+            drawingToolLayout->setSpacingRole(ftk::SizeRole::None);
+            p.undoButton = ftk::ToolButton::create(context, drawingToolLayout);
             p.undoButton->setIcon("Undo");
-
-            p.redoButton = ftk::ToolButton::create(context);
-            historyToolBar->addWidget(p.redoButton);
+            p.redoButton = ftk::ToolButton::create(context, drawingToolLayout);
             p.redoButton->setIcon("Redo");
-
-            // A push button: with no group behind it, a flat button with
-            // only text reads as a label.
-            p.clearDrawingButton = ftk::PushButton::create(context, "Clear", toolLayout);
+            p.clearDrawingButton = ftk::ToolButton::create(context, drawingToolLayout);
+            p.clearDrawingButton->setIcon("Remove");
 
             auto sizeLayout = ftk::HorizontalLayout::create(context, drawingWidget);
             sizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -413,6 +414,7 @@ namespace djv
             ftk::setScreenshotTag(p.addNoteButton, "Review.AddNote");
             ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
             ftk::setScreenshotTag(p.deleteButton, "Review.Delete");
+            ftk::setScreenshotTag(p.selectButton, "Review.Select");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
             ftk::setScreenshotTag(p.lineButton, "Review.Line");
             ftk::setScreenshotTag(p.arrowButton, "Review.Arrow");
@@ -427,6 +429,7 @@ namespace djv
             layout->setSpacingRole(ftk::SizeRole::Border);
             p.bellows["Drawing"] = ftk::Bellows::create(context, "Drawing", layout);
             p.bellows["Drawing"]->setWidget(drawingWidget);
+            p.bellows["Drawing"]->setToolWidget(drawingToolLayout);
             p.bellows["Drawing"]->setOpen(true);
             p.bellows["Markers"] = ftk::Bellows::create(context, "Markers", layout);
             p.bellows["Markers"]->setWidget(p.markerListLayout);
@@ -462,6 +465,7 @@ namespace djv
             };
             bindTooltip(p.addNoteButton, reviewActions.at("AddNote"));
             bindTooltip(p.addRangeButton, reviewActions.at("AddRange"));
+            bindTooltip(p.selectButton, reviewActions.at("Select"));
             bindTooltip(p.penButton, reviewActions.at("Draw"));
             bindTooltip(p.lineButton, reviewActions.at("Line"));
             bindTooltip(p.arrowButton, reviewActions.at("Arrow"));
@@ -499,6 +503,8 @@ namespace djv
                     drawModel->setEnabled(!active);
                 }
             };
+            p.selectButton->setClickedCallback(
+                [toolClicked] { toolClicked(models::DrawTool::Select); });
             p.penButton->setClickedCallback(
                 [toolClicked] { toolClicked(models::DrawTool::Pen); });
             p.lineButton->setClickedCallback(
@@ -806,6 +812,7 @@ namespace djv
                 auto drawModel = app->getDrawModel();
                 const bool enabled = drawModel->isEnabled();
                 const models::DrawTool tool = drawModel->getTool();
+                p.selectButton->setChecked(enabled && models::DrawTool::Select == tool);
                 p.penButton->setChecked(enabled && models::DrawTool::Pen == tool);
                 p.lineButton->setChecked(enabled && models::DrawTool::Line == tool);
                 p.arrowButton->setChecked(enabled && models::DrawTool::Arrow == tool);

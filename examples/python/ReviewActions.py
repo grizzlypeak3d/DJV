@@ -72,6 +72,8 @@ class Actions(IActions.IActions):
             ("Rectangle", djv.models.DrawTool.Rectangle, "Draw rectangles on the frame"),
             ("Ellipse", djv.models.DrawTool.Ellipse, "Draw ellipses on the frame"),
             ("Text", djv.models.DrawTool.Text, "Write text on the frame"),
+            ("Select", djv.models.DrawTool.Select,
+                "Select a stroke on the frame, to move, change, or remove it"),
         ]:
             self._addCheckCommand(
                 name,
@@ -173,6 +175,7 @@ class Actions(IActions.IActions):
             ("Rectangle", "DrawRectangle"),
             ("Ellipse", "DrawEllipse"),
             ("Text", "DrawText"),
+            ("Select", "DrawSelect"),
         ]:
             self.actions[name] = ftk.Action(
                 name,
@@ -249,6 +252,7 @@ class Actions(IActions.IActions):
         self._addShortcut("Ellipse", "Draw ellipses")
         self._addShortcut("Text", "Write text")
         self._addShortcut("Erase", "Erase strokes")
+        self._addShortcut("Select", "Select strokes")
         self._addShortcut("OnionSkin", "Onion skin")
         self._addShortcut("Undo", "Undo drawing", ftk.KeyShortcut(
             ftk.Key.Z, ftk.commandKeyModifier))
