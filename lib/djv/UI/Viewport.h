@@ -125,7 +125,6 @@ namespace djv
             //! pointer is inside and drawing is enabled.
             void _cursorUpdate();
 
-            void _videoUpdate();
             void _toastUpdate();
             void _compareUpdate();
             void _hudUpdate();

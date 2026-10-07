@@ -3,6 +3,8 @@
 
 #include <djv/UI/MagnifyWidget.h>
 
+#include <djv/UI/ViewportBinding.h>
+
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/SettingsKeys.h>
 #include <djv/Models/FilesModel.h>
@@ -53,13 +55,10 @@ namespace djv
             double viewZoom = 1.0;
             std::optional<ftk::V2I> pick;
             ftk::V2I samplePos;
-            size_t videoFramesSize = 0;
-            std::vector<std::string> ocioInputs;
-            ftk::ImageOptions imageOptions;
-            tl::DisplayOptions displayOptions;
             bool sizeInit = true;
 
             std::shared_ptr<tl::ui::Viewport> viewport;
+            std::shared_ptr<ViewportBinding> binding;
             std::shared_ptr<ftk::ComboBox> comboBox;
             std::shared_ptr<ftk::Label> pixelLabel;
             std::shared_ptr<ftk::CheckBox> viewPosAndZoomCheckBox;
@@ -69,14 +68,6 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosAndZoomObserver;
             std::shared_ptr<ftk::Observer<std::optional<ftk::V2I> > > pickObserver;
             std::shared_ptr<ftk::Observer<ftk::V2I> > samplePosObserver;
-            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<std::vector<std::string> > > resolvedInputsObserver;
-            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > settingsObserver;
         };
 
@@ -188,77 +179,11 @@ namespace djv
                     _widgetUpdate();
                 });
 
-            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
-                filesModel->observeCompareOptions(),
-                [this](const tl::CompareOptions& value)
-                {
-                    _p->viewport->setCompareOptions(value);
-                });
-
-            // The options as written; the per item display options carry
-            // the resolved inputs, the same as the main viewport.
-            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                colorModel->observeOCIOOptions(),
-                [this](const tl::OCIOOptions& value)
-                {
-                    _p->viewport->setOCIOOptions(value);
-                });
-
-            p.resolvedInputsObserver = ftk::Observer<std::vector<std::string> >::create(
-                colorModel->observeResolvedInputs(),
-                [this](const std::vector<std::string>& value)
-                {
-                    _p->ocioInputs = value;
-                    _videoUpdate();
-                });
-
-            {
-                // The same per layer resolution as the main viewport.
-                p.viewport->setOCIOInputResolver(
-                    [colorModel](const std::string& path, const ftk::ImageTags& tags)
-                    {
-                        return colorModel->getOCIOOptions().input.empty() ?
-                            colorModel->resolveInput(path, tags) :
-                            std::string();
-                    });
-            }
-
-            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
-                colorModel->observeLUTOptions(),
-                [this](const tl::LUTOptions& value)
-                {
-                    _p->viewport->setLUTOptions(value);
-                });
-
-            p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
-                viewportModel->observeImageOptions(),
-                [this](const ftk::ImageOptions& value)
-                {
-                    _p->imageOptions = value;
-                    _videoUpdate();
-                });
-
-            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
-                viewportModel->observeDisplayOptions(),
-                [this](const tl::DisplayOptions& value)
-                {
-                    _p->displayOptions = value;
-                    _videoUpdate();
-                });
-
-            p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
-                viewportModel->observeBackgroundOptions(),
-                [this](const tl::BackgroundOptions& value)
-                {
-                    _p->viewport->setBackgroundOptions(value);
-                });
-
-            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
-                viewportModel->observeColorBuffer(),
-                [this](ftk::ImageType value)
-                {
-                    _p->viewport->setColorBuffer(value);
-                });
+            p.binding = ViewportBinding::create(
+                filesModel,
+                colorModel,
+                viewportModel,
+                p.viewport);
 
             p.settingsObserver = ftk::Observer<models::MouseSettings>::create(
                 settingsModel->observeMouse(),
@@ -326,15 +251,13 @@ namespace djv
                     value->observeCurrentVideo(),
                     [this](const std::vector<tl::VideoFrame>& value)
                     {
-                        _p->videoFramesSize = value.size();
-                        _videoUpdate();
+                        _p->binding->setVideoFramesSize(value.size());
                     });
             }
             else
             {
-                p.videoFramesSize = 0;
                 p.videoObserver.reset();
-                _videoUpdate();
+                p.binding->setVideoFramesSize(0);
             }
         }
 
@@ -378,22 +301,6 @@ namespace djv
                 pixelText = ftk::Format("{0}").arg(p.pick.value());
             }
             p.pixelLabel->setText(pixelText);
-        }
-
-        void MagnifyWidget::_videoUpdate()
-        {
-            FTK_P();
-            std::vector<ftk::ImageOptions> imageOptions;
-            std::vector<tl::DisplayOptions> displayOptions;
-            for (size_t i = 0; i < p.videoFramesSize; ++i)
-            {
-                imageOptions.push_back(p.imageOptions);
-                displayOptions.push_back(p.displayOptions);
-                displayOptions.back().ocioInput =
-                    i < p.ocioInputs.size() ? p.ocioInputs[i] : std::string();
-            }
-            p.viewport->setImageOptions(imageOptions);
-            p.viewport->setDisplayOptions(displayOptions);
         }
     }
 }

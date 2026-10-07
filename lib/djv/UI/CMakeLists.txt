@@ -19,7 +19,8 @@ set(HEADERS
     InfoWidget.h
     MagnifyWidget.h
     ViewWidgets.h
-    Viewport.h)
+    Viewport.h
+    ViewportBinding.h)
 set(HEADERS_PRIVATE)
 
 set(SOURCE
@@ -45,7 +46,8 @@ set(SOURCE
     InfoWidget.cpp
     MagnifyWidget.cpp
     ViewWidgets.cpp
-    Viewport.cpp)
+    Viewport.cpp
+    ViewportBinding.cpp)
 
 add_library(djvUI ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 # Private when building, so this library's own API is dllexport here and

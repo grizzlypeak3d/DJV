@@ -3,6 +3,8 @@
 
 #include <djv/UI/Viewport.h>
 
+#include <djv/UI/ViewportBinding.h>
+
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/DrawModel.h>
@@ -61,7 +63,6 @@ namespace djv
             double fps = 0.0;
             size_t droppedFrames = 0;
             size_t videoFramesSize = 0;
-            std::vector<std::string> ocioInputs;
             // Whether the picture stands in for a frame the media does not
             // have, and the frame it repeats when there is one.
             bool missing = false;
@@ -69,8 +70,6 @@ namespace djv
             // Kept for the annotation hit test and overlay, which need the
             // image sizes to map screen to image pixels.
             std::vector<tl::VideoFrame> videoFrames;
-            ftk::ImageOptions imageOptions;
-            tl::DisplayOptions displayOptions;
             tl::PlayerCacheInfo cacheInfo;
             double viewZoom = 0.0;
             models::MouseActionBinding frameShuttleBinding =
@@ -96,6 +95,7 @@ namespace djv
             bool toastHint = false;
             bool hudActive = true;
             std::shared_ptr<ftk::Label> toastLabel;
+            std::shared_ptr<ViewportBinding> binding;
             std::shared_ptr<ftk::Timer> toastTimer;
             std::shared_ptr<ftk::VerticalLayout> hudLayout;
             std::map<models::HUDPos, std::shared_ptr<ftk::VerticalLayout> > hudLayouts;
@@ -109,17 +109,9 @@ namespace djv
             std::shared_ptr<ftk::Observer<size_t> > droppedFramesObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
-            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
             std::shared_ptr<ftk::Observer<bool> > drawEnabledObserver;
-            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
-            std::shared_ptr<ftk::Observer<std::vector<std::string> > > resolvedInputsObserver;
-            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > bgOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
-            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
             std::shared_ptr<ftk::ListObserver<ftk::LogItem> > messagesObserver;
             std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
@@ -325,15 +317,6 @@ namespace djv
                     _compareUpdate();
                 });
 
-            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
-                filesModel->observeCompareOptions(),
-                [this](const tl::CompareOptions& value)
-                {
-                    _p->compare = value.compare;
-                    setCompareOptions(value);
-                    _compareUpdate();
-                });
-
             p.drawEnabledObserver = ftk::Observer<bool>::create(
                 drawModel->observeEnabled(),
                 [this](bool)
@@ -349,74 +332,6 @@ namespace djv
                     _compareUpdate();
                 });
 
-            // The options as written, not the resolved ones: the per item
-            // display options carry each file's resolved input, so a file
-            // that resolves nothing falls back to what the user chose
-            // rather than to whatever the active file resolved to.
-            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                colorModel->observeOCIOOptions(),
-                [this](const tl::OCIOOptions& value)
-                {
-                   setOCIOOptions(value);
-                });
-
-            p.resolvedInputsObserver = ftk::Observer<std::vector<std::string> >::create(
-                colorModel->observeResolvedInputs(),
-                [this](const std::vector<std::string>& value)
-                {
-                    _p->ocioInputs = value;
-                    _videoUpdate();
-                });
-
-            // Layers of a timeline resolve their own input color spaces --
-            // each clip of an OTIO file is its own media -- but only when
-            // the input is automatic; one the user chose applies to every
-            // layer.
-            
-            setOCIOInputResolver(
-                [colorModel](const std::string& path, const ftk::ImageTags& tags)
-                {
-                    return colorModel->getOCIOOptions().input.empty() ?
-                        colorModel->resolveInput(path, tags) :
-                        std::string();
-                });
-
-            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
-                colorModel->observeLUTOptions(),
-                [this](const tl::LUTOptions& value)
-                {
-                   setLUTOptions(value);
-                });
-
-            p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
-                viewportModel->observeImageOptions(),
-                [this](const ftk::ImageOptions& value)
-                {
-                    _p->imageOptions = value;
-                    _videoUpdate();
-                });
-
-            p.displayOptionsObserver = ftk::Observer<tl::DisplayOptions>::create(
-                viewportModel->observeDisplayOptions(),
-                [this](const tl::DisplayOptions& value)
-                {
-                    _p->displayOptions = value;
-                    _videoUpdate();
-                    // The heads up display says what is being rendered, which
-                    // the aspect ratio changes. Without this it would only
-                    // catch up when something else refreshes it -- which is
-                    // every frame while playing, and nothing at all while
-                    // stopped.
-                    _hudUpdate();
-                });
-
-            p.bgOptionsObserver = ftk::Observer<tl::BackgroundOptions>::create(
-                viewportModel->observeBackgroundOptions(),
-                [this](const tl::BackgroundOptions& value)
-                {
-                    setBackgroundOptions(value);
-                });
-
             p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
                 viewportModel->observeForegroundOptions(),
                 [this](const tl::ForegroundOptions& value)
@@ -424,11 +339,22 @@ namespace djv
                     setForegroundOptions(value);
                 });
 
-            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
-                viewportModel->observeColorBuffer(),
-                [this](ftk::ImageType value)
+            p.binding = ViewportBinding::create(
+                filesModel,
+                colorModel,
+                viewportModel,
+                std::dynamic_pointer_cast<tl::ui::Viewport>(shared_from_this()));
+            p.binding->setChangedCallback(
+                [this]
                 {
-                    setColorBuffer(value);
+                    FTK_P();
+                    p.compare = getCompareOptions().compare;
+                    _compareUpdate();
+                    // The heads up display says what is being rendered,
+                    // which the aspect ratio and the color buffer change.
+                    // Without this it would only catch up when something
+                    // else refreshes it -- which is every frame while
+                    // playing, and nothing at all while stopped.
                     _hudUpdate();
                 });
 
@@ -643,6 +569,7 @@ namespace djv
                         FTK_P();
                         p.videoFramesSize = value.size();
                         p.videoFrames = value;
+                        p.binding->setVideoFramesSize(value.size());
                         _compareUpdate();
                         p.missing = false;
                         p.heldFrom.reset();
@@ -662,7 +589,6 @@ namespace djv
                                 }
                             }
                         }
-                        _videoUpdate();
                         _hudUpdate();
                     });
 
@@ -903,7 +829,7 @@ namespace djv
             // and the overlay land exactly where the image does.
             return tl::getBoxes(
                 getCompareOptions(),
-                p.displayOptions.aspectRatio,
+                p.binding->getDisplayOptions().aspectRatio,
                 p.videoFrames);
         }
 
@@ -974,11 +900,11 @@ namespace djv
                 // flip takes the hit back to the image's own pixels. Strokes
                 // are stored unmirrored, and follow the image when the
                 // mirror changes.
-                if (p.displayOptions.mirror.x)
+                if (p.binding->getDisplayOptions().mirror.x)
                 {
                     out.pos.x = imageSize.w - out.pos.x;
                 }
-                if (p.displayOptions.mirror.y)
+                if (p.binding->getDisplayOptions().mirror.y)
                 {
                     out.pos.y = imageSize.h - out.pos.y;
                 }
@@ -1012,11 +938,11 @@ namespace djv
             // The inverse of the flip in _hitTest: stored image pixels back
             // to where the mirror shows them.
             ftk::V2F pos = imagePos;
-            if (p.displayOptions.mirror.x)
+            if (p.binding->getDisplayOptions().mirror.x)
             {
                 pos.x = imageSize.w - pos.x;
             }
-            if (p.displayOptions.mirror.y)
+            if (p.binding->getDisplayOptions().mirror.y)
             {
                 pos.y = imageSize.h - pos.y;
             }
@@ -1224,25 +1150,6 @@ namespace djv
             event.render->setClipRect(clipRectPrev);
         }
 
-        void Viewport::_videoUpdate()
-        {
-            FTK_P();
-            std::vector<ftk::ImageOptions> imageOptionsList;
-            std::vector<tl::DisplayOptions> displayOptionsList;
-            for (size_t i = 0; i < p.videoFramesSize; ++i)
-            {
-                imageOptionsList.push_back(p.imageOptions);
-                displayOptionsList.push_back(p.displayOptions);
-                // The input color space resolved for this item's file, so
-                // a comparison of files in different color spaces shows
-                // each of them correctly.
-                displayOptionsList.back().ocioInput =
-                    i < p.ocioInputs.size() ? p.ocioInputs[i] : std::string();
-            }
-            setImageOptions(imageOptionsList);
-            setDisplayOptions(displayOptionsList);
-        }
-
         void Viewport::_compareUpdate()
         {
             FTK_P();
@@ -1356,7 +1263,7 @@ namespace djv
                 const ftk::ImageInfo& videoInfo = p.ioInfo.video[0];
                 const ftk::Size2I renderSize = tl::getRenderSize(
                     videoInfo,
-                    p.displayOptions.aspectRatio);
+                    p.binding->getDisplayOptions().aspectRatio);
                 if (renderSize.isValid() && videoInfo.size.w > 0)
                 {
                     const float pixelAspectRatio =
