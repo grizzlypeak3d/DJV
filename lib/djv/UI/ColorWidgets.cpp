@@ -4,6 +4,7 @@
 #include <djv/UI/ColorWidgets.h>
 
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/SettingsKeys.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/Timeline/Util.h>
@@ -771,7 +772,7 @@ namespace djv
             // typed or set beyond the range extend it, the way the
             // dedicated range edits used to.
             ftk::RangeF range(0.F, 1.F);
-            p.settings->getT("/Color/Levels/InRange", range);
+            p.settings->getT(models::settingsKeys::colorLevelsInRange, range);
             p.sliders["InLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["InLow"]->setRange(range);
             p.sliders["InLow"]->setDefault(0.F);
@@ -790,7 +791,7 @@ namespace djv
             p.sliders["Gamma"]->getModel()->setRangeSoft(true);
             ftk::setScreenshotTag(p.sliders["Gamma"], "Color.Levels.Gamma");
 
-            p.settings->getT("/Color/Levels/OutRange", range);
+            p.settings->getT(models::settingsKeys::colorLevelsOutRange, range);
             p.sliders["OutLow"] = ftk::FloatEditSlider::create(context);
             p.sliders["OutLow"]->setRange(range);
             p.sliders["OutLow"]->setDefault(0.F);
@@ -942,8 +943,8 @@ namespace djv
         LevelsWidget::~LevelsWidget()
         {
             FTK_P();
-            p.settings->setT("/Color/Levels/InRange", p.sliders["InLow"]->getRange());
-            p.settings->setT("/Color/Levels/OutRange", p.sliders["OutLow"]->getRange());
+            p.settings->setT(models::settingsKeys::colorLevelsInRange, p.sliders["InLow"]->getRange());
+            p.settings->setT(models::settingsKeys::colorLevelsOutRange, p.sliders["OutLow"]->getRange());
         }
 
         std::shared_ptr<LevelsWidget> LevelsWidget::create(

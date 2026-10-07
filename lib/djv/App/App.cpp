@@ -27,6 +27,7 @@
 #include <djv/UI/StatusIndicator.h>
 #include <djv/UI/SysInfoDialog.h>
 #include <djv/Models/AnnotationsModel.h>
+#include <djv/Models/SettingsKeys.h>
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
@@ -2656,8 +2657,8 @@ namespace djv
             p.recentFilesModel = models::RecentFilesModel::create(_context, getSettings());
             // Reviews and playlists get their own recent lists, so opening
             // one does not push its media into the recent files.
-            p.recentReviewsModel = models::RecentFilesModel::create(_context, getSettings(), "Review");
-            p.recentPlaylistsModel = models::RecentFilesModel::create(_context, getSettings(), "Playlist");
+            p.recentReviewsModel = models::RecentFilesModel::create(_context, getSettings(), models::settingsKeys::recentReviewsGroup);
+            p.recentPlaylistsModel = models::RecentFilesModel::create(_context, getSettings(), models::settingsKeys::recentPlaylistsGroup);
             {
                 // A playlist is always saved as ".otio", but saving one
                 // under a name typed without the extension listed that name
@@ -2678,9 +2679,9 @@ namespace djv
             // What the file browser's recent list shows: the directories of
             // everything opened, and of anything chosen in the browser -- a
             // LUT, an export directory -- without those choices joining the
-            // recent files. A group of its own: "/FileBrowser" is written
+            // recent files. A group of its own: settingsKeys::fileBrowser is written
             // whole, and would take a list kept inside it along.
-            p.recentDirsModel = models::RecentFilesModel::create(_context, getSettings(), "FileBrowserDirs");
+            p.recentDirsModel = models::RecentFilesModel::create(_context, getSettings(), models::settingsKeys::recentDirsGroup);
             auto fileBrowserSystem = _context->getSystem<ftk::FileBrowserSystem>();
             fileBrowserSystem->getModel()->setExts(tl::getExts(_context));
             // Offered by kind: one at a time there are too many to choose

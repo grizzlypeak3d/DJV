@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/UI/InfoWidget.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <tlRender/Timeline/Player.h>
 
@@ -100,7 +101,7 @@ namespace djv
             // The same keys the tool has always used, so existing settings
             // carry over.
             nlohmann::json json;
-            p.settings->get("/Information/Bellows", json);
+            p.settings->get(models::settingsKeys::informationBellows, json);
             for (auto i = json.begin(); i != json.end(); ++i)
             {
                 auto j = p.bellows.find(i.key());
@@ -157,7 +158,7 @@ namespace djv
             {
                 json[i.first] = i.second->isOpen();
             }
-            p.settings->set("/Information/Bellows", json);
+            p.settings->set(models::settingsKeys::informationBellows, json);
         }
 
         std::shared_ptr<InfoWidget> InfoWidget::create(

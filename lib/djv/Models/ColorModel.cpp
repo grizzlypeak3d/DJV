@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/SettingsKeys.h>
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
@@ -122,9 +123,9 @@ namespace djv
             p.settings = settings;
 
             tl::OCIOOptions ocioOptions;
-            if (p.settings->contains("/Color/OCIO"))
+            if (p.settings->contains(settingsKeys::colorOCIO))
             {
-                p.settings->getT("/Color/OCIO", ocioOptions);
+                p.settings->getT(settingsKeys::colorOCIO, ocioOptions);
             }
             else
             {
@@ -136,7 +137,7 @@ namespace djv
             p.ocioOptions = ftk::Observable<tl::OCIOOptions>::create(ocioOptions);
             _ocioConfigUpdate(ocioOptions);
             std::map<std::string, std::string> extColorSpaces;
-            p.settings->getT("/Color/OCIOExtColorSpaces", extColorSpaces);
+            p.settings->getT(settingsKeys::colorOCIOExtColorSpaces, extColorSpaces);
             p.extColorSpaces = ftk::Observable<std::map<std::string, std::string> >::create(extColorSpaces);
             p.resolvedOCIOOptions = ftk::Observable<tl::OCIOOptions>::create(
                 _resolvedOCIOOptions());
@@ -146,7 +147,7 @@ namespace djv
                 std::vector<std::string>());
 
             tl::LUTOptions lutOptions;
-            p.settings->getT("/Color/LUT", lutOptions);
+            p.settings->getT(settingsKeys::colorLUT, lutOptions);
             p.lutOptions = ftk::Observable<tl::LUTOptions>::create(lutOptions);
         }
 
@@ -182,9 +183,9 @@ namespace djv
         void ColorModel::save()
         {
             FTK_P();
-            p.settings->setT("/Color/OCIO", p.ocioOptions->get());
-            p.settings->setT("/Color/OCIOExtColorSpaces", p.extColorSpaces->get());
-            p.settings->setT("/Color/LUT", p.lutOptions->get());
+            p.settings->setT(settingsKeys::colorOCIO, p.ocioOptions->get());
+            p.settings->setT(settingsKeys::colorOCIOExtColorSpaces, p.extColorSpaces->get());
+            p.settings->setT(settingsKeys::colorLUT, p.lutOptions->get());
         }
 
         std::shared_ptr<ColorModel> ColorModel::create(

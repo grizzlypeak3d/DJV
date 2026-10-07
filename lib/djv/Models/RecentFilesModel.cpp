@@ -3,6 +3,8 @@
 
 #include <djv/Models/RecentFilesModel.h>
 
+#include <djv/Models/SettingsKeys.h>
+
 #include <ftk/UI/Settings.h>
 
 namespace djv
@@ -28,7 +30,7 @@ namespace djv
 
             std::vector<ftk::Path> recent;
             nlohmann::json json;
-            if (p.settings->get("/" + p.settingsGroup + "/Recent", json))
+            if (p.settings->get(settingsKeys::recent(p.settingsGroup), json))
             {
                 for (auto i = json.begin(); i != json.end(); ++i)
                 {
@@ -47,7 +49,7 @@ namespace djv
             }
             setRecent(recent);
             size_t max = 10;
-            p.settings->get("/" + p.settingsGroup + "/RecentMax", max);
+            p.settings->get(settingsKeys::recentMax(p.settingsGroup), max);
             setRecentMax(max);
         }
 
@@ -73,8 +75,8 @@ namespace djv
                 to_json(item, path);
                 json.push_back(item);
             }
-            p.settings->set("/" + p.settingsGroup + "/Recent", json);
-            p.settings->set("/" + p.settingsGroup + "/RecentMax", getRecentMax());
+            p.settings->set(settingsKeys::recent(p.settingsGroup), json);
+            p.settings->set(settingsKeys::recentMax(p.settingsGroup), getRecentMax());
         }
 
         std::shared_ptr<RecentFilesModel> RecentFilesModel::create(
