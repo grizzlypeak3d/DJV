@@ -627,11 +627,16 @@ namespace djv
         {
             FTK_P();
 
-            _makeCurrent();
-            p.viewport->setParent(nullptr);
-            p.viewport.reset();
-            p.timelineWidget->setParent(nullptr);
-            p.timelineWidget.reset();
+            // Nothing was made when making the window failed; the
+            // application lets go of it on the way out all the same.
+            if (p.viewport)
+            {
+                _makeCurrent();
+                p.viewport->setParent(nullptr);
+                p.viewport.reset();
+                p.timelineWidget->setParent(nullptr);
+                p.timelineWidget.reset();
+            }
 
             saveSettings();
         }
