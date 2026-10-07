@@ -26,10 +26,13 @@ if(NOT DJV_TESTS_NO_GL)
                 -captureOutput ${DJV_CAPTURE_OUTPUT}
                 -log
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-        # See djv-test/CMakeLists.txt for why.
+        # The PATH entry: see djv-test/CMakeLists.txt. The audio driver: a
+        # runner has no sound card, and a player that cannot open the audio
+        # device logs an error, which a strict shot counts as a failure.
+        # The shots do not play audio, so SDL's dummy driver serves them.
         set_tests_properties(djv-capture-${shot} PROPERTIES
             ENVIRONMENT_MODIFICATION
-            "PATH=path_list_prepend:${CMAKE_INSTALL_PREFIX}/python/opentimelineio")
+            "PATH=path_list_prepend:${CMAKE_INSTALL_PREFIX}/python/opentimelineio;SDL_AUDIODRIVER=set:dummy")
     endforeach()
     # A shot added to the manifest is a test added, so configure again.
     set_property(DIRECTORY APPEND PROPERTY
