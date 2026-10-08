@@ -51,14 +51,16 @@ namespace djv
             bool operator == (const AudioSettings&) const = default;
         };
 
-        //! Export render width. Only the width, because the height follows
-        //! the aspect ratio of what is being exported.
+        //! Export render size: the source's own, a preset width, a width
+        //! typed in, or a width and height typed in. A width alone has the
+        //! height follow the aspect ratio of what is being exported.
         enum class DJV_MODELS_API_TYPE ExportRenderSize
         {
             Source,
             _1920,
             _3840,
             _4096,
+            Width,
             Custom,
 
             Count,
@@ -123,10 +125,10 @@ namespace djv
         {
             std::string dir;
             ExportRenderSize renderSize = ExportRenderSize::Source;
-            // Only the width: the height follows from the aspect ratio of
-            // what is being exported, which is known whenever there is
-            // anything to export.
+            //! The width typed in, for Width and Custom, and the height for
+            //! Custom, used as they are.
             int customWidth = 1920;
+            int customHeight = 1080;
             ExportFileType fileType = ExportFileType::Image;
 
             //! The output file names, without their extensions. A run of '#'

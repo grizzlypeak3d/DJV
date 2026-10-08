@@ -54,6 +54,7 @@ namespace djv
                 .def_rw("dir", &ExportSettings::dir)
                 .def_rw("renderSize", &ExportSettings::renderSize)
                 .def_rw("customWidth", &ExportSettings::customWidth)
+                .def_rw("customHeight", &ExportSettings::customHeight)
                 .def_rw("fileType", &ExportSettings::fileType)
                 .def_rw("imageFileName", &ExportSettings::imageFileName)
                 .def_rw("imageExt", &ExportSettings::imageExt)

@@ -4,6 +4,7 @@ Changes:
 * Add an option for showing multiple timelines in compare mode.
 * Movies, PNG, and OpenImageIO files are written as 8-bit or 16-bit depending
   on the image type.
+* Export now has options for specifying the width or a custom size.
 
 Fixes:
 * Fix for the levels of 10-bit and deeper YUV movies read as RGB.
@@ -11,6 +12,8 @@ Fixes:
 * Fix for thumbnails of files that are overwritten.
 * Fix for a crash when a Python script exits on Linux.
 * Fix for slow playback and export on Linux when the window is covered.
+* Exports round the output movie size to an even number (except for source and
+  custom settings).
 
 ## 3.7.4
 
