@@ -3,6 +3,7 @@
 
 #include <djv/ModelsPy/Bindings.h>
 #include <djv/UIPy/Bindings.h>
+#include <djv/AppPy/Bindings.h>
 
 #include <djv/Models/Version.h>
 
@@ -28,4 +29,5 @@ NB_MODULE(_djv, m)
 
     djv::python::modelsBind(m);
     djv::python::uiBind(m);
+    djv::python::appBind(m);
 }

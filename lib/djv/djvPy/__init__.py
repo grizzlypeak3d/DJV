@@ -5,8 +5,10 @@
 sequences.
 
 The API is the C++ one, compiled into the _djv module and gathered here: the
-models the application is built from and its widgets. The package also
-carries the application itself, which the djv command runs (see main()).
+models the application is built from, its widgets, and the application,
+which a Python program can start and extend with tools and commands of its
+own (see examples/python). The package also carries the application as a
+program, which the djv command runs (see main()).
 """
 
 import os as _os

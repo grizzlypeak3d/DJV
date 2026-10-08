@@ -16,8 +16,8 @@ target_include_directories(_djv PRIVATE ${PROJECT_SOURCE_DIR}/lib)
 # and GNU ld takes from an archive only what is wanted at the moment it is
 # scanned: a binding archive scanned after it finds the enum and datetime
 # helpers already passed over, and a Release build fails to link.
-target_sources(_djv PRIVATE $<TARGET_OBJECTS:djvModelsPy> $<TARGET_OBJECTS:djvUIPy>)
-target_link_libraries(_djv PRIVATE djvModelsPy djvUIPy)
+target_sources(_djv PRIVATE $<TARGET_OBJECTS:djvModelsPy> $<TARGET_OBJECTS:djvUIPy> $<TARGET_OBJECTS:djvAppPy>)
+target_link_libraries(_djv PRIVATE djvModelsPy djvUIPy djvAppPy)
 
 target_compile_options(_djv PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
 
@@ -120,7 +120,8 @@ add_custom_command(
         ${PROJECT_SOURCE_DIR}/etc/Python/check_stub.py
         ${DJV_PYTHON_PACKAGE_DIR}/_djv/__init__.pyi
         ${DJV_PYTHON_PACKAGE_DIR}/_djv/models.pyi
-        ${DJV_PYTHON_PACKAGE_DIR}/_djv/ui.pyi)
+        ${DJV_PYTHON_PACKAGE_DIR}/_djv/ui.pyi
+        ${DJV_PYTHON_PACKAGE_DIR}/_djv/app.pyi)
 
 install(TARGETS _djv
     LIBRARY DESTINATION ${DJV_PYTHON_INSTALL_DIR}

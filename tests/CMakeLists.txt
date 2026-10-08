@@ -79,4 +79,30 @@ if(DJV_PYTHON)
     endif()
     set_tests_properties(djv-python-test PROPERTIES
         ENVIRONMENT_MODIFICATION "${PYTHON_TEST_ENV}")
+
+    # The Python application in examples/python starts the C++ application
+    # through the bindings and adds a tool and a command to it, and nothing
+    # else exercises that, so it drifts: a binding that changed is only
+    # found when someone runs it. This runs it as a capture (the capture
+    # tool is the application's), which opens the Python tool, types into
+    # it and runs the command. The audio and video drivers: see above.
+    if(NOT DJV_TESTS_NO_GL)
+        set(PYTHON_EXAMPLE_ENV ${PYTHON_TEST_ENV} "SDL_AUDIODRIVER=set:dummy")
+        if(UNIX AND NOT APPLE)
+            list(APPEND PYTHON_EXAMPLE_ENV "SDL_VIDEODRIVER=set:x11")
+        endif()
+        add_test(
+            NAME djv-python-example
+            COMMAND ${Python_EXECUTABLE}
+                ${PROJECT_SOURCE_DIR}/examples/python/main.py
+                -resetSettings
+                -settingsFile ${DJV_CAPTURE_OUTPUT}/python-settings.json
+                -captureManifest ${CMAKE_CURRENT_SOURCE_DIR}/capture/python.json
+                -captureShot notes-tool
+                -captureOutput ${DJV_CAPTURE_OUTPUT}
+                -log
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+        set_tests_properties(djv-python-example PROPERTIES
+            ENVIRONMENT_MODIFICATION "${PYTHON_EXAMPLE_ENV}")
+    endif()
 endif()

@@ -42,7 +42,7 @@
 <li><a href="#building">Building</a></li>
 <li><a href="#running">Running</a></li>
 <li><a href="#the-application">The application</a></li>
-<li><a href="#modifying">Modifying it</a></li>
+<li><a href="#modifying">Extending it</a></li>
 </ul>
 </div>
 <p>The libraries DJV is built from have Python bindings, and there is a version of the DJV application written in Python on top of them. This page describes what is there, how to run it, and how to modify it. It is not an API reference — the bindings follow the C++ headers closely, so the headers and the Python examples are the reference.</p>
@@ -61,26 +61,40 @@ import djv</code></pre>
 <h2 id="running">Running</h2>
 <p>The build writes a launcher that knows the interpreter and the module paths:</p>
 <pre><code>./build-Release/bin/djv-python render.mov</code></pre>
-<p>On Windows it is a batch file under the configuration directory, <code>build-Release\bin\Release\djv-python.cmd</code>, and it reads the libraries from the install prefix rather than the build tree: there is no rpath there, so the install has to have been run. The install gets a copy at <code>bin/djv-python</code> (<code>bin\djv-python.cmd</code> on Windows) that finds everything beside itself. The application takes an input file, and options in the C++ application's style — see <code>-h</code> for the list. The ones useful for scripting:</p>
-<ul><li><strong>-compare</strong>, <strong>-compareMode</strong> — open a comparison "B" file and set the mode. The audio, playback, directory, and color options match the C++ application; <code>djv-python -h</code> lists them.</li><li><strong>-settingsFile</strong>, <strong>-logFile</strong> — the settings and log files, which default to the same directory as the C++ application: <code>Documents/DJV/djv-python.3.json</code> and <code>.log</code>. Pointing these elsewhere keeps a test run out of the real settings.</li><li><strong>-resetSettings</strong> — reset the settings to their defaults.</li><li><strong>-listCommands</strong>, <strong>-command</strong> — the command registry, the same one the C++ application has: every menu action is a named command, <code>-listCommands</code> prints them, and <code>-command "Playback/Seek { \"frame\": 100 }"</code> runs one after startup.</li><li><strong>-exit</strong> — start the user interface and exit without showing a window.</li><li><strong>-screenshot</strong> — write a screenshot of the window to a file and exit.</li></ul>
+<p>On Windows it is a batch file under the configuration directory, <code>build-Release\bin\Release\djv-python.cmd</code>, and it reads the libraries from the install prefix rather than the build tree: there is no rpath there, so the install has to have been run. The install gets a copy at <code>bin/djv-python</code> (<code>bin\djv-python.cmd</code> on Windows) that finds everything beside itself. The application takes an input file and the C++ application's options — see <code>-h</code> for the list. The ones useful for scripting:</p>
+<ul><li><strong>-compare</strong>, <strong>-compareMode</strong> — open a comparison "B" file and set the mode. The audio, playback, directory, and color options match the C++ application; <code>djv-python -h</code> lists them.</li><li><strong>-settingsFile</strong>, <strong>-logFile</strong> — the settings and log files, which default to the same directory as the C++ application: <code>Documents/DJV/djv-python.json</code> and <code>.log</code>. Pointing these elsewhere keeps a test run out of the real settings.</li><li><strong>-resetSettings</strong> — reset the settings to their defaults.</li><li><strong>-listCommands</strong>, <strong>-command</strong> — the command registry, the same one the C++ application has: every menu action is a named command, <code>-listCommands</code> prints them, and <code>-command "Playback/Seek { \"frame\": 100 }"</code> runs one after startup.</li><li><strong>-exit</strong> — start the user interface and exit without showing a window.</li><li><strong>-screenshot</strong> — write a screenshot of the window to a file and exit.</li></ul>
 <h2 id="the-application">The application</h2>
-<p>The application lives in <code>examples/python</code>, one file per concern the way the C++ application is arranged: <code>main.py</code> is the entry point, <code>App.py</code> creates the models and turns the current file into a player, <code>MainWindow.py</code> builds the window, and the rest are the actions, menus, tool bars, and tools.</p>
-<p>The division of labor: the widgets are the C++ application's own, wrapped whole in <code>djv.ui</code> — one implementation, so the two applications cannot drift apart — and the Python code is the composition around them: the models, the actions and menus, and the tool frames. A tool like Color is a stack of bellows around wrapped widgets; a tool like Files builds its own rows from feather-tk widgets where the C++ application does the same.</p>
-<p>The application keeps feature parity with the C++ application — playlists, dragging to reorder the file list, the tools — and the toolkit's widget events all pass through to Python: a widget written in Python can draw, take the keyboard and mouse, and be a drag and drop source or target.</p>
-<p>The actions follow the C++ <code>IActions</code> pattern, in <code>IActions.py</code>: every operation is registered as a named command with the commands model, the menu actions run the commands, and the keyboard shortcuts come from the settings — so the shortcuts editor in the settings tool applies here, and <code>-command</code> can run anything a menu can.</p>
+<p>The application is the C++ one, bound as <code>djv.app.App</code>. <code>examples/python</code> starts it and extends it: <code>main.py</code> is the entry point, <code>App.py</code> derives from the application and adds a tool and a command, and <code>NotesTool.py</code> is the tool. The whole of it is a few dozen lines, which is the point: the menus, the tool bars, playback and the models are the application's own, so a Python program cannot drift from them, and what it adds is the only Python there is.</p>
+<p>The application is built in steps, each a method a derived class can override to do its own work before or after the base's: <code>_modelsInit</code>, <code>_observersInit</code>, <code>_inputFilesInit</code>, <code>_uiInit</code>, and <code>_mainWindowInit</code>, in that order. The tools model and the tool widget factory exist after <code>_uiInit</code>, which is where a tool is registered so that the Tools menu and tool bar built next list it; the main window exists after <code>_mainWindowInit</code>, which is where a menu item is added.</p>
+<pre><code>class App(djv.app.App):
+    def _uiInit(self):
+        djv.app.App._uiInit(self)
+        info = djv.models.ToolInfo()
+        info.name = "Notes"
+        info.icon = "Info"
+        self.getToolsModel().addTool(info)
+        self.getToolWidgetFactory().addTool("Notes", NotesTool)
+
+    def _mainWindowInit(self):
+        djv.app.App._mainWindowInit(self)
+        self.getCommandsModel().add("Notes/Clear", "Clear the notes.", weak(self._clearNotes))
+        self._clearAction = ftk.Action("Clear Notes", weak(self._clearNotes))
+        self.getMainWindow().getMenuBar().getMenu("Tools").addAction(self._clearAction)</code></pre>
+<p>A tool derives from <code>djv.app.IToolWidget</code>, which is the frame every tool has — the title row and the close button — and sets its content with <code>setWidget</code>. The factory makes one each time the tool is opened, from the function it was registered with: the class itself serves, since its constructor takes what the factory passes, the context, the application, the main window and the parent. Everything the toolkit's widget events offer passes through to Python: a widget written in Python can draw, take the keyboard and mouse, and be a drag and drop source or target.</p>
+<p>A command registered with the commands model can be run from the command line with <code>-command</code> and from a capture manifest, and the capture tool itself is the application's: <code>tests/capture/python.json</code> opens the Notes tool, types into it and runs the command, and <code>djv-python-example</code> runs that under CTest.</p>
 <p>Everything follows the same pattern: the DJV models hold the state, and the widgets observe it. A widget changes a model through its setters, and updates itself from an observer — never directly from its own callback, so that every other view of the same state stays in step:</p>
 <pre><code>selfWeak = weakref.ref(self)
-self._volumeObserver = ftk.FloatObserver(
-    audioModel.observeVolume,
-    lambda value: selfWeak()._volumeUpdate(value))</code></pre>
+self._playerObserver = tl.PlayerObserver(
+    app.observePlayer,
+    lambda value: selfWeak()._playerUpdate(value))</code></pre>
 <p>Two things in that pattern matter:</p>
-<ul><li>The observer object must be kept — assign it to <code>self</code>. A discarded observer disconnects.</li><li>The callbacks capture <code>self</code> weakly. A callback handed to the C++ side is held by a <code>std::function</code>, an edge the garbage collector cannot see, so a strong capture forms a cycle that is never collected. <code>Util.weak()</code> wraps a bound method for use as a widget or action callback.</li></ul>
+<ul><li>The observer object must be kept — assign it to <code>self</code>. A discarded observer disconnects.</li><li>The callbacks capture <code>self</code> weakly. A callback handed to the C++ side is held by a <code>std::function</code>, an edge the garbage collector cannot see, so a strong capture forms a cycle that is never collected, and the settings are written when those objects are destroyed. <code>weak()</code> in <code>App.py</code> wraps a bound method for use as a callback.</li></ul>
 <p>Option values are copies. Reading a property, changing a field, and assigning it back is the way to change one:</p>
 <pre><code>options = filesModel.compareOptions
 options.compare = tl.Compare.Wipe
 filesModel.compareOptions = options</code></pre>
-<h2 id="modifying">Modifying it</h2>
-<p>To add a tool, write a class in <code>Tools.py</code> deriving from <code>IToolWidget</code> and add it to the <code>FACTORY</code> dictionary; the tools model already lists the tool names, icons, and shortcuts, and the actions, menu, and tool bar offer whatever the factory implements. To add an action, follow any of the <code>*Actions.py</code> files: create an <code>ftk.Action</code>, add it to a menu in <code>Menus.py</code> or a tool bar in <code>ToolBars.py</code>. <code>checkedCallback</code> must be passed as a keyword argument — passed positionally it binds to the plain callback and fails when clicked.</p>
+<h2 id="modifying">Extending it</h2>
+<p>To add a tool, write a class deriving from <code>djv.app.IToolWidget</code> the way <code>NotesTool.py</code> does, and register it in <code>_uiInit</code> with a <code>ToolInfo</code> for the tools model — the name, the icon, where it sorts, whether it is on the tool bar, and a shortcut — and the class for the factory. To add a command, register it with the commands model in <code>_mainWindowInit</code> and add an <code>ftk.Action</code> that runs it to a menu from the menu bar. The models are reached through the application's getters, <code>getFilesModel()</code> and the rest, and the main window through <code>getMainWindow()</code>, which has the viewport, the timeline widget and the menu bar.</p>
 <p>Smaller examples are in feather-tk's and tlRender's own <code>examples/python</code> directories, and the Python test suites — <code>tests/CorePyTest</code> and <code>tests/UIPyTest</code> in feather-tk, <code>tests/tlRenderPyTest</code> in tlRender, and <code>tests/djvPyTest</code> here — double as working usage of most of the bound API. They run with <code>python -m unittest discover tests</code>, or through CTest as <code>feather_tk-test</code>, <code>tlrender-test</code>, and <code>djv-python-test</code>.</p>
 </main>
 </body>
