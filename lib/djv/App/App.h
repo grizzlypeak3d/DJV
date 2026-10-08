@@ -118,14 +118,14 @@ namespace djv
             DJV_APP_API const std::shared_ptr<models::CommandsModel>& getCommandsModel() const;
 
             //! Get the review markers model.
-            const std::shared_ptr<models::MarkersModel>& getMarkersModel() const;
+            DJV_APP_API const std::shared_ptr<models::MarkersModel>& getMarkersModel() const;
 
             //! Get the review annotations model.
-            const std::shared_ptr<models::AnnotationsModel>& getAnnotationsModel() const;
+            DJV_APP_API const std::shared_ptr<models::AnnotationsModel>& getAnnotationsModel() const;
 
 
             //! Get the drawing state model.
-            const std::shared_ptr<models::DrawModel>& getDrawModel() const;
+            DJV_APP_API const std::shared_ptr<models::DrawModel>& getDrawModel() const;
 
             //! Observe the frames that carry a note or a drawing, sorted and
             //! deduplicated.

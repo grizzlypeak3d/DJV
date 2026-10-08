@@ -22,7 +22,9 @@ namespace djv
             FTK_NON_COPYABLE(IToolWidget);
 
         protected:
-            void _init(
+            // Exported, as the public API is: a tool written in Python is
+            // made from another library.
+            DJV_APP_API void _init(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 const std::shared_ptr<MainWindow>&,
@@ -31,7 +33,7 @@ namespace djv
                 const std::string& objectName,
                 const std::shared_ptr<IWidget>& parent);
 
-            IToolWidget();
+            DJV_APP_API IToolWidget();
 
         public:
             DJV_APP_API virtual ~IToolWidget() = 0;
@@ -58,7 +60,7 @@ namespace djv
             void _bellowsSave();
             void _saveSettings(const std::map<std::string, std::shared_ptr<ftk::Bellows> >&);
 
-            void _setWidget(const std::shared_ptr<ftk::IWidget>&);
+            DJV_APP_API void _setWidget(const std::shared_ptr<ftk::IWidget>&);
 
             std::weak_ptr<App> _app;
             std::weak_ptr<MainWindow> _mainWindow;
