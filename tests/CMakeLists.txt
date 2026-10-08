@@ -26,10 +26,21 @@ if(NOT DJV_TESTS_NO_GL)
                 -captureOutput ${DJV_CAPTURE_OUTPUT}
                 -log
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-        # See djv-test/CMakeLists.txt for why.
+        # The PATH entry: see djv-test/CMakeLists.txt. The audio driver: a
+        # runner has no sound card, and a player that cannot open the audio
+        # device logs an error, which a strict shot counts as a failure.
+        # The shots do not play audio, so SDL's dummy driver serves them.
+        # The video driver: the Linux jobs run under xvfb, where only X11
+        # can work, and SDL probing Wayland first on a runner with no
+        # session (no XDG_RUNTIME_DIR) crashed before the first log line.
+        set(DJV_CAPTURE_ENV
+            "PATH=path_list_prepend:${CMAKE_INSTALL_PREFIX}/python/opentimelineio"
+            "SDL_AUDIODRIVER=set:dummy")
+        if(UNIX AND NOT APPLE)
+            list(APPEND DJV_CAPTURE_ENV "SDL_VIDEODRIVER=set:x11")
+        endif()
         set_tests_properties(djv-capture-${shot} PROPERTIES
-            ENVIRONMENT_MODIFICATION
-            "PATH=path_list_prepend:${CMAKE_INSTALL_PREFIX}/python/opentimelineio")
+            ENVIRONMENT_MODIFICATION "${DJV_CAPTURE_ENV}")
     endforeach()
     # A shot added to the manifest is a test added, so configure again.
     set_property(DIRECTORY APPEND PROPERTY
@@ -68,4 +79,30 @@ if(DJV_PYTHON)
     endif()
     set_tests_properties(djv-python-test PROPERTIES
         ENVIRONMENT_MODIFICATION "${PYTHON_TEST_ENV}")
+
+    # The Python application in examples/python starts the C++ application
+    # through the bindings and adds a tool and a command to it, and nothing
+    # else exercises that, so it drifts: a binding that changed is only
+    # found when someone runs it. This runs it as a capture (the capture
+    # tool is the application's), which opens the Python tool, types into
+    # it and runs the command. The audio and video drivers: see above.
+    if(NOT DJV_TESTS_NO_GL)
+        set(PYTHON_EXAMPLE_ENV ${PYTHON_TEST_ENV} "SDL_AUDIODRIVER=set:dummy")
+        if(UNIX AND NOT APPLE)
+            list(APPEND PYTHON_EXAMPLE_ENV "SDL_VIDEODRIVER=set:x11")
+        endif()
+        add_test(
+            NAME djv-python-example
+            COMMAND ${Python_EXECUTABLE}
+                ${PROJECT_SOURCE_DIR}/examples/python/main.py
+                -resetSettings
+                -settingsFile ${DJV_CAPTURE_OUTPUT}/python-settings.json
+                -captureManifest ${CMAKE_CURRENT_SOURCE_DIR}/capture/python.json
+                -captureShot notes-tool
+                -captureOutput ${DJV_CAPTURE_OUTPUT}
+                -log
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+        set_tests_properties(djv-python-example PROPERTIES
+            ENVIRONMENT_MODIFICATION "${PYTHON_EXAMPLE_ENV}")
+    endif()
 endif()

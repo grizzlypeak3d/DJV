@@ -71,7 +71,7 @@ namespace djv
         private:
             std::vector<ftk::ImageInfo> _getInfos() const;
             ftk::Size2I _getDefaultSize() const;
-            ftk::Size2I _getWidthSize(int width) const;
+            ftk::Size2I _getWidthSize(int width, bool even) const;
             ftk::Size2I _getExportSize(const models::ExportSettings&) const;
             void _sizeUpdate();
             void _widgetUpdate(const models::ExportSettings&);

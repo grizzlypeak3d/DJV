@@ -145,8 +145,13 @@ namespace djv
 
             std::shared_ptr<ftk::FileEdit> dirEdit;
             std::shared_ptr<ftk::ComboBox> renderSizeComboBox;
-            std::shared_ptr<ftk::IntEdit> renderWidthEdit;
-            std::shared_ptr<ftk::Label> outputSizeLabel;
+            std::shared_ptr<ftk::Label> sizeLabel;
+            std::shared_ptr<ftk::IntEdit> widthEdit;
+            std::shared_ptr<ftk::IntEdit> heightEdit;
+            std::shared_ptr<ftk::HorizontalLayout> sizeEditLayout;
+            // The edits report every change, including the ones made here
+            // to show the custom size, which must not read as typed.
+            bool sizeUpdating = false;
             std::shared_ptr<ImageExportWidget> imageWidget;
             std::shared_ptr<SeqExportWidget> seqWidget;
             std::shared_ptr<MovieExportWidget> movieWidget;
@@ -197,19 +202,29 @@ namespace djv
             p.renderSizeComboBox->setTooltip(
                 "\"Default\" is the size of what is being exported, with no "
                 "scaling.\n"
-                "The other choices scale to the width given.");
+                "The presets and \"Width\" scale to a width, with the height "
+                "following the aspect ratio of what is being exported, "
+                "rounded to an even number for a movie, which its codecs "
+                "need.\n"
+                "\"Custom\" is a width and height typed in, used as they are.");
             ftk::setScreenshotTag(p.renderSizeComboBox, "Export.RenderSize");
-            p.renderWidthEdit = ftk::IntEdit::create(context);
-            p.renderWidthEdit->setRange(customSizeMin, customSizeMax);
-            p.renderWidthEdit->setTooltip(
-                "The height follows the aspect ratio of what is being "
-                "exported.");
-            ftk::setScreenshotTag(p.renderWidthEdit, "Export.CustomWidth");
-            p.outputSizeLabel = ftk::Label::create(context);
-            p.outputSizeLabel->setTooltip(
-                "The size the export comes out at, which the width and the "
-                "aspect ratio of what is being exported give between them.");
-            ftk::setScreenshotTag(p.outputSizeLabel, "Export.OutputSize");
+            p.sizeLabel = ftk::Label::create(context);
+            p.sizeLabel->setTooltip("The size the export comes out at.");
+            ftk::setScreenshotTag(p.sizeLabel, "Export.Size");
+            p.widthEdit = ftk::IntEdit::create(context);
+            p.widthEdit->setRange(customSizeMin, customSizeMax);
+            p.widthEdit->setTooltip(
+                "The width the export comes out at, used as it is. For a "
+                "custom size a movie's codecs need even numbers; the export "
+                "says if the codec cannot take the size.");
+            ftk::setScreenshotTag(p.widthEdit, "Export.Width");
+            p.heightEdit = ftk::IntEdit::create(context);
+            p.heightEdit->setRange(customSizeMin, customSizeMax);
+            p.heightEdit->setTooltip(
+                "The height the export comes out at, used as it is. A movie's "
+                "codecs need even numbers; the export says if the codec "
+                "cannot take the size.");
+            ftk::setScreenshotTag(p.heightEdit, "Export.Height");
 
             p.imageWidget = ImageExportWidget::create(
                 context, settingsModel);
@@ -225,12 +240,19 @@ namespace djv
             p.formLayout = ftk::FormLayout::create(context, vLayout);
             p.formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout->addRow("Directory:", p.dirEdit);
-            p.formLayout->addRow("Render width:", p.renderSizeComboBox);
-            p.formLayout->addRow("Custom width:", p.renderWidthEdit);
+            p.formLayout->addRow("Render size:", p.renderSizeComboBox);
+            // One row showing whichever applies: the size as a label, a
+            // width edit with the height it comes to, or both edits.
+            p.sizeEditLayout = ftk::HorizontalLayout::create(context);
+            p.sizeEditLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.widthEdit->setParent(p.sizeEditLayout);
+            p.heightEdit->setParent(p.sizeEditLayout);
+            p.sizeLabel->setParent(p.sizeEditLayout);
+            p.sizeLabel->setVAlign(ftk::VAlign::Center);
+            p.formLayout->addRow("Size:", p.sizeEditLayout);
             // Under both of the ways of giving a width, since it is what
             // either of them comes to, and it is worth saying for the
             // default and the presets as much as for a typed width.
-            p.formLayout->addRow("Output size:", p.outputSizeLabel);
             p.tabWidget = ftk::TabWidget::create(context, p.layout);
             // Tag the tab bar rather than the whole tab widget so that
             // screenshot annotations point at the tabs.
@@ -282,12 +304,25 @@ namespace djv
                     p.settings->setExport(options);
                 });
 
-            p.renderWidthEdit->setCallback(
+            p.widthEdit->setCallback(
                 [this](int value)
                 {
                     FTK_P();
+                    if (p.sizeUpdating)
+                        return;
                     auto options = p.settings->getExport();
                     options.customWidth = value;
+                    p.settings->setExport(options);
+                });
+
+            p.heightEdit->setCallback(
+                [this](int value)
+                {
+                    FTK_P();
+                    if (p.sizeUpdating)
+                        return;
+                    auto options = p.settings->getExport();
+                    options.customHeight = value;
                     p.settings->setExport(options);
                 });
 
@@ -447,16 +482,28 @@ namespace djv
             return out;
         }
 
-        ftk::Size2I ExportWidget::_getWidthSize(int width) const
+        namespace
+        {
+            // Subsampled chroma covers the pixels in pairs, so a movie's
+            // size has to be even: the nearest even number, from the exact
+            // value so that a half rounds to the nearer of the two, and
+            // never nothing.
+            int roundEven(double value)
+            {
+                return std::max(2, static_cast<int>(std::lround(value / 2.0)) * 2);
+            }
+        }
+
+        ftk::Size2I ExportWidget::_getWidthSize(int width, bool even) const
         {
             ftk::Size2I out;
             const ftk::Size2I size = _getDefaultSize();
             if (size.isValid())
             {
                 out.w = std::clamp(width, customSizeMin, customSizeMax);
+                const double h = out.w * size.h / static_cast<double>(size.w);
                 out.h = std::clamp(
-                    static_cast<int>(std::lround(
-                        out.w * size.h / static_cast<double>(size.w))),
+                    even ? roundEven(h) : static_cast<int>(std::lround(h)),
                     customSizeMin,
                     customSizeMax);
             }
@@ -467,20 +514,28 @@ namespace djv
             const models::ExportSettings& settings) const
         {
             ftk::Size2I out;
+            // A height worked out from a width is rounded for a movie's
+            // codecs. The source's own size and a custom size are used as
+            // they are, and the writer says if the codec cannot take them.
+            const bool even = models::ExportFileType::Movie == settings.fileType;
             switch (settings.renderSize)
             {
             case models::ExportRenderSize::Source:
                 out = _getDefaultSize();
                 break;
+            case models::ExportRenderSize::Width:
+                out = _getWidthSize(settings.customWidth, even);
+                break;
             case models::ExportRenderSize::Custom:
-                out = _getWidthSize(settings.customWidth);
+                out.w = std::clamp(settings.customWidth, customSizeMin, customSizeMax);
+                out.h = std::clamp(settings.customHeight, customSizeMin, customSizeMax);
                 break;
             default:
                 // A preset is a width like any other: taking its height as
                 // well would squash anything that is not the shape it was
                 // named for, since the export scales to fill rather than
                 // letterboxing.
-                out = _getWidthSize(models::getWidth(settings.renderSize));
+                out = _getWidthSize(models::getWidth(settings.renderSize), even);
                 break;
             }
             return out;
@@ -489,12 +544,28 @@ namespace djv
         void ExportWidget::_sizeUpdate()
         {
             FTK_P();
-            // Blank until there is something to take an aspect ratio from,
-            // which is also when there is nothing to export.
-            const ftk::Size2I size = _getExportSize(p.settings->getExport());
-            p.outputSizeLabel->setText(size.isValid() ?
-                ftk::Format("{0} x {1}").arg(size.w).arg(size.h).str() :
-                std::string());
+            const auto settings = p.settings->getExport();
+            const bool width = models::ExportRenderSize::Width == settings.renderSize;
+            const bool custom = models::ExportRenderSize::Custom == settings.renderSize;
+            p.widthEdit->setVisible(width || custom);
+            p.heightEdit->setVisible(custom);
+            p.sizeLabel->setVisible(!custom);
+            // Blank until there is something to take a size from, which is
+            // also when there is nothing to export. With a width typed in,
+            // the label is the height it comes to.
+            const ftk::Size2I size = _getExportSize(settings);
+            std::string text;
+            if (size.isValid())
+            {
+                text = width ?
+                    ftk::Format("x {0}").arg(size.h).str() :
+                    ftk::Format("{0} x {1}").arg(size.w).arg(size.h).str();
+            }
+            p.sizeLabel->setText(text);
+            p.sizeUpdating = true;
+            p.widthEdit->setValue(settings.customWidth);
+            p.heightEdit->setValue(settings.customHeight);
+            p.sizeUpdating = false;
         }
 
         void ExportWidget::_widgetUpdate(const models::ExportSettings& settings)
@@ -502,11 +573,7 @@ namespace djv
             FTK_P();
             p.dirEdit->setPath(ftk::Path(settings.dir));
             p.renderSizeComboBox->setCurrentIndex(static_cast<int>(settings.renderSize));
-            p.renderWidthEdit->setValue(settings.customWidth);
             _sizeUpdate();
-            p.formLayout->setRowVisible(
-                p.renderWidthEdit,
-                models::ExportRenderSize::Custom == settings.renderSize);
             p.tabWidget->setCurrent(static_cast<int>(settings.fileType));
         }
 

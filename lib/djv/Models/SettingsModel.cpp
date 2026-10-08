@@ -28,6 +28,7 @@ namespace djv
             "1920",
             "3840",
             "4096",
+            "Width",
             "Custom");
 
         int getWidth(ExportRenderSize value)
@@ -38,6 +39,7 @@ namespace djv
                 1920,
                 3840,
                 4096,
+                0,
                 0
             };
             return data[static_cast<size_t>(value)];
@@ -943,6 +945,7 @@ namespace djv
             json["Dir"] = value.dir;
             json["RenderSize"] = to_string(value.renderSize);
             json["CustomWidth"] = value.customWidth;
+            json["CustomHeight"] = value.customHeight;
             json["FileType"] = to_string(value.fileType);
             // The names are not kept: an output is named for the file being
             // exported, which the export widget works out each time. The
@@ -1117,6 +1120,17 @@ namespace djv
                 ftk::Size2I customSize;
                 json.at("CustomSize").get_to(customSize);
                 value.customWidth = customSize.w;
+            }
+            if (json.contains("CustomHeight"))
+            {
+                json.at("CustomHeight").get_to(value.customHeight);
+            }
+            else if (ExportRenderSize::Custom == value.renderSize)
+            {
+                // Before there was a height to type, "Custom" was a width
+                // with the height following the aspect ratio, which is now
+                // "Width".
+                value.renderSize = ExportRenderSize::Width;
             }
             from_string(json.at("FileType").get<std::string>(), value.fileType);
             if (json.contains("ImageExt"))

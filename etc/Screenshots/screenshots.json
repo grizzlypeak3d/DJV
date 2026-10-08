@@ -1134,10 +1134,10 @@
         },
         {
           "id": "Export.RenderSize",
-          "caption": "Render width"
+          "caption": "Render size"
         },
         {
-          "id": "Export.OutputSize",
+          "id": "Export.Size",
           "caption": "Size the export comes out at"
         },
         {

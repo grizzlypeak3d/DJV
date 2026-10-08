@@ -1,0 +1,20 @@
+{
+  "shots": [
+    {
+      "id": "notes-tool",
+      "strict": true,
+      "window": { "w": 900, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "Notes" },
+        { "expect": "Notes.Edit", "visible": true },
+        { "click": ["Notes.Edit", 0.1, 0.5] },
+        { "text": "Check the sky" },
+        { "key": "Return" },
+        { "expect": "Notes.Edit", "text": "Check the sky" },
+        { "command": "Notes/Clear" },
+        { "expect": "Notes.Edit", "text": "" }
+      ]
+    }
+  ]
+}
