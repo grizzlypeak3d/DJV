@@ -93,10 +93,13 @@ jobs:
         cd build-Release
         xvfb-run ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Release
 
-    # A crash in a capture test prints nothing, the log being flushed only
-    # once the application has started, so this says where it crashed: the
-    # version alone, which starts no window, and then one shot under gdb.
-    - name: Backtrace
+    # The capture tests fail here with "Couldn't find matching GLX visual"
+    # while the same code passes on the runner image, so this tries one
+    # shot with SDL's own log turned up and under the variations that tell
+    # the causes apart: no DirectColor visual, a stated screen depth, EGL
+    # instead of GLX, and OpenGL ES. Only on failure, and each try is
+    # allowed to fail so all of them run.
+    - name: Diagnose
       if: failure()
       env:
         SDL_AUDIODRIVER: dummy
@@ -104,8 +107,14 @@ jobs:
       run: |
         mkdir -p /tmp/capture
         cd djv
-        xvfb-run ../build-Release/bin/djv/djv -version || true
-        xvfb-run gdb -batch -ex run -ex bt --args ../build-Release/bin/djv/djv -resetSettings -settingsFile /tmp/capture/settings.json -captureManifest tests/capture/capture.json -captureShot shortcuts-search -captureOutput /tmp/capture -log
+        echo '../build-Release/bin/djv/djv -resetSettings -settingsFile /tmp/capture/settings.json -captureManifest tests/capture/capture.json -captureShot shortcuts-search -captureOutput /tmp/capture 2>&1 | grep -v "^LOG"' > /tmp/shot.sh
+        echo "== libraries"; ldconfig -p | grep -i "libGL\|libEGL\|libSDL3" || true
+        echo "== display"; xvfb-run sh -c 'xdpyinfo | grep -i "depth\|visual id\|name of display" | head -8' || true
+        echo "== default, SDL verbose"; SDL_LOGGING="*=verbose" xvfb-run sh /tmp/shot.sh || true
+        echo "== no DirectColor"; SDL_VIDEO_X11_NODIRECTCOLOR=1 xvfb-run sh /tmp/shot.sh || true
+        echo "== 24 bit screen"; xvfb-run -s "-screen 0 1280x1024x24" sh /tmp/shot.sh || true
+        echo "== EGL"; SDL_VIDEO_FORCE_EGL=1 xvfb-run sh /tmp/shot.sh || true
+        echo "== OpenGL ES"; FTK_GL_API=GLES_3 xvfb-run sh /tmp/shot.sh || true
 
     # This build packages without the super build's libraries, which is the
     # part of packaging nothing else here covers: the package target went
