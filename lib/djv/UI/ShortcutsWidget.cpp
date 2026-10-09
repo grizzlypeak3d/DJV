@@ -8,7 +8,6 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/SearchBox.h>
-#include <ftk/UI/Spacer.h>
 #include <ftk/UI/TableWidget.h>
 #include <ftk/UI/ToolButton.h>
 
@@ -381,26 +380,17 @@ namespace djv
             // shortcut when it is clicked. A field and a clear button for
             // every shortcut made the list hard to read.
             p.table = ftk::TableWidget::create(context);
-            p.table->setMarginRole(ftk::SizeRole::Margin);
-            p.table->setTooltip("Click a shortcut to change it");
+            p.table->setColumnLines(true);
+            p.table->setTooltip(
+                "Click a shortcut to change it. Each action has a\n"
+                "primary and a secondary shortcut.");
             ftk::setScreenshotTag(p.table, "Shortcuts.Table");
 
             p.layout = ftk::VerticalLayout::create(context);
 
             _setWidget(p.layout);
-            p.layout->setSpacingRole(ftk::SizeRole::None);
-            // Margins around the search box; the table has its own, which
-            // the bands of its headings reach through.
-            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Vertical, p.layout);
-            spacer->setSpacingRole(ftk::SizeRole::Margin);
-            auto searchLayout = ftk::HorizontalLayout::create(context, p.layout);
-            searchLayout->setSpacingRole(ftk::SizeRole::None);
-            spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, searchLayout);
-            spacer->setSpacingRole(ftk::SizeRole::Margin);
-            p.searchBox->setParent(searchLayout);
-            p.searchBox->setHStretch(ftk::Stretch::Expanding);
-            spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, searchLayout);
-            spacer->setSpacingRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::Spacing);
+            p.searchBox->setParent(p.layout);
             p.table->setParent(p.layout);
 
             p.searchBox->setCallback(
@@ -522,19 +512,11 @@ namespace djv
                     return out;
                 };
 
-            // Create the rows: the column titles, then a heading and the
-            // shortcuts for each group. A group with nothing that matches
-            // the search is hidden with its heading.
+            // Create the rows: a heading and the shortcuts for each
+            // group. A group with nothing that matches the search is
+            // hidden with its heading.
             std::vector<ftk::TableRow> rows;
             p.rowNames.clear();
-            rows.push_back(ftk::TableRow(
-                {
-                    ftk::TableCell(),
-                    ftk::TableCell("Primary"),
-                    ftk::TableCell("Secondary")
-                },
-                true));
-            p.rowNames.push_back(std::string());
             for (const auto& group : groups)
             {
                 const size_t heading = rows.size();

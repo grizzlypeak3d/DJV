@@ -99,9 +99,8 @@ namespace djv
             p.bellows["Audio"]->setWidget(vLayout2);
 
             p.bellows["Shortcuts"] = ftk::Bellows::create(context, "Keyboard Shortcuts", vLayout);
-            // The shortcuts have their own margins, so that the group
-            // headings can reach the edges.
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
+            vLayout2->setMarginRole(ftk::SizeRole::Margin);
             ui::ShortcutsSettingsWidget::create(context, settingsModel, vLayout2);
             p.bellows["Shortcuts"]->setWidget(vLayout2);
 
