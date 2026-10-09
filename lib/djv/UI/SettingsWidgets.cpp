@@ -616,7 +616,7 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Open audio files:", p.audioComboBox);
-            p.layout->addRow("Audio file extensions:", p.audioExtensionsEdit);
+            p.layout->addRow("Audio extensions:", p.audioExtensionsEdit);
             p.layout->addRow("Audio file name:", p.audioFileNameEdit);
             p.layout->addRow("Maximum digits:", p.maxDigitsEdit);
             auto hLayout = ftk::HorizontalLayout::create(context);
@@ -1032,7 +1032,7 @@ namespace djv
 
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("Start playback on open:", p.startPlaybackCheckBox);
+            p.layout->addRow("Play on open:", p.startPlaybackCheckBox);
 
             p.settingsObserver = ftk::Observer<models::PlaybackSettings>::create(
                 settings->observePlayback(),
@@ -1238,7 +1238,7 @@ namespace djv
 
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.layout->addRow("YUV to RGB conversion:", p.yuvToRGBCheckBox);
+            p.layout->addRow("YUV to RGB:", p.yuvToRGBCheckBox);
             p.layout->addRow("Hardware decoding:", p.hwAccelCheckBox);
             p.layout->addRow("Merge mono audio:", p.audioMergeCheckBox);
             p.layout->addRow("I/O threads:", p.threadsEdit);
@@ -1427,7 +1427,7 @@ namespace djv
             p.layout->addRow("Render complexity:", p.complexitySlider);
             p.layout->addRow("Draw mode:", p.drawModeComboBox);
             p.layout->addRow("Enable lighting:", p.lightingCheckBox);
-            p.layout->addRow("Enable sRGB color space:", p.sRGBCheckBox);
+            p.layout->addRow("sRGB color space:", p.sRGBCheckBox);
             p.layout->addRow("Stage cache size:", p.stageCacheEdit);
             auto hLayout = ftk::HorizontalLayout::create(context);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
