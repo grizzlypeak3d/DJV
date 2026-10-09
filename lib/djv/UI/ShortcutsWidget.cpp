@@ -245,8 +245,12 @@ namespace djv
             FTK_P();
             switch (event.key)
             {
+            // Return and tab are not shortcuts: they are the way out of
+            // the field without a change. Escape is not, because it can be
+            // a shortcut.
             case ftk::Key::Unknown:
             case ftk::Key::Return:
+            case ftk::Key::Tab:
             case ftk::Key::CapsLock:
             case ftk::Key::ScrollLock:
             case ftk::Key::NumLock:
