@@ -21,6 +21,7 @@ namespace djv
             bool collision = false;
 
             std::shared_ptr<ftk::Label> label;
+            std::shared_ptr<ftk::ToolButton> clearButton;
 
             std::function<void(const ftk::KeyShortcut&)> callback;
 
@@ -58,7 +59,26 @@ namespace djv
             p.label = ftk::Label::create(context, shared_from_this());
             p.label->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
 
+            // The clear button is inside the field, so that the field is
+            // the size of the table cell it is put over.
+            p.clearButton = ftk::ToolButton::create(context, shared_from_this());
+            p.clearButton->setIcon("ClearSmall");
+            p.clearButton->setAcceptsKeyFocus(false);
+            p.clearButton->setTooltip("Clear the shortcut");
+
             _widgetUpdate();
+
+            p.clearButton->setClickedCallback(
+                [this]
+                {
+                    FTK_P();
+                    p.shortcut = ftk::KeyShortcut();
+                    _widgetUpdate();
+                    if (p.callback)
+                    {
+                        p.callback(p.shortcut);
+                    }
+                });
         }
 
         ShortcutEdit::ShortcutEdit() :
@@ -109,7 +129,9 @@ namespace djv
             IMouseWidget::setGeometry(value);
             FTK_P();
             const ftk::Box2I g = ftk::margin(value, -p.size.keyFocus);
-            p.label->setGeometry(g);
+            const int w = std::min(p.clearButton->getSizeHint().w, g.w());
+            p.label->setGeometry(ftk::Box2I(g.min.x, g.min.y, g.w() - w, g.h()));
+            p.clearButton->setGeometry(ftk::Box2I(g.max.x + 1 - w, g.min.y, w, g.h()));
         }
 
         ftk::Box2I ShortcutEdit::getChildrenClipRect() const
@@ -121,7 +143,8 @@ namespace djv
         {
             FTK_P();
             ftk::Size2I out;
-            out.w = std::max(p.label->getSizeHint().w, p.size.minSize);
+            out.w = std::max(p.label->getSizeHint().w, p.size.minSize) +
+                p.clearButton->getSizeHint().w;
             out.h = p.label->getSizeHint().h;
             return out + p.size.keyFocus * 2;
         }
@@ -246,104 +269,6 @@ namespace djv
             p.label->setText(ftk::getShortcutLabel(
                 p.shortcut.key,
                 p.shortcut.modifiers));
-        }
-
-        struct ShortcutWidget::Private
-        {
-            ftk::KeyShortcut shortcut;
-            std::shared_ptr<ShortcutEdit> edit;
-            std::shared_ptr<ftk::ToolButton> clearButton;
-            std::shared_ptr<ftk::HorizontalLayout> layout;
-            std::function<void(const ftk::KeyShortcut&)> callback;
-        };
-
-        void ShortcutWidget::_init(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<IWidget>& parent)
-        {
-            IWidget::_init(context, "djv::ui::ShortcutWidget", parent);
-            FTK_P();
-
-            p.edit = ShortcutEdit::create(context);
-            // The field takes what room the row has: see where the rows
-            // are made.
-            p.edit->setHStretch(ftk::Stretch::Expanding);
-            setHStretch(ftk::Stretch::Expanding);
-
-            p.clearButton = ftk::ToolButton::create(context);
-            p.clearButton->setIcon("ClearSmall");
-            p.clearButton->setTooltip("Clear the shortcut");
-
-            p.layout = ftk::HorizontalLayout::create(context);
-
-            _setWidget(p.layout);
-            p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
-            p.edit->setParent(p.layout);
-            p.clearButton->setParent(p.layout);
-
-            p.edit->setCallback(
-                [this](const ftk::KeyShortcut& value)
-                {
-                    FTK_P();
-                    p.shortcut = value;
-                    if (p.callback)
-                    {
-                        p.callback(p.shortcut);
-                    }
-                });
-
-            p.clearButton->setClickedCallback(
-                [this]
-                {
-                    FTK_P();
-                    p.shortcut = ftk::KeyShortcut();
-                    p.edit->setShortcut(p.shortcut);
-                    if (p.callback)
-                    {
-                        p.callback(p.shortcut);
-                    }
-                });
-        }
-
-        ShortcutWidget::ShortcutWidget() :
-            _p(new Private)
-        {}
-
-        ShortcutWidget::~ShortcutWidget()
-        {}
-
-        std::shared_ptr<ShortcutWidget> ShortcutWidget::create(
-            const std::shared_ptr<ftk::Context>& context,
-            const std::shared_ptr<IWidget>& parent)
-        {
-            auto out = std::shared_ptr<ShortcutWidget>(new ShortcutWidget);
-            out->_init(context, parent);
-            return out;
-        }
-
-        void ShortcutWidget::setShortcut(const ftk::KeyShortcut& value)
-        {
-            FTK_P();
-            if (value == p.shortcut)
-                return;
-            p.shortcut = value;
-            p.edit->setShortcut(value);
-        }
-
-        void ShortcutWidget::setCallback(const std::function<void(const ftk::KeyShortcut&)>& value)
-        {
-            FTK_P();
-            p.callback = value;
-        }
-
-        void ShortcutWidget::setCollision(bool value)
-        {
-            _p->edit->setCollision(value);
-        }
-
-        void ShortcutWidget::takeKeyFocus()
-        {
-            _p->edit->takeKeyFocus();
         }
 
         struct ShortcutsSettingsWidget::Private
@@ -567,7 +492,7 @@ namespace djv
                 return;
             if (auto context = getContext())
             {
-                auto widget = ShortcutWidget::create(context);
+                auto widget = ShortcutEdit::create(context);
                 widget->setShortcut(primary ? i->primary : i->secondary);
                 widget->setCallback(
                     [this, name, primary](const ftk::KeyShortcut& value)
