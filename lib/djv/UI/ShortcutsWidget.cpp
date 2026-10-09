@@ -31,6 +31,7 @@ namespace djv
                 int minSize = 0;
                 int border = 0;
                 int keyFocus = 0;
+                int pad = 0;
             };
             SizeData size;
 
@@ -57,7 +58,9 @@ namespace djv
             _setMousePressEnabled(true);
 
             p.label = ftk::Label::create(context, shared_from_this());
-            p.label->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
+            // The text is inset as the text of a table cell is, so that
+            // it does not move when a cell is edited.
+            p.label->setMarginRole(ftk::SizeRole::MarginInside);
 
             // The clear button is inside the field, so that the field is
             // the size of the table cell it is put over.
@@ -130,7 +133,11 @@ namespace djv
             FTK_P();
             const ftk::Box2I g = ftk::margin(value, -p.size.keyFocus);
             const int w = std::min(p.clearButton->getSizeHint().w, g.w());
-            p.label->setGeometry(ftk::Box2I(g.min.x, g.min.y, g.w() - w, g.h()));
+            p.label->setGeometry(ftk::Box2I(
+                g.min.x + p.size.pad,
+                g.min.y,
+                g.w() - w - p.size.pad,
+                g.h()));
             p.clearButton->setGeometry(ftk::Box2I(g.max.x + 1 - w, g.min.y, w, g.h()));
         }
 
@@ -144,6 +151,7 @@ namespace djv
             FTK_P();
             ftk::Size2I out;
             out.w = std::max(p.label->getSizeHint().w, p.size.minSize) +
+                p.size.pad +
                 p.clearButton->getSizeHint().w;
             out.h = p.label->getSizeHint().h;
             return out + p.size.keyFocus * 2;
@@ -170,6 +178,7 @@ namespace djv
                 p.size.minSize = event.style->getSizeRole(ftk::SizeRole::Icon, event.displayScale);
                 p.size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);
                 p.size.keyFocus = event.style->getSizeRole(ftk::SizeRole::KeyFocus, event.displayScale);
+                p.size.pad = event.style->getSizeRole(ftk::SizeRole::LabelPad, event.displayScale);
                 p.draw.reset();
             }
         }
