@@ -314,6 +314,8 @@ namespace djv
             // shortcut when it is clicked. A field and a clear button for
             // every shortcut made the list hard to read.
             p.table = ftk::TableWidget::create(context);
+            p.table->setHeadingRole(ftk::ColorRole::None);
+            p.table->setHeadingLine(true);
             p.table->setColumnLines(true);
             p.table->setTooltip(
                 "Click a shortcut to change it. Each action has a\n"
