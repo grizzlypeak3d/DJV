@@ -400,8 +400,23 @@ namespace djv
 
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::None);
-            p.searchBox->setParent(p.layout);
+            // Margins around the search box, less below it so that with
+            // the margin of the shortcuts the first heading has the same
+            // space above it as the others.
+            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Vertical, p.layout);
+            spacer->setSpacingRole(ftk::SizeRole::Margin);
+            auto searchLayout = ftk::HorizontalLayout::create(context, p.layout);
+            searchLayout->setSpacingRole(ftk::SizeRole::None);
+            spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, searchLayout);
+            spacer->setSpacingRole(ftk::SizeRole::Margin);
+            p.searchBox->setParent(searchLayout);
+            p.searchBox->setHStretch(ftk::Stretch::Expanding);
+            spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, searchLayout);
+            spacer->setSpacingRole(ftk::SizeRole::Margin);
+            spacer = ftk::Spacer::create(context, ftk::Orientation::Vertical, p.layout);
+            spacer->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.shortcutsLayout = ftk::GridLayout::create(context, p.layout);
+            p.shortcutsLayout->setMarginRole(ftk::SizeRole::Margin);
             p.shortcutsLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
 
             p.searchBox->setCallback(
@@ -516,17 +531,23 @@ namespace djv
                     {
                         const auto& group = p.groups[i];
 
-                        auto spacer = ftk::Spacer::create(context, ftk::Orientation::Vertical, p.shortcutsLayout);
-                        spacer->setSpacingRole(ftk::SizeRole::SpacingSmall);
-                        p.groupSpacers[group.name] = spacer;
-                        p.shortcutsLayout->setGridPos(spacer, column, 0);
-                        ++column;
+                        // Space above each heading but the first, which
+                        // has the margin.
+                        if (i > 0)
+                        {
+                            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Vertical, p.shortcutsLayout);
+                            spacer->setSpacingRole(ftk::SizeRole::Spacing);
+                            p.groupSpacers[group.name] = spacer;
+                            p.shortcutsLayout->setGridPos(spacer, column, 0);
+                            ++column;
+                        }
 
-                        auto groupLabel = ftk::Label::create(context, ftk::toUpper(group.name), p.shortcutsLayout);
+                        auto groupLabel = ftk::Label::create(context, group.name, p.shortcutsLayout);
                         groupLabel->setFont(ftk::FontType::Bold);
-                        groupLabel->setMarginRole(ftk::SizeRole::MarginInside);
+                        groupLabel->setMarginRole(ftk::SizeRole::MarginInside, ftk::SizeRole::MarginSmall);
                         p.groupLabels[group.name] = groupLabel;
                         p.shortcutsLayout->setGridPos(groupLabel, column, 0);
+                        p.shortcutsLayout->setRowBackgroundRole(column, ftk::ColorRole::Base);
                         ++column;
 
                         for (int j = 0; j < static_cast<int>(group.shortcuts.size()); ++j)
