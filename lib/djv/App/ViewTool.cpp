@@ -10,6 +10,7 @@
 #include <djv/UI/Viewport.h>
 
 #include <ftk/UI/CheckBox.h>
+#include <ftk/UI/FormLayout.h>
 #include <ftk/UI/RowLayout.h>
 
 namespace djv
@@ -79,6 +80,10 @@ namespace djv
             p.bellows["HUD"] = ftk::Bellows::create(context, "HUD", layout);
             p.bellows["HUD"]->setWidget(p.hudWidget);
             p.bellows["HUD"]->setToolWidget(p.hudWidget->getEnabledCheckBox());
+            // The sections' labels share one width, so they line up as one
+            // form would.
+            ftk::setFormGroup(layout, ftk::FormGroup::create());
+
             _setWidget(layout);
 
             _loadSettings(p.bellows);

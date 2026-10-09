@@ -246,6 +246,10 @@ namespace djv
             p.tabWidget->addTab("Sequence", p.seqWidget);
             p.tabWidget->addTab("Movie", p.movieWidget);
 
+            // The form above the tabs and the one in each tab share a label
+            // width, so the controls stay put from one tab to the next.
+            ftk::setFormGroup(p.layout, ftk::FormGroup::create());
+
             p.layout->setHStretch(ftk::Stretch::Expanding);
             p.layout->setVStretch(ftk::Stretch::Expanding);
             _setWidget(p.layout);

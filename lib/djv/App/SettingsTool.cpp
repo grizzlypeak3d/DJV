@@ -8,6 +8,7 @@
 
 #include <ftk/UI/DialogSystem.h>
 #include <ftk/UI/Divider.h>
+#include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
@@ -153,6 +154,10 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setSpacingRole(ftk::SizeRole::None);
             p.scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Both, p.layout);
+            // The sections' labels share one width, so they line up as one
+            // form would.
+            ftk::setFormGroup(vLayout, ftk::FormGroup::create());
+
             p.scrollWidget->setWidget(vLayout);
             p.scrollWidget->setBorder(false);
             p.scrollWidget->setVStretch(ftk::Stretch::Expanding);

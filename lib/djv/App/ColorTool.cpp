@@ -8,6 +8,7 @@
 
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/Divider.h>
+#include <ftk/UI/FormLayout.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 
@@ -62,6 +63,10 @@ namespace djv
             p.bellows["Levels"] = ftk::Bellows::create(context, "Levels", layout);
             p.bellows["Levels"]->setWidget(levelsWidget);
             p.bellows["Levels"]->setToolWidget(levelsWidget->getEnabledCheckBox());
+            // The sections' labels share one width, so they line up as one
+            // form would.
+            ftk::setFormGroup(layout, ftk::FormGroup::create());
+
             // Reset where the settings being reset are, as well as in the
             // menu: the tool is where somebody looks for it (DJV #687). The
             // same dialog either way.
