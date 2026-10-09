@@ -266,6 +266,10 @@ namespace djv
             FTK_P();
 
             p.edit = ShortcutEdit::create(context);
+            // The field takes what room the row has: see where the rows
+            // are made.
+            p.edit->setHStretch(ftk::Stretch::Expanding);
+            setHStretch(ftk::Stretch::Expanding);
 
             p.clearButton = ftk::ToolButton::create(context);
             p.clearButton->setIcon("ClearSmall");
@@ -532,7 +536,11 @@ namespace djv
 
                             auto label = ftk::Label::create(context, shortcut.text + ":", p.shortcutsLayout);
                             label->setMarginRole(ftk::SizeRole::MarginInside);
-                            label->setHStretch(ftk::Stretch::Expanding);
+                            // The names are as wide as the longest of them
+                            // and the two shortcuts share the rest. With
+                            // the names taking the spare width instead, a
+                            // wide panel put a gap between a name and its
+                            // shortcuts that was hard to read across.
                             p.labels[shortcut.name] = label;
                             p.shortcutsLayout->setGridPos(label, column, 0);
 
