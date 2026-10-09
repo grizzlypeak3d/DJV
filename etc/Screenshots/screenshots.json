@@ -1326,14 +1326,6 @@
         {
           "id": "Shortcuts.Search",
           "caption": "Search"
-        },
-        {
-          "id": "Shortcuts.Secondary",
-          "caption": "Secondary shortcut"
-        },
-        {
-          "id": "Shortcuts.Primary",
-          "caption": "Primary shortcut"
         }
       ]
     },

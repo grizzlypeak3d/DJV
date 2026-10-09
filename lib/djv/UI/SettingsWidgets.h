@@ -11,6 +11,11 @@
 
 #include <ftk/UI/IContainer.h>
 
+namespace ftk
+{
+    struct TableIndex;
+}
+
 namespace djv
 {
     namespace ui
@@ -268,6 +273,8 @@ namespace djv
             DJV_UI_API void setCallback(const std::function<void(const ftk::KeyShortcut&)>&);
             DJV_UI_API void setCollision(bool);
 
+            DJV_UI_API void takeKeyFocus() override;
+
         private:
             void _widgetUpdate();
 
@@ -298,6 +305,8 @@ namespace djv
         private:
             void _widgetUpdate(const models::ShortcutsSettings&);
             void _searchUpdate(const std::string&);
+            void _tableUpdate();
+            void _edit(const ftk::TableIndex&);
 
             FTK_PRIVATE();
         };
