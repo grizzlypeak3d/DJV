@@ -98,7 +98,11 @@ namespace djv
                     hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     _clearButton->setParent(hLayout);
                     _clearOnExitCheckBox->setParent(hLayout);
+                    // Twice the layout's spacing either side of the divider,
+                    // which is what the tool bars have around theirs.
+                    hLayout->addSpacer(ftk::SizeRole::None);
                     ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
+                    hLayout->addSpacer(ftk::SizeRole::None);
                     _layoutComboBox->setParent(hLayout);
                     hLayout->addSpacer(ftk::SizeRole::Spacing, ftk::Stretch::Expanding);
                     _countLabel->setParent(hLayout);
