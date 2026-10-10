@@ -64,6 +64,26 @@
       ]
     },
     {
+      "id": "recent-files",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "open": "etc/SampleData/Charlie.jpg" },
+        { "command": "File/RecentFiles" },
+        { "expect": "RecentFiles.Search", "visible": true },
+        { "expect": "RecentFiles.Count", "text": "2 files" },
+        { "text": "charl" },
+        { "expect": "RecentFiles.Count", "text": "1 of 2 files" },
+        { "key": "Return" },
+        { "expect": "RecentFiles.Search", "visible": false },
+        { "command": "File/RecentFiles" },
+        { "click": "RecentFiles.Clear" },
+        { "expect": "RecentFiles.Count", "text": "0 files" },
+        { "expect": "RecentFiles.Clear", "enabled": false }
+      ]
+    },
+    {
       "id": "shortcuts-search",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

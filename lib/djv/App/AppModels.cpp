@@ -11,6 +11,7 @@
 #include <ftk/UI/FileBrowser.h>
 
 #include <djv/UI/ColorResetDialog.h>
+#include <djv/UI/RecentFilesDialog.h>
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
@@ -112,6 +113,79 @@ namespace djv
                 });
         }
 
+        void App::recentFilesDialog()
+        {
+            FTK_P();
+            if (p.recentFilesDialog || !p.mainWindow)
+            {
+                return;
+            }
+
+            // The most recent first; the model keeps them the other way
+            // around.
+            const auto recent = [](const std::vector<ftk::Path>& value)
+                {
+                    return std::vector<ftk::Path>(value.rbegin(), value.rend());
+                };
+            p.recentFilesDialog = ui::RecentFilesDialog::create(
+                _context,
+                _context->getSystem<ftk::FileBrowserSystem>()->getModel(),
+                recent(p.recentFilesModel->getRecent()),
+                p.settingsModel->getMisc().clearRecentOnExit);
+            p.recentFilesDialog->open(p.mainWindow);
+            p.recentFilesDialog->setCallback(
+                [this](const std::vector<ftk::Path>& value)
+                {
+                    for (const auto& path : value)
+                    {
+                        // The path as it was recorded, range and all, and
+                        // nothing gathered on top of it: a recent file is
+                        // already what was opened.
+                        open(
+                            path,
+                            ftk::Path(),
+                            std::optional<ftk::RangeI64>(),
+                            false);
+                    }
+                });
+            p.recentFilesDialog->setClearCallback(
+                [this]
+                {
+                    clearRecent();
+                });
+            p.recentFilesDialog->setClearOnExitCallback(
+                [this](bool value)
+                {
+                    auto misc = _p->settingsModel->getMisc();
+                    misc.clearRecentOnExit = value;
+                    _p->settingsModel->setMisc(misc);
+                });
+            p.recentFilesDialog->setCloseCallback(
+                [this]
+                {
+                    _p->recentFilesDialogObserver.reset();
+                    _p->recentFilesDialog.reset();
+                });
+            p.recentFilesDialogObserver = ftk::ListObserver<ftk::Path>::create(
+                p.recentFilesModel->observeRecent(),
+                [this, recent](const std::vector<ftk::Path>& value)
+                {
+                    if (_p->recentFilesDialog)
+                    {
+                        _p->recentFilesDialog->setRecent(recent(value));
+                    }
+                });
+        }
+
+        void App::clearRecent()
+        {
+            FTK_P();
+            p.recentFilesModel->setRecent({});
+            p.recentReviewsModel->setRecent({});
+            p.recentPlaylistsModel->setRecent({});
+            p.recentDirsModel->setRecent({});
+        }
+
         void App::_saveSettings()
         {
             FTK_P();
@@ -124,6 +198,10 @@ namespace djv
             }
             p.timeUnitsModel->save();
             p.filesModel->save();
+            if (p.settingsModel->getMisc().clearRecentOnExit)
+            {
+                clearRecent();
+            }
             p.recentFilesModel->save();
             p.recentReviewsModel->save();
             p.recentPlaylistsModel->save();

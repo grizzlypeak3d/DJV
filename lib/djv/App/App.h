@@ -222,6 +222,15 @@ namespace djv
             //! settings to return to their defaults.
             DJV_APP_API void colorResetDialog();
 
+            //! Open the recent files dialog: the recent files as a list to
+            //! search and open from, and where the recent lists are
+            //! cleared.
+            DJV_APP_API void recentFilesDialog();
+
+            //! Forget the recent files, playlists, reviews and
+            //! directories.
+            DJV_APP_API void clearRecent();
+
             //! Save the current session to the active review, prompting for a
             //! location if none is set.
             void saveReview();

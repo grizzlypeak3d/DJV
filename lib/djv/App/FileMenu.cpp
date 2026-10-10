@@ -58,6 +58,7 @@ namespace djv
             // on the current file, then leaving.
             addAction(actions["Open"]);
             addAction(actions["OpenAudio"]);
+            addAction(actions["RecentFiles"]);
             p.menus["Recent"] = addSubMenu("Recent");
             addAction(actions["Close"]);
             addAction(actions["CloseAll"]);

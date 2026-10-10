@@ -98,6 +98,7 @@ namespace djv
                 .def(nb::init())
                 .def_rw("tooltipsEnabled", &MiscSettings::tooltipsEnabled)
                 .def_rw("showSetup", &MiscSettings::showSetup)
+                .def_rw("clearRecentOnExit", &MiscSettings::clearRecentOnExit)
                 .def(nanobind::self == nanobind::self)
                 .def(nanobind::self != nanobind::self);
 

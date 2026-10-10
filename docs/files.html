@@ -39,6 +39,7 @@
 <div class="toc">
 <ul>
 <li><a href="#opening-files">Opening files</a></li>
+<li><a href="#recent-files">Recent files</a></li>
 <li><a href="#switching-files">Switching files</a></li>
 <li><a href="#playlists">Playlists</a></li>
 <li><a href="#ffmpeg">FFmpeg</a></li>
@@ -65,7 +66,7 @@
 <pre><code>djv shots -dirFilter "*latest*" -dirDepth 3</code></pre>
 <p>The files keep a fixed order, grouped by folder. Folder links are listed but not followed. The options hold for the whole session, folders opened from the dialogs included.</p>
 <p>Shortcuts:</p>
-<ul><li>Open: <kbd>Ctrl+O</kbd></li><li>Open with audio: <kbd>Ctrl+Shift+O</kbd></li><li>Reload: <kbd>Ctrl+R</kbd></li><li>Close: <kbd>Ctrl+E</kbd></li><li>Close all: <kbd>Ctrl+Shift+E</kbd></li></ul>
+<ul><li>Open: <kbd>Ctrl+O</kbd></li><li>Open with audio: <kbd>Ctrl+Shift+O</kbd></li><li>Recent files: <kbd>Ctrl+R</kbd></li><li>Reload: <kbd>Ctrl+Shift+R</kbd></li><li>Close: <kbd>Ctrl+E</kbd></li><li>Close all: <kbd>Ctrl+Shift+E</kbd></li></ul>
 <p>Image sequences can be opened from the command line by either specifying the first frame or using the "#" wildcard. For example:</p>
 <pre><code>djv render.#.exr</code></pre>
 <p>The native file browser is enabled by default on Windows and macOS. To use DJV's built-in file browser instead, change the option in the <strong>Settings</strong> tool. Linux packages are built without the native file browser, since it would mean linking to the desktop's own; there the built-in browser is always used and the option is disabled.</p>
@@ -80,6 +81,11 @@
 <p>The file browser normally opens over the main window, which covers whatever is playing while you choose. Turn on <strong>Floating window</strong> in the <strong>Settings</strong> tool to open it in a window of its own instead, so the media stays visible. The setting takes effect the next time the browser is opened.</p>
 <p>A floating browser closes when a file is chosen, the same as the dialog. Check <strong>Pin</strong> in the browser to keep it open for a run of files. Whether the browser is pinned is remembered between sessions.</p>
 <p><kbd>Escape</kbd> closes a floating browser. It is overloaded: the first press puts down the file list if it has the keyboard focus, and the next one closes the browser.</p>
+<h2 id="recent-files">Recent files</h2>
+<p><img src="assets/recent-files.svg" alt="Recent files"></p>
+<p><strong>File</strong> &gt; <strong>Recent Files</strong> lists the files opened recently, the most recent first, each with a thumbnail and the folder it is in. Type to search by name or folder; <kbd>Return</kbd> opens the first file found, and the down arrow moves into the list. Several files can be selected and opened together. The <strong>Recent</strong> menu beneath it has the same files as a menu.</p>
+<p><strong>Clear</strong> forgets the recent files, playlists, reviews and the folders the file browser remembers. <strong>Clear on exit</strong> does the same each time DJV exits, for a machine that is shared between clients.</p>
+<div class="note">Clearing the recent lists does not remove file names from the log files, which cover the current session and the one before it.</div>
 <h2 id="switching-files">Switching files</h2>
 <p>To switch between open files, use the <strong>File/Current</strong> menu, the <strong>Tab Bar</strong>, or the <strong>Files</strong> tool.</p>
 <p>Locations: <strong>File</strong> menu, <strong>Tab Bar</strong>, <strong>Files</strong> tool</p>

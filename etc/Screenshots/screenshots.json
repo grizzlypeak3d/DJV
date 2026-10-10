@@ -17,6 +17,41 @@
       "annotate": []
     },
     {
+      "id": "recent-files",
+      "window": {
+        "w": 900,
+        "h": 600
+      },
+      "setup": [
+        {
+          "open": "etc/SampleData/BART_2021-02-07.#.jpg"
+        },
+        {
+          "open": "etc/SampleData/Cubes.0001.exr"
+        },
+        {
+          "open": "etc/SampleData/Charlie.jpg"
+        },
+        {
+          "command": "File/RecentFiles"
+        }
+      ],
+      "annotate": [
+        {
+          "id": "RecentFiles.Search",
+          "caption": "Search"
+        },
+        {
+          "id": "RecentFiles.Clear",
+          "caption": "Forget the recent lists"
+        },
+        {
+          "id": "RecentFiles.ClearOnExit",
+          "caption": "Forget them at every exit"
+        }
+      ]
+    },
+    {
       "id": "main-window",
       "window": {
         "w": 900,

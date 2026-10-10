@@ -82,6 +82,28 @@ namespace djv
                 });
 
             _addCommand(
+                "RecentFiles",
+                "Show the recent files, to search and open from. With "
+                "\"clear\" set to true the recent files, playlists, reviews "
+                "and directories are forgotten instead.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        if (args.is_object() &&
+                            args.contains("clear") &&
+                            args.at("clear").get<bool>())
+                        {
+                            app->clearRecent();
+                        }
+                        else
+                        {
+                            app->recentFilesDialog();
+                        }
+                    }
+                });
+
+            _addCommand(
                 "OpenPlaylist",
                 "Open a playlist into the file list. Takes an optional "
                 "\"fileName\"; without one a file browser is shown.",
@@ -309,6 +331,11 @@ namespace djv
                 "Open With Audio",
                 "FileOpenAudio",
                 _command("OpenAudio"));
+            _actions["RecentFiles"] = ftk::Action::create(
+                "Recent Files",
+                _command("RecentFiles"));
+            _tooltips["RecentFiles"] =
+                "Show the recent files, to search and open from.";
             _actions["OpenPlaylist"] = ftk::Action::create(
                 "Open Playlist",
                 _command("OpenPlaylist"));
@@ -366,6 +393,7 @@ namespace djv
                     ftk::Key::O,
                     static_cast<int>(ftk::KeyModifier::Shift) |
                     static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("RecentFiles", ftk::KeyShortcut(ftk::Key::R, static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("OpenPlaylist", "Open playlist");
             _addShortcut("SavePlaylist", "Save playlist");
             _addShortcut("Close", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier)));
