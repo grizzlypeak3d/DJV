@@ -393,7 +393,10 @@ namespace djv
                     ftk::Key::O,
                     static_cast<int>(ftk::KeyModifier::Shift) |
                     static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut("RecentFiles", ftk::KeyShortcut(ftk::Key::R, static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("RecentFiles",
+                ftk::KeyShortcut(
+                    ftk::Key::R,
+                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("OpenPlaylist", "Open playlist");
             _addShortcut("SavePlaylist", "Save playlist");
             _addShortcut("Close", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier)));
@@ -401,10 +404,7 @@ namespace djv
                 ftk::KeyShortcut(
                     ftk::Key::E,
                     static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut("Reload",
-                ftk::KeyShortcut(
-                    ftk::Key::R,
-                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("Reload", ftk::KeyShortcut(ftk::Key::R, static_cast<int>(ftk::commandKeyModifier)));
             _addShortcut("Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("Prev", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Control)));
             _addShortcut("NextMediaReference",
