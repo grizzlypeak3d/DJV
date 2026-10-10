@@ -104,8 +104,11 @@ namespace djv
                     ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
                     hLayout->addSpacer(ftk::SizeRole::None);
                     _layoutComboBox->setParent(hLayout);
-                    hLayout->addSpacer(ftk::SizeRole::Spacing, ftk::Stretch::Expanding);
+                    hLayout->addSpacer(ftk::SizeRole::None);
+                    ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
+                    hLayout->addSpacer(ftk::SizeRole::None);
                     _countLabel->setParent(hLayout);
+                    hLayout->addSpacer(ftk::SizeRole::Spacing, ftk::Stretch::Expanding);
                     _openButton->setParent(hLayout);
                     _cancelButton->setParent(hLayout);
 
