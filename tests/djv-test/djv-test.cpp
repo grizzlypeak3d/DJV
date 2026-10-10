@@ -3,6 +3,7 @@
 
 #include "djv-test.h"
 #include "InfoSearchBaselineTest.h"
+#include "InfoSearchAndTest.h"
 
 #include <djv/ModelsTest/AnnotationsModelTest.h>
 #include <djv/ModelsTest/AudioModelTest.h>
@@ -62,8 +63,9 @@ namespace djv
             p.startTime = std::chrono::steady_clock::now();
             tl::init(context);
 
-            // Information search baseline (before #316 semantics are finalized).
+            // Information search regression coverage.
             p.tests.push_back(InfoSearchBaselineTest::create(context));
+            p.tests.push_back(InfoSearchAndTest::create(context));
 
             // Models tests.
             p.tests.push_back(models_tests::AnnotationsModelTest::create(context));
