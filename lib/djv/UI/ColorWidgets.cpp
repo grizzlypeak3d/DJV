@@ -31,6 +31,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <set>
+
 namespace djv
 {
     namespace ui
@@ -123,13 +125,26 @@ namespace djv
                 context,
                 static_cast<int>(tl::FileType::Media) |
                 static_cast<int>(tl::FileType::Seq));
+            //
+            // Of what is left only the formats in common use are offered.
+            // The plugins read sixty or more extensions between them, most
+            // of them camera raw and bare streams, which made a menu too
+            // long to find ".dpx" in and which nobody assigns a color
+            // space to.
+            const std::set<std::string> common =
+            {
+                ".avi", ".avif", ".bmp", ".cin", ".dpx", ".exr", ".hdr",
+                ".heic", ".jpeg", ".jpg", ".jxl", ".m4v", ".mkv", ".mov",
+                ".mp4", ".mxf", ".png", ".psd", ".sgi", ".tga", ".tif",
+                ".tiff", ".webm", ".webp"
+            };
             p.exts.erase(
                 std::remove_if(
                     p.exts.begin(),
                     p.exts.end(),
-                    [](const std::string& value)
+                    [&common](const std::string& value)
                     {
-                        return ".otio" == value || ".otioz" == value;
+                        return common.find(value) == common.end();
                     }),
                 p.exts.end());
             p.extAddExtComboBox = ftk::ComboBox::create(context, p.exts);
