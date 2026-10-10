@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/UI/InfoWidget.h>
+#include <djv/UI/InfoSearch.h>
 #include <djv/Models/SettingsKeys.h>
 
 #include <tlRender/Timeline/Player.h>
@@ -370,15 +371,7 @@ namespace djv
             {
                 for (const auto& tag : sections.at(name))
                 {
-                    if (!p.search.empty() &&
-                        !ftk::contains(
-                            tag.first,
-                            p.search,
-                            ftk::CaseCompare::Insensitive) &&
-                        !ftk::contains(
-                            tag.second,
-                            p.search,
-                            ftk::CaseCompare::Insensitive))
+                    if (!detail::matchesInfoRow(tag.first, tag.second, p.search))
                     {
                         continue;
                     }

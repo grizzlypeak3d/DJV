@@ -21,7 +21,8 @@ set(HEADERS
     ViewWidgets.h
     Viewport.h
     ViewportBinding.h)
-set(HEADERS_PRIVATE)
+set(HEADERS_PRIVATE
+    InfoSearch.h)
 
 set(SOURCE
     AboutDialog.cpp
