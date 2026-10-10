@@ -86,9 +86,9 @@ jobs:
 
     - name: Build
       run: |
-        sh djv/etc/Linux/sbuild.sh djv Debug
+        sh djv/etc/Linux/sbuild.sh djv Debug ci-linux
 
     - name: Run tests
       run: |
         cd build-Debug
-        xvfb-run ctest --verbose --rerun-failed --output-on-failure -C Debug
+        xvfb-run ctest --verbose --output-on-failure --no-tests=error --timeout 600 -C Debug
