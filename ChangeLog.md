@@ -7,6 +7,7 @@ Changes:
 * Export now has options for specifying the width or a custom size.
 * Add a tile layout option to the file browser.
 * Add a recent files dialog.
+* Add options for clearing recent files.
 
 Fixes:
 * Fix for the levels of 10-bit and deeper YUV movies read as RGB.
