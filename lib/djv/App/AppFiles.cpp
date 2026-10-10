@@ -273,7 +273,35 @@ namespace djv
                 items.push_back(item);
             }
 
+            // A directory is recorded as itself. Its files are recorded as
+            // they are read, which for all but the current one is when
+            // they are switched to, so opening a directory otherwise left
+            // one of its files in the recent files and nothing to say the
+            // rest had been opened.
+            if (!items.empty())
+            {
+                std::error_code ec;
+                if (std::filesystem::is_directory(ftk::toFileSystem(path.get()), ec))
+                {
+                    p.recentFilesModel->addRecent(path);
+                }
+            }
+
             return items;
+        }
+
+        void App::openRecent(const ftk::Path& path)
+        {
+            // A file as it was recorded, range and all, and nothing
+            // gathered on top of it: a recent file is already what was
+            // opened. A directory is read again, its sequences gathered
+            // as they were the first time.
+            std::error_code ec;
+            open(
+                path,
+                ftk::Path(),
+                std::optional<ftk::RangeI64>(),
+                std::filesystem::is_directory(ftk::toFileSystem(path.get()), ec));
         }
 
         void App::open(

@@ -40,7 +40,8 @@ namespace djv
                     nb::new_(&RecentFilesModel::create),
                     nb::arg("context"),
                     nb::arg("settings"),
-                    nb::arg("settingsGroup") = "Files")
+                    nb::arg("settingsGroup") = "Files",
+                    nb::arg("recentMax") = 10)
                 .def("save", &RecentFilesModel::save);
         }
     }

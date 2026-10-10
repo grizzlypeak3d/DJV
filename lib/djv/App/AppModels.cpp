@@ -138,14 +138,7 @@ namespace djv
                 {
                     for (const auto& path : value)
                     {
-                        // The path as it was recorded, range and all, and
-                        // nothing gathered on top of it: a recent file is
-                        // already what was opened.
-                        open(
-                            path,
-                            ftk::Path(),
-                            std::optional<ftk::RangeI64>(),
-                            false);
+                        openRecent(path);
                     }
                 });
             p.recentFilesDialog->setClearCallback(
@@ -330,7 +323,13 @@ namespace djv
             
             p.filesModel = models::FilesModel::create(getSettings());
 
-            p.recentFilesModel = models::RecentFilesModel::create(_context, getSettings());
+            // More than a menu has room for: the recent files dialog
+            // scrolls and searches. The menu shows the newest of them.
+            p.recentFilesModel = models::RecentFilesModel::create(
+                _context,
+                getSettings(),
+                models::settingsKeys::recentFilesGroup,
+                50);
             // Reviews and playlists get their own recent lists, so opening
             // one does not push its media into the recent files.
             p.recentReviewsModel = models::RecentFilesModel::create(_context, getSettings(), models::settingsKeys::recentReviewsGroup);

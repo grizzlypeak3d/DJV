@@ -314,7 +314,9 @@ namespace djv
         {
             FTK_P();
             p.menus["Recent"]->clear();
-            for (auto i = value.rbegin(); i != value.rend(); ++i)
+            // The newest ten; the recent files dialog has the rest.
+            size_t count = 0;
+            for (auto i = value.rbegin(); i != value.rend() && count < 10; ++i, ++count)
             {
                 const auto path = *i;
                 auto weak = std::weak_ptr<FileMenu>(std::dynamic_pointer_cast<FileMenu>(shared_from_this()));
@@ -326,14 +328,7 @@ namespace djv
                         {
                             if (auto app = widget->_p->app.lock())
                             {
-                                // The path as it was recorded, range and all,
-                                // and nothing gathered on top of it: a recent
-                                // file is already what was opened.
-                                app->open(
-                                    path,
-                                    ftk::Path(),
-                                    std::optional<ftk::RangeI64>(),
-                                    false);
+                                app->openRecent(path);
                             }
                             widget->close();
                         }

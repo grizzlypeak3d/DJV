@@ -91,6 +91,19 @@
       ]
     },
     {
+      "id": "recent-folder",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData" },
+        { "command": "File/RecentFiles" },
+        { "expect": "RecentFiles.Count", "text": "2 files" },
+        { "text": "etc" },
+        { "key": "Escape" },
+        { "expect": "RecentFiles.Count", "text": "2 files" }
+      ]
+    },
+    {
       "id": "shortcuts-search",
       "strict": true,
       "window": { "w": 1000, "h": 600 },
