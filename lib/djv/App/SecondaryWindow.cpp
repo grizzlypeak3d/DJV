@@ -4,6 +4,7 @@
 #include <djv/App/SecondaryWindow.h>
 
 #include <djv/App/App.h>
+#include <djv/Models/ViewportModel.h>
 #include <djv/App/MainWindow.h>
 #include <djv/UI/Viewport.h>
 #include <djv/Models/AppInfoModel.h>
@@ -22,6 +23,7 @@ namespace djv
             std::shared_ptr<ui::Viewport> viewport;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::Observer<bool> > ditherObserver;
         };
 
         void SecondaryWindow::_init(
@@ -58,6 +60,13 @@ namespace djv
                 [this](const std::shared_ptr<tl::Player>& value)
                 {
                     _p->viewport->setPlayer(value);
+                });
+
+            p.ditherObserver = ftk::Observer<bool>::create(
+                app->getViewportModel()->observeDither(),
+                [this](bool value)
+                {
+                    setDither(value);
                 });
         }
 

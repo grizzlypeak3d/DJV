@@ -56,6 +56,10 @@ namespace djv
             // Set the color buffer; the observer should see the change.
             model->setColorBuffer(ftk::ImageType::RGBA_U16);
             FTK_CHECK(ftk::ImageType::RGBA_U16 == model->getColorBuffer());
+
+            FTK_CHECK(!model->getDither());
+            model->setDither(true);
+            FTK_CHECK(model->getDither());
             FTK_CHECK(ftk::ImageType::RGBA_U16 == colorBuffer);
         }
 

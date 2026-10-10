@@ -180,6 +180,19 @@ namespace djv
 
             ///@}
 
+            //! \name Dither
+            //! Dithering of the picture written to an eight bit window, so
+            //! that gradients do not band. Only what is shown; the color
+            //! picker, the magnifier and the exports read the picture before
+            //! it. Off by default, since it changes what is shown.
+            ///@{
+
+            DJV_MODELS_API bool getDither() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeDither() const;
+            DJV_MODELS_API void setDither(bool);
+
+            ///@}
+
             //! \name HUD
             ///@{
 

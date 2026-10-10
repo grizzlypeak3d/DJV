@@ -54,6 +54,7 @@ namespace djv
             std::vector<tl::HDR_EOTF> hdrTransfers;
             std::shared_ptr<ftk::ComboBox> hdrTransferComboBox;
             std::shared_ptr<ftk::FloatEdit> hdrWhiteEdit;
+            std::shared_ptr<ftk::CheckBox> ditherCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<ftk::ImageOptions> > imageOptionsObserver;
@@ -61,6 +62,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<tl::HDR_EOTF> > hdrTransferObserver;
             std::shared_ptr<ftk::Observer<float> > hdrWhiteObserver;
+            std::shared_ptr<ftk::Observer<bool> > ditherObserver;
         };
 
         void ViewOptionsWidget::_init(
@@ -157,6 +159,15 @@ namespace djv
             p.hdrTransferComboBox->setEnabled(hdr);
             p.hdrWhiteEdit->setEnabled(hdr);
 
+            p.ditherCheckBox = ftk::CheckBox::create(context);
+            p.ditherCheckBox->setTooltip(
+                "Dither the picture where the window is eight bit, which "
+                "hides the banding of gradients.\n"
+                "\n"
+                "Only what is shown: the color picker, the magnifier and "
+                "the exports read the picture before it.");
+            ftk::setScreenshotTag(p.ditherCheckBox, "View.Options.Dither");
+
             p.layout = ftk::FormLayout::create(context);
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
@@ -171,6 +182,7 @@ namespace djv
             p.layout->addRow("Color buffer:", p.colorBufferComboBox);
             p.layout->addRow("HDR picture:", p.hdrTransferComboBox);
             p.layout->addRow("HDR white:", p.hdrWhiteEdit);
+            p.layout->addRow("Dither:", p.ditherCheckBox);
 
             p.imageOptionsObserver = ftk::Observer<ftk::ImageOptions>::create(
                 viewportModel->observeImageOptions(),
@@ -229,6 +241,13 @@ namespace djv
                     _p->hdrWhiteEdit->setValue(value);
                 });
 
+            p.ditherObserver = ftk::Observer<bool>::create(
+                viewportModel->observeDither(),
+                [this](bool value)
+                {
+                    _p->ditherCheckBox->setChecked(value);
+                });
+
             p.hdrTransferComboBox->setIndexCallback(
                 [this, viewportModel](int value)
                 {
@@ -243,6 +262,12 @@ namespace djv
                 [viewportModel](float value)
                 {
                     viewportModel->setHDRWhite(value);
+                });
+
+            p.ditherCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    viewportModel->setDither(value);
                 });
 
             p.channelsComboBox->setIndexCallback(

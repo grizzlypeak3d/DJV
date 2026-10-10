@@ -67,6 +67,7 @@ namespace djv
                 settingsKeys::viewportBackground,
                 settingsKeys::viewportColorBuffer,
                 settingsKeys::viewportDisplay,
+                settingsKeys::viewportDither,
                 settingsKeys::viewportForeground,
                 settingsKeys::viewportHDRTransfer,
                 settingsKeys::viewportHDRWhite,

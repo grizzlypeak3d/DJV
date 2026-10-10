@@ -73,6 +73,7 @@ namespace djv
             constexpr const char* viewportBackground = "/Viewport/Background";
             constexpr const char* viewportColorBuffer = "/Viewport/ColorBuffer";
             constexpr const char* viewportDisplay = "/Viewport/Display";
+            constexpr const char* viewportDither = "/Viewport/Dither";
             constexpr const char* viewportForeground = "/Viewport/Foreground.1";
             constexpr const char* viewportHDRTransfer = "/Viewport/HDRTransfer";
             constexpr const char* viewportHDRWhite = "/Viewport/HDRWhite";

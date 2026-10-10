@@ -168,6 +168,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<bool> > ditherObserver;
             std::shared_ptr<ftk::ListObserver<std::string> > openToolsObserver;
             std::shared_ptr<ftk::Observer<std::pair<std::string, std::string> > > showSectionObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
@@ -562,6 +563,13 @@ namespace djv
                     setBufferType(ftk::ImageType::RGBA_U8 == value ?
                         ftk::WindowBufferType::U8 :
                         ftk::WindowBufferType::F16);
+                });
+
+            p.ditherObserver = ftk::Observer<bool>::create(
+                app->getViewportModel()->observeDither(),
+                [this](bool value)
+                {
+                    setDither(value);
                 });
 
             p.openToolsObserver = ftk::ListObserver<std::string>::create(

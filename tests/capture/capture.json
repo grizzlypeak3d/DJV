@@ -156,6 +156,18 @@
       ]
     },
     {
+      "id": "view-dither",
+      "strict": true,
+      "window": { "w": 1000, "h": 700 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "View", "expand": ["Options"] },
+        { "expect": "View.Options.Dither", "checked": false },
+        { "click": "View.Options.Dither" },
+        { "expect": "View.Options.Dither", "checked": true }
+      ]
+    },
+    {
       "id": "tooltip",
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },

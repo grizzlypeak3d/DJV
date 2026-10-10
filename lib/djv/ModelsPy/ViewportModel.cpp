@@ -79,7 +79,9 @@ namespace djv
                 .def_prop_ro("observeHUDOptions", &ViewportModel::observeHUDOptions)
                 .def_prop_rw("hdrTransfer", &ViewportModel::getHDRTransfer, &ViewportModel::setHDRTransfer)
                 .def_prop_rw("hdrWhite", &ViewportModel::getHDRWhite, &ViewportModel::setHDRWhite)
-                .def_prop_ro("observeHDRWhite", &ViewportModel::observeHDRWhite);
+                .def_prop_ro("observeHDRWhite", &ViewportModel::observeHDRWhite)
+                .def_prop_rw("dither", &ViewportModel::getDither, &ViewportModel::setDither)
+                .def_prop_ro("observeDither", &ViewportModel::observeDither);
         }
     }
 }
