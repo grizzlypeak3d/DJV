@@ -712,6 +712,21 @@ namespace djv
                                 options.bellows[it.key()] = it.value().get<bool>();
                             model->setOptions(options);
                         }
+                        if (v.contains("layout"))
+                        {
+                            // "List" or "Tiles".
+                            auto options = model->getOptions();
+                            const std::string s = v.at("layout").get<std::string>();
+                            if (!from_string(s, options.layout))
+                                _note("unrecognized fileBrowser layout '" + s + "'");
+                            model->setOptions(options);
+                        }
+                        if (v.contains("open") && !v.at("open").get<bool>())
+                        {
+                            // Configure the browser without opening it, for a
+                            // shot of something else that uses its options.
+                            return true;
+                        }
                     }
                 }
                 app->openDialog();

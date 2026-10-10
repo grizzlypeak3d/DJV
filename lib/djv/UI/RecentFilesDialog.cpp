@@ -4,8 +4,10 @@
 #include <djv/UI/RecentFilesDialog.h>
 
 #include <ftk/UI/CheckBox.h>
+#include <ftk/UI/ComboBox.h>
 #include <ftk/UI/Divider.h>
 #include <ftk/UI/DrawUtil.h>
+#include <ftk/UI/FileBrowser.h>
 #include <ftk/UI/FileBrowserWidgets.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
@@ -43,6 +45,16 @@ namespace djv
                         "down arrow moves into the list.");
                     ftk::setScreenshotTag(_searchBox, "RecentFiles.Search");
 
+                    // The file browser's own option, so the two change
+                    // together.
+                    _layoutComboBox = ftk::ComboBox::create(
+                        context,
+                        ftk::getFileBrowserLayoutLabels());
+                    _layoutComboBox->setTooltip(
+                        "How the files are arranged: a list with their "
+                        "details, or tiles of larger thumbnails.");
+                    ftk::setScreenshotTag(_layoutComboBox, "RecentFiles.Layout");
+
                     _view = ftk::FileBrowserView::create(
                         context,
                         ftk::FileBrowserMode::Open,
@@ -78,7 +90,11 @@ namespace djv
                     vLayout->setMarginRole(ftk::SizeRole::MarginSmall);
                     vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     vLayout->setVStretch(ftk::Stretch::Expanding);
-                    _searchBox->setParent(vLayout);
+                    auto searchLayout = ftk::HorizontalLayout::create(context, vLayout);
+                    searchLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+                    _searchBox->setParent(searchLayout);
+                    _searchBox->setHStretch(ftk::Stretch::Expanding);
+                    _layoutComboBox->setParent(searchLayout);
                     _scrollWidget->setParent(vLayout);
                     ftk::Divider::create(context, ftk::Orientation::Vertical, _layout);
                     auto hLayout = ftk::HorizontalLayout::create(context, _layout);
@@ -157,6 +173,22 @@ namespace djv
                             {
                                 _cancelCallback();
                             }
+                        });
+
+                    _layoutComboBox->setIndexCallback(
+                        [model](int value)
+                        {
+                            auto options = model->getOptions();
+                            options.layout = static_cast<ftk::FileBrowserLayout>(value);
+                            model->setOptions(options);
+                        });
+
+                    _optionsObserver = ftk::Observer<ftk::FileBrowserOptions>::create(
+                        model->observeOptions(),
+                        [this](const ftk::FileBrowserOptions& value)
+                        {
+                            _layoutComboBox->setCurrentIndex(
+                                static_cast<int>(value.layout));
                         });
 
                     _itemCountObserver = ftk::Observer<size_t>::create(
@@ -293,6 +325,8 @@ namespace djv
                 }
 
                 std::shared_ptr<ftk::SearchBox> _searchBox;
+                std::shared_ptr<ftk::ComboBox> _layoutComboBox;
+                std::shared_ptr<ftk::Observer<ftk::FileBrowserOptions> > _optionsObserver;
                 std::shared_ptr<ftk::FileBrowserView> _view;
                 std::shared_ptr<ftk::ScrollWidget> _scrollWidget;
                 std::shared_ptr<ftk::Label> _countLabel;
