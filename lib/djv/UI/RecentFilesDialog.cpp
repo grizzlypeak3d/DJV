@@ -90,11 +90,7 @@ namespace djv
                     vLayout->setMarginRole(ftk::SizeRole::MarginSmall);
                     vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     vLayout->setVStretch(ftk::Stretch::Expanding);
-                    auto searchLayout = ftk::HorizontalLayout::create(context, vLayout);
-                    searchLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-                    _searchBox->setParent(searchLayout);
-                    _searchBox->setHStretch(ftk::Stretch::Expanding);
-                    _layoutComboBox->setParent(searchLayout);
+                    _searchBox->setParent(vLayout);
                     _scrollWidget->setParent(vLayout);
                     ftk::Divider::create(context, ftk::Orientation::Vertical, _layout);
                     auto hLayout = ftk::HorizontalLayout::create(context, _layout);
@@ -102,6 +98,7 @@ namespace djv
                     hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     _clearButton->setParent(hLayout);
                     _clearOnExitCheckBox->setParent(hLayout);
+                    _layoutComboBox->setParent(hLayout);
                     hLayout->addSpacer(ftk::SizeRole::Spacing, ftk::Stretch::Expanding);
                     _countLabel->setParent(hLayout);
                     _openButton->setParent(hLayout);
