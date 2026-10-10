@@ -78,6 +78,13 @@
         { "key": "Return" },
         { "expect": "RecentFiles.Search", "visible": false },
         { "command": "File/RecentFiles" },
+        { "text": "charl" },
+        { "key": "Escape" },
+        { "expect": "RecentFiles.Count", "text": "2 files" },
+        { "expect": "RecentFiles.Search", "visible": true },
+        { "key": "Escape" },
+        { "expect": "RecentFiles.Search", "visible": false },
+        { "command": "File/RecentFiles" },
         { "click": "RecentFiles.Clear" },
         { "expect": "RecentFiles.Count", "text": "0 files" },
         { "expect": "RecentFiles.Clear", "enabled": false }

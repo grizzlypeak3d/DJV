@@ -98,6 +98,7 @@ namespace djv
                     hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     _clearButton->setParent(hLayout);
                     _clearOnExitCheckBox->setParent(hLayout);
+                    ftk::Divider::create(context, ftk::Orientation::Horizontal, hLayout);
                     _layoutComboBox->setParent(hLayout);
                     hLayout->addSpacer(ftk::SizeRole::Spacing, ftk::Stretch::Expanding);
                     _countLabel->setParent(hLayout);
@@ -119,6 +120,18 @@ namespace djv
                         {
                             _view->setCurrent(0);
                             _open(_view->getSelection());
+                        });
+
+                    // Escape with nothing to search for closes the dialog;
+                    // the search box would otherwise let go of the
+                    // keyboard and be handed it straight back.
+                    _searchBox->setEscapeCallback(
+                        [this]
+                        {
+                            if (_cancelCallback)
+                            {
+                                _cancelCallback();
+                            }
                         });
 
                     _view->setCallback(
