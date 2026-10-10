@@ -60,11 +60,7 @@ namespace djv
                     _clearButton = ftk::PushButton::create(context, "Clear");
                     _clearButton->setTooltip(
                         "Forget the recent files, playlists, reviews and "
-                        "directories.\n"
-                        "\n"
-                        "The names of the files that were opened stay in the "
-                        "log files, which cover this session and the one "
-                        "before it.");
+                        "directories.");
                     ftk::setScreenshotTag(_clearButton, "RecentFiles.Clear");
                     _clearOnExitCheckBox = ftk::CheckBox::create(context, "Clear on exit");
                     _clearOnExitCheckBox->setChecked(clearOnExit);
