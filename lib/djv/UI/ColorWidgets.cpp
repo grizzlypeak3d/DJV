@@ -150,7 +150,9 @@ namespace djv
             p.extAddColorSpaceComboBox->setTooltip(
                 "Color space to assign to the extension.");
 
-            p.extAddButton = ftk::ToolButton::create(context, "Add");
+            p.extAddButton = ftk::ToolButton::create(context);
+            p.extAddButton->setIcon("AddSmall");
+            ftk::setScreenshotTag(p.extAddButton, "Color.OCIO.ExtAddButton");
             p.extAddButton->setTooltip(
                 "Assign the color space to files with the extension.\n"
                 "\n"
@@ -172,12 +174,16 @@ namespace djv
             p.formLayout->addRow("Display:", p.displayComboBox);
             p.formLayout->addRow("View:", p.viewComboBox);
             p.formLayout->addRow("Look:", p.lookComboBox);
+            // The extension and its color space are on two rows. On one,
+            // with the button, they made the tool wider than anything else
+            // in it; this way an assignment is no wider than the rows of
+            // the assignments already made.
             p.extAddLayout = ftk::HorizontalLayout::create(context);
             p.extAddLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.extAddExtComboBox->setParent(p.extAddLayout);
             p.extAddColorSpaceComboBox->setParent(p.extAddLayout);
             p.extAddButton->setParent(p.extAddLayout);
-            p.formLayout->addRow("Extensions:", p.extAddLayout);
+            p.formLayout->addRow("Extensions:", p.extAddExtComboBox);
+            p.formLayout->addRow(std::string(), p.extAddLayout);
 
             p.optionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 colorModel->observeOCIOOptions(),
@@ -334,6 +340,7 @@ namespace djv
                 p.formLayout->removeRow(row);
             }
             p.extRows.clear();
+            p.formLayout->removeRow(p.extAddExtComboBox);
             p.formLayout->removeRow(p.extAddLayout);
             if (auto context = getContext())
             {
@@ -377,7 +384,8 @@ namespace djv
                     p.extRows.push_back(hLayout);
                 }
             }
-            p.formLayout->addRow("Extensions:", p.extAddLayout);
+            p.formLayout->addRow("Extensions:", p.extAddExtComboBox);
+            p.formLayout->addRow(std::string(), p.extAddLayout);
         }
 
         struct LUTWidget::Private
