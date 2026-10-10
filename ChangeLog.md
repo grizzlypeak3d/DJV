@@ -5,6 +5,8 @@ Changes:
 * Movies, PNG, and OpenImageIO files are written as 8-bit or 16-bit depending
   on the image type.
 * Export now has options for specifying the width or a custom size.
+* Add a tile layout option to the file browser.
+* Add a recent files dialog.
 
 Fixes:
 * Fix for the levels of 10-bit and deeper YUV movies read as RGB.

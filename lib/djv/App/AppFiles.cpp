@@ -273,17 +273,26 @@ namespace djv
                 items.push_back(item);
             }
 
-            // A directory is recorded as itself. Its files are recorded as
-            // they are read, which for all but the current one is when
-            // they are switched to, so opening a directory otherwise left
-            // one of its files in the recent files and nothing to say the
-            // rest had been opened.
+            // What was asked for is recorded now: a directory as itself,
+            // and anything else as the files it came to. Recording a file
+            // only when it is read, which for all but the current one is
+            // when it is switched to, left one of several files opened
+            // together in the recent files and nothing to say the rest
+            // had been opened. One that turns out not to open is taken
+            // back out.
             if (!items.empty())
             {
                 std::error_code ec;
                 if (std::filesystem::is_directory(ftk::toFileSystem(path.get()), ec))
                 {
                     p.recentFilesModel->addRecent(path);
+                }
+                else
+                {
+                    for (const auto& item : items)
+                    {
+                        p.recentFilesModel->addRecent(item->path);
+                    }
                 }
             }
 
@@ -856,9 +865,8 @@ namespace djv
                         ftk::LogType::Warning);
                 }
 
-                // Recorded here rather than when the file is opened: one
-                // that cannot be read should not be offered back in the
-                // recent files.
+                // Recorded again now that it has been read, which makes
+                // the file being looked at the most recent.
                 p.recentFilesModel->addRecent(item->path);
                 // Its directory as well, which is what the file browser
                 // offers: a file opened from the command line or dropped on
@@ -875,6 +883,7 @@ namespace djv
                 // session.
                 if (item->newFile)
                 {
+                    p.recentFilesModel->removeRecent(item->path);
                     p.failedFiles.push_back(item);
                     _closeFailedLater();
                 }

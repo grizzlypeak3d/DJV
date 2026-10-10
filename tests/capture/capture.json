@@ -91,6 +91,19 @@
       ]
     },
     {
+      "id": "recent-several",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": [
+            "etc/SampleData/Charlie.jpg",
+            "etc/SampleData/Cubes.0001.exr",
+            "etc/SampleData/ColorPattern.png" ] },
+        { "command": "File/RecentFiles" },
+        { "expect": "RecentFiles.Count", "text": "3 files" }
+      ]
+    },
+    {
       "id": "recent-folder",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

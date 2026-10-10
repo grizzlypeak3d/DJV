@@ -103,10 +103,28 @@ namespace djv
             {
                 if (step.contains("open"))
                 {
-                    ftk::Path path(step.at("open").get<std::string>());
-                    if (path.hasSeqWildcard())
-                        path = ftk::expandSeq(path);
-                    app->open(path);
+                    // A file, or a list of files to open together the
+                    // way several chosen in the file browser are.
+                    const auto& v = step.at("open");
+                    if (v.is_array())
+                    {
+                        std::vector<ftk::Path> paths;
+                        for (const auto& i : v)
+                        {
+                            ftk::Path path(i.get<std::string>());
+                            if (path.hasSeqWildcard())
+                                path = ftk::expandSeq(path);
+                            paths.push_back(path);
+                        }
+                        app->open(paths);
+                    }
+                    else
+                    {
+                        ftk::Path path(v.get<std::string>());
+                        if (path.hasSeqWildcard())
+                            path = ftk::expandSeq(path);
+                        app->open(path);
+                    }
                     _setExpectMedia(true);
                 }
             }
