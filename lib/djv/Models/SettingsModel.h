@@ -198,6 +198,10 @@ namespace djv
             bool tooltipsEnabled = true;
             bool showSetup = true;
 
+            //! Forget the recent files, playlists, reviews and directories
+            //! when the application exits (DJV #909).
+            bool clearRecentOnExit = false;
+
             bool operator == (const MiscSettings&) const = default;
         };
 

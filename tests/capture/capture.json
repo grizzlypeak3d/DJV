@@ -64,6 +64,59 @@
       ]
     },
     {
+      "id": "recent-files",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "open": "etc/SampleData/Charlie.jpg" },
+        { "command": "File/RecentFiles" },
+        { "expect": "RecentFiles.Search", "visible": true },
+        { "expect": "RecentFiles.Count", "text": "2 files" },
+        { "text": "charl" },
+        { "expect": "RecentFiles.Count", "text": "1 of 2 files" },
+        { "key": "Return" },
+        { "expect": "RecentFiles.Search", "visible": false },
+        { "command": "File/RecentFiles" },
+        { "text": "charl" },
+        { "key": "Escape" },
+        { "expect": "RecentFiles.Count", "text": "2 files" },
+        { "expect": "RecentFiles.Search", "visible": true },
+        { "key": "Escape" },
+        { "expect": "RecentFiles.Search", "visible": false },
+        { "command": "File/RecentFiles" },
+        { "click": "RecentFiles.Clear" },
+        { "expect": "RecentFiles.Count", "text": "0 files" },
+        { "expect": "RecentFiles.Clear", "enabled": false }
+      ]
+    },
+    {
+      "id": "recent-several",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": [
+            "etc/SampleData/Charlie.jpg",
+            "etc/SampleData/Cubes.0001.exr",
+            "etc/SampleData/ColorPattern.png" ] },
+        { "command": "File/RecentFiles" },
+        { "expect": "RecentFiles.Count", "text": "3 files" }
+      ]
+    },
+    {
+      "id": "recent-folder",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData" },
+        { "command": "File/RecentFiles" },
+        { "expect": "RecentFiles.Count", "text": "2 files" },
+        { "text": "etc" },
+        { "key": "Escape" },
+        { "expect": "RecentFiles.Count", "text": "2 files" }
+      ]
+    },
+    {
       "id": "shortcuts-search",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

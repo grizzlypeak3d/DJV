@@ -42,6 +42,7 @@ namespace djv
     namespace ui
     {
         class ColorResetDialog;
+        class RecentFilesDialog;
         class SeparateAudioDialog;
     }
 
@@ -139,6 +140,8 @@ namespace djv
             std::shared_ptr<ftk::Observable<std::shared_ptr<tl::Player> > > player;
             std::shared_ptr<models::ColorModel> colorModel;
             std::shared_ptr<ui::ColorResetDialog> colorResetDialog;
+            std::shared_ptr<ui::RecentFilesDialog> recentFilesDialog;
+            std::shared_ptr<ftk::ListObserver<ftk::Path> > recentFilesDialogObserver;
             std::shared_ptr<models::ViewportModel> viewportModel;
             std::shared_ptr<models::AudioModel> audioModel;
             bool audioDeviceMute = false;

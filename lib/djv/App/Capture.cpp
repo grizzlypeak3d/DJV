@@ -103,10 +103,28 @@ namespace djv
             {
                 if (step.contains("open"))
                 {
-                    ftk::Path path(step.at("open").get<std::string>());
-                    if (path.hasSeqWildcard())
-                        path = ftk::expandSeq(path);
-                    app->open(path);
+                    // A file, or a list of files to open together the
+                    // way several chosen in the file browser are.
+                    const auto& v = step.at("open");
+                    if (v.is_array())
+                    {
+                        std::vector<ftk::Path> paths;
+                        for (const auto& i : v)
+                        {
+                            ftk::Path path(i.get<std::string>());
+                            if (path.hasSeqWildcard())
+                                path = ftk::expandSeq(path);
+                            paths.push_back(path);
+                        }
+                        app->open(paths);
+                    }
+                    else
+                    {
+                        ftk::Path path(v.get<std::string>());
+                        if (path.hasSeqWildcard())
+                            path = ftk::expandSeq(path);
+                        app->open(path);
+                    }
                     _setExpectMedia(true);
                 }
             }
@@ -711,6 +729,21 @@ namespace djv
                             for (auto it = b.begin(); it != b.end(); ++it)
                                 options.bellows[it.key()] = it.value().get<bool>();
                             model->setOptions(options);
+                        }
+                        if (v.contains("layout"))
+                        {
+                            // "List" or "Tiles".
+                            auto options = model->getOptions();
+                            const std::string s = v.at("layout").get<std::string>();
+                            if (!from_string(s, options.layout))
+                                _note("unrecognized fileBrowser layout '" + s + "'");
+                            model->setOptions(options);
+                        }
+                        if (v.contains("open") && !v.at("open").get<bool>())
+                        {
+                            // Configure the browser without opening it, for a
+                            // shot of something else that uses its options.
+                            return true;
                         }
                     }
                 }

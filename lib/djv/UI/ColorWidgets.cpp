@@ -30,11 +30,29 @@
 
 #include <algorithm>
 #include <cmath>
+#include <set>
 
 namespace djv
 {
     namespace ui
     {
+        namespace
+        {
+            // The extensions offered for a color space assignment: the
+            // formats in common use. The plugins read sixty or more
+            // extensions between them, most of them camera raw and bare
+            // streams, which made a menu too long to find ".dpx" in and
+            // which nobody assigns a color space to. The Export tool keeps
+            // its own lists, of what it writes.
+            const std::set<std::string> ocioExts =
+            {
+                ".avi", ".avif", ".bmp", ".cin", ".dpx", ".exr", ".hdr",
+                ".heic", ".jpeg", ".jpg", ".jxl", ".m4v", ".mkv", ".mov",
+                ".mp4", ".mxf", ".png", ".psd", ".sgi", ".tga", ".tif",
+                ".tiff", ".webm", ".webp"
+            };
+        }
+
         struct OCIOWidget::Private
         {
             std::shared_ptr<models::ColorModel> colorModel;
@@ -123,13 +141,14 @@ namespace djv
                 context,
                 static_cast<int>(tl::FileType::Media) |
                 static_cast<int>(tl::FileType::Seq));
+            // Of those, only the formats in common use.
             p.exts.erase(
                 std::remove_if(
                     p.exts.begin(),
                     p.exts.end(),
                     [](const std::string& value)
                     {
-                        return ".otio" == value || ".otioz" == value;
+                        return ocioExts.find(value) == ocioExts.end();
                     }),
                 p.exts.end());
             p.extAddExtComboBox = ftk::ComboBox::create(context, p.exts);
@@ -150,7 +169,9 @@ namespace djv
             p.extAddColorSpaceComboBox->setTooltip(
                 "Color space to assign to the extension.");
 
-            p.extAddButton = ftk::ToolButton::create(context, "Add");
+            p.extAddButton = ftk::ToolButton::create(context);
+            p.extAddButton->setIcon("AddSmall");
+            ftk::setScreenshotTag(p.extAddButton, "Color.OCIO.ExtAddButton");
             p.extAddButton->setTooltip(
                 "Assign the color space to files with the extension.\n"
                 "\n"
@@ -172,12 +193,16 @@ namespace djv
             p.formLayout->addRow("Display:", p.displayComboBox);
             p.formLayout->addRow("View:", p.viewComboBox);
             p.formLayout->addRow("Look:", p.lookComboBox);
+            // The extension and its color space are on two rows. On one,
+            // with the button, they made the tool wider than anything else
+            // in it; this way an assignment is no wider than the rows of
+            // the assignments already made.
             p.extAddLayout = ftk::HorizontalLayout::create(context);
             p.extAddLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.extAddExtComboBox->setParent(p.extAddLayout);
             p.extAddColorSpaceComboBox->setParent(p.extAddLayout);
             p.extAddButton->setParent(p.extAddLayout);
-            p.formLayout->addRow("Extensions:", p.extAddLayout);
+            p.formLayout->addRow("Extensions:", p.extAddExtComboBox);
+            p.formLayout->addRow(std::string(), p.extAddLayout);
 
             p.optionsObserver = ftk::Observer<tl::OCIOOptions>::create(
                 colorModel->observeOCIOOptions(),
@@ -334,6 +359,7 @@ namespace djv
                 p.formLayout->removeRow(row);
             }
             p.extRows.clear();
+            p.formLayout->removeRow(p.extAddExtComboBox);
             p.formLayout->removeRow(p.extAddLayout);
             if (auto context = getContext())
             {
@@ -377,7 +403,8 @@ namespace djv
                     p.extRows.push_back(hLayout);
                 }
             }
-            p.formLayout->addRow("Extensions:", p.extAddLayout);
+            p.formLayout->addRow("Extensions:", p.extAddExtComboBox);
+            p.formLayout->addRow(std::string(), p.extAddLayout);
         }
 
         struct LUTWidget::Private

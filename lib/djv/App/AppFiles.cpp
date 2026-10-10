@@ -273,7 +273,44 @@ namespace djv
                 items.push_back(item);
             }
 
+            // What was asked for is recorded now: a directory as itself,
+            // and anything else as the files it came to. Recording a file
+            // only when it is read, which for all but the current one is
+            // when it is switched to, left one of several files opened
+            // together in the recent files and nothing to say the rest
+            // had been opened. One that turns out not to open is taken
+            // back out.
+            if (!items.empty())
+            {
+                std::error_code ec;
+                if (std::filesystem::is_directory(ftk::toFileSystem(path.get()), ec))
+                {
+                    p.recentFilesModel->addRecent(path);
+                }
+                else
+                {
+                    for (const auto& item : items)
+                    {
+                        p.recentFilesModel->addRecent(item->path);
+                    }
+                }
+            }
+
             return items;
+        }
+
+        void App::openRecent(const ftk::Path& path)
+        {
+            // A file as it was recorded, range and all, and nothing
+            // gathered on top of it: a recent file is already what was
+            // opened. A directory is read again, its sequences gathered
+            // as they were the first time.
+            std::error_code ec;
+            open(
+                path,
+                ftk::Path(),
+                std::optional<ftk::RangeI64>(),
+                std::filesystem::is_directory(ftk::toFileSystem(path.get()), ec));
         }
 
         void App::open(
@@ -828,9 +865,8 @@ namespace djv
                         ftk::LogType::Warning);
                 }
 
-                // Recorded here rather than when the file is opened: one
-                // that cannot be read should not be offered back in the
-                // recent files.
+                // Recorded again now that it has been read, which makes
+                // the file being looked at the most recent.
                 p.recentFilesModel->addRecent(item->path);
                 // Its directory as well, which is what the file browser
                 // offers: a file opened from the command line or dropped on
@@ -847,6 +883,7 @@ namespace djv
                 // session.
                 if (item->newFile)
                 {
+                    p.recentFilesModel->removeRecent(item->path);
                     p.failedFiles.push_back(item);
                     _closeFailedLater();
                 }

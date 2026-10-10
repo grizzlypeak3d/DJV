@@ -20,7 +20,8 @@ namespace djv
         void RecentFilesModel::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<ftk::Settings>& settings,
-            const std::string& settingsGroup)
+            const std::string& settingsGroup,
+            size_t recentMax)
         {
             ftk::RecentFilesModel::_init(context);
             FTK_P();
@@ -47,10 +48,19 @@ namespace djv
                     }
                 }
             }
-            setRecent(recent);
-            size_t max = 10;
+            // The limit is written back at every exit, so the old limit of
+            // ten is what every existing installation has saved: it is
+            // read as "the default", and gives way to a larger one. The
+            // limit is set before the list, which is cut down to it.
+            const size_t oldMax = 10;
+            size_t max = recentMax;
             p.settings->get(settingsKeys::recentMax(p.settingsGroup), max);
+            if (oldMax == max && recentMax > oldMax)
+            {
+                max = recentMax;
+            }
             setRecentMax(max);
+            setRecent(recent);
         }
 
         RecentFilesModel::RecentFilesModel() :
@@ -82,10 +92,11 @@ namespace djv
         std::shared_ptr<RecentFilesModel> RecentFilesModel::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<ftk::Settings>& settings,
-            const std::string& settingsGroup)
+            const std::string& settingsGroup,
+            size_t recentMax)
         {
             auto out = std::shared_ptr<RecentFilesModel>(new RecentFilesModel);
-            out->_init(context, settings, settingsGroup);
+            out->_init(context, settings, settingsGroup, recentMax);
             return out;
         }
     }

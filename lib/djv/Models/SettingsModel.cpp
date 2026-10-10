@@ -997,6 +997,7 @@ namespace djv
         {
             json["TooltipsEnabled"] = value.tooltipsEnabled;
             json["ShowSetup"] = value.showSetup;
+            json["ClearRecentOnExit"] = value.clearRecentOnExit;
         }
 
         void to_json(nlohmann::json& json, const MouseActionBinding& value)
@@ -1196,6 +1197,10 @@ namespace djv
         {
             json.at("TooltipsEnabled").get_to(value.tooltipsEnabled);
             json.at("ShowSetup").get_to(value.showSetup);
+            if (json.contains("ClearRecentOnExit"))
+            {
+                json.at("ClearRecentOnExit").get_to(value.clearRecentOnExit);
+            }
         }
 
         void from_json(const nlohmann::json& json, MouseActionBinding& value)
