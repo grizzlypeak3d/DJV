@@ -76,52 +76,49 @@ namespace djv
                     return kept;
                 }
 
-                // Use built-in multiword labels for phrase grouping. Basing
-                // query parsing on metadata from the current media file
-                // would change the meaning of the same search across files.
+                // Parse recognized, unambiguous field labels independently
+                // of the media's currently available rows. Terms like
+                // "source channels" must remain separate: "Source Channels"
+                // can coexist with "Source Format" and "Channels".
+                // The exact phrase syntax is pending maintainer feedback.
                 static const std::vector<std::string> phraseLabels = {
-                    "Source Format", "Pixel Type", "Pixel Aspect Ratio",
-                    "Start Time", "Sample Rate", "Source Channels",
-                    "Source Type", "Source Sample Rate" };
+                    "Pixel Aspect Ratio", "Source Format",
+                    "Start Time", "Sample Rate" };
+                std::vector<std::string> remaining = words;
                 std::vector<std::string> terms;
-                for (size_t i = 0; i < words.size();)
+                for (const auto& label : phraseLabels)
                 {
-                    std::string candidate = words[i];
-                    std::string longestLabel;
-                    size_t longestSize = 0;
-                    // Built-in labels contain at most three words.
-                    for (size_t j = i + 1;
-                        j < words.size() && j - i < 3; ++j)
+                    // Consume a full field label as an unordered collection
+                    // of words. If any word is missing, keep all tokens
+                    // available for another label or independent matching.
+                    std::istringstream labelInput(label);
+                    std::vector<std::string> unmatched = remaining;
+                    bool complete = true;
+                    for (std::string labelWord; labelInput >> labelWord;)
                     {
-                        candidate += " " + words[j];
-                        bool matchesLabel = false;
-                        for (const auto& label : phraseLabels)
-                        {
-                            if (ftk::contains(
-                                label, candidate,
-                                ftk::CaseCompare::Insensitive))
+                        const auto i = std::find_if(
+                            unmatched.begin(), unmatched.end(),
+                            [&labelWord](const std::string& word)
                             {
-                                matchesLabel = true;
-                                break;
-                            }
-                        }
-                        if (matchesLabel)
+                                return word.size() == labelWord.size() &&
+                                    ftk::contains(
+                                        labelWord, word,
+                                        ftk::CaseCompare::Insensitive);
+                            });
+                        if (i == unmatched.end())
                         {
-                            longestLabel = candidate;
-                            longestSize = j - i + 1;
+                            complete = false;
+                            break;
                         }
+                        unmatched.erase(i);
                     }
-                    if (longestSize > 0)
+                    if (complete)
                     {
-                        terms.push_back(longestLabel);
-                        i += longestSize;
-                    }
-                    else
-                    {
-                        terms.push_back(words[i]);
-                        ++i;
+                        terms.push_back(label);
+                        remaining.swap(unmatched);
                     }
                 }
+                terms.insert(terms.end(), remaining.begin(), remaining.end());
 
                 for (const auto& term : terms)
                 {

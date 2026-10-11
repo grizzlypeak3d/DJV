@@ -167,6 +167,36 @@ namespace djv
                 FTK_CHECK(ambiguousPhrase.at("Video").size() == 1);
                 FTK_CHECK(ambiguousPhrase.at("Audio").size() == 1);
 
+                // Regression: implied-AND word order should not change results.
+                // "Source Format" and "Channels" exist, but "Source Channels"
+                // does not exist in this fixture.
+                InfoSections wordOrder = sections;
+                wordOrder["Video"].push_back({ "Source Format", "YUV 420P" });
+
+                const auto sourceFirst = filterInfoSections(
+                    wordOrder, order, "source channels");
+                const auto channelsFirst = filterInfoSections(
+                    wordOrder, order, "channels source");
+
+                FTK_CHECK(sourceFirst == channelsFirst);
+                FTK_CHECK(sourceFirst.at("Video").size() == 1);
+                FTK_CHECK(sourceFirst.at("Audio").size() == 1);
+
+                // Word order must also be stable when the optional
+                // Source Channels field is actually present.
+                wordOrder["Audio"].push_back({ "Source Channels", "6" });
+                const auto sourceFieldFirst = filterInfoSections(
+                    wordOrder, order, "source channels");
+                const auto channelsFieldFirst = filterInfoSections(
+                    wordOrder, order, "channels source");
+                FTK_CHECK(sourceFieldFirst == channelsFieldFirst);
+
+                // A recognized multiword label must still match when its
+                // query words are separated or appear in another order.
+                const auto shuffledPhrase = filterInfoSections(
+                    sections, order, "ratio channels pixel aspect");
+                FTK_CHECK(shuffledPhrase == phraseAnd);
+
                 // Filtering must use the current information, not results
                 // cached for a prior media file.
                 InfoSections changed = sections;
@@ -177,6 +207,24 @@ namespace djv
                 {
                     FTK_CHECK(changedResult.at(name).empty());
                 }
+
+                // Adding an optional combined field must not hide existing
+                // matches for the same implied-AND query.
+                InfoSections optionalField = sections;
+                optionalField["Video"].push_back({
+                    "Source Format", "YUV 420P" });
+                const auto beforeField = filterInfoSections(
+                    optionalField, order, "source channels");
+                FTK_CHECK(beforeField.at("Video").size() == 1);
+                FTK_CHECK(beforeField.at("Audio").size() == 1);
+
+                optionalField["Audio"].push_back({
+                    "Source Channels", "6" });
+                const auto afterField = filterInfoSections(
+                    optionalField, order, "source channels");
+                FTK_CHECK(afterField.at("Video") == beforeField.at("Video"));
+                FTK_CHECK(afterField.at("Audio").size() ==
+                    beforeField.at("Audio").size() + 1);
             }
         };
     }
