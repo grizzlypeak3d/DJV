@@ -65,7 +65,20 @@ namespace djv
                 std::vector<std::string> words;
                 for (std::string word; input >> word;)
                 {
-                    words.push_back(word);
+                    // A repeated AND term must not change the result.
+                    // Deduplicate before grouping recognized field labels.
+                    if (std::none_of(
+                        words.begin(), words.end(),
+                        [&word](const std::string& existing)
+                        {
+                            return word.size() == existing.size() &&
+                                ftk::contains(
+                                    existing, word,
+                                    ftk::CaseCompare::Insensitive);
+                        }))
+                    {
+                        words.push_back(word);
+                    }
                 }
                 if (words.empty())
                 {

@@ -128,6 +128,17 @@ namespace djv
                     sections, order, "CHANNELS  PIXEL   ASPECT  RATIO");
                 FTK_CHECK(reversedPhraseAnd == phraseAnd);
 
+                // Implied AND is idempotent: repeating a recognized field
+                // phrase must not introduce new matching rows.
+                const auto repeatedPhrase = filterInfoSections(
+                    sections, order,
+                    "pixel aspect ratio pixel aspect ratio");
+                FTK_CHECK(repeatedPhrase == multiword);
+                const auto repeatedPhraseMixedCase = filterInfoSections(
+                    sections, order,
+                    "RATIO pixel ASPECT PIXEL aspect ratio");
+                FTK_CHECK(repeatedPhraseMixedCase == multiword);
+
                 const auto threePartQuery = filterInfoSections(
                     sections, order, "name pixel aspect ratio channels");
                 FTK_CHECK(threePartQuery.at("File").size() == 1);
