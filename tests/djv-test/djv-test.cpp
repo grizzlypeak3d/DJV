@@ -2,6 +2,8 @@
 // Copyright Contributors to the DJV project.
 
 #include "djv-test.h"
+#include "InfoSearchBaselineTest.h"
+#include "InfoSearchAndTest.h"
 
 #include <djv/ModelsTest/AnnotationsModelTest.h>
 #include <djv/ModelsTest/AudioModelTest.h>
@@ -60,6 +62,10 @@ namespace djv
                 { p.testNames });
             p.startTime = std::chrono::steady_clock::now();
             tl::init(context);
+
+            // Information search regression coverage.
+            p.tests.push_back(InfoSearchBaselineTest::create(context));
+            p.tests.push_back(InfoSearchAndTest::create(context));
 
             // Models tests.
             p.tests.push_back(models_tests::AnnotationsModelTest::create(context));

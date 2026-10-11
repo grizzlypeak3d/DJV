@@ -1,4 +1,4 @@
-add_executable(djv-test djv-test.h djv-test.cpp)
+add_executable(djv-test djv-test.h djv-test.cpp InfoSearchBaselineTest.h InfoSearchAndTest.h)
 
 target_include_directories(djv-test
     PUBLIC

@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/UI/InfoWidget.h>
+#include <djv/UI/InfoSearch.h>
 #include <djv/Models/SettingsKeys.h>
 
 #include <tlRender/Timeline/Player.h>
@@ -17,6 +18,8 @@
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
+
+#include <algorithm>
 
 namespace djv
 {
@@ -121,8 +124,13 @@ namespace djv
                     for (const auto& name : p.sectionNames)
                     {
                         const auto& lines = p.textEdits[name]->getText();
-                        if (lines.empty())
+                        // Empty sections can contain a single blank line.
+                        if (std::all_of(
+                            lines.begin(), lines.end(),
+                            [](const std::string& line) { return line.empty(); }))
+                        {
                             continue;
+                        }
                         if (!text.empty())
                         {
                             text.push_back(std::string());
@@ -364,25 +372,13 @@ namespace djv
             // they do not: the keys are foreign and can be very long, and a
             // single camera tag should not push every value to the right
             // margin.
-            std::map<std::string, Pairs> kept;
+            auto kept = detail::filterInfoSections(
+                sections, p.sectionNames, p.search);
             size_t sharedSize = 0;
             for (const auto& name : p.sectionNames)
             {
-                for (const auto& tag : sections.at(name))
+                for (const auto& tag : kept.at(name))
                 {
-                    if (!p.search.empty() &&
-                        !ftk::contains(
-                            tag.first,
-                            p.search,
-                            ftk::CaseCompare::Insensitive) &&
-                        !ftk::contains(
-                            tag.second,
-                            p.search,
-                            ftk::CaseCompare::Insensitive))
-                    {
-                        continue;
-                    }
-                    kept[name].push_back(tag);
                     if (name != "Metadata")
                     {
                         sharedSize = std::max(sharedSize, tag.first.size() + 2);
