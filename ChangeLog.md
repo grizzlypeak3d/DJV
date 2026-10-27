@@ -6,6 +6,7 @@ Changes:
 Fixes:
 * Fix for OTIO image sequences being read one frame off when the
   available range does not start at the start frame.
+* Fix for the "View/ZoomReset" command not working from the command line.
 
 ## 3.7.5
 
