@@ -954,6 +954,8 @@ namespace djv
                 j["loop"] = tl::to_string(player->getLoop());
                 const OTIO_NS::RationalTime& time = player->getCurrentTime();
                 j["currentTime"] = { time.value(), time.rate() };
+                // As the time widgets show it, drop frame or not.
+                j["currentTimeLabel"] = p.timeUnitsModel->getLabel(time);
                 const OTIO_NS::TimeRange& range = player->getInOutRange();
                 j["inOutRange"] = {
                     range.start_time().value(),

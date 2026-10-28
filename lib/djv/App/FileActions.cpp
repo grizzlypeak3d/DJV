@@ -336,8 +336,10 @@ namespace djv
                 _command("RecentFiles"));
             _tooltips["RecentFiles"] =
                 "Show the recent files, to search and open from.";
+            // The file types are in the labels for someone handed a file who
+            // does not know which item opens it (#930).
             _actions["OpenPlaylist"] = ftk::Action::create(
-                "Open Playlist",
+                "Open Playlist (.otio)",
                 _command("OpenPlaylist"));
             // In the tooltips map rather than set on the action, so the
             // shortcuts update does not put the command's plainer wording
@@ -346,7 +348,7 @@ namespace djv
                 "Open a playlist into the file list. Opening a \".otio\" "
                 "file normally plays it as a timeline.";
             _actions["SavePlaylist"] = ftk::Action::create(
-                "Save Playlist",
+                "Save Playlist (.otio)",
                 _command("SavePlaylist"));
             _tooltips["SavePlaylist"] =
                 "Save the file list as a \".otio\" playlist.";

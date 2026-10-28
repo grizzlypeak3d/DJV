@@ -169,6 +169,7 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> layout;
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
+            std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
@@ -525,6 +526,18 @@ namespace djv
                         _settingsUpdate(settingsModel->getTimeline());
                     }
                     _windowUpdate();
+                });
+
+            // Closing the last file leaves present mode, rather than a black
+            // screen with nothing on it to say how to get back (#942).
+            p.filesObserver = ftk::ListObserver<std::shared_ptr<models::FilesModelItem> >::create(
+                app->getFilesModel()->observeFiles(),
+                [this](const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
+                {
+                    if (value.empty() && _p->presentMode->get())
+                    {
+                        setPresentMode(false);
+                    }
                 });
 
             p.timeHoverObserver = ftk::Observer<std::optional<OTIO_NS::RationalTime> >::create(

@@ -56,11 +56,16 @@ namespace djv
             ViewZoom,
             ColorPicker,
             Render,
+            LUT,
 
             Count,
             First = FileName
         };
         FTK_ENUM(DJV_MODELS_API, HUDItem);
+
+        //! Get the HUD items in the order they are listed and stacked, which
+        //! the enumeration cannot change without a new settings version.
+        DJV_MODELS_API std::vector<HUDItem> getHUDItemOrder();
 
         //! HUD positions.
         enum class DJV_MODELS_API_TYPE HUDPos

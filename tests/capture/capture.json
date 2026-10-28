@@ -46,6 +46,19 @@
       ]
     },
     {
+      "id": "marker-add-collapsed",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "frame": 3 },
+        { "tool": "Review", "collapse": "Markers" },
+        { "expect": "Review.MarkerEdit", "visible": false },
+        { "command": "Review/AddNote" },
+        { "expect": "Review.MarkerEdit", "visible": true }
+      ]
+    },
+    {
       "id": "marker-edit",
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
@@ -280,6 +293,31 @@
         { "click": "Tour.Next" },
         { "expect": "Tour.Title", "visible": false },
         { "expect": "MainWindow.Tools", "visible": false }
+      ]
+    },
+    {
+      "id": "hud-lut",
+      "strict": true,
+      "requires": ["TLRENDER_OCIO"],
+      "window": { "w": 900, "h": 500 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "view": { "hud": { "enabled": true, "items": { "LUT": "Top Left" } } } },
+        { "expect": "View.HUD.LUT", "text": "LUT: -" },
+        { "lut": "deps/tlRender/etc/SampleData/LUT_SRGB_256.lut" },
+        { "expect": "View.HUD.LUT", "text": "LUT: LUT_SRGB_256.lut" }
+      ]
+    },
+    {
+      "id": "present-close",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "command": "Window/PresentMode", "args": { "value": true } },
+        { "expect": "MainWindow.MenuBar", "visible": false },
+        { "command": "File/Close" },
+        { "expect": "MainWindow.MenuBar", "visible": true }
       ]
     },
     {

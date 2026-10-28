@@ -187,6 +187,22 @@ namespace djv
                             { { "scrollTool",
                                 { { "tool", toolStr }, { "section", section } } } });
                 }
+                // And closes these, for a shot that starts from a closed
+                // section.
+                if (step.contains("collapse"))
+                {
+                    const std::string key =
+                        ftk::Format("/{0}/Bellows").arg(toolStr);
+                    nlohmann::json bellows;
+                    app->getSettings()->get(key, bellows);
+                    const auto& collapse = step.at("collapse");
+                    if (collapse.is_string())
+                        bellows[collapse.get<std::string>()] = false;
+                    else
+                        for (const auto& name : collapse)
+                            bellows[name.get<std::string>()] = false;
+                    app->getSettings()->set(key, bellows);
+                }
                 app->getCommandsModel()->exec(
                     ftk::Format("Tools/{0}").arg(toolStr),
                     { { "value", true } });

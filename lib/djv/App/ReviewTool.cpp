@@ -108,27 +108,29 @@ namespace djv
             //! as the frames you will see, not as a half-open interval.
             std::string formatRange(
                 const OTIO_NS::TimeRange& range,
-                tl::TimeUnits units)
+                tl::TimeUnits units,
+                bool dropFrame)
             {
                 if (isSingleFrame(range))
                 {
-                    return tl::timeToText(range.start_time(), units);
+                    return tl::timeToText(range.start_time(), units, dropFrame);
                 }
                 // Frame numbers read as one token; the longer forms need
                 // the space.
                 const char* separator =
                     tl::TimeUnits::Frames == units ? "-" : " - ";
                 return
-                    tl::timeToText(range.start_time(), units) +
+                    tl::timeToText(range.start_time(), units, dropFrame) +
                     separator +
-                    tl::timeToText(range.end_time_inclusive(), units);
+                    tl::timeToText(range.end_time_inclusive(), units, dropFrame);
             }
 
             //! The title a marker's row shows: the name where there is one,
             //! its frames otherwise, and what it is about failing both.
             std::string markerTitle(
                 const models::ReviewMarker& marker,
-                tl::TimeUnits units)
+                tl::TimeUnits units,
+                bool dropFrame)
             {
                 if (!marker.name.empty())
                 {
@@ -136,7 +138,7 @@ namespace djv
                 }
                 if (marker.range.has_value())
                 {
-                    return formatRange(*marker.range, units);
+                    return formatRange(*marker.range, units, dropFrame);
                 }
                 return "No frame";
             }
@@ -227,6 +229,9 @@ namespace djv
             //! Scroll the edited item into view on the next layout, when the
             //! rebuilt list has a geometry to scroll to.
             bool scrollToEdit = false;
+            //! The marker newly highlighted, to scroll into view on the next
+            //! layout when the list was just rebuilt.
+            std::shared_ptr<ftk::ItemButton> scrollToHighlight;
             //! The editor commits when it loses the key focus, deferred a
             //! tick: the loss is reported from inside the editor, and the
             //! commit rebuilds the list that owns it.
@@ -235,12 +240,13 @@ namespace djv
 
             std::optional<OTIO_NS::RationalTime> currentTime;
             tl::TimeUnits timeUnits = tl::TimeUnits::Timecode;
+            bool dropFrame = false;
 
             std::shared_ptr<tl::Player> player;
             std::optional<OTIO_NS::TimeRange> inOutRange;
 
             std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markersObserver;
-            std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<bool> > timeUnitsObserver;
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
@@ -623,13 +629,19 @@ namespace djv
                 });
 
             // The labels show times, so they follow the units the timeline
-            // shows.
-            p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
-                app->getTimeUnitsModel()->observeTimeUnits(),
-                [this](tl::TimeUnits value)
+            // shows, and whether its timecode is drop frame.
+            std::weak_ptr<models::TimeUnitsModel> timeUnitsModelWeak =
+                app->getTimeUnitsModel();
+            p.timeUnitsObserver = ftk::Observer<bool>::create(
+                app->getTimeUnitsModel()->observeTimeUnitsChanged(),
+                [this, timeUnitsModelWeak](bool)
                 {
-                    _p->timeUnits = value;
-                    _markersUpdate();
+                    if (auto timeUnitsModel = timeUnitsModelWeak.lock())
+                    {
+                        _p->timeUnits = timeUnitsModel->getTimeUnits();
+                        _p->dropFrame = timeUnitsModel->isDropFrame();
+                        _markersUpdate();
+                    }
                 });
 
             // The list shows every marker; the playhead moves the highlight.
@@ -748,17 +760,14 @@ namespace djv
             if (p.scrollToEdit && p.editItem)
             {
                 p.scrollToEdit = false;
-                // The scroll area belongs to the widget holding the tools.
-                if (auto scrollWidget = getParentT<ftk::ScrollWidget>())
-                {
-                    if (const auto& content = scrollWidget->getWidget())
-                    {
-                        const ftk::Box2I& g = p.editItem->getGeometry();
-                        scrollWidget->scrollTo(ftk::Box2I(
-                            g.min - content->getGeometry().min,
-                            g.size()));
-                    }
-                }
+                p.scrollToHighlight.reset();
+                _scrollTo(p.editItem);
+            }
+            else if (p.scrollToHighlight)
+            {
+                const auto item = p.scrollToHighlight;
+                p.scrollToHighlight.reset();
+                _scrollTo(item);
             }
         }
 
@@ -928,6 +937,9 @@ namespace djv
             }
             _commitMarker();
             p.editingId = id;
+            // The editor is in the list: with the section closed, adding a
+            // marker looks like it did nothing (#927).
+            p.bellows["Markers"]->setOpen(true);
             _markersUpdate();
         }
 
@@ -1168,7 +1180,7 @@ namespace djv
                 }
 
                 auto titleLabel = ftk::Label::create(
-                    context, markerTitle(marker, p.timeUnits), header);
+                    context, markerTitle(marker, p.timeUnits, p.dropFrame), header);
                 titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                 titleLabel->setVAlign(ftk::VAlign::Center);
                 titleLabel->setHStretch(ftk::Stretch::Expanding);
@@ -1179,7 +1191,7 @@ namespace djv
                 // saying them twice reads as a mistake.
                 if (hasRange && !marker.name.empty())
                 {
-                    const std::string frames = formatRange(*marker.range, p.timeUnits);
+                    const std::string frames = formatRange(*marker.range, p.timeUnits, p.dropFrame);
                     if (marker.name != frames)
                     {
                         auto framesLabel = ftk::Label::create(context, frames, header);
@@ -1244,16 +1256,53 @@ namespace djv
         void ReviewTool::_selectionUpdate()
         {
             FTK_P();
-            // Highlight the markers about the frame being shown.
+            // Highlight the markers about the frame being shown, and bring
+            // the first one newly highlighted into view, so the list follows
+            // next and previous marker and playback (#933). Only a change
+            // scrolls: a list scrolled by hand is left where it is while the
+            // same marker stays highlighted.
+            std::shared_ptr<ftk::ItemButton> scrollTo;
             for (const auto& marker : p.markers)
             {
                 const auto i = p.markerButtons.find(marker.id);
                 if (i != p.markerButtons.end())
                 {
-                    i->second->setChecked(markerShowing(marker, p.currentTime));
+                    const bool showing = markerShowing(marker, p.currentTime);
+                    if (showing && !i->second->isChecked() && !scrollTo)
+                    {
+                        scrollTo = i->second;
+                    }
+                    i->second->setChecked(showing);
+                }
+            }
+            if (scrollTo)
+            {
+                // A list just rebuilt has no geometry yet.
+                if (scrollTo->getGeometry().isValid())
+                {
+                    _scrollTo(scrollTo);
+                }
+                else
+                {
+                    p.scrollToHighlight = scrollTo;
                 }
             }
             _deleteButtonUpdate();
+        }
+
+        void ReviewTool::_scrollTo(const std::shared_ptr<ftk::IWidget>& widget)
+        {
+            // The scroll area belongs to the widget holding the tools.
+            if (auto scrollWidget = getParentT<ftk::ScrollWidget>())
+            {
+                if (const auto& content = scrollWidget->getWidget())
+                {
+                    const ftk::Box2I& g = widget->getGeometry();
+                    scrollWidget->scrollTo(ftk::Box2I(
+                        g.min - content->getGeometry().min,
+                        g.size()));
+                }
+            }
         }
     }
 }

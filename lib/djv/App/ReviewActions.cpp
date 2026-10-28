@@ -257,14 +257,16 @@ namespace djv
                 });
 
             // Create the actions.
+            // The file type is in the labels for someone handed a review
+            // who does not know which item opens it (#930).
             _actions["Open"] = ftk::Action::create(
-                "Open",
+                "Open (.djvr)",
                 _command("Open"));
             _actions["Save"] = ftk::Action::create(
                 "Save",
                 _command("Save"));
             _actions["SaveAs"] = ftk::Action::create(
-                "Save As...",
+                "Save As (.djvr)...",
                 _command("SaveAs"));
             _actions["Import"] = ftk::Action::create(
                 "Import...",

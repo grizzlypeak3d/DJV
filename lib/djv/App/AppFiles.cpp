@@ -1073,6 +1073,16 @@ namespace djv
             {
                 p.droppedFrames += previous->getDroppedFrames();
             }
+            // Timecode is drop frame where the file's says so (#922). Before
+            // the player change, so the times shown for it are right first.
+            bool dropFrame = false;
+            if (player)
+            {
+                const ftk::ImageTags& tags = player->getIOInfo().tags;
+                const auto i = tags.find("timecode");
+                dropFrame = i != tags.end() && tl::isDropFrame(i->second);
+            }
+            p.timeUnitsModel->setDropFrame(dropFrame);
             p.player->setIfChanged(player);
 
             // A file that is not being shown keeps its timeline, so coming

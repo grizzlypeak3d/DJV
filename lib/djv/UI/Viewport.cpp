@@ -196,6 +196,7 @@ namespace djv
             std::shared_ptr<ftk::Label> colorPickerLabel;
             std::shared_ptr<ftk::Label> infoLabel;
             std::shared_ptr<ftk::Label> renderLabel;
+            std::shared_ptr<ftk::Label> lutLabel;
             std::map<models::HUDItem, std::shared_ptr<ftk::IWidget> > hudWidgets;
             tl::Compare compare = tl::Compare::None;
             tl::CompareTime compareTime = tl::CompareTime::Relative;
@@ -227,7 +228,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
             std::shared_ptr<ftk::ListObserver<ftk::LogItem> > messagesObserver;
             std::shared_ptr<ftk::Observer<models::HUDOptions> > hudOptionsObserver;
-            std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<bool> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<models::MouseSettings> > mouseSettingsObserver;
             std::shared_ptr<ftk::Observer<std::optional<ftk::V2I> > > pickObserver;
             std::shared_ptr<ftk::Observer<std::optional<ftk::Color4F> > > colorSampleObserver;
@@ -318,6 +320,12 @@ namespace djv
             p.renderLabel->setFont(ftk::FontType::Mono);
             p.renderLabel->setMarginRole(ftk::SizeRole::MarginSmall);
 
+            p.lutLabel = ftk::Label::create(context);
+            p.lutLabel->setFont(ftk::FontType::Mono);
+            p.lutLabel->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.lutLabel->setElide(true, ftk::ElideMode::Middle);
+            p.lutLabel->setElideFullWidth(true);
+
             p.hudWidgets[models::HUDItem::FileName] = p.fileNameLabel;
             p.hudWidgets[models::HUDItem::Cache] = p.cacheLabel;
             p.hudWidgets[models::HUDItem::Time] = p.timeLabel;
@@ -325,6 +333,7 @@ namespace djv
             p.hudWidgets[models::HUDItem::ColorPicker] = colorPickerLayout;
             p.hudWidgets[models::HUDItem::Info] = p.infoLabel;
             p.hudWidgets[models::HUDItem::Render] = p.renderLabel;
+            p.hudWidgets[models::HUDItem::LUT] = p.lutLabel;
 
             p.hudLayout = ftk::VerticalLayout::create(context, shared_from_this());
             p.hudLayout->setMarginRole(ftk::SizeRole::MarginSmall);
@@ -534,9 +543,18 @@ namespace djv
                     _hudLayout();
                 });
 
-            p.timeUnitsObserver = ftk::Observer<tl::TimeUnits>::create(
-                timeUnitsModel->observeTimeUnits(),
-                [this](tl::TimeUnits value)
+            // The units or whether timecode is drop frame.
+            p.timeUnitsObserver = ftk::Observer<bool>::create(
+                timeUnitsModel->observeTimeUnitsChanged(),
+                [this](bool)
+                {
+                    _hudUpdate();
+                });
+
+            // The LUT the HUD names.
+            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
+                observeLUTOptions(),
+                [this](const tl::LUTOptions&)
                 {
                     _hudUpdate();
                 });
@@ -1400,6 +1418,15 @@ namespace djv
             p.renderLabel->setVisible(!s.empty());
             ftk::setScreenshotTag(p.renderLabel, "View.HUD.Render");
 
+            // Which LUT is on, by its file name: two that look alike are
+            // otherwise only told apart in the color tool (#921).
+            const tl::LUTOptions& lutOptions = getLUTOptions();
+            p.lutLabel->setText(ftk::Format("LUT: {0}").arg(
+                lutOptions.enabled && !lutOptions.fileName.empty() ?
+                ftk::Path(lutOptions.fileName).getFileName() :
+                std::string("-")));
+            ftk::setScreenshotTag(p.lutLabel, "View.HUD.LUT");
+
             s = std::string();
             if (auto timeUnitsModel = p.timeUnitsModel.lock())
             {
@@ -1524,14 +1551,24 @@ namespace djv
             // there, reads as information (DJV #900). The options stay as
             // they are, and the items come back with the next file.
             const bool file = getPlayer() != nullptr;
-            for (const auto& i : options.items)
+            // In the listed order rather than the enumeration's, so that
+            // items sharing a corner stack in it.
+            for (const auto item : models::getHUDItemOrder())
             {
+                const auto i = options.items.find(item);
+                const models::HUDPos pos = i != options.items.end() ?
+                    i->second :
+                    models::HUDPos::None;
                 const bool visible =
-                    i.second != models::HUDPos::None &&
-                    (file || models::HUDItem::FileName == i.first);
-                p.hudWidgets[i.first]->setParent(visible ?
-                    p.hudLayouts[i.second] :
-                    nullptr);
+                    pos != models::HUDPos::None &&
+                    (file || models::HUDItem::FileName == item);
+                // Taken out first, so that an item comes back at the end of
+                // its corner, in order, rather than where it was.
+                p.hudWidgets[item]->setParent(nullptr);
+                if (visible)
+                {
+                    p.hudWidgets[item]->setParent(p.hudLayouts[pos]);
+                }
             }
             for (const auto& i : p.hudLayouts)
             {

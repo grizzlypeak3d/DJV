@@ -2,11 +2,21 @@
 
 Changes:
 * The startup dialog has been replaced with an interactive tour.
+* Add a HUD option for showing the LUT name.
+* The playlist and review menu items show their file extensions.
+* The keyboard shortcuts table has grid lines.
 
 Fixes:
 * Fix for OTIO image sequences being read one frame off when the
   available range does not start at the start frame.
 * Fix for the "View/ZoomReset" command not working from the command line.
+* Fix for 29.97 non-drop frame timecode being shown as drop frame.
+* Fix for images not being centered when switching between files of
+  different sizes.
+* Fix for the marker list not following the next and previous marker.
+* Fix for adding a marker when the Markers section is collapsed.
+* Fix for presentation mode staying on when the last file is closed.
+* Fix for the image not updating when moving outside the in/out points.
 
 ## 3.7.5
 

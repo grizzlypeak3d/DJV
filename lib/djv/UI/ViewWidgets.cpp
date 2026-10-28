@@ -1209,7 +1209,7 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            for (const auto i : enums)
+            for (const auto i : models::getHUDItemOrder())
             {
                 p.layout->addRow(
                     ftk::toSentenceCase(models::getLabel(i)) + ":",

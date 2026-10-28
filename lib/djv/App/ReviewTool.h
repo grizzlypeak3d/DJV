@@ -78,6 +78,7 @@ namespace djv
             void _goToRange(const OTIO_NS::TimeRange&);
             void _markersUpdate();
             void _selectionUpdate();
+            void _scrollTo(const std::shared_ptr<ftk::IWidget>&);
             void _inOutUpdate();
 
             FTK_PRIVATE();
