@@ -6,6 +6,7 @@
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
 #include <djv/UI/Viewport.h>
+#include <djv/Models/SettingsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <ftk/Core/Format.h>
@@ -16,6 +17,34 @@ namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            //! A menu entry's label: the value, written the way the tlRender
+            //! label writes it, and the type by its abbreviation, as the
+            //! View tool names it (#940, #941).
+            std::string aspectRatioLabel(const tl::AspectRatioOptions& value)
+            {
+                const bool pixel = tl::AspectRatioType::Pixel == value.type;
+                const std::string number = pixel ?
+                    std::string(ftk::Format("{0}").arg(static_cast<float>(value.value), 2)) :
+                    tl::getLabel(value.value);
+                return ftk::Format("{0} {1}").arg(number).arg(pixel ? "PAR" : "DAR");
+            }
+
+            //! A menu entry's tooltip, shown in the status bar: the type by
+            //! its full name.
+            std::string aspectRatioTooltip(const tl::AspectRatioOptions& value)
+            {
+                const bool pixel = tl::AspectRatioType::Pixel == value.type;
+                const std::string number = pixel ?
+                    std::string(ftk::Format("{0}").arg(static_cast<float>(value.value), 2)) :
+                    tl::getLabel(value.value);
+                return ftk::Format("Set the aspect ratio to {0} {1}.").
+                    arg(number).
+                    arg(pixel ? "pixel aspect ratio (PAR)" : "display aspect ratio (DAR)");
+            }
+        }
+
         struct ViewActions::Private
         {
             std::shared_ptr<ftk::Observer<bool> > frameViewObserver;
@@ -289,8 +318,9 @@ namespace djv
             {
                 _addCommand(
                     ftk::Format("AspectRatio_{0}").arg(i),
-                    ftk::Format("Set the aspect ratio to {0}.").
-                        arg(getLabel(aspectRatioOptions.options[i])),
+                    // The entry's number rather than its value, which can be
+                    // changed: the tooltip says the value (see below).
+                    ftk::Format("Set the aspect ratio to custom entry {0}.").arg(i),
                     [appWeak, i](const nlohmann::json&)
                     {
                         if (auto app = appWeak.lock())
@@ -415,14 +445,22 @@ namespace djv
 
             p.aspectRatioOptionsObserver = ftk::Observer<models::AspectRatioOptions>::create(
                 app->getViewportModel()->observeAspectRatioOptions(),
-                [this](const models::AspectRatioOptions& value)
+                [this, appWeak](const models::AspectRatioOptions& value)
                 {
                     _actions["AspectRatio_0"]->setChecked(0 == value.index);
                     for (size_t i = 1; i < value.options.size(); ++i)
                     {
-                        auto& action = _actions[ftk::Format("AspectRatio_{0}").arg(i)];
-                        action->setText(getLabel(value.options[i]));
+                        const std::string key = ftk::Format("AspectRatio_{0}").arg(i);
+                        auto& action = _actions[key];
+                        action->setText(aspectRatioLabel(value.options[i]));
                         action->setChecked(static_cast<int>(i) == value.index);
+                        _tooltips[key] = aspectRatioTooltip(value.options[i]);
+                    }
+                    // Applied with the shortcut suffix, the way the
+                    // shortcuts update applies every tooltip.
+                    if (auto app = appWeak.lock())
+                    {
+                        _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
                     }
                 });
 

@@ -5,6 +5,8 @@ Changes:
 * Add a HUD option for showing the LUT name.
 * The playlist and review menu items show their file extensions.
 * The keyboard shortcuts table has grid lines.
+* The aspect ratio types are named in full: Pixel Aspect Ratio (PAR) and
+  Display Aspect Ratio (DAR).
 
 Fixes:
 * Fix for OTIO image sequences being read one frame off when the
