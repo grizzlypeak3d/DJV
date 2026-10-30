@@ -331,9 +331,14 @@ namespace djv
             p.resolvedInputLabel = std::string();
             tl::OCIOOptions out = p.ocioOptions->get();
             // An empty input color space means automatic: it is resolved
-            // for the active file.
-            if (out.enabled &&
-                out.input.empty() &&
+            // for the active file. Resolved whether or not OpenColorIO is
+            // on -- the input is a fact about the file, and an output that
+            // color manages itself while the viewport does not (DJV Studio's
+            // BMD output with a display of its own) starts from these
+            // options, where without the input the display transform has
+            // nothing to transform from. Disabled options change nothing
+            // else: the render ignores them.
+            if (out.input.empty() &&
                 !p.activeFiles.empty() &&
                 !p.activeFiles[0].first.empty())
             {
@@ -346,11 +351,17 @@ namespace djv
                 {
                     out.input = input;
                 }
-                // Kept when the input is empty as well: an unresolved
-                // declaration labels itself, so the row can say why the
-                // image is unmanaged rather than saying nothing.
-                p.resolvedInputLabel = label;
-                _logInput(p.activeFiles[0].first, label);
+                // The resolved row and the log stay the Color tool's: they
+                // say what is managed, so they follow the enabled state.
+                //
+                // The label is kept when the input is empty as well: an
+                // unresolved declaration labels itself, so the row can say
+                // why the image is unmanaged rather than saying nothing.
+                if (out.enabled)
+                {
+                    p.resolvedInputLabel = label;
+                    _logInput(p.activeFiles[0].first, label);
+                }
             }
             return out;
         }
