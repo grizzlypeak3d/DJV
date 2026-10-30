@@ -101,6 +101,8 @@ namespace djv
             std::shared_ptr<ftk::Observable<tl::OCIOOptions> > ocioOptions;
             std::shared_ptr<ftk::Observable<tl::OCIOOptions> > resolvedOCIOOptions;
             std::shared_ptr<ftk::Observable<std::string> > resolvedInput;
+            std::shared_ptr<ftk::Observable<std::string> > resolvedInputAlways;
+            std::string resolvedInputAlwaysLabel;
             std::shared_ptr<ftk::Observable<tl::LUTOptions> > lutOptions;
             std::shared_ptr<ftk::Observable<std::map<std::string, std::string> > > extColorSpaces;
             std::vector<std::pair<std::string, ftk::ImageTags> > activeFiles;
@@ -147,6 +149,8 @@ namespace djv
                 _resolvedOCIOOptions());
             p.resolvedInput = ftk::Observable<std::string>::create(
                 p.resolvedInputLabel);
+            p.resolvedInputAlways = ftk::Observable<std::string>::create(
+                p.resolvedInputAlwaysLabel);
             p.resolvedInputs = ftk::Observable<std::vector<std::string> >::create(
                 std::vector<std::string>());
 
@@ -302,11 +306,17 @@ namespace djv
             return _p->resolvedInput;
         }
 
+        std::shared_ptr<ftk::IObservable<std::string> > ColorModel::observeResolvedInputAlways() const
+        {
+            return _p->resolvedInputAlways;
+        }
+
         void ColorModel::_resolvedUpdate()
         {
             FTK_P();
             p.resolvedOCIOOptions->setIfChanged(_resolvedOCIOOptions());
             p.resolvedInput->setIfChanged(p.resolvedInputLabel);
+            p.resolvedInputAlways->setIfChanged(p.resolvedInputAlwaysLabel);
 
             // One resolution per active file, for the per item display
             // options; all empty when the user chose an input themselves.
@@ -362,6 +372,17 @@ namespace djv
                     p.resolvedInputLabel = label;
                     _logInput(p.activeFiles[0].first, label);
                 }
+                p.resolvedInputAlwaysLabel = label;
+            }
+            else if (!out.input.empty())
+            {
+                // The settings name the input, so nothing resolves; the
+                // label says where this one came from too.
+                p.resolvedInputAlwaysLabel = out.input + " (settings)";
+            }
+            else
+            {
+                p.resolvedInputAlwaysLabel = std::string();
             }
             return out;
         }

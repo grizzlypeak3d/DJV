@@ -90,6 +90,12 @@ namespace djv
             //! nothing is resolved.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::string> > observeResolvedInput() const;
 
+            //! As observeResolvedInput(), but whether or not OpenColorIO
+            //! is on, and saying so when the input is the settings' own:
+            //! for an output that color manages itself while the viewport
+            //! does not, whose tool shows what the output resolved.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::string> > observeResolvedInputAlways() const;
+
             //! Get the file name extension color spaces.
             DJV_MODELS_API const std::map<std::string, std::string>& getExtColorSpaces() const;
 
