@@ -785,8 +785,8 @@ namespace djv
 
             if (p.cmdLine.command->found())
             {
-                // Wait for the command line inputs to be opened before
-                // executing the command.
+                // Wait for the command line inputs to be opened, and their
+                // first frame to be shown, before executing the command.
                 p.commandTimer = ftk::Timer::create(_context);
                 p.commandTimer->setRepeating(true);
                 p.commandTimer->start(
@@ -796,8 +796,19 @@ namespace djv
                         FTK_P();
                         ++p.commandTicks;
                         const bool timeout = p.commandTicks > 100;
+                        bool ready = false;
+                        if (auto player = p.player->get())
+                        {
+                            // The view commands need the image and the
+                            // viewport's size to work from.
+                            ready =
+                                player->getIOInfo().video.empty() ||
+                                (!player->getCurrentVideo().empty() &&
+                                 p.mainWindow &&
+                                 p.mainWindow->getViewport()->getGeometry().isValid());
+                        }
                         if (p.cmdLine.inputs->getList().empty() ||
-                            p.player->get() ||
+                            ready ||
                             timeout)
                         {
                             p.commandTimer->stop();
@@ -1034,6 +1045,8 @@ namespace djv
                 j["loop"] = tl::to_string(player->getLoop());
                 const OTIO_NS::RationalTime& time = player->getCurrentTime();
                 j["currentTime"] = { time.value(), time.rate() };
+                // As the time widgets show it, drop frame or not.
+                j["currentTimeLabel"] = p.timeUnitsModel->getLabel(time);
                 const OTIO_NS::TimeRange& range = player->getInOutRange();
                 j["inOutRange"] = {
                     range.start_time().value(),

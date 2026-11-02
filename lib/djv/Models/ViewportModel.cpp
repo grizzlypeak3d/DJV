@@ -27,7 +27,25 @@ namespace djv
             "Time",
             "View Zoom",
             "Color Picker",
-            "Render");
+            "Render",
+            "LUT");
+
+        std::vector<HUDItem> getHUDItemOrder()
+        {
+            // The LUT under the file name: which LUT is on is said about
+            // the file being looked at (#921).
+            return
+            {
+                HUDItem::FileName,
+                HUDItem::LUT,
+                HUDItem::Info,
+                HUDItem::Cache,
+                HUDItem::Time,
+                HUDItem::ViewZoom,
+                HUDItem::ColorPicker,
+                HUDItem::Render
+            };
+        }
 
         FTK_ENUM_IMPL(
             HUDPos,

@@ -30,6 +30,7 @@
 #include <ftk/GPU/System.h>
 #endif // FTK_GPU
 #include <tlRender/UI/Viewport.h>
+#include <ftk/Core/Assert.h>
 #include <ftk/Core/Format.h>
 
 #include <sstream>
@@ -382,8 +383,21 @@ namespace djv
             p.edit->setFormat("0.00:0");
             p.edit->getModel()->setRegex("[0-9\\.\\:]*");
 
-            p.typeComboBox = ftk::ComboBox::create(context, tl::getAspectRatioTypeLabels());
+            // The full names here: the type's own labels are what settings
+            // and reviews save, so they stay short (#940, #941). In the
+            // order of tl::AspectRatioType.
+            const std::vector<std::string> typeLabels =
+            {
+                "Pixel Aspect Ratio (PAR)",
+                "Display Aspect Ratio (DAR)"
+            };
+            FTK_ASSERT(typeLabels.size() == static_cast<size_t>(tl::AspectRatioType::Count));
+            p.typeComboBox = ftk::ComboBox::create(context, typeLabels);
             p.typeComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.typeComboBox->setTooltip(
+                "Pixel aspect ratio: the shape of a pixel, applied to the\n"
+                "stored resolution. Also called the lens squeeze factor.\n"
+                "Display aspect ratio: the finished shape of the image.");
 
             p.layout = ftk::HorizontalLayout::create(context);
             _setWidget(p.layout);
@@ -1315,7 +1329,7 @@ namespace djv
             _setWidget(p.layout);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            for (const auto i : enums)
+            for (const auto i : models::getHUDItemOrder())
             {
                 p.layout->addRow(
                     ftk::toSentenceCase(models::getLabel(i)) + ":",

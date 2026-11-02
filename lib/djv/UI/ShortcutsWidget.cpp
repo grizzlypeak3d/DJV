@@ -320,7 +320,9 @@ namespace djv
             p.table = ftk::TableWidget::create(context);
             p.table->setHeadingRole(ftk::ColorRole::None);
             p.table->setHeadingLine(true);
+            // A grid, so the shortcuts read as cells to fill in (#926).
             p.table->setColumnLines(true);
+            p.table->setRowLines(true);
             p.table->setTooltip(
                 "Click a shortcut to change it. Each action has a\n"
                 "primary and a secondary shortcut.");

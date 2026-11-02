@@ -259,10 +259,13 @@ elseif(APPLE)
             set(PRE_BUILD_SCRIPTS "${PROJECT_SOURCE_DIR}/cmake/Modules/usdPluginsSymlink.cmake")
         endif()
         set(POST_BUILD_SCRIPTS)
+        # The application is always signed: with the Developer ID when there
+        # is one, and otherwise ad hoc (see macOSAppSign.cmake). The disk
+        # image only with the Developer ID.
+        list(APPEND PRE_BUILD_SCRIPTS
+            "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSAppSign.cmake")
         set(DJV_MACOS_TEAM_ID $ENV{DJV_MACOS_TEAM_ID})
         if(DJV_MACOS_TEAM_ID)
-            list(APPEND PRE_BUILD_SCRIPTS
-                "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSAppSign.cmake")
             list(APPEND POST_BUILD_SCRIPTS
                 "${PROJECT_SOURCE_DIR}/cmake/Modules/macOSPackageSign.cmake")
         endif()
