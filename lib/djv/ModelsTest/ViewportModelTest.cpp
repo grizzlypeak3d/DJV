@@ -32,6 +32,7 @@ namespace djv
         void ViewportModelTest::run()
         {
             _behavior();
+            _colorAdjustments();
             _persistence();
         }
 
@@ -61,6 +62,44 @@ namespace djv
             model->setDither(true);
             FTK_CHECK(model->getDither());
             FTK_CHECK(ftk::ImageType::RGBA_U16 == colorBuffer);
+        }
+
+        void ViewportModelTest::_colorAdjustments()
+        {
+            auto settings = createTestSettings(_context);
+            auto model = models::ViewportModel::create(_context, settings);
+            FTK_CHECK(!model->hasColorAdjustments());
+
+            tl::DisplayOptions options = model->getDisplayOptions();
+            options.channels = ftk::ChannelDisplay::Red;
+            options.negative = true;
+            model->setDisplayOptions(options);
+            // How the picture is viewed is not an adjustment.
+            FTK_CHECK(!model->hasColorAdjustments());
+
+            options.color.enabled = true;
+            options.color.hue = 90.F;
+            options.levels.enabled = true;
+            options.levels.gamma = 2.F;
+            options.exposure.enabled = true;
+            options.softClip.enabled = true;
+            model->setDisplayOptions(options);
+            FTK_CHECK(model->hasColorAdjustments());
+
+            // Each half on its own.
+            model->resetColorAdjustments(true, false);
+            FTK_CHECK(model->getDisplayOptions().color == tl::Color());
+            FTK_CHECK(!model->getDisplayOptions().exposure.enabled);
+            FTK_CHECK(!model->getDisplayOptions().softClip.enabled);
+            FTK_CHECK(model->getDisplayOptions().levels.enabled);
+            FTK_CHECK(model->hasColorAdjustments());
+            model->resetColorAdjustments(false, true);
+            FTK_CHECK(model->getDisplayOptions().levels == tl::Levels());
+            FTK_CHECK(!model->hasColorAdjustments());
+
+            // And the view options left as they were.
+            FTK_CHECK(ftk::ChannelDisplay::Red == model->getDisplayOptions().channels);
+            FTK_CHECK(model->getDisplayOptions().negative);
         }
 
         void ViewportModelTest::_persistence()

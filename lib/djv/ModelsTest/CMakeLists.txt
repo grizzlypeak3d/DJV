@@ -3,6 +3,8 @@ set(HEADERS
     AudioModelTest.h
     ColorModelTest.h
     FilesModelTest.h
+    HUDTest.h
+    InfoTest.h
     ModelsTestUtil.h
     MarkersModelTest.h
     PlaylistTest.h
@@ -21,6 +23,8 @@ set(SOURCE
     AudioModelTest.cpp
     ColorModelTest.cpp
     FilesModelTest.cpp
+    HUDTest.cpp
+    InfoTest.cpp
     MarkersModelTest.cpp
     PlaylistTest.cpp
     RecentFilesModelTest.cpp

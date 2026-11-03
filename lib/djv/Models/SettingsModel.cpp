@@ -563,7 +563,14 @@ namespace djv
             // operating system and whatever else is open. A cache larger
             // than this can only end with the machine swapping.
             const float ramGB = static_cast<float>(ftk::getSysInfo().ramGB);
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+            // iOS kills an application long before that: a quarter of the
+            // memory, twice the default, with the decoders' frame pools
+            // able to hold as much again.
+            return std::max(ramGB / 4.F, .25F);
+#else // TARGET_OS_IPHONE
             return std::max(ramGB - 2.F, 1.F);
+#endif // TARGET_OS_IPHONE
         }
 
         tl::PlayerCacheOptions SettingsModel::getDefaultCache()

@@ -130,6 +130,17 @@ namespace djv
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::DisplayOptions> > observeDisplayOptions() const;
             DJV_MODELS_API void setDisplayOptions(const tl::DisplayOptions&);
 
+            //! Whether any of the color adjustments is on: the color
+            //! values, levels, exposure or soft clip. The channels, the
+            //! mirroring and the negative are how the picture is viewed,
+            //! not adjustments.
+            DJV_MODELS_API bool hasColorAdjustments() const;
+
+            //! Reset the color adjustments to their defaults: the color
+            //! values, exposure and soft clip with "color", the levels with
+            //! "levels". The view options beside them are left as they are.
+            DJV_MODELS_API void resetColorAdjustments(bool color = true, bool levels = true);
+
             ///@}
 
             //! \name Aspect Ratio Options

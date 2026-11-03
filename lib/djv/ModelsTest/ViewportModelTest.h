@@ -22,6 +22,7 @@ namespace djv
 
         private:
             void _behavior();
+            void _colorAdjustments();
             void _persistence();
         };
     }

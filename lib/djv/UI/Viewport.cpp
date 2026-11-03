@@ -9,6 +9,7 @@
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/HUD.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/Stroke.h>
 #include <djv/UI/StrokeDraw.h>
@@ -2326,109 +2327,48 @@ namespace djv
         {
             FTK_P();
 
-            // For a sequence, the image on screen rather than the
-            // pattern: which frame a picture came from is the question a
-            // sequence of renders gets asked. Sequence time is the frame
-            // number, so the value is the name (#490).
-            std::string s =
-                p.path.isSeq() && p.currentTime.has_value() ?
-                p.path.getFrame(static_cast<int64_t>(p.currentTime->value())) :
-                p.path.getFileName();
-            p.fileNameLabel->setText(!s.empty() ? s : "(No file)");
+            // The lines are the models', shared with the iPad.
+            models::HUDData data;
+            data.path = p.path;
+            data.ioInfo = p.ioInfo;
+            data.videoLayer = p.videoLayer;
+            data.currentTime = p.currentTime;
+            if (auto timeUnitsModel = p.timeUnitsModel.lock())
+            {
+                data.timeLabel = timeUnitsModel->getLabel(p.currentTime);
+            }
+            data.fps = p.fps;
+            data.droppedFrames = p.droppedFrames;
+            data.missing = p.missing;
+            data.heldFrom = p.heldFrom;
+            data.cacheInfo = p.cacheInfo;
+            if (p.binding)
+            {
+                data.aspectRatio = p.binding->getDisplayOptions().aspectRatio;
+            }
+            data.lutOptions = getLUTOptions();
+            data.viewZoom = p.viewZoom;
+
+            p.fileNameLabel->setText(models::getHUDText(models::HUDItem::FileName, data));
             ftk::setScreenshotTag(p.fileNameLabel, "View.HUD.FileName");
 
-            std::vector<std::string> info;
-            if (!p.ioInfo.video.empty())
-            {
-                info.push_back(std::string(ftk::Format("V: {0}").
-                    arg(ftk::getLabel(
-                        tl::getVideoInfo(p.ioInfo, p.videoLayer)))));
-            }
-            if (p.ioInfo.audio.isValid())
-            {
-                info.push_back(std::string(ftk::Format("A: {0}").
-                    arg(tl::getLabel(p.ioInfo.audio, true))));
-            }
-            p.infoLabel->setText(ftk::join(info, ", "));
-            p.infoLabel->setVisible(!info.empty());
+            std::string s = models::getHUDText(models::HUDItem::Info, data);
+            p.infoLabel->setText(s);
+            p.infoLabel->setVisible(!s.empty());
             ftk::setScreenshotTag(p.infoLabel, "View.HUD.Info");
 
-            // What is actually rendered, which the pixel aspect ratio and the
-            // aspect ratio override can both move away from the media size
-            // reported above. The effective pixel aspect ratio is taken back
-            // out of the render size rather than read from either source, so
-            // it holds whether it came from the media or from an override.
-            s = std::string();
-            if (!p.ioInfo.video.empty())
-            {
-                const ftk::ImageInfo& videoInfo = p.ioInfo.video[0];
-                const ftk::Size2I renderSize = tl::getRenderSize(
-                    videoInfo,
-                    p.binding->getDisplayOptions().aspectRatio);
-                if (renderSize.isValid() && videoInfo.size.w > 0)
-                {
-                    const float pixelAspectRatio =
-                        renderSize.w / static_cast<float>(videoInfo.size.w);
-                    s = ftk::Format("Render: {0}x{1}:{2}").
-                        arg(renderSize.w).
-                        arg(renderSize.h).
-                        arg(ftk::aspectRatio(renderSize), 2);
-                    // Square pixels are the common case and add nothing.
-                    if (std::fabs(pixelAspectRatio - 1.F) > 0.001F)
-                    {
-                        s += ftk::Format(", PAR: {0}").
-                            arg(pixelAspectRatio, 2);
-                    }
-                }
-            }
+            s = models::getHUDText(models::HUDItem::Render, data);
             p.renderLabel->setText(s);
             p.renderLabel->setVisible(!s.empty());
             ftk::setScreenshotTag(p.renderLabel, "View.HUD.Render");
 
-            // Which LUT is on, by its file name: two that look alike are
-            // otherwise only told apart in the color tool (#921).
-            const tl::LUTOptions& lutOptions = getLUTOptions();
-            p.lutLabel->setText(ftk::Format("LUT: {0}").arg(
-                lutOptions.enabled && !lutOptions.fileName.empty() ?
-                ftk::Path(lutOptions.fileName).getFileName() :
-                std::string("-")));
+            p.lutLabel->setText(models::getHUDText(models::HUDItem::LUT, data));
             ftk::setScreenshotTag(p.lutLabel, "View.HUD.LUT");
 
-            s = std::string();
-            if (auto timeUnitsModel = p.timeUnitsModel.lock())
-            {
-                s = timeUnitsModel->getLabel(p.currentTime);
-            }
-            std::string missing;
-            if (p.missing)
-            {
-                // Said rather than only drawn, so which frame is standing in
-                // is known and not merely that one is.
-                missing = p.heldFrom.has_value() ?
-                    ftk::Format(", held from {0}").
-                        arg(p.heldFrom.value()).str() :
-                    ", missing";
-            }
-            // Frames per second and frames dropped are about video, and a
-            // file without any has neither -- reporting none and an
-            // ever-growing count of what was never going to arrive reads as
-            // a fault rather than as an absence.
-            std::string timeText = ftk::Format("Time: {0}{1}").
-                arg(s).
-                arg(missing);
-            if (!p.ioInfo.video.empty())
-            {
-                timeText = ftk::Format("Time: {0}, {1} FPS, {2} dropped{3}").
-                    arg(s).
-                    arg(p.fps, 2, 6).
-                    arg(static_cast<int>(p.droppedFrames), 3).
-                    arg(missing);
-            }
-            p.timeLabel->setText(timeText);
+            p.timeLabel->setText(models::getHUDText(models::HUDItem::Time, data));
             ftk::setScreenshotTag(p.timeLabel, "View.HUD.Time");
 
-            p.viewZoomLabel->setText(ftk::Format("Zoom: {0}").
-                arg(p.viewZoom, 2, 6));
+            p.viewZoomLabel->setText(models::getHUDText(models::HUDItem::ViewZoom, data));
             ftk::setScreenshotTag(p.viewZoomLabel, "View.HUD.ViewZoom");
 
             const auto& colorSample = observeColorSample()->get();
@@ -2478,20 +2418,7 @@ namespace djv
             ftk::setScreenshotTag(p.colorPickerLabel, "View.HUD.ColorPicker");
             ftk::setScreenshotTag(p.colorPickerSwatch, "View.HUD.ColorPickerSwatch");
 
-            std::vector<std::string> cache;
-            if (!p.ioInfo.video.empty())
-            {
-                cache.push_back(std::string(ftk::Format("{0}% V").
-                    arg(static_cast<int>(p.cacheInfo.videoPercentage), 3)));
-            }
-            if (p.ioInfo.audio.isValid())
-            {
-                cache.push_back(std::string(ftk::Format("{0}% A").
-                    arg(static_cast<int>(p.cacheInfo.audioPercentage), 3)));
-            }
-            s = !cache.empty() ?
-                std::string(ftk::Format("Cache: {0}").arg(ftk::join(cache, ", "))) :
-                std::string();
+            s = models::getHUDText(models::HUDItem::Cache, data);
             p.cacheLabel->setText(s);
             p.cacheLabel->setVisible(!s.empty());
             ftk::setScreenshotTag(p.cacheLabel, "View.HUD.Cache");

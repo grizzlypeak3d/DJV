@@ -1165,6 +1165,262 @@ namespace djv
             return _p->enabledCheckBox;
         }
 
+        struct ViewFrameGuideWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::shared_ptr<ftk::FloatEditSlider> aspectEdit;
+            std::shared_ptr<ftk::FloatEditSlider> maskEdit;
+            std::shared_ptr<ftk::IntEditSlider> lineWidthEdit;
+            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
+        };
+
+        void ViewFrameGuideWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IContainer::_init(context, "djv::app::ViewFrameGuideWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setTooltip("Toggle whether the frame guide is enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.FrameGuide.Enabled");
+
+            p.aspectEdit = ftk::FloatEditSlider::create(context);
+            p.aspectEdit->setRange(1.F, 3.F);
+            p.aspectEdit->setDefault(2.39F);
+            p.aspectEdit->setTooltip("The width over the height of the frame, 2.39 say.");
+            ftk::setScreenshotTag(p.aspectEdit, "View.FrameGuide.Aspect");
+            p.maskEdit = ftk::FloatEditSlider::create(context);
+            p.maskEdit->setRange(0.F, 1.F);
+            p.maskEdit->setDefault(.85F);
+            p.maskEdit->setTooltip("How dark the picture outside the frame is.");
+            ftk::setScreenshotTag(p.maskEdit, "View.FrameGuide.Mask");
+
+            p.lineWidthEdit = ftk::IntEditSlider::create(context);
+            p.lineWidthEdit->setRange(1, 10);
+            ftk::setScreenshotTag(p.lineWidthEdit, "View.FrameGuide.LineWidth");
+
+            p.colorSwatch = ftk::ColorSwatch::create(context);
+            p.colorSwatch->setEditable(true);
+            p.colorSwatch->setHAlign(ftk::HAlign::Left);
+            ftk::setScreenshotTag(p.colorSwatch, "View.FrameGuide.Color");
+
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Aspect:", p.aspectEdit);
+            p.layout->addRow("Mask:", p.maskEdit);
+            p.layout->addRow("Line width:", p.lineWidthEdit);
+            p.layout->addRow("Color:", p.colorSwatch);
+
+            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
+                viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions& value)
+                {
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.frameGuide.enabled);
+                    p.aspectEdit->setValue(value.frameGuide.aspect);
+                    p.maskEdit->setValue(value.frameGuide.maskOpacity);
+                    p.lineWidthEdit->setValue(value.frameGuide.lineWidth);
+                    p.colorSwatch->setColor(value.frameGuide.color);
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.frameGuide.enabled = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.aspectEdit->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.frameGuide.aspect = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.maskEdit->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.frameGuide.maskOpacity = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.lineWidthEdit->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.frameGuide.lineWidth = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.colorSwatch->setCallback(
+                [viewportModel](const ftk::Color4F& value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.frameGuide.color = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+        }
+
+        ViewFrameGuideWidget::ViewFrameGuideWidget() :
+            _p(new Private)
+        {}
+
+        ViewFrameGuideWidget::~ViewFrameGuideWidget()
+        {}
+
+        std::shared_ptr<ViewFrameGuideWidget> ViewFrameGuideWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewFrameGuideWidget>(new ViewFrameGuideWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        std::shared_ptr<ftk::CheckBox> ViewFrameGuideWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
+        struct ViewSafeAreasWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::shared_ptr<ftk::FloatEditSlider> actionEdit;
+            std::shared_ptr<ftk::FloatEditSlider> titleEdit;
+            std::shared_ptr<ftk::IntEditSlider> lineWidthEdit;
+            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
+        };
+
+        void ViewSafeAreasWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IContainer::_init(context, "djv::app::ViewSafeAreasWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setTooltip("Toggle whether the action and title safe areas are shown.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.SafeAreas.Enabled");
+
+            p.actionEdit = ftk::FloatEditSlider::create(context);
+            p.actionEdit->setRange(.5F, 1.F);
+            p.actionEdit->setDefault(.93F);
+            p.actionEdit->setTooltip("The action safe area, a fraction of the frame.");
+            ftk::setScreenshotTag(p.actionEdit, "View.SafeAreas.Action");
+            p.titleEdit = ftk::FloatEditSlider::create(context);
+            p.titleEdit->setRange(.5F, 1.F);
+            p.titleEdit->setDefault(.9F);
+            p.titleEdit->setTooltip("The title safe area, a fraction of the frame.");
+            ftk::setScreenshotTag(p.titleEdit, "View.SafeAreas.Title");
+
+            p.lineWidthEdit = ftk::IntEditSlider::create(context);
+            p.lineWidthEdit->setRange(1, 10);
+            ftk::setScreenshotTag(p.lineWidthEdit, "View.SafeAreas.LineWidth");
+
+            p.colorSwatch = ftk::ColorSwatch::create(context);
+            p.colorSwatch->setEditable(true);
+            p.colorSwatch->setHAlign(ftk::HAlign::Left);
+            ftk::setScreenshotTag(p.colorSwatch, "View.SafeAreas.Color");
+
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Action:", p.actionEdit);
+            p.layout->addRow("Title:", p.titleEdit);
+            p.layout->addRow("Line width:", p.lineWidthEdit);
+            p.layout->addRow("Color:", p.colorSwatch);
+
+            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
+                viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions& value)
+                {
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.safeAreas.enabled);
+                    p.actionEdit->setValue(value.safeAreas.action);
+                    p.titleEdit->setValue(value.safeAreas.title);
+                    p.lineWidthEdit->setValue(value.safeAreas.lineWidth);
+                    p.colorSwatch->setColor(value.safeAreas.color);
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.safeAreas.enabled = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.actionEdit->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.safeAreas.action = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.titleEdit->setCallback(
+                [viewportModel](float value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.safeAreas.title = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.lineWidthEdit->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.safeAreas.lineWidth = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.colorSwatch->setCallback(
+                [viewportModel](const ftk::Color4F& value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.safeAreas.color = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+        }
+
+        ViewSafeAreasWidget::ViewSafeAreasWidget() :
+            _p(new Private)
+        {}
+
+        ViewSafeAreasWidget::~ViewSafeAreasWidget()
+        {}
+
+        std::shared_ptr<ViewSafeAreasWidget> ViewSafeAreasWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewSafeAreasWidget>(new ViewSafeAreasWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        std::shared_ptr<ftk::CheckBox> ViewSafeAreasWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         struct ViewClippingWarningWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;

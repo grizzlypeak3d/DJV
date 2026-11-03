@@ -163,6 +163,13 @@ typedef struct djv_display_options
 TL_TIMELINE_API djv_display_options djv_viewport_get_display(djv_models*);
 TL_TIMELINE_API void djv_viewport_set_display(djv_models*, djv_display_options);
 
+//! Whether any color adjustment is on (the color values, levels,
+//! exposure, soft clip), and putting them back to their defaults: the
+//! color values, exposure and soft clip with color, the levels with
+//! levels. The channels, mirroring and negative are left alone.
+TL_TIMELINE_API int djv_viewport_has_color_adjustments(djv_models*);
+TL_TIMELINE_API void djv_viewport_reset_color_adjustments(djv_models*, int color, int levels);
+
 //! How the image is sampled and blended.
 typedef struct djv_image_options
 {
@@ -225,6 +232,15 @@ typedef struct djv_foreground_options
     int clippingMode;
     float clippingLow;
     float clippingHigh;
+
+    //! The frame of another aspect ratio within the picture, the rest
+    //! masked, and the action and title safe areas of the frame.
+    int frameGuideEnabled;
+    float frameGuideAspect;
+    float frameGuideMaskOpacity;
+    int safeAreasEnabled;
+    float safeAreasAction;
+    float safeAreasTitle;
 } djv_foreground_options;
 TL_TIMELINE_API djv_foreground_options djv_viewport_get_foreground(djv_models*);
 TL_TIMELINE_API void djv_viewport_set_foreground(djv_models*, djv_foreground_options);
@@ -235,6 +251,105 @@ TL_TIMELINE_API size_t djv_viewport_get_aspect_ratio_count(djv_models*);
 TL_TIMELINE_API const char* djv_viewport_get_aspect_ratio(djv_models*, size_t);
 TL_TIMELINE_API size_t djv_viewport_get_aspect_ratio_index(djv_models*);
 TL_TIMELINE_API void djv_viewport_set_aspect_ratio_index(djv_models*, size_t);
+
+///@}
+
+//! \name HUD
+///@{
+
+//! The HUD's items, as DJV's viewport model has them.
+typedef enum
+{
+    DJV_HUD_FILE_NAME,
+    DJV_HUD_INFO,
+    DJV_HUD_CACHE,
+    DJV_HUD_TIME,
+    DJV_HUD_VIEW_ZOOM,
+    DJV_HUD_COLOR_PICKER,
+    DJV_HUD_RENDER,
+    DJV_HUD_LUT,
+    DJV_HUD_COUNT
+} djv_hud_item;
+
+//! The items in the order they are listed and stacked, and each one's
+//! name.
+TL_TIMELINE_API size_t djv_hud_get_item_count(void);
+TL_TIMELINE_API djv_hud_item djv_hud_get_item(size_t);
+TL_TIMELINE_API const char* djv_hud_get_item_name(djv_hud_item);
+
+//! The corners of the picture an item is shown in, or none.
+typedef enum
+{
+    DJV_HUD_POS_NONE,
+    DJV_HUD_POS_TOP_LEFT,
+    DJV_HUD_POS_TOP_RIGHT,
+    DJV_HUD_POS_BOTTOM_LEFT,
+    DJV_HUD_POS_BOTTOM_RIGHT
+} djv_hud_pos;
+
+//! Whether the HUD is shown, and the corner each item is in.
+TL_TIMELINE_API int djv_hud_is_enabled(djv_models*);
+TL_TIMELINE_API void djv_hud_set_enabled(djv_models*, int);
+TL_TIMELINE_API djv_hud_pos djv_hud_get_pos(djv_models*, djv_hud_item);
+TL_TIMELINE_API void djv_hud_set_pos(djv_models*, djv_hud_item, djv_hud_pos);
+
+//! An item's line about the player now, as the desktop shows it; empty
+//! when it has nothing to say. The speed played, the frames dropped and
+//! the view's zoom are the caller's. Valid until the next call.
+TL_TIMELINE_API const char* djv_hud_get_text(
+    djv_models*,
+    djv_hud_item,
+    double fps,
+    size_t droppedFrames,
+    double viewZoom);
+
+///@}
+
+//! \name Time Units
+///@{
+
+typedef enum
+{
+    DJV_TIME_UNITS_FRAMES,
+    DJV_TIME_UNITS_SECONDS,
+    DJV_TIME_UNITS_TIMECODE
+} djv_time_units;
+
+//! The units times are shown in, as DJV's settings keep them, and a
+//! time of the player's in them: seconds from the start of its timeline,
+//! shown as the timeline counts, from its own start time. Valid until
+//! the next call.
+TL_TIMELINE_API djv_time_units djv_time_get_units(djv_models*);
+TL_TIMELINE_API void djv_time_set_units(djv_models*, djv_time_units);
+TL_TIMELINE_API const char* djv_time_get_label(djv_models*, double seconds);
+
+///@}
+
+//! \name Cache
+///@{
+
+//! The video cache of the player, in gigabytes, as DJV's settings keep
+//! it; set, it is held to the most the machine can take. What a machine
+//! of this size starts with, and that most.
+TL_TIMELINE_API float djv_cache_get_video_gb(djv_models*);
+TL_TIMELINE_API void djv_cache_set_video_gb(djv_models*, float);
+TL_TIMELINE_API float djv_cache_get_default_video_gb(void);
+TL_TIMELINE_API float djv_cache_get_max_gb(void);
+
+///@}
+
+//! \name Information
+///@{
+
+//! The information about the player's file, as DJV's Info tool shows
+//! it: rows of a section (File, Video, Audio, Metadata), a name and a
+//! value, those matching the search (NULL or empty for all). For a cut,
+//! the media of its first clip. Read when counted; the strings stay
+//! valid until the next count.
+TL_TIMELINE_API size_t djv_info_get_count(djv_models*, const char* search);
+TL_TIMELINE_API const char* djv_info_get_section(djv_models*, size_t);
+TL_TIMELINE_API const char* djv_info_get_name(djv_models*, size_t);
+TL_TIMELINE_API const char* djv_info_get_value(djv_models*, size_t);
 
 ///@}
 

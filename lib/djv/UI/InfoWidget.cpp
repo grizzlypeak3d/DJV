@@ -2,6 +2,7 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/UI/InfoWidget.h>
+#include <djv/Models/Info.h>
 #include <djv/Models/SettingsKeys.h>
 
 #include <tlRender/Timeline/Player.h>
@@ -71,7 +72,7 @@ namespace djv
             copyButton->setParent(hLayout);
             ftk::TextEditOptions textEditOptions;
             textEditOptions.fontInfo.name = ftk::getDefaultFont(ftk::FontType::Mono);
-            p.sectionNames = { "File", "Video", "Audio", "Metadata" };
+            p.sectionNames = models::getInfoSections();
             for (const auto& name : p.sectionNames)
             {
                 auto textEdit = ftk::TextEdit::create(context);
@@ -212,194 +213,29 @@ namespace djv
             }
         }
 
-        namespace
-        {
-            typedef std::vector<std::pair<std::string, std::string> > Pairs;
-
-            std::string timecode(const OTIO_NS::RationalTime& value)
-            {
-                std::stringstream ss;
-                ss << value.to_timecode();
-                return ss.str();
-            }
-
-            template<typename T>
-            std::string str(const T& value)
-            {
-                std::stringstream ss;
-                ss << value;
-                return ss.str();
-            }
-
-            //! Audio times are counted in samples, at a rate that is not a
-            //! timecode rate, so they are given in seconds.
-            std::string seconds(const OTIO_NS::RationalTime& value)
-            {
-                std::stringstream ss;
-                ss.precision(2);
-                ss << std::fixed << value.rescaled_to(1.0).value() << " seconds";
-                return ss.str();
-            }
-
-            std::string rate(double value)
-            {
-                std::stringstream ss;
-                ss.precision(1);
-                ss << std::fixed << value / 1000.0 << "kHz";
-                return ss.str();
-            }
-
-            //! Name and directory rather than one full path: the name is
-            //! what somebody scanning the tool wants first, and the two
-            //! compose the full path for sharing.
-            Pairs filePairs(const ftk::Path& path)
-            {
-                Pairs out;
-                if (path.isEmpty())
-                    return out;
-                out.push_back({ "Name", path.getFileName() });
-                out.push_back({ "Directory", path.getDir() });
-                if (path.isSeq())
-                {
-                    out.push_back({ "Frames", path.getFrameRange(true) });
-                }
-                return out;
-            }
-
-            //! The video the file holds, and the video it is decoded to. The
-            //! two are not always the same and the difference is the point:
-            //! what the rest of the application reports is the decoded one.
-            Pairs videoPairs(const tl::IOInfo& info, int videoLayer)
-            {
-                Pairs out;
-                if (info.video.empty())
-                    return out;
-                const ftk::ImageInfo& video = tl::getVideoInfo(info, videoLayer);
-                if (!info.videoSource.codec.empty())
-                {
-                    out.push_back({ "Codec", info.videoSource.codec });
-                }
-                if (!info.videoSource.pixelFormat.empty())
-                {
-                    out.push_back({ "Source Format", info.videoSource.pixelFormat });
-                }
-                out.push_back({ "Resolution",
-                    str(video.size.w) + " " + str(video.size.h) });
-                // The interleaved name: whether this renderer holds the
-                // channels in planes is not something the file said.
-                out.push_back({ "Pixel Type",
-                    str(ftk::getInterleavedType(video.type)) });
-                {
-                    std::stringstream ss;
-                    ss.precision(2);
-                    ss << std::fixed << video.pixelAspectRatio;
-                    out.push_back({ "Pixel Aspect Ratio", ss.str() });
-                }
-                out.push_back({ "Levels", str(video.videoLevels) });
-                if (info.videoTime.has_value())
-                {
-                    out.push_back({ "Start Time", timecode(info.videoTime->start_time()) });
-                    out.push_back({ "Duration", timecode(info.videoTime->duration()) });
-                    std::stringstream ss;
-                    ss.precision(2);
-                    ss << std::fixed << info.videoTime->start_time().rate() << " FPS";
-                    out.push_back({ "Speed", ss.str() });
-                }
-                return out;
-            }
-
-            Pairs audioPairs(const tl::IOInfo& info)
-            {
-                Pairs out;
-                if (!info.audio.isValid())
-                    return out;
-                const tl::AudioSourceInfo& source = info.audioSource;
-                if (!source.codec.empty())
-                {
-                    out.push_back({ "Codec", source.codec });
-                }
-                out.push_back({ "Channels", str(info.audio.channelCount) });
-                out.push_back({ "Type", str(info.audio.type) });
-                out.push_back({ "Sample Rate", rate(info.audio.sampleRate) });
-                // Only when the file is not what comes out of the reader,
-                // which is the case worth showing.
-                if (source.channelCount != 0 &&
-                    static_cast<int>(source.channelCount) != info.audio.channelCount)
-                {
-                    out.push_back({ "Source Channels",
-                        str(static_cast<int>(source.channelCount)) });
-                }
-                if (source.type != tl::AudioType::None &&
-                    source.type != info.audio.type)
-                {
-                    out.push_back({ "Source Type", str(source.type) });
-                }
-                if (source.sampleRate != 0 &&
-                    static_cast<int>(source.sampleRate) != info.audio.sampleRate)
-                {
-                    out.push_back({ "Source Sample Rate", rate(source.sampleRate) });
-                }
-                if (info.audioTime.has_value())
-                {
-                    out.push_back({ "Start Time", seconds(info.audioTime->start_time()) });
-                    out.push_back({ "Duration", seconds(info.audioTime->duration()) });
-                }
-                return out;
-            }
-        }
-
         void InfoWidget::_widgetUpdate()
         {
             FTK_P();
-            const std::map<std::string, Pairs> sections =
-            {
-                { "File", filePairs(p.path) },
-                { "Video", videoPairs(p.info, p.videoLayer) },
-                { "Audio", audioPairs(p.info) },
-                { "Metadata", Pairs(p.info.tags.begin(), p.info.tags.end()) }
-            };
+            // The rows and the search are the models', shared with the
+            // iPad; the layout of the text is this widget's.
+            const std::vector<models::InfoItem> items = models::filterInfo(
+                models::getInfo(p.path, p.info, p.videoLayer),
+                p.search);
             // The values line up in one column across the sections, so the
             // tool and the copied text read as one document (#37). Metadata
             // joins the column while its keys fit, and pads by itself when
             // they do not: the keys are foreign and can be very long, and a
             // single camera tag should not push every value to the right
             // margin.
-            // Each word of the search stands on its own, and a row is kept
-            // when any of them is in its name or its value: "name duration"
-            // shows both rows (#316).
-            const std::vector<std::string> words = ftk::split(
-                p.search, { ' ', '\t' });
+            typedef std::vector<std::pair<std::string, std::string> > Pairs;
             std::map<std::string, Pairs> kept;
             size_t sharedSize = 0;
-            for (const auto& name : p.sectionNames)
+            for (const auto& item : items)
             {
-                for (const auto& tag : sections.at(name))
+                kept[item.section].push_back({ item.name, item.value });
+                if (item.section != "Metadata")
                 {
-                    bool match = words.empty();
-                    for (const auto& word : words)
-                    {
-                        if (ftk::contains(
-                                tag.first,
-                                word,
-                                ftk::CaseCompare::Insensitive) ||
-                            ftk::contains(
-                                tag.second,
-                                word,
-                                ftk::CaseCompare::Insensitive))
-                        {
-                            match = true;
-                            break;
-                        }
-                    }
-                    if (!match)
-                    {
-                        continue;
-                    }
-                    kept[name].push_back(tag);
-                    if (name != "Metadata")
-                    {
-                        sharedSize = std::max(sharedSize, tag.first.size() + 2);
-                    }
+                    sharedSize = std::max(sharedSize, item.name.size() + 2);
                 }
             }
             for (const auto& name : p.sectionNames)

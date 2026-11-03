@@ -5,7 +5,11 @@
 
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/HUD.h>
+#include <djv/Models/Info.h>
 #include <djv/Models/OCIOModel.h>
+#include <djv/Models/SettingsModel.h>
+#include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <tlRender/C/EngineCpp.h>
@@ -27,6 +31,8 @@ struct djv_models
     std::shared_ptr<models::OCIOModel> ocioModel;
     std::shared_ptr<models::AudioModel> audioModel;
     std::shared_ptr<models::ViewportModel> viewportModel;
+    std::shared_ptr<models::SettingsModel> settingsModel;
+    std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
 
     tl_view* view = nullptr;
     tl_player* player = nullptr;
@@ -36,6 +42,9 @@ struct djv_models
     models::OCIOModelData ocioData;
     std::string resolvedInput;
     std::vector<std::string> aspectRatios;
+    std::vector<models::InfoItem> info;
+    std::string hudText;
+    std::string timeLabel;
 
     std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::OCIOOptions> > colorOCIOOptionsObserver;
@@ -50,6 +59,7 @@ struct djv_models
     std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > backgroundOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > foregroundOptionsObserver;
+    std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
 
     // The options as the view and the player should have them now.
     void applyToView()
@@ -77,6 +87,7 @@ struct djv_models
             p->setVolume(audioModel->getVolume());
             p->setMute(audioModel->isMuted());
             p->setAudioOffset(audioModel->getSyncOffset());
+            p->setCacheOptions(settingsModel->getCache());
         }
     }
 };
@@ -95,6 +106,8 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->ocioModel = models::OCIOModel::create(context);
         out->audioModel = models::AudioModel::create(context, out->settings);
         out->viewportModel = models::ViewportModel::create(context, out->settings);
+        out->settingsModel = models::SettingsModel::create(context, out->settings);
+        out->timeUnitsModel = models::TimeUnitsModel::create(context, out->settings);
     }
     catch (const std::exception&)
     {
@@ -214,6 +227,16 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
             }
             ++out->generation;
         });
+    out->cacheObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
+        out->settingsModel->observeCache(),
+        [out](const tl::PlayerCacheOptions& value)
+        {
+            if (auto p = tl::c::getPlayer(out->player))
+            {
+                p->setCacheOptions(value);
+            }
+            ++out->generation;
+        });
     return out;
 }
 
@@ -222,6 +245,7 @@ void djv_models_destroy(djv_models* models)
     if (!models)
         return;
     // The observers first: they hold the models.
+    models->cacheObserver.reset();
     models->foregroundOptionsObserver.reset();
     models->backgroundOptionsObserver.reset();
     models->displayOptionsObserver.reset();
@@ -245,6 +269,8 @@ void djv_models_save(djv_models* models)
     models->colorModel->save();
     models->audioModel->save();
     models->viewportModel->save();
+    models->settingsModel->save();
+    models->timeUnitsModel->save();
     models->settings->save();
 }
 
@@ -622,6 +648,18 @@ void djv_viewport_set_display(djv_models* models, djv_display_options value)
     models->viewportModel->setDisplayOptions(o);
 }
 
+int djv_viewport_has_color_adjustments(djv_models* models)
+{
+    return models && models->viewportModel->hasColorAdjustments() ? 1 : 0;
+}
+
+void djv_viewport_reset_color_adjustments(djv_models* models, int color, int levels)
+{
+    if (!models)
+        return;
+    models->viewportModel->resetColorAdjustments(color != 0, levels != 0);
+}
+
 djv_image_options djv_viewport_get_image(djv_models* models)
 {
     djv_image_options out = {};
@@ -709,6 +747,12 @@ djv_foreground_options djv_viewport_get_foreground(djv_models* models)
     out.clippingMode = static_cast<int>(o.clippingWarning.mode);
     out.clippingLow = o.clippingWarning.low;
     out.clippingHigh = o.clippingWarning.high;
+    out.frameGuideEnabled = o.frameGuide.enabled ? 1 : 0;
+    out.frameGuideAspect = o.frameGuide.aspect;
+    out.frameGuideMaskOpacity = o.frameGuide.maskOpacity;
+    out.safeAreasEnabled = o.safeAreas.enabled ? 1 : 0;
+    out.safeAreasAction = o.safeAreas.action;
+    out.safeAreasTitle = o.safeAreas.title;
     return out;
 }
 
@@ -735,6 +779,12 @@ void djv_viewport_set_foreground(djv_models* models, djv_foreground_options valu
     o.clippingWarning.mode = static_cast<tl::ClippingWarningMode>(value.clippingMode);
     o.clippingWarning.low = value.clippingLow;
     o.clippingWarning.high = value.clippingHigh;
+    o.frameGuide.enabled = value.frameGuideEnabled != 0;
+    o.frameGuide.aspect = value.frameGuideAspect;
+    o.frameGuide.maskOpacity = value.frameGuideMaskOpacity;
+    o.safeAreas.enabled = value.safeAreasEnabled != 0;
+    o.safeAreas.action = value.safeAreasAction;
+    o.safeAreas.title = value.safeAreasTitle;
     models->viewportModel->setForegroundOptions(o);
 }
 
@@ -781,4 +831,193 @@ void djv_viewport_set_aspect_ratio_index(djv_models* models, size_t value)
     auto options = models->viewportModel->getAspectRatioOptions();
     options.index = static_cast<int>(value);
     models->viewportModel->setAspectRatioOptions(options);
+}
+
+// Information.
+
+size_t djv_info_get_count(djv_models* models, const char* search)
+{
+    if (!models)
+        return 0;
+    models->info.clear();
+    if (auto player = tl::c::getPlayer(models->player))
+    {
+        models->info = models::filterInfo(
+            models::getInfo(player->getPath(), player->getIOInfo(), player->getVideoLayer()),
+            search ? search : "");
+    }
+    return models->info.size();
+}
+
+const char* djv_info_get_section(djv_models* models, size_t i)
+{
+    return models && i < models->info.size() ? models->info[i].section.c_str() : "";
+}
+
+const char* djv_info_get_name(djv_models* models, size_t i)
+{
+    return models && i < models->info.size() ? models->info[i].name.c_str() : "";
+}
+
+const char* djv_info_get_value(djv_models* models, size_t i)
+{
+    return models && i < models->info.size() ? models->info[i].value.c_str() : "";
+}
+
+// Cache.
+
+float djv_cache_get_video_gb(djv_models* models)
+{
+    return models ? models->settingsModel->getCache().videoGB : 0.F;
+}
+
+void djv_cache_set_video_gb(djv_models* models, float value)
+{
+    if (!models)
+        return;
+    auto options = models->settingsModel->getCache();
+    options.videoGB = std::min(std::max(value, 0.F), models::SettingsModel::getMaxCacheGB());
+    models->settingsModel->setCache(options);
+}
+
+float djv_cache_get_default_video_gb(void)
+{
+    return models::SettingsModel::getDefaultCache().videoGB;
+}
+
+float djv_cache_get_max_gb(void)
+{
+    return models::SettingsModel::getMaxCacheGB();
+}
+
+// HUD.
+
+size_t djv_hud_get_item_count(void)
+{
+    return models::getHUDItemOrder().size();
+}
+
+djv_hud_item djv_hud_get_item(size_t i)
+{
+    const auto order = models::getHUDItemOrder();
+    return i < order.size() ? static_cast<djv_hud_item>(order[i]) : DJV_HUD_COUNT;
+}
+
+const char* djv_hud_get_item_name(djv_hud_item item)
+{
+    static std::vector<std::string> names;
+    if (names.empty())
+    {
+        for (const auto i : models::getHUDItemEnums())
+        {
+            names.push_back(models::getLabel(i));
+        }
+    }
+    const size_t i = static_cast<size_t>(item);
+    return i < names.size() ? names[i].c_str() : "";
+}
+
+int djv_hud_is_enabled(djv_models* models)
+{
+    return models && models->viewportModel->getHUDOptions().enabled ? 1 : 0;
+}
+
+void djv_hud_set_enabled(djv_models* models, int value)
+{
+    if (!models)
+        return;
+    auto options = models->viewportModel->getHUDOptions();
+    options.enabled = value != 0;
+    models->viewportModel->setHUDOptions(options);
+}
+
+djv_hud_pos djv_hud_get_pos(djv_models* models, djv_hud_item item)
+{
+    if (!models)
+        return DJV_HUD_POS_NONE;
+    const auto& items = models->viewportModel->getHUDOptions().items;
+    const auto i = items.find(static_cast<models::HUDItem>(item));
+    return i != items.end() ? static_cast<djv_hud_pos>(i->second) : DJV_HUD_POS_NONE;
+}
+
+void djv_hud_set_pos(djv_models* models, djv_hud_item item, djv_hud_pos pos)
+{
+    if (!models ||
+        static_cast<int>(item) < 0 || static_cast<int>(item) >= DJV_HUD_COUNT ||
+        static_cast<int>(pos) < 0 || static_cast<int>(pos) > DJV_HUD_POS_BOTTOM_RIGHT)
+        return;
+    auto options = models->viewportModel->getHUDOptions();
+    options.items[static_cast<models::HUDItem>(item)] = static_cast<models::HUDPos>(pos);
+    models->viewportModel->setHUDOptions(options);
+}
+
+const char* djv_hud_get_text(
+    djv_models* models,
+    djv_hud_item item,
+    double fps,
+    size_t droppedFrames,
+    double viewZoom)
+{
+    if (!models)
+        return "";
+    models::HUDData data;
+    if (auto player = tl::c::getPlayer(models->player))
+    {
+        data.path = player->getPath();
+        data.ioInfo = player->getIOInfo();
+        data.videoLayer = player->getVideoLayer();
+        data.currentTime = player->getCurrentTime();
+        data.cacheInfo = player->observeCacheInfo()->get();
+    }
+    data.timeLabel = models->timeUnitsModel->getLabel(data.currentTime);
+    data.fps = fps;
+    data.droppedFrames = droppedFrames;
+    data.aspectRatio = models->viewportModel->getDisplayOptions().aspectRatio;
+    data.lutOptions = models->colorModel->getLUTOptions();
+    data.viewZoom = viewZoom;
+    models->hudText = models::getHUDText(static_cast<models::HUDItem>(item), data);
+    return models->hudText.c_str();
+}
+
+// Time units.
+
+djv_time_units djv_time_get_units(djv_models* models)
+{
+    if (!models)
+        return DJV_TIME_UNITS_TIMECODE;
+    switch (models->timeUnitsModel->getTimeUnits())
+    {
+    case tl::TimeUnits::Frames: return DJV_TIME_UNITS_FRAMES;
+    case tl::TimeUnits::Seconds: return DJV_TIME_UNITS_SECONDS;
+    default: return DJV_TIME_UNITS_TIMECODE;
+    }
+}
+
+void djv_time_set_units(djv_models* models, djv_time_units value)
+{
+    if (!models)
+        return;
+    tl::TimeUnits units = tl::TimeUnits::Timecode;
+    switch (value)
+    {
+    case DJV_TIME_UNITS_FRAMES: units = tl::TimeUnits::Frames; break;
+    case DJV_TIME_UNITS_SECONDS: units = tl::TimeUnits::Seconds; break;
+    default: break;
+    }
+    models->timeUnitsModel->setTimeUnits(units);
+    ++models->generation;
+}
+
+const char* djv_time_get_label(djv_models* models, double seconds)
+{
+    if (!models)
+        return "";
+    models->timeLabel.clear();
+    if (auto player = tl::c::getPlayer(models->player))
+    {
+        const OTIO_NS::RationalTime& start = player->getTimeRange().start_time();
+        models->timeLabel = models->timeUnitsModel->getLabel(
+            start + OTIO_NS::RationalTime(seconds, 1.0).rescaled_to(start.rate()).round());
+    }
+    return models->timeLabel.c_str();
 }

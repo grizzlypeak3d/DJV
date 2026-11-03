@@ -211,6 +211,60 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! View frame guide widget: the frame of another aspect ratio, masked.
+        class DJV_UI_API_TYPE ViewFrameGuideWidget : public ftk::IContainer
+        {
+            FTK_NON_COPYABLE(ViewFrameGuideWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            ViewFrameGuideWidget();
+
+        public:
+            DJV_UI_API virtual ~ViewFrameGuideWidget();
+
+            DJV_UI_API static std::shared_ptr<ViewFrameGuideWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
+        private:
+            FTK_PRIVATE();
+        };
+
+        //! View safe areas widget.
+        class DJV_UI_API_TYPE ViewSafeAreasWidget : public ftk::IContainer
+        {
+            FTK_NON_COPYABLE(ViewSafeAreasWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            ViewSafeAreasWidget();
+
+        public:
+            DJV_UI_API virtual ~ViewSafeAreasWidget();
+
+            DJV_UI_API static std::shared_ptr<ViewSafeAreasWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
+        private:
+            FTK_PRIVATE();
+        };
+
         //! View clipping warning widget.
         class DJV_UI_API_TYPE ViewClippingWarningWidget : public ftk::IContainer
         {

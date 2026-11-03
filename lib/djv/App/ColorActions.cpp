@@ -231,19 +231,7 @@ namespace djv
                         }
                         // The view options beside them, the channels and
                         // the mirroring, belong to the view tool.
-                        auto display = app->getViewportModel()->getDisplayOptions();
-                        const tl::DisplayOptions defaults;
-                        if (color)
-                        {
-                            display.color = defaults.color;
-                            display.exposure = defaults.exposure;
-                            display.softClip = defaults.softClip;
-                        }
-                        if (levels)
-                        {
-                            display.levels = defaults.levels;
-                        }
-                        app->getViewportModel()->setDisplayOptions(display);
+                        app->getViewportModel()->resetColorAdjustments(color, levels);
                         _enabledUpdate(app);
                     }
                 });

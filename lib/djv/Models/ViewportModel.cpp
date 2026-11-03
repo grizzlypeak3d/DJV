@@ -215,6 +215,33 @@ namespace djv
             p.displayOptions->setIfChanged(tmp);
         }
 
+        bool ViewportModel::hasColorAdjustments() const
+        {
+            const tl::DisplayOptions& options = _p->displayOptions->get();
+            return
+                options.color.enabled ||
+                options.levels.enabled ||
+                options.exposure.enabled ||
+                options.softClip.enabled;
+        }
+
+        void ViewportModel::resetColorAdjustments(bool color, bool levels)
+        {
+            tl::DisplayOptions options = _p->displayOptions->get();
+            const tl::DisplayOptions defaults;
+            if (color)
+            {
+                options.color = defaults.color;
+                options.exposure = defaults.exposure;
+                options.softClip = defaults.softClip;
+            }
+            if (levels)
+            {
+                options.levels = defaults.levels;
+            }
+            setDisplayOptions(options);
+        }
+
         const AspectRatioOptions& ViewportModel::getAspectRatioOptions() const
         {
             return _p->aspectRatioOptions->get();

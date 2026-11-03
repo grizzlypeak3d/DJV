@@ -461,7 +461,8 @@ namespace djv
             //! in gigabytes, and at least one. Nothing else is allowed for
             //! here -- the decoders, the display, and whatever else is
             //! running want their share too -- but a cache larger than the
-            //! machine itself can only end one way.
+            //! machine itself can only end one way. On the iPad, a quarter
+            //! of it, as iOS stops an application that takes much more.
             DJV_MODELS_API static float getMaxCacheGB();
 
             //! Get the cache sizes a machine of this size starts with: a
