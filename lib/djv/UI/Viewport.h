@@ -5,6 +5,8 @@
 
 #include <djv/UI/Export.h>
 
+#include <djv/Models/Stroke.h>
+
 #include <tlRender/UI/Viewport.h>
 
 namespace ftk
@@ -104,6 +106,13 @@ namespace djv
                 //! Image pixels per render unit, for stroke widths.
                 float    scale = 1.F;
             };
+
+            //! Where a source's image is in render space, for mapping to
+            //! and from its pixels.
+            models::ImageMapping _imageMapping(int index) const;
+
+            //! A widget-local position in render space.
+            ftk::V2F _widgetToRender(const ftk::V2I& widgetPos) const;
 
             //! Map a widget-local position to a source and its image pixels.
             SourceHit _hitTest(const ftk::V2I& widgetPos) const;

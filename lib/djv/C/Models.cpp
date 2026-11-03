@@ -3,14 +3,19 @@
 
 #include <djv/C/Models.h>
 
+#include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/DrawModel.h>
 #include <djv/Models/HUD.h>
 #include <djv/Models/Info.h>
 #include <djv/Models/OCIOModel.h>
 #include <djv/Models/SettingsModel.h>
+#include <djv/Models/Stroke.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ViewportModel.h>
+
+#include <djv/UI/StrokeDraw.h>
 
 #include <tlRender/C/EngineCpp.h>
 
@@ -18,6 +23,8 @@
 #include <ftk/Core/Observable.h>
 
 #include <algorithm>
+#include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -33,6 +40,22 @@ struct djv_models
     std::shared_ptr<models::ViewportModel> viewportModel;
     std::shared_ptr<models::SettingsModel> settingsModel;
     std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
+    std::shared_ptr<models::DrawModel> drawModel;
+    std::shared_ptr<models::AnnotationsModel> annotationsModel;
+
+    // The review open, and the file in it the player shows.
+    models::Review review;
+    std::string reviewPath;
+    std::string fileId;
+    std::string reviewError;
+
+    // The stroke being drawn, or the eraser at work.
+    bool drawing = false;
+    bool erasing = false;
+    bool erasingPen = false;
+    models::ReviewStroke stroke;
+    OTIO_NS::RationalTime strokeTime;
+    std::vector<double> frames;
 
     tl_view* view = nullptr;
     tl_player* player = nullptr;
@@ -60,6 +83,105 @@ struct djv_models
     std::shared_ptr<ftk::Observer<tl::BackgroundOptions> > backgroundOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > foregroundOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
+    std::shared_ptr<ftk::ListObserver<models::ReviewAnnotation> > annotationsObserver;
+    std::shared_ptr<ftk::Observer<models::DrawTool> > drawToolObserver;
+    std::shared_ptr<ftk::Observer<ftk::Color4F> > drawColorObserver;
+    std::shared_ptr<ftk::Observer<float> > drawSizeObserver;
+
+    // Where the picture is: its box and image, and the view's pixels to
+    // its render space.
+    models::ImageMapping mapping() const
+    {
+        models::ImageMapping out;
+        const auto picture = tl::c::getViewPicture(view);
+        out.box = picture.box;
+        out.imageSize = picture.imageSize;
+        const auto& display = viewportModel->getDisplayOptions();
+        out.mirrorX = display.mirror.x;
+        out.mirrorY = display.mirror.y;
+        return out;
+    }
+
+    ftk::V2F toRender(float x, float y) const
+    {
+        const auto picture = tl::c::getViewPicture(view);
+        return picture.zoom > 0.F ?
+            ftk::V2F((x - picture.pos.x) / picture.zoom, (y - picture.pos.y) / picture.zoom) :
+            ftk::V2F();
+    }
+
+    std::optional<OTIO_NS::RationalTime> currentTime() const
+    {
+        std::optional<OTIO_NS::RationalTime> out;
+        if (auto p = tl::c::getPlayer(player))
+        {
+            out = p->getCurrentTime();
+        }
+        return out;
+    }
+
+    void erase(const ftk::V2F& render)
+    {
+        const auto time = currentTime();
+        const models::ImageMapping m = mapping();
+        if (!time.has_value() || !m.contains(render))
+            return;
+        const auto picture = tl::c::getViewPicture(view);
+        // A fingertip's reach for a finger, a pointer's for a pen, as the
+        // desktop's viewport has them.
+        const float reach = (erasingPen ? 8.F : 22.F) * picture.displayScale;
+        annotationsModel->eraseStrokes(
+            fileId,
+            *time,
+            m.toImage(render),
+            models::eraserRadius(drawModel->getSize(), reach, m.scale() * picture.zoom));
+    }
+
+    // The drawings of the frame shown, and the stroke being drawn, over
+    // the picture with the desktop's stroke drawing.
+    void drawAnnotations(const std::shared_ptr<ftk::IRender>& render)
+    {
+        const auto time = currentTime();
+        const models::ImageMapping m = mapping();
+        if (!time.has_value() || fileId.empty() || !m.isValid())
+            return;
+        const auto picture = tl::c::getViewPicture(view);
+        const auto toScreen = [&m, &picture](const ftk::V2F& point)
+        {
+            const ftk::V2F r = m.toRender(point);
+            return ftk::V2F(picture.pos.x + r.x * picture.zoom, picture.pos.y + r.y * picture.zoom);
+        };
+        const float scale = m.scale() * picture.zoom;
+        const auto fontSystem = context->getSystem<ftk::FontSystem>();
+        for (const auto& s : annotationsModel->getStrokes(fileId, *time))
+        {
+            ui::drawStroke(render, fontSystem, s, toScreen, scale);
+        }
+        if (drawing && models::sameTime(strokeTime, *time))
+        {
+            ui::drawStroke(render, fontSystem, stroke, toScreen, scale);
+        }
+    }
+
+    void framesUpdate()
+    {
+        frames.clear();
+        auto p = tl::c::getPlayer(player);
+        if (!p || fileId.empty())
+            return;
+        const OTIO_NS::RationalTime start = p->getTimeRange().start_time();
+        for (const auto& annotation : annotationsModel->getAnnotations())
+        {
+            if (annotation.sourceId == fileId &&
+                annotation.time.has_value() &&
+                !annotation.strokes.empty())
+            {
+                frames.push_back((*annotation.time - start).rescaled_to(1.0).value());
+            }
+        }
+        std::sort(frames.begin(), frames.end());
+        frames.erase(std::unique(frames.begin(), frames.end()), frames.end());
+    }
 
     // The options as the view and the player should have them now.
     void applyToView()
@@ -108,6 +230,8 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->viewportModel = models::ViewportModel::create(context, out->settings);
         out->settingsModel = models::SettingsModel::create(context, out->settings);
         out->timeUnitsModel = models::TimeUnitsModel::create(context, out->settings);
+        out->drawModel = models::DrawModel::create(out->settings);
+        out->annotationsModel = models::AnnotationsModel::create();
     }
     catch (const std::exception&)
     {
@@ -227,6 +351,23 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
             }
             ++out->generation;
         });
+    out->annotationsObserver = ftk::ListObserver<models::ReviewAnnotation>::create(
+        out->annotationsModel->observeAnnotations(),
+        [out](const std::vector<models::ReviewAnnotation>&)
+        {
+            out->framesUpdate();
+            tl::c::setNeedsDraw(out->view);
+            ++out->generation;
+        });
+    out->drawToolObserver = ftk::Observer<models::DrawTool>::create(
+        out->drawModel->observeTool(),
+        [out](models::DrawTool) { ++out->generation; });
+    out->drawColorObserver = ftk::Observer<ftk::Color4F>::create(
+        out->drawModel->observeColor(),
+        [out](const ftk::Color4F&) { ++out->generation; });
+    out->drawSizeObserver = ftk::Observer<float>::create(
+        out->drawModel->observeSize(),
+        [out](float) { ++out->generation; });
     out->cacheObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
         out->settingsModel->observeCache(),
         [out](const tl::PlayerCacheOptions& value)
@@ -245,6 +386,14 @@ void djv_models_destroy(djv_models* models)
     if (!models)
         return;
     // The observers first: they hold the models.
+    if (models->view)
+    {
+        tl::c::setOverlay(models->view, nullptr);
+    }
+    models->annotationsObserver.reset();
+    models->drawToolObserver.reset();
+    models->drawColorObserver.reset();
+    models->drawSizeObserver.reset();
     models->cacheObserver.reset();
     models->foregroundOptionsObserver.reset();
     models->backgroundOptionsObserver.reset();
@@ -280,6 +429,15 @@ void djv_models_bind_view(djv_models* models, tl_view* view)
         return;
     models->view = view;
     models->applyToView();
+    if (view)
+    {
+        tl::c::setOverlay(
+            view,
+            [models](const std::shared_ptr<ftk::IRender>& render)
+            {
+                models->drawAnnotations(render);
+            });
+    }
 }
 
 void djv_models_set_player(djv_models* models, tl_player* player)
@@ -294,6 +452,8 @@ void djv_models_set_player(djv_models* models, tl_player* player)
     }
     models->colorModel->setActiveFiles(files);
     models->applyToPlayer();
+    djv_draw_cancel(models);
+    models->framesUpdate();
     ++models->generation;
 }
 
@@ -1020,4 +1180,309 @@ const char* djv_time_get_label(djv_models* models, double seconds)
             start + OTIO_NS::RationalTime(seconds, 1.0).rescaled_to(start.rate()).round());
     }
     return models->timeLabel.c_str();
+}
+
+// Drawing.
+
+djv_draw_tool djv_draw_get_tool(djv_models* models)
+{
+    return models ? static_cast<djv_draw_tool>(models->drawModel->getTool()) : DJV_DRAW_PEN;
+}
+
+void djv_draw_set_tool(djv_models* models, djv_draw_tool value)
+{
+    if (models && static_cast<int>(value) >= 0 && static_cast<int>(value) <= DJV_DRAW_SELECT)
+    {
+        models->drawModel->setTool(static_cast<models::DrawTool>(value));
+    }
+}
+
+void djv_draw_get_color(djv_models* models, float color[4])
+{
+    if (!models || !color)
+        return;
+    const ftk::Color4F& c = models->drawModel->getColor();
+    color[0] = c.r;
+    color[1] = c.g;
+    color[2] = c.b;
+    color[3] = c.a;
+}
+
+void djv_draw_set_color(djv_models* models, const float color[4])
+{
+    if (models && color)
+    {
+        models->drawModel->setColor(ftk::Color4F(color[0], color[1], color[2], color[3]));
+    }
+}
+
+float djv_draw_get_size(djv_models* models)
+{
+    return models ? models->drawModel->getSize() : 0.F;
+}
+
+void djv_draw_set_size(djv_models* models, float value)
+{
+    if (models)
+    {
+        models->drawModel->setSize(value);
+    }
+}
+
+int djv_draw_is_constrain(djv_models* models)
+{
+    return models && models->drawModel->isConstrain() ? 1 : 0;
+}
+
+void djv_draw_set_constrain(djv_models* models, int value)
+{
+    if (models)
+    {
+        models->drawModel->setConstrain(value != 0);
+        ++models->generation;
+    }
+}
+
+int djv_review_open(djv_models* models, const char* reviewPath, const char* mediaPath)
+{
+    if (!models || !reviewPath || !mediaPath)
+        return 0;
+    djv_review_close(models);
+    models->reviewPath = reviewPath;
+    const std::filesystem::path review = std::filesystem::u8path(reviewPath);
+    const std::filesystem::path media = std::filesystem::u8path(mediaPath);
+    try
+    {
+        if (std::filesystem::exists(review))
+        {
+            models->review = models::reviewOpen(reviewPath);
+        }
+    }
+    catch (const std::exception& e)
+    {
+        models->reviewError = e.what();
+        models->reviewPath.clear();
+        return 0;
+    }
+    // The file in the review the media is: by its path, or by its name,
+    // as the desktop's relocation finds a file that moved.
+    const auto base = review.parent_path();
+    for (const auto& file : models->review.files)
+    {
+        const std::filesystem::path relative = std::filesystem::u8path(file.path);
+        const std::filesystem::path absolute = std::filesystem::u8path(file.pathAbsolute);
+        if ((!file.path.empty() && (base / relative).lexically_normal() == media.lexically_normal()) ||
+            (!file.pathAbsolute.empty() && absolute == media) ||
+            (!file.path.empty() && relative.filename() == media.filename()))
+        {
+            models->fileId = file.id;
+            break;
+        }
+    }
+    if (models->fileId.empty())
+    {
+        models::ReviewFile file;
+        file.id = models::generateId();
+        file.path = models::reviewGenericPath(models::reviewRelativePath(mediaPath, base));
+        file.pathAbsolute = models::reviewGenericPath(mediaPath);
+        models->review.files.push_back(file);
+        models->fileId = file.id;
+        if (models->review.compare.aId.empty())
+        {
+            models->review.compare.aId = file.id;
+        }
+    }
+    models->annotationsModel->setAnnotations(models->review.annotations);
+    return 1;
+}
+
+int djv_review_save(djv_models* models)
+{
+    if (!models || models->reviewPath.empty())
+        return 0;
+    const auto& annotations = models->annotationsModel->getAnnotations();
+    const std::filesystem::path path = std::filesystem::u8path(models->reviewPath);
+    if (annotations.empty() && !std::filesystem::exists(path))
+        return 1;
+    try
+    {
+        models->review.annotations = annotations;
+        if (models->review.app.empty())
+        {
+            models->review.app = "DJV Studio for iPad";
+        }
+        if (models->review.created.empty())
+        {
+            models->review.created = models::timestamp();
+        }
+        models::reviewSave(models->reviewPath, models->review);
+    }
+    catch (const std::exception& e)
+    {
+        models->reviewError = e.what();
+        return 0;
+    }
+    return 1;
+}
+
+void djv_review_close(djv_models* models)
+{
+    if (!models)
+        return;
+    djv_draw_cancel(models);
+    models->review = models::Review();
+    models->reviewPath.clear();
+    models->fileId.clear();
+    models->reviewError.clear();
+    models->annotationsModel->clear();
+}
+
+const char* djv_review_get_error(djv_models* models)
+{
+    return models ? models->reviewError.c_str() : "";
+}
+
+int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure)
+{
+    if (!models || models->fileId.empty())
+        return 0;
+    djv_draw_cancel(models);
+    const auto time = models->currentTime();
+    const models::ImageMapping m = models->mapping();
+    const ftk::V2F render = models->toRender(x, y);
+    if (!time.has_value() || !m.contains(render))
+        return 0;
+    const models::DrawTool tool = models->drawModel->getTool();
+    switch (tool)
+    {
+    case models::DrawTool::Eraser:
+        models->erasing = true;
+        models->erasingPen = pen != 0;
+        models->erase(render);
+        return 1;
+    case models::DrawTool::Text:
+    case models::DrawTool::Select:
+        // Not on a touch screen yet: typing and handles want more.
+        return 0;
+    default: break;
+    }
+    models->stroke = models::ReviewStroke();
+    models->stroke.kind = models::getStrokeKind(tool);
+    models->stroke.color = models->drawModel->getColor();
+    models->stroke.width = models->drawModel->getSize();
+    models::strokeBegin(models->stroke, m.toImage(render), pen != 0, pressure);
+    models->strokeTime = *time;
+    models->drawing = true;
+    tl::c::setNeedsDraw(models->view);
+    return 1;
+}
+
+void djv_draw_move(djv_models* models, float x, float y, float pressure)
+{
+    if (!models)
+        return;
+    const ftk::V2F render = models->toRender(x, y);
+    if (models->erasing)
+    {
+        models->erase(render);
+        return;
+    }
+    if (!models->drawing)
+        return;
+    const models::ImageMapping m = models->mapping();
+    if (!m.isValid())
+        return;
+    if (models::isTwoPointShape(models->stroke.kind))
+    {
+        // A shape goes on at the edge when the finger leaves the picture.
+        models::strokeContinue(
+            models->stroke,
+            m.clamp(m.toImage(render)),
+            pressure,
+            models->drawModel->isConstrain());
+    }
+    else if (m.contains(render))
+    {
+        models::strokeContinue(models->stroke, m.toImage(render), pressure, false);
+    }
+    tl::c::setNeedsDraw(models->view);
+}
+
+void djv_draw_end(djv_models* models)
+{
+    if (!models)
+        return;
+    if (models->drawing && models::strokeComplete(models->stroke))
+    {
+        models->annotationsModel->addStroke(models->fileId, models->strokeTime, models->stroke);
+    }
+    djv_draw_cancel(models);
+}
+
+void djv_draw_cancel(djv_models* models)
+{
+    if (!models)
+        return;
+    const bool was = models->drawing;
+    models->drawing = false;
+    models->erasing = false;
+    models->stroke = models::ReviewStroke();
+    if (was)
+    {
+        tl::c::setNeedsDraw(models->view);
+    }
+}
+
+int djv_draw_has_undo(djv_models* models)
+{
+    return models && models->annotationsModel->observeHasUndo()->get() ? 1 : 0;
+}
+
+int djv_draw_has_redo(djv_models* models)
+{
+    return models && models->annotationsModel->observeHasRedo()->get() ? 1 : 0;
+}
+
+void djv_draw_undo(djv_models* models)
+{
+    if (models)
+    {
+        models->annotationsModel->undo();
+    }
+}
+
+void djv_draw_redo(djv_models* models)
+{
+    if (models)
+    {
+        models->annotationsModel->redo();
+    }
+}
+
+void djv_draw_clear_frame(djv_models* models)
+{
+    if (!models || models->fileId.empty())
+        return;
+    if (const auto time = models->currentTime())
+    {
+        models->annotationsModel->clearFrame({ models->fileId }, *time);
+    }
+}
+
+size_t djv_draw_get_frame_count(djv_models* models)
+{
+    return models ? models->frames.size() : 0;
+}
+
+double djv_draw_get_frame(djv_models* models, size_t i)
+{
+    return models && i < models->frames.size() ? models->frames[i] : 0.0;
+}
+
+int djv_draw_has_frame(djv_models* models)
+{
+    if (!models || models->fileId.empty())
+        return 0;
+    const auto time = models->currentTime();
+    return time.has_value() && !models->annotationsModel->getStrokes(models->fileId, *time).empty() ? 1 : 0;
 }

@@ -193,6 +193,111 @@ static void settings(djv_models* models)
     }
 }
 
+static void writeFile(const char* path, const char* text)
+{
+    FILE* f = fopen(path, "w");
+    CHECK(f != NULL);
+    if (f)
+    {
+        fputs(text, f);
+        fclose(f);
+    }
+}
+
+static int fileContains(const char* path, const char* text)
+{
+    char buf[8192];
+    FILE* f = fopen(path, "r");
+    if (!f)
+        return 0;
+    const size_t n = fread(buf, 1, sizeof(buf) - 1, f);
+    fclose(f);
+    buf[n] = 0;
+    return strstr(buf, text) != NULL;
+}
+
+/* A review as the desktop writes one: the file, a drawing on its first
+ * frame, and a section the iPad does not know, which a save keeps. */
+static const char* reviewText =
+    "{\"djvReview\": 1, \"app\": \"DJV\", \"created\": \"2026-11-02T00:00:00Z\","
+    " \"files\": [{\"id\": \"f1\", \"path\": \"BART_2021-02-07.0000.jpg\"}],"
+    " \"annotations\": [{\"id\": \"a1\", \"sourceId\": \"f1\", \"space\": \"image\","
+    " \"time\": {\"value\": 0.0, \"rate\": 24.0}, \"author\": \"desk\", \"strokes\": ["
+    " {\"color\": [1.0, 0.0, 0.0, 1.0], \"width\": 4.0, \"widthSpace\": \"image\","
+    " \"points\": [10.0, 10.0, 20.0, 20.0]}]}],"
+    " \"elsewhere\": {\"kept\": true}}";
+
+static void drawing(tl_engine* engine, tl_player* player)
+{
+    djv_models* models = djv_models_create(engine, DJV_C_TEST_SETTINGS);
+    CHECK(models != NULL);
+    if (!models)
+        return;
+
+    /* The tool, kept in the settings. */
+    djv_draw_set_tool(models, DJV_DRAW_ARROW);
+    CHECK(djv_draw_get_tool(models) == DJV_DRAW_ARROW);
+    const float red[4] = { 1.F, 0.F, 0.F, 1.F };
+    djv_draw_set_color(models, red);
+    float color[4] = { 0.F, 0.F, 0.F, 0.F };
+    djv_draw_get_color(models, color);
+    CHECK_NEAR(color[0], 1.0, 0.0001);
+    CHECK_NEAR(color[1], 0.0, 0.0001);
+    djv_draw_set_size(models, 9.F);
+    CHECK_NEAR(djv_draw_get_size(models), 9.0, 0.0001);
+    djv_draw_set_constrain(models, 1);
+    CHECK(djv_draw_is_constrain(models));
+    djv_draw_set_tool(models, DJV_DRAW_PEN);
+
+    /* The desktop's review of the file. */
+    writeFile(DJV_C_TEST_DIR "/review.djvr", reviewText);
+    CHECK(djv_review_open(models, DJV_C_TEST_DIR "/review.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
+    djv_models_set_player(models, player);
+    CHECK(djv_draw_get_frame_count(models) == 1);
+    CHECK_NEAR(djv_draw_get_frame(models, 0), 0.0, 0.0001);
+    CHECK(djv_draw_has_frame(models));
+
+    /* No view, so nowhere to draw. */
+    CHECK(djv_draw_begin(models, 10.F, 10.F, 0, 0.F) == 0);
+
+    /* Cleared, and back again. */
+    CHECK(!djv_draw_has_undo(models));
+    djv_draw_clear_frame(models);
+    CHECK(!djv_draw_has_frame(models));
+    CHECK(djv_draw_get_frame_count(models) == 0);
+    CHECK(djv_draw_has_undo(models));
+    djv_draw_undo(models);
+    CHECK(djv_draw_has_frame(models));
+    CHECK(djv_draw_has_redo(models));
+    djv_draw_redo(models);
+    CHECK(!djv_draw_has_frame(models));
+    djv_draw_undo(models);
+    CHECK(djv_draw_has_frame(models));
+
+    /* Saved, keeping what the iPad does not read, and read again. */
+    CHECK(djv_review_save(models) == 1);
+    CHECK(fileContains(DJV_C_TEST_DIR "/review.djvr", "\"elsewhere\""));
+    djv_review_close(models);
+    CHECK(djv_draw_get_frame_count(models) == 0);
+    CHECK(djv_review_open(models, DJV_C_TEST_DIR "/review.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
+    djv_models_set_player(models, player);
+    CHECK(djv_draw_get_frame_count(models) == 1);
+
+    /* A new review is not written while it has nothing in it. */
+    CHECK(djv_review_open(models, DJV_C_TEST_DIR "/empty.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
+    CHECK(djv_draw_get_frame_count(models) == 0);
+    CHECK(djv_review_save(models) == 1);
+    CHECK(fopen(DJV_C_TEST_DIR "/empty.djvr", "r") == NULL);
+
+    /* What cannot be read says why. */
+    writeFile(DJV_C_TEST_DIR "/bad.djvr", "{ not a review");
+    CHECK(djv_review_open(models, DJV_C_TEST_DIR "/bad.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 0);
+    CHECK(strlen(djv_review_get_error(models)) > 0);
+
+    djv_models_set_player(models, NULL);
+    djv_models_destroy(models);
+}
+
 /* What was set is there again when the models are made from the file. */
 static void persistence(tl_engine* engine)
 {
@@ -241,6 +346,10 @@ int main(void)
     }
     viewport(models);
     settings(models);
+    if (player)
+    {
+        drawing(engine, player);
+    }
 
     djv_models_set_player(models, NULL);
     CHECK(djv_info_get_count(models, NULL) == 0);

@@ -1130,14 +1130,12 @@ namespace djv
             return tl::isShown(p.compare, static_cast<size_t>(index));
         }
 
-        std::optional<ftk::V2F> Viewport::_imagePosClamped(int index, const ftk::V2I& widgetPos) const
+        models::ImageMapping Viewport::_imageMapping(int index) const
         {
             FTK_P();
-            std::optional<ftk::V2F> out;
-            const double zoom = getZoom();
+            models::ImageMapping out;
             const auto boxes = _sourceBoxes();
-            if (zoom <= 0.0 ||
-                index < 0 ||
+            if (index < 0 ||
                 index >= static_cast<int>(boxes.size()) ||
                 index >= static_cast<int>(p.videoFrames.size()))
             {
@@ -1148,91 +1146,64 @@ namespace djv
             {
                 return out;
             }
-            const ftk::Size2I imageSize = video.layers[0].image->getSize();
-            const ftk::Box2I& box = boxes[index];
-            if (imageSize.w <= 0 || imageSize.h <= 0 || box.w() <= 0 || box.h() <= 0)
+            out.box = boxes[index];
+            out.imageSize = video.layers[0].image->getSize();
+            out.mirrorX = p.binding->getDisplayOptions().mirror.x;
+            out.mirrorY = p.binding->getDisplayOptions().mirror.y;
+            return out;
+        }
+
+        ftk::V2F Viewport::_widgetToRender(const ftk::V2I& widgetPos) const
+        {
+            // Widget -> render space: the inverse of translate(viewPos) * scale.
+            const double zoom = getZoom();
+            const ftk::V2I& viewPos = getViewPos();
+            return zoom > 0.0 ?
+                ftk::V2F(
+                    static_cast<float>((widgetPos.x - viewPos.x) / zoom),
+                    static_cast<float>((widgetPos.y - viewPos.y) / zoom)) :
+                ftk::V2F();
+        }
+
+        std::optional<ftk::V2F> Viewport::_imagePosClamped(int index, const ftk::V2I& widgetPos) const
+        {
+            std::optional<ftk::V2F> out;
+            const models::ImageMapping mapping = _imageMapping(index);
+            if (getZoom() <= 0.0 || !mapping.isValid())
             {
                 return out;
             }
             // The same mapping as the hit test, without the test.
-            const ftk::V2I& viewPos = getViewPos();
-            const ftk::V2F render(
-                static_cast<float>((widgetPos.x - viewPos.x) / zoom),
-                static_cast<float>((widgetPos.y - viewPos.y) / zoom));
-            ftk::V2F pos(
-                (render.x - box.min.x) * imageSize.w / static_cast<float>(box.w()),
-                (render.y - box.min.y) * imageSize.h / static_cast<float>(box.h()));
-            if (p.binding->getDisplayOptions().mirror.x)
-            {
-                pos.x = imageSize.w - pos.x;
-            }
-            if (p.binding->getDisplayOptions().mirror.y)
-            {
-                pos.y = imageSize.h - pos.y;
-            }
-            pos.x = std::max(0.F, std::min(static_cast<float>(imageSize.w), pos.x));
-            pos.y = std::max(0.F, std::min(static_cast<float>(imageSize.h), pos.y));
-            out = pos;
+            out = mapping.clamp(mapping.toImage(_widgetToRender(widgetPos)));
             return out;
         }
 
         Viewport::SourceHit Viewport::_hitTest(const ftk::V2I& widgetPos) const
         {
-            FTK_P();
             SourceHit out;
-            // Widget -> render space: the inverse of translate(viewPos) * scale.
-            const double zoom = getZoom();
-            if (zoom <= 0.0)
+            if (getZoom() <= 0.0)
             {
                 return out;
             }
-            const ftk::V2I& viewPos = getViewPos();
-            const ftk::V2F render(
-                static_cast<float>((widgetPos.x - viewPos.x) / zoom),
-                static_cast<float>((widgetPos.y - viewPos.y) / zoom));
-
-            const auto boxes = _sourceBoxes();
-            for (size_t i = 0; i < boxes.size() && i < p.videoFrames.size(); ++i)
+            const ftk::V2F render = _widgetToRender(widgetPos);
+            const size_t count = _sourceBoxes().size();
+            for (size_t i = 0; i < count; ++i)
             {
                 if (!_sourceShown(static_cast<int>(i)))
                 {
                     continue;
                 }
-                const ftk::Box2I& box = boxes[i];
-                if (render.x < box.min.x || render.x > box.max.x ||
-                    render.y < box.min.y || render.y > box.max.y ||
-                    box.w() <= 0 || box.h() <= 0)
+                const models::ImageMapping mapping = _imageMapping(static_cast<int>(i));
+                if (!mapping.contains(render))
                 {
                     continue;
                 }
-                const auto& video = p.videoFrames[i];
-                if (video.layers.empty() || !video.layers[0].image)
-                {
-                    continue;
-                }
-                const ftk::Size2I imageSize = video.layers[0].image->getSize();
-                if (imageSize.w <= 0 || imageSize.h <= 0)
-                {
-                    continue;
-                }
-                // Render space -> the source's own pixels.
+                // Render space -> the source's own pixels, unmirrored.
+                // Strokes are stored unmirrored, and follow the image when
+                // the mirror changes.
                 out.index = static_cast<int>(i);
-                out.pos = ftk::V2F(
-                    (render.x - box.min.x) * imageSize.w / static_cast<float>(box.w()),
-                    (render.y - box.min.y) * imageSize.h / static_cast<float>(box.h()));
-                // The mirror flips the image inside its box, so the same
-                // flip takes the hit back to the image's own pixels. Strokes
-                // are stored unmirrored, and follow the image when the
-                // mirror changes.
-                if (p.binding->getDisplayOptions().mirror.x)
-                {
-                    out.pos.x = imageSize.w - out.pos.x;
-                }
-                if (p.binding->getDisplayOptions().mirror.y)
-                {
-                    out.pos.y = imageSize.h - out.pos.y;
-                }
-                out.scale = box.w() / static_cast<float>(imageSize.w);
+                out.pos = mapping.toImage(render);
+                out.scale = mapping.scale();
                 break;
             }
             return out;
@@ -1240,43 +1211,18 @@ namespace djv
 
         ftk::V2F Viewport::_imageToWidget(int index, const ftk::V2F& imagePos) const
         {
-            FTK_P();
-            const auto boxes = _sourceBoxes();
-            if (index < 0 ||
-                index >= static_cast<int>(boxes.size()) ||
-                index >= static_cast<int>(p.videoFrames.size()))
+            const models::ImageMapping mapping = _imageMapping(index);
+            if (!mapping.isValid())
             {
                 return ftk::V2F();
             }
-            const ftk::Box2I& box = boxes[index];
-            const auto& video = p.videoFrames[index];
-            if (video.layers.empty() || !video.layers[0].image)
-            {
-                return ftk::V2F();
-            }
-            const ftk::Size2I imageSize = video.layers[0].image->getSize();
-            if (imageSize.w <= 0 || imageSize.h <= 0)
-            {
-                return ftk::V2F();
-            }
-            // The inverse of the flip in _hitTest: stored image pixels back
-            // to where the mirror shows them.
-            ftk::V2F pos = imagePos;
-            if (p.binding->getDisplayOptions().mirror.x)
-            {
-                pos.x = imageSize.w - pos.x;
-            }
-            if (p.binding->getDisplayOptions().mirror.y)
-            {
-                pos.y = imageSize.h - pos.y;
-            }
-            const float renderX = box.min.x + pos.x * box.w() / static_cast<float>(imageSize.w);
-            const float renderY = box.min.y + pos.y * box.h() / static_cast<float>(imageSize.h);
+            // Stored image pixels back to where the mirror shows them.
+            const ftk::V2F render = mapping.toRender(imagePos);
             const double zoom = getZoom();
             const ftk::V2I& viewPos = getViewPos();
             return ftk::V2F(
-                static_cast<float>(viewPos.x + renderX * zoom),
-                static_cast<float>(viewPos.y + renderY * zoom));
+                static_cast<float>(viewPos.x + render.x * zoom),
+                static_cast<float>(viewPos.y + render.y * zoom));
         }
 
         void Viewport::keyPressEvent(ftk::KeyEvent& event)
@@ -1365,58 +1311,6 @@ namespace djv
 
         namespace
         {
-            //! Whether a stroke is a shape between two points, which the
-            //! handles edit.
-            bool isTwoPointShape(models::ReviewStrokeKind kind)
-            {
-                return
-                    models::ReviewStrokeKind::Line == kind ||
-                    models::ReviewStrokeKind::Arrow == kind ||
-                    models::ReviewStrokeKind::Rectangle == kind ||
-                    models::ReviewStrokeKind::Ellipse == kind;
-            }
-
-            //! One point of a shape against its other point, constrained:
-            //! square or round, or at a multiple of forty-five degrees.
-            ftk::V2F constrainShape(
-                models::ReviewStrokeKind kind,
-                const ftk::V2F& anchor,
-                const ftk::V2F& pos,
-                bool constrain)
-            {
-                ftk::V2F out = pos;
-                if (!constrain)
-                {
-                    return out;
-                }
-                const float dx = pos.x - anchor.x;
-                const float dy = pos.y - anchor.y;
-                switch (kind)
-                {
-                case models::ReviewStrokeKind::Rectangle:
-                case models::ReviewStrokeKind::Ellipse:
-                {
-                    const float d = std::max(std::abs(dx), std::abs(dy));
-                    out.x = anchor.x + (dx < 0.F ? -d : d);
-                    out.y = anchor.y + (dy < 0.F ? -d : d);
-                    break;
-                }
-                default:
-                {
-                    const float length = std::sqrt(dx * dx + dy * dy);
-                    if (length > 0.F)
-                    {
-                        const float step = 3.14159265F / 4.F;
-                        const float angle = std::round(std::atan2(dy, dx) / step) * step;
-                        out.x = anchor.x + std::cos(angle) * length;
-                        out.y = anchor.y + std::sin(angle) * length;
-                    }
-                    break;
-                }
-                }
-                return out;
-            }
-
             //! The size of a handle on the screen, in pixels at a display
             //! scale of one.
             const float handleSize = 8.F;
@@ -1445,13 +1339,7 @@ namespace djv
                 p.stroke.kind = models::getStrokeKind(drawModel->getTool());
                 p.stroke.color = drawModel->getColor();
                 p.stroke.width = drawModel->getSize();
-                p.stroke.points.push_back(hit.pos);
-                // A pen's pressure is kept with a freehand stroke; see
-                // ReviewStroke::pressures.
-                if (pen && models::ReviewStrokeKind::Freehand == p.stroke.kind)
-                {
-                    p.stroke.pressures.push_back(pressure);
-                }
+                models::strokeBegin(p.stroke, hit.pos, pen, pressure);
                 setDrawUpdate();
             }
         }
@@ -1473,8 +1361,7 @@ namespace djv
                 {
                     return;
                 }
-                p.stroke.points.resize(2);
-                p.stroke.points[1] = constrainShape(p.stroke.kind, p.stroke.points.front(), *clamped, _isConstrained(modifiers));
+                models::strokeContinue(p.stroke, *clamped, pressure, _isConstrained(modifiers));
                 setDrawUpdate();
                 return;
             }
@@ -1485,22 +1372,7 @@ namespace djv
             {
                 return;
             }
-            if (!p.stroke.points.empty())
-            {
-                const ftk::V2F& last = p.stroke.points.back();
-                const float dx = hit.pos.x - last.x;
-                const float dy = hit.pos.y - last.y;
-                // Drop points the mouse barely moved, to keep strokes compact.
-                if (dx * dx + dy * dy < .25F)
-                {
-                    return;
-                }
-            }
-            p.stroke.points.push_back(hit.pos);
-            if (!p.stroke.pressures.empty())
-            {
-                p.stroke.pressures.push_back(pressure);
-            }
+            models::strokeContinue(p.stroke, hit.pos, pressure, false);
             setDrawUpdate();
         }
 
@@ -1509,12 +1381,9 @@ namespace djv
             FTK_P();
             // A shape wants its second point: a click with no drag is nothing.
             // Ink and text want one.
-            const bool shape =
-                p.stroke.kind != models::ReviewStrokeKind::Freehand &&
-                p.stroke.kind != models::ReviewStrokeKind::Text;
             if (p.strokeSource >= 0 &&
                 p.strokeTime.has_value() &&
-                (shape ? p.stroke.points.size() > 1 : !p.stroke.points.empty()))
+                models::strokeComplete(p.stroke))
             {
                 const auto& active = p.filesModel->getActive();
                 if (p.strokeSource < static_cast<int>(active.size()))
@@ -1665,7 +1534,7 @@ namespace djv
             {
                 const auto strokes = p.annotationsModel->getStrokes(p.selection->sourceId, p.selection->time);
                 if (p.selection->index < strokes.size() &&
-                    isTwoPointShape(strokes[p.selection->index].kind) &&
+                    models::isTwoPointShape(strokes[p.selection->index].kind) &&
                     strokes[p.selection->index].points.size() > 1)
                 {
                     const auto& stroke = strokes[p.selection->index];
@@ -1761,7 +1630,7 @@ namespace djv
                 if (p.handle < static_cast<int>(stroke.points.size()))
                 {
                     const ftk::V2F& other = stroke.points[1 - p.handle];
-                    stroke.points[p.handle] = constrainShape(stroke.kind, other, *clamped, _isConstrained(modifiers));
+                    stroke.points[p.handle] = models::constrainShape(stroke.kind, other, *clamped, _isConstrained(modifiers));
                     p.moving = stroke;
                     setDrawUpdate();
                 }
@@ -1938,10 +1807,10 @@ namespace djv
                     float radius = p.drawModel->getSize();
                     if (p.touchInput)
                     {
-                        const float zoom = static_cast<float>(getZoom());
-                        radius = std::max(
+                        radius = models::eraserRadius(
                             radius,
-                            _reach() / std::max(.001F, hit.scale * zoom));
+                            _reach(),
+                            hit.scale * static_cast<float>(getZoom()));
                     }
                     const size_t before = p.annotationsModel->getStrokes(
                         active[hit.index]->id,
@@ -2219,7 +2088,7 @@ namespace djv
                 }
             }
             // The two points of a shape, as handles to drag.
-            if (isTwoPointShape(stroke.kind) && stroke.points.size() > 1)
+            if (models::isTwoPointShape(stroke.kind) && stroke.points.size() > 1)
             {
                 for (int i = 0; i < 2; ++i)
                 {

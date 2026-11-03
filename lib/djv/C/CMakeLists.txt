@@ -7,7 +7,7 @@ set(SOURCE
 # engine; for Swift. Static: it is linked into one application, so its
 # functions need no export macro (DJV_C_API is empty).
 add_library(djvC STATIC ${HEADERS} ${SOURCE})
-target_link_libraries(djvC PUBLIC djvModels tlRender::tlC)
+target_link_libraries(djvC PUBLIC djvModels djvUI tlRender::tlC)
 set_target_properties(djvC PROPERTIES FOLDER lib)
 set_target_properties(djvC PROPERTIES PUBLIC_HEADER "${HEADERS}")
 

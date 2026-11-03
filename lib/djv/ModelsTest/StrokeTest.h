@@ -30,6 +30,8 @@ namespace djv
             void _mesh();
             void _shapes();
             void _hit();
+            void _mapping();
+            void _input();
 
             // FTK_CHECK reports through the test, so the helpers are part of
             // it rather than free functions.

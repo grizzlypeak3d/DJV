@@ -5,7 +5,8 @@ add_executable(djv-c-test djv-c-test.c)
 target_link_libraries(djv-c-test djvC)
 target_compile_definitions(djv-c-test PRIVATE
     DJV_SAMPLE_DATA="${PROJECT_SOURCE_DIR}/etc/SampleData"
-    DJV_C_TEST_SETTINGS="${CMAKE_CURRENT_BINARY_DIR}/djv-c-test-settings.json")
+    DJV_C_TEST_SETTINGS="${CMAKE_CURRENT_BINARY_DIR}/djv-c-test-settings.json"
+    DJV_C_TEST_DIR="${CMAKE_CURRENT_BINARY_DIR}")
 set_target_properties(djv-c-test PROPERTIES
     FOLDER tests
     C_STANDARD 11
@@ -13,7 +14,11 @@ set_target_properties(djv-c-test PROPERTIES
 
 add_test(
     NAME djv-c-test-settings
-    COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_CURRENT_BINARY_DIR}/djv-c-test-settings.json)
+    COMMAND ${CMAKE_COMMAND} -E rm -f
+        ${CMAKE_CURRENT_BINARY_DIR}/djv-c-test-settings.json
+        ${CMAKE_CURRENT_BINARY_DIR}/review.djvr
+        ${CMAKE_CURRENT_BINARY_DIR}/empty.djvr
+        ${CMAKE_CURRENT_BINARY_DIR}/bad.djvr)
 set_tests_properties(djv-c-test-settings PROPERTIES FIXTURES_SETUP djv-c-test-clean)
 add_test(NAME djv-c-test COMMAND djv-c-test)
 # No sound card on a runner: SDL's dummy audio driver. OpenTimelineIO's

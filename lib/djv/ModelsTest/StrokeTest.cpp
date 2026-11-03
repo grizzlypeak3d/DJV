@@ -31,6 +31,8 @@ namespace djv
             _mesh();
             _shapes();
             _hit();
+            _mapping();
+            _input();
         }
 
         // Every index is one-based and inside the mesh, or the renderer
@@ -336,6 +338,75 @@ namespace djv
             // Nothing is hit on nothing.
             stroke.points.clear();
             FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(10.F, 20.F), 100.F));
+        }
+
+        void StrokeTest::_mapping()
+        {
+            // A 200 by 100 image drawn twice its size at 10, 20.
+            models::ImageMapping m;
+            FTK_CHECK(!m.isValid());
+            m.box = ftk::Box2I(10, 20, 400, 200);
+            m.imageSize = ftk::Size2I(200, 100);
+            FTK_CHECK(m.isValid());
+            FTK_CHECK(2.F == m.scale());
+            FTK_CHECK(m.contains(ftk::V2F(10.F, 20.F)));
+            FTK_CHECK(!m.contains(ftk::V2F(9.F, 20.F)));
+            const ftk::V2F image = m.toImage(ftk::V2F(110.F, 120.F));
+            FTK_CHECK(50.F == image.x && 50.F == image.y);
+            const ftk::V2F render = m.toRender(image);
+            FTK_CHECK(110.F == render.x && 120.F == render.y);
+
+            // Mirrored, the image's own pixels are the other way round,
+            // and a point comes back to where it was.
+            m.mirrorX = true;
+            const ftk::V2F mirrored = m.toImage(ftk::V2F(110.F, 120.F));
+            FTK_CHECK(150.F == mirrored.x && 50.F == mirrored.y);
+            const ftk::V2F back = m.toRender(mirrored);
+            FTK_CHECK(110.F == back.x && 120.F == back.y);
+
+            const ftk::V2F clamped = m.clamp(ftk::V2F(-5.F, 500.F));
+            FTK_CHECK(0.F == clamped.x && 100.F == clamped.y);
+        }
+
+        void StrokeTest::_input()
+        {
+            // Ink: a pen's pressure is kept, a point that barely moved is
+            // not.
+            models::ReviewStroke ink;
+            models::strokeBegin(ink, ftk::V2F(0.F, 0.F), true, .5F);
+            FTK_CHECK(1 == ink.points.size() && 1 == ink.pressures.size());
+            FTK_CHECK(models::strokeComplete(ink));
+            models::strokeContinue(ink, ftk::V2F(.1F, .1F), .6F, false);
+            FTK_CHECK(1 == ink.points.size());
+            models::strokeContinue(ink, ftk::V2F(10.F, 0.F), .7F, false);
+            FTK_CHECK(2 == ink.points.size() && 2 == ink.pressures.size());
+            FTK_CHECK(.7F == ink.pressures.back());
+
+            // A finger draws at the width: no pressures.
+            models::ReviewStroke finger;
+            models::strokeBegin(finger, ftk::V2F(0.F, 0.F), false, 1.F);
+            models::strokeContinue(finger, ftk::V2F(10.F, 0.F), 1.F, false);
+            FTK_CHECK(finger.pressures.empty());
+
+            // A shape is its two points, the second constrained when asked.
+            models::ReviewStroke rect;
+            rect.kind = models::ReviewStrokeKind::Rectangle;
+            models::strokeBegin(rect, ftk::V2F(0.F, 0.F), true, 1.F);
+            FTK_CHECK(rect.pressures.empty());
+            FTK_CHECK(!models::strokeComplete(rect));
+            models::strokeContinue(rect, ftk::V2F(10.F, 4.F), 1.F, false);
+            models::strokeContinue(rect, ftk::V2F(20.F, 5.F), 1.F, false);
+            FTK_CHECK(2 == rect.points.size());
+            FTK_CHECK(20.F == rect.points[1].x && 5.F == rect.points[1].y);
+            FTK_CHECK(models::strokeComplete(rect));
+            models::strokeContinue(rect, ftk::V2F(20.F, 5.F), 1.F, true);
+            FTK_CHECK(20.F == rect.points[1].x && 20.F == rect.points[1].y);
+            FTK_CHECK(models::isTwoPointShape(models::ReviewStrokeKind::Arrow));
+            FTK_CHECK(!models::isTwoPointShape(models::ReviewStrokeKind::Freehand));
+
+            // The eraser's reach: the size, or a fingertip on the screen.
+            FTK_CHECK(10.F == models::eraserRadius(10.F, 22.F, 4.F));
+            FTK_CHECK(11.F == models::eraserRadius(4.F, 22.F, 2.F));
         }
     }
 }

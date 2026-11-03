@@ -7,7 +7,9 @@
 
 #include <djv/Models/Review.h>
 
+#include <ftk/Core/Box.h>
 #include <ftk/Core/Mesh.h>
+#include <ftk/Core/Size.h>
 
 #include <vector>
 
@@ -95,6 +97,81 @@ namespace djv
             const ReviewStroke&,
             const ftk::V2F& pos,
             float radius);
+
+        //! Where a source image is in a view: its box in render space
+        //! (the view's pixels before the zoom and the pan), the size of the
+        //! image, and whether it is mirrored. Strokes are kept in the
+        //! image's own pixels, unmirrored, so they stay on the picture
+        //! whatever the zoom, the comparison or the mirror.
+        struct DJV_MODELS_API_TYPE ImageMapping
+        {
+            ftk::Box2I  box;
+            ftk::Size2I imageSize;
+            bool        mirrorX = false;
+            bool        mirrorY = false;
+
+            DJV_MODELS_API bool isValid() const;
+
+            //! Whether a point of render space is on the image.
+            DJV_MODELS_API bool contains(const ftk::V2F& render) const;
+
+            //! A point of render space in the image's pixels, and back.
+            DJV_MODELS_API ftk::V2F toImage(const ftk::V2F& render) const;
+            DJV_MODELS_API ftk::V2F toRender(const ftk::V2F& image) const;
+
+            //! Held inside the image.
+            DJV_MODELS_API ftk::V2F clamp(const ftk::V2F& image) const;
+
+            //! Render pixels to one image pixel.
+            DJV_MODELS_API float scale() const;
+        };
+
+        //! Whether a kind of stroke is a shape between two points.
+        DJV_MODELS_API bool isTwoPointShape(ReviewStrokeKind);
+
+        //! One point of a shape against its other point, constrained:
+        //! square or round, or at a multiple of forty-five degrees.
+        DJV_MODELS_API ftk::V2F constrainShape(
+            ReviewStrokeKind,
+            const ftk::V2F& anchor,
+            const ftk::V2F& pos,
+            bool constrain);
+
+        //! \name Drawing a Stroke
+        //! What the desktop's viewport and the iPad do with a pointer, a
+        //! finger or a pen while a stroke is drawn. The stroke comes in
+        //! with its kind, color and width set; the points are in the
+        //! image's pixels.
+        ///@{
+
+        //! The first point, and a pen's pressure for freehand ink.
+        DJV_MODELS_API void strokeBegin(
+            ReviewStroke&,
+            const ftk::V2F& pos,
+            bool pen,
+            float pressure);
+
+        //! The next point: ink takes it, unless it barely moved, with the
+        //! pressure when the stroke has them; a shape takes it as its
+        //! second point, which the caller holds inside the picture, and
+        //! constrained when asked.
+        DJV_MODELS_API void strokeContinue(
+            ReviewStroke&,
+            const ftk::V2F& pos,
+            float pressure,
+            bool constrain);
+
+        //! Whether a stroke is worth keeping: a shape wants its second
+        //! point, ink and text one.
+        DJV_MODELS_API bool strokeComplete(const ReviewStroke&);
+
+        //! How far the eraser reaches, in the image's pixels: the tool's
+        //! size, and for a finger never less than a fingertip covers on
+        //! the screen. The reach is in screen pixels, and the scale is the
+        //! screen pixels to one image pixel.
+        DJV_MODELS_API float eraserRadius(float size, float screenReach, float screenScale);
+
+        ///@}
 
         ///@}
     }

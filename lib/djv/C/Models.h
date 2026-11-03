@@ -329,6 +329,75 @@ DJV_C_API const char* djv_time_get_label(djv_models*, double seconds);
 
 ///@}
 
+//! \name Drawing
+//! Drawing on the picture, as the desktop's Review tool does: the tool
+//! and its color and size, kept in the settings; the strokes, kept in
+//! DJV's annotations model and saved in a review (.djvr) beside the
+//! media, which the desktop opens; and the input, in the view's pixels.
+///@{
+
+//! The tools, as DJV's draw model has them. The iPad draws with the pen,
+//! the eraser and the shapes.
+typedef enum
+{
+    DJV_DRAW_PEN,
+    DJV_DRAW_ERASER,
+    DJV_DRAW_LINE,
+    DJV_DRAW_ARROW,
+    DJV_DRAW_RECTANGLE,
+    DJV_DRAW_ELLIPSE,
+    DJV_DRAW_TEXT,
+    DJV_DRAW_SELECT
+} djv_draw_tool;
+
+DJV_C_API djv_draw_tool djv_draw_get_tool(djv_models*);
+DJV_C_API void djv_draw_set_tool(djv_models*, djv_draw_tool);
+//! RGBA, zero to one.
+DJV_C_API void djv_draw_get_color(djv_models*, float color[4]);
+DJV_C_API void djv_draw_set_color(djv_models*, const float color[4]);
+//! The width, in the pixels of the image.
+DJV_C_API float djv_draw_get_size(djv_models*);
+DJV_C_API void djv_draw_set_size(djv_models*, float);
+//! Shapes held square or round, lines to forty-five degrees: a touch
+//! screen has no Shift key.
+DJV_C_API int djv_draw_is_constrain(djv_models*);
+DJV_C_API void djv_draw_set_constrain(djv_models*, int);
+
+//! Open the review of a file: the review file, which need not exist yet,
+//! and the media it is about. Its drawings are read into the model; a
+//! review the desktop wrote keeps what this does not use. Zero, with the
+//! reason in djv_review_get_error(), when it cannot be read.
+DJV_C_API int djv_review_open(djv_models*, const char* reviewPath, const char* mediaPath);
+//! Write it: not at all while it has no drawings and no file yet. Zero
+//! on failure, with the reason.
+DJV_C_API int djv_review_save(djv_models*);
+DJV_C_API void djv_review_close(djv_models*);
+DJV_C_API const char* djv_review_get_error(djv_models*);
+
+//! Drawing with a finger or a pen, at a point of the view in its pixels:
+//! begun on the picture of the player's frame (one when it began), and
+//! kept when it ends. The eraser removes the strokes it touches. A pen
+//! gives its pressure, zero to one.
+DJV_C_API int djv_draw_begin(djv_models*, float x, float y, int pen, float pressure);
+DJV_C_API void djv_draw_move(djv_models*, float x, float y, float pressure);
+DJV_C_API void djv_draw_end(djv_models*);
+DJV_C_API void djv_draw_cancel(djv_models*);
+
+//! Undo and redo the drawing, and clear the frame shown.
+DJV_C_API int djv_draw_has_undo(djv_models*);
+DJV_C_API int djv_draw_has_redo(djv_models*);
+DJV_C_API void djv_draw_undo(djv_models*);
+DJV_C_API void djv_draw_redo(djv_models*);
+DJV_C_API void djv_draw_clear_frame(djv_models*);
+
+//! The frames with drawings on them, in seconds from the start of the
+//! player's timeline, in order; and whether the frame shown has any.
+DJV_C_API size_t djv_draw_get_frame_count(djv_models*);
+DJV_C_API double djv_draw_get_frame(djv_models*, size_t);
+DJV_C_API int djv_draw_has_frame(djv_models*);
+
+///@}
+
 //! \name Cache
 ///@{
 

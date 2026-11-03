@@ -611,5 +611,174 @@ namespace djv
             }
             return false;
         }
+
+        bool ImageMapping::isValid() const
+        {
+            return box.w() > 0 && box.h() > 0 && imageSize.w > 0 && imageSize.h > 0;
+        }
+
+        bool ImageMapping::contains(const ftk::V2F& render) const
+        {
+            return
+                isValid() &&
+                render.x >= box.min.x && render.x <= box.max.x &&
+                render.y >= box.min.y && render.y <= box.max.y;
+        }
+
+        ftk::V2F ImageMapping::toImage(const ftk::V2F& render) const
+        {
+            if (!isValid())
+                return ftk::V2F();
+            ftk::V2F out(
+                (render.x - box.min.x) * imageSize.w / static_cast<float>(box.w()),
+                (render.y - box.min.y) * imageSize.h / static_cast<float>(box.h()));
+            // The mirror flips the image inside its box, so the same flip
+            // takes a point back to the image's own pixels.
+            if (mirrorX)
+            {
+                out.x = imageSize.w - out.x;
+            }
+            if (mirrorY)
+            {
+                out.y = imageSize.h - out.y;
+            }
+            return out;
+        }
+
+        ftk::V2F ImageMapping::toRender(const ftk::V2F& image) const
+        {
+            if (!isValid())
+                return ftk::V2F();
+            ftk::V2F pos = image;
+            if (mirrorX)
+            {
+                pos.x = imageSize.w - pos.x;
+            }
+            if (mirrorY)
+            {
+                pos.y = imageSize.h - pos.y;
+            }
+            return ftk::V2F(
+                box.min.x + pos.x * box.w() / static_cast<float>(imageSize.w),
+                box.min.y + pos.y * box.h() / static_cast<float>(imageSize.h));
+        }
+
+        ftk::V2F ImageMapping::clamp(const ftk::V2F& image) const
+        {
+            return ftk::V2F(
+                std::max(0.F, std::min(static_cast<float>(imageSize.w), image.x)),
+                std::max(0.F, std::min(static_cast<float>(imageSize.h), image.y)));
+        }
+
+        float ImageMapping::scale() const
+        {
+            return imageSize.w > 0 ? box.w() / static_cast<float>(imageSize.w) : 1.F;
+        }
+
+        bool isTwoPointShape(ReviewStrokeKind kind)
+        {
+            return
+                ReviewStrokeKind::Line == kind ||
+                ReviewStrokeKind::Arrow == kind ||
+                ReviewStrokeKind::Rectangle == kind ||
+                ReviewStrokeKind::Ellipse == kind;
+        }
+
+        ftk::V2F constrainShape(
+            ReviewStrokeKind kind,
+            const ftk::V2F& anchor,
+            const ftk::V2F& pos,
+            bool constrain)
+        {
+            ftk::V2F out = pos;
+            if (!constrain)
+            {
+                return out;
+            }
+            const float dx = pos.x - anchor.x;
+            const float dy = pos.y - anchor.y;
+            switch (kind)
+            {
+            case ReviewStrokeKind::Rectangle:
+            case ReviewStrokeKind::Ellipse:
+            {
+                const float d = std::max(std::abs(dx), std::abs(dy));
+                out.x = anchor.x + (dx < 0.F ? -d : d);
+                out.y = anchor.y + (dy < 0.F ? -d : d);
+                break;
+            }
+            default:
+            {
+                const float length = std::sqrt(dx * dx + dy * dy);
+                if (length > 0.F)
+                {
+                    const float step = 3.14159265F / 4.F;
+                    const float angle = std::round(std::atan2(dy, dx) / step) * step;
+                    out.x = anchor.x + std::cos(angle) * length;
+                    out.y = anchor.y + std::sin(angle) * length;
+                }
+                break;
+            }
+            }
+            return out;
+        }
+
+        void strokeBegin(
+            ReviewStroke& stroke,
+            const ftk::V2F& pos,
+            bool pen,
+            float pressure)
+        {
+            stroke.points.clear();
+            stroke.pressures.clear();
+            stroke.points.push_back(pos);
+            // A pen's pressure is kept with a freehand stroke; see
+            // ReviewStroke::pressures.
+            if (pen && ReviewStrokeKind::Freehand == stroke.kind)
+            {
+                stroke.pressures.push_back(pressure);
+            }
+        }
+
+        void strokeContinue(
+            ReviewStroke& stroke,
+            const ftk::V2F& pos,
+            float pressure,
+            bool constrain)
+        {
+            if (stroke.points.empty())
+                return;
+            if (isTwoPointShape(stroke.kind))
+            {
+                stroke.points.resize(2);
+                stroke.points[1] = constrainShape(stroke.kind, stroke.points.front(), pos, constrain);
+                return;
+            }
+            if (stroke.kind != ReviewStrokeKind::Freehand)
+                return;
+            const ftk::V2F& last = stroke.points.back();
+            const float dx = pos.x - last.x;
+            const float dy = pos.y - last.y;
+            // Drop points that barely moved, to keep strokes compact.
+            if (dx * dx + dy * dy < .25F)
+                return;
+            stroke.points.push_back(pos);
+            if (!stroke.pressures.empty())
+            {
+                stroke.pressures.push_back(pressure);
+            }
+        }
+
+        bool strokeComplete(const ReviewStroke& stroke)
+        {
+            return isTwoPointShape(stroke.kind) ?
+                stroke.points.size() > 1 :
+                !stroke.points.empty();
+        }
+
+        float eraserRadius(float size, float screenReach, float screenScale)
+        {
+            return std::max(size, screenReach / std::max(.001F, screenScale));
+        }
     }
 }
