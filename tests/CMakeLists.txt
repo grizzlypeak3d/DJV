@@ -1,4 +1,7 @@
 add_subdirectory(djv-test)
+if(TARGET djvC)
+    add_subdirectory(djv-c-test)
+endif()
 
 # Scripted sessions: each shot in capture/capture.json is a test that drives
 # the application through the capture tool -- clicks, drags, keys, typed

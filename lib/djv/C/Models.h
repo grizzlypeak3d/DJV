@@ -15,6 +15,10 @@
 
 #include <tlRender/C/Engine.h>
 
+//! djvC is a static library, linked into the one application: nothing
+//! to export or import, whether tlRender's libraries are shared or not.
+#define DJV_C_API
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -26,30 +30,30 @@ extern "C" {
 //! view they are drawn with and the player they apply to.
 typedef struct djv_models djv_models;
 
-TL_TIMELINE_API djv_models* djv_models_create(tl_engine*, const char* settingsPath);
-TL_TIMELINE_API void djv_models_destroy(djv_models*);
+DJV_C_API djv_models* djv_models_create(tl_engine*, const char* settingsPath);
+DJV_C_API void djv_models_destroy(djv_models*);
 
 //! Write the settings.
-TL_TIMELINE_API void djv_models_save(djv_models*);
+DJV_C_API void djv_models_save(djv_models*);
 
 //! The view the color and viewport options are drawn with; NULL unbinds.
-TL_TIMELINE_API void djv_models_bind_view(djv_models*, tl_view*);
+DJV_C_API void djv_models_bind_view(djv_models*, tl_view*);
 
 //! The player the audio applies to and the file the color is resolved
 //! for; NULL for none.
-TL_TIMELINE_API void djv_models_set_player(djv_models*, tl_player*);
+DJV_C_API void djv_models_set_player(djv_models*, tl_player*);
 
 //! Moves on every change to any model, from any side.
-TL_TIMELINE_API uint64_t djv_models_get_generation(djv_models*);
+DJV_C_API uint64_t djv_models_get_generation(djv_models*);
 
 //! \name OpenColorIO
 ///@{
 
 //! Whether OpenColorIO is built in: the rest of this section does
 //! nothing without it.
-TL_TIMELINE_API int djv_ocio_is_available(void);
-TL_TIMELINE_API int djv_ocio_is_enabled(djv_models*);
-TL_TIMELINE_API void djv_ocio_set_enabled(djv_models*, int);
+DJV_C_API int djv_ocio_is_available(void);
+DJV_C_API int djv_ocio_is_enabled(djv_models*);
+DJV_C_API void djv_ocio_set_enabled(djv_models*, int);
 
 //! Where the configuration comes from.
 typedef enum
@@ -58,72 +62,72 @@ typedef enum
     DJV_OCIO_CONFIG_ENV,
     DJV_OCIO_CONFIG_FILE
 } djv_ocio_config;
-TL_TIMELINE_API djv_ocio_config djv_ocio_get_config(djv_models*);
-TL_TIMELINE_API void djv_ocio_set_config(djv_models*, djv_ocio_config);
-TL_TIMELINE_API const char* djv_ocio_get_file_name(djv_models*);
-TL_TIMELINE_API void djv_ocio_set_file_name(djv_models*, const char*);
+DJV_C_API djv_ocio_config djv_ocio_get_config(djv_models*);
+DJV_C_API void djv_ocio_set_config(djv_models*, djv_ocio_config);
+DJV_C_API const char* djv_ocio_get_file_name(djv_models*);
+DJV_C_API void djv_ocio_set_file_name(djv_models*, const char*);
 //! The configuration's own name.
-TL_TIMELINE_API const char* djv_ocio_get_name(djv_models*);
+DJV_C_API const char* djv_ocio_get_name(djv_models*);
 
 //! The choices the configuration offers, and which is chosen.
-TL_TIMELINE_API size_t djv_ocio_get_input_count(djv_models*);
-TL_TIMELINE_API const char* djv_ocio_get_input(djv_models*, size_t);
-TL_TIMELINE_API size_t djv_ocio_get_input_index(djv_models*);
-TL_TIMELINE_API void djv_ocio_set_input_index(djv_models*, size_t);
-TL_TIMELINE_API size_t djv_ocio_get_display_count(djv_models*);
-TL_TIMELINE_API const char* djv_ocio_get_display(djv_models*, size_t);
-TL_TIMELINE_API size_t djv_ocio_get_display_index(djv_models*);
-TL_TIMELINE_API void djv_ocio_set_display_index(djv_models*, size_t);
-TL_TIMELINE_API size_t djv_ocio_get_view_count(djv_models*);
-TL_TIMELINE_API const char* djv_ocio_get_view(djv_models*, size_t);
-TL_TIMELINE_API size_t djv_ocio_get_view_index(djv_models*);
-TL_TIMELINE_API void djv_ocio_set_view_index(djv_models*, size_t);
-TL_TIMELINE_API size_t djv_ocio_get_look_count(djv_models*);
-TL_TIMELINE_API const char* djv_ocio_get_look(djv_models*, size_t);
-TL_TIMELINE_API size_t djv_ocio_get_look_index(djv_models*);
-TL_TIMELINE_API void djv_ocio_set_look_index(djv_models*, size_t);
+DJV_C_API size_t djv_ocio_get_input_count(djv_models*);
+DJV_C_API const char* djv_ocio_get_input(djv_models*, size_t);
+DJV_C_API size_t djv_ocio_get_input_index(djv_models*);
+DJV_C_API void djv_ocio_set_input_index(djv_models*, size_t);
+DJV_C_API size_t djv_ocio_get_display_count(djv_models*);
+DJV_C_API const char* djv_ocio_get_display(djv_models*, size_t);
+DJV_C_API size_t djv_ocio_get_display_index(djv_models*);
+DJV_C_API void djv_ocio_set_display_index(djv_models*, size_t);
+DJV_C_API size_t djv_ocio_get_view_count(djv_models*);
+DJV_C_API const char* djv_ocio_get_view(djv_models*, size_t);
+DJV_C_API size_t djv_ocio_get_view_index(djv_models*);
+DJV_C_API void djv_ocio_set_view_index(djv_models*, size_t);
+DJV_C_API size_t djv_ocio_get_look_count(djv_models*);
+DJV_C_API const char* djv_ocio_get_look(djv_models*, size_t);
+DJV_C_API size_t djv_ocio_get_look_index(djv_models*);
+DJV_C_API void djv_ocio_set_look_index(djv_models*, size_t);
 
 //! The input color space resolved for the player's file and where it
 //! came from, for display: "sRGB (extension)"; empty when nothing
 //! resolves and the chosen input is used.
-TL_TIMELINE_API const char* djv_color_get_resolved_input(djv_models*);
+DJV_C_API const char* djv_color_get_resolved_input(djv_models*);
 
 ///@}
 
 //! \name LUT
 ///@{
 
-TL_TIMELINE_API int djv_lut_is_enabled(djv_models*);
-TL_TIMELINE_API void djv_lut_set_enabled(djv_models*, int);
-TL_TIMELINE_API const char* djv_lut_get_file_name(djv_models*);
-TL_TIMELINE_API void djv_lut_set_file_name(djv_models*, const char*);
+DJV_C_API int djv_lut_is_enabled(djv_models*);
+DJV_C_API void djv_lut_set_enabled(djv_models*, int);
+DJV_C_API const char* djv_lut_get_file_name(djv_models*);
+DJV_C_API void djv_lut_set_file_name(djv_models*, const char*);
 typedef enum
 {
     DJV_LUT_ORDER_POST_CONFIG,
     DJV_LUT_ORDER_PRE_CONFIG
 } djv_lut_order;
-TL_TIMELINE_API djv_lut_order djv_lut_get_order(djv_models*);
-TL_TIMELINE_API void djv_lut_set_order(djv_models*, djv_lut_order);
+DJV_C_API djv_lut_order djv_lut_get_order(djv_models*);
+DJV_C_API void djv_lut_set_order(djv_models*, djv_lut_order);
 typedef enum
 {
     DJV_LUT_DIRECTION_FORWARD,
     DJV_LUT_DIRECTION_INVERSE
 } djv_lut_direction;
-TL_TIMELINE_API djv_lut_direction djv_lut_get_direction(djv_models*);
-TL_TIMELINE_API void djv_lut_set_direction(djv_models*, djv_lut_direction);
+DJV_C_API djv_lut_direction djv_lut_get_direction(djv_models*);
+DJV_C_API void djv_lut_set_direction(djv_models*, djv_lut_direction);
 
 ///@}
 
 //! \name Audio
 ///@{
 
-TL_TIMELINE_API float djv_audio_get_volume(djv_models*);
-TL_TIMELINE_API void djv_audio_set_volume(djv_models*, float);
-TL_TIMELINE_API int djv_audio_is_muted(djv_models*);
-TL_TIMELINE_API void djv_audio_set_muted(djv_models*, int);
+DJV_C_API float djv_audio_get_volume(djv_models*);
+DJV_C_API void djv_audio_set_volume(djv_models*, float);
+DJV_C_API int djv_audio_is_muted(djv_models*);
+DJV_C_API void djv_audio_set_muted(djv_models*, int);
 //! Seconds the audio is moved by against the video.
-TL_TIMELINE_API double djv_audio_get_sync_offset(djv_models*);
-TL_TIMELINE_API void djv_audio_set_sync_offset(djv_models*, double);
+DJV_C_API double djv_audio_get_sync_offset(djv_models*);
+DJV_C_API void djv_audio_set_sync_offset(djv_models*, double);
 
 ///@}
 
@@ -160,15 +164,15 @@ typedef struct djv_display_options
     int softClipEnabled;
     float softClip;
 } djv_display_options;
-TL_TIMELINE_API djv_display_options djv_viewport_get_display(djv_models*);
-TL_TIMELINE_API void djv_viewport_set_display(djv_models*, djv_display_options);
+DJV_C_API djv_display_options djv_viewport_get_display(djv_models*);
+DJV_C_API void djv_viewport_set_display(djv_models*, djv_display_options);
 
 //! Whether any color adjustment is on (the color values, levels,
 //! exposure, soft clip), and putting them back to their defaults: the
 //! color values, exposure and soft clip with color, the levels with
 //! levels. The channels, mirroring and negative are left alone.
-TL_TIMELINE_API int djv_viewport_has_color_adjustments(djv_models*);
-TL_TIMELINE_API void djv_viewport_reset_color_adjustments(djv_models*, int color, int levels);
+DJV_C_API int djv_viewport_has_color_adjustments(djv_models*);
+DJV_C_API void djv_viewport_reset_color_adjustments(djv_models*, int color, int levels);
 
 //! How the image is sampled and blended.
 typedef struct djv_image_options
@@ -181,8 +185,8 @@ typedef struct djv_image_options
     int minify;
     int magnify;
 } djv_image_options;
-TL_TIMELINE_API djv_image_options djv_viewport_get_image(djv_models*);
-TL_TIMELINE_API void djv_viewport_set_image(djv_models*, djv_image_options);
+DJV_C_API djv_image_options djv_viewport_get_image(djv_models*);
+DJV_C_API void djv_viewport_set_image(djv_models*, djv_image_options);
 
 //! What is behind the picture.
 typedef struct djv_background_options
@@ -200,8 +204,8 @@ typedef struct djv_background_options
     int outlineWidth;
     float outlineColor[4];
 } djv_background_options;
-TL_TIMELINE_API djv_background_options djv_viewport_get_background(djv_models*);
-TL_TIMELINE_API void djv_viewport_set_background(djv_models*, djv_background_options);
+DJV_C_API djv_background_options djv_viewport_get_background(djv_models*);
+DJV_C_API void djv_viewport_set_background(djv_models*, djv_background_options);
 
 //! What is drawn over the picture: the grid, the center marker, the
 //! indicator for a missing frame, the clipping warning.
@@ -242,15 +246,15 @@ typedef struct djv_foreground_options
     float safeAreasAction;
     float safeAreasTitle;
 } djv_foreground_options;
-TL_TIMELINE_API djv_foreground_options djv_viewport_get_foreground(djv_models*);
-TL_TIMELINE_API void djv_viewport_set_foreground(djv_models*, djv_foreground_options);
+DJV_C_API djv_foreground_options djv_viewport_get_foreground(djv_models*);
+DJV_C_API void djv_viewport_set_foreground(djv_models*, djv_foreground_options);
 
 //! The aspect ratios offered, as labels, and which is chosen; the first
 //! is the picture's own.
-TL_TIMELINE_API size_t djv_viewport_get_aspect_ratio_count(djv_models*);
-TL_TIMELINE_API const char* djv_viewport_get_aspect_ratio(djv_models*, size_t);
-TL_TIMELINE_API size_t djv_viewport_get_aspect_ratio_index(djv_models*);
-TL_TIMELINE_API void djv_viewport_set_aspect_ratio_index(djv_models*, size_t);
+DJV_C_API size_t djv_viewport_get_aspect_ratio_count(djv_models*);
+DJV_C_API const char* djv_viewport_get_aspect_ratio(djv_models*, size_t);
+DJV_C_API size_t djv_viewport_get_aspect_ratio_index(djv_models*);
+DJV_C_API void djv_viewport_set_aspect_ratio_index(djv_models*, size_t);
 
 ///@}
 
@@ -273,9 +277,9 @@ typedef enum
 
 //! The items in the order they are listed and stacked, and each one's
 //! name.
-TL_TIMELINE_API size_t djv_hud_get_item_count(void);
-TL_TIMELINE_API djv_hud_item djv_hud_get_item(size_t);
-TL_TIMELINE_API const char* djv_hud_get_item_name(djv_hud_item);
+DJV_C_API size_t djv_hud_get_item_count(void);
+DJV_C_API djv_hud_item djv_hud_get_item(size_t);
+DJV_C_API const char* djv_hud_get_item_name(djv_hud_item);
 
 //! The corners of the picture an item is shown in, or none.
 typedef enum
@@ -288,15 +292,15 @@ typedef enum
 } djv_hud_pos;
 
 //! Whether the HUD is shown, and the corner each item is in.
-TL_TIMELINE_API int djv_hud_is_enabled(djv_models*);
-TL_TIMELINE_API void djv_hud_set_enabled(djv_models*, int);
-TL_TIMELINE_API djv_hud_pos djv_hud_get_pos(djv_models*, djv_hud_item);
-TL_TIMELINE_API void djv_hud_set_pos(djv_models*, djv_hud_item, djv_hud_pos);
+DJV_C_API int djv_hud_is_enabled(djv_models*);
+DJV_C_API void djv_hud_set_enabled(djv_models*, int);
+DJV_C_API djv_hud_pos djv_hud_get_pos(djv_models*, djv_hud_item);
+DJV_C_API void djv_hud_set_pos(djv_models*, djv_hud_item, djv_hud_pos);
 
 //! An item's line about the player now, as the desktop shows it; empty
 //! when it has nothing to say. The speed played, the frames dropped and
 //! the view's zoom are the caller's. Valid until the next call.
-TL_TIMELINE_API const char* djv_hud_get_text(
+DJV_C_API const char* djv_hud_get_text(
     djv_models*,
     djv_hud_item,
     double fps,
@@ -319,9 +323,9 @@ typedef enum
 //! time of the player's in them: seconds from the start of its timeline,
 //! shown as the timeline counts, from its own start time. Valid until
 //! the next call.
-TL_TIMELINE_API djv_time_units djv_time_get_units(djv_models*);
-TL_TIMELINE_API void djv_time_set_units(djv_models*, djv_time_units);
-TL_TIMELINE_API const char* djv_time_get_label(djv_models*, double seconds);
+DJV_C_API djv_time_units djv_time_get_units(djv_models*);
+DJV_C_API void djv_time_set_units(djv_models*, djv_time_units);
+DJV_C_API const char* djv_time_get_label(djv_models*, double seconds);
 
 ///@}
 
@@ -331,10 +335,10 @@ TL_TIMELINE_API const char* djv_time_get_label(djv_models*, double seconds);
 //! The video cache of the player, in gigabytes, as DJV's settings keep
 //! it; set, it is held to the most the machine can take. What a machine
 //! of this size starts with, and that most.
-TL_TIMELINE_API float djv_cache_get_video_gb(djv_models*);
-TL_TIMELINE_API void djv_cache_set_video_gb(djv_models*, float);
-TL_TIMELINE_API float djv_cache_get_default_video_gb(void);
-TL_TIMELINE_API float djv_cache_get_max_gb(void);
+DJV_C_API float djv_cache_get_video_gb(djv_models*);
+DJV_C_API void djv_cache_set_video_gb(djv_models*, float);
+DJV_C_API float djv_cache_get_default_video_gb(void);
+DJV_C_API float djv_cache_get_max_gb(void);
 
 ///@}
 
@@ -346,10 +350,10 @@ TL_TIMELINE_API float djv_cache_get_max_gb(void);
 //! value, those matching the search (NULL or empty for all). For a cut,
 //! the media of its first clip. Read when counted; the strings stay
 //! valid until the next count.
-TL_TIMELINE_API size_t djv_info_get_count(djv_models*, const char* search);
-TL_TIMELINE_API const char* djv_info_get_section(djv_models*, size_t);
-TL_TIMELINE_API const char* djv_info_get_name(djv_models*, size_t);
-TL_TIMELINE_API const char* djv_info_get_value(djv_models*, size_t);
+DJV_C_API size_t djv_info_get_count(djv_models*, const char* search);
+DJV_C_API const char* djv_info_get_section(djv_models*, size_t);
+DJV_C_API const char* djv_info_get_name(djv_models*, size_t);
+DJV_C_API const char* djv_info_get_value(djv_models*, size_t);
 
 ///@}
 

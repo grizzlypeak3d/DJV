@@ -22,7 +22,7 @@ project(
     VERSION ${DJV_VERSION_MAJOR}.${DJV_VERSION_MINOR}.${DJV_VERSION_PATCH}
     DESCRIPTION "DJV is an open source application for media playback and review."
     HOMEPAGE_URL "https://github.com/grizzlypeak3d/DJV"
-    LANGUAGES CXX)
+    LANGUAGES CXX C)
 
 # A Python wheel build: scikit-build-core sets SKBUILD. The wheel settings
 # are read before the options below, the way "cmake -C" would read them, so
@@ -160,6 +160,9 @@ if(IOS)
     add_library(tlRender::tlIO ALIAS tlIO)
     add_library(tlRender::tlTimeline ALIAS tlTimeline)
     add_library(tlRender::tlUI ALIAS tlUI)
+    if(TARGET tlC)
+        add_library(tlRender::tlC ALIAS tlC)
+    endif()
     add_subdirectory(lib/djv/Resource)
     add_subdirectory(lib/djv/Models)
     add_subdirectory(lib/djv/C)
@@ -243,6 +246,9 @@ else()
     add_library(tlRender::tlIO ALIAS tlIO)
     add_library(tlRender::tlTimeline ALIAS tlTimeline)
     add_library(tlRender::tlUI ALIAS tlUI)
+    if(TARGET tlC)
+        add_library(tlRender::tlC ALIAS tlC)
+    endif()
 endif()
 
 #-------------------------------------------------------------------------------
