@@ -6,6 +6,7 @@
 #include <djv/UI/Export.h>
 
 #include <djv/Models/Stroke.h>
+#include <djv/Models/Wipe.h>
 
 #include <tlRender/UI/Viewport.h>
 
@@ -180,6 +181,12 @@ namespace djv
             //! The cursor follows the drawing mode: a crosshair while the
             //! pointer is inside and drawing is enabled.
             void _cursorUpdate();
+
+            //! The wipe's line and handles, in window coordinates, while
+            //! wiping; and dragging them.
+            std::optional<models::WipeWidget> _wipeWidget();
+            models::WipeHandle _wipeHandle(const ftk::V2I& windowPos);
+            void _wipeMove(const ftk::V2I& windowPos);
 
             void _toastUpdate();
             void _compareUpdate();

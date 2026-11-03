@@ -329,6 +329,82 @@ DJV_C_API const char* djv_time_get_label(djv_models*, double seconds);
 
 ///@}
 
+//! \name Frame Shuttle
+///@{
+
+//! Where the frame shuttle is, in seconds from the start of the player's
+//! time, a drag of so many of the view's pixels sideways from where it
+//! began at a time: as DJV's viewport steps through the frames with the
+//! mouse, with its frame shuttle scale. The time it began at without a
+//! player.
+DJV_C_API double djv_shuttle_get_time(djv_models*, double start, float dx);
+
+///@}
+
+//! \name Comparing
+//! Comparing the player's file, "A", with one other, "B", as DJV's
+//! Compare menu does: the mode, the wipe, the overlay and the time are
+//! the files model's, with its settings. A new player compares with
+//! nothing.
+///@{
+
+//! The modes, as tlRender's compare options have them.
+typedef enum
+{
+    DJV_COMPARE_NONE,
+    DJV_COMPARE_B,
+    DJV_COMPARE_WIPE,
+    DJV_COMPARE_BUTTERFLY,
+    DJV_COMPARE_OVERLAY,
+    DJV_COMPARE_DIFFERENCE,
+    DJV_COMPARE_HORIZONTAL,
+    DJV_COMPARE_VERTICAL,
+    DJV_COMPARE_TILE,
+    DJV_COMPARE_COUNT
+} djv_compare;
+
+//! The modes' labels, as the desktop's Compare menu shows them.
+DJV_C_API const char* djv_compare_get_label(djv_compare);
+
+//! The file compared with, or NULL or an empty path for none, which
+//! also turns the comparison off. Zero if the file cannot be opened,
+//! with the reason in the engine's error.
+DJV_C_API int djv_compare_set_file(djv_models*, const char* path);
+DJV_C_API int djv_compare_has_file(djv_models*);
+
+DJV_C_API djv_compare djv_compare_get_mode(djv_models*);
+DJV_C_API void djv_compare_set_mode(djv_models*, djv_compare);
+
+//! The wipe's center, as a fraction of the picture, and its rotation in
+//! degrees.
+DJV_C_API void djv_compare_get_wipe(djv_models*, float* x, float* y, float* rotation);
+DJV_C_API void djv_compare_set_wipe_rotation(djv_models*, float);
+
+//! Dragging the wipe with a finger, in the view's pixels, as the desktop
+//! drags it with the mouse: its rotation handle turns it, and its center
+//! moves it from where it was taken. The models draw its handles over
+//! the picture while wiping. Zero from the beginning when not wiping, or
+//! not on a handle, which leaves the drag to something else.
+DJV_C_API int djv_compare_wipe_begin(djv_models*, float x, float y);
+DJV_C_API void djv_compare_wipe_move(djv_models*, float x, float y);
+DJV_C_API void djv_compare_wipe_end(djv_models*);
+
+//! How much of B the overlay shows, from zero to one.
+DJV_C_API float djv_compare_get_overlay(djv_models*);
+DJV_C_API void djv_compare_set_overlay(djv_models*, float);
+
+//! What the difference is multiplied by before it is shown.
+DJV_C_API float djv_compare_get_difference_gain(djv_models*);
+DJV_C_API void djv_compare_set_difference_gain(djv_models*, float);
+
+//! How B's time follows A's: from each one's start (relative), or the
+//! same time code (absolute); labeled as the desktop labels them.
+DJV_C_API int djv_compare_is_absolute_time(djv_models*);
+DJV_C_API void djv_compare_set_absolute_time(djv_models*, int);
+DJV_C_API const char* djv_compare_get_time_label(int absolute);
+
+///@}
+
 //! \name Drawing
 //! Drawing on the picture, as the desktop's Review tool does: the tool
 //! and its color and size, kept in the settings; the strokes, kept in
@@ -377,7 +453,9 @@ DJV_C_API const char* djv_review_get_error(djv_models*);
 //! Drawing with a finger or a pen, at a point of the view in its pixels:
 //! begun on the picture of the player's frame (one when it began), and
 //! kept when it ends. The eraser removes the strokes it touches. A pen
-//! gives its pressure, zero to one.
+//! gives its pressure, zero to one. A cancelled stroke is not kept, and
+//! what a cancelled eraser took is put back: a second finger landing
+//! makes the first a pinch.
 DJV_C_API int djv_draw_begin(djv_models*, float x, float y, int pen, float pressure);
 DJV_C_API void djv_draw_move(djv_models*, float x, float y, float pressure);
 DJV_C_API void djv_draw_end(djv_models*);

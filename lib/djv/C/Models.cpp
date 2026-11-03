@@ -7,15 +7,19 @@
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/DrawModel.h>
+#include <djv/Models/FilesModel.h>
 #include <djv/Models/HUD.h>
 #include <djv/Models/Info.h>
 #include <djv/Models/OCIOModel.h>
 #include <djv/Models/SettingsModel.h>
+#include <djv/Models/Shuttle.h>
 #include <djv/Models/Stroke.h>
+#include <djv/Models/Wipe.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <djv/UI/StrokeDraw.h>
+#include <djv/UI/WipeDraw.h>
 
 #include <tlRender/C/EngineCpp.h>
 
@@ -42,6 +46,7 @@ struct djv_models
     std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
     std::shared_ptr<models::DrawModel> drawModel;
     std::shared_ptr<models::AnnotationsModel> annotationsModel;
+    std::shared_ptr<models::FilesModel> filesModel;
 
     // The review open, and the file in it the player shows.
     models::Review review;
@@ -53,12 +58,21 @@ struct djv_models
     bool drawing = false;
     bool erasing = false;
     bool erasingPen = false;
+    // How many undo steps the eraser has made since it began, to take back
+    // if the stroke is cancelled.
+    size_t eraseSteps = 0;
     models::ReviewStroke stroke;
     OTIO_NS::RationalTime strokeTime;
     std::vector<double> frames;
 
     tl_view* view = nullptr;
     tl_player* player = nullptr;
+    bool compareFile = false;
+
+    // The part of the wipe being dragged, and where it was taken from
+    // the center.
+    models::WipeHandle wipeDrag = models::WipeHandle::None;
+    ftk::V2F wipeGrab;
     uint64_t generation = 0;
 
     // What the strings handed out point into.
@@ -87,6 +101,8 @@ struct djv_models
     std::shared_ptr<ftk::Observer<models::DrawTool> > drawToolObserver;
     std::shared_ptr<ftk::Observer<ftk::Color4F> > drawColorObserver;
     std::shared_ptr<ftk::Observer<float> > drawSizeObserver;
+    std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+    std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
 
     // Where the picture is: its box and image, and the view's pixels to
     // its render space.
@@ -130,11 +146,16 @@ struct djv_models
         // A fingertip's reach for a finger, a pointer's for a pen, as the
         // desktop's viewport has them.
         const float reach = (erasingPen ? 8.F : 22.F) * picture.displayScale;
+        const size_t before = annotationsModel->getStrokes(fileId, *time).size();
         annotationsModel->eraseStrokes(
             fileId,
             *time,
             m.toImage(render),
             models::eraserRadius(drawModel->getSize(), reach, m.scale() * picture.zoom));
+        if (annotationsModel->getStrokes(fileId, *time).size() < before)
+        {
+            ++eraseSteps;
+        }
     }
 
     // The drawings of the frame shown, and the stroke being drawn, over
@@ -143,7 +164,7 @@ struct djv_models
     {
         const auto time = currentTime();
         const models::ImageMapping m = mapping();
-        if (!time.has_value() || fileId.empty() || !m.isValid())
+        if (!time.has_value() || fileId.empty() || !m.isValid() || !isAShown())
             return;
         const auto picture = tl::c::getViewPicture(view);
         const auto toScreen = [&m, &picture](const ftk::V2F& point)
@@ -161,6 +182,60 @@ struct djv_models
         {
             ui::drawStroke(render, fontSystem, stroke, toScreen, scale);
         }
+    }
+
+    // The wipe's handles, in the view's pixels, while wiping.
+    std::optional<models::WipeWidget> wipeWidget() const
+    {
+        std::optional<models::WipeWidget> out;
+        const auto& options = filesModel->getCompareOptions();
+        if (view && compareFile && tl::Compare::Wipe == options.compare)
+        {
+            const auto picture = tl::c::getViewPicture(view);
+            if (picture.zoom > 0.F)
+            {
+                out = models::getWipeWidget(
+                    options,
+                    picture.box,
+                    picture.pos,
+                    picture.zoom,
+                    ui::wipeRotateDistance * picture.displayScale);
+            }
+        }
+        return out;
+    }
+
+    void drawWipe(const std::shared_ptr<ftk::IRender>& render)
+    {
+        if (const auto widget = wipeWidget())
+        {
+            ui::drawWipe(render, *widget, tl::c::getViewPicture(view).displayScale, wipeDrag);
+        }
+    }
+
+    // Whether A is drawn: not when B is shown in its place. The
+    // drawings are A's.
+    bool isAShown() const
+    {
+        return tl::isShown(filesModel->getCompareOptions().compare, 0);
+    }
+
+    // The files the color is resolved for: A, then B.
+    void activeFilesUpdate()
+    {
+        std::vector<std::pair<std::string, ftk::ImageTags> > files;
+        if (auto timeline = tl::c::getTimeline(player))
+        {
+            files.push_back({ timeline->getPath().get(), timeline->getIOInfo().tags });
+        }
+        if (auto p = tl::c::getPlayer(player))
+        {
+            for (const auto& timeline : p->getCompare())
+            {
+                files.push_back({ timeline->getPath().get(), timeline->getIOInfo().tags });
+            }
+        }
+        colorModel->setActiveFiles(files);
     }
 
     void framesUpdate()
@@ -200,6 +275,7 @@ struct djv_models
         tl::c::setDisplayOptions(view, viewportModel->getDisplayOptions());
         tl::c::setBackgroundOptions(view, viewportModel->getBackgroundOptions());
         tl::c::setForegroundOptions(view, viewportModel->getForegroundOptions());
+        tl::c::setCompareOptions(view, filesModel->getCompareOptions());
     }
 
     void applyToPlayer()
@@ -210,6 +286,7 @@ struct djv_models
             p->setMute(audioModel->isMuted());
             p->setAudioOffset(audioModel->getSyncOffset());
             p->setCacheOptions(settingsModel->getCache());
+            p->setCompareTime(filesModel->getCompareTime());
         }
     }
 };
@@ -232,6 +309,7 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->timeUnitsModel = models::TimeUnitsModel::create(context, out->settings);
         out->drawModel = models::DrawModel::create(out->settings);
         out->annotationsModel = models::AnnotationsModel::create();
+        out->filesModel = models::FilesModel::create(out->settings);
     }
     catch (const std::exception&)
     {
@@ -368,6 +446,30 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
     out->drawSizeObserver = ftk::Observer<float>::create(
         out->drawModel->observeSize(),
         [out](float) { ++out->generation; });
+    out->compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
+        out->filesModel->observeCompareOptions(),
+        [out](const tl::CompareOptions& value)
+        {
+            if (out->view)
+            {
+                tl::c::setCompareOptions(out->view, value);
+            }
+            if (!out->isAShown())
+            {
+                djv_draw_cancel(out);
+            }
+            ++out->generation;
+        });
+    out->compareTimeObserver = ftk::Observer<tl::CompareTime>::create(
+        out->filesModel->observeCompareTime(),
+        [out](tl::CompareTime value)
+        {
+            if (auto p = tl::c::getPlayer(out->player))
+            {
+                p->setCompareTime(value);
+            }
+            ++out->generation;
+        });
     out->cacheObserver = ftk::Observer<tl::PlayerCacheOptions>::create(
         out->settingsModel->observeCache(),
         [out](const tl::PlayerCacheOptions& value)
@@ -394,6 +496,8 @@ void djv_models_destroy(djv_models* models)
     models->drawToolObserver.reset();
     models->drawColorObserver.reset();
     models->drawSizeObserver.reset();
+    models->compareOptionsObserver.reset();
+    models->compareTimeObserver.reset();
     models->cacheObserver.reset();
     models->foregroundOptionsObserver.reset();
     models->backgroundOptionsObserver.reset();
@@ -420,6 +524,7 @@ void djv_models_save(djv_models* models)
     models->viewportModel->save();
     models->settingsModel->save();
     models->timeUnitsModel->save();
+    models->filesModel->save();
     models->settings->save();
 }
 
@@ -436,6 +541,7 @@ void djv_models_bind_view(djv_models* models, tl_view* view)
             [models](const std::shared_ptr<ftk::IRender>& render)
             {
                 models->drawAnnotations(render);
+                models->drawWipe(render);
             });
     }
 }
@@ -445,12 +551,13 @@ void djv_models_set_player(djv_models* models, tl_player* player)
     if (!models)
         return;
     models->player = player;
-    std::vector<std::pair<std::string, ftk::ImageTags> > files;
-    if (auto timeline = tl::c::getTimeline(player))
-    {
-        files.push_back({ timeline->getPath().get(), timeline->getIOInfo().tags });
-    }
-    models->colorModel->setActiveFiles(files);
+    // A new player is compared with nothing.
+    models->compareFile = false;
+    tl_player_set_compare(player, nullptr);
+    auto compare = models->filesModel->getCompareOptions();
+    compare.compare = tl::Compare::None;
+    models->filesModel->setCompareOptions(compare);
+    models->activeFilesUpdate();
     models->applyToPlayer();
     djv_draw_cancel(models);
     models->framesUpdate();
@@ -1182,6 +1289,182 @@ const char* djv_time_get_label(djv_models* models, double seconds)
     return models->timeLabel.c_str();
 }
 
+// Comparing.
+
+static_assert(DJV_COMPARE_COUNT == static_cast<int>(tl::Compare::Count));
+
+const char* djv_compare_get_label(djv_compare value)
+{
+    static const std::vector<std::string> labels = tl::getCompareLabels();
+    const size_t i = static_cast<size_t>(value);
+    return i < labels.size() ? labels[i].c_str() : "";
+}
+
+int djv_compare_set_file(djv_models* models, const char* path)
+{
+    if (!models || !models->player)
+        return 0;
+    const bool file = path && path[0];
+    if (!tl_player_set_compare(models->player, path))
+        return 0;
+    models->compareFile = file;
+    if (!file)
+    {
+        // Nothing to compare with, as the files model does with one file.
+        auto options = models->filesModel->getCompareOptions();
+        options.compare = tl::Compare::None;
+        models->filesModel->setCompareOptions(options);
+    }
+    models->activeFilesUpdate();
+    models->applyToPlayer();
+    tl::c::setNeedsDraw(models->view);
+    ++models->generation;
+    return 1;
+}
+
+int djv_compare_has_file(djv_models* models)
+{
+    return models && models->compareFile ? 1 : 0;
+}
+
+djv_compare djv_compare_get_mode(djv_models* models)
+{
+    return models ?
+        static_cast<djv_compare>(models->filesModel->getCompareOptions().compare) :
+        DJV_COMPARE_NONE;
+}
+
+void djv_compare_set_mode(djv_models* models, djv_compare value)
+{
+    if (!models || value < DJV_COMPARE_NONE || value >= DJV_COMPARE_COUNT)
+        return;
+    auto options = models->filesModel->getCompareOptions();
+    options.compare = models->compareFile ?
+        static_cast<tl::Compare>(value) :
+        tl::Compare::None;
+    models->filesModel->setCompareOptions(options);
+}
+
+void djv_compare_get_wipe(djv_models* models, float* x, float* y, float* rotation)
+{
+    if (!models)
+        return;
+    const auto& options = models->filesModel->getCompareOptions();
+    if (x) *x = options.wipeCenter.x;
+    if (y) *y = options.wipeCenter.y;
+    if (rotation) *rotation = options.wipeRotation;
+}
+
+void djv_compare_set_wipe_rotation(djv_models* models, float value)
+{
+    if (!models)
+        return;
+    auto options = models->filesModel->getCompareOptions();
+    options.wipeRotation = value;
+    models->filesModel->setCompareOptions(options);
+}
+
+int djv_compare_wipe_begin(djv_models* models, float x, float y)
+{
+    if (!models)
+        return 0;
+    const auto widget = models->wipeWidget();
+    if (!widget.has_value())
+        return 0;
+    const ftk::V2F pos(x, y);
+    const auto picture = tl::c::getViewPicture(models->view);
+    models->wipeDrag = models::getWipeHandle(
+        *widget, pos, ui::wipeTouchReach * picture.displayScale);
+    if (models::WipeHandle::None == models->wipeDrag)
+        return 0;
+    models->wipeGrab = models::WipeHandle::Center == models->wipeDrag ?
+        ftk::V2F(pos.x - widget->center.x, pos.y - widget->center.y) :
+        ftk::V2F();
+    djv_compare_wipe_move(models, x, y);
+    tl::c::setNeedsDraw(models->view);
+    return 1;
+}
+
+void djv_compare_wipe_move(djv_models* models, float x, float y)
+{
+    if (!models || models::WipeHandle::None == models->wipeDrag)
+        return;
+    const auto widget = models->wipeWidget();
+    if (!widget.has_value())
+        return;
+    const auto picture = tl::c::getViewPicture(models->view);
+    auto options = models->filesModel->getCompareOptions();
+    if (models::WipeHandle::Rotate == models->wipeDrag)
+    {
+        options.wipeRotation = models::getWipeRotation(widget->center, ftk::V2F(x, y));
+    }
+    else
+    {
+        options.wipeCenter = models::getWipeCenter(
+            ftk::V2F(x - models->wipeGrab.x, y - models->wipeGrab.y),
+            picture.box,
+            picture.pos,
+            picture.zoom);
+    }
+    models->filesModel->setCompareOptions(options);
+}
+
+void djv_compare_wipe_end(djv_models* models)
+{
+    if (!models)
+        return;
+    models->wipeDrag = models::WipeHandle::None;
+    tl::c::setNeedsDraw(models->view);
+}
+
+float djv_compare_get_overlay(djv_models* models)
+{
+    return models ? models->filesModel->getCompareOptions().overlay : 0.F;
+}
+
+void djv_compare_set_overlay(djv_models* models, float value)
+{
+    if (!models)
+        return;
+    auto options = models->filesModel->getCompareOptions();
+    options.overlay = std::clamp(value, 0.F, 1.F);
+    models->filesModel->setCompareOptions(options);
+}
+
+float djv_compare_get_difference_gain(djv_models* models)
+{
+    return models ? models->filesModel->getCompareOptions().differenceGain : 1.F;
+}
+
+void djv_compare_set_difference_gain(djv_models* models, float value)
+{
+    if (!models)
+        return;
+    auto options = models->filesModel->getCompareOptions();
+    options.differenceGain = std::max(value, 0.F);
+    models->filesModel->setCompareOptions(options);
+}
+
+int djv_compare_is_absolute_time(djv_models* models)
+{
+    return models && models->filesModel->getCompareTime() == tl::CompareTime::Absolute ? 1 : 0;
+}
+
+void djv_compare_set_absolute_time(djv_models* models, int value)
+{
+    if (!models)
+        return;
+    models->filesModel->setCompareTime(
+        value ? tl::CompareTime::Absolute : tl::CompareTime::Relative);
+}
+
+const char* djv_compare_get_time_label(int absolute)
+{
+    static const std::vector<std::string> labels = models::getCompareTimeLabels();
+    const size_t i = absolute ? 1 : 0;
+    return i < labels.size() ? labels[i].c_str() : "";
+}
+
 // Drawing.
 
 djv_draw_tool djv_draw_get_tool(djv_models* models)
@@ -1344,7 +1627,7 @@ const char* djv_review_get_error(djv_models* models)
 
 int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure)
 {
-    if (!models || models->fileId.empty())
+    if (!models || models->fileId.empty() || !models->isAShown())
         return 0;
     djv_draw_cancel(models);
     const auto time = models->currentTime();
@@ -1358,6 +1641,7 @@ int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure
     case models::DrawTool::Eraser:
         models->erasing = true;
         models->erasingPen = pen != 0;
+        models->eraseSteps = 0;
         models->erase(render);
         return 1;
     case models::DrawTool::Text:
@@ -1416,6 +1700,8 @@ void djv_draw_end(djv_models* models)
     {
         models->annotationsModel->addStroke(models->fileId, models->strokeTime, models->stroke);
     }
+    // What the eraser took stays taken.
+    models->eraseSteps = 0;
     djv_draw_cancel(models);
 }
 
@@ -1423,8 +1709,17 @@ void djv_draw_cancel(djv_models* models)
 {
     if (!models)
         return;
-    const bool was = models->drawing;
+    const bool was = models->drawing || models->eraseSteps > 0;
     models->drawing = false;
+    if (models->erasing)
+    {
+        // What the eraser took is put back, as the desktop does for the
+        // first finger of a pinch.
+        for (; models->eraseSteps > 0; --models->eraseSteps)
+        {
+            models->annotationsModel->undo();
+        }
+    }
     models->erasing = false;
     models->stroke = models::ReviewStroke();
     if (was)
@@ -1485,4 +1780,21 @@ int djv_draw_has_frame(djv_models* models)
         return 0;
     const auto time = models->currentTime();
     return time.has_value() && !models->annotationsModel->getStrokes(models->fileId, *time).empty() ? 1 : 0;
+}
+
+double djv_shuttle_get_time(djv_models* models, double start, float dx)
+{
+    if (!models)
+        return start;
+    auto player = tl::c::getPlayer(models->player);
+    if (!player)
+        return start;
+    const auto& range = player->getTimeRange();
+    const double rate = range.duration().rate();
+    const auto t = models::getFrameShuttleTime(
+        range.start_time() + OTIO_NS::RationalTime(start * rate, rate).round(),
+        range,
+        dx,
+        models->settingsModel->getMouse().frameShuttleScale);
+    return (t - range.start_time()).rescaled_to(1.0).value();
 }

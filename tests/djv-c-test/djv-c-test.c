@@ -298,6 +298,59 @@ static void drawing(tl_engine* engine, tl_player* player)
     djv_models_destroy(models);
 }
 
+/* Comparing with another file, as the files model has it. */
+static void comparing(djv_models* models, tl_player* player)
+{
+    CHECK(strcmp(djv_compare_get_label(DJV_COMPARE_WIPE), "Wipe") == 0);
+    CHECK(strcmp(djv_compare_get_label(DJV_COMPARE_COUNT), "") == 0);
+    CHECK(strcmp(djv_compare_get_time_label(1), "Timecode") == 0);
+
+    /* Nothing to compare with: no comparison. */
+    CHECK(!djv_compare_has_file(models));
+    djv_compare_set_mode(models, DJV_COMPARE_WIPE);
+    CHECK(djv_compare_get_mode(models) == DJV_COMPARE_NONE);
+
+    CHECK(djv_compare_set_file(models, DJV_SAMPLE_DATA "/BART_2021-02-07.0001.jpg") == 1);
+    CHECK(djv_compare_has_file(models));
+    djv_compare_set_mode(models, DJV_COMPARE_WIPE);
+    CHECK(djv_compare_get_mode(models) == DJV_COMPARE_WIPE);
+
+    /* No view to drag it in. */
+    CHECK(djv_compare_wipe_begin(models, 10.F, 10.F) == 0);
+
+    /* One frame to shuttle through: always at it. */
+    CHECK_NEAR(djv_shuttle_get_time(models, 0.0, 0.F), 0.0, 0.0001);
+    CHECK_NEAR(djv_shuttle_get_time(models, 0.0, 200.F), 0.0, 0.0001);
+    djv_compare_wipe_move(models, 20.F, 20.F);
+    djv_compare_wipe_end(models);
+
+    djv_compare_set_wipe_rotation(models, 45.F);
+    float x = 0.F, y = 0.F, rotation = 0.F;
+    djv_compare_get_wipe(models, &x, &y, &rotation);
+    CHECK_NEAR(rotation, 45.0, 0.0001);
+    djv_compare_set_overlay(models, 2.F);
+    CHECK_NEAR(djv_compare_get_overlay(models), 1.0, 0.0001);
+    djv_compare_set_difference_gain(models, 4.F);
+    CHECK_NEAR(djv_compare_get_difference_gain(models), 4.0, 0.0001);
+    djv_compare_set_absolute_time(models, 1);
+    CHECK(djv_compare_is_absolute_time(models));
+
+    /* A file that cannot be opened leaves the comparison as it was. */
+    CHECK(djv_compare_set_file(models, DJV_SAMPLE_DATA "/nothing-here.mov") == 0);
+    CHECK(djv_compare_has_file(models));
+    CHECK(djv_compare_get_mode(models) == DJV_COMPARE_WIPE);
+
+    /* None, and a new player, turn it off. */
+    CHECK(djv_compare_set_file(models, NULL) == 1);
+    CHECK(!djv_compare_has_file(models));
+    CHECK(djv_compare_get_mode(models) == DJV_COMPARE_NONE);
+    CHECK(djv_compare_set_file(models, DJV_SAMPLE_DATA "/BART_2021-02-07.0001.jpg") == 1);
+    djv_compare_set_mode(models, DJV_COMPARE_B);
+    djv_models_set_player(models, player);
+    CHECK(!djv_compare_has_file(models));
+    CHECK(djv_compare_get_mode(models) == DJV_COMPARE_NONE);
+}
+
 /* What was set is there again when the models are made from the file. */
 static void persistence(tl_engine* engine)
 {
@@ -313,6 +366,10 @@ static void persistence(tl_engine* engine)
     CHECK(djv_viewport_get_foreground(models).frameGuideEnabled);
     CHECK(djv_viewport_get_background(models).outlineWidth == 7);
     CHECK(djv_viewport_get_display(models).negative);
+    float rotation = 0.F;
+    djv_compare_get_wipe(models, NULL, NULL, &rotation);
+    CHECK_NEAR(rotation, 45.0, 0.0001);
+    CHECK(djv_compare_is_absolute_time(models));
     djv_models_destroy(models);
 }
 
@@ -328,7 +385,8 @@ int main(void)
     if (!models)
         return 1;
 
-    /* Nothing open: nothing to say. */
+    /* Nothing open: nothing to say, and the shuttle stays put. */
+    CHECK_NEAR(djv_shuttle_get_time(models, 1.5, 100.F), 1.5, 0.0001);
     CHECK(djv_info_get_count(models, NULL) == 0);
     CHECK(strcmp(djv_hud_get_text(models, DJV_HUD_FILE_NAME, 0.0, 0, 1.0), "(No file)") == 0);
     CHECK(strlen(djv_time_get_label(models, 0.0)) == 0);
@@ -349,6 +407,7 @@ int main(void)
     if (player)
     {
         drawing(engine, player);
+        comparing(models, player);
     }
 
     djv_models_set_player(models, NULL);

@@ -11,8 +11,10 @@
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/HUD.h>
 #include <djv/Models/SettingsModel.h>
+#include <djv/Models/Shuttle.h>
 #include <djv/Models/Stroke.h>
 #include <djv/UI/StrokeDraw.h>
+#include <djv/UI/WipeDraw.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ViewportModel.h>
 
@@ -252,7 +254,8 @@ namespace djv
                 Shuttle,
                 Draw,
                 Erase,
-                Select
+                Select,
+                Wipe
             };
             struct MouseData
             {
@@ -261,6 +264,14 @@ namespace djv
                 tl::Playback shuttlePlayback = tl::Playback::Stop;
             };
             MouseData mouse;
+
+            //! The part of the wipe under the pointer, the part being
+            //! dragged, where it was taken from the center, and the
+            //! options before, for a cancelled press to put back.
+            models::WipeHandle wipeHover = models::WipeHandle::None;
+            models::WipeHandle wipeDrag = models::WipeHandle::None;
+            ftk::V2F wipeGrab;
+            tl::CompareOptions wipePress;
 
             //! The stroke being drawn, in the image pixels of its source,
             //! and the frame it started on: the frame can change under a
@@ -902,6 +913,20 @@ namespace djv
             case Private::MouseMode::Select:
                 _selectMove(event.pos - getGeometry().min, event.keyModifiers);
                 break;
+            case Private::MouseMode::Wipe:
+                _wipeMove(event.pos);
+                break;
+            case Private::MouseMode::None:
+            {
+                // The handle under the pointer, drawn larger.
+                const models::WipeHandle hover = _wipeHandle(event.pos);
+                if (hover != p.wipeHover)
+                {
+                    p.wipeHover = hover;
+                    setDrawUpdate();
+                }
+                break;
+            }
             case Private::MouseMode::Shuttle:
                 if (auto player = getPlayer())
                 {
@@ -910,20 +935,11 @@ namespace djv
                     // disagree and the shuttle has nothing to move from.
                     if (p.mouse.shuttleStart.has_value())
                     {
-                        const OTIO_NS::RationalTime offset = OTIO_NS::RationalTime(
-                            (event.pos.x - _getMousePressPos().x) * .05F * p.frameShuttleScale,
-                            p.mouse.shuttleStart->rate()).round();
-                        const OTIO_NS::TimeRange& timeRange = player->getTimeRange();
-                        OTIO_NS::RationalTime t = *p.mouse.shuttleStart + offset;
-                        if (t < timeRange.start_time())
-                        {
-                            t = timeRange.end_time_exclusive() - (timeRange.start_time() - t);
-                        }
-                        else if (t > timeRange.end_time_exclusive())
-                        {
-                            t = timeRange.start_time() + (t - timeRange.end_time_exclusive());
-                        }
-                        player->seek(t);
+                        player->seek(models::getFrameShuttleTime(
+                            *p.mouse.shuttleStart,
+                            player->getTimeRange(),
+                            event.pos.x - _getMousePressPos().x,
+                            p.frameShuttleScale));
                     }
                 }
                 break;
@@ -941,6 +957,31 @@ namespace djv
             if (!isInputEnabled())
             {
                 return;
+            }
+
+            // The wipe's handles take the plain left button first: they are
+            // where the pointer is, and alt and a drag anywhere still moves
+            // the wipe.
+            if (ftk::MouseButton::Left == event.button &&
+                0 == event.modifiers &&
+                !event.accept)
+            {
+                p.touchInput = event.touch;
+                const models::WipeHandle handle = _wipeHandle(event.pos);
+                if (handle != models::WipeHandle::None)
+                {
+                    event.accept = true;
+                    takeKeyFocus();
+                    const auto widget = _wipeWidget();
+                    p.mouse.mode = Private::MouseMode::Wipe;
+                    p.wipeDrag = handle;
+                    p.wipeGrab = widget.has_value() ?
+                        ftk::V2F(event.pos.x - widget->center.x, event.pos.y - widget->center.y) :
+                        ftk::V2F();
+                    p.wipePress = p.filesModel->getCompareOptions();
+                    setDrawUpdate();
+                    return;
+                }
             }
 
             // A double click, or a double tap, frames the view: the
@@ -1058,6 +1099,16 @@ namespace djv
                     p.annotationsModel->undo();
                 }
             }
+            else if (Private::MouseMode::Wipe == p.mouse.mode)
+            {
+                // The first finger of a pinch was not wiping.
+                if (event.cancel)
+                {
+                    p.filesModel->setCompareOptions(p.wipePress);
+                }
+                p.wipeDrag = models::WipeHandle::None;
+                setDrawUpdate();
+            }
             else if (Private::MouseMode::Shuttle == p.mouse.mode && event.cancel)
             {
                 // Back to the frame, and playing if it was: the first
@@ -1083,6 +1134,12 @@ namespace djv
         void Viewport::mouseLeaveEvent()
         {
             tl::ui::Viewport::mouseLeaveEvent();
+            FTK_P();
+            if (p.wipeHover != models::WipeHandle::None)
+            {
+                p.wipeHover = models::WipeHandle::None;
+                setDrawUpdate();
+            }
             _cursorUpdate();
         }
 
@@ -1768,6 +1825,70 @@ namespace djv
                 stroke);
         }
 
+        std::optional<models::WipeWidget> Viewport::_wipeWidget()
+        {
+            FTK_P();
+            std::optional<models::WipeWidget> out;
+            if (tl::Compare::Wipe == p.compare)
+            {
+                const auto boxes = _sourceBoxes();
+                if (!boxes.empty())
+                {
+                    const ftk::Box2I& g = getGeometry();
+                    const ftk::V2I& viewPos = getViewPos();
+                    out = models::getWipeWidget(
+                        getCompareOptions(),
+                        boxes.front(),
+                        ftk::V2F(g.min.x + viewPos.x, g.min.y + viewPos.y),
+                        static_cast<float>(getZoom()),
+                        wipeRotateDistance * _displayScale());
+                }
+            }
+            return out;
+        }
+
+        models::WipeHandle Viewport::_wipeHandle(const ftk::V2I& windowPos)
+        {
+            FTK_P();
+            models::WipeHandle out = models::WipeHandle::None;
+            if (const auto widget = _wipeWidget())
+            {
+                out = models::getWipeHandle(
+                    *widget,
+                    ftk::V2F(windowPos.x, windowPos.y),
+                    (p.touchInput ? wipeTouchReach : wipePointerReach) * _displayScale());
+            }
+            return out;
+        }
+
+        void Viewport::_wipeMove(const ftk::V2I& windowPos)
+        {
+            FTK_P();
+            const auto widget = _wipeWidget();
+            const auto boxes = _sourceBoxes();
+            if (!widget.has_value() || boxes.empty())
+            {
+                return;
+            }
+            const ftk::V2F pos(windowPos.x, windowPos.y);
+            auto options = p.filesModel->getCompareOptions();
+            if (models::WipeHandle::Rotate == p.wipeDrag)
+            {
+                options.wipeRotation = models::getWipeRotation(widget->center, pos);
+            }
+            else
+            {
+                const ftk::Box2I& g = getGeometry();
+                const ftk::V2I& viewPos = getViewPos();
+                options.wipeCenter = models::getWipeCenter(
+                    ftk::V2F(pos.x - p.wipeGrab.x, pos.y - p.wipeGrab.y),
+                    boxes.front(),
+                    ftk::V2F(g.min.x + viewPos.x, g.min.y + viewPos.y),
+                    static_cast<float>(getZoom()));
+            }
+            p.filesModel->setCompareOptions(options);
+        }
+
         float Viewport::_displayScale()
         {
             if (auto window = getWindow())
@@ -1942,6 +2063,16 @@ namespace djv
             if (p.strokeSource >= 0)
             {
                 _drawStroke(event, p.strokeSource, p.stroke, sourceScale(p.strokeSource), 1.F, p.textEditing);
+            }
+
+            // The wipe's handles, over the drawings.
+            if (const auto widget = _wipeWidget())
+            {
+                drawWipe(
+                    event.render,
+                    *widget,
+                    event.displayScale,
+                    p.wipeDrag != models::WipeHandle::None ? p.wipeDrag : p.wipeHover);
             }
 
             event.render->setClipRectEnabled(clipRectEnabledPrev);

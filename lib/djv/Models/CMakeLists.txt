@@ -16,6 +16,8 @@ set(HEADERS
     RecentFilesModel.h
     Review.h
     Stroke.h
+    Shuttle.h
+    Wipe.h
     SettingsKeys.h
     SettingsModel.h
     ShellCommand.h
@@ -43,6 +45,8 @@ set(SOURCE
     RecentFilesModel.cpp
     Review.cpp
     Stroke.cpp
+    Shuttle.cpp
+    Wipe.cpp
     SettingsKeys.cpp
     SettingsModel.cpp
     ShellCommand.cpp
