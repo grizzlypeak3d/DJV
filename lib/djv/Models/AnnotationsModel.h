@@ -105,6 +105,10 @@ namespace djv
                 const std::vector<std::string>& sourceIds,
                 const OTIO_NS::RationalTime&);
 
+            //! Remove every stroke of the given sources, on every frame, as
+            //! one undo step: a file's drawings, the others' left.
+            DJV_MODELS_API void clearSources(const std::vector<std::string>& sourceIds);
+
             //! Remove all the annotations, clearing the undo history.
             DJV_MODELS_API void clear();
 

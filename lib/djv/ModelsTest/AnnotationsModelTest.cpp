@@ -45,6 +45,7 @@ namespace djv
             _erase();
             _pick();
             _clearFrame();
+            _clearSources();
             _undo();
             _serialize();
         }
@@ -182,6 +183,31 @@ namespace djv
             // Clearing a frame with no strokes is not an undo step.
             model->redo();
             model->clearFrame({ "srcA", "srcB" }, frame(200));
+            model->undo();
+            FTK_CHECK(1 == model->getStrokes("srcA", frame(100)).size());
+        }
+
+        void AnnotationsModelTest::_clearSources()
+        {
+            auto model = models::AnnotationsModel::create();
+            model->addStroke("srcA", frame(100), makeStroke(0.F, 0.F, 10.F, 10.F));
+            model->addStroke("srcA", frame(101), makeStroke(40.F, 40.F, 50.F, 50.F));
+            model->addStroke("srcB", frame(100), makeStroke(20.F, 20.F, 30.F, 30.F));
+
+            // A file's drawings on every frame go; another file's stay.
+            model->clearSources({ "srcA" });
+            FTK_CHECK(model->getStrokes("srcA", frame(100)).empty());
+            FTK_CHECK(model->getStrokes("srcA", frame(101)).empty());
+            FTK_CHECK(1 == model->getStrokes("srcB", frame(100)).size());
+
+            // One undo step brings them all back.
+            model->undo();
+            FTK_CHECK(1 == model->getStrokes("srcA", frame(100)).size());
+            FTK_CHECK(1 == model->getStrokes("srcA", frame(101)).size());
+
+            // A file with no drawings is not an undo step.
+            model->redo();
+            model->clearSources({ "srcC" });
             model->undo();
             FTK_CHECK(1 == model->getStrokes("srcA", frame(100)).size());
         }

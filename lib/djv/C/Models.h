@@ -471,6 +471,10 @@ DJV_C_API void djv_draw_undo(djv_models*);
 DJV_C_API void djv_draw_redo(djv_models*);
 DJV_C_API void djv_draw_clear_frame(djv_models*);
 
+//! Clear the drawings on the player's file, every frame, as one undo
+//! step.
+DJV_C_API void djv_draw_clear_all(djv_models*);
+
 //! The frames with drawings on them, in seconds from the start of the
 //! player's timeline, in order; and whether the frame shown has any.
 DJV_C_API size_t djv_draw_get_frame_count(djv_models*);
@@ -506,6 +510,8 @@ DJV_C_API const char* djv_note_add(djv_models*, const char* text);
 //! A note's text changed; who wrote it and when stay.
 DJV_C_API void djv_note_set_text(djv_models*, const char* id, const char* text);
 DJV_C_API void djv_note_remove(djv_models*, const char* id);
+//! Remove all the notes.
+DJV_C_API void djv_note_clear_all(djv_models*);
 
 //! The name the notes and drawings are signed with, kept in the
 //! settings. Empty signs them with nothing on the iPad.

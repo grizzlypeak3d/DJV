@@ -2130,3 +2130,19 @@ void djv_review_restore_compare(djv_models* models)
     models->compareQuiet = false;
     models->compareChanged = false;
 }
+
+void djv_draw_clear_all(djv_models* models)
+{
+    if (!models || models->fileId.empty())
+        return;
+    djv_draw_cancel(models);
+    models->annotationsModel->clearSources({ models->fileId });
+}
+
+void djv_note_clear_all(djv_models* models)
+{
+    if (models)
+    {
+        models->markersModel->clear();
+    }
+}

@@ -25,6 +25,7 @@ namespace djv
             void _erase();
             void _pick();
             void _clearFrame();
+            void _clearSources();
             void _undo();
             void _serialize();
         };

@@ -327,6 +327,16 @@ static void drawing(tl_engine* engine, tl_player* player)
     CHECK(strcmp(djv_note_get_text(models, 0), "Much too dark") == 0);
     CHECK(strcmp(djv_note_get_author(models, 0), "Pad") == 0);
 
+    /* All the drawings cleared, the notes kept, and back with an undo;
+       then all the notes. */
+    djv_draw_clear_all(models);
+    CHECK(djv_draw_get_frame_count(models) == 0);
+    CHECK(djv_note_get_count(models) == 1);
+    djv_draw_undo(models);
+    CHECK(djv_draw_get_frame_count(models) == 1);
+    djv_note_clear_all(models);
+    CHECK(djv_note_get_count(models) == 0);
+
     /* A new review is not written while it has nothing in it. */
     CHECK(djv_review_open(models, DJV_C_TEST_DIR "/empty.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
     CHECK(djv_draw_get_frame_count(models) == 0);

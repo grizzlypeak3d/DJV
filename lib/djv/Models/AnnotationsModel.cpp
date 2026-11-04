@@ -283,6 +283,29 @@ namespace djv
             }
         }
 
+        void AnnotationsModel::clearSources(const std::vector<std::string>& sourceIds)
+        {
+            FTK_P();
+            auto annotations = p.annotations->get();
+            const size_t before = annotations.size();
+            annotations.erase(
+                std::remove_if(
+                    annotations.begin(),
+                    annotations.end(),
+                    [&sourceIds](const ReviewAnnotation& value)
+                    {
+                        return std::find(
+                            sourceIds.begin(),
+                            sourceIds.end(),
+                            value.sourceId) != sourceIds.end();
+                    }),
+                annotations.end());
+            if (annotations.size() != before)
+            {
+                _push(annotations);
+            }
+        }
+
         void AnnotationsModel::clear()
         {
             FTK_P();
