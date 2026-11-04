@@ -257,6 +257,13 @@ static void drawing(tl_engine* engine, tl_player* player)
     CHECK_NEAR(djv_draw_get_frame(models, 0), 0.0, 0.0001);
     CHECK(djv_draw_has_frame(models));
 
+    /* The drawing's frame is the only one to go to, either way; with
+       nothing else, nowhere. */
+    CHECK_NEAR(djv_review_get_jump(models, NULL, 0, 1), 0.0, 0.0001);
+    CHECK_NEAR(djv_review_get_jump(models, NULL, 0, 0), 0.0, 0.0001);
+    const double markers[1] = { 0.0 };
+    CHECK_NEAR(djv_review_get_jump(models, markers, 1, 1), 0.0, 0.0001);
+
     /* No view, so nowhere to draw. */
     CHECK(djv_draw_begin(models, 10.F, 10.F, 0, 0.F) == 0);
 
@@ -265,6 +272,7 @@ static void drawing(tl_engine* engine, tl_player* player)
     djv_draw_clear_frame(models);
     CHECK(!djv_draw_has_frame(models));
     CHECK(djv_draw_get_frame_count(models) == 0);
+    CHECK(djv_review_get_jump(models, NULL, 0, 1) < 0.0);
     CHECK(djv_draw_has_undo(models));
     djv_draw_undo(models);
     CHECK(djv_draw_has_frame(models));
@@ -386,7 +394,9 @@ int main(void)
     if (!models)
         return 1;
 
-    /* Nothing open: nothing to say, and the shuttle stays put. */
+    /* Nothing open: nothing to say, nowhere to go, and the shuttle stays
+       put. */
+    CHECK(djv_review_get_jump(models, NULL, 0, 1) < 0.0);
     CHECK_NEAR(djv_shuttle_get_time(models, 1.5, 100.F), 1.5, 0.0001);
     CHECK(djv_info_get_count(models, NULL) == 0);
     CHECK(strcmp(djv_hud_get_text(models, DJV_HUD_FILE_NAME, 0.0, 0, 1.0), "(No file)") == 0);

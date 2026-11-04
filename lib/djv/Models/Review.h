@@ -362,6 +362,15 @@ namespace djv
             const std::vector<ReviewMarker>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
 
+        //! The frame to go to from the current one, among the frames with
+        //! a marker or a drawing (sorted, without repeats): the first after
+        //! it, or the last before it, around from one end to the other so
+        //! that the jump is never a dead end. None without any frames.
+        DJV_MODELS_API std::optional<int> getReviewJump(
+            const std::vector<int>& frames,
+            int current,
+            bool next);
+
         //! Open a review from a ".djvr" file.
         //!
         //! Throws on a file that cannot be read, and on a review written by a

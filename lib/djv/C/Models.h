@@ -475,6 +475,13 @@ DJV_C_API void djv_draw_clear_frame(djv_models*);
 //! player's timeline, in order; and whether the frame shown has any.
 DJV_C_API size_t djv_draw_get_frame_count(djv_models*);
 DJV_C_API double djv_draw_get_frame(djv_models*, size_t);
+
+//! The frame to go to from the player's, in seconds from the start of
+//! its timeline, as DJV's Previous and Next Marker do: the next or the
+//! previous with a drawing or one of the markers given (in seconds from
+//! the start), around from one end to the other. Below zero when there
+//! is none.
+DJV_C_API double djv_review_get_jump(djv_models*, const double* markers, size_t count, int next);
 DJV_C_API int djv_draw_has_frame(djv_models*);
 
 ///@}

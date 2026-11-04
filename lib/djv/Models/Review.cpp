@@ -1036,5 +1036,27 @@ namespace djv
             }
             return ftk::toFileSystem(absolute);
         }
+
+        std::optional<int> getReviewJump(
+            const std::vector<int>& frames,
+            int current,
+            bool next)
+        {
+            std::optional<int> out;
+            if (!frames.empty())
+            {
+                if (next)
+                {
+                    const auto i = std::upper_bound(frames.begin(), frames.end(), current);
+                    out = i != frames.end() ? *i : frames.front();
+                }
+                else
+                {
+                    const auto i = std::lower_bound(frames.begin(), frames.end(), current);
+                    out = i != frames.begin() ? *(i - 1) : frames.back();
+                }
+            }
+            return out;
+        }
     }
 }

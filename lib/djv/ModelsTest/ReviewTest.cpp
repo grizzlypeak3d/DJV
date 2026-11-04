@@ -41,6 +41,28 @@ namespace djv
             _unknownKeys();
             _courtesyRead();
             _otioMarkers();
+            _jump();
+        }
+
+        void ReviewTest::_jump()
+        {
+            // Nowhere to go without frames.
+            FTK_CHECK(!models::getReviewJump({}, 5, true).has_value());
+
+            // The next after, the previous before, and around the ends.
+            const std::vector<int> frames = { 10, 20, 30 };
+            FTK_CHECK(20 == models::getReviewJump(frames, 10, true));
+            FTK_CHECK(20 == models::getReviewJump(frames, 15, true));
+            FTK_CHECK(10 == models::getReviewJump(frames, 30, true));
+            FTK_CHECK(10 == models::getReviewJump(frames, 40, true));
+            FTK_CHECK(10 == models::getReviewJump(frames, 20, false));
+            FTK_CHECK(20 == models::getReviewJump(frames, 25, false));
+            FTK_CHECK(30 == models::getReviewJump(frames, 10, false));
+            FTK_CHECK(30 == models::getReviewJump(frames, 0, false));
+
+            // One frame: always it.
+            FTK_CHECK(7 == models::getReviewJump({ 7 }, 7, true));
+            FTK_CHECK(7 == models::getReviewJump({ 7 }, 7, false));
         }
 
         void ReviewTest::_version()

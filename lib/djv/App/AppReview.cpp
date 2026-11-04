@@ -74,22 +74,16 @@ namespace djv
                 return;
             }
             const OTIO_NS::RationalTime currentTime = player->getCurrentTime();
-            const int current = static_cast<int>(currentTime.value());
-            int target = 0;
-            if (next)
+            const auto target = models::getReviewJump(
+                markers,
+                static_cast<int>(currentTime.value()),
+                next);
+            if (!target.has_value())
             {
-                // The first marker strictly after the playhead, or wrap around
-                // to the first one so the button never becomes a dead end.
-                const auto i = std::upper_bound(markers.begin(), markers.end(), current);
-                target = i != markers.end() ? *i : markers.front();
-            }
-            else
-            {
-                const auto i = std::lower_bound(markers.begin(), markers.end(), current);
-                target = i != markers.begin() ? *(i - 1) : markers.back();
+                return;
             }
             player->stop();
-            const OTIO_NS::RationalTime targetTime(target, currentTime.rate());
+            const OTIO_NS::RationalTime targetTime(*target, currentTime.rate());
             // Going to feedback wins over a narrower in/out range: with the
             // target outside it, the seek would move the clock into a span
             // the player cannot show.

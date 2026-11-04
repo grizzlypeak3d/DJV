@@ -27,6 +27,7 @@
 #include <ftk/Core/Observable.h>
 
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -1810,4 +1811,35 @@ double djv_shuttle_get_time(djv_models* models, double start, float dx)
         dx,
         models->settingsModel->getMouse().frameShuttleScale);
     return (t - range.start_time()).rescaled_to(1.0).value();
+}
+
+double djv_review_get_jump(djv_models* models, const double* markers, size_t count, int next)
+{
+    if (!models)
+        return -1.0;
+    auto p = tl::c::getPlayer(models->player);
+    if (!p)
+        return -1.0;
+    const auto& range = p->getTimeRange();
+    const double rate = range.duration().rate();
+    const auto frame = [rate](double seconds)
+    {
+        return static_cast<int>(std::round(seconds * rate));
+    };
+    std::vector<int> frames;
+    for (double seconds : models->frames)
+    {
+        frames.push_back(frame(seconds));
+    }
+    for (size_t i = 0; markers && i < count; ++i)
+    {
+        frames.push_back(frame(markers[i]));
+    }
+    std::sort(frames.begin(), frames.end());
+    frames.erase(std::unique(frames.begin(), frames.end()), frames.end());
+    const auto target = models::getReviewJump(
+        frames,
+        frame((p->getCurrentTime() - range.start_time()).rescaled_to(1.0).value()),
+        next != 0);
+    return target.has_value() ? *target / rate : -1.0;
 }
