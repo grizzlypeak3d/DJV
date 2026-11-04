@@ -2152,6 +2152,15 @@ namespace djv
             float alpha,
             bool caret)
         {
+            // Nowhere to draw until the picture is there: a review opened
+            // has its strokes before its first frame, and without the
+            // picture's box every point fell on the corner of the view, a
+            // stroke as wide as the zoom made it, and the view flashed
+            // with its color.
+            if (!_imageMapping(index).isValid())
+            {
+                return;
+            }
             const ftk::Box2I& g = getGeometry();
             drawStroke(
                 event.render,
@@ -2175,7 +2184,7 @@ namespace djv
             const models::ReviewStroke& stroke,
             float scale)
         {
-            if (stroke.points.empty())
+            if (stroke.points.empty() || !_imageMapping(index).isValid())
             {
                 return;
             }

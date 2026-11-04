@@ -417,6 +417,24 @@ namespace djv
                 std::filesystem::is_directory(ftk::toFileSystem(path.get()), ec));
         }
 
+        namespace
+        {
+            // A review among files opened, as the command line takes one:
+            // it is a whole session, opened as a review rather than read
+            // as media.
+            std::optional<std::filesystem::path> reviewIn(const std::vector<ftk::Path>& paths)
+            {
+                for (const auto& path : paths)
+                {
+                    if (ftk::toLower(path.getExt()) == models::reviewExtension())
+                    {
+                        return ftk::toFileSystem(path.get());
+                    }
+                }
+                return std::nullopt;
+            }
+        }
+
         void App::open(
             const ftk::Path& path,
             const ftk::Path& audioPath,
@@ -424,6 +442,11 @@ namespace djv
             bool gatherSeq)
         {
             FTK_P();
+            if (const auto review = reviewIn({ path }))
+            {
+                openReview(*review);
+                return;
+            }
             // Added together rather than one at a time: each add makes its
             // file the current one, so a directory would be opened file by
             // file on the way to the last of them.
@@ -437,6 +460,13 @@ namespace djv
             bool gatherSeq)
         {
             FTK_P();
+            // A review dropped with other files, its media perhaps: the
+            // review, which opens its media itself.
+            if (const auto review = reviewIn(paths))
+            {
+                openReview(*review);
+                return;
+            }
             std::vector<std::shared_ptr<models::FilesModelItem> > items;
             std::optional<ftk::RangeI64> itemFrames = frames;
             for (const auto& path : paths)
