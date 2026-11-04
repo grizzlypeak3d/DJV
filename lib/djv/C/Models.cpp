@@ -71,6 +71,13 @@ struct djv_models
     tl_view* view = nullptr;
     tl_player* player = nullptr;
     bool compareFile = false;
+    // The file compared with; whether the comparison changed since the
+    // review was opened, which is when the review's is written over; and
+    // the changes the models make themselves, which are not.
+    std::string compareFilePath;
+    bool compareChanged = false;
+    bool compareQuiet = false;
+    std::string reviewCompareFile;
 
     // The part of the wipe being dragged, and where it was taken from
     // the center.
@@ -263,6 +270,78 @@ struct djv_models
         }
         std::sort(frames.begin(), frames.end());
         frames.erase(std::unique(frames.begin(), frames.end()), frames.end());
+    }
+
+    // The review's file at a path: by its path, or by its name, as the
+    // desktop's relocation finds a file that moved. Empty for none.
+    std::string reviewFileId(const std::filesystem::path& media) const
+    {
+        const auto base = std::filesystem::u8path(reviewPath).parent_path();
+        for (const auto& file : review.files)
+        {
+            const std::filesystem::path relative = std::filesystem::u8path(file.path);
+            const std::filesystem::path absolute = std::filesystem::u8path(file.pathAbsolute);
+            if ((!file.path.empty() && (base / relative).lexically_normal() == media.lexically_normal()) ||
+                (!file.pathAbsolute.empty() && absolute == media) ||
+                (!file.path.empty() && relative.filename() == media.filename()))
+            {
+                return file.id;
+            }
+        }
+        return std::string();
+    }
+
+    // Add a file to the review, its path relative to the review's and
+    // absolute; its id.
+    std::string reviewFileAdd(const std::string& path)
+    {
+        const auto base = std::filesystem::u8path(reviewPath).parent_path();
+        models::ReviewFile file;
+        file.id = models::generateId();
+        file.path = models::reviewGenericPath(models::reviewRelativePath(path, base));
+        file.pathAbsolute = models::reviewGenericPath(path);
+        review.files.push_back(file);
+        return file.id;
+    }
+
+    // The comparison into the review, as the desktop writes it: "A", the
+    // file compared with as "B", the options and the time. A "B" taken
+    // out goes from the files too, unless something else is about it.
+    void reviewCompareUpdate()
+    {
+        auto& compare = review.compare;
+        for (const auto& id : compare.bIds)
+        {
+            const bool used =
+                id == fileId ||
+                std::any_of(
+                    review.annotations.begin(),
+                    review.annotations.end(),
+                    [&id](const models::ReviewAnnotation& a) { return a.sourceId == id; });
+            if (!used)
+            {
+                review.files.erase(
+                    std::remove_if(
+                        review.files.begin(),
+                        review.files.end(),
+                        [&id](const models::ReviewFile& f) { return f.id == id; }),
+                    review.files.end());
+            }
+        }
+        compare.aId = fileId;
+        compare.bIds.clear();
+        if (compareFile && !compareFilePath.empty())
+        {
+            const std::filesystem::path path = std::filesystem::u8path(compareFilePath);
+            std::string id = reviewFileId(path);
+            if (id.empty() || id == fileId)
+            {
+                id = reviewFileAdd(compareFilePath);
+            }
+            compare.bIds.push_back(id);
+        }
+        compare.options = filesModel->getCompareOptions();
+        compare.time = filesModel->getCompareTime();
     }
 
     // The options as the view and the player should have them now.
@@ -478,6 +557,10 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
             {
                 djv_draw_cancel(out);
             }
+            if (!out->compareQuiet)
+            {
+                out->compareChanged = true;
+            }
             ++out->generation;
         });
     out->compareTimeObserver = ftk::Observer<tl::CompareTime>::create(
@@ -487,6 +570,10 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
             if (auto p = tl::c::getPlayer(out->player))
             {
                 p->setCompareTime(value);
+            }
+            if (!out->compareQuiet)
+            {
+                out->compareChanged = true;
             }
             ++out->generation;
         });
@@ -575,10 +662,13 @@ void djv_models_set_player(djv_models* models, tl_player* player)
     models->player = player;
     // A new player is compared with nothing.
     models->compareFile = false;
+    models->compareFilePath.clear();
     tl_player_set_compare(player, nullptr);
     auto compare = models->filesModel->getCompareOptions();
     compare.compare = tl::Compare::None;
+    models->compareQuiet = true;
     models->filesModel->setCompareOptions(compare);
+    models->compareQuiet = false;
     models->activeFilesUpdate();
     models->applyToPlayer();
     djv_draw_cancel(models);
@@ -1330,6 +1420,8 @@ int djv_compare_set_file(djv_models* models, const char* path)
     if (!tl_player_set_compare(models->player, path))
         return 0;
     models->compareFile = file;
+    models->compareFilePath = file ? path : "";
+    models->compareChanged = true;
     if (!file)
     {
         // Nothing to compare with, as the files model does with one file.
@@ -1582,36 +1674,46 @@ int djv_review_open(djv_models* models, const char* reviewPath, const char* medi
         models->reviewPath.clear();
         return 0;
     }
-    // The file in the review the media is: by its path, or by its name,
-    // as the desktop's relocation finds a file that moved.
-    const auto base = review.parent_path();
-    for (const auto& file : models->review.files)
-    {
-        const std::filesystem::path relative = std::filesystem::u8path(file.path);
-        const std::filesystem::path absolute = std::filesystem::u8path(file.pathAbsolute);
-        if ((!file.path.empty() && (base / relative).lexically_normal() == media.lexically_normal()) ||
-            (!file.pathAbsolute.empty() && absolute == media) ||
-            (!file.path.empty() && relative.filename() == media.filename()))
-        {
-            models->fileId = file.id;
-            break;
-        }
-    }
+    // The file in the review the media is.
+    models->fileId = models->reviewFileId(media);
     if (models->fileId.empty())
     {
-        models::ReviewFile file;
-        file.id = models::generateId();
-        file.path = models::reviewGenericPath(models::reviewRelativePath(mediaPath, base));
-        file.pathAbsolute = models::reviewGenericPath(mediaPath);
-        models->review.files.push_back(file);
-        models->fileId = file.id;
+        models->fileId = models->reviewFileAdd(mediaPath);
         if (models->review.compare.aId.empty())
         {
-            models->review.compare.aId = file.id;
+            models->review.compare.aId = models->fileId;
         }
     }
     models->annotationsModel->setAnnotations(models->review.annotations);
     models->markersModel->setMarkers(models->review.markers);
+
+    // The file the review compares with, where it is found from the
+    // review; and the comparison is the review's until it changes.
+    models->reviewCompareFile.clear();
+    const auto& compare = models->review.compare;
+    if (!compare.bIds.empty())
+    {
+        for (const auto& file : models->review.files)
+        {
+            if (file.id == compare.bIds.front() && file.id != models->fileId)
+            {
+                bool exists = false;
+                const auto path = models::resolveReviewPath(
+                    file.path,
+                    file.pathAbsolute,
+                    review.parent_path(),
+                    std::filesystem::path(),
+                    ftk::PathOptions(),
+                    exists);
+                if (exists)
+                {
+                    models->reviewCompareFile = ftk::fromFileSystem(path);
+                }
+                break;
+            }
+        }
+    }
+    models->compareChanged = false;
     return 1;
 }
 
@@ -1622,12 +1724,19 @@ int djv_review_save(djv_models* models)
     const auto& annotations = models->annotationsModel->getAnnotations();
     const auto& markers = models->markersModel->getMarkers();
     const std::filesystem::path path = std::filesystem::u8path(models->reviewPath);
-    if (annotations.empty() && markers.empty() && !std::filesystem::exists(path))
+    const bool comparing = models->compareChanged && models->compareFile;
+    if (annotations.empty() && markers.empty() && !comparing && !std::filesystem::exists(path))
         return 1;
     try
     {
         models->review.annotations = annotations;
         models->review.markers = markers;
+        // The comparison only once it changed here: a review's the iPad
+        // could not show, its "B" not found, stays as it was.
+        if (models->compareChanged)
+        {
+            models->reviewCompareUpdate();
+        }
         if (models->review.app.empty())
         {
             models->review.app = "DJV Studio for iPad";
@@ -1654,6 +1763,7 @@ void djv_review_close(djv_models* models)
     models->review = models::Review();
     models->reviewPath.clear();
     models->fileId.clear();
+    models->reviewCompareFile.clear();
     models->reviewError.clear();
     models->annotationsModel->clear();
     models->markersModel->clear();
@@ -1998,4 +2108,25 @@ void djv_review_set_author(djv_models* models, const char* value)
     auto review = models->settingsModel->getReview();
     review.author = value ? value : "";
     models->settingsModel->setReview(review);
+}
+
+const char* djv_review_get_compare_file(djv_models* models)
+{
+    return models ? models->reviewCompareFile.c_str() : "";
+}
+
+void djv_review_restore_compare(djv_models* models)
+{
+    if (!models)
+        return;
+    auto options = models->review.compare.options;
+    if (!models->compareFile)
+    {
+        options.compare = tl::Compare::None;
+    }
+    models->compareQuiet = true;
+    models->filesModel->setCompareOptions(options);
+    models->filesModel->setCompareTime(models->review.compare.time);
+    models->compareQuiet = false;
+    models->compareChanged = false;
 }

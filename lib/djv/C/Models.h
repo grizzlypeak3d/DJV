@@ -510,6 +510,14 @@ DJV_C_API void djv_note_remove(djv_models*, const char* id);
 //! The name the notes and drawings are signed with, kept in the
 //! settings. Empty signs them with nothing on the iPad.
 DJV_C_API const char* djv_review_get_author(djv_models*);
+
+//! The file the review compares with, as "B", where it is found from the
+//! review; empty for none, or none found. Compared with, the review's
+//! mode, options and time are put back with djv_review_restore_compare().
+//! A comparison changed is written into the review when it is saved, as
+//! the desktop writes it; one not changed stays as the review has it.
+DJV_C_API const char* djv_review_get_compare_file(djv_models*);
+DJV_C_API void djv_review_restore_compare(djv_models*);
 DJV_C_API void djv_review_set_author(djv_models*, const char*);
 DJV_C_API int djv_draw_has_frame(djv_models*);
 

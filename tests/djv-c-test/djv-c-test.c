@@ -405,6 +405,67 @@ static void comparing(djv_models* models, tl_player* player)
 }
 
 /* What was set is there again when the models are made from the file. */
+/* A review whose comparison is with a file that is not there. */
+static const char* reviewMissingB =
+    "{\"djvReview\": 1, \"app\": \"DJV\", \"created\": \"2026-11-03T00:00:00Z\","
+    " \"files\": [{\"id\": \"f1\", \"path\": \"BART_2021-02-07.0000.jpg\"},"
+    " {\"id\": \"f2\", \"path\": \"NotThere.jpg\"}],"
+    " \"compare\": {\"aId\": \"f1\", \"bIds\": [\"f2\"], \"options\": {\"Compare\": \"Wipe\","
+    " \"DifferenceGain\": 1.0, \"Overlay\": 0.5, \"SameSize\": true,"
+    " \"WipeCenter\": [0.5, 0.5], \"WipeRotation\": 0.0}, \"time\": \"Relative\"}}";
+
+static void reviewComparing(tl_engine* engine, tl_player* player)
+{
+    djv_models* models = djv_models_create(engine, DJV_C_TEST_SETTINGS);
+    CHECK(models != NULL);
+    if (!models)
+        return;
+    djv_models_set_player(models, player);
+
+    /* Compared, and saved as the desktop saves it: "B" one of the files. */
+    remove(DJV_C_TEST_DIR "/compare.djvr");
+    CHECK(djv_review_open(models, DJV_C_TEST_DIR "/compare.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
+    CHECK(strlen(djv_review_get_compare_file(models)) == 0);
+    CHECK(djv_compare_set_file(models, DJV_SAMPLE_DATA "/BART_2021-02-07.0001.jpg") == 1);
+    djv_compare_set_mode(models, DJV_COMPARE_WIPE);
+    djv_compare_set_wipe_rotation(models, 30.F);
+    CHECK(djv_review_save(models) == 1);
+    CHECK(fileContains(DJV_C_TEST_DIR "/compare.djvr", "BART_2021-02-07.0001.jpg"));
+    CHECK(fileContains(DJV_C_TEST_DIR "/compare.djvr", "\"Wipe\""));
+
+    /* Opened again: "B" found, and the comparison put back. */
+    djv_models_set_player(models, player);
+    CHECK(djv_compare_get_mode(models) == DJV_COMPARE_NONE);
+    CHECK(djv_review_open(models, DJV_C_TEST_DIR "/compare.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
+    const char* b = djv_review_get_compare_file(models);
+    CHECK(strstr(b, "BART_2021-02-07.0001.jpg") != NULL);
+    CHECK(djv_compare_set_file(models, b) == 1);
+    djv_review_restore_compare(models);
+    CHECK(djv_compare_get_mode(models) == DJV_COMPARE_WIPE);
+    float x = 0.F, y = 0.F, rotation = 0.F;
+    djv_compare_get_wipe(models, &x, &y, &rotation);
+    CHECK_NEAR(rotation, 30.0, 0.0001);
+
+    /* Turned off: "B" out of the files too. */
+    CHECK(djv_compare_set_file(models, NULL) == 1);
+    CHECK(djv_review_save(models) == 1);
+    CHECK(!fileContains(DJV_C_TEST_DIR "/compare.djvr", "BART_2021-02-07.0001.jpg"));
+
+    /* A comparison the iPad cannot show stays as the review has it. */
+    writeFile(DJV_C_TEST_DIR "/missing.djvr", reviewMissingB);
+    djv_models_set_player(models, player);
+    CHECK(djv_review_open(models, DJV_C_TEST_DIR "/missing.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
+    CHECK(strlen(djv_review_get_compare_file(models)) == 0);
+    CHECK(djv_note_add(models, "Kept") != NULL);
+    CHECK(djv_review_save(models) == 1);
+    CHECK(fileContains(DJV_C_TEST_DIR "/missing.djvr", "NotThere.jpg"));
+    CHECK(fileContains(DJV_C_TEST_DIR "/missing.djvr", "\"bIds\": ["));
+
+    djv_review_close(models);
+    djv_models_set_player(models, NULL);
+    djv_models_destroy(models);
+}
+
 static void persistence(tl_engine* engine)
 {
     djv_models* models = djv_models_create(engine, DJV_C_TEST_SETTINGS);
@@ -462,6 +523,7 @@ int main(void)
     if (player)
     {
         drawing(engine, player);
+        reviewComparing(engine, player);
         comparing(models, player);
     }
 
