@@ -456,6 +456,12 @@ static void reviewComparing(tl_engine* engine, tl_player* player)
     djv_compare_get_wipe(models, &x, &y, &rotation);
     CHECK_NEAR(rotation, 30.0, 0.0001);
 
+    /* What the review is about, read without opening it: "A" first. */
+    CHECK(djv_review_read_file_names(models, DJV_C_TEST_DIR "/compare.djvr") == 2);
+    CHECK(strcmp(djv_review_get_file_name(models, 0), "BART_2021-02-07.0000.jpg") == 0);
+    CHECK(strcmp(djv_review_get_file_name(models, 1), "BART_2021-02-07.0001.jpg") == 0);
+    CHECK(djv_review_read_file_names(models, DJV_C_TEST_DIR "/NotThere.djvr") == 0);
+
     /* Turned off: "B" out of the files too. */
     CHECK(djv_compare_set_file(models, NULL) == 1);
     CHECK(djv_review_save(models) == 1);

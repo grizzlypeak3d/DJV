@@ -94,6 +94,7 @@ struct djv_models
     std::string timeLabel;
     std::string noteId;
     std::string author;
+    std::vector<std::string> reviewFileNames;
 
     std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::OCIOOptions> > colorOCIOOptionsObserver;
@@ -2145,4 +2146,48 @@ void djv_note_clear_all(djv_models* models)
     {
         models->markersModel->clear();
     }
+}
+
+size_t djv_review_read_file_names(djv_models* models, const char* path)
+{
+    if (!models)
+        return 0;
+    models->reviewFileNames.clear();
+    if (!path)
+        return 0;
+    try
+    {
+        const models::Review review = models::reviewOpen(path);
+        auto name = [](const models::ReviewFile& file)
+        {
+            const std::string& p = !file.path.empty() ? file.path : file.pathAbsolute;
+            return ftk::fromFileSystem(std::filesystem::u8path(p).filename());
+        };
+        // "A" first: the file the review is about.
+        for (const auto& file : review.files)
+        {
+            if (file.id == review.compare.aId)
+            {
+                models->reviewFileNames.push_back(name(file));
+            }
+        }
+        for (const auto& file : review.files)
+        {
+            if (file.id != review.compare.aId)
+            {
+                models->reviewFileNames.push_back(name(file));
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        models->reviewError = e.what();
+    }
+    return models->reviewFileNames.size();
+}
+
+const char* djv_review_get_file_name(djv_models* models, size_t i)
+{
+    return models && i < models->reviewFileNames.size() ?
+        models->reviewFileNames[i].c_str() : "";
 }

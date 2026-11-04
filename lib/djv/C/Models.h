@@ -523,6 +523,13 @@ DJV_C_API const char* djv_review_get_author(djv_models*);
 //! A comparison changed is written into the review when it is saved, as
 //! the desktop writes it; one not changed stays as the review has it.
 DJV_C_API const char* djv_review_get_compare_file(djv_models*);
+
+//! The names of the files a review file is about, without opening it: the
+//! one it is about ("A") first, then those it compares with. Zero, with
+//! the reason in djv_review_get_error(), when it cannot be read. The names
+//! stay valid until the next read.
+DJV_C_API size_t djv_review_read_file_names(djv_models*, const char* path);
+DJV_C_API const char* djv_review_get_file_name(djv_models*, size_t);
 DJV_C_API void djv_review_restore_compare(djv_models*);
 DJV_C_API void djv_review_set_author(djv_models*, const char*);
 DJV_C_API int djv_draw_has_frame(djv_models*);
@@ -547,7 +554,7 @@ DJV_C_API float djv_cache_get_max_gb(void);
 
 //! The information about the player's file, as DJV's Info tool shows
 //! it: rows of a section (File, Video, Audio, Metadata), a name and a
-//! value, those matching the search (NULL or empty for all). For a cut,
+//! value, those matching the search (NULL or empty for all). For a timeline,
 //! the media of its first clip. Read when counted; the strings stay
 //! valid until the next count.
 DJV_C_API size_t djv_info_get_count(djv_models*, const char* search);
