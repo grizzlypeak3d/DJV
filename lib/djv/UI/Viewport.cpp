@@ -1048,6 +1048,27 @@ namespace djv
             return out;
         }
 
+        bool Viewport::_hasPicture(int index) const
+        {
+            FTK_P();
+            const auto boxes = _sourceBoxes();
+            if (index < 0 ||
+                index >= static_cast<int>(boxes.size()) ||
+                index >= static_cast<int>(p.videoFrames.size()) ||
+                boxes[index].w() <= 0 ||
+                boxes[index].h() <= 0)
+            {
+                return false;
+            }
+            const auto& video = p.videoFrames[index];
+            if (video.layers.empty() || !video.layers[0].image)
+            {
+                return false;
+            }
+            const ftk::Size2I imageSize = video.layers[0].image->getSize();
+            return imageSize.w > 0 && imageSize.h > 0;
+        }
+
         ftk::V2F Viewport::_imageToWidget(int index, const ftk::V2F& imagePos) const
         {
             FTK_P();
@@ -1204,7 +1225,12 @@ namespace djv
                 const models::ReviewStroke& stroke,
                 float scale)
             {
-                if (stroke.points.empty())
+                // Nowhere to draw until the picture is there: a review
+                // opened has its strokes before its first frame, and without
+                // the picture every point fell on the corner of the view, a
+                // stroke as wide as the zoom made it, and the view flashed
+                // with its color.
+                if (stroke.points.empty() || !_hasPicture(index))
                 {
                     return;
                 }

@@ -106,6 +106,8 @@ namespace djv
 
             //! Map a position in a source's image pixels back to widget-local
             //! coordinates.
+            //! Whether a source's picture is there to draw over.
+            bool _hasPicture(int index) const;
             ftk::V2F _imageToWidget(int index, const ftk::V2F& imagePos) const;
 
             //! The boxes of the sources in render space, as used for drawing.
