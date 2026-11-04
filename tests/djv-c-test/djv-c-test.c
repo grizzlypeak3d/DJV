@@ -317,6 +317,7 @@ static void comparing(djv_models* models, tl_player* player)
 
     /* No view to drag it in. */
     CHECK(djv_compare_wipe_begin(models, 10.F, 10.F) == 0);
+    CHECK(djv_compare_wipe_hit(models, 10.F, 10.F) == 0);
 
     /* One frame to shuttle through: always at it. */
     CHECK_NEAR(djv_shuttle_get_time(models, 0.0, 0.F), 0.0, 0.0001);

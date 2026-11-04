@@ -386,6 +386,9 @@ DJV_C_API void djv_compare_set_wipe_rotation(djv_models*, float);
 //! the picture while wiping. Zero from the beginning when not wiping, or
 //! not on a handle, which leaves the drag to something else.
 DJV_C_API int djv_compare_wipe_begin(djv_models*, float x, float y);
+//! Whether a finger at a point is on one of the wipe's handles, which
+//! take it before drawing does, as the desktop's handles take the mouse.
+DJV_C_API int djv_compare_wipe_hit(djv_models*, float x, float y);
 DJV_C_API void djv_compare_wipe_move(djv_models*, float x, float y);
 DJV_C_API void djv_compare_wipe_end(djv_models*);
 

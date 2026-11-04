@@ -1385,6 +1385,19 @@ int djv_compare_wipe_begin(djv_models* models, float x, float y)
     return 1;
 }
 
+int djv_compare_wipe_hit(djv_models* models, float x, float y)
+{
+    if (!models)
+        return 0;
+    const auto widget = models->wipeWidget();
+    if (!widget.has_value())
+        return 0;
+    const auto picture = tl::c::getViewPicture(models->view);
+    return models::getWipeHandle(
+        *widget, ftk::V2F(x, y), ui::wipeTouchReach * picture.displayScale) !=
+        models::WipeHandle::None ? 1 : 0;
+}
+
 void djv_compare_wipe_move(djv_models* models, float x, float y)
 {
     if (!models || models::WipeHandle::None == models->wipeDrag)
