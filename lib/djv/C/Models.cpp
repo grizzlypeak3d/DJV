@@ -10,6 +10,7 @@
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/HUD.h>
 #include <djv/Models/Info.h>
+#include <djv/Models/MarkersModel.h>
 #include <djv/Models/OCIOModel.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/Shuttle.h>
@@ -47,6 +48,7 @@ struct djv_models
     std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
     std::shared_ptr<models::DrawModel> drawModel;
     std::shared_ptr<models::AnnotationsModel> annotationsModel;
+    std::shared_ptr<models::MarkersModel> markersModel;
     std::shared_ptr<models::FilesModel> filesModel;
 
     // The review open, and the file in it the player shows.
@@ -83,6 +85,8 @@ struct djv_models
     std::vector<models::InfoItem> info;
     std::string hudText;
     std::string timeLabel;
+    std::string noteId;
+    std::string author;
 
     std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::OCIOOptions> > colorOCIOOptionsObserver;
@@ -99,6 +103,8 @@ struct djv_models
     std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > foregroundOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::PlayerCacheOptions> > cacheObserver;
     std::shared_ptr<ftk::ListObserver<models::ReviewAnnotation> > annotationsObserver;
+    std::shared_ptr<ftk::ListObserver<models::ReviewMarker> > markersObserver;
+    std::shared_ptr<ftk::Observer<models::ReviewSettings> > reviewSettingsObserver;
     std::shared_ptr<ftk::Observer<models::DrawTool> > drawToolObserver;
     std::shared_ptr<ftk::Observer<ftk::Color4F> > drawColorObserver;
     std::shared_ptr<ftk::Observer<float> > drawSizeObserver;
@@ -310,6 +316,7 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->timeUnitsModel = models::TimeUnitsModel::create(context, out->settings);
         out->drawModel = models::DrawModel::create(out->settings);
         out->annotationsModel = models::AnnotationsModel::create();
+        out->markersModel = models::MarkersModel::create();
         out->filesModel = models::FilesModel::create(out->settings);
     }
     catch (const std::exception&)
@@ -447,6 +454,18 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
     out->drawSizeObserver = ftk::Observer<float>::create(
         out->drawModel->observeSize(),
         [out](float) { ++out->generation; });
+    out->markersObserver = ftk::ListObserver<models::ReviewMarker>::create(
+        out->markersModel->observeMarkers(),
+        [out](const std::vector<models::ReviewMarker>&) { ++out->generation; });
+    // The notes and drawings are signed with the author from the
+    // settings, as the desktop signs them.
+    out->reviewSettingsObserver = ftk::Observer<models::ReviewSettings>::create(
+        out->settingsModel->observeReview(),
+        [out](const models::ReviewSettings& value)
+        {
+            models::setReviewAuthor(value.author);
+            ++out->generation;
+        });
     out->compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
         out->filesModel->observeCompareOptions(),
         [out](const tl::CompareOptions& value)
@@ -494,6 +513,8 @@ void djv_models_destroy(djv_models* models)
         tl::c::setOverlay(models->view, nullptr);
     }
     models->annotationsObserver.reset();
+    models->markersObserver.reset();
+    models->reviewSettingsObserver.reset();
     models->drawToolObserver.reset();
     models->drawColorObserver.reset();
     models->drawSizeObserver.reset();
@@ -1590,6 +1611,7 @@ int djv_review_open(djv_models* models, const char* reviewPath, const char* medi
         }
     }
     models->annotationsModel->setAnnotations(models->review.annotations);
+    models->markersModel->setMarkers(models->review.markers);
     return 1;
 }
 
@@ -1598,12 +1620,14 @@ int djv_review_save(djv_models* models)
     if (!models || models->reviewPath.empty())
         return 0;
     const auto& annotations = models->annotationsModel->getAnnotations();
+    const auto& markers = models->markersModel->getMarkers();
     const std::filesystem::path path = std::filesystem::u8path(models->reviewPath);
-    if (annotations.empty() && !std::filesystem::exists(path))
+    if (annotations.empty() && markers.empty() && !std::filesystem::exists(path))
         return 1;
     try
     {
         models->review.annotations = annotations;
+        models->review.markers = markers;
         if (models->review.app.empty())
         {
             models->review.app = "DJV Studio for iPad";
@@ -1632,6 +1656,7 @@ void djv_review_close(djv_models* models)
     models->fileId.clear();
     models->reviewError.clear();
     models->annotationsModel->clear();
+    models->markersModel->clear();
 }
 
 const char* djv_review_get_error(djv_models* models)
@@ -1835,6 +1860,14 @@ double djv_review_get_jump(djv_models* models, const double* markers, size_t cou
     {
         frames.push_back(frame(markers[i]));
     }
+    for (const auto& marker : models->markersModel->getMarkers())
+    {
+        if (marker.range.has_value())
+        {
+            frames.push_back(frame(
+                (marker.range->start_time() - range.start_time()).rescaled_to(1.0).value()));
+        }
+    }
     std::sort(frames.begin(), frames.end());
     frames.erase(std::unique(frames.begin(), frames.end()), frames.end());
     const auto target = models::getReviewJump(
@@ -1842,4 +1875,127 @@ double djv_review_get_jump(djv_models* models, const double* markers, size_t cou
         frame((p->getCurrentTime() - range.start_time()).rescaled_to(1.0).value()),
         next != 0);
     return target.has_value() ? *target / rate : -1.0;
+}
+
+namespace
+{
+    const models::ReviewMarker* note(djv_models* models, size_t i)
+    {
+        if (!models)
+            return nullptr;
+        const auto& markers = models->markersModel->getMarkers();
+        return i < markers.size() ? &markers[i] : nullptr;
+    }
+}
+
+size_t djv_note_get_count(djv_models* models)
+{
+    return models ? models->markersModel->getMarkers().size() : 0;
+}
+
+const char* djv_note_get_id(djv_models* models, size_t i)
+{
+    const auto* n = note(models, i);
+    return n ? n->id.c_str() : "";
+}
+
+const char* djv_note_get_name(djv_models* models, size_t i)
+{
+    const auto* n = note(models, i);
+    return n ? n->name.c_str() : "";
+}
+
+const char* djv_note_get_text(djv_models* models, size_t i)
+{
+    const auto* n = note(models, i);
+    return n ? n->text.c_str() : "";
+}
+
+const char* djv_note_get_author(djv_models* models, size_t i)
+{
+    const auto* n = note(models, i);
+    return n ? n->author.c_str() : "";
+}
+
+const char* djv_note_get_created(djv_models* models, size_t i)
+{
+    const auto* n = note(models, i);
+    return n ? n->created.c_str() : "";
+}
+
+void djv_note_get_range(djv_models* models, size_t i, double* start, double* duration)
+{
+    double s = -1.0;
+    double d = 0.0;
+    const auto* n = note(models, i);
+    auto p = models ? tl::c::getPlayer(models->player) : nullptr;
+    if (n && n->range.has_value() && p)
+    {
+        const auto& range = p->getTimeRange();
+        s = (n->range->start_time() - range.start_time()).rescaled_to(1.0).value();
+        d = n->range->duration().rescaled_to(1.0).value();
+    }
+    if (start) *start = s;
+    if (duration) *duration = d;
+}
+
+void djv_note_get_color(djv_models* models, size_t i, float* rgba)
+{
+    const auto* n = note(models, i);
+    const ftk::Color4F c = n ? n->color : models::reviewMarkerColor();
+    if (rgba)
+    {
+        rgba[0] = c.r;
+        rgba[1] = c.g;
+        rgba[2] = c.b;
+        rgba[3] = c.a;
+    }
+}
+
+const char* djv_note_add(djv_models* models, const char* text)
+{
+    if (!models || models->reviewPath.empty())
+        return nullptr;
+    auto p = tl::c::getPlayer(models->player);
+    if (!p)
+        return nullptr;
+    const OTIO_NS::RationalTime time = p->getCurrentTime();
+    models->noteId = models->markersModel->add(
+        OTIO_NS::TimeRange(time, OTIO_NS::RationalTime(1.0, time.rate())),
+        std::string(),
+        text ? text : "");
+    return models->noteId.c_str();
+}
+
+void djv_note_set_text(djv_models* models, const char* id, const char* text)
+{
+    if (models && id)
+    {
+        models->markersModel->update(id, text ? text : "");
+    }
+}
+
+void djv_note_remove(djv_models* models, const char* id)
+{
+    if (models && id)
+    {
+        models->markersModel->remove(id);
+    }
+}
+
+const char* djv_review_get_author(djv_models* models)
+{
+    if (!models)
+        return "";
+    models->author = models->settingsModel->getReview().author;
+    return models->author.c_str();
+}
+
+void djv_review_set_author(djv_models* models, const char* value)
+{
+    if (!models)
+        return;
+    auto review = models->settingsModel->getReview();
+    review.author = value ? value : "";
+    models->settingsModel->setReview(review);
 }

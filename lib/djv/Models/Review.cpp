@@ -24,6 +24,10 @@
 #include <sstream>
 #include <stdexcept>
 
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#endif
+
 namespace djv
 {
     namespace models
@@ -219,6 +223,9 @@ namespace djv
         std::string reviewAuthor()
         {
             std::string out = author;
+#if !(defined(__APPLE__) && TARGET_OS_IPHONE)
+            // The iPad's user is the same for everyone ("mobile"): no
+            // name rather than that one.
             if (out.empty())
             {
 #if defined(_WIN32)
@@ -227,6 +234,7 @@ namespace djv
                 ftk::getEnv("USER", out);
 #endif
             }
+#endif
             return out;
         }
 

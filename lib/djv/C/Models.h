@@ -478,10 +478,39 @@ DJV_C_API double djv_draw_get_frame(djv_models*, size_t);
 
 //! The frame to go to from the player's, in seconds from the start of
 //! its timeline, as DJV's Previous and Next Marker do: the next or the
-//! previous with a drawing or one of the markers given (in seconds from
-//! the start), around from one end to the other. Below zero when there
-//! is none.
+//! previous with a drawing, a note, or one of the markers given (in
+//! seconds from the start), around from one end to the other. Below zero
+//! when there is none.
 DJV_C_API double djv_review_get_jump(djv_models*, const double* markers, size_t count, int next);
+
+//! The review's notes, as DJV's review markers: in time order, those
+//! about no frame in particular first. Saved in the review with the
+//! drawings, and the desktop's markers. The strings stay valid until the
+//! notes change.
+DJV_C_API size_t djv_note_get_count(djv_models*);
+DJV_C_API const char* djv_note_get_id(djv_models*, size_t);
+DJV_C_API const char* djv_note_get_name(djv_models*, size_t);
+DJV_C_API const char* djv_note_get_text(djv_models*, size_t);
+DJV_C_API const char* djv_note_get_author(djv_models*, size_t);
+//! When it was written, ISO 8601.
+DJV_C_API const char* djv_note_get_created(djv_models*, size_t);
+//! The frames it is about, in seconds from the start of the player's
+//! timeline: a start below zero for none in particular.
+DJV_C_API void djv_note_get_range(djv_models*, size_t, double* start, double* duration);
+DJV_C_API void djv_note_get_color(djv_models*, size_t, float rgba[4]);
+
+//! Add a note about the player's frame, signed with the author: its id,
+//! valid until the next one is added; NULL without a review or a
+//! player.
+DJV_C_API const char* djv_note_add(djv_models*, const char* text);
+//! A note's text changed; who wrote it and when stay.
+DJV_C_API void djv_note_set_text(djv_models*, const char* id, const char* text);
+DJV_C_API void djv_note_remove(djv_models*, const char* id);
+
+//! The name the notes and drawings are signed with, kept in the
+//! settings. Empty signs them with nothing on the iPad.
+DJV_C_API const char* djv_review_get_author(djv_models*);
+DJV_C_API void djv_review_set_author(djv_models*, const char*);
 DJV_C_API int djv_draw_has_frame(djv_models*);
 
 ///@}

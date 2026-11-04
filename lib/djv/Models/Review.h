@@ -87,7 +87,7 @@ namespace djv
         //! it says who wrote a note when a session comes back from someone else.
         //! Who is making the markers and the drawings: the author set with
         //! setReviewAuthor(), and the user name the system gives where none
-        //! is set.
+        //! is set, except on the iPad, whose user is the same for everyone.
         DJV_MODELS_API std::string reviewAuthor();
 
         //! Set the author, from the settings. Empty goes back to the user

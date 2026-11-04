@@ -206,7 +206,7 @@ static void writeFile(const char* path, const char* text)
 
 static int fileContains(const char* path, const char* text)
 {
-    char buf[8192];
+    static char buf[65536];
     FILE* f = fopen(path, "r");
     if (!f)
         return 0;
@@ -282,20 +282,64 @@ static void drawing(tl_engine* engine, tl_player* player)
     djv_draw_undo(models);
     CHECK(djv_draw_has_frame(models));
 
+    /* A note on the frame, signed with the author; its text changed, who
+       wrote it kept; another added and taken away. */
+    djv_review_set_author(models, "Pad");
+    CHECK(strcmp(djv_review_get_author(models), "Pad") == 0);
+    CHECK(djv_note_get_count(models) == 0);
+    const char* id = djv_note_add(models, "Too dark");
+    CHECK(id != NULL);
+    char noteId[64] = { 0 };
+    if (id)
+        strncpy(noteId, id, sizeof(noteId) - 1);
+    CHECK(djv_note_get_count(models) == 1);
+    CHECK(strcmp(djv_note_get_text(models, 0), "Too dark") == 0);
+    CHECK(strcmp(djv_note_get_author(models, 0), "Pad") == 0);
+    CHECK(strlen(djv_note_get_created(models, 0)) > 0);
+    double start = -1.0, duration = 0.0;
+    djv_note_get_range(models, 0, &start, &duration);
+    CHECK_NEAR(start, 0.0, 0.0001);
+    CHECK(duration > 0.0);
+    djv_note_set_text(models, noteId, "Much too dark");
+    CHECK(strcmp(djv_note_get_text(models, 0), "Much too dark") == 0);
+    CHECK(strcmp(djv_note_get_author(models, 0), "Pad") == 0);
+    id = djv_note_add(models, "Gone");
+    CHECK(djv_note_get_count(models) == 2);
+    if (id)
+    {
+        char gone[64] = { 0 };
+        strncpy(gone, id, sizeof(gone) - 1);
+        djv_note_remove(models, gone);
+    }
+    CHECK(djv_note_get_count(models) == 1);
+
     /* Saved, keeping what the iPad does not read, and read again. */
     CHECK(djv_review_save(models) == 1);
     CHECK(fileContains(DJV_C_TEST_DIR "/review.djvr", "\"elsewhere\""));
+    CHECK(fileContains(DJV_C_TEST_DIR "/review.djvr", "Much too dark"));
     djv_review_close(models);
     CHECK(djv_draw_get_frame_count(models) == 0);
+    CHECK(djv_note_get_count(models) == 0);
     CHECK(djv_review_open(models, DJV_C_TEST_DIR "/review.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
     djv_models_set_player(models, player);
     CHECK(djv_draw_get_frame_count(models) == 1);
+    CHECK(djv_note_get_count(models) == 1);
+    CHECK(strcmp(djv_note_get_text(models, 0), "Much too dark") == 0);
+    CHECK(strcmp(djv_note_get_author(models, 0), "Pad") == 0);
 
     /* A new review is not written while it has nothing in it. */
     CHECK(djv_review_open(models, DJV_C_TEST_DIR "/empty.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
     CHECK(djv_draw_get_frame_count(models) == 0);
     CHECK(djv_review_save(models) == 1);
     CHECK(fopen(DJV_C_TEST_DIR "/empty.djvr", "r") == NULL);
+
+    /* One with only a note is. */
+    remove(DJV_C_TEST_DIR "/note.djvr");
+    CHECK(djv_review_open(models, DJV_C_TEST_DIR "/note.djvr", DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg") == 1);
+    CHECK(djv_note_add(models, "Only this") != NULL);
+    CHECK(djv_review_save(models) == 1);
+    CHECK(fileContains(DJV_C_TEST_DIR "/note.djvr", "Only this"));
+    djv_review_set_author(models, "");
 
     /* What cannot be read says why. */
     writeFile(DJV_C_TEST_DIR "/bad.djvr", "{ not a review");
