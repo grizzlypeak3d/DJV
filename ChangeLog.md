@@ -7,6 +7,7 @@ Changes:
 * The keyboard shortcuts table has grid lines.
 * The aspect ratio types are named in full: Pixel Aspect Ratio (PAR) and
   Display Aspect Ratio (DAR).
+* Review files open in DJV from the Finder on macOS.
 
 Fixes:
 * Fix for OTIO image sequences being read one frame off when the
