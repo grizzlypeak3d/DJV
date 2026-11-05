@@ -21,7 +21,6 @@ Fixes:
 * Fix for presentation mode staying on when the last file is closed.
 * Fix for the image not updating when moving outside the in/out points.
 * Fix for review files not opening when dropped on the window.
-* Fix for the view flashing with the drawings' color when a review opens.
 
 ## 3.7.5
 
