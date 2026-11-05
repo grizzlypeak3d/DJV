@@ -505,7 +505,7 @@ static void persistence(tl_engine* engine)
 
 int main(void)
 {
-    tl_engine* engine = tl_engine_create();
+    tl_engine* engine = tl_engine_create(NULL);
     CHECK(engine != NULL);
     if (!engine)
         return 1;
