@@ -24,5 +24,4 @@ settings.html Settings
 automation.html Automation
 command-line.html Command line
 python.html Python
-ipad.html iPad
 troubleshooting.html Troubleshooting
