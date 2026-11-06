@@ -33,6 +33,7 @@ namespace djv
             _hit();
             _mapping();
             _input();
+            _move();
         }
 
         // Every index is one-based and inside the mesh, or the renderer
@@ -407,6 +408,57 @@ namespace djv
             // The eraser's reach: the size, or a fingertip on the screen.
             FTK_CHECK(10.F == models::eraserRadius(10.F, 22.F, 4.F));
             FTK_CHECK(11.F == models::eraserRadius(4.F, 22.F, 2.F));
+        }
+    
+        void StrokeTest::_move()
+        {
+            const ftk::Size2I imageSize(100, 100);
+
+            // Ink moves whole, and stops at the edge of the picture.
+            models::ReviewStroke ink;
+            ink.kind = models::ReviewStrokeKind::Freehand;
+            ink.points = { ftk::V2F(10.F, 10.F), ftk::V2F(20.F, 20.F) };
+            FTK_CHECK(models::strokeHandles(ink).empty());
+            auto moved = models::moveStroke(ink, ftk::V2F(5.F, 5.F), imageSize);
+            FTK_CHECK(15.F == moved.points[0].x && 15.F == moved.points[0].y);
+            FTK_CHECK(25.F == moved.points[1].x && 25.F == moved.points[1].y);
+            moved = models::moveStroke(ink, ftk::V2F(100.F, -50.F), imageSize);
+            FTK_CHECK(90.F == moved.points[0].x && 0.F == moved.points[0].y);
+            FTK_CHECK(100.F == moved.points[1].x && 10.F == moved.points[1].y);
+            // Without the picture's size, nothing holds it.
+            moved = models::moveStroke(ink, ftk::V2F(100.F, 0.F), ftk::Size2I());
+            FTK_CHECK(110.F == moved.points[0].x);
+
+            // A shape's two points are its handles.
+            models::ReviewStroke rect;
+            rect.kind = models::ReviewStrokeKind::Rectangle;
+            rect.points = { ftk::V2F(10.F, 10.F), ftk::V2F(30.F, 20.F) };
+            const auto handles = models::strokeHandles(rect);
+            FTK_CHECK(2 == handles.size());
+            FTK_CHECK(30.F == handles[1].x && 20.F == handles[1].y);
+            moved = models::moveHandle(rect, 1, ftk::V2F(40.F, 25.F), false);
+            FTK_CHECK(10.F == moved.points[0].x && 10.F == moved.points[0].y);
+            FTK_CHECK(40.F == moved.points[1].x && 25.F == moved.points[1].y);
+            // Held square against the other point.
+            moved = models::moveHandle(rect, 0, ftk::V2F(0.F, 5.F), true);
+            FTK_CHECK(0.F == moved.points[0].x && -10.F == moved.points[0].y);
+            FTK_CHECK(30.F == moved.points[1].x && 20.F == moved.points[1].y);
+            moved = models::moveHandle(rect, 2, ftk::V2F(0.F, 0.F), false);
+            FTK_CHECK(10.F == moved.points[0].x && 30.F == moved.points[1].x);
+            // The whole shape, the corners it is drawn through held inside.
+            moved = models::moveStroke(rect, ftk::V2F(-20.F, 100.F), imageSize);
+            FTK_CHECK(0.F == moved.points[0].x && 90.F == moved.points[0].y);
+            FTK_CHECK(20.F == moved.points[1].x && 100.F == moved.points[1].y);
+
+            // Text, by the box it is taken to cover.
+            models::ReviewStroke text;
+            text.kind = models::ReviewStrokeKind::Text;
+            text.text = "abc";
+            text.textSize = 10.F;
+            text.points = { ftk::V2F(0.F, 0.F) };
+            FTK_CHECK(models::strokeHandles(text).empty());
+            moved = models::moveStroke(text, ftk::V2F(200.F, 200.F), imageSize);
+            FTK_CHECK(82.F == moved.points[0].x && 90.F == moved.points[0].y);
         }
     }
 }

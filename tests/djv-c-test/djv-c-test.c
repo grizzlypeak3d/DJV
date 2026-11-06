@@ -334,8 +334,28 @@ static void drawing(tl_engine* engine, tl_player* player)
     const double markers[1] = { 0.0 };
     CHECK_NEAR(djv_review_get_jump(models, markers, 1, 1), 0.0, 0.0001);
 
-    /* No view, so nowhere to draw. */
+    /* No view, so nowhere to draw, to type or to select. */
     CHECK(djv_draw_begin(models, 10.F, 10.F, 0, 0.F) == 0);
+    djv_draw_set_tool(models, DJV_DRAW_TEXT);
+    CHECK(djv_draw_begin(models, 10.F, 10.F, 0, 0.F) == 0);
+    CHECK(!djv_text_is_open(models));
+    CHECK(strcmp(djv_text_get(models), "") == 0);
+    djv_text_set(models, "ignored");
+    djv_text_end(models, 1);
+    CHECK(djv_draw_get_frame_count(models) == 1);
+    djv_draw_set_tool(models, DJV_DRAW_SELECT);
+    CHECK(djv_draw_begin(models, 10.F, 10.F, 0, 0.F) == 0);
+    CHECK(!djv_select_has(models));
+    CHECK(djv_select_get_index(models) < 0);
+    CHECK(!djv_select_is_text(models));
+    CHECK(!djv_select_edit_text(models));
+    djv_select_remove(models);
+    CHECK(djv_draw_has_frame(models));
+    djv_draw_set_tool(models, DJV_DRAW_PEN);
+
+    /* The text's size, kept in the settings. */
+    djv_draw_set_text_size(models, 64.F);
+    CHECK_NEAR(djv_draw_get_text_size(models), 64.0, 0.0001);
 
     /* Cleared, and back again. */
     CHECK(!djv_draw_has_undo(models));

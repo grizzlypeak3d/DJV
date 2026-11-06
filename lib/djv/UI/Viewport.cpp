@@ -1368,10 +1368,6 @@ namespace djv
 
         namespace
         {
-            //! The size of a handle on the screen, in pixels at a display
-            //! scale of one.
-            const float handleSize = 8.F;
-
             //! How near a press has to be to take a handle or a stroke, and
             //! the least an eraser reaches, in pixels at a display scale of
             //! one: a pointer's, and a fingertip's, which covers far more
@@ -1590,19 +1586,18 @@ namespace djv
             if (p.selection.has_value())
             {
                 const auto strokes = p.annotationsModel->getStrokes(p.selection->sourceId, p.selection->time);
-                if (p.selection->index < strokes.size() &&
-                    models::isTwoPointShape(strokes[p.selection->index].kind) &&
-                    strokes[p.selection->index].points.size() > 1)
+                if (p.selection->index < strokes.size())
                 {
                     const auto& stroke = strokes[p.selection->index];
-                    for (int i = 0; i < 2; ++i)
+                    const auto handles = models::strokeHandles(stroke);
+                    for (size_t i = 0; i < handles.size(); ++i)
                     {
-                        const ftk::V2F s = _imageToWidget(p.selection->source, stroke.points[i]);
+                        const ftk::V2F s = _imageToWidget(p.selection->source, handles[i]);
                         const float reach = _reach();
                         if (std::abs(s.x - widgetPos.x) <= reach &&
                             std::abs(s.y - widgetPos.y) <= reach)
                         {
-                            p.handle = i;
+                            p.handle = static_cast<int>(i);
                             p.moving = stroke;
                             setDrawUpdate();
                             return;
@@ -1683,57 +1678,26 @@ namespace djv
             }
             if (p.handle >= 0)
             {
-                models::ReviewStroke stroke = strokes[p.selection->index];
-                if (p.handle < static_cast<int>(stroke.points.size()))
-                {
-                    const ftk::V2F& other = stroke.points[1 - p.handle];
-                    stroke.points[p.handle] = models::constrainShape(stroke.kind, other, *clamped, _isConstrained(modifiers));
-                    p.moving = stroke;
-                    setDrawUpdate();
-                }
+                p.moving = models::moveHandle(
+                    strokes[p.selection->index],
+                    p.handle,
+                    *clamped,
+                    _isConstrained(modifiers));
+                setDrawUpdate();
                 return;
             }
-            ftk::V2F offset(clamped->x - p.movePressPos.x, clamped->y - p.movePressPos.y);
-            models::ReviewStroke stroke = strokes[p.selection->index];
             // The stroke stops at the edge of the picture rather than
-            // leaving it: the offset is held to what keeps its bounds
-            // inside.
+            // leaving it.
+            ftk::Size2I imageSize;
             const auto& video = p.videoFrames[p.selection->source];
             if (!video.layers.empty() && video.layers[0].image)
             {
-                const ftk::Size2I imageSize = video.layers[0].image->getSize();
-                float minX = 0.F, minY = 0.F, maxX = 0.F, maxY = 0.F;
-                bool first = true;
-                for (const auto& point : models::shapePath(stroke.kind, stroke.points))
-                {
-                    if (first)
-                    {
-                        minX = maxX = point.x;
-                        minY = maxY = point.y;
-                        first = false;
-                    }
-                    minX = std::min(minX, point.x);
-                    minY = std::min(minY, point.y);
-                    maxX = std::max(maxX, point.x);
-                    maxY = std::max(maxY, point.y);
-                }
-                if (models::ReviewStrokeKind::Text == stroke.kind)
-                {
-                    maxX = minX + std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
-                    maxY = minY + stroke.textSize;
-                }
-                if (!first)
-                {
-                    offset.x = std::max(-minX, std::min(imageSize.w - maxX, offset.x));
-                    offset.y = std::max(-minY, std::min(imageSize.h - maxY, offset.y));
-                }
+                imageSize = video.layers[0].image->getSize();
             }
-            for (auto& point : stroke.points)
-            {
-                point.x += offset.x;
-                point.y += offset.y;
-            }
-            p.moving = stroke;
+            p.moving = models::moveStroke(
+                strokes[p.selection->index],
+                ftk::V2F(clamped->x - p.movePressPos.x, clamped->y - p.movePressPos.y),
+                imageSize);
             setDrawUpdate();
         }
 
@@ -2184,81 +2148,24 @@ namespace djv
             const models::ReviewStroke& stroke,
             float scale)
         {
-            if (stroke.points.empty() || !_imageMapping(index).isValid())
+            if (!_imageMapping(index).isValid())
             {
                 return;
             }
-            // A thin frame around what the stroke covers on the screen,
-            // a little outside it.
             const ftk::Box2I& g = getGeometry();
-            const float zoom = static_cast<float>(getZoom());
-            float minX = 0.F, minY = 0.F, maxX = 0.F, maxY = 0.F;
-            bool first = true;
-            auto add = [&](const ftk::V2F& point)
-            {
-                ftk::V2F s = _imageToWidget(index, point);
-                s.x += g.min.x;
-                s.y += g.min.y;
-                if (first)
+            models::drawSelection(
+                event.render,
+                event.fontSystem,
+                stroke,
+                [this, index, &g](const ftk::V2F& point)
                 {
-                    minX = maxX = s.x;
-                    minY = maxY = s.y;
-                    first = false;
-                }
-                minX = std::min(minX, s.x);
-                minY = std::min(minY, s.y);
-                maxX = std::max(maxX, s.x);
-                maxY = std::max(maxY, s.y);
-            };
-            if (models::ReviewStrokeKind::Text == stroke.kind)
-            {
-                ftk::FontInfo fontInfo;
-                fontInfo.size = std::max(1, static_cast<int>(std::round(stroke.textSize * scale * zoom)));
-                const ftk::Size2I size = event.fontSystem->getSize(stroke.text, fontInfo);
-                add(stroke.points.front());
-                const float w = size.w / (scale * zoom);
-                const float h = std::max(static_cast<float>(size.h), fontInfo.size * 1.F) / (scale * zoom);
-                add(ftk::V2F(stroke.points.front().x + w, stroke.points.front().y + h));
-            }
-            else
-            {
-                for (const auto& point : models::shapePath(stroke.kind, stroke.points))
-                {
-                    add(point);
-                }
-            }
-            // The two points of a shape, as handles to drag.
-            if (models::isTwoPointShape(stroke.kind) && stroke.points.size() > 1)
-            {
-                for (int i = 0; i < 2; ++i)
-                {
-                    ftk::V2F s = _imageToWidget(index, stroke.points[i]);
-                    s.x += g.min.x;
-                    s.y += g.min.y;
-                    const float h = handleSize * _displayScale();
-                    event.render->drawRect(
-                        ftk::Box2F(s.x - h / 2.F - 1.F, s.y - h / 2.F - 1.F, h + 2.F, h + 2.F),
-                        ftk::Color4F(0.F, 0.F, 0.F, .6F));
-                    event.render->drawRect(
-                        ftk::Box2F(s.x - h / 2.F, s.y - h / 2.F, h, h),
-                        ftk::Color4F(1.F, 1.F, 1.F, .95F));
-                }
-            }
-            const float pad = stroke.width * scale * zoom / 2.F + 6.F;
-            const ftk::Box2F box(minX - pad, minY - pad, maxX - minX + pad * 2.F, maxY - minY + pad * 2.F);
-            const ftk::Color4F color(1.F, 1.F, 1.F, .85F);
-            const ftk::Color4F shadow(0.F, 0.F, 0.F, .5F);
-            // A dark line under a light one, so the frame reads on any picture.
-            for (int pass = 0; pass < 2; ++pass)
-            {
-                const float t = pass ? 1.F : 3.F;
-                const float o = pass ? 0.F : 1.F;
-                const ftk::Color4F& c = pass ? color : shadow;
-                event.render->drawRect(ftk::Box2F(box.min.x - o, box.min.y - o, box.w() + o * 2.F, t), c);
-                event.render->drawRect(ftk::Box2F(box.min.x - o, box.max.y - t + o + 1.F, box.w() + o * 2.F, t), c);
-                event.render->drawRect(ftk::Box2F(box.min.x - o, box.min.y - o, t, box.h() + o * 2.F), c);
-                event.render->drawRect(ftk::Box2F(box.max.x - t + o + 1.F, box.min.y - o, t, box.h() + o * 2.F), c);
-            }
+                    ftk::V2F out = _imageToWidget(index, point);
+                    out.x += g.min.x;
+                    out.y += g.min.y;
+                    return out;
+                },
+                scale * static_cast<float>(getZoom()),
+                _displayScale());
         }
 
         void Viewport::_compareUpdate()

@@ -173,6 +173,33 @@ namespace djv
 
         ///@}
 
+        //! \name Moving a Stroke
+        //! What the desktop's viewport and the iPad do with the Select
+        //! tool. The points are in the image's pixels.
+        ///@{
+
+        //! The points of a stroke that are dragged on their own: the two
+        //! of a shape; none for ink or text, which move whole.
+        DJV_MODELS_API std::vector<ftk::V2F> strokeHandles(const ReviewStroke&);
+
+        //! A stroke moved by an offset, held so that what it covers stays
+        //! on an image of the size: it stops at the edge rather than
+        //! leaving the picture.
+        DJV_MODELS_API ReviewStroke moveStroke(
+            const ReviewStroke&,
+            const ftk::V2F& offset,
+            const ftk::Size2I& imageSize);
+
+        //! A stroke with one of its handles moved to a point, against the
+        //! other, constrained when asked.
+        DJV_MODELS_API ReviewStroke moveHandle(
+            const ReviewStroke&,
+            int handle,
+            const ftk::V2F& pos,
+            bool constrain);
+
+        ///@}
+
         ///@}
     }
 }

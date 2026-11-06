@@ -780,5 +780,78 @@ namespace djv
         {
             return std::max(size, screenReach / std::max(.001F, screenScale));
         }
+
+        std::vector<ftk::V2F> strokeHandles(const ReviewStroke& stroke)
+        {
+            std::vector<ftk::V2F> out;
+            if (isTwoPointShape(stroke.kind) && stroke.points.size() > 1)
+            {
+                out.push_back(stroke.points[0]);
+                out.push_back(stroke.points[1]);
+            }
+            return out;
+        }
+
+        ReviewStroke moveStroke(
+            const ReviewStroke& stroke,
+            const ftk::V2F& offset,
+            const ftk::Size2I& imageSize)
+        {
+            ReviewStroke out = stroke;
+            ftk::V2F o = offset;
+            if (imageSize.isValid())
+            {
+                // The offset is held to what keeps the stroke's bounds
+                // inside.
+                float minX = 0.F, minY = 0.F, maxX = 0.F, maxY = 0.F;
+                bool first = true;
+                for (const auto& point : shapePath(stroke.kind, stroke.points))
+                {
+                    if (first)
+                    {
+                        minX = maxX = point.x;
+                        minY = maxY = point.y;
+                        first = false;
+                    }
+                    minX = std::min(minX, point.x);
+                    minY = std::min(minY, point.y);
+                    maxX = std::max(maxX, point.x);
+                    maxY = std::max(maxY, point.y);
+                }
+                if (ReviewStrokeKind::Text == stroke.kind && !first)
+                {
+                    // The box the text is taken to cover, as strokeHit()
+                    // has it.
+                    maxX = minX + std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
+                    maxY = minY + stroke.textSize;
+                }
+                if (!first)
+                {
+                    o.x = std::max(-minX, std::min(imageSize.w - maxX, o.x));
+                    o.y = std::max(-minY, std::min(imageSize.h - maxY, o.y));
+                }
+            }
+            for (auto& point : out.points)
+            {
+                point.x += o.x;
+                point.y += o.y;
+            }
+            return out;
+        }
+
+        ReviewStroke moveHandle(
+            const ReviewStroke& stroke,
+            int handle,
+            const ftk::V2F& pos,
+            bool constrain)
+        {
+            ReviewStroke out = stroke;
+            if (handle >= 0 && handle < 2 && out.points.size() > 1)
+            {
+                const ftk::V2F other = out.points[1 - handle];
+                out.points[handle] = constrainShape(out.kind, other, pos, constrain);
+            }
+            return out;
+        }
     }
 }

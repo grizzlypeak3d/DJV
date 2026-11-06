@@ -96,5 +96,81 @@ namespace djv
                 break;
             }
         }
+    
+        void drawSelection(
+            const std::shared_ptr<ftk::IRender>& render,
+            const std::shared_ptr<ftk::FontSystem>& fontSystem,
+            const models::ReviewStroke& stroke,
+            const std::function<ftk::V2F(const ftk::V2F&)>& toScreen,
+            float scale,
+            float displayScale)
+        {
+            if (stroke.points.empty())
+            {
+                return;
+            }
+            // What the stroke covers on the screen.
+            float minX = 0.F, minY = 0.F, maxX = 0.F, maxY = 0.F;
+            bool first = true;
+            auto add = [&](const ftk::V2F& point)
+            {
+                const ftk::V2F s = toScreen(point);
+                if (first)
+                {
+                    minX = maxX = s.x;
+                    minY = maxY = s.y;
+                    first = false;
+                }
+                minX = std::min(minX, s.x);
+                minY = std::min(minY, s.y);
+                maxX = std::max(maxX, s.x);
+                maxY = std::max(maxY, s.y);
+            };
+            const float s = std::max(.001F, scale);
+            if (models::ReviewStrokeKind::Text == stroke.kind)
+            {
+                ftk::FontInfo fontInfo;
+                fontInfo.size = std::max(1, static_cast<int>(std::round(stroke.textSize * s)));
+                const ftk::Size2I size = fontSystem->getSize(stroke.text, fontInfo);
+                const ftk::V2F& a = stroke.points.front();
+                const float w = size.w / s;
+                const float h = std::max(static_cast<float>(size.h), fontInfo.size * 1.F) / s;
+                add(a);
+                add(ftk::V2F(a.x + w, a.y + h));
+            }
+            else
+            {
+                for (const auto& point : models::shapePath(stroke.kind, stroke.points))
+                {
+                    add(point);
+                }
+            }
+            // The two points of a shape, as handles to drag.
+            for (const auto& point : models::strokeHandles(stroke))
+            {
+                const ftk::V2F p = toScreen(point);
+                const float h = selectionHandleSize * displayScale;
+                render->drawRect(
+                    ftk::Box2F(p.x - h / 2.F - 1.F, p.y - h / 2.F - 1.F, h + 2.F, h + 2.F),
+                    ftk::Color4F(0.F, 0.F, 0.F, .6F));
+                render->drawRect(
+                    ftk::Box2F(p.x - h / 2.F, p.y - h / 2.F, h, h),
+                    ftk::Color4F(1.F, 1.F, 1.F, .95F));
+            }
+            const float pad = stroke.width * s / 2.F + 6.F;
+            const ftk::Box2F box(minX - pad, minY - pad, maxX - minX + pad * 2.F, maxY - minY + pad * 2.F);
+            const ftk::Color4F color(1.F, 1.F, 1.F, .85F);
+            const ftk::Color4F shadow(0.F, 0.F, 0.F, .5F);
+            for (int pass = 0; pass < 2; ++pass)
+            {
+                const float t = pass ? 1.F : 3.F;
+                const float o = pass ? 0.F : 1.F;
+                const ftk::Color4F& c = pass ? color : shadow;
+                render->drawRect(ftk::Box2F(box.min.x - o, box.min.y - o, box.w() + o * 2.F, t), c);
+                render->drawRect(ftk::Box2F(box.min.x - o, box.max.y - t + o + 1.F, box.w() + o * 2.F, t), c);
+                render->drawRect(ftk::Box2F(box.min.x - o, box.min.y - o, t, box.h() + o * 2.F), c);
+                render->drawRect(ftk::Box2F(box.max.x - t + o + 1.F, box.min.y - o, t, box.h() + o * 2.F), c);
+            }
+        }
     }
 }

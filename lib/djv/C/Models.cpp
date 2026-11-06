@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -76,6 +77,26 @@ struct djv_models
     models::ReviewStroke stroke;
     OTIO_NS::RationalTime strokeTime;
     std::vector<double> frames;
+
+    // The text being typed, which stays open after the tap that began it
+    // until it is finished; and whether it is the selected stroke written
+    // again rather than a new one.
+    bool typing = false;
+    bool typingSelection = false;
+
+    // The selected stroke: the frame it is on and its place among that
+    // frame's strokes. While it is moved, a copy with the move applied is
+    // drawn in its place; the handle is the point of a shape dragged, or
+    // none while the whole stroke moves.
+    struct Selection
+    {
+        OTIO_NS::RationalTime time;
+        size_t index = 0;
+    };
+    std::optional<Selection> selection;
+    std::optional<models::ReviewStroke> moving;
+    ftk::V2F movePressPos;
+    int handle = -1;
 
     tl_view* view = nullptr;
     tl_player* player = nullptr;
@@ -125,6 +146,7 @@ struct djv_models
     std::shared_ptr<ftk::Observer<models::DrawTool> > drawToolObserver;
     std::shared_ptr<ftk::Observer<ftk::Color4F> > drawColorObserver;
     std::shared_ptr<ftk::Observer<float> > drawSizeObserver;
+    std::shared_ptr<ftk::Observer<float> > drawTextSizeObserver;
     std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
 
@@ -182,6 +204,160 @@ struct djv_models
         }
     }
 
+    // The strokes of the selection's frame, and the selected one, while
+    // the frame shown is the one it is on and it is still there: a frame
+    // changed, an undo or an erase takes it away.
+    std::optional<models::ReviewStroke> selected() const
+    {
+        std::optional<models::ReviewStroke> out;
+        const auto time = currentTime();
+        if (selection.has_value() && time.has_value() && !fileId.empty() &&
+            models::sameTime(selection->time, *time))
+        {
+            const auto strokes = annotationsModel->getStrokes(fileId, selection->time);
+            if (selection->index < strokes.size())
+            {
+                out = strokes[selection->index];
+            }
+        }
+        return out;
+    }
+
+    void selectionClear()
+    {
+        if (typingSelection)
+        {
+            textEnd(true);
+        }
+        if (selection.has_value())
+        {
+            selection.reset();
+            moving.reset();
+            handle = -1;
+            tl::c::setNeedsDraw(view);
+            ++generation;
+        }
+    }
+
+    // The color or a size changed, for the selected stroke too, as on
+    // the desktop: one undo step.
+    void selectionUpdate(const std::function<void(models::ReviewStroke&)>& change)
+    {
+        if (moving.has_value() || typing)
+            return;
+        if (auto stroke = selected())
+        {
+            change(*stroke);
+            annotationsModel->setStroke(fileId, selection->time, selection->index, *stroke);
+        }
+    }
+
+    // A press with the Select tool, in the view's pixels: a handle of
+    // the selected shape, or the stroke under it, as the desktop's
+    // viewport takes them; false, and nothing selected, where there is
+    // none.
+    bool selectPress(float x, float y, bool pen)
+    {
+        const auto time = currentTime();
+        const models::ImageMapping m = mapping();
+        const ftk::V2F render = toRender(x, y);
+        if (!time.has_value() || !m.isValid())
+            return false;
+        const auto picture = tl::c::getViewPicture(view);
+        // A fingertip's reach for a finger, a pointer's for a pen.
+        const float reach = (pen ? 8.F : 22.F) * picture.displayScale;
+        handle = -1;
+        if (const auto stroke = selected())
+        {
+            const auto handles = models::strokeHandles(*stroke);
+            for (size_t i = 0; i < handles.size(); ++i)
+            {
+                const ftk::V2F r = m.toRender(handles[i]);
+                const ftk::V2F s(picture.pos.x + r.x * picture.zoom, picture.pos.y + r.y * picture.zoom);
+                if (std::abs(s.x - x) <= reach && std::abs(s.y - y) <= reach)
+                {
+                    handle = static_cast<int>(i);
+                    moving = *stroke;
+                    tl::c::setNeedsDraw(view);
+                    return true;
+                }
+            }
+        }
+        std::optional<size_t> found;
+        if (m.contains(render))
+        {
+            const float radius = reach / std::max(.001F, m.scale() * picture.zoom);
+            found = annotationsModel->findStroke(fileId, *time, m.toImage(render), radius);
+        }
+        if (!found.has_value())
+        {
+            // A press away from the selection takes it away, and nothing
+            // more; with none, the press is not the tool's.
+            const bool had = selection.has_value();
+            selectionClear();
+            return had;
+        }
+        selection = Selection{ *time, *found };
+        moving = annotationsModel->getStrokes(fileId, *time)[*found];
+        movePressPos = m.toImage(render);
+        tl::c::setNeedsDraw(view);
+        ++generation;
+        return true;
+    }
+
+    void selectMove(float x, float y)
+    {
+        const auto stroke = selected();
+        const models::ImageMapping m = mapping();
+        if (!stroke.has_value() || !moving.has_value() || !m.isValid())
+            return;
+        const ftk::V2F pos = m.clamp(m.toImage(toRender(x, y)));
+        if (handle >= 0)
+        {
+            moving = models::moveHandle(*stroke, handle, pos, drawModel->isConstrain());
+        }
+        else
+        {
+            moving = models::moveStroke(
+                *stroke,
+                ftk::V2F(pos.x - movePressPos.x, pos.y - movePressPos.y),
+                m.imageSize);
+        }
+        tl::c::setNeedsDraw(view);
+    }
+
+    // The text finished: kept, or dropped. The selected text written
+    // again is kept as it is now, or removed when nothing is left of it.
+    void textEnd(bool commit)
+    {
+        if (!typing)
+            return;
+        typing = false;
+        if (typingSelection)
+        {
+            typingSelection = false;
+            if (commit && selection.has_value())
+            {
+                if (!stroke.text.empty())
+                {
+                    annotationsModel->setStroke(fileId, selection->time, selection->index, stroke);
+                }
+                else
+                {
+                    annotationsModel->removeStroke(fileId, selection->time, selection->index);
+                    selection.reset();
+                }
+            }
+        }
+        else if (commit && !stroke.text.empty())
+        {
+            annotationsModel->addStroke(fileId, strokeTime, stroke);
+        }
+        stroke = models::ReviewStroke();
+        tl::c::setNeedsDraw(view);
+        ++generation;
+    }
+
     // The drawings of the frame shown, and the stroke being drawn, over
     // the picture with the desktop's stroke drawing.
     void drawAnnotations(const std::shared_ptr<ftk::IRender>& render)
@@ -198,13 +374,29 @@ struct djv_models
         };
         const float scale = m.scale() * picture.zoom;
         const auto fontSystem = context->getSystem<ftk::FontSystem>();
-        for (const auto& s : annotationsModel->getStrokes(fileId, *time))
+        const bool selectedHere = selection.has_value() && models::sameTime(selection->time, *time);
+        const auto strokes = annotationsModel->getStrokes(fileId, *time);
+        for (size_t i = 0; i < strokes.size(); ++i)
         {
-            models::drawStroke(render, fontSystem, s, toScreen, scale);
+            const bool isSelected = selectedHere && selection->index == i;
+            // A stroke being moved or written again is drawn from the
+            // copy below, not from here.
+            if (isSelected && (moving.has_value() || typingSelection))
+                continue;
+            models::drawStroke(render, fontSystem, strokes[i], toScreen, scale);
+            if (isSelected)
+            {
+                models::drawSelection(render, fontSystem, strokes[i], toScreen, scale, picture.displayScale);
+            }
         }
-        if (drawing && models::sameTime(strokeTime, *time))
+        if (selectedHere && moving.has_value())
         {
-            models::drawStroke(render, fontSystem, stroke, toScreen, scale);
+            models::drawStroke(render, fontSystem, *moving, toScreen, scale);
+            models::drawSelection(render, fontSystem, *moving, toScreen, scale, picture.displayScale);
+        }
+        if ((drawing || typing) && models::sameTime(strokeTime, *time))
+        {
+            models::drawStroke(render, fontSystem, stroke, toScreen, scale, 1.F, typing);
         }
     }
 
@@ -533,19 +725,58 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->annotationsModel->observeAnnotations(),
         [out](const std::vector<models::ReviewAnnotation>&)
         {
+            // The selection names a stroke by its place; an undo or an
+            // erase can take that place away.
+            if (out->selection.has_value() && !out->moving.has_value() &&
+                out->selection->index >= out->annotationsModel->getStrokes(
+                    out->fileId, out->selection->time).size())
+            {
+                out->selection.reset();
+            }
             out->framesUpdate();
             tl::c::setNeedsDraw(out->view);
             ++out->generation;
         });
     out->drawToolObserver = ftk::Observer<models::DrawTool>::create(
         out->drawModel->observeTool(),
-        [out](models::DrawTool) { ++out->generation; });
+        [out](models::DrawTool value)
+        {
+            if (value != models::DrawTool::Select)
+            {
+                out->selectionClear();
+            }
+            ++out->generation;
+        });
+    // The color and the sizes are for the next stroke, and for the
+    // selected one while there is one.
     out->drawColorObserver = ftk::Observer<ftk::Color4F>::create(
         out->drawModel->observeColor(),
-        [out](const ftk::Color4F&) { ++out->generation; });
+        [out](const ftk::Color4F& value)
+        {
+            out->selectionUpdate([&value](models::ReviewStroke& s) { s.color = value; });
+            ++out->generation;
+        });
     out->drawSizeObserver = ftk::Observer<float>::create(
         out->drawModel->observeSize(),
-        [out](float) { ++out->generation; });
+        [out](float value)
+        {
+            out->selectionUpdate([value](models::ReviewStroke& s) { s.width = value; });
+            ++out->generation;
+        });
+    out->drawTextSizeObserver = ftk::Observer<float>::create(
+        out->drawModel->observeTextSize(),
+        [out](float value)
+        {
+            out->selectionUpdate(
+                [value](models::ReviewStroke& s)
+                {
+                    if (models::ReviewStrokeKind::Text == s.kind)
+                    {
+                        s.textSize = value;
+                    }
+                });
+            ++out->generation;
+        });
     out->markersObserver = ftk::ListObserver<models::ReviewMarker>::create(
         out->markersModel->observeMarkers(),
         [out](const std::vector<models::ReviewMarker>&) { ++out->generation; });
@@ -618,6 +849,7 @@ void djv_models_destroy(djv_models* models)
     models->drawToolObserver.reset();
     models->drawColorObserver.reset();
     models->drawSizeObserver.reset();
+    models->drawTextSizeObserver.reset();
     models->compareOptionsObserver.reset();
     models->compareTimeObserver.reset();
     models->cacheObserver.reset();
@@ -1808,12 +2040,18 @@ int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure
     if (!models || models->fileId.empty() || !models->isAShown())
         return 0;
     djv_draw_cancel(models);
+    const models::DrawTool tool = models->drawModel->getTool();
+    if (models::DrawTool::Select == tool)
+    {
+        // A handle can be at the edge of the picture, and a press off it
+        // still takes the selection away.
+        return models->selectPress(x, y, pen != 0) ? 1 : 0;
+    }
     const auto time = models->currentTime();
     const models::ImageMapping m = models->mapping();
     const ftk::V2F render = models->toRender(x, y);
     if (!time.has_value() || !m.contains(render))
         return 0;
-    const models::DrawTool tool = models->drawModel->getTool();
     switch (tool)
     {
     case models::DrawTool::Eraser:
@@ -1823,9 +2061,19 @@ int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure
         models->erase(render);
         return 1;
     case models::DrawTool::Text:
-    case models::DrawTool::Select:
-        // Not on a touch screen yet: typing and handles want more.
-        return 0;
+        // Begun where it was tapped, and open for typing until
+        // djv_text_end().
+        models->stroke = models::ReviewStroke();
+        models->stroke.kind = models::ReviewStrokeKind::Text;
+        models->stroke.color = models->drawModel->getColor();
+        models->stroke.width = models->drawModel->getSize();
+        models->stroke.textSize = models->drawModel->getTextSize();
+        models->stroke.points.push_back(m.toImage(render));
+        models->strokeTime = *time;
+        models->typing = true;
+        tl::c::setNeedsDraw(models->view);
+        ++models->generation;
+        return 1;
     default: break;
     }
     models->stroke = models::ReviewStroke();
@@ -1847,6 +2095,11 @@ void djv_draw_move(djv_models* models, float x, float y, float pressure)
     if (models->erasing)
     {
         models->erase(render);
+        return;
+    }
+    if (models->moving.has_value())
+    {
+        models->selectMove(x, y);
         return;
     }
     if (!models->drawing)
@@ -1874,6 +2127,26 @@ void djv_draw_end(djv_models* models)
 {
     if (!models)
         return;
+    // Text stays open for typing.
+    if (models->typing)
+        return;
+    if (models->moving.has_value())
+    {
+        // One undo step for the move; a press that did not move changes
+        // nothing.
+        if (models->selected().has_value())
+        {
+            models->annotationsModel->setStroke(
+                models->fileId,
+                models->selection->time,
+                models->selection->index,
+                *models->moving);
+        }
+        models->moving.reset();
+        models->handle = -1;
+        tl::c::setNeedsDraw(models->view);
+        return;
+    }
     if (models->drawing && models::strokeComplete(models->stroke))
     {
         models->annotationsModel->addStroke(models->fileId, models->strokeTime, models->stroke);
@@ -1899,11 +2172,128 @@ void djv_draw_cancel(djv_models* models)
         }
     }
     models->erasing = false;
+    // Text being typed is dropped, and a move put back.
+    if (models->typing)
+    {
+        models->textEnd(false);
+    }
+    if (models->moving.has_value())
+    {
+        models->moving.reset();
+        models->handle = -1;
+        tl::c::setNeedsDraw(models->view);
+    }
     models->stroke = models::ReviewStroke();
     if (was)
     {
         tl::c::setNeedsDraw(models->view);
     }
+}
+
+float djv_draw_get_text_size(djv_models* models)
+{
+    return models ? models->drawModel->getTextSize() : 48.F;
+}
+
+void djv_draw_set_text_size(djv_models* models, float value)
+{
+    if (models)
+        models->drawModel->setTextSize(value);
+}
+
+int djv_text_is_open(djv_models* models)
+{
+    return models && models->typing ? 1 : 0;
+}
+
+const char* djv_text_get(djv_models* models)
+{
+    return models && models->typing ? models->stroke.text.c_str() : "";
+}
+
+void djv_text_set(djv_models* models, const char* text)
+{
+    if (!models || !models->typing)
+        return;
+    models->stroke.text = text ? text : "";
+    tl::c::setNeedsDraw(models->view);
+}
+
+void djv_text_get_area(djv_models* models, float* x, float* y, float* height)
+{
+    float ox = 0.F, oy = 0.F, oh = 0.F;
+    if (models && models->typing && !models->stroke.points.empty())
+    {
+        const models::ImageMapping m = models->mapping();
+        const auto picture = tl::c::getViewPicture(models->view);
+        if (m.isValid())
+        {
+            const ftk::V2F r = m.toRender(models->stroke.points.front());
+            ox = picture.pos.x + r.x * picture.zoom;
+            oy = picture.pos.y + r.y * picture.zoom;
+            oh = models->stroke.textSize * m.scale() * picture.zoom;
+        }
+    }
+    if (x) *x = ox;
+    if (y) *y = oy;
+    if (height) *height = oh;
+}
+
+void djv_text_end(djv_models* models, int commit)
+{
+    if (models)
+        models->textEnd(commit != 0);
+}
+
+int djv_select_has(djv_models* models)
+{
+    return models && models->selected().has_value() ? 1 : 0;
+}
+
+int djv_select_get_index(djv_models* models)
+{
+    return models && models->selected().has_value() ? static_cast<int>(models->selection->index) : -1;
+}
+
+int djv_select_is_text(djv_models* models)
+{
+    if (!models)
+        return 0;
+    const auto stroke = models->selected();
+    return stroke.has_value() && models::ReviewStrokeKind::Text == stroke->kind ? 1 : 0;
+}
+
+void djv_select_remove(djv_models* models)
+{
+    if (!models || models->typing || !models->selected().has_value())
+        return;
+    const auto selection = *models->selection;
+    models->selection.reset();
+    models->moving.reset();
+    models->annotationsModel->removeStroke(models->fileId, selection.time, selection.index);
+}
+
+int djv_select_edit_text(djv_models* models)
+{
+    if (!models || models->typing)
+        return 0;
+    const auto stroke = models->selected();
+    if (!stroke.has_value() || stroke->kind != models::ReviewStrokeKind::Text)
+        return 0;
+    models->moving.reset();
+    models->stroke = *stroke;
+    models->strokeTime = models->selection->time;
+    models->typing = true;
+    models->typingSelection = true;
+    tl::c::setNeedsDraw(models->view);
+    ++models->generation;
+    return 1;
+}
+
+void djv_select_clear(djv_models* models)
+{
+    if (models)
+        models->selectionClear();
 }
 
 int djv_draw_has_undo(djv_models* models)

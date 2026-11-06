@@ -418,8 +418,7 @@ DJV_C_API const char* djv_compare_get_time_label(int absolute);
 //! media, which the desktop opens; and the input, in the view's pixels.
 ///@{
 
-//! The tools, as DJV's draw model has them. The iPad draws with the pen,
-//! the eraser and the shapes.
+//! The tools, as DJV's draw model has them.
 typedef enum
 {
     DJV_DRAW_PEN,
@@ -444,6 +443,9 @@ DJV_C_API void djv_draw_set_size(djv_models*, float);
 //! screen has no Shift key.
 DJV_C_API int djv_draw_is_constrain(djv_models*);
 DJV_C_API void djv_draw_set_constrain(djv_models*, int);
+//! The height of text, in the pixels of the image.
+DJV_C_API float djv_draw_get_text_size(djv_models*);
+DJV_C_API void djv_draw_set_text_size(djv_models*, float);
 
 //! Open the review of a file: the review file, which need not exist yet,
 //! and the media it is about. Its drawings are read into the model; a
@@ -462,10 +464,41 @@ DJV_C_API const char* djv_review_get_error(djv_models*);
 //! gives its pressure, zero to one. A cancelled stroke is not kept, and
 //! what a cancelled eraser took is put back: a second finger landing
 //! makes the first a pinch.
+//!
+//! The text tool begins text where it touched, which stays open for
+//! typing after the touch ends (djv_text_*). The select tool takes the
+//! stroke under the touch, or a handle of the shape selected, and moves
+//! it; the move is kept when the touch ends and put back when it is
+//! cancelled. A touch away from the selection takes the selection away,
+//! and nothing more. Zero when the touch is not the tool's.
 DJV_C_API int djv_draw_begin(djv_models*, float x, float y, int pen, float pressure);
 DJV_C_API void djv_draw_move(djv_models*, float x, float y, float pressure);
 DJV_C_API void djv_draw_end(djv_models*);
 DJV_C_API void djv_draw_cancel(djv_models*);
+
+//! The text being typed: whether there is any, what it says so far, as
+//! it is drawn on the picture with a caret, and where it is in the
+//! view's pixels (its top left, and the height of its letters), for a
+//! field beside it. Finished, it is kept (unless it is empty) or
+//! dropped; the selected text written again is kept as it is now, or
+//! removed when it was emptied. The string stays valid until the text
+//! changes.
+DJV_C_API int djv_text_is_open(djv_models*);
+DJV_C_API const char* djv_text_get(djv_models*);
+DJV_C_API void djv_text_set(djv_models*, const char*);
+DJV_C_API void djv_text_get_area(djv_models*, float* x, float* y, float* height);
+DJV_C_API void djv_text_end(djv_models*, int commit);
+
+//! The selected stroke, on the frame shown: whether there is one, its
+//! place among the frame's strokes (below zero for none), and whether it
+//! is text. The color and the sizes set apply to it too. Removed, or its
+//! text opened for typing again (zero when it is not text), or let go.
+DJV_C_API int djv_select_has(djv_models*);
+DJV_C_API int djv_select_get_index(djv_models*);
+DJV_C_API int djv_select_is_text(djv_models*);
+DJV_C_API void djv_select_remove(djv_models*);
+DJV_C_API int djv_select_edit_text(djv_models*);
+DJV_C_API void djv_select_clear(djv_models*);
 
 //! Undo and redo the drawing, and clear the frame shown.
 DJV_C_API int djv_draw_has_undo(djv_models*);
