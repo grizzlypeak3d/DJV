@@ -6,7 +6,11 @@
 #include <djv/Models/SettingsModel.h>
 
 #include <ftk/Core/Assert.h>
+#include <ftk/Core/Format.h>
 #include <ftk/Core/Path.h>
+
+#include <map>
+#include <set>
 
 namespace djv
 {
@@ -29,6 +33,7 @@ namespace djv
             _exportNames();
             _fileNameRules();
             _shortcuts();
+            _defaultShortcuts();
         }
 
         void SettingsModelTest::_exportNames()
@@ -131,6 +136,48 @@ namespace djv
             // A version number is a name, not a frame slot.
             FTK_CHECK(models::getFileNameError(
                 "shot_v002", ".tif", models::ExportFileType::Image, exts).empty());
+        }
+
+        void SettingsModelTest::_defaultShortcuts()
+        {
+            // The default keys the desktop and the iPad share: one entry a
+            // name, every one with a key, and no key given to two actions,
+            // which would leave one of them unreachable.
+            const auto& defaults = models::getDefaultShortcuts();
+            FTK_CHECK(!defaults.empty());
+            std::set<std::string> names;
+            std::map<std::pair<ftk::Key, int>, std::string> keys;
+            for (const auto& shortcut : defaults)
+            {
+                FTK_CHECK(names.insert(shortcut.name).second);
+                FTK_CHECK(shortcut.primary.key != ftk::Key::Unknown);
+                for (const auto& key : { shortcut.primary, shortcut.secondary })
+                {
+                    if (key.key == ftk::Key::Unknown)
+                        continue;
+                    const auto inserted = keys.insert(
+                        { { key.key, key.modifiers }, shortcut.name });
+                    if (!inserted.second)
+                    {
+                        _print(ftk::Format("{0} and {1} have the same key").
+                            arg(inserted.first->second).
+                            arg(shortcut.name));
+                    }
+                    FTK_CHECK(inserted.second);
+                }
+            }
+            {
+                const auto shortcut = models::getDefaultShortcut("Playback/Toggle");
+                FTK_CHECK("Playback/Toggle" == shortcut.name);
+                FTK_CHECK(ftk::Key::Space == shortcut.primary.key);
+                FTK_CHECK(0 == shortcut.primary.modifiers);
+            }
+            {
+                // An action with no default keys has none.
+                const auto shortcut = models::getDefaultShortcut("Review/Draw");
+                FTK_CHECK("Review/Draw" == shortcut.name);
+                FTK_CHECK(ftk::Key::Unknown == shortcut.primary.key);
+            }
         }
 
         void SettingsModelTest::_shortcuts()

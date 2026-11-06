@@ -29,6 +29,15 @@ namespace djv
             bool operator == (const Shortcut&) const = default;
         };
 
+        //! The default keys of the application's actions, by the action's
+        //! name ("Playback/Toggle"): the desktop's actions take theirs from
+        //! here, and the iPad's keyboard does too, so the two keep the same
+        //! keys. The text is left to the actions, which show it.
+        DJV_MODELS_API const std::vector<Shortcut>& getDefaultShortcuts();
+
+        //! The default keys of one action: none when it has none.
+        DJV_MODELS_API Shortcut getDefaultShortcut(const std::string& name);
+
         //! \name Serialize
         ///@{
 

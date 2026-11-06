@@ -51,6 +51,10 @@ struct djv_models
     std::shared_ptr<models::MarkersModel> markersModel;
     std::shared_ptr<models::FilesModel> filesModel;
 
+    // The shortcuts as last counted, and their keys' names.
+    std::vector<models::Shortcut> shortcuts;
+    std::vector<std::pair<std::string, std::string> > shortcutKeys;
+
     // The review open, and the file in it the player shows.
     models::Review review;
     std::string reviewPath;
@@ -393,6 +397,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->audioModel = models::AudioModel::create(context, out->settings);
         out->viewportModel = models::ViewportModel::create(context, out->settings);
         out->settingsModel = models::SettingsModel::create(context, out->settings);
+        // The desktop registers its shortcuts with its actions; here there
+        // are none, so the table of defaults is registered whole.
+        out->settingsModel->addShortcuts(models::getDefaultShortcuts());
         out->timeUnitsModel = models::TimeUnitsModel::create(context, out->settings);
         out->drawModel = models::DrawModel::create(out->settings);
         out->annotationsModel = models::AnnotationsModel::create();
@@ -917,6 +924,22 @@ void djv_audio_set_volume(djv_models* models, float value)
 {
     if (models)
         models->audioModel->setVolume(value);
+}
+
+void djv_audio_volume_up(djv_models* models)
+{
+    if (models)
+    {
+        models->audioModel->volumeUp();
+    }
+}
+
+void djv_audio_volume_down(djv_models* models)
+{
+    if (models)
+    {
+        models->audioModel->volumeDown();
+    }
 }
 
 int djv_audio_is_muted(djv_models* models)
@@ -2190,4 +2213,47 @@ const char* djv_review_get_file_name(djv_models* models, size_t i)
 {
     return models && i < models->reviewFileNames.size() ?
         models->reviewFileNames[i].c_str() : "";
+}
+
+size_t djv_shortcut_get_count(djv_models* models)
+{
+    if (!models)
+        return 0;
+    models->shortcuts = models->settingsModel->getShortcuts().shortcuts;
+    models->shortcutKeys.clear();
+    for (const auto& shortcut : models->shortcuts)
+    {
+        const auto name = [](const ftk::KeyShortcut& value)
+        {
+            return value.key != ftk::Key::Unknown ? ftk::to_string(value.key) : std::string();
+        };
+        models->shortcutKeys.push_back({ name(shortcut.primary), name(shortcut.secondary) });
+    }
+    return models->shortcuts.size();
+}
+
+const char* djv_shortcut_get_name(djv_models* models, size_t index)
+{
+    return models && index < models->shortcuts.size() ?
+        models->shortcuts[index].name.c_str() :
+        "";
+}
+
+const char* djv_shortcut_get_key(djv_models* models, size_t index, int which, int* modifiers)
+{
+    if (modifiers)
+    {
+        *modifiers = 0;
+    }
+    if (!models || index >= models->shortcuts.size())
+        return "";
+    const auto& shortcut = models->shortcuts[index];
+    const auto& key = which ? shortcut.secondary : shortcut.primary;
+    if (modifiers)
+    {
+        *modifiers = key.modifiers;
+    }
+    return which ?
+        models->shortcutKeys[index].second.c_str() :
+        models->shortcutKeys[index].first.c_str();
 }

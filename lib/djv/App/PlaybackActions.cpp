@@ -301,21 +301,21 @@ namespace djv
                 _command("ResetOutPoint"));
 
             // Register the shortcuts.
-            _addShortcut("Stop", ftk::Key::K);
-            _addShortcut("Forward", ftk::Key::L);
-            _addShortcut("Reverse", ftk::Key::J);
-            _addShortcut("Toggle", "Toggle", ftk::Key::Space);
-            _addShortcut("JumpBack1s", ftk::KeyShortcut(ftk::Key::J, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("JumpBack10s", ftk::KeyShortcut(ftk::Key::J, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("JumpForward1s", ftk::KeyShortcut(ftk::Key::L, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("JumpForward10s", ftk::KeyShortcut(ftk::Key::L, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Stop");
+            _addShortcut("Forward");
+            _addShortcut("Reverse");
+            _addShortcut("Toggle", "Toggle");
+            _addShortcut("JumpBack1s");
+            _addShortcut("JumpBack10s");
+            _addShortcut("JumpForward1s");
+            _addShortcut("JumpForward10s");
             _addShortcut("Loop", "Loop");
             _addShortcut("Once", "Once");
             _addShortcut("PingPong", "Ping-Pong");
-            _addShortcut("SetInPoint", ftk::Key::I);
-            _addShortcut("ResetInPoint", ftk::KeyShortcut(ftk::Key::I, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("SetOutPoint", ftk::Key::O);
-            _addShortcut("ResetOutPoint", ftk::KeyShortcut(ftk::Key::O, static_cast<int>(ftk::KeyModifier::Shift)));
+            _addShortcut("SetInPoint");
+            _addShortcut("ResetInPoint");
+            _addShortcut("SetOutPoint");
+            _addShortcut("ResetOutPoint");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
             _playbackUpdate(tl::Playback::Stop);

@@ -478,23 +478,8 @@ namespace djv
                 "place.";
 
             // Register the shortcuts.
-            // Alt rather than Shift on the command modifier: Shift+Ctrl+O is
-            // "Open with audio", and Shift+Ctrl+S is free but keeping the pair
-            // symmetrical is worth more than reusing it.
-            _addShortcut(
-                "Open",
-                "Open review",
-                ftk::KeyShortcut(
-                    ftk::Key::O,
-                    static_cast<int>(ftk::KeyModifier::Alt) |
-                    static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut(
-                "Save",
-                "Save review",
-                ftk::KeyShortcut(
-                    ftk::Key::S,
-                    static_cast<int>(ftk::KeyModifier::Alt) |
-                    static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("Open", "Open review");
+            _addShortcut("Save", "Save review");
             _addShortcut("SaveAs", "Save review as");
             _addShortcut("Import", "Import a timeline");
             _addShortcut("Export", "Export markers");
@@ -512,44 +497,13 @@ namespace djv
             _addShortcut("Select", "Select strokes");
             _addShortcut("OnionSkin", "Onion skin");
             _addShortcut("Constrain", "Constrain shapes");
-            _addShortcut(
-                "Undo",
-                "Undo drawing",
-                ftk::KeyShortcut(ftk::Key::Z, static_cast<int>(ftk::commandKeyModifier)));
-            // Ctrl+Y as well where that is the convention; macOS has only the
-            // one.
-#if defined(__APPLE__)
-            const ftk::KeyShortcut redoSecondary;
-#else // __APPLE__
-            const ftk::KeyShortcut redoSecondary(
-                ftk::Key::Y,
-                static_cast<int>(ftk::KeyModifier::Control));
-#endif // __APPLE__
-            _addShortcut(
-                "Redo",
-                "Redo drawing",
-                ftk::KeyShortcut(
-                    ftk::Key::Z,
-                    static_cast<int>(ftk::KeyModifier::Shift) |
-                    static_cast<int>(ftk::commandKeyModifier)),
-                redoSecondary);
+            _addShortcut("Undo", "Undo drawing");
+            _addShortcut("Redo", "Redo drawing");
             _addShortcut("ClearDrawing", "Clear drawing");
             _addShortcut("AddNote", "Add a marker");
             _addShortcut("AddRange", "Add a range");
-            // Shift and Control on the arrows are already taken by the X10 and
-            // X100 frame steps.
-            _addShortcut(
-                "PrevFrame",
-                "Previous marker",
-                ftk::KeyShortcut(
-                    ftk::Key::Left,
-                    static_cast<int>(ftk::KeyModifier::Alt)));
-            _addShortcut(
-                "NextFrame",
-                "Next marker",
-                ftk::KeyShortcut(
-                    ftk::Key::Right,
-                    static_cast<int>(ftk::KeyModifier::Alt)));
+            _addShortcut("PrevFrame", "Previous marker");
+            _addShortcut("NextFrame", "Next marker");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

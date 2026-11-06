@@ -63,11 +63,10 @@ namespace djv
 
             //! Register a keyboard shortcut named "<group>/<name>" with the
             //! settings model, listed under the name of the action it runs.
-            //! Any saved key binding overrides the given default.
-            void _addShortcut(
-                const std::string& name,
-                const ftk::KeyShortcut& primary = ftk::KeyShortcut(),
-                const ftk::KeyShortcut& secondary = ftk::KeyShortcut());
+            //! Its default keys are the models' (models::getDefaultShortcuts()),
+            //! which the iPad's keyboard uses as well; any saved key binding
+            //! overrides them.
+            void _addShortcut(const std::string& name);
 
             //! Register a shortcut listed under a name of its own, for where
             //! that should differ from the action's: the shortcuts are grouped
@@ -75,9 +74,15 @@ namespace djv
             //! "Frame > Next" rather than "Frame > Next Frame".
             void _addShortcut(
                 const std::string& name,
+                const std::string& label);
+
+            //! Register a shortcut whose default key comes from a model of
+            //! its own rather than the default table: the tools', which
+            //! models::ToolsModel lists with their keys.
+            void _addShortcut(
+                const std::string& name,
                 const std::string& label,
-                const ftk::KeyShortcut& primary = ftk::KeyShortcut(),
-                const ftk::KeyShortcut& secondary = ftk::KeyShortcut());
+                const ftk::KeyShortcut& primary);
 
             void _shortcutsUpdate(const models::ShortcutsSettings&);
 

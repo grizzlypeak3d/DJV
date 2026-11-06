@@ -445,24 +445,24 @@ namespace djv
             }
 
             // Register the shortcuts.
-            _addShortcut("Frame", ftk::Key::Backspace);
-            _addShortcut("ZoomReset", ftk::Key::_0);
-            _addShortcut("ZoomIn", ftk::Key::Equals);
-            _addShortcut("ZoomOut", ftk::Key::Minus);
-            _addShortcut("Center", ftk::Key::Backslash);
-            _addShortcut("Red", ftk::Key::R);
-            _addShortcut("Green", ftk::Key::G);
-            _addShortcut("Blue", ftk::Key::B);
-            _addShortcut("Alpha", ftk::Key::A);
-            _addShortcut("Negative", ftk::KeyShortcut(ftk::Key::I, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("MirrorHorizontal", ftk::Key::H);
-            _addShortcut("MirrorVertical", ftk::Key::V);
+            _addShortcut("Frame");
+            _addShortcut("ZoomReset");
+            _addShortcut("ZoomIn");
+            _addShortcut("ZoomOut");
+            _addShortcut("Center");
+            _addShortcut("Red");
+            _addShortcut("Green");
+            _addShortcut("Blue");
+            _addShortcut("Alpha");
+            _addShortcut("Negative");
+            _addShortcut("MirrorHorizontal");
+            _addShortcut("MirrorVertical");
             _addShortcut("AspectRatio_0", "Default Aspect Ratio");
-            _addShortcut("Grid", ftk::KeyShortcut(ftk::Key::G, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Grid");
             _addShortcut("Outline");
             _addShortcut("CenterMarker");
             _addShortcut("ClippingWarning");
-            _addShortcut("HUD", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("HUD");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

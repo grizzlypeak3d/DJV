@@ -102,37 +102,38 @@ namespace djv
             };
         }
 
-        void IActions::_addShortcut(
-            const std::string& name,
-            const ftk::KeyShortcut& primary,
-            const ftk::KeyShortcut& secondary)
+        void IActions::_addShortcut(const std::string& name)
         {
             // Without an action there is no name to take, and the shortcut
             // would be listed under the key instead -- which reads like a
             // label without being one.
             const auto i = _actions.find(name);
             FTK_ASSERT(i != _actions.end());
-            _addShortcut(
-                name,
-                i != _actions.end() ? i->second->getText() : name,
-                primary,
-                secondary);
+            _addShortcut(name, i != _actions.end() ? i->second->getText() : name);
+        }
+
+        void IActions::_addShortcut(
+            const std::string& name,
+            const std::string& label)
+        {
+            FTK_P();
+            const std::string fullName = ftk::Format("{0}/{1}").arg(_name).arg(name);
+            const models::Shortcut defaults = models::getDefaultShortcut(fullName);
+            p.settingsModel->addShortcuts(
+            {
+                models::Shortcut(fullName, label, defaults.primary, defaults.secondary)
+            });
         }
 
         void IActions::_addShortcut(
             const std::string& name,
             const std::string& label,
-            const ftk::KeyShortcut& primary,
-            const ftk::KeyShortcut& secondary)
+            const ftk::KeyShortcut& primary)
         {
             FTK_P();
             p.settingsModel->addShortcuts(
             {
-                models::Shortcut(
-                    ftk::Format("{0}/{1}").arg(_name).arg(name),
-                    label,
-                    primary,
-                    secondary)
+                models::Shortcut(ftk::Format("{0}/{1}").arg(_name).arg(name), label, primary)
             });
         }
 

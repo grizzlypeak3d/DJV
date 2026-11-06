@@ -193,6 +193,48 @@ static void settings(djv_models* models)
     }
 }
 
+/* The keyboard's shortcuts, the desktop's defaults: Space plays and
+   stops, and an action without a key has none. */
+static void shortcuts(djv_models* models)
+{
+    /* Volume Up and Volume Down, as DJV steps them. */
+    djv_audio_set_volume(models, .5F);
+    djv_audio_volume_up(models);
+    CHECK_NEAR(djv_audio_get_volume(models), .51, 0.0001);
+    djv_audio_volume_down(models);
+    djv_audio_volume_down(models);
+    CHECK_NEAR(djv_audio_get_volume(models), .49, 0.0001);
+    djv_audio_set_volume(models, 1.F);
+
+    const size_t count = djv_shortcut_get_count(models);
+    CHECK(count > 0);
+    int toggle = 0;
+    int redo = 0;
+    for (size_t i = 0; i < count; ++i)
+    {
+        const char* name = djv_shortcut_get_name(models, i);
+        int modifiers = -1;
+        const char* key = djv_shortcut_get_key(models, i, 0, &modifiers);
+        if (strcmp(name, "Playback/Toggle") == 0)
+        {
+            toggle = 1;
+            CHECK(strcmp(key, "Space") == 0);
+            CHECK(modifiers == 0);
+            CHECK(strlen(djv_shortcut_get_key(models, i, 1, &modifiers)) == 0);
+        }
+        else if (strcmp(name, "Review/Redo") == 0)
+        {
+            redo = 1;
+            CHECK(strcmp(key, "Z") == 0);
+            /* Shift and the command key. */
+            CHECK(modifiers & 1);
+        }
+    }
+    CHECK(toggle);
+    CHECK(redo);
+    CHECK(strlen(djv_shortcut_get_name(models, count)) == 0);
+}
+
 static void writeFile(const char* path, const char* text)
 {
     FILE* f = fopen(path, "w");
@@ -536,6 +578,7 @@ int main(void)
     }
     viewport(models);
     settings(models);
+    shortcuts(models);
     if (player)
     {
         drawing(engine, player);

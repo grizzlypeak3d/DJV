@@ -184,15 +184,15 @@ namespace djv
                 _command("FocusCurrent"));
 
             // Register the shortcuts.
-            _addShortcut("Start", "Start", ftk::Key::Home);
-            _addShortcut("End", "End", ftk::Key::End);
-            _addShortcut("Prev", "Previous", ftk::Key::Left);
-            _addShortcut("PrevX10", "Previous X10", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("PrevX100", "Previous X100", ftk::KeyShortcut(ftk::Key::Left, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("Next", "Next", ftk::Key::Right);
-            _addShortcut("NextX10", "Next X10", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("NextX100", "Next X100", ftk::KeyShortcut(ftk::Key::Right, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("FocusCurrent", "Focus Current", ftk::KeyShortcut(ftk::Key::F, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Start", "Start");
+            _addShortcut("End", "End");
+            _addShortcut("Prev", "Previous");
+            _addShortcut("PrevX10", "Previous X10");
+            _addShortcut("PrevX100", "Previous X100");
+            _addShortcut("Next", "Next");
+            _addShortcut("NextX10", "Next X10");
+            _addShortcut("NextX100", "Next X100");
+            _addShortcut("FocusCurrent", "Focus Current");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

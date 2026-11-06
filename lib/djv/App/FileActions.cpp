@@ -389,31 +389,20 @@ namespace djv
                 _command("Exit"));
 
             // Register the shortcuts.
-            _addShortcut("Open", ftk::KeyShortcut(ftk::Key::O, static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut("OpenAudio",
-                ftk::KeyShortcut(
-                    ftk::Key::O,
-                    static_cast<int>(ftk::KeyModifier::Shift) |
-                    static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut("RecentFiles",
-                ftk::KeyShortcut(
-                    ftk::Key::R,
-                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("Open");
+            _addShortcut("OpenAudio");
+            _addShortcut("RecentFiles");
             _addShortcut("OpenPlaylist", "Open playlist");
             _addShortcut("SavePlaylist", "Save playlist");
-            _addShortcut("Close", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut("CloseAll",
-                ftk::KeyShortcut(
-                    ftk::Key::E,
-                    static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut("Reload", ftk::KeyShortcut(ftk::Key::R, static_cast<int>(ftk::commandKeyModifier)));
-            _addShortcut("Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("Prev", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("NextMediaReference",
-                ftk::KeyShortcut(ftk::Key::M, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("NextLayer", ftk::KeyShortcut(ftk::Key::Equals, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("PrevLayer", ftk::KeyShortcut(ftk::Key::Minus, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("Exit", ftk::KeyShortcut(ftk::Key::Q, static_cast<int>(ftk::commandKeyModifier)));
+            _addShortcut("Close");
+            _addShortcut("CloseAll");
+            _addShortcut("Reload");
+            _addShortcut("Next");
+            _addShortcut("Prev");
+            _addShortcut("NextMediaReference");
+            _addShortcut("NextLayer");
+            _addShortcut("PrevLayer");
+            _addShortcut("Exit");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

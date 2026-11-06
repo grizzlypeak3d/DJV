@@ -279,16 +279,16 @@ namespace djv
                 _command("Absolute"));
 
             // Register the shortcuts.
-            _addShortcut("Next", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("Prev", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Shift)));
-            _addShortcut("B", ftk::KeyShortcut(ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("Wipe", ftk::KeyShortcut(ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Next");
+            _addShortcut("Prev");
+            _addShortcut("B");
+            _addShortcut("Wipe");
             _addShortcut("Butterfly");
             _addShortcut("Overlay");
             _addShortcut("Difference");
             _addShortcut("Horizontal");
             _addShortcut("Vertical");
-            _addShortcut("Tile", ftk::KeyShortcut(ftk::Key::T, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("Tile");
             // The first argument names the shortcut where it is stored; the
             // second is what the shortcuts editor shows.
             _addShortcut("Relative", compareTimeLabels[0]);

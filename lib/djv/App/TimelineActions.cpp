@@ -338,7 +338,7 @@ namespace djv
             _addShortcut("ThumbnailSizeMedium", "Medium Video Thumbnails");
             _addShortcut("ThumbnailSizeLarge", "Large Video Thumbnails");
             _addShortcut("Waveforms");
-            _addShortcut("TrackMedia", ftk::Key::C);
+            _addShortcut("TrackMedia");
             _addShortcut("WaveformSizeSmall", "Small Audio Waveforms");
             _addShortcut("WaveformSizeMedium", "Medium Audio Waveforms");
             _addShortcut("WaveformSizeLarge", "Large Audio Waveforms");

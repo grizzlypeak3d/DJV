@@ -123,6 +123,9 @@ DJV_C_API void djv_lut_set_direction(djv_models*, djv_lut_direction);
 
 DJV_C_API float djv_audio_get_volume(djv_models*);
 DJV_C_API void djv_audio_set_volume(djv_models*, float);
+//! A step up or down, as DJV's Volume Up and Volume Down take it.
+DJV_C_API void djv_audio_volume_up(djv_models*);
+DJV_C_API void djv_audio_volume_down(djv_models*);
 DJV_C_API int djv_audio_is_muted(djv_models*);
 DJV_C_API void djv_audio_set_muted(djv_models*, int);
 //! Seconds the audio is moved by against the video.
@@ -561,6 +564,25 @@ DJV_C_API size_t djv_info_get_count(djv_models*, const char* search);
 DJV_C_API const char* djv_info_get_section(djv_models*, size_t);
 DJV_C_API const char* djv_info_get_name(djv_models*, size_t);
 DJV_C_API const char* djv_info_get_value(djv_models*, size_t);
+
+///@}
+
+//! \name Shortcuts
+///@{
+
+//! The keyboard's shortcuts: the desktop's, from the models' table of
+//! default keys (models::getDefaultShortcuts()), with any saved ones over
+//! them. An action's name, "Playback/Toggle", and its keys: a key as ftk
+//! names it ("Space", "Left", "K", "0"), and its modifiers as ftk's bits
+//! (shift 1, control 2, alt 4, super 8, which is the command key on
+//! Apple's systems). Read when counted; the strings stay valid until the
+//! next count.
+DJV_C_API size_t djv_shortcut_get_count(djv_models*);
+DJV_C_API const char* djv_shortcut_get_name(djv_models*, size_t);
+
+//! A shortcut's primary key (which is 0) or its secondary (1), and its
+//! modifiers; an empty string when there is none.
+DJV_C_API const char* djv_shortcut_get_key(djv_models*, size_t, int which, int* modifiers);
 
 ///@}
 

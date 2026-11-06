@@ -263,8 +263,8 @@ namespace djv
                 });
 
             // Register the shortcuts.
-            _addShortcut("OCIO", ftk::KeyShortcut(ftk::Key::N, static_cast<int>(ftk::KeyModifier::Control)));
-            _addShortcut("LUT", ftk::KeyShortcut(ftk::Key::K, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("OCIO");
+            _addShortcut("LUT");
             _addShortcut("Enabled");
             _addShortcut("Reset");
 

@@ -265,10 +265,10 @@ namespace djv
                 _checkCommand("StatusToolBar"));
 
             // Register the shortcuts.
-            _addShortcut("FullScreen", ftk::Key::U);
-            _addShortcut("PresentMode", "Presentation Mode", ftk::KeyShortcut(ftk::Key::P, static_cast<int>(ftk::KeyModifier::Control)));
+            _addShortcut("FullScreen");
+            _addShortcut("PresentMode", "Presentation Mode");
             _addShortcut("FloatOnTop");
-            _addShortcut("Secondary", ftk::Key::Y);
+            _addShortcut("Secondary");
             _addShortcut("FileToolBar");
             _addShortcut("CompareToolBar");
             _addShortcut("WindowToolBar");

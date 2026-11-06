@@ -73,9 +73,9 @@ namespace djv
                 _checkCommand("Mute"));
 
             // Register the shortcuts.
-            _addShortcut("VolumeUp", ftk::Key::Period);
-            _addShortcut("VolumeDown", ftk::Key::Comma);
-            _addShortcut("Mute", ftk::Key::M);
+            _addShortcut("VolumeUp");
+            _addShortcut("VolumeDown");
+            _addShortcut("Mute");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 

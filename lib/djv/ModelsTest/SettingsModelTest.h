@@ -24,6 +24,7 @@ namespace djv
             void _exportNames();
             void _fileNameRules();
             void _shortcuts();
+            void _defaultShortcuts();
         };
     }
 }
