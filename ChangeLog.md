@@ -21,6 +21,8 @@ Fixes:
 * Fix for presentation mode staying on when the last file is closed.
 * Fix for the image not updating when moving outside the in/out points.
 * Fix for review files not opening when dropped on the window.
+* Fix for OTIO files with markers from older versions of OpenTimelineIO not
+  opening.
 
 ## 3.7.5
 
