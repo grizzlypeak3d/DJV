@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/UI/StrokeDraw.h>
+#include <djv/Models/StrokeDraw.h>
 
 #include <djv/Models/Stroke.h>
 
@@ -11,7 +11,7 @@
 
 namespace djv
 {
-    namespace ui
+    namespace models
     {
         void drawStroke(
             const std::shared_ptr<ftk::IRender>& render,

@@ -235,6 +235,34 @@ static void shortcuts(djv_models* models)
     CHECK(strlen(djv_shortcut_get_name(models, count)) == 0);
 }
 
+/* A still of the frame shown: named after the file and the time, and
+   written where there is a renderer to draw it with. */
+static void stills(tl_engine* engine, djv_models* models)
+{
+    const char* name = djv_still_get_name(models, ".png");
+    CHECK(strncmp(name, "BART_2021-02-07_", 16) == 0);
+    CHECK(strlen(name) > 20 && strcmp(name + strlen(name) - 4, ".png") == 0);
+    if (tl_engine_has_gpu(engine))
+    {
+        const char* path = DJV_C_TEST_SETTINGS "-still.png";
+        remove(path);
+        CHECK(djv_still_write(models, path));
+        CHECK(strlen(djv_still_get_error(models)) == 0);
+        FILE* f = fopen(path, "rb");
+        CHECK(f != NULL);
+        if (f)
+        {
+            fseek(f, 0, SEEK_END);
+            CHECK(ftell(f) > 1000);
+            fclose(f);
+        }
+        remove(path);
+    }
+    /* A type nothing writes says why. */
+    CHECK(!djv_still_write(models, DJV_C_TEST_SETTINGS "-still.unknown"));
+    CHECK(strlen(djv_still_get_error(models)) > 0);
+}
+
 static void writeFile(const char* path, const char* text)
 {
     FILE* f = fopen(path, "w");
@@ -575,6 +603,7 @@ int main(void)
         information(models);
         hud(models);
         timeUnits(models);
+        stills(engine, models);
     }
     viewport(models);
     settings(models);

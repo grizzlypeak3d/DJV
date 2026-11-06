@@ -72,7 +72,6 @@ namespace djv
                 const std::function<void(bool)>&);
 
         private:
-            void _drawAnnotations(const OTIO_NS::RationalTime&);
             std::vector<ftk::ImageInfo> _getInfos() const;
             ftk::Size2I _getDefaultSize() const;
             ftk::Size2I _getWidthSize(int width, bool even) const;

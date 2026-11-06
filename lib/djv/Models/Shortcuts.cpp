@@ -51,6 +51,7 @@ namespace djv
                 Shortcut("File/Close", "", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::commandKeyModifier))),
                 Shortcut("File/CloseAll", "", ftk::KeyShortcut(ftk::Key::E, static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier))),
                 Shortcut("File/Reload", "", ftk::KeyShortcut(ftk::Key::R, static_cast<int>(ftk::commandKeyModifier))),
+                Shortcut("File/ExportStill", "", ftk::KeyShortcut(ftk::Key::S, static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier))),
                 Shortcut("File/Next", "", ftk::KeyShortcut(ftk::Key::PageDown, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("File/Prev", "", ftk::KeyShortcut(ftk::Key::PageUp, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("File/NextMediaReference", "", ftk::KeyShortcut(ftk::Key::M, static_cast<int>(ftk::KeyModifier::Shift))),

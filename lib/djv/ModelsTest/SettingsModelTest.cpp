@@ -3,6 +3,7 @@
 
 #include <djv/ModelsTest/SettingsModelTest.h>
 
+#include <djv/Models/ExportRender.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <ftk/Core/Assert.h>
@@ -31,6 +32,7 @@ namespace djv
         void SettingsModelTest::run()
         {
             _exportNames();
+            _stillFileName();
             _fileNameRules();
             _shortcuts();
             _defaultShortcuts();
@@ -136,6 +138,25 @@ namespace djv
             // A version number is a name, not a frame slot.
             FTK_CHECK(models::getFileNameError(
                 "shot_v002", ".tif", models::ExportFileType::Image, exts).empty());
+        }
+
+        void SettingsModelTest::_stillFileName()
+        {
+            // The file's name and the time, what a file name cannot hold made
+            // a dash: a timecode's colons, and a drop frame one's semicolon.
+            FTK_CHECK("Train-Shaded_01-00-00-03.tif" == models::getStillFileName(
+                ftk::Path("/media/Train-Shaded.otioz"), "01:00:00:03", ".tif"));
+            FTK_CHECK("Train-Shaded_00-59-59-29.png" == models::getStillFileName(
+                ftk::Path("Train-Shaded.mov"), "00:59:59;29", ".png"));
+            // A sequence's name without its frame number or the separator
+            // before it.
+            FTK_CHECK("render_1001.jpg" == models::getStillFileName(
+                ftk::Path("/shots/render.1001.exr"), "1001", ".jpg"));
+            FTK_CHECK("shot_v002_24.dpx" == models::getStillFileName(
+                ftk::Path("shot_v002_0001.dpx"), "24", ".dpx"));
+            // Without a time, the name alone.
+            FTK_CHECK("render.tif" == models::getStillFileName(
+                ftk::Path("render.mov"), "", ".tif"));
         }
 
         void SettingsModelTest::_defaultShortcuts()

@@ -1,3 +1,9 @@
+## 3.8.0
+
+Changes:
+* Add File > Export Still, for writing the current frame as an image in one
+  step (#696).
+
 ## 3.7.6
 
 Changes:

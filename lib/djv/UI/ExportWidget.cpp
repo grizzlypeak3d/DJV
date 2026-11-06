@@ -3,7 +3,7 @@
 
 #include <djv/UI/ExportWidget.h>
 
-#include <djv/UI/StrokeDraw.h>
+#include <djv/Models/ExportRender.h>
 
 #include <djv/Models/AnnotationsModel.h>
 
@@ -55,34 +55,6 @@ namespace djv
             const int customSizeMin = 1;
             const int customSizeMax = 16384;
 
-            // Scale a comparison layout to the export size. The boxes come
-            // out of the comparison at the size it lays out to naturally; a
-            // custom or preset export size stretches that, the same as the
-            // single image case does. Scaling the edges rather than the
-            // origin and the size keeps neighbouring boxes touching instead
-            // of leaving a seam between them.
-            std::vector<ftk::Box2I> scaleBoxes(
-                const std::vector<ftk::Box2I>& boxes,
-                const ftk::Size2I& from,
-                const ftk::Size2I& to)
-            {
-                if (!from.isValid() || from == to)
-                {
-                    return boxes;
-                }
-                const double sx = to.w / static_cast<double>(from.w);
-                const double sy = to.h / static_cast<double>(from.h);
-                std::vector<ftk::Box2I> out;
-                for (const auto& box : boxes)
-                {
-                    const int x0 = std::lround(box.min.x * sx);
-                    const int y0 = std::lround(box.min.y * sy);
-                    const int x1 = std::lround((box.max.x + 1) * sx);
-                    const int y1 = std::lround((box.max.y + 1) * sy);
-                    out.push_back(ftk::Box2I(x0, y0, x1 - x0, y1 - y0));
-                }
-                return out;
-            }
         }
 
         struct ExportWidget::Private
@@ -107,35 +79,9 @@ namespace djv
                 double audioDurationSeconds = 0.0;
                 double audioSeconds = 0.0;
                 int64_t audioSamples = 0;
-                tl::OCIOOptions ocioOptions;
-                tl::LUTOptions lutOptions;
-                // One entry per video source: the A file followed by the
-                // files it is being compared with. The layout is computed
-                // once so that it cannot shift part way through a movie.
-                std::vector<ftk::ImageOptions> imageOptions;
-                std::vector<tl::DisplayOptions> displayOptions;
-                tl::CompareOptions compareOptions;
-                std::vector<ftk::Box2I> boxes;
-                //! What the picture is rendered into on the way to the file.
-                //!
-                //! Not the viewport's buffer, which is a choice about
-                //! showing: a viewport trades precision for memory because
-                //! several buffers are live at once and a display has
-                //! nowhere to put the difference. An export renders one
-                //! frame at a time into a file that may well be asked to
-                //! hold it, so it takes the most this build has.
-                ftk::ImageType colorBuffer = tl::ui::getViewportColorBufferDefault();
-                //! Where the frames are rendered, with whichever renderer the
-                //! windows draw with.
-                std::shared_ptr<tl::ui::OffscreenRender> offscreen;
-                std::shared_ptr<tl::IRender> render;
-                //! The drawings written into the picture, with the sources
-                //! they are on, in the order of the boxes, and the sizes
-                //! their points are in. Taken once, like the layout.
-                bool burnAnnotations = false;
-                std::vector<models::ReviewAnnotation> annotations;
-                std::vector<std::string> sourceIds;
-                std::vector<ftk::ImageInfo> infos;
+                //! Where the frames are rendered, as the viewport shows them;
+                //! see models::ExportRender.
+                std::shared_ptr<models::ExportRender> render;
             };
             std::unique_ptr<ExportData> exportData;
 
@@ -452,121 +398,19 @@ namespace djv
             p.movieWidget->setPlayer(value);
         }
 
-        void ExportWidget::_drawAnnotations(const OTIO_NS::RationalTime& time)
-        {
-            FTK_P();
-            auto context = getContext();
-            if (!context)
-            {
-                return;
-            }
-            auto fontSystem = context->getSystem<ftk::FontSystem>();
-            const auto& compare = p.player->getCompare();
-            for (const auto& annotation : p.exportData->annotations)
-            {
-                // The source's place in the layout, and the frame it is
-                // showing at this time, which for a compared source is
-                // the player's mapping of it.
-                int index = -1;
-                for (size_t i = 0; i < p.exportData->sourceIds.size(); ++i)
-                {
-                    if (p.exportData->sourceIds[i] == annotation.sourceId)
-                    {
-                        index = static_cast<int>(i);
-                        break;
-                    }
-                }
-                if (index < 0 ||
-                    index >= static_cast<int>(p.exportData->boxes.size()) ||
-                    index >= static_cast<int>(p.exportData->infos.size()))
-                {
-                    continue;
-                }
-                OTIO_NS::RationalTime sourceTime = time;
-                if (index > 0 && index - 1 < static_cast<int>(compare.size()))
-                {
-                    sourceTime = tl::getCompareTime(
-                        time,
-                        p.player->getTimeRange(),
-                        compare[index - 1]->getTimeRange(),
-                        p.player->getCompareTime());
-                }
-                if (!models::sameTime(annotation.time, sourceTime))
-                {
-                    continue;
-                }
-                const ftk::Box2I& box = p.exportData->boxes[index];
-                const ftk::Size2I& imageSize = p.exportData->infos[index].size;
-                if (!imageSize.isValid())
-                {
-                    continue;
-                }
-                const float scale = box.w() / static_cast<float>(imageSize.w);
-                for (const auto& stroke : annotation.strokes)
-                {
-                    drawStroke(
-                        p.exportData->render,
-                        fontSystem,
-                        stroke,
-                        [&box, scale](const ftk::V2F& point)
-                        {
-                            return ftk::V2F(
-                                box.min.x + point.x * scale,
-                                box.min.y + point.y * scale);
-                        },
-                        scale);
-                }
-            }
-        }
-
         std::vector<ftk::ImageInfo> ExportWidget::_getInfos() const
         {
             FTK_P();
-            std::vector<ftk::ImageInfo> out;
-            if (p.player)
-            {
-                const tl::IOInfo& ioInfo = p.player->getIOInfo();
-                if (!ioInfo.video.empty())
-                {
-                    out.push_back(ioInfo.video.front());
-                    for (const auto& compare : p.player->getCompare())
-                    {
-                        // A source without video still takes a place in the
-                        // layout, so that the sources stay lined up with the
-                        // frames requested for them.
-                        const tl::IOInfo& compareIOInfo = compare->getIOInfo();
-                        out.push_back(
-                            !compareIOInfo.video.empty() ?
-                            compareIOInfo.video.front() :
-                            ftk::ImageInfo());
-                    }
-                }
-            }
-            return out;
+            return models::getExportInfos(p.player);
         }
 
         ftk::Size2I ExportWidget::_getDefaultSize() const
         {
             FTK_P();
-            ftk::Size2I out;
-            {
-                const std::vector<ftk::ImageInfo> infos = _getInfos();
-                const tl::AspectRatioOptions& aspectRatio =
-                    p.viewportModel.lock()->getDisplayOptions().aspectRatio;
-                out = tl::getRenderSize(
-                    p.filesModel.lock()->getCompareOptions(),
-                    aspectRatio,
-                    infos);
-                // The B comparison sizes itself from the B file, which there
-                // need not be one of yet. Fall back to the A file so that the
-                // export still has a size to work with; it renders the same
-                // empty picture the viewport shows in the meantime.
-                if (!out.isValid() && !infos.empty())
-                {
-                    out = tl::getRenderSize(infos.front(), aspectRatio);
-                }
-            }
-            return out;
+            return models::getExportDefaultSize(
+                p.filesModel.lock()->getCompareOptions(),
+                p.viewportModel.lock()->getDisplayOptions().aspectRatio,
+                _getInfos());
         }
 
         namespace
@@ -809,15 +653,6 @@ namespace djv
                     p.exportData->range = _getExportRange(fileType);
                     p.exportData->frame = p.exportData->range.start_time().value();
 
-                    // Get the video sources. The export renders what the
-                    // viewport shows, so the files being compared with the A
-                    // file are laid out alongside it rather than dropped.
-                    const auto& displayOptions = p.viewportModel.lock()->getDisplayOptions();
-                    p.exportData->compareOptions =
-                        p.filesModel.lock()->getCompareOptions();
-                    const std::vector<ftk::ImageInfo> infos = _getInfos();
-                    const ftk::Size2I compareSize = _getDefaultSize();
-
                     // Get the render size.
                     p.exportData->info.size = _getExportSize(options);
 
@@ -861,26 +696,6 @@ namespace djv
                     {
                         p.exportData->info.type = ftk::ImageType::RGBA_U8;
                     }
-                    p.exportData->burnAnnotations = options.burnAnnotations;
-                    if (options.burnAnnotations)
-                    {
-                        if (auto annotationsModel = p.annotationsModel.lock())
-                        {
-                            p.exportData->annotations = annotationsModel->getAnnotations();
-                        }
-                        for (const auto& item : p.filesModel.lock()->getActive())
-                        {
-                            p.exportData->sourceIds.push_back(item->id);
-                        }
-                        p.exportData->infos = infos;
-                    }
-                    p.exportData->boxes = scaleBoxes(
-                        tl::getBoxes(
-                            p.exportData->compareOptions,
-                            displayOptions.aspectRatio,
-                            infos),
-                        compareSize,
-                        p.exportData->info.size);
                     if (!tl::ui::OffscreenRender::canRead(p.exportData->info.type))
                     {
                         throw std::runtime_error(
@@ -993,44 +808,27 @@ namespace djv
 #endif // TLRENDER_FFMPEG_PLUGIN
                     p.exportData->writer = plugin->write(p.exportData->path, outputInfo, ioOptions);
 
-                    // Create the renderer.
-                    p.exportData->ocioOptions = ocioOptions;
-                    p.exportData->lutOptions = p.colorModel.lock()->getLUTOptions();
-                    p.exportData->imageOptions = std::vector<ftk::ImageOptions>(
-                        infos.size(),
-                        p.viewportModel.lock()->getImageOptions());
-                    p.exportData->displayOptions = std::vector<tl::DisplayOptions>(
-                        infos.size(),
-                        displayOptions);
-                    // Each file's resolved input color space, the same as
-                    // the viewport, so the export bakes what the viewport
-                    // shows.
-                    const auto resolvedInputs =
-                        p.colorModel.lock()->observeResolvedInputs()->get();
-                    for (size_t i = 0;
-                        i < p.exportData->displayOptions.size() &&
-                            i < resolvedInputs.size();
-                        ++i)
+                    // Create the renderer, which renders what the viewport
+                    // shows: the files being compared with the A file laid out
+                    // alongside it, the color as it is managed and adjusted,
+                    // and the drawings if they are burned in.
+                    std::vector<std::string> sourceIds;
+                    for (const auto& item : p.filesModel.lock()->getActive())
                     {
-                        p.exportData->displayOptions[i].ocioInput = resolvedInputs[i];
+                        sourceIds.push_back(item->id);
                     }
-                    p.exportData->offscreen = tl::ui::OffscreenRender::create(
+                    p.exportData->render = models::ExportRender::create(
                         context,
-                        p.exportData->info.size,
-                        p.exportData->colorBuffer);
-                    p.exportData->render = p.exportData->offscreen->getRender();
-                    {
-                        // The same per layer resolution as the viewport, so
-                        // the export bakes what the viewport shows.
-                        const auto colorModel = p.colorModel.lock();
-                        p.exportData->render->setOCIOInputResolver(
-                            [colorModel](const std::string& path, const ftk::ImageTags& tags)
-                            {
-                                return colorModel->getOCIOOptions().input.empty() ?
-                                    colorModel->resolveInput(path, tags) :
-                                    std::string();
-                            });
-                    }
+                        models::getExportRenderOptions(
+                            p.player,
+                            p.viewportModel.lock(),
+                            p.colorModel.lock(),
+                            p.filesModel.lock(),
+                            p.annotationsModel.lock(),
+                            sourceIds,
+                            p.exportData->info.size,
+                            p.exportData->info.type,
+                            options.burnAnnotations));
 
                     // Create the progress dialog.
                     p.progressDialog = ftk::ProgressDialog::create(
@@ -1116,58 +914,11 @@ namespace djv
             bool out = false;
             try
             {
-                // Get the video for the A file and each of the files it is
-                // being compared with. The requests are all made before any
-                // of them is waited on so that the sources are read in
-                // parallel.
+                // Render the frame as the viewport shows it.
                 const OTIO_NS::RationalTime t(p.exportData->frame, p.exportData->range.duration().rate());
-                auto ioOptions = p.player->getTimeline()->getOptions().ioOptions;
-                ioOptions["Layer"] = ftk::Format("{0}").arg(p.player->getVideoLayer());
-                std::vector<tl::VideoRequest> requests;
-                requests.push_back(p.player->getTimeline()->getVideo(t, ioOptions));
-                const auto& compare = p.player->getCompare();
-                const auto& compareVideoLayers = p.player->getCompareVideoLayers();
-                for (size_t i = 0; i < compare.size(); ++i)
-                {
-                    // The same time mapping the player uses, so that the
-                    // frame exported for each source is the frame that was
-                    // on screen.
-                    const OTIO_NS::RationalTime compareTime = tl::getCompareTime(
-                        t,
-                        p.player->getTimeRange(),
-                        compare[i]->getTimeRange(),
-                        p.player->getCompareTime());
-                    ioOptions["Layer"] = ftk::Format("{0}").arg(
-                        i < compareVideoLayers.size() ?
-                        compareVideoLayers[i] :
-                        p.player->getVideoLayer());
-                    requests.push_back(compare[i]->getVideo(compareTime, ioOptions));
-                }
-                std::vector<tl::VideoFrame> videoFrame;
-                for (auto& request : requests)
-                {
-                    videoFrame.push_back(request.future.get());
-                }
-
-                // Render the video.
-                p.exportData->offscreen->begin();
-                p.exportData->render->setOCIOOptions(p.exportData->ocioOptions);
-                p.exportData->render->setLUTOptions(p.exportData->lutOptions);
-                p.exportData->render->drawVideo(
-                    videoFrame,
-                    p.exportData->boxes,
-                    p.exportData->imageOptions,
-                    p.exportData->displayOptions,
-                    p.exportData->compareOptions,
-                    p.exportData->colorBuffer);
-                if (p.exportData->burnAnnotations)
-                {
-                    _drawAnnotations(t);
-                }
-                p.exportData->offscreen->end();
+                auto image = p.exportData->render->render(p.player, t);
 
                 // Write the output image.
-                auto image = p.exportData->offscreen->read(p.exportData->info);
 
                 // The sequence writers name each file from the time it is
                 // written at, so those keep the frame numbers of the timeline

@@ -4,6 +4,7 @@
 #include <djv/App/AppPrivate.h>
 #include <djv/App/MainWindow.h>
 #include <djv/Models/AudioModel.h>
+#include <djv/Models/ExportRender.h>
 #include <djv/Models/FilesModel.h>
 #include <opentimelineio/externalReference.h>
 #include <djv/Models/Review.h>
@@ -553,6 +554,54 @@ namespace djv
         void App::reload()
         {
             _reload(false);
+        }
+
+        std::string App::exportStill()
+        {
+            FTK_P();
+            auto player = p.player->get();
+            if (!player)
+            {
+                throw std::runtime_error("No file to write a still of");
+            }
+            // The directory checked first, as the Export tool does: an empty
+            // one is an error rather than a write to wherever the
+            // application happens to be running.
+            const auto& settings = p.settingsModel->getExport();
+            if (settings.dir.empty())
+            {
+                throw std::runtime_error("No export directory");
+            }
+            if (!std::filesystem::is_directory(ftk::toFileSystem(settings.dir)))
+            {
+                throw std::runtime_error(
+                    ftk::Format("Directory not found: \"{0}\"").arg(settings.dir).str());
+            }
+            std::vector<std::string> sourceIds;
+            for (const auto& item : p.filesModel->getActive())
+            {
+                sourceIds.push_back(item->id);
+            }
+            const ftk::Path path(
+                settings.dir,
+                models::getStillFileName(
+                    player->getPath(),
+                    p.timeUnitsModel->getLabel(player->getCurrentTime()),
+                    settings.imageExt));
+            models::writeStill(
+                _context,
+                player,
+                p.viewportModel,
+                p.colorModel,
+                p.filesModel,
+                p.annotationsModel,
+                sourceIds,
+                settings.burnAnnotations,
+                path);
+            _context->log(
+                "djv::app::App",
+                ftk::Format("Export Still: wrote \"{0}\"").arg(path.get()));
+            return path.get();
         }
 
         void App::_reload(bool restructured)

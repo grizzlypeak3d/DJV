@@ -13,7 +13,7 @@
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/Shuttle.h>
 #include <djv/Models/Stroke.h>
-#include <djv/UI/StrokeDraw.h>
+#include <djv/Models/StrokeDraw.h>
 #include <djv/UI/WipeDraw.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ViewportModel.h>
@@ -2162,7 +2162,7 @@ namespace djv
                 return;
             }
             const ftk::Box2I& g = getGeometry();
-            drawStroke(
+            models::drawStroke(
                 event.render,
                 event.fontSystem,
                 stroke,

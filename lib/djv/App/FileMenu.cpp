@@ -71,6 +71,7 @@ namespace djv
             addAction(actions["Close"]);
             addAction(actions["CloseAll"]);
             addAction(actions["Reload"]);
+            addAction(actions["ExportStill"]);
             addDivider();
             addAction(actions["OpenPlaylist"]);
             addAction(actions["SavePlaylist"]);

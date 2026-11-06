@@ -23,6 +23,7 @@ namespace djv
             addAction(tmp["Close"]);
             addAction(tmp["CloseAll"]);
             addAction(tmp["Reload"]);
+            addAction(tmp["ExportStill"]);
         }
 
         FileToolBar::~FileToolBar()

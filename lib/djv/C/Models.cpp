@@ -12,6 +12,7 @@
 #include <djv/Models/Info.h>
 #include <djv/Models/MarkersModel.h>
 #include <djv/Models/OCIOModel.h>
+#include <djv/Models/ExportRender.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/Shuttle.h>
 #include <djv/Models/Stroke.h>
@@ -19,7 +20,7 @@
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ViewportModel.h>
 
-#include <djv/UI/StrokeDraw.h>
+#include <djv/Models/StrokeDraw.h>
 #include <djv/UI/WipeDraw.h>
 
 #include <tlRender/C/EngineCpp.h>
@@ -50,6 +51,10 @@ struct djv_models
     std::shared_ptr<models::AnnotationsModel> annotationsModel;
     std::shared_ptr<models::MarkersModel> markersModel;
     std::shared_ptr<models::FilesModel> filesModel;
+
+    // The name of a still, and why one was not written.
+    std::string stillName;
+    std::string stillError;
 
     // The shortcuts as last counted, and their keys' names.
     std::vector<models::Shortcut> shortcuts;
@@ -195,11 +200,11 @@ struct djv_models
         const auto fontSystem = context->getSystem<ftk::FontSystem>();
         for (const auto& s : annotationsModel->getStrokes(fileId, *time))
         {
-            ui::drawStroke(render, fontSystem, s, toScreen, scale);
+            models::drawStroke(render, fontSystem, s, toScreen, scale);
         }
         if (drawing && models::sameTime(strokeTime, *time))
         {
-            ui::drawStroke(render, fontSystem, stroke, toScreen, scale);
+            models::drawStroke(render, fontSystem, stroke, toScreen, scale);
         }
     }
 
@@ -2256,4 +2261,51 @@ const char* djv_shortcut_get_key(djv_models* models, size_t index, int which, in
     return which ?
         models->shortcutKeys[index].second.c_str() :
         models->shortcutKeys[index].first.c_str();
+}
+
+const char* djv_still_get_name(djv_models* models, const char* ext)
+{
+    if (!models)
+        return "";
+    models->stillName.clear();
+    if (auto player = tl::c::getPlayer(models->player))
+    {
+        models->stillName = models::getStillFileName(
+            player->getPath(),
+            models->timeUnitsModel->getLabel(player->getCurrentTime()),
+            ext ? ext : ".png");
+    }
+    return models->stillName.c_str();
+}
+
+int djv_still_write(djv_models* models, const char* path)
+{
+    if (!models || !path)
+        return 0;
+    models->stillError.clear();
+    try
+    {
+        // The drawings the view shows: A's.
+        models::writeStill(
+            models->context,
+            tl::c::getPlayer(models->player),
+            models->viewportModel,
+            models->colorModel,
+            models->filesModel,
+            models->annotationsModel,
+            { models->fileId },
+            true,
+            ftk::Path(path));
+    }
+    catch (const std::exception& e)
+    {
+        models->stillError = e.what();
+        return 0;
+    }
+    return 1;
+}
+
+const char* djv_still_get_error(djv_models* models)
+{
+    return models ? models->stillError.c_str() : "";
 }

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <djv/UI/Export.h>
+#include <djv/Models/Export.h>
 
 #include <djv/Models/Review.h>
 
@@ -14,7 +14,7 @@
 
 namespace djv
 {
-    namespace ui
+    namespace models
     {
         //! \name Annotation Drawing
         ///@{
@@ -27,7 +27,7 @@ namespace djv
         //! The geometry is built after the mapping, so a curve is smooth
         //! and a width round at any zoom. The alpha fades a stroke, as the
         //! onion skin does; the caret marks text being typed.
-        DJV_UI_API void drawStroke(
+        DJV_MODELS_API void drawStroke(
             const std::shared_ptr<ftk::IRender>&,
             const std::shared_ptr<ftk::FontSystem>&,
             const models::ReviewStroke&,

@@ -3,7 +3,10 @@
 
 #include <djv/App/FileActions.h>
 
+#include <ftk/UI/DialogSystem.h>
+
 #include <djv/App/App.h>
+#include <djv/App/MainWindow.h>
 #include <djv/Models/FilesModel.h>
 
 #include <ftk/Core/Format.h>
@@ -173,6 +176,30 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         app->reload();
+                    }
+                });
+
+            _addCommand(
+                "ExportStill",
+                "Write a still of the current frame, as the viewport shows it, "
+                "into the Export tool's directory in its image format.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        try
+                        {
+                            app->exportStill();
+                        }
+                        catch (const std::exception& e)
+                        {
+                            auto context = app->getContext();
+                            context->log("djv::app::FileActions", e.what(), ftk::LogType::Error);
+                            context->getSystem<ftk::DialogSystem>()->message(
+                                "Export Still",
+                                e.what(),
+                                app->getMainWindow());
+                        }
                     }
                 });
 
@@ -364,6 +391,14 @@ namespace djv
                 "Reload",
                 "FileReload",
                 _command("Reload"));
+            _actions["ExportStill"] = ftk::Action::create(
+                "Export Still",
+                "ExportStill",
+                _command("ExportStill"));
+            _tooltips["ExportStill"] =
+                "Write a still of the current frame, as the viewport shows it, "
+                "into the Export tool's directory in its image format, named "
+                "after the file and the time.";
             _actions["Next"] = ftk::Action::create(
                 "Next",
                 "Next",
@@ -397,6 +432,7 @@ namespace djv
             _addShortcut("Close");
             _addShortcut("CloseAll");
             _addShortcut("Reload");
+            _addShortcut("ExportStill");
             _addShortcut("Next");
             _addShortcut("Prev");
             _addShortcut("NextMediaReference");
@@ -415,6 +451,7 @@ namespace djv
                     _actions["Close"]->setEnabled(!value.empty());
                     _actions["CloseAll"]->setEnabled(!value.empty());
                     _actions["Reload"]->setEnabled(!value.empty());
+                    _actions["ExportStill"]->setEnabled(!value.empty());
                     _actions["Next"]->setEnabled(value.size() > 1);
                     _actions["Prev"]->setEnabled(value.size() > 1);
                 });

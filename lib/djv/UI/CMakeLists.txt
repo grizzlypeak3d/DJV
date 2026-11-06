@@ -21,7 +21,6 @@ set(HEADERS
     InfoWidget.h
     MagnifyWidget.h
     ViewWidgets.h
-    StrokeDraw.h
     WipeDraw.h
     Viewport.h
     ViewportBinding.h)
@@ -52,7 +51,6 @@ set(SOURCE
     InfoWidget.cpp
     MagnifyWidget.cpp
     ViewWidgets.cpp
-    StrokeDraw.cpp
     WipeDraw.cpp
     Viewport.cpp
     ViewportBinding.cpp)

@@ -278,6 +278,12 @@ namespace djv
             //! Reload the active files.
             DJV_APP_API void reload();
 
+            //! Write a still of the current frame, as the viewport shows it,
+            //! into the Export tool's directory in its image format, named
+            //! after the file and the time (models::getStillFileName()).
+            //! Returns the path written; throws when it cannot.
+            DJV_APP_API std::string exportStill();
+
             //! Observe the timeline player.
             DJV_APP_API std::shared_ptr<ftk::IObservable<std::shared_ptr<tl::Player> > > observePlayer() const;
 

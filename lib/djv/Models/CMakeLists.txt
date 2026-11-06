@@ -6,6 +6,7 @@ set(HEADERS
     CommandsModel.h
     DrawModel.h
     Export.h
+    ExportRender.h
     FilesModel.h
     HUD.h
     Info.h
@@ -16,6 +17,7 @@ set(HEADERS
     RecentFilesModel.h
     Review.h
     Stroke.h
+    StrokeDraw.h
     Shuttle.h
     Wipe.h
     SettingsKeys.h
@@ -35,6 +37,7 @@ set(SOURCE
     ColorModel.cpp
     CommandsModel.cpp
     DrawModel.cpp
+    ExportRender.cpp
     FilesModel.cpp
     HUD.cpp
     Info.cpp
@@ -45,6 +48,7 @@ set(SOURCE
     RecentFilesModel.cpp
     Review.cpp
     Stroke.cpp
+    StrokeDraw.cpp
     Shuttle.cpp
     Wipe.cpp
     SettingsKeys.cpp

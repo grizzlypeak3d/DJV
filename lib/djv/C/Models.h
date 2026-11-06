@@ -567,6 +567,22 @@ DJV_C_API const char* djv_info_get_value(djv_models*, size_t);
 
 ///@}
 
+//! \name Stills
+///@{
+
+//! The name a still of the frame shown is given, with an extension
+//! (".png"): the file's name and the time as the time units label it,
+//! as DJV's Export Still names it. Valid until the next call.
+DJV_C_API const char* djv_still_get_name(djv_models*, const char* ext);
+
+//! Write a still of the frame shown, as the view shows it with its
+//! drawings, into a file of the type its extension says. Zero when it
+//! cannot, and djv_still_get_error() says why.
+DJV_C_API int djv_still_write(djv_models*, const char* path);
+DJV_C_API const char* djv_still_get_error(djv_models*);
+
+///@}
+
 //! \name Shortcuts
 ///@{
 
