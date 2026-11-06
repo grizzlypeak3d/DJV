@@ -2106,6 +2106,39 @@ const char* djv_note_add(djv_models* models, const char* text)
     return models->noteId.c_str();
 }
 
+const char* djv_note_add_range(
+    djv_models* models,
+    double start,
+    double duration,
+    const char* text)
+{
+    if (!models || models->reviewPath.empty())
+        return nullptr;
+    auto p = tl::c::getPlayer(models->player);
+    if (!p)
+        return nullptr;
+    // Whole frames of the timeline, from its start.
+    const OTIO_NS::TimeRange& timeRange = p->getTimeRange();
+    const double rate = timeRange.duration().rate();
+    const OTIO_NS::RationalTime first =
+        timeRange.start_time() + OTIO_NS::RationalTime(start * rate, rate).round();
+    const OTIO_NS::RationalTime count =
+        OTIO_NS::RationalTime(std::max(1.0, std::round(duration * rate)), rate);
+    models->noteId = models->markersModel->add(
+        OTIO_NS::TimeRange(first, count),
+        std::string(),
+        text ? text : "");
+    return models->noteId.c_str();
+}
+
+void djv_note_set_color(djv_models* models, const char* id, const float rgba[4])
+{
+    if (models && id && rgba)
+    {
+        models->markersModel->updateColor(id, ftk::Color4F(rgba[0], rgba[1], rgba[2], rgba[3]));
+    }
+}
+
 void djv_note_set_text(djv_models* models, const char* id, const char* text)
 {
     if (models && id)

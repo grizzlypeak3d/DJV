@@ -383,6 +383,39 @@ static void drawing(tl_engine* engine, tl_player* player)
     }
     CHECK(djv_note_get_count(models) == 1);
 
+    /* A note about a span of frames, in a color of its own: after the one
+       about the first frame, in time order. */
+    id = djv_note_add_range(models, 1.0, 0.5, "This runs long");
+    CHECK(id != NULL);
+    CHECK(djv_note_get_count(models) == 2);
+    if (id)
+    {
+        char range[64] = { 0 };
+        strncpy(range, id, sizeof(range) - 1);
+        const float green[4] = { 0.2F, 0.85F, 0.3F, 1.F };
+        djv_note_set_color(models, range, green);
+        CHECK(strcmp(djv_note_get_text(models, 1), "This runs long") == 0);
+        djv_note_get_range(models, 1, &start, &duration);
+        CHECK_NEAR(start, 1.0, 0.05);
+        CHECK_NEAR(duration, 0.5, 0.05);
+        float rgba[4] = { 0.F, 0.F, 0.F, 0.F };
+        djv_note_get_color(models, 1, rgba);
+        CHECK_NEAR(rgba[1], 0.85, 0.0001);
+        djv_note_remove(models, range);
+    }
+    /* At least a frame. */
+    id = djv_note_add_range(models, 0.0, 0.0, "A frame");
+    CHECK(id != NULL);
+    djv_note_get_range(models, 1, &start, &duration);
+    CHECK(duration > 0.0);
+    if (id)
+    {
+        char frame[64] = { 0 };
+        strncpy(frame, id, sizeof(frame) - 1);
+        djv_note_remove(models, frame);
+    }
+    CHECK(djv_note_get_count(models) == 1);
+
     /* Saved, keeping what the iPad does not read, and read again. */
     CHECK(djv_review_save(models) == 1);
     CHECK(fileContains(DJV_C_TEST_DIR "/review.djvr", "\"elsewhere\""));

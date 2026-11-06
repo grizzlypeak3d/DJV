@@ -510,8 +510,18 @@ DJV_C_API void djv_note_get_color(djv_models*, size_t, float rgba[4]);
 //! valid until the next one is added; NULL without a review or a
 //! player.
 DJV_C_API const char* djv_note_add(djv_models*, const char* text);
+//! Add a note about a span of frames, in seconds from the start of the
+//! timeline, as the desktop's Add a Range adds one for the in and out
+//! points; at least a frame. Its identifier, or NULL.
+DJV_C_API const char* djv_note_add_range(
+    djv_models*,
+    double start,
+    double duration,
+    const char* text);
 //! A note's text changed; who wrote it and when stay.
 DJV_C_API void djv_note_set_text(djv_models*, const char* id, const char* text);
+//! A note's color, as the desktop's swatch sets it.
+DJV_C_API void djv_note_set_color(djv_models*, const char* id, const float rgba[4]);
 DJV_C_API void djv_note_remove(djv_models*, const char* id);
 //! Remove all the notes.
 DJV_C_API void djv_note_clear_all(djv_models*);
