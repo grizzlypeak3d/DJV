@@ -348,7 +348,7 @@ namespace djv
                 "Close",
                 _command("Close"));
             _actions["Draw"] = ftk::Action::create(
-                "Draw",
+                "Pen",
                 "DrawTool",
                 _checkCommand("Draw"));
             _actions["Line"] = ftk::Action::create(
@@ -372,7 +372,7 @@ namespace djv
                 "DrawText",
                 _checkCommand("Text"));
             _actions["Erase"] = ftk::Action::create(
-                "Erase",
+                "Eraser",
                 "Eraser",
                 _checkCommand("Erase"));
             _actions["Select"] = ftk::Action::create(
@@ -383,7 +383,7 @@ namespace djv
                 "Onion Skin",
                 _checkCommand("OnionSkin"));
             _actions["Constrain"] = ftk::Action::create(
-                "Constrain Shapes",
+                "Square and Straight Shapes",
                 _checkCommand("Constrain"));
             _actions["Undo"] = ftk::Action::create(
                 "Undo Drawing",
@@ -496,7 +496,7 @@ namespace djv
             _addShortcut("Erase", "Erase strokes");
             _addShortcut("Select", "Select strokes");
             _addShortcut("OnionSkin", "Onion skin");
-            _addShortcut("Constrain", "Constrain shapes");
+            _addShortcut("Constrain", "Square and straight shapes");
             _addShortcut("Undo", "Undo drawing");
             _addShortcut("Redo", "Redo drawing");
             _addShortcut("ClearDrawing", "Clear drawing");

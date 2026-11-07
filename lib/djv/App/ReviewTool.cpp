@@ -405,7 +405,7 @@ namespace djv
             p.sizeSlider->setRange(1, 50);
             p.sizeSlider->setValue(static_cast<int>(std::round(drawModel->getSize())));
             p.sizeSlider->setTooltip("The stroke width, in source pixels.");
-            sizeLayout->addRow("Size:", p.sizeSlider);
+            sizeLayout->addRow("Width:", p.sizeSlider);
             p.textSizeSlider = ftk::IntEditSlider::create(context);
             p.textSizeSlider->setRange(8, 400);
             p.textSizeSlider->setValue(static_cast<int>(std::round(drawModel->getTextSize())));
