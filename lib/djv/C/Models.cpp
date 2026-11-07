@@ -29,6 +29,7 @@
 #include <ftk/Core/Observable.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <filesystem>
 #include <functional>
@@ -1187,6 +1188,36 @@ djv_lut_direction djv_lut_get_direction(djv_models* models)
     return models && tl::LUTDirection::Inverse == models->colorModel->getLUTOptions().direction ?
         DJV_LUT_DIRECTION_INVERSE :
         DJV_LUT_DIRECTION_FORWARD;
+}
+
+const char* djv_lut_get_extensions(void)
+{
+    static const std::string out = []
+    {
+        std::vector<std::string> exts;
+        for (std::string ext : tl::getLUTFormatExts())
+        {
+            if (!ext.empty() && '.' == ext.front())
+            {
+                ext.erase(ext.begin());
+            }
+            for (auto& c : ext)
+            {
+                c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+            }
+            if (!ext.empty() && std::find(exts.begin(), exts.end(), ext) == exts.end())
+            {
+                exts.push_back(ext);
+            }
+        }
+        std::string s;
+        for (const auto& ext : exts)
+        {
+            s += (s.empty() ? "" : " ") + ext;
+        }
+        return s;
+    }();
+    return out.c_str();
 }
 
 void djv_lut_set_direction(djv_models* models, djv_lut_direction value)

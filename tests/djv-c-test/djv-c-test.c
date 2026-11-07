@@ -299,6 +299,47 @@ static const char* reviewText =
     " \"points\": [10.0, 10.0, 20.0, 20.0]}]}],"
     " \"elsewhere\": {\"kept\": true}}";
 
+/* Whether a space-separated list has a word. */
+static int hasLUTWord(const char* list, const char* word)
+{
+    const size_t n = strlen(word);
+    for (const char* p = list; (p = strstr(p, word)); p += n)
+    {
+        if ((p == list || ' ' == p[-1]) && (' ' == p[n] || 0 == p[n]))
+            return 1;
+    }
+    return 0;
+}
+
+/* The LUT: its file, order and direction, kept in the settings; and the
+ * extensions a LUT can have. */
+static void luts(djv_models* models)
+{
+    djv_lut_set_file_name(models, "/tmp/look.cube");
+    CHECK(strcmp(djv_lut_get_file_name(models), "/tmp/look.cube") == 0);
+    djv_lut_set_enabled(models, 1);
+    CHECK(djv_lut_is_enabled(models));
+    djv_lut_set_order(models, DJV_LUT_ORDER_PRE_CONFIG);
+    CHECK(djv_lut_get_order(models) == DJV_LUT_ORDER_PRE_CONFIG);
+    djv_lut_set_direction(models, DJV_LUT_DIRECTION_INVERSE);
+    CHECK(djv_lut_get_direction(models) == DJV_LUT_DIRECTION_INVERSE);
+    djv_lut_set_enabled(models, 0);
+    djv_lut_set_order(models, DJV_LUT_ORDER_POST_CONFIG);
+    djv_lut_set_direction(models, DJV_LUT_DIRECTION_FORWARD);
+    djv_lut_set_file_name(models, "");
+    CHECK(!djv_lut_is_enabled(models));
+
+    const char* exts = djv_lut_get_extensions();
+    printf("LUT extensions: %s\n", exts);
+    if (djv_ocio_is_available())
+    {
+        CHECK(hasLUTWord(exts, "cube"));
+        CHECK(hasLUTWord(exts, "3dl"));
+        CHECK(!strchr(exts, '.'));
+    }
+    CHECK(djv_lut_get_extensions() == exts);
+}
+
 static void drawing(tl_engine* engine, tl_player* player)
 {
     djv_models* models = djv_models_create(engine, DJV_C_TEST_SETTINGS);
@@ -671,6 +712,7 @@ int main(void)
     djv_models_bind_view(models, NULL);
     djv_models_bind_output(models, NULL);
     viewport(models);
+    luts(models);
     settings(models);
     shortcuts(models);
     if (player)

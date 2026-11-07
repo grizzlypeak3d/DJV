@@ -122,6 +122,10 @@ typedef enum
 } djv_lut_direction;
 DJV_C_API djv_lut_direction djv_lut_get_direction(djv_models*);
 DJV_C_API void djv_lut_set_direction(djv_models*, djv_lut_direction);
+//! The extensions of the LUT files this build reads, through OpenColorIO:
+//! a space-separated list, lowercase, without the dot ("cube 3dl ...");
+//! empty without OpenColorIO. The same string each time.
+DJV_C_API const char* djv_lut_get_extensions(void);
 
 ///@}
 
