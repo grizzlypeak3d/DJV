@@ -84,6 +84,11 @@ namespace djv
 
         DrawModel::~DrawModel()
         {
+            save();
+        }
+
+        void DrawModel::save()
+        {
             FTK_P();
             p.settings->setT(settingsKeys::drawColor, p.color->get());
             p.settings->set(settingsKeys::drawSize, p.size->get());

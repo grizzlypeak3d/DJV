@@ -320,6 +320,12 @@ static void drawing(tl_engine* engine, tl_player* player)
     djv_draw_set_constrain(models, 1);
     CHECK(djv_draw_is_constrain(models));
     djv_draw_set_tool(models, DJV_DRAW_PEN);
+    /* Written by a save while the models are still there: an iPad's
+       application is stopped, never quit, so they never go. */
+    djv_draw_set_text_size(models, 72.F);
+    djv_models_save(models);
+    CHECK(fileContains(DJV_C_TEST_SETTINGS, "\"Draw\""));
+    CHECK(fileContains(DJV_C_TEST_SETTINGS, "\"TextSize\": 72"));
 
     /* The desktop's review of the file. */
     writeFile(DJV_C_TEST_DIR "/review.djvr", reviewText);

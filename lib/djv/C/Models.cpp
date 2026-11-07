@@ -907,6 +907,7 @@ void djv_models_save(djv_models* models)
     models->settingsModel->save();
     models->timeUnitsModel->save();
     models->filesModel->save();
+    models->drawModel->save();
     models->settings->save();
 }
 

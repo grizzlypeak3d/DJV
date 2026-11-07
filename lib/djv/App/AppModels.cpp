@@ -207,6 +207,7 @@ namespace djv
             p.colorModel->save();
             p.audioModel->save();
             p.toolsModel->save();
+            p.drawModel->save();
             p.settingsModel->save();
             getSettings()->save();
         }

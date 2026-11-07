@@ -56,6 +56,11 @@ namespace djv
         public:
             DJV_MODELS_API ~DrawModel();
 
+            //! Put the settings in the settings object, which writes them.
+            //! Done when the model goes too, which an application that is
+            //! stopped rather than quit, as an iPad's is, never reaches.
+            DJV_MODELS_API void save();
+
             //! Create a new model.
             DJV_MODELS_API static std::shared_ptr<DrawModel> create(
                 const std::shared_ptr<ftk::Settings>&);
