@@ -4,6 +4,9 @@ Changes:
 * Add File > Export Still, for writing the current frame as an image in one
   step (#696).
 * Read HEIC and HEIF images on macOS, the photos an iPhone or an iPad takes.
+* Show Display P3 images and the OpenColorIO Display P3 view in their colors
+  on a wide-gamut display, and write ICC profiles into exported JPEG, PNG, and
+  TIFF images.
 
 ## 3.7.6
 
