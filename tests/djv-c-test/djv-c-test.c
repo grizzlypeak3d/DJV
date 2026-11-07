@@ -658,6 +658,10 @@ int main(void)
         timeUnits(models);
         stills(engine, models);
     }
+    /* No views here: binding none, or none for the second display,
+       changes nothing. */
+    djv_models_bind_view(models, NULL);
+    djv_models_bind_output(models, NULL);
     viewport(models);
     settings(models);
     shortcuts(models);

@@ -39,6 +39,13 @@ DJV_C_API void djv_models_save(djv_models*);
 //! The view the color and viewport options are drawn with; NULL unbinds.
 DJV_C_API void djv_models_bind_view(djv_models*, tl_view*);
 
+//! A second view, as the desktop's secondary window is one: on a second
+//! display, a television or a projector, drawn with the same options and
+//! the drawings, but without the selection's frame, the text's caret or
+//! the wipe's handles, which are for whoever is drawing. Where its
+//! picture is, is the caller's. NULL unbinds.
+DJV_C_API void djv_models_bind_output(djv_models*, tl_view*);
+
 //! The player the audio applies to and the file the color is resolved
 //! for; NULL for none.
 DJV_C_API void djv_models_set_player(djv_models*, tl_player*);

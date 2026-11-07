@@ -99,6 +99,9 @@ struct djv_models
     int handle = -1;
 
     tl_view* view = nullptr;
+    //! A second view, on a second display: the picture as the view has
+    //! it, without what is there to be touched.
+    tl_view* output = nullptr;
     tl_player* player = nullptr;
     bool compareFile = false;
     // The file compared with; whether the comparison changed since the
@@ -234,7 +237,7 @@ struct djv_models
             selection.reset();
             moving.reset();
             handle = -1;
-            tl::c::setNeedsDraw(view);
+            needsDraw();
             ++generation;
         }
     }
@@ -278,7 +281,7 @@ struct djv_models
                 {
                     handle = static_cast<int>(i);
                     moving = *stroke;
-                    tl::c::setNeedsDraw(view);
+                    needsDraw();
                     return true;
                 }
             }
@@ -300,7 +303,7 @@ struct djv_models
         selection = Selection{ *time, *found };
         moving = annotationsModel->getStrokes(fileId, *time)[*found];
         movePressPos = m.toImage(render);
-        tl::c::setNeedsDraw(view);
+        needsDraw();
         ++generation;
         return true;
     }
@@ -323,7 +326,7 @@ struct djv_models
                 ftk::V2F(pos.x - movePressPos.x, pos.y - movePressPos.y),
                 m.imageSize);
         }
-        tl::c::setNeedsDraw(view);
+        needsDraw();
     }
 
     // The text finished: kept, or dropped. The selected text written
@@ -354,19 +357,22 @@ struct djv_models
             annotationsModel->addStroke(fileId, strokeTime, stroke);
         }
         stroke = models::ReviewStroke();
-        tl::c::setNeedsDraw(view);
+        needsDraw();
         ++generation;
     }
 
     // The drawings of the frame shown, and the stroke being drawn, over
     // the picture with the desktop's stroke drawing.
-    void drawAnnotations(const std::shared_ptr<ftk::IRender>& render)
+    // On the output the selection is not framed and the text has no
+    // caret: they are for whoever is drawing.
+    void drawAnnotations(const std::shared_ptr<ftk::IRender>& render, tl_view* target)
     {
         const auto time = currentTime();
         const models::ImageMapping m = mapping();
         if (!time.has_value() || fileId.empty() || !m.isValid() || !isAShown())
             return;
-        const auto picture = tl::c::getViewPicture(view);
+        const bool touched = target == view;
+        const auto picture = tl::c::getViewPicture(target);
         const auto toScreen = [&m, &picture](const ftk::V2F& point)
         {
             const ftk::V2F r = m.toRender(point);
@@ -384,7 +390,7 @@ struct djv_models
             if (isSelected && (moving.has_value() || typingSelection))
                 continue;
             models::drawStroke(render, fontSystem, strokes[i], toScreen, scale);
-            if (isSelected)
+            if (isSelected && touched)
             {
                 models::drawSelection(render, fontSystem, strokes[i], toScreen, scale, picture.displayScale);
             }
@@ -392,11 +398,14 @@ struct djv_models
         if (selectedHere && moving.has_value())
         {
             models::drawStroke(render, fontSystem, *moving, toScreen, scale);
-            models::drawSelection(render, fontSystem, *moving, toScreen, scale, picture.displayScale);
+            if (touched)
+            {
+                models::drawSelection(render, fontSystem, *moving, toScreen, scale, picture.displayScale);
+            }
         }
         if ((drawing || typing) && models::sameTime(strokeTime, *time))
         {
-            models::drawStroke(render, fontSystem, stroke, toScreen, scale, 1.F, typing);
+            models::drawStroke(render, fontSystem, stroke, toScreen, scale, 1.F, typing && touched);
         }
     }
 
@@ -546,8 +555,27 @@ struct djv_models
         compare.time = filesModel->getCompareTime();
     }
 
-    // The options as the view and the player should have them now.
-    void applyToView()
+    // The views the options are drawn with.
+    std::vector<tl_view*> views() const
+    {
+        std::vector<tl_view*> out;
+        if (view)
+            out.push_back(view);
+        if (output)
+            out.push_back(output);
+        return out;
+    }
+
+    void needsDraw()
+    {
+        for (tl_view* v : views())
+        {
+            tl::c::setNeedsDraw(v);
+        }
+    }
+
+    // The options as a view and the player should have them now.
+    void applyToView(tl_view* view)
     {
         if (!view)
             return;
@@ -637,9 +665,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->colorModel->observeResolvedOCIOOptions(),
         [out](const tl::OCIOOptions& value)
         {
-            if (out->view)
+            for (tl_view* view : out->views())
             {
-                tl::c::setOCIOOptions(out->view, value);
+                tl::c::setOCIOOptions(view, value);
             }
             ++out->generation;
         });
@@ -654,9 +682,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->colorModel->observeLUTOptions(),
         [out](const tl::LUTOptions& value)
         {
-            if (out->view)
+            for (tl_view* view : out->views())
             {
-                tl::c::setLUTOptions(out->view, value);
+                tl::c::setLUTOptions(view, value);
             }
             ++out->generation;
         });
@@ -685,9 +713,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->viewportModel->observeImageOptions(),
         [out](const ftk::ImageOptions& value)
         {
-            if (out->view)
+            for (tl_view* view : out->views())
             {
-                tl::c::setImageOptions(out->view, value);
+                tl::c::setImageOptions(view, value);
             }
             ++out->generation;
         });
@@ -695,9 +723,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->viewportModel->observeDisplayOptions(),
         [out](const tl::DisplayOptions& value)
         {
-            if (out->view)
+            for (tl_view* view : out->views())
             {
-                tl::c::setDisplayOptions(out->view, value);
+                tl::c::setDisplayOptions(view, value);
             }
             ++out->generation;
         });
@@ -705,9 +733,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->viewportModel->observeBackgroundOptions(),
         [out](const tl::BackgroundOptions& value)
         {
-            if (out->view)
+            for (tl_view* view : out->views())
             {
-                tl::c::setBackgroundOptions(out->view, value);
+                tl::c::setBackgroundOptions(view, value);
             }
             ++out->generation;
         });
@@ -715,9 +743,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->viewportModel->observeForegroundOptions(),
         [out](const tl::ForegroundOptions& value)
         {
-            if (out->view)
+            for (tl_view* view : out->views())
             {
-                tl::c::setForegroundOptions(out->view, value);
+                tl::c::setForegroundOptions(view, value);
             }
             ++out->generation;
         });
@@ -734,7 +762,7 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
                 out->selection.reset();
             }
             out->framesUpdate();
-            tl::c::setNeedsDraw(out->view);
+            out->needsDraw();
             ++out->generation;
         });
     out->drawToolObserver = ftk::Observer<models::DrawTool>::create(
@@ -793,9 +821,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->filesModel->observeCompareOptions(),
         [out](const tl::CompareOptions& value)
         {
-            if (out->view)
+            for (tl_view* view : out->views())
             {
-                tl::c::setCompareOptions(out->view, value);
+                tl::c::setCompareOptions(view, value);
             }
             if (!out->isAShown())
             {
@@ -839,9 +867,9 @@ void djv_models_destroy(djv_models* models)
     if (!models)
         return;
     // The observers first: they hold the models.
-    if (models->view)
+    for (tl_view* view : models->views())
     {
-        tl::c::setOverlay(models->view, nullptr);
+        tl::c::setOverlay(view, nullptr);
     }
     models->annotationsObserver.reset();
     models->markersObserver.reset();
@@ -887,15 +915,36 @@ void djv_models_bind_view(djv_models* models, tl_view* view)
     if (!models)
         return;
     models->view = view;
-    models->applyToView();
+    models->applyToView(view);
     if (view)
     {
         tl::c::setOverlay(
             view,
-            [models](const std::shared_ptr<ftk::IRender>& render)
+            [models, view](const std::shared_ptr<ftk::IRender>& render)
             {
-                models->drawAnnotations(render);
+                models->drawAnnotations(render, view);
                 models->drawWipe(render);
+            });
+    }
+}
+
+void djv_models_bind_output(djv_models* models, tl_view* view)
+{
+    if (!models)
+        return;
+    if (models->output && models->output != view)
+    {
+        tl::c::setOverlay(models->output, nullptr);
+    }
+    models->output = view;
+    models->applyToView(view);
+    if (view)
+    {
+        tl::c::setOverlay(
+            view,
+            [models, view](const std::shared_ptr<ftk::IRender>& render)
+            {
+                models->drawAnnotations(render, view);
             });
     }
 }
@@ -1692,7 +1741,7 @@ int djv_compare_set_file(djv_models* models, const char* path)
     }
     models->activeFilesUpdate();
     models->applyToPlayer();
-    tl::c::setNeedsDraw(models->view);
+    models->needsDraw();
     ++models->generation;
     return 1;
 }
@@ -1756,7 +1805,7 @@ int djv_compare_wipe_begin(djv_models* models, float x, float y)
         ftk::V2F(pos.x - widget->center.x, pos.y - widget->center.y) :
         ftk::V2F();
     djv_compare_wipe_move(models, x, y);
-    tl::c::setNeedsDraw(models->view);
+    models->needsDraw();
     return 1;
 }
 
@@ -1802,7 +1851,7 @@ void djv_compare_wipe_end(djv_models* models)
     if (!models)
         return;
     models->wipeDrag = models::WipeHandle::None;
-    tl::c::setNeedsDraw(models->view);
+    models->needsDraw();
 }
 
 float djv_compare_get_overlay(djv_models* models)
@@ -2071,7 +2120,7 @@ int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure
         models->stroke.points.push_back(m.toImage(render));
         models->strokeTime = *time;
         models->typing = true;
-        tl::c::setNeedsDraw(models->view);
+        models->needsDraw();
         ++models->generation;
         return 1;
     default: break;
@@ -2083,7 +2132,7 @@ int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure
     models::strokeBegin(models->stroke, m.toImage(render), pen != 0, pressure);
     models->strokeTime = *time;
     models->drawing = true;
-    tl::c::setNeedsDraw(models->view);
+    models->needsDraw();
     return 1;
 }
 
@@ -2120,7 +2169,7 @@ void djv_draw_move(djv_models* models, float x, float y, float pressure)
     {
         models::strokeContinue(models->stroke, m.toImage(render), pressure, false);
     }
-    tl::c::setNeedsDraw(models->view);
+    models->needsDraw();
 }
 
 void djv_draw_end(djv_models* models)
@@ -2144,7 +2193,7 @@ void djv_draw_end(djv_models* models)
         }
         models->moving.reset();
         models->handle = -1;
-        tl::c::setNeedsDraw(models->view);
+        models->needsDraw();
         return;
     }
     if (models->drawing && models::strokeComplete(models->stroke))
@@ -2181,12 +2230,12 @@ void djv_draw_cancel(djv_models* models)
     {
         models->moving.reset();
         models->handle = -1;
-        tl::c::setNeedsDraw(models->view);
+        models->needsDraw();
     }
     models->stroke = models::ReviewStroke();
     if (was)
     {
-        tl::c::setNeedsDraw(models->view);
+        models->needsDraw();
     }
 }
 
@@ -2216,7 +2265,7 @@ void djv_text_set(djv_models* models, const char* text)
     if (!models || !models->typing)
         return;
     models->stroke.text = text ? text : "";
-    tl::c::setNeedsDraw(models->view);
+    models->needsDraw();
 }
 
 void djv_text_get_area(djv_models* models, float* x, float* y, float* height)
@@ -2285,7 +2334,7 @@ int djv_select_edit_text(djv_models* models)
     models->strokeTime = models->selection->time;
     models->typing = true;
     models->typingSelection = true;
-    tl::c::setNeedsDraw(models->view);
+    models->needsDraw();
     ++models->generation;
     return 1;
 }
