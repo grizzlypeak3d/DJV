@@ -270,7 +270,14 @@ namespace djv
                     info.size,
                     info.type,
                     burnAnnotations));
-            auto writer = plugin->write(path, outputInfo, tl::IOOptions());
+            // The file is written with the name given. A name that ends in
+            // a number, as one ending in the time does, would otherwise be
+            // taken for a frame of a sequence, and the number replaced with
+            // the frame's.
+            ftk::PathOptions pathOptions;
+            pathOptions.seqMaxDigits = 0;
+            const ftk::Path writePath(path.get(), pathOptions);
+            auto writer = plugin->write(writePath, outputInfo, tl::IOOptions());
             writer->writeVideo(time, render->render(player, time));
             writer->finish();
         }

@@ -244,7 +244,9 @@ static void stills(tl_engine* engine, djv_models* models)
     CHECK(strlen(name) > 20 && strcmp(name + strlen(name) - 4, ".png") == 0);
     if (tl_engine_has_gpu(engine))
     {
-        const char* path = DJV_C_TEST_SETTINGS "-still.png";
+        /* Written with the name given: one ending in a number, as the
+         * time does, is not taken for a frame of a sequence. */
+        const char* path = DJV_C_TEST_SETTINGS "-still_01-00-00-03.png";
         remove(path);
         CHECK(djv_still_write(models, path));
         CHECK(strlen(djv_still_get_error(models)) == 0);

@@ -3,6 +3,7 @@
 Changes:
 * Add File > Export Still, for writing the current frame as an image in one
   step (#696).
+* Read HEIC and HEIF images on macOS, the photos an iPhone or an iPad takes.
 
 ## 3.7.6
 
