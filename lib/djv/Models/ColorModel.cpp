@@ -630,6 +630,11 @@ namespace djv
                 {
                     candidates = { "srgb_tx", "sRGB - Texture", "sRGB" };
                 }
+                else if ("smpte432" == primaries && "iec61966-2-1" == transfer)
+                {
+                    // Display P3: an iPhone's photos, and movies from a Mac.
+                    candidates = { "srgb_p3d65_scene", "sRGB Encoded P3-D65", "srgb_p3d65_tx" };
+                }
                 else if ("bt709" == primaries && "bt709" == transfer)
                 {
                     candidates =

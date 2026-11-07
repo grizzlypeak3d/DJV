@@ -81,6 +81,18 @@ namespace djv
                 { { "Color Primaries", "bt709" },
                   { "Color Transfer", "iec61966-2-1" } }).empty());
 
+            // Display P3, as an iPhone's photo says it, is the
+            // configuration's P3, not its sRGB.
+            const std::string p3 = model->resolveInput(
+                "photo.heic",
+                { { "Color Primaries", "smpte432" },
+                  { "Color Transfer", "iec61966-2-1" } });
+            FTK_CHECK(!p3.empty());
+            FTK_CHECK(p3 != model->resolveInput(
+                "movie.mov",
+                { { "Color Primaries", "bt709" },
+                  { "Color Transfer", "iec61966-2-1" } }));
+
             // Primaries alone are not a declaration: what the transfer
             // would be is for the configuration's rules to say, not for
             // a guess here, so the file resolves as an untagged one.
