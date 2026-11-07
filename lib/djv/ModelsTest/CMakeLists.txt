@@ -15,6 +15,7 @@ set(HEADERS
     ShellCommandTest.h
     StrokeTest.h
     ShuttleTest.h
+    StatusTest.h
     WipeTest.h
     TimeUnitsModelTest.h
     ToolsModelTest.h
@@ -36,6 +37,7 @@ set(SOURCE
     ShellCommandTest.cpp
     StrokeTest.cpp
     ShuttleTest.cpp
+    StatusTest.cpp
     WipeTest.cpp
     TimeUnitsModelTest.cpp
     ToolsModelTest.cpp

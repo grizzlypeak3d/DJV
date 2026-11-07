@@ -17,6 +17,7 @@
 #include <djv/Models/ExportRender.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/Shuttle.h>
+#include <djv/Models/Status.h>
 #include <djv/Models/Stroke.h>
 #include <djv/Models/Wipe.h>
 #include <djv/Models/TimeUnitsModel.h>
@@ -69,6 +70,9 @@ struct djv_models
     std::string reviewPath;
     std::string fileId;
     std::string reviewError;
+
+    // The options on that change the picture or the sound, as last read.
+    std::vector<models::StatusItem> status;
 
     // The media reference keys as last read, "As Authored" first; the
     // storage of a label and the key in use; and whether one was chosen
@@ -1218,6 +1222,41 @@ djv_lut_direction djv_lut_get_direction(djv_models* models)
     return models && tl::LUTDirection::Inverse == models->colorModel->getLUTOptions().direction ?
         DJV_LUT_DIRECTION_INVERSE :
         DJV_LUT_DIRECTION_FORWARD;
+}
+
+size_t djv_status_get_count(djv_models* models)
+{
+    if (!models)
+        return 0;
+    models::StatusOptions options;
+    options.display = models->viewportModel->getDisplayOptions();
+    options.foreground = models->viewportModel->getForegroundOptions();
+    options.aspectRatio = models->viewportModel->getAspectRatioOptions();
+    options.ocio = models->colorModel->getOCIOOptions();
+    options.lut = models->colorModel->getLUTOptions();
+    options.audioOffset = models->audioModel->getSyncOffset();
+    options.audioChannel = models->filesModel->getAudioChannel();
+    const auto values = models::getStatus(options);
+    models->status.clear();
+    for (const auto& item : models::getStatusItems())
+    {
+        const auto i = values.find(item.id);
+        if (i != values.end() && i->second)
+        {
+            models->status.push_back(item);
+        }
+    }
+    return models->status.size();
+}
+
+const char* djv_status_get_id(djv_models* models, size_t index)
+{
+    return models && index < models->status.size() ? models->status[index].id.c_str() : "";
+}
+
+const char* djv_status_get_label(djv_models* models, size_t index)
+{
+    return models && index < models->status.size() ? models->status[index].label.c_str() : "";
 }
 
 size_t djv_media_reference_get_count(djv_models* models)

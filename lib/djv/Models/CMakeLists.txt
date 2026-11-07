@@ -19,6 +19,7 @@ set(HEADERS
     Stroke.h
     StrokeDraw.h
     Shuttle.h
+    Status.h
     Wipe.h
     SettingsKeys.h
     SettingsModel.h
@@ -50,6 +51,7 @@ set(SOURCE
     Stroke.cpp
     StrokeDraw.cpp
     Shuttle.cpp
+    Status.cpp
     Wipe.cpp
     SettingsKeys.cpp
     SettingsModel.cpp

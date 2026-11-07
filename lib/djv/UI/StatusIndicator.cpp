@@ -6,6 +6,7 @@
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/Status.h>
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/ViewportModel.h>
 
@@ -20,16 +21,9 @@ namespace djv
     {
         struct StatusIndicator::Private
         {
-            bool channelsEnabled = false;
-            bool negativeEnabled = false;
-            bool clippingWarningEnabled = false;
-            bool mirrorEnabled = false;
-            bool aspectRatioEnabled = false;
-            bool ocioEnabled = false;
-            bool lutEnabled = false;
-            bool colorEnabled = false;
-            bool audioOffsetEnabled = false;
-            bool audioChannelEnabled = false;
+            // The options watched, which the models say what is on from;
+            // see models::getStatus().
+            models::StatusOptions options;
 
             std::weak_ptr<models::ViewportModel> viewportModel;
             std::weak_ptr<models::ToolsModel> toolsModel;
@@ -77,25 +71,7 @@ namespace djv
                 viewportModel->observeDisplayOptions(),
                 [this](const tl::DisplayOptions& value)
                 {
-                    FTK_P();
-                    p.channelsEnabled =
-                        value.channels != ftk::ChannelDisplay::Color;
-                    p.negativeEnabled = value.negative;
-                    p.mirrorEnabled =
-                        value.mirror.x ||
-                        value.mirror.y;
-                    // Only an adjustment that changes the picture: enabled at
-                    // its defaults it is neutral, and the renderer skips it or
-                    // nearly so, so there is nothing to be reminded of.
-                    tl::Color color = value.color;
-                    color.enabled = false;
-                    tl::Levels levels = value.levels;
-                    levels.enabled = false;
-                    p.colorEnabled =
-                        (value.color.enabled && color != tl::Color()) ||
-                        (value.levels.enabled && levels != tl::Levels()) ||
-                        (value.exposure.enabled && value.exposure.exposure != 0.F) ||
-                        (value.softClip.enabled && value.softClip.value > 0.F);
+                    _p->options.display = value;
                     _indicatorUpdate();
                 });
 
@@ -103,7 +79,7 @@ namespace djv
                 viewportModel->observeForegroundOptions(),
                 [this](const tl::ForegroundOptions& value)
                 {
-                    _p->clippingWarningEnabled = value.clippingWarning.enabled;
+                    _p->options.foreground = value;
                     _indicatorUpdate();
                 });
 
@@ -111,8 +87,7 @@ namespace djv
                 viewportModel->observeAspectRatioOptions(),
                 [this](const models::AspectRatioOptions& value)
                 {
-                    FTK_P();
-                    p.aspectRatioEnabled = value.index != 0;
+                    _p->options.aspectRatio = value;
                     _indicatorUpdate();
                 });
 
@@ -120,12 +95,7 @@ namespace djv
                 colorModel->observeOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
-                    // As the renderer decides: a display and a view to
-                    // transform to.
-                    _p->ocioEnabled =
-                        value.enabled &&
-                        !value.display.empty() &&
-                        !value.view.empty();
+                    _p->options.ocio = value;
                     _indicatorUpdate();
                 });
 
@@ -133,7 +103,7 @@ namespace djv
                 colorModel->observeLUTOptions(),
                 [this](const tl::LUTOptions& value)
                 {
-                    _p->lutEnabled = value.enabled && !value.fileName.empty();
+                    _p->options.lut = value;
                     _indicatorUpdate();
                 });
 
@@ -141,7 +111,7 @@ namespace djv
                 audioModel->observeSyncOffset(),
                 [this](double value)
                 {
-                    _p->audioOffsetEnabled = value != 0.0;
+                    _p->options.audioOffset = value;
                     _indicatorUpdate();
                 });
 
@@ -149,7 +119,7 @@ namespace djv
                 filesModel->observeAudioChannel(),
                 [this](int value)
                 {
-                    _p->audioChannelEnabled = value != -1;
+                    _p->options.audioChannel = value;
                     _indicatorUpdate();
                 });
 
@@ -183,53 +153,29 @@ namespace djv
 
         bool StatusIndicator::_hasIndicator() const
         {
-            FTK_P();
-            return
-                p.channelsEnabled    ||
-                p.negativeEnabled    ||
-                p.clippingWarningEnabled ||
-                p.mirrorEnabled      ||
-                p.aspectRatioEnabled ||
-                p.ocioEnabled        ||
-                p.lutEnabled         ||
-                p.colorEnabled       ||
-                p.audioOffsetEnabled ||
-                p.audioChannelEnabled;
+            for (const auto& i : models::getStatus(_p->options))
+            {
+                if (i.second)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         std::vector<std::pair<std::string, std::string> > StatusIndicator::_getIndicators() const
         {
-            return
+            std::vector<std::pair<std::string, std::string> > out;
+            for (const auto& item : models::getStatusItems())
             {
-                { "Channels", "Image channels" },
-                { "Negative", "Negative" },
-                { "ClippingWarning", "Clipping warning" },
-                { "Mirror", "Mirror" },
-                { "AspectRatio", "Aspect ratio" },
-                { "OCIO", "OCIO" },
-                { "LUT", "LUT" },
-                { "Color", "Color controls" },
-                { "AudioOffset", "Audio offset" },
-                { "AudioChannel", "Audio channel" }
-            };
+                out.push_back(std::make_pair(item.id, item.label));
+            }
+            return out;
         }
 
         std::map<std::string, bool> StatusIndicator::_getIndicatorValues() const
         {
-            FTK_P();
-            return
-            {
-                { "Channels", p.channelsEnabled },
-                { "Negative", p.negativeEnabled },
-                { "ClippingWarning", p.clippingWarningEnabled },
-                { "Mirror", p.mirrorEnabled },
-                { "AspectRatio", p.aspectRatioEnabled },
-                { "OCIO", p.ocioEnabled },
-                { "LUT", p.lutEnabled },
-                { "Color", p.colorEnabled },
-                { "AudioOffset", p.audioOffsetEnabled },
-                { "AudioChannel", p.audioChannelEnabled }
-            };
+            return models::getStatus(_p->options);
         }
 
         std::string StatusIndicator::_getIndicatorTool(const std::string& name) const

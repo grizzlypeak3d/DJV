@@ -18,6 +18,7 @@
 #include <djv/ModelsTest/ShellCommandTest.h>
 #include <djv/ModelsTest/StrokeTest.h>
 #include <djv/ModelsTest/ShuttleTest.h>
+#include <djv/ModelsTest/StatusTest.h>
 #include <djv/ModelsTest/WipeTest.h>
 #include <djv/ModelsTest/TimeUnitsModelTest.h>
 #include <djv/ModelsTest/ToolsModelTest.h>
@@ -81,6 +82,7 @@ namespace djv
             p.tests.push_back(models_tests::ShellCommandTest::create(context));
             p.tests.push_back(models_tests::StrokeTest::create(context));
             p.tests.push_back(models_tests::ShuttleTest::create(context));
+            p.tests.push_back(models_tests::StatusTest::create(context));
             p.tests.push_back(models_tests::WipeTest::create(context));
             p.tests.push_back(models_tests::TimeUnitsModelTest::create(context));
             p.tests.push_back(models_tests::ToolsModelTest::create(context));

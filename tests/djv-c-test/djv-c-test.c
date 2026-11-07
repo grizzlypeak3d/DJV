@@ -313,6 +313,38 @@ static int hasLUTWord(const char* list, const char* word)
 
 /* The LUT: its file, order and direction, kept in the settings; and the
  * extensions a LUT can have. */
+/* What changes the picture: nothing at first, then a LUT and the
+ * negative, in the indicator's order, and nothing again. */
+static void status(tl_engine* engine)
+{
+    /* Models of their own, with settings of their own: nothing on. */
+    const char* settings = DJV_C_TEST_DIR "/status-settings.json";
+    remove(settings);
+    djv_models* models = djv_models_create(engine, settings);
+    CHECK(models != NULL);
+    if (!models)
+        return;
+    CHECK(djv_status_get_count(models) == 0);
+    djv_lut_set_file_name(models, "/tmp/look.cube");
+    djv_lut_set_enabled(models, 1);
+    djv_display_options display = djv_viewport_get_display(models);
+    display.negative = 1;
+    djv_viewport_set_display(models, display);
+    CHECK(djv_status_get_count(models) == 2);
+    CHECK(strcmp(djv_status_get_id(models, 0), "Negative") == 0);
+    CHECK(strcmp(djv_status_get_id(models, 1), "LUT") == 0);
+    CHECK(strcmp(djv_status_get_label(models, 1), "LUT") == 0);
+    CHECK(strcmp(djv_status_get_id(models, 2), "") == 0);
+    display.negative = 0;
+    djv_viewport_set_display(models, display);
+    djv_lut_set_enabled(models, 0);
+    djv_lut_set_file_name(models, "");
+    CHECK(djv_status_get_count(models) == 0);
+    CHECK(djv_status_get_count(NULL) == 0);
+    djv_models_destroy(models);
+    remove(settings);
+}
+
 static void luts(djv_models* models)
 {
     djv_lut_set_file_name(models, "/tmp/look.cube");
@@ -798,6 +830,7 @@ int main(void)
     djv_models_bind_output(models, NULL);
     viewport(models);
     luts(models);
+    status(engine);
     settings(models);
     shortcuts(models);
     if (player)

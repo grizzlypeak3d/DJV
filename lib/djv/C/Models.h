@@ -101,6 +101,19 @@ DJV_C_API const char* djv_color_get_resolved_input(djv_models*);
 
 ///@}
 
+//! \name Status
+//! What changes the picture or the sound from the media as it is: the
+//! options the desktop's status indicator reminds of, those that are on,
+//! in its order, by an id ("LUT", "Negative", ...) and a name. Read again
+//! on each count.
+///@{
+
+DJV_C_API size_t djv_status_get_count(djv_models*);
+DJV_C_API const char* djv_status_get_id(djv_models*, size_t index);
+DJV_C_API const char* djv_status_get_label(djv_models*, size_t index);
+
+///@}
+
 //! \name Media references
 //! A timeline's clips may carry several versions of their media, chosen by
 //! key: a proxy and the full resolution, say. As the desktop's File > Media
