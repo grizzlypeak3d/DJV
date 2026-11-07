@@ -216,6 +216,8 @@ typedef struct djv_display_options
     float softClip;
 } djv_display_options;
 DJV_C_API djv_display_options djv_viewport_get_display(djv_models*);
+//! The options as they start, which a slider is reset to.
+DJV_C_API djv_display_options djv_viewport_get_default_display(void);
 DJV_C_API void djv_viewport_set_display(djv_models*, djv_display_options);
 
 //! Whether any color adjustment is on (the color values, levels,

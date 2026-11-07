@@ -1456,12 +1456,28 @@ namespace
     }
 }
 
+namespace
+{
+    djv_display_options toC(const tl::DisplayOptions& o);
+}
+
 djv_display_options djv_viewport_get_display(djv_models* models)
 {
-    djv_display_options out = {};
     if (!models)
-        return out;
-    const tl::DisplayOptions& o = models->viewportModel->getDisplayOptions();
+        return djv_display_options{};
+    return toC(models->viewportModel->getDisplayOptions());
+}
+
+djv_display_options djv_viewport_get_default_display(void)
+{
+    return toC(tl::DisplayOptions());
+}
+
+namespace
+{
+djv_display_options toC(const tl::DisplayOptions& o)
+{
+    djv_display_options out = {};
     out.channels = static_cast<int>(o.channels);
     out.mirrorX = o.mirror.x ? 1 : 0;
     out.mirrorY = o.mirror.y ? 1 : 0;
@@ -1483,6 +1499,7 @@ djv_display_options djv_viewport_get_display(djv_models* models)
     out.softClipEnabled = o.softClip.enabled ? 1 : 0;
     out.softClip = o.softClip.value;
     return out;
+}
 }
 
 void djv_viewport_set_display(djv_models* models, djv_display_options value)

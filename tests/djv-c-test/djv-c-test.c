@@ -119,6 +119,19 @@ static void timeUnits(djv_models* models)
 
 static void viewport(djv_models* models)
 {
+    /* The defaults a slider goes back to. */
+    const djv_display_options defaults = djv_viewport_get_default_display();
+    CHECK_NEAR(defaults.brightness[0], 1.0, 0.0001);
+    CHECK_NEAR(defaults.contrast[1], 1.0, 0.0001);
+    CHECK_NEAR(defaults.saturation[2], 1.0, 0.0001);
+    CHECK_NEAR(defaults.add[0], 0.0, 0.0001);
+    CHECK_NEAR(defaults.hue, 0.0, 0.0001);
+    CHECK_NEAR(defaults.levelsInHigh, 1.0, 0.0001);
+    CHECK_NEAR(defaults.levelsGamma, 1.0, 0.0001);
+    CHECK_NEAR(defaults.levelsOutHigh, 1.0, 0.0001);
+    CHECK_NEAR(defaults.exposure, 0.0, 0.0001);
+    CHECK(!defaults.negative && !defaults.colorEnabled);
+
     /* The adjustments, and the reset that leaves the view options. */
     CHECK(!djv_viewport_has_color_adjustments(models));
     djv_display_options display = djv_viewport_get_display(models);
