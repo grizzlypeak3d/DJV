@@ -101,6 +101,30 @@ DJV_C_API const char* djv_color_get_resolved_input(djv_models*);
 
 ///@}
 
+//! \name Media references
+//! A timeline's clips may carry several versions of their media, chosen by
+//! key: a proxy and the full resolution, say. As the desktop's File > Media
+//! References has them: "As Authored", the empty key, first, which leaves
+//! each clip on the reference it was made with, then the timeline's keys.
+//! The choice is the review's, kept with it for the file shown, and put
+//! back when the review is opened.
+///@{
+
+//! How many there are to choose from: none when the timeline has no
+//! versions to choose between, its clips each on OTIO's default key alone.
+//! The keys are read again here.
+DJV_C_API size_t djv_media_reference_get_count(djv_models*);
+DJV_C_API const char* djv_media_reference_get_key(djv_models*, size_t index);
+//! A key's name as the desktop shows it: "As Authored" for the empty key,
+//! "Default" for OTIO's default key, the key itself otherwise.
+DJV_C_API const char* djv_media_reference_get_label(djv_models*, const char* key);
+//! The key the player uses.
+DJV_C_API const char* djv_media_reference_get_current(djv_models*);
+//! Use a key: the media is read again, and the review keeps it.
+DJV_C_API void djv_media_reference_set_current(djv_models*, const char* key);
+
+///@}
+
 //! \name LUT
 ///@{
 

@@ -8,6 +8,8 @@
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
+
+#include <opentimelineio/clip.h>
 #include <djv/Models/HUD.h>
 #include <djv/Models/Info.h>
 #include <djv/Models/MarkersModel.h>
@@ -67,6 +69,33 @@ struct djv_models
     std::string reviewPath;
     std::string fileId;
     std::string reviewError;
+
+    // The media reference keys as last read, "As Authored" first; the
+    // storage of a label and the key in use; and whether one was chosen
+    // here, for the review to keep.
+    std::vector<std::string> mediaReferenceKeys;
+    std::string mediaReferenceLabel;
+    std::string mediaReferenceKey;
+    bool mediaReferenceChanged = false;
+
+    // The review's media reference for the file shown, onto the player.
+    void applyReviewMediaReference()
+    {
+        auto p = tl::c::getPlayer(player);
+        if (!p)
+            return;
+        for (const auto& file : review.files)
+        {
+            if (file.id == fileId)
+            {
+                if (p->getMediaReferenceKey() != file.mediaReferenceKey)
+                {
+                    p->setMediaReferenceKey(file.mediaReferenceKey);
+                }
+                break;
+            }
+        }
+    }
 
     // The stroke being drawn, or the eraser at work.
     bool drawing = false;
@@ -967,6 +996,7 @@ void djv_models_set_player(djv_models* models, tl_player* player)
     models->compareQuiet = false;
     models->activeFilesUpdate();
     models->applyToPlayer();
+    models->applyReviewMediaReference();
     djv_draw_cancel(models);
     models->framesUpdate();
     ++models->generation;
@@ -1188,6 +1218,81 @@ djv_lut_direction djv_lut_get_direction(djv_models* models)
     return models && tl::LUTDirection::Inverse == models->colorModel->getLUTOptions().direction ?
         DJV_LUT_DIRECTION_INVERSE :
         DJV_LUT_DIRECTION_FORWARD;
+}
+
+size_t djv_media_reference_get_count(djv_models* models)
+{
+    if (!models)
+        return 0;
+    models->mediaReferenceKeys.clear();
+    if (auto player = tl::c::getPlayer(models->player))
+    {
+        const auto keys = player->getMediaReferenceKeys();
+        const bool versions = std::any_of(
+            keys.begin(),
+            keys.end(),
+            [](const std::string& key)
+            {
+                return !key.empty() && key != OTIO_NS::Clip::default_media_key;
+            });
+        if (versions)
+        {
+            models->mediaReferenceKeys.push_back(std::string());
+            for (const auto& key : keys)
+            {
+                if (!key.empty())
+                {
+                    models->mediaReferenceKeys.push_back(key);
+                }
+            }
+        }
+    }
+    return models->mediaReferenceKeys.size();
+}
+
+const char* djv_media_reference_get_key(djv_models* models, size_t index)
+{
+    return models && index < models->mediaReferenceKeys.size() ?
+        models->mediaReferenceKeys[index].c_str() :
+        "";
+}
+
+const char* djv_media_reference_get_label(djv_models* models, const char* key)
+{
+    if (!models)
+        return "";
+    models->mediaReferenceLabel = models::getMediaReferenceLabel(key ? key : "");
+    return models->mediaReferenceLabel.c_str();
+}
+
+const char* djv_media_reference_get_current(djv_models* models)
+{
+    if (!models)
+        return "";
+    auto player = tl::c::getPlayer(models->player);
+    models->mediaReferenceKey = player ? player->getMediaReferenceKey() : std::string();
+    return models->mediaReferenceKey.c_str();
+}
+
+void djv_media_reference_set_current(djv_models* models, const char* key)
+{
+    if (!models || !key)
+        return;
+    auto player = tl::c::getPlayer(models->player);
+    if (!player || player->getMediaReferenceKey() == key)
+        return;
+    player->setMediaReferenceKey(key);
+    // Kept with the review, for the file shown, as the desktop keeps it.
+    for (auto& file : models->review.files)
+    {
+        if (file.id == models->fileId)
+        {
+            file.mediaReferenceKey = key;
+            models->mediaReferenceChanged = true;
+            break;
+        }
+    }
+    ++models->generation;
 }
 
 const char* djv_lut_get_extensions(void)
@@ -2028,6 +2133,8 @@ int djv_review_open(djv_models* models, const char* reviewPath, const char* medi
     }
     models->annotationsModel->setAnnotations(models->review.annotations);
     models->markersModel->setMarkers(models->review.markers);
+    models->applyReviewMediaReference();
+    models->mediaReferenceChanged = false;
 
     // The file the review compares with, where it is found from the
     // review; and the comparison is the review's until it changes.
@@ -2067,7 +2174,11 @@ int djv_review_save(djv_models* models)
     const auto& markers = models->markersModel->getMarkers();
     const std::filesystem::path path = std::filesystem::u8path(models->reviewPath);
     const bool comparing = models->compareChanged && models->compareFile;
-    if (annotations.empty() && markers.empty() && !comparing && !std::filesystem::exists(path))
+    if (annotations.empty() &&
+        markers.empty() &&
+        !comparing &&
+        !models->mediaReferenceChanged &&
+        !std::filesystem::exists(path))
         return 1;
     try
     {
@@ -2107,6 +2218,7 @@ void djv_review_close(djv_models* models)
     models->fileId.clear();
     models->reviewCompareFile.clear();
     models->reviewError.clear();
+    models->mediaReferenceChanged = false;
     models->annotationsModel->clear();
     models->markersModel->clear();
 }

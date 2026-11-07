@@ -596,6 +596,91 @@ static const char* reviewMissingB =
     " \"DifferenceGain\": 1.0, \"Overlay\": 0.5, \"SameSize\": true,"
     " \"WipeCenter\": [0.5, 0.5], \"WipeRotation\": 0.0}, \"time\": \"Relative\"}}";
 
+/* A timeline whose clip has two versions of its media, a proxy and the
+ * full resolution, as OTIO's media references. */
+static void writeMediaReferences(const char* path)
+{
+    const char* image = DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg";
+    static char text[8192];
+    const char* range =
+        "{\"OTIO_SCHEMA\": \"TimeRange.1\", "
+        "\"start_time\": {\"OTIO_SCHEMA\": \"RationalTime.1\", \"rate\": 24.0, \"value\": 0.0}, "
+        "\"duration\": {\"OTIO_SCHEMA\": \"RationalTime.1\", \"rate\": 24.0, \"value\": 1.0}}";
+    snprintf(text, sizeof(text),
+        "{\"OTIO_SCHEMA\": \"Timeline.1\", \"name\": \"refs\", \"metadata\": {}, "
+        "\"tracks\": {\"OTIO_SCHEMA\": \"Stack.1\", \"name\": \"tracks\", \"metadata\": {}, "
+        "\"children\": [{\"OTIO_SCHEMA\": \"Track.1\", \"name\": \"V1\", \"kind\": \"Video\", "
+        "\"metadata\": {}, \"children\": [{\"OTIO_SCHEMA\": \"Clip.2\", \"name\": \"clip\", "
+        "\"metadata\": {}, \"source_range\": %s, "
+        "\"media_references\": {"
+        "\"Proxy\": {\"OTIO_SCHEMA\": \"ExternalReference.1\", \"metadata\": {}, \"target_url\": \"%s\", \"available_range\": %s}, "
+        "\"Full\": {\"OTIO_SCHEMA\": \"ExternalReference.1\", \"metadata\": {}, \"target_url\": \"%s\", \"available_range\": %s}}, "
+        "\"active_media_reference_key\": \"Proxy\"}]}]}}",
+        range, image, range, image, range);
+    writeFile(path, text);
+}
+
+/* Media references: none for a file of one version; for a timeline of
+ * two, "As Authored" and its keys, chosen and kept with the review, and
+ * put back when the review is opened again. */
+static void mediaReferences(tl_engine* engine, tl_player* single)
+{
+    djv_models* models = djv_models_create(engine, DJV_C_TEST_SETTINGS);
+    CHECK(models != NULL);
+    if (!models)
+        return;
+    djv_models_set_player(models, single);
+    CHECK(djv_media_reference_get_count(models) == 0);
+
+    const char* timeline = DJV_C_TEST_DIR "/refs.otio";
+    const char* review = DJV_C_TEST_DIR "/refs.djvr";
+    writeMediaReferences(timeline);
+    remove(review);
+    tl_player* player = tl_player_create(engine, timeline);
+    CHECK(player != NULL);
+    if (player)
+    {
+        djv_models_set_player(models, player);
+        CHECK(djv_review_open(models, review, timeline) == 1);
+        CHECK(djv_media_reference_get_count(models) == 3);
+        CHECK(strcmp(djv_media_reference_get_key(models, 0), "") == 0);
+        CHECK(strcmp(djv_media_reference_get_key(models, 1), "Full") == 0);
+        CHECK(strcmp(djv_media_reference_get_key(models, 2), "Proxy") == 0);
+        CHECK(strcmp(djv_media_reference_get_key(models, 3), "") == 0);
+        CHECK(strcmp(djv_media_reference_get_label(models, ""), "As Authored") == 0);
+        CHECK(strcmp(djv_media_reference_get_label(models, "Full"), "Full") == 0);
+        CHECK(strcmp(djv_media_reference_get_current(models), "") == 0);
+
+        /* Chosen, and kept with the review though it has nothing else. */
+        djv_media_reference_set_current(models, "Full");
+        CHECK(strcmp(djv_media_reference_get_current(models), "Full") == 0);
+        CHECK(djv_review_save(models) == 1);
+        CHECK(fileContains(review, "\"mediaReferenceKey\": \"Full\""));
+        djv_review_close(models);
+        djv_models_set_player(models, NULL);
+        tl_player_destroy(player);
+
+        /* Opened again: the review's choice. */
+        player = tl_player_create(engine, timeline);
+        CHECK(player != NULL);
+        if (player)
+        {
+            djv_models_set_player(models, player);
+            CHECK(strcmp(djv_media_reference_get_current(models), "") == 0);
+            CHECK(djv_review_open(models, review, timeline) == 1);
+            CHECK(strcmp(djv_media_reference_get_current(models), "Full") == 0);
+            djv_review_close(models);
+            djv_models_set_player(models, NULL);
+            tl_player_destroy(player);
+        }
+    }
+    remove(review);
+    remove(timeline);
+    CHECK(strcmp(djv_media_reference_get_current(NULL), "") == 0);
+    CHECK(djv_media_reference_get_count(NULL) == 0);
+    djv_models_destroy(models);
+}
+
 static void reviewComparing(tl_engine* engine, tl_player* player)
 {
     djv_models* models = djv_models_create(engine, DJV_C_TEST_SETTINGS);
@@ -719,6 +804,7 @@ int main(void)
     {
         drawing(engine, player);
         reviewComparing(engine, player);
+        mediaReferences(engine, player);
         comparing(models, player);
     }
 
