@@ -2298,6 +2298,17 @@ const char* djv_review_get_error(djv_models* models)
     return models ? models->reviewError.c_str() : "";
 }
 
+int djv_review_export_markers(djv_models* models, const char* path)
+{
+    if (!models || !path)
+        return 0;
+    models->reviewError = models::exportReviewMarkers(
+        models->markersModel->getMarkers(),
+        tl::c::getPlayer(models->player),
+        std::filesystem::u8path(path));
+    return models->reviewError.empty() ? 1 : 0;
+}
+
 int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure)
 {
     if (!models || models->fileId.empty() || !models->isAShown())

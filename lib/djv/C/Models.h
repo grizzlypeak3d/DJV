@@ -511,6 +511,12 @@ DJV_C_API int djv_review_save(djv_models*);
 DJV_C_API void djv_review_close(djv_models*);
 DJV_C_API const char* djv_review_get_error(djv_models*);
 
+//! Write the markers to an OTIO file about what the player has open, as
+//! DJV's Review > Export does: a timeline as a copy of itself with the
+//! markers in it, for an editor to bring in. Zero on failure, with the
+//! reason in djv_review_get_error().
+DJV_C_API int djv_review_export_markers(djv_models*, const char* path);
+
 //! Drawing with a finger or a pen, at a point of the view in its pixels:
 //! begun on the picture of the player's frame (one when it began), and
 //! kept when it ends. The eraser removes the strokes it touches. A pen

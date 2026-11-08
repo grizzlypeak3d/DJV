@@ -4,13 +4,16 @@
 #include <djv/Models/Review.h>
 
 #include <tlRender/Timeline/OTIOVersion.h>
+#include <tlRender/Timeline/Player.h>
 #include <tlRender/UI/ItemOptions.h>
 
 #include <ftk/Core/Format.h>
 #include <ftk/Core/OS.h>
 #include <ftk/Core/Path.h>
+#include <ftk/Core/String.h>
 
 #include <opentimelineio/clip.h>
+#include <opentimelineio/externalReference.h>
 #include <opentimelineio/marker.h>
 #include <opentimelineio/stack.h>
 #include <opentimelineio/track.h>
@@ -871,6 +874,51 @@ namespace djv
                             marker.text));
                 stack->markers().push_back(otioMarker);
             }
+        }
+
+        std::string exportReviewMarkers(
+            const std::vector<ReviewMarker>& markers,
+            const std::shared_ptr<tl::Player>& player,
+            const std::filesystem::path& path)
+        {
+            if (!player)
+            {
+                return "Nothing is open";
+            }
+            OTIO_NS::ErrorStatus errorStatus;
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> timeline;
+            const ftk::Path& aPath = player->getPath();
+            const std::string ext = ftk::toLower(aPath.getExt());
+            if (".otio" == ext || ".otioz" == ext)
+            {
+                timeline = dynamic_cast<OTIO_NS::Timeline*>(
+                    player->getTimeline()->getOTIOTimeline()->clone(&errorStatus));
+            }
+            else
+            {
+                const OTIO_NS::TimeRange timeRange = player->getTimeRange();
+                auto clip = new OTIO_NS::Clip(
+                    aPath.getFileName(),
+                    new OTIO_NS::ExternalReference(aPath.getFileName(true)),
+                    timeRange);
+                auto track = new OTIO_NS::Track(
+                    "Video",
+                    std::nullopt,
+                    OTIO_NS::Track::Kind::video);
+                track->append_child(clip, &errorStatus);
+                timeline = new OTIO_NS::Timeline;
+                timeline->tracks()->append_child(track, &errorStatus);
+            }
+            if (!timeline || OTIO_NS::is_error(errorStatus))
+            {
+                return errorStatus.details;
+            }
+            reviewMarkersToTimeline(markers, timeline);
+            if (!timeline->to_json_file(ftk::fromFileSystem(path), &errorStatus))
+            {
+                return errorStatus.details;
+            }
+            return std::string();
         }
 
         Review reviewOpen(const std::string& fileName)

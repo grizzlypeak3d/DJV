@@ -549,6 +549,17 @@ static void drawing(tl_engine* engine, tl_player* player)
     CHECK(strcmp(djv_note_get_text(models, 0), "Much too dark") == 0);
     CHECK(strcmp(djv_note_get_author(models, 0), "Pad") == 0);
 
+    /* The markers out to OTIO, as Review > Export writes them: an image is
+       not a timeline, so a timeline of one clip referencing it, with the
+       marker on it. A file that cannot be written says why. */
+    remove(DJV_C_TEST_DIR "/markers.otio");
+    CHECK(djv_review_export_markers(models, DJV_C_TEST_DIR "/markers.otio") == 1);
+    CHECK(fileContains(DJV_C_TEST_DIR "/markers.otio", "\"Timeline."));
+    CHECK(fileContains(DJV_C_TEST_DIR "/markers.otio", "BART_2021-02-07.0000.jpg"));
+    CHECK(fileContains(DJV_C_TEST_DIR "/markers.otio", "Much too dark"));
+    CHECK(djv_review_export_markers(models, DJV_C_TEST_DIR "/no-such-dir/markers.otio") == 0);
+    CHECK(strlen(djv_review_get_error(models)) > 0);
+
     /* All the drawings cleared, the notes kept, and back with an undo;
        then all the notes. */
     djv_draw_clear_all(models);
@@ -579,6 +590,8 @@ static void drawing(tl_engine* engine, tl_player* player)
     CHECK(strlen(djv_review_get_error(models)) > 0);
 
     djv_models_set_player(models, NULL);
+    /* With nothing open, nothing to write about. */
+    CHECK(djv_review_export_markers(models, DJV_C_TEST_DIR "/markers.otio") == 0);
     djv_models_destroy(models);
 }
 

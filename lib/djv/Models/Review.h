@@ -23,9 +23,15 @@
 #include <nlohmann/json.hpp>
 
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
+
+namespace tl
+{
+    class Player;
+}
 
 namespace djv
 {
@@ -361,6 +367,17 @@ namespace djv
         DJV_MODELS_API void reviewMarkersToTimeline(
             const std::vector<ReviewMarker>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
+
+        //! Write review markers to an OTIO file, about what the player
+        //! has open. A timeline is written as a copy of itself with the
+        //! markers in it, the editorial round trip; other media as a
+        //! timeline of one clip referencing it, so the file always says
+        //! what the feedback is about. The player's timeline is not
+        //! touched. Returns why it could not, or an empty string.
+        DJV_MODELS_API std::string exportReviewMarkers(
+            const std::vector<ReviewMarker>&,
+            const std::shared_ptr<tl::Player>&,
+            const std::filesystem::path&);
 
         //! The frame to go to from the current one, among the frames with
         //! a marker or a drawing (sorted, without repeats): the first after

@@ -674,54 +674,15 @@ namespace djv
             {
                 return;
             }
-            // The shape follows what "A" is. A timeline exports as a copy
-            // of itself with the markers written in, the editorial round
-            // trip; plain media exports as a minimal timeline with one clip
-            // referencing it, so the document always says what the feedback
-            // is about. The live timeline is never touched: the export
-            // builds its own document and discards it.
-            OTIO_NS::ErrorStatus errorStatus;
-            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> timeline;
-            const ftk::Path& aPath = player->getPath();
-            const std::string ext = ftk::toLower(aPath.getExt());
-            if (".otio" == ext || ".otioz" == ext)
-            {
-                timeline = dynamic_cast<OTIO_NS::Timeline*>(
-                    player->getTimeline()->getOTIOTimeline()->clone(&errorStatus));
-            }
-            else
-            {
-                const OTIO_NS::TimeRange timeRange = player->getTimeRange();
-                auto clip = new OTIO_NS::Clip(
-                    aPath.getFileName(),
-                    new OTIO_NS::ExternalReference(aPath.getFileName(true)),
-                    timeRange);
-                auto track = new OTIO_NS::Track(
-                    "Video",
-                    std::nullopt,
-                    OTIO_NS::Track::Kind::video);
-                track->append_child(clip, &errorStatus);
-                timeline = new OTIO_NS::Timeline;
-                timeline->tracks()->append_child(track, &errorStatus);
-            }
-            if (!timeline || OTIO_NS::is_error(errorStatus))
-            {
-                _context->log(
-                    "djv::app::App",
-                    ftk::Format("Cannot export markers: {0}").
-                        arg(errorStatus.details),
-                    ftk::LogType::Error);
-                return;
-            }
-            models::reviewMarkersToTimeline(
-                p.markersModel->getMarkers(), timeline);
-            if (!timeline->to_json_file(ftk::fromFileSystem(path), &errorStatus))
+            const std::string error = models::exportReviewMarkers(
+                p.markersModel->getMarkers(), player, path);
+            if (!error.empty())
             {
                 _context->log(
                     "djv::app::App",
                     ftk::Format("Cannot export markers \"{0}\": {1}").
                         arg(ftk::fromFileSystem(path)).
-                        arg(errorStatus.details),
+                        arg(error),
                     ftk::LogType::Error);
             }
         }
