@@ -1890,6 +1890,82 @@ void djv_time_set_units(djv_models* models, djv_time_units value)
     ++models->generation;
 }
 
+namespace
+{
+    djv_timeline_size toC(models::TimelineThumbnailSize value)
+    {
+        switch (value)
+        {
+        case models::TimelineThumbnailSize::Medium: return DJV_TIMELINE_SIZE_MEDIUM;
+        case models::TimelineThumbnailSize::Large: return DJV_TIMELINE_SIZE_LARGE;
+        default: return DJV_TIMELINE_SIZE_SMALL;
+        }
+    }
+
+    models::TimelineThumbnailSize fromC(djv_timeline_size value)
+    {
+        switch (value)
+        {
+        case DJV_TIMELINE_SIZE_MEDIUM: return models::TimelineThumbnailSize::Medium;
+        case DJV_TIMELINE_SIZE_LARGE: return models::TimelineThumbnailSize::Large;
+        default: return models::TimelineThumbnailSize::Small;
+        }
+    }
+
+    // Change the timeline settings, through the settings model as DJV's
+    // settings widget does.
+    template<typename T>
+    void setTimeline(djv_models* models, T&& change)
+    {
+        if (!models)
+            return;
+        auto settings = models->settingsModel->getTimeline();
+        change(settings);
+        models->settingsModel->setTimeline(settings);
+        ++models->generation;
+    }
+}
+
+int djv_timeline_get_thumbnails(djv_models* models)
+{
+    return models && models->settingsModel->getTimeline().thumbnails ? 1 : 0;
+}
+
+void djv_timeline_set_thumbnails(djv_models* models, int value)
+{
+    setTimeline(models, [value](models::TimelineSettings& s) { s.thumbnails = value != 0; });
+}
+
+djv_timeline_size djv_timeline_get_thumbnail_size(djv_models* models)
+{
+    return models ? toC(models->settingsModel->getTimeline().thumbnailSize) : DJV_TIMELINE_SIZE_SMALL;
+}
+
+void djv_timeline_set_thumbnail_size(djv_models* models, djv_timeline_size value)
+{
+    setTimeline(models, [value](models::TimelineSettings& s) { s.thumbnailSize = fromC(value); });
+}
+
+int djv_timeline_get_waveforms(djv_models* models)
+{
+    return models && models->settingsModel->getTimeline().waveforms ? 1 : 0;
+}
+
+void djv_timeline_set_waveforms(djv_models* models, int value)
+{
+    setTimeline(models, [value](models::TimelineSettings& s) { s.waveforms = value != 0; });
+}
+
+djv_timeline_size djv_timeline_get_waveform_size(djv_models* models)
+{
+    return models ? toC(models->settingsModel->getTimeline().waveformSize) : DJV_TIMELINE_SIZE_SMALL;
+}
+
+void djv_timeline_set_waveform_size(djv_models* models, djv_timeline_size value)
+{
+    setTimeline(models, [value](models::TimelineSettings& s) { s.waveformSize = fromC(value); });
+}
+
 const char* djv_time_get_label(djv_models* models, double seconds)
 {
     if (!models)

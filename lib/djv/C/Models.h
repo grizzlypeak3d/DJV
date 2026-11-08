@@ -385,6 +385,31 @@ DJV_C_API const char* djv_time_get_length_label(djv_models*, double seconds);
 
 ///@}
 
+//! \name Timeline
+///@{
+
+//! The sizes of the timeline's pictures and sound, as DJV's settings have
+//! them.
+typedef enum
+{
+    DJV_TIMELINE_SIZE_SMALL,
+    DJV_TIMELINE_SIZE_MEDIUM,
+    DJV_TIMELINE_SIZE_LARGE
+} djv_timeline_size;
+
+//! Whether the timeline shows the clips' pictures and their sound, and how
+//! large: DJV's Settings > Timeline.
+DJV_C_API int djv_timeline_get_thumbnails(djv_models*);
+DJV_C_API void djv_timeline_set_thumbnails(djv_models*, int);
+DJV_C_API djv_timeline_size djv_timeline_get_thumbnail_size(djv_models*);
+DJV_C_API void djv_timeline_set_thumbnail_size(djv_models*, djv_timeline_size);
+DJV_C_API int djv_timeline_get_waveforms(djv_models*);
+DJV_C_API void djv_timeline_set_waveforms(djv_models*, int);
+DJV_C_API djv_timeline_size djv_timeline_get_waveform_size(djv_models*);
+DJV_C_API void djv_timeline_set_waveform_size(djv_models*, djv_timeline_size);
+
+///@}
+
 //! \name Frame Shuttle
 ///@{
 

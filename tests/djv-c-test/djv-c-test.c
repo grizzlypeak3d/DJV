@@ -200,6 +200,22 @@ static void settings(djv_models* models)
     djv_audio_set_sync_offset(models, .25);
     CHECK_NEAR(djv_audio_get_sync_offset(models), .25, 0.0001);
 
+    /* The timeline's pictures and sound: shown and small at first, as the
+       desktop starts. */
+    CHECK(djv_timeline_get_thumbnails(models));
+    CHECK(djv_timeline_get_thumbnail_size(models) == DJV_TIMELINE_SIZE_SMALL);
+    CHECK(djv_timeline_get_waveforms(models));
+    CHECK(djv_timeline_get_waveform_size(models) == DJV_TIMELINE_SIZE_SMALL);
+    djv_timeline_set_thumbnail_size(models, DJV_TIMELINE_SIZE_LARGE);
+    CHECK(djv_timeline_get_thumbnail_size(models) == DJV_TIMELINE_SIZE_LARGE);
+    djv_timeline_set_waveforms(models, 0);
+    CHECK(!djv_timeline_get_waveforms(models));
+    djv_timeline_set_waveform_size(models, DJV_TIMELINE_SIZE_MEDIUM);
+    CHECK(djv_timeline_get_waveform_size(models) == DJV_TIMELINE_SIZE_MEDIUM);
+    djv_timeline_set_thumbnails(models, 0);
+    CHECK(!djv_timeline_get_thumbnails(models));
+    djv_timeline_set_thumbnails(models, 1);
+
     /* The built-in OpenColorIO configuration, where it is built in. */
     if (djv_ocio_is_available())
     {
@@ -820,6 +836,10 @@ static void persistence(tl_engine* engine)
     djv_compare_get_wipe(models, NULL, NULL, &rotation);
     CHECK_NEAR(rotation, 45.0, 0.0001);
     CHECK(djv_compare_is_absolute_time(models));
+    CHECK(djv_timeline_get_thumbnails(models));
+    CHECK(djv_timeline_get_thumbnail_size(models) == DJV_TIMELINE_SIZE_LARGE);
+    CHECK(!djv_timeline_get_waveforms(models));
+    CHECK(djv_timeline_get_waveform_size(models) == DJV_TIMELINE_SIZE_MEDIUM);
     djv_models_destroy(models);
 }
 
