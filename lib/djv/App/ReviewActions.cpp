@@ -341,8 +341,9 @@ namespace djv
             _actions["Import"] = ftk::Action::create(
                 "Import...",
                 _command("Import"));
+            // What is exported, and to what: the review itself is saved.
             _actions["Export"] = ftk::Action::create(
-                "Export...",
+                "Export Markers (.otio)...",
                 _command("Export"));
             _actions["Close"] = ftk::Action::create(
                 "Close",

@@ -512,7 +512,7 @@ DJV_C_API void djv_review_close(djv_models*);
 DJV_C_API const char* djv_review_get_error(djv_models*);
 
 //! Write the markers to an OTIO file about what the player has open, as
-//! DJV's Review > Export does: a timeline as a copy of itself with the
+//! DJV's Review > Export Markers does: a timeline as a copy of itself with the
 //! markers in it, for an editor to bring in. Zero on failure, with the
 //! reason in djv_review_get_error().
 DJV_C_API int djv_review_export_markers(djv_models*, const char* path);

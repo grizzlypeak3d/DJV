@@ -549,7 +549,7 @@ static void drawing(tl_engine* engine, tl_player* player)
     CHECK(strcmp(djv_note_get_text(models, 0), "Much too dark") == 0);
     CHECK(strcmp(djv_note_get_author(models, 0), "Pad") == 0);
 
-    /* The markers out to OTIO, as Review > Export writes them: an image is
+    /* The markers out to OTIO, as Review > Export Markers writes them: an image is
        not a timeline, so a timeline of one clip referencing it, with the
        marker on it. A file that cannot be written says why. */
     remove(DJV_C_TEST_DIR "/markers.otio");
