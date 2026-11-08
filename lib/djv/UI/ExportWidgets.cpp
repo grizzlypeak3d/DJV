@@ -662,7 +662,9 @@ namespace djv
             std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             std::shared_ptr<ftk::Observer<tl::ffmpeg_cmd::Options> > cmdObserver;
+#endif // TLRENDER_FFMPEG_PLUGIN
             std::shared_ptr<ftk::Observer<models::ExportSettings> > settingsObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
@@ -765,12 +767,16 @@ namespace djv
             // The command line presets follow the ffmpeg application the
             // settings name. Before the export settings, which are checked
             // against the presets.
+#if defined(TLRENDER_FFMPEG_PLUGIN)
             p.cmdObserver = ftk::Observer<tl::ffmpeg_cmd::Options>::create(
                 p.settings->observeFFmpegCmd(),
                 [this](const tl::ffmpeg_cmd::Options&)
                 {
                     _presetsUpdate();
                 });
+#else // TLRENDER_FFMPEG_PLUGIN
+            _presetsUpdate();
+#endif // TLRENDER_FFMPEG_PLUGIN
 
             p.settingsObserver = ftk::Observer<models::ExportSettings>::create(
                 p.settings->observeExport(),
