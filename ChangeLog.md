@@ -7,6 +7,8 @@ Changes:
 * Show Display P3 images and the OpenColorIO Display P3 view in their colors
   on a wide-gamut display, and write ICC profiles into exported JPEG, PNG, and
   TIFF images.
+* System Information shows the FFmpeg command line's version for writing as
+  well as reading (#949).
 
 ## 3.7.6
 
