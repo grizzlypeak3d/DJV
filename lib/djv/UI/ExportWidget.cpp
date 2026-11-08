@@ -779,7 +779,8 @@ namespace djv
                     tl::IOOptions ioOptions;
 #if defined(TLRENDER_FFMPEG_PLUGIN)
                     const auto presets =
-                        ioSystem->getPlugin<tl::ffmpeg::WritePlugin>()->getWritePresets();
+                        ioSystem->getPlugin<tl::ffmpeg::WritePlugin>()->getWritePresets(
+                            p.settings->getIOOptions());
                     const tl::ffmpeg::WritePreset* preset = &presets.front();
                     for (const auto& i : presets)
                     {

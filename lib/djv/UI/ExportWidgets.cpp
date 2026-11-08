@@ -662,6 +662,7 @@ namespace djv
             std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
+            std::shared_ptr<ftk::Observer<tl::ffmpeg_cmd::Options> > cmdObserver;
             std::shared_ptr<ftk::Observer<models::ExportSettings> > settingsObserver;
             std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
@@ -708,19 +709,8 @@ namespace djv
             p.audioCodecComboBox = ftk::ComboBox::create(context, p.audioCodecs);
             p.audioCodecComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.audioCodecComboBox, "Export.MovieAudioCodec");
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-            // The presets are the whole surface, so choosing an output does
-            // not mean picking through every encoder FFmpeg has; what they
-            // cannot express is what tlbake is for. Only the ones this build
-            // can write: a minimal FFmpeg has no ProRes encoder, nor does a
-            // build that leaves it out, and offering one would only fail
-            // when the export starts.
-            for (const auto& preset : ffmpegPlugin->getWritePresets())
-            {
-                p.presets.push_back(preset.name);
-            }
-#endif // TLRENDER_FFMPEG_PLUGIN
-            p.presetComboBox = ftk::ComboBox::create(context, p.presets);
+            // Filled from the presets that can be written (_presetsUpdate()).
+            p.presetComboBox = ftk::ComboBox::create(context);
             p.presetComboBox->setHStretch(ftk::Stretch::Expanding);
             p.presetComboBox->setTooltip(
                 "What to export. The command line presets use the FFmpeg "
@@ -771,6 +761,16 @@ namespace djv
             formLayout->addRow("Range:", p.rangeLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
             p.exportButton->setParent(p.layout);
+
+            // The command line presets follow the ffmpeg application the
+            // settings name. Before the export settings, which are checked
+            // against the presets.
+            p.cmdObserver = ftk::Observer<tl::ffmpeg_cmd::Options>::create(
+                p.settings->observeFFmpegCmd(),
+                [this](const tl::ffmpeg_cmd::Options&)
+                {
+                    _presetsUpdate();
+                });
 
             p.settingsObserver = ftk::Observer<models::ExportSettings>::create(
                 p.settings->observeExport(),
@@ -944,6 +944,43 @@ namespace djv
                     i != p.presetExts.end() ?
                         static_cast<int>(i - p.presetExts.begin()) :
                         -1);
+            }
+        }
+
+        void MovieExportWidget::_presetsUpdate()
+        {
+            FTK_P();
+            // The presets are the whole surface, so choosing an output does
+            // not mean picking through every encoder FFmpeg has; what they
+            // cannot express is what tlbake is for. Only the ones that can be
+            // written: a minimal FFmpeg has no ProRes encoder, nor does a
+            // build that leaves it out, an ffmpeg application may have no
+            // H.264 encoder or not be there at all, and offering one would
+            // only fail when the export starts.
+            p.presets.clear();
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+            if (auto context = getContext())
+            {
+                auto ffmpegPlugin = context->getSystem<tl::WriteSystem>()->
+                    getPlugin<tl::ffmpeg::WritePlugin>();
+                for (const auto& preset : ffmpegPlugin->getWritePresets(p.settings->getIOOptions()))
+                {
+                    p.presets.push_back(preset.name);
+                }
+            }
+#endif // TLRENDER_FFMPEG_PLUGIN
+            p.presetComboBox->setItems(p.presets);
+            auto options = p.settings->getExport();
+            const auto i = std::find(p.presets.begin(), p.presets.end(), options.moviePreset);
+            if (i == p.presets.end() && !p.presets.empty())
+            {
+                // The settings observer shows it.
+                options.moviePreset = p.presets.front();
+                p.settings->setExport(options);
+            }
+            else
+            {
+                p.presetComboBox->setCurrentIndex(i != p.presets.end() ? (i - p.presets.begin()) : -1);
             }
         }
 

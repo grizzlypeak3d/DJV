@@ -1148,7 +1148,7 @@ namespace djv
                 if (auto plugin = _context->getSystem<tl::WriteSystem>()->
                     getPlugin<tl::ffmpeg::WritePlugin>())
                 {
-                    for (const auto& preset : plugin->getWritePresets())
+                    for (const auto& preset : plugin->getWritePresets(p.settingsModel->getIOOptions()))
                     {
                         names.push_back(preset.name);
                     }
@@ -1171,7 +1171,7 @@ namespace djv
                 // the preset is written to, and a script asking for another
                 // is told rather than quietly given one of them.
                 for (const auto& preset : _context->getSystem<tl::WriteSystem>()->
-                    getPlugin<tl::ffmpeg::WritePlugin>()->getWritePresets())
+                    getPlugin<tl::ffmpeg::WritePlugin>()->getWritePresets(p.settingsModel->getIOOptions()))
                 {
                     if (preset.name == settings.moviePreset &&
                         !preset.exts.empty() &&

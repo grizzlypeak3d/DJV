@@ -9,6 +9,8 @@ Changes:
   TIFF images.
 * System Information shows the FFmpeg command line's version for writing as
   well as reading (#949).
+* The Export tool offers the FFmpeg command line presets only when the
+  installed ffmpeg has their encoder (#949).
 
 ## 3.7.6
 
