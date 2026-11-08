@@ -1904,6 +1904,20 @@ const char* djv_time_get_label(djv_models* models, double seconds)
     return models->timeLabel.c_str();
 }
 
+const char* djv_time_get_length_label(djv_models* models, double seconds)
+{
+    if (!models)
+        return "";
+    models->timeLabel.clear();
+    if (auto player = tl::c::getPlayer(models->player))
+    {
+        const double rate = player->getTimeRange().start_time().rate();
+        models->timeLabel = models->timeUnitsModel->getLabel(
+            OTIO_NS::RationalTime(seconds, 1.0).rescaled_to(rate).round());
+    }
+    return models->timeLabel.c_str();
+}
+
 // Comparing.
 
 static_assert(DJV_COMPARE_COUNT == static_cast<int>(tl::Compare::Count));

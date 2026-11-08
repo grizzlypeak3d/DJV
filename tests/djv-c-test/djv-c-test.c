@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static int failures = 0;
@@ -113,6 +114,10 @@ static void timeUnits(djv_models* models)
     CHECK(djv_time_get_units(models) == DJV_TIME_UNITS_FRAMES);
     const char* frames = djv_time_get_label(models, 1.0);
     CHECK(strlen(frames) > 0 && strchr(frames, ':') == NULL);
+    /* A length counts from zero: two seconds twice one. */
+    const int one = atoi(djv_time_get_length_label(models, 1.0));
+    CHECK(one > 0);
+    CHECK(atoi(djv_time_get_length_label(models, 2.0)) == 2 * one);
     djv_time_set_units(models, DJV_TIME_UNITS_SECONDS);
     CHECK(djv_time_get_units(models) == DJV_TIME_UNITS_SECONDS);
 }
@@ -824,6 +829,7 @@ int main(void)
     CHECK(djv_info_get_count(models, NULL) == 0);
     CHECK(strcmp(djv_hud_get_text(models, DJV_HUD_FILE_NAME, 0.0, 0, 1.0), "(No file)") == 0);
     CHECK(strlen(djv_time_get_label(models, 0.0)) == 0);
+    CHECK(strlen(djv_time_get_length_label(models, 1.0)) == 0);
 
     tl_player* player = tl_player_create(engine, DJV_SAMPLE_DATA "/BART_2021-02-07.0000.jpg");
     CHECK(player != NULL);

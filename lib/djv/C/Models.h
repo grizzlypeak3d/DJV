@@ -379,6 +379,9 @@ typedef enum
 DJV_C_API djv_time_units djv_time_get_units(djv_models*);
 DJV_C_API void djv_time_set_units(djv_models*, djv_time_units);
 DJV_C_API const char* djv_time_get_label(djv_models*, double seconds);
+//! A length in seconds in the same units, as a clip's is shown: counted
+//! from zero rather than from the timeline's start time.
+DJV_C_API const char* djv_time_get_length_label(djv_models*, double seconds);
 
 ///@}
 
