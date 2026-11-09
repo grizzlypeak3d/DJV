@@ -44,6 +44,7 @@ using namespace djv;
 
 struct djv_models
 {
+    tl_engine* engine = nullptr;
     std::shared_ptr<ftk::Context> context;
     std::shared_ptr<ftk::Settings> settings;
     std::shared_ptr<models::ColorModel> colorModel;
@@ -608,6 +609,20 @@ struct djv_models
         }
     }
 
+    // The thumbnails and posters are shown in the picture's color, as
+    // the desktop's timeline draws its thumbnails.
+    void applyToThumbnails()
+    {
+        tl::c::setThumbnailColor(
+            engine,
+            colorModel->observeResolvedOCIOOptions()->get(),
+            [this](const std::string& path, const ftk::ImageTags& tags)
+            {
+                return colorModel->resolveInput(path, tags);
+            },
+            colorModel->getLUTOptions());
+    }
+
     // The options as a view and the player should have them now.
     void applyToView(tl_view* view)
     {
@@ -649,6 +664,7 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
     auto out = new djv_models;
     try
     {
+        out->engine = engine;
         out->context = context;
         out->settings = ftk::Settings::create(context, settingsPath);
         out->colorModel = models::ColorModel::create(context, out->settings);
@@ -703,6 +719,7 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
             {
                 tl::c::setOCIOOptions(view, value);
             }
+            out->applyToThumbnails();
             ++out->generation;
         });
     out->resolvedInputObserver = ftk::Observer<std::string>::create(
@@ -720,6 +737,7 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
             {
                 tl::c::setLUTOptions(view, value);
             }
+            out->applyToThumbnails();
             ++out->generation;
         });
     out->volumeObserver = ftk::Observer<float>::create(
@@ -905,6 +923,7 @@ void djv_models_destroy(djv_models* models)
     {
         tl::c::setOverlay(view, nullptr);
     }
+    tl::c::setThumbnailColor(models->engine, tl::OCIOOptions(), nullptr, tl::LUTOptions());
     models->annotationsObserver.reset();
     models->markersObserver.reset();
     models->reviewSettingsObserver.reset();
