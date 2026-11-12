@@ -20,6 +20,7 @@ Changes:
 * The Color Picker shows the luminance in nits.
 * Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
 * Read HEIC and HEIF images on macOS.
+* Read WebP images, still and animated (#867).
 * Show Display P3 colors on wide-gamut displays with the GPU renderer.
 * Exported JPEG, PNG, and TIFF images include ICC profiles.
 * System Information shows the FFmpeg command line's version for writing as
