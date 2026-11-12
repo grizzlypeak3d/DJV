@@ -24,6 +24,8 @@ Changes:
   well as reading (#949).
 * The Export tool offers the FFmpeg command line presets only when the
   installed ffmpeg has their encoder (#949).
+* Library updates:
+    - FFmpeg 9.0.2
 
 ## 3.7.6
 
