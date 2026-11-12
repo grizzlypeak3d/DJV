@@ -88,6 +88,10 @@ tlRender.
 - [ ] Regenerate the screenshots (`etc/Screenshots/build_screenshots.py`) so
       they show the release. The assets carry no version text, so this can be
       done before or after tagging.
+- [ ] The VFX Reference Platform table (`docs/install.html`) against
+      vfxplatform.com and the versions in tlRender's
+      `etc/SuperBuild/cmake/Modules/Build*.cmake`: a new platform year is
+      final each August, and a dependency bump changes DJV's column.
 - [ ] The Pages deploy runs on a push to main touching `docs/**`.
 - [ ] The docs describe the release rather than main: Pages serves whatever
       was last pushed, so anyone on an older version reads about features
