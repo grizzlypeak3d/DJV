@@ -1,16 +1,37 @@
 ## 3.8.0
 
 Changes:
+* Add line, arrow, rectangle, ellipse, and text annotations.
+* Annotations can be selected, moved, resized, recolored, and deleted.
+* Add an onion skin for showing the annotations on the neighboring frames.
+* Annotations and markers record an author name, set in the settings.
+* Annotations can be burned into exported images and movies.
+* Freehand annotations follow pen pressure.
 * Add File > Export Still, for writing the current frame as an image in one
   step (#696).
+* Add a mouse tool option for choosing what the left mouse button does: pan,
+  compare wipe, color picker, or frame shuttle.
+* The compare modes and the mouse tools each have one tool bar button.
+* Tool bars that do not fit the window move into a menu.
+* Double clicking the view frames the image.
+* Add a Dither view option.
+* Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
+  Graphics or with the -renderer command line option. With it, the View tool
+  shows whether the picture is HDR, and on macOS hardware-decoded video is
+  drawn without a copy.
+* The Color Picker shows the luminance in nits.
+* Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
 * Read HEIC and HEIF images on macOS, the photos an iPhone or an iPad takes.
 * Show Display P3 images and the OpenColorIO Display P3 view in their colors
   on a wide-gamut display, and write ICC profiles into exported JPEG, PNG, and
   TIFF images.
+* The recent files menus show the file names, with the full path in the
+  tooltip.
 * System Information shows the FFmpeg command line's version for writing as
   well as reading (#949).
 * The Export tool offers the FFmpeg command line presets only when the
   installed ffmpeg has their encoder (#949).
+* Add the -monkey command line option, for testing with random input.
 
 ## 3.7.6
 
