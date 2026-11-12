@@ -28,6 +28,21 @@
     <string>public.app-category.video</string>
     <key>CFBundleDocumentTypes</key>
     <array>
+        <!-- Reviews, under a type of their own: a Mac that knows it sends
+             it with the file, which AirDrop needs to hand a review to DJV
+             Studio on the iPad rather than to Files. -->
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>DJV Review</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>com.grizzlypeak3d.djv.review</string>
+            </array>
+        </dict>
         <dict>
             <key>CFBundleTypeExtensions</key>
             <array>
@@ -125,5 +140,27 @@
             </array>
         </dict>
 @DJV_MACOS_USD_DOCUMENT_TYPES@    </array>
+    <!-- The same type the iPad's DJV Studio declares. -->
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeIdentifier</key>
+            <string>com.grizzlypeak3d.djv.review</string>
+            <key>UTTypeDescription</key>
+            <string>DJV Review</string>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.json</string>
+                <string>public.data</string>
+            </array>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>djvr</string>
+                </array>
+            </dict>
+        </dict>
+    </array>
 </dict>
 </plist>

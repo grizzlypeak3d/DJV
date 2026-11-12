@@ -110,9 +110,24 @@ for PACKAGE in "$@"; do
     ln -s /Applications "$STAGE/Applications"
     SIGNED=$OUTPUT/$NAME
     rm -f "$SIGNED"
-    hdiutil create -volname "$VOLUME" -srcfolder "$STAGE" -format UDZO \
-        -imagekey zlib-level=9 \
-        -ov -quiet "$SIGNED"
+    # Made by hand rather than with "hdiutil create -srcfolder", which builds
+    # the image on a volume it mounts under /Volumes and, from 2026-11-08 on
+    # the release Mac, was refused copying the signed application there
+    # ("Operation not permitted"). An image attached at a folder of our own
+    # takes the copy.
+    RW=$WORK/rw.dmg
+    rm -f "$RW"
+    SIZE=$(du -sm "$STAGE" | cut -f1)
+    hdiutil create -size $((SIZE + SIZE / 5 + 20))m -fs HFS+ \
+        -volname "$VOLUME" -quiet "$RW"
+    MOUNT=$WORK/rw
+    mkdir -p "$MOUNT"
+    hdiutil attach "$RW" -nobrowse -noverify -mountpoint "$MOUNT" -quiet
+    ditto "$STAGE" "$MOUNT"
+    hdiutil detach "$MOUNT" -quiet
+    MOUNT=
+    hdiutil convert "$RW" -format UDZO -imagekey zlib-level=9 -quiet \
+        -o "$SIGNED"
     codesign --sign "$IDENTITY" --timestamp --force --options runtime \
         --identifier $IDENTIFIER "$SIGNED"
 
