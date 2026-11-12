@@ -31,7 +31,6 @@ Changes:
   well as reading (#949).
 * The Export tool offers the FFmpeg command line presets only when the
   installed ffmpeg has their encoder (#949).
-* Add the -monkey command line option, for testing with random input.
 
 ## 3.7.6
 

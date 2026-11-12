@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright Contributors to the DJV project.
 
-#include <djv/App/Monkey.h>
+#include <djv/App/RandomInput.h>
 
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
@@ -32,7 +32,7 @@ namespace djv
             const int inputsPerTick = 3;
         }
 
-        struct Monkey::Private
+        struct RandomInput::Private
         {
             std::weak_ptr<ftk::Context> context;
             std::weak_ptr<App> app;
@@ -47,7 +47,7 @@ namespace djv
             bool success = false;
         };
 
-        void Monkey::_init(
+        void RandomInput::_init(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
             double seconds,
@@ -60,20 +60,20 @@ namespace djv
             p.random.seed(seed);
         }
 
-        Monkey::Monkey() :
+        RandomInput::RandomInput() :
             _p(new Private)
         {}
 
-        Monkey::~Monkey()
+        RandomInput::~RandomInput()
         {}
 
-        std::shared_ptr<Monkey> Monkey::create(
+        std::shared_ptr<RandomInput> RandomInput::create(
             const std::shared_ptr<ftk::Context>& context,
             const std::shared_ptr<App>& app,
             double seconds,
             unsigned seed)
         {
-            auto out = std::shared_ptr<Monkey>(new Monkey);
+            auto out = std::shared_ptr<RandomInput>(new RandomInput);
             out->_init(context, app, seconds, seed);
             return out;
         }
@@ -94,7 +94,7 @@ namespace djv
             }
         }
 
-        bool Monkey::begin()
+        bool RandomInput::begin()
         {
             FTK_P();
             auto context = p.context.lock();
@@ -109,7 +109,7 @@ namespace djv
 
             p.timer = ftk::Timer::create(context);
             p.timer->setRepeating(true);
-            auto weak = std::weak_ptr<Monkey>(shared_from_this());
+            auto weak = std::weak_ptr<RandomInput>(shared_from_this());
             p.timer->start(tickInterval, [weak] {
                 if (auto self = weak.lock())
                     self->_tick();
@@ -117,12 +117,12 @@ namespace djv
             return true;
         }
 
-        bool Monkey::succeeded() const
+        bool RandomInput::succeeded() const
         {
             return _p->success;
         }
 
-        void Monkey::_tick()
+        void RandomInput::_tick()
         {
             FTK_P();
             auto context = p.context.lock();
@@ -266,14 +266,14 @@ namespace djv
             }
         }
 
-        void Monkey::_note(const std::string& msg)
+        void RandomInput::_note(const std::string& msg)
         {
             // The console and the log, as the benchmark: on a device with
             // no console the log is the only place this reaches.
-            std::cerr << "djv monkey: " << msg << std::endl;
+            std::cerr << "djv random input: " << msg << std::endl;
             if (auto context = _p->context.lock())
             {
-                context->log("djv::app::Monkey", msg);
+                context->log("djv::app::RandomInput", msg);
             }
         }
     }

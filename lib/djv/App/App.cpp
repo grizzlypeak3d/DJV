@@ -13,7 +13,7 @@
 
 #include <djv/App/AudioTool.h>
 #include <djv/App/Benchmark.h>
-#include <djv/App/Monkey.h>
+#include <djv/App/RandomInput.h>
 #include <djv/App/Capture.h>
 #include <djv/App/ColorPickerTool.h>
 #include <djv/App/ColorTool.h>
@@ -303,16 +303,16 @@ namespace djv
                 "rate achieved.",
                 "Benchmark",
                 5.0);
-            p.cmdLine.monkey = ftk::CmdLineOption<double>::create(
-                { "-monkey" },
+            p.cmdLine.randomInput = ftk::CmdLineOption<double>::create(
+                { "-randomInput" },
                 "Feed random input -- clicks, drags, keys, gestures, seeks -- "
                 "for this many seconds with playback running, headlessly, "
                 "and fail if anything is logged as an error. The sequence is "
                 "set by the seed.",
                 "Testing",
                 30.0);
-            p.cmdLine.monkeySeed = ftk::CmdLineOption<int>::create(
-                { "-monkeySeed" },
+            p.cmdLine.randomInputSeed = ftk::CmdLineOption<int>::create(
+                { "-randomInputSeed" },
                 "The seed for the random input.",
                 "Testing",
                 1);
@@ -365,8 +365,8 @@ namespace djv
                 p.cmdLine.command,
                 p.cmdLine.debugLoop,
                 p.cmdLine.benchmark,
-                p.cmdLine.monkey,
-                p.cmdLine.monkeySeed
+                p.cmdLine.randomInput,
+                p.cmdLine.randomInputSeed
             };
             cmdLineOptions.insert(
                 cmdLineOptions.end(), options.begin(), options.end());
@@ -479,7 +479,7 @@ namespace djv
                 _p->cmdLine.command->found() ||
                 isCaptureRun() ||
                 _p->cmdLine.benchmark->found() ||
-                _p->cmdLine.monkey->found();
+                _p->cmdLine.randomInput->found();
         }
 
         void App::exit()
@@ -886,13 +886,13 @@ namespace djv
                     });
             }
 
-            if (p.cmdLine.monkey->found())
+            if (p.cmdLine.randomInput->found())
             {
-                p.monkey = Monkey::create(
+                p.randomInput = RandomInput::create(
                     _context, std::dynamic_pointer_cast<App>(shared_from_this()),
-                    p.cmdLine.monkey->getValue(),
-                    static_cast<unsigned>(p.cmdLine.monkeySeed->getValue()));
-                if (!p.monkey->begin())
+                    p.cmdLine.randomInput->getValue(),
+                    static_cast<unsigned>(p.cmdLine.randomInputSeed->getValue()));
+                if (!p.randomInput->begin())
                 {
                     throw std::runtime_error("Cannot set up the random input");
                 }
@@ -900,7 +900,7 @@ namespace djv
                 _logSessionSummary();
                 _saveSettings();
 #if !(defined(__APPLE__) && TARGET_OS_IPHONE)
-                if (!p.monkey->succeeded())
+                if (!p.randomInput->succeeded())
                 {
                     throw std::runtime_error("The random input logged errors");
                 }

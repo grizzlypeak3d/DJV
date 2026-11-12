@@ -75,18 +75,18 @@ if(NOT DJV_TESTS_NO_GL)
     # running, a fixed seed, and no error allowed in the log: what a
     # tester does in the first minute, done by the thousand.
     add_test(
-        NAME djv-monkey
+        NAME djv-random-input
         COMMAND djv
             -resetSettings
-            -settingsFile ${DJV_CAPTURE_OUTPUT}/monkey-settings.json
-            -monkey 30
-            -monkeySeed 1
+            -settingsFile ${DJV_CAPTURE_OUTPUT}/random-input-settings.json
+            -randomInput 30
+            -randomInputSeed 1
             -log
             # Quoted: unquoted, CMake reads the "#" as a comment and the
             # application was given "Counter." and nothing to play.
             "etc/SampleData/Counter.#.png"
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-    set_tests_properties(djv-monkey PROPERTIES
+    set_tests_properties(djv-random-input PROPERTIES
         ENVIRONMENT_MODIFICATION "${DJV_CAPTURE_ENV}")
 endif()
 

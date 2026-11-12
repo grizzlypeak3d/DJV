@@ -28,7 +28,7 @@ namespace djv
         //! its first minute, done by the thousand, to shake out a crash
         //! that comes of two things happening at once. The sequence is set
         //! by the seed, so a run that failed can be run again.
-        class DJV_APP_API_TYPE Monkey : public std::enable_shared_from_this<Monkey>
+        class DJV_APP_API_TYPE RandomInput : public std::enable_shared_from_this<RandomInput>
         {
         protected:
             void _init(
@@ -37,12 +37,12 @@ namespace djv
                 double seconds,
                 unsigned seed);
 
-            Monkey();
+            RandomInput();
 
         public:
-            DJV_APP_API ~Monkey();
+            DJV_APP_API ~RandomInput();
 
-            DJV_APP_API static std::shared_ptr<Monkey> create(
+            DJV_APP_API static std::shared_ptr<RandomInput> create(
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&,
                 double seconds,

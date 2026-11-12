@@ -5,7 +5,7 @@ set(HEADERS
     AudioTool.h
     BottomToolBar.h
     Benchmark.h
-    Monkey.h
+    RandomInput.h
     Capture.h
     ColorActions.h
     ColorMenu.h
@@ -68,7 +68,7 @@ set(SOURCE
     AudioTool.cpp
     BottomToolBar.cpp
     Benchmark.cpp
-    Monkey.cpp
+    RandomInput.cpp
     Capture.cpp
     ColorActions.cpp
     ColorMenu.cpp
