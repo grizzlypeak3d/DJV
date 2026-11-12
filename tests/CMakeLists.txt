@@ -1,4 +1,5 @@
 add_subdirectory(djv-test)
+add_subdirectory(djv-crash-test)
 if(TARGET djvC)
     add_subdirectory(djv-c-test)
 endif()

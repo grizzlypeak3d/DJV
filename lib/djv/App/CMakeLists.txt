@@ -1,5 +1,6 @@
 set(HEADERS
     App.h
+    CrashLog.h
     AudioActions.h
     AudioMenu.h
     AudioTool.h
@@ -60,6 +61,7 @@ set(HEADERS_PRIVATE
 
 set(SOURCE
     App.cpp
+    CrashLog.cpp
     AppFiles.cpp
     AppModels.cpp
     AppReview.cpp
