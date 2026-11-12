@@ -11,22 +11,15 @@ Changes:
   step (#696).
 * Add a mouse tool option for choosing what the left mouse button does: pan,
   compare wipe, color picker, or frame shuttle.
-* The compare modes and the mouse tools each have one tool bar button.
-* Tool bars that do not fit the window move into a menu.
 * Double clicking the view frames the image.
 * Add a Dither view option.
 * Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
-  Graphics or with the -renderer command line option. With it, the View tool
-  shows whether the picture is HDR, and on macOS hardware-decoded video is
-  drawn without a copy.
+  Graphics or with the -renderer command line option.
 * The Color Picker shows the luminance in nits.
 * Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
-* Read HEIC and HEIF images on macOS, the photos an iPhone or an iPad takes.
-* Show Display P3 images and the OpenColorIO Display P3 view in their colors
-  on a wide-gamut display, and write ICC profiles into exported JPEG, PNG, and
-  TIFF images.
-* The recent files menus show the file names, with the full path in the
-  tooltip.
+* Read HEIC and HEIF images on macOS.
+* Show Display P3 colors on wide-gamut displays with the GPU renderer.
+* Exported JPEG, PNG, and TIFF images include ICC profiles.
 * System Information shows the FFmpeg command line's version for writing as
   well as reading (#949).
 * The Export tool offers the FFmpeg command line presets only when the
