@@ -171,6 +171,17 @@ namespace djv
         //! screen pixels to one image pixel.
         DJV_MODELS_API float eraserRadius(float size, float screenReach, float screenScale);
 
+        //! The picture width the drawing sizes are given for: an HD picture.
+        constexpr float drawSizeReferenceWidth = 1920.F;
+
+        //! A size from the drawing settings (the width, the text size, the
+        //! eraser's) in the pixels of a picture this wide. The settings are
+        //! sizes on an HD picture, so a stroke looks the same on a proxy, on
+        //! HD and on 8K: 4 on HD is 8 on 4K. Never less than one pixel. A
+        //! width of zero or less, a picture not known yet, leaves the size
+        //! as it is.
+        DJV_MODELS_API float pictureDrawSize(float size, int pictureWidth);
+
         ///@}
 
         //! \name Moving a Stroke

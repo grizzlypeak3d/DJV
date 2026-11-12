@@ -408,6 +408,19 @@ namespace djv
             // The eraser's reach: the size, or a fingertip on the screen.
             FTK_CHECK(10.F == models::eraserRadius(10.F, 22.F, 4.F));
             FTK_CHECK(11.F == models::eraserRadius(4.F, 22.F, 2.F));
+
+            // The drawing sizes are given for an HD picture and follow the
+            // picture's width: the same setting is the same share of the
+            // picture on HD, 4K and 8K, at least a pixel on a small proxy,
+            // and as it is while the picture is not known.
+            FTK_CHECK(4.F == models::pictureDrawSize(4.F, 1920));
+            FTK_CHECK(8.F == models::pictureDrawSize(4.F, 3840));
+            FTK_CHECK(16.F == models::pictureDrawSize(4.F, 7680));
+            FTK_CHECK(96.F == models::pictureDrawSize(48.F, 3840));
+            FTK_CHECK(models::pictureDrawSize(4.F, 1920) / 1920.F ==
+                models::pictureDrawSize(4.F, 3840) / 3840.F);
+            FTK_CHECK(1.F == models::pictureDrawSize(4.F, 200));
+            FTK_CHECK(4.F == models::pictureDrawSize(4.F, 0));
         }
     
         void StrokeTest::_move()

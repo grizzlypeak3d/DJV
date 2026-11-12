@@ -514,14 +514,15 @@ DJV_C_API void djv_draw_set_tool(djv_models*, djv_draw_tool);
 //! RGBA, zero to one.
 DJV_C_API void djv_draw_get_color(djv_models*, float color[4]);
 DJV_C_API void djv_draw_set_color(djv_models*, const float color[4]);
-//! The width, in the pixels of the image.
+//! The width, on an HD picture: a stroke is this many pixels wide on a
+//! 1920 wide picture, and in proportion on others.
 DJV_C_API float djv_draw_get_size(djv_models*);
 DJV_C_API void djv_draw_set_size(djv_models*, float);
 //! Shapes held square or round, lines to forty-five degrees: a touch
 //! screen has no Shift key.
 DJV_C_API int djv_draw_is_constrain(djv_models*);
 DJV_C_API void djv_draw_set_constrain(djv_models*, int);
-//! The height of text, in the pixels of the image.
+//! The height of text, on an HD picture, as the width is.
 DJV_C_API float djv_draw_get_text_size(djv_models*);
 DJV_C_API void djv_draw_set_text_size(djv_models*, float);
 

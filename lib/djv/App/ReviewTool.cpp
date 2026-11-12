@@ -399,17 +399,17 @@ namespace djv
             // The two sizes in a form, so their labels line up.
             auto sizeLayout = ftk::FormLayout::create(context, drawingWidget);
             sizeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            // Whole pixels: the sizes are in source pixels, where a
+            // Whole pixels: the sizes are pixels on an HD picture, where a
             // fraction is nothing anyone can see.
             p.sizeSlider = ftk::IntEditSlider::create(context);
             p.sizeSlider->setRange(1, 50);
             p.sizeSlider->setValue(static_cast<int>(std::round(drawModel->getSize())));
-            p.sizeSlider->setTooltip("The stroke width, in source pixels.");
+            p.sizeSlider->setTooltip("The stroke width, in pixels on an HD picture: twice that on 4K.");
             sizeLayout->addRow("Width:", p.sizeSlider);
             p.textSizeSlider = ftk::IntEditSlider::create(context);
             p.textSizeSlider->setRange(8, 400);
             p.textSizeSlider->setValue(static_cast<int>(std::round(drawModel->getTextSize())));
-            p.textSizeSlider->setTooltip("The height of text, in source pixels.");
+            p.textSizeSlider->setTooltip("The height of text, in pixels on an HD picture: twice that on 4K.");
             sizeLayout->addRow("Text size:", p.textSizeSlider);
 
             p.onionSkinCheckBox = ftk::CheckBox::create(context, "Onion skin", drawingWidget);

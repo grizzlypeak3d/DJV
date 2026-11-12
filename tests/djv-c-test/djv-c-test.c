@@ -432,7 +432,7 @@ static void drawing(tl_engine* engine, tl_player* player)
     djv_draw_set_text_size(models, 72.F);
     djv_models_save(models);
     CHECK(fileContains(DJV_C_TEST_SETTINGS, "\"Draw\""));
-    CHECK(fileContains(DJV_C_TEST_SETTINGS, "\"TextSize\": 72"));
+    CHECK(fileContains(DJV_C_TEST_SETTINGS, "\"HDTextSize\": 72"));
 
     /* The desktop's review of the file. */
     writeFile(DJV_C_TEST_DIR "/review.djvr", reviewText);

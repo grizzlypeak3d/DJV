@@ -7,6 +7,8 @@ Changes:
 * Annotations and markers record an author name, set in the settings.
 * Annotations can be burned into exported images and movies.
 * Freehand annotations follow pen pressure.
+* Annotation widths and text sizes are given for an HD picture and scale
+  with the picture, so they look the same at any resolution.
 * Add File > Export Still, for writing the current frame as an image in one
   step (#696).
 * Add a mouse tool option for choosing what the left mouse button does: pan,

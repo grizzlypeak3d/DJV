@@ -235,7 +235,10 @@ struct djv_models
             fileId,
             *time,
             m.toImage(render),
-            models::eraserRadius(drawModel->getSize(), reach, m.scale() * picture.zoom));
+            models::eraserRadius(
+                models::pictureDrawSize(drawModel->getSize(), m.imageSize.w),
+                reach,
+                m.scale() * picture.zoom));
         if (annotationsModel->getStrokes(fileId, *time).size() < before)
         {
             ++eraseSteps;
@@ -840,19 +843,21 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
         out->drawModel->observeSize(),
         [out](float value)
         {
-            out->selectionUpdate([value](models::ReviewStroke& s) { s.width = value; });
+            const float width = models::pictureDrawSize(value, out->mapping().imageSize.w);
+            out->selectionUpdate([width](models::ReviewStroke& s) { s.width = width; });
             ++out->generation;
         });
     out->drawTextSizeObserver = ftk::Observer<float>::create(
         out->drawModel->observeTextSize(),
         [out](float value)
         {
+            const float textSize = models::pictureDrawSize(value, out->mapping().imageSize.w);
             out->selectionUpdate(
-                [value](models::ReviewStroke& s)
+                [textSize](models::ReviewStroke& s)
                 {
                     if (models::ReviewStrokeKind::Text == s.kind)
                     {
-                        s.textSize = value;
+                        s.textSize = textSize;
                     }
                 });
             ++out->generation;
@@ -2435,8 +2440,10 @@ int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure
         models->stroke = models::ReviewStroke();
         models->stroke.kind = models::ReviewStrokeKind::Text;
         models->stroke.color = models->drawModel->getColor();
-        models->stroke.width = models->drawModel->getSize();
-        models->stroke.textSize = models->drawModel->getTextSize();
+        models->stroke.width = models::pictureDrawSize(
+            models->drawModel->getSize(), m.imageSize.w);
+        models->stroke.textSize = models::pictureDrawSize(
+            models->drawModel->getTextSize(), m.imageSize.w);
         models->stroke.points.push_back(m.toImage(render));
         models->strokeTime = *time;
         models->typing = true;
@@ -2448,7 +2455,8 @@ int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure
     models->stroke = models::ReviewStroke();
     models->stroke.kind = models::getStrokeKind(tool);
     models->stroke.color = models->drawModel->getColor();
-    models->stroke.width = models->drawModel->getSize();
+    models->stroke.width = models::pictureDrawSize(
+        models->drawModel->getSize(), m.imageSize.w);
     models::strokeBegin(models->stroke, m.toImage(render), pen != 0, pressure);
     models->strokeTime = *time;
     models->drawing = true;

@@ -112,6 +112,10 @@ namespace djv
             //! and from its pixels.
             models::ImageMapping _imageMapping(int index) const;
 
+            //! The width of the picture the selected stroke is on, for the
+            //! drawing sizes; zero with nothing selected.
+            int _selectionPictureWidth() const;
+
             //! A widget-local position in render space.
             ftk::V2F _widgetToRender(const ftk::V2I& widgetPos) const;
 

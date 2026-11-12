@@ -547,18 +547,20 @@ namespace djv
                 drawModel->observeSize(),
                 [this](float value)
                 {
-                    _selectionUpdate([value](models::ReviewStroke& s) { s.width = value; });
+                    const float width = models::pictureDrawSize(value, _selectionPictureWidth());
+                    _selectionUpdate([width](models::ReviewStroke& s) { s.width = width; });
                 });
             p.drawTextSizeObserver = ftk::Observer<float>::create(
                 drawModel->observeTextSize(),
                 [this](float value)
                 {
+                    const float textSize = models::pictureDrawSize(value, _selectionPictureWidth());
                     _selectionUpdate(
-                        [value](models::ReviewStroke& s)
+                        [textSize](models::ReviewStroke& s)
                         {
                             if (models::ReviewStrokeKind::Text == s.kind)
                             {
-                                s.textSize = value;
+                                s.textSize = textSize;
                             }
                         });
                 });
@@ -1187,6 +1189,14 @@ namespace djv
             return tl::isShown(p.compare, static_cast<size_t>(index));
         }
 
+        int Viewport::_selectionPictureWidth() const
+        {
+            FTK_P();
+            return p.selection.has_value() ?
+                _imageMapping(p.selection->source).imageSize.w :
+                0;
+        }
+
         models::ImageMapping Viewport::_imageMapping(int index) const
         {
             FTK_P();
@@ -1391,7 +1401,9 @@ namespace djv
                 p.stroke = models::ReviewStroke();
                 p.stroke.kind = models::getStrokeKind(drawModel->getTool());
                 p.stroke.color = drawModel->getColor();
-                p.stroke.width = drawModel->getSize();
+                p.stroke.width = models::pictureDrawSize(
+                    drawModel->getSize(),
+                    _imageMapping(hit.index).imageSize.w);
                 models::strokeBegin(p.stroke, hit.pos, pen, pressure);
                 setDrawUpdate();
             }
@@ -1467,8 +1479,9 @@ namespace djv
             p.stroke = models::ReviewStroke();
             p.stroke.kind = models::ReviewStrokeKind::Text;
             p.stroke.color = drawModel->getColor();
-            p.stroke.width = drawModel->getSize();
-            p.stroke.textSize = drawModel->getTextSize();
+            const int pictureWidth = _imageMapping(hit.index).imageSize.w;
+            p.stroke.width = models::pictureDrawSize(drawModel->getSize(), pictureWidth);
+            p.stroke.textSize = models::pictureDrawSize(drawModel->getTextSize(), pictureWidth);
             p.stroke.points.push_back(hit.pos);
             p.textEditing = true;
             // The viewport takes the keyboard only while text is typed into
@@ -1889,7 +1902,9 @@ namespace djv
                     // The eraser removes whole strokes it touches; its reach
                     // follows the tool size, and is never less than a
                     // fingertip's for a finger.
-                    float radius = p.drawModel->getSize();
+                    float radius = models::pictureDrawSize(
+                        p.drawModel->getSize(),
+                        _imageMapping(hit.index).imageSize.w);
                     if (p.touchInput)
                     {
                         radius = models::eraserRadius(

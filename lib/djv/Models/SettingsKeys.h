@@ -59,8 +59,12 @@ namespace djv
             constexpr const char* colorLevelsOutRange = "/Color/Levels/OutRange";
             constexpr const char* colorWidgetMode = "/ColorWidget/Mode";
             constexpr const char* drawColor = "/Draw/Color";
-            constexpr const char* drawSize = "/Draw/Size";
-            constexpr const char* drawTextSize = "/Draw/TextSize";
+            // Sizes on an HD picture (pictureDrawSize). "/Draw/Size" and
+            // "/Draw/TextSize" were sizes in the picture's own pixels, and
+            // are not read: what a size meant there depended on the
+            // picture it was chosen for.
+            constexpr const char* drawSize = "/Draw/HDWidth";
+            constexpr const char* drawTextSize = "/Draw/HDTextSize";
             constexpr const char* drawOnionSkin = "/Draw/OnionSkin";
             constexpr const char* drawConstrain = "/Draw/Constrain";
             constexpr const char* filesCompareDifferenceGain = "/Files/Compare/DifferenceGain";

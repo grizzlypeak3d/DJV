@@ -81,12 +81,13 @@ namespace djv
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColor() const;
             DJV_MODELS_API void setColor(const ftk::Color4F&);
 
-            //! The stroke width, in the pixels of the source image.
+            //! The stroke width, on an HD picture; pictureDrawSize() gives it
+            //! in the pixels of the picture drawn on.
             DJV_MODELS_API float getSize() const;
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<float> > observeSize() const;
             DJV_MODELS_API void setSize(float);
 
-            //! The height of text, in the pixels of the source image.
+            //! The height of text, on an HD picture, as the width is.
             DJV_MODELS_API float getTextSize() const;
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<float> > observeTextSize() const;
             DJV_MODELS_API void setTextSize(float);

@@ -781,6 +781,15 @@ namespace djv
             return std::max(size, screenReach / std::max(.001F, screenScale));
         }
 
+        float pictureDrawSize(float size, int pictureWidth)
+        {
+            if (pictureWidth <= 0)
+            {
+                return size;
+            }
+            return std::max(1.F, size * pictureWidth / drawSizeReferenceWidth);
+        }
+
         std::vector<ftk::V2F> strokeHandles(const ReviewStroke& stroke)
         {
             std::vector<ftk::V2F> out;
