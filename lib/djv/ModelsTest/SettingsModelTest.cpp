@@ -258,6 +258,11 @@ namespace djv
                 FTK_CHECK(std::vector<std::string>({ "." }) ==
                     models::getDefaultShortcutLabels("Audio/VolumeUp"));
                 FTK_CHECK(models::getDefaultShortcutLabels("Review/Draw").empty());
+                // A key one platform lacks is listed on every platform, and
+                // marked, so the reference does not depend on where it was
+                // made.
+                FTK_CHECK(std::vector<std::string>({ "Ctrl/Cmd+Shift+Z", "Ctrl+Y (not macOS)" }) ==
+                    models::getDefaultShortcutLabels("Review/Redo"));
             }
         }
 

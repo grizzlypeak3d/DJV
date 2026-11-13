@@ -15,8 +15,10 @@ DJV is the application, run with its settings and log in TMP so that it
 neither reads nor writes the user's.
 """
 
+import difflib
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -42,6 +44,13 @@ def cell(text):
     return " ".join(text.split()).replace("|", "\\|")
 
 
+def key(label):
+    """A key as the page shows it, with a note such as "(not macOS)" after
+    it rather than on the key."""
+    m = re.match(r"(.*?) (\(.*\))$", label)
+    return "<kbd>%s</kbd> %s" % m.groups() if m else "<kbd>%s</kbd>" % label
+
+
 def rows(items, actions, prefix=""):
     """The table rows of a menu's items, with sub menus' items under their
     titles."""
@@ -49,7 +58,7 @@ def rows(items, actions, prefix=""):
     for item in items:
         if "action" in item:
             action = actions[item["action"]]
-            keys = ", ".join("<kbd>%s</kbd>" % k for k in action["shortcuts"])
+            keys = ", ".join(key(k) for k in action["shortcuts"])
             out.append("| %s | %s | `%s` | %s |" % (
                 cell(prefix + action["text"]),
                 keys,
@@ -110,9 +119,15 @@ def main(argv):
     page = convert(json.loads(result.stdout))
     if check:
         with open(out, encoding="utf-8") as f:
-            if f.read() != page:
-                sys.exit("%s is out of date with the application; "
-                         "build the djvDocsActions target" % out)
+            old = f.read()
+        if old != page:
+            # What differs, so a failure on a platform no one here builds
+            # on says what it is.
+            diff = difflib.unified_diff(
+                old.splitlines(), page.splitlines(),
+                "actions.md", "application", lineterm="")
+            sys.exit("\n".join(list(diff)[:60]) + "\n\n%s is out of date with "
+                     "the application; build the djvDocsActions target" % out)
         return
     with open(out, "w", encoding="utf-8") as f:
         f.write(page)

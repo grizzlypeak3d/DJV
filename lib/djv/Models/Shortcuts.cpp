@@ -27,6 +27,15 @@ namespace djv
 
         namespace
         {
+            //! The documentation's stand-in for the command modifier: a bit
+            //! no key modifier uses.
+            const int docsCommandModifier = 1 << 12;
+
+            //! The documentation's mark on a key that macOS does not have,
+            //! so that the reference made on any platform lists it, and
+            //! says so, rather than each platform writing its own.
+            const int docsNotMacOS = 1 << 13;
+
             //! The table, with the modifier that is Command on macOS and
             //! Control elsewhere given: the application's own, or the
             //! documentation's stand-in for it, which on Linux and Windows
@@ -104,10 +113,12 @@ namespace djv
                     "Review/Redo",
                     "",
                     ftk::KeyShortcut(ftk::Key::Z, static_cast<int>(ftk::KeyModifier::Shift) | cmd),
+                    docsCommandModifier == cmd ?
+                        ftk::KeyShortcut(ftk::Key::Y, static_cast<int>(ftk::KeyModifier::Control) | docsNotMacOS) :
 #if defined(__APPLE__)
-                    ftk::KeyShortcut()),
+                        ftk::KeyShortcut()),
 #else // __APPLE__
-                    ftk::KeyShortcut(ftk::Key::Y, static_cast<int>(ftk::KeyModifier::Control))),
+                        ftk::KeyShortcut(ftk::Key::Y, static_cast<int>(ftk::KeyModifier::Control))),
 #endif // __APPLE__
                 // Shift and Control on the arrows are already taken by the X10 and
                 // X100 frame steps.
@@ -139,10 +150,6 @@ namespace djv
                 Shortcut("Window/Secondary", "", ftk::Key::Y),
             };
             }
-
-            //! The documentation's stand-in for the command modifier: a bit
-            //! no key modifier uses.
-            const int docsCommandModifier = 1 << 12;
 
             std::string getKeyLabel(ftk::Key key)
             {
@@ -187,6 +194,8 @@ namespace djv
                     {
                         out += (i > 0 ? "+" : "") + parts[i];
                     }
+                    if (shortcut.modifiers & docsNotMacOS)
+                        out += " (not macOS)";
                 }
                 return out;
             }

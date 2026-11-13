@@ -59,7 +59,7 @@ The commands are how the menu items are run from outside the window: with
 | Onion Skin |  | `Review/OnionSkin` | Show the drawings on the frames before and after, faded, behind this frame's. |
 | Square and Straight Shapes |  | `Review/Constrain` | Hold rectangles square, ellipses round, and lines and arrows to multiples of 45 degrees, as Shift does. |
 | Undo Drawing | <kbd>Ctrl/Cmd+Z</kbd> | `Review/Undo` | Undo drawing. |
-| Redo Drawing | <kbd>Ctrl/Cmd+Shift+Z</kbd> | `Review/Redo` | Redo drawing. |
+| Redo Drawing | <kbd>Ctrl/Cmd+Shift+Z</kbd>, <kbd>Ctrl+Y</kbd> (not macOS) | `Review/Redo` | Redo drawing. |
 | Clear Drawing |  | `Review/ClearDrawing` | Remove every stroke on this frame. |
 | Add Marker |  | `Review/AddNote` | Add a marker about the current frame, written in place. |
 | Add Range |  | `Review/AddRange` | Add a marker for the timeline in/out points, written in place. |

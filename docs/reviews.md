@@ -65,7 +65,7 @@ The select tool picks a stroke: click it, and drag to move it. A line, an arrow,
 
 ![A selected arrow, with its frame and the handles at its two ends](assets/review-handles.svg)
 
-The color, the width and the text size apply to the next stroke, and to the stroke selected; the width and the text size are pixels on an HD picture, and scale with the picture drawn on, so a stroke looks the same on a proxy, on HD and on 8K, and keeps its weight whatever the zoom. **Review > Undo Drawing** (<kbd>Ctrl/Cmd+Z</kbd>) and **Review > Redo Drawing** (<kbd>Ctrl/Cmd+Shift+Z</kbd>) cover every stroke, and **Review > Clear Drawing** removes every stroke on the frame, the "B" strokes of a compared frame with it.
+The color, the width and the text size apply to the next stroke, and to the stroke selected; the width and the text size are pixels on an HD picture, and scale with the picture drawn on, so a stroke looks the same on a proxy, on HD and on 8K, and keeps its weight whatever the zoom. **Review > Undo Drawing** (<kbd>Ctrl/Cmd+Z</kbd>) and **Review > Redo Drawing** (<kbd>Ctrl/Cmd+Shift+Z</kbd>, or <kbd>Ctrl+Y</kbd> on Windows and Linux) cover every stroke, and **Review > Clear Drawing** removes every stroke on the frame, the "B" strokes of a compared frame with it.
 
 A drawing belongs to the frame it was made on. **Review > Onion Skin** shows the drawings on the frames before and after as well, faded, so a note about motion is drawn against where the last one was.
 
