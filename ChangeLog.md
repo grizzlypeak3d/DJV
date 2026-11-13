@@ -19,7 +19,8 @@ Changes:
 * Double clicking the view frames the image.
 * Add a Dither view option.
 * Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
-  Graphics or with the -renderer command line option.
+  Graphics or with the -renderer command line option. On an HDR display it
+  shows HDR pictures.
 * The Color Picker shows the luminance in nits.
 * Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
 * Movies that cannot be decoded in real time show the frames they can,
