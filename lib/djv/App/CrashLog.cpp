@@ -151,6 +151,15 @@ namespace djv
 
             LONG WINAPI exceptionFilter(EXCEPTION_POINTERS* info)
             {
+                // A C++ exception nothing caught: the runtime's filter,
+                // next in the chain, calls std::terminate, and the
+                // terminate handler says what the exception was.
+                if (0xE06D7363 == info->ExceptionRecord->ExceptionCode)
+                {
+                    return oldFilter ?
+                        oldFilter(info) :
+                        EXCEPTION_CONTINUE_SEARCH;
+                }
                 char code[16];
                 char address[24];
                 writeHex(code, info->ExceptionRecord->ExceptionCode, 8);

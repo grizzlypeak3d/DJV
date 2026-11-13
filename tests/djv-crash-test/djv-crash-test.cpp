@@ -69,7 +69,13 @@ int main(int argc, char** argv)
     }
 
 #if defined(_WINDOWS)
-    SetUnhandledExceptionFilter(earlierFilter);
+    // Only for the crash: on Windows an exception nothing caught goes to
+    // the C++ runtime's filter, which is what calls std::terminate, and a
+    // filter of the test's own in its place would take that too.
+    if ("crash" == how)
+    {
+        SetUnhandledExceptionFilter(earlierFilter);
+    }
 #else // _WINDOWS
     std::signal(SIGSEGV, earlierHandler);
     std::signal(SIGBUS, earlierHandler);
