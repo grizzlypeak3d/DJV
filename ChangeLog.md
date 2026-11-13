@@ -22,6 +22,8 @@ Changes:
   Graphics or with the -renderer command line option.
 * The Color Picker shows the luminance in nits.
 * Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
+* Movies that cannot be decoded in real time show the frames they can,
+  rather than freezing while the audio plays.
 * Read HEIC and HEIF images on macOS.
 * Read WebP images, still and animated (#867).
 * Show Display P3 colors on wide-gamut displays with the GPU renderer.
@@ -37,6 +39,9 @@ Changes:
   line (#866).
 * The log ends with a line saying how the program ended: a clean exit, an
   error, or a crash with a backtrace.
+* The documentation has a page for each part of the application and a
+  reference of every menu item, and is installed with the application in
+  HTML and Markdown, with an llms.txt for AI assistants.
 * Library updates:
     - FFmpeg 9.0.2
 
