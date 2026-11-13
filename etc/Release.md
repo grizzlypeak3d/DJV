@@ -268,3 +268,11 @@ Pushing a version tag builds that repository's wheels and publishes them
   install names and in the packaging: check them against
   `libavutil/version.h` and its siblings at the new tag. In this tree they
   are in `BuildFFmpeg.cmake` and `cmake/Modules/Package.cmake`.
+- Between releases, tlRender's and DJV's wheel builds on main are expected
+  to fail as soon as main uses something feather-tk or tlRender added since
+  their last release: a wheel builds against the pinned release from PyPI,
+  not the submodule, while the CI workflow builds against main. After
+  0.28.0, every tlRender wheel build on main failed on
+  `ftk::ImageInfo::depth`, new in feather-tk after 0.20.0; the pins move
+  with the next release and its tag builds. A failure there is worth
+  reading all the same, since a real one looks the same from outside.
