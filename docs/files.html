@@ -88,14 +88,14 @@
 <p><strong>Clear</strong> forgets the recent files, playlists, reviews and the folders the file browser remembers. <strong>Clear on exit</strong> does the same each time DJV exits, for a machine that is shared between clients.</p>
 <div class="note">Clearing the recent lists does not remove file names from the log files, which cover the current session and the one before it.</div>
 <h2 id="switching-files">Switching files</h2>
-<p>To switch between open files, use the <strong>File/Current</strong> menu, the <strong>Tab Bar</strong>, or the <strong>Files</strong> tool.</p>
+<p>To switch between open files, use the <strong>File &gt; Current</strong> menu, the <strong>Tab Bar</strong>, or the <strong>Files</strong> tool.</p>
 <p>Locations: <strong>File</strong> menu, <strong>Tab Bar</strong>, <strong>Files</strong> tool</p>
 <p>Shortcuts:</p>
 <ul><li>Next file: <kbd>Ctrl+Page Down</kbd></li><li>Previous file: <kbd>Ctrl+Page Up</kbd></li></ul>
 <h2 id="playlists">Playlists</h2>
-<p><strong>File/Save Playlist</strong> saves the list of open files as an OTIO file: the order, each file's in/out points, position, speed, layer, and media reference, and the A/B comparison. <strong>File/Open Playlist</strong> opens one back into the file list.</p>
+<p><strong>File &gt; Save Playlist (.otio)</strong> saves the list of open files as an OTIO file: the order, each file's in/out points, position, speed, layer, and media reference, and the A/B comparison. <strong>File &gt; Open Playlist (.otio)</strong> opens one back into the file list.</p>
 <p>Locations: <strong>File</strong> menu</p>
-<p>A playlist is a plain OTIO timeline — a single video track with one clip per file — so other applications can open it, and DJV's own state rides in metadata they ignore. Opening a <code>.otio</code> file with <strong>File/Open</strong> plays it as a timeline in one tab; <strong>Open Playlist</strong> is what expands it into the file list. Any timeline can be opened as a playlist: multiple video tracks are flattened, and whatever the file list cannot carry — transitions, effects, markers, audio tracks — is dropped and reported in the log. A timeline of only audio opens its first audio track. A clip with a range but no saved position starts at its in point. The file being opened is never modified.</p>
+<p>A playlist is a plain OTIO timeline — a single video track with one clip per file — so other applications can open it, and DJV's own state rides in metadata they ignore. Opening a <code>.otio</code> file with <strong>File &gt; Open</strong> plays it as a timeline in one tab; <strong>Open Playlist</strong> is what expands it into the file list. Any timeline can be opened as a playlist: multiple video tracks are flattened, and whatever the file list cannot carry — transitions, effects, markers, audio tracks — is dropped and reported in the log. A timeline of only audio opens its first audio track. A clip with a range but no saved position starts at its in point. The file being opened is never modified.</p>
 <p>A <code>.otioz</code> bundle opens as a timeline only: its media lives inside the bundle, so its clips cannot become entries in the file list.</p>
 <p>Media references are saved relative to the playlist's directory when the media is under it, so a playlist saved above its media can move with it. Everything else is saved with an absolute path.</p>
 <p>A playlist holds the file list and the comparison. Color, view, and window state stay in the <a href="settings.html">settings</a>.</p>
@@ -114,11 +114,11 @@
 <p>The sizes start at a quarter of the memory the machine has for them, and cannot be set past what it has: its memory less the couple of gigabytes DJV itself takes to run. The <strong>Settings</strong> tool says what that comes to, e.g. <strong>8 of 62 GB</strong>. That is not a promise of free memory, since whatever else is open has its own share.</p>
 <p>The cache sizes are budgets for decoded frames and audio, not a limit on how much memory DJV uses. The decoders for playback, a second set for the timeline thumbnails, the thumbnail and waveform caches, the GPU, and the application itself come on top; together they are roughly a fixed amount rather than a share of the cache, and grow with the resolution of the media and the number of processor cores. The audio cache fills with as much of the in/out range as fits, so a long file uses all of it. System monitors also usually count the shared libraries DJV loads, which adds a few hundred megabytes that are not DJV's own. The <strong>Diagnostics</strong> tool shows the memory held by images, audio, and the GPU as it changes.</p>
 <h2 id="layers">Layers</h2>
-<p>For files with multiple layers (such as multi-part OpenEXR), the active layer can be changed from the <strong>File/Layers</strong> menu or from the <strong>Files</strong> tool.</p>
+<p>For files with multiple layers (such as multi-part OpenEXR), the active layer can be changed from the <strong>File &gt; Layers</strong> menu or from the <strong>Files</strong> tool.</p>
 <p>Locations: <strong>File</strong> menu, <strong>Files</strong> tool</p>
 <p>Shortcuts:</p>
 <ul><li>Next layer: <kbd>Ctrl+Equals</kbd></li><li>Previous layer: <kbd>Ctrl+Minus</kbd></li></ul>
-<p>From a script, <strong>File/Layer</strong> chooses one by name or index, e.g., <code>-command 'File/Layer { "layer": "diffuse" }'</code>, for the A file or, with <strong>"file"</strong>, the one at that index in the file list (see <a href="automation.html">Automation</a>).</p>
+<p>From a script, <code>File/Layer</code> chooses one by name or index, e.g., <code>-command 'File/Layer { "layer": "diffuse" }'</code>, for the A file or, with <strong>"file"</strong>, the one at that index in the file list (see <a href="automation.html">Automation</a>).</p>
 <h2 id="files-tool">Files tool</h2>
 <p>The <strong>Files</strong> tool is the central place for managing open files: it sets the current file, picks active layers, and configures comparison.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
@@ -147,18 +147,18 @@
 <h2 id="image-sequences-with-audio">Image sequences with audio</h2>
 <p>Audio can be paired with an image sequence either automatically or manually.</p>
 <p>To pair audio automatically, open the <strong>Image Sequences</strong> section in the <strong>Settings</strong> tool. You can either list the file extensions DJV should look for (for example, <code>.wav .mp3</code>), or provide a specific file name to match.</p>
-<p>To pair audio manually, use the menu <strong>File/Open With Audio</strong>.</p>
+<p>To pair audio manually, use the menu <strong>File &gt; Open With Audio</strong>.</p>
 <h2 id="timelines">Timelines</h2>
 <p>OTIO timelines are opened like any other file. An <code>.otio</code> file references other pieces of media, and relative paths are relative to the <code>.otio</code> file. An <code>.otioz</code> bundle carries the media inside the one file: it is self-contained, so it can be moved or sent somewhere else, and DJV reads the media from the bundle itself rather than from disk.</p>
 <p>A timeline's layers are those of its first video clip; choosing one applies to every clip that has it.</p>
 <h2 id="media-references">Media references</h2>
 <p>A clip in an OTIO timeline can carry more than one version of its media as <em>media references</em> — for example a proxy and a full resolution render of the same shot, selected by name.</p>
-<p>DJV lists the names it finds in the <strong>File/Media References</strong> menu, and in a menu on the file's row in the <strong>Files</strong> tool once the file has been opened. Choosing one switches every clip in the timeline to the reference with that name; clips that do not have one keep the reference they were authored with. Switching changes only what is read — the layout and zoom stay where they are — and the <strong>Information</strong> tool and HUD describe the reference being read.</p>
+<p>DJV lists the names it finds in the <strong>File &gt; Media References</strong> menu, and in a menu on the file's row in the <strong>Files</strong> tool once the file has been opened. Choosing one switches every clip in the timeline to the reference with that name; clips that do not have one keep the reference they were authored with. Switching changes only what is read — the layout and zoom stay where they are — and the <strong>Information</strong> tool and HUD describe the reference being read.</p>
 <p>Each file keeps its own choice, so an A/B comparison can put one version against another — the proxy against the full resolution render of the same timeline. The <strong>File</strong> menu and the shortcut change the A file; the <strong>Files</strong> tool changes any of them. The choice is saved with reviews and playlists.</p>
 <p>Locations: <strong>File</strong> menu, <strong>Files</strong> tool</p>
 <p>Shortcuts:</p>
 <ul><li>Next media reference: <kbd>Shift+M</kbd></li></ul>
-<p>To open with a media reference, give it on the command line, e.g., <code>djv shot.otio -mediaReference Proxy</code>; it applies to the files opened, not the B file. From a script, <strong>File/MediaReference</strong> chooses one by name, e.g., <code>-command 'File/MediaReference { "key": "Full" }'</code>, for the A file or, with <strong>"file"</strong>, the one at that index in the file list. A name a file does not have is reported in the log with the ones it does. OTIO's default reference is shown as <strong>Default</strong>, and either name works.</p>
+<p>To open with a media reference, give it on the command line, e.g., <code>djv shot.otio -mediaReference Proxy</code>; it applies to the files opened, not the B file. From a script, <code>File/MediaReference</code> chooses one by name, e.g., <code>-command 'File/MediaReference { "key": "Full" }'</code>, for the A file or, with <strong>"file"</strong>, the one at that index in the file list. A name a file does not have is reported in the log with the ones it does. OTIO's default reference is shown as <strong>Default</strong>, and either name works.</p>
 <h2 id="reviews">Reviews</h2>
 <p>Reviews — saved sessions with markers and drawn feedback — have a page of their own: <a href="reviews.html">Review</a>.</p>
 <h2 id="otio-spatial-coordinates">OTIO spatial coordinates</h2>

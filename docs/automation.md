@@ -61,7 +61,7 @@ Errors, such as unknown commands or malformed arguments, are reported in the log
 
 ## Exiting
 
-**File/Exit** is itself a command, so it can be used as the final command to run DJV as a batch process:
+`File/Exit` is itself a command, so it can be used as the final command to run DJV as a batch process:
 
 ```
 djv -command 'Timeline/WaveformSizeLarge' -command 'File/Exit'
@@ -71,14 +71,14 @@ Since settings are saved on exit, this example changes the timeline waveform siz
 
 ## Exporting
 
-**Export/Movie** exports the current file as a movie with the **Export** tool's settings, changing any that are given first:
+`Export/Movie` exports the current file as a movie with the **Export** tool's settings, changing any that are given first:
 
 ```
 djv render.#.exr -offscreen \
     -command 'Export/Movie { "dir": "/tmp", "fileName": "review", "preset": "APV 422", "exit": true }'
 ```
 
-The arguments are all optional: **dir**, **fileName**, **ext**, **preset** (as the **Preset** menu names it), **audioCodec** and **burnAnnotations**, which writes the review drawings into the picture. An existing file is written over only with **"overwrite": true**, since there is nobody to answer the question. The export takes as long as it takes, so **File/Exit** after it would stop it part way; **"exit": true** quits once the movie is written or has failed, and the log says which. **-offscreen** keeps the window from being shown while it runs.
+The arguments are all optional: **dir**, **fileName**, **ext**, **preset** (as the **Preset** menu names it), **audioCodec** and **burnAnnotations**, which writes the review drawings into the picture. An existing file is written over only with **"overwrite": true**, since there is nobody to answer the question. The export takes as long as it takes, so `File/Exit` after it would stop it part way; **"exit": true** quits once the movie is written or has failed, and the log says which. **-offscreen** keeps the window from being shown while it runs.
 
 ## Color settings
 
@@ -96,7 +96,7 @@ djv "$@" \
     -command 'Color/OCIO { "display": "sRGB", "view": "ACES 1.0 - SDR Video" }'
 ```
 
-**Color/OCIO** takes **config** (**Built In**, **Environment Variable**, or **File**), **fileName**, **input**, **display**, **view**, and **look**, and **Color/LUT** takes **fileName** and **order**; either turns its section on unless **"value": false** is given. **Color/Reset** leaves a section as it is when given **"ocio"**, **"lut"**, **"color"**, or **"levels"** as false. The **-ocio** and **-lut** options are applied before any command, so a **Color/Reset** would undo them; use the commands after it instead. The user can change the settings during the session, and the next run of the script starts from its own again.
+`Color/OCIO` takes **config** (**Built In**, **Environment Variable**, or **File**), **fileName**, **input**, **display**, **view**, and **look**, and `Color/LUT` takes **fileName** and **order**; either turns its section on unless **"value": false** is given. `Color/Reset` leaves a section as it is when given **"ocio"**, **"lut"**, **"color"**, or **"levels"** as false. The **-ocio** and **-lut** options are applied before any command, so a `Color/Reset` would undo them; use the commands after it instead. The user can change the settings during the session, and the next run of the script starts from its own again.
 
 ## Command line basics
 
@@ -125,7 +125,7 @@ djv -widgetDump widgets.json
 
 **-screenshot** writes an image of the window to a file and exits. **-widgetDump** writes the window's widget tree to a file as JSON — the type, position, size, state, and text of every widget — and exits. Both work in any application built on the UI library, including the Python application.
 
-**Debug/State** is a command that writes the live model state as JSON — the display, color, and audio options, the open files, and the player — to standard output, or to a file given as an argument:
+`Debug/State` is a command that writes the live model state as JSON — the display, color, and audio options, the open files, and the player — to standard output, or to a file given as an argument:
 
 ```
 djv render.mov -command 'Debug/State {"file": "state.json"}' -command 'File/Exit'

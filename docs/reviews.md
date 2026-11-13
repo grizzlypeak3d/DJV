@@ -84,6 +84,6 @@ The markers draw on the timeline in their colors: a span as a band along the top
 
 ## Import and export
 
-Markers are standard OpenTimelineIO markers. **Review/Import** opens a `.otio` timeline as a review: it becomes the review's first file, and its markers — wherever they sit, on the stack, the tracks, or the clips — are copied into the feedback. **Review/Export Markers (.otio)** writes the review's markers into a `.otio`: a copy of the reviewed timeline when there is one, and a timeline with one clip referencing the media otherwise, with the markers at the timeline level and the text in each marker's comment. The file being imported is never modified.
+Markers are standard OpenTimelineIO markers. **Review > Import** opens a `.otio` timeline as a review: it becomes the review's first file, and its markers — wherever they sit, on the stack, the tracks, or the clips — are copied into the feedback. **Review > Export Markers (.otio)** writes the review's markers into a `.otio`: a copy of the reviewed timeline when there is one, and a timeline with one clip referencing the media otherwise, with the markers at the timeline level and the text in each marker's comment. The file being imported is never modified.
 
 Markers and drawings record who made them, taken from your account name on the machine, so a session that has been passed around stays readable.

@@ -2,12 +2,12 @@
 
 A/B comparison lets you view two files (or layers) at once — useful for checking revisions, matching color between shots, or spotting differences between renders.
 
-It is for comparing *pixels*. To compare what two files are — their resolution, format or timing — open them and switch between them with **File/Next** and **File/Previous** instead, which makes each one current in turn. See [Comparing file information](#comparing-file-information).
+It is for comparing *pixels*. To compare what two files are — their resolution, format or timing — open them and switch between them with **File > Next** and **File > Previous** instead, which makes each one current in turn. See [Comparing file information](#comparing-file-information).
 
 ## Setting up a comparison
 
 1. Open the files in DJV.
-2. The current file is the **A** file. Mark one or more of the others as **B** with the **B** button in the **Files** tool, or step through them with **Compare/Next** and **Compare/Previous**.
+2. The current file is the **A** file. Mark one or more of the others as **B** with the **B** button in the **Files** tool, or step through them with **Compare > Next** and **Compare > Previous**.
 3. Turn on a compare mode (see below).
 
 Locations: **Compare** menu, **Compare** tool bar, **Files** tool
@@ -74,11 +74,11 @@ Locations: **Compare** menu, **Files** tool
 
 ## Comparing against a held frame {#held-frame}
 
-**Compare/Hold Frame** keeps the current frame and makes it **B**: it stays put while you play, scrub, or open another file, and every compare mode works with it. It is for a frame against another frame of the same clip, or a still against a movie: hold the still, then go to the movie. A wipe is used if no compare mode is chosen.
+**Compare > Hold Frame** keeps the current frame and makes it **B**: it stays put while you play, scrub, or open another file, and every compare mode works with it. It is for a frame against another frame of the same clip, or a still against a movie: hold the still, then go to the movie. A wipe is used if no compare mode is chosen.
 
-While it is **B**, the bottom of the view says so, with the file and the time it was held from. The color settings apply to it as they do to **A**, and exports and **File/Export Still** show it as the view does. Drawings are not made on it or shown over it.
+While it is **B**, the bottom of the view says so, with the file and the time it was held from. The color settings apply to it as they do to **A**, and exports and **File > Export Still** show it as the view does. Drawings are not made on it or shown over it.
 
-To see **A** alone, set the compare mode to none: the frame stays held, and is **B** again with the next mode chosen. **Compare/Hold Frame** again holds the frame then current, and **Compare/Clear Held Frame** lets it go, back to the **B** files. It is not kept when DJV closes.
+To see **A** alone, set the compare mode to none: the frame stays held, and is **B** again with the next mode chosen. **Compare > Hold Frame** again holds the frame then current, and **Compare > Clear Held Frame** lets it go, back to the **B** files. It is not kept when DJV closes.
 
 Locations: **Compare** menu
 
@@ -98,4 +98,4 @@ The **Information** tool and the HUD describe the **A** file — the current one
 
 Drawings from the **Review** tool follow the same rule where the files are drawn over each other: **Wipe**, **Butterfly**, **Overlay**, and **Difference** show and take the drawings of **A**. The drawings of **B** show in **B**, **Horizontal**, **Vertical**, and **Tile**.
 
-To compare what two files are rather than how they look, open them and switch between them with **File/Next** and **File/Previous** (<kbd>Ctrl+Page Down</kbd> and <kbd>Ctrl+Page Up</kbd>), or click their tabs. Each becomes the current file in turn, and every display follows it.
+To compare what two files are rather than how they look, open them and switch between them with **File > Next** and **File > Previous** (<kbd>Ctrl+Page Down</kbd> and <kbd>Ctrl+Page Up</kbd>), or click their tabs. Each becomes the current file in turn, and every display follows it.

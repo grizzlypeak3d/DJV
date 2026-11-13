@@ -76,14 +76,14 @@ Tools/Export - Toggle the Export tool; e.g., { "value": true }.
 <p>When files are given on the command line, commands wait until the files have been opened before executing.</p>
 <p>Errors, such as unknown commands or malformed arguments, are reported in the log (see <a href="troubleshooting.html">Troubleshooting</a>).</p>
 <h2 id="exiting">Exiting</h2>
-<p><strong>File/Exit</strong> is itself a command, so it can be used as the final command to run DJV as a batch process:</p>
+<p><code>File/Exit</code> is itself a command, so it can be used as the final command to run DJV as a batch process:</p>
 <pre><code>djv -command 'Timeline/WaveformSizeLarge' -command 'File/Exit'</code></pre>
 <p>Since settings are saved on exit, this example changes the timeline waveform size for future sessions and then exits.</p>
 <h2 id="exporting">Exporting</h2>
-<p><strong>Export/Movie</strong> exports the current file as a movie with the <strong>Export</strong> tool's settings, changing any that are given first:</p>
+<p><code>Export/Movie</code> exports the current file as a movie with the <strong>Export</strong> tool's settings, changing any that are given first:</p>
 <pre><code>djv render.#.exr -offscreen \
     -command 'Export/Movie { "dir": "/tmp", "fileName": "review", "preset": "APV 422", "exit": true }'</code></pre>
-<p>The arguments are all optional: <strong>dir</strong>, <strong>fileName</strong>, <strong>ext</strong>, <strong>preset</strong> (as the <strong>Preset</strong> menu names it), <strong>audioCodec</strong> and <strong>burnAnnotations</strong>, which writes the review drawings into the picture. An existing file is written over only with <strong>"overwrite": true</strong>, since there is nobody to answer the question. The export takes as long as it takes, so <strong>File/Exit</strong> after it would stop it part way; <strong>"exit": true</strong> quits once the movie is written or has failed, and the log says which. <strong>-offscreen</strong> keeps the window from being shown while it runs.</p>
+<p>The arguments are all optional: <strong>dir</strong>, <strong>fileName</strong>, <strong>ext</strong>, <strong>preset</strong> (as the <strong>Preset</strong> menu names it), <strong>audioCodec</strong> and <strong>burnAnnotations</strong>, which writes the review drawings into the picture. An existing file is written over only with <strong>"overwrite": true</strong>, since there is nobody to answer the question. The export takes as long as it takes, so <code>File/Exit</code> after it would stop it part way; <strong>"exit": true</strong> quits once the movie is written or has failed, and the log says which. <strong>-offscreen</strong> keeps the window from being shown while it runs.</p>
 <h2 id="color-settings">Color settings</h2>
 <p>Settings changed from the command line are saved like any others, so a later run starts from them. A script that wants the same color every time, whatever the user changed last, resets them first. With the <strong>OCIO</strong> environment variable set, a reset turns OCIO on with that configuration, so this is a clean start with the site's configuration:</p>
 <pre><code>djv -command 'Color/Reset' "$@"</code></pre>
@@ -91,7 +91,7 @@ Tools/Export - Toggle the Export tool; e.g., { "value": true }.
 <pre><code>djv "$@" \
     -command 'Color/Reset' \
     -command 'Color/OCIO { "display": "sRGB", "view": "ACES 1.0 - SDR Video" }'</code></pre>
-<p><strong>Color/OCIO</strong> takes <strong>config</strong> (<strong>Built In</strong>, <strong>Environment Variable</strong>, or <strong>File</strong>), <strong>fileName</strong>, <strong>input</strong>, <strong>display</strong>, <strong>view</strong>, and <strong>look</strong>, and <strong>Color/LUT</strong> takes <strong>fileName</strong> and <strong>order</strong>; either turns its section on unless <strong>"value": false</strong> is given. <strong>Color/Reset</strong> leaves a section as it is when given <strong>"ocio"</strong>, <strong>"lut"</strong>, <strong>"color"</strong>, or <strong>"levels"</strong> as false. The <strong>-ocio</strong> and <strong>-lut</strong> options are applied before any command, so a <strong>Color/Reset</strong> would undo them; use the commands after it instead. The user can change the settings during the session, and the next run of the script starts from its own again.</p>
+<p><code>Color/OCIO</code> takes <strong>config</strong> (<strong>Built In</strong>, <strong>Environment Variable</strong>, or <strong>File</strong>), <strong>fileName</strong>, <strong>input</strong>, <strong>display</strong>, <strong>view</strong>, and <strong>look</strong>, and <code>Color/LUT</code> takes <strong>fileName</strong> and <strong>order</strong>; either turns its section on unless <strong>"value": false</strong> is given. <code>Color/Reset</code> leaves a section as it is when given <strong>"ocio"</strong>, <strong>"lut"</strong>, <strong>"color"</strong>, or <strong>"levels"</strong> as false. The <strong>-ocio</strong> and <strong>-lut</strong> options are applied before any command, so a <code>Color/Reset</code> would undo them; use the commands after it instead. The user can change the settings during the session, and the next run of the script starts from its own again.</p>
 <h2 id="command-line-basics">Command line basics</h2>
 <p>One or more files, directories, or timelines can be given on the command line:</p>
 <pre><code>djv render.mov</code></pre>
@@ -103,7 +103,7 @@ Tools/Export - Toggle the Export tool; e.g., { "value": true }.
 <pre><code>djv -screenshot window.png
 djv -widgetDump widgets.json</code></pre>
 <p><strong>-screenshot</strong> writes an image of the window to a file and exits. <strong>-widgetDump</strong> writes the window's widget tree to a file as JSON — the type, position, size, state, and text of every widget — and exits. Both work in any application built on the UI library, including the Python application.</p>
-<p><strong>Debug/State</strong> is a command that writes the live model state as JSON — the display, color, and audio options, the open files, and the player — to standard output, or to a file given as an argument:</p>
+<p><code>Debug/State</code> is a command that writes the live model state as JSON — the display, color, and audio options, the open files, and the player — to standard output, or to a file given as an argument:</p>
 <pre><code>djv render.mov -command 'Debug/State {"file": "state.json"}' -command 'File/Exit'</code></pre>
 <p>Setting the environment variable <strong>FTK_TRACE_EVENTS</strong> logs keyboard and mouse button dispatch: each widget an event is offered to, in order, and which one accepted it.</p>
 <p>The log's <strong>Library</strong> line records which library file the application loaded and when it was last modified, which tells a stale build from a fresh one.</p>

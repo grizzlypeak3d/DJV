@@ -85,7 +85,7 @@ A floating browser closes when a file is chosen, the same as the dialog. Check *
 
 ## Switching files
 
-To switch between open files, use the **File/Current** menu, the **Tab Bar**, or the **Files** tool.
+To switch between open files, use the **File > Current** menu, the **Tab Bar**, or the **Files** tool.
 
 Locations: **File** menu, **Tab Bar**, **Files** tool
 
@@ -96,11 +96,11 @@ Shortcuts:
 
 ## Playlists
 
-**File/Save Playlist** saves the list of open files as an OTIO file: the order, each file's in/out points, position, speed, layer, and media reference, and the A/B comparison. **File/Open Playlist** opens one back into the file list.
+**File > Save Playlist (.otio)** saves the list of open files as an OTIO file: the order, each file's in/out points, position, speed, layer, and media reference, and the A/B comparison. **File > Open Playlist (.otio)** opens one back into the file list.
 
 Locations: **File** menu
 
-A playlist is a plain OTIO timeline — a single video track with one clip per file — so other applications can open it, and DJV's own state rides in metadata they ignore. Opening a `.otio` file with **File/Open** plays it as a timeline in one tab; **Open Playlist** is what expands it into the file list. Any timeline can be opened as a playlist: multiple video tracks are flattened, and whatever the file list cannot carry — transitions, effects, markers, audio tracks — is dropped and reported in the log. A timeline of only audio opens its first audio track. A clip with a range but no saved position starts at its in point. The file being opened is never modified.
+A playlist is a plain OTIO timeline — a single video track with one clip per file — so other applications can open it, and DJV's own state rides in metadata they ignore. Opening a `.otio` file with **File > Open** plays it as a timeline in one tab; **Open Playlist** is what expands it into the file list. Any timeline can be opened as a playlist: multiple video tracks are flattened, and whatever the file list cannot carry — transitions, effects, markers, audio tracks — is dropped and reported in the log. A timeline of only audio opens its first audio track. A clip with a range but no saved position starts at its in point. The file being opened is never modified.
 
 A `.otioz` bundle opens as a timeline only: its media lives inside the bundle, so its clips cannot become entries in the file list.
 
@@ -141,7 +141,7 @@ The cache sizes are budgets for decoded frames and audio, not a limit on how muc
 
 ## Layers
 
-For files with multiple layers (such as multi-part OpenEXR), the active layer can be changed from the **File/Layers** menu or from the **Files** tool.
+For files with multiple layers (such as multi-part OpenEXR), the active layer can be changed from the **File > Layers** menu or from the **Files** tool.
 
 Locations: **File** menu, **Files** tool
 
@@ -150,7 +150,7 @@ Shortcuts:
 - Next layer: <kbd>Ctrl+Equals</kbd>
 - Previous layer: <kbd>Ctrl+Minus</kbd>
 
-From a script, **File/Layer** chooses one by name or index, e.g., `-command 'File/Layer { "layer": "diffuse" }'`, for the A file or, with **"file"**, the one at that index in the file list (see [Automation](automation.html)).
+From a script, `File/Layer` chooses one by name or index, e.g., `-command 'File/Layer { "layer": "diffuse" }'`, for the A file or, with **"file"**, the one at that index in the file list (see [Automation](automation.html)).
 
 ## Files tool
 
@@ -216,7 +216,7 @@ Audio can be paired with an image sequence either automatically or manually.
 
 To pair audio automatically, open the **Image Sequences** section in the **Settings** tool. You can either list the file extensions DJV should look for (for example, `.wav .mp3`), or provide a specific file name to match.
 
-To pair audio manually, use the menu **File/Open With Audio**.
+To pair audio manually, use the menu **File > Open With Audio**.
 
 ## Timelines
 
@@ -228,7 +228,7 @@ A timeline's layers are those of its first video clip; choosing one applies to e
 
 A clip in an OTIO timeline can carry more than one version of its media as *media references* — for example a proxy and a full resolution render of the same shot, selected by name.
 
-DJV lists the names it finds in the **File/Media References** menu, and in a menu on the file's row in the **Files** tool once the file has been opened. Choosing one switches every clip in the timeline to the reference with that name; clips that do not have one keep the reference they were authored with. Switching changes only what is read — the layout and zoom stay where they are — and the **Information** tool and HUD describe the reference being read.
+DJV lists the names it finds in the **File > Media References** menu, and in a menu on the file's row in the **Files** tool once the file has been opened. Choosing one switches every clip in the timeline to the reference with that name; clips that do not have one keep the reference they were authored with. Switching changes only what is read — the layout and zoom stay where they are — and the **Information** tool and HUD describe the reference being read.
 
 Each file keeps its own choice, so an A/B comparison can put one version against another — the proxy against the full resolution render of the same timeline. The **File** menu and the shortcut change the A file; the **Files** tool changes any of them. The choice is saved with reviews and playlists.
 
@@ -238,7 +238,7 @@ Shortcuts:
 
 - Next media reference: <kbd>Shift+M</kbd>
 
-To open with a media reference, give it on the command line, e.g., `djv shot.otio -mediaReference Proxy`; it applies to the files opened, not the B file. From a script, **File/MediaReference** chooses one by name, e.g., `-command 'File/MediaReference { "key": "Full" }'`, for the A file or, with **"file"**, the one at that index in the file list. A name a file does not have is reported in the log with the ones it does. OTIO's default reference is shown as **Default**, and either name works.
+To open with a media reference, give it on the command line, e.g., `djv shot.otio -mediaReference Proxy`; it applies to the files opened, not the B file. From a script, `File/MediaReference` chooses one by name, e.g., `-command 'File/MediaReference { "key": "Full" }'`, for the A file or, with **"file"**, the one at that index in the file list. A name a file does not have is reported in the log with the ones it does. OTIO's default reference is shown as **Default**, and either name works.
 
 ## Reviews
 

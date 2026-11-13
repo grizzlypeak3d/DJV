@@ -144,8 +144,12 @@ if(Python3_Interpreter_FOUND)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/Nav.cmake
         COMMENT "Documentation pages from their Markdown")
     set_target_properties(djvDocsPages PROPERTIES FOLDER docs)
+    # And what the pages say about the application against the actions
+    # reference: the menu items, the commands and the links they name.
     add_custom_target(djvDocsPagesCheck
         ${DJV_DOCS_PAGES_CHECKS}
+        COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/checkdocs.py
+            ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Documentation pages check")
     set_target_properties(djvDocsPagesCheck PROPERTIES FOLDER docs)
 
