@@ -242,7 +242,6 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
             std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
-            std::shared_ptr<ftk::Observer<bool> > compareHeldObserver;
             std::shared_ptr<ftk::Observer<bool> > drawEnabledObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
@@ -602,12 +601,6 @@ namespace djv
             p.heldFrameObserver = ftk::Observer<std::optional<models::HeldFrame> >::create(
                 filesModel->observeHeldFrame(),
                 [this](const std::optional<models::HeldFrame>&)
-                {
-                    _heldUpdate();
-                });
-            p.compareHeldObserver = ftk::Observer<bool>::create(
-                filesModel->observeCompareHeld(),
-                [this](bool)
                 {
                     _heldUpdate();
                 });

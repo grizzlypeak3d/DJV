@@ -301,21 +301,12 @@ namespace djv
             //! Observe the held frame.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::optional<HeldFrame> > > observeHeldFrame() const;
 
-            //! Hold a frame, or none, which also stops comparing against it.
+            //! Hold a frame, or none. A held frame is the comparison's B, in
+            //! place of the B files, whatever the time or the file; with no
+            //! compare mode, A alone is shown and the frame stays held.
             DJV_MODELS_API void setHeldFrame(const std::optional<HeldFrame>&);
 
-            //! Get whether the held frame is the comparison's B, in place of
-            //! the B files, whatever the time or the file.
-            DJV_MODELS_API bool isCompareHeld() const;
-
-            //! Observe whether the held frame is the comparison's B.
-            DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeCompareHeld() const;
-
-            //! Set whether the held frame is the comparison's B. Only with a
-            //! frame held.
-            DJV_MODELS_API void setCompareHeld(bool);
-
-            //! The held frame while it is the comparison's B, or none.
+            //! The held frame's video, or none.
             DJV_MODELS_API std::optional<tl::VideoFrame> getCompareHeldFrame() const;
 
         private:

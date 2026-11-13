@@ -63,32 +63,24 @@ namespace djv
 
         void FilesModelTest::_heldFrame()
         {
-            // The frame store: comparing against a held frame needs one, and
-            // letting it go stops comparing against it.
+            // The frame store: a held frame is the comparison's B until it
+            // is let go.
             auto settings = createTestSettings(_context);
             auto model = models::FilesModel::create(settings);
             FTK_CHECK(!model->getHeldFrame().has_value());
             FTK_CHECK(!model->getCompareHeldFrame().has_value());
-            model->setCompareHeld(true);
-            FTK_CHECK(!model->isCompareHeld());
 
             models::HeldFrame held;
             held.frame.time = OTIO_NS::RationalTime(3.0, 24.0);
             held.label = "render.0003.exr 3";
             model->setHeldFrame(held);
             FTK_CHECK(held == *model->getHeldFrame());
-            FTK_CHECK(!model->getCompareHeldFrame().has_value());
-            model->setCompareHeld(true);
-            FTK_CHECK(model->isCompareHeld());
             FTK_CHECK(model->getCompareHeldFrame().has_value());
             FTK_CHECK(held.frame == *model->getCompareHeldFrame());
-            model->setCompareHeld(false);
-            FTK_CHECK(!model->getCompareHeldFrame().has_value());
 
-            model->setCompareHeld(true);
             model->setHeldFrame(std::nullopt);
-            FTK_CHECK(!model->isCompareHeld());
             FTK_CHECK(!model->getHeldFrame().has_value());
+            FTK_CHECK(!model->getCompareHeldFrame().has_value());
         }
 
         void FilesModelTest::_files()

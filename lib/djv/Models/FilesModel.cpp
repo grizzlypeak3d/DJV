@@ -33,7 +33,6 @@ namespace djv
             std::shared_ptr<ftk::Observable<tl::CompareOptions> > compareOptions;
             std::shared_ptr<ftk::Observable<tl::CompareTime> > compareTime;
             std::shared_ptr<ftk::Observable<std::optional<HeldFrame> > > heldFrame;
-            std::shared_ptr<ftk::Observable<bool> > compareHeld;
         };
 
         void FilesModel::_init(const std::shared_ptr<ftk::Settings>& settings)
@@ -77,7 +76,6 @@ namespace djv
             from_string(s, compareTime);
             p.compareTime = ftk::Observable<tl::CompareTime>::create(compareTime);
             p.heldFrame = ftk::Observable<std::optional<HeldFrame> >::create();
-            p.compareHeld = ftk::Observable<bool>::create(false);
         }
 
         FilesModel::FilesModel() :
@@ -843,35 +841,14 @@ namespace djv
 
         void FilesModel::setHeldFrame(const std::optional<HeldFrame>& value)
         {
-            FTK_P();
-            if (!value.has_value())
-            {
-                p.compareHeld->setIfChanged(false);
-            }
-            p.heldFrame->setIfChanged(value);
-        }
-
-        bool FilesModel::isCompareHeld() const
-        {
-            return _p->compareHeld->get();
-        }
-
-        std::shared_ptr<ftk::IObservable<bool> > FilesModel::observeCompareHeld() const
-        {
-            return _p->compareHeld;
-        }
-
-        void FilesModel::setCompareHeld(bool value)
-        {
-            FTK_P();
-            p.compareHeld->setIfChanged(value && p.heldFrame->get().has_value());
+            _p->heldFrame->setIfChanged(value);
         }
 
         std::optional<tl::VideoFrame> FilesModel::getCompareHeldFrame() const
         {
             FTK_P();
             std::optional<tl::VideoFrame> out;
-            if (p.compareHeld->get() && p.heldFrame->get().has_value())
+            if (p.heldFrame->get().has_value())
             {
                 out = p.heldFrame->get()->frame;
             }

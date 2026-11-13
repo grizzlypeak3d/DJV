@@ -21,7 +21,6 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > optionsObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > timeObserver;
             std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
-            std::shared_ptr<ftk::Observer<bool> > compareHeldObserver;
         };
 
         void CompareActions::_init(
@@ -241,7 +240,8 @@ namespace djv
                 "HoldFrame",
                 "Hold the current frame and compare against it: it becomes "
                 "the comparison's B, wiped against A if no other comparison "
-                "is chosen, whatever the time or the file.",
+                "is chosen, whatever the time or the file, until it is let "
+                "go. Holding again holds the frame then current.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
@@ -260,31 +260,8 @@ namespace djv
                             arg(app->getTimeUnitsModel()->getLabel(held.frame.time));
                         auto filesModel = app->getFilesModel();
                         filesModel->setHeldFrame(held);
-                        filesModel->setCompareHeld(true);
                         auto options = filesModel->getCompareOptions();
                         if (tl::Compare::None == options.compare)
-                        {
-                            options.compare = tl::Compare::Wipe;
-                            filesModel->setCompareOptions(options);
-                        }
-                    }
-                });
-
-            _addCheckCommand(
-                "CompareHeld",
-                "Compare against the held frame, in place of the B files.",
-                [appWeak](const nlohmann::json& args)
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        auto filesModel = app->getFilesModel();
-                        const bool value = args.contains("value") ?
-                            args["value"].get<bool>() :
-                            !filesModel->isCompareHeld();
-                        filesModel->setCompareHeld(value);
-                        auto options = filesModel->getCompareOptions();
-                        if (filesModel->isCompareHeld() &&
-                            tl::Compare::None == options.compare)
                         {
                             options.compare = tl::Compare::Wipe;
                             filesModel->setCompareOptions(options);
@@ -358,9 +335,6 @@ namespace djv
             _actions["HoldFrame"] = ftk::Action::create(
                 "Hold Frame",
                 _command("HoldFrame"));
-            _actions["CompareHeld"] = ftk::Action::create(
-                "Compare to Held Frame",
-                _checkCommand("CompareHeld"));
             _actions["ClearHeld"] = ftk::Action::create(
                 "Clear Held Frame",
                 _command("ClearHeld"));
@@ -382,7 +356,6 @@ namespace djv
             _addShortcut("Absolute", compareTimeLabels[1]);
             // No keys yet; they can be set in the shortcuts.
             _addShortcut("HoldFrame");
-            _addShortcut("CompareHeld");
             _addShortcut("ClearHeld");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
@@ -426,15 +399,7 @@ namespace djv
                 app->getFilesModel()->observeHeldFrame(),
                 [this](const std::optional<models::HeldFrame>& value)
                 {
-                    _actions["CompareHeld"]->setEnabled(value.has_value());
                     _actions["ClearHeld"]->setEnabled(value.has_value());
-                });
-
-            p.compareHeldObserver = ftk::Observer<bool>::create(
-                app->getFilesModel()->observeCompareHeld(),
-                [this](bool value)
-                {
-                    _actions["CompareHeld"]->setChecked(value);
                 });
 
             p.timeObserver = ftk::Observer<tl::CompareTime>::create(

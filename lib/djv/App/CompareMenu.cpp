@@ -47,7 +47,6 @@ namespace djv
             addAction(actions["Tile"]);
             addDivider();
             addAction(actions["HoldFrame"]);
-            addAction(actions["CompareHeld"]);
             addAction(actions["ClearHeld"]);
             addDivider();
             p.menus["Time"] = addSubMenu("Sync by");
