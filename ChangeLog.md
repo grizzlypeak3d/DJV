@@ -24,6 +24,8 @@ Changes:
 * Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
 * Movies that cannot be decoded in real time show the frames they can,
   rather than freezing while the audio plays.
+* Faster playback of RGB images, such as PNG sequences and 16-bit RGB
+  movies, with NVIDIA graphics.
 * Read HEIC and HEIF images on macOS.
 * Read WebP images, still and animated (#867).
 * Show Display P3 colors on wide-gamut displays with the GPU renderer.
