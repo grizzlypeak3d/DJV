@@ -2,7 +2,7 @@
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcut: <kbd>F10</kbd>
+Open it with **Tools > Settings** (<kbd>F10</kbd>).
 
 Settings are stored as a JSON file in the application support directory: **~/Library/Application Support/DJV** on macOS, **%APPDATA%\DJV** on Windows, **~/.config/DJV** on Linux. The path is shown in **Help > System Information**.
 

@@ -4,14 +4,14 @@ The **Color** tool covers everything color-related: OpenColorIO settings, LUTs (
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcut: <kbd>F4</kbd>
+Open it with **Tools > Color** (<kbd>F4</kbd>).
 
 The tool is divided into collapsible sections — **OCIO**, **LUT**, **Color**, and **Levels** — and each can be turned on or off independently using the checkbox in its header. This makes it easy to compare the image with and without a given adjustment.
 
 > [!NOTE]
 > When any of the color controls are active, a status bar indicator is shown so the adjustment isn't forgotten about.
 
-**Color** > **Enable Color** turns all of the sections off at once, to see the image unaltered, and turns the same ones back on again. **Color** > **Reset Color**, and the **Reset** button at the bottom of the tool, return the sections to their defaults, asking which: the sections that have something to reset are ticked, and the ones already at their defaults are shown but cannot be chosen. The **OCIO** section includes the extension assignments. Neither has a shortcut by default; one can be assigned in the **Settings** tool.
+**Color > Enable Color** turns all of the sections off at once, to see the image unaltered, and turns the same ones back on again. **Color > Reset Color**, and the **Reset** button at the bottom of the tool, return the sections to their defaults, asking which: the sections that have something to reset are ticked, and the ones already at their defaults are shown but cannot be chosen. The **OCIO** section includes the extension assignments. Neither has a shortcut by default; one can be assigned in the **Settings** tool.
 
 A slider marks its default value with a vertical line. Double click the slider to reset it. The triangle at the end of the slider opens a popup with the reset and the range.
 
@@ -33,9 +33,7 @@ The **Color** tool shows what was resolved and where it came from, and files bei
 
 An OTIO timeline resolves per clip rather than as a whole.
 
-Shortcuts:
-
-- Toggle OCIO enabled: <kbd>Ctrl+N</kbd>
+**Color > Enable OCIO** (<kbd>Ctrl+N</kbd>) turns the OCIO section on and off.
 
 ## LUT
 
@@ -45,9 +43,7 @@ A LUT can be applied either before or after the OpenColorIO pass — set the LUT
 
 The **Direction** option applies the LUT forward or inverted. An ICC monitor profile reads from the monitor's code values, so correcting the display with one takes **Inverse**.
 
-Shortcuts:
-
-- Toggle LUT enabled: <kbd>Ctrl+K</kbd>
+**Color > Enable LUT** (<kbd>Ctrl+K</kbd>) turns the LUT section on and off.
 
 ### Supported LUT formats
 

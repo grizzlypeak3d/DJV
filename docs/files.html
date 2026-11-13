@@ -57,8 +57,8 @@
 <p>Opening a folder opens every supported file in that folder. From the command line, <strong>-dirFilter</strong> filters the files by name — a case-insensitive substring, or a wildcard pattern with "*" and "?" — and <strong>-dirDepth</strong> opens that many folder levels, the default being one, the folder alone. So a whole shot tree opens as one file list:</p>
 <pre><code>djv shots -dirFilter "*latest*" -dirDepth 3</code></pre>
 <p>The files keep a fixed order, grouped by folder. Folder links are listed but not followed. The options hold for the whole session, folders opened from the dialogs included.</p>
-<p>Shortcuts:</p>
-<ul><li>Open: <kbd>Ctrl+O</kbd></li><li>Open with audio: <kbd>Ctrl+Shift+O</kbd></li><li>Recent files: <kbd>Ctrl+Shift+R</kbd></li><li>Reload: <kbd>Ctrl+R</kbd></li><li>Close: <kbd>Ctrl+E</kbd></li><li>Close all: <kbd>Ctrl+Shift+E</kbd></li><li>Export still: <kbd>Ctrl+Shift+S</kbd> (see <a href="export.html#still">Export Still</a>)</li></ul>
+<p>The <strong>File</strong> menu items:</p>
+<ul><li><strong>File &gt; Open</strong> (<kbd>Ctrl/Cmd+O</kbd>) and <strong>File &gt; Open With Audio</strong> (<kbd>Ctrl/Cmd+Shift+O</kbd>), which pairs an audio file with the one opened</li><li><strong>File &gt; Recent Files</strong> (<kbd>Ctrl/Cmd+Shift+R</kbd>); see <a href="#recent-files">Recent files</a></li><li><strong>File &gt; Reload</strong> (<kbd>Ctrl/Cmd+R</kbd>) reads the current file again from disk, for a render that has been written over</li><li><strong>File &gt; Close</strong> (<kbd>Ctrl/Cmd+E</kbd>) and <strong>File &gt; Close All</strong> (<kbd>Ctrl/Cmd+Shift+E</kbd>)</li><li><strong>File &gt; Export Still</strong> (<kbd>Ctrl/Cmd+Shift+S</kbd>); see <a href="export.html#still">Export Still</a></li></ul>
 <p>Image sequences can be opened from the command line by either specifying the first frame or using the "#" wildcard. For example:</p>
 <pre><code>djv render.#.exr</code></pre>
 <p>The native file browser is enabled by default on Windows and macOS. To use DJV's built-in file browser instead, change the option in the <strong>Settings</strong> tool. Linux packages are built without the native file browser, since it would mean linking to the desktop's own; there the built-in browser is always used and the option is disabled.</p>
@@ -81,8 +81,7 @@
 <h2 id="switching-files">Switching files</h2>
 <p>To switch between open files, use the <strong>File &gt; Current</strong> menu, the <strong>Tab Bar</strong>, or the <strong>Files</strong> tool.</p>
 <p>Locations: <strong>File</strong> menu, <strong>Tab Bar</strong>, <strong>Files</strong> tool</p>
-<p>Shortcuts:</p>
-<ul><li>Next file: <kbd>Ctrl+Page Down</kbd></li><li>Previous file: <kbd>Ctrl+Page Up</kbd></li></ul>
+<p><strong>File &gt; Next</strong> (<kbd>Ctrl+Page Down</kbd>) and <strong>File &gt; Previous</strong> (<kbd>Ctrl+Page Up</kbd>) change to the next or previous file.</p>
 <h2 id="playlists">Playlists</h2>
 <p><strong>File &gt; Save Playlist (.otio)</strong> saves the list of open files as an OTIO file: the order, each file's in/out points, position, speed, layer, and media reference, and the A/B comparison. <strong>File &gt; Open Playlist (.otio)</strong> opens one back into the file list.</p>
 <p>Locations: <strong>File</strong> menu</p>
@@ -98,13 +97,12 @@
 <h2 id="layers">Layers</h2>
 <p>For files with multiple layers (such as multi-part OpenEXR), the active layer can be changed from the <strong>File &gt; Layers</strong> menu or from the <strong>Files</strong> tool.</p>
 <p>Locations: <strong>File</strong> menu, <strong>Files</strong> tool</p>
-<p>Shortcuts:</p>
-<ul><li>Next layer: <kbd>Ctrl+Equals</kbd></li><li>Previous layer: <kbd>Ctrl+Minus</kbd></li></ul>
+<p><strong>File &gt; Next Layer</strong> (<kbd>Ctrl+=</kbd>) and <strong>File &gt; Previous Layer</strong> (<kbd>Ctrl+-</kbd>) step through the layers.</p>
 <p>From a script, <code>File/Layer</code> chooses one by name or index, e.g., <code>-command 'File/Layer { "layer": "diffuse" }'</code>, for the A file or, with <strong>"file"</strong>, the one at that index in the file list (see <a href="automation.html">Automation</a>).</p>
 <h2 id="files-tool">Files tool</h2>
 <p>The <strong>Files</strong> tool is the central place for managing open files: it sets the current file, picks active layers, and configures comparison.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
-<p>Shortcut: <kbd>F1</kbd></p>
+<p>Open it with <strong>Tools &gt; Files</strong> (<kbd>F1</kbd>).</p>
 <p><img src="assets/files-tool.svg" alt="Files tool"></p>
 <ul><li>Current file (the <strong>A</strong> file)</li><li><strong>B</strong> files (multiple <strong>B</strong> files can be set in tile mode)</li><li>The frame range of an image sequence, which can be edited to open the sequence over a different range (see <a href="formats.html#partial-image-sequences">Partial image sequences</a>)</li></ul>
 <p>Click a file to make it the current file, or drag it to reorder the list. The order is what a <a href="#playlists">playlist</a> saves, and what the next and previous file actions step through. When the drag reaches the top or bottom of the panel the list scrolls, so a spot that is off the screen can be reached.</p>

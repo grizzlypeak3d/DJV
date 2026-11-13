@@ -21,15 +21,13 @@ djv shots -dirFilter "*latest*" -dirDepth 3
 
 The files keep a fixed order, grouped by folder. Folder links are listed but not followed. The options hold for the whole session, folders opened from the dialogs included.
 
-Shortcuts:
+The **File** menu items:
 
-- Open: <kbd>Ctrl+O</kbd>
-- Open with audio: <kbd>Ctrl+Shift+O</kbd>
-- Recent files: <kbd>Ctrl+Shift+R</kbd>
-- Reload: <kbd>Ctrl+R</kbd>
-- Close: <kbd>Ctrl+E</kbd>
-- Close all: <kbd>Ctrl+Shift+E</kbd>
-- Export still: <kbd>Ctrl+Shift+S</kbd> (see [Export Still](export.html#still))
+- **File > Open** (<kbd>Ctrl/Cmd+O</kbd>) and **File > Open With Audio** (<kbd>Ctrl/Cmd+Shift+O</kbd>), which pairs an audio file with the one opened
+- **File > Recent Files** (<kbd>Ctrl/Cmd+Shift+R</kbd>); see [Recent files](#recent-files)
+- **File > Reload** (<kbd>Ctrl/Cmd+R</kbd>) reads the current file again from disk, for a render that has been written over
+- **File > Close** (<kbd>Ctrl/Cmd+E</kbd>) and **File > Close All** (<kbd>Ctrl/Cmd+Shift+E</kbd>)
+- **File > Export Still** (<kbd>Ctrl/Cmd+Shift+S</kbd>); see [Export Still](export.html#still)
 
 Image sequences can be opened from the command line by either specifying the first frame or using the "#" wildcard. For example:
 
@@ -81,10 +79,7 @@ To switch between open files, use the **File > Current** menu, the **Tab Bar**, 
 
 Locations: **File** menu, **Tab Bar**, **Files** tool
 
-Shortcuts:
-
-- Next file: <kbd>Ctrl+Page Down</kbd>
-- Previous file: <kbd>Ctrl+Page Up</kbd>
+**File > Next** (<kbd>Ctrl+Page Down</kbd>) and **File > Previous** (<kbd>Ctrl+Page Up</kbd>) change to the next or previous file.
 
 ## Playlists
 
@@ -116,10 +111,7 @@ For files with multiple layers (such as multi-part OpenEXR), the active layer ca
 
 Locations: **File** menu, **Files** tool
 
-Shortcuts:
-
-- Next layer: <kbd>Ctrl+Equals</kbd>
-- Previous layer: <kbd>Ctrl+Minus</kbd>
+**File > Next Layer** (<kbd>Ctrl+=</kbd>) and **File > Previous Layer** (<kbd>Ctrl+-</kbd>) step through the layers.
 
 From a script, `File/Layer` chooses one by name or index, e.g., `-command 'File/Layer { "layer": "diffuse" }'`, for the A file or, with **"file"**, the one at that index in the file list (see [Automation](automation.html)).
 
@@ -129,7 +121,7 @@ The **Files** tool is the central place for managing open files: it sets the cur
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcut: <kbd>F1</kbd>
+Open it with **Tools > Files** (<kbd>F1</kbd>).
 
 ![Files tool](assets/files-tool.svg)
 

@@ -6,11 +6,7 @@ DJV plays multi-track audio in sync with video, including during variable-speed 
 
 Volume and mute are available from the **Audio** menu, the speaker control in the **Bottom** tool bar (click to show the volume slider and mute button), and the **Audio** tool. The speaker icon changes to show when the audio is muted.
 
-Shortcuts:
-
-- Volume up — <kbd>Period</kbd>
-- Volume down — <kbd>Comma</kbd>
-- Mute — <kbd>M</kbd>
+**Audio > Volume Up** (<kbd>.</kbd>), **Audio > Volume Down** (<kbd>,</kbd>), and **Audio > Mute** (<kbd>M</kbd>).
 
 ## Audio tool
 
@@ -18,7 +14,7 @@ The **Audio** tool gives fine-grained control over audio output.
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcut: <kbd>F8</kbd>
+Open it with **Tools > Audio** (<kbd>F8</kbd>).
 
 ![Audio tool](assets/audio-tool.svg)
 

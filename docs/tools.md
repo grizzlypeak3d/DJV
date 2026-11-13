@@ -27,7 +27,7 @@ The **Information** tool displays the metadata of the current file: the file nam
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcut: <kbd>F7</kbd>
+Open it with **Tools > Information** (<kbd>F7</kbd>).
 
 Use the search box to filter the list to matching entries: each word of the search is matched on its own against the names and values, so **name duration** shows both rows. The **Copy** button copies the information, filtered the same way, to the clipboard.
 
@@ -39,7 +39,7 @@ The **Color picker** tool samples the color of a pixel in the view.
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcut: <kbd>F5</kbd>
+Open it with **Tools > Color Picker** (<kbd>F5</kbd>).
 
 Pick a pixel with **Ctrl** + left mouse button (the binding can be changed in the **Mouse** section of the **Settings** tool). The tool shows a color swatch, the sampled RGBA values, the pixel position, and the current mouse binding. **Luminance** is the luminance the color stands for, in nits, where that is known: for a picture that is PQ encoded, and for any picture in an HDR window. Otherwise it is a dash.
 
@@ -51,7 +51,7 @@ The **Magnify** tool shows a magnified view of the area around the picked pixel 
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcut: <kbd>F6</kbd>
+Open it with **Tools > Magnify** (<kbd>F6</kbd>).
 
 Pick a pixel with **Ctrl** + left mouse button. The magnification level can be set from **2X** up to **128X**.
 
@@ -66,9 +66,14 @@ The **Messages** tool shows application messages such as warnings and errors, wh
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcuts:
-
-- Messages: <kbd>F11</kbd>
-- System Log: <kbd>F12</kbd>
+Open them with **Tools > Messages** (<kbd>F11</kbd>) and **Tools > System Log** (<kbd>F12</kbd>).
 
 Each tool can **Copy** its contents to the clipboard or **Clear** them, and has an **Auto-scroll** option to keep the newest entries in view.
+
+## Diagnostics
+
+The **Diagnostics** tool graphs what the application is doing, sampled every few seconds: the playback rate, dropped frames, and how full the video and audio caches are; the time to draw each frame; the memory held by images, audio, and the GPU; and counts of the objects behind them. It is for finding out why playback is slow or memory is growing, and what to include when reporting one of those.
+
+Locations: **Tools > Diagnostics**
+
+It has no shortcut by default; one can be assigned in the **Settings** tool.

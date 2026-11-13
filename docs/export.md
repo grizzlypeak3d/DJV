@@ -4,7 +4,7 @@ The **Export** tool writes out the current file as a single still image, a numbe
 
 Locations: **Tools** menu, **Tools** toolbar
 
-Shortcut: <kbd>F2</kbd>
+Open it with **Tools > Export** (<kbd>F2</kbd>).
 
 ![Export tool](assets/export-tool.svg)
 
@@ -21,11 +21,9 @@ The **Image** tab exports just the current frame as a single still image. A file
 
 ## Export Still {#still}
 
-**Export Still** writes the current frame in one step, without the Export tool: as the viewport shows it, with the files being compared, the color, and the drawings when **Burn in drawings** is on, at the size the sources are shown at. It goes into the Export tool's directory in the format of its **Image** tab, named after the file and the time as the time units show it: `Train-Shaded_01-00-00-03.tif`. A still of the same frame is written over.
+**File > Export Still** (<kbd>Ctrl/Cmd+Shift+S</kbd>) writes the current frame in one step, without the Export tool: as the viewport shows it, with the files being compared, the color, and the drawings when **Burn in drawings** is on, at the size the sources are shown at. It goes into the Export tool's directory in the format of its **Image** tab, named after the file and the time as the time units show it: `Train-Shaded_01-00-00-03.tif`. A still of the same frame is written over.
 
 Locations: **File** menu, **File** toolbar
-
-Shortcut: <kbd>Ctrl+Shift+S</kbd>
 
 ## Sequence
 

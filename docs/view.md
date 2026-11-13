@@ -53,14 +53,9 @@ Shortcuts:
 
 ## Mirror
 
-The image can be mirrored horizontally or vertically.
+**View > Mirror Horizontal** (<kbd>H</kbd>) and **View > Mirror Vertical** (<kbd>V</kbd>) flip the image.
 
 Locations: **View** menu, **View** tool
-
-Shortcuts:
-
-- **Mirror horizontal** — <kbd>H</kbd>
-- **Mirror vertical** — <kbd>V</kbd>
 
 ## Options
 
@@ -139,11 +134,9 @@ Locations: **View** tool
 
 ## Grid
 
-A grid overlay can be shown to identify areas in the view.
+**View > Grid** (<kbd>Ctrl+G</kbd>) shows a grid over the view, to identify areas of the image.
 
 Locations: **View** menu, **View** tool
-
-Shortcut: <kbd>Ctrl+G</kbd>
 
 ![Pixel grid](assets/view-pixel-grid.svg)
 
@@ -159,15 +152,15 @@ The grid can also help you inspect individual pixels. To do so:
 
 ## Outline
 
-An outline can be drawn around the image to make transparent regions easier to distinguish from the background.
+**View > Outline** draws an outline around the image, to make transparent regions easier to distinguish from the background.
 
-Locations: **View** tool
+Locations: **View** menu, **View** tool
 
 ![Outline](assets/view-outline.svg)
 
 ## Center marker
 
-A marker can be shown at the center of the view to help with alignment and framing. Its size, line width, and color can be customized.
+**View > Center Marker** shows a marker at the center of the view to help with alignment and framing. Its size, line width, and color can be customized.
 
 Locations: **View** menu, **View** tool
 
@@ -175,7 +168,7 @@ Locations: **View** menu, **View** tool
 
 ## Clipping warning
 
-**Clipping warning** covers pixels outside a range in a warning color: red above the range, magenta below it. **Mode** sets what is compared: **Any Channel** flags a pixel when any of red, green, and blue is outside the range, **All Channels** only when all three are, and **Luminance** compares the brightness of the pixel, with the Rec. 709 weights. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.
+**View > Clipping Warning** covers pixels outside a range in a warning color: red above the range, magenta below it. **Mode** sets what is compared: **Any Channel** flags a pixel when any of red, green, and blue is outside the range, **All Channels** only when all three are, and **Luminance** compares the brightness of the pixel, with the Rec. 709 weights. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.
 
 Locations: **View** menu, **View** tool
 

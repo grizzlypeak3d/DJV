@@ -13,6 +13,8 @@ The current frame is the red vertical line. The in/out range is represented by t
 - **Frame the whole timeline** — <kbd>Backspace</kbd>, or **Timeline > Frame View**
 - **Pan** — Middle mouse button
 
+From a script, `Timeline/Zoom` sets the zoom in pixels per second, e.g., `-command 'Timeline/Zoom { "value": 100 }'` (see [Automation](automation.html)).
+
 **Timeline > Auto Scroll** keeps the current frame in sight while playing, scrolling the timeline as it goes. **Timeline > Scroll Bars** shows scroll bars for a zoomed timeline.
 
 Locations: **Timeline** menu

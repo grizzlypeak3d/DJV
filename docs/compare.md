@@ -14,10 +14,7 @@ Locations: **Compare** menu, **Compare** tool bar, **Files** tool
 
 The tool bar has one button for the modes: it shows the mode chosen last and turns it on and off, and the arrow beside it chooses another.
 
-Shortcuts:
-
-- Next B file: <kbd>Shift+Page Down</kbd>
-- Previous B file: <kbd>Shift+Page Up</kbd>
+**Compare > Next** (<kbd>Shift+Page Down</kbd>) and **Compare > Previous** (<kbd>Shift+Page Up</kbd>) change the B file to the next or previous one in the file list.
 
 > [!NOTE]
 > Drag with **Alt** + left mouse button to move the wipe between **A** and **B**.

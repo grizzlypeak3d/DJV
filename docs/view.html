@@ -75,10 +75,8 @@
 <p>Shortcuts:</p>
 <ul><li><strong>View &gt; Red Channel</strong> — <kbd>R</kbd></li><li><strong>View &gt; Green Channel</strong> — <kbd>G</kbd></li><li><strong>View &gt; Blue Channel</strong> — <kbd>B</kbd></li><li><strong>View &gt; Alpha Channel</strong> — <kbd>A</kbd></li></ul>
 <h2 id="mirror">Mirror</h2>
-<p>The image can be mirrored horizontally or vertically.</p>
+<p><strong>View &gt; Mirror Horizontal</strong> (<kbd>H</kbd>) and <strong>View &gt; Mirror Vertical</strong> (<kbd>V</kbd>) flip the image.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
-<p>Shortcuts:</p>
-<ul><li><strong>Mirror horizontal</strong> — <kbd>H</kbd></li><li><strong>Mirror vertical</strong> — <kbd>V</kbd></li></ul>
 <h2 id="options">Options</h2>
 <p><img src="assets/view-options.svg" alt="Options"></p>
 <ul><li><strong>Channels</strong> — Show the color image, or only the red, green, blue, or alpha channel.</li><li><strong>Negative</strong> — Show the image as a negative.</li><li><strong>Mirror</strong> — Mirror the image horizontally or vertically.</li><li><strong>Minify</strong> — Filter used when the image is scaled down (<strong>Nearest</strong>, <strong>Linear</strong> or <strong>High Quality</strong>).</li><li><strong>Magnify</strong> — Filter used when the image is scaled up (<strong>Nearest</strong>, <strong>Linear</strong> or <strong>High Quality</strong>). Use <strong>Nearest</strong> to see individual pixels without smoothing.</li><li><strong>Video levels</strong> — How video levels are interpreted: from the file, full range, or legal range.</li><li><strong>Alpha blend</strong> — How the alpha channel is blended: none, straight, or pre-multiplied.</li><li><strong>Color buffer</strong> — The view's bit depth. The default, <strong>RGBA F16</strong>, keeps color values above white and below black rather than clamping them, at half the memory of <strong>RGBA F32</strong>; F32 is there for the rare case where half a float is not enough. <strong>RGBA U8</strong> is the fastest and the only one that clamps. Exporting is not affected: it always renders at the highest precision this build has.</li><li><strong>HDR picture</strong> — Whether the picture is shown as HDR: <strong>SDR</strong>, or <strong>PQ</strong> for a picture that is PQ encoded (see <a href="#hdr">HDR</a>).</li><li><strong>HDR white</strong> — The luminance, in nits, that the white of the interface stands for, where the system does not say: on macOS.</li><li><strong>Dither</strong> — Dither the picture where the window is eight bit, which hides the banding of gradients drawn with more precision (see <a href="#bit-depth">Bit depth</a>). Only what is shown changes: the color picker, the magnifier and the exports read the picture before it. Off by default.</li></ul>
@@ -110,23 +108,22 @@
 <p>Locations: <strong>View</strong> tool</p>
 <p><img src="assets/view-background.svg" alt="Background"></p>
 <h2 id="grid">Grid</h2>
-<p>A grid overlay can be shown to identify areas in the view.</p>
+<p><strong>View &gt; Grid</strong> (<kbd>Ctrl+G</kbd>) shows a grid over the view, to identify areas of the image.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
-<p>Shortcut: <kbd>Ctrl+G</kbd></p>
 <p><img src="assets/view-pixel-grid.svg" alt="Pixel grid"></p>
 <p><img src="assets/view-pixel-grid2.svg" alt="Pixel grid"></p>
 <p>The grid can also help you inspect individual pixels. To do so:</p>
 <ul><li>Set <strong>Magnify</strong> to <strong>Nearest</strong></li><li>Enable the grid</li><li>Set the grid cell mode to <code>Cell Size</code></li><li>Set the grid size to <code>1</code></li><li>Set the grid labels</li></ul>
 <h2 id="outline">Outline</h2>
-<p>An outline can be drawn around the image to make transparent regions easier to distinguish from the background.</p>
-<p>Locations: <strong>View</strong> tool</p>
+<p><strong>View &gt; Outline</strong> draws an outline around the image, to make transparent regions easier to distinguish from the background.</p>
+<p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p><img src="assets/view-outline.svg" alt="Outline"></p>
 <h2 id="center-marker">Center marker</h2>
-<p>A marker can be shown at the center of the view to help with alignment and framing. Its size, line width, and color can be customized.</p>
+<p><strong>View &gt; Center Marker</strong> shows a marker at the center of the view to help with alignment and framing. Its size, line width, and color can be customized.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p><img src="assets/view-center-marker.svg" alt="Center marker"></p>
 <h2 id="clipping-warning">Clipping warning</h2>
-<p><strong>Clipping warning</strong> covers pixels outside a range in a warning color: red above the range, magenta below it. <strong>Mode</strong> sets what is compared: <strong>Any Channel</strong> flags a pixel when any of red, green, and blue is outside the range, <strong>All Channels</strong> only when all three are, and <strong>Luminance</strong> compares the brightness of the pixel, with the Rec. 709 weights. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.</p>
+<p><strong>View &gt; Clipping Warning</strong> covers pixels outside a range in a warning color: red above the range, magenta below it. <strong>Mode</strong> sets what is compared: <strong>Any Channel</strong> flags a pixel when any of red, green, and blue is outside the range, <strong>All Channels</strong> only when all three are, and <strong>Luminance</strong> compares the brightness of the pixel, with the Rec. 709 weights. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p>A shortcut can be assigned in the <strong>Settings</strong> tool.</p>
 <h2 id="hud">HUD</h2>

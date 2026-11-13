@@ -45,11 +45,6 @@ The recommended way to build a review:
 
 Locations: **Review** menu
 
-Shortcuts:
-
-- Open review: <kbd>Ctrl+Alt+O</kbd>
-- Save review: <kbd>Ctrl+Alt+S</kbd>
-
 Reviews can also be opened from the command line:
 
 ```

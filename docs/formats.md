@@ -90,7 +90,7 @@ A timeline's layers are those of its first video clip; choosing one applies to e
 
 ## Media references
 
-A clip in an OTIO timeline can carry more than one version of its media as *media references* — for example a proxy and a full resolution render of the same shot, selected by name.
+A clip in an OTIO timeline can carry more than one version of its media as *media references* — for example a proxy and a full resolution render, selected by name.
 
 DJV lists the names it finds in the **File > Media References** menu, and in a menu on the file's row in the **Files** tool once the file has been opened. Choosing one switches every clip in the timeline to the reference with that name; clips that do not have one keep the reference they were authored with. Switching changes only what is read — the layout and zoom stay where they are — and the **Information** tool and HUD describe the reference being read.
 
@@ -98,9 +98,7 @@ Each file keeps its own choice, so an A/B comparison can put one version against
 
 Locations: **File** menu, **Files** tool
 
-Shortcuts:
-
-- Next media reference: <kbd>Shift+M</kbd>
+**File > Next Media Reference** (<kbd>Shift+M</kbd>) steps to the next name.
 
 To open with a media reference, give it on the command line, e.g., `djv shot.otio -mediaReference Proxy`; it applies to the files opened, not the B file. From a script, `File/MediaReference` chooses one by name, e.g., `-command 'File/MediaReference { "key": "Full" }'`, for the A file or, with **"file"**, the one at that index in the file list. A name a file does not have is reported in the log with the ones it does. OTIO's default reference is shown as **Default**, and either name works.
 

@@ -10,16 +10,9 @@
 
 ## Playback controls
 
-Start, reverse, and stop playback from the **Playback** menu or the playback controls.
+**Playback > Forward** (<kbd>L</kbd>), **Playback > Reverse** (<kbd>J</kbd>), and **Playback > Stop** (<kbd>K</kbd>). **Playback > Toggle Playback** (<kbd>Space</kbd>) stops if playing, and otherwise plays in the direction last played.
 
 Locations: **Playback** menu, **Playback** controls
-
-Shortcuts:
-
-- Forward — <kbd>L</kbd>
-- Reverse — <kbd>J</kbd>
-- Stop — <kbd>K</kbd>
-- Toggle playback — <kbd>Space</kbd>
 
 ## Speed multiplier
 
@@ -72,16 +65,9 @@ A second is a second of timecode: 24 frames at 23.976, 30 at 29.97. A jump past 
 
 ## In and out points
 
-In and out points can be set to limit playback to a section of the timeline.
+In and out points limit playback to a section of the timeline. **Playback > Set In Point** (<kbd>I</kbd>) and **Playback > Set Out Point** (<kbd>O</kbd>) set them at the current frame; **Playback > Reset In Point** (<kbd>Shift+I</kbd>) and **Playback > Reset Out Point** (<kbd>Shift+O</kbd>) put them back at the start and end.
 
 Locations: **Playback** menu, **Playback** controls
-
-Shortcuts:
-
-- Set in point — <kbd>I</kbd>
-- Reset in point — <kbd>Shift+I</kbd>
-- Set out point — <kbd>O</kbd>
-- Reset out point — <kbd>Shift+O</kbd>
 
 ## Dropped frames
 

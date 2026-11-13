@@ -44,6 +44,7 @@
 <li><a href="#color-picker">Color picker</a></li>
 <li><a href="#magnify">Magnify</a></li>
 <li><a href="#messages-and-system-log">Messages and system log</a></li>
+<li><a href="#diagnostics">Diagnostics</a></li>
 </ul>
 </div>
 <p>DJV's features are organized into <em>tools</em>. Each tool opens in a panel on the right side of the main window, and only one tool is shown at a time. Tools can be opened from the <strong>Tools</strong> menu or the <strong>Tools</strong> tool bar, and each has a default keyboard shortcut.</p>
@@ -53,28 +54,31 @@
 <h2 id="information">Information</h2>
 <p>The <strong>Information</strong> tool displays the metadata of the current file: the file name and directory, video and audio format details (codec, resolution, pixel type, sample rate, and so on), and any tags embedded in the file, such as camera make and model or creation date.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
-<p>Shortcut: <kbd>F7</kbd></p>
+<p>Open it with <strong>Tools &gt; Information</strong> (<kbd>F7</kbd>).</p>
 <p>Use the search box to filter the list to matching entries: each word of the search is matched on its own against the names and values, so <strong>name duration</strong> shows both rows. The <strong>Copy</strong> button copies the information, filtered the same way, to the clipboard.</p>
 <p><img src="assets/info-tool.svg" alt="Information tool"></p>
 <h2 id="color-picker">Color picker</h2>
 <p>The <strong>Color picker</strong> tool samples the color of a pixel in the view.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
-<p>Shortcut: <kbd>F5</kbd></p>
+<p>Open it with <strong>Tools &gt; Color Picker</strong> (<kbd>F5</kbd>).</p>
 <p>Pick a pixel with <strong>Ctrl</strong> + left mouse button (the binding can be changed in the <strong>Mouse</strong> section of the <strong>Settings</strong> tool). The tool shows a color swatch, the sampled RGBA values, the pixel position, and the current mouse binding. <strong>Luminance</strong> is the luminance the color stands for, in nits, where that is known: for a picture that is PQ encoded, and for any picture in an HDR window. Otherwise it is a dash.</p>
 <p><img src="assets/color-picker-tool.svg" alt="Color picker tool"></p>
 <h2 id="magnify">Magnify</h2>
 <p>The <strong>Magnify</strong> tool shows a magnified view of the area around the picked pixel — handy for inspecting fine detail.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
-<p>Shortcut: <kbd>F6</kbd></p>
+<p>Open it with <strong>Tools &gt; Magnify</strong> (<kbd>F6</kbd>).</p>
 <p>Pick a pixel with <strong>Ctrl</strong> + left mouse button. The magnification level can be set from <strong>2X</strong> up to <strong>128X</strong>.</p>
 <p><img src="assets/magnify-tool.svg" alt="Magnify tool"></p>
 <div class="tip">To inspect exact pixel boundaries, combine the magnifier with the grid: set <strong>Magnify</strong> to <strong>Nearest</strong> in the <strong>View</strong> tool, enable the grid, and set the grid size to <code>1</code> (see <a href="view.html">View</a>).</div>
 <h2 id="messages-and-system-log">Messages and system log</h2>
 <p>The <strong>Messages</strong> tool shows application messages such as warnings and errors, while the <strong>System Log</strong> tool shows a more detailed, low-level log. Both are useful when reporting a problem (see <a href="troubleshooting.html">Troubleshooting</a>).</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
-<p>Shortcuts:</p>
-<ul><li>Messages: <kbd>F11</kbd></li><li>System Log: <kbd>F12</kbd></li></ul>
+<p>Open them with <strong>Tools &gt; Messages</strong> (<kbd>F11</kbd>) and <strong>Tools &gt; System Log</strong> (<kbd>F12</kbd>).</p>
 <p>Each tool can <strong>Copy</strong> its contents to the clipboard or <strong>Clear</strong> them, and has an <strong>Auto-scroll</strong> option to keep the newest entries in view.</p>
+<h2 id="diagnostics">Diagnostics</h2>
+<p>The <strong>Diagnostics</strong> tool graphs what the application is doing, sampled every few seconds: the playback rate, dropped frames, and how full the video and audio caches are; the time to draw each frame; the memory held by images, audio, and the GPU; and counts of the objects behind them. It is for finding out why playback is slow or memory is growing, and what to include when reporting one of those.</p>
+<p>Locations: <strong>Tools &gt; Diagnostics</strong></p>
+<p>It has no shortcut by default; one can be assigned in the <strong>Settings</strong> tool.</p>
 </main>
 </body>
 </html>
