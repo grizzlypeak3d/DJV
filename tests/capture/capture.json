@@ -287,9 +287,12 @@
         { "command": "Compare/HoldFrame" },
         { "command": "Playback/Seek", "args": { "frame": 9 } },
         { "wait": 1.0 },
-        { "expect": "View.Held", "contains": "B: held Counter.0.png 00:00:00:03" },
+        { "expect": "Status.Indicator", "checked": true },
+        { "tool": "Files", "expand": ["Compare"] },
+        { "expect": "Files.Held", "contains": "Counter.0.png 00:00:00:03" },
         { "command": "Compare/ClearHeld" },
-        { "expect": "View.Held", "visible": false }
+        { "expect": "Status.Indicator", "checked": false },
+        { "expect": "Files.Held", "visible": false }
       ]
     },
     {

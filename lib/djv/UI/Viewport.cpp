@@ -194,7 +194,6 @@ namespace djv
             // the held frame while it is the comparison's B.
             std::vector<tl::VideoFrame> playerVideoFrames;
             std::optional<tl::VideoFrame> heldFrame;
-            std::string heldLabel;
             tl::PlayerCacheInfo cacheInfo;
             double viewZoom = 0.0;
             models::MouseActionBinding frameShuttleBinding =
@@ -220,7 +219,6 @@ namespace djv
             std::shared_ptr<models::FilesModelItem> a;
             std::vector<std::shared_ptr<models::FilesModelItem> > b;
             std::shared_ptr<ftk::Label> compareLabel;
-            std::shared_ptr<ftk::Label> heldLabelWidget;
 
             bool toastActive = false;
             bool toastHint = false;
@@ -423,15 +421,6 @@ namespace djv
             p.compareLabel->setBackgroundRole(ftk::ColorRole::Overlay);
             p.compareLabel->setVisible(false);
 
-            // At the bottom rather than over the middle of the picture, where
-            // the warnings go: it is up for as long as the frame is held.
-            p.heldLabelWidget = ftk::Label::create(context);
-            p.heldLabelWidget->setMarginRole(ftk::SizeRole::MarginSmall);
-            p.heldLabelWidget->setBackgroundRole(ftk::ColorRole::Overlay);
-            p.heldLabelWidget->setClipText(true);
-            p.heldLabelWidget->setVisible(false);
-            ftk::setScreenshotTag(p.heldLabelWidget, "View.Held");
-
             p.toastLabel = ftk::Label::create(context);
             p.toastLabel->setMarginRole(ftk::SizeRole::MarginSmall);
             p.toastLabel->setBackgroundRole(ftk::ColorRole::Overlay);
@@ -468,14 +457,6 @@ namespace djv
 
             auto bottomLayout = ftk::VerticalLayout::create(context, p.hudLayout);
             bottomLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            auto heldLayout = ftk::HorizontalLayout::create(context, bottomLayout);
-            spacer = ftk::Spacer::create(
-                context, ftk::Orientation::Horizontal, heldLayout);
-            spacer->setStretch(ftk::Stretch::Expanding);
-            p.heldLabelWidget->setParent(heldLayout);
-            spacer = ftk::Spacer::create(
-                context, ftk::Orientation::Horizontal, heldLayout);
-            spacer->setStretch(ftk::Stretch::Expanding);
             auto toastLayout = ftk::HorizontalLayout::create(context, bottomLayout);
             spacer = ftk::Spacer::create(
                 context, ftk::Orientation::Horizontal, toastLayout);
@@ -2227,14 +2208,9 @@ namespace djv
         {
             FTK_P();
             p.heldFrame.reset();
-            p.heldLabel.clear();
             if (auto filesModel = p.filesModel)
             {
                 p.heldFrame = filesModel->getCompareHeldFrame();
-                if (p.heldFrame.has_value() && filesModel->getHeldFrame().has_value())
-                {
-                    p.heldLabel = filesModel->getHeldFrame()->label;
-                }
             }
             setHeldFrame(p.heldFrame);
             p.videoFrames = tl::withHeldFrame(p.playerVideoFrames, p.heldFrame);
@@ -2255,13 +2231,9 @@ namespace djv
             // draws anything, and an empty picture is the one thing a black
             // frame, an unreadable file and a comparison out of sync all look
             // like as well.
-            // A held frame is B, said for as long as it is up so it is never
-            // taken for B's frame at this time; the warnings about B files
-            // do not apply to it.
-            const bool held = p.compare != tl::Compare::None && p.heldFrame.has_value();
-            const std::string heldText = held ? "B: held " + p.heldLabel : std::string();
-            p.heldLabelWidget->setText(heldText);
-            p.heldLabelWidget->setVisible(held);
+            // A held frame is B, and the warnings about B files do not apply
+            // to it. That it is held is said off the picture, by the status
+            // indicator, and its name in the Files tool (#627).
             std::string s;
             if (p.compare != tl::Compare::None && !p.heldFrame.has_value())
             {

@@ -12,6 +12,7 @@
 
 #include <djv/UI/StatusIndicatorPopup.h>
 
+#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Context.h>
 
@@ -38,6 +39,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
             std::shared_ptr<ftk::Observer<int> > audioChannelObserver;
+            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
         };
 
         void StatusIndicator::_init(
@@ -63,6 +66,7 @@ namespace djv
             _setWidget(p.button);
             p.button->setIcon("MenuChecked");
             p.button->setPopupIcon(true);
+            ftk::setScreenshotTag(p.button, "Status.Indicator");
             p.button->setTooltip(
                 "This indicator shows options that affect video, audio, or performance.\n"
                 "Click to show the options in use, and go to their controls.");
@@ -120,6 +124,22 @@ namespace djv
                 [this](int value)
                 {
                     _p->options.audioChannel = value;
+                    _indicatorUpdate();
+                });
+
+            p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
+                filesModel->observeCompareOptions(),
+                [this](const tl::CompareOptions& value)
+                {
+                    _p->options.compare = value.compare;
+                    _indicatorUpdate();
+                });
+
+            p.heldFrameObserver = ftk::Observer<std::optional<models::HeldFrame> >::create(
+                filesModel->observeHeldFrame(),
+                [this](const std::optional<models::HeldFrame>& value)
+                {
+                    _p->options.heldFrame = value.has_value();
                     _indicatorUpdate();
                 });
 
@@ -196,6 +216,12 @@ namespace djv
             {
                 out = "Color";
             }
+            else if ("HeldFrame" == name)
+            {
+                // The held frame's name and the button to let it go are
+                // with the other compare options.
+                out = "Files";
+            }
             else if (
                 "AudioOffset" == name ||
                 "AudioChannel" == name)
@@ -214,6 +240,10 @@ namespace djv
                 "Mirror" == name)
             {
                 out = "Options";
+            }
+            else if ("HeldFrame" == name)
+            {
+                out = "Compare";
             }
             else if (
                 "ClippingWarning" == name ||

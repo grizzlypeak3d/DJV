@@ -1260,6 +1260,8 @@ size_t djv_status_get_count(djv_models* models)
     options.lut = models->colorModel->getLUTOptions();
     options.audioOffset = models->audioModel->getSyncOffset();
     options.audioChannel = models->filesModel->getAudioChannel();
+    options.compare = models->filesModel->getCompareOptions().compare;
+    options.heldFrame = models->filesModel->getHeldFrame().has_value();
     const auto values = models::getStatus(options);
     models->status.clear();
     for (const auto& item : models::getStatusItems())

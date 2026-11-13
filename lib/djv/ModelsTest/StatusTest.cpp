@@ -42,7 +42,7 @@ namespace djv
         {
             // Every item has a value, and nothing is on by default.
             const auto items = models::getStatusItems();
-            FTK_CHECK(10 == items.size());
+            FTK_CHECK(11 == items.size());
             const auto values = models::getStatus(models::StatusOptions());
             for (const auto& item : items)
             {
@@ -108,6 +108,17 @@ namespace djv
                 FTK_CHECK(on(options).empty());
                 options.display.exposure.exposure = 1.F;
                 FTK_CHECK(only(options, "Color"));
+            }
+            {
+                // A held frame is on while a compare mode draws it: with
+                // none the view is A alone, and the frame only waits.
+                models::StatusOptions options;
+                options.heldFrame = true;
+                FTK_CHECK(on(options).empty());
+                options.compare = tl::Compare::Wipe;
+                FTK_CHECK(only(options, "HeldFrame"));
+                options.heldFrame = false;
+                FTK_CHECK(on(options).empty());
             }
             {
                 models::StatusOptions options;

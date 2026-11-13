@@ -19,6 +19,7 @@ namespace djv
                 { "OCIO", "OCIO" },
                 { "LUT", "LUT" },
                 { "Color", "Color controls" },
+                { "HeldFrame", "Held frame" },
                 { "AudioOffset", "Audio offset" },
                 { "AudioChannel", "Audio channel" }
             };
@@ -51,6 +52,8 @@ namespace djv
                     (display.levels.enabled && levels != tl::Levels()) ||
                     (display.exposure.enabled && display.exposure.exposure != 0.F) ||
                     (display.softClip.enabled && display.softClip.value > 0.F) },
+                { "HeldFrame",
+                    options.heldFrame && options.compare != tl::Compare::None },
                 { "AudioOffset", options.audioOffset != 0.0 },
                 { "AudioChannel", options.audioChannel != -1 }
             };
