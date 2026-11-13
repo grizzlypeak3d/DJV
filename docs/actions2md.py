@@ -60,11 +60,11 @@ def rows(items, actions, prefix=""):
             if item["items"]:
                 out.extend(rows(item["items"], actions, prefix + title + " > "))
             else:
-                # Filled as the application runs: the recent files, the
-                # files to compare.
+                # Items the application makes rather than commands: the
+                # recent files, the files to compare, the window sizes.
                 out.append("| %s | | | %s |" % (
                     cell(prefix + title + " >"),
-                    "Filled in as files are opened."))
+                    "A list the application fills in: files, layers, sizes."))
     return out
 
 

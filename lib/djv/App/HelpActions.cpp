@@ -110,10 +110,15 @@ namespace djv
                 // A build that was not installed has none. Saying so is
                 // better than a menu item that does nothing when it is
                 // clicked.
+                // After the description, under "Not available:", which
+                // the actions reference leaves out: the reference describes
+                // the item, not the build it was made from.
                 _actions["Documentation"]->setEnabled(false);
                 _tooltips["Documentation"] =
-                    "The documentation is installed with the application,\n"
-                    "and this build was not installed.";
+                    "Open the documentation in a web browser.\n"
+                    "\n"
+                    "Not available: the documentation is installed with\n"
+                    "the application, and this build was not installed.";
             }
             if (!studioURL.empty())
             {

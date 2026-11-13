@@ -12,7 +12,7 @@ The packages require:
 Other systems can build from source; see the [README](https://github.com/grizzlypeak3d/DJV).
 
 > [!NOTE]
-> Download packages include only a minimal set of video and audio codecs. To support additional codecs, install FFmpeg and DJV will use it for the files it cannot decode itself (see [Files](files.html)), or build from source.
+> Download packages include only a minimal set of video and audio codecs. To support additional codecs, install FFmpeg and DJV will use it for the files it cannot decode itself (see [File formats](formats.html#ffmpeg)), or build from source.
 
 ## Linux
 

@@ -39,19 +39,21 @@ Locations: **Frame** menu, frame controls
 
 Shortcuts:
 
-- Start / End — <kbd>Home</kbd> / <kbd>End</kbd>
-- Previous / Next frame — <kbd>Left</kbd> / <kbd>Right</kbd>
-- Previous / Next ×10 — <kbd>Shift+Left</kbd> / <kbd>Shift+Right</kbd>
-- Previous / Next ×100 — <kbd>Ctrl+Left</kbd> / <kbd>Ctrl+Right</kbd>
-- Focus current frame (scroll the timeline to the playhead) — <kbd>Ctrl+F</kbd>
+- **Frame > Go To Start** / **Frame > Go To End** — <kbd>Home</kbd> / <kbd>End</kbd>
+- **Frame > Previous Frame** / **Frame > Next Frame** — <kbd>Left</kbd> / <kbd>Right</kbd>
+- **Frame > Previous Frame X10** / **Frame > Next Frame X10** — <kbd>Shift+Left</kbd> / <kbd>Shift+Right</kbd>
+- **Frame > Previous Frame X100** / **Frame > Next Frame X100** — <kbd>Ctrl+Left</kbd> / <kbd>Ctrl+Right</kbd>
+- **Frame > Focus Current Frame**, scrolling the timeline to the playhead — <kbd>Ctrl+F</kbd>
 
 ## Loop modes
 
 Playback can loop in three ways, set from the **Playback** menu or the loop button in the playback controls:
 
-- **Loop** — Repeat continuously.
-- **Once** — Play through once and stop.
-- **Ping-Pong** — Play forward to the end, then reverse, and repeat.
+- **Playback > Playback Loop** — Repeat continuously.
+- **Playback > Playback Once** — Play through once and stop.
+- **Playback > Playback Ping-Pong** — Play forward to the end, then reverse, and repeat.
+
+Locations: **Playback** menu, playback controls
 
 ## Jumping
 
@@ -61,10 +63,12 @@ Locations: **Playback** menu
 
 Shortcuts:
 
-- Jump back 1s — <kbd>Shift+J</kbd>
-- Jump back 10s — <kbd>Ctrl+J</kbd>
-- Jump forward 1s — <kbd>Shift+L</kbd>
-- Jump forward 10s — <kbd>Ctrl+L</kbd>
+- **Playback > Jump Back 1s** — <kbd>Shift+J</kbd>
+- **Playback > Jump Back 10s** — <kbd>Ctrl+J</kbd>
+- **Playback > Jump Forward 1s** — <kbd>Shift+L</kbd>
+- **Playback > Jump Forward 10s** — <kbd>Ctrl+L</kbd>
+
+A second is a second of timecode: 24 frames at 23.976, 30 at 29.97. A jump past the in or out point stops there, or, playing in a loop, goes to the frame the loop comes back to.
 
 ## In and out points
 

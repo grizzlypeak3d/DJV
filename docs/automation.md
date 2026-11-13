@@ -106,7 +106,7 @@ One or more files, directories, or timelines can be given on the command line:
 djv render.mov
 ```
 
-Image sequences can be opened by specifying the first frame or using the "#" wildcard (see [Files](files.html)):
+Image sequences can be opened by specifying the first frame or using the "#" wildcard (see [File formats](formats.html#partial-image-sequences)):
 
 ```
 djv render.#.exr

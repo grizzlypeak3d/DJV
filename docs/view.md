@@ -16,9 +16,27 @@ View controls can be remapped in the **Mouse** section of the **Settings** tool.
 
 ## Framing and zoom
 
-The view can be framed (fit to the view), reset to 1:1, or zoomed in and out from the **View** menu and the zoom control on the **View** tool bar.
+The view can be framed (fit to the view), reset to 1:1, or zoomed in and out from the **View** menu and the zoom control on the **View** tool bar. A double click, or a double tap on a touch screen, frames it too.
+
+- **View > Frame** — <kbd>Backspace</kbd>
+- **View > Zoom Reset**, 1:1 — <kbd>0</kbd>
+- **View > Zoom In** / **View > Zoom Out** — <kbd>=</kbd> / <kbd>-</kbd>
+- **View > Center** — <kbd>\</kbd>
 
 Locations: **View** menu, **View** tool bar, **View** tool
+
+## Mouse tool
+
+What the plain left mouse button, or a finger on a touch screen, does in the view: nothing of its own, or one of the tools under **View > Mouse Tool**:
+
+- **View > Mouse Tool > Pan View** — Drag to move the picture.
+- **View > Mouse Tool > Compare Wipe** — Drag to move the wipe between A and B; see [A/B comparison](compare.html).
+- **View > Mouse Tool > Pick** — Pick colors, as the **Color Picker** tool does; see [Tools](tools.html).
+- **View > Mouse Tool > Frame Shuttle** — Drag left and right to move through the frames.
+
+With a tool chosen, the other actions keep their buttons and keys, so the modifiers still work beside it; the drawing tools take the button while one is in use. The tools are also on the **View** tool bar, and the bindings are in the **Mouse** section of the **Settings** tool; see [Settings](settings.html).
+
+Locations: **View** menu, **View** tool bar, **Settings** tool
 
 ## Color channels
 
@@ -28,10 +46,10 @@ Locations: **View** menu, **View** tool
 
 Shortcuts:
 
-- **Red** — <kbd>R</kbd>
-- **Green** — <kbd>G</kbd>
-- **Blue** — <kbd>B</kbd>
-- **Alpha** — <kbd>A</kbd>
+- **View > Red Channel** — <kbd>R</kbd>
+- **View > Green Channel** — <kbd>G</kbd>
+- **View > Blue Channel** — <kbd>B</kbd>
+- **View > Alpha Channel** — <kbd>A</kbd>
 
 ## Mirror
 
@@ -105,6 +123,8 @@ The pixel aspect ratio can be left at the file's default or overridden. Up to th
 > [!TIP]
 > To see an anamorphic image as it is stored, set a custom entry to **Pixel Aspect Ratio (PAR)** with a value of **1**.
 
+The custom entries start as **View > Aspect Ratio > 16:9 DAR**, **View > Aspect Ratio > 1.85:1 DAR** and **View > Aspect Ratio > 2.39:1 DAR**, the common delivery shapes, and are changed in the **View** tool.
+
 Locations: **View** menu, **View** tool
 
 ![Aspect ratio](assets/view-aspect-ratio.svg)
@@ -163,11 +183,9 @@ A shortcut can be assigned in the **Settings** tool.
 
 ## HUD
 
-The heads-up display (HUD) overlays useful information on top of the view.
+The heads-up display (HUD) overlays useful information on top of the view: **View > HUD / Information Display** (<kbd>Ctrl+H</kbd>).
 
 Locations: **View** menu, **View** tool
-
-Shortcut: <kbd>Ctrl+H</kbd>
 
 ![HUD](assets/view-hud.svg)
 

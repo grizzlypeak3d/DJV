@@ -18,6 +18,7 @@
 <li><a href="building.html">Building from source</a></li>
 <li><a href="main-window.html">Main window</a></li>
 <li><a href="files.html">Files</a></li>
+<li><a href="formats.html">File formats</a></li>
 <li><a href="view.html">View</a></li>
 <li><a class="current" href="playback.html">Playback and frame control</a></li>
 <li><a href="timeline.html">Timeline</a></li>
@@ -66,15 +67,17 @@
 <p>Step through frames or jump to the start or end from the <strong>Frame</strong> menu and the frame controls. Stepping can move by one, ten, or a hundred frames at a time.</p>
 <p>Locations: <strong>Frame</strong> menu, frame controls</p>
 <p>Shortcuts:</p>
-<ul><li>Start / End — <kbd>Home</kbd> / <kbd>End</kbd></li><li>Previous / Next frame — <kbd>Left</kbd> / <kbd>Right</kbd></li><li>Previous / Next ×10 — <kbd>Shift+Left</kbd> / <kbd>Shift+Right</kbd></li><li>Previous / Next ×100 — <kbd>Ctrl+Left</kbd> / <kbd>Ctrl+Right</kbd></li><li>Focus current frame (scroll the timeline to the playhead) — <kbd>Ctrl+F</kbd></li></ul>
+<ul><li><strong>Frame &gt; Go To Start</strong> / <strong>Frame &gt; Go To End</strong> — <kbd>Home</kbd> / <kbd>End</kbd></li><li><strong>Frame &gt; Previous Frame</strong> / <strong>Frame &gt; Next Frame</strong> — <kbd>Left</kbd> / <kbd>Right</kbd></li><li><strong>Frame &gt; Previous Frame X10</strong> / <strong>Frame &gt; Next Frame X10</strong> — <kbd>Shift+Left</kbd> / <kbd>Shift+Right</kbd></li><li><strong>Frame &gt; Previous Frame X100</strong> / <strong>Frame &gt; Next Frame X100</strong> — <kbd>Ctrl+Left</kbd> / <kbd>Ctrl+Right</kbd></li><li><strong>Frame &gt; Focus Current Frame</strong>, scrolling the timeline to the playhead — <kbd>Ctrl+F</kbd></li></ul>
 <h2 id="loop-modes">Loop modes</h2>
 <p>Playback can loop in three ways, set from the <strong>Playback</strong> menu or the loop button in the playback controls:</p>
-<ul><li><strong>Loop</strong> — Repeat continuously.</li><li><strong>Once</strong> — Play through once and stop.</li><li><strong>Ping-Pong</strong> — Play forward to the end, then reverse, and repeat.</li></ul>
+<ul><li><strong>Playback &gt; Playback Loop</strong> — Repeat continuously.</li><li><strong>Playback &gt; Playback Once</strong> — Play through once and stop.</li><li><strong>Playback &gt; Playback Ping-Pong</strong> — Play forward to the end, then reverse, and repeat.</li></ul>
+<p>Locations: <strong>Playback</strong> menu, playback controls</p>
 <h2 id="jumping">Jumping</h2>
 <p>You can jump backward or forward by one or ten seconds.</p>
 <p>Locations: <strong>Playback</strong> menu</p>
 <p>Shortcuts:</p>
-<ul><li>Jump back 1s — <kbd>Shift+J</kbd></li><li>Jump back 10s — <kbd>Ctrl+J</kbd></li><li>Jump forward 1s — <kbd>Shift+L</kbd></li><li>Jump forward 10s — <kbd>Ctrl+L</kbd></li></ul>
+<ul><li><strong>Playback &gt; Jump Back 1s</strong> — <kbd>Shift+J</kbd></li><li><strong>Playback &gt; Jump Back 10s</strong> — <kbd>Ctrl+J</kbd></li><li><strong>Playback &gt; Jump Forward 1s</strong> — <kbd>Shift+L</kbd></li><li><strong>Playback &gt; Jump Forward 10s</strong> — <kbd>Ctrl+L</kbd></li></ul>
+<p>A second is a second of timecode: 24 frames at 23.976, 30 at 29.97. A jump past the in or out point stops there, or, playing in a loop, goes to the frame the loop comes back to.</p>
 <h2 id="in-and-out-points">In and out points</h2>
 <p>In and out points can be set to limit playback to a section of the timeline.</p>
 <p>Locations: <strong>Playback</strong> menu, <strong>Playback</strong> controls</p>

@@ -115,12 +115,16 @@ namespace djv
                         action["name"] = name;
                         action["text"] = i.second->getText();
                         // Without the shortcut the tooltip ends with, which is
-                        // the platform's and has its own field below.
+                        // the platform's and has its own field below, or a
+                        // note on why the item is not available in this run.
                         std::string tooltip = i.second->getTooltip();
-                        const size_t shortcutPos = tooltip.find("\n\nShortcut:");
-                        if (shortcutPos != std::string::npos)
+                        for (const auto& suffix : { "\n\nNot available:", "\n\nShortcut:" })
                         {
-                            tooltip.erase(shortcutPos);
+                            const size_t pos = tooltip.find(suffix);
+                            if (pos != std::string::npos)
+                            {
+                                tooltip.erase(pos);
+                            }
                         }
                         action["tooltip"] = tooltip;
                         action["checkable"] = i.second->isCheckable();

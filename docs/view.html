@@ -18,6 +18,7 @@
 <li><a href="building.html">Building from source</a></li>
 <li><a href="main-window.html">Main window</a></li>
 <li><a href="files.html">Files</a></li>
+<li><a href="formats.html">File formats</a></li>
 <li><a class="current" href="view.html">View</a></li>
 <li><a href="playback.html">Playback and frame control</a></li>
 <li><a href="timeline.html">Timeline</a></li>
@@ -40,6 +41,7 @@
 <div class="toc">
 <ul>
 <li><a href="#framing-and-zoom">Framing and zoom</a></li>
+<li><a href="#mouse-tool">Mouse tool</a></li>
 <li><a href="#color-channels">Color channels</a></li>
 <li><a href="#mirror">Mirror</a></li>
 <li><a href="#options">Options</a></li>
@@ -59,13 +61,19 @@
 <ul><li><strong>Pan</strong> — Middle mouse button</li><li><strong>Zoom</strong> — Mouse wheel, or the <strong>-</strong> and <strong>=</strong> keys</li><li><strong>Frame view</strong> (fit image to view) — <strong>Backspace</strong></li><li><strong>Wipe</strong> (in compare mode) — <strong>Alt</strong> + left mouse button</li><li><strong>Color picker</strong> — <strong>Ctrl</strong> + left mouse button</li><li><strong>Frame shuttle</strong> (scrub frames by dragging) — Left mouse button</li><li><strong>Scrub frames</strong> — <strong>Ctrl</strong> + mouse wheel</li></ul>
 <p>View controls can be remapped in the <strong>Mouse</strong> section of the <strong>Settings</strong> tool.</p>
 <h2 id="framing-and-zoom">Framing and zoom</h2>
-<p>The view can be framed (fit to the view), reset to 1:1, or zoomed in and out from the <strong>View</strong> menu and the zoom control on the <strong>View</strong> tool bar.</p>
+<p>The view can be framed (fit to the view), reset to 1:1, or zoomed in and out from the <strong>View</strong> menu and the zoom control on the <strong>View</strong> tool bar. A double click, or a double tap on a touch screen, frames it too.</p>
+<ul><li><strong>View &gt; Frame</strong> — <kbd>Backspace</kbd></li><li><strong>View &gt; Zoom Reset</strong>, 1:1 — <kbd>0</kbd></li><li><strong>View &gt; Zoom In</strong> / <strong>View &gt; Zoom Out</strong> — <kbd>=</kbd> / <kbd>-</kbd></li><li><strong>View &gt; Center</strong> — <kbd>\</kbd></li></ul>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool bar, <strong>View</strong> tool</p>
+<h2 id="mouse-tool">Mouse tool</h2>
+<p>What the plain left mouse button, or a finger on a touch screen, does in the view: nothing of its own, or one of the tools under <strong>View &gt; Mouse Tool</strong>:</p>
+<ul><li><strong>View &gt; Mouse Tool &gt; Pan View</strong> — Drag to move the picture.</li><li><strong>View &gt; Mouse Tool &gt; Compare Wipe</strong> — Drag to move the wipe between A and B; see <a href="compare.html">A/B comparison</a>.</li><li><strong>View &gt; Mouse Tool &gt; Pick</strong> — Pick colors, as the <strong>Color Picker</strong> tool does; see <a href="tools.html">Tools</a>.</li><li><strong>View &gt; Mouse Tool &gt; Frame Shuttle</strong> — Drag left and right to move through the frames.</li></ul>
+<p>With a tool chosen, the other actions keep their buttons and keys, so the modifiers still work beside it; the drawing tools take the button while one is in use. The tools are also on the <strong>View</strong> tool bar, and the bindings are in the <strong>Mouse</strong> section of the <strong>Settings</strong> tool; see <a href="settings.html">Settings</a>.</p>
+<p>Locations: <strong>View</strong> menu, <strong>View</strong> tool bar, <strong>Settings</strong> tool</p>
 <h2 id="color-channels">Color channels</h2>
 <p>Individual color channels can be isolated to inspect them.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p>Shortcuts:</p>
-<ul><li><strong>Red</strong> — <kbd>R</kbd></li><li><strong>Green</strong> — <kbd>G</kbd></li><li><strong>Blue</strong> — <kbd>B</kbd></li><li><strong>Alpha</strong> — <kbd>A</kbd></li></ul>
+<ul><li><strong>View &gt; Red Channel</strong> — <kbd>R</kbd></li><li><strong>View &gt; Green Channel</strong> — <kbd>G</kbd></li><li><strong>View &gt; Blue Channel</strong> — <kbd>B</kbd></li><li><strong>View &gt; Alpha Channel</strong> — <kbd>A</kbd></li></ul>
 <h2 id="mirror">Mirror</h2>
 <p>The image can be mirrored horizontally or vertically.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
@@ -94,6 +102,7 @@
 <p><strong>Default</strong> uses the aspect ratio the file declares, which de-squeezes an anamorphic movie. Each custom entry has a value and a type:</p>
 <ul><li><strong>Display Aspect Ratio (DAR)</strong> — The value is the finished shape of the image, so 2.39 shows it at 2.39:1 whatever the file says.</li><li><strong>Pixel Aspect Ratio (PAR)</strong> — The value is the shape of a pixel, applied to the stored resolution, and the file's own is ignored. On a camera this is the lens squeeze factor.</li></ul>
 <div class="tip">To see an anamorphic image as it is stored, set a custom entry to <strong>Pixel Aspect Ratio (PAR)</strong> with a value of <strong>1</strong>.</div>
+<p>The custom entries start as <strong>View &gt; Aspect Ratio &gt; 16:9 DAR</strong>, <strong>View &gt; Aspect Ratio &gt; 1.85:1 DAR</strong> and <strong>View &gt; Aspect Ratio &gt; 2.39:1 DAR</strong>, the common delivery shapes, and are changed in the <strong>View</strong> tool.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p><img src="assets/view-aspect-ratio.svg" alt="Aspect ratio"></p>
 <h2 id="background">Background</h2>
@@ -121,9 +130,8 @@
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p>A shortcut can be assigned in the <strong>Settings</strong> tool.</p>
 <h2 id="hud">HUD</h2>
-<p>The heads-up display (HUD) overlays useful information on top of the view.</p>
+<p>The heads-up display (HUD) overlays useful information on top of the view: <strong>View &gt; HUD / Information Display</strong> (<kbd>Ctrl+H</kbd>).</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
-<p>Shortcut: <kbd>Ctrl+H</kbd></p>
 <p><img src="assets/view-hud.svg" alt="HUD"></p>
 <ul><li><strong>File name</strong> - Name of the current file.</li><li><strong>Information</strong> - Video (<strong>V</strong>) and audio (<strong>A</strong>) format of the current file.</li><li><strong>Cache</strong> - Video (<strong>V</strong>) and audio (<strong>A</strong>) cache fill (%)</li><li><strong>Time</strong> - Current frame, actual playback speed (the rate DJV is achieving, which may differ from the requested rate), number of frames dropped during playback.</li><li><strong>View zoom</strong> - Current view zoom.</li><li><strong>Color picker</strong> - Color and position of the picked pixel. Shown as <strong>-</strong> when the pointer is not over an image.</li><li><strong>Render</strong> - Size the image is rendered at, and the pixel aspect ratio when it is not square. This differs from the file's own resolution when an aspect ratio is applied.</li></ul>
 <p>Each item can be placed in any corner of the view, or set to <strong>None</strong> to hide it, so that only what is wanted is shown and items do not crowd each other.</p>

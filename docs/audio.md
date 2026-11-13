@@ -1,6 +1,6 @@
 # Audio
 
-DJV plays multi-track audio in sync with video, including during variable-speed and reverse playback. Audio can come from a movie file, or be paired with an image sequence (see [Files](files.html)).
+DJV plays multi-track audio in sync with video, including during variable-speed and reverse playback. Audio can come from a movie file, or be paired with an image sequence (see [File formats](formats.html#image-sequences-with-audio)).
 
 ## Volume and mute
 

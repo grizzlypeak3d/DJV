@@ -32,11 +32,11 @@ The commands are how the menu items are run from outside the window: with
 | Previous Layer | <kbd>Ctrl+-</kbd> | `File/PrevLayer` | Change to the previous layer. |
 | Next Media Reference | <kbd>Shift+M</kbd> | `File/NextMediaReference` | Change to the next media reference. |
 | Exit | <kbd>Ctrl/Cmd+Q</kbd> | `File/Exit` | Exit the application. |
-| Recent > | | | Filled in as files are opened. |
-| Recent Playlists > | | | Filled in as files are opened. |
-| Current > | | | Filled in as files are opened. |
-| Layers > | | | Filled in as files are opened. |
-| Media References > | | | Filled in as files are opened. |
+| Recent > | | | A list the application fills in: files, layers, sizes. |
+| Recent Playlists > | | | A list the application fills in: files, layers, sizes. |
+| Current > | | | A list the application fills in: files, layers, sizes. |
+| Layers > | | | A list the application fills in: files, layers, sizes. |
+| Media References > | | | A list the application fills in: files, layers, sizes. |
 
 ## Review
 
@@ -65,7 +65,7 @@ The commands are how the menu items are run from outside the window: with
 | Add Range |  | `Review/AddRange` | Add a marker for the timeline in/out points, written in place. |
 | Previous Marker | <kbd>Alt+Left</kbd> | `Review/PrevFrame` | Go to the previous frame with a marker or a drawing. |
 | Next Marker | <kbd>Alt+Right</kbd> | `Review/NextFrame` | Go to the next frame with a marker or a drawing. |
-| Recent > | | | Filled in as files are opened. |
+| Recent > | | | A list the application fills in: files, layers, sizes. |
 
 ## Compare
 
@@ -83,7 +83,7 @@ The commands are how the menu items are run from outside the window: with
 | Tile | <kbd>Ctrl+T</kbd> | `Compare/Tile` | Show the A and B files in a tiled layout. |
 | Hold Frame |  | `Compare/HoldFrame` | Hold the current frame and compare against it: it becomes the comparison's B, wiped against A if no other comparison is chosen, whatever the time or the file, until it is let go. Holding again holds the frame then current. |
 | Clear Held Frame |  | `Compare/ClearHeld` | Let go of the held frame. |
-| B > | | | Filled in as files are opened. |
+| B > | | | A list the application fills in: files, layers, sizes. |
 | Sync by > Start of File |  | `Compare/Relative` | Compare files using relative time. |
 | Sync by > Timecode |  | `Compare/Absolute` | Compare files using absolute time. |
 
@@ -199,7 +199,7 @@ The commands are how the menu items are run from outside the window: with
 | Bottom Tool Bar |  | `Window/BottomToolBar` | Toggle the bottom tool bar. |
 | Status Tool Bar |  | `Window/StatusToolBar` | Toggle the status tool bar. |
 | Tools |  | `Window/Tools` | Toggle the tools panel. |
-| Resize > | | | Filled in as files are opened. |
+| Resize > | | | A list the application fills in: files, layers, sizes. |
 
 ## Color
 
@@ -233,7 +233,7 @@ The commands are how the menu items are run from outside the window: with
 | Menu item | Keys | Command | Description |
 |---|---|---|---|
 | Tour |  | `Help/Tour` | Show the tour of the window: each part of it, what it does, and how it is worked. |
-| Documentation |  | `Help/Documentation` | The documentation is installed with the application, and this build was not installed. |
+| Documentation |  | `Help/Documentation` | Open the documentation in a web browser. |
 | Get DJV Studio |  | `Help/Studio` | Open the web site for DJV Studio, the commercial version of DJV. |
 | About |  | `Help/About` | Show the about dialog. |
 | System Information |  | `Help/SysInfo` | Show the system information dialog. |

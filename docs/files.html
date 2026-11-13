@@ -18,6 +18,7 @@
 <li><a href="building.html">Building from source</a></li>
 <li><a href="main-window.html">Main window</a></li>
 <li><a class="current" href="files.html">Files</a></li>
+<li><a href="formats.html">File formats</a></li>
 <li><a href="view.html">View</a></li>
 <li><a href="playback.html">Playback and frame control</a></li>
 <li><a href="timeline.html">Timeline</a></li>
@@ -43,23 +44,13 @@
 <li><a href="#recent-files">Recent files</a></li>
 <li><a href="#switching-files">Switching files</a></li>
 <li><a href="#playlists">Playlists</a></li>
-<li><a href="#ffmpeg">FFmpeg</a></li>
 <li><a href="#memory-cache">Memory cache</a></li>
 <li><a href="#layers">Layers</a></li>
 <li><a href="#files-tool">Files tool</a></li>
-<li><a href="#partial-image-sequences">Partial image sequences</a></li>
-<li><a href="#image-sequences-with-audio">Image sequences with audio</a></li>
-<li><a href="#timelines">Timelines</a></li>
-<li><a href="#media-references">Media references</a></li>
 <li><a href="#reviews">Reviews</a></li>
-<li><a href="#otio-spatial-coordinates">OTIO spatial coordinates</a></li>
-<li><a href="#usd">USD</a></li>
 </ul>
 </div>
-<p>DJV ships with support for the following formats:</p>
-<ul><li>Image sequences: Cineon, DPX, JPEG, OpenEXR, PNG, PPM, Radiance HDR, SGI, TGA, BMP, TIFF</li><li>Movie codecs: MJPEG, MPEG-2, MPEG-4, AV1, APV, CineForm, GIF</li><li>Audio codecs: FLAC, MP3, WAV</li><li>Timelines: OTIO, OTIOZ</li><li>Experimental: USD</li></ul>
-<p>Different formats may be available depending on how DJV was built, or by using an external FFmpeg command.</p>
-<div class="note">These are the formats DJV reads. For the formats DJV writes, see <a href="export.html">Exporting files</a>.</div>
+<p>Opening files, and moving between the files DJV has open: the file browser, recent files, playlists, layers, and the <strong>Files</strong> tool. For what DJV can read, and how image sequences, timelines and the other formats behave, see <a href="formats.html">File formats</a>.</p>
 <h2 id="opening-files">Opening files</h2>
 <p>You can open files and folders in three ways:</p>
 <ul><li>From the <strong>File</strong> menu or <strong>File</strong> tool bar</li><li>By dragging and dropping onto the main window</li><li>From the command line</li></ul>
@@ -99,15 +90,6 @@
 <p>A <code>.otioz</code> bundle opens as a timeline only: its media lives inside the bundle, so its clips cannot become entries in the file list.</p>
 <p>Media references are saved relative to the playlist's directory when the media is under it, so a playlist saved above its media can move with it. Everything else is saved with an absolute path.</p>
 <p>A playlist holds the file list and the comparison. Color, view, and window state stay in the <a href="settings.html">settings</a>.</p>
-<h2 id="ffmpeg">FFmpeg</h2>
-<p>The FFmpeg plugin provides support for movie and audio files. Only a limited set of codecs is enabled in the open source packages; anything the packaged FFmpeg cannot decode is read with an external FFmpeg command instead, or you can build from source.</p>
-<p>The command is not something to turn on. The plugin decides per file: when the packaged FFmpeg has no decoder for what the file holds, or cannot open the file at all, FFmpeg runs as a sub-process and streams decoded video and audio to DJV; otherwise the file is read by the FFmpeg libraries. So bringing your own FFmpeg is a matter of installing one, and files that the packaged build reads perfectly well go on being read by it.</p>
-<p>A file that carries each audio channel as its own mono stream, as broadcast MXF does, is read as one track with a channel per stream. The <strong>Merge mono audio</strong> setting in the <strong>FFmpeg</strong> section of the <strong>Settings</strong> tool turns this off, so only the first stream plays.</p>
-<p>Which of the two read a file is written to the log, since it is otherwise not visible from the outside.</p>
-<p>The <strong>ffmpeg location</strong> and <strong>ffprobe location</strong> settings take a name or a location. A name on its own is looked for on the system path, and on macOS and Linux in the places the package managers install to as well, since an application started from the desktop is not given the path a shell has. Under each is where DJV found the command, or <strong>No ffmpeg found.</strong> where there is none to find — which also says which one is being used where several are installed.</p>
-<p><img src="assets/ffmpeg.svg" alt="FFmpeg"></p>
-<p>Changes take effect on newly opened files; reload (<kbd>Ctrl+R</kbd>) to apply them to the current file.</p>
-<ul><li><strong>Software YUV conversion</strong> - Convert YUV to RGB on the CPU instead of on the GPU. Off by default: the decoded YUV frame is uploaded directly and converted in the display shader, which is faster and avoids an extra frame copy. Enable this to perform the conversion in software before display.</li><li><strong>Hardware decoding</strong> - Decode video on the GPU (VideoToolbox on macOS, Direct3D 11 on Windows) when the file is compatible. Off by default. Files that are not compatible will automatically fall back to software decoding.</li><li><strong>Threads</strong> - The number of threads used for decoding. The default, <code>0</code>, lets FFmpeg choose automatically based on the system.</li><li><strong>ffmpeg</strong>, <strong>ffprobe</strong> — Where to find the external commands. Leave them as the command names to find an installed one automatically. Click the field to show the full path, or the folder icon to browse for it.</li></ul>
 <h2 id="memory-cache">Memory cache</h2>
 <p>DJV caches frames in memory for smooth playback and scrubbing. The cache is configured in the <strong>Settings</strong> tool, with separate values for video, audio, and <em>read-behind</em>. Read-behind is the number of seconds cached <em>before</em> the current frame, which keeps scrubbing responsive when moving backward.</p>
 <p>Only the current file is cached. Switching files clears the cache and reloads it for the new file.</p>
@@ -124,57 +106,11 @@
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
 <p>Shortcut: <kbd>F1</kbd></p>
 <p><img src="assets/files-tool.svg" alt="Files tool"></p>
-<ul><li>Current file (the <strong>A</strong> file)</li><li><strong>B</strong> files (multiple <strong>B</strong> files can be set in tile mode)</li><li>The frame range of an image sequence, which can be edited to open the sequence over a different range (see <a href="#partial-image-sequences">Partial image sequences</a>)</li></ul>
+<ul><li>Current file (the <strong>A</strong> file)</li><li><strong>B</strong> files (multiple <strong>B</strong> files can be set in tile mode)</li><li>The frame range of an image sequence, which can be edited to open the sequence over a different range (see <a href="formats.html#partial-image-sequences">Partial image sequences</a>)</li></ul>
 <p>Click a file to make it the current file, or drag it to reorder the list. The order is what a <a href="#playlists">playlist</a> saves, and what the next and previous file actions step through. When the drag reaches the top or bottom of the panel the list scrolls, so a spot that is off the screen can be reached.</p>
 <p>The list can be driven from the keyboard: the arrow keys browse it, <kbd>Return</kbd> sets the current file, and <kbd>Delete</kbd> closes one.</p>
-<h2 id="partial-image-sequences">Partial image sequences</h2>
-<p>A sequence does not have to be complete. A render still in progress has only the frames written so far, and a render distributed across several machines can gain them out of order. DJV opens such a sequence and lets you choose what happens where the frames are not there.</p>
-<p>The choice is the <strong>Missing frames</strong> setting in the <strong>Image Sequences</strong> section of the <strong>Settings</strong> tool:</p>
-<ul><li><strong>Error</strong> — the frame does not read, and the error is reported in the status bar.</li><li><strong>Hold</strong> — the nearest frame before it is repeated.</li><li><strong>Black</strong> — a blank frame.</li><li><strong>Skip</strong> — the missing frames are left out, so only the frames that are there play and the sequence is as long as they are.</li><li><strong>Gaps</strong> — the missing frames are left as holes, so every frame keeps the time it had and the gaps are visible on the timeline.</li></ul>
-<p>The first three are decided as each frame is read, so changing between them applies to what is already open, and a timeline that states its own policy is followed instead. <strong>Skip</strong> and <strong>Gaps</strong> decide what the timeline is built from, so they apply only to an image sequence opened on its own, and changing to or from one of them opens the file again.</p>
-<p>Which frames a sequence has is found by reading them, not by scanning at startup, so a complete sequence costs nothing and a render in progress picks up frames as they land. <strong>Skip</strong> and <strong>Gaps</strong> are the exception: they have to look for the frames once in order to build the timeline, so they are a snapshot, and frames written afterwards appear when the file is opened again.</p>
-<h3 id="frame-numbers">Frame numbers</h3>
-<p>Under <strong>Skip</strong> the sequence is shorter than the range it covers, so counting from the start no longer gives the frame number. DJV shows the number the frame actually has — in the current time, on the timeline, and when you type a frame number to go to it. A sequence holding frames 1, 11, 21, 31 and 88 to 90 plays as seven frames, and the fourth of them reads as frame 31.</p>
-<p>Typing a frame number the sequence does not have goes to the nearest frame before it, so the frame you land on is the frame you are shown.</p>
-<p>This holds while the timeline plays one media through, whether in one piece or in the runs a sparse sequence is cut into. A timeline that cuts between different media, or plays the same media twice, has no single numbering to show: the number would restart at every cut, and a clip whose media runs at a different rate than the timeline would repeat it from one frame to the next. The current time and the timeline ruler count the timeline itself there.</p>
-<h3 id="marking-the-frames-that-are-not-there">Marking the frames that are not there</h3>
-<p>Under <strong>Hold</strong> and <strong>Black</strong> the picture on screen is not the frame that was asked for, and nothing about it says so — a render part way through can look finished. Turn on <strong>Indicate missing</strong> in the same settings section to draw a cross over any such picture; the width and colour are alongside it. The time in the heads up display also says which frame is being held, for example <code>held from 1</code>.</p>
-<p>This only changes what is drawn, so unlike the setting above it applies to whatever is already open.</p>
-<h3 id="stating-the-range">Stating the range</h3>
-<p>The frames found on disk are not always the range you want. A render that will end up as frames 1 to 100 has fewer than that today, and watching it over the range it will become is often more useful than watching it over the range it has reached.</p>
-<p>Set the range for an open file with the frame range fields in the <a href="#files-tool">Files tool</a>, which reopens it over that range. From the command line use <strong>-frameRange</strong> (or <strong>-fr</strong>), which applies to the first file opened:</p>
-<pre><code>djv render.#.exr -frameRange 1-100</code></pre>
-<h2 id="image-sequences-with-audio">Image sequences with audio</h2>
-<p>Audio can be paired with an image sequence either automatically or manually.</p>
-<p>To pair audio automatically, open the <strong>Image Sequences</strong> section in the <strong>Settings</strong> tool. You can either list the file extensions DJV should look for (for example, <code>.wav .mp3</code>), or provide a specific file name to match.</p>
-<p>To pair audio manually, use the menu <strong>File &gt; Open With Audio</strong>.</p>
-<h2 id="timelines">Timelines</h2>
-<p>OTIO timelines are opened like any other file. An <code>.otio</code> file references other pieces of media, and relative paths are relative to the <code>.otio</code> file. An <code>.otioz</code> bundle carries the media inside the one file: it is self-contained, so it can be moved or sent somewhere else, and DJV reads the media from the bundle itself rather than from disk.</p>
-<p>A timeline's layers are those of its first video clip; choosing one applies to every clip that has it.</p>
-<h2 id="media-references">Media references</h2>
-<p>A clip in an OTIO timeline can carry more than one version of its media as <em>media references</em> — for example a proxy and a full resolution render of the same shot, selected by name.</p>
-<p>DJV lists the names it finds in the <strong>File &gt; Media References</strong> menu, and in a menu on the file's row in the <strong>Files</strong> tool once the file has been opened. Choosing one switches every clip in the timeline to the reference with that name; clips that do not have one keep the reference they were authored with. Switching changes only what is read — the layout and zoom stay where they are — and the <strong>Information</strong> tool and HUD describe the reference being read.</p>
-<p>Each file keeps its own choice, so an A/B comparison can put one version against another — the proxy against the full resolution render of the same timeline. The <strong>File</strong> menu and the shortcut change the A file; the <strong>Files</strong> tool changes any of them. The choice is saved with reviews and playlists.</p>
-<p>Locations: <strong>File</strong> menu, <strong>Files</strong> tool</p>
-<p>Shortcuts:</p>
-<ul><li>Next media reference: <kbd>Shift+M</kbd></li></ul>
-<p>To open with a media reference, give it on the command line, e.g., <code>djv shot.otio -mediaReference Proxy</code>; it applies to the files opened, not the B file. From a script, <code>File/MediaReference</code> chooses one by name, e.g., <code>-command 'File/MediaReference { "key": "Full" }'</code>, for the A file or, with <strong>"file"</strong>, the one at that index in the file list. A name a file does not have is reported in the log with the ones it does. OTIO's default reference is shown as <strong>Default</strong>, and either name works.</p>
 <h2 id="reviews">Reviews</h2>
 <p>Reviews — saved sessions with markers and drawn feedback — have a page of their own: <a href="reviews.html">Review</a>.</p>
-<h2 id="otio-spatial-coordinates">OTIO spatial coordinates</h2>
-<p>OTIO files can give each clip a bounding box, called the <a target="_blank" href="https://opentimelineio.readthedocs.io/en/stable/tutorials/spatial-coordinates.html">spatial coordinates</a>, that describes the area the image occupies on a canvas shared by the whole timeline. DJV uses these boxes to size and position the images.</p>
-<p>The most common use is playing back clips that were rendered at different resolutions. Give the clips the same box and they are all displayed at the same size, so the view no longer jumps between them when playback moves from one clip to the next. This also keeps the zoom and pan steady across a cut, which is useful for checking continuity between shots.</p>
-<p>The coordinates are unit-less, so boxes of <code>0, 0, 1920, 1080</code> and <code>0, 0, 16, 9</code> describe the same area. DJV works out the size in pixels from the first clip that has coordinates, together with the resolution the timeline is working at. The Y axis points up, unlike image coordinates, so a clip with a larger Y value is displayed higher.</p>
-<div class="note">Clips are not required to have spatial coordinates. In a timeline where only some clips have them, the clips without them fill the canvas, and so are displayed at the same size as the clips that do.</div>
-<p>Clips can also be given different boxes to place them side by side, or to position a smaller image within a larger frame.</p>
-<p>The <strong>OTIO</strong> section in the <strong>Settings</strong> tool controls how the coordinates are used:</p>
-<ul><li><strong>None</strong> — Ignore the spatial coordinates. Clips are sized from their own resolution.</li><li><strong>Coordinates</strong> — Use the spatial coordinates where clips provide them. This is the default.</li><li><strong>Normalize</strong> — Use the spatial coordinates, and display clips that do not have them at the size of the first clip. Use this to play clips of differing resolutions at the same size when the timeline was not authored with spatial coordinates.</li></ul>
-<div class="note">The color picker and magnifier report positions in the original image, not the canvas, so the pixel coordinates always refer to the media itself.</div>
-<p>The authored coordinates are shown in the <strong>Information</strong> tool, along with the canvas DJV derived from them.</p>
-<h2 id="usd">USD</h2>
-<p>USD support is currently experimental, and is not included in the packages; it is available when building from source. When a USD file is opened, DJV renders it to an image sequence using the Hydra renderer.</p>
-<p>DJV picks the rendering camera in this order:</p>
-<ol><li>The clip name, if the USD file is referenced from an OTIO file</li><li>The primary camera in the scene</li><li>The first camera found in the scene</li><li>A temporary camera generated to frame the scene</li></ol>
 </main>
 </body>
 </html>

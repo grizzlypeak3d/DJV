@@ -18,6 +18,7 @@
 <li><a href="building.html">Building from source</a></li>
 <li><a href="main-window.html">Main window</a></li>
 <li><a href="files.html">Files</a></li>
+<li><a href="formats.html">File formats</a></li>
 <li><a href="view.html">View</a></li>
 <li><a href="playback.html">Playback and frame control</a></li>
 <li><a class="current" href="timeline.html">Timeline</a></li>
@@ -37,15 +38,32 @@
 </nav>
 <main>
 <h1>Timeline</h1>
-<p>By default, the timeline is minimized and shows only the first video and audio track. To see every track, toggle the minimized state from the <strong>Timeline</strong> menu.</p>
+<div class="toc">
+<ul>
+<li><a href="#moving-around">Moving around</a></li>
+<li><a href="#scrubbing">Scrubbing</a></li>
+<li><a href="#tracks-and-media">Tracks and media</a></li>
+<li><a href="#comparing-timelines">Comparing timelines</a></li>
+</ul>
+</div>
+<p>The timeline is the strip under the view: the frames of the current file, where the current frame is, the in and out points, what is in the cache, and the markers. Clicking or dragging in it changes the current frame.</p>
 <p><img src="assets/timeline.svg" alt="Timeline"></p>
-<p>The current frame is the red vertical line. The in/out range is represented by the blue line at the top of the timeline. The cache is represented by the green and purple lines.</p>
-<p>Default timeline controls:</p>
-<ul><li><strong>Change current frame</strong> — Left mouse button</li><li><strong>Zoom</strong> — Mouse wheel, or the <strong>-</strong> and <strong>=</strong> keys</li><li><strong>Frame view</strong> — <strong>Backspace</strong></li><li><strong>Pan</strong> — Middle mouse button</li></ul>
-<p>Scrubbing while playing pauses playback for as long as the mouse button is held, so the picture follows the pointer, and playback resumes from where the drag ends. <strong>Stop On Scrub</strong> in the <strong>Timeline</strong> menu stops playback instead, so that it stays stopped after the drag.</p>
-<p>Resting the cursor on the timeline shows a preview of the frame under it, drawn the way the view would show it, with the frame's time. <strong>Hover Preview</strong> in the <strong>Timeline</strong> menu turns it off. The preview is shown while playback is stopped.</p>
-<p><strong>Compare Timelines</strong> in the <strong>Timeline</strong> menu shows the timeline of each file being compared under the current file's, which is useful when the files are two cuts of the same edit. It is off by default.</p>
-<p>The video thumbnails and audio waveforms can be toggled and sized independently from the <strong>Timeline</strong> menu. Turning them off saves vertical space and improves performance; with both off, the timeline is a compact strip with just the current frame, in/out range, and cache.</p>
+<p>The current frame is the red vertical line. The in/out range is represented by the blue line at the top of the timeline. The cache is represented by the green and purple lines. Markers, from a review or from an OTIO file, are drawn at their frames; see <a href="reviews.html#markers">Markers</a>.</p>
+<h2 id="moving-around">Moving around</h2>
+<ul><li><strong>Change the current frame</strong> — Left mouse button, clicking or dragging</li><li><strong>Zoom</strong> — Mouse wheel, or the <kbd>-</kbd> and <kbd>=</kbd> keys</li><li><strong>Frame the whole timeline</strong> — <kbd>Backspace</kbd>, or <strong>Timeline &gt; Frame View</strong></li><li><strong>Pan</strong> — Middle mouse button</li></ul>
+<p><strong>Timeline &gt; Auto Scroll</strong> keeps the current frame in sight while playing, scrolling the timeline as it goes. <strong>Timeline &gt; Scroll Bars</strong> shows scroll bars for a zoomed timeline.</p>
+<p>Locations: <strong>Timeline</strong> menu</p>
+<h2 id="scrubbing">Scrubbing</h2>
+<p>Scrubbing while playing pauses playback for as long as the mouse button is held, so the picture follows the pointer, and playback resumes from where the drag ends. <strong>Timeline &gt; Stop Playback When Scrubbing</strong> stops playback instead, so that it stays stopped after the drag.</p>
+<p>Resting the cursor on the timeline shows a preview of the frame under it, drawn the way the view would show it, with the frame's time. <strong>Timeline &gt; Hover Preview</strong> turns it off. The preview is shown while playback is stopped.</p>
+<p>Locations: <strong>Timeline</strong> menu</p>
+<h2 id="tracks-and-media">Tracks and media</h2>
+<p>By default, the timeline is minimized and shows only the first video and audio track. <strong>Timeline &gt; Minimize</strong> turns that off to show every track.</p>
+<p>The video thumbnails and audio waveforms can be shown and sized independently: <strong>Timeline &gt; Video Thumbnails</strong>, <strong>Timeline &gt; Audio Waveforms</strong>, and their sizes under <strong>Timeline &gt; Video Thumbnail Size</strong> and <strong>Timeline &gt; Audio Waveform Size</strong>. <strong>Timeline &gt; Track Media</strong> (<kbd>C</kbd>) turns both on or off at once. Turning them off saves vertical space and improves performance; with both off, the timeline is a compact strip with just the current frame, in/out range, and cache.</p>
+<p>Locations: <strong>Timeline</strong> menu</p>
+<h2 id="comparing-timelines">Comparing timelines</h2>
+<p><strong>Timeline &gt; Compare Timelines</strong> shows the timeline of each file being compared under the current file's, which is useful when the files are two cuts of the same edit. It is off by default. See <a href="compare.html">A/B comparison</a>.</p>
+<p>Locations: <strong>Timeline</strong> menu</p>
 </main>
 </body>
 </html>

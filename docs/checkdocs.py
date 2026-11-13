@@ -69,7 +69,9 @@ def main(argv):
     for path in glob.glob(os.path.join(docs, "*.md")):
         with open(path, encoding="utf-8") as f:
             pages[os.path.basename(path)[:-3]] = f.read()
+    # A page made from Markdown counts before its HTML is made.
     html = {os.path.basename(p)[:-5] for p in glob.glob(os.path.join(docs, "*.html"))}
+    html |= set(pages)
     errors = []
     for name, md in pages.items():
         if "actions" == name:

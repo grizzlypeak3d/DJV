@@ -18,6 +18,7 @@
 <li><a href="building.html">Building from source</a></li>
 <li><a class="current" href="main-window.html">Main window</a></li>
 <li><a href="files.html">Files</a></li>
+<li><a href="formats.html">File formats</a></li>
 <li><a href="view.html">View</a></li>
 <li><a href="playback.html">Playback and frame control</a></li>
 <li><a href="timeline.html">Timeline</a></li>
@@ -39,31 +40,39 @@
 <h1>Main window</h1>
 <div class="toc">
 <ul>
+<li><a href="#the-parts">The parts</a></li>
+<li><a href="#showing-and-hiding-the-parts">Showing and hiding the parts</a></li>
 <li><a href="#full-screen">Full screen</a></li>
 <li><a href="#presentation-mode">Presentation mode</a></li>
 <li><a href="#float-on-top">Float on top</a></li>
 <li><a href="#secondary-window">Secondary window</a></li>
+<li><a href="#help">Help</a></li>
 </ul>
 </div>
+<p>The main window is a frame around the view: the menus and tool bars at the top, the timeline and the playback controls under the view, a panel for the tools at the side, and the status bar at the bottom. Each part has a page of its own; this one is about the frame and how to arrange it.</p>
 <p><img src="assets/main-window.svg" alt="Main window"></p>
-<ul><li>Tool bars — files, compare, window, view, and the tool panels. When the window is too narrow for them all, buttons move into the <strong>»</strong> menu at the end of the row one at a time, from the right.</li><li>Tab bar — switch between currently opened files</li><li>Timeline — time scrubbing, thumbnails, and audio waveforms</li><li>Bottom tool bar — playback, frame, and audio controls</li><li>Tools — the currently active tool (for example, color picker or magnifier)</li><li>Status bar — warnings, errors, information, and status indicators. Errors are also shown briefly over the image, so one is not missed while looking at the picture; warnings stay in the status bar. Clicking the status indicator shows the options, with those in use highlighted; click one to show its controls.</li></ul>
-<p>Different parts of the interface can be shown or hidden from the <strong>Window</strong> menu.</p>
 <p>A short tour of the window is shown on the first start, and again from <strong>Help &gt; Tour</strong>.</p>
+<h2 id="the-parts">The parts</h2>
+<ul><li><strong>Tool bars</strong> — files, compare, window, view, and the tools. When the window is too narrow for them all, buttons move into the <strong>»</strong> menu at the end of the row one at a time, from the right.</li><li><strong>Tab bar</strong> — the open files; see <a href="files.html">Files</a>.</li><li><strong>View</strong> — the picture; see <a href="view.html">View</a>.</li><li><strong>Timeline</strong> — the frames of the current file; see <a href="timeline.html">Timeline</a>.</li><li><strong>Bottom tool bar</strong> — playback, frame, and audio controls; see <a href="playback.html">Playback and frame control</a>.</li><li><strong>Tools</strong> — the panel with the current tool, for example the color picker or the magnifier; see <a href="tools.html">Tools</a>.</li><li><strong>Status bar</strong> — warnings, errors, information, and status indicators. Errors are also shown briefly over the image, so one is not missed while looking at the picture; warnings stay in the status bar. Clicking the status indicator shows the options, with those in use highlighted; click one to show its controls.</li></ul>
+<h2 id="showing-and-hiding-the-parts">Showing and hiding the parts</h2>
+<p>Each part can be shown or hidden from the <strong>Window</strong> menu: <strong>Window &gt; File Tool Bar</strong>, <strong>Window &gt; Compare Tool Bar</strong>, <strong>Window &gt; View Tool Bar</strong>, <strong>Window &gt; Window Tool Bar</strong>, <strong>Window &gt; Tools Tool Bar</strong>, <strong>Window &gt; Tab Bar</strong>, <strong>Window &gt; Timeline</strong>, <strong>Window &gt; Bottom Tool Bar</strong>, <strong>Window &gt; Status Tool Bar</strong>, and <strong>Window &gt; Tools</strong> for the tools panel. Hiding parts leaves more room for the view, and the choice is kept between runs.</p>
+<p><strong>Window &gt; Resize</strong> sets the window to one of a few common sizes.</p>
+<p>Locations: <strong>Window</strong> menu</p>
 <h2 id="full-screen">Full screen</h2>
-<p>Toggle full screen mode.</p>
-<p>Locations: <strong>Window</strong> menu, <strong>Window</strong> toolbar</p>
-<p>Shortcut: <kbd>U</kbd></p>
+<p><strong>Window &gt; Full Screen</strong> (<kbd>U</kbd>) fills the screen with the window, keeping its parts.</p>
+<p>Locations: <strong>Window</strong> menu, <strong>Window</strong> tool bar</p>
 <h2 id="presentation-mode">Presentation mode</h2>
-<p>Presentation mode enables fullscreen and hides the user interface and HUD to show only the view.</p>
-<p>Locations: <strong>Window</strong> menu, <strong>Window</strong> toolbar</p>
-<p>Shortcut: <kbd>Ctrl+P</kbd></p>
+<p><strong>Window &gt; Presentation</strong> (<kbd>Ctrl+P</kbd>) fills the screen and hides the user interface and HUD to show only the view.</p>
+<p>Locations: <strong>Window</strong> menu, <strong>Window</strong> tool bar</p>
 <h2 id="float-on-top">Float on top</h2>
-<p>Keep the window above other applications, so a small reference view stays visible while working in something else.</p>
+<p><strong>Window &gt; Float On Top</strong> keeps the window above other applications, so a small reference view stays visible while working in something else.</p>
 <p>Locations: <strong>Window</strong> menu</p>
 <h2 id="secondary-window">Secondary window</h2>
-<p>A secondary window can be used to mirror the view on a separate monitor — useful for client review on a calibrated display.</p>
-<p>Locations: <strong>Window</strong> menu, <strong>Window</strong> toolbar</p>
-<p>Shortcut: <kbd>Y</kbd></p>
+<p><strong>Window &gt; Secondary</strong> (<kbd>Y</kbd>) opens a secondary window that mirrors the view, to put on a separate monitor: useful for client review on a calibrated display.</p>
+<p>Locations: <strong>Window</strong> menu, <strong>Window</strong> tool bar</p>
+<h2 id="help">Help</h2>
+<ul><li><strong>Help &gt; Tour</strong> — the tour of the window, the same one shown on the first start.</li><li><strong>Help &gt; Documentation</strong> — these pages, in a web browser. They are installed with the application, so they describe the version that is running; in a build that was not installed the item is unavailable.</li><li><strong>Help &gt; Get DJV Studio</strong> — the web site for DJV Studio, the commercial version of DJV. DJV Studio itself does not have this item.</li><li><strong>Help &gt; About</strong> — the version, when it was built, and the copyright, with <strong>Legal Notices</strong> for the licenses of the libraries DJV uses.</li><li><strong>Help &gt; System Information</strong> — the version and commit, the paths of the settings and log files, the operating system and hardware, the graphics device and driver, and the versions of the libraries and plugins, with a <strong>Copy</strong> button: what to include when reporting a problem.</li></ul>
+<p>Locations: <strong>Help</strong> menu</p>
 </main>
 </body>
 </html>
