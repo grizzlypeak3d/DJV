@@ -178,7 +178,7 @@
       "id": "ffmpeg",
       "window": {
         "w": 900,
-        "h": 600,
+        "h": 1000,
         "splitter2": 0.5
       },
       "crop": "MainWindow.Tools",
@@ -198,6 +198,10 @@
         {
           "id": "FFmpeg.HardwareDecoding",
           "caption": "Hardware decoding"
+        },
+        {
+          "id": "FFmpeg.AudioMerge",
+          "caption": "Merge mono audio"
         },
         {
           "id": "FFmpeg.Threads",
