@@ -24,15 +24,18 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+# Two jobs, as GitHub's own example has it: the artifact is uploaded by one
+# and deployed by the next, once it is finished. Deployed from the same job,
+# straight after the upload, the deployment sometimes could not find it yet
+# ("No artifacts named github-pages"), and each re-run then added another,
+# which fails differently ("Multiple artifacts"). Now a failed deployment
+# re-runs alone, with the one artifact.
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-24.04
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Change log page
         run: |
@@ -40,13 +43,20 @@ jobs:
           cmake -DNAV_DIR=docs -DNAV_LIST=docs/nav.txt -DNAV_EXTRA=docs/nav-pages.txt -P docs/Nav.cmake
 
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
