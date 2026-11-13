@@ -3072,7 +3072,11 @@ const char* djv_still_get_name(djv_models* models, const char* ext)
     {
         models->stillName = models::getStillFileName(
             player->getPath(),
-            models->timeUnitsModel->getLabel(player->getCurrentTime()),
+            models::getStillTimeLabel(
+                player->getCurrentTime(),
+                player->getTimeRange(),
+                models->timeUnitsModel->getTimeUnits(),
+                models->timeUnitsModel->getLabel(player->getCurrentTime())),
             ext ? ext : ".png");
     }
     return models->stillName.c_str();

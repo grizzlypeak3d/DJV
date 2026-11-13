@@ -165,6 +165,31 @@ namespace djv
                 ftk::Path("/Users/me/Desktop/IMG_1589.MOV"), "00:00:00:00", ".tif"));
             FTK_CHECK("shot_0001_1.png" == models::getStillFileName(
                 ftk::Path("shot_0001.png"), "1", ".png"));
+            // The time in the timeline's units, in a form that sorts and is
+            // not taken for a frame number: frames padded to the last
+            // frame's digits, seconds the same with an "s", timecode as
+            // labeled.
+            const OTIO_NS::TimeRange range(
+                OTIO_NS::RationalTime(0.0, 24.0),
+                OTIO_NS::RationalTime(2400.0, 24.0));
+            const OTIO_NS::RationalTime time(42.0, 24.0);
+            FTK_CHECK("0042" == models::getStillTimeLabel(
+                time, range, tl::TimeUnits::Frames, "00:00:01:18"));
+            FTK_CHECK("01.75s" == models::getStillTimeLabel(
+                time, range, tl::TimeUnits::Seconds, "00:00:01:18"));
+            FTK_CHECK("00:00:01:18" == models::getStillTimeLabel(
+                time, range, tl::TimeUnits::Timecode, "00:00:01:18"));
+            FTK_CHECK("IMG_1589_01.75s.tif" == models::getStillFileName(
+                ftk::Path("IMG_1589.MOV"),
+                models::getStillTimeLabel(time, range, tl::TimeUnits::Seconds, ""),
+                ".tif"));
+            // A short range pads to its own digits.
+            FTK_CHECK("7" == models::getStillTimeLabel(
+                OTIO_NS::RationalTime(7.0, 24.0),
+                OTIO_NS::TimeRange(OTIO_NS::RationalTime(0.0, 24.0), OTIO_NS::RationalTime(10.0, 24.0)),
+                tl::TimeUnits::Frames,
+                ""));
+
             // Without a time, the name alone.
             FTK_CHECK("render.tif" == models::getStillFileName(
                 ftk::Path("render.mov"), "", ".tif"));

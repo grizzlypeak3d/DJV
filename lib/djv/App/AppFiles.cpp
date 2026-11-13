@@ -586,7 +586,11 @@ namespace djv
                 settings.dir,
                 models::getStillFileName(
                     player->getPath(),
-                    p.timeUnitsModel->getLabel(player->getCurrentTime()),
+                    models::getStillTimeLabel(
+                        player->getCurrentTime(),
+                        player->getTimeRange(),
+                        p.timeUnitsModel->getTimeUnits(),
+                        p.timeUnitsModel->getLabel(player->getCurrentTime())),
                     settings.imageExt));
             models::writeStill(
                 _context,

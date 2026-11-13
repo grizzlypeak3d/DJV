@@ -421,6 +421,7 @@ namespace djv
             p.toastLabel->setBackgroundRole(ftk::ColorRole::Overlay);
             p.toastLabel->setClipText(true);
             p.toastLabel->setVisible(false);
+            ftk::setScreenshotTag(p.toastLabel, "View.Toast");
 
             auto topRow = HUDRow::create(context, p.hudLayout);
             topRow->setVAlign(ftk::VAlign::Top);

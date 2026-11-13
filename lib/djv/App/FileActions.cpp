@@ -7,6 +7,7 @@
 
 #include <djv/App/App.h>
 #include <djv/App/MainWindow.h>
+#include <djv/UI/Viewport.h>
 #include <djv/Models/FilesModel.h>
 
 #include <ftk/Core/Format.h>
@@ -189,7 +190,18 @@ namespace djv
                     {
                         try
                         {
-                            app->exportStill();
+                            // Said where it can be seen, since nothing else
+                            // changes: the name in the viewport's toast, the
+                            // whole path in the log.
+                            const ftk::Path path(app->exportStill());
+                            app->getContext()->log(
+                                "djv::app::FileActions",
+                                ftk::Format("Exported still: {0}").arg(path.get()));
+                            if (auto mainWindow = app->getMainWindow())
+                            {
+                                mainWindow->getViewport()->showHint(
+                                    ftk::Format("Exported {0}").arg(path.getFileName()));
+                            }
                         }
                         catch (const std::exception& e)
                         {

@@ -8,6 +8,7 @@
 #include <tlRender/Timeline/ColorOptions.h>
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/DisplayOptions.h>
+#include <tlRender/Timeline/TimeUnits.h>
 
 #include <ftk/Core/Image.h>
 #include <ftk/Core/Path.h>
@@ -155,6 +156,18 @@ namespace djv
             const ftk::Path& source,
             const std::string& time,
             const std::string& ext);
+
+        //! The time part of a still's name, in the units the timeline shows
+        //! so the name matches it, in a form that sorts in a folder and is
+        //! not taken for a sequence's frame number: frames padded to the
+        //! last frame's digits ("0042"), seconds padded the same way with
+        //! two decimals and an "s" ("012.50s"), and timecode as the label
+        //! given for it.
+        DJV_MODELS_API std::string getStillTimeLabel(
+            const OTIO_NS::RationalTime& time,
+            const OTIO_NS::TimeRange& range,
+            tl::TimeUnits,
+            const std::string& timecodeLabel);
 
         //! Write a still of the frame a player is at, as the viewport shows
         //! it, at the size its sources are shown at together, into a file

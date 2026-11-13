@@ -20,6 +20,9 @@
 #include <ftk/Core/Format.h>
 
 #include <cmath>
+#include <cstdlib>
+#include <iomanip>
+#include <sstream>
 #include <stdexcept>
 
 namespace djv
@@ -200,6 +203,62 @@ namespace djv
                 }
             }
             return label.empty() ? name + ext : name + "_" + label + ext;
+        }
+
+        std::string getStillTimeLabel(
+            const OTIO_NS::RationalTime& time,
+            const OTIO_NS::TimeRange& range,
+            tl::TimeUnits units,
+            const std::string& timecodeLabel)
+        {
+            // How many digits the largest whole number in the range has.
+            const auto digits = [](int64_t value)
+            {
+                int out = 1;
+                for (value = std::abs(value); value >= 10; value /= 10)
+                {
+                    ++out;
+                }
+                return out;
+            };
+            std::string out;
+            switch (units)
+            {
+            case tl::TimeUnits::Frames:
+            {
+                const int64_t frame = static_cast<int64_t>(time.to_frames());
+                const int width = digits(static_cast<int64_t>(
+                    range.end_time_inclusive().to_frames()));
+                std::stringstream ss;
+                if (frame < 0)
+                {
+                    ss << "-";
+                }
+                ss << std::setfill('0') << std::setw(width) << std::abs(frame);
+                out = ss.str();
+                break;
+            }
+            case tl::TimeUnits::Seconds:
+            {
+                const double seconds = time.to_seconds();
+                const int width = digits(static_cast<int64_t>(
+                    std::floor(range.end_time_inclusive().to_seconds())));
+                std::stringstream ss;
+                if (seconds < 0.0)
+                {
+                    ss << "-";
+                }
+                // The whole seconds padded, the point, two decimals.
+                ss << std::fixed << std::setprecision(2) << std::setfill('0') <<
+                    std::setw(width + 3) << std::abs(seconds) << "s";
+                out = ss.str();
+                break;
+            }
+            default:
+                out = timecodeLabel;
+                break;
+            }
+            return out;
         }
 
         void writeStill(
