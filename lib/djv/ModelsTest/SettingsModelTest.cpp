@@ -150,10 +150,21 @@ namespace djv
                 ftk::Path("Train-Shaded.mov"), "00:59:59;29", ".png"));
             // A sequence's name without its frame number or the separator
             // before it.
-            FTK_CHECK("render_1001.jpg" == models::getStillFileName(
-                ftk::Path("/shots/render.1001.exr"), "1001", ".jpg"));
-            FTK_CHECK("shot_v002_24.dpx" == models::getStillFileName(
-                ftk::Path("shot_v002_0001.dpx"), "24", ".dpx"));
+            {
+                ftk::Path path("/shots/render.1001.exr");
+                path.setFrames(ftk::RangeI64(1001, 1100));
+                FTK_CHECK("render_1001.jpg" == models::getStillFileName(path, "1001", ".jpg"));
+            }
+            {
+                ftk::Path path("shot_v002_0001.dpx");
+                path.setFrames(ftk::RangeI64(1, 48));
+                FTK_CHECK("shot_v002_24.dpx" == models::getStillFileName(path, "24", ".dpx"));
+            }
+            // A movie or a single image keeps the digits its name ends in.
+            FTK_CHECK("IMG_1589_00-00-00-00.tif" == models::getStillFileName(
+                ftk::Path("/Users/me/Desktop/IMG_1589.MOV"), "00:00:00:00", ".tif"));
+            FTK_CHECK("shot_0001_1.png" == models::getStillFileName(
+                ftk::Path("shot_0001.png"), "1", ".png"));
             // Without a time, the name alone.
             FTK_CHECK("render.tif" == models::getStillFileName(
                 ftk::Path("render.mov"), "", ".tif"));

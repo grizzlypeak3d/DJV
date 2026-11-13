@@ -158,12 +158,21 @@ namespace djv
             const std::string& time,
             const std::string& ext)
         {
-            // The name without a sequence's frame number and what separates
-            // it, or a file's name without its extension.
+            // A sequence's name without its frame number and what separates
+            // it, or a file's name without its extension. Only a sequence
+            // loses its number: a movie or a single image whose name ends
+            // in digits, as a camera's IMG_1589.MOV does, keeps them.
             std::string name = source.getBase();
-            while (!name.empty() && ('.' == name.back() || '_' == name.back() || '-' == name.back()))
+            if (source.isSeq())
             {
-                name.pop_back();
+                while (!name.empty() && ('.' == name.back() || '_' == name.back() || '-' == name.back()))
+                {
+                    name.pop_back();
+                }
+            }
+            else
+            {
+                name += source.getNum();
             }
             if (name.empty())
             {
