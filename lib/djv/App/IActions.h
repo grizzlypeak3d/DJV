@@ -32,6 +32,10 @@ namespace djv
         public:
             DJV_APP_API ~IActions();
 
+            //! Get the group's name, the first part of its commands' names
+            //! ("File" for "File/Open").
+            DJV_APP_API const std::string& getName() const;
+
             DJV_APP_API const std::map<std::string, std::shared_ptr<ftk::Action> >& getActions() const;
 
         protected:

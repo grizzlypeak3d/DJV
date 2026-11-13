@@ -13,6 +13,7 @@
 
 namespace ftk
 {
+    class Menu;
     class MenuBar;
 }
 
@@ -34,6 +35,7 @@ namespace djv
     namespace app
     {
         class App;
+        class IActions;
         class IToolWidget;
         class ReviewActions;
 
@@ -59,6 +61,13 @@ namespace djv
 
             //! Get the menu bar.
             DJV_APP_API const std::shared_ptr<ftk::MenuBar> getMenuBar() const;
+
+            //! Get the menus, with their titles, in the order the menu bar
+            //! has them.
+            DJV_APP_API std::vector<std::pair<std::string, std::shared_ptr<ftk::Menu> > > getMenus() const;
+
+            //! Get the action groups, in the menu bar's order.
+            DJV_APP_API std::vector<std::shared_ptr<IActions> > getActionGroups() const;
 
             //! Get the viewport.
             DJV_APP_API const std::shared_ptr<ui::Viewport>& getViewport() const;

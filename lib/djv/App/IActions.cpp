@@ -151,6 +151,11 @@ namespace djv
             };
         }
 
+        const std::string& IActions::getName() const
+        {
+            return _name;
+        }
+
         const std::map<std::string, std::shared_ptr<ftk::Action> >& IActions::getActions() const
         {
             return _actions;

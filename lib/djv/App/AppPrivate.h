@@ -98,6 +98,7 @@ namespace djv
             std::shared_ptr<ftk::CmdLineFlag> version;
             std::shared_ptr<ftk::CmdLineFlag> sysInfo;
             std::shared_ptr<ftk::CmdLineFlag> listCommands;
+            std::shared_ptr<ftk::CmdLineFlag> actionsJSON;
             std::shared_ptr<ftk::CmdLineListOption<std::string> > command;
             std::shared_ptr<ftk::CmdLineOption<int> > debugLoop;
             std::shared_ptr<ftk::CmdLineOption<double> > benchmark;

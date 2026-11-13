@@ -38,6 +38,12 @@ namespace djv
         //! The default keys of one action: none when it has none.
         DJV_MODELS_API Shortcut getDefaultShortcut(const std::string& name);
 
+        //! The default keys of one action as the documentation writes them,
+        //! the same on every platform: "Ctrl/Cmd+O" for a shortcut that is
+        //! Command on macOS and Control elsewhere, "Ctrl+B" for one that is
+        //! Control everywhere. None when it has none.
+        DJV_MODELS_API std::vector<std::string> getDefaultShortcutLabels(const std::string& name);
+
         //! \name Serialize
         ///@{
 

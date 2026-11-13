@@ -246,6 +246,19 @@ namespace djv
                 FTK_CHECK("Review/Draw" == shortcut.name);
                 FTK_CHECK(ftk::Key::Unknown == shortcut.primary.key);
             }
+            {
+                // As the documentation writes them, the same on every
+                // platform: the command key as Ctrl/Cmd, Control as Ctrl.
+                FTK_CHECK(std::vector<std::string>({ "Ctrl/Cmd+O" }) ==
+                    models::getDefaultShortcutLabels("File/Open"));
+                FTK_CHECK(std::vector<std::string>({ "Ctrl/Cmd+Shift+O" }) ==
+                    models::getDefaultShortcutLabels("File/OpenAudio"));
+                FTK_CHECK(std::vector<std::string>({ "Ctrl+B" }) ==
+                    models::getDefaultShortcutLabels("Compare/B"));
+                FTK_CHECK(std::vector<std::string>({ "." }) ==
+                    models::getDefaultShortcutLabels("Audio/VolumeUp"));
+                FTK_CHECK(models::getDefaultShortcutLabels("Review/Draw").empty());
+            }
         }
 
         void SettingsModelTest::_shortcuts()

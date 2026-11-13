@@ -702,6 +702,46 @@ namespace djv
             return _p->menuBar;
         }
 
+        std::vector<std::pair<std::string, std::shared_ptr<ftk::Menu> > > MainWindow::getMenus() const
+        {
+            FTK_P();
+            return
+            {
+                { "File", p.fileMenu },
+                { "Review", p.reviewMenu },
+                { "Compare", p.compareMenu },
+                { "Playback", p.playbackMenu },
+                { "Frame", p.frameMenu },
+                { "Timeline", p.timelineMenu },
+                { "Audio", p.audioMenu },
+                { "View", p.viewMenu },
+                { "Window", p.windowMenu },
+                { "Color", p.colorMenu },
+                { "Tools", p.toolsMenu },
+                { "Help", p.helpMenu }
+            };
+        }
+
+        std::vector<std::shared_ptr<IActions> > MainWindow::getActionGroups() const
+        {
+            FTK_P();
+            return
+            {
+                p.fileActions,
+                p.reviewActions,
+                p.compareActions,
+                p.playbackActions,
+                p.frameActions,
+                p.timelineActions,
+                p.audioActions,
+                p.viewActions,
+                p.windowActions,
+                p.colorActions,
+                p.toolsActions,
+                p.helpActions
+            };
+        }
+
         void MainWindow::click(const ftk::V2I& pos, int modifiers)
         {
             _cursorEnter(true);

@@ -22,6 +22,7 @@
 #include <djv/App/FilesTool.h>
 #include <djv/App/InfoTool.h>
 #include <djv/App/MagnifyTool.h>
+#include <djv/App/IActions.h>
 #include <djv/App/MainWindow.h>
 #include <djv/App/MessagesTool.h>
 #include <djv/App/ReviewTool.h>
@@ -43,6 +44,7 @@
 #include <djv/Models/Review.h>
 #include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/CommandsModel.h>
+#include <djv/Models/Shortcuts.h>
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/ViewportModel.h>
 
@@ -59,6 +61,7 @@
 
 #include <ftk/GL/Window.h>
 #include <ftk/UI/DialogSystem.h>
+#include <ftk/UI/Menu.h>
 #include <ftk/UI/Settings.h>
 #include <ftk/UI/SysLogModel.h>
 #include <ftk/Core/CmdLine.h>
@@ -73,8 +76,12 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <iomanip>
+#include <map>
+
+#include <nlohmann/json.hpp>
 #include <optional>
 
 #if defined(__GLIBC__)
@@ -85,6 +92,109 @@ namespace djv
 {
     namespace app
     {
+        namespace
+        {
+            // The menus, the actions and the commands, for the documentation's
+            // reference (-actionsJSON): taken from the application as it runs,
+            // so the reference cannot drift from it. The shortcuts are the
+            // defaults, written the same on every platform.
+            nlohmann::json getActionsJSON(
+                const std::shared_ptr<MainWindow>& mainWindow,
+                const std::shared_ptr<models::CommandsModel>& commandsModel)
+            {
+                nlohmann::json out;
+                std::map<std::shared_ptr<ftk::Action>, std::string> commandOf;
+                nlohmann::json actions = nlohmann::json::array();
+                for (const auto& group : mainWindow->getActionGroups())
+                {
+                    for (const auto& i : group->getActions())
+                    {
+                        const std::string name = group->getName() + "/" + i.first;
+                        commandOf[i.second] = name;
+                        nlohmann::json action;
+                        action["name"] = name;
+                        action["text"] = i.second->getText();
+                        // Without the shortcut the tooltip ends with, which is
+                        // the platform's and has its own field below.
+                        std::string tooltip = i.second->getTooltip();
+                        const size_t shortcutPos = tooltip.find("\n\nShortcut:");
+                        if (shortcutPos != std::string::npos)
+                        {
+                            tooltip.erase(shortcutPos);
+                        }
+                        action["tooltip"] = tooltip;
+                        action["checkable"] = i.second->isCheckable();
+                        std::vector<std::string> shortcuts = models::getDefaultShortcutLabels(name);
+                        if (shortcuts.empty())
+                        {
+                            // The tools' keys, which come from the tools model
+                            // and have no command modifier.
+                            for (const auto& shortcut : i.second->getShortcuts())
+                            {
+                                const std::string label = ftk::getShortcutLabel(
+                                    shortcut.key,
+                                    shortcut.modifiers);
+                                if (!label.empty())
+                                {
+                                    shortcuts.push_back(label);
+                                }
+                            }
+                        }
+                        action["shortcuts"] = shortcuts;
+                        actions.push_back(action);
+                    }
+                }
+                out["actions"] = actions;
+
+                // A menu's actions, then its sub menus: what is not one of the
+                // groups' actions -- the recent files, a configuration's views
+                // -- depends on the run and is left out.
+                std::function<nlohmann::json(const std::shared_ptr<ftk::Menu>&)> getItems;
+                getItems = [&commandOf, &getItems](const std::shared_ptr<ftk::Menu>& menu)
+                {
+                    nlohmann::json items = nlohmann::json::array();
+                    for (const auto& action : menu->getActions())
+                    {
+                        const auto i = commandOf.find(action);
+                        if (i != commandOf.end())
+                        {
+                            items.push_back({ { "action", i->second } });
+                        }
+                    }
+                    for (const auto& subMenu : menu->getSubMenus())
+                    {
+                        items.push_back(
+                            {
+                                { "menu", menu->getSubMenuText(subMenu) },
+                                { "items", getItems(subMenu) }
+                            });
+                    }
+                    return items;
+                };
+                nlohmann::json menus = nlohmann::json::array();
+                for (const auto& i : mainWindow->getMenus())
+                {
+                    if (i.second)
+                    {
+                        menus.push_back(
+                            {
+                                { "menu", i.first },
+                                { "items", getItems(i.second) }
+                            });
+                    }
+                }
+                out["menus"] = menus;
+
+                nlohmann::json commands = nlohmann::json::array();
+                for (const auto& command : commandsModel->getCommands())
+                {
+                    commands.push_back({ { "name", command.name }, { "doc", command.doc } });
+                }
+                out["commands"] = commands;
+                return out;
+            }
+        }
+
         void App::_init(
             const std::shared_ptr<ftk::Context>& context,
             std::vector<std::string>& argv,
@@ -284,6 +394,10 @@ namespace djv
             p.cmdLine.listCommands = ftk::CmdLineFlag::create(
                 { "-listCommands" },
                 "Print the list of commands and exit.");
+            p.cmdLine.actionsJSON = ftk::CmdLineFlag::create(
+                { "-actionsJSON" },
+                "Print the menus, the actions and the commands as JSON and "
+                "exit, for the documentation's reference.");
             p.cmdLine.command = ftk::CmdLineListOption<std::string>::create(
                 { "-command" },
                 "Execute a command after startup. The command name may be "
@@ -362,6 +476,7 @@ namespace djv
                 p.cmdLine.version,
                 p.cmdLine.sysInfo,
                 p.cmdLine.listCommands,
+                p.cmdLine.actionsJSON,
                 p.cmdLine.command,
                 p.cmdLine.debugLoop,
                 p.cmdLine.benchmark,
@@ -476,6 +591,7 @@ namespace djv
             return
                 _p->cmdLine.hideSetup->found() ||
                 _p->cmdLine.listCommands->found() ||
+                _p->cmdLine.actionsJSON->found() ||
                 _p->cmdLine.command->found() ||
                 isCaptureRun() ||
                 _p->cmdLine.benchmark->found() ||
@@ -772,6 +888,12 @@ namespace djv
                 _context->getLogSystem()->print(
                     "djv::app::App",
                     "System information:\n" + ftk::join(lines, '\n'));
+            }
+
+            if (p.cmdLine.actionsJSON->found())
+            {
+                std::cout << getActionsJSON(p.mainWindow, p.commandsModel).dump(4) << std::endl;
+                return;
             }
 
             if (p.cmdLine.listCommands->found())
