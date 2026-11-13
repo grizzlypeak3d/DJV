@@ -44,6 +44,10 @@ Fixes:
 * Fix for jumping one second at 23.976, 29.97, and 59.94 fps landing a frame
   short (#720).
 * Fix for jumps past the in or out point wrapping around (#659).
+* Fix for an image sequence in a timeline with a different frame rate
+  playing at the timeline's rate (tlRender #128).
+* Fix for OTIO media referenced by file URLs with a Windows drive letter, as
+  Hiero writes them (tlRender #143).
 
 ## 3.7.6
 
