@@ -1,6 +1,8 @@
 # The documentation is installed beside the application and opened from
 # there, so that what it describes is the version that is running. It is
-# plain HTML with relative links, so the directory works as it stands.
+# plain HTML with relative links, so the directory works as it stands; the
+# Markdown the pages are made from, and llms.txt listing it, go with it for
+# agents.
 
 # The macOS package is not here: the bundle carries its own copy,
 # taken from the prefix by cmake/Modules/Package.cmake, so this stays
@@ -15,9 +17,12 @@ install(
     COMPONENT docs
     FILES_MATCHING
         PATTERN "*.html"
+        PATTERN "*.md"
+        PATTERN "llms.txt"
         PATTERN "*.css"
         PATTERN "*.svg"
-        PATTERN "*.png")
+        PATTERN "*.png"
+        PATTERN "__pycache__" EXCLUDE)
 
 # The sample files, opened on a first start for the tour to point at (see
 # MainWindow::showFirstStart()): a turntable of a train model, shaded and
@@ -65,7 +70,8 @@ install(
     CODE "
         set(NAV_DIR \"\${CMAKE_INSTALL_PREFIX}/${DEST}\")
         set(NAV_LIST \"${CMAKE_CURRENT_SOURCE_DIR}/nav.txt\")
-        set(NAV_EXTRA \"${CMAKE_CURRENT_SOURCE_DIR}/nav-install.txt\")"
+        set(NAV_EXTRA \"${CMAKE_CURRENT_SOURCE_DIR}/nav-install.txt\")
+        set(NAV_VERSION \"${DJV_VERSION_FULL}\")"
     COMPONENT docs)
 install(
     SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/Nav.cmake

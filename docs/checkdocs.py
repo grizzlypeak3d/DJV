@@ -7,7 +7,8 @@ The pages name menu items as **Menu > Item** and commands as `Group/Name`;
 this fails on any that the actions reference (actions.md, made from the
 application) does not have, so a renamed or removed item breaks the build
 rather than leaving a page that describes something that is not there. It
-also fails on links to pages, or sections of pages, that do not exist.
+also fails on links to pages, or sections of pages, that do not exist, and
+on an llms.txt that does not list every page in the navigation.
 
     python3 checkdocs.py DOCS_DIR
 """
@@ -17,6 +18,8 @@ import os
 import re
 import sys
 
+# No __pycache__ beside the pages, where it would be installed with them.
+sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from md2html import slug  # noqa: E402
 
@@ -93,6 +96,19 @@ def main(argv):
         for anchor in re.findall(r"\]\(#([\w-]+)\)", text):
             if anchor not in anchors(md):
                 errors.append("%s.md: no section \"#%s\"" % (name, anchor))
+    # The index for agents: every page in the navigation, and nothing that
+    # is not there.
+    with open(os.path.join(docs, "llms.txt"), encoding="utf-8") as f:
+        listed = re.findall(r"\]\(([\w-]+)\.(?:md|html)\)", f.read())
+    for page in listed:
+        if page not in html:
+            errors.append("llms.txt: no page \"%s\"" % page)
+    with open(os.path.join(docs, "nav.txt"), encoding="utf-8") as f:
+        for line in f:
+            if line.strip() and not line.startswith(("#", "= ")):
+                page = line.split()[0][:-5]
+                if page not in listed:
+                    errors.append("llms.txt: \"%s\" is not listed" % page)
     if errors:
         sys.exit("\n".join(sorted(set(errors))))
 

@@ -16,4 +16,6 @@ Features include:
 
 ![Main window](assets/index.svg)
 
-Use the navigation on the left to browse the documentation, or the search box at the top to jump straight to a topic.
+Use the navigation on the left to browse the documentation. Every menu item and its keys are listed in the [Actions reference](actions.html).
+
+The pages are written in Markdown, and most can be read that way: the same name with `.md` in place of `.html`. [llms.txt](llms.txt) lists them for AI agents and other tools.

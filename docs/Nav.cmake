@@ -15,6 +15,9 @@
 #   NAV_LIST   the list to write
 #   NAV_EXTRA  further lists, appended in order (optional)
 #   NAV_CHECK  report pages that would change and fail, writing nothing
+#   NAV_VERSION  the version, written after the name at the top of each page
+#                and of llms.txt (optional; an install's, so that a page
+#                read on its own says which version it describes)
 
 if(NOT NAV_DIR OR NOT NAV_LIST)
     message(FATAL_ERROR "NAV_DIR and NAV_LIST are required")
@@ -95,6 +98,13 @@ foreach(PAGE ${PAGES})
     string(SUBSTRING "${TEXT}" ${END} -1 AFTER)
     set(UPDATED "${BEFORE}${LIST_HTML}${AFTER}")
 
+    if(NAV_VERSION)
+        string(REGEX REPLACE
+            "(<a class=\"logo\" href=\"index.html\"><img [^>]*>DJV)[^<]*</a>"
+            "\\1 ${NAV_VERSION}</a>"
+            UPDATED "${UPDATED}")
+    endif()
+
     # The table of contents, on the pages that carry the block.
     set(TOC_OPEN "<div class=\"toc\">\n<ul>\n")
     set(TOC_CLOSE "\n</ul>\n</div>")
@@ -134,6 +144,12 @@ foreach(PAGE ${PAGES})
         file(WRITE "${PAGE}" "${UPDATED}")
     endif()
 endforeach()
+
+if(NAV_VERSION AND NOT NAV_CHECK AND EXISTS "${NAV_DIR}/llms.txt")
+    file(READ "${NAV_DIR}/llms.txt" TEXT)
+    string(REGEX REPLACE "^# DJV[^\n]*" "# DJV ${NAV_VERSION}" TEXT "${TEXT}")
+    file(WRITE "${NAV_DIR}/llms.txt" "${TEXT}")
+endif()
 
 if(NAV_CHECK AND CHANGED)
     string(REPLACE ";" ", " CHANGED "${CHANGED}")

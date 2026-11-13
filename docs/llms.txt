@@ -1,0 +1,36 @@
+# DJV
+
+> DJV is an open source application for media playback and review: image sequences, movies, and OpenTimelineIO timelines, with A/B comparison, color management, annotations, and export. These are its user documentation pages, in Markdown; each has an HTML copy of the same name.
+
+The pages name menu items as **Menu > Item** and commands as `Group/Name`. Every menu item and command is in the actions reference, which is made from the application itself; commands run from the command line with `-command` and from Python.
+
+## Using DJV
+
+- [Main window](main-window.md): the parts of the window, showing and hiding them, full screen, presentation mode, the secondary window, and the Help menu
+- [Files](files.md): opening files, recent files, switching between files, playlists, the memory cache, layers, and the Files tool
+- [File formats](formats.md): the image, movie, audio, and timeline formats that can be read, and how sequences, media references, and USD are handled
+- [View](view.md): zooming and panning, channels, mirroring, aspect ratio, the HUD, and the mouse tool
+- [Playback and frame control](playback.md): playing, looping, speed, the in/out range, and moving between frames
+- [Timeline](timeline.md): the timeline under the view, scrubbing, tracks and media, and comparing timelines
+- [A/B comparison](compare.md): comparing files or layers side by side, wiped, overlaid, or as a difference, and holding a frame to compare against
+- [Review](reviews.md): saving a session as a review file, drawing on frames, and markers
+- [Color](color.md): OpenColorIO, LUTs, and image adjustments
+- [Audio](audio.md): audio tracks, output devices, and audio paired with image sequences
+- [Tools](tools.md): the tool panels, such as the color picker, magnifier, and information
+- [Exporting files](export.md): writing stills, image sequences, and movies
+- [Settings](settings.md): the settings, where they are stored, and keyboard shortcuts
+- [Troubleshooting](troubleshooting.md): the log, resetting settings, and graphics problems
+
+## Reference
+
+- [Actions reference](actions.md): every menu item with its default keys, command name, and description, made from the application
+- [Command line](command-line.html): the command line options, from the application's own help (`djv -help`)
+- [Automation](automation.md): running commands from the command line and from scripts
+- [Python](python.md): the Python bindings and the Python version of the application
+- [Review file format](review-format.md): the `.djvr` review file
+
+## Optional
+
+- [Download and install](install.md): packages for each platform
+- [Building from source](building.md): building DJV and its dependencies with CMake
+- [Home](index.md): the overview of DJV
