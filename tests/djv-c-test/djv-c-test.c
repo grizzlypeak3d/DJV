@@ -274,7 +274,8 @@ static void shortcuts(djv_models* models)
 static void stills(tl_engine* engine, djv_models* models)
 {
     const char* name = djv_still_get_name(models, ".png");
-    CHECK(strncmp(name, "BART_2021-02-07_", 16) == 0);
+    /* One file, not a sequence: its name keeps its number. */
+    CHECK(strncmp(name, "BART_2021-02-07.0000_", 21) == 0);
     CHECK(strlen(name) > 20 && strcmp(name + strlen(name) - 4, ".png") == 0);
     if (tl_engine_has_gpu(engine))
     {
