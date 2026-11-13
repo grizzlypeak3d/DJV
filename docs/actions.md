@@ -81,8 +81,8 @@ The commands are how the menu items are run from outside the window: with
 | Horizontal |  | `Compare/Horizontal` | Show the A and B files in a horizontal layout. |
 | Vertical |  | `Compare/Vertical` | Show the A and B files in a vertical layout. |
 | Tile | <kbd>Ctrl+T</kbd> | `Compare/Tile` | Show the A and B files in a tiled layout. |
-| Hold Frame |  | `Compare/HoldFrame` | Hold the current frame and compare against it: it becomes the comparison's B, wiped against A if no other comparison is chosen, whatever the time or the file, until it is let go. Holding again holds the frame then current. |
-| Clear Held Frame |  | `Compare/ClearHeld` | Let go of the held frame. |
+| Hold Frame | <kbd>Shift+H</kbd> | `Compare/HoldFrame` | Hold the current frame and compare against it: it becomes the comparison's B, wiped against A if no other comparison is chosen, whatever the time or the file, until it is let go. Holding again holds the frame then current. |
+| Clear Held Frame | <kbd>Alt+Shift+H</kbd> | `Compare/ClearHeld` | Let go of the held frame. |
 | B > | | | A list the application fills in: files, layers, sizes. |
 | Sync by > Start of File |  | `Compare/Relative` | Compare files using relative time. |
 | Sync by > Timecode |  | `Compare/Absolute` | Compare files using absolute time. |

@@ -59,6 +59,8 @@ namespace djv
                 Shortcut("Compare/B", "", ftk::KeyShortcut(ftk::Key::B, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Compare/Wipe", "", ftk::KeyShortcut(ftk::Key::W, static_cast<int>(ftk::KeyModifier::Control))),
                 Shortcut("Compare/Tile", "", ftk::KeyShortcut(ftk::Key::T, static_cast<int>(ftk::KeyModifier::Control))),
+                Shortcut("Compare/HoldFrame", "", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Shift))),
+                Shortcut("Compare/ClearHeld", "", ftk::KeyShortcut(ftk::Key::H, static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::KeyModifier::Alt))),
 
                 // File
                 Shortcut("File/Open", "", ftk::KeyShortcut(ftk::Key::O, cmd)),

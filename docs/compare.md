@@ -71,11 +71,11 @@ Locations: **Compare** menu, **Files** tool
 
 ## Comparing against a held frame {#held-frame}
 
-**Compare > Hold Frame** keeps the current frame and makes it **B**: it stays put while you play, scrub, or open another file, and every compare mode works with it. It is for a frame against another frame of the same clip, or a still against a movie: hold the still, then go to the movie. A wipe is used if no compare mode is chosen.
+**Compare > Hold Frame** (<kbd>Shift+H</kbd>) keeps the current frame and makes it **B**: it stays put while you play, scrub, or open another file, and every compare mode works with it. It is for a frame against another frame of the same clip, or a still against a movie: hold the still, then go to the movie. A wipe is used if no compare mode is chosen.
 
 While it is **B**, the bottom of the view says so, with the file and the time it was held from. The color settings apply to it as they do to **A**, and exports and **File > Export Still** show it as the view does. Drawings are not made on it or shown over it.
 
-To see **A** alone, set the compare mode to none: the frame stays held, and is **B** again with the next mode chosen. **Compare > Hold Frame** again holds the frame then current, and **Compare > Clear Held Frame** lets it go, back to the **B** files. It is not kept when DJV closes.
+To see **A** alone, set the compare mode to none: the frame stays held, and is **B** again with the next mode chosen. **Compare > Hold Frame** again holds the frame then current, and **Compare > Clear Held Frame** (<kbd>Alt+Shift+H</kbd>) lets it go, back to the **B** files. It is not kept when DJV closes.
 
 Locations: **Compare** menu
 
