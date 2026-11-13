@@ -58,23 +58,23 @@ set(TLRENDER_USD ON CACHE BOOL "")</code></pre>
 <p>For the number of build jobs, export <code>CMAKE_BUILD_PARALLEL_LEVEL</code>.</p>
 <h2 id="linux">Linux</h2>
 <p>Requirements: Git and CMake 3.31.</p>
-<h3>Debian and Ubuntu</h3>
+<h3 id="debian-and-ubuntu">Debian and Ubuntu</h3>
 <p>Install the system packages:</p>
 <pre><code>sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev</code></pre>
 <p>The Wayland packages are optional; without them SDL is built with X11 only and runs through XWayland on a Wayland desktop.</p>
-<h3>Rocky 9</h3>
+<h3 id="rocky-9">Rocky 9</h3>
 <pre><code>sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel libdecor-devel</code></pre>
 <p>Rocky 9 packages CMake 3.26, and OpenTimelineIO needs 3.31. A newer one can be installed with pip; the cmake.org <code>.sh</code> file is an installer that takes a prefix, and either way the result has to be on the path ahead of the system's:</p>
 <pre><code>pip3 install --user "cmake&lt;4"
 export PATH=$HOME/.local/bin:$PATH</code></pre>
-<h3>Rocky 8</h3>
+<h3 id="rocky-8">Rocky 8</h3>
 <pre><code>sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel</code></pre>
 <p>Rocky 8 also needs a newer compiler, installed and then enabled for the shell that builds:</p>
 <pre><code>sudo dnf install gcc-toolset-13
 scl enable gcc-toolset-13 bash</code></pre>
 <p>NVIDIA hardware decoding loads the driver's CUDA library at run time. On RHEL family systems that is a separate package:</p>
 <pre><code>sudo dnf install nvidia-driver-cuda-libs</code></pre>
-<h3>Build</h3>
+<h3 id="build">Build</h3>
 <p>Clone the repository and run the super build script:</p>
 <pre><code>git clone https://github.com/grizzlypeak3d/DJV.git
 sh DJV/sbuild-linux.sh</code></pre>
@@ -93,12 +93,7 @@ sh DJV/sbuild-linux.sh</code></pre>
 set(TLRENDER_SVTAV1 OFF CACHE BOOL "")
 set(TLRENDER_OPENAPV OFF CACHE BOOL "")</code></pre>
 <p>What differs from a desktop:</p>
-<ul>
-<li>OpenGL ES has no 16-bit textures, so images with 16 bits per channel, and video with more than 8, are not displayed.</li>
-<li>There is no hardware decoding: the Pi's only video decoder is for HEVC, and FFmpeg does not support it without Raspberry Pi's patches. Video is decoded on the CPU.</li>
-<li>The display scale is set from the monitor's size and resolution. On the Raspberry Pi Touch Display 2 it comes out at 2; <code>-displayScale</code> sets it on the command line.</li>
-<li>On a touch screen one finger acts as the mouse, and two fingers pan and pinch to zoom the view and the timeline.</li>
-</ul>
+<ul><li>OpenGL ES has no 16-bit textures, so images with 16 bits per channel, and video with more than 8, are not displayed.</li><li>There is no hardware decoding: the Pi's only video decoder is for HEVC, and FFmpeg does not support it without Raspberry Pi's patches. Video is decoded on the CPU.</li><li>The display scale is set from the monitor's size and resolution. On the Raspberry Pi Touch Display 2 it comes out at 2; <code>-displayScale</code> sets it on the command line.</li><li>On a touch screen one finger acts as the mouse, and two fingers pan and pinch to zoom the view and the timeline.</li></ul>
 <h2 id="macos">macOS</h2>
 <p>Requirements: Git, Xcode, and CMake 3.31.</p>
 <p>Clone the repository and run the super build script:</p>
@@ -111,16 +106,7 @@ sh DJV/sbuild-macos.sh</code></pre>
 alias intel="env /usr/bin/arch -x86_64 /bin/zsh --login"</code></pre>
 <h2 id="windows">Windows</h2>
 <p>Requirements:</p>
-<ul>
-<li>Git (<a target="_blank" href="https://git-scm.com">git-scm.com</a>)</li>
-<li>Visual Studio 2022</li>
-<li>CMake 3.31</li>
-<li>NASM (<a target="_blank" href="https://www.nasm.us">nasm.us</a>) for compiling FFmpeg and libjpeg-turbo</li>
-<li>MSYS2 (<a target="_blank" href="https://www.msys2.org">msys2.org</a>) for compiling FFmpeg</li>
-<li>Strawberry Perl (<a target="_blank" href="https://strawberryperl.com/">strawberryperl.com</a>) for compiling network support</li>
-<li>Python 3.11 for compiling USD</li>
-<li>NSIS (<a target="_blank" href="https://nsis.sourceforge.io/Main_Page">nsis.sourceforge.io</a>) for packaging</li>
-</ul>
+<ul><li>Git (<a target="_blank" href="https://git-scm.com">git-scm.com</a>)</li><li>Visual Studio 2022</li><li>CMake 3.31</li><li>NASM (<a target="_blank" href="https://www.nasm.us">nasm.us</a>) for compiling FFmpeg and libjpeg-turbo</li><li>MSYS2 (<a target="_blank" href="https://www.msys2.org">msys2.org</a>) for compiling FFmpeg</li><li>Strawberry Perl (<a target="_blank" href="https://strawberryperl.com/">strawberryperl.com</a>) for compiling network support</li><li>Python 3.11 for compiling USD</li><li>NSIS (<a target="_blank" href="https://nsis.sourceforge.io/Main_Page">nsis.sourceforge.io</a>) for packaging</li></ul>
 <p>Open the Visual Studio command console "x64 Native Tools Command Prompt for VS 2022", found in the Start menu in the "Visual Studio 2022" folder.</p>
 <p>Clone the repository and run the super build script:</p>
 <pre><code>git clone https://github.com/grizzlypeak3d/DJV.git
@@ -140,11 +126,7 @@ build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg</c
 git -C DJV submodule update --init --recursive</code></pre>
 <p>Then run the super build script again. Dependencies that are already built are not built again, and DJV is built from where it left off.</p>
 <p>A clean build is needed only in some cases:</p>
-<ul>
-<li>When a dependency changes, for example a new version of FFmpeg, or when the compiler is updated: remove <code>ftk-Release</code>, <code>tl-Release</code>, <code>build-Release</code>, and <code>install-Release</code>, and build again.</li>
-<li>When an option in <code>etc/Config/local.cmake</code> changes: the same, since the options apply to the dependencies as well as to DJV.</li>
-<li>When a build that was working fails to link, or the application misbehaves after an update: remove <code>build-Release</code> and build again. feather-tk, tlRender, and DJV are all built there, so this takes much less time than the dependencies.</li>
-</ul>
+<ul><li>When a dependency changes, for example a new version of FFmpeg, or when the compiler is updated: remove <code>ftk-Release</code>, <code>tl-Release</code>, <code>build-Release</code>, and <code>install-Release</code>, and build again.</li><li>When an option in <code>etc/Config/local.cmake</code> changes: the same, since the options apply to the dependencies as well as to DJV.</li><li>When a build that was working fails to link, or the application misbehaves after an update: remove <code>build-Release</code> and build again. feather-tk, tlRender, and DJV are all built there, so this takes much less time than the dependencies.</li></ul>
 <h2 id="system-packages">System packages</h2>
 <p>On Linux the dependencies can come from the distribution instead of the super build. This is the build a distribution package would make. Ubuntu 26.04 is the first release with every package it needs, and it is the configuration continuous integration builds, so what follows is kept true there.</p>
 <p>Install the system packages:</p>
@@ -164,11 +146,7 @@ cmake -S DJV -B build-Release -C DJV/etc/Config/default.cmake -DCMAKE_BUILD_TYPE
 cmake --build build-Release</code></pre>
 <p>The script <code>etc/Linux/build-system.sh</code> does the same, and is what continuous integration runs.</p>
 <p>What differs from the super build:</p>
-<ul>
-<li>The distribution's OpenTimelineIO is 0.18.1. Markers carry an RGBA color from 0.19, so a review saved by this build writes marker colors as the default named color, and reads named colors.</li>
-<li>The super build patches FFmpeg so that media past 2 GB inside an OTIOZ bundle can be read; the distribution's FFmpeg is unpatched, and such an entry does not open.</li>
-<li>The codecs are whatever the distribution's FFmpeg carries, rather than the packages' minimal set.</li>
-</ul>
+<ul><li>The distribution's OpenTimelineIO is 0.18.1. Markers carry an RGBA color from 0.19, so a review saved by this build writes marker colors as the default named color, and reads named colors.</li><li>The super build patches FFmpeg so that media past 2 GB inside an OTIOZ bundle can be read; the distribution's FFmpeg is unpatched, and such an entry does not open.</li><li>The codecs are whatever the distribution's FFmpeg carries, rather than the packages' minimal set.</li></ul>
 </main>
 </body>
 </html>

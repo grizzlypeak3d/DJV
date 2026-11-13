@@ -11,7 +11,8 @@ draw the same subset:
 
 - "# Title", the page's one h1; "## Section" and "### Part", with an id from
   the text, or one given as "## Section {#id}"
-- paragraphs; **bold**, *italic*, `code`, [links](page.html), ![pictures](x.svg)
+- paragraphs; **bold**, *italic*, `code`, [links](page.html), ![pictures](x.svg);
+  a link to another site opens beside the documentation
 - inline <kbd>keys</kbd>, the one HTML the pages write
 - "- " and "1. " lists, nested by two spaces
 - "Term" then ": definition" lines, a definition list
@@ -93,9 +94,14 @@ def inline(text):
             r"!\[([^\]]*)\]\(([^)\s]+)\)",
             lambda m: '<img src="%s" alt="%s">' % (m.group(2), m.group(1)),
             part)
+        # Another site opens beside the documentation, as the pages always
+        # have.
         part = re.sub(
             r"\[([^\]]+)\]\(([^)\s]+)\)",
-            lambda m: '<a href="%s">%s</a>' % (m.group(2), m.group(1)),
+            lambda m: '<a %shref="%s">%s</a>' % (
+                'target="_blank" ' if re.match(r"https?:", m.group(2)) else "",
+                m.group(2),
+                m.group(1)),
             part)
         part = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", part)
         part = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", part)

@@ -36,7 +36,7 @@
 </ul>
 </nav>
 <main>
-<h1 id="review-file-format">Review file format</h1>
+<h1>Review file format</h1>
 <div class="toc">
 <ul>
 <li><a href="#version">Version</a></li>
@@ -48,8 +48,7 @@
 <p>A review is a JSON document with the <code>.djvr</code> extension. This page describes version 1 of that format: what a document contains, and what a program reading one is expected to do. For how reviews are used in DJV, see <a href="reviews.html">Review</a>.</p>
 <h2 id="version">Version</h2>
 <p>Every document carries an integer under <code>djvReview</code>:</p>
-<pre><code>{ "djvReview": 1 }
-</code></pre>
+<pre><code>{ "djvReview": 1 }</code></pre>
 <p>The version is incremented <strong>only</strong> when a document can no longer be read correctly by an older DJV. Adding a key, or a whole new section, does not change it: a reader ignores what it does not recognize, so those changes are already safe.</p>
 <p>A document is written as the lowest version that reads everything in it, so it stays open to older versions until it holds something they would get wrong. Version 2 is strokes that are shapes or text, which a version 1 reader would draw as ink between their points; a document of freehand ink alone is written as version 1 whatever wrote it.</p>
 <p>A reader that finds a version higher than the one it knows <strong>refuses the document</strong> and says so. It does not read what it can and leave the rest: the next save would write that loss back over the author's own file. DJV reports this in the <strong>Messages</strong> tool and leaves the current session untouched.</p>
@@ -61,19 +60,7 @@
 <p><strong>Do not overwrite what you could not read.</strong> A section that failed to load is written back exactly as it was found, rather than replaced by the defaults the application fell back to.</p>
 <p><strong>Skip, but keep, what you cannot place.</strong> An annotation or a stroke in a coordinate space the reader does not know is not drawn — and not deleted either. It is written back as it was found, after the items that were understood.</p>
 <h2 id="the-document">The document</h2>
-<table>
-<tr><th>Key</th><th>Contents</th></tr>
-<tr><td><code>djvReview</code></td><td>Format version, integer.</td></tr>
-<tr><td><code>app</code></td><td>The application and version that wrote the document, informational.</td></tr>
-<tr><td><code>created</code></td><td>When it was written, ISO 8601 UTC.</td></tr>
-<tr><td><code>files</code></td><td>The open sources, in tab order.</td></tr>
-<tr><td><code>compare</code></td><td>The A/B setup: <code>aId</code>, <code>bIds</code>, comparison options and time mode.</td></tr>
-<tr><td><code>view</code></td><td>Viewport framing, pan and zoom.</td></tr>
-<tr><td><code>color</code></td><td>OCIO, LUT, display, background, foreground, aspect ratio and HUD.</td></tr>
-<tr><td><code>ui</code></td><td>The open tool panels.</td></tr>
-<tr><td><code>annotations</code></td><td>Drawings, by source and frame.</td></tr>
-<tr><td><code>markers</code></td><td>Feedback: comments and named frame ranges, anchored to spans of frames.</td></tr>
-</table>
+<div class="table-wrap"><table><thead><tr><th>Key</th><th>Contents</th></tr></thead><tbody><tr><td><code>djvReview</code></td><td>Format version, integer.</td></tr><tr><td><code>app</code></td><td>The application and version that wrote the document, informational.</td></tr><tr><td><code>created</code></td><td>When it was written, ISO 8601 UTC.</td></tr><tr><td><code>files</code></td><td>The open sources, in tab order.</td></tr><tr><td><code>compare</code></td><td>The A/B setup: <code>aId</code>, <code>bIds</code>, comparison options and time mode.</td></tr><tr><td><code>view</code></td><td>Viewport framing, pan and zoom.</td></tr><tr><td><code>color</code></td><td>OCIO, LUT, display, background, foreground, aspect ratio and HUD.</td></tr><tr><td><code>ui</code></td><td>The open tool panels.</td></tr><tr><td><code>annotations</code></td><td>Drawings, by source and frame.</td></tr><tr><td><code>markers</code></td><td>Feedback: comments and named frame ranges, anchored to spans of frames.</td></tr></tbody></table></div>
 <p><code>compare</code>, <code>view</code>, <code>color</code> and <code>ui</code> delegate to serializers shared with the application settings, and those require every key they know. They are therefore the sections most likely to fail against a document written by a different version — which is why the rules above exist.</p>
 <h3 id="files">Files</h3>
 <pre><code>{
@@ -88,8 +75,7 @@
     "start":    { "value": 0.0,   "rate": 24.0 },
     "duration": { "value": 476.0, "rate": 24.0 }
   }
-}
-</code></pre>
+}</code></pre>
 <p><code>id</code> is what the rest of the document refers to a source by — <code>compare.aId</code>, <code>compare.bIds</code>, <code>annotations[].sourceId</code>. Indices are not used anywhere, because they do not survive closing or reordering a file.</p>
 <p>Paths are stored twice. <code>path</code> is relative to the <code>.djvr</code> and is tried first, so a review stays valid when it travels with its media; <code>pathAbsolute</code> is the fallback for media that lives outside the review's folder. Separate audio uses the same pair, <code>audioPath</code> and <code>audioPathAbsolute</code>. <strong>All four are stored with forward slashes</strong>, on every platform, so a document moves between them unchanged.</p>
 <p>When neither form resolves, DJV reports the missing sources and offers to look for them in a folder you choose.</p>
@@ -125,8 +111,7 @@
       "points": [20.0, 20.0]
     }
   ]
-}
-</code></pre>
+}</code></pre>
 <p>An annotation belongs to one source and is visible on one frame only.</p>
 <p><code>kind</code> says what a stroke is, and what its points are: absent or <code>"Freehand"</code>, ink along the points; <code>"Line"</code> and <code>"Arrow"</code>, the two ends, the head at the second; <code>"Rectangle"</code> and <code>"Ellipse"</code>, two opposite corners of the shape or of the box it fills; <code>"Text"</code>, the top left of the text, with the text in <code>text</code> and its height in image pixels in <code>textSize</code>. A kind the reader does not know is refused like a space it does not know: the annotation is kept verbatim, not drawn as something else. Any stroke with a kind other than freehand makes the document version 2.</p>
 <p><code>space</code> and <code>widthSpace</code> are both <code>"image"</code> in version 1: points and widths are expressed in the pixels of the source image, so a drawing keeps its position and its weight whatever the zoom, the pan or the comparison mode. A reader that meets any other value must not draw the item — the coordinates would land somewhere else entirely — and must keep it, per the rules above. An absent space means <code>"image"</code>.</p>
@@ -143,8 +128,7 @@
   "text": "Grade is too cold from here.",
   "created": "2026-08-26T09:00:00Z",
   "author": "matthieu"
-}
-</code></pre>
+}</code></pre>
 <p>A marker belongs to the review rather than to a source: the frames locate it. One type covers a comment on a frame (a one-frame <code>range</code> with <code>text</code>), a named span of frames (a wider <code>range</code> with a <code>name</code>), and both at once. <code>name</code>, <code>range</code>, <code>text</code>, <code>author</code> and <code>created</code> are each optional; a marker with no <code>range</code> speaks about the whole review. The fields map one to one onto OpenTimelineIO markers.</p>
 <h3 id="attribution">Attribution</h3>
 <p><code>author</code> is optional on both markers and annotations, and is empty when it is not known. DJV has no accounts: it fills the field from the <strong>Author</strong> setting, or where that is empty from the environment — <code>USERNAME</code> on Windows, <code>USER</code> elsewhere — when the item is created. Treat it as a label saying who wrote something when a session comes back from someone else, not as an identity, and never as a permission.</p>
