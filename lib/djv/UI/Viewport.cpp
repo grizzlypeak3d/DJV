@@ -190,6 +190,11 @@ namespace djv
             // Kept for the annotation hit test and overlay, which need the
             // image sizes to map screen to image pixels.
             std::vector<tl::VideoFrame> videoFrames;
+            // The player's frames, before a held frame takes B's place, and
+            // the held frame while it is the comparison's B.
+            std::vector<tl::VideoFrame> playerVideoFrames;
+            std::optional<tl::VideoFrame> heldFrame;
+            std::string heldLabel;
             tl::PlayerCacheInfo cacheInfo;
             double viewZoom = 0.0;
             models::MouseActionBinding frameShuttleBinding =
@@ -215,6 +220,7 @@ namespace djv
             std::shared_ptr<models::FilesModelItem> a;
             std::vector<std::shared_ptr<models::FilesModelItem> > b;
             std::shared_ptr<ftk::Label> compareLabel;
+            std::shared_ptr<ftk::Label> heldLabelWidget;
 
             bool toastActive = false;
             bool toastHint = false;
@@ -235,6 +241,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
+            std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
+            std::shared_ptr<ftk::Observer<bool> > compareHeldObserver;
             std::shared_ptr<ftk::Observer<bool> > drawEnabledObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
@@ -416,6 +424,15 @@ namespace djv
             p.compareLabel->setBackgroundRole(ftk::ColorRole::Overlay);
             p.compareLabel->setVisible(false);
 
+            // At the bottom rather than over the middle of the picture, where
+            // the warnings go: it is up for as long as the frame is held.
+            p.heldLabelWidget = ftk::Label::create(context);
+            p.heldLabelWidget->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.heldLabelWidget->setBackgroundRole(ftk::ColorRole::Overlay);
+            p.heldLabelWidget->setClipText(true);
+            p.heldLabelWidget->setVisible(false);
+            ftk::setScreenshotTag(p.heldLabelWidget, "View.Held");
+
             p.toastLabel = ftk::Label::create(context);
             p.toastLabel->setMarginRole(ftk::SizeRole::MarginSmall);
             p.toastLabel->setBackgroundRole(ftk::ColorRole::Overlay);
@@ -452,6 +469,14 @@ namespace djv
 
             auto bottomLayout = ftk::VerticalLayout::create(context, p.hudLayout);
             bottomLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            auto heldLayout = ftk::HorizontalLayout::create(context, bottomLayout);
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Horizontal, heldLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
+            p.heldLabelWidget->setParent(heldLayout);
+            spacer = ftk::Spacer::create(
+                context, ftk::Orientation::Horizontal, heldLayout);
+            spacer->setStretch(ftk::Stretch::Expanding);
             auto toastLayout = ftk::HorizontalLayout::create(context, bottomLayout);
             spacer = ftk::Spacer::create(
                 context, ftk::Orientation::Horizontal, toastLayout);
@@ -572,6 +597,19 @@ namespace djv
                 {
                     _p->compareTime = value;
                     _compareUpdate();
+                });
+
+            p.heldFrameObserver = ftk::Observer<std::optional<models::HeldFrame> >::create(
+                filesModel->observeHeldFrame(),
+                [this](const std::optional<models::HeldFrame>&)
+                {
+                    _heldUpdate();
+                });
+            p.compareHeldObserver = ftk::Observer<bool>::create(
+                filesModel->observeCompareHeld(),
+                [this](bool)
+                {
+                    _heldUpdate();
                 });
 
             p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
@@ -804,9 +842,10 @@ namespace djv
                     [this](const std::vector<tl::VideoFrame>& value)
                     {
                         FTK_P();
-                        p.videoFramesSize = value.size();
-                        p.videoFrames = value;
-                        p.binding->setVideoFramesSize(value.size());
+                        p.playerVideoFrames = value;
+                        p.videoFrames = tl::withHeldFrame(value, p.heldFrame);
+                        p.videoFramesSize = p.videoFrames.size();
+                        p.binding->setVideoFramesSize(p.videoFrames.size());
                         _compareUpdate();
                         p.missing = false;
                         p.heldFrom.reset();
@@ -845,6 +884,7 @@ namespace djv
                 p.mediaReferenceKeyObserver.reset();
                 p.currentTime.reset();
                 p.videoFrames.clear();
+                p.playerVideoFrames.clear();
                 p.currentTimeObserver.reset();
                 p.videoObserver.reset();
                 p.cacheInfo = tl::PlayerCacheInfo();
@@ -1174,6 +1214,12 @@ namespace djv
         bool Viewport::_sourceShown(int index) const
         {
             FTK_P();
+            // A held frame takes no drawings: they belong to a file and a
+            // time, and it stands in for B whatever the time or the file.
+            if (p.heldFrame.has_value() && index > 0)
+            {
+                return false;
+            }
             // The comparisons that put the files over each other give them all
             // the same box, so drawings of B landed on A's picture, and a new
             // stroke could only ever reach A, the first box hit. Only A is
@@ -2184,6 +2230,31 @@ namespace djv
                 _displayScale());
         }
 
+        void Viewport::_heldUpdate()
+        {
+            FTK_P();
+            p.heldFrame.reset();
+            p.heldLabel.clear();
+            if (auto filesModel = p.filesModel)
+            {
+                p.heldFrame = filesModel->getCompareHeldFrame();
+                if (p.heldFrame.has_value() && filesModel->getHeldFrame().has_value())
+                {
+                    p.heldLabel = filesModel->getHeldFrame()->label;
+                }
+            }
+            setHeldFrame(p.heldFrame);
+            p.videoFrames = tl::withHeldFrame(p.playerVideoFrames, p.heldFrame);
+            p.videoFramesSize = p.videoFrames.size();
+            // The observers run as they are made, before the binding is.
+            if (!p.binding)
+                return;
+            p.binding->setVideoFramesSize(p.videoFrames.size());
+            _selectionClear();
+            _compareUpdate();
+            setDrawUpdate();
+        }
+
         void Viewport::_compareUpdate()
         {
             FTK_P();
@@ -2191,8 +2262,15 @@ namespace djv
             // draws anything, and an empty picture is the one thing a black
             // frame, an unreadable file and a comparison out of sync all look
             // like as well.
+            // A held frame is B, said for as long as it is up so it is never
+            // taken for B's frame at this time; the warnings about B files
+            // do not apply to it.
+            const bool held = p.compare != tl::Compare::None && p.heldFrame.has_value();
+            const std::string heldText = held ? "B: held " + p.heldLabel : std::string();
+            p.heldLabelWidget->setText(heldText);
+            p.heldLabelWidget->setVisible(held);
             std::string s;
-            if (p.compare != tl::Compare::None)
+            if (p.compare != tl::Compare::None && !p.heldFrame.has_value())
             {
                 if (p.videoFramesSize < 2)
                 {

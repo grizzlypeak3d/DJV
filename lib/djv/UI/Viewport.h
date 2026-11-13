@@ -193,6 +193,7 @@ namespace djv
             void _wipeMove(const ftk::V2I& windowPos);
 
             void _toastUpdate();
+            void _heldUpdate();
             void _compareUpdate();
             void _hudUpdate();
             void _hudLayout();

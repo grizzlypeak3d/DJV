@@ -91,6 +91,17 @@ namespace djv
         };
 
         //! Files model.
+        //! A frame held to compare against (Compare > Hold Frame): the
+        //! frame, and what it is, the file and the time, for saying so. Held
+        //! as decoded, so the color settings apply to it as they do to A.
+        struct DJV_MODELS_API_TYPE HeldFrame
+        {
+            tl::VideoFrame frame;
+            std::string    label;
+
+            bool operator == (const HeldFrame&) const = default;
+        };
+
         class DJV_MODELS_API_TYPE FilesModel : public std::enable_shared_from_this<FilesModel>
         {
             FTK_NON_COPYABLE(FilesModel);
@@ -283,6 +294,29 @@ namespace djv
 
             //! Set the compare time mode.
             DJV_MODELS_API void setCompareTime(tl::CompareTime);
+
+            //! Get the held frame.
+            DJV_MODELS_API const std::optional<HeldFrame>& getHeldFrame() const;
+
+            //! Observe the held frame.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::optional<HeldFrame> > > observeHeldFrame() const;
+
+            //! Hold a frame, or none, which also stops comparing against it.
+            DJV_MODELS_API void setHeldFrame(const std::optional<HeldFrame>&);
+
+            //! Get whether the held frame is the comparison's B, in place of
+            //! the B files, whatever the time or the file.
+            DJV_MODELS_API bool isCompareHeld() const;
+
+            //! Observe whether the held frame is the comparison's B.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeCompareHeld() const;
+
+            //! Set whether the held frame is the comparison's B. Only with a
+            //! frame held.
+            DJV_MODELS_API void setCompareHeld(bool);
+
+            //! The held frame while it is the comparison's B, or none.
+            DJV_MODELS_API std::optional<tl::VideoFrame> getCompareHeldFrame() const;
 
         private:
             int _getIndex(const std::shared_ptr<FilesModelItem>&) const;

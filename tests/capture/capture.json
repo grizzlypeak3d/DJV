@@ -277,6 +277,22 @@
       ]
     },
     {
+      "id": "hold-frame",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "command": "Playback/Seek", "args": { "frame": 3 } },
+        { "wait": 0.5 },
+        { "command": "Compare/HoldFrame" },
+        { "command": "Playback/Seek", "args": { "frame": 9 } },
+        { "wait": 1.0 },
+        { "expect": "View.Held", "contains": "B: held Counter.0.png 00:00:00:03" },
+        { "command": "Compare/ClearHeld" },
+        { "expect": "View.Held", "visible": false }
+      ]
+    },
+    {
       "id": "export-size",
       "strict": true,
       "window": { "w": 1000, "h": 700 },

@@ -5,6 +5,11 @@
 
 #include <djv/App/App.h>
 #include <djv/Models/FilesModel.h>
+#include <djv/Models/TimeUnitsModel.h>
+
+#include <tlRender/Timeline/Player.h>
+
+#include <ftk/Core/Format.h>
 
 namespace djv
 {
@@ -15,6 +20,8 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > optionsObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > timeObserver;
+            std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
+            std::shared_ptr<ftk::Observer<bool> > compareHeldObserver;
         };
 
         void CompareActions::_init(
@@ -226,6 +233,76 @@ namespace djv
                     }
                 });
 
+            // The frame store: a frame held to compare against, whatever the
+            // time or the file, which a comparison of files cannot do -- a
+            // still against a movie's frames, or a frame against another of
+            // the same clip (#627).
+            _addCommand(
+                "HoldFrame",
+                "Hold the current frame and compare against it: it becomes "
+                "the comparison's B, wiped against A if no other comparison "
+                "is chosen, whatever the time or the file.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto player = app->observePlayer()->get();
+                        const auto& a = app->getFilesModel()->getA();
+                        if (!player || !a)
+                            return;
+                        const auto& frames = player->getCurrentVideo();
+                        if (frames.empty() || frames.front().layers.empty())
+                            return;
+                        models::HeldFrame held;
+                        held.frame = frames.front();
+                        held.label = ftk::Format("{0} {1}").
+                            arg(a->path.getFileName()).
+                            arg(app->getTimeUnitsModel()->getLabel(held.frame.time));
+                        auto filesModel = app->getFilesModel();
+                        filesModel->setHeldFrame(held);
+                        filesModel->setCompareHeld(true);
+                        auto options = filesModel->getCompareOptions();
+                        if (tl::Compare::None == options.compare)
+                        {
+                            options.compare = tl::Compare::Wipe;
+                            filesModel->setCompareOptions(options);
+                        }
+                    }
+                });
+
+            _addCheckCommand(
+                "CompareHeld",
+                "Compare against the held frame, in place of the B files.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        auto filesModel = app->getFilesModel();
+                        const bool value = args.contains("value") ?
+                            args["value"].get<bool>() :
+                            !filesModel->isCompareHeld();
+                        filesModel->setCompareHeld(value);
+                        auto options = filesModel->getCompareOptions();
+                        if (filesModel->isCompareHeld() &&
+                            tl::Compare::None == options.compare)
+                        {
+                            options.compare = tl::Compare::Wipe;
+                            filesModel->setCompareOptions(options);
+                        }
+                    }
+                });
+
+            _addCommand(
+                "ClearHeld",
+                "Let go of the held frame.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getFilesModel()->setHeldFrame(std::nullopt);
+                    }
+                });
+
             // Create the actions.
             _actions["Next"] = ftk::Action::create(
                 "Next",
@@ -278,6 +355,16 @@ namespace djv
                 compareTimeLabels[1],
                 _command("Absolute"));
 
+            _actions["HoldFrame"] = ftk::Action::create(
+                "Hold Frame",
+                _command("HoldFrame"));
+            _actions["CompareHeld"] = ftk::Action::create(
+                "Compare to Held Frame",
+                _checkCommand("CompareHeld"));
+            _actions["ClearHeld"] = ftk::Action::create(
+                "Clear Held Frame",
+                _command("ClearHeld"));
+
             // Register the shortcuts.
             _addShortcut("Next");
             _addShortcut("Prev");
@@ -293,6 +380,10 @@ namespace djv
             // second is what the shortcuts editor shows.
             _addShortcut("Relative", compareTimeLabels[0]);
             _addShortcut("Absolute", compareTimeLabels[1]);
+            // No keys yet; they can be set in the shortcuts.
+            _addShortcut("HoldFrame");
+            _addShortcut("CompareHeld");
+            _addShortcut("ClearHeld");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
@@ -311,6 +402,7 @@ namespace djv
                     _actions["Horizontal"]->setEnabled(!value.empty());
                     _actions["Vertical"]->setEnabled(!value.empty());
                     _actions["Tile"]->setEnabled(!value.empty());
+                    _actions["HoldFrame"]->setEnabled(!value.empty());
                 });
 
             p.optionsObserver = ftk::Observer<tl::CompareOptions>::create(
@@ -328,6 +420,21 @@ namespace djv
                             continue;
                         _actions[labels[i]]->setChecked(enums[i] == value.compare);
                     }
+                });
+
+            p.heldFrameObserver = ftk::Observer<std::optional<models::HeldFrame> >::create(
+                app->getFilesModel()->observeHeldFrame(),
+                [this](const std::optional<models::HeldFrame>& value)
+                {
+                    _actions["CompareHeld"]->setEnabled(value.has_value());
+                    _actions["ClearHeld"]->setEnabled(value.has_value());
+                });
+
+            p.compareHeldObserver = ftk::Observer<bool>::create(
+                app->getFilesModel()->observeCompareHeld(),
+                [this](bool value)
+                {
+                    _actions["CompareHeld"]->setChecked(value);
                 });
 
             p.timeObserver = ftk::Observer<tl::CompareTime>::create(

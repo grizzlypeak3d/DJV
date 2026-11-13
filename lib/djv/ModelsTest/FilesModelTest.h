@@ -26,6 +26,7 @@ namespace djv
             void _audioChannel();
             void _mediaReferences();
             void _compare();
+            void _heldFrame();
             void _tileCompare();
             void _reviewRestore();
             void _frames();

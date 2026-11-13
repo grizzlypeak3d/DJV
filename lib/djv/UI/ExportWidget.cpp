@@ -107,6 +107,7 @@ namespace djv
             // What the export size is worked out from, so that the size shown
             // for it does not go stale while the tool is open.
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<bool> > compareHeldObserver;
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<tl::Timeline> > > compareObserver;
 
@@ -230,6 +231,14 @@ namespace djv
             p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 p.filesModel.lock()->observeCompareOptions(),
                 [this](const tl::CompareOptions&)
+                {
+                    _sizeUpdate();
+                });
+
+            // A held frame's size takes the compared files' place.
+            p.compareHeldObserver = ftk::Observer<bool>::create(
+                p.filesModel.lock()->observeCompareHeld(),
+                [this](bool)
                 {
                     _sizeUpdate();
                 });
@@ -401,7 +410,10 @@ namespace djv
         std::vector<ftk::ImageInfo> ExportWidget::_getInfos() const
         {
             FTK_P();
-            return models::getExportInfos(p.player);
+            auto filesModel = p.filesModel.lock();
+            return models::getExportInfos(
+                p.player,
+                filesModel ? filesModel->getCompareHeldFrame() : std::nullopt);
         }
 
         ftk::Size2I ExportWidget::_getDefaultSize() const

@@ -46,6 +46,10 @@ namespace djv
             addAction(actions["Vertical"]);
             addAction(actions["Tile"]);
             addDivider();
+            addAction(actions["HoldFrame"]);
+            addAction(actions["CompareHeld"]);
+            addAction(actions["ClearHeld"]);
+            addDivider();
             p.menus["Time"] = addSubMenu("Sync by");
             const auto timeLabels = tl::getCompareTimeLabels();
             for (const auto& label : timeLabels)

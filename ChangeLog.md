@@ -11,6 +11,9 @@ Changes:
   with the picture, so they look the same at any resolution.
 * Add File > Export Still, for writing the current frame as an image in one
   step (#696).
+* Add Compare > Hold Frame, for comparing against a held frame: a still
+  against a movie, or a frame against another of the same clip (#627).
+* A still compared with a movie is shown at every frame.
 * Add a mouse tool option for choosing what the left mouse button does: pan,
   compare wipe, color picker, or frame shuttle.
 * Double clicking the view frames the image.
