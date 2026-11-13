@@ -301,6 +301,14 @@ namespace djv
             formLayout->addRow("Output:", p.fileLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
             p.exportButton->setParent(p.layout);
+            // The menu's still is set up here: nothing else says where it
+            // goes or in what format.
+            auto stillLabel = ftk::Label::create(
+                context,
+                "File > Export Still uses this directory and extension.",
+                p.layout);
+            stillLabel->setTextRole(ftk::ColorRole::TextDisabled);
+            ftk::setScreenshotTag(stillLabel, "Export.StillNote");
 
             p.settingsObserver = ftk::Observer<models::ExportSettings>::create(
                 p.settings->observeExport(),

@@ -11,10 +11,12 @@
 #include <djv/Models/FilesModel.h>
 
 #include <ftk/Core/Format.h>
+#include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
 
 
 #include <algorithm>
+#include <filesystem>
 
 namespace djv
 {
@@ -194,13 +196,32 @@ namespace djv
                             // changes: the name in the viewport's toast, the
                             // whole path in the log.
                             const ftk::Path path(app->exportStill());
+                            std::error_code ec;
                             app->getContext()->log(
                                 "djv::app::FileActions",
                                 ftk::Format("Exported still: {0}").arg(path.get()));
                             if (auto mainWindow = app->getMainWindow())
                             {
+                                // The folder by its name, which says where
+                                // to look; the toast has no room for more.
+                                std::filesystem::path dir =
+                                    ftk::toFileSystem(path.getDir());
+                                if (!dir.empty() && !dir.has_filename())
+                                {
+                                    dir = dir.parent_path();
+                                }
+                                std::string folder = ftk::fromFileSystem(dir.filename());
+                                if (std::filesystem::equivalent(
+                                    dir, ftk::getUserPath(ftk::UserPath::Home), ec))
+                                {
+                                    folder = "Home";
+                                }
                                 mainWindow->getViewport()->showHint(
-                                    ftk::Format("Exported {0}").arg(path.getFileName()));
+                                    folder.empty() ?
+                                    ftk::Format("Exported {0}").arg(path.getFileName()).str() :
+                                    ftk::Format("Exported {0} to {1}").
+                                        arg(path.getFileName()).
+                                        arg(folder).str());
                             }
                         }
                         catch (const std::exception& e)
