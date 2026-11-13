@@ -23,5 +23,6 @@ export.html Exporting files
 settings.html Settings
 automation.html Automation
 command-line.html Command line
+actions.html Actions reference
 python.html Python
 troubleshooting.html Troubleshooting

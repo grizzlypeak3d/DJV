@@ -117,6 +117,59 @@ endif()
 # The same, reporting rather than writing, for a build that wants to know
 # whether anyone has edited a page's navigation or table of contents by
 # hand.
+# The pages written in Markdown (*.md here), made into HTML by md2html.py
+# and committed beside them, as the command line page is: the website, the
+# application and the iPad read the HTML, agents and people the Markdown.
+# The check is what continuous integration runs, so a page edited without
+# remaking its HTML fails the build. Python's standard library only.
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    file(GLOB DJV_DOCS_MD CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.md)
+    set(DJV_DOCS_PAGES_COMMANDS)
+    set(DJV_DOCS_PAGES_CHECKS)
+    foreach(MD ${DJV_DOCS_MD})
+        get_filename_component(NAME ${MD} NAME_WE)
+        list(APPEND DJV_DOCS_PAGES_COMMANDS
+            COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/md2html.py
+                ${MD} ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.html)
+        list(APPEND DJV_DOCS_PAGES_CHECKS
+            COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/md2html.py --check
+                ${MD} ${CMAKE_CURRENT_SOURCE_DIR}/${NAME}.html)
+    endforeach()
+    add_custom_target(djvDocsPages
+        ${DJV_DOCS_PAGES_COMMANDS}
+        COMMAND ${CMAKE_COMMAND}
+            -DNAV_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DNAV_LIST=${CMAKE_CURRENT_SOURCE_DIR}/nav.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/Nav.cmake
+        COMMENT "Documentation pages from their Markdown")
+    set_target_properties(djvDocsPages PROPERTIES FOLDER docs)
+    add_custom_target(djvDocsPagesCheck
+        ${DJV_DOCS_PAGES_CHECKS}
+        COMMENT "Documentation pages check")
+    set_target_properties(djvDocsPagesCheck PROPERTIES FOLDER docs)
+
+    # The actions reference, from the application's own list
+    # (-actionsJSON): its Markdown, then the pages.
+    if(DJV_PROGRAMS)
+        add_custom_target(djvDocsActions
+            COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/actions2md.py
+                $<TARGET_FILE:djv> ${CMAKE_CURRENT_BINARY_DIR}
+                ${CMAKE_CURRENT_SOURCE_DIR}/actions.md
+            DEPENDS djv
+            COMMENT "Documentation actions reference")
+        add_dependencies(djvDocsPages djvDocsActions)
+        set_target_properties(djvDocsActions PROPERTIES FOLDER docs)
+        add_custom_target(djvDocsActionsCheck
+            COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/actions2md.py --check
+                $<TARGET_FILE:djv> ${CMAKE_CURRENT_BINARY_DIR}
+                ${CMAKE_CURRENT_SOURCE_DIR}/actions.md
+            DEPENDS djv
+            COMMENT "Documentation actions reference check")
+        set_target_properties(djvDocsActionsCheck PROPERTIES FOLDER docs)
+    endif()
+endif()
+
 add_custom_target(djvDocsNavCheck
     COMMAND ${CMAKE_COMMAND}
         -DNAV_DIR=${CMAKE_CURRENT_SOURCE_DIR}

@@ -72,6 +72,9 @@ jobs:
     - name: Documentation check
       run: |
         cmake --build build-Debug --target djvDocsHelpCheck
+        # The application makes its window to list the menus: a display.
+        xvfb-run cmake --build build-Debug --target djvDocsActionsCheck
+        cmake --build build-Debug --target djvDocsPagesCheck
 
     - name: Run tests
       run: |
