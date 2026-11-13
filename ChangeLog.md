@@ -34,6 +34,11 @@ Changes:
 * Library updates:
     - FFmpeg 9.0.2
 
+Fixes:
+* Fix for jumping one second at 23.976, 29.97, and 59.94 fps landing a frame
+  short (#720).
+* Fix for jumps past the in or out point wrapping around (#659).
+
 ## 3.7.6
 
 Changes:
