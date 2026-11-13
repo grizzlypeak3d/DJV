@@ -71,6 +71,8 @@ namespace djv
                 models::ExportFileType fileType = models::ExportFileType::Image;
                 OTIO_NS::TimeRange range;
                 int64_t frame = 0;
+                //! When it began, for the time it has left.
+                std::chrono::steady_clock::time_point startTime;
                 ftk::Path path;
                 ftk::ImageInfo info;
                 std::shared_ptr<tl::IWrite> writer;
@@ -849,9 +851,10 @@ namespace djv
                         "Export",
                         "Rendering:");
                     p.progressDialog->setRange(0.0, p.exportData->range.duration().value() - 1.0);
+                    p.exportData->startTime = std::chrono::steady_clock::now();
                     p.progressDialog->setMessage(ftk::Format("Frame: {0} / {1}").
-                        arg(p.exportData->frame).
-                        arg(p.exportData->range.end_time_inclusive().value()));
+                        arg(0).
+                        arg(static_cast<int64_t>(p.exportData->range.duration().value())));
                     p.progressDialog->setCloseCallback(
                         [this]
                         {
@@ -884,9 +887,19 @@ namespace djv
                                 const int64_t end = p.exportData->range.end_time_inclusive().value();
                                 if (p.exportData->frame <= end)
                                 {
-                                    p.progressDialog->setMessage(ftk::Format("Frame: {0} / {1}").
-                                        arg(p.exportData->frame - start).
-                                        arg(static_cast<int64_t>(p.exportData->range.duration().value())));
+                                    const int64_t done = p.exportData->frame - start;
+                                    const int64_t total = static_cast<int64_t>(
+                                        p.exportData->range.duration().value());
+                                    const std::string left = models::getExportTimeLeft(
+                                        done,
+                                        total,
+                                        std::chrono::duration<double>(
+                                            std::chrono::steady_clock::now() -
+                                            p.exportData->startTime).count());
+                                    p.progressDialog->setMessage(
+                                        left.empty() ?
+                                        ftk::Format("Frame: {0} / {1}").arg(done).arg(total).str() :
+                                        ftk::Format("Frame: {0} / {1}, {2}").arg(done).arg(total).arg(left).str());
                                 }
                                 else
                                 {

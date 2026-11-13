@@ -190,6 +190,17 @@ namespace djv
                 tl::TimeUnits::Frames,
                 ""));
 
+            // The time an export has left, from the rate so far, once there
+            // is enough to go on.
+            FTK_CHECK(models::getExportTimeLeft(2, 100, 10.0).empty());
+            FTK_CHECK(models::getExportTimeLeft(50, 100, 0.5).empty());
+            FTK_CHECK(models::getExportTimeLeft(100, 100, 10.0).empty());
+            FTK_CHECK("a few seconds left" == models::getExportTimeLeft(50, 100, 5.0));
+            FTK_CHECK("about 30 seconds left" == models::getExportTimeLeft(50, 100, 31.0));
+            FTK_CHECK("about a minute left" == models::getExportTimeLeft(50, 100, 70.0));
+            FTK_CHECK("about 2 minutes left" == models::getExportTimeLeft(100, 300, 60.0));
+            FTK_CHECK("about 1 h 30 min left" == models::getExportTimeLeft(100, 400, 1800.0));
+
             // Without a time, the name alone.
             FTK_CHECK("render.tif" == models::getStillFileName(
                 ftk::Path("render.mov"), "", ".tif"));

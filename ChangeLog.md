@@ -30,6 +30,7 @@ Changes:
   well as reading (#949).
 * The Export tool offers the FFmpeg command line presets only when the
   installed ffmpeg has their encoder (#949).
+* The export progress says about how long is left (#943).
 * Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command
   line (#866).
 * The log ends with a line saying how the program ended: a clean exit, an

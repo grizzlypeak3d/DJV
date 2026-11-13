@@ -221,6 +221,43 @@ namespace djv
             return label.empty() ? name + ext : name + "_" + label + ext;
         }
 
+        std::string getExportTimeLeft(
+            int64_t framesDone,
+            int64_t framesTotal,
+            double secondsElapsed)
+        {
+            std::string out;
+            if (framesDone >= 3 && secondsElapsed >= 1.0 && framesTotal > framesDone)
+            {
+                const double left =
+                    secondsElapsed / framesDone * (framesTotal - framesDone);
+                if (left < 10.0)
+                {
+                    out = "a few seconds left";
+                }
+                else if (left < 60.0)
+                {
+                    // To the nearest five, so it does not flicker.
+                    const int seconds = static_cast<int>(std::round(left / 5.0) * 5.0);
+                    out = ftk::Format("about {0} seconds left").arg(seconds);
+                }
+                else if (left < 3600.0)
+                {
+                    const int minutes = static_cast<int>(std::round(left / 60.0));
+                    out = 1 == minutes ?
+                        std::string("about a minute left") :
+                        ftk::Format("about {0} minutes left").arg(minutes).str();
+                }
+                else
+                {
+                    const int hours = static_cast<int>(left / 3600.0);
+                    const int minutes = static_cast<int>(std::round((left - hours * 3600.0) / 60.0));
+                    out = ftk::Format("about {0} h {1} min left").arg(hours).arg(minutes);
+                }
+            }
+            return out;
+        }
+
         std::string getStillTimeLabel(
             const OTIO_NS::RationalTime& time,
             const OTIO_NS::TimeRange& range,

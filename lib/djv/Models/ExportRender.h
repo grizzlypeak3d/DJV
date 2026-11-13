@@ -163,6 +163,15 @@ namespace djv
             const std::string& time,
             const std::string& ext);
 
+        //! How long an export has left, from the rate so far: "about 2
+        //! minutes left". Empty until there is enough to go on: a few frames
+        //! and a second, the first frames being slower to arrive than the
+        //! rest.
+        DJV_MODELS_API std::string getExportTimeLeft(
+            int64_t framesDone,
+            int64_t framesTotal,
+            double secondsElapsed);
+
         //! The time part of a still's name, in the units the timeline shows
         //! so the name matches it, in a form that sorts in a folder and is
         //! not taken for a sequence's frame number: frames padded to the
