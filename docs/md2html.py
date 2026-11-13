@@ -10,7 +10,9 @@ than a dependency, and so that the help viewer inside the application can
 draw the same subset:
 
 - "# Title", the page's one h1; "## Section" and "### Part", with an id from
-  the text, or one given as "## Section {#id}"
+  the text, or one given as "## Section {#id}"; a list item can be given
+  one the same way, which is how a section that moved to another page keeps
+  its old address
 - paragraphs; **bold**, *italic*, `code`, [links](page.html), ![pictures](x.svg);
   a link to another site opens beside the documentation
 - inline <kbd>keys</kbd>, the one HTML the pages write
@@ -205,7 +207,11 @@ def convert(lines):
                 while len(stack) < level + 1:
                     out.append("<%s>" % tag)
                     stack.append(tag)
-                out.append("<li>" + inline(text))
+                m = re.match(r"(.*?) \{#([\w-]+)\}$", text)
+                if m:
+                    out.append('<li id="%s">' % m.group(2) + inline(m.group(1)))
+                else:
+                    out.append("<li>" + inline(text))
             while stack:
                 out.append("</li></%s>" % stack.pop())
             body.append("".join(out))

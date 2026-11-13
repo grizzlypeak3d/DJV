@@ -136,3 +136,18 @@ The list can be driven from the keyboard: the arrow keys browse it, <kbd>Return<
 ## Reviews
 
 Reviews — saved sessions with markers and drawn feedback — have a page of their own: [Review](reviews.html).
+
+## Moved to File formats
+
+These sections are on the [File formats](formats.html) page now:
+
+- [FFmpeg](formats.html#ffmpeg) {#ffmpeg}
+- [Partial image sequences](formats.html#partial-image-sequences) {#partial-image-sequences}
+- [Frame numbers](formats.html#frame-numbers) {#frame-numbers}
+- [Marking the frames that are not there](formats.html#marking-the-frames-that-are-not-there) {#marking-the-frames-that-are-not-there}
+- [Stating the range](formats.html#stating-the-range) {#stating-the-range}
+- [Image sequences with audio](formats.html#image-sequences-with-audio) {#image-sequences-with-audio}
+- [Timelines](formats.html#timelines) {#timelines}
+- [Media references](formats.html#media-references) {#media-references}
+- [OTIO spatial coordinates](formats.html#otio-spatial-coordinates) {#otio-spatial-coordinates}
+- [USD](formats.html#usd) {#usd}
