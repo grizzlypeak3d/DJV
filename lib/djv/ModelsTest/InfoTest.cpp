@@ -85,6 +85,18 @@ namespace djv
 
             FTK_CHECK(find(items, "File", "Name") && "a.mov" == find(items, "File", "Name")->value);
             FTK_CHECK(!find(items, "File", "Frames"));
+            FTK_CHECK(!find(items, "File", "Missing"));
+
+            // A sequence missing frames says how many and which.
+            {
+                ftk::Path seq("/renders/comp.1001.exr");
+                seq.setSeq(ftk::toFrameSeq({ 1001, 1002, 1003, 1006, 1008 }));
+                const auto seqItems = models::getInfo(seq, info);
+                FTK_CHECK(find(seqItems, "File", "Frames") &&
+                    "1001-1008 (3 missing)" == find(seqItems, "File", "Frames")->value);
+                FTK_CHECK(find(seqItems, "File", "Missing") &&
+                    "1004-1005,1007" == find(seqItems, "File", "Missing")->value);
+            }
             FTK_CHECK(find(items, "Video", "Codec") && "ProRes" == find(items, "Video", "Codec")->value);
             FTK_CHECK(!find(items, "Video", "Source Format"));
             FTK_CHECK(find(items, "Video", "Resolution") && "1920 1080" == find(items, "Video", "Resolution")->value);

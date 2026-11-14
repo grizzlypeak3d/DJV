@@ -48,7 +48,7 @@ The built-in file browser has a panel on the left for navigation and a file list
 
 Above the file list are buttons to go up a directory, navigate back and forward, reload, and edit the current path, along with a row of *path buttons* for quickly jumping to any parent directory. Below the list, a search box filters by name, an extension menu filters by file type, and the sort menu and direction button order the results.
 
-Image sequences are shown as a single item with their frame range, so a multi-thousand-frame render appears as one entry rather than thousands.
+Image sequences are shown as a single item with their frame range, so a multi-thousand-frame render appears as one entry rather than thousands. A sequence with frames missing says how many, for example `1001-1100 (3 missing)`, so a broken render is seen before it is opened; one rendered on twos says `(step 2)` instead. The **Information** tool lists which frames are missing.
 
 ![File browser](assets/file-browser.svg)
 

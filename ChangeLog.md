@@ -27,6 +27,8 @@ Changes:
   rather than freezing while the audio plays.
 * Faster playback of RGB images, such as PNG sequences and 16-bit RGB
   movies, with NVIDIA graphics.
+* The file browser says how many frames a sequence is missing, and the
+  Information tool which ones.
 * Read HEIC and HEIF images on macOS.
 * Read WebP images, still and animated (#867).
 * Show Display P3 colors on wide-gamut displays with the GPU renderer.

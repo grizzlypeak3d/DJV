@@ -73,6 +73,14 @@ namespace djv
                 if (path.isSeq())
                 {
                     out.push_back({ "File", "Frames", path.getFrameRange(true) });
+                    // Which frames a broken render is missing, for whoever
+                    // has to go and find them.
+                    const auto missing = ftk::getMissing(path.getSeq());
+                    if (!missing.empty())
+                    {
+                        out.push_back({ "File", "Missing",
+                            ftk::getLabel(missing, path.getPad()) });
+                    }
                 }
             }
 
