@@ -1593,8 +1593,8 @@ namespace djv
                         });
                 }
 
-                // Being edited, a marker's frames are in its time fields, and
-                // the header has only its name.
+                // Being edited, a marker's frames are its time fields, in the
+                // header in place of the frames label.
                 const bool editingTimes = editing && hasRange;
                 auto titleLabel = ftk::Label::create(
                     context,
@@ -1603,6 +1603,12 @@ namespace djv
                 titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                 titleLabel->setVAlign(ftk::VAlign::Center);
                 titleLabel->setHStretch(ftk::Stretch::Expanding);
+                if (editingTimes)
+                {
+                    // The time fields and the date keep their room: a long
+                    // name is shortened beside them.
+                    titleLabel->setElide(true);
+                }
 
                 // The frames sit against the right edge, the way the file
                 // browser lays out its columns, so a named row says where it
@@ -1620,6 +1626,16 @@ namespace djv
                     }
                 }
 
+                // Being edited, the frames are its time fields, in the same
+                // place.
+                std::shared_ptr<ftk::HorizontalLayout> headerTimes;
+                if (editingTimes)
+                {
+                    headerTimes = ftk::HorizontalLayout::create(context, header);
+                    headerTimes->setSpacingRole(ftk::SizeRole::SpacingSmall);
+                    headerTimes->setVAlign(ftk::VAlign::Center);
+                }
+
                 if (!marker.created.empty())
                 {
                     auto createdLabel = ftk::Label::create(
@@ -1633,19 +1649,18 @@ namespace djv
                 {
                     // Where it is, edited with what it says: typing a time
                     // moves this marker, the one open, keeping its length;
-                    // a range's end makes it longer or shorter. Above the
-                    // text, so Escape in the text, which moves the focus on,
-                    // moves it out of the marker and keeps it.
+                    // a range's end makes it longer or shorter. In the header,
+                    // above the text, so Escape in the text, which moves the
+                    // focus on, moves it out of the marker and keeps it. No
+                    // labels, for the room: the tooltips say which is which.
                     p.editStart.reset();
                     p.editEnd.reset();
                     auto app = _app.lock();
-                    if (hasRange && app)
+                    if (headerTimes && app)
                     {
                         const OTIO_NS::TimeRange range = *marker.range;
-                        auto timeLayout = ftk::HorizontalLayout::create(context, card);
-                        timeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+                        auto timeLayout = headerTimes;
                         const bool single = isSingleFrame(range);
-                        ftk::Label::create(context, single ? "Frame:" : "Start:", timeLayout);
                         p.editStart = tl::ui::TimeEdit::create(
                             context, app->getTimeUnitsModel(), timeLayout);
                         p.editStart->setValue(range.start_time());
@@ -1655,7 +1670,8 @@ namespace djv
                         ftk::setScreenshotTag(p.editStart, "Review.MarkerStart");
                         if (!single)
                         {
-                            ftk::Label::create(context, "End:", timeLayout);
+                            auto dash = ftk::Label::create(context, "-", timeLayout);
+                            dash->setVAlign(ftk::VAlign::Center);
                             p.editEnd = tl::ui::TimeEdit::create(
                                 context, app->getTimeUnitsModel(), timeLayout);
                             p.editEnd->setValue(range.end_time_inclusive());
