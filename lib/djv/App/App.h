@@ -355,6 +355,8 @@ namespace djv
             void _exportMovieCommand(const nlohmann::json&);
             void _saveSettings();
             void _closeFailed();
+            void _secondaryWindowOpen(bool);
+            void _secondaryWindowRestore();
             void _secondaryWindowCreate(int screen, const ftk::Size2I&, bool fullScreen);
             void _secondaryMonitorUpdate();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);

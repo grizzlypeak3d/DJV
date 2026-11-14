@@ -65,6 +65,7 @@ namespace djv
         {
             json["Color"] = value.color;
             json["Monitor"] = value.monitor;
+            json["Open"] = value.open;
         }
 
         void from_json(const nlohmann::json& json, SecondaryDisplay& value)
@@ -74,6 +75,7 @@ namespace djv
                 json.at("Color").get_to(value.color);
             }
             value.monitor = json.value("Monitor", std::string());
+            value.open = json.value("Open", false);
         }
 
         struct DisplaysModel::Private
@@ -178,6 +180,14 @@ namespace djv
             FTK_P();
             auto secondary = p.secondary->get();
             secondary.monitor = value;
+            p.secondary->setIfChanged(secondary);
+        }
+
+        void DisplaysModel::setSecondaryOpen(bool value)
+        {
+            FTK_P();
+            auto secondary = p.secondary->get();
+            secondary.open = value;
             p.secondary->setIfChanged(secondary);
         }
 

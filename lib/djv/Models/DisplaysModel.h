@@ -71,6 +71,10 @@ namespace djv
             //! them in changes when one is plugged in.
             std::string monitor;
 
+            //! Whether it was open when the application quit, to open again
+            //! at the next start, as the Blackmagic output turns on again.
+            bool open = false;
+
             bool operator == (const SecondaryDisplay&) const = default;
         };
 
@@ -129,6 +133,10 @@ namespace djv
             //! Set the monitor the secondary window fills, or empty for a
             //! window.
             DJV_MODELS_API void setSecondaryMonitor(const std::string&);
+
+            //! Set whether the secondary window is open, as the user left
+            //! it: opened or closed, not closed by the application quitting.
+            DJV_MODELS_API void setSecondaryOpen(bool);
 
             //! Observe the secondary window's color as the configuration
             //! has it: what the viewport is given (see

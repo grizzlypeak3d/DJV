@@ -68,6 +68,7 @@ namespace djv
             models::SecondaryDisplay secondary;
             secondary.color = { "Rec.2100-PQ", "Un-tone-mapped" };
             secondary.monitor = "LG TV SSCR2";
+            secondary.open = true;
             nlohmann::json json;
             models::to_json(json, secondary);
             models::SecondaryDisplay read;
@@ -117,6 +118,8 @@ namespace djv
                 FTK_CHECK(!model->observeSecondaryHDRTransfer()->get().has_value());
 
                 model->setSecondaryMonitor("LG TV SSCR2");
+                model->setSecondaryOpen(true);
+                FTK_CHECK(model->getSecondary().open);
                 model->save();
             }
             {
@@ -124,6 +127,7 @@ namespace djv
                 auto model = models::DisplaysModel::create(_context, settings, colorModel);
                 FTK_CHECK("LG TV SSCR2" == model->getSecondary().monitor);
                 FTK_CHECK("No such display" == model->getSecondary().color.display);
+                FTK_CHECK(model->getSecondary().open);
             }
         }
     }

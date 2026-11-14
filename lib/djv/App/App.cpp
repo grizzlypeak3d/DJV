@@ -763,6 +763,50 @@ namespace djv
         void App::setSecondaryWindow(bool value)
         {
             FTK_P();
+            // As the user leaves it, to open again at the next start.
+            p.displaysModel->setSecondaryOpen(value);
+            _secondaryWindowOpen(value);
+        }
+
+        void App::_secondaryWindowRestore()
+        {
+            FTK_P();
+            // Open again if it was open when the application quit, on its
+            // monitor. Not when that monitor is not connected: a window on
+            // the desktop in its place would be a surprise, and the choice is
+            // kept for when the monitor is back.
+            const models::SecondaryDisplay& secondary = p.displaysModel->getSecondary();
+            if (!secondary.open)
+            {
+                return;
+            }
+#if !(defined(__APPLE__) && TARGET_OS_IPHONE)
+            if (!secondary.monitor.empty())
+            {
+                const auto monitors = observeMonitors()->get();
+                const auto i = std::find_if(
+                    monitors.begin(),
+                    monitors.end(),
+                    [&secondary](const ftk::MonitorInfo& value)
+                    {
+                        return value.name == secondary.monitor;
+                    });
+                if (i == monitors.end())
+                {
+                    _context->log(
+                        "djv::app::App",
+                        ftk::Format("Monitor \"{0}\" is not connected, the secondary window is not opened").
+                            arg(secondary.monitor));
+                    return;
+                }
+            }
+#endif // TARGET_OS_IPHONE
+            _secondaryWindowOpen(true);
+        }
+
+        void App::_secondaryWindowOpen(bool value)
+        {
+            FTK_P();
             if (p.secondaryWindowActive->setIfChanged(value))
             {
                 if (value)
@@ -827,6 +871,8 @@ namespace djv
                 [this]
                 {
                     FTK_P();
+                    // Closed by the user, so it stays closed next time.
+                    p.displaysModel->setSecondaryOpen(false);
                     p.secondaryWindowActive->setIfChanged(false);
                     p.secondaryWindow.reset();
                     p.secondaryMonitorApplied.reset();
@@ -972,6 +1018,7 @@ namespace djv
             repairShellAssociations(_context);
 
             _mainWindowInit();
+            _secondaryWindowRestore();
 
             // What Help > System Information shows, in the log as well: the
             // log is what gets sent, and it had neither the version nor
@@ -1472,6 +1519,9 @@ namespace djv
                     FTK_P();
                     if (p.secondaryWindow)
                     {
+                        // Closed by quitting, not by the user: it opens
+                        // again at the next start.
+                        p.secondaryWindow->setCloseCallback(nullptr);
                         p.secondaryWindow->close();
                         p.secondaryWindow.reset();
                     }
@@ -1595,7 +1645,9 @@ namespace djv
                         _context->log(
                             "djv::app::App",
                             "Second screen gone, closing the secondary window");
-                        setSecondaryWindow(false);
+                        // Not the user closing it: it opens again with the
+                        // screen at the next start.
+                        _secondaryWindowOpen(false);
                     }
                 });
 #else // TARGET_OS_IPHONE
