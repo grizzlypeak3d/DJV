@@ -1623,39 +1623,10 @@ namespace djv
                 }
                 if (editing)
                 {
-                    // The name, edited where it is shown, taking the room
-                    // between the times and the date. Kept as it is typed,
-                    // on Return or leaving the field.
-                    p.editName = ftk::LineEdit::create(context, header);
-                    p.editName->setText(marker.name);
-                    p.editName->setFormat("Scene 00");
-                    p.editName->setHStretch(ftk::Stretch::Expanding);
-                    p.editName->setVAlign(ftk::VAlign::Center);
-                    p.editName->setTooltip("The marker's name.");
-                    ftk::setScreenshotTag(p.editName, "Review.MarkerName");
-                    p.editName->setCallback(
-                        [weak, id](const std::string& value)
-                        {
-                            if (auto widget = weak.lock())
-                            {
-                                if (auto app = widget->_app.lock())
-                                {
-                                    app->getMarkersModel()->setName(id, value);
-                                }
-                            }
-                        });
-                    p.editName->setFocusCallback(
-                        [weak](bool value)
-                        {
-                            if (auto widget = weak.lock())
-                            {
-                                if (value)
-                                {
-                                    widget->_p->editField = Private::EditField::Name;
-                                }
-                                widget->_editFocus(widget->_p->editEdit, value);
-                            }
-                        });
+                    // The name is edited on a row of its own, below, with
+                    // the text: this keeps the times and the date apart.
+                    auto spacer = ftk::Label::create(context, header);
+                    spacer->setHStretch(ftk::Stretch::Expanding);
                 }
                 else
                 {
@@ -1753,6 +1724,37 @@ namespace djv
                                 });
                         }
                     }
+
+                    // The name, above the text: what the marker says. Kept
+                    // as it is typed, on Return or leaving the field.
+                    p.editName = ftk::LineEdit::create(context, card);
+                    p.editName->setText(marker.name);
+                    p.editName->setHStretch(ftk::Stretch::Expanding);
+                    p.editName->setTooltip("The marker's name.");
+                    ftk::setScreenshotTag(p.editName, "Review.MarkerName");
+                    p.editName->setCallback(
+                        [weak, id](const std::string& value)
+                        {
+                            if (auto widget = weak.lock())
+                            {
+                                if (auto app = widget->_app.lock())
+                                {
+                                    app->getMarkersModel()->setName(id, value);
+                                }
+                            }
+                        });
+                    p.editName->setFocusCallback(
+                        [weak](bool value)
+                        {
+                            if (auto widget = weak.lock())
+                            {
+                                if (value)
+                                {
+                                    widget->_p->editField = Private::EditField::Name;
+                                }
+                                widget->_editFocus(widget->_p->editEdit, value);
+                            }
+                        });
 
                     // Written and edited in place. The marker keeps itself
                     // when the editor loses the focus, or on Command-Return
