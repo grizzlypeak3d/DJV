@@ -38,12 +38,12 @@ namespace djv
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Add a section after the built in ones: a title, what it
-            //! shows, and a widget for its header, such as a check box that
-            //! turns it on.
+            //! shows, and a check box in its header that turns it on, beside
+            //! the title.
             DJV_APP_API void addSection(
                 const std::string& title,
                 const std::shared_ptr<IWidget>&,
-                const std::shared_ptr<IWidget>& headerWidget = nullptr);
+                const std::shared_ptr<IWidget>& checkWidget = nullptr);
 
         private:
             void _secondaryHDRUpdate();

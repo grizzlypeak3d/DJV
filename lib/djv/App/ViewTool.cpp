@@ -71,25 +71,25 @@ namespace djv
             p.bellows["Background"]->setWidget(p.backgroundWidget);
             p.bellows["Outline"] = ftk::Bellows::create(context, "Outline", layout);
             p.bellows["Outline"]->setWidget(p.outlineWidget);
-            p.bellows["Outline"]->setToolWidget(p.outlineWidget->getEnabledCheckBox());
+            p.bellows["Outline"]->setCheckWidget(p.outlineWidget->getEnabledCheckBox());
             p.bellows["Grid"] = ftk::Bellows::create(context, "Grid", layout);
             p.bellows["Grid"]->setWidget(p.gridWidget);
-            p.bellows["Grid"]->setToolWidget(p.gridWidget->getEnabledCheckBox());
+            p.bellows["Grid"]->setCheckWidget(p.gridWidget->getEnabledCheckBox());
             p.bellows["CenterMarker"] = ftk::Bellows::create(context, "Center Marker", layout);
             p.bellows["CenterMarker"]->setWidget(p.centerMarkerWidget);
-            p.bellows["CenterMarker"]->setToolWidget(p.centerMarkerWidget->getEnabledCheckBox());
+            p.bellows["CenterMarker"]->setCheckWidget(p.centerMarkerWidget->getEnabledCheckBox());
             p.bellows["FrameGuide"] = ftk::Bellows::create(context, "Frame Guide", layout);
             p.bellows["FrameGuide"]->setWidget(p.frameGuideWidget);
-            p.bellows["FrameGuide"]->setToolWidget(p.frameGuideWidget->getEnabledCheckBox());
+            p.bellows["FrameGuide"]->setCheckWidget(p.frameGuideWidget->getEnabledCheckBox());
             p.bellows["SafeAreas"] = ftk::Bellows::create(context, "Safe Areas", layout);
             p.bellows["SafeAreas"]->setWidget(p.safeAreasWidget);
-            p.bellows["SafeAreas"]->setToolWidget(p.safeAreasWidget->getEnabledCheckBox());
+            p.bellows["SafeAreas"]->setCheckWidget(p.safeAreasWidget->getEnabledCheckBox());
             p.bellows["ClippingWarning"] = ftk::Bellows::create(context, "Clipping Warning", layout);
             p.bellows["ClippingWarning"]->setWidget(p.clippingWarningWidget);
-            p.bellows["ClippingWarning"]->setToolWidget(p.clippingWarningWidget->getEnabledCheckBox());
+            p.bellows["ClippingWarning"]->setCheckWidget(p.clippingWarningWidget->getEnabledCheckBox());
             p.bellows["HUD"] = ftk::Bellows::create(context, "HUD", layout);
             p.bellows["HUD"]->setWidget(p.hudWidget);
-            p.bellows["HUD"]->setToolWidget(p.hudWidget->getEnabledCheckBox());
+            p.bellows["HUD"]->setCheckWidget(p.hudWidget->getEnabledCheckBox());
             // The sections' labels share one width, so they line up as one
             // form would.
             ftk::setFormGroup(layout, ftk::FormGroup::create());

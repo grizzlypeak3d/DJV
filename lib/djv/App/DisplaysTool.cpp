@@ -160,7 +160,7 @@ namespace djv
             p.bellows["Viewport"]->setWidget(hdrLayout);
             p.bellows["Secondary Window"] = ftk::Bellows::create(context, "Secondary Window", p.layout);
             p.bellows["Secondary Window"]->setWidget(secondaryLayout);
-            p.bellows["Secondary Window"]->setToolWidget(p.secondaryCheckBox);
+            p.bellows["Secondary Window"]->setCheckWidget(p.secondaryCheckBox);
             p.bellows["Viewport"]->setOpen(true);
             p.bellows["Secondary Window"]->setOpen(true);
             // The sections' labels share one width, so they line up as one
@@ -301,7 +301,7 @@ namespace djv
         void DisplaysTool::addSection(
             const std::string& title,
             const std::shared_ptr<IWidget>& widget,
-            const std::shared_ptr<IWidget>& headerWidget)
+            const std::shared_ptr<IWidget>& checkWidget)
         {
             FTK_P();
             if (auto context = getContext())
@@ -311,9 +311,9 @@ namespace djv
                 layout->setMarginRole(ftk::SizeRole::Margin);
                 widget->setParent(layout);
                 bellows->setWidget(layout);
-                if (headerWidget)
+                if (checkWidget)
                 {
-                    bellows->setToolWidget(headerWidget);
+                    bellows->setCheckWidget(checkWidget);
                 }
                 bellows->setOpen(true);
                 p.bellows[title] = bellows;

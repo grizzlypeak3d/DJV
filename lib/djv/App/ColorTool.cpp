@@ -52,17 +52,17 @@ namespace djv
 #if defined(TLRENDER_OCIO)
             p.bellows["OCIO"] = ftk::Bellows::create(context, "OCIO", layout);
             p.bellows["OCIO"]->setWidget(ocioWidget);
-            p.bellows["OCIO"]->setToolWidget(ocioWidget->getEnabledCheckBox());
+            p.bellows["OCIO"]->setCheckWidget(ocioWidget->getEnabledCheckBox());
             p.bellows["LUT"] = ftk::Bellows::create(context, "LUT", layout);
             p.bellows["LUT"]->setWidget(lutWidget);
-            p.bellows["LUT"]->setToolWidget(lutWidget->getEnabledCheckBox());
+            p.bellows["LUT"]->setCheckWidget(lutWidget->getEnabledCheckBox());
 #endif // TLRENDER_OCIO
             p.bellows["Color"] = ftk::Bellows::create(context, "Color", layout);
             p.bellows["Color"]->setWidget(colorWidget);
-            p.bellows["Color"]->setToolWidget(colorWidget->getEnabledCheckBox());
+            p.bellows["Color"]->setCheckWidget(colorWidget->getEnabledCheckBox());
             p.bellows["Levels"] = ftk::Bellows::create(context, "Levels", layout);
             p.bellows["Levels"]->setWidget(levelsWidget);
-            p.bellows["Levels"]->setToolWidget(levelsWidget->getEnabledCheckBox());
+            p.bellows["Levels"]->setCheckWidget(levelsWidget->getEnabledCheckBox());
             // The sections' labels share one width, so they line up as one
             // form would.
             ftk::setFormGroup(layout, ftk::FormGroup::create());
