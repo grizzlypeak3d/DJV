@@ -46,6 +46,7 @@ namespace djv
                 const std::shared_ptr<IWidget>& headerWidget = nullptr);
 
         private:
+            void _secondaryHDRUpdate();
             void _monitorsUpdate();
 
             FTK_PRIVATE();

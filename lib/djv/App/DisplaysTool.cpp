@@ -7,7 +7,6 @@
 
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/DisplaysModel.h>
-#include <djv/Models/ToolsModel.h>
 #include <djv/Models/ViewportModel.h>
 
 #include <djv/UI/DisplayColorWidget.h>
@@ -18,10 +17,8 @@
 #include <ftk/UI/FloatEdit.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
-#include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
-#include <ftk/Core/Format.h>
 #if defined(FTK_GPU)
 #include <ftk/GPU/System.h>
 #endif // FTK_GPU
@@ -40,8 +37,6 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> layout;
             std::shared_ptr<ftk::FormGroup> formGroup;
 
-            std::shared_ptr<ftk::Label> viewportLabel;
-            std::shared_ptr<ftk::PushButton> colorToolButton;
             std::vector<tl::HDR_EOTF> hdrTransfers;
             std::shared_ptr<ftk::ComboBox> hdrTransferComboBox;
             std::shared_ptr<ftk::FloatEdit> hdrWhiteEdit;
@@ -50,6 +45,8 @@ namespace djv
             std::shared_ptr<ftk::ComboBox> monitorComboBox;
             std::vector<std::string> monitorItems;
             std::shared_ptr<ui::DisplayColorWidget> secondaryColorWidget;
+            std::shared_ptr<ftk::Label> secondaryHDRLabel;
+            std::optional<tl::HDR_EOTF> secondaryHDRTransfer;
 
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioObserver;
             std::shared_ptr<ftk::Observer<tl::HDR_EOTF> > hdrTransferObserver;
@@ -57,6 +54,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<bool> > secondaryObserver;
             std::shared_ptr<ftk::Observer<models::SecondaryDisplay> > secondaryDisplayObserver;
             std::shared_ptr<ftk::Observer<models::DisplayColorLists> > secondaryListsObserver;
+            std::shared_ptr<ftk::Observer<std::optional<tl::HDR_EOTF> > > secondaryHDRObserver;
             std::shared_ptr<ftk::ListObserver<ftk::MonitorInfo> > monitorsObserver;
         };
 
@@ -77,21 +75,8 @@ namespace djv
             FTK_P();
             p.app = app;
 
-            // The viewport: its color is the Color tool's, said here and
-            // set there, so there is one place to set it.
-            p.viewportLabel = ftk::Label::create(context);
-            p.viewportLabel->setHStretch(ftk::Stretch::Expanding);
-            p.colorToolButton = ftk::PushButton::create(context, "Color Tool");
-            p.colorToolButton->setTooltip("Set the viewport's color in the Color tool.");
-            auto viewportLayout = ftk::VerticalLayout::create(context);
-            viewportLayout->setMarginRole(ftk::SizeRole::Margin);
-            viewportLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.viewportLabel->setParent(viewportLayout);
-            auto buttonLayout = ftk::HorizontalLayout::create(context, viewportLayout);
-            buttonLayout->addSpacer(ftk::Stretch::Expanding);
-            p.colorToolButton->setParent(buttonLayout);
-
-            // Whether the picture is HDR, and how bright the interface's
+            // The viewport. Its color is the Color tool's; what is here is
+            // whether the picture is HDR, and how bright the interface's
             // white is beside it: what the display shows, so here with the
             // display, not with how the picture is looked at. Gamma HDR is
             // not offered: nothing here draws it.
@@ -126,7 +111,8 @@ namespace djv
 #endif // FTK_GPU
             p.hdrTransferComboBox->setEnabled(hdr);
             p.hdrWhiteEdit->setEnabled(hdr);
-            auto hdrLayout = ftk::FormLayout::create(context, viewportLayout);
+            auto hdrLayout = ftk::FormLayout::create(context);
+            hdrLayout->setMarginRole(ftk::SizeRole::Margin);
             hdrLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             hdrLayout->addRow("HDR picture:", p.hdrTransferComboBox);
             hdrLayout->addRow("HDR white:", p.hdrWhiteEdit);
@@ -153,11 +139,25 @@ namespace djv
             monitorLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             monitorLayout->addRow("Monitor:", p.monitorComboBox);
             p.secondaryColorWidget->setParent(secondaryLayout);
+            // Whether it is HDR, which follows from its display or the
+            // viewport's setting: said, so a picture that is HDR on the
+            // television and not on the desktop reads as meant.
+            p.secondaryHDRLabel = ftk::Label::create(context);
+            p.secondaryHDRLabel->setHStretch(ftk::Stretch::Expanding);
+            p.secondaryHDRLabel->setTooltip(
+                "Whether the window shows the picture as HDR: from its own "
+                "display when it has one, a PQ display being HDR, or else as "
+                "the viewport's HDR picture.");
+            p.secondaryHDRLabel->setEnabled(hdr);
+            ftk::setScreenshotTag(p.secondaryHDRLabel, "Displays.SecondaryHDR");
+            auto secondaryHDRLayout = ftk::FormLayout::create(context, secondaryLayout);
+            secondaryHDRLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            secondaryHDRLayout->addRow("HDR:", p.secondaryHDRLabel);
 
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setSpacingRole(ftk::SizeRole::Border);
             p.bellows["Viewport"] = ftk::Bellows::create(context, "Viewport", p.layout);
-            p.bellows["Viewport"]->setWidget(viewportLayout);
+            p.bellows["Viewport"]->setWidget(hdrLayout);
             p.bellows["Secondary Window"] = ftk::Bellows::create(context, "Secondary Window", p.layout);
             p.bellows["Secondary Window"]->setWidget(secondaryLayout);
             p.bellows["Secondary Window"]->setToolWidget(p.secondaryCheckBox);
@@ -170,14 +170,6 @@ namespace djv
             _setWidget(p.layout);
 
             std::weak_ptr<App> appWeak(app);
-            p.colorToolButton->setClickedCallback(
-                [appWeak]
-                {
-                    if (auto app = appWeak.lock())
-                    {
-                        app->getToolsModel()->showSection("Color", "OCIO");
-                    }
-                });
             p.secondaryCheckBox->setCheckedCallback(
                 [appWeak](bool value)
                 {
@@ -232,12 +224,7 @@ namespace djv
                 app->getColorModel()->observeResolvedOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
-                    FTK_P();
-                    p.viewportLabel->setText(value.enabled ?
-                        ftk::Format("OpenColorIO: {0}, {1}").
-                            arg(value.display).arg(value.view).str() :
-                        std::string("OpenColorIO is off."));
-                    p.secondaryColorWidget->setOCIOEnabled(value.enabled);
+                    _p->secondaryColorWidget->setOCIOEnabled(value.enabled);
                 });
             p.hdrTransferObserver = ftk::Observer<tl::HDR_EOTF>::create(
                 app->getViewportModel()->observeHDRTransfer(),
@@ -247,6 +234,14 @@ namespace djv
                     const auto i = std::find(p.hdrTransfers.begin(), p.hdrTransfers.end(), value);
                     p.hdrTransferComboBox->setCurrentIndex(
                         i != p.hdrTransfers.end() ? static_cast<int>(i - p.hdrTransfers.begin()) : 0);
+                    _secondaryHDRUpdate();
+                });
+            p.secondaryHDRObserver = ftk::Observer<std::optional<tl::HDR_EOTF> >::create(
+                app->getDisplaysModel()->observeSecondaryHDRTransfer(),
+                [this](const std::optional<tl::HDR_EOTF>& value)
+                {
+                    _p->secondaryHDRTransfer = value;
+                    _secondaryHDRUpdate();
                 });
             p.hdrWhiteObserver = ftk::Observer<float>::create(
                 app->getViewportModel()->observeHDRWhite(),
@@ -325,6 +320,21 @@ namespace djv
                 ftk::setFormGroup(p.layout, p.formGroup);
                 _loadSettings(p.bellows);
             }
+        }
+
+        void DisplaysTool::_secondaryHDRUpdate()
+        {
+            FTK_P();
+            auto app = p.app.lock();
+            if (!app || !p.secondaryHDRLabel)
+                return;
+            auto label = [](tl::HDR_EOTF value)
+            {
+                return tl::HDR_EOTF::ST2084 == value ? std::string("PQ") : std::string("SDR");
+            };
+            p.secondaryHDRLabel->setText(p.secondaryHDRTransfer.has_value() ?
+                label(*p.secondaryHDRTransfer) + ", from its display" :
+                label(app->getViewportModel()->observeHDRTransfer()->get()) + ", as the viewport");
         }
 
         void DisplaysTool::_monitorsUpdate()

@@ -50,9 +50,11 @@ Locations: **Window** menu
 
 **Tools > Displays** sets where the picture goes and the color it is given there. Its **Secondary Window** section opens and closes the window (the check box in its header), and chooses its **Monitor**: **Window** for a window of its own, or a monitor for the window to fill, with the picture alone and nothing else on it. Escape in the window gives the window back. A monitor that is unplugged gives a window too, and the choice is remembered from one run to the next.
 
-The secondary window can also have a color of its own: **Display** and **View** choose an OpenColorIO display and view for it, in place of the viewport's, such as a PQ display for an HDR television while the desktop monitor stays as it is. **Same as viewport** follows the [Color](color.html) tool. The **Viewport** section says what the viewport is given, and its button opens the Color tool to change it. It also has the viewport's [HDR](view.html#hdr) options, which need the GPU renderer:
+The secondary window can also have a color of its own: **Display** and **View** choose an OpenColorIO display and view for it, in place of the viewport's, such as a PQ display for an HDR television while the desktop monitor stays as it is. **Same as viewport** follows the [Color](color.html) tool. **HDR** says whether the window shows the picture as HDR, and why: from its own display, a PQ display being HDR, or as the viewport.
 
-- **HDR picture** — Whether the picture is shown as HDR: **SDR**, or **PQ** for a picture that is PQ encoded. The secondary window follows it unless it has a display of its own, which then decides.
+The **Viewport** section has the viewport's [HDR](view.html#hdr) options, which need the GPU renderer:
+
+- **HDR picture** — Whether the picture is shown as HDR: **SDR**, or **PQ** for a picture that is PQ encoded. The secondary window follows it unless it has a display of its own.
 - **HDR white** — The luminance, in nits, that the white of the interface stands for, where the system does not say: on macOS.
 
 Locations: **Window** menu, **Window** tool bar, **Tools** menu

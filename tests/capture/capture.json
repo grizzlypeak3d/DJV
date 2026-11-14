@@ -397,7 +397,8 @@
         { "tool": "Displays" },
         { "expect": "Displays.HDRTransfer", "visible": true },
         { "expect": "Displays.HDRTransfer", "enabled": false },
-        { "expect": "Displays.HDRWhite", "enabled": false }
+        { "expect": "Displays.HDRWhite", "enabled": false },
+        { "expect": "Displays.SecondaryHDR", "text": "SDR, as the viewport" }
       ]
     },
     {
