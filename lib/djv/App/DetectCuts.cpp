@@ -53,6 +53,7 @@ namespace djv
 
             std::chrono::steady_clock::time_point startTime;
             std::string path;
+            models::CutMarkerOptions options;
 
             std::shared_ptr<ftk::ProgressDialog> dialog;
             std::shared_ptr<ftk::Timer> timer;
@@ -92,7 +93,7 @@ namespace djv
             return out;
         }
 
-        void DetectCuts::start()
+        void DetectCuts::start(const models::CutMarkerOptions& options)
         {
             FTK_P();
             auto context = p.context.lock();
@@ -116,6 +117,7 @@ namespace djv
             auto timeline = player->getTimeline();
             p.range = player->getInOutRange();
             p.playerStart = player->getTimeRange().start_time();
+            p.options = options;
             p.running = true;
             p.cancel = false;
             p.done = false;
@@ -132,8 +134,8 @@ namespace djv
             // A timeline of its own, opened on the thread: opening can take
             // seconds (a bundle, a probe), and the player's readers keep
             // serving playback. Pixels, not textures.
-            tl::Options options = timeline->getOptions();
-            options.ioOptions.erase("Texture");
+            tl::Options timelineOptions = timeline->getOptions();
+            timelineOptions.ioOptions.erase("Texture");
             const ftk::Path path = timeline->getPath();
             const ftk::Path audioPath = timeline->getAudioPath();
             const OTIO_NS::TimeRange playerRange = p.range;
@@ -141,7 +143,7 @@ namespace djv
             std::weak_ptr<ftk::Context> contextWeak = context;
             Private* pp = _p.get();
             p.thread = std::thread(
-                [pp, contextWeak, path, audioPath, options, playerRange, playerStart]
+                [pp, contextWeak, path, audioPath, timelineOptions, playerRange, playerStart]
                 {
                     try
                     {
@@ -150,7 +152,7 @@ namespace djv
                         {
                             throw std::runtime_error("No context");
                         }
-                        auto detect = tl::Timeline::create(context, path, audioPath, options);
+                        auto detect = tl::Timeline::create(context, path, audioPath, timelineOptions);
                         const OTIO_NS::RationalTime detectStart =
                             detect->getTimeRange().start_time();
                         const OTIO_NS::TimeRange range(
@@ -274,7 +276,7 @@ namespace djv
                     frames.push_back(std::to_string(
                         static_cast<int64_t>(times.back().value())));
                 }
-                const size_t added = app->getMarkersModel()->addCuts(times);
+                const size_t added = app->getMarkersModel()->addCuts(times, p.options);
                 if (auto context = p.context.lock())
                 {
                     context->getLogSystem()->print(

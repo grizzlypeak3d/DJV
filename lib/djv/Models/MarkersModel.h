@@ -91,11 +91,13 @@ namespace djv
             DJV_MODELS_API void clear();
 
             //! Mark the cuts at the given times, as Detect Cuts finds them: an
-            //! ordinary one-frame marker named "Cut" at each, and none at a
-            //! frame that has a marker already, so finding the cuts again
-            //! adds only the new ones and leaves what anybody wrote alone.
-            //! Returns how many were added.
-            DJV_MODELS_API size_t addCuts(const std::vector<OTIO_NS::RationalTime>&);
+            //! ordinary one-frame marker at each, with the given name and
+            //! color, and none at a frame that has a marker already, so
+            //! finding the cuts again adds only the new ones and leaves what
+            //! anybody wrote alone. Returns how many were added.
+            DJV_MODELS_API size_t addCuts(
+                const std::vector<OTIO_NS::RationalTime>&,
+                const CutMarkerOptions& = CutMarkerOptions());
 
         private:
             //! Sort into time order, then set.

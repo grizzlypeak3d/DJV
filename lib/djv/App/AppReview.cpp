@@ -4,6 +4,7 @@
 #include <djv/App/AppPrivate.h>
 #include <tlRender/UI/TimelineWidget.h>
 #include <djv/App/MainWindow.h>
+#include <djv/UI/DetectCutsDialog.h>
 #include <djv/UI/Viewport.h>
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/AppInfoModel.h>
@@ -12,6 +13,7 @@
 #include <djv/Models/Playlist.h>
 #include <opentimelineio/externalReference.h>
 #include <djv/Models/MarkersModel.h>
+#include <djv/Models/SettingsKeys.h>
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/Version.h>
 #include <djv/Models/ViewportModel.h>
@@ -63,7 +65,7 @@ namespace djv
             return _p->reviewMarkers;
         }
 
-        void App::detectCuts()
+        void App::detectCuts(const nlohmann::json& args)
         {
             FTK_P();
             if (!p.detectCuts)
@@ -72,7 +74,48 @@ namespace djv
                     _context,
                     std::dynamic_pointer_cast<App>(shared_from_this()));
             }
-            p.detectCuts->start();
+            if (p.detectCuts->isRunning() || p.detectCutsDialog)
+            {
+                return;
+            }
+
+            // The options last chosen, remembered for the next file.
+            models::CutMarkerOptions options;
+            getSettings()->getT(models::settingsKeys::detectCuts, options);
+
+            if (args.is_object() || !p.mainWindow)
+            {
+                // From a script or the command line: no questions.
+                if (args.is_object())
+                {
+                    if (args.contains("Name"))
+                    {
+                        options.name = args.at("Name").get<std::string>();
+                    }
+                    if (args.contains("Color"))
+                    {
+                        args.at("Color").get_to(options.color);
+                    }
+                }
+                p.detectCuts->start(options);
+                return;
+            }
+
+            p.detectCutsDialog = ui::DetectCutsDialog::create(_context, options);
+            p.detectCutsDialog->setCallback(
+                [this](const models::CutMarkerOptions& value)
+                {
+                    FTK_P();
+                    getSettings()->setT(models::settingsKeys::detectCuts, value);
+                    p.detectCutsDialog->close();
+                    p.detectCuts->start(value);
+                });
+            p.detectCutsDialog->setCloseCallback(
+                [this]
+                {
+                    _p->detectCutsDialog.reset();
+                });
+            p.detectCutsDialog->open(p.mainWindow);
         }
 
         void App::seekReviewMarker(bool next)

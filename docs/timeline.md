@@ -37,7 +37,7 @@ Locations: **Timeline** menu
 
 ## Detecting cuts
 
-Review material is often a whole edit flattened into one movie or one image sequence, with no clips to step between. **Timeline > Detect Cuts** finds the cuts in the current file from its pictures and adds a marker named "Cut" at each. **Review > Previous Marker** and **Review > Next Marker** (<kbd>Alt+Left</kbd> / <kbd>Alt+Right</kbd>) then step from cut to cut, and the markers are saved with the review like any others; see [Markers](reviews.html#markers).
+Review material is often a whole edit flattened into one movie or one image sequence, with no clips to step between. **Timeline > Detect Cuts** finds the cuts in the current file from its pictures and adds a marker at each. It asks first what the markers are called and their color: by default no name, so each shows its frame, and a blue of their own, apart from the green of notes. The choice is remembered for next time. **Review > Previous Marker** and **Review > Next Marker** (<kbd>Alt+Left</kbd> / <kbd>Alt+Right</kbd>) then step from cut to cut, and the markers are saved with the review like any others; see [Markers](reviews.html#markers).
 
 It reads every frame in the in/out range, so narrowing the range first does one part of a long movie on its own. The frames are read separately from playback, which carries on, with a progress dialog to cancel it from. A frame that has a marker already is left alone, so running it again adds only cuts not marked before. A cut it got wrong is deleted like any marker, one it missed is added with **Review > Add Marker**, and one a frame out is moved by editing it in the **Review** tool and changing its frame.
 

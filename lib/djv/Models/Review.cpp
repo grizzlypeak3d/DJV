@@ -515,6 +515,29 @@ namespace djv
             return out;
         }
 
+        const ftk::Color4F& cutMarkerColor()
+        {
+            // Sky blue, from the color blind safe set the style's colors
+            // come from.
+            static const ftk::Color4F out(.337F, .706F, .914F, 1.F);
+            return out;
+        }
+
+        void to_json(nlohmann::json& json, const CutMarkerOptions& value)
+        {
+            json["Name"] = value.name;
+            json["Color"] = value.color;
+        }
+
+        void from_json(const nlohmann::json& json, CutMarkerOptions& value)
+        {
+            value.name = json.value("Name", std::string());
+            if (json.contains("Color"))
+            {
+                json.at("Color").get_to(value.color);
+            }
+        }
+
         bool ReviewMarker::operator == (const ReviewMarker& other) const
         {
             return

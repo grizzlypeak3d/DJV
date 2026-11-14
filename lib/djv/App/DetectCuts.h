@@ -5,6 +5,8 @@
 
 #include <djv/App/Export.h>
 
+#include <djv/Models/Review.h>
+
 #include <ftk/Core/Util.h>
 
 #include <memory>
@@ -45,9 +47,11 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const std::shared_ptr<App>&);
 
-            //! Start finding the cuts in the current file. Nothing while it
-            //! is already running, or with no file open.
-            DJV_APP_API void start();
+            //! Start finding the cuts in the current file, marking them with
+            //! the given options. Nothing while it is already running, or
+            //! with no file open.
+            DJV_APP_API void start(
+                const models::CutMarkerOptions& = models::CutMarkerOptions());
 
             //! Get whether it is running.
             DJV_APP_API bool isRunning() const;

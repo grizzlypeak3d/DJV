@@ -44,6 +44,7 @@ namespace djv
     namespace ui
     {
         class ColorResetDialog;
+        class DetectCutsDialog;
         class RecentFilesDialog;
         class SeparateAudioDialog;
     }
@@ -175,6 +176,7 @@ namespace djv
             std::shared_ptr<MainWindow> mainWindow;
             std::shared_ptr<SecondaryWindow> secondaryWindow;
             std::shared_ptr<ui::SeparateAudioDialog> separateAudioDialog;
+            std::shared_ptr<ui::DetectCutsDialog> detectCutsDialog;
 
             //! What marks the review modified. Everything the document holds
             //! and a person would call a change to it: the files, what is

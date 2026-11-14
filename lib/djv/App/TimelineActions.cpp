@@ -259,12 +259,15 @@ namespace djv
                 "DetectCuts",
                 "Find the cuts in the current file, over the in/out range, "
                 "and add a marker at each, except where there is one "
-                "already.",
-                [appWeak](const nlohmann::json&)
+                "already. Without arguments a dialog asks the markers' name "
+                "and color first; with them it runs straight away, e.g. "
+                "{ \"Name\": \"Cut\", \"Color\": [1, 1, 0, 1] }, or {} "
+                "for the ones last chosen.",
+                [appWeak](const nlohmann::json& args)
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->detectCuts();
+                        app->detectCuts(args);
                     }
                 });
 
@@ -285,7 +288,7 @@ namespace djv
 
             // Create the actions.
             _actions["DetectCuts"] = ftk::Action::create(
-                "Detect Cuts",
+                "Detect Cuts...",
                 _command("DetectCuts"));
             _actions["Minimize"] = ftk::Action::create(
                 "Minimize",

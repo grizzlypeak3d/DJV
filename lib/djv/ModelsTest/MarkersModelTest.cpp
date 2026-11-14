@@ -8,6 +8,8 @@
 #include <ftk/Core/Assert.h>
 #include <ftk/Core/Format.h>
 
+#include <nlohmann/json.hpp>
+
 namespace djv
 {
     namespace models_tests
@@ -116,17 +118,33 @@ namespace djv
                 OTIO_NS::RationalTime(96.0, 24.0) }));
             auto markers = model->getMarkers();
             FTK_CHECK(3 == markers.size());
-            FTK_CHECK("Cut" == markers[0].name);
+            // No name, and the cut color, by default.
+            FTK_CHECK(markers[0].name.empty());
             FTK_CHECK(24.0 == markers[0].range->start_time().value());
             FTK_CHECK(1.0 == markers[0].range->duration().value());
-            FTK_CHECK(models::reviewMarkerColor() == markers[0].color);
+            FTK_CHECK(models::cutMarkerColor() == markers[0].color);
             FTK_CHECK(mine == markers[1].id);
-            FTK_CHECK("Cut" == markers[2].name);
+            FTK_CHECK(markers[2].name.empty());
             FTK_CHECK(1 == model->addCuts({
                 OTIO_NS::RationalTime(24.0, 24.0),
                 OTIO_NS::RationalTime(120.0, 24.0) }));
             FTK_CHECK(4 == model->getMarkers().size());
             FTK_CHECK(0 == model->addCuts({}));
+            {
+                // Named and colored as asked; the options survive JSON.
+                models::CutMarkerOptions options;
+                options.name = "Cut";
+                options.color = ftk::Color4F(1.F, 1.F, 0.F);
+                FTK_CHECK(1 == model->addCuts({ OTIO_NS::RationalTime(150.0, 24.0) }, options));
+                const auto& last = model->getMarkers().back();
+                FTK_CHECK("Cut" == last.name);
+                FTK_CHECK(options.color == last.color);
+                nlohmann::json json = options;
+                FTK_CHECK(options == json.get<models::CutMarkerOptions>());
+                FTK_CHECK(models::CutMarkerOptions() ==
+                    nlohmann::json::object().get<models::CutMarkerOptions>());
+                model->remove(last.id);
+            }
 
             // A cut a frame early, moved: the list keeps its time order.
             const std::string cut = model->getMarkers()[0].id;

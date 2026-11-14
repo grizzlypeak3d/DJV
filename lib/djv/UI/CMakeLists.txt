@@ -8,6 +8,7 @@ set(HEADERS
     FrameRangePopup.h
     Init.h
     ColorResetDialog.h
+    DetectCutsDialog.h
     RecentFilesDialog.h
     SeparateAudioDialog.h
     SettingsWidgets.h
@@ -37,6 +38,7 @@ set(SOURCE
     FrameRangePopup.cpp
     Init.cpp
     ColorResetDialog.cpp
+    DetectCutsDialog.cpp
     RecentFilesDialog.cpp
     SeparateAudioDialog.cpp
     SettingsWidgets.cpp

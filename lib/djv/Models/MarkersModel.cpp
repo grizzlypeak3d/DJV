@@ -201,7 +201,9 @@ namespace djv
             _set({});
         }
 
-        size_t MarkersModel::addCuts(const std::vector<OTIO_NS::RationalTime>& times)
+        size_t MarkersModel::addCuts(
+            const std::vector<OTIO_NS::RationalTime>& times,
+            const CutMarkerOptions& options)
         {
             FTK_P();
             auto markers = p.markers->get();
@@ -225,7 +227,8 @@ namespace djv
                 }
                 ReviewMarker marker;
                 marker.id = generateId();
-                marker.name = "Cut";
+                marker.name = options.name;
+                marker.color = options.color;
                 marker.range = OTIO_NS::TimeRange(
                     time,
                     OTIO_NS::RationalTime(1.0, time.rate()));

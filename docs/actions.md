@@ -135,7 +135,7 @@ The commands are how the menu items are run from outside the window: with
 | Track Media | <kbd>C</kbd> | `Timeline/TrackMedia` | Toggle the timeline video thumbnails and audio waveforms. |
 | Video Thumbnails |  | `Timeline/Thumbnails` | Toggle the timeline video thumbnails. |
 | Audio Waveforms |  | `Timeline/Waveforms` | Toggle the timeline audio waveforms. |
-| Detect Cuts |  | `Timeline/DetectCuts` | Find the cuts in the current file, over the in/out range, and add a marker at each, except where there is one already. |
+| Detect Cuts... |  | `Timeline/DetectCuts` | Find the cuts in the current file, over the in/out range, and add a marker at each, except where there is one already. Without arguments a dialog asks the markers' name and color first; with them it runs straight away, e.g. { "Name": "Cut", "Color": [1, 1, 0, 1] }, or {} for the ones last chosen. |
 | Video Thumbnail Size > Small |  | `Timeline/ThumbnailSizeSmall` | Small timeline thumbnails. |
 | Video Thumbnail Size > Medium |  | `Timeline/ThumbnailSizeMedium` | Medium timeline thumbnails. |
 | Video Thumbnail Size > Large |  | `Timeline/ThumbnailSizeLarge` | Large timeline thumbnails. |

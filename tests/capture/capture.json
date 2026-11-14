@@ -368,6 +368,27 @@
       ]
     },
     {
+      "id": "detect-cuts-dialog",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "action": "Timeline/DetectCuts" },
+        { "expect": "DetectCuts.Name", "visible": true },
+        { "expect": "DetectCuts.Name", "text": "" },
+        { "click": "DetectCuts.Name" },
+        { "text": "Shot" },
+        { "click": "DetectCuts.Detect" },
+        { "wait": 2.0 },
+        { "expect": "DetectCuts.Name", "visible": false },
+        { "action": "Timeline/DetectCuts" },
+        { "expect": "DetectCuts.Name", "text": "Shot" },
+        { "key": "Escape" },
+        { "key": "Escape" },
+        { "expect": "DetectCuts.Name", "visible": false }
+      ]
+    },
+    {
       "id": "hold-frame",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

@@ -145,7 +145,11 @@ namespace djv
 
             //! Find the cuts in the current file and mark each one, on a
             //! thread of its own with a progress dialog (see DetectCuts).
-            DJV_APP_API void detectCuts();
+            //! Without arguments, as from the menu, a dialog asks first what
+            //! the markers are called and their color; with an object, it
+            //! runs straight away, with its "Name" and "Color" or else the
+            //! ones last chosen.
+            DJV_APP_API void detectCuts(const nlohmann::json& = nlohmann::json());
 
             //! Get whether the setup dialog should be hidden. The setup
             //! dialog is hidden by the "-hideSetup" command line flag, by

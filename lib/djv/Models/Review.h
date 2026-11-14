@@ -231,6 +231,22 @@ namespace djv
         //! The default marker color.
         DJV_MODELS_API const ftk::Color4F& reviewMarkerColor();
 
+        //! The default color of the markers Detect Cuts adds: apart from the
+        //! notes' green, the playhead, and the in/out band, so the cuts read
+        //! as cuts in the list and on the timeline.
+        DJV_MODELS_API const ftk::Color4F& cutMarkerColor();
+
+        //! The markers Detect Cuts adds: a name, none by default -- the
+        //! frame says where, and seventy cards saying "Cut" say nothing --
+        //! and a color.
+        struct DJV_MODELS_API_TYPE CutMarkerOptions
+        {
+            std::string name;
+            ftk::Color4F color = cutMarkerColor();
+
+            bool operator == (const CutMarkerOptions&) const = default;
+        };
+
         //! Review feedback: a marker anchored to a span of frames.
         //!
         //! One type covers what used to be two: a note is a marker with text
@@ -321,6 +337,8 @@ namespace djv
         //! \name Serialize
         ///@{
 
+        DJV_MODELS_API void to_json(nlohmann::json&, const CutMarkerOptions&);
+        DJV_MODELS_API void from_json(const nlohmann::json&, CutMarkerOptions&);
         DJV_MODELS_API void to_json(nlohmann::json&, const ReviewFile&);
         DJV_MODELS_API void to_json(nlohmann::json&, const ReviewCompare&);
         DJV_MODELS_API void to_json(nlohmann::json&, const ReviewView&);
