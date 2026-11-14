@@ -1556,7 +1556,7 @@ namespace djv
                 // so the header and the text sit evenly inside the item.
                 auto card = ftk::VerticalLayout::create(context);
                 card->setMarginRole(ftk::SizeRole::MarginInside);
-                card->setSpacingRole(ftk::SizeRole::Spacing);
+                card->setSpacingRole(ftk::SizeRole::SpacingTool);
                 button->setWidget(card);
 
                 auto header = ftk::HorizontalLayout::create(context, card);
