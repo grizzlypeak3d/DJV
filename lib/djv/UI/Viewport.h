@@ -86,6 +86,10 @@ namespace djv
             //! nothing follows the color model (see ViewportBinding).
             DJV_UI_API void setDisplayColor(const models::DisplayColor&);
 
+            //! Give this viewport whether the picture is HDR, or nothing to
+            //! follow the viewport model (see ViewportBinding).
+            DJV_UI_API void setHDRTransferOverride(const std::optional<tl::HDR_EOTF>&);
+
             DJV_UI_API ftk::Size2I getSizeHint() const override;
             DJV_UI_API void setGeometry(const ftk::Box2I&) override;
             DJV_UI_API void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;

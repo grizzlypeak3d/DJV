@@ -292,6 +292,22 @@ namespace djv
                 {
                     out.viewIndex = j - out.views.begin();
                 }
+                if (!out.views.empty())
+                {
+                    const std::string& view = out.views[out.viewIndex];
+                    const char* name = p.ocioConfig->getDisplayViewColorSpaceName(
+                        display.c_str(), view.c_str());
+                    std::string colorSpaceName = name ? name : "";
+                    if (OCIO::OCIO_VIEW_USE_DISPLAY_NAME == colorSpaceName)
+                    {
+                        colorSpaceName = display;
+                    }
+                    if (auto colorSpace = p.ocioConfig->getColorSpace(colorSpaceName.c_str()))
+                    {
+                        const char* encoding = colorSpace->getEncoding();
+                        out.hdr = encoding && std::string(encoding) == "hdr-video";
+                    }
+                }
 
                 out.looks.push_back("None");
                 for (int i = 0; i < p.ocioConfig->getNumLooks(); ++i)

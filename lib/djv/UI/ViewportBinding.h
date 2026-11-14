@@ -6,12 +6,14 @@
 #include <djv/UI/Export.h>
 
 #include <tlRender/Timeline/DisplayOptions.h>
+#include <tlRender/Core/HDR.h>
 
 #include <ftk/Core/Image.h>
 #include <ftk/Core/Util.h>
 
 #include <functional>
 #include <memory>
+#include <optional>
 
 namespace tl
 {
@@ -77,6 +79,11 @@ namespace djv
             //! monitor that wants another display (see
             //! models::DisplaysModel).
             DJV_UI_API void setDisplayColor(const models::DisplayColor&);
+
+            //! Give this viewport whether the picture is HDR, in place of the
+            //! viewport model's, or nothing to follow the model: with a
+            //! display of its own, whether that display is PQ decides it.
+            DJV_UI_API void setHDRTransfer(const std::optional<tl::HDR_EOTF>&);
 
             DJV_UI_API const ftk::ImageOptions& getImageOptions() const;
             DJV_UI_API const tl::DisplayOptions& getDisplayOptions() const;

@@ -83,6 +83,7 @@ namespace djv
                 auto model = models::DisplaysModel::create(_context, settings, colorModel);
                 FTK_CHECK(models::SecondaryDisplay() == model->getSecondary());
                 FTK_CHECK(models::DisplayColor() == model->observeSecondaryColor()->get());
+                FTK_CHECK(!model->observeSecondaryHDRTransfer()->get().has_value());
 
 #if defined(TLRENDER_OCIO)
                 // The configuration's displays, and a display chosen from
@@ -99,6 +100,13 @@ namespace djv
                     const auto views = model->observeSecondaryLists()->get().views;
                     FTK_CHECK(std::find(views.begin(), views.end(), color.view) != views.end());
                 }
+
+                // A PQ display is HDR, and an SDR one is not; the built in
+                // configuration has both.
+                model->setSecondaryColor({ "Rec.2100-PQ - Display", "" });
+                FTK_CHECK(tl::HDR_EOTF::ST2084 == model->observeSecondaryHDRTransfer()->get());
+                model->setSecondaryColor({ "sRGB - Display", "" });
+                FTK_CHECK(tl::HDR_EOTF::SDR == model->observeSecondaryHDRTransfer()->get());
 #endif // TLRENDER_OCIO
 
                 // A display the configuration does not have follows the
@@ -106,6 +114,7 @@ namespace djv
                 model->setSecondaryColor({ "No such display", "" });
                 FTK_CHECK("No such display" == model->getSecondary().color.display);
                 FTK_CHECK(models::DisplayColor() == model->observeSecondaryColor()->get());
+                FTK_CHECK(!model->observeSecondaryHDRTransfer()->get().has_value());
 
                 model->setSecondaryMonitor("LG TV SSCR2");
                 model->save();

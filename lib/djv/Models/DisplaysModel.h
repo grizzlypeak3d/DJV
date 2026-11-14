@@ -6,12 +6,14 @@
 #include <djv/Models/Export.h>
 
 #include <tlRender/Timeline/ColorOptions.h>
+#include <tlRender/Core/HDR.h>
 
 #include <ftk/Core/Observable.h>
 
 #include <nlohmann/json_fwd.hpp>
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -132,6 +134,14 @@ namespace djv
             //! has it: what the viewport is given (see
             //! validateDisplayColor()).
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<DisplayColor> > observeSecondaryColor() const;
+
+            //! Observe whether the secondary window shows the picture as HDR:
+            //! nothing while it follows the viewport, which then follows the
+            //! View tool's setting, and with a display of its own, PQ for an
+            //! HDR display and SDR otherwise. The secondary window is the
+            //! one place an HDR television beside an SDR desktop wants
+            //! otherwise.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::optional<tl::HDR_EOTF> > > observeSecondaryHDRTransfer() const;
 
             //! Observe the lists the secondary window's color is chosen
             //! from.

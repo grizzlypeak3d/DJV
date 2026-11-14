@@ -878,6 +878,15 @@ namespace djv
             }
         }
 
+        void Viewport::setHDRTransferOverride(const std::optional<tl::HDR_EOTF>& value)
+        {
+            FTK_P();
+            if (p.binding)
+            {
+                p.binding->setHDRTransfer(value);
+            }
+        }
+
         void Viewport::setHUDActive(bool value)
         {
             FTK_P();

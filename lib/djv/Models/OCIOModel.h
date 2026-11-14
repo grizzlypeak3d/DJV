@@ -34,6 +34,12 @@ namespace djv
             std::vector<std::string> looks;
             size_t lookIndex = 0;
 
+            //! Whether the display and view give HDR video: the display's
+            //! color space is encoded "hdr-video", as a PQ display's is. The
+            //! view is the one in use, the first where the one asked for is
+            //! not the display's.
+            bool hdr = false;
+
             bool operator == (const OCIOModelData&) const = default;
         };
 

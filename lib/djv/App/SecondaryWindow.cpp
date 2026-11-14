@@ -28,6 +28,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<bool> > ditherObserver;
             std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
             std::shared_ptr<ftk::Observer<models::DisplayColor> > displayColorObserver;
+            std::shared_ptr<ftk::Observer<std::optional<tl::HDR_EOTF> > > hdrTransferObserver;
         };
 
         void SecondaryWindow::_init(
@@ -95,6 +96,15 @@ namespace djv
                 [this](const models::DisplayColor& value)
                 {
                     _p->viewport->setDisplayColor(value);
+                });
+
+            // And with it whether the picture is HDR: a PQ display for an
+            // HDR television beside an SDR desktop.
+            p.hdrTransferObserver = ftk::Observer<std::optional<tl::HDR_EOTF> >::create(
+                app->getDisplaysModel()->observeSecondaryHDRTransfer(),
+                [this](const std::optional<tl::HDR_EOTF>& value)
+                {
+                    _p->viewport->setHDRTransferOverride(value);
                 });
         }
 

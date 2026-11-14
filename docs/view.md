@@ -98,7 +98,7 @@ It needs three things:
 - A display that is showing HDR: turned on in the system's display settings on macOS and Windows, and on Linux in a Wayland session with HDR turned on for the display. An X11 session has no HDR.
 - **HDR picture** set to **PQ** in the **View** tool's options.
 
-With OpenColorIO off, the picture's PQ values are shown as they are. With it on, choose a display and view that are PQ, such as **Rec.2100-PQ - Display** with an HDR view, so that what OpenColorIO produces is PQ as well. A picture that OpenColorIO has brought to an SDR display is an SDR picture, and **HDR picture** stays at **SDR** for it.
+With OpenColorIO off, the picture's PQ values are shown as they are. With it on, choose a display and view that are PQ, such as **Rec.2100-PQ - Display** with an HDR view, so that what OpenColorIO produces is PQ as well. A picture that OpenColorIO has brought to an SDR display is an SDR picture, and **HDR picture** stays at **SDR** for it. The secondary window, given a display of its own in the **Displays** tool, decides for itself: a PQ display there shows the picture as HDR whatever **HDR picture** is set to, so an HDR television can sit beside an SDR desktop.
 
 The interface and SDR pictures are shown at the display's ordinary white, not brighter. **HDR white** is the luminance that white stands for, which decides how bright a PQ picture is beside it. It is used on macOS, where the system does not say what its white is; Windows says, and on Linux it is 203 nits, which is where the desktop puts white for an HDR surface.
 

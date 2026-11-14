@@ -89,6 +89,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<SecondaryDisplay> > secondary;
             std::shared_ptr<ftk::Observable<DisplayColor> > secondaryColor;
             std::shared_ptr<ftk::Observable<DisplayColorLists> > secondaryLists;
+            std::shared_ptr<ftk::Observable<std::optional<tl::HDR_EOTF> > > secondaryHDRTransfer;
 
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
         };
@@ -111,6 +112,7 @@ namespace djv
             p.secondary = ftk::Observable<SecondaryDisplay>::create(secondary);
             p.secondaryColor = ftk::Observable<DisplayColor>::create();
             p.secondaryLists = ftk::Observable<DisplayColorLists>::create();
+            p.secondaryHDRTransfer = ftk::Observable<std::optional<tl::HDR_EOTF> >::create();
 
             if (p.colorModel)
             {
@@ -184,6 +186,11 @@ namespace djv
             return _p->secondaryColor;
         }
 
+        std::shared_ptr<ftk::IObservable<std::optional<tl::HDR_EOTF> > > DisplaysModel::observeSecondaryHDRTransfer() const
+        {
+            return _p->secondaryHDRTransfer;
+        }
+
         std::shared_ptr<ftk::IObservable<DisplayColorLists> > DisplaysModel::observeSecondaryLists() const
         {
             return _p->secondaryLists;
@@ -209,8 +216,15 @@ namespace djv
             p.ocioModel->setOptions(options);
             const OCIOModelData& data = p.ocioModel->observeData()->get();
             p.secondaryLists->setIfChanged({ data.displays, data.views });
-            p.secondaryColor->setIfChanged(
-                validateDisplayColor(chosen, data.displays, data.views));
+            const DisplayColor color = validateDisplayColor(chosen, data.displays, data.views);
+            p.secondaryColor->setIfChanged(color);
+            // The data's view is the one in use, as the validated color's.
+            std::optional<tl::HDR_EOTF> hdrTransfer;
+            if (!color.display.empty())
+            {
+                hdrTransfer = data.hdr ? tl::HDR_EOTF::ST2084 : tl::HDR_EOTF::SDR;
+            }
+            p.secondaryHDRTransfer->setIfChanged(hdrTransfer);
         }
     }
 }

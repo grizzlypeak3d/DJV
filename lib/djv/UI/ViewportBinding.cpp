@@ -19,6 +19,8 @@ namespace djv
             std::weak_ptr<tl::ui::Viewport> viewport;
             std::weak_ptr<models::ColorModel> colorModel;
             models::DisplayColor displayColor;
+            std::optional<tl::HDR_EOTF> hdrTransfer;
+            tl::HDR_EOTF modelHDRTransfer = tl::HDR_EOTF::SDR;
             size_t videoFramesSize = 0;
             std::vector<std::string> ocioInputs;
             ftk::ImageOptions imageOptions;
@@ -147,9 +149,10 @@ namespace djv
                 viewportModel->observeHDRTransfer(),
                 [this](tl::HDR_EOTF value)
                 {
+                    _p->modelHDRTransfer = value;
                     if (auto viewport = _p->viewport.lock())
                     {
-                        viewport->setHDRTransfer(value);
+                        viewport->setHDRTransfer(_p->hdrTransfer.value_or(value));
                     }
                     _changed();
                 });
@@ -197,6 +200,19 @@ namespace djv
                 viewport->setOCIOOptions(models::applyDisplayColor(
                     colorModel->getOCIOOptions(),
                     p.displayColor));
+            }
+            _changed();
+        }
+
+        void ViewportBinding::setHDRTransfer(const std::optional<tl::HDR_EOTF>& value)
+        {
+            FTK_P();
+            if (value == p.hdrTransfer)
+                return;
+            p.hdrTransfer = value;
+            if (auto viewport = p.viewport.lock())
+            {
+                viewport->setHDRTransfer(p.hdrTransfer.value_or(p.modelHDRTransfer));
             }
             _changed();
         }
