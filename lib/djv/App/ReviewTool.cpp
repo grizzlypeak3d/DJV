@@ -27,6 +27,7 @@
 #include <ftk/UI/ItemButton.h>
 #include <ftk/UI/ItemButtonList.h>
 #include <ftk/UI/Label.h>
+#include <ftk/UI/LineEdit.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
@@ -242,11 +243,12 @@ namespace djv
             std::shared_ptr<ftk::TextEdit> editEdit;
             std::shared_ptr<tl::ui::TimeEdit> editStart;
             std::shared_ptr<tl::ui::TimeEdit> editEnd;
+            std::shared_ptr<ftk::LineEdit> editName;
             std::shared_ptr<ftk::ItemButton> editItem;
             //! The field of the edit that last had the focus, for a rebuild
             //! to give it back to: the text, the start (or frame), or the
             //! end.
-            enum class EditField { Text, Start, End };
+            enum class EditField { Text, Start, End, Name };
             EditField editField = EditField::Text;
             //! Scroll the edited item into view on the next layout, when the
             //! rebuilt list has a geometry to scroll to.
@@ -1119,6 +1121,7 @@ namespace djv
             p.editEdit.reset();
             p.editStart.reset();
             p.editEnd.reset();
+            p.editName.reset();
             p.editItem.reset();
             if (auto app = _app.lock())
             {
@@ -1228,6 +1231,7 @@ namespace djv
                 models::ReviewMarker edited = value[i];
                 edited.range = prev.range;
                 edited.text = prev.text;
+                edited.name = prev.name;
                 if (!(edited == prev))
                 {
                     return false;
@@ -1300,6 +1304,13 @@ namespace djv
                     p.editStart->setSelectAllOnFocus(false);
                     p.editStart->takeKeyFocus();
                     p.editStart->setSelectAllOnFocus(true);
+                    return;
+                }
+                break;
+            case Private::EditField::Name:
+                if (p.editName)
+                {
+                    p.editName->takeKeyFocus();
                     return;
                 }
                 break;
@@ -1451,6 +1462,10 @@ namespace djv
                         {
                             editFocusField = static_cast<int>(Private::EditField::End);
                         }
+                        else if (p.editName && widget == p.editName)
+                        {
+                            editFocusField = static_cast<int>(Private::EditField::Name);
+                        }
                         else if (widget == p.editEdit)
                         {
                             editFocusField = static_cast<int>(Private::EditField::Text);
@@ -1472,6 +1487,7 @@ namespace djv
             p.editEdit.reset();
             p.editStart.reset();
             p.editEnd.reset();
+            p.editName.reset();
             p.editItem.reset();
             p.markerListLayout->clear();
             p.markerButtons.clear();
@@ -1605,18 +1621,53 @@ namespace djv
                     headerTimes->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     headerTimes->setVAlign(ftk::VAlign::Center);
                 }
-                auto titleLabel = ftk::Label::create(
-                    context,
-                    editingTimes ? marker.name : markerTitle(marker, p.timeUnits, p.dropFrame),
-                    header);
-                titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
-                titleLabel->setVAlign(ftk::VAlign::Center);
-                titleLabel->setHStretch(ftk::Stretch::Expanding);
-                if (editingTimes)
+                if (editing)
                 {
-                    // The time fields and the date keep their room: a long
-                    // name is shortened beside them.
-                    titleLabel->setElide(true);
+                    // The name, edited where it is shown, taking the room
+                    // between the times and the date. Kept as it is typed,
+                    // on Return or leaving the field.
+                    p.editName = ftk::LineEdit::create(context, header);
+                    p.editName->setText(marker.name);
+                    p.editName->setFormat("Scene 00");
+                    p.editName->setHStretch(ftk::Stretch::Expanding);
+                    p.editName->setVAlign(ftk::VAlign::Center);
+                    p.editName->setTooltip(
+                        "The marker's name, shown in the list and on the "
+                        "timeline. Without one, the marker shows its frames.");
+                    ftk::setScreenshotTag(p.editName, "Review.MarkerName");
+                    p.editName->setCallback(
+                        [weak, id](const std::string& value)
+                        {
+                            if (auto widget = weak.lock())
+                            {
+                                if (auto app = widget->_app.lock())
+                                {
+                                    app->getMarkersModel()->setName(id, value);
+                                }
+                            }
+                        });
+                    p.editName->setFocusCallback(
+                        [weak](bool value)
+                        {
+                            if (auto widget = weak.lock())
+                            {
+                                if (value)
+                                {
+                                    widget->_p->editField = Private::EditField::Name;
+                                }
+                                widget->_editFocus(widget->_p->editEdit, value);
+                            }
+                        });
+                }
+                else
+                {
+                    auto titleLabel = ftk::Label::create(
+                        context,
+                        markerTitle(marker, p.timeUnits, p.dropFrame),
+                        header);
+                    titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                    titleLabel->setVAlign(ftk::VAlign::Center);
+                    titleLabel->setHStretch(ftk::Stretch::Expanding);
                 }
 
                 // The frames sit against the right edge, the way the file

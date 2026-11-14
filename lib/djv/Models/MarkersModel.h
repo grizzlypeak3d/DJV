@@ -72,6 +72,12 @@ namespace djv
             //! Replace the color of the marker with the given identifier.
             DJV_MODELS_API void updateColor(const std::string& id, const ftk::Color4F&);
 
+            //! Set the name of the marker with the given identifier: the
+            //! short label the list and the timeline show, where a marker
+            //! without one shows its frames. Leading and trailing spaces
+            //! are dropped, so a name of only spaces is none.
+            DJV_MODELS_API void setName(const std::string& id, const std::string&);
+
             //! Set the frames of the marker with the given identifier: how a
             //! marker a frame out is put right, a cut that Detect Cuts found
             //! a frame early included, or a range made longer. Nothing for a

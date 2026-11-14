@@ -5,8 +5,7 @@ Changes:
 * Annotations can be selected, moved, resized, recolored, and deleted.
 * Add an onion skin for showing the annotations on the neighboring frames.
 * Annotations and markers record an author name, set in the settings.
-* A marker's frame, or a range's start and end, can be edited in the Review
-  tool.
+* A marker's name and frames can be edited in the Review tool.
 * Annotations can be burned into exported images and movies.
 * Freehand annotations follow pen pressure.
 * Annotation widths and text sizes are given for an HD picture and scale

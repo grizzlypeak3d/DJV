@@ -138,6 +138,26 @@ namespace djv
             }
         }
 
+        void MarkersModel::setName(const std::string& id, const std::string& name)
+        {
+            FTK_P();
+            const size_t first = name.find_first_not_of(" \t");
+            const size_t last = name.find_last_not_of(" \t");
+            const std::string trimmed = first != std::string::npos ?
+                name.substr(first, last - first + 1) :
+                std::string();
+            auto markers = p.markers->get();
+            const auto i = std::find_if(
+                markers.begin(),
+                markers.end(),
+                [id](const ReviewMarker& marker) { return marker.id == id; });
+            if (i != markers.end())
+            {
+                i->name = trimmed;
+                p.markers->setIfChanged(markers);
+            }
+        }
+
         void MarkersModel::setRange(const std::string& id, const OTIO_NS::TimeRange& range)
         {
             FTK_P();

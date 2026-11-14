@@ -166,6 +166,24 @@ namespace djv
 
         void MarkersModelTest::_move()
         {
+            {
+                // Named, renamed, and the name taken off again; the order
+                // is by time, so a name does not move a marker.
+                auto model = models::MarkersModel::create();
+                const std::string id = model->add(
+                    OTIO_NS::TimeRange(
+                        OTIO_NS::RationalTime(5.0, 24.0),
+                        OTIO_NS::RationalTime(1.0, 24.0)),
+                    "Cut",
+                    "");
+                model->setName(id, "  Sc 12 ");
+                FTK_CHECK("Sc 12" == model->getMarkers()[0].name);
+                model->setName(id, "   ");
+                FTK_CHECK(model->getMarkers()[0].name.empty());
+                model->setName("no such marker", "Sc 13");
+                FTK_CHECK(1 == model->getMarkers().size());
+            }
+
             auto time = [](double value) { return OTIO_NS::RationalTime(value, 24.0); };
             auto range = [](double start, double duration)
             {
