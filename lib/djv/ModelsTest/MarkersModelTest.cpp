@@ -27,6 +27,7 @@ namespace djv
             _markers();
             _serialize();
             _cuts();
+            _move();
         }
 
         void MarkersModelTest::_markers()
@@ -161,6 +162,35 @@ namespace djv
             model->setRange("no such marker", OTIO_NS::TimeRange(
                 OTIO_NS::RationalTime(5.0, 24.0),
                 OTIO_NS::RationalTime(1.0, 24.0)));
+        }
+
+        void MarkersModelTest::_move()
+        {
+            auto time = [](double value) { return OTIO_NS::RationalTime(value, 24.0); };
+            auto range = [](double start, double duration)
+            {
+                return OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(start, 24.0),
+                    OTIO_NS::RationalTime(duration, 24.0));
+            };
+            const auto bounds = range(0.0, 100.0);
+            // The start moves the range, keeping its length.
+            FTK_CHECK(range(10.0, 5.0) == models::moveMarkerRange(range(3.0, 5.0), time(10.0), true, bounds));
+            // Stopping at either end of the timeline.
+            FTK_CHECK(range(0.0, 5.0) == models::moveMarkerRange(range(3.0, 5.0), time(-4.0), true, bounds));
+            FTK_CHECK(range(95.0, 5.0) == models::moveMarkerRange(range(3.0, 5.0), time(98.0), true, bounds));
+            FTK_CHECK(range(99.0, 1.0) == models::moveMarkerRange(range(3.0, 1.0), time(150.0), true, bounds));
+            // The end changes the length, stopping at the timeline's end and
+            // a frame after the start.
+            FTK_CHECK(range(3.0, 8.0) == models::moveMarkerRange(range(3.0, 5.0), time(10.0), false, bounds));
+            FTK_CHECK(range(3.0, 97.0) == models::moveMarkerRange(range(3.0, 5.0), time(200.0), false, bounds));
+            FTK_CHECK(range(3.0, 2.0) == models::moveMarkerRange(range(3.0, 5.0), time(1.0), false, bounds));
+            // Without the timeline's frames, only the start stops the end.
+            FTK_CHECK(range(-4.0, 5.0) == models::moveMarkerRange(range(3.0, 5.0), time(-4.0), true));
+            FTK_CHECK(range(3.0, 198.0) == models::moveMarkerRange(range(3.0, 5.0), time(200.0), false));
+            // Rounded to the marker's frames, from another rate.
+            FTK_CHECK(range(12.0, 5.0) == models::moveMarkerRange(
+                range(3.0, 5.0), OTIO_NS::RationalTime(0.51, 1.0), true, bounds));
         }
 
         void MarkersModelTest::_serialize()

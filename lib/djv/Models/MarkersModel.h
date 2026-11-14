@@ -13,6 +13,19 @@ namespace djv
 {
     namespace models
     {
+        //! A marker's frames with its start or its end moved to a time, as
+        //! its time fields move it, inside the timeline's frames when they
+        //! are given. Moving the start keeps the length, stopping where the
+        //! range meets either end of the timeline. Moving the end makes the
+        //! range longer or shorter, stopping at the timeline's end, and a
+        //! frame after the start: a range stays a range. The time is
+        //! rounded to the marker's frames.
+        DJV_MODELS_API OTIO_NS::TimeRange moveMarkerRange(
+            const OTIO_NS::TimeRange& range,
+            const OTIO_NS::RationalTime& time,
+            bool start,
+            const std::optional<OTIO_NS::TimeRange>& bounds = std::nullopt);
+
         //! The review markers.
         //!
         //! Markers are session state: they live in the review file, not in

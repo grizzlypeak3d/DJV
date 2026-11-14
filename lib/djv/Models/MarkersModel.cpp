@@ -9,6 +9,46 @@ namespace djv
 {
     namespace models
     {
+        OTIO_NS::TimeRange moveMarkerRange(
+            const OTIO_NS::TimeRange& range,
+            const OTIO_NS::RationalTime& time,
+            bool start,
+            const std::optional<OTIO_NS::TimeRange>& bounds)
+        {
+            const double rate = range.duration().rate();
+            const OTIO_NS::RationalTime frame(1.0, rate);
+            const OTIO_NS::RationalTime t = time.rescaled_to(rate).round();
+            std::optional<OTIO_NS::RationalTime> first;
+            std::optional<OTIO_NS::RationalTime> last;
+            if (bounds.has_value())
+            {
+                first = bounds->start_time().rescaled_to(rate).round();
+                last = bounds->end_time_inclusive().rescaled_to(rate).round();
+            }
+            if (start)
+            {
+                const OTIO_NS::RationalTime duration = range.duration();
+                OTIO_NS::RationalTime s = t;
+                if (last.has_value())
+                {
+                    s = std::min(s, *last - duration + frame);
+                }
+                if (first.has_value())
+                {
+                    s = std::max(s, *first);
+                }
+                return OTIO_NS::TimeRange(s, duration);
+            }
+            OTIO_NS::RationalTime e = t;
+            if (last.has_value())
+            {
+                e = std::min(e, *last);
+            }
+            e = std::max(e, range.start_time() + frame);
+            return OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                range.start_time(), e);
+        }
+
         struct MarkersModel::Private
         {
             std::shared_ptr<ftk::ObservableList<ReviewMarker> > markers;

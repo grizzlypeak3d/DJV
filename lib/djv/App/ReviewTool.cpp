@@ -1375,18 +1375,13 @@ namespace djv
             {
                 return;
             }
-            const OTIO_NS::TimeRange range = *i->range;
-            const OTIO_NS::RationalTime time = value.rescaled_to(range.duration().rate()).round();
-            OTIO_NS::TimeRange out = range;
-            if (start)
+            // Kept to the timeline's frames.
+            std::optional<OTIO_NS::TimeRange> bounds;
+            if (p.player)
             {
-                out = OTIO_NS::TimeRange(time, range.duration());
+                bounds = p.player->getTimeRange();
             }
-            else if (time >= range.start_time())
-            {
-                out = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-                    range.start_time(), time);
-            }
+            const OTIO_NS::TimeRange out = models::moveMarkerRange(*i->range, value, start, bounds);
             // What was typed so far stays, with the marker still open.
             p.editTimeActive = true;
             if (p.editEdit)
@@ -1395,8 +1390,7 @@ namespace djv
             }
             app->getMarkersModel()->setRange(id, out);
             p.editTimeActive = false;
-            // The fields show the range as it is: an end before the start
-            // is not taken.
+            // The fields show the range as it is, where it was stopped.
             _editUpdate();
             // Showing where it went.
             _seekTo(out.start_time());
