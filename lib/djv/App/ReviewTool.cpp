@@ -19,7 +19,6 @@
 #include <ftk/UI/ColorDot.h>
 #include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/DialogSystem.h>
-#include <ftk/UI/Divider.h>
 #include <ftk/UI/FloatEditSlider.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEditSlider.h>
@@ -321,8 +320,11 @@ namespace djv
             // arrows move, and rows that do not take the focus themselves.
             // The current item outlives the focus leaving, so the delete
             // button always has its target.
+            // Each marker a card of its own, apart from the others: a note,
+            // not a row in a table.
             p.markerListLayout = ftk::ItemButtonList::create(context);
-            p.markerListLayout->setSpacingRole(ftk::SizeRole::None);
+            p.markerListLayout->setMarginRole(ftk::SizeRole::MarginSmall);
+            p.markerListLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
 
             // Drawing.
             auto drawingWidget = ftk::VerticalLayout::create(context);
@@ -1504,18 +1506,13 @@ namespace djv
             auto appWeak = _app;
             std::weak_ptr<ReviewTool> weak(
                 std::dynamic_pointer_cast<ReviewTool>(shared_from_this()));
-            bool first = true;
             for (const auto& marker : value)
             {
-                if (!first)
-                {
-                    ftk::Divider::create(
-                        context, ftk::Orientation::Vertical, p.markerListLayout);
-                }
-                first = false;
                 // The whole marker is one item button: the marker is what the
                 // click selects, not one widget inside it.
                 auto button = ftk::ItemButton::create(context, p.markerListLayout);
+                button->setButtonRole(ftk::ColorRole::Base);
+                button->setCornerRadiusRole(ftk::SizeRole::CornerRadius);
                 const bool hasRange = marker.range.has_value();
                 const bool editing =
                     !marker.id.empty() && marker.id == p.editingId;
@@ -1555,7 +1552,7 @@ namespace djv
                 // One margin around the whole marker, carried by the card,
                 // so the header and the text sit evenly inside the item.
                 auto card = ftk::VerticalLayout::create(context);
-                card->setMarginRole(ftk::SizeRole::MarginInside);
+                card->setMarginRole(ftk::SizeRole::MarginSmall);
                 card->setSpacingRole(ftk::SizeRole::SpacingTool);
                 button->setWidget(card);
 
