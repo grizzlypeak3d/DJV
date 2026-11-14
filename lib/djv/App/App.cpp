@@ -776,7 +776,11 @@ namespace djv
             // the desktop in its place would be a surprise, and the choice is
             // kept for when the monitor is back.
             const models::SecondaryDisplay& secondary = p.displaysModel->getSecondary();
-            if (!secondary.open)
+            // Not in a run nobody is watching: a capture, a benchmark.
+            if (!secondary.open ||
+                isCaptureRun() ||
+                p.cmdLine.benchmark->found() ||
+                p.cmdLine.randomInput->found())
             {
                 return;
             }
@@ -801,6 +805,13 @@ namespace djv
                 }
             }
 #endif // TARGET_OS_IPHONE
+            // The main window first: the application shows its first window
+            // only when no window is showing yet, and the secondary window
+            // would be one.
+            if (p.mainWindow)
+            {
+                p.mainWindow->show();
+            }
             _secondaryWindowOpen(true);
         }
 
