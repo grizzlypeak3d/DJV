@@ -243,10 +243,6 @@ namespace djv
             std::shared_ptr<tl::ui::TimeEdit> editStart;
             std::shared_ptr<tl::ui::TimeEdit> editEnd;
             std::shared_ptr<ftk::ItemButton> editItem;
-            //! The edited marker's title and frames, updated in place when
-            //! its times change. No frames label when the title is them.
-            std::shared_ptr<ftk::Label> editTitle;
-            std::shared_ptr<ftk::Label> editFrames;
             //! The field of the edit that last had the focus, for a rebuild
             //! to give it back to: the text, the start (or frame), or the
             //! end.
@@ -1124,8 +1120,6 @@ namespace djv
             p.editStart.reset();
             p.editEnd.reset();
             p.editItem.reset();
-            p.editTitle.reset();
-            p.editFrames.reset();
             if (auto app = _app.lock())
             {
                 if (!id.empty())
@@ -1208,15 +1202,8 @@ namespace djv
             {
                 return false;
             }
-            // The frames label is there or not by the range, as is the end
-            // field: a change to either is a rebuild.
-            auto hasFrames = [&p](const models::ReviewMarker& marker)
-            {
-                return
-                    marker.range.has_value() &&
-                    !marker.name.empty() &&
-                    marker.name != formatRange(*marker.range, p.timeUnits, p.dropFrame);
-            };
+            // The end field is there or not by the range: a change to that
+            // is a rebuild.
             for (size_t i = 0; i < value.size(); ++i)
             {
                 const models::ReviewMarker& prev = p.markers[i];
@@ -1234,8 +1221,7 @@ namespace djv
                 }
                 if (value[i].range.has_value() != prev.range.has_value() ||
                     (prev.range.has_value() &&
-                        isSingleFrame(*value[i].range) != isSingleFrame(*prev.range)) ||
-                    hasFrames(value[i]) != hasFrames(prev))
+                        isSingleFrame(*value[i].range) != isSingleFrame(*prev.range)))
                 {
                     return false;
                 }
@@ -1261,18 +1247,11 @@ namespace djv
             {
                 return;
             }
-            // The text is the editor's already.
-            if (p.editTitle)
-            {
-                p.editTitle->setText(markerTitle(*i, p.timeUnits, p.dropFrame));
-            }
+            // The text is the editor's already, and the header does not show
+            // the frames while they are edited.
             if (i->range.has_value())
             {
                 const OTIO_NS::TimeRange& range = *i->range;
-                if (p.editFrames)
-                {
-                    p.editFrames->setText(formatRange(range, p.timeUnits, p.dropFrame));
-                }
                 if (p.editStart)
                 {
                     p.editStart->setValue(range.start_time());
@@ -1494,8 +1473,6 @@ namespace djv
             p.editStart.reset();
             p.editEnd.reset();
             p.editItem.reset();
-            p.editTitle.reset();
-            p.editFrames.reset();
             p.markerListLayout->clear();
             p.markerButtons.clear();
             p.swatches.clear();
@@ -1616,13 +1593,13 @@ namespace djv
                         });
                 }
 
+                // Being edited, a marker's frames are in its time fields, and
+                // the header has only its name.
+                const bool editingTimes = editing && hasRange;
                 auto titleLabel = ftk::Label::create(
-                    context, markerTitle(marker, p.timeUnits, p.dropFrame), header);
-                if (editing)
-                {
-                    p.editTitle = titleLabel;
-                    p.editFrames.reset();
-                }
+                    context,
+                    editingTimes ? marker.name : markerTitle(marker, p.timeUnits, p.dropFrame),
+                    header);
                 titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                 titleLabel->setVAlign(ftk::VAlign::Center);
                 titleLabel->setHStretch(ftk::Stretch::Expanding);
@@ -1631,7 +1608,7 @@ namespace djv
                 // browser lays out its columns, so a named row says where it
                 // points -- unless the title is the frames already, and
                 // saying them twice reads as a mistake.
-                if (hasRange && !marker.name.empty())
+                if (hasRange && !marker.name.empty() && !editingTimes)
                 {
                     const std::string frames = formatRange(*marker.range, p.timeUnits, p.dropFrame);
                     if (marker.name != frames)
@@ -1640,10 +1617,6 @@ namespace djv
                         framesLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                         framesLabel->setTextRole(ftk::ColorRole::TextDisabled);
                         framesLabel->setVAlign(ftk::VAlign::Center);
-                        if (editing)
-                        {
-                            p.editFrames = framesLabel;
-                        }
                     }
                 }
 
