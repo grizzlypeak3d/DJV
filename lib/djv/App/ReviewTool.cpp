@@ -132,24 +132,6 @@ namespace djv
                     tl::timeToText(range.end_time_inclusive(), units, dropFrame);
             }
 
-            //! The title a marker's row shows: the name where there is one,
-            //! its frames otherwise, and what it is about failing both.
-            std::string markerTitle(
-                const models::ReviewMarker& marker,
-                tl::TimeUnits units,
-                bool dropFrame)
-            {
-                if (!marker.name.empty())
-                {
-                    return marker.name;
-                }
-                if (marker.range.has_value())
-                {
-                    return formatRange(*marker.range, units, dropFrame);
-                }
-                return "No frame";
-            }
-
             //! Whether the marker speaks about the frame being shown.
             bool markerShowing(
                 const models::ReviewMarker& marker,
@@ -1621,38 +1603,25 @@ namespace djv
                     headerTimes->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     headerTimes->setVAlign(ftk::VAlign::Center);
                 }
-                if (editing)
+                // The header is where and when: the frames, and the date.
+                // The name is on a row of its own below, with the text,
+                // edited or not, so nothing moves when the marker opens.
+                if (editingTimes)
                 {
-                    // The name is edited on a row of its own, below, with
-                    // the text: this keeps the times and the date apart.
                     auto spacer = ftk::Label::create(context, header);
                     spacer->setHStretch(ftk::Stretch::Expanding);
                 }
                 else
                 {
-                    auto titleLabel = ftk::Label::create(
+                    auto framesLabel = ftk::Label::create(
                         context,
-                        markerTitle(marker, p.timeUnits, p.dropFrame),
+                        hasRange ?
+                            formatRange(*marker.range, p.timeUnits, p.dropFrame) :
+                            std::string("No frame"),
                         header);
-                    titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
-                    titleLabel->setVAlign(ftk::VAlign::Center);
-                    titleLabel->setHStretch(ftk::Stretch::Expanding);
-                }
-
-                // The frames sit against the right edge, the way the file
-                // browser lays out its columns, so a named row says where it
-                // points -- unless the title is the frames already, and
-                // saying them twice reads as a mistake.
-                if (hasRange && !marker.name.empty() && !editingTimes)
-                {
-                    const std::string frames = formatRange(*marker.range, p.timeUnits, p.dropFrame);
-                    if (marker.name != frames)
-                    {
-                        auto framesLabel = ftk::Label::create(context, frames, header);
-                        framesLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
-                        framesLabel->setTextRole(ftk::ColorRole::TextDisabled);
-                        framesLabel->setVAlign(ftk::VAlign::Center);
-                    }
+                    framesLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                    framesLabel->setVAlign(ftk::VAlign::Center);
+                    framesLabel->setHStretch(ftk::Stretch::Expanding);
                 }
 
                 if (!marker.created.empty())
@@ -1729,6 +1698,8 @@ namespace djv
                     // as it is typed, on Return or leaving the field.
                     p.editName = ftk::LineEdit::create(context, card);
                     p.editName->setText(marker.name);
+                    p.editName->setFont(ftk::FontType::Bold);
+                    p.editName->setPlaceholder("Name");
                     p.editName->setHStretch(ftk::Stretch::Expanding);
                     p.editName->setTooltip("The marker's name.");
                     ftk::setScreenshotTag(p.editName, "Review.MarkerName");
@@ -1780,11 +1751,21 @@ namespace djv
                     p.editItem = button;
                     p.scrollToEdit = true;
                 }
-                else if (!marker.text.empty())
+                else
                 {
-                    auto textLabel = ftk::Label::create(context, wrapText(marker.text, 40), card);
-                    textLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
-                    textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
+                    if (!marker.name.empty())
+                    {
+                        auto nameLabel = ftk::Label::create(context, marker.name, card);
+                        nameLabel->setFont(ftk::FontType::Bold);
+                        nameLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                        nameLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
+                    }
+                    if (!marker.text.empty())
+                    {
+                        auto textLabel = ftk::Label::create(context, wrapText(marker.text, 40), card);
+                        textLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
+                        textLabel->setAlign(ftk::HAlign::Left, ftk::VAlign::Top);
+                    }
                 }
             }
             for (size_t i = 0; i < p.itemOrder.size(); ++i)
