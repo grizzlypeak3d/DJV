@@ -402,6 +402,21 @@
       ]
     },
     {
+      "id": "bellows-check",
+      "strict": true,
+      "window": { "w": 1000, "h": 700 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "View" },
+        { "expect": "View.Grid.Enabled", "checked": false },
+        { "click": ["View.Grid.Enabled", 4.0, 0.5] },
+        { "key": "Space" },
+        { "expect": "View.Grid.Enabled", "checked": true },
+        { "click": "View.Grid.Enabled" },
+        { "expect": "View.Grid.Enabled", "checked": false }
+      ]
+    },
+    {
       "id": "hold-frame",
       "strict": true,
       "window": { "w": 1000, "h": 600 },
