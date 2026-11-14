@@ -219,12 +219,12 @@ The commands are how the menu items are run from outside the window: with
 | Export | <kbd>F2</kbd> | `Tools/Export` | Toggle the Export tool. |
 | View | <kbd>F3</kbd> | `Tools/View` | Toggle the View tool. |
 | Color | <kbd>F4</kbd> | `Tools/Color` | Toggle the Color tool. |
-| Displays |  | `Tools/Displays` | Toggle the Displays tool. |
 | Color Picker | <kbd>F5</kbd> | `Tools/Color Picker` | Toggle the Color Picker tool. |
 | Magnify | <kbd>F6</kbd> | `Tools/Magnify` | Toggle the Magnify tool. |
 | Information | <kbd>F7</kbd> | `Tools/Information` | Toggle the Information tool. |
 | Audio | <kbd>F8</kbd> | `Tools/Audio` | Toggle the Audio tool. |
 | Review | <kbd>F9</kbd> | `Tools/Review` | Toggle the Review tool. |
+| Displays | <kbd>Shift+F9</kbd> | `Tools/Displays` | Toggle the Displays tool. |
 | Settings | <kbd>F10</kbd> | `Tools/Settings` | Toggle the Settings tool. |
 | Messages | <kbd>F11</kbd> | `Tools/Messages` | Toggle the Messages tool. |
 | System Log | <kbd>F12</kbd> | `Tools/System Log` | Toggle the System Log tool. |
