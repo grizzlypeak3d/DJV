@@ -320,6 +320,11 @@
         { "key": "Up" },
         { "expect": "Review.MarkerStart", "contains": "00:00:00:09" },
         { "expect": "Review.MarkerEnd", "contains": "00:00:00:15" },
+        { "press": ["Review.MarkerStart", 0.96, 0.75] },
+        { "wait": 1.0 },
+        { "release": ["Review.MarkerStart", 0.96, 0.75] },
+        { "expect": "Review.MarkerEdit", "visible": true },
+        { "expect": "Review.MarkerStart", "contains": "00:00:00:0" },
         { "click": "MainWindow.Viewport" },
         { "expect": "Review.MarkerEdit", "visible": false }
       ]

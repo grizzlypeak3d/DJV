@@ -262,6 +262,12 @@ namespace djv
             //! tick: the loss is reported from inside the editor, and the
             //! commit rebuilds the list that owns it.
             std::shared_ptr<ftk::Timer> commitTimer;
+            //! A rebuild from a time edit waits for the next tick: the
+            //! edit's own widgets are on the stack, a field in its key
+            //! event or an arrow in its tick, and would be destroyed under
+            //! it. The edit updates in place until then.
+            bool editTimeActive = false;
+            std::shared_ptr<ftk::Timer> rebuildTimer;
             std::vector<std::shared_ptr<ftk::Observer<std::string> > > tooltipObservers;
 
             std::optional<OTIO_NS::RationalTime> currentTime;
@@ -497,6 +503,7 @@ namespace djv
             bindTooltip(p.clearDrawingButton, reviewActions.at("ClearDrawing"));
 
             p.commitTimer = ftk::Timer::create(context);
+            p.rebuildTimer = ftk::Timer::create(context);
 
             p.colorSwatch->setCallback(
                 [appWeak](const ftk::Color4F& value)
@@ -751,6 +758,16 @@ namespace djv
                     if (editOnly)
                     {
                         _editUpdate();
+                    }
+                    else if (p.editTimeActive)
+                    {
+                        _editUpdate();
+                        p.rebuildTimer->start(
+                            std::chrono::milliseconds(0),
+                            [this]
+                            {
+                                _markersUpdate();
+                            });
                     }
                     else if (colorOnly)
                     {
@@ -1289,6 +1306,8 @@ namespace djv
 
         void ReviewTool::_editTakeFocus(const std::optional<int>& field)
         {
+            // Given back, not newly taken: the time fields keep their text
+            // unselected, as it was.
             FTK_P();
             if (field.has_value())
             {
@@ -1299,14 +1318,18 @@ namespace djv
             case Private::EditField::Start:
                 if (p.editStart)
                 {
+                    p.editStart->setSelectAllOnFocus(false);
                     p.editStart->takeKeyFocus();
+                    p.editStart->setSelectAllOnFocus(true);
                     return;
                 }
                 break;
             case Private::EditField::End:
                 if (p.editEnd)
                 {
+                    p.editEnd->setSelectAllOnFocus(false);
                     p.editEnd->takeKeyFocus();
+                    p.editEnd->setSelectAllOnFocus(true);
                     return;
                 }
                 break;
@@ -1365,11 +1388,13 @@ namespace djv
                     range.start_time(), time);
             }
             // What was typed so far stays, with the marker still open.
+            p.editTimeActive = true;
             if (p.editEdit)
             {
                 app->getMarkersModel()->update(id, ftk::join(p.editEdit->getText(), '\n'));
             }
             app->getMarkersModel()->setRange(id, out);
+            p.editTimeActive = false;
             // The fields show the range as it is: an end before the start
             // is not taken.
             _editUpdate();
@@ -1417,6 +1442,7 @@ namespace djv
         void ReviewTool::_markersUpdate()
         {
             FTK_P();
+            p.rebuildTimer->stop();
             // The current item survives the rebuild by identifier.
             std::string currentId;
             const int current = p.markerListLayout->getCurrent();
