@@ -1631,9 +1631,7 @@ namespace djv
                     p.editName->setFormat("Scene 00");
                     p.editName->setHStretch(ftk::Stretch::Expanding);
                     p.editName->setVAlign(ftk::VAlign::Center);
-                    p.editName->setTooltip(
-                        "The marker's name, shown in the list and on the "
-                        "timeline. Without one, the marker shows its frames.");
+                    p.editName->setTooltip("The marker's name.");
                     ftk::setScreenshotTag(p.editName, "Review.MarkerName");
                     p.editName->setCallback(
                         [weak, id](const std::string& value)
