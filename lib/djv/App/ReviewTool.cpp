@@ -195,6 +195,7 @@ namespace djv
         {
             std::shared_ptr<ftk::ToolButton> addNoteButton;
             std::shared_ptr<ftk::ToolButton> addRangeButton;
+            std::shared_ptr<ftk::ToolButton> moveButton;
             std::shared_ptr<ftk::ToolButton> deleteButton;
             std::shared_ptr<ftk::ItemButtonList> markerListLayout;
             //! The row buttons, by marker identifier, so the highlight can be
@@ -300,6 +301,15 @@ namespace djv
             p.addRangeButton = ftk::ToolButton::create(context);
             p.addRangeButton->setIcon("FrameInOut");
 
+            // Like the delete, on the selected marker: select it, go to the
+            // right frame, and move it there.
+            p.moveButton = ftk::ToolButton::create(context);
+            p.moveButton->setIcon("MarkerToFrame");
+            p.moveButton->setTooltip(
+                "Move the selected marker to the current frame, keeping its "
+                "length.");
+            p.moveButton->setEnabled(false);
+
             // One delete for the list, acting on the focused row, rather
             // than one on every row.
             p.deleteButton = ftk::ToolButton::create(context);
@@ -316,6 +326,7 @@ namespace djv
             markerToolLayout->setSpacingRole(ftk::SizeRole::None);
             p.addNoteButton->setParent(markerToolLayout);
             p.addRangeButton->setParent(markerToolLayout);
+            p.moveButton->setParent(markerToolLayout);
             p.deleteButton->setParent(markerToolLayout);
 
             // The list is the focus unit: one tab stop, a current item the
@@ -420,6 +431,7 @@ namespace djv
 
             ftk::setScreenshotTag(p.addNoteButton, "Review.AddNote");
             ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
+            ftk::setScreenshotTag(p.moveButton, "Review.Move");
             ftk::setScreenshotTag(p.deleteButton, "Review.Delete");
             ftk::setScreenshotTag(p.selectButton, "Review.Select");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
@@ -669,6 +681,12 @@ namespace djv
                 [this]
                 {
                     addRange();
+                });
+
+            p.moveButton->setClickedCallback(
+                [this]
+                {
+                    _moveMarker();
                 });
 
             p.deleteButton->setClickedCallback(
@@ -998,7 +1016,42 @@ namespace djv
         void ReviewTool::_deleteButtonUpdate()
         {
             FTK_P();
-            p.deleteButton->setEnabled(!_deleteTarget().empty());
+            const std::string id = _deleteTarget();
+            p.deleteButton->setEnabled(!id.empty());
+            // A marker about no frame in particular has nowhere to move.
+            bool movable = false;
+            for (const auto& row : p.itemOrder)
+            {
+                if (row.id == id)
+                {
+                    movable = row.range.has_value();
+                    break;
+                }
+            }
+            p.moveButton->setEnabled(movable && p.player);
+        }
+
+        void ReviewTool::_moveMarker()
+        {
+            FTK_P();
+            const std::string id = _deleteTarget();
+            auto app = _app.lock();
+            if (id.empty() || !p.player || !app)
+            {
+                return;
+            }
+            app->getMarkersModel()->move(id, p.player->getCurrentTime());
+            // The list is in time order, so the marker may have changed
+            // places: it stays the selected one.
+            for (size_t i = 0; i < p.itemOrder.size(); ++i)
+            {
+                if (p.itemOrder[i].id == id)
+                {
+                    p.markerListLayout->setCurrent(static_cast<int>(i));
+                    break;
+                }
+            }
+            _deleteButtonUpdate();
         }
 
         void ReviewTool::_deleteMarker()

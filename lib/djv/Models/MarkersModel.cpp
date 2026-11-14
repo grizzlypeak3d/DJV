@@ -98,6 +98,26 @@ namespace djv
             }
         }
 
+        void MarkersModel::move(const std::string& id, const OTIO_NS::RationalTime& time)
+        {
+            FTK_P();
+            auto markers = p.markers->get();
+            const auto i = std::find_if(
+                markers.begin(),
+                markers.end(),
+                [id](const ReviewMarker& marker) { return marker.id == id; });
+            if (i != markers.end() && i->range.has_value())
+            {
+                const OTIO_NS::TimeRange range(time, i->range->duration());
+                if (range != i->range.value())
+                {
+                    i->range = range;
+                    // Sorted again: it may now come before or after others.
+                    _set(markers);
+                }
+            }
+        }
+
         void MarkersModel::remove(const std::string& id)
         {
             FTK_P();

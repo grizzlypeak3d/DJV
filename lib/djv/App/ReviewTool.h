@@ -60,6 +60,7 @@ namespace djv
             //! frame.
             std::string _deleteTarget() const;
             void _deleteButtonUpdate();
+            void _moveMarker();
             void _deleteMarker();
             void _deleteMarkerId(const std::string& id, int index);
             //! Seek, releasing the in/out range when the target lies

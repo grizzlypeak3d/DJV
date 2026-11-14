@@ -126,6 +126,30 @@ namespace djv
                 OTIO_NS::RationalTime(120.0, 24.0) }));
             FTK_CHECK(4 == model->getMarkers().size());
             FTK_CHECK(0 == model->addCuts({}));
+
+            // A cut a frame early, moved: it keeps its length and the list
+            // its time order.
+            const std::string cut = model->getMarkers()[0].id;
+            model->move(cut, OTIO_NS::RationalTime(60.0, 24.0));
+            markers = model->getMarkers();
+            FTK_CHECK(mine == markers[0].id);
+            FTK_CHECK(cut == markers[1].id);
+            FTK_CHECK(60.0 == markers[1].range->start_time().value());
+            FTK_CHECK(1.0 == markers[1].range->duration().value());
+            const std::string range = model->add(
+                OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(200.0, 24.0),
+                    OTIO_NS::RationalTime(10.0, 24.0)),
+                "Sky",
+                "");
+            model->move(range, OTIO_NS::RationalTime(0.0, 24.0));
+            FTK_CHECK(range == model->getMarkers()[0].id);
+            FTK_CHECK(10.0 == model->getMarkers()[0].range->duration().value());
+            // About no frame, or unknown: nothing.
+            const std::string whole = model->add(std::nullopt, "", "General");
+            model->move(whole, OTIO_NS::RationalTime(5.0, 24.0));
+            FTK_CHECK(!model->getMarkers()[0].range.has_value());
+            model->move("no such marker", OTIO_NS::RationalTime(5.0, 24.0));
         }
 
         void MarkersModelTest::_serialize()
