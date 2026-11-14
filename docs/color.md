@@ -21,6 +21,8 @@ A slider marks its default value with a vertical line. Double click the slider t
 
 The OpenColorIO configuration can be set to a built-in configuration, the **OCIO** environment variable, or a specific file path. A configuration is shown through its own default **Display** and **View** until others are chosen; the check box in the section header is how OCIO is turned off. When the **OCIO** environment variable is set, DJV starts with OCIO turned on and using it, until a different choice is made in the settings; **Reset Color** returns to it too.
 
+The display and view here are the viewport's. The secondary window can be given a display and view of its own in the **Displays** tool; see [Secondary window](main-window.html#secondary-window).
+
 ### Input color spaces
 
 The **Input** color space can be named explicitly, or left at **Automatic** and resolved for each file. Resolving takes the first of:

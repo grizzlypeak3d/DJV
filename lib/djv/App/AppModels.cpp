@@ -205,6 +205,7 @@ namespace djv
             p.recentDirsModel->save();
             p.viewportModel->save();
             p.colorModel->save();
+            p.displaysModel->save();
             p.audioModel->save();
             p.toolsModel->save();
             p.drawModel->save();
@@ -383,6 +384,7 @@ namespace djv
             fileBrowserSystem->setRecentDirsModel(p.recentDirsModel);
 
             p.colorModel = models::ColorModel::create(_context, getSettings());
+            p.displaysModel = models::DisplaysModel::create(_context, getSettings(), p.colorModel);
 #if defined(TLRENDER_OCIO)
             if (p.cmdLine.ocioFileName->found() ||
                 p.cmdLine.ocioInput->found() ||

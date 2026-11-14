@@ -36,6 +36,7 @@ namespace djv
         class AppInfoModel;
         class AudioModel;
         class ColorModel;
+        class DisplaysModel;
         class CommandsModel;
         class DrawModel;
         class FilesModel;
@@ -104,6 +105,10 @@ namespace djv
 
             //! Get the color model.
             DJV_APP_API const std::shared_ptr<models::ColorModel>& getColorModel() const;
+
+            //! Get the displays model: the secondary window's monitor and
+            //! color.
+            DJV_APP_API const std::shared_ptr<models::DisplaysModel>& getDisplaysModel() const;
 
             //! Get the viewport model.
             DJV_APP_API const std::shared_ptr<models::ViewportModel>& getViewportModel() const;
@@ -346,6 +351,8 @@ namespace djv
             void _exportMovieCommand(const nlohmann::json&);
             void _saveSettings();
             void _closeFailed();
+            void _secondaryWindowCreate(int screen, const ftk::Size2I&, bool fullScreen);
+            void _secondaryMonitorUpdate();
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             void _activeUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
             // The timeline for a file in the list, opened the first time

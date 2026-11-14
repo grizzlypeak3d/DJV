@@ -46,7 +46,13 @@ Locations: **Window** menu
 
 **Window > Secondary** (<kbd>Y</kbd>) opens a secondary window that mirrors the view, to put on a separate monitor: useful for client review on a calibrated display.
 
-Locations: **Window** menu, **Window** tool bar
+![Displays tool](assets/displays-tool.svg)
+
+**Tools > Displays** sets where the picture goes and the color it is given there. Its **Secondary Window** section opens and closes the window (the check box in its header), and chooses its **Monitor**: **Window** for a window of its own, or a monitor for the window to fill, with the picture alone and nothing else on it. Escape in the window gives the window back. A monitor that is unplugged gives a window too, and the choice is remembered from one run to the next.
+
+The secondary window can also have a color of its own: **Display** and **View** choose an OpenColorIO display and view for it, in place of the viewport's, such as a PQ display for an HDR television while the desktop monitor stays as it is. **Same as viewport** follows the [Color](color.html) tool. The **Viewport** section says what the viewport is given, and its button opens the Color tool to change it.
+
+Locations: **Window** menu, **Window** tool bar, **Tools** menu
 
 ## Help
 

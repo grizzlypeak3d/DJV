@@ -786,6 +786,37 @@
       ]
     },
     {
+      "id": "displays-tool",
+      "window": {
+        "w": 900,
+        "h": 600,
+        "splitter2": 0.5
+      },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        {
+          "open": "etc/SampleData/BART_2021-02-07.#.jpg"
+        },
+        {
+          "tool": "Displays"
+        }
+      ],
+      "annotate": [
+        {
+          "id": "Displays.Secondary",
+          "caption": "Open the secondary window"
+        },
+        {
+          "id": "Displays.Monitor",
+          "caption": "Window, or a monitor to fill"
+        },
+        {
+          "id": "Displays.SecondaryColor",
+          "caption": "Its own display and view"
+        }
+      ]
+    },
+    {
       "id": "color-ocio",
       "window": {
         "w": 900,

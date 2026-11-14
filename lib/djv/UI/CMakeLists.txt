@@ -2,6 +2,7 @@ set(HEADERS
     AboutDialog.h
     AudioPopup.h
     ColorWidgets.h
+    DisplayColorWidget.h
     FileThumbnail.h
     FolderAccess.h
     FrameRangePopup.h
@@ -30,6 +31,7 @@ set(SOURCE
     AboutDialog.cpp
     AudioPopup.cpp
     ColorWidgets.cpp
+    DisplayColorWidget.cpp
     FileThumbnail.cpp
     FolderAccess.cpp
     FrameRangePopup.cpp

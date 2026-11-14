@@ -219,6 +219,7 @@ The commands are how the menu items are run from outside the window: with
 | Export | <kbd>F2</kbd> | `Tools/Export` | Toggle the Export tool. |
 | View | <kbd>F3</kbd> | `Tools/View` | Toggle the View tool. |
 | Color | <kbd>F4</kbd> | `Tools/Color` | Toggle the Color tool. |
+| Displays |  | `Tools/Displays` | Toggle the Displays tool. |
 | Color Picker | <kbd>F5</kbd> | `Tools/Color Picker` | Toggle the Color Picker tool. |
 | Magnify | <kbd>F6</kbd> | `Tools/Magnify` | Toggle the Magnify tool. |
 | Information | <kbd>F7</kbd> | `Tools/Information` | Toggle the Information tool. |

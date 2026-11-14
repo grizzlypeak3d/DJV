@@ -869,6 +869,15 @@ namespace djv
             _hudLayout();
         }
 
+        void Viewport::setDisplayColor(const models::DisplayColor& value)
+        {
+            FTK_P();
+            if (p.binding)
+            {
+                p.binding->setDisplayColor(value);
+            }
+        }
+
         void Viewport::setHUDActive(bool value)
         {
             FTK_P();

@@ -38,6 +38,7 @@ namespace djv
             p.tools.push_back({ "Export", "Export", "B", true, ftk::Key::F2 });
             p.tools.push_back({ "View", "View", "C", true, ftk::Key::F3 });
             p.tools.push_back({ "Color", "ColorControls", "D", true, ftk::Key::F4 });
+            p.tools.push_back({ "Displays", "Displays", "DA", false, ftk::KeyShortcut() });
             p.tools.push_back({ "Color Picker", "ColorPicker", "E", true, ftk::Key::F5 });
             p.tools.push_back({ "Magnify", "Magnify", "F", true, ftk::Key::F6 });
             p.tools.push_back({ "Information", "Info", "G", true, ftk::Key::F7 });

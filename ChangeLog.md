@@ -16,6 +16,9 @@ Changes:
 * Add Compare > Hold Frame, for comparing against a held frame: a still
   against a movie, or a frame against another of the same clip (#627).
 * A still compared with a movie is shown at every frame.
+* Add a Displays tool, for where the picture goes: the secondary window
+  can fill a chosen monitor with the picture alone, and have an
+  OpenColorIO display and view of its own (#615).
 * Add a mouse tool option for choosing what the left mouse button does: pan,
   compare wipe, color picker, or frame shuttle.
 * Double clicking the view frames the image.

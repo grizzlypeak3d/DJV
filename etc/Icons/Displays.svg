@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- The Displays tool: two monitors, the places the picture goes. The one
+     behind is drawn only where the one in front leaves it showing. -->
+<svg
+   width="100%"
+   height="100%"
+   viewBox="0 0 20 20"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg">
+  <path style="fill:#f0f0f0"
+     d="M 8,3 H 18 V 4 H 8 Z M 17,4 H 18 V 10 H 17 Z M 12.5,9 H 17 V 10 H 12.5 Z M 8,4 H 9 V 6.5 H 8 Z" />
+  <path style="fill:#f0f0f0;fill-rule:evenodd"
+     d="M 2,7 H 12 V 14 H 2 Z M 3,8 V 13 H 11 V 8 Z" />
+  <path style="fill:#f0f0f0" d="M 6,14 H 8 V 16 H 10 V 17 H 4 V 16 H 6 Z" />
+</svg>

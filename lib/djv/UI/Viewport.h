@@ -26,6 +26,7 @@ namespace djv
         class SettingsModel;
         class TimeUnitsModel;
         class ViewportModel;
+        struct DisplayColor;
         struct ReviewStroke;
     }
 
@@ -80,6 +81,10 @@ namespace djv
             //! the display's own options so that turning it off for
             //! presentation does not forget what was being shown.
             DJV_UI_API void setHUDActive(bool);
+
+            //! Give this viewport an OpenColorIO display and view of its own;
+            //! nothing follows the color model (see ViewportBinding).
+            DJV_UI_API void setDisplayColor(const models::DisplayColor&);
 
             DJV_UI_API ftk::Size2I getSizeHint() const override;
             DJV_UI_API void setGeometry(const ftk::Box2I&) override;

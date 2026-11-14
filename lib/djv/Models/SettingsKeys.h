@@ -58,6 +58,7 @@ namespace djv
             constexpr const char* colorLevelsInRange = "/Color/Levels/InRange";
             constexpr const char* colorLevelsOutRange = "/Color/Levels/OutRange";
             constexpr const char* colorWidgetMode = "/ColorWidget/Mode";
+            constexpr const char* displaysSecondary = "/Displays/Secondary";
             constexpr const char* drawColor = "/Draw/Color";
             // Sizes on an HD picture (pictureDrawSize). "/Draw/Size" and
             // "/Draw/TextSize" were sizes in the picture's own pixels, and

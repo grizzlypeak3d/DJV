@@ -26,6 +26,7 @@ namespace djv
     namespace models
     {
         class ColorModel;
+        struct DisplayColor;
         class FilesModel;
         class ViewportModel;
     }
@@ -69,6 +70,13 @@ namespace djv
             //! color space resolved for its file, so a comparison of files
             //! in different color spaces shows each of them correctly.
             DJV_UI_API void setVideoFramesSize(size_t);
+
+            //! Give this viewport an OpenColorIO display and view of its own,
+            //! in place of the color model's; nothing follows the model. The
+            //! input still resolves per layer. For a second window on a
+            //! monitor that wants another display (see
+            //! models::DisplaysModel).
+            DJV_UI_API void setDisplayColor(const models::DisplayColor&);
 
             DJV_UI_API const ftk::ImageOptions& getImageOptions() const;
             DJV_UI_API const tl::DisplayOptions& getDisplayOptions() const;

@@ -17,6 +17,7 @@
 #include <djv/App/Capture.h>
 #include <djv/App/ColorPickerTool.h>
 #include <djv/App/ColorTool.h>
+#include <djv/App/DisplaysTool.h>
 #include <djv/App/DiagTool.h>
 #include <djv/App/ExportTool.h>
 #include <djv/App/FilesTool.h>
@@ -550,6 +551,11 @@ namespace djv
             return _p->recentFilesModel;
         }
 
+        const std::shared_ptr<models::DisplaysModel>& App::getDisplaysModel() const
+        {
+            return _p->displaysModel;
+        }
+
         const std::shared_ptr<models::ColorModel>& App::getColorModel() const
         {
             return _p->colorModel;
@@ -783,27 +789,118 @@ namespace djv
                     // The whole of it: a television shows one window.
                     size = monitors[1].size;
 #endif // TARGET_OS_IPHONE
-                    p.secondaryWindow = SecondaryWindow::create(
-                        _context,
-                        std::dynamic_pointer_cast<App>(shared_from_this()),
-                        nullptr,
-                        screen,
-                        size);
-                    p.secondaryWindow->setCloseCallback(
-                        [this]
-                        {
-                            FTK_P();
-                            p.secondaryWindowActive->setIfChanged(false);
-                            p.secondaryWindow.reset();
-                        });
-                    p.secondaryWindow->show();
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+                    _secondaryWindowCreate(screen, size, false);
+#else // TARGET_OS_IPHONE
+                    // On the monitor chosen for it in the Displays tool,
+                    // filling it, when that monitor is there.
+                    _secondaryMonitorUpdate();
+#endif // TARGET_OS_IPHONE
                 }
                 else if (p.secondaryWindow)
                 {
+                    p.secondaryWindow->setCloseCallback(nullptr);
                     p.secondaryWindow->close();
                     p.secondaryWindow.reset();
+                    p.secondaryMonitorApplied.reset();
                 }
             }
+        }
+
+        void App::_secondaryWindowCreate(int screen, const ftk::Size2I& size, bool fullScreen)
+        {
+            FTK_P();
+            if (p.secondaryWindow)
+            {
+                // Replaced, not closed: the window stays on.
+                p.secondaryWindow->setCloseCallback(nullptr);
+                p.secondaryWindow->close();
+                p.secondaryWindow.reset();
+            }
+            p.secondaryWindow = SecondaryWindow::create(
+                _context,
+                std::dynamic_pointer_cast<App>(shared_from_this()),
+                nullptr,
+                screen,
+                size);
+            p.secondaryWindow->setCloseCallback(
+                [this]
+                {
+                    FTK_P();
+                    p.secondaryWindowActive->setIfChanged(false);
+                    p.secondaryWindow.reset();
+                    p.secondaryMonitorApplied.reset();
+                });
+            p.secondaryWindow->show();
+            if (fullScreen)
+            {
+                p.secondaryWindow->setFullScreen(true);
+            }
+            // The picture alone on a monitor it fills: no heads up display,
+            // as presentation mode does for the main window.
+            p.secondaryWindow->getViewport()->setHUDActive(!fullScreen);
+        }
+
+        void App::_secondaryMonitorUpdate()
+        {
+            FTK_P();
+#if !(defined(__APPLE__) && TARGET_OS_IPHONE)
+            if (!p.secondaryWindowActive->get())
+            {
+                return;
+            }
+            // A monitor is known by name: the order the system lists them in
+            // changes when one is plugged in. One that is not there gives a
+            // window, and the choice becomes a window: what is seen and what
+            // the Displays tool says should agree.
+            const std::string name = p.displaysModel->getSecondary().monitor;
+            const auto monitors = observeMonitors()->get();
+            int screen = -1;
+            for (size_t i = 0; i < monitors.size(); ++i)
+            {
+                if (monitors[i].name == name)
+                {
+                    screen = static_cast<int>(i);
+                    break;
+                }
+            }
+            if (!name.empty() && -1 == screen)
+            {
+                _context->log(
+                    "djv::app::App",
+                    ftk::Format("Monitor \"{0}\" is not connected, the secondary window is a window").
+                        arg(name),
+                    ftk::LogType::Warning);
+                p.displaysModel->setSecondaryMonitor(std::string());
+                return;
+            }
+            if (p.secondaryWindow &&
+                p.secondaryMonitorApplied.has_value() &&
+                p.secondaryMonitorApplied.value() == name)
+            {
+                return;
+            }
+            p.secondaryMonitorApplied = name;
+            if (name.empty())
+            {
+                if (p.secondaryWindow)
+                {
+                    p.secondaryWindow->setFullScreen(false);
+                    p.secondaryWindow->getViewport()->setHUDActive(true);
+                }
+                else
+                {
+                    _secondaryWindowCreate(-1, ftk::Size2I(1280, 960), false);
+                }
+            }
+            else
+            {
+                // Made again on the monitor rather than moved there: a
+                // window leaving full screen does it in its own time, and
+                // one moved while it does lands where it was.
+                _secondaryWindowCreate(screen, ftk::Size2I(1280, 960), true);
+            }
+#endif // TARGET_OS_IPHONE
         }
 
         std::vector<std::string> App::getSysInfo() const
@@ -1349,6 +1446,7 @@ namespace djv
             p.toolWidgetFactory->addTool("Audio", &AudioTool::create);
             p.toolWidgetFactory->addTool("Color Picker", &ColorPickerTool::create);
             p.toolWidgetFactory->addTool("Color", &ColorTool::create);
+            p.toolWidgetFactory->addTool("Displays", &DisplaysTool::create);
             p.toolWidgetFactory->addTool("Diagnostics", &DiagTool::create);
             p.toolWidgetFactory->addTool("Export", &ExportTool::create);
             p.toolWidgetFactory->addTool("Files", &FilesTool::create);
@@ -1498,6 +1596,21 @@ namespace djv
                             "Second screen gone, closing the secondary window");
                         setSecondaryWindow(false);
                     }
+                });
+#else // TARGET_OS_IPHONE
+            // The monitor the secondary window fills: chosen in the Displays
+            // tool, or plugged in or out.
+            p.monitorsObserver = ftk::ListObserver<ftk::MonitorInfo>::create(
+                observeMonitors(),
+                [this](const std::vector<ftk::MonitorInfo>&)
+                {
+                    _secondaryMonitorUpdate();
+                });
+            p.secondaryDisplayObserver = ftk::Observer<models::SecondaryDisplay>::create(
+                p.displaysModel->observeSecondary(),
+                [this](const models::SecondaryDisplay&)
+                {
+                    _secondaryMonitorUpdate();
                 });
 #endif // TARGET_OS_IPHONE
 

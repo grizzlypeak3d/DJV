@@ -11,6 +11,7 @@
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/DisplaysModel.h>
 #include <djv/Models/DrawModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/Playlist.h>
@@ -155,6 +156,7 @@ namespace djv
             //! A reload is under way; see _reload().
             bool reloading = false;
             std::shared_ptr<models::ColorModel> colorModel;
+            std::shared_ptr<models::DisplaysModel> displaysModel;
             std::shared_ptr<ui::ColorResetDialog> colorResetDialog;
             std::shared_ptr<ui::RecentFilesDialog> recentFilesDialog;
             std::shared_ptr<ftk::ListObserver<ftk::Path> > recentFilesDialogObserver;
@@ -224,6 +226,10 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::pair<ftk::V2I, double> > > viewPosZoomObserver;
             std::shared_ptr<ftk::Observer<bool> > viewFramedObserver;
             std::shared_ptr<ftk::ListObserver<ftk::MonitorInfo> > monitorsObserver;
+            std::shared_ptr<ftk::Observer<models::SecondaryDisplay> > secondaryDisplayObserver;
+            //! The monitor the secondary window was last put on, empty for a
+            //! window; nothing while there is no secondary window.
+            std::optional<std::string> secondaryMonitorApplied;
             std::shared_ptr<ftk::Observer<tl::AudioDeviceID> > audioDeviceObserver;
             std::shared_ptr<ftk::Observer<float> > volumeObserver;
             std::shared_ptr<ftk::Observer<bool> > muteObserver;

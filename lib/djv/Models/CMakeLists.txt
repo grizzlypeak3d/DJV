@@ -3,6 +3,7 @@ set(HEADERS
     AppInfoModel.h
     AudioModel.h
     ColorModel.h
+    DisplaysModel.h
     CommandsModel.h
     DrawModel.h
     Export.h
@@ -36,6 +37,7 @@ set(SOURCE
     AppInfoModel.cpp
     AudioModel.cpp
     ColorModel.cpp
+    DisplaysModel.cpp
     CommandsModel.cpp
     DrawModel.cpp
     ExportRender.cpp

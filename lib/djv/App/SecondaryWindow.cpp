@@ -3,6 +3,8 @@
 
 #include <djv/App/SecondaryWindow.h>
 
+#include <djv/Models/DisplaysModel.h>
+
 #include <djv/App/App.h>
 #include <djv/Models/ViewportModel.h>
 #include <djv/App/MainWindow.h>
@@ -24,6 +26,8 @@ namespace djv
 
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<bool> > ditherObserver;
+            std::shared_ptr<ftk::Observer<ftk::ImageType> > colorBufferObserver;
+            std::shared_ptr<ftk::Observer<models::DisplayColor> > displayColorObserver;
         };
 
         void SecondaryWindow::_init(
@@ -70,6 +74,27 @@ namespace djv
                 [this](bool value)
                 {
                     setDither(value);
+                });
+
+            // The same buffer as the main window's: without it the window
+            // kept the default, eight bits on OpenGL ES and half float
+            // elsewhere, whatever the settings chose.
+            p.colorBufferObserver = ftk::Observer<ftk::ImageType>::create(
+                app->getViewportModel()->observeColorBuffer(),
+                [this](ftk::ImageType value)
+                {
+                    setBufferType(ftk::ImageType::RGBA_U8 == value ?
+                        ftk::WindowBufferType::U8 :
+                        ftk::WindowBufferType::F16);
+                });
+
+            // Its own display and view, when one is chosen for it in the
+            // Displays tool.
+            p.displayColorObserver = ftk::Observer<models::DisplayColor>::create(
+                app->getDisplaysModel()->observeSecondaryColor(),
+                [this](const models::DisplayColor& value)
+                {
+                    _p->viewport->setDisplayColor(value);
                 });
         }
 
@@ -122,8 +147,18 @@ namespace djv
                 ftk::Key::Escape == event.key &&
                 0 == event.modifiers)
             {
+                // Filling a monitor, Escape gives a window back rather than
+                // closing it: the way out of full screen everywhere else.
                 event.accept = true;
-                close();
+                auto app = p.app.lock();
+                if (app && !app->getDisplaysModel()->getSecondary().monitor.empty())
+                {
+                    app->getDisplaysModel()->setSecondaryMonitor(std::string());
+                }
+                else
+                {
+                    close();
+                }
             }
             if (!event.accept)
             {

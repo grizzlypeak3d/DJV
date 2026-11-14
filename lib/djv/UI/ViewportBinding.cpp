@@ -4,6 +4,7 @@
 #include <djv/UI/ViewportBinding.h>
 
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/DisplaysModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/ViewportModel.h>
 
@@ -16,6 +17,8 @@ namespace djv
         struct ViewportBinding::Private
         {
             std::weak_ptr<tl::ui::Viewport> viewport;
+            std::weak_ptr<models::ColorModel> colorModel;
+            models::DisplayColor displayColor;
             size_t videoFramesSize = 0;
             std::vector<std::string> ocioInputs;
             ftk::ImageOptions imageOptions;
@@ -42,6 +45,7 @@ namespace djv
         {
             FTK_P();
             p.viewport = viewport;
+            p.colorModel = colorModel;
 
             p.compareOptionsObserver = ftk::Observer<tl::CompareOptions>::create(
                 filesModel->observeCompareOptions(),
@@ -64,7 +68,8 @@ namespace djv
                 {
                     if (auto viewport = _p->viewport.lock())
                     {
-                        viewport->setOCIOOptions(value);
+                        viewport->setOCIOOptions(
+                            models::applyDisplayColor(value, _p->displayColor));
                     }
                     _changed();
                 });
@@ -177,6 +182,23 @@ namespace djv
             auto out = std::shared_ptr<ViewportBinding>(new ViewportBinding);
             out->_init(filesModel, colorModel, viewportModel, viewport);
             return out;
+        }
+
+        void ViewportBinding::setDisplayColor(const models::DisplayColor& value)
+        {
+            FTK_P();
+            if (value == p.displayColor)
+                return;
+            p.displayColor = value;
+            auto viewport = p.viewport.lock();
+            auto colorModel = p.colorModel.lock();
+            if (viewport && colorModel)
+            {
+                viewport->setOCIOOptions(models::applyDisplayColor(
+                    colorModel->getOCIOOptions(),
+                    p.displayColor));
+            }
+            _changed();
         }
 
         void ViewportBinding::setVideoFramesSize(size_t value)

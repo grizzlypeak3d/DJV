@@ -51,6 +51,7 @@ namespace djv
                 settingsKeys::colorLevelsInRange,
                 settingsKeys::colorLevelsOutRange,
                 settingsKeys::colorWidgetMode,
+                settingsKeys::displaysSecondary,
                 settingsKeys::drawColor,
                 settingsKeys::drawSize,
                 settingsKeys::drawTextSize,
