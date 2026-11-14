@@ -1594,8 +1594,17 @@ namespace djv
                 }
 
                 // Being edited, a marker's frames are its time fields, in the
-                // header in place of the frames label.
+                // header in place of the frames label or title.
                 const bool editingTimes = editing && hasRange;
+                // First, where an unnamed marker shows its frames, so they
+                // stay put when it opens.
+                std::shared_ptr<ftk::HorizontalLayout> headerTimes;
+                if (editingTimes)
+                {
+                    headerTimes = ftk::HorizontalLayout::create(context, header);
+                    headerTimes->setSpacingRole(ftk::SizeRole::SpacingSmall);
+                    headerTimes->setVAlign(ftk::VAlign::Center);
+                }
                 auto titleLabel = ftk::Label::create(
                     context,
                     editingTimes ? marker.name : markerTitle(marker, p.timeUnits, p.dropFrame),
@@ -1624,16 +1633,6 @@ namespace djv
                         framesLabel->setTextRole(ftk::ColorRole::TextDisabled);
                         framesLabel->setVAlign(ftk::VAlign::Center);
                     }
-                }
-
-                // Being edited, the frames are its time fields, in the same
-                // place.
-                std::shared_ptr<ftk::HorizontalLayout> headerTimes;
-                if (editingTimes)
-                {
-                    headerTimes = ftk::HorizontalLayout::create(context, header);
-                    headerTimes->setSpacingRole(ftk::SizeRole::SpacingSmall);
-                    headerTimes->setVAlign(ftk::VAlign::Center);
                 }
 
                 if (!marker.created.empty())
@@ -1670,8 +1669,6 @@ namespace djv
                         ftk::setScreenshotTag(p.editStart, "Review.MarkerStart");
                         if (!single)
                         {
-                            auto dash = ftk::Label::create(context, "-", timeLayout);
-                            dash->setVAlign(ftk::VAlign::Center);
                             p.editEnd = tl::ui::TimeEdit::create(
                                 context, app->getTimeUnitsModel(), timeLayout);
                             p.editEnd->setValue(range.end_time_inclusive());
