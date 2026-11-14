@@ -7,6 +7,8 @@
 
 #include <djv/Models/Review.h>
 
+#include <optional>
+
 namespace ftk
 {
     class TextEdit;
@@ -62,6 +64,18 @@ namespace djv
             void _deleteButtonUpdate();
             void _editTime(const std::string& id, const OTIO_NS::RationalTime&, bool start);
             bool _editHasFocus();
+            //! Is the mouse pressing inside the marker being edited?
+            bool _editPressed();
+            //! Is a change to the markers only to the text or times of the
+            //! one being edited, which updates it in place? A rebuild would
+            //! take the focus from the field being typed or stepped in.
+            bool _editOnly(const std::vector<models::ReviewMarker>&) const;
+            void _editUpdate();
+            //! The edit's time field under the cursor, if any.
+            std::optional<int> _editFieldAtCursor();
+            //! Give the focus to a field of the edit (an EditField), or
+            //! without one to the field that last had it.
+            void _editTakeFocus(const std::optional<int>& = std::nullopt);
             void _deleteMarker();
             void _deleteMarkerId(const std::string& id, int index);
             //! Seek, releasing the in/out range when the target lies

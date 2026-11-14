@@ -295,6 +295,36 @@
       ]
     },
     {
+      "id": "marker-time-step",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "Review" },
+        { "markers": [
+            { "range": [3, 7], "name": "Train pass", "text": "Hold the timing." },
+            { "frame": 6, "text": "Late." } ] },
+        { "click": "Review.Marker0", "count": 2 },
+        { "expect": "Review.MarkerEdit", "visible": true },
+        { "click": ["Review.MarkerStart", 0.96, 0.25] },
+        { "expect": "Review.MarkerEdit", "visible": true },
+        { "expect": "Review.MarkerStart", "contains": "00:00:00:04" },
+        { "expect": "Review.MarkerEnd", "contains": "00:00:00:08" },
+        { "click": "Review.MarkerEnd" },
+        { "key": "Up" },
+        { "key": "Up" },
+        { "expect": "Review.MarkerEnd", "contains": "00:00:00:10" },
+        { "click": "Review.MarkerStart" },
+        { "text": "00:00:00:08" },
+        { "key": "Return" },
+        { "key": "Up" },
+        { "expect": "Review.MarkerStart", "contains": "00:00:00:09" },
+        { "expect": "Review.MarkerEnd", "contains": "00:00:00:15" },
+        { "click": "MainWindow.Viewport" },
+        { "expect": "Review.MarkerEdit", "visible": false }
+      ]
+    },
+    {
       "id": "hold-frame",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

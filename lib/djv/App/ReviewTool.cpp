@@ -243,6 +243,15 @@ namespace djv
             std::shared_ptr<tl::ui::TimeEdit> editStart;
             std::shared_ptr<tl::ui::TimeEdit> editEnd;
             std::shared_ptr<ftk::ItemButton> editItem;
+            //! The edited marker's title and frames, updated in place when
+            //! its times change. No frames label when the title is them.
+            std::shared_ptr<ftk::Label> editTitle;
+            std::shared_ptr<ftk::Label> editFrames;
+            //! The field of the edit that last had the focus, for a rebuild
+            //! to give it back to: the text, the start (or frame), or the
+            //! end.
+            enum class EditField { Text, Start, End };
+            EditField editField = EditField::Text;
             //! Scroll the edited item into view on the next layout, when the
             //! rebuilt list has a geometry to scroll to.
             bool scrollToEdit = false;
@@ -737,8 +746,13 @@ namespace djv
                         recolored.color = p.markers[i].color;
                         colorOnly = recolored == p.markers[i];
                     }
+                    const bool editOnly = !colorOnly && _editOnly(value);
                     p.markers = value;
-                    if (colorOnly)
+                    if (editOnly)
+                    {
+                        _editUpdate();
+                    }
+                    else if (colorOnly)
                     {
                         for (const auto& marker : value)
                         {
@@ -1070,6 +1084,7 @@ namespace djv
             }
             _commitMarker();
             p.editingId = id;
+            p.editField = Private::EditField::Text;
             // The editor is in the list: with the section closed, adding a
             // marker looks like it did nothing (#927).
             p.bellows["Markers"]->setOpen(true);
@@ -1092,6 +1107,8 @@ namespace djv
             p.editStart.reset();
             p.editEnd.reset();
             p.editItem.reset();
+            p.editTitle.reset();
+            p.editFrames.reset();
             if (auto app = _app.lock())
             {
                 if (!id.empty())
@@ -1135,15 +1152,170 @@ namespace djv
                         if (auto editor = editWeak.lock())
                         {
                             // Still in the edit: moved from the text to
-                            // its time, or back.
+                            // its time, or back. A press inside it, on a
+                            // time's arrows or between the fields, takes
+                            // the focus from them without leaving it: the
+                            // focus goes back.
                             if (editor == widget->_p->editEdit &&
                                 !widget->_editHasFocus())
                             {
-                                widget->_commitMarker();
+                                if (widget->_editPressed())
+                                {
+                                    widget->_editTakeFocus(widget->_editFieldAtCursor());
+                                }
+                                else
+                                {
+                                    widget->_commitMarker();
+                                }
                             }
                         }
                     }
                 });
+        }
+
+        bool ReviewTool::_editPressed()
+        {
+            FTK_P();
+            auto window = getWindow();
+            return
+                window &&
+                p.editItem &&
+                !window->isLastPressKey() &&
+                ftk::contains(p.editItem->getGeometry(), window->getCursorPos());
+        }
+
+        bool ReviewTool::_editOnly(const std::vector<models::ReviewMarker>& value) const
+        {
+            FTK_P();
+            if (p.editingId.empty() || !p.editEdit || value.size() != p.markers.size())
+            {
+                return false;
+            }
+            // The frames label is there or not by the range, as is the end
+            // field: a change to either is a rebuild.
+            auto hasFrames = [&p](const models::ReviewMarker& marker)
+            {
+                return
+                    marker.range.has_value() &&
+                    !marker.name.empty() &&
+                    marker.name != formatRange(*marker.range, p.timeUnits, p.dropFrame);
+            };
+            for (size_t i = 0; i < value.size(); ++i)
+            {
+                const models::ReviewMarker& prev = p.markers[i];
+                if (value[i].id != prev.id)
+                {
+                    return false;
+                }
+                if (value[i].id != p.editingId)
+                {
+                    if (!(value[i] == prev))
+                    {
+                        return false;
+                    }
+                    continue;
+                }
+                if (value[i].range.has_value() != prev.range.has_value() ||
+                    (prev.range.has_value() &&
+                        isSingleFrame(*value[i].range) != isSingleFrame(*prev.range)) ||
+                    hasFrames(value[i]) != hasFrames(prev))
+                {
+                    return false;
+                }
+                models::ReviewMarker edited = value[i];
+                edited.range = prev.range;
+                edited.text = prev.text;
+                if (!(edited == prev))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        void ReviewTool::_editUpdate()
+        {
+            FTK_P();
+            const auto i = std::find_if(
+                p.markers.begin(),
+                p.markers.end(),
+                [&p](const models::ReviewMarker& marker) { return marker.id == p.editingId; });
+            if (i == p.markers.end())
+            {
+                return;
+            }
+            // The text is the editor's already.
+            if (p.editTitle)
+            {
+                p.editTitle->setText(markerTitle(*i, p.timeUnits, p.dropFrame));
+            }
+            if (i->range.has_value())
+            {
+                const OTIO_NS::TimeRange& range = *i->range;
+                if (p.editFrames)
+                {
+                    p.editFrames->setText(formatRange(range, p.timeUnits, p.dropFrame));
+                }
+                if (p.editStart)
+                {
+                    p.editStart->setValue(range.start_time());
+                }
+                if (p.editEnd)
+                {
+                    p.editEnd->setValue(range.end_time_inclusive());
+                }
+            }
+            _selectionUpdate();
+        }
+
+        std::optional<int> ReviewTool::_editFieldAtCursor()
+        {
+            FTK_P();
+            std::optional<int> out;
+            if (auto window = getWindow())
+            {
+                const ftk::V2I& pos = window->getCursorPos();
+                if (p.editStart && ftk::contains(p.editStart->getGeometry(), pos))
+                {
+                    out = static_cast<int>(Private::EditField::Start);
+                }
+                else if (p.editEnd && ftk::contains(p.editEnd->getGeometry(), pos))
+                {
+                    out = static_cast<int>(Private::EditField::End);
+                }
+            }
+            return out;
+        }
+
+        void ReviewTool::_editTakeFocus(const std::optional<int>& field)
+        {
+            FTK_P();
+            if (field.has_value())
+            {
+                p.editField = static_cast<Private::EditField>(*field);
+            }
+            switch (p.editField)
+            {
+            case Private::EditField::Start:
+                if (p.editStart)
+                {
+                    p.editStart->takeKeyFocus();
+                    return;
+                }
+                break;
+            case Private::EditField::End:
+                if (p.editEnd)
+                {
+                    p.editEnd->takeKeyFocus();
+                    return;
+                }
+                break;
+            default: break;
+            }
+            if (p.editEdit)
+            {
+                p.editEdit->takeKeyFocus();
+            }
         }
 
         bool ReviewTool::_editHasFocus()
@@ -1192,13 +1364,15 @@ namespace djv
                 out = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
                     range.start_time(), time);
             }
-            // What was typed so far stays: the list is built again from the
-            // model, with the marker still open.
+            // What was typed so far stays, with the marker still open.
             if (p.editEdit)
             {
                 app->getMarkersModel()->update(id, ftk::join(p.editEdit->getText(), '\n'));
             }
             app->getMarkersModel()->setRange(id, out);
+            // The fields show the range as it is: an end before the start
+            // is not taken.
+            _editUpdate();
             // Showing where it went.
             _seekTo(out.start_time());
         }
@@ -1250,10 +1424,58 @@ namespace djv
             {
                 currentId = p.itemOrder[current].id;
             }
+            // Where the focus is in the edit, to give the rebuilt one: the
+            // field with it, or the one it is moving to (the field it leaves
+            // commits its time, which can move the marker past another), or
+            // with none the field pressed or last used. A fresh edit starts
+            // in the text. Focus outside the edit stays there.
+            bool editFocus = false;
+            std::optional<int> editFocusField;
+            if (!p.editingId.empty())
+            {
+                editFocus = true;
+                std::shared_ptr<ftk::IWidget> focus;
+                if (auto window = getWindow())
+                {
+                    focus = window->getKeyFocus();
+                }
+                if (p.editItem && focus)
+                {
+                    editFocus = false;
+                    for (auto widget = focus; widget; widget = widget->getParent())
+                    {
+                        if (p.editStart && widget == p.editStart)
+                        {
+                            editFocusField = static_cast<int>(Private::EditField::Start);
+                        }
+                        else if (p.editEnd && widget == p.editEnd)
+                        {
+                            editFocusField = static_cast<int>(Private::EditField::End);
+                        }
+                        else if (widget == p.editEdit)
+                        {
+                            editFocusField = static_cast<int>(Private::EditField::Text);
+                        }
+                        if (widget == p.editItem)
+                        {
+                            editFocus = true;
+                            break;
+                        }
+                    }
+                }
+                else if (p.editItem && _editPressed())
+                {
+                    editFocusField = _editFieldAtCursor();
+                }
+            }
             // Let go of any editor before the clear destroys it, so the focus
             // loss it reports on the way out finds nothing left to commit.
             p.editEdit.reset();
+            p.editStart.reset();
+            p.editEnd.reset();
             p.editItem.reset();
+            p.editTitle.reset();
+            p.editFrames.reset();
             p.markerListLayout->clear();
             p.markerButtons.clear();
             p.swatches.clear();
@@ -1376,6 +1598,11 @@ namespace djv
 
                 auto titleLabel = ftk::Label::create(
                     context, markerTitle(marker, p.timeUnits, p.dropFrame), header);
+                if (editing)
+                {
+                    p.editTitle = titleLabel;
+                    p.editFrames.reset();
+                }
                 titleLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                 titleLabel->setVAlign(ftk::VAlign::Center);
                 titleLabel->setHStretch(ftk::Stretch::Expanding);
@@ -1393,6 +1620,10 @@ namespace djv
                         framesLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);
                         framesLabel->setTextRole(ftk::ColorRole::TextDisabled);
                         framesLabel->setVAlign(ftk::VAlign::Center);
+                        if (editing)
+                        {
+                            p.editFrames = framesLabel;
+                        }
                     }
                 }
 
@@ -1452,10 +1683,16 @@ namespace djv
                                     }
                                 });
                             edit->setFocusCallback(
-                                [weak](bool value)
+                                [weak, start](bool value)
                                 {
                                     if (auto widget = weak.lock())
                                     {
+                                        if (value)
+                                        {
+                                            widget->_p->editField = start ?
+                                                Private::EditField::Start :
+                                                Private::EditField::End;
+                                        }
                                         widget->_editFocus(widget->_p->editEdit, value);
                                     }
                                 });
@@ -1474,6 +1711,10 @@ namespace djv
                         {
                             if (auto widget = weak.lock())
                             {
+                                if (value)
+                                {
+                                    widget->_p->editField = Private::EditField::Text;
+                                }
                                 widget->_editFocus(editWeak.lock(), value);
                             }
                         });
@@ -1497,9 +1738,9 @@ namespace djv
                     break;
                 }
             }
-            if (p.editEdit)
+            if (editFocus)
             {
-                p.editEdit->takeKeyFocus();
+                _editTakeFocus(editFocusField);
             }
             _selectionUpdate();
         }
