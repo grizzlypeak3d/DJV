@@ -389,6 +389,18 @@
       ]
     },
     {
+      "id": "displays-hdr",
+      "strict": true,
+      "window": { "w": 1000, "h": 700 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "Displays" },
+        { "expect": "Displays.HDRTransfer", "visible": true },
+        { "expect": "Displays.HDRTransfer", "enabled": false },
+        { "expect": "Displays.HDRWhite", "enabled": false }
+      ]
+    },
+    {
       "id": "hold-frame",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

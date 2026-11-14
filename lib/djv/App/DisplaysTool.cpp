@@ -8,18 +8,23 @@
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/DisplaysModel.h>
 #include <djv/Models/ToolsModel.h>
+#include <djv/Models/ViewportModel.h>
 
 #include <djv/UI/DisplayColorWidget.h>
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
+#include <ftk/UI/FloatEdit.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/Core/Format.h>
+#if defined(FTK_GPU)
+#include <ftk/GPU/System.h>
+#endif // FTK_GPU
 
 #include <algorithm>
 
@@ -37,6 +42,9 @@ namespace djv
 
             std::shared_ptr<ftk::Label> viewportLabel;
             std::shared_ptr<ftk::PushButton> colorToolButton;
+            std::vector<tl::HDR_EOTF> hdrTransfers;
+            std::shared_ptr<ftk::ComboBox> hdrTransferComboBox;
+            std::shared_ptr<ftk::FloatEdit> hdrWhiteEdit;
 
             std::shared_ptr<ftk::CheckBox> secondaryCheckBox;
             std::shared_ptr<ftk::ComboBox> monitorComboBox;
@@ -44,6 +52,8 @@ namespace djv
             std::shared_ptr<ui::DisplayColorWidget> secondaryColorWidget;
 
             std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioObserver;
+            std::shared_ptr<ftk::Observer<tl::HDR_EOTF> > hdrTransferObserver;
+            std::shared_ptr<ftk::Observer<float> > hdrWhiteObserver;
             std::shared_ptr<ftk::Observer<bool> > secondaryObserver;
             std::shared_ptr<ftk::Observer<models::SecondaryDisplay> > secondaryDisplayObserver;
             std::shared_ptr<ftk::Observer<models::DisplayColorLists> > secondaryListsObserver;
@@ -80,6 +90,46 @@ namespace djv
             auto buttonLayout = ftk::HorizontalLayout::create(context, viewportLayout);
             buttonLayout->addSpacer(ftk::Stretch::Expanding);
             p.colorToolButton->setParent(buttonLayout);
+
+            // Whether the picture is HDR, and how bright the interface's
+            // white is beside it: what the display shows, so here with the
+            // display, not with how the picture is looked at. Gamma HDR is
+            // not offered: nothing here draws it.
+            p.hdrTransfers = { tl::HDR_EOTF::SDR, tl::HDR_EOTF::ST2084 };
+            p.hdrTransferComboBox = ftk::ComboBox::create(
+                context,
+                std::vector<std::string>({ "SDR", "PQ" }));
+            p.hdrTransferComboBox->setHStretch(ftk::Stretch::Expanding);
+            p.hdrTransferComboBox->setTooltip(
+                "What the picture is display encoded for. Choose PQ for a PQ "
+                "encoded picture with OpenColorIO off, or with an HDR display "
+                "such as Rec.2100-PQ: on an HDR display the picture is then "
+                "shown as HDR. The secondary window follows this unless it "
+                "has a display of its own. Windows are HDR only with the GPU "
+                "renderer.");
+            ftk::setScreenshotTag(p.hdrTransferComboBox, "Displays.HDRTransfer");
+            p.hdrWhiteEdit = ftk::FloatEdit::create(context);
+            p.hdrWhiteEdit->setRange(80.F, 1000.F);
+            p.hdrWhiteEdit->setStep(1.F);
+            p.hdrWhiteEdit->setLargeStep(10.F);
+            p.hdrWhiteEdit->setPrecision(0);
+            p.hdrWhiteEdit->setDefault(203.F);
+            p.hdrWhiteEdit->setTooltip(
+                "The luminance, in nits, that the window's white stands for "
+                "when a PQ picture is shown, where the system does not say. "
+                "203 is the reference white for HDR.");
+            ftk::setScreenshotTag(p.hdrWhiteEdit, "Displays.HDRWhite");
+#if defined(FTK_GPU)
+            const bool hdr = ftk::gpu::isEnabled();
+#else // FTK_GPU
+            const bool hdr = false;
+#endif // FTK_GPU
+            p.hdrTransferComboBox->setEnabled(hdr);
+            p.hdrWhiteEdit->setEnabled(hdr);
+            auto hdrLayout = ftk::FormLayout::create(context, viewportLayout);
+            hdrLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            hdrLayout->addRow("HDR picture:", p.hdrTransferComboBox);
+            hdrLayout->addRow("HDR white:", p.hdrWhiteEdit);
 
             // The secondary window: on or off in the header, as an output
             // is, and a monitor to fill, and a color of its own.
@@ -148,6 +198,27 @@ namespace djv
                             std::string());
                     }
                 });
+            std::weak_ptr<models::ViewportModel> viewportModelWeak(app->getViewportModel());
+            p.hdrTransferComboBox->setIndexCallback(
+                [this, viewportModelWeak](int value)
+                {
+                    FTK_P();
+                    auto viewportModel = viewportModelWeak.lock();
+                    if (viewportModel &&
+                        value >= 0 &&
+                        value < static_cast<int>(p.hdrTransfers.size()))
+                    {
+                        viewportModel->setHDRTransfer(p.hdrTransfers[value]);
+                    }
+                });
+            p.hdrWhiteEdit->setCallback(
+                [viewportModelWeak](float value)
+                {
+                    if (auto viewportModel = viewportModelWeak.lock())
+                    {
+                        viewportModel->setHDRWhite(value);
+                    }
+                });
             p.secondaryColorWidget->setCallback(
                 [appWeak](const models::DisplayColor& value)
                 {
@@ -167,6 +238,21 @@ namespace djv
                             arg(value.display).arg(value.view).str() :
                         std::string("OpenColorIO is off."));
                     p.secondaryColorWidget->setOCIOEnabled(value.enabled);
+                });
+            p.hdrTransferObserver = ftk::Observer<tl::HDR_EOTF>::create(
+                app->getViewportModel()->observeHDRTransfer(),
+                [this](tl::HDR_EOTF value)
+                {
+                    FTK_P();
+                    const auto i = std::find(p.hdrTransfers.begin(), p.hdrTransfers.end(), value);
+                    p.hdrTransferComboBox->setCurrentIndex(
+                        i != p.hdrTransfers.end() ? static_cast<int>(i - p.hdrTransfers.begin()) : 0);
+                });
+            p.hdrWhiteObserver = ftk::Observer<float>::create(
+                app->getViewportModel()->observeHDRWhite(),
+                [this](float value)
+                {
+                    _p->hdrWhiteEdit->setValue(value);
                 });
             p.secondaryObserver = ftk::Observer<bool>::create(
                 app->observeSecondaryWindow(),

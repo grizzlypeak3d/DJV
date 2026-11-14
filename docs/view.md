@@ -69,8 +69,6 @@ Locations: **View** menu, **View** tool
 - **Video levels** — How video levels are interpreted: from the file, full range, or legal range.
 - **Alpha blend** — How the alpha channel is blended: none, straight, or pre-multiplied.
 - **Color buffer** — The view's bit depth. The default, **RGBA F16**, keeps color values above white and below black rather than clamping them, at half the memory of **RGBA F32**; F32 is there for the rare case where half a float is not enough. **RGBA U8** is the fastest and the only one that clamps. Exporting is not affected: it always renders at the highest precision this build has.
-- **HDR picture** — Whether the picture is shown as HDR: **SDR**, or **PQ** for a picture that is PQ encoded (see [HDR](#hdr)).
-- **HDR white** — The luminance, in nits, that the white of the interface stands for, where the system does not say: on macOS.
 - **Dither** — Dither the picture where the window is eight bit, which hides the banding of gradients drawn with more precision (see [Bit depth](#bit-depth)). Only what is shown changes: the color picker, the magnifier and the exports read the picture before it. Off by default.
 
 **High Quality** weighs many more pixels than **Linear**, which reads only four whatever the scale. The difference shows most where the scale is largest — a thumbnail, or the view zoomed well out — where **Linear** misses most of the image and fine detail breaks up into aliasing that crawls during playback.
@@ -96,7 +94,7 @@ It needs three things:
 
 - The newer renderer. Choose **Metal** or **Vulkan** for **Renderer** in the **Graphics** section of the **Settings** tool, and start DJV again. OpenGL cannot show HDR, and the two options below are disabled with it.
 - A display that is showing HDR: turned on in the system's display settings on macOS and Windows, and on Linux in a Wayland session with HDR turned on for the display. An X11 session has no HDR.
-- **HDR picture** set to **PQ** in the **View** tool's options.
+- **HDR picture** set to **PQ** in the **Viewport** section of the **Displays** tool (**Tools > Displays**).
 
 With OpenColorIO off, the picture's PQ values are shown as they are. With it on, choose a display and view that are PQ, such as **Rec.2100-PQ - Display** with an HDR view, so that what OpenColorIO produces is PQ as well. A picture that OpenColorIO has brought to an SDR display is an SDR picture, and **HDR picture** stays at **SDR** for it. The secondary window, given a display of its own in the **Displays** tool, decides for itself: a PQ display there shows the picture as HDR whatever **HDR picture** is set to, so an HDR television can sit beside an SDR desktop.
 
