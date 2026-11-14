@@ -1158,6 +1158,21 @@ namespace djv
             review["path"] = ftk::fromFileSystem(p.reviewPath);
             review["modified"] = p.reviewModified;
             review["markers"] = p.markersModel->getMarkers().size();
+            // Where they are and what they are called, for a script to check
+            // what Detect Cuts or an import made.
+            nlohmann::json markers = nlohmann::json::array();
+            for (const auto& marker : p.markersModel->getMarkers())
+            {
+                nlohmann::json j;
+                j["name"] = marker.name;
+                if (marker.range.has_value())
+                {
+                    j["start"] = marker.range->start_time().value();
+                    j["duration"] = marker.range->duration().value();
+                }
+                markers.push_back(j);
+            }
+            review["markerList"] = markers;
             review["annotations"] = p.annotationsModel->getAnnotations().size();
             out["review"] = review;
 

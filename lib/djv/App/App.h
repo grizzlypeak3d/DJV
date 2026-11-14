@@ -138,6 +138,10 @@ namespace djv
             //! wrapping around at the ends. Does nothing without a marker.
             void seekReviewMarker(bool next);
 
+            //! Find the cuts in the current file and mark each one, on a
+            //! thread of its own with a progress dialog (see DetectCuts).
+            DJV_APP_API void detectCuts();
+
             //! Get whether the setup dialog should be hidden. The setup
             //! dialog is hidden by the "-hideSetup" command line flag, by
             //! automation (the "-command" and "-listCommands" flags), and

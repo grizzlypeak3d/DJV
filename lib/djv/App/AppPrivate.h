@@ -4,6 +4,7 @@
 #pragma once
 
 #include <djv/App/App.h>
+#include <djv/App/DetectCuts.h>
 
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/SettingsKeys.h>
@@ -118,6 +119,7 @@ namespace djv
             //! was drawn.
             std::shared_ptr<Benchmark> benchmark;
             std::shared_ptr<RandomInput> randomInput;
+            std::shared_ptr<DetectCuts> detectCuts;
 
             std::shared_ptr<models::AppInfoModel> appInfoModel;
             std::shared_ptr<models::SettingsModel> settingsModel;

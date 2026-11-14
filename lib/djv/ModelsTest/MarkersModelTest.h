@@ -23,6 +23,7 @@ namespace djv
         private:
             void _markers();
             void _serialize();
+            void _cuts();
         };
     }
 }

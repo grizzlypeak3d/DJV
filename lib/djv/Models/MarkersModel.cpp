@@ -118,6 +118,46 @@ namespace djv
             _set({});
         }
 
+        size_t MarkersModel::addCuts(const std::vector<OTIO_NS::RationalTime>& times)
+        {
+            FTK_P();
+            auto markers = p.markers->get();
+            const std::string created = timestamp();
+            const std::string author = reviewAuthor();
+            size_t out = 0;
+            for (const auto& time : times)
+            {
+                const auto i = std::find_if(
+                    markers.begin(),
+                    markers.end(),
+                    [&time](const ReviewMarker& marker)
+                    {
+                        return marker.range.has_value() &&
+                            marker.range->start_time().rescaled_to(time.rate()).round() ==
+                                time.round();
+                    });
+                if (i != markers.end())
+                {
+                    continue;
+                }
+                ReviewMarker marker;
+                marker.id = generateId();
+                marker.name = "Cut";
+                marker.range = OTIO_NS::TimeRange(
+                    time,
+                    OTIO_NS::RationalTime(1.0, time.rate()));
+                marker.created = created;
+                marker.author = author;
+                markers.push_back(marker);
+                ++out;
+            }
+            if (out > 0)
+            {
+                _set(markers);
+            }
+            return out;
+        }
+
         void MarkersModel::_set(std::vector<ReviewMarker> value)
         {
             FTK_P();

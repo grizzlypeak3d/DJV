@@ -11,6 +11,8 @@ Changes:
   with the picture, so they look the same at any resolution.
 * Add File > Export Still, for writing the current frame as an image in one
   step (#696).
+* Add Timeline > Detect Cuts, for marking the cuts in an edit flattened to
+  one movie or image sequence.
 * Add Compare > Hold Frame, for comparing against a held frame: a still
   against a movie, or a frame against another of the same clip (#627).
 * A still compared with a movie is shown at every frame.

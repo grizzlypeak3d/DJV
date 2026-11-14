@@ -16,6 +16,7 @@ set(HEADERS
     CompareMenu.h
     CompareToolBar.h
     DiagTool.h
+    DetectCuts.h
     ExportTool.h
     FileActions.h
     FileMenu.h
@@ -80,6 +81,7 @@ set(SOURCE
     CompareMenu.cpp
     CompareToolBar.cpp
     DiagTool.cpp
+    DetectCuts.cpp
     ExportTool.cpp
     FileActions.cpp
     FileMenu.cpp

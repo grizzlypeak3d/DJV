@@ -44,6 +44,8 @@ namespace djv
             waveformSizeMenu->addAction(actions["WaveformSizeSmall"]);
             waveformSizeMenu->addAction(actions["WaveformSizeMedium"]);
             waveformSizeMenu->addAction(actions["WaveformSizeLarge"]);
+            addDivider();
+            addAction(actions["DetectCuts"]);
         }
 
         TimelineMenu::TimelineMenu() :

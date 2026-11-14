@@ -43,6 +43,7 @@
 <li><a href="#moving-around">Moving around</a></li>
 <li><a href="#scrubbing">Scrubbing</a></li>
 <li><a href="#tracks-and-media">Tracks and media</a></li>
+<li><a href="#detecting-cuts">Detecting cuts</a></li>
 <li><a href="#comparing-timelines">Comparing timelines</a></li>
 </ul>
 </div>
@@ -61,6 +62,12 @@
 <h2 id="tracks-and-media">Tracks and media</h2>
 <p>By default, the timeline is minimized and shows only the first video and audio track. <strong>Timeline &gt; Minimize</strong> turns that off to show every track.</p>
 <p>The video thumbnails and audio waveforms can be shown and sized independently: <strong>Timeline &gt; Video Thumbnails</strong>, <strong>Timeline &gt; Audio Waveforms</strong>, and their sizes under <strong>Timeline &gt; Video Thumbnail Size</strong> and <strong>Timeline &gt; Audio Waveform Size</strong>. <strong>Timeline &gt; Track Media</strong> (<kbd>C</kbd>) turns both on or off at once. Turning them off saves vertical space and improves performance; with both off, the timeline is a compact strip with just the current frame, in/out range, and cache.</p>
+<p>Locations: <strong>Timeline</strong> menu</p>
+<h2 id="detecting-cuts">Detecting cuts</h2>
+<p>Review material is often a whole edit flattened into one movie or one image sequence, with no clips to step between. <strong>Timeline &gt; Detect Cuts</strong> finds the cuts in the current file from its pictures and adds a marker named "Cut" at each. <strong>Review &gt; Previous Marker</strong> and <strong>Review &gt; Next Marker</strong> (<kbd>Alt+Left</kbd> / <kbd>Alt+Right</kbd>) then step from cut to cut, and the markers are saved with the review like any others; see <a href="reviews.html#markers">Markers</a>.</p>
+<p>It reads every frame in the in/out range, so narrowing the range first does one part of a long movie on its own. The frames are read separately from playback, which carries on, with a progress dialog to cancel it from. A frame that has a marker already is left alone, so running it again adds only cuts not marked before. A cut it got wrong is deleted like any marker, and one it missed is added with <strong>Review &gt; Add Marker</strong>.</p>
+<p>It finds hard cuts: each frame is compared with the one before it, and a cut is a frame that is very different, or much more different than the frames around it. A dissolve is not found, and strobing or flashes can add a cut. On a 17 minute 4K film it found 191 of the edit's 196 cuts, with 6 that were not cuts, in about three minutes.</p>
+<p>From a script, <code>-command 'Timeline/DetectCuts'</code> (see <a href="automation.html">Automation</a>); from Python, <code>tl.detectCuts()</code> in the tlrender module (see <a href="python.html">Python</a>).</p>
 <p>Locations: <strong>Timeline</strong> menu</p>
 <h2 id="comparing-timelines">Comparing timelines</h2>
 <p><strong>Timeline &gt; Compare Timelines</strong> shows the timeline of each file being compared under the current file's, which is useful when the files are two cuts of the same edit. It is off by default. See <a href="compare.html">A/B comparison</a>.</p>

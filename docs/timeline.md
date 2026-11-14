@@ -35,6 +35,18 @@ The video thumbnails and audio waveforms can be shown and sized independently: *
 
 Locations: **Timeline** menu
 
+## Detecting cuts
+
+Review material is often a whole edit flattened into one movie or one image sequence, with no clips to step between. **Timeline > Detect Cuts** finds the cuts in the current file from its pictures and adds a marker named "Cut" at each. **Review > Previous Marker** and **Review > Next Marker** (<kbd>Alt+Left</kbd> / <kbd>Alt+Right</kbd>) then step from cut to cut, and the markers are saved with the review like any others; see [Markers](reviews.html#markers).
+
+It reads every frame in the in/out range, so narrowing the range first does one part of a long movie on its own. The frames are read separately from playback, which carries on, with a progress dialog to cancel it from. A frame that has a marker already is left alone, so running it again adds only cuts not marked before. A cut it got wrong is deleted like any marker, and one it missed is added with **Review > Add Marker**.
+
+It finds hard cuts: each frame is compared with the one before it, and a cut is a frame that is very different, or much more different than the frames around it. A dissolve is not found, and strobing or flashes can add a cut. On a 17 minute 4K film it found 191 of the edit's 196 cuts, with 6 that were not cuts, in about three minutes.
+
+From a script, `-command 'Timeline/DetectCuts'` (see [Automation](automation.html)); from Python, `tl.detectCuts()` in the tlrender module (see [Python](python.html)).
+
+Locations: **Timeline** menu
+
 ## Comparing timelines
 
 **Timeline > Compare Timelines** shows the timeline of each file being compared under the current file's, which is useful when the files are two cuts of the same edit. It is off by default. See [A/B comparison](compare.html).

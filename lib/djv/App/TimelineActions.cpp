@@ -255,6 +255,19 @@ namespace djv
                     }
                 });
 
+            _addCommand(
+                "DetectCuts",
+                "Find the cuts in the current file, over the in/out range, "
+                "and add a marker at each, except where there is one "
+                "already.",
+                [appWeak](const nlohmann::json&)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->detectCuts();
+                    }
+                });
+
             // Commands without menu actions, for scripting and automation.
             auto mainWindowWeak = std::weak_ptr<MainWindow>(mainWindow);
             _addCommand(
@@ -271,6 +284,9 @@ namespace djv
                 });
 
             // Create the actions.
+            _actions["DetectCuts"] = ftk::Action::create(
+                "Detect Cuts",
+                _command("DetectCuts"));
             _actions["Minimize"] = ftk::Action::create(
                 "Minimize",
                 _checkCommand("Minimize"));
@@ -327,6 +343,7 @@ namespace djv
 
             // Register the shortcuts.
             _addShortcut("Minimize");
+            _addShortcut("DetectCuts", "Detect Cuts");
             _addShortcut("FrameView");
             _addShortcut("ScrollBars");
             _addShortcut("AutoScroll");

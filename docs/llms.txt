@@ -11,7 +11,7 @@ The pages name menu items as **Menu > Item** and commands as `Group/Name`. Every
 - [File formats](formats.md): the image, movie, audio, and timeline formats that can be read, and how sequences, media references, and USD are handled
 - [View](view.md): zooming and panning, channels, mirroring, aspect ratio, the HUD, and the mouse tool
 - [Playback and frame control](playback.md): playing, looping, speed, the in/out range, and moving between frames
-- [Timeline](timeline.md): the timeline under the view, scrubbing, tracks and media, and comparing timelines
+- [Timeline](timeline.md): the timeline under the view, scrubbing, tracks and media, detecting cuts, and comparing timelines
 - [A/B comparison](compare.md): comparing files or layers side by side, wiped, overlaid, or as a difference, and holding a frame to compare against
 - [Review](reviews.md): saving a session as a review file, drawing on frames, and markers
 - [Color](color.md): OpenColorIO, LUTs, and image adjustments

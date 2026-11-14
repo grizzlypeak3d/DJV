@@ -63,6 +63,18 @@ namespace djv
             return _p->reviewMarkers;
         }
 
+        void App::detectCuts()
+        {
+            FTK_P();
+            if (!p.detectCuts)
+            {
+                p.detectCuts = DetectCuts::create(
+                    _context,
+                    std::dynamic_pointer_cast<App>(shared_from_this()));
+            }
+            p.detectCuts->start();
+        }
+
         void App::seekReviewMarker(bool next)
         {
             FTK_P();

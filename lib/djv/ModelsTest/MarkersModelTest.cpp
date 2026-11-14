@@ -26,6 +26,7 @@ namespace djv
         {
             _markers();
             _serialize();
+            _cuts();
         }
 
         void MarkersModelTest::_markers()
@@ -94,6 +95,37 @@ namespace djv
             {
                 _error("MarkersModel add/update/remove/clear failed");
             }
+        }
+
+        void MarkersModelTest::_cuts()
+        {
+            // Cuts marked beside a marker written by hand, one of them on
+            // the hand written marker's frame, which keeps it alone; found
+            // again, only the new cut is added.
+            auto model = models::MarkersModel::create();
+            const std::string mine = model->add(
+                OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(48.0, 24.0),
+                    OTIO_NS::RationalTime(1.0, 24.0)),
+                "",
+                "Too dark");
+            FTK_CHECK(2 == model->addCuts({
+                OTIO_NS::RationalTime(24.0, 24.0),
+                OTIO_NS::RationalTime(48.0, 24.0),
+                OTIO_NS::RationalTime(96.0, 24.0) }));
+            auto markers = model->getMarkers();
+            FTK_CHECK(3 == markers.size());
+            FTK_CHECK("Cut" == markers[0].name);
+            FTK_CHECK(24.0 == markers[0].range->start_time().value());
+            FTK_CHECK(1.0 == markers[0].range->duration().value());
+            FTK_CHECK(models::reviewMarkerColor() == markers[0].color);
+            FTK_CHECK(mine == markers[1].id);
+            FTK_CHECK("Cut" == markers[2].name);
+            FTK_CHECK(1 == model->addCuts({
+                OTIO_NS::RationalTime(24.0, 24.0),
+                OTIO_NS::RationalTime(120.0, 24.0) }));
+            FTK_CHECK(4 == model->getMarkers().size());
+            FTK_CHECK(0 == model->addCuts({}));
         }
 
         void MarkersModelTest::_serialize()
