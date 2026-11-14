@@ -1262,6 +1262,7 @@ namespace djv
             {
                 nlohmann::json j;
                 j["name"] = marker.name;
+                j["text"] = marker.text;
                 if (marker.range.has_value())
                 {
                     j["start"] = marker.range->start_time().value();

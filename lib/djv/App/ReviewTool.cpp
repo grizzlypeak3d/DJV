@@ -31,6 +31,8 @@
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/ScrollWidget.h>
 #include <ftk/UI/TextEdit.h>
+
+#include <tlRender/UI/TimeEdit.h>
 #include <ftk/UI/ToolBar.h>
 #include <ftk/UI/PushButton.h>
 #include <ftk/UI/ToolButton.h>
@@ -195,7 +197,6 @@ namespace djv
         {
             std::shared_ptr<ftk::ToolButton> addNoteButton;
             std::shared_ptr<ftk::ToolButton> addRangeButton;
-            std::shared_ptr<ftk::ToolButton> moveButton;
             std::shared_ptr<ftk::ToolButton> deleteButton;
             std::shared_ptr<ftk::ItemButtonList> markerListLayout;
             //! The row buttons, by marker identifier, so the highlight can be
@@ -239,6 +240,8 @@ namespace djv
             //! The live in-place editor and its item, for the commit to read
             //! and the scroll to find.
             std::shared_ptr<ftk::TextEdit> editEdit;
+            std::shared_ptr<tl::ui::TimeEdit> editStart;
+            std::shared_ptr<tl::ui::TimeEdit> editEnd;
             std::shared_ptr<ftk::ItemButton> editItem;
             //! Scroll the edited item into view on the next layout, when the
             //! rebuilt list has a geometry to scroll to.
@@ -301,15 +304,6 @@ namespace djv
             p.addRangeButton = ftk::ToolButton::create(context);
             p.addRangeButton->setIcon("FrameInOut");
 
-            // Like the delete, on the selected marker: select it, go to the
-            // right frame, and move it there.
-            p.moveButton = ftk::ToolButton::create(context);
-            p.moveButton->setIcon("MarkerToFrame");
-            p.moveButton->setTooltip(
-                "Move the selected marker to the current frame, keeping its "
-                "length.");
-            p.moveButton->setEnabled(false);
-
             // One delete for the list, acting on the focused row, rather
             // than one on every row.
             p.deleteButton = ftk::ToolButton::create(context);
@@ -326,7 +320,6 @@ namespace djv
             markerToolLayout->setSpacingRole(ftk::SizeRole::None);
             p.addNoteButton->setParent(markerToolLayout);
             p.addRangeButton->setParent(markerToolLayout);
-            p.moveButton->setParent(markerToolLayout);
             p.deleteButton->setParent(markerToolLayout);
 
             // The list is the focus unit: one tab stop, a current item the
@@ -431,7 +424,6 @@ namespace djv
 
             ftk::setScreenshotTag(p.addNoteButton, "Review.AddNote");
             ftk::setScreenshotTag(p.addRangeButton, "Review.AddRange");
-            ftk::setScreenshotTag(p.moveButton, "Review.Move");
             ftk::setScreenshotTag(p.deleteButton, "Review.Delete");
             ftk::setScreenshotTag(p.selectButton, "Review.Select");
             ftk::setScreenshotTag(p.penButton, "Review.Pen");
@@ -681,12 +673,6 @@ namespace djv
                 [this]
                 {
                     addRange();
-                });
-
-            p.moveButton->setClickedCallback(
-                [this]
-                {
-                    _moveMarker();
                 });
 
             p.deleteButton->setClickedCallback(
@@ -1016,42 +1002,7 @@ namespace djv
         void ReviewTool::_deleteButtonUpdate()
         {
             FTK_P();
-            const std::string id = _deleteTarget();
-            p.deleteButton->setEnabled(!id.empty());
-            // A marker about no frame in particular has nowhere to move.
-            bool movable = false;
-            for (const auto& row : p.itemOrder)
-            {
-                if (row.id == id)
-                {
-                    movable = row.range.has_value();
-                    break;
-                }
-            }
-            p.moveButton->setEnabled(movable && p.player);
-        }
-
-        void ReviewTool::_moveMarker()
-        {
-            FTK_P();
-            const std::string id = _deleteTarget();
-            auto app = _app.lock();
-            if (id.empty() || !p.player || !app)
-            {
-                return;
-            }
-            app->getMarkersModel()->move(id, p.player->getCurrentTime());
-            // The list is in time order, so the marker may have changed
-            // places: it stays the selected one.
-            for (size_t i = 0; i < p.itemOrder.size(); ++i)
-            {
-                if (p.itemOrder[i].id == id)
-                {
-                    p.markerListLayout->setCurrent(static_cast<int>(i));
-                    break;
-                }
-            }
-            _deleteButtonUpdate();
+            p.deleteButton->setEnabled(!_deleteTarget().empty());
         }
 
         void ReviewTool::_deleteMarker()
@@ -1138,6 +1089,8 @@ namespace djv
             // rebuilds the list, and must not find a half-finished edit.
             p.editingId.clear();
             p.editEdit.reset();
+            p.editStart.reset();
+            p.editEnd.reset();
             p.editItem.reset();
             if (auto app = _app.lock())
             {
@@ -1181,13 +1134,73 @@ namespace djv
                     {
                         if (auto editor = editWeak.lock())
                         {
-                            if (editor == widget->_p->editEdit)
+                            // Still in the edit: moved from the text to
+                            // its time, or back.
+                            if (editor == widget->_p->editEdit &&
+                                !widget->_editHasFocus())
                             {
                                 widget->_commitMarker();
                             }
                         }
                     }
                 });
+        }
+
+        bool ReviewTool::_editHasFocus()
+        {
+            FTK_P();
+            auto window = getWindow();
+            auto item = p.editItem;
+            if (!window || !item)
+            {
+                return false;
+            }
+            for (auto widget = window->getKeyFocus(); widget; widget = widget->getParent())
+            {
+                if (widget == item)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        void ReviewTool::_editTime(
+            const std::string& id,
+            const OTIO_NS::RationalTime& value,
+            bool start)
+        {
+            FTK_P();
+            auto app = _app.lock();
+            const auto i = std::find_if(
+                p.markers.begin(),
+                p.markers.end(),
+                [&id](const models::ReviewMarker& marker) { return marker.id == id; });
+            if (!app || i == p.markers.end() || !i->range.has_value())
+            {
+                return;
+            }
+            const OTIO_NS::TimeRange range = *i->range;
+            const OTIO_NS::RationalTime time = value.rescaled_to(range.duration().rate()).round();
+            OTIO_NS::TimeRange out = range;
+            if (start)
+            {
+                out = OTIO_NS::TimeRange(time, range.duration());
+            }
+            else if (time >= range.start_time())
+            {
+                out = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+                    range.start_time(), time);
+            }
+            // What was typed so far stays: the list is built again from the
+            // model, with the marker still open.
+            if (p.editEdit)
+            {
+                app->getMarkersModel()->update(id, ftk::join(p.editEdit->getText(), '\n'));
+            }
+            app->getMarkersModel()->setRange(id, out);
+            // Showing where it went.
+            _seekTo(out.start_time());
         }
 
         void ReviewTool::_markerClicked(const std::string& id)
@@ -1394,6 +1407,61 @@ namespace djv
 
                 if (editing)
                 {
+                    // Where it is, edited with what it says: typing a time
+                    // moves this marker, the one open, keeping its length;
+                    // a range's end makes it longer or shorter. Above the
+                    // text, so Escape in the text, which moves the focus on,
+                    // moves it out of the marker and keeps it.
+                    p.editStart.reset();
+                    p.editEnd.reset();
+                    auto app = _app.lock();
+                    if (hasRange && app)
+                    {
+                        const OTIO_NS::TimeRange range = *marker.range;
+                        auto timeLayout = ftk::HorizontalLayout::create(context, card);
+                        timeLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+                        const bool single = isSingleFrame(range);
+                        ftk::Label::create(context, single ? "Frame:" : "Start:", timeLayout);
+                        p.editStart = tl::ui::TimeEdit::create(
+                            context, app->getTimeUnitsModel(), timeLayout);
+                        p.editStart->setValue(range.start_time());
+                        p.editStart->setTooltip(single ?
+                            "The marker's frame." :
+                            "The marker's first frame. The marker keeps its length.");
+                        ftk::setScreenshotTag(p.editStart, "Review.MarkerStart");
+                        if (!single)
+                        {
+                            ftk::Label::create(context, "End:", timeLayout);
+                            p.editEnd = tl::ui::TimeEdit::create(
+                                context, app->getTimeUnitsModel(), timeLayout);
+                            p.editEnd->setValue(range.end_time_inclusive());
+                            p.editEnd->setTooltip("The marker's last frame.");
+                            ftk::setScreenshotTag(p.editEnd, "Review.MarkerEnd");
+                        }
+                        for (const auto& edit : { p.editStart, p.editEnd })
+                        {
+                            if (!edit)
+                                continue;
+                            const bool start = edit == p.editStart;
+                            edit->setCallback(
+                                [weak, id, start](const OTIO_NS::RationalTime& value)
+                                {
+                                    if (auto widget = weak.lock())
+                                    {
+                                        widget->_editTime(id, value, start);
+                                    }
+                                });
+                            edit->setFocusCallback(
+                                [weak](bool value)
+                                {
+                                    if (auto widget = weak.lock())
+                                    {
+                                        widget->_editFocus(widget->_p->editEdit, value);
+                                    }
+                                });
+                        }
+                    }
+
                     // Written and edited in place. The marker keeps itself
                     // when the editor loses the focus, or on Command-Return
                     // where the key bubbles to.
@@ -1410,6 +1478,7 @@ namespace djv
                             }
                         });
                     ftk::setScreenshotTag(p.editEdit, "Review.MarkerEdit");
+
                     p.editItem = button;
                     p.scrollToEdit = true;
                 }

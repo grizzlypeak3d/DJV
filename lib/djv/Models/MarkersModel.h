@@ -59,11 +59,11 @@ namespace djv
             //! Replace the color of the marker with the given identifier.
             DJV_MODELS_API void updateColor(const std::string& id, const ftk::Color4F&);
 
-            //! Move the marker with the given identifier to start at the given
-            //! time, keeping its length: how a marker a frame out is put
-            //! right, a cut that Detect Cuts found a frame early included.
-            //! Nothing for a marker about no frame in particular.
-            DJV_MODELS_API void move(const std::string& id, const OTIO_NS::RationalTime&);
+            //! Set the frames of the marker with the given identifier: how a
+            //! marker a frame out is put right, a cut that Detect Cuts found
+            //! a frame early included, or a range made longer. Nothing for a
+            //! marker about no frame in particular, or an empty range.
+            DJV_MODELS_API void setRange(const std::string& id, const OTIO_NS::TimeRange&);
 
             //! Remove the marker with the given identifier.
             DJV_MODELS_API void remove(const std::string& id);

@@ -277,6 +277,24 @@
       ]
     },
     {
+      "id": "marker-time",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "Review" },
+        { "command": "Review/AddNote" },
+        { "text": "Moved" },
+        { "click": "Review.MarkerStart" },
+        { "text": "00:00:00:05" },
+        { "key": "Return" },
+        { "expect": "Review.MarkerEdit", "visible": true },
+        { "expect": "Review.MarkerStart", "contains": "00:00:00:05" },
+        { "click": "MainWindow.Viewport" },
+        { "expect": "Review.MarkerEdit", "visible": false }
+      ]
+    },
+    {
       "id": "hold-frame",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

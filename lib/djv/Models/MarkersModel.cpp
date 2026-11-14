@@ -98,9 +98,13 @@ namespace djv
             }
         }
 
-        void MarkersModel::move(const std::string& id, const OTIO_NS::RationalTime& time)
+        void MarkersModel::setRange(const std::string& id, const OTIO_NS::TimeRange& range)
         {
             FTK_P();
+            if (range.duration().value() <= 0.0)
+            {
+                return;
+            }
             auto markers = p.markers->get();
             const auto i = std::find_if(
                 markers.begin(),
@@ -108,7 +112,6 @@ namespace djv
                 [id](const ReviewMarker& marker) { return marker.id == id; });
             if (i != markers.end() && i->range.has_value())
             {
-                const OTIO_NS::TimeRange range(time, i->range->duration());
                 if (range != i->range.value())
                 {
                     i->range = range;
