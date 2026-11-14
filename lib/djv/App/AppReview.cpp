@@ -106,9 +106,12 @@ namespace djv
                 [this](const models::CutMarkerOptions& value)
                 {
                     FTK_P();
-                    getSettings()->setT(models::settingsKeys::detectCuts, value);
+                    // A copy: the value is the dialog's, and closing the
+                    // dialog destroys it.
+                    const models::CutMarkerOptions options = value;
+                    getSettings()->setT(models::settingsKeys::detectCuts, options);
                     p.detectCutsDialog->close();
-                    p.detectCuts->start(value);
+                    p.detectCuts->start(options);
                 });
             p.detectCutsDialog->setCloseCallback(
                 [this]
