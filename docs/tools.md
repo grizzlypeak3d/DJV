@@ -1,6 +1,6 @@
 # Tools
 
-DJV's features are organized into *tools*. Each tool opens in a panel on the right side of the main window, and only one tool is shown at a time. Tools can be opened from the **Tools** menu or the **Tools** tool bar, and each has a default keyboard shortcut.
+DJV's features are organized into *tools*. Each tool opens in the panel on the right side of the main window. More than one can be open at once: they stack in the panel, one under another, with one scroll bar. Tools can be opened from the **Tools** menu or the **Tools** tool bar, and each has a default keyboard shortcut.
 
 | Tool | Shortcut | Purpose |
 |---|---|---|
@@ -13,6 +13,7 @@ DJV's features are organized into *tools*. Each tool opens in a panel on the rig
 | **Information** | <kbd>F7</kbd> | View file metadata |
 | **Audio** | <kbd>F8</kbd> | Audio output, volume, and sync |
 | **Review** | <kbd>F9</kbd> | Markers and drawn annotations — see [Review](reviews.html) |
+| **Displays** | <kbd>Shift+F9</kbd> | Where the picture goes: the secondary window, its monitor and color, and the viewport's HDR — see [Secondary window](main-window.html#secondary-window) |
 | **Settings** | <kbd>F10</kbd> | Application settings |
 | **Messages** | <kbd>F11</kbd> | Application messages |
 | **System Log** | <kbd>F12</kbd> | Low-level system log |
