@@ -1749,6 +1749,9 @@ namespace djv
                     ftk::setScreenshotTag(p.editEdit, "Review.MarkerEdit");
 
                     p.editItem = button;
+                    // Its fields take the hover; the item highlighting as
+                    // the mouse crosses between them flashes.
+                    button->setMouseHighlight(false);
                     p.scrollToEdit = true;
                 }
                 else
