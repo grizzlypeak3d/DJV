@@ -25,30 +25,6 @@ namespace djv
             };
         }
 
-        FrameStoreShowing getFrameStoreShowing(bool stored, tl::Compare compare)
-        {
-            FrameStoreShowing out;
-            if (!stored)
-            {
-                return out;
-            }
-            switch (compare)
-            {
-            case tl::Compare::None:
-                out.text = "Showing: A";
-                break;
-            case tl::Compare::B:
-                out.text = "Showing: Frame store";
-                out.shown = true;
-                break;
-            default:
-                out.text = tl::to_string(compare) + ": A | Frame store";
-                out.shown = true;
-                break;
-            }
-            return out;
-        }
-
         std::map<std::string, bool> getStatus(const StatusOptions& options)
         {
             const tl::DisplayOptions& display = options.display;

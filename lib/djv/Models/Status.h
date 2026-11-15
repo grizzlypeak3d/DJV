@@ -52,24 +52,5 @@ namespace djv
         //! a stored frame while a compare mode draws it, since with none the
         //! view shows A alone.
         DJV_MODELS_API std::map<std::string, bool> getStatus(const StatusOptions&);
-
-        //! What the view shows while a frame is in the frame store, for the
-        //! status bar to say off the picture (#627): the indicator is lit
-        //! for a LUT as well, and does not say which picture is up.
-        struct DJV_MODELS_API_TYPE FrameStoreShowing
-        {
-            //! "Showing: A", "Showing: Frame store", or a mode with both,
-            //! "Wipe: A | Frame store"; empty with nothing stored.
-            std::string text;
-
-            //! Whether the stored frame is in view.
-            bool shown = false;
-
-            bool operator == (const FrameStoreShowing&) const = default;
-        };
-
-        //! Get what the view shows with a frame stored or not, in a compare
-        //! mode.
-        DJV_MODELS_API FrameStoreShowing getFrameStoreShowing(bool stored, tl::Compare);
     }
 }

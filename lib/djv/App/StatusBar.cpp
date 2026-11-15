@@ -4,15 +4,12 @@
 #include <djv/App/StatusBar.h>
 
 #include <djv/App/App.h>
-#include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
-#include <djv/Models/Status.h>
 #include <djv/Models/ToolsModel.h>
 
 #include <ftk/UI/DrawUtil.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
-#include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/SysLogModel.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
@@ -28,7 +25,6 @@ namespace djv
             std::weak_ptr<App> app;
 
             std::shared_ptr<ftk::Label> messagesLabel;
-            std::shared_ptr<ftk::Label> frameStoreLabel;
             std::shared_ptr<ftk::Label> infoLabel;
             std::string message;
             std::string hint;
@@ -44,8 +40,6 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
             std::shared_ptr<ftk::Observer<int> > videoLayerObserver;
-            std::shared_ptr<ftk::Observer<std::optional<models::StoredFrame> > > frameStoreObserver;
-            std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareObserver;
         };
 
         void StatusBar::_init(
@@ -74,18 +68,6 @@ namespace djv
                 "\n"
                 "Click to open messages tool.");
 
-            // What the view shows while a frame is stored, off the picture,
-            // and marked while the stored frame is in view, so switching
-            // between A and it reads at a glance (#627).
-            p.frameStoreLabel = ftk::Label::create(context);
-            p.frameStoreLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
-            p.frameStoreLabel->setTooltip(
-                "What the view shows while a frame is in the frame store:\n"
-                "A, the stored frame, or both in a compare mode. The\n"
-                "frame stays stored until Compare > Clear Frame Store.");
-            p.frameStoreLabel->setVisible(false);
-            ftk::setScreenshotTag(p.frameStoreLabel, "StatusBar.FrameStore");
-
             p.infoLabel = ftk::Label::create(context);
             p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
             p.infoLabel->setClipText(true);
@@ -93,36 +75,7 @@ namespace djv
             p.layout = ftk::HorizontalLayout::create(context, shared_from_this());
             p.layout->setSpacingRole(ftk::SizeRole::SpacingTool);
             p.messagesLabel->setParent(p.layout);
-            p.frameStoreLabel->setParent(p.layout);
             p.infoLabel->setParent(p.layout);
-
-            auto frameStoreUpdate = [this]
-            {
-                FTK_P();
-                auto app = p.app.lock();
-                if (!app)
-                    return;
-                const auto filesModel = app->getFilesModel();
-                const models::FrameStoreShowing showing = models::getFrameStoreShowing(
-                    filesModel->getFrameStore().has_value(),
-                    filesModel->getCompareOptions().compare);
-                p.frameStoreLabel->setText(showing.text);
-                p.frameStoreLabel->setVisible(!showing.text.empty());
-                p.frameStoreLabel->setBackgroundRole(
-                    showing.shown ? ftk::ColorRole::Checked : ftk::ColorRole::None);
-            };
-            p.frameStoreObserver = ftk::Observer<std::optional<models::StoredFrame> >::create(
-                app->getFilesModel()->observeFrameStore(),
-                [frameStoreUpdate](const std::optional<models::StoredFrame>&)
-                {
-                    frameStoreUpdate();
-                });
-            p.compareObserver = ftk::Observer<tl::CompareOptions>::create(
-                app->getFilesModel()->observeCompareOptions(),
-                [frameStoreUpdate](const tl::CompareOptions&)
-                {
-                    frameStoreUpdate();
-                });
 
             p.messagesTimer = ftk::Timer::create(context);
 

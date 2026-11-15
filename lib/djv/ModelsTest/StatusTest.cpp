@@ -121,20 +121,6 @@ namespace djv
                 FTK_CHECK(on(options).empty());
             }
             {
-                // What the status bar says is in view.
-                FTK_CHECK(models::FrameStoreShowing() ==
-                    models::getFrameStoreShowing(false, tl::Compare::Wipe));
-                auto showing = models::getFrameStoreShowing(true, tl::Compare::None);
-                FTK_CHECK("Showing: A" == showing.text);
-                FTK_CHECK(!showing.shown);
-                showing = models::getFrameStoreShowing(true, tl::Compare::B);
-                FTK_CHECK("Showing: Frame store" == showing.text);
-                FTK_CHECK(showing.shown);
-                showing = models::getFrameStoreShowing(true, tl::Compare::Wipe);
-                FTK_CHECK("Wipe: A | Frame store" == showing.text);
-                FTK_CHECK(showing.shown);
-            }
-            {
                 models::StatusOptions options;
                 options.audioOffset = .5;
                 FTK_CHECK(only(options, "AudioOffset"));
