@@ -5,6 +5,7 @@
 
 #include <djv/UI/Export.h>
 #include <djv/Models/Export.h>
+#include <djv/Models/Status.h>
 
 #include <ftk/UI/IContainer.h>
 
@@ -28,8 +29,9 @@ namespace djv
     {
         //! Status indicator widget.
         //!
-        //! Shows whether any options are enabled that can affect video, audio,
-        //! or performance, and opens a popup listing them.
+        //! Shows which options are enabled that can affect video, audio, or
+        //! performance, as a letter for each group of them, lit while one of
+        //! the group is on, and opens a popup listing them.
         class DJV_UI_API_TYPE StatusIndicator : public ftk::IContainer
         {
             FTK_NON_COPYABLE(StatusIndicator);
@@ -62,7 +64,8 @@ namespace djv
 
         protected:
             DJV_UI_API virtual bool _hasIndicator() const;
-            DJV_UI_API virtual std::vector<std::pair<std::string, std::string> > _getIndicators() const;
+            DJV_UI_API virtual std::vector<models::StatusItem> _getIndicators() const;
+            DJV_UI_API virtual std::vector<models::StatusGroup> _getIndicatorGroups() const;
             DJV_UI_API virtual std::map<std::string, bool> _getIndicatorValues() const;
 
             //! Get the tool that has an option's controls.

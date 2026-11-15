@@ -14,7 +14,7 @@ A short tour of the window is shown on the first start, and again from **Help > 
 - **Timeline** — the frames of the current file; see [Timeline](timeline.html).
 - **Bottom tool bar** — playback, frame, and audio controls; see [Playback and frame control](playback.html).
 - **Tools** — the panel with the current tool, for example the color picker or the magnifier; see [Tools](tools.html).
-- **Status bar** — warnings, errors, information, and status indicators. Errors are also shown briefly over the image, so one is not missed while looking at the picture; warnings stay in the status bar. Clicking the status indicator shows the options, with those in use highlighted; click one to show its controls.
+- **Status bar** — warnings, errors, information, and status indicators. Errors are also shown briefly over the image, so one is not missed while looking at the picture; warnings stay in the status bar. The status indicator has a letter for each group of options that change the picture or the sound, lit while one of the group is in use: **V** view, **C** color, **M** compare, **F** frame store, **A** audio. Its tooltip says which options are in use. Clicking it shows the options, grouped by letter, with those in use highlighted; click one to show its controls.
 
 ## Showing and hiding the parts
 

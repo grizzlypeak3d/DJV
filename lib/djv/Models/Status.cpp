@@ -11,17 +11,32 @@ namespace djv
         {
             return
             {
-                { "Channels", "Image channels" },
-                { "Negative", "Negative" },
-                { "ClippingWarning", "Clipping warning" },
-                { "Mirror", "Mirror" },
-                { "AspectRatio", "Aspect ratio" },
-                { "OCIO", "OCIO" },
-                { "LUT", "LUT" },
-                { "Color", "Color controls" },
-                { "FrameStore", "Frame store" },
-                { "AudioOffset", "Audio offset" },
-                { "AudioChannel", "Audio channel" }
+                { "Channels", "Image channels", "View" },
+                { "Negative", "Negative", "View" },
+                { "ClippingWarning", "Clipping warning", "View" },
+                { "Mirror", "Mirror", "View" },
+                { "AspectRatio", "Aspect ratio", "View" },
+                { "OCIO", "OCIO", "Color" },
+                { "LUT", "LUT", "Color" },
+                { "Color", "Color controls", "Color" },
+                { "Compare", "Compare", "Compare" },
+                { "FrameStore", "Frame store", "FrameStore" },
+                { "AudioOffset", "Audio offset", "Audio" },
+                { "AudioChannel", "Audio channel", "Audio" }
+            };
+        }
+
+        std::vector<StatusGroup> getStatusGroups()
+        {
+            // One letter each, so the letters keep their places: M for
+            // compare, as C is color.
+            return
+            {
+                { "View", "V", "View" },
+                { "Color", "C", "Color" },
+                { "Compare", "M", "Compare" },
+                { "FrameStore", "F", "Frame store" },
+                { "Audio", "A", "Audio" }
             };
         }
 
@@ -52,6 +67,10 @@ namespace djv
                     (display.levels.enabled && levels != tl::Levels()) ||
                     (display.exposure.enabled && display.exposure.exposure != 0.F) ||
                     (display.softClip.enabled && display.softClip.value > 0.F) },
+                { "Compare",
+                    options.compare != tl::Compare::None &&
+                    options.bFiles &&
+                    !options.storedFrame },
                 { "FrameStore",
                     options.storedFrame && options.compare != tl::Compare::None },
                 { "AudioOffset", options.audioOffset != 0.0 },

@@ -5,6 +5,7 @@
 
 #include <djv/UI/Export.h>
 #include <djv/Models/Export.h>
+#include <djv/Models/Status.h>
 
 #include <ftk/UI/IWidgetPopup.h>
 
@@ -17,7 +18,8 @@ namespace djv
 {
     namespace ui
     {
-        //! Status indicator popup.
+        //! Status indicator popup: the options by group, each group by its
+        //! letter, in the order the indicator shows the letters.
         class DJV_UI_API_TYPE StatusIndicatorPopup : public ftk::IWidgetPopup
         {
             FTK_NON_COPYABLE(StatusIndicatorPopup);
@@ -25,7 +27,8 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
-                const std::vector<std::pair<std::string, std::string> >&,
+                const std::vector<models::StatusItem>&,
+                const std::vector<models::StatusGroup>&,
                 const std::shared_ptr<IWidget>& parent);
 
             StatusIndicatorPopup();
@@ -35,7 +38,8 @@ namespace djv
 
             DJV_UI_API static std::shared_ptr<StatusIndicatorPopup> create(
                 const std::shared_ptr<ftk::Context>&,
-                const std::vector<std::pair<std::string, std::string> >&,
+                const std::vector<models::StatusItem>&,
+                const std::vector<models::StatusGroup>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set which options are in use.

@@ -20,16 +20,31 @@ namespace djv
     {
         //! An option that changes what is seen or heard from the media as
         //! it is, which the status indicator reminds of: by an id, which
-        //! the applications find its controls by, and a name.
+        //! the applications find its controls by, a name, and the group it
+        //! is shown in.
         struct DJV_MODELS_API_TYPE StatusItem
         {
             std::string id;
             std::string label;
+            std::string group;
         };
 
         //! Get the options the status indicator knows, in the order it
-        //! lists them.
+        //! lists them, a group's options together.
         DJV_MODELS_API std::vector<StatusItem> getStatusItems();
+
+        //! A group of options, which the status indicator shows as a
+        //! letter, lit while any of them is on: always in the same place,
+        //! so what is on can be seen at a glance without reading.
+        struct DJV_MODELS_API_TYPE StatusGroup
+        {
+            std::string id;
+            std::string letter;
+            std::string label;
+        };
+
+        //! Get the groups, in the order the status indicator shows them.
+        DJV_MODELS_API std::vector<StatusGroup> getStatusGroups();
 
         //! What the options that the status indicator watches are.
         struct DJV_MODELS_API_TYPE StatusOptions
@@ -42,6 +57,7 @@ namespace djv
             double                audioOffset = 0.0;
             int                   audioChannel = -1;
             tl::Compare           compare = tl::Compare::None;
+            bool                  bFiles = false;
             bool                  storedFrame = false;
         };
 
@@ -50,7 +66,8 @@ namespace djv
         //! is neutral, and not on; OpenColorIO is on with a display and a
         //! view to transform to, as the renderer decides; a LUT with a file;
         //! a stored frame while a compare mode draws it, since with none the
-        //! view shows A alone.
+        //! view shows A alone; a comparison while it has B files to draw,
+        //! and no stored frame, which stands in for them.
         DJV_MODELS_API std::map<std::string, bool> getStatus(const StatusOptions&);
     }
 }

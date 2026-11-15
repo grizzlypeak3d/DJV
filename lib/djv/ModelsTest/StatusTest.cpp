@@ -7,6 +7,8 @@
 
 #include <ftk/Core/Assert.h>
 
+#include <algorithm>
+
 namespace djv
 {
     namespace models_tests
@@ -42,7 +44,7 @@ namespace djv
         {
             // Every item has a value, and nothing is on by default.
             const auto items = models::getStatusItems();
-            FTK_CHECK(11 == items.size());
+            FTK_CHECK(12 == items.size());
             const auto values = models::getStatus(models::StatusOptions());
             for (const auto& item : items)
             {
@@ -50,6 +52,40 @@ namespace djv
                 FTK_CHECK(!item.label.empty());
             }
             FTK_CHECK(on(models::StatusOptions()).empty());
+
+            // Every item is in a group, a group's items are together, and
+            // each group has one letter of its own.
+            const auto groups = models::getStatusGroups();
+            FTK_CHECK(5 == groups.size());
+            {
+                std::vector<std::string> seen;
+                for (const auto& item : items)
+                {
+                    const auto i = std::find_if(
+                        groups.begin(),
+                        groups.end(),
+                        [&item](const models::StatusGroup& group)
+                        {
+                            return group.id == item.group;
+                        });
+                    FTK_CHECK(i != groups.end());
+                    if (seen.empty() || seen.back() != item.group)
+                    {
+                        FTK_CHECK(std::find(seen.begin(), seen.end(), item.group) == seen.end());
+                        seen.push_back(item.group);
+                    }
+                }
+                FTK_CHECK(seen.size() == groups.size());
+                std::vector<std::string> letters;
+                for (size_t i = 0; i < groups.size(); ++i)
+                {
+                    FTK_CHECK(groups[i].id == seen[i]);
+                    FTK_CHECK(1 == groups[i].letter.size());
+                    FTK_CHECK(!groups[i].label.empty());
+                    FTK_CHECK(std::find(letters.begin(), letters.end(), groups[i].letter) == letters.end());
+                    letters.push_back(groups[i].letter);
+                }
+            }
 
             // Each option, on alone.
             const auto only = [](const models::StatusOptions& options, const std::string& id)
@@ -117,6 +153,20 @@ namespace djv
                 FTK_CHECK(on(options).empty());
                 options.compare = tl::Compare::Wipe;
                 FTK_CHECK(only(options, "FrameStore"));
+                options.storedFrame = false;
+                FTK_CHECK(on(options).empty());
+            }
+            {
+                // A comparison is on with B files to draw; a stored frame
+                // stands in for them, and is what is on then.
+                models::StatusOptions options;
+                options.compare = tl::Compare::Wipe;
+                FTK_CHECK(on(options).empty());
+                options.bFiles = true;
+                FTK_CHECK(only(options, "Compare"));
+                options.storedFrame = true;
+                FTK_CHECK(only(options, "FrameStore"));
+                options.compare = tl::Compare::None;
                 options.storedFrame = false;
                 FTK_CHECK(on(options).empty());
             }
