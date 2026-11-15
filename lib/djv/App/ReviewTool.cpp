@@ -286,6 +286,10 @@ namespace djv
                 parent);
             FTK_P();
 
+            // The marker times are written through it, and the markers
+            // observer below builds the list as it is made: set before it.
+            p.timeUnitsModel = app->getTimeUnitsModel();
+
             // Markers. The list is the bellows content with no margin, so the
             // items run edge to edge.
             // The add buttons live in the bellows title row, so the list
@@ -769,7 +773,6 @@ namespace djv
             // The labels show times, so they follow the units the timeline
             // shows, and whether its timecode is drop frame.
             // And whether they count from the start.
-            p.timeUnitsModel = app->getTimeUnitsModel();
             p.timeUnitsObserver = ftk::Observer<bool>::create(
                 app->getTimeUnitsModel()->observeTimeUnitsChanged(),
                 [this](bool)

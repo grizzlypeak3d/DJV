@@ -160,6 +160,20 @@
       ]
     },
     {
+      "id": "marker-tool-opened-after",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "markers": [
+            { "frame": 1, "text": "Made before the tool." },
+            { "range": [3, 7], "name": "Range" } ] },
+        { "tool": "Review" },
+        { "expect": "Review.Marker0", "visible": true },
+        { "expect": "Review.Marker1", "visible": true }
+      ]
+    },
+    {
       "id": "marker-edit",
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
