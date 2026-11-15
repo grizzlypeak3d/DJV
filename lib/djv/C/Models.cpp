@@ -191,6 +191,7 @@ struct djv_models
     std::shared_ptr<ftk::Observer<ftk::Color4F> > drawColorObserver;
     std::shared_ptr<ftk::Observer<float> > drawSizeObserver;
     std::shared_ptr<ftk::Observer<float> > drawTextSizeObserver;
+    std::shared_ptr<ftk::Observer<bool> > drawTextBackgroundObserver;
     std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
     std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
 
@@ -882,6 +883,25 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
                 });
             ++out->generation;
         });
+    out->drawTextBackgroundObserver = ftk::Observer<bool>::create(
+        out->drawModel->observeTextBackground(),
+        [out](bool value)
+        {
+            if (out->typing)
+            {
+                out->stroke.textBackground = value;
+                out->needsDraw();
+            }
+            out->selectionUpdate(
+                [value](models::ReviewStroke& s)
+                {
+                    if (models::ReviewStrokeKind::Text == s.kind)
+                    {
+                        s.textBackground = value;
+                    }
+                });
+            ++out->generation;
+        });
     out->markersObserver = ftk::ListObserver<models::ReviewMarker>::create(
         out->markersModel->observeMarkers(),
         [out](const std::vector<models::ReviewMarker>&) { ++out->generation; });
@@ -956,6 +976,7 @@ void djv_models_destroy(djv_models* models)
     models->drawColorObserver.reset();
     models->drawSizeObserver.reset();
     models->drawTextSizeObserver.reset();
+    models->drawTextBackgroundObserver.reset();
     models->compareOptionsObserver.reset();
     models->compareTimeObserver.reset();
     models->cacheObserver.reset();
@@ -2475,6 +2496,7 @@ int djv_draw_begin(djv_models* models, float x, float y, int pen, float pressure
             models->drawModel->getSize(), m.imageSize.w);
         models->stroke.textSize = models::pictureDrawSize(
             models->drawModel->getTextSize(), m.imageSize.w);
+        models->stroke.textBackground = models->drawModel->isTextBackground();
         models->stroke.points.push_back(m.toImage(render));
         models->strokeTime = *time;
         models->typing = true;
@@ -2607,6 +2629,17 @@ void djv_draw_set_text_size(djv_models* models, float value)
 {
     if (models)
         models->drawModel->setTextSize(value);
+}
+
+int djv_draw_is_text_background(djv_models* models)
+{
+    return models && models->drawModel->isTextBackground() ? 1 : 0;
+}
+
+void djv_draw_set_text_background(djv_models* models, int value)
+{
+    if (models)
+        models->drawModel->setTextBackground(value != 0);
 }
 
 int djv_text_is_open(djv_models* models)

@@ -586,6 +586,7 @@ namespace djv
             {
                 return ftk::Box2F();
             }
+            const float aspect = view.aspect > 0.F ? view.aspect : 1.F;
             // Measured in the font it is drawn in, at the text size: the
             // text is drawn square on the screen, so its width across is
             // that many image pixels whatever the zoom. A guess, the glyphs
@@ -594,27 +595,41 @@ namespace djv
             // image's right edge it stopped (#960). Nothing typed yet is
             // the size of the caret's square.
             float w = stroke.textSize;
+            float h = stroke.textSize;
             if (!stroke.text.empty())
             {
                 if (view.fontSystem)
                 {
                     ftk::FontInfo fontInfo;
                     fontInfo.size = std::max(1, static_cast<int>(std::round(stroke.textSize)));
-                    w = view.fontSystem->getSize(stroke.text, fontInfo).w *
-                        (stroke.textSize / fontInfo.size);
+                    const ftk::Size2I size = view.fontSystem->getSize(stroke.text, fontInfo);
+                    const float k = stroke.textSize / fontInfo.size;
+                    w = size.w * k;
+                    h = std::max(static_cast<float>(size.h) * k, stroke.textSize);
                 }
                 else
                 {
                     w = std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
                 }
             }
-            const float h = stroke.textSize * (view.aspect > 0.F ? view.aspect : 1.F);
+            h *= aspect;
             const ftk::V2F& a = stroke.points.front();
-            return ftk::Box2F(
+            ftk::Box2F out(
                 view.mirrorX ? a.x - w : a.x,
                 view.mirrorY ? a.y - h : a.y,
                 w,
                 h);
+            if (stroke.textBackground && !stroke.text.empty())
+            {
+                const float mx = stroke.textSize * textBackgroundMarginX;
+                const float my = stroke.textSize * textBackgroundMarginY * aspect;
+                out = ftk::Box2F(
+                    out.min.x - mx,
+                    out.min.y - my,
+                    out.w() + mx * 2.F,
+                    out.h() + my * 2.F);
+            }
+            return out;
         }
 
         bool strokeHit(const ReviewStroke& stroke, const ftk::V2F& pos, float radius, const TextView& view)

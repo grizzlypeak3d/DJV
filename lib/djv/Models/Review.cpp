@@ -420,6 +420,10 @@ namespace djv
             {
                 json["text"] = in.text;
                 json["textSize"] = in.textSize;
+                if (in.textBackground)
+                {
+                    json["textBackground"] = true;
+                }
             }
             json["color"] = in.color;
             json["width"] = in.width;
@@ -455,6 +459,8 @@ namespace djv
             out.text.clear();
             if (json.contains("text")) json.at("text").get_to(out.text);
             if (json.contains("textSize")) json.at("textSize").get_to(out.textSize);
+            out.textBackground = false;
+            if (json.contains("textBackground")) json.at("textBackground").get_to(out.textBackground);
             if (json.contains("color")) json.at("color").get_to(out.color);
             if (json.contains("width")) json.at("width").get_to(out.width);
             out.pressures.clear();

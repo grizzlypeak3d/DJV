@@ -329,6 +329,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<ftk::Color4F> > drawColorObserver;
             std::shared_ptr<ftk::Observer<float> > drawSizeObserver;
             std::shared_ptr<ftk::Observer<float> > drawTextSizeObserver;
+            std::shared_ptr<ftk::Observer<bool> > drawTextBackgroundObserver;
 
             std::shared_ptr<models::FilesModel> filesModel;
             std::shared_ptr<models::AnnotationsModel> annotationsModel;
@@ -582,6 +583,27 @@ namespace djv
                             if (models::ReviewStrokeKind::Text == s.kind)
                             {
                                 s.textSize = textSize;
+                            }
+                        });
+                });
+            p.drawTextBackgroundObserver = ftk::Observer<bool>::create(
+                drawModel->observeTextBackground(),
+                [this](bool value)
+                {
+                    FTK_P();
+                    // The text being typed shows it at once, as the text
+                    // selected does.
+                    if (p.textEditing)
+                    {
+                        p.stroke.textBackground = value;
+                        setDrawUpdate();
+                    }
+                    _selectionUpdate(
+                        [value](models::ReviewStroke& s)
+                        {
+                            if (models::ReviewStrokeKind::Text == s.kind)
+                            {
+                                s.textBackground = value;
                             }
                         });
                 });
@@ -1611,6 +1633,7 @@ namespace djv
             const int pictureWidth = _imageMapping(hit.index).imageSize.w;
             p.stroke.width = models::pictureDrawSize(drawModel->getSize(), pictureWidth);
             p.stroke.textSize = models::pictureDrawSize(drawModel->getTextSize(), pictureWidth);
+            p.stroke.textBackground = drawModel->isTextBackground();
             p.stroke.points.push_back(hit.pos);
             p.textEditing = true;
             // The viewport takes the keyboard only while text is typed into

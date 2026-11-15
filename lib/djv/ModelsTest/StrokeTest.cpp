@@ -529,12 +529,30 @@ namespace djv
                 const int w = measured.fontSystem->getSize(longText.text, fontInfo).w;
                 FTK_CHECK(w > 0 && static_cast<float>(w) == box.w());
                 FTK_CHECK(box.w() < guessed.w());
-                FTK_CHECK(48.F == box.h());
+                // The line's height, descenders and all.
+                FTK_CHECK(box.h() >= 48.F);
                 moved = models::moveStroke(longText, ftk::V2F(5000.F, 0.F), wide, measured);
                 FTK_CHECK(std::fabs(moved.points[0].x + box.w() - 2000.F) < .001F);
                 // Hit where it is drawn, and not past its end.
                 FTK_CHECK(models::strokeHit(longText, ftk::V2F(w - 2.F, 10.F), 1.F, measured));
                 FTK_CHECK(!models::strokeHit(longText, ftk::V2F(w + 10.F, 10.F), 1.F, measured));
+
+                // On a background the box takes in the plate's margin, so
+                // the plate stays on the picture and is hit too.
+                models::ReviewStroke plated = longText;
+                plated.textBackground = true;
+                const ftk::Box2F platedBox = models::textBox(plated, measured);
+                const float mx = 48.F * models::textBackgroundMarginX;
+                const float my = 48.F * models::textBackgroundMarginY;
+                FTK_CHECK(std::fabs(platedBox.min.x - (box.min.x - mx)) < .001F);
+                FTK_CHECK(std::fabs(platedBox.w() - (box.w() + mx * 2.F)) < .001F);
+                FTK_CHECK(std::fabs(platedBox.h() - (box.h() + my * 2.F)) < .001F);
+                FTK_CHECK(models::strokeHit(plated, ftk::V2F(w + mx * .5F, 10.F), 1.F, measured));
+                moved = models::moveStroke(plated, ftk::V2F(5000.F, 0.F), wide, measured);
+                FTK_CHECK(std::fabs(moved.points[0].x + box.w() + mx - 2000.F) < .001F);
+                // Nothing typed yet has no plate to take in.
+                plated.text.clear();
+                FTK_CHECK(models::textBox(plated, measured).w() == 48.F);
             }
         }
     }

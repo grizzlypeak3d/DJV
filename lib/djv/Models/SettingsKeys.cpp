@@ -58,6 +58,7 @@ namespace djv
                 settingsKeys::drawTextSize,
                 settingsKeys::drawOnionSkin,
                 settingsKeys::drawConstrain,
+                settingsKeys::drawTextBackground,
                 settingsKeys::filesCompareDifferenceGain,
                 settingsKeys::filesCompareOverlay,
                 settingsKeys::filesCompareSameSize,

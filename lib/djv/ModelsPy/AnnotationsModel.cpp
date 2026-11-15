@@ -49,6 +49,7 @@ namespace djv
                 .def_rw("points", &ReviewStroke::points)
                 .def_rw("text", &ReviewStroke::text)
                 .def_rw("textSize", &ReviewStroke::textSize)
+                .def_rw("textBackground", &ReviewStroke::textBackground)
                 .def(nanobind::self == nanobind::self)
                 .def(nanobind::self != nanobind::self);
 

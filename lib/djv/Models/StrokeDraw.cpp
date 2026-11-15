@@ -5,6 +5,9 @@
 
 #include <djv/Models/Stroke.h>
 
+#include <ftk/UI/DrawUtil.h>
+#include <ftk/Core/Color.h>
+
 #include <cmath>
 
 #include <algorithm>
@@ -76,6 +79,25 @@ namespace djv
                 fontInfo.size = std::max(1, static_cast<int>(std::round(stroke.textSize * scale)));
                 const auto fontMetrics = fontSystem->getMetrics(fontInfo);
                 const auto glyphs = fontSystem->getGlyphs(stroke.text, fontInfo);
+                if (stroke.textBackground && !stroke.text.empty())
+                {
+                    // A plate behind the text, dark behind light text and
+                    // light behind dark, faded as the text is.
+                    const ftk::Size2I size = fontSystem->getSize(stroke.text, fontInfo);
+                    const float mx = fontInfo.size * textBackgroundMarginX;
+                    const float my = fontInfo.size * textBackgroundMarginY;
+                    const ftk::Box2I box(
+                        static_cast<int>(std::round(path.front().x - mx)),
+                        static_cast<int>(std::round(path.front().y - my)),
+                        static_cast<int>(std::round(size.w + mx * 2.F)),
+                        static_cast<int>(std::round(
+                            std::max(static_cast<float>(size.h), fontInfo.size * 1.F) + my * 2.F)));
+                    ftk::Color4F plate = ftk::contrastColor(color);
+                    plate.a = textBackgroundAlpha * color.a;
+                    render->drawMesh(
+                        ftk::rect(box, static_cast<int>(std::round(mx * .5F))),
+                        plate);
+                }
                 render->drawText(glyphs, fontMetrics, path.front(), color);
                 if (caret)
                 {
@@ -141,6 +163,15 @@ namespace djv
                 minY = maxY = a.y;
                 maxX += size.w;
                 maxY += std::max(static_cast<float>(size.h), fontInfo.size * 1.F);
+                if (stroke.textBackground && !stroke.text.empty())
+                {
+                    const float mx = fontInfo.size * textBackgroundMarginX;
+                    const float my = fontInfo.size * textBackgroundMarginY;
+                    minX -= mx;
+                    maxX += mx;
+                    minY -= my;
+                    maxY += my;
+                }
             }
             else
             {

@@ -106,6 +106,12 @@ namespace djv
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeConstrain() const;
             DJV_MODELS_API void setConstrain(bool);
 
+            //! Whether new text is drawn on a background plate, so it reads
+            //! over any picture. On by default.
+            DJV_MODELS_API bool isTextBackground() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeTextBackground() const;
+            DJV_MODELS_API void setTextBackground(bool);
+
         private:
             FTK_PRIVATE();
         };

@@ -525,6 +525,10 @@ DJV_C_API void djv_draw_set_constrain(djv_models*, int);
 //! The height of text, on an HD picture, as the width is.
 DJV_C_API float djv_draw_get_text_size(djv_models*);
 DJV_C_API void djv_draw_set_text_size(djv_models*, float);
+//! Whether new text is drawn on a background plate, so it reads over any
+//! picture; set, it changes the text selected and the text being typed.
+DJV_C_API int djv_draw_is_text_background(djv_models*);
+DJV_C_API void djv_draw_set_text_background(djv_models*, int);
 
 //! Open the review of a file: the review file, which need not exist yet,
 //! and the media it is about. Its drawings are read into the model; a

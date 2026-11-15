@@ -121,11 +121,21 @@ namespace djv
             float radius,
             const TextView& = TextView());
 
+        //! The margin of a text stroke's background plate around the text,
+        //! across and down, as a fraction of the text size.
+        constexpr float textBackgroundMarginX = .25F;
+        constexpr float textBackgroundMarginY = .1F;
+
+        //! How opaque a text stroke's background plate is.
+        constexpr float textBackgroundAlpha = .6F;
+
         //! The box a text stroke is taken to cover, in the pixels of the
         //! source image: its height the text size, and its width the text's
         //! measured in the view's font system, or estimated from its length
         //! without one, from its point down and to the right on the screen
-        //! however the view shows the image.
+        //! however the view shows the image. Measured, the height is the
+        //! line's, descenders and all. Text on a background takes in the
+        //! plate's margin as well.
         DJV_MODELS_API ftk::Box2F textBox(
             const ReviewStroke&,
             const TextView& = TextView());

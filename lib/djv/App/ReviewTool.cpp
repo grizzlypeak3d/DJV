@@ -210,6 +210,7 @@ namespace djv
             std::shared_ptr<ftk::IntEditSlider> textSizeSlider;
             std::shared_ptr<ftk::CheckBox> onionSkinCheckBox;
             std::shared_ptr<ftk::CheckBox> constrainCheckBox;
+            std::shared_ptr<ftk::CheckBox> textBackgroundCheckBox;
             std::shared_ptr<ftk::ToolButton> undoButton;
             std::shared_ptr<ftk::ToolButton> redoButton;
             std::shared_ptr<ftk::ToolButton> clearDrawingButton;
@@ -266,6 +267,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<float> > textSizeObserver;
             std::shared_ptr<ftk::Observer<bool> > onionSkinObserver;
             std::shared_ptr<ftk::Observer<bool> > constrainObserver;
+            std::shared_ptr<ftk::Observer<bool> > textBackgroundObserver;
             std::shared_ptr<ftk::Observer<bool> > hasUndoObserver;
             std::shared_ptr<ftk::Observer<bool> > hasRedoObserver;
         };
@@ -415,6 +417,10 @@ namespace djv
             p.textSizeSlider->setTooltip("The height of text, in pixels on an HD picture: twice that on 4K.");
             sizeLayout->addRow("Text size:", p.textSizeSlider);
 
+            p.textBackgroundCheckBox = ftk::CheckBox::create(context, "Text background", drawingWidget);
+            p.textBackgroundCheckBox->setChecked(drawModel->isTextBackground());
+            ftk::setScreenshotTag(p.textBackgroundCheckBox, "Review.TextBackground");
+
             p.onionSkinCheckBox = ftk::CheckBox::create(context, "Onion skin", drawingWidget);
             p.onionSkinCheckBox->setChecked(drawModel->isOnionSkin());
             p.constrainCheckBox = ftk::CheckBox::create(context, "Constrain shapes", drawingWidget);
@@ -482,6 +488,7 @@ namespace djv
             bindTooltip(p.eraserButton, reviewActions.at("Erase"));
             bindTooltip(p.onionSkinCheckBox, reviewActions.at("OnionSkin"));
             bindTooltip(p.constrainCheckBox, reviewActions.at("Constrain"));
+            bindTooltip(p.textBackgroundCheckBox, reviewActions.at("TextBackground"));
             bindTooltip(p.undoButton, reviewActions.at("Undo"));
             bindTooltip(p.redoButton, reviewActions.at("Redo"));
             bindTooltip(p.clearDrawingButton, reviewActions.at("ClearDrawing"));
@@ -552,6 +559,14 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         app->getDrawModel()->setConstrain(value);
+                    }
+                });
+            p.textBackgroundCheckBox->setCheckedCallback(
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getDrawModel()->setTextBackground(value);
                     }
                 });
 
@@ -647,6 +662,12 @@ namespace djv
                 [this](bool value)
                 {
                     _p->constrainCheckBox->setChecked(value);
+                });
+            p.textBackgroundObserver = ftk::Observer<bool>::create(
+                drawModel->observeTextBackground(),
+                [this](bool value)
+                {
+                    _p->textBackgroundCheckBox->setChecked(value);
                 });
 
             p.hasUndoObserver = ftk::Observer<bool>::create(

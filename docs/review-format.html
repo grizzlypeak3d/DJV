@@ -13,37 +13,14 @@
 <nav>
 <a class="logo" href="index.html"><img src="assets/DJV_Icon_32.svg" alt="">DJV</a>
 <ul>
-<li><a href="index.html">Home</a></li>
-<li><a href="install.html">Download and install</a></li>
-<li><a href="building.html">Building from source</a></li>
-<li><a href="main-window.html">Main window</a></li>
-<li><a href="files.html">Files</a></li>
-<li><a href="formats.html">File formats</a></li>
-<li><a href="view.html">View</a></li>
-<li><a href="playback.html">Playback and frame control</a></li>
-<li><a href="timeline.html">Timeline</a></li>
-<li><a href="compare.html">A/B comparison</a></li>
-<li><a href="reviews.html">Review</a></li>
-<li><a href="color.html">Color</a></li>
-<li><a href="audio.html">Audio</a></li>
-<li><a href="tools.html">Tools</a></li>
-<li><a href="export.html">Exporting files</a></li>
-<li><a href="settings.html">Settings</a></li>
-<li><a href="automation.html">Automation</a></li>
-<li><a href="command-line.html">Command line</a></li>
-<li><a href="actions.html">Actions reference</a></li>
-<li><a href="python.html">Python</a></li>
-<li><a href="troubleshooting.html">Troubleshooting</a></li>
+<li></li>
 </ul>
 </nav>
 <main>
 <h1>Review file format</h1>
 <div class="toc">
 <ul>
-<li><a href="#version">Version</a></li>
-<li><a href="#what-a-reader-must-do">What a reader must do</a></li>
-<li><a href="#the-document">The document</a></li>
-<li><a href="#what-is-not-stored">What is not stored</a></li>
+<li></li>
 </ul>
 </div>
 <p>A review is a JSON document with the <code>.djvr</code> extension. This page describes version 1 of that format: what a document contains, and what a program reading one is expected to do. For how reviews are used in DJV, see <a href="reviews.html">Review</a>.</p>
@@ -114,7 +91,7 @@
   ]
 }</code></pre>
 <p>An annotation belongs to one source and is visible on one frame only.</p>
-<p><code>kind</code> says what a stroke is, and what its points are: absent or <code>"Freehand"</code>, ink along the points; <code>"Line"</code> and <code>"Arrow"</code>, the two ends, the head at the second; <code>"Rectangle"</code> and <code>"Ellipse"</code>, two opposite corners of the shape or of the box it fills; <code>"Text"</code>, the top left of the text, with the text in <code>text</code> and its height in image pixels in <code>textSize</code>. A kind the reader does not know is refused like a space it does not know: the annotation is kept verbatim, not drawn as something else. Any stroke with a kind other than freehand makes the document version 2.</p>
+<p><code>kind</code> says what a stroke is, and what its points are: absent or <code>"Freehand"</code>, ink along the points; <code>"Line"</code> and <code>"Arrow"</code>, the two ends, the head at the second; <code>"Rectangle"</code> and <code>"Ellipse"</code>, two opposite corners of the shape or of the box it fills; <code>"Text"</code>, the top left of the text, with the text in <code>text</code> and its height in image pixels in <code>textSize</code>, and <code>textBackground</code> <code>true</code> where it is drawn on a plate (dark behind light text, light behind dark); absent is <code>false</code>, and a reader that does not know it draws the text alone. A kind the reader does not know is refused like a space it does not know: the annotation is kept verbatim, not drawn as something else. Any stroke with a kind other than freehand makes the document version 2.</p>
 <p><code>space</code> and <code>widthSpace</code> are both <code>"image"</code> in version 1: points and widths are expressed in the pixels of the source image, so a drawing keeps its position and its weight whatever the zoom, the pan or the comparison mode. A reader that meets any other value must not draw the item — the coordinates would land somewhere else entirely — and must keep it, per the rules above. An absent space means <code>"image"</code>.</p>
 <p><code>points</code> is a flat <code>[x, y, x, y, ...]</code> array, which keeps long strokes compact. A trailing odd value is ignored.</p>
 <h3 id="markers">Markers</h3>

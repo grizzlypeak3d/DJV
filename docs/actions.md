@@ -58,6 +58,7 @@ The commands are how the menu items are run from outside the window: with
 | Eraser |  | `Review/Erase` | Erase the strokes you touch. Click again to stop. |
 | Onion Skin |  | `Review/OnionSkin` | Show the drawings on the frames before and after, faded, behind this frame's. |
 | Square and Straight Shapes |  | `Review/Constrain` | Hold rectangles square, ellipses round, and lines and arrows to multiples of 45 degrees, as Shift does. |
+| Text Background |  | `Review/TextBackground` | Draw text on a background, dark behind light text and light behind dark, so it reads over any picture. |
 | Undo Drawing | <kbd>Ctrl/Cmd+Z</kbd> | `Review/Undo` | Undo drawing. |
 | Redo Drawing | <kbd>Ctrl/Cmd+Shift+Z</kbd>, <kbd>Ctrl+Y</kbd> (not macOS) | `Review/Redo` | Redo drawing. |
 | Clear Drawing |  | `Review/ClearDrawing` | Remove every stroke on this frame. |

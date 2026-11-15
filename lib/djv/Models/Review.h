@@ -202,6 +202,11 @@ namespace djv
             std::string           text;
             float                 textSize = 48.F;
 
+            //! Whether text is drawn on a plate, dark behind light text and
+            //! light behind dark, so it reads over any picture. A reader that
+            //! does not know it draws the text alone.
+            bool                  textBackground = false;
+
             bool operator == (const ReviewStroke&) const = default;
         };
 

@@ -30,6 +30,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<bool> > enabledObserver;
             std::shared_ptr<ftk::Observer<bool> > onionSkinObserver;
             std::shared_ptr<ftk::Observer<bool> > constrainObserver;
+            std::shared_ptr<ftk::Observer<bool> > textBackgroundObserver;
             std::shared_ptr<ftk::Observer<bool> > hasUndoObserver;
             std::shared_ptr<ftk::Observer<bool> > hasRedoObserver;
             std::shared_ptr<ftk::ListObserver<int> > markersObserver;
@@ -204,6 +205,17 @@ namespace djv
                     if (auto app = appWeak.lock())
                     {
                         app->getDrawModel()->setConstrain(args.at("value").get<bool>());
+                    }
+                });
+
+            _addCheckCommand(
+                "TextBackground",
+                "Draw text on a background, so it reads over any picture.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getDrawModel()->setTextBackground(args.at("value").get<bool>());
                     }
                 });
 
@@ -386,6 +398,9 @@ namespace djv
             _actions["Constrain"] = ftk::Action::create(
                 "Square and Straight Shapes",
                 _checkCommand("Constrain"));
+            _actions["TextBackground"] = ftk::Action::create(
+                "Text Background",
+                _checkCommand("TextBackground"));
             _actions["Undo"] = ftk::Action::create(
                 "Undo Drawing",
                 "Undo",
@@ -471,6 +486,9 @@ namespace djv
             _tooltips["Constrain"] =
                 "Hold rectangles square, ellipses round, and lines and arrows\n"
                 "to multiples of 45 degrees, as Shift does.";
+            _tooltips["TextBackground"] =
+                "Draw text on a background, dark behind light text and light\n"
+                "behind dark, so it reads over any picture.";
             _tooltips["ClearDrawing"] = "Remove every stroke on this frame.";
             _tooltips["AddNote"] =
                 "Add a marker about the current frame, written in place.";
@@ -498,6 +516,7 @@ namespace djv
             _addShortcut("Select", "Select strokes");
             _addShortcut("OnionSkin", "Onion skin");
             _addShortcut("Constrain", "Square and straight shapes");
+            _addShortcut("TextBackground", "Text background");
             _addShortcut("Undo", "Undo drawing");
             _addShortcut("Redo", "Redo drawing");
             _addShortcut("ClearDrawing", "Clear drawing");
@@ -532,6 +551,12 @@ namespace djv
                 [this](bool value)
                 {
                     _actions["Constrain"]->setChecked(value);
+                });
+            p.textBackgroundObserver = ftk::Observer<bool>::create(
+                drawModel->observeTextBackground(),
+                [this](bool value)
+                {
+                    _actions["TextBackground"]->setChecked(value);
                 });
 
             p.toolObserver = ftk::Observer<models::DrawTool>::create(

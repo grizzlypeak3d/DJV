@@ -118,6 +118,22 @@ namespace djv
             FTK_CHECK(ink == out.annotations[0].strokes[0]);
             FTK_CHECK(arrow == out.annotations[0].strokes[1]);
             FTK_CHECK(text == out.annotations[0].strokes[2]);
+            // Text with no background writes no key for it, as before.
+            FTK_CHECK(!json.at("annotations")[0].at("strokes")[2].contains("textBackground"));
+
+            // A background is written only where it is on, read back, and
+            // changes nothing about the document's version: a reader that
+            // does not know it draws the text alone.
+            {
+                models::Review withBackground = review;
+                withBackground.annotations[0].strokes[2].textBackground = true;
+                FTK_CHECK(2 == models::reviewVersionFor(withBackground));
+                const nlohmann::json json2 = withBackground;
+                FTK_CHECK(json2.at("annotations")[0].at("strokes")[2].at("textBackground").get<bool>());
+                const auto out2 = json2.get<models::Review>();
+                FTK_CHECK(out2.annotations[0].strokes[2].textBackground);
+                FTK_CHECK(!out2.annotations[0].strokes[1].textBackground);
+            }
 
             // A kind this version does not know keeps the annotation verbatim
             // rather than drawing it as something else.

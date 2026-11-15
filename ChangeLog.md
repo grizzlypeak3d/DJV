@@ -7,6 +7,8 @@ Changes:
 * Annotations and markers record an author name, set in the settings.
 * A marker's name and frames can be edited in the Review tool.
 * Annotations can be burned into exported images and movies.
+* Text annotations are drawn on a background, so they read over any picture;
+  it can be turned off.
 * Freehand annotations follow pen pressure.
 * Annotation widths and text sizes are given for an HD picture and scale
   with the picture, so they look the same at any resolution.

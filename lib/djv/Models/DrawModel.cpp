@@ -46,6 +46,7 @@ namespace djv
             std::shared_ptr<ftk::Observable<float> > textSize;
             std::shared_ptr<ftk::Observable<bool> > onionSkin;
             std::shared_ptr<ftk::Observable<bool> > constrain;
+            std::shared_ptr<ftk::Observable<bool> > textBackground;
         };
 
         void DrawModel::_init(const std::shared_ptr<ftk::Settings>& settings)
@@ -76,6 +77,11 @@ namespace djv
             bool constrain = false;
             p.settings->get(settingsKeys::drawConstrain, constrain);
             p.constrain = ftk::Observable<bool>::create(constrain);
+            // On: text in the annotation color is lost on a busy or bright
+            // picture without something behind it.
+            bool textBackground = true;
+            p.settings->get(settingsKeys::drawTextBackground, textBackground);
+            p.textBackground = ftk::Observable<bool>::create(textBackground);
         }
 
         DrawModel::DrawModel() :
@@ -95,6 +101,7 @@ namespace djv
             p.settings->set(settingsKeys::drawTextSize, p.textSize->get());
             p.settings->set(settingsKeys::drawOnionSkin, p.onionSkin->get());
             p.settings->set(settingsKeys::drawConstrain, p.constrain->get());
+            p.settings->set(settingsKeys::drawTextBackground, p.textBackground->get());
         }
 
         std::shared_ptr<DrawModel> DrawModel::create(
@@ -209,6 +216,21 @@ namespace djv
         void DrawModel::setConstrain(bool value)
         {
             _p->constrain->setIfChanged(value);
+        }
+
+        bool DrawModel::isTextBackground() const
+        {
+            return _p->textBackground->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<bool> > DrawModel::observeTextBackground() const
+        {
+            return _p->textBackground;
+        }
+
+        void DrawModel::setTextBackground(bool value)
+        {
+            _p->textBackground->setIfChanged(value);
         }
     }
 }
