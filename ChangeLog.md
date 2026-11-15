@@ -29,6 +29,8 @@ Changes:
   playback waits for each frame rather than skipping it, with the audio
   silent (#123).
 * Audio > Volume Up and Volume Down step by 5% (#649).
+* The status indicator shows a letter for each group of options (view,
+  color, compare, frame store, audio), lit while one of them is in use.
 * The compare wipe has a dot to move it and a ring to turn it, which settles
   on level, and Shift steps it by 45 degrees. They fade while the pointer
   rests.
