@@ -6,6 +6,8 @@
 #include <djv/Models/Stroke.h>
 
 #include <ftk/Core/Assert.h>
+#include <ftk/Core/Context.h>
+#include <ftk/Core/FontSystem.h>
 
 #include <algorithm>
 #include <cmath>
@@ -508,6 +510,32 @@ namespace djv
             view.aspect = 2.F;
             moved = models::moveStroke(text, ftk::V2F(200.F, 200.F), imageSize, view);
             FTK_CHECK(82.F == moved.points[0].x && 80.F == moved.points[0].y);
+
+            // Measured in the font it is drawn in, long text goes as far as
+            // the image's right edge, not to where a guess at its width
+            // stopped it, further out the longer it was (#960).
+            if (auto context = _context)
+            {
+                models::TextView measured;
+                measured.fontSystem = context->getSystem<ftk::FontSystem>();
+                models::ReviewStroke longText = text;
+                longText.text = "this is a pretty long text here...";
+                longText.textSize = 48.F;
+                const ftk::Size2I wide(2000, 1000);
+                const ftk::Box2F guessed = models::textBox(longText);
+                const ftk::Box2F box = models::textBox(longText, measured);
+                ftk::FontInfo fontInfo;
+                fontInfo.size = 48;
+                const int w = measured.fontSystem->getSize(longText.text, fontInfo).w;
+                FTK_CHECK(w > 0 && static_cast<float>(w) == box.w());
+                FTK_CHECK(box.w() < guessed.w());
+                FTK_CHECK(48.F == box.h());
+                moved = models::moveStroke(longText, ftk::V2F(5000.F, 0.F), wide, measured);
+                FTK_CHECK(std::fabs(moved.points[0].x + box.w() - 2000.F) < .001F);
+                // Hit where it is drawn, and not past its end.
+                FTK_CHECK(models::strokeHit(longText, ftk::V2F(w - 2.F, 10.F), 1.F, measured));
+                FTK_CHECK(!models::strokeHit(longText, ftk::V2F(w + 10.F, 10.F), 1.F, measured));
+            }
         }
     }
 }

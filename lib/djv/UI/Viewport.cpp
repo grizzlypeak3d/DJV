@@ -1396,6 +1396,10 @@ namespace djv
                 out.pos = mapping.toImage(render);
                 out.scale = mapping.scale();
                 out.textView = mapping.textView();
+                if (auto context = getContext())
+                {
+                    out.textView.fontSystem = context->getSystem<ftk::FontSystem>();
+                }
                 break;
             }
             return out;
@@ -1835,11 +1839,16 @@ namespace djv
             {
                 imageSize = video.layers[0].image->getSize();
             }
+            models::TextView textView = _imageMapping(p.selection->source).textView();
+            if (auto context = getContext())
+            {
+                textView.fontSystem = context->getSystem<ftk::FontSystem>();
+            }
             p.moving = models::moveStroke(
                 strokes[p.selection->index],
                 ftk::V2F(clamped->x - p.movePressPos.x, clamped->y - p.movePressPos.y),
                 imageSize,
-                _imageMapping(p.selection->source).textView());
+                textView);
             setDrawUpdate();
         }
 

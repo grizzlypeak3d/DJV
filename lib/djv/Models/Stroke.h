@@ -11,7 +11,13 @@
 #include <ftk/Core/Mesh.h>
 #include <ftk/Core/Size.h>
 
+#include <memory>
 #include <vector>
+
+namespace ftk
+{
+    class FontSystem;
+}
 
 namespace djv
 {
@@ -93,13 +99,15 @@ namespace djv
         //! the image, so where an image pixel is shown wider than tall (a
         //! pixel aspect, or an aspect ratio set in the view) it covers that
         //! many more rows, and where the image is mirrored it runs the other
-        //! way through the image's pixels.
+        //! way through the image's pixels. With a font system the text is
+        //! measured as it is drawn; without one its width is estimated.
         struct DJV_MODELS_API_TYPE TextView
         {
             //! How much wider than tall an image pixel is shown.
             float aspect  = 1.F;
             bool  mirrorX = false;
             bool  mirrorY = false;
+            std::shared_ptr<ftk::FontSystem> fontSystem;
         };
 
         //! Does the stroke pass within the radius of the position? The
@@ -114,9 +122,10 @@ namespace djv
             const TextView& = TextView());
 
         //! The box a text stroke is taken to cover, in the pixels of the
-        //! source image: its height the text size, and its width estimated
-        //! from its length, from its point down and to the right on the
-        //! screen however the view shows the image.
+        //! source image: its height the text size, and its width the text's
+        //! measured in the view's font system, or estimated from its length
+        //! without one, from its point down and to the right on the screen
+        //! however the view shows the image.
         DJV_MODELS_API ftk::Box2F textBox(
             const ReviewStroke&,
             const TextView& = TextView());

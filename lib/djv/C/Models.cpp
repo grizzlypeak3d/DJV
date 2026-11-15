@@ -29,6 +29,7 @@
 #include <tlRender/C/EngineCpp.h>
 
 #include <ftk/UI/Settings.h>
+#include <ftk/Core/FontSystem.h>
 #include <ftk/Core/Observable.h>
 #include <ftk/Core/Path.h>
 
@@ -215,6 +216,18 @@ struct djv_models
             ftk::V2F();
     }
 
+    //! How a source image is shown, for text, measured in the font it is
+    //! drawn in (#960).
+    models::TextView textViewOf(const models::ImageMapping& m) const
+    {
+        models::TextView out = m.textView();
+        if (context)
+        {
+            out.fontSystem = context->getSystem<ftk::FontSystem>();
+        }
+        return out;
+    }
+
     std::optional<OTIO_NS::RationalTime> currentTime() const
     {
         std::optional<OTIO_NS::RationalTime> out;
@@ -244,7 +257,7 @@ struct djv_models
                 models::pictureDrawSize(drawModel->getSize(), m.imageSize.w),
                 reach,
                 m.scale() * picture.zoom),
-            m.textView());
+            textViewOf(m));
         if (annotationsModel->getStrokes(fileId, *time).size() < before)
         {
             ++eraseSteps;
@@ -334,7 +347,7 @@ struct djv_models
         if (m.contains(render))
         {
             const float radius = reach / std::max(.001F, m.scale() * picture.zoom);
-            found = annotationsModel->findStroke(fileId, *time, m.toImage(render), radius, m.textView());
+            found = annotationsModel->findStroke(fileId, *time, m.toImage(render), radius, textViewOf(m));
         }
         if (!found.has_value())
         {
@@ -369,7 +382,7 @@ struct djv_models
                 *stroke,
                 ftk::V2F(pos.x - movePressPos.x, pos.y - movePressPos.y),
                 m.imageSize,
-                m.textView());
+                textViewOf(m));
         }
         needsDraw();
     }

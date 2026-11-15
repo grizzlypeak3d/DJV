@@ -3,6 +3,8 @@
 
 #include <djv/Models/Stroke.h>
 
+#include <ftk/Core/FontSystem.h>
+
 #include <algorithm>
 #include <cmath>
 
@@ -584,8 +586,28 @@ namespace djv
             {
                 return ftk::Box2F();
             }
-            // The glyphs taken as somewhat narrower than they are tall.
-            const float w = std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
+            // Measured in the font it is drawn in, at the text size: the
+            // text is drawn square on the screen, so its width across is
+            // that many image pixels whatever the zoom. A guess, the glyphs
+            // somewhat narrower than they are tall, made the box too wide
+            // for most text, and the longer the text the further from the
+            // image's right edge it stopped (#960). Nothing typed yet is
+            // the size of the caret's square.
+            float w = stroke.textSize;
+            if (!stroke.text.empty())
+            {
+                if (view.fontSystem)
+                {
+                    ftk::FontInfo fontInfo;
+                    fontInfo.size = std::max(1, static_cast<int>(std::round(stroke.textSize)));
+                    w = view.fontSystem->getSize(stroke.text, fontInfo).w *
+                        (stroke.textSize / fontInfo.size);
+                }
+                else
+                {
+                    w = std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
+                }
+            }
             const float h = stroke.textSize * (view.aspect > 0.F ? view.aspect : 1.F);
             const ftk::V2F& a = stroke.points.front();
             return ftk::Box2F(
