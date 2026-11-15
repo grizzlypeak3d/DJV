@@ -79,10 +79,10 @@ namespace djv
             // The ring that turns it: thin and faint, so it does not hide
             // the seam it crosses, and plain when pointed at or dragged.
             const bool ring = models::WipeHandle::Rotate == highlight;
-            const float ringAlpha = ring ? 1.F : .5F;
-            drawRing(render, widget.center, widget.radius, (ring ? 4.F : 3.F) * s,
+            const float ringAlpha = ring ? 1.F : .7F;
+            drawRing(render, widget.center, widget.radius, (ring ? 5.F : 4.F) * s,
                 ftk::Color4F(dark.r, dark.g, dark.b, dark.a * ringAlpha));
-            drawRing(render, widget.center, widget.radius, (ring ? 2.F : 1.F) * s,
+            drawRing(render, widget.center, widget.radius, (ring ? 3.F : 2.F) * s,
                 ftk::Color4F(light.r, light.g, light.b, light.a * ringAlpha));
 
             // Ticks where the wipe crosses the ring, for its angle.
