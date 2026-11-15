@@ -19,7 +19,7 @@ The **Settings** tool is divided into collapsible sections:
 - **Keyboard Shortcuts** — All keyboard shortcuts (see below).
 - **Style** — Interface colors, scale, and whether tooltips are shown (see below). **Auto** follows the display; a chosen scale is kept.
 - **Graphics** — What the windows are drawn with: **OpenGL**, or the newer renderer, which is Metal on macOS and Vulkan on Linux and Windows and is what HDR needs. It is experimental; where it cannot draw, OpenGL does. The setting takes effect the next time DJV is started, and the section also says what is drawing now. Starting with `-renderer OpenGL` draws with OpenGL whatever is set. On macOS, with the newer renderer, frames decoded by the hardware are drawn from the decoder's own buffer rather than copied.
-- **Time** — Default time units (frames or timecode).
+- **Time** — Default time units (frames, seconds or timecode), and whether times count from the start (see [Time units](playback.html#time-units)).
 - **FFmpeg** — Built-in FFmpeg decoding options, and where to find the external FFmpeg command, used for what the packaged FFmpeg cannot decode (see [File formats](formats.html#ffmpeg)) and for the movie export presets marked *ffmpeg command* (see [Export](export.html)).
 - **USD** — Options for the experimental USD renderer (see [File formats](formats.html#usd)).
 

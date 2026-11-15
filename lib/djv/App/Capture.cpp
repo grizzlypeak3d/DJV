@@ -10,6 +10,7 @@
 #include <djv/Models/CommandsModel.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/MarkersModel.h>
+#include <djv/Models/TimeUnitsModel.h>
 #include <djv/Models/ToolsModel.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/SettingsModel.h>
@@ -634,6 +635,25 @@ namespace djv
                             "unrecognized timeline thumbnailSize '" + s + "'");
                 }
                 settingsModel->setTimeline(settings);
+            }
+            else if (step.contains("timeUnits"))
+            {
+                // The time units, and whether they count from the start, as
+                // the clock button's menu sets them. e.g. { "timeUnits":
+                // { "units": "Frames", "startAtZero": true } }.
+                const auto& v = step.at("timeUnits");
+                auto timeUnitsModel = app->getTimeUnitsModel();
+                if (v.contains("units"))
+                {
+                    const std::string s = v.at("units").get<std::string>();
+                    tl::TimeUnits units = tl::TimeUnits::Timecode;
+                    if (tl::from_string(s, units))
+                        timeUnitsModel->setTimeUnits(units);
+                    else
+                        _note("unrecognized time units '" + s + "'");
+                }
+                if (v.contains("startAtZero"))
+                    timeUnitsModel->setStartAtZero(v.at("startAtZero").get<bool>());
             }
             else if (step.contains("ocio"))
             {

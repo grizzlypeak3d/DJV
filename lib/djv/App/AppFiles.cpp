@@ -1291,6 +1291,10 @@ namespace djv
                 dropFrame = i != tags.end() && tl::isDropFrame(i->second);
             }
             p.timeUnitsModel->setDropFrame(dropFrame);
+            // And where its times count from, for showing them from zero.
+            p.timeUnitsModel->setStart(player ?
+                std::optional<OTIO_NS::RationalTime>(player->getTimeRange().start_time()) :
+                std::nullopt);
             p.player->setIfChanged(player);
             p.reloading = false;
 

@@ -8,6 +8,12 @@
 - Frame shuttle — click and drag to scrub the current frame
 - Time units (e.g., frames or timecode)
 
+## Time units
+
+The clock button in the playback controls chooses how times are shown: **Frames**, **Seconds**, or **Timecode**. Times are the media's own by default, the frame number or timecode the file gives the first frame, so a movie whose timecode starts at an hour starts at 01:00:00:00.
+
+**Start at Zero**, under the units in the same menu, counts from the start instead: the first frame is 0, 0.00 seconds, or 00:00:00:00, as most players count. Use it when someone says "at 20 seconds" from a player like that. It applies to the frame counter, the timeline, the markers, and what is typed in, and not to durations. It is remembered, and also in the **Time** section of the **Settings** tool.
+
 ## Playback controls
 
 **Playback > Forward** (<kbd>L</kbd>), **Playback > Reverse** (<kbd>J</kbd>), and **Playback > Stop** (<kbd>K</kbd>). **Playback > Toggle Playback** (<kbd>Space</kbd>) stops if playing, and otherwise plays in the direction last played.

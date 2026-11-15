@@ -23,6 +23,8 @@ Changes:
   OpenColorIO display and view of its own (#615).
 * Add a mouse tool option for choosing what the left mouse button does: pan,
   compare wipe, color picker, or frame shuttle.
+* Add a Start at Zero option to the time units, for counting from the start
+  of a file rather than its frame numbers or timecode (#958).
 * The compare wipe has a dot to move it and a ring to turn it, which settles
   on level, and Shift steps it by 45 degrees. They fade while the pointer
   rests.

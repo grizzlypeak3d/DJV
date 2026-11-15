@@ -114,21 +114,20 @@ namespace djv
             //! as the frames you will see, not as a half-open interval.
             std::string formatRange(
                 const OTIO_NS::TimeRange& range,
-                tl::TimeUnits units,
-                bool dropFrame)
+                const tl::TimeUnitsModel& model)
             {
                 if (isSingleFrame(range))
                 {
-                    return tl::timeToText(range.start_time(), units, dropFrame);
+                    return model.getLabel(range.start_time());
                 }
                 // Frame numbers read as one token; the longer forms need
                 // the space.
                 const char* separator =
-                    tl::TimeUnits::Frames == units ? "-" : " - ";
+                    tl::TimeUnits::Frames == model.getTimeUnits() ? "-" : " - ";
                 return
-                    tl::timeToText(range.start_time(), units, dropFrame) +
+                    model.getLabel(range.start_time()) +
                     separator +
-                    tl::timeToText(range.end_time_inclusive(), units, dropFrame);
+                    model.getLabel(range.end_time_inclusive());
             }
 
             //! Whether the marker speaks about the frame being shown.
@@ -250,8 +249,7 @@ namespace djv
             std::vector<std::shared_ptr<ftk::Observer<std::string> > > tooltipObservers;
 
             std::optional<OTIO_NS::RationalTime> currentTime;
-            tl::TimeUnits timeUnits = tl::TimeUnits::Timecode;
-            bool dropFrame = false;
+            std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
 
             std::shared_ptr<tl::Player> player;
             std::optional<OTIO_NS::TimeRange> inOutRange;
@@ -770,18 +768,13 @@ namespace djv
 
             // The labels show times, so they follow the units the timeline
             // shows, and whether its timecode is drop frame.
-            std::weak_ptr<models::TimeUnitsModel> timeUnitsModelWeak =
-                app->getTimeUnitsModel();
+            // And whether they count from the start.
+            p.timeUnitsModel = app->getTimeUnitsModel();
             p.timeUnitsObserver = ftk::Observer<bool>::create(
                 app->getTimeUnitsModel()->observeTimeUnitsChanged(),
-                [this, timeUnitsModelWeak](bool)
+                [this](bool)
                 {
-                    if (auto timeUnitsModel = timeUnitsModelWeak.lock())
-                    {
-                        _p->timeUnits = timeUnitsModel->getTimeUnits();
-                        _p->dropFrame = timeUnitsModel->isDropFrame();
-                        _markersUpdate();
-                    }
+                    _markersUpdate();
                 });
 
             // The list shows every marker; the playhead moves the highlight.
@@ -1613,7 +1606,7 @@ namespace djv
                     auto framesLabel = ftk::Label::create(
                         context,
                         hasRange ?
-                            formatRange(*marker.range, p.timeUnits, p.dropFrame) :
+                            formatRange(*marker.range, *p.timeUnitsModel) :
                             std::string("No frame"),
                         header);
                     framesLabel->setMarginRole(ftk::SizeRole::LabelPad, ftk::SizeRole::None);

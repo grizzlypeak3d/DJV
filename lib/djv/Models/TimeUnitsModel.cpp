@@ -29,6 +29,9 @@ namespace djv
             p.settings->get(settingsKeys::timeUnits, s);
             tl::from_string(s, units);
             setTimeUnits(units);
+            bool startAtZero = false;
+            p.settings->get(settingsKeys::timeUnitsStartAtZero, startAtZero);
+            setStartAtZero(startAtZero);
         }
 
         TimeUnitsModel::TimeUnitsModel() :
@@ -44,6 +47,7 @@ namespace djv
         {
             FTK_P();
             p.settings->set(settingsKeys::timeUnits, tl::to_string(getTimeUnits()));
+            p.settings->set(settingsKeys::timeUnitsStartAtZero, isStartAtZero());
         }
 
         std::shared_ptr<TimeUnitsModel> TimeUnitsModel::create(

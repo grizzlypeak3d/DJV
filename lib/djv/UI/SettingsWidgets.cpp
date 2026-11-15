@@ -1294,9 +1294,11 @@ namespace djv
             std::shared_ptr<models::TimeUnitsModel> timeUnitsModel;
 
             std::shared_ptr<ftk::ComboBox> timeUnitsComboBox;
+            std::shared_ptr<ftk::CheckBox> startAtZeroCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<tl::TimeUnits> > timeUnitsObserver;
+            std::shared_ptr<ftk::Observer<bool> > startAtZeroObserver;
         };
 
         void TimeSettingsWidget::_init(
@@ -1311,11 +1313,19 @@ namespace djv
 
             p.timeUnitsComboBox = ftk::ComboBox::create(context, tl::getTimeUnitsLabels());
 
+            p.startAtZeroCheckBox = ftk::CheckBox::create(context);
+            p.startAtZeroCheckBox->setTooltip(
+                "Count times from the start: the first frame 0, or\n"
+                "00:00:00:00, rather than the frame or timecode the\n"
+                "media gives it. Durations do not change.");
+            ftk::setScreenshotTag(p.startAtZeroCheckBox, "Settings.Time.StartAtZero");
+
             p.layout = ftk::FormLayout::create(context);
 
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Time units:", p.timeUnitsComboBox);
+            p.layout->addRow("Start at zero:", p.startAtZeroCheckBox);
 
             p.timeUnitsComboBox->setIndexCallback(
                 [this](int value)
@@ -1328,6 +1338,18 @@ namespace djv
                 [this](tl::TimeUnits value)
                 {
                     _p->timeUnitsComboBox->setCurrentIndex(static_cast<int>(value));
+                });
+
+            p.startAtZeroCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    _p->timeUnitsModel->setStartAtZero(value);
+                });
+            p.startAtZeroObserver = ftk::Observer<bool>::create(
+                p.timeUnitsModel->observeStartAtZero(),
+                [this](bool value)
+                {
+                    _p->startAtZeroCheckBox->setChecked(value);
                 });
 
         }

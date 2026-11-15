@@ -79,6 +79,8 @@ namespace djv
             constexpr const char* magnifyLevel = "/Magnify/Level";
             constexpr const char* magnifyViewPosAndZoom = "/Magnify/ViewPosAndZoom";
             constexpr const char* timeUnits = "/TimeUnits";
+            //! Beside "/TimeUnits", not under it: that one is a value.
+            constexpr const char* timeUnitsStartAtZero = "/TimeUnitsStartAtZero";
             constexpr const char* toolsOpen = "/Tools/Open.1";
             constexpr const char* viewportAspectRatio = "/Viewport/AspectRatio.1";
             constexpr const char* viewportBackground = "/Viewport/Background";

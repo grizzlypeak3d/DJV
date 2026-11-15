@@ -417,6 +417,22 @@
       ]
     },
     {
+      "id": "start-at-zero",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "tests/capture/StartTimecode.otio" },
+        { "timeUnits": { "units": "Timecode" } },
+        { "expect": "Playback.CurrentFrame", "contains": "01:00:00:00" },
+        { "timeUnits": { "startAtZero": true } },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:00" },
+        { "command": "Playback/Seek", "args": { "frame": 5 } },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:05" },
+        { "timeUnits": { "startAtZero": false } },
+        { "expect": "Playback.CurrentFrame", "contains": "01:00:00:05" }
+      ]
+    },
+    {
       "id": "frame-store",
       "strict": true,
       "window": { "w": 1000, "h": 600 },
