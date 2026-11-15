@@ -2,6 +2,8 @@
 // Copyright Contributors to the DJV project.
 
 #include <djv/Models/AudioModel.h>
+
+#include <cmath>
 #include <djv/Models/SettingsKeys.h>
 
 #include <ftk/UI/Settings.h>
@@ -124,14 +126,25 @@ namespace djv
             _p->volume->setIfChanged(tmp);
         }
 
+        namespace
+        {
+            // Steps of 5%, onto the multiples of it: adding .05 again and
+            // again drifted (100, 95, 90, 85, 79...), and a volume set
+            // between steps goes to the next one rather than past it.
+            const float volumeSteps = 20.F;
+            const float volumeSlop = .01F;
+        }
+
         void AudioModel::volumeUp()
         {
-            setVolume(_p->volume->get() + .05F);
+            const float v = _p->volume->get() * volumeSteps;
+            setVolume((std::floor(v + volumeSlop) + 1.F) / volumeSteps);
         }
 
         void AudioModel::volumeDown()
         {
-            setVolume(_p->volume->get() - .05F);
+            const float v = _p->volume->get() * volumeSteps;
+            setVolume((std::ceil(v - volumeSlop) - 1.F) / volumeSteps);
         }
 
         bool AudioModel::isMuted() const

@@ -75,6 +75,22 @@ namespace djv
             FTK_CHECK(ftk::fuzzyCompare(.55F, model->getVolume()));
             model->volumeDown();
             FTK_CHECK(ftk::fuzzyCompare(.5F, model->getVolume()));
+            // All the way down from the top lands on every multiple of 5%,
+            // not drifting off them (#649).
+            model->setVolume(1.F);
+            for (int i = 19; i >= 0; --i)
+            {
+                model->volumeDown();
+                FTK_CHECK(i * 5 == static_cast<int>(model->getVolume() * 100.F + .5F));
+                FTK_CHECK(ftk::fuzzyCompare(i / 20.F, model->getVolume()));
+            }
+            // Between steps, to the next one.
+            model->setVolume(.53F);
+            model->volumeUp();
+            FTK_CHECK(ftk::fuzzyCompare(.55F, model->getVolume()));
+            model->setVolume(.53F);
+            model->volumeDown();
+            FTK_CHECK(ftk::fuzzyCompare(.5F, model->getVolume()));
 
             // Set the mute.
             model->setMute(true);

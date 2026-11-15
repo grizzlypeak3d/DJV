@@ -32,6 +32,7 @@
 #include <ftk/Core/Format.h>
 
 #include <algorithm>
+#include <cmath>
 
 namespace djv
 {
@@ -343,7 +344,7 @@ namespace djv
                 {
                     FTK_P();
                     p.audioButton->setText(ftk::Format("{0}%").
-                        arg(static_cast<int>(value * 100.F), 3));
+                        arg(static_cast<int>(std::round(value * 100.F)), 3));
                 });
 
             p.muteObserver = ftk::Observer<bool>::create(
