@@ -41,6 +41,7 @@ class SettingsModelTest(unittest.TestCase):
         model = djv.models.SettingsModel(self.context, self.settings)
         playback = model.playback
         playback.startPlayback = not playback.startPlayback
+        playback.playEveryFrame = not playback.playEveryFrame
         model.playback = playback
         self.assertEqual(playback, model.playback)
 

@@ -1228,6 +1228,8 @@ namespace djv
             }
             if (player)
             {
+                player->setPlayEveryFrame(
+                    p.settingsModel->getPlayback().playEveryFrame);
                 const double speed = activeFiles.front()->speed;
                 if (speed >= 0.0)
                 {

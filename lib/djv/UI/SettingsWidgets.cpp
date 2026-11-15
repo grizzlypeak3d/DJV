@@ -1164,6 +1164,7 @@ namespace djv
         {
             std::shared_ptr<models::SettingsModel> settings;
             std::shared_ptr<ftk::CheckBox> startPlaybackCheckBox;
+            std::shared_ptr<ftk::CheckBox> playEveryFrameCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<models::PlaybackSettings> > settingsObserver;
@@ -1181,11 +1182,18 @@ namespace djv
 
             p.startPlaybackCheckBox = ftk::CheckBox::create(context);
 
+            p.playEveryFrameCheckBox = ftk::CheckBox::create(context);
+            p.playEveryFrameCheckBox->setTooltip(
+                "Wait for each frame rather than skip the ones that are not\n"
+                "ready in time. Media that cannot play in real time plays\n"
+                "slower, with every frame shown. The audio is silent.");
+
             p.layout = ftk::FormLayout::create(context);
 
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.layout->addRow("Play on open:", p.startPlaybackCheckBox);
+            p.layout->addRow("Play every frame:", p.playEveryFrameCheckBox);
 
             p.settingsObserver = ftk::Observer<models::PlaybackSettings>::create(
                 settings->observePlayback(),
@@ -1193,6 +1201,7 @@ namespace djv
                 {
                     FTK_P();
                     p.startPlaybackCheckBox->setChecked(value.startPlayback);
+                    p.playEveryFrameCheckBox->setChecked(value.playEveryFrame);
                 });
 
             p.startPlaybackCheckBox->setCheckedCallback(
@@ -1201,6 +1210,15 @@ namespace djv
                     FTK_P();
                     auto settings = p.settings->getPlayback();
                     settings.startPlayback = value;
+                    p.settings->setPlayback(settings);
+                });
+
+            p.playEveryFrameCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    FTK_P();
+                    auto settings = p.settings->getPlayback();
+                    settings.playEveryFrame = value;
                     p.settings->setPlayback(settings);
                 });
         }

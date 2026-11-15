@@ -306,6 +306,11 @@ namespace djv
         {
             bool startPlayback = false;
 
+            //! Wait for each frame rather than drop the ones the cache does
+            //! not have in time, with the audio silent; see
+            //! tl::Player::setPlayEveryFrame().
+            bool playEveryFrame = false;
+
             bool operator == (const PlaybackSettings&) const = default;
         };
 

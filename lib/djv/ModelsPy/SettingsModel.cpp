@@ -127,6 +127,7 @@ namespace djv
             nb::class_<PlaybackSettings>(m, "PlaybackSettings")
                 .def(nb::init())
                 .def_rw("startPlayback", &PlaybackSettings::startPlayback)
+                .def_rw("playEveryFrame", &PlaybackSettings::playEveryFrame)
                 .def(nanobind::self == nanobind::self)
                 .def(nanobind::self != nanobind::self);
 

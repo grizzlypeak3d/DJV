@@ -13,7 +13,7 @@ The **Settings** tool is divided into collapsible sections:
 - **Image Sequences** — How audio is paired with image sequences, and what happens where a sequence is missing frames (see [File formats](formats.html#partial-image-sequences)).
 - **OTIO** — How the spatial coordinates in OTIO files are used to size and position images, and whether to enable workarounds for timelines that do not conform exactly to specification (see [File formats](formats.html#otio-spatial-coordinates)).
 - **Mouse** — Mouse button bindings and scaling (see below).
-- **Playback** — Options such as whether playback starts automatically when a file is opened.
+- **Playback** — Whether playback starts automatically when a file is opened, and whether to [play every frame](playback.html#play-every-frame).
 - **Review** — The author the markers and drawings are signed with; empty for the user name of the account (see [Review](reviews.html)).
 - **Audio** — The size of the buffer the audio device is given. Increase this if the audio breaks up during playback.
 - **Keyboard Shortcuts** — All keyboard shortcuts (see below).

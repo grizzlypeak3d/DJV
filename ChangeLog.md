@@ -25,6 +25,9 @@ Changes:
   compare wipe, color picker, or frame shuttle.
 * Add a Start at Zero option to the time units, for counting from the start
   of a file rather than its frame numbers or timecode (#958).
+* Add Playback > Play Every Frame, for media that cannot play in real time:
+  playback waits for each frame rather than skipping it, with the audio
+  silent (#123).
 * The compare wipe has a dot to move it and a ring to turn it, which settles
   on level, and Shift steps it by 45 degrees. They fade while the pointer
   rests.

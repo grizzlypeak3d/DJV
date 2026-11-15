@@ -1156,6 +1156,7 @@ namespace djv
         void to_json(nlohmann::json& json, const PlaybackSettings& value)
         {
             json["StartPlayback"] = value.startPlayback;
+            json["PlayEveryFrame"] = value.playEveryFrame;
         }
 
         void to_json(nlohmann::json& json, const ReviewSettings& value)
@@ -1387,6 +1388,11 @@ namespace djv
         void from_json(const nlohmann::json& json, PlaybackSettings& value)
         {
             json.at("StartPlayback").get_to(value.startPlayback);
+            // Not required: settings written before it existed still load.
+            if (json.contains("PlayEveryFrame"))
+            {
+                json.at("PlayEveryFrame").get_to(value.playEveryFrame);
+            }
         }
 
         void from_json(const nlohmann::json& json, ReviewSettings& value)

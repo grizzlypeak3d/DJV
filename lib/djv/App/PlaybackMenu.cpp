@@ -31,6 +31,8 @@ namespace djv
             addAction(actions["Once"]);
             addAction(actions["PingPong"]);
             addDivider();
+            addAction(actions["PlayEveryFrame"]);
+            addDivider();
             addAction(actions["SetInPoint"]);
             addAction(actions["ResetInPoint"]);
             addAction(actions["SetOutPoint"]);

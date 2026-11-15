@@ -54,6 +54,14 @@ Playback can loop in three ways, set from the **Playback** menu or the loop butt
 
 Locations: **Playback** menu, playback controls
 
+## Play every frame
+
+Media that can't be read fast enough plays in real time by skipping the frames that aren't ready in time. **Playback > Play Every Frame** waits for each frame instead, so every frame is shown and playback runs slower. The audio is silent while it is on.
+
+The setting is kept between sessions, and it is also in the Settings tool's **Playback** section.
+
+Locations: **Playback** menu, **Settings** tool
+
 ## Jumping
 
 You can jump backward or forward by one or ten seconds.
@@ -77,6 +85,6 @@ Locations: **Playback** menu, **Playback** controls
 
 ## Dropped frames
 
-If playback isn't keeping up, the HUD shows the number of dropped frames in real time.
+If playback isn't keeping up, the HUD shows the number of dropped frames in real time. To see every frame instead, turn on [Play every frame](#play-every-frame).
 
 Locations: **View** menu

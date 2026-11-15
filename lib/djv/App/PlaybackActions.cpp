@@ -18,6 +18,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<tl::Player> > > playerObserver;
             std::shared_ptr<ftk::Observer<tl::Playback> > playbackObserver;
             std::shared_ptr<ftk::Observer<tl::Loop> > loopObserver;
+            std::shared_ptr<ftk::Observer<models::PlaybackSettings> > settingsObserver;
         };
 
         void PlaybackActions::_init(
@@ -160,6 +161,23 @@ namespace djv
                     }
                 });
 
+            auto appWeak = std::weak_ptr<App>(app);
+            _addCheckCommand(
+                "PlayEveryFrame",
+                "Wait for each frame rather than skip the ones that are not "
+                "ready in time, with the audio silent.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto settingsModel = app->getSettingsModel();
+                        auto settings = settingsModel->getPlayback();
+                        settings.playEveryFrame = value;
+                        settingsModel->setPlayback(settings);
+                    }
+                });
+
             _addCommand(
                 "SetInPoint",
                 "Set the playback in point to the current frame.",
@@ -287,6 +305,9 @@ namespace djv
                 "Playback Ping-Pong",
                 "PlaybackPingPong",
                 _command("PingPong"));
+            _actions["PlayEveryFrame"] = ftk::Action::create(
+                "Play Every Frame",
+                _checkCommand("PlayEveryFrame"));
             _actions["SetInPoint"] = ftk::Action::create(
                 "Set In Point",
                 _command("SetInPoint"));
@@ -312,6 +333,7 @@ namespace djv
             _addShortcut("Loop", "Loop");
             _addShortcut("Once", "Once");
             _addShortcut("PingPong", "Ping-Pong");
+            _addShortcut("PlayEveryFrame");
             _addShortcut("SetInPoint");
             _addShortcut("ResetInPoint");
             _addShortcut("SetOutPoint");
@@ -320,6 +342,20 @@ namespace djv
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
             _playbackUpdate(tl::Playback::Stop);
             _loopUpdate(tl::Loop::Loop);
+
+            // The setting is the state; the player follows it, as each new
+            // one does when it is made (see App::_activeUpdate()).
+            p.settingsObserver = ftk::Observer<models::PlaybackSettings>::create(
+                app->getSettingsModel()->observePlayback(),
+                [this](const models::PlaybackSettings& value)
+                {
+                    FTK_P();
+                    _actions["PlayEveryFrame"]->setChecked(value.playEveryFrame);
+                    if (p.player)
+                    {
+                        p.player->setPlayEveryFrame(value.playEveryFrame);
+                    }
+                });
 
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),

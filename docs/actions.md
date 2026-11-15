@@ -102,6 +102,7 @@ The commands are how the menu items are run from outside the window: with
 | Playback Loop |  | `Playback/Loop` | Loop playback continuously. |
 | Playback Once |  | `Playback/Once` | Playback once and stop. |
 | Playback Ping-Pong |  | `Playback/PingPong` | Playback forward and reverse continuously. |
+| Play Every Frame |  | `Playback/PlayEveryFrame` | Wait for each frame rather than skip the ones that are not ready in time, with the audio silent. |
 | Set In Point | <kbd>I</kbd> | `Playback/SetInPoint` | Set the playback in point to the current frame. |
 | Reset In Point | <kbd>Shift+I</kbd> | `Playback/ResetInPoint` | Reset the playback in point. |
 | Set Out Point | <kbd>O</kbd> | `Playback/SetOutPoint` | Set the playback out point to the current frame. |
