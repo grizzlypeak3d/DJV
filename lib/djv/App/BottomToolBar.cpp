@@ -511,6 +511,9 @@ namespace djv
                         };
                 }
                 p.currentTimeEdit->setTimeMap(timeMap);
+                // Wide enough for the last frame from the start, rather
+                // than growing as playback crosses a digit (#959).
+                p.currentTimeEdit->setRange(p.player->getTimeRange());
 
                 p.speedObserver = ftk::Observer<double>::create(
                     p.player->observeSpeed(),
@@ -555,6 +558,7 @@ namespace djv
             {
                 p.loopWidget->setLoop(tl::Loop::Loop);
                 p.currentTimeEdit->setValue(std::nullopt);
+                p.currentTimeEdit->setRange(std::nullopt);
                 p.durationLabel->setValue(std::nullopt);
                 p.speedModel->setValue(0.0);
                 p.speedButton->setText(ftk::Format("{0}").arg(0.0, 2));

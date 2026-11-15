@@ -76,6 +76,8 @@ Fixes:
   playing at the timeline's rate (tlRender #128).
 * Fix for OTIO media referenced by file URLs with a Windows drive letter, as
   Hiero writes them (tlRender #143).
+* Fix for the current frame being cut off when it has more than six digits
+  (#959).
 
 ## 3.7.6
 

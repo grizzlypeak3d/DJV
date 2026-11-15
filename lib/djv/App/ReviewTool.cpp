@@ -1661,6 +1661,12 @@ namespace djv
                         {
                             if (!edit)
                                 continue;
+                            // Wide enough for any frame of the timeline, so
+                            // a long one's frames are not cut off (#959).
+                            if (p.player)
+                            {
+                                edit->setRange(p.player->getTimeRange());
+                            }
                             const bool start = edit == p.editStart;
                             edit->setCallback(
                                 [weak, id, start](const OTIO_NS::RationalTime& value)

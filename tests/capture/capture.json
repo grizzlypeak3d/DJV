@@ -447,6 +447,18 @@
       ]
     },
     {
+      "id": "time-frames-long",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "tests/capture/LongTimecode.otio" },
+        { "timeUnits": { "units": "Frames", "startAtZero": false } },
+        { "expect": "Playback.CurrentFrame", "contains": "1728000" },
+        { "command": "Playback/Seek", "args": { "frame": 5 } },
+        { "expect": "Playback.CurrentFrame", "contains": "1728005" }
+      ]
+    },
+    {
       "id": "time-units-menu",
       "strict": true,
       "window": { "w": 1000, "h": 600 },
