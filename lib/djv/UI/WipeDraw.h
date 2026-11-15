@@ -16,15 +16,17 @@ namespace djv
         //! \name Wipe Drawing
         ///@{
 
-        //! The rotation handle's distance from the center, and how near a
-        //! pointer has to be to take a handle, in the view's pixels at a
-        //! display scale of one: a fingertip's reach for a finger.
+        //! The radius of the ring that turns the wipe, and how near a
+        //! pointer has to be to take the dot or the ring, in the view's
+        //! pixels at a display scale of one: a fingertip's reach for a
+        //! finger.
         constexpr float wipeRotateDistance = 64.F;
         constexpr float wipePointerReach = 10.F;
         constexpr float wipeTouchReach = 22.F;
 
         //! Draw the wipe's handles, light over dark so that they show on
-        //! any picture, the one being dragged or pointed at larger.
+        //! any picture: the dot, larger when pointed at or dragged, and the
+        //! ring, faint until then, with ticks where the wipe crosses it.
         DJV_UI_API void drawWipe(
             const std::shared_ptr<ftk::IRender>&,
             const models::WipeWidget&,

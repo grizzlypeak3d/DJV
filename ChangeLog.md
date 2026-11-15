@@ -23,6 +23,8 @@ Changes:
   OpenColorIO display and view of its own (#615).
 * Add a mouse tool option for choosing what the left mouse button does: pan,
   compare wipe, color picker, or frame shuttle.
+* The compare wipe has a dot to move it and a ring to turn it, which settles
+  on level, and Shift steps it by 45 degrees.
 * Double clicking the view frames the image.
 * Add a Dither view option.
 * Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >

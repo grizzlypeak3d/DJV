@@ -151,6 +151,10 @@ struct djv_models
     // the center.
     models::WipeHandle wipeDrag = models::WipeHandle::None;
     ftk::V2F wipeGrab;
+    // Where the ring was taken, and the rotation then, which it turns
+    // from.
+    ftk::V2F wipeGrabPos;
+    float wipePressRotation = 0.F;
     uint64_t generation = 0;
 
     // What the strings handed out point into.
@@ -2113,6 +2117,8 @@ int djv_compare_wipe_begin(djv_models* models, float x, float y)
     models->wipeGrab = models::WipeHandle::Center == models->wipeDrag ?
         ftk::V2F(pos.x - widget->center.x, pos.y - widget->center.y) :
         ftk::V2F();
+    models->wipeGrabPos = pos;
+    models->wipePressRotation = models->filesModel->getCompareOptions().wipeRotation;
     djv_compare_wipe_move(models, x, y);
     models->needsDraw();
     return 1;
@@ -2142,7 +2148,13 @@ void djv_compare_wipe_move(djv_models* models, float x, float y)
     auto options = models->filesModel->getCompareOptions();
     if (models::WipeHandle::Rotate == models->wipeDrag)
     {
-        options.wipeRotation = models::getWipeRotation(widget->center, ftk::V2F(x, y));
+        // Turned from where the ring was taken; no Shift to step it on a
+        // tablet, but level still snaps.
+        options.wipeRotation = models::getWipeRotationDrag(
+            models->wipePressRotation,
+            widget->center,
+            models->wipeGrabPos,
+            ftk::V2F(x, y));
     }
     else
     {

@@ -43,6 +43,7 @@ namespace djv
                 return ftk::V2F(viewPos.x + v.x * zoom, viewPos.y + v.y * zoom);
             };
             out.center = toView(c);
+            out.radius = rotateDistance;
 
             // Up the wipe from the center when it is upright.
             out.rotate = ftk::V2F(
@@ -57,13 +58,14 @@ namespace djv
             float reach)
         {
             WipeHandle out = WipeHandle::None;
-            if (distance(pos, widget.rotate) <= reach)
-            {
-                out = WipeHandle::Rotate;
-            }
-            else if (distance(pos, widget.center) <= reach)
+            const float d = distance(pos, widget.center);
+            if (d <= reach)
             {
                 out = WipeHandle::Center;
+            }
+            else if (std::abs(d - widget.radius) <= reach)
+            {
+                out = WipeHandle::Rotate;
             }
             return out;
         }
@@ -95,6 +97,39 @@ namespace djv
                 return 0.F;
             }
             float out = ftk::rad2deg(std::atan2(dx, -dy));
+            if (out < 0.F)
+            {
+                out += 360.F;
+            }
+            return out;
+        }
+
+        float getWipeRotationDrag(
+            float pressRotation,
+            const ftk::V2F& center,
+            const ftk::V2F& grab,
+            const ftk::V2F& pos,
+            bool step)
+        {
+            const float delta = getWipeRotation(center, pos) - getWipeRotation(center, grab);
+            float out = std::fmod(pressRotation + delta, 360.F);
+            if (out < 0.F)
+            {
+                out += 360.F;
+            }
+            return snapWipeRotation(out, step);
+        }
+
+        float snapWipeRotation(float value, bool step)
+        {
+            const float increment = step ? 45.F : 90.F;
+            const float nearest = std::round(value / increment) * increment;
+            float out = value;
+            if (step || std::abs(value - nearest) <= 2.F)
+            {
+                out = nearest;
+            }
+            out = std::fmod(out, 360.F);
             if (out < 0.F)
             {
                 out += 360.F;

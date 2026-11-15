@@ -17,7 +17,7 @@ The tool bar has one button for the modes: it shows the mode chosen last and tur
 **Compare > Next** (<kbd>Shift+Page Down</kbd>) and **Compare > Previous** (<kbd>Shift+Page Up</kbd>) change the B file to the next or previous one in the file list.
 
 > [!NOTE]
-> Drag with **Alt** + left mouse button to move the wipe between **A** and **B**.
+> The wipe has a dot at its center and a ring around the dot. Drag the dot to move the wipe, and drag the ring, from anywhere on it, to turn it; the ticks on the ring show its angle. It settles on level when it comes within two degrees of horizontal or vertical, and **Shift** while turning steps it by 45 degrees. **Alt** + left mouse button drags the wipe from anywhere.
 
 ## Compare modes
 
@@ -26,7 +26,7 @@ The modes are toggles rather than a list to choose from: turning one on turns of
 | Mode | What it shows | Shortcut |
 |---|---|---|
 | **B** | Only the **B** file | <kbd>Ctrl+B</kbd> |
-| **Wipe** | A wipe between **A** and **B** (drag with **Alt** + left mouse button) | <kbd>Ctrl+W</kbd> |
+| **Wipe** | A wipe between **A** and **B**, moved with its dot and turned with its ring | <kbd>Ctrl+W</kbd> |
 | **Butterfly** | The same half of **A** and **B**, one mirrored, meeting in the middle |  |
 | **Overlay** | **B** layered on top of **A** |  |
 | **Difference** | The pixel difference between **A** and **B** |  |

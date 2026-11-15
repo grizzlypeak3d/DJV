@@ -276,6 +276,8 @@ namespace djv
             models::WipeHandle wipeHover = models::WipeHandle::None;
             models::WipeHandle wipeDrag = models::WipeHandle::None;
             ftk::V2F wipeGrab;
+            //! Where the ring was taken, which it turns from.
+            ftk::V2F wipeGrabPos;
             tl::CompareOptions wipePress;
 
             //! The stroke being drawn, in the image pixels of its source,
@@ -949,7 +951,7 @@ namespace djv
                 _selectMove(event.pos - getGeometry().min, event.keyModifiers);
                 break;
             case Private::MouseMode::Wipe:
-                _wipeMove(event.pos);
+                _wipeMove(event.pos, event.keyModifiers);
                 break;
             case Private::MouseMode::None:
             {
@@ -1013,6 +1015,7 @@ namespace djv
                     p.wipeGrab = widget.has_value() ?
                         ftk::V2F(event.pos.x - widget->center.x, event.pos.y - widget->center.y) :
                         ftk::V2F();
+                    p.wipeGrabPos = ftk::V2F(event.pos.x, event.pos.y);
                     p.wipePress = p.filesModel->getCompareOptions();
                     setDrawUpdate();
                     return;
@@ -1877,7 +1880,7 @@ namespace djv
             return out;
         }
 
-        void Viewport::_wipeMove(const ftk::V2I& windowPos)
+        void Viewport::_wipeMove(const ftk::V2I& windowPos, int modifiers)
         {
             FTK_P();
             const auto widget = _wipeWidget();
@@ -1890,7 +1893,14 @@ namespace djv
             auto options = p.filesModel->getCompareOptions();
             if (models::WipeHandle::Rotate == p.wipeDrag)
             {
-                options.wipeRotation = models::getWipeRotation(widget->center, pos);
+                // Turned from where the ring was taken, Shift stepping it
+                // by 45 degrees as it holds a shape square.
+                options.wipeRotation = models::getWipeRotationDrag(
+                    p.wipePress.wipeRotation,
+                    widget->center,
+                    p.wipeGrabPos,
+                    pos,
+                    modifiers & static_cast<int>(ftk::KeyModifier::Shift));
             }
             else
             {
