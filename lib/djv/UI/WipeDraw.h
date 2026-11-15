@@ -27,11 +27,13 @@ namespace djv
         //! Draw the wipe's handles, light over dark so that they show on
         //! any picture: the dot, larger when pointed at or dragged, and the
         //! ring, faint until then, with ticks where the wipe crosses it.
+        //! The opacity fades the whole of it.
         DJV_UI_API void drawWipe(
             const std::shared_ptr<ftk::IRender>&,
             const models::WipeWidget&,
             float displayScale,
-            models::WipeHandle highlight = models::WipeHandle::None);
+            models::WipeHandle highlight = models::WipeHandle::None,
+            float opacity = 1.F);
 
         ///@}
     }

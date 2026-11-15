@@ -13,8 +13,8 @@ namespace djv
     {
         namespace
         {
-            const ftk::Color4F light(1.F, 1.F, 1.F, .9F);
-            const ftk::Color4F dark(0.F, 0.F, 0.F, .6F);
+            const ftk::Color4F lightColor(1.F, 1.F, 1.F, .9F);
+            const ftk::Color4F darkColor(0.F, 0.F, 0.F, .6F);
 
             //! A ring, its middle left clear.
             void drawRing(
@@ -72,9 +72,12 @@ namespace djv
             const std::shared_ptr<ftk::IRender>& render,
             const models::WipeWidget& widget,
             float displayScale,
-            models::WipeHandle highlight)
+            models::WipeHandle highlight,
+            float opacity)
         {
             const float s = displayScale;
+            const ftk::Color4F light(lightColor.r, lightColor.g, lightColor.b, lightColor.a * opacity);
+            const ftk::Color4F dark(darkColor.r, darkColor.g, darkColor.b, darkColor.a * opacity);
 
             // The ring that turns it: thin and faint, so it does not hide
             // the seam it crosses, and plain when pointed at or dragged.

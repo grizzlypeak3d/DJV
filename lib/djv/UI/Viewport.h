@@ -200,6 +200,8 @@ namespace djv
             std::optional<models::WipeWidget> _wipeWidget();
             models::WipeHandle _wipeHandle(const ftk::V2I& windowPos);
             void _wipeMove(const ftk::V2I& windowPos, int modifiers = 0);
+            void _wipeShow();
+            void _wipeFade();
 
             void _toastUpdate();
             void _frameStoreUpdate();

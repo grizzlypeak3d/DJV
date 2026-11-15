@@ -226,6 +226,16 @@ namespace djv
             std::shared_ptr<ftk::Label> toastLabel;
             std::shared_ptr<ViewportBinding> binding;
             std::shared_ptr<ftk::Timer> toastTimer;
+
+            //! The wipe's handles fade when the pointer leaves or rests, so
+            //! they do not sit over the seam being looked at (#957), and
+            //! come back with the pointer.
+            float wipeOpacity = 1.F;
+            std::shared_ptr<ftk::Timer> wipeIdleTimer;
+            std::shared_ptr<ftk::Timer> wipeFadeTimer;
+            //! Where the pointer last moved to: the window sends moves
+            //! where it has not, as the layout changes under it.
+            std::optional<ftk::V2I> wipePointerPos;
             std::shared_ptr<ftk::VerticalLayout> hudLayout;
             std::map<models::HUDPos, std::shared_ptr<ftk::VerticalLayout> > hudLayouts;
 
@@ -476,6 +486,9 @@ namespace djv
                 p.hudLayouts[models::HUDPos::BottomRight]);
 
             p.toastTimer = ftk::Timer::create(context);
+            p.wipeIdleTimer = ftk::Timer::create(context);
+            p.wipeFadeTimer = ftk::Timer::create(context);
+            p.wipeFadeTimer->setRepeating(true);
 
             p.fpsObserver = ftk::Observer<double>::create(
                 observeFPS(),
@@ -604,7 +617,12 @@ namespace djv
                 [this]
                 {
                     FTK_P();
-                    p.compare = getCompareOptions().compare;
+                    const tl::Compare compare = getCompareOptions().compare;
+                    if (compare != p.compare && tl::Compare::Wipe == compare)
+                    {
+                        _wipeShow();
+                    }
+                    p.compare = compare;
                     _compareUpdate();
                     // The heads up display says what is being rendered,
                     // which the aspect ratio and the color buffer change.
@@ -939,6 +957,11 @@ namespace djv
         {
             tl::ui::Viewport::mouseMoveEvent(event);
             FTK_P();
+            if (!p.wipePointerPos.has_value() || *p.wipePointerPos != event.pos)
+            {
+                p.wipePointerPos = event.pos;
+                _wipeShow();
+            }
             switch (p.mouse.mode)
             {
             case Private::MouseMode::Draw:
@@ -1166,6 +1189,7 @@ namespace djv
         void Viewport::mouseEnterEvent(ftk::MouseEnterEvent& event)
         {
             tl::ui::Viewport::mouseEnterEvent(event);
+            _wipeShow();
             _cursorUpdate();
         }
 
@@ -1178,7 +1202,65 @@ namespace djv
                 p.wipeHover = models::WipeHandle::None;
                 setDrawUpdate();
             }
+            // Out of the view, no waiting: the picture is what is left.
+            if (models::WipeHandle::None == p.wipeDrag)
+            {
+                p.wipeIdleTimer->stop();
+                _wipeFade();
+            }
             _cursorUpdate();
+        }
+
+        void Viewport::_wipeShow()
+        {
+            FTK_P();
+            if (p.compare != tl::Compare::Wipe)
+            {
+                return;
+            }
+            p.wipeFadeTimer->stop();
+            if (p.wipeOpacity < 1.F)
+            {
+                p.wipeOpacity = 1.F;
+                setDrawUpdate();
+            }
+            // Resting for a moment, they go.
+            p.wipeIdleTimer->start(
+                std::chrono::milliseconds(2000),
+                [this]
+                {
+                    FTK_P();
+                    if (p.wipeDrag != models::WipeHandle::None)
+                    {
+                        _wipeShow();
+                    }
+                    else
+                    {
+                        _wipeFade();
+                    }
+                });
+        }
+
+        void Viewport::_wipeFade()
+        {
+            FTK_P();
+            if (p.wipeOpacity <= 0.F || p.wipeFadeTimer->isActive())
+            {
+                return;
+            }
+            // Over a quarter of a second.
+            p.wipeFadeTimer->start(
+                std::chrono::milliseconds(16),
+                [this]
+                {
+                    FTK_P();
+                    p.wipeOpacity = std::max(0.F, p.wipeOpacity - 16.F / 250.F);
+                    if (p.wipeOpacity <= 0.F)
+                    {
+                        p.wipeFadeTimer->stop();
+                    }
+                    setDrawUpdate();
+                });
         }
 
         void Viewport::_cursorUpdate()
@@ -2094,13 +2176,15 @@ namespace djv
             }
 
             // The wipe's handles, over the drawings.
-            if (const auto widget = _wipeWidget())
+            const auto widget = _wipeWidget();
+            if (widget.has_value() && p.wipeOpacity > 0.F)
             {
                 drawWipe(
                     event.render,
                     *widget,
                     event.displayScale,
-                    p.wipeDrag != models::WipeHandle::None ? p.wipeDrag : p.wipeHover);
+                    p.wipeDrag != models::WipeHandle::None ? p.wipeDrag : p.wipeHover,
+                    p.wipeOpacity);
             }
 
             event.render->setClipRectEnabled(clipRectEnabledPrev);
