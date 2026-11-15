@@ -433,6 +433,31 @@
       ]
     },
     {
+      "id": "time-units-menu",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "tests/capture/StartTimecode.otio" },
+        { "timeUnits": { "units": "Frames", "startAtZero": false } },
+        { "click": "Playback.TimeUnits" },
+        { "key": "Up" },
+        { "key": "Up" },
+        { "key": "Return" },
+        { "wait": 0.2 },
+        { "expect": "Playback.CurrentFrame", "contains": "01:00:00:00" },
+        { "click": "Playback.TimeUnits" },
+        { "key": "Up" },
+        { "key": "Return" },
+        { "wait": 0.2 },
+        { "expect": "Playback.CurrentFrame", "contains": "00:00:00:00" },
+        { "click": "Playback.TimeUnits" },
+        { "key": "Up" },
+        { "key": "Return" },
+        { "wait": 0.2 },
+        { "expect": "Playback.CurrentFrame", "contains": "01:00:00:00" }
+      ]
+    },
+    {
       "id": "frame-store",
       "strict": true,
       "window": { "w": 1000, "h": 600 },
