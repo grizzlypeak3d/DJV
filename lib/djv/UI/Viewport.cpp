@@ -190,10 +190,10 @@ namespace djv
             // Kept for the annotation hit test and overlay, which need the
             // image sizes to map screen to image pixels.
             std::vector<tl::VideoFrame> videoFrames;
-            // The player's frames, before a held frame takes B's place, and
-            // the held frame while it is the comparison's B.
+            // The player's frames, before a stored frame takes B's place, and
+            // the stored frame while it is the comparison's B.
             std::vector<tl::VideoFrame> playerVideoFrames;
-            std::optional<tl::VideoFrame> heldFrame;
+            std::optional<tl::VideoFrame> storedFrame;
             tl::PlayerCacheInfo cacheInfo;
             double viewZoom = 0.0;
             models::MouseActionBinding frameShuttleBinding =
@@ -239,7 +239,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<models::FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > bObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
-            std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
+            std::shared_ptr<ftk::Observer<std::optional<models::StoredFrame> > > frameStoreObserver;
             std::shared_ptr<ftk::Observer<bool> > drawEnabledObserver;
             std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > fgOptionsObserver;
             std::shared_ptr<ftk::Observer<double> > viewZoomObserver;
@@ -579,11 +579,11 @@ namespace djv
                     _compareUpdate();
                 });
 
-            p.heldFrameObserver = ftk::Observer<std::optional<models::HeldFrame> >::create(
-                filesModel->observeHeldFrame(),
-                [this](const std::optional<models::HeldFrame>&)
+            p.frameStoreObserver = ftk::Observer<std::optional<models::StoredFrame> >::create(
+                filesModel->observeFrameStore(),
+                [this](const std::optional<models::StoredFrame>&)
                 {
-                    _heldUpdate();
+                    _frameStoreUpdate();
                 });
 
             p.fgOptionsObserver = ftk::Observer<tl::ForegroundOptions>::create(
@@ -817,7 +817,7 @@ namespace djv
                     {
                         FTK_P();
                         p.playerVideoFrames = value;
-                        p.videoFrames = tl::withHeldFrame(value, p.heldFrame);
+                        p.videoFrames = tl::withHeldFrame(value, p.storedFrame);
                         p.videoFramesSize = p.videoFrames.size();
                         p.binding->setVideoFramesSize(p.videoFrames.size());
                         _compareUpdate();
@@ -1206,9 +1206,9 @@ namespace djv
         bool Viewport::_sourceShown(int index) const
         {
             FTK_P();
-            // A held frame takes no drawings: they belong to a file and a
+            // A stored frame takes no drawings: they belong to a file and a
             // time, and it stands in for B whatever the time or the file.
-            if (p.heldFrame.has_value() && index > 0)
+            if (p.storedFrame.has_value() && index > 0)
             {
                 return false;
             }
@@ -2222,16 +2222,16 @@ namespace djv
                 _displayScale());
         }
 
-        void Viewport::_heldUpdate()
+        void Viewport::_frameStoreUpdate()
         {
             FTK_P();
-            p.heldFrame.reset();
+            p.storedFrame.reset();
             if (auto filesModel = p.filesModel)
             {
-                p.heldFrame = filesModel->getCompareHeldFrame();
+                p.storedFrame = filesModel->getCompareFrameStore();
             }
-            setHeldFrame(p.heldFrame);
-            p.videoFrames = tl::withHeldFrame(p.playerVideoFrames, p.heldFrame);
+            setHeldFrame(p.storedFrame);
+            p.videoFrames = tl::withHeldFrame(p.playerVideoFrames, p.storedFrame);
             p.videoFramesSize = p.videoFrames.size();
             // The observers run as they are made, before the binding is.
             if (!p.binding)
@@ -2249,11 +2249,11 @@ namespace djv
             // draws anything, and an empty picture is the one thing a black
             // frame, an unreadable file and a comparison out of sync all look
             // like as well.
-            // A held frame is B, and the warnings about B files do not apply
-            // to it. That it is held is said off the picture, by the status
-            // indicator, and its name in the Files tool (#627).
+            // A stored frame is B, and the warnings about B files do not apply
+            // to it. What is shown is said off the picture, in the status
+            // bar, and its name in the Files tool (#627).
             std::string s;
-            if (p.compare != tl::Compare::None && !p.heldFrame.has_value())
+            if (p.compare != tl::Compare::None && !p.storedFrame.has_value())
             {
                 if (p.videoFramesSize < 2)
                 {

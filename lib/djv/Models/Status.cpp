@@ -19,10 +19,34 @@ namespace djv
                 { "OCIO", "OCIO" },
                 { "LUT", "LUT" },
                 { "Color", "Color controls" },
-                { "HeldFrame", "Held frame" },
+                { "FrameStore", "Frame store" },
                 { "AudioOffset", "Audio offset" },
                 { "AudioChannel", "Audio channel" }
             };
+        }
+
+        FrameStoreShowing getFrameStoreShowing(bool stored, tl::Compare compare)
+        {
+            FrameStoreShowing out;
+            if (!stored)
+            {
+                return out;
+            }
+            switch (compare)
+            {
+            case tl::Compare::None:
+                out.text = "Showing: A";
+                break;
+            case tl::Compare::B:
+                out.text = "Showing: Frame store";
+                out.shown = true;
+                break;
+            default:
+                out.text = tl::to_string(compare) + ": A | Frame store";
+                out.shown = true;
+                break;
+            }
+            return out;
         }
 
         std::map<std::string, bool> getStatus(const StatusOptions& options)
@@ -52,8 +76,8 @@ namespace djv
                     (display.levels.enabled && levels != tl::Levels()) ||
                     (display.exposure.enabled && display.exposure.exposure != 0.F) ||
                     (display.softClip.enabled && display.softClip.value > 0.F) },
-                { "HeldFrame",
-                    options.heldFrame && options.compare != tl::Compare::None },
+                { "FrameStore",
+                    options.storedFrame && options.compare != tl::Compare::None },
                 { "AudioOffset", options.audioOffset != 0.0 },
                 { "AudioChannel", options.audioChannel != -1 }
             };

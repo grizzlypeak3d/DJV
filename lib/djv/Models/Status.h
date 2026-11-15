@@ -42,15 +42,34 @@ namespace djv
             double                audioOffset = 0.0;
             int                   audioChannel = -1;
             tl::Compare           compare = tl::Compare::None;
-            bool                  heldFrame = false;
+            bool                  storedFrame = false;
         };
 
         //! Get whether each option is on, by its id: on where it changes
         //! the picture or the sound. An adjustment enabled at its defaults
         //! is neutral, and not on; OpenColorIO is on with a display and a
         //! view to transform to, as the renderer decides; a LUT with a file;
-        //! a held frame while a compare mode draws it, since with none the
+        //! a stored frame while a compare mode draws it, since with none the
         //! view shows A alone.
         DJV_MODELS_API std::map<std::string, bool> getStatus(const StatusOptions&);
+
+        //! What the view shows while a frame is in the frame store, for the
+        //! status bar to say off the picture (#627): the indicator is lit
+        //! for a LUT as well, and does not say which picture is up.
+        struct DJV_MODELS_API_TYPE FrameStoreShowing
+        {
+            //! "Showing: A", "Showing: Frame store", or a mode with both,
+            //! "Wipe: A | Frame store"; empty with nothing stored.
+            std::string text;
+
+            //! Whether the stored frame is in view.
+            bool shown = false;
+
+            bool operator == (const FrameStoreShowing&) const = default;
+        };
+
+        //! Get what the view shows with a frame stored or not, in a compare
+        //! mode.
+        DJV_MODELS_API FrameStoreShowing getFrameStoreShowing(bool stored, tl::Compare);
     }
 }

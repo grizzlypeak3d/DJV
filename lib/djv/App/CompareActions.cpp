@@ -20,7 +20,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > optionsObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > timeObserver;
-            std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
+            std::shared_ptr<ftk::Observer<std::optional<models::StoredFrame> > > frameStoreObserver;
         };
 
         void CompareActions::_init(
@@ -232,16 +232,17 @@ namespace djv
                     }
                 });
 
-            // The frame store: a frame held to compare against, whatever the
+            // The frame store: a frame stored to compare against, whatever the
             // time or the file, which a comparison of files cannot do -- a
             // still against a movie's frames, or a frame against another of
             // the same clip (#627).
             _addCommand(
-                "HoldFrame",
-                "Hold the current frame and compare against it: it becomes "
-                "the comparison's B, wiped against A if no other comparison "
-                "is chosen, whatever the time or the file, until it is let "
-                "go. Holding again holds the frame then current.",
+                "StoreFrame",
+                "Store the current frame in the frame store and compare "
+                "against it: it becomes the comparison's B, wiped against A "
+                "if no other comparison is chosen, whatever the time or the "
+                "file, until the frame store is cleared. Storing again stores "
+                "the frame then current.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
@@ -253,13 +254,13 @@ namespace djv
                         const auto& frames = player->getCurrentVideo();
                         if (frames.empty() || frames.front().layers.empty())
                             return;
-                        models::HeldFrame held;
-                        held.frame = frames.front();
-                        held.label = ftk::Format("{0} {1}").
+                        models::StoredFrame stored;
+                        stored.frame = frames.front();
+                        stored.label = ftk::Format("{0} {1}").
                             arg(a->path.getFileName()).
-                            arg(app->getTimeUnitsModel()->getLabel(held.frame.time));
+                            arg(app->getTimeUnitsModel()->getLabel(stored.frame.time));
                         auto filesModel = app->getFilesModel();
-                        filesModel->setHeldFrame(held);
+                        filesModel->setFrameStore(stored);
                         auto options = filesModel->getCompareOptions();
                         if (tl::Compare::None == options.compare)
                         {
@@ -270,13 +271,13 @@ namespace djv
                 });
 
             _addCommand(
-                "ClearHeld",
-                "Let go of the held frame.",
+                "ClearFrameStore",
+                "Clear the frame store.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getFilesModel()->setHeldFrame(std::nullopt);
+                        app->getFilesModel()->setFrameStore(std::nullopt);
                     }
                 });
 
@@ -332,12 +333,12 @@ namespace djv
                 compareTimeLabels[1],
                 _command("Absolute"));
 
-            _actions["HoldFrame"] = ftk::Action::create(
-                "Hold Frame",
-                _command("HoldFrame"));
-            _actions["ClearHeld"] = ftk::Action::create(
-                "Clear Held Frame",
-                _command("ClearHeld"));
+            _actions["StoreFrame"] = ftk::Action::create(
+                "Store Frame",
+                _command("StoreFrame"));
+            _actions["ClearFrameStore"] = ftk::Action::create(
+                "Clear Frame Store",
+                _command("ClearFrameStore"));
 
             // Register the shortcuts.
             _addShortcut("Next");
@@ -355,8 +356,8 @@ namespace djv
             _addShortcut("Relative", compareTimeLabels[0]);
             _addShortcut("Absolute", compareTimeLabels[1]);
             // No keys yet; they can be set in the shortcuts.
-            _addShortcut("HoldFrame");
-            _addShortcut("ClearHeld");
+            _addShortcut("StoreFrame");
+            _addShortcut("ClearFrameStore");
 
             _shortcutsUpdate(app->getSettingsModel()->getShortcuts());
 
@@ -375,7 +376,7 @@ namespace djv
                     _actions["Horizontal"]->setEnabled(!value.empty());
                     _actions["Vertical"]->setEnabled(!value.empty());
                     _actions["Tile"]->setEnabled(!value.empty());
-                    _actions["HoldFrame"]->setEnabled(!value.empty());
+                    _actions["StoreFrame"]->setEnabled(!value.empty());
                 });
 
             p.optionsObserver = ftk::Observer<tl::CompareOptions>::create(
@@ -395,11 +396,11 @@ namespace djv
                     }
                 });
 
-            p.heldFrameObserver = ftk::Observer<std::optional<models::HeldFrame> >::create(
-                app->getFilesModel()->observeHeldFrame(),
-                [this](const std::optional<models::HeldFrame>& value)
+            p.frameStoreObserver = ftk::Observer<std::optional<models::StoredFrame> >::create(
+                app->getFilesModel()->observeFrameStore(),
+                [this](const std::optional<models::StoredFrame>& value)
                 {
-                    _actions["ClearHeld"]->setEnabled(value.has_value());
+                    _actions["ClearFrameStore"]->setEnabled(value.has_value());
                 });
 
             p.timeObserver = ftk::Observer<tl::CompareTime>::create(

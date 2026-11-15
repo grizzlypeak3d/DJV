@@ -45,11 +45,11 @@ namespace djv
         //! The video of each source a player shows: the A file, then each
         //! file it is compared with. A source without video still takes a
         //! place, as an empty information, so that the sources stay lined
-        //! up with the frames asked for them. A held frame the comparison
+        //! up with the frames asked for them. A stored frame the comparison
         //! is against takes the place of the compared files.
         DJV_MODELS_API std::vector<ftk::ImageInfo> getExportInfos(
             const std::shared_ptr<tl::Player>&,
-            const std::optional<tl::VideoFrame>& heldFrame = std::nullopt);
+            const std::optional<tl::VideoFrame>& storedFrame = std::nullopt);
 
         //! The size the sources render at together, as the viewport lays
         //! them out. The B comparison sizes itself from the B file, which
@@ -100,9 +100,9 @@ namespace djv
             std::vector<std::string> sourceIds;
             std::vector<ftk::ImageInfo> infos;
 
-            //! The held frame the comparison is against, in place of the
-            //! compared files' frames (FilesModel::getCompareHeldFrame()).
-            std::optional<tl::VideoFrame> heldFrame;
+            //! The stored frame the comparison is against, in place of the
+            //! compared files' frames (FilesModel::getCompareFrameStore()).
+            std::optional<tl::VideoFrame> storedFrame;
         };
 
         //! The options to render a player's frames with, at a size and for

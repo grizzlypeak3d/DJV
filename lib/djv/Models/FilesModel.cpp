@@ -32,7 +32,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::Observable<tl::CompareOptions> > compareOptions;
             std::shared_ptr<ftk::Observable<tl::CompareTime> > compareTime;
-            std::shared_ptr<ftk::Observable<std::optional<HeldFrame> > > heldFrame;
+            std::shared_ptr<ftk::Observable<std::optional<StoredFrame> > > storedFrame;
         };
 
         void FilesModel::_init(const std::shared_ptr<ftk::Settings>& settings)
@@ -75,7 +75,7 @@ namespace djv
             tl::CompareTime compareTime = tl::CompareTime::First;
             from_string(s, compareTime);
             p.compareTime = ftk::Observable<tl::CompareTime>::create(compareTime);
-            p.heldFrame = ftk::Observable<std::optional<HeldFrame> >::create();
+            p.storedFrame = ftk::Observable<std::optional<StoredFrame> >::create();
         }
 
         FilesModel::FilesModel() :
@@ -829,28 +829,28 @@ namespace djv
             p.compareTime->setIfChanged(value);
         }
 
-        const std::optional<HeldFrame>& FilesModel::getHeldFrame() const
+        const std::optional<StoredFrame>& FilesModel::getFrameStore() const
         {
-            return _p->heldFrame->get();
+            return _p->storedFrame->get();
         }
 
-        std::shared_ptr<ftk::IObservable<std::optional<HeldFrame> > > FilesModel::observeHeldFrame() const
+        std::shared_ptr<ftk::IObservable<std::optional<StoredFrame> > > FilesModel::observeFrameStore() const
         {
-            return _p->heldFrame;
+            return _p->storedFrame;
         }
 
-        void FilesModel::setHeldFrame(const std::optional<HeldFrame>& value)
+        void FilesModel::setFrameStore(const std::optional<StoredFrame>& value)
         {
-            _p->heldFrame->setIfChanged(value);
+            _p->storedFrame->setIfChanged(value);
         }
 
-        std::optional<tl::VideoFrame> FilesModel::getCompareHeldFrame() const
+        std::optional<tl::VideoFrame> FilesModel::getCompareFrameStore() const
         {
             FTK_P();
             std::optional<tl::VideoFrame> out;
-            if (p.heldFrame->get().has_value())
+            if (p.storedFrame->get().has_value())
             {
-                out = p.heldFrame->get()->frame;
+                out = p.storedFrame->get()->frame;
             }
             return out;
         }

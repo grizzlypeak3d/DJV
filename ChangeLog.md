@@ -14,8 +14,9 @@ Changes:
   step (#696).
 * Add Timeline > Detect Cuts, for marking the cuts in an edit flattened to
   one movie or image sequence.
-* Add Compare > Hold Frame, for comparing against a held frame: a still
-  against a movie, or a frame against another of the same clip (#627).
+* Add a frame store, Compare > Store Frame, for comparing against a stored
+  frame: a still against a movie, or a frame against another of the same
+  clip (#627).
 * A still compared with a movie is shown at every frame.
 * Add a Displays tool, for where the picture goes: the secondary window
   can fill a chosen monitor with the picture alone, and have an

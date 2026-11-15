@@ -53,7 +53,7 @@ namespace djv
             _audioChannel();
             _mediaReferences();
             _compare();
-            _heldFrame();
+            _frameStore();
             _tileCompare();
             _reviewRestore();
             _frames();
@@ -61,26 +61,26 @@ namespace djv
             _persistence();
         }
 
-        void FilesModelTest::_heldFrame()
+        void FilesModelTest::_frameStore()
         {
-            // The frame store: a held frame is the comparison's B until it
+            // The frame store: a stored frame is the comparison's B until it
             // is let go.
             auto settings = createTestSettings(_context);
             auto model = models::FilesModel::create(settings);
-            FTK_CHECK(!model->getHeldFrame().has_value());
-            FTK_CHECK(!model->getCompareHeldFrame().has_value());
+            FTK_CHECK(!model->getFrameStore().has_value());
+            FTK_CHECK(!model->getCompareFrameStore().has_value());
 
-            models::HeldFrame held;
-            held.frame.time = OTIO_NS::RationalTime(3.0, 24.0);
-            held.label = "render.0003.exr 3";
-            model->setHeldFrame(held);
-            FTK_CHECK(held == *model->getHeldFrame());
-            FTK_CHECK(model->getCompareHeldFrame().has_value());
-            FTK_CHECK(held.frame == *model->getCompareHeldFrame());
+            models::StoredFrame stored;
+            stored.frame.time = OTIO_NS::RationalTime(3.0, 24.0);
+            stored.label = "render.0003.exr 3";
+            model->setFrameStore(stored);
+            FTK_CHECK(stored == *model->getFrameStore());
+            FTK_CHECK(model->getCompareFrameStore().has_value());
+            FTK_CHECK(stored.frame == *model->getCompareFrameStore());
 
-            model->setHeldFrame(std::nullopt);
-            FTK_CHECK(!model->getHeldFrame().has_value());
-            FTK_CHECK(!model->getCompareHeldFrame().has_value());
+            model->setFrameStore(std::nullopt);
+            FTK_CHECK(!model->getFrameStore().has_value());
+            FTK_CHECK(!model->getCompareFrameStore().has_value());
         }
 
         void FilesModelTest::_files()

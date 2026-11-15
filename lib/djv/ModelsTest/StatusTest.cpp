@@ -110,15 +110,29 @@ namespace djv
                 FTK_CHECK(only(options, "Color"));
             }
             {
-                // A held frame is on while a compare mode draws it: with
+                // A stored frame is on while a compare mode draws it: with
                 // none the view is A alone, and the frame only waits.
                 models::StatusOptions options;
-                options.heldFrame = true;
+                options.storedFrame = true;
                 FTK_CHECK(on(options).empty());
                 options.compare = tl::Compare::Wipe;
-                FTK_CHECK(only(options, "HeldFrame"));
-                options.heldFrame = false;
+                FTK_CHECK(only(options, "FrameStore"));
+                options.storedFrame = false;
                 FTK_CHECK(on(options).empty());
+            }
+            {
+                // What the status bar says is in view.
+                FTK_CHECK(models::FrameStoreShowing() ==
+                    models::getFrameStoreShowing(false, tl::Compare::Wipe));
+                auto showing = models::getFrameStoreShowing(true, tl::Compare::None);
+                FTK_CHECK("Showing: A" == showing.text);
+                FTK_CHECK(!showing.shown);
+                showing = models::getFrameStoreShowing(true, tl::Compare::B);
+                FTK_CHECK("Showing: Frame store" == showing.text);
+                FTK_CHECK(showing.shown);
+                showing = models::getFrameStoreShowing(true, tl::Compare::Wipe);
+                FTK_CHECK("Wipe: A | Frame store" == showing.text);
+                FTK_CHECK(showing.shown);
             }
             {
                 models::StatusOptions options;

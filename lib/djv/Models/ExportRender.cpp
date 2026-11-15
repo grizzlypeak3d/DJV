@@ -31,18 +31,18 @@ namespace djv
     {
         std::vector<ftk::ImageInfo> getExportInfos(
             const std::shared_ptr<tl::Player>& player,
-            const std::optional<tl::VideoFrame>& heldFrame)
+            const std::optional<tl::VideoFrame>& storedFrame)
         {
             std::vector<ftk::ImageInfo> out;
             if (player)
             {
                 const tl::IOInfo& ioInfo = player->getIOInfo();
-                if (!ioInfo.video.empty() && heldFrame.has_value())
+                if (!ioInfo.video.empty() && storedFrame.has_value())
                 {
                     out.push_back(ioInfo.video.front());
                     out.push_back(
-                        !heldFrame->layers.empty() && heldFrame->layers.front().image ?
-                        heldFrame->layers.front().image->getInfo() :
+                        !storedFrame->layers.empty() && storedFrame->layers.front().image ?
+                        storedFrame->layers.front().image->getInfo() :
                         ftk::ImageInfo());
                 }
                 else if (!ioInfo.video.empty())
@@ -116,8 +116,8 @@ namespace djv
             // The sources and their layout, at the size asked for.
             const auto& displayOptions = viewportModel->getDisplayOptions();
             out.compareOptions = filesModel->getCompareOptions();
-            out.heldFrame = filesModel->getCompareHeldFrame();
-            const std::vector<ftk::ImageInfo> infos = getExportInfos(player, out.heldFrame);
+            out.storedFrame = filesModel->getCompareFrameStore();
+            const std::vector<ftk::ImageInfo> infos = getExportInfos(player, out.storedFrame);
             out.boxes = scaleBoxes(
                 tl::getBoxes(out.compareOptions, displayOptions.aspectRatio, infos),
                 getExportDefaultSize(out.compareOptions, displayOptions.aspectRatio, infos),
@@ -162,8 +162,8 @@ namespace djv
                     out.annotations = annotationsModel->getAnnotations();
                 }
                 out.sourceIds = sourceIds;
-                // A held frame takes no drawings, as in the viewport.
-                if (out.heldFrame.has_value() && out.sourceIds.size() > 1)
+                // A stored frame takes no drawings, as in the viewport.
+                if (out.storedFrame.has_value() && out.sourceIds.size() > 1)
                 {
                     out.sourceIds.resize(1);
                 }
@@ -347,7 +347,7 @@ namespace djv
             info.size = getExportDefaultSize(
                 filesModel->getCompareOptions(),
                 viewportModel->getDisplayOptions().aspectRatio,
-                getExportInfos(player, filesModel->getCompareHeldFrame()));
+                getExportInfos(player, filesModel->getCompareFrameStore()));
             info.type = ioInfo.video.front().type;
             info = plugin->getInfo(info);
             if (ftk::ImageType::None == info.type)
@@ -465,9 +465,9 @@ namespace djv
             ioOptions["Layer"] = ftk::Format("{0}").arg(player->getVideoLayer());
             std::vector<tl::VideoRequest> requests;
             requests.push_back(player->getTimeline()->getVideo(t, ioOptions));
-            // A held frame needs nothing read for the compared files.
+            // A stored frame needs nothing read for the compared files.
             static const std::vector<std::shared_ptr<tl::Timeline> > noCompare;
-            const auto& compare = p.options.heldFrame.has_value() ?
+            const auto& compare = p.options.storedFrame.has_value() ?
                 noCompare :
                 player->getCompare();
             const auto& compareVideoLayers = player->getCompareVideoLayers();
@@ -493,7 +493,7 @@ namespace djv
             {
                 videoFrame.push_back(request.future.get());
             }
-            videoFrame = tl::withHeldFrame(videoFrame, p.options.heldFrame);
+            videoFrame = tl::withHeldFrame(videoFrame, p.options.storedFrame);
 
             // Render the video, and the drawings over it.
             p.offscreen->begin();

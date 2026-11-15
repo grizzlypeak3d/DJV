@@ -40,7 +40,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<double> > audioSyncOffsetObserver;
             std::shared_ptr<ftk::Observer<int> > audioChannelObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareOptionsObserver;
-            std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
+            std::shared_ptr<ftk::Observer<std::optional<models::StoredFrame> > > frameStoreObserver;
         };
 
         void StatusIndicator::_init(
@@ -135,11 +135,11 @@ namespace djv
                     _indicatorUpdate();
                 });
 
-            p.heldFrameObserver = ftk::Observer<std::optional<models::HeldFrame> >::create(
-                filesModel->observeHeldFrame(),
-                [this](const std::optional<models::HeldFrame>& value)
+            p.frameStoreObserver = ftk::Observer<std::optional<models::StoredFrame> >::create(
+                filesModel->observeFrameStore(),
+                [this](const std::optional<models::StoredFrame>& value)
                 {
-                    _p->options.heldFrame = value.has_value();
+                    _p->options.storedFrame = value.has_value();
                     _indicatorUpdate();
                 });
 
@@ -216,9 +216,9 @@ namespace djv
             {
                 out = "Color";
             }
-            else if ("HeldFrame" == name)
+            else if ("FrameStore" == name)
             {
-                // The held frame's name and the button to let it go are
+                // The stored frame's name and the button to let it go are
                 // with the other compare options.
                 out = "Files";
             }
@@ -241,7 +241,7 @@ namespace djv
             {
                 out = "Options";
             }
-            else if ("HeldFrame" == name)
+            else if ("FrameStore" == name)
             {
                 out = "Compare";
             }

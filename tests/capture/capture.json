@@ -417,22 +417,24 @@
       ]
     },
     {
-      "id": "hold-frame",
+      "id": "frame-store",
       "strict": true,
       "window": { "w": 1000, "h": 600 },
       "setup": [
         { "open": "etc/SampleData/Counter.#.png" },
         { "command": "Playback/Seek", "args": { "frame": 3 } },
         { "wait": 0.5 },
-        { "command": "Compare/HoldFrame" },
+        { "command": "Compare/StoreFrame" },
         { "command": "Playback/Seek", "args": { "frame": 9 } },
         { "wait": 1.0 },
         { "expect": "Status.Indicator", "checked": true },
+        { "expect": "StatusBar.FrameStore", "text": "Wipe: A | Frame store" },
         { "tool": "Files", "expand": ["Compare"] },
-        { "expect": "Files.Held", "contains": "Counter.0.png 00:00:00:03" },
-        { "command": "Compare/ClearHeld" },
+        { "expect": "Files.FrameStore", "contains": "Counter.0.png 00:00:00:03" },
+        { "command": "Compare/ClearFrameStore" },
         { "expect": "Status.Indicator", "checked": false },
-        { "expect": "Files.Held", "visible": false }
+        { "expect": "Files.FrameStore", "visible": false },
+        { "expect": "StatusBar.FrameStore", "visible": false }
       ]
     },
     {

@@ -92,9 +92,9 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> differenceGainSlider;
             std::shared_ptr<ftk::ComboBox> compareTimeComboBox;
             std::shared_ptr<ftk::CheckBox> sameSizeCheckBox;
-            std::shared_ptr<ftk::Label> heldLabel;
-            std::shared_ptr<ftk::ToolButton> heldClearButton;
-            std::shared_ptr<ftk::HorizontalLayout> heldLayout;
+            std::shared_ptr<ftk::Label> frameStoreLabel;
+            std::shared_ptr<ftk::ToolButton> frameStoreClearButton;
+            std::shared_ptr<ftk::HorizontalLayout> frameStoreLayout;
             std::shared_ptr<ftk::FormLayout> compareLayout;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::ItemButtonList> fileList;
@@ -118,7 +118,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::string> > mediaReferenceKeysObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
-            std::shared_ptr<ftk::Observer<std::optional<models::HeldFrame> > > heldFrameObserver;
+            std::shared_ptr<ftk::Observer<std::optional<models::StoredFrame> > > frameStoreObserver;
         };
 
         void FilesTool::_init(
@@ -191,18 +191,18 @@ namespace djv
                 "Draw the compared files at the size of the current file,\n"
                 "so a smaller one is not shown tiny beside it.");
 
-            // The held frame (Compare > Hold Frame), by name, and a button
-            // to let it go: the status indicator says that one is held, and
+            // The stored frame (Compare > Store Frame), by name, and a button
+            // to clear it: the status bar says what is shown, and
             // this says which, off the picture (#627).
-            p.heldLayout = ftk::HorizontalLayout::create(context);
-            p.heldLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.heldLabel = ftk::Label::create(context, p.heldLayout);
-            p.heldLabel->setHStretch(ftk::Stretch::Expanding);
-            p.heldLabel->setClipText(true);
-            ftk::setScreenshotTag(p.heldLabel, "Files.Held");
-            p.heldClearButton = ftk::ToolButton::create(context, p.heldLayout);
-            p.heldClearButton->setIcon("Clear");
-            p.heldClearButton->setTooltip("Let go of the held frame.");
+            p.frameStoreLayout = ftk::HorizontalLayout::create(context);
+            p.frameStoreLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.frameStoreLabel = ftk::Label::create(context, p.frameStoreLayout);
+            p.frameStoreLabel->setHStretch(ftk::Stretch::Expanding);
+            p.frameStoreLabel->setClipText(true);
+            ftk::setScreenshotTag(p.frameStoreLabel, "Files.FrameStore");
+            p.frameStoreClearButton = ftk::ToolButton::create(context, p.frameStoreLayout);
+            p.frameStoreClearButton->setIcon("Clear");
+            p.frameStoreClearButton->setTooltip("Clear the frame store.");
 
             auto layout = ftk::VerticalLayout::create(context);
             layout->setSpacingRole(ftk::SizeRole::None);
@@ -220,7 +220,7 @@ namespace djv
             p.compareLayout = ftk::FormLayout::create(context, vLayout);
             p.compareLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.compareLayout->addRow("Mode:", p.compareComboBox);
-            p.compareLayout->addRow("Held:", p.heldLayout);
+            p.compareLayout->addRow("Frame store:", p.frameStoreLayout);
             p.compareLayout->addRow("X:", p.wipeXSlider);
             p.compareLayout->addRow("Y:", p.wipeYSlider);
             p.compareLayout->addRow("Rotation:", p.wipeRotationSlider);
@@ -329,12 +329,12 @@ namespace djv
                     }
                 });
 
-            p.heldClearButton->setClickedCallback(
+            p.frameStoreClearButton->setClickedCallback(
                 [appWeak]
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getFilesModel()->setHeldFrame(std::nullopt);
+                        app->getFilesModel()->setFrameStore(std::nullopt);
                     }
                 });
 
@@ -408,13 +408,13 @@ namespace djv
                     _p->compareTimeComboBox->setCurrentIndex(static_cast<int>(value));
                 });
 
-            p.heldFrameObserver = ftk::Observer<std::optional<models::HeldFrame> >::create(
-                app->getFilesModel()->observeHeldFrame(),
-                [this](const std::optional<models::HeldFrame>& value)
+            p.frameStoreObserver = ftk::Observer<std::optional<models::StoredFrame> >::create(
+                app->getFilesModel()->observeFrameStore(),
+                [this](const std::optional<models::StoredFrame>& value)
                 {
                     FTK_P();
-                    p.heldLabel->setText(value.has_value() ? value->label : std::string());
-                    p.compareLayout->setRowVisible(p.heldLayout, value.has_value());
+                    p.frameStoreLabel->setText(value.has_value() ? value->label : std::string());
+                    p.compareLayout->setRowVisible(p.frameStoreLayout, value.has_value());
                 });
         }
 

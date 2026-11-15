@@ -91,15 +91,16 @@ namespace djv
         };
 
         //! Files model.
-        //! A frame held to compare against (Compare > Hold Frame): the
-        //! frame, and what it is, the file and the time, for saying so. Held
-        //! as decoded, so the color settings apply to it as they do to A.
-        struct DJV_MODELS_API_TYPE HeldFrame
+        //! The frame in the frame store, to compare against (Compare >
+        //! Store Frame): the frame, and what it is, the file and the time,
+        //! for saying so. Kept as decoded, so the color settings apply to it
+        //! as they do to A.
+        struct DJV_MODELS_API_TYPE StoredFrame
         {
             tl::VideoFrame frame;
             std::string    label;
 
-            bool operator == (const HeldFrame&) const = default;
+            bool operator == (const StoredFrame&) const = default;
         };
 
         class DJV_MODELS_API_TYPE FilesModel : public std::enable_shared_from_this<FilesModel>
@@ -295,19 +296,19 @@ namespace djv
             //! Set the compare time mode.
             DJV_MODELS_API void setCompareTime(tl::CompareTime);
 
-            //! Get the held frame.
-            DJV_MODELS_API const std::optional<HeldFrame>& getHeldFrame() const;
+            //! Get the stored frame.
+            DJV_MODELS_API const std::optional<StoredFrame>& getFrameStore() const;
 
-            //! Observe the held frame.
-            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::optional<HeldFrame> > > observeHeldFrame() const;
+            //! Observe the stored frame.
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::optional<StoredFrame> > > observeFrameStore() const;
 
-            //! Hold a frame, or none. A held frame is the comparison's B, in
+            //! Store a frame, or none. A stored frame is the comparison's B, in
             //! place of the B files, whatever the time or the file; with no
-            //! compare mode, A alone is shown and the frame stays held.
-            DJV_MODELS_API void setHeldFrame(const std::optional<HeldFrame>&);
+            //! compare mode, A alone is shown and the frame stays stored.
+            DJV_MODELS_API void setFrameStore(const std::optional<StoredFrame>&);
 
-            //! The held frame's video, or none.
-            DJV_MODELS_API std::optional<tl::VideoFrame> getCompareHeldFrame() const;
+            //! The stored frame's video, or none.
+            DJV_MODELS_API std::optional<tl::VideoFrame> getCompareFrameStore() const;
 
         private:
             int _getIndex(const std::shared_ptr<FilesModelItem>&) const;
