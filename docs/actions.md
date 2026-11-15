@@ -148,8 +148,8 @@ The commands are how the menu items are run from outside the window: with
 
 | Menu item | Keys | Command | Description |
 |---|---|---|---|
-| Volume Up | <kbd>.</kbd> | `Audio/VolumeUp` | Increase the audio volume. |
-| Volume Down | <kbd>,</kbd> | `Audio/VolumeDown` | Decrease the audio volume. |
+| Volume Up | <kbd>.</kbd> | `Audio/VolumeUp` | Increase the audio volume by 5%. |
+| Volume Down | <kbd>,</kbd> | `Audio/VolumeDown` | Decrease the audio volume by 5%. |
 | Mute | <kbd>M</kbd> | `Audio/Mute` | Toggle the audio mute. |
 
 ## View

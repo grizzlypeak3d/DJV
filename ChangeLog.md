@@ -28,6 +28,7 @@ Changes:
 * Add Playback > Play Every Frame, for media that cannot play in real time:
   playback waits for each frame rather than skipping it, with the audio
   silent (#123).
+* Audio > Volume Up and Volume Down step by 5% (#649).
 * The compare wipe has a dot to move it and a ring to turn it, which settles
   on level, and Shift steps it by 45 degrees. They fade while the pointer
   rests.

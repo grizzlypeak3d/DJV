@@ -28,7 +28,7 @@ namespace djv
             // Register the commands.
             _addCommand(
                 "VolumeUp",
-                "Increase the audio volume.",
+                "Increase the audio volume by 5%.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())
@@ -39,7 +39,7 @@ namespace djv
 
             _addCommand(
                 "VolumeDown",
-                "Decrease the audio volume.",
+                "Decrease the audio volume by 5%.",
                 [appWeak](const nlohmann::json&)
                 {
                     if (auto app = appWeak.lock())

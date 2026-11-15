@@ -234,10 +234,10 @@ static void shortcuts(djv_models* models)
     /* Volume Up and Volume Down, as DJV steps them. */
     djv_audio_set_volume(models, .5F);
     djv_audio_volume_up(models);
-    CHECK_NEAR(djv_audio_get_volume(models), .51, 0.0001);
+    CHECK_NEAR(djv_audio_get_volume(models), .55, 0.0001);
     djv_audio_volume_down(models);
     djv_audio_volume_down(models);
-    CHECK_NEAR(djv_audio_get_volume(models), .49, 0.0001);
+    CHECK_NEAR(djv_audio_get_volume(models), .45, 0.0001);
     djv_audio_set_volume(models, 1.F);
 
     const size_t count = djv_shortcut_get_count(models);

@@ -69,10 +69,10 @@ namespace djv
             model->setVolume(-1.F);
             FTK_CHECK(0.F == model->getVolume());
 
-            // Step the volume up and down (+/- .01).
+            // Step the volume up and down (+/- .05, as other players do; #649).
             model->setVolume(.5F);
             model->volumeUp();
-            FTK_CHECK(ftk::fuzzyCompare(.51F, model->getVolume()));
+            FTK_CHECK(ftk::fuzzyCompare(.55F, model->getVolume()));
             model->volumeDown();
             FTK_CHECK(ftk::fuzzyCompare(.5F, model->getVolume()));
 

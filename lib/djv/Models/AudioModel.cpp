@@ -126,12 +126,12 @@ namespace djv
 
         void AudioModel::volumeUp()
         {
-            setVolume(_p->volume->get() + .01F);
+            setVolume(_p->volume->get() + .05F);
         }
 
         void AudioModel::volumeDown()
         {
-            setVolume(_p->volume->get() - .01F);
+            setVolume(_p->volume->get() - .05F);
         }
 
         bool AudioModel::isMuted() const

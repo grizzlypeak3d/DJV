@@ -67,10 +67,10 @@ namespace djv
             //! Set the volume.
             DJV_MODELS_API void setVolume(float);
 
-            //! Increase the volume.
+            //! Increase the volume by 5%.
             DJV_MODELS_API void volumeUp();
 
-            //! Decrease the volume.
+            //! Decrease the volume by 5%.
             DJV_MODELS_API void volumeDown();
 
             //! Get the audio mute.
