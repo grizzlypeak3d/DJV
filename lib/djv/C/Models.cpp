@@ -30,6 +30,7 @@
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Observable.h>
+#include <ftk/Core/Path.h>
 
 #include <algorithm>
 #include <cctype>
@@ -529,11 +530,11 @@ struct djv_models
     // desktop's relocation finds a file that moved. Empty for none.
     std::string reviewFileId(const std::filesystem::path& media) const
     {
-        const auto base = std::filesystem::u8path(reviewPath).parent_path();
+        const auto base = ftk::toFileSystem(reviewPath).parent_path();
         for (const auto& file : review.files)
         {
-            const std::filesystem::path relative = std::filesystem::u8path(file.path);
-            const std::filesystem::path absolute = std::filesystem::u8path(file.pathAbsolute);
+            const std::filesystem::path relative = ftk::toFileSystem(file.path);
+            const std::filesystem::path absolute = ftk::toFileSystem(file.pathAbsolute);
             if ((!file.path.empty() && (base / relative).lexically_normal() == media.lexically_normal()) ||
                 (!file.pathAbsolute.empty() && absolute == media) ||
                 (!file.path.empty() && relative.filename() == media.filename()))
@@ -548,7 +549,7 @@ struct djv_models
     // absolute; its id.
     std::string reviewFileAdd(const std::string& path)
     {
-        const auto base = std::filesystem::u8path(reviewPath).parent_path();
+        const auto base = ftk::toFileSystem(reviewPath).parent_path();
         models::ReviewFile file;
         file.id = models::generateId();
         file.path = models::reviewGenericPath(models::reviewRelativePath(path, base));
@@ -585,7 +586,7 @@ struct djv_models
         compare.bIds.clear();
         if (compareFile && !compareFilePath.empty())
         {
-            const std::filesystem::path path = std::filesystem::u8path(compareFilePath);
+            const std::filesystem::path path = ftk::toFileSystem(compareFilePath);
             std::string id = reviewFileId(path);
             if (id.empty() || id == fileId)
             {
@@ -2290,8 +2291,8 @@ int djv_review_open(djv_models* models, const char* reviewPath, const char* medi
         return 0;
     djv_review_close(models);
     models->reviewPath = reviewPath;
-    const std::filesystem::path review = std::filesystem::u8path(reviewPath);
-    const std::filesystem::path media = std::filesystem::u8path(mediaPath);
+    const std::filesystem::path review = ftk::toFileSystem(reviewPath);
+    const std::filesystem::path media = ftk::toFileSystem(mediaPath);
     try
     {
         if (std::filesystem::exists(review))
@@ -2356,7 +2357,7 @@ int djv_review_save(djv_models* models)
         return 0;
     const auto& annotations = models->annotationsModel->getAnnotations();
     const auto& markers = models->markersModel->getMarkers();
-    const std::filesystem::path path = std::filesystem::u8path(models->reviewPath);
+    const std::filesystem::path path = ftk::toFileSystem(models->reviewPath);
     const bool comparing = models->compareChanged && models->compareFile;
     if (annotations.empty() &&
         markers.empty() &&
@@ -2419,7 +2420,7 @@ int djv_review_export_markers(djv_models* models, const char* path)
     models->reviewError = models::exportReviewMarkers(
         models->markersModel->getMarkers(),
         tl::c::getPlayer(models->player),
-        std::filesystem::u8path(path));
+        ftk::toFileSystem(path));
     return models->reviewError.empty() ? 1 : 0;
 }
 
@@ -3003,7 +3004,7 @@ size_t djv_review_read_file_names(djv_models* models, const char* path)
         auto name = [](const models::ReviewFile& file)
         {
             const std::string& p = !file.path.empty() ? file.path : file.pathAbsolute;
-            return ftk::fromFileSystem(std::filesystem::u8path(p).filename());
+            return ftk::fromFileSystem(ftk::toFileSystem(p).filename());
         };
         // "A" first: the file the review is about.
         for (const auto& file : review.files)

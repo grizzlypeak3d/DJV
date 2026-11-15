@@ -822,8 +822,6 @@ namespace djv
             {
                 if (value)
                 {
-                    int screen = -1;
-                    ftk::Size2I size(1280, 960);
 #if defined(__APPLE__) && TARGET_OS_IPHONE
                     // On a tablet the second window is the second screen,
                     // a television or a monitor on the adapter: with one
@@ -840,12 +838,8 @@ namespace djv
                         p.secondaryWindowActive->setIfChanged(false);
                         return;
                     }
-                    screen = 1;
                     // The whole of it: a television shows one window.
-                    size = monitors[1].size;
-#endif // TARGET_OS_IPHONE
-#if defined(__APPLE__) && TARGET_OS_IPHONE
-                    _secondaryWindowCreate(screen, size, false);
+                    _secondaryWindowCreate(1, monitors[1].size, false);
 #else // TARGET_OS_IPHONE
                     // On the monitor chosen for it in the Displays tool,
                     // filling it, when that monitor is there.
