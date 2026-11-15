@@ -578,7 +578,24 @@ namespace djv
             }
         }
 
-        bool strokeHit(const ReviewStroke& stroke, const ftk::V2F& pos, float radius)
+        ftk::Box2F textBox(const ReviewStroke& stroke, const TextView& view)
+        {
+            if (stroke.points.empty())
+            {
+                return ftk::Box2F();
+            }
+            // The glyphs taken as somewhat narrower than they are tall.
+            const float w = std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
+            const float h = stroke.textSize * (view.aspect > 0.F ? view.aspect : 1.F);
+            const ftk::V2F& a = stroke.points.front();
+            return ftk::Box2F(
+                view.mirrorX ? a.x - w : a.x,
+                view.mirrorY ? a.y - h : a.y,
+                w,
+                h);
+        }
+
+        bool strokeHit(const ReviewStroke& stroke, const ftk::V2F& pos, float radius, const TextView& view)
         {
             if (stroke.points.empty())
             {
@@ -586,13 +603,11 @@ namespace djv
             }
             if (ReviewStrokeKind::Text == stroke.kind)
             {
-                // The box the text is drawn in, with the glyphs taken as
-                // somewhat narrower than they are tall.
-                const ftk::V2F& a = stroke.points.front();
-                const float w = std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
+                // The box the text is drawn in.
+                const ftk::Box2F box = textBox(stroke, view);
                 return
-                    pos.x >= a.x - radius && pos.x <= a.x + w + radius &&
-                    pos.y >= a.y - radius && pos.y <= a.y + stroke.textSize + radius;
+                    pos.x >= box.min.x - radius && pos.x <= box.max.x + radius &&
+                    pos.y >= box.min.y - radius && pos.y <= box.max.y + radius;
             }
             // Include the stroke's own width, so a thick stroke is as easy to
             // hit as it looks.
@@ -673,6 +688,20 @@ namespace djv
         float ImageMapping::scale() const
         {
             return imageSize.w > 0 ? box.w() / static_cast<float>(imageSize.w) : 1.F;
+        }
+
+        TextView ImageMapping::textView() const
+        {
+            TextView out;
+            if (isValid())
+            {
+                out.aspect =
+                    (box.w() / static_cast<float>(imageSize.w)) /
+                    (box.h() / static_cast<float>(imageSize.h));
+            }
+            out.mirrorX = mirrorX;
+            out.mirrorY = mirrorY;
+            return out;
         }
 
         bool isTwoPointShape(ReviewStrokeKind kind)
@@ -804,7 +833,8 @@ namespace djv
         ReviewStroke moveStroke(
             const ReviewStroke& stroke,
             const ftk::V2F& offset,
-            const ftk::Size2I& imageSize)
+            const ftk::Size2I& imageSize,
+            const TextView& view)
         {
             ReviewStroke out = stroke;
             ftk::V2F o = offset;
@@ -831,8 +861,11 @@ namespace djv
                 {
                     // The box the text is taken to cover, as strokeHit()
                     // has it.
-                    maxX = minX + std::max(stroke.textSize, stroke.text.size() * stroke.textSize * .6F);
-                    maxY = minY + stroke.textSize;
+                    const ftk::Box2F box = textBox(stroke, view);
+                    minX = box.min.x;
+                    minY = box.min.y;
+                    maxX = box.max.x;
+                    maxY = box.max.y;
                 }
                 if (!first)
                 {

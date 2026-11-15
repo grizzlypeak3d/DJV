@@ -1395,6 +1395,7 @@ namespace djv
                 out.index = static_cast<int>(i);
                 out.pos = mapping.toImage(render);
                 out.scale = mapping.scale();
+                out.textView = mapping.textView();
                 break;
             }
             return out;
@@ -1639,10 +1640,12 @@ namespace djv
             // under the keyboard. A little room below it besides.
             const ftk::V2F& a = p.stroke.points.front();
             const ftk::V2F top = _imageToWidget(p.strokeSource, a);
-            const ftk::V2F bottom = _imageToWidget(
+            // The text is sized across, as it is drawn: down differs where
+            // the view stretches the image one way more than the other.
+            const ftk::V2F right = _imageToWidget(
                 p.strokeSource,
-                ftk::V2F(a.x, a.y + p.stroke.textSize));
-            const float size = std::abs(bottom.y - top.y);
+                ftk::V2F(a.x + p.stroke.textSize, a.y));
+            const float size = std::abs(right.x - top.x);
             float lineHeight = size * 1.4F;
             if (auto context = getContext())
             {
@@ -1656,7 +1659,7 @@ namespace djv
             const ftk::Box2I& g = getGeometry();
             window->setTextInputArea(ftk::Box2I(
                 g.min.x + static_cast<int>(top.x),
-                g.min.y + static_cast<int>(std::min(top.y, bottom.y)),
+                g.min.y + static_cast<int>(top.y),
                 1,
                 std::max(1, static_cast<int>(std::round(lineHeight + 8.F * _displayScale())))));
         }
@@ -1756,7 +1759,8 @@ namespace djv
                         active[hit.index]->id,
                         *p.currentTime,
                         hit.pos,
-                        radius);
+                        radius,
+                        hit.textView);
                 }
             }
             if (!found.has_value())
@@ -1834,7 +1838,8 @@ namespace djv
             p.moving = models::moveStroke(
                 strokes[p.selection->index],
                 ftk::V2F(clamped->x - p.movePressPos.x, clamped->y - p.movePressPos.y),
-                imageSize);
+                imageSize,
+                _imageMapping(p.selection->source).textView());
             setDrawUpdate();
         }
 
@@ -2050,7 +2055,8 @@ namespace djv
                         active[hit.index]->id,
                         *p.currentTime,
                         hit.pos,
-                        radius);
+                        radius,
+                        hit.textView);
                     if (p.annotationsModel->getStrokes(
                         active[hit.index]->id,
                         *p.currentTime).size() < before)

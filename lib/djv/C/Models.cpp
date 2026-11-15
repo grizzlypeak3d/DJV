@@ -243,7 +243,8 @@ struct djv_models
             models::eraserRadius(
                 models::pictureDrawSize(drawModel->getSize(), m.imageSize.w),
                 reach,
-                m.scale() * picture.zoom));
+                m.scale() * picture.zoom),
+            m.textView());
         if (annotationsModel->getStrokes(fileId, *time).size() < before)
         {
             ++eraseSteps;
@@ -333,7 +334,7 @@ struct djv_models
         if (m.contains(render))
         {
             const float radius = reach / std::max(.001F, m.scale() * picture.zoom);
-            found = annotationsModel->findStroke(fileId, *time, m.toImage(render), radius);
+            found = annotationsModel->findStroke(fileId, *time, m.toImage(render), radius, m.textView());
         }
         if (!found.has_value())
         {
@@ -367,7 +368,8 @@ struct djv_models
             moving = models::moveStroke(
                 *stroke,
                 ftk::V2F(pos.x - movePressPos.x, pos.y - movePressPos.y),
-                m.imageSize);
+                m.imageSize,
+                m.textView());
         }
         needsDraw();
     }

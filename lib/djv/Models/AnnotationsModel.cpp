@@ -146,7 +146,8 @@ namespace djv
             const std::string& sourceId,
             const OTIO_NS::RationalTime& time,
             const ftk::V2F& pos,
-            float radius)
+            float radius,
+            const TextView& view)
         {
             FTK_P();
             auto annotations = p.annotations->get();
@@ -161,9 +162,9 @@ namespace djv
                         std::remove_if(
                             strokes.begin(),
                             strokes.end(),
-                            [&pos, radius](const ReviewStroke& stroke)
+                            [&pos, radius, &view](const ReviewStroke& stroke)
                             {
-                                return strokeHit(stroke, pos, radius);
+                                return strokeHit(stroke, pos, radius, view);
                             }),
                         strokes.end());
                     changed = changed || strokes.size() != before;
@@ -189,7 +190,8 @@ namespace djv
             const std::string& sourceId,
             const OTIO_NS::RationalTime& time,
             const ftk::V2F& pos,
-            float radius) const
+            float radius,
+            const TextView& view) const
         {
             std::optional<size_t> out;
             const std::vector<ReviewStroke> strokes = getStrokes(sourceId, time);
@@ -197,7 +199,7 @@ namespace djv
             // on two strokes means.
             for (size_t i = strokes.size(); i > 0; --i)
             {
-                if (strokeHit(strokes[i - 1], pos, radius))
+                if (strokeHit(strokes[i - 1], pos, radius, view))
                 {
                     out = i - 1;
                     break;

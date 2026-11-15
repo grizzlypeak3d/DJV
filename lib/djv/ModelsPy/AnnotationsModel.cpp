@@ -72,7 +72,16 @@ namespace djv
                 .def("getStrokes", &AnnotationsModel::getStrokes, nb::arg("sourceId"), nb::arg("time"))
                 .def("setAnnotations", &AnnotationsModel::setAnnotations, nb::arg("annotations"))
                 .def("addStroke", &AnnotationsModel::addStroke, nb::arg("sourceId"), nb::arg("time"), nb::arg("stroke"))
-                .def("eraseStrokes", &AnnotationsModel::eraseStrokes, nb::arg("sourceId"), nb::arg("time"), nb::arg("pos"), nb::arg("radius"))
+                .def("eraseStrokes",
+                    [](AnnotationsModel& self,
+                        const std::string& sourceId,
+                        const OTIO_NS::RationalTime& time,
+                        const ftk::V2F& pos,
+                        float radius)
+                    {
+                        self.eraseStrokes(sourceId, time, pos, radius);
+                    },
+                    nb::arg("sourceId"), nb::arg("time"), nb::arg("pos"), nb::arg("radius"))
                 .def("clearFrame", &AnnotationsModel::clearFrame, nb::arg("sourceIds"), nb::arg("time"))
                 .def("clear", &AnnotationsModel::clear)
                 .def_prop_ro("observeHasUndo", &AnnotationsModel::observeHasUndo)

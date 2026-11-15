@@ -115,6 +115,9 @@ namespace djv
 
                 //! Image pixels per render unit, for stroke widths.
                 float    scale = 1.F;
+
+                //! How the image is shown, for the box text covers.
+                models::TextView textView;
             };
 
             //! Where a source's image is in render space, for mapping to

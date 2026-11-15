@@ -129,14 +129,18 @@ namespace djv
             const float s = std::max(.001F, scale);
             if (models::ReviewStrokeKind::Text == stroke.kind)
             {
+                // Measured on the screen, where the text is drawn: taken
+                // back to the image and out again, it came out short where
+                // the view stretches the image one way more than the other
+                // (a pixel aspect, or an aspect ratio set in the view).
                 ftk::FontInfo fontInfo;
                 fontInfo.size = std::max(1, static_cast<int>(std::round(stroke.textSize * s)));
                 const ftk::Size2I size = fontSystem->getSize(stroke.text, fontInfo);
-                const ftk::V2F& a = stroke.points.front();
-                const float w = size.w / s;
-                const float h = std::max(static_cast<float>(size.h), fontInfo.size * 1.F) / s;
-                add(a);
-                add(ftk::V2F(a.x + w, a.y + h));
+                const ftk::V2F a = toScreen(stroke.points.front());
+                minX = maxX = a.x;
+                minY = maxY = a.y;
+                maxX += size.w;
+                maxY += std::max(static_cast<float>(size.h), fontInfo.size * 1.F);
             }
             else
             {

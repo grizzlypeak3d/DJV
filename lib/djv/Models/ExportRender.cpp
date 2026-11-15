@@ -541,18 +541,22 @@ namespace djv
                         {
                             continue;
                         }
+                        // Down as well as across: the box is stretched one
+                        // way more than the other where the image has a
+                        // pixel aspect, or an aspect ratio is set.
                         const float scale = box.w() / static_cast<float>(imageSize.w);
+                        const float scaleY = box.h() / static_cast<float>(imageSize.h);
                         for (const auto& stroke : annotation.strokes)
                         {
                             drawStroke(
                                 p.render,
                                 fontSystem,
                                 stroke,
-                                [&box, scale](const ftk::V2F& point)
+                                [&box, scale, scaleY](const ftk::V2F& point)
                                 {
                                     return ftk::V2F(
                                         box.min.x + point.x * scale,
-                                        box.min.y + point.y * scale);
+                                        box.min.y + point.y * scaleY);
                                 },
                                 scale);
                         }

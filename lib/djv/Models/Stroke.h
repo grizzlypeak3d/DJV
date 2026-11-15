@@ -88,15 +88,38 @@ namespace djv
             const std::vector<ftk::V2F>& points,
             float width);
 
+        //! How a view shows a source image, as far as text needs it. Text is
+        //! drawn square and upright on the screen whatever the view does to
+        //! the image, so where an image pixel is shown wider than tall (a
+        //! pixel aspect, or an aspect ratio set in the view) it covers that
+        //! many more rows, and where the image is mirrored it runs the other
+        //! way through the image's pixels.
+        struct DJV_MODELS_API_TYPE TextView
+        {
+            //! How much wider than tall an image pixel is shown.
+            float aspect  = 1.F;
+            bool  mirrorX = false;
+            bool  mirrorY = false;
+        };
+
         //! Does the stroke pass within the radius of the position? The
         //! position and the radius are in the pixels of the source image,
         //! as the stroke is; its own width counts, so a thick stroke is as
         //! easy to hit as it looks. Text is hit anywhere in the box it is
-        //! drawn in, taken from its size and length.
+        //! drawn in, taken from its size and length, as textBox() has it.
         DJV_MODELS_API bool strokeHit(
             const ReviewStroke&,
             const ftk::V2F& pos,
-            float radius);
+            float radius,
+            const TextView& = TextView());
+
+        //! The box a text stroke is taken to cover, in the pixels of the
+        //! source image: its height the text size, and its width estimated
+        //! from its length, from its point down and to the right on the
+        //! screen however the view shows the image.
+        DJV_MODELS_API ftk::Box2F textBox(
+            const ReviewStroke&,
+            const TextView& = TextView());
 
         //! Where a source image is in a view: its box in render space
         //! (the view's pixels before the zoom and the pan), the size of the
@@ -122,8 +145,11 @@ namespace djv
             //! Held inside the image.
             DJV_MODELS_API ftk::V2F clamp(const ftk::V2F& image) const;
 
-            //! Render pixels to one image pixel.
+            //! Render pixels to one image pixel, across.
             DJV_MODELS_API float scale() const;
+
+            //! How the image is shown, for text.
+            DJV_MODELS_API TextView textView() const;
         };
 
         //! Whether a kind of stroke is a shape between two points.
@@ -195,11 +221,12 @@ namespace djv
 
         //! A stroke moved by an offset, held so that what it covers stays
         //! on an image of the size: it stops at the edge rather than
-        //! leaving the picture.
+        //! leaving the picture. Text covers what textBox() has it cover.
         DJV_MODELS_API ReviewStroke moveStroke(
             const ReviewStroke&,
             const ftk::V2F& offset,
-            const ftk::Size2I& imageSize);
+            const ftk::Size2I& imageSize,
+            const TextView& = TextView());
 
         //! A stroke with one of its handles moved to a point, against the
         //! other, constrained when asked.

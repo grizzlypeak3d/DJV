@@ -336,6 +336,28 @@ namespace djv
             FTK_CHECK(models::strokeHit(stroke, ftk::V2F(30.F, 30.F), 1.F));
             FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(30.F, 60.F), 1.F));
             FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(200.F, 30.F), 1.F));
+            // Where the view shows an image pixel twice as wide as tall, the
+            // text, drawn square, covers twice the rows (#950).
+            {
+                models::TextView view;
+                view.aspect = 2.F;
+                FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(30.F, 50.F), 1.F));
+                FTK_CHECK(models::strokeHit(stroke, ftk::V2F(30.F, 50.F), 1.F, view));
+                FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(30.F, 70.F), 1.F, view));
+                const ftk::Box2F box = models::textBox(stroke, view);
+                FTK_CHECK(20.F == box.min.y && 40.F == box.h());
+            }
+            // Mirrored, the text runs the other way through the image's
+            // pixels from its point.
+            {
+                models::TextView view;
+                view.mirrorX = true;
+                view.mirrorY = true;
+                FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(30.F, 30.F), 1.F, view));
+                FTK_CHECK(models::strokeHit(stroke, ftk::V2F(0.F, 10.F), 1.F, view));
+                const ftk::Box2F box = models::textBox(stroke, view);
+                FTK_CHECK(10.F == box.max.x && 20.F == box.max.y);
+            }
             // Nothing is hit on nothing.
             stroke.points.clear();
             FTK_CHECK(!models::strokeHit(stroke, ftk::V2F(10.F, 20.F), 100.F));
@@ -367,6 +389,14 @@ namespace djv
 
             const ftk::V2F clamped = m.clamp(ftk::V2F(-5.F, 500.F));
             FTK_CHECK(0.F == clamped.x && 100.F == clamped.y);
+
+            // How the image is shown, for text: square here, and twice as
+            // wide where the box is stretched across.
+            models::TextView view = m.textView();
+            FTK_CHECK(1.F == view.aspect && view.mirrorX && !view.mirrorY);
+            m.box = ftk::Box2I(10, 20, 800, 200);
+            view = m.textView();
+            FTK_CHECK(2.F == view.aspect);
         }
 
         void StrokeTest::_input()
@@ -472,6 +502,12 @@ namespace djv
             FTK_CHECK(models::strokeHandles(text).empty());
             moved = models::moveStroke(text, ftk::V2F(200.F, 200.F), imageSize);
             FTK_CHECK(82.F == moved.points[0].x && 90.F == moved.points[0].y);
+            // Covering twice the rows, it stops twice as far from the
+            // bottom.
+            models::TextView view;
+            view.aspect = 2.F;
+            moved = models::moveStroke(text, ftk::V2F(200.F, 200.F), imageSize, view);
+            FTK_CHECK(82.F == moved.points[0].x && 80.F == moved.points[0].y);
         }
     }
 }

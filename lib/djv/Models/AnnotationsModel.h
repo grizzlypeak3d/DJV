@@ -6,6 +6,7 @@
 #include <djv/Models/Export.h>
 
 #include <djv/Models/Review.h>
+#include <djv/Models/Stroke.h>
 
 #include <ftk/Core/ObservableList.h>
 #include <ftk/Core/Observable.h>
@@ -65,22 +66,26 @@ namespace djv
 
             //! Erase the strokes of the given source and frame whose path passes
             //! within the radius of the position. The position and the radius are
-            //! in the pixels of the source image.
+            //! in the pixels of the source image, and text
+            //! covers what textBox() has it cover in the view.
             DJV_MODELS_API void eraseStrokes(
                 const std::string& sourceId,
                 const OTIO_NS::RationalTime&,
                 const ftk::V2F& pos,
-                float radius);
+                float radius,
+                const TextView& = TextView());
 
             //! Find the stroke of the given source and frame that passes
             //! within the radius of the position, the one on top where there
             //! are several: its index in getStrokes(), or none. The position
-            //! and the radius are in the pixels of the source image.
+            //! and the radius are in the pixels of the source image, and text
+            //! covers what textBox() has it cover in the view.
             DJV_MODELS_API std::optional<size_t> findStroke(
                 const std::string& sourceId,
                 const OTIO_NS::RationalTime&,
                 const ftk::V2F& pos,
-                float radius) const;
+                float radius,
+                const TextView& = TextView()) const;
 
             //! Replace a stroke of the given source and frame, by its index
             //! in getStrokes(): moved, recolored, resized, or text written
