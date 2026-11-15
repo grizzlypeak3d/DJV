@@ -316,6 +316,7 @@ namespace djv
             p.typeComboBox->setTooltip(
                 "Pixel aspect ratio: the shape of a pixel, applied to the\n"
                 "stored resolution. Also called the lens squeeze factor.\n"
+                "\n"
                 "Display aspect ratio: the finished shape of the image.");
 
             p.layout = ftk::HorizontalLayout::create(context);
