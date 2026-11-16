@@ -7,8 +7,10 @@ The pages name menu items as **Menu > Item** and commands as `Group/Name`;
 this fails on any that the actions reference (actions.md, made from the
 application) does not have, so a renamed or removed item breaks the build
 rather than leaving a page that describes something that is not there. It
-also fails on links to pages, or sections of pages, that do not exist, and
-on an llms.txt that does not list every page in the navigation.
+also fails on links to pages, or sections of pages, that do not exist, on an
+llms.txt that does not list every page in the navigation, and on a page
+whose navigation or contents list was left empty: md2html.py run on its
+own leaves them for Nav.cmake to fill, and its check does not look at them.
 
     python3 checkdocs.py DOCS_DIR
 """
@@ -109,6 +111,12 @@ def main(argv):
                 page = line.split()[0][:-5]
                 if page not in listed:
                     errors.append("llms.txt: \"%s\" is not listed" % page)
+    for name in html:
+        with open(os.path.join(docs, name + ".html"), encoding="utf-8") as f:
+            text = f.read()
+        for block in re.findall(r"<nav>.*?</nav>|<div class=\"toc\">.*?</div>", text, flags=re.S):
+            if "<li></li>" in block:
+                errors.append("%s.html: the navigation is empty; build djvDocsPages" % name)
     if errors:
         sys.exit("\n".join(sorted(set(errors))))
 
