@@ -1031,21 +1031,19 @@ namespace djv
 
         void Viewport::mousePressEvent(ftk::MouseClickEvent& event)
         {
-            tl::ui::Viewport::mousePressEvent(event);
             FTK_P();
-            // Shuttling is ours rather than the base class's, so it needs
-            // this test of its own; without it it would go on working in a
-            // view that takes no input.
-            if (!isInputEnabled())
-            {
-                return;
-            }
 
-            // The wipe's handles take the plain left button first: they are
-            // where the pointer is, and alt and a drag anywhere still moves
-            // the wipe.
-            if (ftk::MouseButton::Left == event.button &&
-                0 == event.modifiers &&
+            // The wipe's handles take the left button before the bindings
+            // do, plain or with Shift, which steps the ring and holds the
+            // dot level or plumb: on a handle the handle wins. Shift and
+            // the left button bound to the wipe took the press on the ring
+            // and moved the wipe there, so it could not be turned (#957).
+            // Any other modifier, and a press off the handles, is the
+            // bindings'.
+            if (isInputEnabled() &&
+                ftk::MouseButton::Left == event.button &&
+                (0 == event.modifiers ||
+                 static_cast<int>(ftk::KeyModifier::Shift) == event.modifiers) &&
                 !event.accept)
             {
                 p.touchInput = event.touch;
@@ -1065,6 +1063,15 @@ namespace djv
                     setDrawUpdate();
                     return;
                 }
+            }
+
+            tl::ui::Viewport::mousePressEvent(event);
+            // Shuttling is ours rather than the base class's, so it needs
+            // this test of its own; without it it would go on working in a
+            // view that takes no input.
+            if (!isInputEnabled())
+            {
+                return;
             }
 
             // A double click, or a double tap, frames the view: the
@@ -2023,10 +2030,24 @@ namespace djv
             }
             else
             {
+                // Shift holds it level or plumb, along whichever way it has
+                // gone further from where it was taken.
+                ftk::V2F to = pos;
+                if (modifiers & static_cast<int>(ftk::KeyModifier::Shift))
+                {
+                    if (std::abs(to.x - p.wipeGrabPos.x) >= std::abs(to.y - p.wipeGrabPos.y))
+                    {
+                        to.y = p.wipeGrabPos.y;
+                    }
+                    else
+                    {
+                        to.x = p.wipeGrabPos.x;
+                    }
+                }
                 const ftk::Box2I& g = getGeometry();
                 const ftk::V2I& viewPos = getViewPos();
                 options.wipeCenter = models::getWipeCenter(
-                    ftk::V2F(pos.x - p.wipeGrab.x, pos.y - p.wipeGrab.y),
+                    ftk::V2F(to.x - p.wipeGrab.x, to.y - p.wipeGrab.y),
                     boxes.front(),
                     ftk::V2F(g.min.x + viewPos.x, g.min.y + viewPos.y),
                     static_cast<float>(getZoom()));

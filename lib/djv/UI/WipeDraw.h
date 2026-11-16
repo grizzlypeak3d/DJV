@@ -20,7 +20,7 @@ namespace djv
         //! pointer has to be to take the dot or the ring, in the view's
         //! pixels at a display scale of one: a fingertip's reach for a
         //! finger.
-        constexpr float wipeRotateDistance = 64.F;
+        constexpr float wipeRotateDistance = 48.F;
         constexpr float wipePointerReach = 10.F;
         constexpr float wipeTouchReach = 22.F;
 
