@@ -847,6 +847,33 @@ jobs:
         exclude-azure-developer-cli-credential: true
         exclude-interactive-browser-credential: true
 
+    # The libraries the packages take from the dependency builds -- FFmpeg
+    # and the others -- signed too. Windows 11's Smart App Control refuses to
+    # load an unsigned DLL from a download, and the program fails to start
+    # with "Bad Image" (0xc0e90002) naming it.
+    - name: Sign the libraries
+      if: env.SIGN == 'true'
+      uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+      with:
+        endpoint: ${{ vars.AZURE_SIGNING_ENDPOINT }}
+        signing-account-name: ${{ vars.AZURE_SIGNING_ACCOUNT }}
+        certificate-profile-name: ${{ vars.AZURE_SIGNING_PROFILE }}
+        files-folder: ${{ github.workspace }}\install-Release\bin
+        files-folder-filter: dll
+        file-digest: SHA256
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
+        exclude-environment-credential: true
+        exclude-workload-identity-credential: true
+        exclude-managed-identity-credential: true
+        exclude-shared-token-cache-credential: true
+        exclude-visual-studio-credential: true
+        exclude-visual-studio-code-credential: true
+        exclude-azure-cli-credential: false
+        exclude-azure-powershell-credential: true
+        exclude-azure-developer-cli-credential: true
+        exclude-interactive-browser-credential: true
+
     # The uninstaller is made while the installer is compiled, by the
     # packaging step below, so it is signed there: with the signing tool and
     # the Artifact Signing client the step above put on the runner, and the
@@ -927,15 +954,30 @@ jobs:
           $dir = Join-Path $env:RUNNER_TEMP 'installed'
           Start-Process -Wait -FilePath $_.FullName -ArgumentList '/S', "/D=$dir"
           foreach ($f in @('Uninstall.exe', 'bin\djv.exe')) {
-            $path = Join-Path $dir $f
-            if (-not (Test-Path $path)) {
+            if (-not (Test-Path (Join-Path $dir $f))) {
               Write-Host "::error::The installer did not write $f"
               $failed = $true
-              continue
             }
-            $s = Get-AuthenticodeSignature $path
-            Write-Host $f $s.Status $s.SignerCertificate.Subject
-            if ($s.Status -ne 'Valid') { $failed = $true }
+          }
+          $installed = $dir
+        }
+
+        # Every program and library, in what the installer wrote and in the
+        # archive: one unsigned DLL is enough for Smart App Control to stop
+        # the program from starting.
+        $zipDir = Join-Path $env:RUNNER_TEMP 'zip'
+        Get-ChildItem build-Release -Filter 'djv-*.zip' | ForEach-Object {
+          Expand-Archive -Path $_.FullName -DestinationPath $zipDir -Force
+        }
+        foreach ($root in @($installed, $zipDir)) {
+          if (-not $root) { continue }
+          Get-ChildItem $root -Recurse -Include *.exe, *.dll, *.com | ForEach-Object {
+            $s = Get-AuthenticodeSignature $_.FullName
+            Write-Host $_.FullName.Substring($root.Length + 1) $s.Status
+            if ($s.Status -ne 'Valid') {
+              Write-Host "::error::Not signed: $($_.FullName)"
+              $failed = $true
+            }
           }
         }
         if ($failed) { exit 1 }
