@@ -26,7 +26,7 @@ The modes are toggles rather than a list to choose from: turning one on turns of
 | Mode | What it shows | Shortcut |
 |---|---|---|
 | **B** | Only the **B** file | <kbd>Ctrl+B</kbd> |
-| **Wipe** | A wipe between **A** and **B**, moved with its dot and turned with its ring | <kbd>Ctrl+W</kbd> |
+| **Wipe** | A wipe between **A** and **B**, moved with its dot and turned with its disk | <kbd>Ctrl+W</kbd> |
 | **Butterfly** | The same half of **A** and **B**, one mirrored, meeting in the middle |  |
 | **Overlay** | **B** layered on top of **A** |  |
 | **Difference** | The pixel difference between **A** and **B** |  |

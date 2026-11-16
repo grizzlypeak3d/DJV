@@ -52,6 +52,7 @@
 <li><a href="#grid">Grid</a></li>
 <li><a href="#outline">Outline</a></li>
 <li><a href="#center-marker">Center marker</a></li>
+<li><a href="#frame-guide-and-safe-areas">Frame guide and safe areas</a></li>
 <li><a href="#clipping-warning">Clipping warning</a></li>
 <li><a href="#hud">HUD</a></li>
 </ul>
@@ -97,7 +98,7 @@
 <p>Not supported: HLG pictures, and HDR metadata, which is neither read from a file nor written by the export.</p>
 <h2 id="aspect-ratio">Aspect ratio</h2>
 <p>The pixel aspect ratio can be left at the file's default or overridden. Up to three custom aspect ratios can be defined.</p>
-<p><strong>Default</strong> uses the aspect ratio the file declares, which de-squeezes an anamorphic movie. Each custom entry has a value and a type:</p>
+<p><strong>Default</strong> uses the aspect ratio the file declares, which de-squeezes an anamorphic movie. Each custom entry has a value, typed as a ratio or a number (<code>16:9</code>, <code>2.39</code>), and a type:</p>
 <ul><li><strong>Display Aspect Ratio (DAR)</strong> — The value is the finished shape of the image, so 2.39 shows it at 2.39:1 whatever the file says.</li><li><strong>Pixel Aspect Ratio (PAR)</strong> — The value is the shape of a pixel, applied to the stored resolution, and the file's own is ignored. On a camera this is the lens squeeze factor.</li></ul>
 <div class="tip">To see an anamorphic image as it is stored, set a custom entry to <strong>Pixel Aspect Ratio (PAR)</strong> with a value of <strong>1</strong>.</div>
 <p>The custom entries start as <strong>View &gt; Aspect Ratio &gt; 16:9 DAR</strong>, <strong>View &gt; Aspect Ratio &gt; 1.85:1 DAR</strong> and <strong>View &gt; Aspect Ratio &gt; 2.39:1 DAR</strong>, the common delivery shapes, and are changed in the <strong>View</strong> tool.</p>
@@ -122,6 +123,10 @@
 <p><strong>View &gt; Center Marker</strong> shows a marker at the center of the view to help with alignment and framing. Its size, line width, and color can be customized.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>
 <p><img src="assets/view-center-marker.svg" alt="Center marker"></p>
+<h2 id="frame-guide-and-safe-areas">Frame guide and safe areas</h2>
+<p><strong>Frame Guide</strong> outlines the frame of another aspect ratio within the picture and masks the rest, for checking the framing of a delivery shape: 2.39:1 in a 16:9 picture, say. <strong>Aspect</strong> takes a ratio or a number, <code>16:9</code>, <code>1.85</code>, or <code>2.39:1</code>, and keeps it as typed, so 16:9 is exact rather than 1.78. <strong>Mask</strong> sets how dark the picture outside the frame is. The lines stay the same width however far the picture is zoomed.</p>
+<p><strong>Safe Areas</strong> outlines the action and title safe areas, as fractions of the frame: the frame guide's when it is on, the picture's otherwise.</p>
+<p>Locations: <strong>View</strong> tool</p>
 <h2 id="clipping-warning">Clipping warning</h2>
 <p><strong>View &gt; Clipping Warning</strong> covers pixels outside a range in a warning color: red above the range, magenta below it. <strong>Mode</strong> sets what is compared: <strong>Any Channel</strong> flags a pixel when any of red, green, and blue is outside the range, <strong>All Channels</strong> only when all three are, and <strong>Luminance</strong> compares the brightness of the pixel, with the Rec. 709 weights. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.</p>
 <p>Locations: <strong>View</strong> menu, <strong>View</strong> tool</p>

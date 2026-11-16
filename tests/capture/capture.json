@@ -577,6 +577,32 @@
       ]
     },
     {
+      "id": "frame-guide-aspect",
+      "strict": true,
+      "window": { "w": 1000, "h": 700 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "View", "expand": ["FrameGuide"] },
+        { "click": "View.FrameGuide.Enabled" },
+        { "expect": "View.FrameGuide.Enabled", "checked": true },
+        { "expect": "View.FrameGuide.Aspect", "text": "2.39:1" },
+        { "click": "View.FrameGuide.Aspect" },
+        { "text": "16:9" },
+        { "key": "Return" },
+        { "expect": "View.FrameGuide.Aspect", "text": "16:9" },
+        { "key": "Tab" },
+        { "click": "View.FrameGuide.Aspect" },
+        { "text": "16:0" },
+        { "key": "Return" },
+        { "expect": "View.FrameGuide.Aspect", "text": "16:9" },
+        { "key": "Tab" },
+        { "click": "View.FrameGuide.Aspect" },
+        { "text": "1.85" },
+        { "key": "Return" },
+        { "expect": "View.FrameGuide.Aspect", "text": "1.85:1" }
+      ]
+    },
+    {
       "id": "tooltip",
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },

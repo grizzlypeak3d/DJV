@@ -35,6 +35,23 @@ namespace djv
 {
     namespace ui
     {
+        namespace
+        {
+            //! An aspect ratio typed as a ratio, "16:9", or as a number,
+            //! "2.39": the aspect ratio and frame guide sections both take
+            //! one, and keep it as typed. A ratio is replaced rather than
+            //! edited, so the text is selected when the field is.
+            std::shared_ptr<ftk::LineEdit> createRatioEdit(
+                const std::shared_ptr<ftk::Context>& context)
+            {
+                auto out = ftk::LineEdit::create(context);
+                out->setFormat("0.00:0");
+                out->setSelectAllOnFocus(true);
+                out->getModel()->setRegex("[0-9\\.\\: ]*");
+                return out;
+            }
+        }
+
         struct ViewOptionsWidget::Private
         {
             std::vector<ftk::ImageType> colorBuffers;
@@ -298,9 +315,7 @@ namespace djv
             ftk::IContainer::_init(context, "djv::app::AspectRatioWidget", parent);
             FTK_P();
 
-            p.edit = ftk::LineEdit::create(context);
-            p.edit->setFormat("0.00:0");
-            p.edit->getModel()->setRegex("[0-9\\.\\:]*");
+            p.edit = createRatioEdit(context);
 
             // The full names here: the type's own labels are what settings
             // and reviews save, so they stay short (#940, #941). In the
@@ -331,19 +346,9 @@ namespace djv
                 [this](const std::string value)
                 {
                     FTK_P();
-                    const auto split = ftk::split(value, ':');
-                    if (1 == split.size())
-                    {
-                        p.value.value.num = std::atof(split[0].c_str());
-                        p.value.value.den = 1.F;
-                    }
-                    else if (2 == split.size())
-                    {
-                        p.value.value.num = std::atof(split[0].c_str());
-                        p.value.value.den = std::atof(split[1].c_str());
-                    }
+                    const bool valid = tl::parseAspectRatio(value, p.value.value);
                     _widgetUpdate();
-                    if (p.callback)
+                    if (valid && p.callback)
                     {
                         p.callback(p.value);
                     }
@@ -1088,7 +1093,8 @@ namespace djv
         struct ViewFrameGuideWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;
-            std::shared_ptr<ftk::FloatEditSlider> aspectEdit;
+            tl::AspectRatio aspect;
+            std::shared_ptr<ftk::LineEdit> aspectEdit;
             std::shared_ptr<ftk::FloatEditSlider> maskEdit;
             std::shared_ptr<ftk::IntEditSlider> lineWidthEdit;
             std::shared_ptr<ftk::ColorSwatch> colorSwatch;
@@ -1109,10 +1115,11 @@ namespace djv
             p.enabledCheckBox->setTooltip("Toggle whether the frame guide is enabled.");
             ftk::setScreenshotTag(p.enabledCheckBox, "View.FrameGuide.Enabled");
 
-            p.aspectEdit = ftk::FloatEditSlider::create(context);
-            p.aspectEdit->setRange(1.F, 3.F);
-            p.aspectEdit->setDefault(2.39F);
-            p.aspectEdit->setTooltip("The width over the height of the frame, 2.39 say.");
+            p.aspectEdit = createRatioEdit(context);
+            p.aspectEdit->setHStretch(ftk::Stretch::Expanding);
+            p.aspectEdit->setTooltip(
+                "The frame's aspect ratio, as a ratio or a number:\n"
+                "16:9, 1.85, or 2.39:1 say.");
             ftk::setScreenshotTag(p.aspectEdit, "View.FrameGuide.Aspect");
             p.maskEdit = ftk::FloatEditSlider::create(context);
             p.maskEdit->setRange(0.F, 1.F);
@@ -1144,7 +1151,8 @@ namespace djv
                 {
                     FTK_P();
                     p.enabledCheckBox->setChecked(value.frameGuide.enabled);
-                    p.aspectEdit->setValue(value.frameGuide.aspect);
+                    p.aspect = value.frameGuide.aspect;
+                    p.aspectEdit->setText(tl::getLabel(p.aspect));
                     p.maskEdit->setValue(value.frameGuide.maskOpacity);
                     p.lineWidthEdit->setValue(value.frameGuide.lineWidth);
                     p.colorSwatch->setColor(value.frameGuide.color);
@@ -1159,11 +1167,18 @@ namespace djv
                 });
 
             p.aspectEdit->setCallback(
-                [viewportModel](float value)
+                [this, viewportModel](const std::string& value)
                 {
-                    auto options = viewportModel->getForegroundOptions();
-                    options.frameGuide.aspect = value;
-                    viewportModel->setForegroundOptions(options);
+                    FTK_P();
+                    tl::AspectRatio aspect = p.aspect;
+                    if (tl::parseAspectRatio(value, aspect))
+                    {
+                        auto options = viewportModel->getForegroundOptions();
+                        options.frameGuide.aspect = aspect;
+                        viewportModel->setForegroundOptions(options);
+                    }
+                    // Not a ratio: back to the one there was.
+                    p.aspectEdit->setText(tl::getLabel(p.aspect));
                 });
 
             p.maskEdit->setCallback(

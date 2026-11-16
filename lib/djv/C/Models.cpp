@@ -1704,7 +1704,8 @@ djv_foreground_options djv_viewport_get_foreground(djv_models* models)
     out.clippingLow = o.clippingWarning.low;
     out.clippingHigh = o.clippingWarning.high;
     out.frameGuideEnabled = o.frameGuide.enabled ? 1 : 0;
-    out.frameGuideAspect = o.frameGuide.aspect;
+    out.frameGuideAspectNum = o.frameGuide.aspect.num;
+    out.frameGuideAspectDen = o.frameGuide.aspect.den;
     out.frameGuideMaskOpacity = o.frameGuide.maskOpacity;
     out.safeAreasEnabled = o.safeAreas.enabled ? 1 : 0;
     out.safeAreasAction = o.safeAreas.action;
@@ -1736,7 +1737,7 @@ void djv_viewport_set_foreground(djv_models* models, djv_foreground_options valu
     o.clippingWarning.low = value.clippingLow;
     o.clippingWarning.high = value.clippingHigh;
     o.frameGuide.enabled = value.frameGuideEnabled != 0;
-    o.frameGuide.aspect = value.frameGuideAspect;
+    o.frameGuide.aspect = tl::AspectRatio(value.frameGuideAspectNum, value.frameGuideAspectDen);
     o.frameGuide.maskOpacity = value.frameGuideMaskOpacity;
     o.safeAreas.enabled = value.safeAreasEnabled != 0;
     o.safeAreas.action = value.safeAreasAction;

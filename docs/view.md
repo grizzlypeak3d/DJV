@@ -108,7 +108,7 @@ Not supported: HLG pictures, and HDR metadata, which is neither read from a file
 
 The pixel aspect ratio can be left at the file's default or overridden. Up to three custom aspect ratios can be defined.
 
-**Default** uses the aspect ratio the file declares, which de-squeezes an anamorphic movie. Each custom entry has a value and a type:
+**Default** uses the aspect ratio the file declares, which de-squeezes an anamorphic movie. Each custom entry has a value, typed as a ratio or a number (`16:9`, `2.39`), and a type:
 
 - **Display Aspect Ratio (DAR)** — The value is the finished shape of the image, so 2.39 shows it at 2.39:1 whatever the file says.
 - **Pixel Aspect Ratio (PAR)** — The value is the shape of a pixel, applied to the stored resolution, and the file's own is ignored. On a camera this is the lens squeeze factor.
@@ -163,6 +163,14 @@ Locations: **View** menu, **View** tool
 Locations: **View** menu, **View** tool
 
 ![Center marker](assets/view-center-marker.svg)
+
+## Frame guide and safe areas
+
+**Frame Guide** outlines the frame of another aspect ratio within the picture and masks the rest, for checking the framing of a delivery shape: 2.39:1 in a 16:9 picture, say. **Aspect** takes a ratio or a number, `16:9`, `1.85`, or `2.39:1`, and keeps it as typed, so 16:9 is exact rather than 1.78. **Mask** sets how dark the picture outside the frame is. The lines stay the same width however far the picture is zoomed.
+
+**Safe Areas** outlines the action and title safe areas, as fractions of the frame: the frame guide's when it is on, the picture's otherwise.
+
+Locations: **View** tool
 
 ## Clipping warning
 

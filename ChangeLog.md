@@ -33,11 +33,13 @@ Changes:
 * Audio > Volume Up and Volume Down step by 5% (#649).
 * The status indicator shows a letter for each group of options (view,
   color, compare, frame store, audio), lit while one of them is in use.
-* The compare wipe has a dot to move it and a ring to turn it, which settles
+* The compare wipe has a dot to move it and a disk to turn it, which settles
   on level, and Shift steps it by 45 degrees. They fade while the pointer
-  rests.
+  rests, and Compare > Wipe Handles hides them.
 * Double clicking the view frames the image.
 * Add a Dither view option.
+* Add a frame guide and safe areas to the View tool. The frame guide's aspect
+  is typed as a ratio or a number, 16:9 or 2.39, and kept exactly (#963).
 * Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
   Graphics or with the -renderer command line option. On an HDR display it
   shows HDR pictures.

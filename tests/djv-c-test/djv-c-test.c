@@ -163,13 +163,15 @@ static void viewport(djv_models* models)
     CHECK(!foreground.frameGuideEnabled);
     CHECK(!foreground.safeAreasEnabled);
     foreground.frameGuideEnabled = 1;
-    foreground.frameGuideAspect = 1.85F;
+    foreground.frameGuideAspectNum = 16.F;
+    foreground.frameGuideAspectDen = 9.F;
     foreground.safeAreasEnabled = 1;
     foreground.gridCellSize = 1;
     djv_viewport_set_foreground(models, foreground);
     foreground = djv_viewport_get_foreground(models);
     CHECK(foreground.frameGuideEnabled);
-    CHECK_NEAR(foreground.frameGuideAspect, 1.85, 0.0001);
+    CHECK(foreground.frameGuideAspectNum == 16.F);
+    CHECK(foreground.frameGuideAspectDen == 9.F);
     CHECK(foreground.safeAreasEnabled);
     CHECK(foreground.gridCellSize == 1);
 

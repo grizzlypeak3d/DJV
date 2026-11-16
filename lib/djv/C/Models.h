@@ -291,9 +291,11 @@ typedef struct djv_foreground_options
     float clippingHigh;
 
     //! The frame of another aspect ratio within the picture, the rest
-    //! masked, and the action and title safe areas of the frame.
+    //! masked, and the action and title safe areas of the frame. The
+    //! aspect is a ratio, 16 and 9 or 2.39 and 1, so 16:9 is exact.
     int frameGuideEnabled;
-    float frameGuideAspect;
+    float frameGuideAspectNum;
+    float frameGuideAspectDen;
     float frameGuideMaskOpacity;
     int safeAreasEnabled;
     float safeAreasAction;
