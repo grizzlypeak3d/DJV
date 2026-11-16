@@ -16,10 +16,12 @@ namespace djv
         //! \name Wipe
         //! The wipe's handles over the picture, for the desktop's viewport
         //! and the iPad to draw and drag the same way: a dot at its center
-        //! that moves it, and a ring around the dot that turns it, from
-        //! anywhere on it -- a ring reads as turning, where a second dot
-        //! did not (#957). There is no line across the picture, which would
-        //! hide the seam being looked at. All in the view's pixels.
+        //! that moves it, and a disk around the dot that turns it, from
+        //! anywhere on it -- a second dot to turn it did not read as
+        //! turning, and a ring with ticks was more than it needed (#957).
+        //! There is no line across the picture, which would hide the seam
+        //! being looked at; the seam shows the angle. All in the view's
+        //! pixels.
         ///@{
 
         //! A part of the wipe.
@@ -36,11 +38,11 @@ namespace djv
             //! The center, which the wipe goes through.
             ftk::V2F center;
 
-            //! The ring's radius.
+            //! The disk's radius.
             float radius = 0.F;
 
-            //! Where the wipe crosses the ring, up the wipe from the center
-            //! when it is upright, marked to show its angle.
+            //! Where the wipe crosses the disk's edge, up the wipe from the
+            //! center when it is upright.
             ftk::V2F rotate;
 
             bool operator == (const WipeWidget&) const = default;
@@ -48,8 +50,7 @@ namespace djv
 
         //! The wipe's handles, for the compare options, the first
         //! box (which the wipe is drawn across, see tl::getWipeCenter()),
-        //! the view's position and zoom, and the rotation handle's distance
-        //! from the center.
+        //! the view's position and zoom, and the disk's radius.
         DJV_MODELS_API WipeWidget getWipeWidget(
             const tl::CompareOptions&,
             const ftk::Box2I& firstBox,
@@ -57,7 +58,8 @@ namespace djv
             float zoom,
             float rotateDistance);
 
-        //! The handle within reach of a point: the dot, or the ring.
+        //! The handle within reach of a point: the dot, or else the disk,
+        //! anywhere on it or within reach of its edge.
         DJV_MODELS_API WipeHandle getWipeHandle(
             const WipeWidget&,
             const ftk::V2F& pos,
@@ -77,8 +79,8 @@ namespace djv
             const ftk::V2F& center,
             const ftk::V2F& pos);
 
-        //! The wipe's rotation as the ring is dragged: the rotation it had
-        //! when the ring was taken, turned by the angle from where it was
+        //! The wipe's rotation as the disk is dragged: the rotation it had
+        //! when the disk was taken, turned by the angle from where it was
         //! taken to where the pointer is, so taking it anywhere does not
         //! make it jump. Snapped (see snapWipeRotation()).
         DJV_MODELS_API float getWipeRotationDrag(
@@ -88,10 +90,10 @@ namespace djv
             const ftk::V2F& pos,
             bool step = false);
 
-        //! Snap a rotation, from zero to 360, to level or plumb: always with
-        //! step (Shift), and otherwise when it is within two degrees of it,
-        //! which is what a wipe is almost always meant to be. No diagonals:
-        //! a wipe at 45 degrees is a free turn of the ring away.
+        //! Snap a rotation, from zero to 360: to the nearest multiple of 45
+        //! degrees with step (Shift, as for a shape held square), and
+        //! otherwise to level or plumb when it is within two degrees of it,
+        //! which is what a wipe is almost always meant to be.
         DJV_MODELS_API float snapWipeRotation(float, bool step = false);
 
         ///@}

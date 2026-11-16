@@ -290,7 +290,7 @@ namespace djv
             models::WipeHandle wipeHover = models::WipeHandle::None;
             models::WipeHandle wipeDrag = models::WipeHandle::None;
             ftk::V2F wipeGrab;
-            //! Where the ring was taken, which it turns from.
+            //! Where the disk was taken, which it turns from.
             ftk::V2F wipeGrabPos;
             tl::CompareOptions wipePress;
 
@@ -1048,9 +1048,9 @@ namespace djv
             FTK_P();
 
             // The wipe's handles take the left button before the bindings
-            // do, plain or with Shift, which snaps the ring: on a handle
+            // do, plain or with Shift, which snaps the disk: on a handle
             // the handle wins. Shift and the left button bound to the wipe
-            // took the press on the ring and moved the wipe there, so it
+            // took the press on the handle and moved the wipe there, so it
             // could not be turned (#957). Any other modifier, and a press
             // off the handles, is the bindings'.
             if (isInputEnabled() &&
@@ -1999,7 +1999,7 @@ namespace djv
                         boxes.front(),
                         ftk::V2F(g.min.x + viewPos.x, g.min.y + viewPos.y),
                         static_cast<float>(getZoom()),
-                        wipeRotateDistance * _displayScale());
+                        wipeDiskRadius * _displayScale());
                 }
             }
             return out;
@@ -2032,8 +2032,8 @@ namespace djv
             auto options = p.filesModel->getCompareOptions();
             if (models::WipeHandle::Rotate == p.wipeDrag)
             {
-                // Turned from where the ring was taken, Shift holding it
-                // level or plumb.
+                // Turned from where the disk was taken, Shift stepping it
+                // by 45 degrees as it holds a shape square.
                 options.wipeRotation = models::getWipeRotationDrag(
                     p.wipePress.wipeRotation,
                     widget->center,
@@ -2241,7 +2241,8 @@ namespace djv
                     event.render,
                     *widget,
                     event.displayScale,
-                    p.wipeDrag != models::WipeHandle::None ? p.wipeDrag : p.wipeHover,
+                    p.wipeHover,
+                    p.wipeDrag,
                     p.wipeOpacity);
             }
 

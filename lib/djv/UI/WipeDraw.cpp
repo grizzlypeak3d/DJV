@@ -13,8 +13,26 @@ namespace djv
     {
         namespace
         {
-            const ftk::Color4F lightColor(1.F, 1.F, 1.F, .9F);
-            const ftk::Color4F darkColor(0.F, 0.F, 0.F, .6F);
+            const ftk::Color4F diskColor(0.F, 0.F, 0.F, .35F);
+            const ftk::Color4F edgeColor(1.F, 1.F, 1.F, .35F);
+            const ftk::Color4F outlineColor(0.F, 0.F, 0.F, .6F);
+
+            //! How much lighter a part is pointed at and pressed: the dark
+            //! style's hover and pressed overlays.
+            const float hoverLight = .1F;
+            const float pressedLight = .2F;
+
+            //! The dot, from its resting gray toward white as it is pointed
+            //! at and pressed. A white overlay does not show on a light dot,
+            //! so its steps are larger.
+            const float dotGray = .7F;
+            const float dotHoverGray = .85F;
+            const float dotPressedGray = 1.F;
+
+            ftk::Color4F faded(const ftk::Color4F& c, float opacity)
+            {
+                return ftk::Color4F(c.r, c.g, c.b, c.a * opacity);
+            }
 
             //! A ring, its middle left clear.
             void drawRing(
@@ -55,15 +73,15 @@ namespace djv
 
             void drawDisc(
                 const std::shared_ptr<ftk::IRender>& render,
-                const ftk::V2F& pos,
+                const ftk::V2I& pos,
                 float radius,
                 const ftk::Color4F& color)
             {
                 render->drawMesh(
                     ftk::circle(
-                        ftk::V2I(std::round(pos.x), std::round(pos.y)),
+                        pos,
                         std::max(1, static_cast<int>(std::round(radius))),
-                        32),
+                        64),
                     color);
             }
         }
@@ -72,47 +90,35 @@ namespace djv
             const std::shared_ptr<ftk::IRender>& render,
             const models::WipeWidget& widget,
             float displayScale,
-            models::WipeHandle highlight,
+            models::WipeHandle hover,
+            models::WipeHandle pressed,
             float opacity)
         {
             const float s = displayScale;
-            const ftk::Color4F light(lightColor.r, lightColor.g, lightColor.b, lightColor.a * opacity);
-            const ftk::Color4F dark(darkColor.r, darkColor.g, darkColor.b, darkColor.a * opacity);
+            // On whole pixels, so the dot sits in the middle of the disk.
+            const ftk::V2I c(std::round(widget.center.x), std::round(widget.center.y));
+            const ftk::V2F cf(c.x, c.y);
 
-            // The ring that turns it: thin and faint, so it does not hide
-            // the seam it crosses, and plain when pointed at or dragged.
-            const bool ring = models::WipeHandle::Rotate == highlight;
-            const float ringAlpha = ring ? 1.F : .7F;
-            drawRing(render, widget.center, widget.radius, (ring ? 5.F : 4.F) * s,
-                ftk::Color4F(dark.r, dark.g, dark.b, dark.a * ringAlpha));
-            drawRing(render, widget.center, widget.radius, (ring ? 3.F : 2.F) * s,
-                ftk::Color4F(light.r, light.g, light.b, light.a * ringAlpha));
-
-            // Ticks where the wipe crosses the ring, for its angle.
+            // The disk that turns it.
+            drawDisc(render, c, widget.radius, faded(diskColor, opacity));
+            const float light =
+                models::WipeHandle::Rotate == pressed ? pressedLight :
+                models::WipeHandle::Rotate == hover ? hoverLight :
+                0.F;
+            if (light > 0.F)
             {
-                const ftk::V2F d(
-                    (widget.rotate.x - widget.center.x) / std::max(widget.radius, 1.F),
-                    (widget.rotate.y - widget.center.y) / std::max(widget.radius, 1.F));
-                const float t = 6.F * s;
-                for (const float side : { 1.F, -1.F })
-                {
-                    const ftk::V2F p(
-                        widget.center.x + d.x * widget.radius * side,
-                        widget.center.y + d.y * widget.radius * side);
-                    const ftk::V2F a(p.x - d.x * t, p.y - d.y * t);
-                    const ftk::V2F b(p.x + d.x * t, p.y + d.y * t);
-                    ftk::LineOptions options;
-                    options.width = 4.F * s;
-                    render->drawLine(a, b, dark, options);
-                    options.width = 2.F * s;
-                    render->drawLine(a, b, light, options);
-                }
+                drawDisc(render, c, widget.radius, ftk::Color4F(1.F, 1.F, 1.F, light * opacity));
             }
+            drawRing(render, cf, widget.radius, 1.F * s, faded(edgeColor, opacity));
 
             // The dot that moves it.
-            const float r = (models::WipeHandle::Center == highlight ? 7.F : 5.F) * s;
-            drawDisc(render, widget.center, r + 1.5F * s, dark);
-            drawDisc(render, widget.center, r, light);
+            const float gray =
+                models::WipeHandle::Center == pressed ? dotPressedGray :
+                models::WipeHandle::Center == hover ? dotHoverGray :
+                dotGray;
+            const float r = 4.F * s;
+            drawDisc(render, c, r + 1.5F * s, faded(outlineColor, opacity));
+            drawDisc(render, c, r, ftk::Color4F(gray, gray, gray, opacity));
         }
     }
 }

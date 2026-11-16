@@ -153,7 +153,7 @@ struct djv_models
     // the center.
     models::WipeHandle wipeDrag = models::WipeHandle::None;
     ftk::V2F wipeGrab;
-    // Where the ring was taken, and the rotation then, which it turns
+    // Where the disk was taken, and the rotation then, which it turns
     // from.
     ftk::V2F wipeGrabPos;
     float wipePressRotation = 0.F;
@@ -484,7 +484,7 @@ struct djv_models
                     picture.box,
                     picture.pos,
                     picture.zoom,
-                    ui::wipeRotateDistance * picture.displayScale);
+                    ui::wipeTouchDiskRadius * picture.displayScale);
             }
         }
         return out;
@@ -494,7 +494,12 @@ struct djv_models
     {
         if (const auto widget = wipeWidget())
         {
-            ui::drawWipe(render, *widget, tl::c::getViewPicture(view).displayScale, wipeDrag);
+            ui::drawWipe(
+                render,
+                *widget,
+                tl::c::getViewPicture(view).displayScale,
+                models::WipeHandle::None,
+                wipeDrag);
         }
     }
 
@@ -2187,7 +2192,7 @@ void djv_compare_wipe_move(djv_models* models, float x, float y)
     auto options = models->filesModel->getCompareOptions();
     if (models::WipeHandle::Rotate == models->wipeDrag)
     {
-        // Turned from where the ring was taken; no Shift to step it on a
+        // Turned from where the disk was taken; no Shift to step it on a
         // tablet, but level still snaps.
         options.wipeRotation = models::getWipeRotationDrag(
             models->wipePressRotation,

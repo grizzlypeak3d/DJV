@@ -16,23 +16,26 @@ namespace djv
         //! \name Wipe Drawing
         ///@{
 
-        //! The radius of the ring that turns the wipe, and how near a
-        //! pointer has to be to take the dot or the ring, in the view's
-        //! pixels at a display scale of one: a fingertip's reach for a
-        //! finger.
-        constexpr float wipeRotateDistance = 40.F;
-        constexpr float wipePointerReach = 10.F;
+        //! The radius of the disk that turns the wipe, for a pointer and
+        //! for a finger, and how near each has to be to take the dot, in
+        //! the view's pixels at a display scale of one.
+        constexpr float wipeDiskRadius = 24.F;
+        constexpr float wipeTouchDiskRadius = 36.F;
+        constexpr float wipePointerReach = 8.F;
         constexpr float wipeTouchReach = 22.F;
 
-        //! Draw the wipe's handles, light over dark so that they show on
-        //! any picture: the dot, larger when pointed at or dragged, and the
-        //! ring, faint until then, with ticks where the wipe crosses it.
-        //! The opacity fades the whole of it.
+        //! Draw the wipe's handles so that they show on any picture: a
+        //! translucent dark disk with a faint light edge, and a light dot
+        //! with a dark outline at its center. Like a widget, the part
+        //! pointed at is lighter, and the part pressed lighter still. The
+        //! seam itself shows the wipe's angle. The opacity fades the whole
+        //! of it.
         DJV_UI_API void drawWipe(
             const std::shared_ptr<ftk::IRender>&,
             const models::WipeWidget&,
             float displayScale,
-            models::WipeHandle highlight = models::WipeHandle::None,
+            models::WipeHandle hover = models::WipeHandle::None,
+            models::WipeHandle pressed = models::WipeHandle::None,
             float opacity = 1.F);
 
         ///@}

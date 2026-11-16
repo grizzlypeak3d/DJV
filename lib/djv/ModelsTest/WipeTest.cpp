@@ -64,11 +64,13 @@ namespace djv
             const auto widget = models::getWipeWidget(options, box, ftk::V2F(), 1.F, 30.F);
             FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(102.F, 21.F), 5.F));
             FTK_CHECK(models::WipeHandle::Center == models::getWipeHandle(widget, ftk::V2F(99.F, 52.F), 5.F));
-            // The ring is taken anywhere around: right, and down and left.
+            // The disk is taken anywhere on it: its edge right, and down
+            // and left, inside it off the dot, and just past its edge.
             FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(130.F, 50.F), 5.F));
             FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(79.F, 71.F), 5.F));
-            // Inside the ring, off the dot: nothing.
-            FTK_CHECK(models::WipeHandle::None == models::getWipeHandle(widget, ftk::V2F(112.F, 50.F), 5.F));
+            FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(112.F, 50.F), 5.F));
+            FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(100.F, 84.F), 5.F));
+            FTK_CHECK(models::WipeHandle::None == models::getWipeHandle(widget, ftk::V2F(100.F, 86.F), 5.F));
             // On the wipe, away from the handles: nothing.
             FTK_CHECK(models::WipeHandle::None == models::getWipeHandle(widget, ftk::V2F(100.F, 90.F), 5.F));
             FTK_CHECK(models::WipeHandle::None == models::getWipeHandle(widget, ftk::V2F(150.F, 90.F), 5.F));
@@ -109,11 +111,9 @@ namespace djv
                 30.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(90.F, 50.F)) - 30.F) < .01F);
             FTK_CHECK(std::abs(models::getWipeRotationDrag(
                 350.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(50.F, 90.F)) - 80.F) < .01F);
-            // With the step, to level or plumb only.
-            FTK_CHECK(90.F == models::getWipeRotationDrag(
-                0.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(70.F, 85.F), true));
-            FTK_CHECK(0.F == models::getWipeRotationDrag(
-                0.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(85.F, 70.F), true));
+            // With the step, to 45 degrees.
+            FTK_CHECK(45.F == models::getWipeRotationDrag(
+                0.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(80.F, 75.F), true));
 
             // Level within two degrees of it, and nothing else snapped
             // without the step.
@@ -122,9 +122,9 @@ namespace djv
             FTK_CHECK(90.F == models::snapWipeRotation(91.F));
             FTK_CHECK(3.F == models::snapWipeRotation(3.F));
             FTK_CHECK(30.F == models::snapWipeRotation(30.F));
-            FTK_CHECK(0.F == models::snapWipeRotation(30.F, true));
-            FTK_CHECK(90.F == models::snapWipeRotation(50.F, true));
-            FTK_CHECK(180.F == models::snapWipeRotation(200.F, true));
+            FTK_CHECK(45.F == models::snapWipeRotation(30.F, true));
+            FTK_CHECK(0.F == models::snapWipeRotation(20.F, true));
+            FTK_CHECK(180.F == models::snapWipeRotation(190.F, true));
             FTK_CHECK(0.F == models::snapWipeRotation(350.F, true));
         }
     }

@@ -63,7 +63,7 @@ namespace djv
             {
                 out = WipeHandle::Center;
             }
-            else if (std::abs(d - widget.radius) <= reach)
+            else if (d <= widget.radius + reach)
             {
                 out = WipeHandle::Rotate;
             }
@@ -122,7 +122,7 @@ namespace djv
 
         float snapWipeRotation(float value, bool step)
         {
-            const float increment = 90.F;
+            const float increment = step ? 45.F : 90.F;
             const float nearest = std::round(value / increment) * increment;
             float out = value;
             if (step || std::abs(value - nearest) <= 2.F)
