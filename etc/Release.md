@@ -138,6 +138,13 @@ tlRender.
       machine as well (Properties > Digital Signatures on the installer,
       and on `djv.exe` once installed). A push that is not a tag is built
       unsigned. See "Signing (Windows)" below.
+- [ ] **Start the installed program and the unzipped archive on a Windows
+      11 machine with Smart App Control on** (Windows Security > App &
+      browser control > Smart App Control). It refuses to load any unsigned
+      DLL from a download, and the program fails with "Bad Image"
+      (0xc0e90002); with it off, unsigned DLLs load without a word. 3.7.6
+      went out with its FFmpeg DLLs unsigned and was tested only with it
+      off; 3.7.7 fixed it.
 - [ ] To build a package here all the same: `package-macos.sh` and
       `package-win.bat` take the source directory and build type, and
       choose the config themselves. The Intel Mac package is a second run
