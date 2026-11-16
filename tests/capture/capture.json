@@ -603,6 +603,23 @@
       ]
     },
     {
+      "id": "frame-guide-menu",
+      "strict": true,
+      "window": { "w": 1000, "h": 700 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "View" },
+        { "expect": "View.FrameGuide.Enabled", "checked": false },
+        { "expect": "View.SafeAreas.Enabled", "checked": false },
+        { "command": "View/FrameGuide", "args": { "value": true } },
+        { "command": "View/SafeAreas", "args": { "value": true } },
+        { "expect": "View.FrameGuide.Enabled", "checked": true },
+        { "expect": "View.SafeAreas.Enabled", "checked": true },
+        { "command": "View/SafeAreas", "args": { "value": false } },
+        { "expect": "View.SafeAreas.Enabled", "checked": false }
+      ]
+    },
+    {
       "id": "tooltip",
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },

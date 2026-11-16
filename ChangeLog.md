@@ -38,8 +38,9 @@ Changes:
   rests, and Compare > Wipe Handles hides them.
 * Double clicking the view frames the image.
 * Add a Dither view option.
-* Add a frame guide and safe areas to the View tool. The frame guide's aspect
-  is typed as a ratio or a number, 16:9 or 2.39, and kept exactly (#963).
+* Add a frame guide and safe areas, in the View menu and the View tool
+  (#962). The frame guide's aspect is typed as a ratio or a number, 16:9 or
+  2.39, and kept exactly (#963).
 * Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
   Graphics or with the -renderer command line option. On an HDR display it
   shows HDR pictures.

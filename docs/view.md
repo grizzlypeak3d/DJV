@@ -166,11 +166,13 @@ Locations: **View** menu, **View** tool
 
 ## Frame guide and safe areas
 
-**Frame Guide** outlines the frame of another aspect ratio within the picture and masks the rest, for checking the framing of a delivery shape: 2.39:1 in a 16:9 picture, say. **Aspect** takes a ratio or a number, `16:9`, `1.85`, or `2.39:1`, and keeps it as typed, so 16:9 is exact rather than 1.78. **Mask** sets how dark the picture outside the frame is. The lines stay the same width however far the picture is zoomed.
+**View > Frame Guide** outlines the frame of another aspect ratio within the picture and masks the rest, for checking the framing of a delivery shape: 2.39:1 in a 16:9 picture, say. **Aspect** takes a ratio or a number, `16:9`, `1.85`, or `2.39:1`, and keeps it as typed, so 16:9 is exact rather than 1.78. **Mask** sets how dark the picture outside the frame is. The lines stay the same width however far the picture is zoomed.
 
-**Safe Areas** outlines the action and title safe areas, as fractions of the frame: the frame guide's when it is on, the picture's otherwise.
+**View > Safe Areas** outlines the action and title safe areas, as fractions of the frame: the frame guide's when it is on, the picture's otherwise.
 
-Locations: **View** tool
+Neither has a shortcut to start with; one can be given in the **Keyboard Shortcuts** section of the **Settings** tool.
+
+Locations: **View** menu, **View** tool
 
 ## Clipping warning
 

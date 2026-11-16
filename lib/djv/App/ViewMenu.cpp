@@ -61,6 +61,8 @@ namespace djv
             addAction(actions["Grid"]);
             addAction(actions["Outline"]);
             addAction(actions["CenterMarker"]);
+            addAction(actions["FrameGuide"]);
+            addAction(actions["SafeAreas"]);
             addAction(actions["ClippingWarning"]);
             addAction(actions["HUD"]);
         }
