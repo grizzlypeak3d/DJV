@@ -5,7 +5,7 @@
 
 #define DJV_VERSION_MAJOR 3
 #define DJV_VERSION_MINOR 7
-#define DJV_VERSION_PATCH 6
+#define DJV_VERSION_PATCH 7
 #define DJV_VERSION_DEV ""
 
 #define DJV_VERSION_STR_(x) #x
