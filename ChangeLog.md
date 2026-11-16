@@ -81,6 +81,12 @@ Fixes:
 * Fix for the current frame being cut off when it has more than six digits
   (#959).
 
+## 3.7.7
+
+Fixes:
+* Fix for DJV not starting on Windows 11 with Smart App Control on ("Bad
+  Image"): the libraries in the Windows packages are signed now.
+
 ## 3.7.6
 
 Changes:
