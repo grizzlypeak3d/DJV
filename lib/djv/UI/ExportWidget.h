@@ -21,6 +21,7 @@ namespace djv
     {
         class AnnotationsModel;
         class ColorModel;
+        class ExportQueue;
         class FilesModel;
         class TimeUnitsModel;
         class ViewportModel;
@@ -42,6 +43,7 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<models::AnnotationsModel>&,
+                const std::shared_ptr<models::ExportQueue>&,
                 const std::shared_ptr<IWidget>& parent);
 
             ExportWidget();
@@ -57,16 +59,18 @@ namespace djv
                 const std::shared_ptr<models::SettingsModel>&,
                 const std::shared_ptr<models::TimeUnitsModel>&,
                 const std::shared_ptr<models::AnnotationsModel>&,
+                const std::shared_ptr<models::ExportQueue>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
             //! Set the player.
             DJV_UI_API void setPlayer(const std::shared_ptr<tl::Player>&);
 
             //! Export a movie with the current settings, as the Export Movie
-            //! button does. An existing file is written over only when asked
-            //! to: there is no one to answer the question a script would
-            //! otherwise be asked. The callback is called once with whether
-            //! the movie was written, including when it could not start.
+            //! button does: it is added to the queue. An existing file is
+            //! written over only when asked to: there is no one to answer
+            //! the question a script would otherwise be asked. The callback
+            //! is called once with whether the movie was written, including
+            //! when it could not start.
             DJV_UI_API void exportMovie(
                 bool overwrite,
                 const std::function<void(bool)>&);
@@ -82,8 +86,6 @@ namespace djv
             void _error(const std::string&);
             void _export(models::ExportFileType);
             void _exportStart(models::ExportFileType);
-            bool _exportFrame();
-            void _exportAudio();
 
             FTK_PRIVATE();
         };

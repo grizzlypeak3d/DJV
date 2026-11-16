@@ -9,6 +9,7 @@
 #include <tlRender/Timeline/CompareOptions.h>
 #include <tlRender/Timeline/DisplayOptions.h>
 #include <tlRender/Timeline/TimeUnits.h>
+#include <tlRender/Timeline/Timeline.h>
 
 #include <ftk/Core/Image.h>
 #include <ftk/Core/Path.h>
@@ -122,6 +123,49 @@ namespace djv
             ftk::ImageType,
             bool burnAnnotations);
 
+        //! Where an export's frames come from: the timelines a player shows,
+        //! the A file's and each compared file's, and how it shows them.
+        //! Taken from the player, so that the export does not need it, and
+        //! the file can be closed while it runs.
+        struct DJV_MODELS_API_TYPE ExportSources
+        {
+            std::shared_ptr<tl::Timeline> timeline;
+            int videoLayer = 0;
+            std::vector<std::shared_ptr<tl::Timeline> > compare;
+            std::vector<int> compareVideoLayers;
+            OTIO_NS::TimeRange timeRange;
+            tl::CompareTime compareTime = tl::CompareTime::First;
+            double speed = 0.0;
+        };
+
+        //! The sources a player shows, sharing its timelines: for a single
+        //! frame, read while the player waits.
+        DJV_MODELS_API ExportSources getExportSources(const std::shared_ptr<tl::Player>&);
+
+        //! The same sources on timelines of their own, opened again from the
+        //! same paths with the same options and media reference key. A
+        //! player moving its playhead tells its timeline's readers to pass
+        //! over the frames behind it, and DJV closes the readers of a file
+        //! that is not being shown; an export reading a timeline of its own
+        //! is touched by neither.
+        DJV_MODELS_API ExportSources openExportSources(
+            const std::shared_ptr<ftk::Context>&,
+            const ExportSources&);
+
+        //! The frames of one time asked for, for each source, before any is
+        //! waited on, so that the sources are read in parallel.
+        struct DJV_MODELS_API_TYPE ExportFrameRequest
+        {
+            OTIO_NS::RationalTime time;
+            std::vector<tl::VideoRequest> requests;
+            //! Each source's time: the A file's, then each compared file's
+            //! as the player maps it.
+            std::vector<OTIO_NS::RationalTime> times;
+
+            //! Whether every frame has arrived.
+            DJV_MODELS_API bool isReady() const;
+        };
+
         //! Renders frames off the screen, with whichever renderer the
         //! application draws with.
         class DJV_MODELS_API_TYPE ExportRender : public std::enable_shared_from_this<ExportRender>
@@ -144,9 +188,19 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const ExportRenderOptions&);
 
-            //! Render the frame at a time of the player's timeline: the A
-            //! file's, and each compared file's at the time the player maps
-            //! it to, so that what is rendered is what was on screen.
+            //! Ask for the frames of a time of the A file's timeline: its
+            //! own, and each compared file's at the time the player maps it
+            //! to, so that what is rendered is what was on screen.
+            DJV_MODELS_API ExportFrameRequest request(
+                const ExportSources&,
+                const OTIO_NS::RationalTime&);
+
+            //! Render the frames asked for, waiting for any that have not
+            //! arrived.
+            DJV_MODELS_API std::shared_ptr<ftk::Image> render(ExportFrameRequest&);
+
+            //! Ask for and render the frame at a time of the player's
+            //! timeline.
             DJV_MODELS_API std::shared_ptr<ftk::Image> render(
                 const std::shared_ptr<tl::Player>&,
                 const OTIO_NS::RationalTime&);

@@ -22,6 +22,7 @@
 #include <djv/ModelsTest/StatusTest.h>
 #include <djv/ModelsTest/WipeTest.h>
 #include <djv/ModelsTest/TimeUnitsModelTest.h>
+#include <djv/ModelsTest/ExportQueueTest.h>
 #include <djv/ModelsTest/ToolsModelTest.h>
 #include <djv/ModelsTest/ViewportModelTest.h>
 
@@ -87,6 +88,7 @@ namespace djv
             p.tests.push_back(models_tests::StatusTest::create(context));
             p.tests.push_back(models_tests::WipeTest::create(context));
             p.tests.push_back(models_tests::TimeUnitsModelTest::create(context));
+            p.tests.push_back(models_tests::ExportQueueTest::create(context));
             p.tests.push_back(models_tests::ToolsModelTest::create(context));
             p.tests.push_back(models_tests::ViewportModelTest::create(context));
         }

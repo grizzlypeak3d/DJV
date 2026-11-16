@@ -7,6 +7,7 @@
 #include <djv/App/DetectCuts.h>
 
 #include <djv/Models/AnnotationsModel.h>
+#include <djv/Models/ExportQueue.h>
 #include <djv/Models/SettingsKeys.h>
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
@@ -168,6 +169,7 @@ namespace djv
             std::shared_ptr<models::CommandsModel> commandsModel;
             std::shared_ptr<models::MarkersModel> markersModel;
             std::shared_ptr<models::AnnotationsModel> annotationsModel;
+            std::shared_ptr<models::ExportQueue> exportQueue;
             std::shared_ptr<models::DrawModel> drawModel;
             std::shared_ptr<ftk::ObservableList<int> > reviewMarkers;
 

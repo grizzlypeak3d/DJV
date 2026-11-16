@@ -125,6 +125,10 @@ namespace djv
                 bool overwrite,
                 const std::function<void(bool)>&);
 
+            //! Make the window's graphics context current, for the exports,
+            //! which render off the screen in it.
+            DJV_APP_API void makeCurrent();
+
             //! Save the window settings.
             DJV_APP_API void saveSettings();
 

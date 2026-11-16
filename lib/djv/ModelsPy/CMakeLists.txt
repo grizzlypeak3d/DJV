@@ -10,6 +10,7 @@ set(SOURCE
     ColorModel.cpp
     CommandsModel.cpp
     DrawModel.cpp
+    ExportQueue.cpp
     FilesModel.cpp
     MarkersModel.cpp
     OCIOModel.cpp

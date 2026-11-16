@@ -49,6 +49,7 @@ namespace djv
                     nb::arg("settingsModel"),
                     nb::arg("timeUnitsModel"),
                     nb::arg("annotationsModel"),
+                    nb::arg("exportQueue"),
                     nb::arg("parent") = nullptr)
                 .def("setPlayer", &ExportWidget::setPlayer, nb::arg("player"));
         }

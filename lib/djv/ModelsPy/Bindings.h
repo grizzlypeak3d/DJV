@@ -21,6 +21,7 @@ namespace djv
         void colorModel(nanobind::module_&);
         void commandsModel(nanobind::module_&);
         void drawModel(nanobind::module_&);
+        void exportQueue(nanobind::module_&);
         void filesModel(nanobind::module_&);
         void markersModel(nanobind::module_&);
         void ocioModel(nanobind::module_&);

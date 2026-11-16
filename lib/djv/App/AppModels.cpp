@@ -447,6 +447,7 @@ namespace djv
 
             p.markersModel = models::MarkersModel::create();
             p.annotationsModel = models::AnnotationsModel::create();
+            p.exportQueue = models::ExportQueue::create(_context);
             p.drawModel = models::DrawModel::create(getSettings());
             p.reviewMarkers = ftk::ObservableList<int>::create();
             // Introspection: what the models hold right now, as opposed to

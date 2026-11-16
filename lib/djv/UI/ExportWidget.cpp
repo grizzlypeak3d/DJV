@@ -3,10 +3,11 @@
 
 #include <djv/UI/ExportWidget.h>
 
-#include <djv/Models/ExportRender.h>
+#include <djv/Models/ExportQueue.h>
 
 #include <djv/Models/AnnotationsModel.h>
 
+#include <djv/UI/ExportQueueWidget.h>
 #include <djv/UI/ExportWidgets.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/FilesModel.h>
@@ -21,8 +22,6 @@
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#include <tlRender/Core/Audio.h>
-
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DialogSystem.h>
@@ -30,20 +29,17 @@
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEdit.h>
 #include <ftk/UI/Label.h>
-#include <ftk/UI/ProgressDialog.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/TabBar.h>
 #include <ftk/UI/TabWidget.h>
 #include <tlRender/UI/OffscreenRender.h>
 #include <ftk/Core/Format.h>
-#include <ftk/Core/Timer.h>
 #include <ftk/Core/Path.h>
 
 #include <algorithm>
 #include <cctype>
 #include <cmath>
-#include <cstring>
 #include <filesystem>
 
 namespace djv
@@ -65,27 +61,7 @@ namespace djv
             std::weak_ptr<models::ColorModel> colorModel;
             std::weak_ptr<models::ViewportModel> viewportModel;
             std::weak_ptr<models::AnnotationsModel> annotationsModel;
-
-            struct ExportData
-            {
-                models::ExportFileType fileType = models::ExportFileType::Image;
-                OTIO_NS::TimeRange range;
-                int64_t frame = 0;
-                //! When it began, for the time it has left.
-                std::chrono::steady_clock::time_point startTime;
-                ftk::Path path;
-                ftk::ImageInfo info;
-                std::shared_ptr<tl::IWrite> writer;
-                bool hasAudio = false;
-                double audioStartSeconds = 0.0;
-                double audioDurationSeconds = 0.0;
-                double audioSeconds = 0.0;
-                int64_t audioSamples = 0;
-                //! Where the frames are rendered, as the viewport shows them;
-                //! see models::ExportRender.
-                std::shared_ptr<models::ExportRender> render;
-            };
-            std::unique_ptr<ExportData> exportData;
+            std::weak_ptr<models::ExportQueue> queue;
 
             std::shared_ptr<ftk::FileEdit> dirEdit;
             std::shared_ptr<ftk::ComboBox> renderSizeComboBox;
@@ -101,9 +77,9 @@ namespace djv
             std::shared_ptr<SeqExportWidget> seqWidget;
             std::shared_ptr<MovieExportWidget> movieWidget;
             std::shared_ptr<ftk::TabWidget> tabWidget;
+            std::shared_ptr<ExportQueueWidget> queueWidget;
             std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
-            std::shared_ptr<ftk::ProgressDialog> progressDialog;
 
             std::shared_ptr<ftk::Observer<models::ExportSettings> > settingsObserver;
             // What the export size is worked out from, so that the size shown
@@ -113,13 +89,9 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::DisplayOptions> > displayOptionsObserver;
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<tl::Timeline> > > compareObserver;
 
-            std::shared_ptr<ftk::Timer> progressTimer;
-            //! Told how an export requested by exportMovie() ended.
+            //! Told how an export requested by exportMovie() ended; handed
+            //! to the queue with it.
             std::function<void(bool)> doneCallback;
-            // Set when a frame, or the writer finishing, reported an error:
-            // the last frame can be written and the file still fail to
-            // close, which otherwise read as an export that worked.
-            bool exportFailed = false;
         };
 
         void ExportWidget::_init(
@@ -130,11 +102,13 @@ namespace djv
             const std::shared_ptr<models::SettingsModel>& settingsModel,
             const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<models::AnnotationsModel>& annotationsModel,
+            const std::shared_ptr<models::ExportQueue>& queue,
             const std::shared_ptr<IWidget>& parent)
         {
             ftk::IContainer::_init(context, "djv::ui::ExportWidget", parent);
             FTK_P();
 
+            p.queue = queue;
             p.settings = settingsModel;
             p.annotationsModel = annotationsModel;
             p.filesModel = filesModel;
@@ -214,6 +188,10 @@ namespace djv
             p.tabWidget->addTab("Image", p.imageWidget);
             p.tabWidget->addTab("Sequence", p.seqWidget);
             p.tabWidget->addTab("Movie", p.movieWidget);
+
+            // Under the settings, the exports they made, which run on while
+            // the work goes on.
+            p.queueWidget = ExportQueueWidget::create(context, queue, p.layout);
 
             // The form above the tabs and the one in each tab share a label
             // width, so the controls stay put from one tab to the next.
@@ -328,8 +306,6 @@ namespace djv
                     _export(models::ExportFileType::Movie);
                 });
 
-            p.progressTimer = ftk::Timer::create(context);
-            p.progressTimer->setRepeating(true);
         }
 
         ExportWidget::ExportWidget() :
@@ -347,6 +323,7 @@ namespace djv
             const std::shared_ptr<models::SettingsModel>& settingsModel,
             const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<models::AnnotationsModel>& annotationsModel,
+            const std::shared_ptr<models::ExportQueue>& queue,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<ExportWidget>(new ExportWidget);
@@ -358,6 +335,7 @@ namespace djv
                 settingsModel,
                 timeUnitsModel,
                 annotationsModel,
+                queue,
                 parent);
             return out;
         }
@@ -562,9 +540,9 @@ namespace djv
                     callbackCopy(value);
                 }
             };
-            if (!p.player || p.exportData)
+            if (!p.player)
             {
-                _error(!p.player ? "No file to export" : "An export is already running");
+                _error("No file to export");
                 done(false);
                 return;
             }
@@ -578,21 +556,14 @@ namespace djv
                 done(false);
                 return;
             }
-            p.exportFailed = false;
+            // Handed to the queue with the export, or told at once that it
+            // could not be queued.
             p.doneCallback = done;
             _exportStart(fileType);
-            // A start that failed has reported already and left nothing
-            // running to finish.
-            if (!p.exportData && p.doneCallback)
-            {
-                p.doneCallback(false);
-            }
         }
 
         void ExportWidget::_error(const std::string& value)
         {
-            FTK_P();
-            p.exportFailed = true;
             // Logged as well as shown: a scripted export has nobody watching
             // the dialog, and the log is where it would look.
             if (auto context = getContext())
@@ -649,404 +620,250 @@ namespace djv
         void ExportWidget::_exportStart(models::ExportFileType fileType)
         {
             FTK_P();
-            if (p.player)
-            {
-                auto context = getContext();
-                try
-                {
-                    const tl::IOInfo ioInfo = p.player->getIOInfo();
-                    if (ioInfo.video.empty())
-                    {
-                        throw std::runtime_error("No video to render");
-                    }
-                    p.exportData.reset(new Private::ExportData);
-                    p.exportData->fileType = fileType;
-
-                    // Get the time range.
-                    const auto options = p.settings->getExport();
-                    p.exportData->range = _getExportRange(fileType);
-                    p.exportData->frame = p.exportData->range.start_time().value();
-
-                    // Get the render size.
-                    p.exportData->info.size = _getExportSize(options);
-
-                    // Check the output directory before anything is rendered,
-                    // rather than letting each writer report it in its own way.
-                    // An empty one is an error and not an implicit write to
-                    // wherever the application happens to be running: the field
-                    // is filled in with a real directory, so clearing it is
-                    // something the user did.
-                    if (options.dir.empty())
-                    {
-                        throw std::runtime_error("No export directory");
-                    }
-                    if (!std::filesystem::is_directory(
-                        ftk::toFileSystem(options.dir)))
-                    {
-                        throw std::runtime_error(
-                            ftk::Format("Directory not found: \"{0}\"").
-                            arg(options.dir).str());
-                    }
-
-                    // Get the export path.
-                    const std::string fileName = getExportFileName(
-                        options,
-                        fileType,
-                        static_cast<int64_t>(
-                            p.exportData->range.start_time().value()));
-                    p.exportData->path = ftk::Path(options.dir, fileName);
-
-                    // Get the writer.
-                    auto ioSystem = context->getSystem<tl::WriteSystem>();
-                    auto plugin = ioSystem->getPlugin(p.exportData->path);
-                    if (!plugin)
-                    {
-                        throw std::runtime_error(
-                            ftk::Format("Cannot open: \"{0}\"").arg(p.exportData->path.get()));
-                    }
-                    p.exportData->info.type = ioInfo.video.front().type;
-                    p.exportData->info = plugin->getInfo(p.exportData->info);
-                    if (ftk::ImageType::None == p.exportData->info.type)
-                    {
-                        p.exportData->info.type = ftk::ImageType::RGBA_U8;
-                    }
-                    if (!tl::ui::OffscreenRender::canRead(p.exportData->info.type))
-                    {
-                        throw std::runtime_error(
-                            ftk::Format("Cannot open: \"{0}\"").arg(p.exportData->path.get()));
-                    }
-                    const double speed = p.player->getSpeed();
-                    tl::IOInfo outputInfo;
-                    outputInfo.video.push_back(p.exportData->info);
-                    outputInfo.videoTime = OTIO_NS::TimeRange(
-                        OTIO_NS::RationalTime(0.0, speed),
-                        p.exportData->range.duration().rescaled_to(speed));
-                    if (models::ExportFileType::Movie == fileType)
-                    {
-                        // A movie's frames start at zero, so where it came
-                        // from in the timeline is only recoverable from the
-                        // start timecode. Rates that have no timecode of
-                        // their own are left without one rather than given a
-                        // wrong one.
-                        try
-                        {
-                            outputInfo.tags["timecode"] =
-                                p.exportData->range.start_time().to_timecode();
-                        }
-                        catch (const std::exception&)
-                        {}
-                    }
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-                    if (models::ExportFileType::Movie == fileType &&
-                        ioInfo.audio.isValid() &&
-                        std::dynamic_pointer_cast<tl::ffmpeg::WritePlugin>(plugin))
-                    {
-                        p.exportData->hasAudio = true;
-                        outputInfo.audio = ioInfo.audio;
-                        outputInfo.audioTime = OTIO_NS::TimeRange(
-                            OTIO_NS::RationalTime(0.0, ioInfo.audio.sampleRate),
-                            p.exportData->range.duration().rescaled_to(ioInfo.audio.sampleRate));
-                        p.exportData->audioStartSeconds =
-                            p.exportData->range.start_time().rescaled_to(1.0).value();
-                        p.exportData->audioDurationSeconds =
-                            p.exportData->range.duration().rescaled_to(1.0).value();
-                    }
-#endif // TLRENDER_FFMPEG_PLUGIN
-
-                    // What the output pixels are. The export bakes the
-                    // display transform, so the color description written
-                    // is the display's; an unrecognized display writes
-                    // nothing rather than guessing. Without color
-                    // management the source pixels pass through, and the
-                    // source's description with them.
-                    const tl::OCIOOptions ocioOptions =
-                        p.colorModel.lock()->getOCIOOptions();
-                    if (ocioOptions.enabled &&
-                        !ocioOptions.display.empty() &&
-                        !ocioOptions.view.empty())
-                    {
-                        const ftk::ImageTags colorTags =
-                            tl::getDisplayColorTags(
-                                ocioOptions,
-                                models::ExportFileType::Movie != fileType);
-                        outputInfo.tags.insert(
-                            colorTags.begin(),
-                            colorTags.end());
-                    }
-                    else
-                    {
-                        for (const auto& tag :
-                            { "Color Primaries", "Color Transfer", "Chromaticities" })
-                        {
-                            const auto i = ioInfo.tags.find(tag);
-                            if (i != ioInfo.tags.end())
-                            {
-                                outputInfo.tags[tag] = i->second;
-                            }
-                        }
-                    }
-
-                    // The preset carries the options and which writer does
-                    // the work; an unknown name, or one this build cannot
-                    // write, falls back to the first preset rather than
-                    // exporting with nothing set.
-                    tl::IOOptions ioOptions;
-#if defined(TLRENDER_FFMPEG_PLUGIN)
-                    const auto presets =
-                        ioSystem->getPlugin<tl::ffmpeg::WritePlugin>()->getWritePresets(
-                            p.settings->getIOOptions());
-                    const tl::ffmpeg::WritePreset* preset = &presets.front();
-                    for (const auto& i : presets)
-                    {
-                        if (i.name == options.moviePreset)
-                        {
-                            preset = &i;
-                            break;
-                        }
-                    }
-                    if (preset->command)
-                    {
-                        // The settings' paths, so a custom ffmpeg is
-                        // honoured.
-                        ioOptions = p.settings->getIOOptions();
-                    }
-                    for (const auto& i : preset->options)
-                    {
-                        ioOptions[i.first] = i.second;
-                    }
-                    if (!preset->command &&
-                        !options.movieAudioCodec.empty() &&
-                        options.movieAudioCodec != "Auto")
-                    {
-                        ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
-                    }
-#endif // TLRENDER_FFMPEG_PLUGIN
-                    p.exportData->writer = plugin->write(p.exportData->path, outputInfo, ioOptions);
-
-                    // Create the renderer, which renders what the viewport
-                    // shows: the files being compared with the A file laid out
-                    // alongside it, the color as it is managed and adjusted,
-                    // and the drawings if they are burned in.
-                    std::vector<std::string> sourceIds;
-                    for (const auto& item : p.filesModel.lock()->getActive())
-                    {
-                        sourceIds.push_back(item->id);
-                    }
-                    p.exportData->render = models::ExportRender::create(
-                        context,
-                        models::getExportRenderOptions(
-                            p.player,
-                            p.viewportModel.lock(),
-                            p.colorModel.lock(),
-                            p.filesModel.lock(),
-                            p.annotationsModel.lock(),
-                            sourceIds,
-                            p.exportData->info.size,
-                            p.exportData->info.type,
-                            options.burnAnnotations));
-
-                    // Create the progress dialog.
-                    p.progressDialog = ftk::ProgressDialog::create(
-                        context,
-                        "Export",
-                        "Rendering:");
-                    p.progressDialog->setRange(0.0, p.exportData->range.duration().value() - 1.0);
-                    p.exportData->startTime = std::chrono::steady_clock::now();
-                    p.progressDialog->setMessage(ftk::Format("Frame: {0} / {1}").
-                        arg(0).
-                        arg(static_cast<int64_t>(p.exportData->range.duration().value())));
-                    p.progressDialog->setCloseCallback(
-                        [this]
-                        {
-                            FTK_P();
-                            p.progressTimer->stop();
-                            // Finished only when every frame was written;
-                            // closing early is cancelling, and a failed frame
-                            // closes it too.
-                            const bool finished =
-                                p.exportData &&
-                                !p.exportFailed &&
-                                p.exportData->frame > p.exportData->range.end_time_inclusive().value();
-                            p.exportData.reset();
-                            p.progressDialog.reset();
-                            if (p.doneCallback)
-                            {
-                                p.doneCallback(finished);
-                            }
-                        });
-                    p.progressDialog->open(getWindow());
-                    p.progressTimer->start(
-                        std::chrono::microseconds(500),
-                        [this]
-                        {
-                            FTK_P();
-                            if (_exportFrame())
-                            {
-                                const int64_t start = p.exportData->range.start_time().value();
-                                p.progressDialog->setValue(p.exportData->frame - start);
-                                const int64_t end = p.exportData->range.end_time_inclusive().value();
-                                if (p.exportData->frame <= end)
-                                {
-                                    const int64_t done = p.exportData->frame - start;
-                                    const int64_t total = static_cast<int64_t>(
-                                        p.exportData->range.duration().value());
-                                    const std::string left = models::getExportTimeLeft(
-                                        done,
-                                        total,
-                                        std::chrono::duration<double>(
-                                            std::chrono::steady_clock::now() -
-                                            p.exportData->startTime).count());
-                                    p.progressDialog->setMessage(
-                                        left.empty() ?
-                                        ftk::Format("Frame: {0} / {1}").arg(done).arg(total).str() :
-                                        ftk::Format("Frame: {0} / {1}, {2}").arg(done).arg(total).arg(left).str());
-                                }
-                                else
-                                {
-                                    p.progressDialog->close();
-                                }
-                            }
-                            else if (p.progressDialog)
-                            {
-                                p.progressDialog->close();
-                            }
-                        });
-                }
-                catch (const std::exception& e)
-                {
-                    if (p.progressDialog)
-                    {
-                        p.progressDialog->close();
-                    }
-                    // Nothing is left running: an export that failed to
-                    // start would otherwise read as one in progress.
-                    p.exportData.reset();
-                    _error(e.what());
-                    context->getSystem<ftk::DialogSystem>()->message(
-                        "ERROR",
-                        ftk::Format("Error: {0}").arg(e.what()),
-                        getWindow());
-                    if (p.doneCallback)
-                    {
-                        p.doneCallback(false);
-                    }
-                }
-            }
-        }
-
-        bool ExportWidget::_exportFrame()
-        {
-            FTK_P();
-            bool out = false;
+            auto context = getContext();
+            auto queue = p.queue.lock();
+            if (!p.player || !context || !queue)
+                return;
             try
             {
-                // Render the frame as the viewport shows it.
-                const OTIO_NS::RationalTime t(p.exportData->frame, p.exportData->range.duration().rate());
-                auto image = p.exportData->render->render(p.player, t);
-
-                // Write the output image.
-
-                // The sequence writers name each file from the time it is
-                // written at, so those keep the frame numbers of the timeline
-                // -- which is what the file name shown in the tool promises.
-                // A movie has no frame numbers in its name and the time
-                // becomes the presentation timestamp, so it starts at zero.
-                const int64_t start = p.exportData->range.start_time().value();
-                const double speed = p.player->getSpeed();
-                const OTIO_NS::RationalTime t2(
-                    models::ExportFileType::Movie == p.exportData->fileType ?
-                        p.exportData->frame - start :
-                        p.exportData->frame,
-                    speed);
-                p.exportData->writer->writeVideo(t2, image);
-
-                ++p.exportData->frame;
-
-                // Write the audio.
-                _exportAudio();
-
-                // Finish writing after the last frame.
-                if (p.exportData->frame > p.exportData->range.end_time_inclusive().value())
+                const tl::IOInfo ioInfo = p.player->getIOInfo();
+                if (ioInfo.video.empty())
                 {
-                    p.exportData->writer->finish();
+                    throw std::runtime_error("No video to render");
+                }
+                models::ExportJobOptions job;
+                job.fileType = fileType;
+                job.sourceName = p.player->getPath().getFileName();
+
+                // Get the time range.
+                const auto options = p.settings->getExport();
+                job.range = _getExportRange(fileType);
+
+                // Get the render size.
+                ftk::ImageInfo info;
+                info.size = _getExportSize(options);
+
+                // Check the output directory before anything is rendered,
+                // rather than letting each writer report it in its own way.
+                // An empty one is an error and not an implicit write to
+                // wherever the application happens to be running: the field
+                // is filled in with a real directory, so clearing it is
+                // something the user did.
+                if (options.dir.empty())
+                {
+                    throw std::runtime_error("No export directory");
+                }
+                if (!std::filesystem::is_directory(
+                    ftk::toFileSystem(options.dir)))
+                {
+                    throw std::runtime_error(
+                        ftk::Format("Directory not found: \"{0}\"").
+                        arg(options.dir).str());
                 }
 
-                out = true;
+                // Get the export path.
+                const std::string fileName = getExportFileName(
+                    options,
+                    fileType,
+                    static_cast<int64_t>(job.range.start_time().value()));
+                job.path = ftk::Path(options.dir, fileName);
+                job.name = fileName;
+                // Two exports to one file would write over each other as
+                // they went.
+                if (queue->isWriting(job.path))
+                {
+                    throw std::runtime_error(
+                        ftk::Format("Already being exported: \"{0}\"").
+                        arg(job.path.get()).str());
+                }
+
+                // The writer's image type, nearest the source's.
+                auto ioSystem = context->getSystem<tl::WriteSystem>();
+                auto plugin = ioSystem->getPlugin(job.path);
+                if (!plugin)
+                {
+                    throw std::runtime_error(
+                        ftk::Format("Cannot open: \"{0}\"").arg(job.path.get()));
+                }
+                info.type = ioInfo.video.front().type;
+                info = plugin->getInfo(info);
+                if (ftk::ImageType::None == info.type)
+                {
+                    info.type = ftk::ImageType::RGBA_U8;
+                }
+                if (!tl::ui::OffscreenRender::canRead(info.type))
+                {
+                    throw std::runtime_error(
+                        ftk::Format("Cannot open: \"{0}\"").arg(job.path.get()));
+                }
+                const double speed = p.player->getSpeed();
+                job.outputInfo.video.push_back(info);
+                job.outputInfo.videoTime = OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(0.0, speed),
+                    job.range.duration().rescaled_to(speed));
+                if (models::ExportFileType::Movie == fileType)
+                {
+                    // A movie's frames start at zero, so where it came
+                    // from in the timeline is only recoverable from the
+                    // start timecode. Rates that have no timecode of
+                    // their own are left without one rather than given a
+                    // wrong one.
+                    try
+                    {
+                        job.outputInfo.tags["timecode"] =
+                            job.range.start_time().to_timecode();
+                    }
+                    catch (const std::exception&)
+                    {}
+                }
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+                if (models::ExportFileType::Movie == fileType &&
+                    ioInfo.audio.isValid() &&
+                    std::dynamic_pointer_cast<tl::ffmpeg::WritePlugin>(plugin))
+                {
+                    job.hasAudio = true;
+                    job.outputInfo.audio = ioInfo.audio;
+                    job.outputInfo.audioTime = OTIO_NS::TimeRange(
+                        OTIO_NS::RationalTime(0.0, ioInfo.audio.sampleRate),
+                        job.range.duration().rescaled_to(ioInfo.audio.sampleRate));
+                    job.audioStartSeconds = job.range.start_time().rescaled_to(1.0).value();
+                    job.audioDurationSeconds = job.range.duration().rescaled_to(1.0).value();
+                }
+#endif // TLRENDER_FFMPEG_PLUGIN
+
+                // What the output pixels are. The export bakes the
+                // display transform, so the color description written
+                // is the display's; an unrecognized display writes
+                // nothing rather than guessing. Without color
+                // management the source pixels pass through, and the
+                // source's description with them.
+                const tl::OCIOOptions ocioOptions =
+                    p.colorModel.lock()->getOCIOOptions();
+                if (ocioOptions.enabled &&
+                    !ocioOptions.display.empty() &&
+                    !ocioOptions.view.empty())
+                {
+                    const ftk::ImageTags colorTags =
+                        tl::getDisplayColorTags(
+                            ocioOptions,
+                            models::ExportFileType::Movie != fileType);
+                    job.outputInfo.tags.insert(
+                        colorTags.begin(),
+                        colorTags.end());
+                }
+                else
+                {
+                    for (const auto& tag :
+                        { "Color Primaries", "Color Transfer", "Chromaticities" })
+                    {
+                        const auto i = ioInfo.tags.find(tag);
+                        if (i != ioInfo.tags.end())
+                        {
+                            job.outputInfo.tags[tag] = i->second;
+                        }
+                    }
+                }
+
+                // The preset carries the options and which writer does
+                // the work; an unknown name, or one this build cannot
+                // write, falls back to the first preset rather than
+                // exporting with nothing set.
+#if defined(TLRENDER_FFMPEG_PLUGIN)
+                const auto presets =
+                    ioSystem->getPlugin<tl::ffmpeg::WritePlugin>()->getWritePresets(
+                        p.settings->getIOOptions());
+                const tl::ffmpeg::WritePreset* preset = &presets.front();
+                for (const auto& i : presets)
+                {
+                    if (i.name == options.moviePreset)
+                    {
+                        preset = &i;
+                        break;
+                    }
+                }
+                if (preset->command)
+                {
+                    // The settings' paths, so a custom ffmpeg is
+                    // honoured.
+                    job.ioOptions = p.settings->getIOOptions();
+                }
+                for (const auto& i : preset->options)
+                {
+                    job.ioOptions[i.first] = i.second;
+                }
+                if (!preset->command &&
+                    !options.movieAudioCodec.empty() &&
+                    options.movieAudioCodec != "Auto")
+                {
+                    job.ioOptions["FFmpeg/AudioCodec"] = options.movieAudioCodec;
+                }
+#endif // TLRENDER_FFMPEG_PLUGIN
+
+                // What is rendered: what the viewport shows, the files
+                // being compared with the A file laid out alongside it, the
+                // color as it is managed and adjusted, and the drawings if
+                // they are burned in. All of it taken now, so that what is
+                // changed while the export waits or runs is not in it.
+                std::vector<std::string> sourceIds;
+                for (const auto& item : p.filesModel.lock()->getActive())
+                {
+                    sourceIds.push_back(item->id);
+                }
+                job.sources = models::getExportSources(p.player);
+                job.render = models::getExportRenderOptions(
+                    p.player,
+                    p.viewportModel.lock(),
+                    p.colorModel.lock(),
+                    p.filesModel.lock(),
+                    p.annotationsModel.lock(),
+                    sourceIds,
+                    info.size,
+                    info.type,
+                    options.burnAnnotations);
+
+                // Told how it ended: a script that asked for it, and
+                // anyone at the tool if it failed.
+                const auto callback = p.doneCallback;
+                p.doneCallback = nullptr;
+                auto jobWeak = std::make_shared<std::weak_ptr<models::ExportJob> >();
+                std::weak_ptr<ExportWidget> widgetWeak(
+                    std::dynamic_pointer_cast<ExportWidget>(shared_from_this()));
+                *jobWeak = queue->add(
+                    job,
+                    [callback, jobWeak, widgetWeak](bool value)
+                    {
+                        if (callback)
+                        {
+                            callback(value);
+                        }
+                        auto job = jobWeak->lock();
+                        auto widget = widgetWeak.lock();
+                        if (job && widget &&
+                            models::ExportStatus::Failed == job->getProgress().status)
+                        {
+                            if (auto context = widget->getContext())
+                            {
+                                context->getSystem<ftk::DialogSystem>()->message(
+                                    "ERROR",
+                                    ftk::Format("Error: {0}").arg(job->getProgress().error),
+                                    widget->getWindow());
+                            }
+                        }
+                    });
             }
             catch (const std::exception& e)
             {
                 _error(e.what());
-                if (p.progressDialog)
+                context->getSystem<ftk::DialogSystem>()->message(
+                    "ERROR",
+                    ftk::Format("Error: {0}").arg(e.what()),
+                    getWindow());
+                if (p.doneCallback)
                 {
-                    p.progressDialog->close();
+                    const auto callback = p.doneCallback;
+                    p.doneCallback = nullptr;
+                    callback(false);
                 }
-                if (auto context = getContext())
-                {
-                    context->getSystem<ftk::DialogSystem>()->message(
-                        "ERROR",
-                        ftk::Format("Error: {0}").arg(e.what()),
-                        getWindow());
-                }
-            }
-            return out;
-        }
-
-        void ExportWidget::_exportAudio()
-        {
-            FTK_P();
-            if (!p.exportData->hasAudio)
-                return;
-
-            const int64_t start = p.exportData->range.start_time().value();
-            const double speed = p.player->getSpeed();
-            const double videoSeconds = OTIO_NS::RationalTime(
-                p.exportData->frame - start,
-                speed).rescaled_to(1.0).value();
-            while (p.exportData->audioSeconds <
-                std::min(videoSeconds, p.exportData->audioDurationSeconds))
-            {
-                // Get one second of audio from the timeline and mix the
-                // layers together.
-                auto frame = p.player->getTimeline()->getAudio(
-                    p.exportData->audioStartSeconds + p.exportData->audioSeconds).future.get();
-                std::vector<std::shared_ptr<tl::Audio> > layers;
-                for (const auto& layer : frame.layers)
-                {
-                    if (layer.audio)
-                    {
-                        layers.push_back(layer.audio);
-                    }
-                }
-                auto audio = tl::mixAudio(layers, 1.F);
-                if (audio && audio->isValid())
-                {
-                    // Trim the final chunk to the in/out range.
-                    const double remaining =
-                        p.exportData->audioDurationSeconds - p.exportData->audioSeconds;
-                    if (remaining < 1.0)
-                    {
-                        const size_t sampleCount = std::min(
-                            audio->getSampleCount(),
-                            static_cast<size_t>(
-                                remaining * audio->getInfo().sampleRate + .5));
-                        auto tmp = tl::Audio::create(audio->getInfo(), sampleCount);
-                        std::memcpy(
-                            tmp->getData(),
-                            audio->getData(),
-                            tmp->getByteCount());
-                        audio = tmp;
-                    }
-                    const OTIO_NS::TimeRange timeRange(
-                        OTIO_NS::RationalTime(
-                            p.exportData->audioSamples,
-                            audio->getInfo().sampleRate),
-                        OTIO_NS::RationalTime(
-                            audio->getSampleCount(),
-                            audio->getInfo().sampleRate));
-                    p.exportData->writer->writeAudio(timeRange, audio);
-                    p.exportData->audioSamples += audio->getSampleCount();
-                }
-                p.exportData->audioSeconds += 1.0;
             }
         }
     }

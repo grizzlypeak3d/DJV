@@ -34,6 +34,7 @@ namespace djv
 
         class AnnotationsModel;
         class AppInfoModel;
+        class ExportQueue;
         class AudioModel;
         class ColorModel;
         class DisplaysModel;
@@ -127,6 +128,14 @@ namespace djv
 
             //! Get the review annotations model.
             DJV_APP_API const std::shared_ptr<models::AnnotationsModel>& getAnnotationsModel() const;
+
+            //! Get the export queue.
+            DJV_APP_API const std::shared_ptr<models::ExportQueue>& getExportQueue() const;
+
+            //! Ask before quitting while exports are running, cancel them if
+            //! the answer is to quit, and then ask about the review as
+            //! confirmClose() does.
+            void confirmExit(const std::function<void()>& onProceed);
 
 
             //! Get the drawing state model.

@@ -61,6 +61,9 @@ Changes:
 * The Export tool offers the FFmpeg command line presets only when the
   installed ffmpeg has their encoder (#949).
 * The export progress says about how long is left (#943).
+* Exports go into a queue and run while the work goes on: the file being
+  exported can be closed, which frees its cache, and others queued behind
+  it (#947).
 * With the display scale on Auto, each window follows the display it is on
   (#732).
 * Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command

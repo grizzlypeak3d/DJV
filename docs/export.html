@@ -44,6 +44,7 @@
 <li><a href="#still">Export Still</a></li>
 <li><a href="#sequence">Sequence</a></li>
 <li><a href="#movie">Movie</a></li>
+<li><a href="#queue">The queue</a></li>
 </ul>
 </div>
 <p>The <strong>Export</strong> tool writes out the current file as a single still image, a numbered image sequence, or a movie. Each kind of export has its own tab with its own options and export button.</p>
@@ -51,6 +52,7 @@
 <p>Open it with <strong>Tools &gt; Export</strong> (<kbd>F2</kbd>).</p>
 <p><img src="assets/export-tool.svg" alt="Export tool"></p>
 <ul><li>Render size — <strong>Default</strong> for the size of what is being exported with no scaling; one of the preset widths, or <strong>Width</strong> for a width typed in, where the height follows the aspect ratio of what is being exported so nothing is squashed to fit; or <strong>Custom</strong> for a width and height typed in, used as they are. A height that follows from a width is rounded to an even number for a movie, which its codecs need; the source's own size and a custom size are used as they are, and the export says if the codec cannot take them.</li><li>Size — The size the export comes out at, with the edits for what can be typed.</li><li>Burn in drawings — Write the review drawings into the picture, on the frames they are on (see <a href="reviews.html">Review</a>).</li><li>File name — The name of the file to write, without its extension. A run of <code>#</code> is replaced by the frame number, as many digits wide as there are <code>#</code>: <code>render.####</code> writes <code>render.0023.exr</code>. Digits are part of the name. A name typed with one of the extensions on it takes that extension.</li><li>Extension — The file format to write.</li><li>Output — The name that will be written, or what is wrong with the file name. Exporting over a file that is already there asks first, so nothing is overwritten without saying so.</li></ul>
+<p>An export goes into the <a href="#queue">queue</a> under the tabs, and runs while the work goes on.</p>
 <h2 id="image">Image</h2>
 <p>The <strong>Image</strong> tab exports just the current frame as a single still image. A file name without <code>#</code> has no frame number; with one, the number follows the playhead.</p>
 <h2 id="still">Export Still</h2>
@@ -68,6 +70,10 @@
 <p>Available extensions depend on how DJV was built, and the <strong>Extension</strong> menu lists them. Image and sequence exports typically support <code>.exr</code>, <code>.png</code>, <code>.tif</code>, and <code>.tiff</code>; movie exports typically support <code>.mov</code>, <code>.mp4</code>, <code>.mkv</code>, and <code>.m4v</code>.</p>
 <p>Exports respect the current layer, playback speed, in/out range, and color settings. A comparison is exported the way the viewport shows it: a side by side comparison of two files writes both of them, at the size the comparison comes to, and the <strong>Source</strong> render width follows that rather than the A file on its own.</p>
 <p>The file that is written carries a color description: the display's when the export is color managed, the source's when it is not.</p>
+<h2 id="queue">The queue</h2>
+<p>The export buttons add to the queue under the tabs, which runs the exports one after another while the work goes on: playing, reviewing, opening other files, or closing the one being exported, which frees its cache. An export is made from the settings as they were when it was asked for — the color, the comparison, the in/out range, the drawings — so changing them afterwards changes nothing about an export already in the queue, and one file after another can be queued. An export to a file another one in the queue is writing is refused.</p>
+<p>Each row says how far its export has got and about how long it has left. The <strong>×</strong> beside it cancels it, leaving what has been written, and takes it off the list once it has stopped; <strong>Clear</strong> takes off every one that has stopped. Quitting while exports are running asks first.</p>
+<p>The exports run one at a time because an encoder needs memory of its own. The long GOP codecs, H.264, HEVC, and AV1, hold dozens of frames to compare them with and can use a few gigabytes at 4K, where ProRes and the other codecs that encode each frame on its own need a few hundred megabytes. On a machine short of memory, close the file once its export is queued, or lower the cache in the <a href="settings.html">settings</a>.</p>
 </main>
 </body>
 </html>

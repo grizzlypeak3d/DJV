@@ -15,6 +15,8 @@ Open it with **Tools > Export** (<kbd>F2</kbd>).
 - Extension — The file format to write.
 - Output — The name that will be written, or what is wrong with the file name. Exporting over a file that is already there asks first, so nothing is overwritten without saying so.
 
+An export goes into the [queue](#queue) under the tabs, and runs while the work goes on.
+
 ## Image
 
 The **Image** tab exports just the current frame as a single still image. A file name without `#` has no frame number; with one, the number follows the playhead.
@@ -48,3 +50,11 @@ Available extensions depend on how DJV was built, and the **Extension** menu lis
 Exports respect the current layer, playback speed, in/out range, and color settings. A comparison is exported the way the viewport shows it: a side by side comparison of two files writes both of them, at the size the comparison comes to, and the **Source** render width follows that rather than the A file on its own.
 
 The file that is written carries a color description: the display's when the export is color managed, the source's when it is not.
+
+## The queue {#queue}
+
+The export buttons add to the queue under the tabs, which runs the exports one after another while the work goes on: playing, reviewing, opening other files, or closing the one being exported, which frees its cache. An export is made from the settings as they were when it was asked for — the color, the comparison, the in/out range, the drawings — so changing them afterwards changes nothing about an export already in the queue, and one file after another can be queued. An export to a file another one in the queue is writing is refused.
+
+Each row says how far its export has got and about how long it has left. The **×** beside it cancels it, leaving what has been written, and takes it off the list once it has stopped; **Clear** takes off every one that has stopped. Quitting while exports are running asks first.
+
+The exports run one at a time because an encoder needs memory of its own. The long GOP codecs, H.264, HEVC, and AV1, hold dozens of frames to compare them with and can use a few gigabytes at 4K, where ProRes and the other codecs that encode each frame on its own need a few hundred megabytes. On a machine short of memory, close the file once its export is queued, or lower the cache in the [settings](settings.html).

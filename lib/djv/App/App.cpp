@@ -591,6 +591,11 @@ namespace djv
             return _p->annotationsModel;
         }
 
+        const std::shared_ptr<models::ExportQueue>& App::getExportQueue() const
+        {
+            return _p->exportQueue;
+        }
+
         const std::shared_ptr<models::DrawModel>& App::getDrawModel() const
         {
             return _p->drawModel;
@@ -619,11 +624,34 @@ namespace djv
             }
             // The base class exit is what actually stops the event loop, so
             // nothing may call it while the question is still open.
-            confirmClose(
+            confirmExit(
                 [this]
                 {
                     ftk::App::exit();
                 });
+        }
+
+        void App::confirmExit(const std::function<void()>& onProceed)
+        {
+            FTK_P();
+            if (!p.exportQueue->observeBusy()->get() || !p.mainWindow)
+            {
+                confirmClose(onProceed);
+                return;
+            }
+            _context->getSystem<ftk::DialogSystem>()->confirm(
+                "Export",
+                "Exports are still running; quit and cancel them?",
+                p.mainWindow,
+                [this, onProceed](bool value)
+                {
+                    if (value)
+                    {
+                        _p->exportQueue->cancelAll();
+                        confirmClose(onProceed);
+                    }
+                },
+                "Quit");
         }
 
         void App::confirmClose(const std::function<void()>& onProceed)
@@ -1518,10 +1546,26 @@ namespace djv
             p.mainWindow = MainWindow::create(
                 _context,
                 std::dynamic_pointer_cast<App>(shared_from_this()));
+            // The exports render in the main window's graphics context, and
+            // a tick of the queue can come after another window has drawn
+            // in its own.
+            std::weak_ptr<MainWindow> mainWindowWeak(p.mainWindow);
+            p.exportQueue->setMakeCurrent(
+                [mainWindowWeak]
+                {
+                    if (auto mainWindow = mainWindowWeak.lock())
+                    {
+                        mainWindow->makeCurrent();
+                    }
+                });
             p.mainWindow->setCloseCallback(
                 [this]
                 {
                     FTK_P();
+                    // Asked about already, if anyone was there to ask; what
+                    // they render with goes with the window's context.
+                    p.mainWindow->makeCurrent();
+                    p.exportQueue->cancelAll();
                     if (p.secondaryWindow)
                     {
                         // Closed by quitting, not by the user: it opens

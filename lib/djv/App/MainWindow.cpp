@@ -887,6 +887,11 @@ namespace djv
             }
         }
 
+        void MainWindow::makeCurrent()
+        {
+            _makeCurrent();
+        }
+
         void MainWindow::exportMovie(
             bool overwrite,
             const std::function<void(bool)>& callback)
@@ -1323,7 +1328,7 @@ namespace djv
             // for saving the review before actually closing.
             if (auto app = p.app.lock())
             {
-                app->confirmClose(
+                app->confirmExit(
                     [this]
                     {
                         ftk::Window::close();

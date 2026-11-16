@@ -19,6 +19,7 @@ namespace djv
             auto mModels = m.def_submodule("models", "Data models");
 
             annotationsModel(mModels);
+            exportQueue(mModels);
             appInfoModel(mModels);
             audioModel(mModels);
             colorModel(mModels);

@@ -18,6 +18,7 @@ set(HEADERS
     StatusIndicatorPopup.h
     TimelinePreview.h
     SysInfoDialog.h
+    ExportQueueWidget.h
     ExportWidget.h
     ExportWidgets.h
     InfoWidget.h
@@ -50,6 +51,7 @@ set(SOURCE
     TimelinePreview.cpp
     StyleWidget.cpp
     SysInfoDialog.cpp
+    ExportQueueWidget.cpp
     ExportWidget.cpp
     ExportWidgets.cpp
     InfoWidget.cpp

@@ -9,6 +9,7 @@
 #include <djv/Models/AnnotationsModel.h>
 #include <djv/Models/AppInfoModel.h>
 #include <djv/Models/AudioModel.h>
+#include <djv/Models/ExportQueue.h>
 #include <djv/Models/ColorModel.h>
 #include <djv/Models/CommandsModel.h>
 #include <djv/Models/DrawModel.h>
@@ -136,6 +137,7 @@ namespace djv
                 .def("getCommandsModel", &App::getCommandsModel)
                 .def("getMarkersModel", &App::getMarkersModel)
                 .def("getAnnotationsModel", &App::getAnnotationsModel)
+                .def("getExportQueue", &App::getExportQueue)
                 .def("getDrawModel", &App::getDrawModel)
                 .def("getToolWidgetFactory", &App::getToolWidgetFactory)
                 .def("getMainWindow", &App::getMainWindow)

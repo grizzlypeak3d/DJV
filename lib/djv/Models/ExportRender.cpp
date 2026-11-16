@@ -19,6 +19,7 @@
 #include <ftk/Core/FontSystem.h>
 #include <ftk/Core/Format.h>
 
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
@@ -403,6 +404,68 @@ namespace djv
             writer->finish();
         }
 
+        ExportSources getExportSources(const std::shared_ptr<tl::Player>& player)
+        {
+            ExportSources out;
+            if (player)
+            {
+                out.timeline = player->getTimeline();
+                out.videoLayer = player->getVideoLayer();
+                out.compare = player->getCompare();
+                out.compareVideoLayers = player->getCompareVideoLayers();
+                out.timeRange = player->getTimeRange();
+                out.compareTime = player->getCompareTime();
+                out.speed = player->getSpeed();
+            }
+            return out;
+        }
+
+        namespace
+        {
+            std::shared_ptr<tl::Timeline> reopen(
+                const std::shared_ptr<ftk::Context>& context,
+                const std::shared_ptr<tl::Timeline>& timeline)
+            {
+                std::shared_ptr<tl::Timeline> out;
+                if (timeline)
+                {
+                    out = tl::Timeline::create(
+                        context,
+                        timeline->getPath(),
+                        timeline->getAudioPath(),
+                        timeline->getOptions());
+                    out->setMediaReferenceKey(timeline->getMediaReferenceKey());
+                }
+                return out;
+            }
+        }
+
+        ExportSources openExportSources(
+            const std::shared_ptr<ftk::Context>& context,
+            const ExportSources& sources)
+        {
+            ExportSources out = sources;
+            out.timeline = reopen(context, sources.timeline);
+            for (size_t i = 0; i < out.compare.size(); ++i)
+            {
+                out.compare[i] = reopen(context, sources.compare[i]);
+            }
+            return out;
+        }
+
+        bool ExportFrameRequest::isReady() const
+        {
+            for (const auto& request : requests)
+            {
+                if (request.future.valid() &&
+                    request.future.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         struct ExportRender::Private
         {
             std::weak_ptr<ftk::Context> context;
@@ -452,48 +515,68 @@ namespace djv
             return out;
         }
 
-        std::shared_ptr<ftk::Image> ExportRender::render(
-            const std::shared_ptr<tl::Player>& player,
+        ExportFrameRequest ExportRender::request(
+            const ExportSources& sources,
             const OTIO_NS::RationalTime& t)
         {
             FTK_P();
+            ExportFrameRequest out;
+            out.time = t;
+            if (!sources.timeline)
+            {
+                return out;
+            }
 
             // The video for the A file and each of the files it is being
             // compared with. The requests are all made before any of them
             // is waited on so that the sources are read in parallel.
-            auto ioOptions = player->getTimeline()->getOptions().ioOptions;
-            ioOptions["Layer"] = ftk::Format("{0}").arg(player->getVideoLayer());
-            std::vector<tl::VideoRequest> requests;
-            requests.push_back(player->getTimeline()->getVideo(t, ioOptions));
+            auto ioOptions = sources.timeline->getOptions().ioOptions;
+            ioOptions["Layer"] = ftk::Format("{0}").arg(sources.videoLayer);
+            out.requests.push_back(sources.timeline->getVideo(t, ioOptions));
+            out.times.push_back(t);
             // A stored frame needs nothing read for the compared files.
-            static const std::vector<std::shared_ptr<tl::Timeline> > noCompare;
-            const auto& compare = p.options.storedFrame.has_value() ?
-                noCompare :
-                player->getCompare();
-            const auto& compareVideoLayers = player->getCompareVideoLayers();
-            std::vector<OTIO_NS::RationalTime> times = { t };
-            for (size_t i = 0; i < compare.size(); ++i)
+            if (!p.options.storedFrame.has_value())
             {
-                // The same time mapping the player uses, so that the frame
-                // rendered for each source is the frame that was on screen.
-                const OTIO_NS::RationalTime compareTime = tl::getCompareTime(
-                    t,
-                    player->getTimeRange(),
-                    compare[i]->getTimeRange(),
-                    player->getCompareTime());
-                times.push_back(compareTime);
-                ioOptions["Layer"] = ftk::Format("{0}").arg(
-                    i < compareVideoLayers.size() ?
-                    compareVideoLayers[i] :
-                    player->getVideoLayer());
-                requests.push_back(compare[i]->getVideo(compareTime, ioOptions));
+                for (size_t i = 0; i < sources.compare.size(); ++i)
+                {
+                    // The same time mapping the player uses, so that the
+                    // frame rendered for each source is the frame that was
+                    // on screen.
+                    const OTIO_NS::RationalTime compareTime = tl::getCompareTime(
+                        t,
+                        sources.timeRange,
+                        sources.compare[i]->getTimeRange(),
+                        sources.compareTime);
+                    out.times.push_back(compareTime);
+                    ioOptions["Layer"] = ftk::Format("{0}").arg(
+                        i < sources.compareVideoLayers.size() ?
+                        sources.compareVideoLayers[i] :
+                        sources.videoLayer);
+                    out.requests.push_back(sources.compare[i]->getVideo(compareTime, ioOptions));
+                }
             }
+            return out;
+        }
+
+        std::shared_ptr<ftk::Image> ExportRender::render(
+            const std::shared_ptr<tl::Player>& player,
+            const OTIO_NS::RationalTime& t)
+        {
+            auto request = this->request(getExportSources(player), t);
+            return render(request);
+        }
+
+        std::shared_ptr<ftk::Image> ExportRender::render(ExportFrameRequest& request)
+        {
+            FTK_P();
             std::vector<tl::VideoFrame> videoFrame;
-            for (auto& request : requests)
+            for (auto& i : request.requests)
             {
-                videoFrame.push_back(request.future.get());
+                videoFrame.push_back(i.future.valid() ? i.future.get() : tl::VideoFrame());
             }
+            request.requests.clear();
             videoFrame = tl::withHeldFrame(videoFrame, p.options.storedFrame);
+            const std::vector<OTIO_NS::RationalTime>& times = request.times;
 
             // Render the video, and the drawings over it.
             p.offscreen->begin();

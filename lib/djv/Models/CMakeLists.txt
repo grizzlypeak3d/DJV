@@ -7,6 +7,7 @@ set(HEADERS
     CommandsModel.h
     DrawModel.h
     Export.h
+    ExportQueue.h
     ExportRender.h
     FilesModel.h
     HUD.h
@@ -40,6 +41,7 @@ set(SOURCE
     DisplaysModel.cpp
     CommandsModel.cpp
     DrawModel.cpp
+    ExportQueue.cpp
     ExportRender.cpp
     FilesModel.cpp
     HUD.cpp

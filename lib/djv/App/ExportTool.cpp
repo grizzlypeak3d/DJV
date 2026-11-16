@@ -42,7 +42,8 @@ namespace djv
                 app->getViewportModel(),
                 app->getSettingsModel(),
                 app->getTimeUnitsModel(),
-                app->getAnnotationsModel());
+                app->getAnnotationsModel(),
+                app->getExportQueue());
 
             _setWidget(p.widget);
 

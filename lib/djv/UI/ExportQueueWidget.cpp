@@ -1,0 +1,271 @@
+// SPDX-License-Identifier: BSD-3-Clause
+// Copyright Contributors to the DJV project.
+
+#include <djv/UI/ExportQueueWidget.h>
+
+#include <djv/Models/ExportQueue.h>
+
+#include <ftk/UI/Label.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScreenshotTag.h>
+#include <ftk/UI/ToolButton.h>
+#include <ftk/Core/Format.h>
+
+namespace djv
+{
+    namespace ui
+    {
+        namespace
+        {
+            //! A thin bar of how much is done, flat, without a border.
+            class ProgressBar : public ftk::IWidget
+            {
+            protected:
+                void _init(
+                    const std::shared_ptr<ftk::Context>& context,
+                    const std::shared_ptr<ftk::IWidget>& parent)
+                {
+                    ftk::IWidget::_init(context, "djv::ui::ProgressBar", parent);
+                    setHStretch(ftk::Stretch::Expanding);
+                }
+
+            public:
+                static std::shared_ptr<ProgressBar> create(
+                    const std::shared_ptr<ftk::Context>& context,
+                    const std::shared_ptr<ftk::IWidget>& parent = nullptr)
+                {
+                    auto out = std::shared_ptr<ProgressBar>(new ProgressBar);
+                    out->_init(context, parent);
+                    return out;
+                }
+
+                void setValue(float value)
+                {
+                    if (value == _value)
+                        return;
+                    _value = value;
+                    setDrawUpdate();
+                }
+
+                ftk::Size2I getSizeHint() const override
+                {
+                    return ftk::Size2I(_height, _height);
+                }
+
+                void sizeHintEvent(const ftk::SizeHintEvent& event) override
+                {
+                    ftk::IWidget::sizeHintEvent(event);
+                    _height = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale) * 3;
+                }
+
+                void drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event) override
+                {
+                    ftk::IWidget::drawEvent(drawRect, event);
+                    const ftk::Box2I& g = getGeometry();
+                    event.render->drawRect(g, event.style->getColorRole(ftk::ColorRole::Base));
+                    const int w = static_cast<int>(std::clamp(_value, 0.F, 1.F) * g.w());
+                    if (w > 0)
+                    {
+                        event.render->drawRect(
+                            ftk::Box2I(g.min.x, g.min.y, w, g.h()),
+                            event.style->getColorRole(ftk::ColorRole::Checked));
+                    }
+                }
+
+            private:
+                float _value = 0.F;
+                int _height = 0;
+            };
+
+            //! One export.
+            class JobWidget : public ftk::IContainer
+            {
+            protected:
+                void _init(
+                    const std::shared_ptr<ftk::Context>& context,
+                    const std::shared_ptr<models::ExportQueue>& queue,
+                    const std::shared_ptr<models::ExportJob>& job,
+                    const std::shared_ptr<ftk::IWidget>& parent)
+                {
+                    ftk::IContainer::_init(context, "djv::ui::ExportJobWidget", parent);
+
+                    const auto& options = job->getOptions();
+                    _nameLabel = ftk::Label::create(context, options.name);
+                    _nameLabel->setHStretch(ftk::Stretch::Expanding);
+                    _nameLabel->setClipText(true);
+                    _nameLabel->setTooltip(
+                        ftk::Format("{0}\nFrom: {1}").
+                            arg(options.path.get()).
+                            arg(options.sourceName));
+                    ftk::setScreenshotTag(_nameLabel, "Export.Queue.Name");
+                    _statusLabel = ftk::Label::create(context);
+                    _statusLabel->setHStretch(ftk::Stretch::Expanding);
+                    _statusLabel->setClipText(true);
+                    _statusLabel->setTextRole(ftk::ColorRole::TextDisabled);
+                    ftk::setScreenshotTag(_statusLabel, "Export.Queue.Status");
+                    _progressBar = ProgressBar::create(context);
+                    _button = ftk::ToolButton::create(context);
+                    _button->setIcon("CloseSmall");
+                    ftk::setScreenshotTag(_button, "Export.Queue.Cancel");
+
+                    auto layout = ftk::HorizontalLayout::create(context);
+                    layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+                    _setWidget(layout);
+                    auto vLayout = ftk::VerticalLayout::create(context, layout);
+                    vLayout->setSpacingRole(ftk::SizeRole::SpacingTool);
+                    vLayout->setHStretch(ftk::Stretch::Expanding);
+                    _nameLabel->setParent(vLayout);
+                    _statusLabel->setParent(vLayout);
+                    _progressBar->setParent(vLayout);
+                    _button->setParent(layout);
+                    _button->setVAlign(ftk::VAlign::Top);
+
+                    std::weak_ptr<models::ExportQueue> queueWeak(queue);
+                    std::weak_ptr<models::ExportJob> jobWeak(job);
+                    _button->setClickedCallback(
+                        [queueWeak, jobWeak]
+                        {
+                            auto queue = queueWeak.lock();
+                            auto job = jobWeak.lock();
+                            if (queue && job)
+                            {
+                                if (models::isDone(job->getProgress().status))
+                                {
+                                    queue->remove(job);
+                                }
+                                else
+                                {
+                                    queue->cancel(job);
+                                }
+                            }
+                        });
+
+                    _progressObserver = ftk::Observer<models::ExportProgress>::create(
+                        job->observeProgress(),
+                        [this](const models::ExportProgress& value)
+                        {
+                            _statusLabel->setText(models::getLabel(value));
+                            _statusLabel->setTextRole(
+                                models::ExportStatus::Failed == value.status ?
+                                ftk::ColorRole::Red :
+                                ftk::ColorRole::TextDisabled);
+                            _progressBar->setValue(
+                                value.frames > 0 ?
+                                value.framesDone / static_cast<float>(value.frames) :
+                                0.F);
+                            _progressBar->setVisible(models::ExportStatus::Running == value.status);
+                            const bool done = models::isDone(value.status);
+                            _button->setTooltip(done ?
+                                "Remove the export from the list." :
+                                "Cancel the export. What has been written is left.");
+                        });
+                }
+
+            public:
+                static std::shared_ptr<JobWidget> create(
+                    const std::shared_ptr<ftk::Context>& context,
+                    const std::shared_ptr<models::ExportQueue>& queue,
+                    const std::shared_ptr<models::ExportJob>& job,
+                    const std::shared_ptr<ftk::IWidget>& parent = nullptr)
+                {
+                    auto out = std::shared_ptr<JobWidget>(new JobWidget);
+                    out->_init(context, queue, job, parent);
+                    return out;
+                }
+
+            private:
+                std::shared_ptr<ftk::Label> _nameLabel;
+                std::shared_ptr<ftk::Label> _statusLabel;
+                std::shared_ptr<ProgressBar> _progressBar;
+                std::shared_ptr<ftk::ToolButton> _button;
+                std::shared_ptr<ftk::Observer<models::ExportProgress> > _progressObserver;
+            };
+        }
+
+        struct ExportQueueWidget::Private
+        {
+            std::weak_ptr<models::ExportQueue> queue;
+            std::shared_ptr<ftk::Label> titleLabel;
+            std::shared_ptr<ftk::ToolButton> clearButton;
+            std::shared_ptr<ftk::VerticalLayout> jobsLayout;
+            std::shared_ptr<ftk::VerticalLayout> layout;
+
+            std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::ExportJob> > > jobsObserver;
+        };
+
+        void ExportQueueWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ExportQueue>& queue,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            ftk::IContainer::_init(context, "djv::ui::ExportQueueWidget", parent);
+            FTK_P();
+
+            p.queue = queue;
+
+            p.titleLabel = ftk::Label::create(context, "Queue");
+            p.titleLabel->setHStretch(ftk::Stretch::Expanding);
+            p.titleLabel->setVAlign(ftk::VAlign::Center);
+            p.clearButton = ftk::ToolButton::create(context, "Clear");
+            p.clearButton->setTooltip("Remove the exports that have stopped from the list.");
+            ftk::setScreenshotTag(p.clearButton, "Export.Queue.Clear");
+
+            p.layout = ftk::VerticalLayout::create(context);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            _setWidget(p.layout);
+            auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.titleLabel->setParent(hLayout);
+            p.clearButton->setParent(hLayout);
+            p.jobsLayout = ftk::VerticalLayout::create(context, p.layout);
+            p.jobsLayout->setSpacingRole(ftk::SizeRole::Spacing);
+            ftk::setScreenshotTag(p.jobsLayout, "Export.Queue");
+
+            p.clearButton->setClickedCallback(
+                [this]
+                {
+                    if (auto queue = _p->queue.lock())
+                    {
+                        queue->clearDone();
+                    }
+                });
+
+            p.jobsObserver = ftk::ListObserver<std::shared_ptr<models::ExportJob> >::create(
+                queue->observeJobs(),
+                [this](const std::vector<std::shared_ptr<models::ExportJob> >& value)
+                {
+                    FTK_P();
+                    p.jobsLayout->clear();
+                    if (auto context = getContext())
+                    {
+                        if (auto queue = p.queue.lock())
+                        {
+                            for (const auto& job : value)
+                            {
+                                JobWidget::create(context, queue, job, p.jobsLayout);
+                            }
+                        }
+                    }
+                    setVisible(!value.empty());
+                });
+        }
+
+        ExportQueueWidget::ExportQueueWidget() :
+            _p(new Private)
+        {}
+
+        ExportQueueWidget::~ExportQueueWidget()
+        {}
+
+        std::shared_ptr<ExportQueueWidget> ExportQueueWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ExportQueue>& queue,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ExportQueueWidget>(new ExportQueueWidget);
+            out->_init(context, queue, parent);
+            return out;
+        }
+    }
+}

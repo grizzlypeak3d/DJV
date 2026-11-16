@@ -3,6 +3,7 @@ set(HEADERS
     AudioModelTest.h
     ColorModelTest.h
     DisplaysModelTest.h
+    ExportQueueTest.h
     FilesModelTest.h
     HUDTest.h
     InfoTest.h
@@ -27,6 +28,7 @@ set(SOURCE
     AudioModelTest.cpp
     ColorModelTest.cpp
     DisplaysModelTest.cpp
+    ExportQueueTest.cpp
     FilesModelTest.cpp
     HUDTest.cpp
     InfoTest.cpp
