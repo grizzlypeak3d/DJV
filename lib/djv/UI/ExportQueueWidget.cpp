@@ -5,6 +5,7 @@
 
 #include <djv/Models/ExportQueue.h>
 
+#include <ftk/UI/DrawUtil.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
@@ -62,7 +63,7 @@ namespace djv
                 {
                     ftk::IWidget::drawEvent(drawRect, event);
                     const ftk::Box2I& g = getGeometry();
-                    event.render->drawRect(g, event.style->getColorRole(ftk::ColorRole::Base));
+                    event.render->drawRect(g, event.style->getColorRole(ftk::ColorRole::Window));
                     const int w = static_cast<int>(std::clamp(_value, 0.F, 1.F) * g.w());
                     if (w > 0)
                     {
@@ -77,7 +78,9 @@ namespace djv
                 int _height = 0;
             };
 
-            //! One export.
+            //! One export, on a card of its own as a marker is in the
+            //! Review tool, though not a button: there is nothing to do with
+            //! an export by clicking it.
             class JobWidget : public ftk::IContainer
             {
             protected:
@@ -91,8 +94,12 @@ namespace djv
 
                     const auto& options = job->getOptions();
                     _nameLabel = ftk::Label::create(context, options.name);
+                    _nameLabel->setFont(ftk::FontType::Bold);
+                    // Elided rather than clipped: a clipped label still asks
+                    // for its whole width, and a long name or error would
+                    // widen the tool.
                     _nameLabel->setHStretch(ftk::Stretch::Expanding);
-                    _nameLabel->setClipText(true);
+                    _nameLabel->setElide(true);
                     _nameLabel->setTooltip(
                         ftk::Format("{0}\nFrom: {1}").
                             arg(options.path.get()).
@@ -100,7 +107,7 @@ namespace djv
                     ftk::setScreenshotTag(_nameLabel, "Export.Queue.Name");
                     _statusLabel = ftk::Label::create(context);
                     _statusLabel->setHStretch(ftk::Stretch::Expanding);
-                    _statusLabel->setClipText(true);
+                    _statusLabel->setElide(true);
                     _statusLabel->setTextRole(ftk::ColorRole::TextDisabled);
                     ftk::setScreenshotTag(_statusLabel, "Export.Queue.Status");
                     _progressBar = ProgressBar::create(context);
@@ -109,6 +116,7 @@ namespace djv
                     ftk::setScreenshotTag(_button, "Export.Queue.Cancel");
 
                     auto layout = ftk::HorizontalLayout::create(context);
+                    layout->setMarginRole(ftk::SizeRole::MarginSmall);
                     layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
                     _setWidget(layout);
                     auto vLayout = ftk::VerticalLayout::create(context, layout);
@@ -144,7 +152,13 @@ namespace djv
                         job->observeProgress(),
                         [this](const models::ExportProgress& value)
                         {
-                            _statusLabel->setText(models::getLabel(value));
+                            const std::string label = models::getLabel(value);
+                            _statusLabel->setText(label);
+                            // The whole of an error, which is elided.
+                            _statusLabel->setTooltip(
+                                models::ExportStatus::Failed == value.status ?
+                                label :
+                                std::string());
                             _statusLabel->setTextRole(
                                 models::ExportStatus::Failed == value.status ?
                                 ftk::ColorRole::Red :
@@ -173,7 +187,22 @@ namespace djv
                     return out;
                 }
 
+                void sizeHintEvent(const ftk::SizeHintEvent& event) override
+                {
+                    ftk::IContainer::sizeHintEvent(event);
+                    _cornerRadius = event.style->getSizeRole(ftk::SizeRole::CornerRadius, event.displayScale);
+                }
+
+                void drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event) override
+                {
+                    ftk::IContainer::drawEvent(drawRect, event);
+                    event.render->drawMesh(
+                        ftk::rect(getGeometry(), _cornerRadius),
+                        event.style->getColorRole(ftk::ColorRole::Base));
+                }
+
             private:
+                int _cornerRadius = 0;
                 std::shared_ptr<ftk::Label> _nameLabel;
                 std::shared_ptr<ftk::Label> _statusLabel;
                 std::shared_ptr<ProgressBar> _progressBar;
@@ -219,7 +248,7 @@ namespace djv
             p.titleLabel->setParent(hLayout);
             p.clearButton->setParent(hLayout);
             p.jobsLayout = ftk::VerticalLayout::create(context, p.layout);
-            p.jobsLayout->setSpacingRole(ftk::SizeRole::Spacing);
+            p.jobsLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             ftk::setScreenshotTag(p.jobsLayout, "Export.Queue");
 
             p.clearButton->setClickedCallback(

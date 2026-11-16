@@ -821,35 +821,13 @@ namespace djv
                     info.type,
                     options.burnAnnotations);
 
-                // Told how it ended: a script that asked for it, and
-                // anyone at the tool if it failed.
+                // Told how it ended, for a script that asked for it. A
+                // failure is not put in a dialog: it can come long after
+                // the click, in the middle of something else. The export's
+                // row says so, and the log, which the status bar shows.
                 const auto callback = p.doneCallback;
                 p.doneCallback = nullptr;
-                auto jobWeak = std::make_shared<std::weak_ptr<models::ExportJob> >();
-                std::weak_ptr<ExportWidget> widgetWeak(
-                    std::dynamic_pointer_cast<ExportWidget>(shared_from_this()));
-                *jobWeak = queue->add(
-                    job,
-                    [callback, jobWeak, widgetWeak](bool value)
-                    {
-                        if (callback)
-                        {
-                            callback(value);
-                        }
-                        auto job = jobWeak->lock();
-                        auto widget = widgetWeak.lock();
-                        if (job && widget &&
-                            models::ExportStatus::Failed == job->getProgress().status)
-                        {
-                            if (auto context = widget->getContext())
-                            {
-                                context->getSystem<ftk::DialogSystem>()->message(
-                                    "ERROR",
-                                    ftk::Format("Error: {0}").arg(job->getProgress().error),
-                                    widget->getWindow());
-                            }
-                        }
-                    });
+                queue->add(job, callback);
             }
             catch (const std::exception& e)
             {
