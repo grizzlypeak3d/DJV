@@ -43,6 +43,8 @@ open out of the box. To play those, either install FFmpeg yourself and point
 DJV at the external FFmpeg command
 (see [documentation](https://grizzlypeak3d.github.io/DJV/index.html#files)),
 or build from source, where the codecs are compiled in.
+[DJV Studio](https://grizzlypeak3d.com/djv-studio), the commercial version
+of DJV, includes them.
 
 DJV can also be installed with pip, for Python 3.12 or newer on Linux, macOS,
 and Windows:
