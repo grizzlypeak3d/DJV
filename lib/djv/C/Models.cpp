@@ -473,7 +473,8 @@ struct djv_models
     {
         std::optional<models::WipeWidget> out;
         const auto& options = filesModel->getCompareOptions();
-        if (view && compareFile && tl::Compare::Wipe == options.compare)
+        if (view && compareFile && tl::Compare::Wipe == options.compare &&
+            filesModel->getWipeHandles())
         {
             const auto picture = tl::c::getViewPicture(view);
             if (picture.zoom > 0.F)

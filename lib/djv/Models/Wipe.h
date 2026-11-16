@@ -88,10 +88,10 @@ namespace djv
             const ftk::V2F& pos,
             bool step = false);
 
-        //! Snap a rotation, from zero to 360: to the nearest multiple of 45
-        //! degrees with step (Shift, as for a shape held square), and
-        //! otherwise to level when it is within two degrees of it, which is
-        //! what a wipe is almost always meant to be.
+        //! Snap a rotation, from zero to 360, to level or plumb: always with
+        //! step (Shift), and otherwise when it is within two degrees of it,
+        //! which is what a wipe is almost always meant to be. No diagonals:
+        //! a wipe at 45 degrees is a free turn of the ring away.
         DJV_MODELS_API float snapWipeRotation(float, bool step = false);
 
         ///@}

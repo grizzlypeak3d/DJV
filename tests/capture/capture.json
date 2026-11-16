@@ -484,6 +484,21 @@
       ]
     },
     {
+      "id": "wipe-handles",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "command": "Compare/StoreFrame" },
+        { "tool": "Files", "expand": ["Compare"] },
+        { "expect": "Files.WipeHandles", "checked": true },
+        { "command": "Compare/WipeHandles", "args": { "value": false } },
+        { "expect": "Files.WipeHandles", "checked": false },
+        { "command": "Compare/WipeHandles" },
+        { "expect": "Files.WipeHandles", "checked": true }
+      ]
+    },
+    {
       "id": "frame-store",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

@@ -120,7 +120,12 @@ namespace djv
                     "compareTime",
                     &FilesModel::getCompareTime,
                     &FilesModel::setCompareTime)
-                .def_prop_ro("observeCompareTime", &FilesModel::observeCompareTime);
+                .def_prop_ro("observeCompareTime", &FilesModel::observeCompareTime)
+                .def_prop_rw(
+                    "wipeHandles",
+                    &FilesModel::getWipeHandles,
+                    &FilesModel::setWipeHandles)
+                .def_prop_ro("observeWipeHandles", &FilesModel::observeWipeHandles);
 
             m.def("getCompareTimeLabels", &getCompareTimeLabels);
         }

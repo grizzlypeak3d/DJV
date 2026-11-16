@@ -236,6 +236,10 @@ namespace djv
             //! Where the pointer last moved to: the window sends moves
             //! where it has not, as the layout changes under it.
             std::optional<ftk::V2I> wipePointerPos;
+            //! Whether the handles are shown at all (Compare > Wipe
+            //! Handles): hidden, they are neither drawn nor taken.
+            bool wipeHandles = true;
+            std::shared_ptr<ftk::Observer<bool> > wipeHandlesObserver;
             std::shared_ptr<ftk::VerticalLayout> hudLayout;
             std::map<models::HUDPos, std::shared_ptr<ftk::VerticalLayout> > hudLayouts;
 
@@ -585,6 +589,16 @@ namespace djv
                                 s.textSize = textSize;
                             }
                         });
+                });
+            p.wipeHandlesObserver = ftk::Observer<bool>::create(
+                filesModel->observeWipeHandles(),
+                [this](bool value)
+                {
+                    FTK_P();
+                    p.wipeHandles = value;
+                    p.wipeHover = models::WipeHandle::None;
+                    setDrawUpdate();
+                    _cursorUpdate();
                 });
             p.drawTextBackgroundObserver = ftk::Observer<bool>::create(
                 drawModel->observeTextBackground(),
@@ -1034,12 +1048,11 @@ namespace djv
             FTK_P();
 
             // The wipe's handles take the left button before the bindings
-            // do, plain or with Shift, which steps the ring and holds the
-            // dot level or plumb: on a handle the handle wins. Shift and
-            // the left button bound to the wipe took the press on the ring
-            // and moved the wipe there, so it could not be turned (#957).
-            // Any other modifier, and a press off the handles, is the
-            // bindings'.
+            // do, plain or with Shift, which snaps the ring: on a handle
+            // the handle wins. Shift and the left button bound to the wipe
+            // took the press on the ring and moved the wipe there, so it
+            // could not be turned (#957). Any other modifier, and a press
+            // off the handles, is the bindings'.
             if (isInputEnabled() &&
                 ftk::MouseButton::Left == event.button &&
                 (0 == event.modifiers ||
@@ -1974,7 +1987,7 @@ namespace djv
         {
             FTK_P();
             std::optional<models::WipeWidget> out;
-            if (tl::Compare::Wipe == p.compare)
+            if (tl::Compare::Wipe == p.compare && p.wipeHandles)
             {
                 const auto boxes = _sourceBoxes();
                 if (!boxes.empty())
@@ -2019,8 +2032,8 @@ namespace djv
             auto options = p.filesModel->getCompareOptions();
             if (models::WipeHandle::Rotate == p.wipeDrag)
             {
-                // Turned from where the ring was taken, Shift stepping it
-                // by 45 degrees as it holds a shape square.
+                // Turned from where the ring was taken, Shift holding it
+                // level or plumb.
                 options.wipeRotation = models::getWipeRotationDrag(
                     p.wipePress.wipeRotation,
                     widget->center,
@@ -2030,24 +2043,10 @@ namespace djv
             }
             else
             {
-                // Shift holds it level or plumb, along whichever way it has
-                // gone further from where it was taken.
-                ftk::V2F to = pos;
-                if (modifiers & static_cast<int>(ftk::KeyModifier::Shift))
-                {
-                    if (std::abs(to.x - p.wipeGrabPos.x) >= std::abs(to.y - p.wipeGrabPos.y))
-                    {
-                        to.y = p.wipeGrabPos.y;
-                    }
-                    else
-                    {
-                        to.x = p.wipeGrabPos.x;
-                    }
-                }
                 const ftk::Box2I& g = getGeometry();
                 const ftk::V2I& viewPos = getViewPos();
                 options.wipeCenter = models::getWipeCenter(
-                    ftk::V2F(to.x - p.wipeGrab.x, to.y - p.wipeGrab.y),
+                    ftk::V2F(pos.x - p.wipeGrab.x, pos.y - p.wipeGrab.y),
                     boxes.front(),
                     ftk::V2F(g.min.x + viewPos.x, g.min.y + viewPos.y),
                     static_cast<float>(getZoom()));

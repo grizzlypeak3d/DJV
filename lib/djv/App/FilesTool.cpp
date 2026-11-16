@@ -88,6 +88,7 @@ namespace djv
             std::shared_ptr<ftk::FloatEditSlider> wipeXSlider;
             std::shared_ptr<ftk::FloatEditSlider> wipeYSlider;
             std::shared_ptr<ftk::FloatEditSlider> wipeRotationSlider;
+            std::shared_ptr<ftk::CheckBox> wipeHandlesCheckBox;
             std::shared_ptr<ftk::FloatEditSlider> overlaySlider;
             std::shared_ptr<ftk::FloatEditSlider> differenceGainSlider;
             std::shared_ptr<ftk::ComboBox> compareTimeComboBox;
@@ -118,6 +119,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::string> > mediaReferenceKeysObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > compareObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
+            std::shared_ptr<ftk::Observer<bool> > wipeHandlesObserver;
             std::shared_ptr<ftk::Observer<std::optional<models::StoredFrame> > > frameStoreObserver;
         };
 
@@ -159,6 +161,11 @@ namespace djv
             p.wipeRotationSlider->setStep(1.F);
             p.wipeRotationSlider->setLargeStep(10.F);
             p.wipeRotationSlider->setDefault(0.F);
+            p.wipeHandlesCheckBox = ftk::CheckBox::create(context);
+            p.wipeHandlesCheckBox->setHStretch(ftk::Stretch::Expanding);
+            p.wipeHandlesCheckBox->setTooltip(
+                "Show the dot that moves the wipe and the ring that turns it.");
+            ftk::setScreenshotTag(p.wipeHandlesCheckBox, "Files.WipeHandles");
 
             p.overlaySlider = ftk::FloatEditSlider::create(context);
             p.overlaySlider->setDefault(.5F);
@@ -224,6 +231,7 @@ namespace djv
             p.compareLayout->addRow("X:", p.wipeXSlider);
             p.compareLayout->addRow("Y:", p.wipeYSlider);
             p.compareLayout->addRow("Rotation:", p.wipeRotationSlider);
+            p.compareLayout->addRow("Handles:", p.wipeHandlesCheckBox);
             p.compareLayout->addRow("Amount:", p.overlaySlider);
             p.compareLayout->addRow("Gain:", p.differenceGainSlider);
             p.compareLayout->addRow("Sync by:", p.compareTimeComboBox);
@@ -348,6 +356,15 @@ namespace djv
                     }
                 });
 
+            p.wipeHandlesCheckBox->setCheckedCallback(
+                [appWeak](bool value)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getFilesModel()->setWipeHandles(value);
+                    }
+                });
+
             p.sameSizeCheckBox->setCheckedCallback(
                 [appWeak](bool value)
                 {
@@ -406,6 +423,13 @@ namespace djv
                 [this](const tl::CompareTime& value)
                 {
                     _p->compareTimeComboBox->setCurrentIndex(static_cast<int>(value));
+                });
+
+            p.wipeHandlesObserver = ftk::Observer<bool>::create(
+                app->getFilesModel()->observeWipeHandles(),
+                [this](bool value)
+                {
+                    _p->wipeHandlesCheckBox->setChecked(value);
                 });
 
             p.frameStoreObserver = ftk::Observer<std::optional<models::StoredFrame> >::create(
@@ -951,6 +975,7 @@ namespace djv
             p.compareLayout->setRowVisible(p.wipeXSlider, value.compare == tl::Compare::Wipe);
             p.compareLayout->setRowVisible(p.wipeYSlider, value.compare == tl::Compare::Wipe);
             p.compareLayout->setRowVisible(p.wipeRotationSlider, value.compare == tl::Compare::Wipe);
+            p.compareLayout->setRowVisible(p.wipeHandlesCheckBox, value.compare == tl::Compare::Wipe);
             p.compareLayout->setRowVisible(p.overlaySlider, value.compare == tl::Compare::Overlay);
             p.compareLayout->setRowVisible(
                 p.differenceGainSlider, value.compare == tl::Compare::Difference);

@@ -46,6 +46,8 @@ namespace djv
             addAction(actions["Vertical"]);
             addAction(actions["Tile"]);
             addDivider();
+            addAction(actions["WipeHandles"]);
+            addDivider();
             addAction(actions["StoreFrame"]);
             addAction(actions["ClearFrameStore"]);
             addDivider();

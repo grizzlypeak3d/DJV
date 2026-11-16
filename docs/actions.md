@@ -82,6 +82,7 @@ The commands are how the menu items are run from outside the window: with
 | Horizontal |  | `Compare/Horizontal` | Show the A and B files in a horizontal layout. |
 | Vertical |  | `Compare/Vertical` | Show the A and B files in a vertical layout. |
 | Tile | <kbd>Ctrl+T</kbd> | `Compare/Tile` | Show the A and B files in a tiled layout. |
+| Wipe Handles |  | `Compare/WipeHandles` | Show the wipe's handles over the picture: the dot that moves it and the ring that turns it. Hidden, the wipe is moved with the mouse binding and set in the Files tool. |
 | Store Frame | <kbd>Shift+H</kbd> | `Compare/StoreFrame` | Store the current frame in the frame store and compare against it: it becomes the comparison's B, wiped against A if no other comparison is chosen, whatever the time or the file, until the frame store is cleared. Storing again stores the frame then current. |
 | Clear Frame Store | <kbd>Alt+Shift+H</kbd> | `Compare/ClearFrameStore` | Clear the frame store. |
 | B > | | | A list the application fills in: files, layers, sizes. |

@@ -20,6 +20,7 @@ namespace djv
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::FilesModelItem> > > filesObserver;
             std::shared_ptr<ftk::Observer<tl::CompareOptions> > optionsObserver;
             std::shared_ptr<ftk::Observer<tl::CompareTime> > timeObserver;
+            std::shared_ptr<ftk::Observer<bool> > wipeHandlesObserver;
             std::shared_ptr<ftk::Observer<std::optional<models::StoredFrame> > > frameStoreObserver;
         };
 
@@ -210,6 +211,22 @@ namespace djv
                     }
                 });
 
+            _addCheckCommand(
+                "WipeHandles",
+                "Show the wipe's handles over the picture: the dot that moves "
+                "it and the ring that turns it. Hidden, the wipe is moved with "
+                "the mouse binding and set in the Files tool.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->getFilesModel()->setWipeHandles(
+                            args.contains("value") ?
+                            args.at("value").get<bool>() :
+                            true);
+                    }
+                });
+
             _addCommand(
                 "Relative",
                 "Compare files using relative time.",
@@ -322,6 +339,9 @@ namespace djv
                 "Tile",
                 "CompareTile",
                 _checkCommand("Tile"));
+            _actions["WipeHandles"] = ftk::Action::create(
+                "Wipe Handles",
+                _checkCommand("WipeHandles"));
             // The keys and the commands keep the enumeration's names, which
             // are what the shortcuts are stored under; only what is shown
             // changes.
@@ -351,6 +371,7 @@ namespace djv
             _addShortcut("Horizontal");
             _addShortcut("Vertical");
             _addShortcut("Tile");
+            _addShortcut("WipeHandles");
             // The first argument names the shortcut where it is stored; the
             // second is what the shortcuts editor shows.
             _addShortcut("Relative", compareTimeLabels[0]);
@@ -401,6 +422,13 @@ namespace djv
                 [this](const std::optional<models::StoredFrame>& value)
                 {
                     _actions["ClearFrameStore"]->setEnabled(value.has_value());
+                });
+
+            p.wipeHandlesObserver = ftk::Observer<bool>::create(
+                app->getFilesModel()->observeWipeHandles(),
+                [this](bool value)
+                {
+                    _actions["WipeHandles"]->setChecked(value);
                 });
 
             p.timeObserver = ftk::Observer<tl::CompareTime>::create(

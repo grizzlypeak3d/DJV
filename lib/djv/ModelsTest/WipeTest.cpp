@@ -109,9 +109,11 @@ namespace djv
                 30.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(90.F, 50.F)) - 30.F) < .01F);
             FTK_CHECK(std::abs(models::getWipeRotationDrag(
                 350.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(50.F, 90.F)) - 80.F) < .01F);
-            // With the step, to 45 degrees.
-            FTK_CHECK(45.F == models::getWipeRotationDrag(
-                0.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(80.F, 75.F), true));
+            // With the step, to level or plumb only.
+            FTK_CHECK(90.F == models::getWipeRotationDrag(
+                0.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(70.F, 85.F), true));
+            FTK_CHECK(0.F == models::getWipeRotationDrag(
+                0.F, c, ftk::V2F(90.F, 50.F), ftk::V2F(85.F, 70.F), true));
 
             // Level within two degrees of it, and nothing else snapped
             // without the step.
@@ -120,8 +122,9 @@ namespace djv
             FTK_CHECK(90.F == models::snapWipeRotation(91.F));
             FTK_CHECK(3.F == models::snapWipeRotation(3.F));
             FTK_CHECK(30.F == models::snapWipeRotation(30.F));
-            FTK_CHECK(45.F == models::snapWipeRotation(30.F, true));
-            FTK_CHECK(0.F == models::snapWipeRotation(20.F, true));
+            FTK_CHECK(0.F == models::snapWipeRotation(30.F, true));
+            FTK_CHECK(90.F == models::snapWipeRotation(50.F, true));
+            FTK_CHECK(180.F == models::snapWipeRotation(200.F, true));
             FTK_CHECK(0.F == models::snapWipeRotation(350.F, true));
         }
     }

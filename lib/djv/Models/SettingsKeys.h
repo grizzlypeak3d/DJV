@@ -75,6 +75,7 @@ namespace djv
             constexpr const char* filesCompareSameSize = "/Files/Compare/SameSize";
             constexpr const char* filesCompareTime = "/Files/Compare/Time";
             constexpr const char* filesCompareWipeCenter = "/Files/Compare/WipeCenter";
+            constexpr const char* filesCompareWipeHandles = "/Files/Compare/WipeHandles";
             constexpr const char* filesCompareWipeRotation = "/Files/Compare/WipeRotation";
             constexpr const char* informationBellows = "/Information/Bellows";
             constexpr const char* magnifyLevel = "/Magnify/Level";

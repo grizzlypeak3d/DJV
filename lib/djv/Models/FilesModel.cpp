@@ -32,6 +32,7 @@ namespace djv
             std::shared_ptr<ftk::Observer<std::shared_ptr<FilesModelItem> > > aObserver;
             std::shared_ptr<ftk::Observable<tl::CompareOptions> > compareOptions;
             std::shared_ptr<ftk::Observable<tl::CompareTime> > compareTime;
+            std::shared_ptr<ftk::Observable<bool> > wipeHandles;
             std::shared_ptr<ftk::Observable<std::optional<StoredFrame> > > storedFrame;
         };
 
@@ -75,6 +76,9 @@ namespace djv
             tl::CompareTime compareTime = tl::CompareTime::First;
             from_string(s, compareTime);
             p.compareTime = ftk::Observable<tl::CompareTime>::create(compareTime);
+            bool wipeHandles = true;
+            p.settings->getT(settingsKeys::filesCompareWipeHandles, wipeHandles);
+            p.wipeHandles = ftk::Observable<bool>::create(wipeHandles);
             p.storedFrame = ftk::Observable<std::optional<StoredFrame> >::create();
         }
 
@@ -98,6 +102,7 @@ namespace djv
                 settingsKeys::filesCompareDifferenceGain, compareOptions.differenceGain);
             p.settings->setT(settingsKeys::filesCompareSameSize, compareOptions.sameSize);
             p.settings->set(settingsKeys::filesCompareTime, to_string(p.compareTime->get()));
+            p.settings->setT(settingsKeys::filesCompareWipeHandles, p.wipeHandles->get());
         }
 
         std::shared_ptr<FilesModel> FilesModel::create(const std::shared_ptr<ftk::Settings>& settings)
@@ -827,6 +832,21 @@ namespace djv
         {
             FTK_P();
             p.compareTime->setIfChanged(value);
+        }
+
+        bool FilesModel::getWipeHandles() const
+        {
+            return _p->wipeHandles->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<bool> > FilesModel::observeWipeHandles() const
+        {
+            return _p->wipeHandles;
+        }
+
+        void FilesModel::setWipeHandles(bool value)
+        {
+            _p->wipeHandles->setIfChanged(value);
         }
 
         const std::optional<StoredFrame>& FilesModel::getFrameStore() const

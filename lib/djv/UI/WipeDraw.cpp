@@ -110,7 +110,7 @@ namespace djv
             }
 
             // The dot that moves it.
-            const float r = (models::WipeHandle::Center == highlight ? 8.F : 6.F) * s;
+            const float r = (models::WipeHandle::Center == highlight ? 7.F : 5.F) * s;
             drawDisc(render, widget.center, r + 1.5F * s, dark);
             drawDisc(render, widget.center, r, light);
         }

@@ -64,6 +64,7 @@ namespace djv
                 settingsKeys::filesCompareSameSize,
                 settingsKeys::filesCompareTime,
                 settingsKeys::filesCompareWipeCenter,
+                settingsKeys::filesCompareWipeHandles,
                 settingsKeys::filesCompareWipeRotation,
                 settingsKeys::informationBellows,
                 settingsKeys::magnifyLevel,

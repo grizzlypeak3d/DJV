@@ -296,6 +296,13 @@ namespace djv
             //! Set the compare time mode.
             DJV_MODELS_API void setCompareTime(tl::CompareTime);
 
+            //! Whether the wipe's handles are shown over the picture: the
+            //! dot that moves it and the ring that turns it. Hidden, the
+            //! wipe is moved with the mouse binding and the Files tool.
+            DJV_MODELS_API bool getWipeHandles() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeWipeHandles() const;
+            DJV_MODELS_API void setWipeHandles(bool);
+
             //! Get the stored frame.
             DJV_MODELS_API const std::optional<StoredFrame>& getFrameStore() const;
 
