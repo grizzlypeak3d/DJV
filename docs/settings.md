@@ -37,7 +37,7 @@ The **Mouse** section maps mouse buttons (and optional modifier keys) to differe
 
 ![Keyboard shortcuts](assets/keyboard-shortcuts.svg)
 
-Each action can have a primary and a secondary shortcut, in the two columns of the table. To set one, click it in the table and press the new key combination; to remove it, click it and then the clear button beside it. A shortcut is shown in red if it conflicts with another. The arrow keys move between the shortcuts and <kbd>Return</kbd> edits the current one; <kbd>Return</kbd> again, or <kbd>Tab</kbd>, leaves it unchanged. The search box helps find an action by name.
+Each action can have a primary and a secondary shortcut, in the two columns of the table. To set one, click it in the table and press the new key combination; to remove it, click it and then the clear button beside it. A shortcut is shown in red if it conflicts with another; pressed, it does what the first of them in the menus does, and only that. The arrow keys move between the shortcuts and <kbd>Return</kbd> edits the current one; <kbd>Return</kbd> again, or <kbd>Tab</kbd>, leaves it unchanged. The search box helps find an action by name.
 
 > [!NOTE]
 > On macOS some shortcuts use the **Command** key instead of **Ctrl**.
