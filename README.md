@@ -16,6 +16,10 @@ CORE FEATURES:
 * Experimental support for USD files
 * Available for Linux, macOS, and Windows
 
+[DJV Studio](https://grizzlypeak3d.com/djv-studio), the commercial version of
+DJV, adds H.264, HEVC, ProRes and AAC playback and Blackmagic Design video
+output.
+
 [Documentation](https://grizzlypeak3d.github.io/DJV/index.html)
 
 DJV is built with the [tlRender](https://github.com/grizzlypeak3d/tlRender) and
