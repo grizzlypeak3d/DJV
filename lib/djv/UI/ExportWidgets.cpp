@@ -289,6 +289,10 @@ namespace djv
 
             p.exportButton = ftk::PushButton::create(context, "Export Image");
             ftk::setScreenshotTag(p.exportButton, "Export.ImageExport");
+            p.exportButton->setTooltip(
+                "Add an export of the current frame\n"
+                "to the queue. Exports run one at a time: open\n"
+                "another file and export it to queue that one too.");
 
             p.layout = ftk::VerticalLayout::create(context);
 
@@ -488,6 +492,10 @@ namespace djv
 
             p.exportButton = ftk::PushButton::create(context, "Export Sequence");
             ftk::setScreenshotTag(p.exportButton, "Export.SeqExport");
+            p.exportButton->setTooltip(
+                "Add an export of the in/out range as an image sequence\n"
+                "to the queue. Exports run one at a time: open\n"
+                "another file and export it to queue that one too.");
 
             p.layout = ftk::VerticalLayout::create(context);
 
@@ -748,6 +756,10 @@ namespace djv
 
             p.exportButton = ftk::PushButton::create(context, "Export Movie");
             ftk::setScreenshotTag(p.exportButton, "Export.MovieExport");
+            p.exportButton->setTooltip(
+                "Add an export of the in/out range as a movie\n"
+                "to the queue. Exports run one at a time: open\n"
+                "another file and export it to queue that one too.");
 
             p.layout = ftk::VerticalLayout::create(context);
 
