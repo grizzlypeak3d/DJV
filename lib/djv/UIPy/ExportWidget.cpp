@@ -13,6 +13,7 @@
 #include <djv/Models/AnnotationsModel.h>
 
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/ExportQueue.h>
 #include <djv/Models/FilesModel.h>
 #include <djv/Models/SettingsModel.h>
 #include <djv/Models/TimeUnitsModel.h>
