@@ -494,11 +494,12 @@ struct djv_models
     {
         if (const auto widget = wipeWidget())
         {
-            // No letters: the bridge has no font system to hand.
+            // The letters are sized to the ring, so the font's size here
+            // does not matter, only which font it is.
             ui::drawWipe(
                 render,
-                nullptr,
-                ftk::FontInfo(),
+                context->getSystem<ftk::FontSystem>(),
+                ftk::FontInfo(ftk::getDefaultFont(ftk::FontType::Bold), 12),
                 *widget,
                 tl::c::getViewPicture(view).displayScale,
                 models::WipeHandle::None,
