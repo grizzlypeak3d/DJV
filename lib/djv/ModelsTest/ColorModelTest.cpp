@@ -28,6 +28,7 @@ namespace djv
             _resolve();
             _labels();
             _fitToConfig();
+            _defaults();
         }
 
         // Options that name what the configuration does not have -- saved
@@ -73,6 +74,23 @@ namespace djv
             model->setOCIOOptions(options);
             FTK_CHECK("scene_linear" == model->getOCIOOptions().input);
 #endif // TLRENDER_OCIO
+        }
+
+        void ColorModelTest::_defaults()
+        {
+            // OpenColorIO off by default unless the application turns it
+            // on, as DJV Studio does; the environment variable turns it on
+            // regardless, so the test stands aside when it is set.
+            if (!tl::hasOCIOEnvVar())
+            {
+                FTK_CHECK(!models::ColorModel::getDefaultOCIOOptions().enabled);
+                models::ColorModel::setDefaultOCIOEnabled(true);
+                const auto options = models::ColorModel::getDefaultOCIOOptions();
+                FTK_CHECK(options.enabled);
+                FTK_CHECK(tl::OCIOConfig::BuiltIn == options.config);
+                models::ColorModel::setDefaultOCIOEnabled(false);
+                FTK_CHECK(!models::ColorModel::getDefaultOCIOOptions().enabled);
+            }
         }
 
         // The resolution order against the built-in configuration, which

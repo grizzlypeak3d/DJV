@@ -49,8 +49,16 @@ namespace djv
 
             //! Get the default OpenColorIO options: the configuration in
             //! the OCIO environment variable when it is set, otherwise
-            //! OCIO turned off.
+            //! the built-in configuration, turned off unless the
+            //! application turned it on (see setDefaultOCIOEnabled()).
             DJV_MODELS_API static tl::OCIOOptions getDefaultOCIOOptions();
+
+            //! Set whether OpenColorIO is on by default, with the built-in
+            //! configuration: for an application whose files are mostly
+            //! camera log encodings, which look right only managed (DJV
+            //! Studio). Off unless set; settings already saved are the
+            //! user's and win. Set before the model is created.
+            DJV_MODELS_API static void setDefaultOCIOEnabled(bool);
 
             //! Get the OpenColorIO options.
             DJV_MODELS_API const tl::OCIOOptions& getOCIOOptions() const;

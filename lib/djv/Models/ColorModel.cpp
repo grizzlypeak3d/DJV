@@ -160,9 +160,20 @@ namespace djv
             p.lutOptions = ftk::Observable<tl::LUTOptions>::create(lutOptions);
         }
 
+        namespace
+        {
+            bool defaultOCIOEnabled = false;
+        }
+
+        void ColorModel::setDefaultOCIOEnabled(bool value)
+        {
+            defaultOCIOEnabled = value;
+        }
+
         tl::OCIOOptions ColorModel::getDefaultOCIOOptions()
         {
             tl::OCIOOptions out;
+            out.enabled = defaultOCIOEnabled;
             // The OCIO environment variable is taken as the configuration
             // to use, as other applications do. It is only a default: once
             // there are color settings they are the user's choice, and the
