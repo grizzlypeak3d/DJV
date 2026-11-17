@@ -567,31 +567,35 @@
     {
       "id": "export-queue",
       "strict": true,
-      "window": { "w": 1000, "h": 700, "splitter2": 0.55 },
+      "window": { "w": 1000, "h": 900, "splitter2": 0.55 },
       "setup": [
         { "open": "etc/SampleData/Counter.#.png" },
         { "exportDir": "{output}" },
         { "tool": "Export" },
+        { "export": { "SeqExt": ".png", "ImageExt": ".png" } },
         { "expect": "Export.Queue", "visible": false },
         { "tab": "Sequence" },
+        { "expect": "Export.SeqExport", "enabled": true },
         { "click": "Export.SeqExport" },
         { "tab": "Image" },
         { "click": "Export.ImageExport" },
         { "expect": "Export.Queue", "visible": true },
         { "wait": 3.0 },
-        { "expect": "Export.Queue.Name", "text": "Counter.0.tif" },
+        { "expect": "Export.Queue.Name", "text": "Counter.0.png" },
         { "expect": "Export.Queue.Status", "text": "Done" }
       ]
     },
     {
       "id": "export-remove",
       "strict": true,
-      "window": { "w": 1000, "h": 700, "splitter2": 0.55 },
+      "window": { "w": 1000, "h": 900, "splitter2": 0.55 },
       "setup": [
         { "open": "etc/SampleData/Counter.#.png" },
         { "exportDir": "{output}" },
         { "tool": "Export" },
+        { "export": { "ImageExt": ".png" } },
         { "tab": "Image" },
+        { "expect": "Export.ImageExport", "enabled": true },
         { "click": "Export.ImageExport" },
         { "wait": 2.0 },
         { "expect": "Export.Queue.Status", "text": "Done" },

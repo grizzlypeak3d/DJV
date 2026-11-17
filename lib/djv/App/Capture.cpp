@@ -259,6 +259,22 @@ namespace djv
                         ftk::LogType::Error);
                 }
             }
+            else if (step.contains("export"))
+            {
+                // Change export settings by their settings keys, e.g.
+                // { "export": { "SeqExt": ".png" } }. A shot that exports
+                // has to name a format every build writes: a minimal one
+                // has PNG and OpenEXR, not the TIFF the tabs start with.
+                auto settingsModel = app->getSettingsModel();
+                nlohmann::json json;
+                models::to_json(json, settingsModel->getExport());
+                json.merge_patch(step.at("export"));
+                // Onto the settings there are, which keep the file names
+                // the JSON leaves out.
+                models::ExportSettings exportSettings = settingsModel->getExport();
+                models::from_json(json, exportSettings);
+                settingsModel->setExport(exportSettings);
+            }
             else if (step.contains("exportDir"))
             {
                 // Set the export directory, e.g. { "exportDir": "/tmp" }. It is
