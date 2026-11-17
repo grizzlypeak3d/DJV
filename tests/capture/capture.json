@@ -567,15 +567,15 @@
     {
       "id": "export-queue",
       "strict": true,
-      "window": { "w": 1400, "h": 900, "splitter": 0.6 },
+      "window": { "w": 1000, "h": 700, "splitter2": 0.55 },
       "setup": [
         { "open": "etc/SampleData/Counter.#.png" },
         { "exportDir": "{output}" },
         { "tool": "Export" },
         { "expect": "Export.Queue", "visible": false },
-        { "click": ["Export.Tabs", 0.2, 0.5] },
+        { "tab": "Sequence" },
         { "click": "Export.SeqExport" },
-        { "click": ["Export.Tabs", 0.04, 0.5] },
+        { "tab": "Image" },
         { "click": "Export.ImageExport" },
         { "expect": "Export.Queue", "visible": true },
         { "wait": 3.0 },
@@ -586,12 +586,12 @@
     {
       "id": "export-remove",
       "strict": true,
-      "window": { "w": 1400, "h": 900, "splitter": 0.6 },
+      "window": { "w": 1000, "h": 700, "splitter2": 0.55 },
       "setup": [
         { "open": "etc/SampleData/Counter.#.png" },
         { "exportDir": "{output}" },
         { "tool": "Export" },
-        { "click": ["Export.Tabs", 0.04, 0.5] },
+        { "tab": "Image" },
         { "click": "Export.ImageExport" },
         { "wait": 2.0 },
         { "expect": "Export.Queue.Status", "text": "Done" },
