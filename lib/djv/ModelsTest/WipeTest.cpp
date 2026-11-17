@@ -87,6 +87,16 @@ namespace djv
             FTK_CHECK(models::isWipeTurnHeld(widget, ftk::V2F(112.F, 52.F)));
             FTK_CHECK(!models::isWipeTurnHeld(widget, ftk::V2F(116.F, 50.F)));
             FTK_CHECK(!models::isWipeTurnHeld(widget, ftk::V2F(100.F, 150.F)));
+
+            // The pointer is either end of the seam: of a rotation and its
+            // opposite, the nearer to where the wipe is, the short way
+            // round.
+            FTK_CHECK(10.F == models::getWipeRotationNearest(10.F, 0.F));
+            FTK_CHECK(10.F == models::getWipeRotationNearest(190.F, 0.F));
+            FTK_CHECK(190.F == models::getWipeRotationNearest(190.F, 180.F));
+            FTK_CHECK(190.F == models::getWipeRotationNearest(10.F, 180.F));
+            FTK_CHECK(350.F == models::getWipeRotationNearest(170.F, 0.F));
+            FTK_CHECK(0.F == models::getWipeRotationNearest(180.F, 350.F));
         }
 
         void WipeTest::_drag()

@@ -2033,20 +2033,24 @@ namespace djv
             if (models::WipeHandle::Rotate == p.wipeDrag)
             {
                 // Held while the pointer crosses the middle, where the
-                // angle swings fast; it is measured from where the ring
-                // was taken, so it picks up again on the far side.
+                // angle swings fast.
                 if (models::isWipeTurnHeld(*widget, pos))
                 {
                     return;
                 }
                 // Turned from where the ring was taken, Shift stepping it
-                // by 45 degrees as it holds a shape square.
-                options.wipeRotation = models::getWipeRotationDrag(
-                    p.wipePress.wipeRotation,
-                    widget->center,
-                    p.wipeGrabPos,
-                    pos,
-                    modifiers & static_cast<int>(ftk::KeyModifier::Shift));
+                // by 45 degrees as it holds a shape square; the pointer is
+                // either end of the seam, so coming out of the middle on
+                // the far side carries on rather than turning it half way
+                // round.
+                options.wipeRotation = models::getWipeRotationNearest(
+                    models::getWipeRotationDrag(
+                        p.wipePress.wipeRotation,
+                        widget->center,
+                        p.wipeGrabPos,
+                        pos,
+                        modifiers & static_cast<int>(ftk::KeyModifier::Shift)),
+                    options.wipeRotation);
             }
             else
             {

@@ -128,6 +128,20 @@ namespace djv
             return distance(pos, widget.center) < widget.radius * wipeMoveFraction;
         }
 
+                float getWipeRotationNearest(float rotation, float current)
+        {
+            // How far apart two rotations are, the short way round.
+            const auto apart = [](float a, float b)
+            {
+                const float d = std::fmod(std::abs(a - b), 360.F);
+                return std::min(d, 360.F - d);
+            };
+            const float opposite = std::fmod(rotation + 180.F, 360.F);
+            return apart(opposite, current) < apart(rotation, current) ?
+                opposite :
+                rotation;
+        }
+
                 float snapWipeRotation(float value, bool step)
         {
             const float increment = step ? 45.F : 90.F;

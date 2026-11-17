@@ -101,12 +101,17 @@ namespace djv
 
         //! Whether a turn holds its angle with the pointer at a point: in
         //! the middle of the disk, where the angle around the center swings
-        //! fast and, at the center, is not there at all. A drag through the
-        //! middle holds the wipe still, then turns it to point at the
-        //! pointer on the far side.
+        //! fast and, at the center, is not there at all.
         DJV_MODELS_API bool isWipeTurnHeld(
             const WipeWidget&,
             const ftk::V2F& pos);
+
+        //! Of a rotation and the one opposite it, which both put the seam
+        //! through the same points, the one nearer the current rotation,
+        //! from zero to 360. A turn takes the pointer as either end of the
+        //! seam, so a drag across the middle carries on from where the wipe
+        //! is rather than turning it half way round.
+        DJV_MODELS_API float getWipeRotationNearest(float rotation, float current);
 
         //! Snap a rotation, from zero to 360: to the nearest multiple of 45
         //! degrees with step (Shift, as for a shape held square), and
