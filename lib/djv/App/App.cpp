@@ -639,9 +639,11 @@ namespace djv
                 confirmClose(onProceed);
                 return;
             }
+            // Each button says what it does: "Cancel" beside a question about
+            // cancelling the exports read as either answer.
             _context->getSystem<ftk::DialogSystem>()->confirm(
-                "Export",
-                "Exports are still running; quit and cancel them?",
+                "Quit",
+                "Exports are still running; quitting stops them.",
                 p.mainWindow,
                 [this, onProceed](bool value)
                 {
@@ -651,7 +653,8 @@ namespace djv
                         confirmClose(onProceed);
                     }
                 },
-                "Quit");
+                "Quit",
+                "Keep Exporting");
         }
 
         void App::confirmClose(const std::function<void()>& onProceed)
