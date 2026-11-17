@@ -2250,6 +2250,8 @@ namespace djv
             {
                 drawWipe(
                     event.render,
+                    event.fontSystem,
+                    event.style->getFont(ftk::FontType::Bold, event.displayScale),
                     *widget,
                     event.displayScale,
                     p.wipeHover,

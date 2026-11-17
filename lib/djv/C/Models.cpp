@@ -494,8 +494,11 @@ struct djv_models
     {
         if (const auto widget = wipeWidget())
         {
+            // No letters: the bridge has no font system to hand.
             ui::drawWipe(
                 render,
+                nullptr,
+                ftk::FontInfo(),
                 *widget,
                 tl::c::getViewPicture(view).displayScale,
                 models::WipeHandle::None,

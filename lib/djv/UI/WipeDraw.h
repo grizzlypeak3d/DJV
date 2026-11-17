@@ -7,6 +7,7 @@
 
 #include <djv/Models/Wipe.h>
 
+#include <ftk/Core/FontSystem.h>
 #include <ftk/Core/IRender.h>
 
 namespace djv
@@ -33,8 +34,14 @@ namespace djv
         //! lighter, and the part pressed lighter still. The seam itself
         //! shows the wipe's angle, through the middle. The opacity fades
         //! the whole of it.
+        //!
+        //! With a font system, "A" and "B" are drawn just outside the
+        //! ring, each on its own side of the seam (#967): A, the current
+        //! file, on the left when the wipe is upright.
         DJV_UI_API void drawWipe(
             const std::shared_ptr<ftk::IRender>&,
+            const std::shared_ptr<ftk::FontSystem>&,
+            const ftk::FontInfo&,
             const models::WipeWidget&,
             float displayScale,
             models::WipeHandle hover = models::WipeHandle::None,

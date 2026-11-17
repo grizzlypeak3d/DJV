@@ -35,8 +35,9 @@ Changes:
   color, compare, frame store, audio), lit while one of them is in use.
 * The compare wipe has a dot to move it, from anywhere in the middle around
   it, and a ring to turn it, which settles on level, and Shift steps it by 45
-  degrees. They fade while the pointer rests, and Compare > Wipe Handles
-  hides them (#957, #966).
+  degrees; the ring marks the angle and which side is A and which is B. They
+  fade while the pointer rests, and Compare > Wipe Handles hides them (#957,
+  #966, #967).
 * Double clicking the view frames the image.
 * Add a Dither view option.
 * Add a frame guide and safe areas, in the View menu and the View tool
