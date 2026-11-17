@@ -36,7 +36,10 @@ namespace djv
         struct Capture::Private
         {
             std::weak_ptr<App> app;
-            std::filesystem::path outputDir;
+            //! Where a shot that exports writes: a directory of its own,
+            //! emptied when the shot starts, so that a file from the run
+            //! before does not stop it to ask about overwriting.
+            std::filesystem::path exportDir;
         };
 
         void Capture::_init(
@@ -48,7 +51,7 @@ namespace djv
         {
             ftk::Capture::_init(context, app, manifest, shotId, outputDir);
             _p->app = app;
-            _p->outputDir = outputDir;
+            _p->exportDir = outputDir / (shotId + "-export");
         }
 
         Capture::Capture() :
@@ -261,16 +264,17 @@ namespace djv
                 // Set the export directory, e.g. { "exportDir": "/tmp" }. It is
                 // filled in with the home directory otherwise, which would put
                 // whoever built the documentation into the screenshot.
-                // "{output}" is the directory the shot is written to, for a
-                // shot that exports something.
+                // "{output}" is a directory of the shot's own beside its
+                // screenshot, emptied first, for a shot that exports.
                 auto settingsModel = app->getSettingsModel();
                 auto exportSettings = settingsModel->getExport();
                 exportSettings.dir = step.at("exportDir").get<std::string>();
                 if ("{output}" == exportSettings.dir)
                 {
                     std::error_code ec;
-                    std::filesystem::create_directories(_p->outputDir, ec);
-                    exportSettings.dir = ftk::fromFileSystem(_p->outputDir);
+                    std::filesystem::remove_all(_p->exportDir, ec);
+                    std::filesystem::create_directories(_p->exportDir, ec);
+                    exportSettings.dir = ftk::fromFileSystem(_p->exportDir);
                 }
                 settingsModel->setExport(exportSettings);
             }
