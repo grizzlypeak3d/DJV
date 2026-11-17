@@ -202,7 +202,9 @@ namespace djv
                 const OTIO_NS::TimeRange& range,
                 const std::shared_ptr<models::TimeUnitsModel>& timeUnitsModel)
             {
-                return ftk::Format("{0} - {1} ({2} frames @ {3})").
+                // Two lines, the span and then how much of it there is: on
+                // one line, it was the widest thing in the Export tool.
+                return ftk::Format("{0} - {1}\n{2} frames @ {3}").
                     arg(timeUnitsModel->getLabel(range.start_time())).
                     arg(timeUnitsModel->getLabel(range.end_time_inclusive())).
                     arg(static_cast<int64_t>(range.duration().value())).
@@ -628,7 +630,9 @@ namespace djv
                 const OTIO_NS::TimeRange range = p.player->getInOutRange();
                 if (error.empty())
                 {
-                    fileText = ftk::Format("{0} - {1}").
+                    // The first file and the last, a line each, so that
+                    // each is elided on its own if the tool is narrow.
+                    fileText = ftk::Format("{0}\n{1}").
                         arg(getExportFileName(
                             options,
                             models::ExportFileType::Seq,
