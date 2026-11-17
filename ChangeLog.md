@@ -33,9 +33,10 @@ Changes:
 * Audio > Volume Up and Volume Down step by 5% (#649).
 * The status indicator shows a letter for each group of options (view,
   color, compare, frame store, audio), lit while one of them is in use.
-* The compare wipe has a dot to move it and a disk to turn it, which settles
-  on level, and Shift steps it by 45 degrees. They fade while the pointer
-  rests, and Compare > Wipe Handles hides them.
+* The compare wipe has a dot to move it, from anywhere in the middle around
+  it, and a ring to turn it, which settles on level, and Shift steps it by 45
+  degrees. They fade while the pointer rests, and Compare > Wipe Handles
+  hides them (#957, #966).
 * Double clicking the view frames the image.
 * Add a Dither view option.
 * Add a frame guide and safe areas, in the View menu and the View tool

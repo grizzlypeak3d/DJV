@@ -5,6 +5,7 @@
 
 #include <ftk/Core/Math.h>
 
+#include <algorithm>
 #include <cmath>
 
 namespace djv
@@ -59,7 +60,7 @@ namespace djv
         {
             WipeHandle out = WipeHandle::None;
             const float d = distance(pos, widget.center);
-            if (d <= reach)
+            if (d <= std::max(reach, widget.radius * wipeMoveFraction))
             {
                 out = WipeHandle::Center;
             }

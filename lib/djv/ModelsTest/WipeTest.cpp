@@ -64,11 +64,17 @@ namespace djv
             const auto widget = models::getWipeWidget(options, box, ftk::V2F(), 1.F, 30.F);
             FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(102.F, 21.F), 5.F));
             FTK_CHECK(models::WipeHandle::Center == models::getWipeHandle(widget, ftk::V2F(99.F, 52.F), 5.F));
-            // The disk is taken anywhere on it: its edge right, and down
-            // and left, inside it off the dot, and just past its edge.
+            // The middle of the disk moves it, well off the dot: a press
+            // that misses the dot does not turn it (#966).
+            FTK_CHECK(models::WipeHandle::Center == models::getWipeHandle(widget, ftk::V2F(112.F, 50.F), 5.F));
+            FTK_CHECK(models::WipeHandle::Center == models::getWipeHandle(widget, ftk::V2F(100.F, 65.F), 5.F));
+            // Within reach of the dot when that is larger than the middle.
+            FTK_CHECK(models::WipeHandle::Center == models::getWipeHandle(widget, ftk::V2F(118.F, 50.F), 20.F));
+            // The band is taken anywhere on it: its edge right, and down
+            // and left, just outside the middle, and just past its edge.
             FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(130.F, 50.F), 5.F));
             FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(79.F, 71.F), 5.F));
-            FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(112.F, 50.F), 5.F));
+            FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(116.F, 50.F), 5.F));
             FTK_CHECK(models::WipeHandle::Rotate == models::getWipeHandle(widget, ftk::V2F(100.F, 84.F), 5.F));
             FTK_CHECK(models::WipeHandle::None == models::getWipeHandle(widget, ftk::V2F(100.F, 86.F), 5.F));
             // On the wipe, away from the handles: nothing.

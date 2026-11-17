@@ -25,11 +25,13 @@ namespace djv
         constexpr float wipeTouchReach = 22.F;
 
         //! Draw the wipe's handles so that they show on any picture: a
-        //! translucent dark disk with a faint light edge, and a light dot
-        //! with a dark outline at its center. Like a widget, the part
-        //! pointed at is lighter, and the part pressed lighter still. The
-        //! seam itself shows the wipe's angle. The opacity fades the whole
-        //! of it.
+        //! translucent dark band with faint light edges, which turns it,
+        //! and a light dot with a dark outline in the clear middle, which
+        //! moves it from anywhere in the middle (see
+        //! models::wipeMoveFraction). Like a widget, the part pointed at is
+        //! lighter, and the part pressed lighter still. The seam itself
+        //! shows the wipe's angle, through the middle. The opacity fades
+        //! the whole of it.
         DJV_UI_API void drawWipe(
             const std::shared_ptr<ftk::IRender>&,
             const models::WipeWidget&,

@@ -99,17 +99,33 @@ namespace djv
             const ftk::V2I c(std::round(widget.center.x), std::round(widget.center.y));
             const ftk::V2F cf(c.x, c.y);
 
-            // The disk that turns it.
-            drawDisc(render, c, widget.radius, faded(diskColor, opacity));
+            // The band that turns it, around the middle that moves it,
+            // which is left clear so the seam shows through.
+            const float inner = widget.radius * models::wipeMoveFraction;
+            const float bandRadius = (inner + widget.radius) / 2.F;
+            const float bandWidth = widget.radius - inner;
+            drawRing(render, cf, bandRadius, bandWidth, faded(diskColor, opacity));
             const float light =
                 models::WipeHandle::Rotate == pressed ? pressedLight :
                 models::WipeHandle::Rotate == hover ? hoverLight :
                 0.F;
             if (light > 0.F)
             {
-                drawDisc(render, c, widget.radius, ftk::Color4F(1.F, 1.F, 1.F, light * opacity));
+                drawRing(render, cf, bandRadius, bandWidth, ftk::Color4F(1.F, 1.F, 1.F, light * opacity));
             }
             drawRing(render, cf, widget.radius, 1.F * s, faded(edgeColor, opacity));
+            drawRing(render, cf, inner, 1.F * s, faded(edgeColor, opacity));
+
+            // The middle, lit faintly while it is pointed at or pressed,
+            // so how much of it moves the wipe shows.
+            const float middleLight =
+                models::WipeHandle::Center == pressed ? pressedLight :
+                models::WipeHandle::Center == hover ? hoverLight :
+                0.F;
+            if (middleLight > 0.F)
+            {
+                drawDisc(render, c, inner, ftk::Color4F(1.F, 1.F, 1.F, middleLight * opacity));
+            }
 
             // The dot that moves it.
             const float gray =

@@ -17,7 +17,7 @@ The tool bar has one button for the modes: it shows the mode chosen last and tur
 **Compare > Next** (<kbd>Shift+Page Down</kbd>) and **Compare > Previous** (<kbd>Shift+Page Up</kbd>) change the B file to the next or previous one in the file list.
 
 > [!NOTE]
-> The wipe has a dot at its center on a translucent disk. Drag the dot to move the wipe, and drag the disk, from anywhere on it, to turn it. It settles on level when it comes within two degrees of horizontal or vertical. Hold **Shift** while turning to turn it in steps of 45 degrees. The dot and the disk take the mouse before any mouse binding. They fade when the pointer rests or leaves the view, so they are not left over the seam, and come back when it moves; **Compare > Wipe Handles** hides them altogether, leaving the wipe to the mouse binding and the **Files** tool. **Alt** + left mouse button drags the wipe from anywhere.
+> The wipe has a dot at its center inside a translucent ring. Drag the dot, or anywhere in the clear middle around it, to move the wipe, and drag the ring, from anywhere on it, to turn it. It settles on level when it comes within two degrees of horizontal or vertical. Hold **Shift** while turning to turn it in steps of 45 degrees. The dot and the ring take the mouse before any mouse binding. They fade when the pointer rests or leaves the view, so they are not left over the seam, and come back when it moves; **Compare > Wipe Handles** hides them altogether, leaving the wipe to the mouse binding and the **Files** tool. **Alt** + left mouse button drags the wipe from anywhere.
 
 ## Compare modes
 
@@ -26,7 +26,7 @@ The modes are toggles rather than a list to choose from: turning one on turns of
 | Mode | What it shows | Shortcut |
 |---|---|---|
 | **B** | Only the **B** file | <kbd>Ctrl+B</kbd> |
-| **Wipe** | A wipe between **A** and **B**, moved with its dot and turned with its disk | <kbd>Ctrl+W</kbd> |
+| **Wipe** | A wipe between **A** and **B**, moved with its dot and turned with its ring | <kbd>Ctrl+W</kbd> |
 | **Butterfly** | The same half of **A** and **B**, one mirrored, meeting in the middle |  |
 | **Overlay** | **B** layered on top of **A** |  |
 | **Difference** | The pixel difference between **A** and **B** |  |

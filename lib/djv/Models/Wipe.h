@@ -16,9 +16,12 @@ namespace djv
         //! \name Wipe
         //! The wipe's handles over the picture, for the desktop's viewport
         //! and the iPad to draw and drag the same way: a dot at its center
-        //! that moves it, and a disk around the dot that turns it, from
-        //! anywhere on it -- a second dot to turn it did not read as
-        //! turning, and a ring with ticks was more than it needed (#957).
+        //! that moves it from anywhere within half the disk, and the band
+        //! around that which turns it, from anywhere on it -- a second dot
+        //! to turn it did not read as turning, and a ring with ticks was
+        //! more than it needed (#957). Turning starts no nearer the center
+        //! than the band: the angle swings fast there, and a press just off
+        //! the dot turned the wipe when it was meant to move it (#966).
         //! There is no line across the picture, which would hide the seam
         //! being looked at; the seam shows the angle. All in the view's
         //! pixels.
@@ -58,7 +61,13 @@ namespace djv
             float zoom,
             float rotateDistance);
 
-        //! The handle within reach of a point: the dot, or else the disk,
+        //! The fraction of the disk's radius, from the center, that moves
+        //! the wipe rather than turning it.
+        constexpr float wipeMoveFraction = .5F;
+
+        //! The handle within reach of a point: the dot, from anywhere in
+        //! the middle of the disk (see wipeMoveFraction) or within reach of
+        //! the dot, whichever is larger; or else the band around it,
         //! anywhere on it or within reach of its edge.
         DJV_MODELS_API WipeHandle getWipeHandle(
             const WipeWidget&,
