@@ -913,11 +913,23 @@ namespace djv
                     p.secondaryWindow.reset();
                     p.secondaryMonitorApplied.reset();
                 });
+#if defined(__linux__)
+            // Full screen before it is first shown, so that it appears on
+            // its monitor already filling it: shown first, a Wayland
+            // compositor put it on a display of its own choosing and then
+            // moved it, with an animation, or left it there.
+            if (fullScreen)
+            {
+                p.secondaryWindow->setFullScreen(true);
+            }
+            p.secondaryWindow->show();
+#else // __linux__
             p.secondaryWindow->show();
             if (fullScreen)
             {
                 p.secondaryWindow->setFullScreen(true);
             }
+#endif // __linux__
             // The picture alone on a monitor it fills: no heads up display,
             // as presentation mode does for the main window.
             p.secondaryWindow->getViewport()->setHUDActive(!fullScreen);
