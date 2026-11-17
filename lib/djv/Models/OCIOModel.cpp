@@ -334,7 +334,7 @@ namespace djv
                 switch (options.config)
                 {
                 case tl::OCIOConfig::BuiltIn:
-                    p.ocioConfig = OCIO::Config::CreateFromFile("ocio://default");
+                    p.ocioConfig = OCIO::Config::CreateFromFile(tl::getBuiltInOCIOConfig().c_str());
                     break;
                 case tl::OCIOConfig::EnvVar:
                     // Without the variable there is nothing to read; the
