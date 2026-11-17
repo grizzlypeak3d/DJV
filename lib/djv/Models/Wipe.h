@@ -99,6 +99,15 @@ namespace djv
             const ftk::V2F& pos,
             bool step = false);
 
+        //! Whether a turn holds its angle with the pointer at a point: in
+        //! the middle of the disk, where the angle around the center swings
+        //! fast and, at the center, is not there at all. A drag through the
+        //! middle holds the wipe still, then turns it to point at the
+        //! pointer on the far side.
+        DJV_MODELS_API bool isWipeTurnHeld(
+            const WipeWidget&,
+            const ftk::V2F& pos);
+
         //! Snap a rotation, from zero to 360: to the nearest multiple of 45
         //! degrees with step (Shift, as for a shape held square), and
         //! otherwise to level or plumb when it is within two degrees of it,

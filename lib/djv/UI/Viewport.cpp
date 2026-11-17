@@ -2032,7 +2032,14 @@ namespace djv
             auto options = p.filesModel->getCompareOptions();
             if (models::WipeHandle::Rotate == p.wipeDrag)
             {
-                // Turned from where the disk was taken, Shift stepping it
+                // Held while the pointer crosses the middle, where the
+                // angle swings fast; it is measured from where the ring
+                // was taken, so it picks up again on the far side.
+                if (models::isWipeTurnHeld(*widget, pos))
+                {
+                    return;
+                }
+                // Turned from where the ring was taken, Shift stepping it
                 // by 45 degrees as it holds a shape square.
                 options.wipeRotation = models::getWipeRotationDrag(
                     p.wipePress.wipeRotation,

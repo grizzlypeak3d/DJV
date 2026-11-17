@@ -80,6 +80,13 @@ namespace djv
             // On the wipe, away from the handles: nothing.
             FTK_CHECK(models::WipeHandle::None == models::getWipeHandle(widget, ftk::V2F(100.F, 90.F), 5.F));
             FTK_CHECK(models::WipeHandle::None == models::getWipeHandle(widget, ftk::V2F(150.F, 90.F), 5.F));
+
+            // A turn holds in the middle, where the angle swings, and not
+            // on the ring or beyond it.
+            FTK_CHECK(models::isWipeTurnHeld(widget, ftk::V2F(100.F, 50.F)));
+            FTK_CHECK(models::isWipeTurnHeld(widget, ftk::V2F(112.F, 52.F)));
+            FTK_CHECK(!models::isWipeTurnHeld(widget, ftk::V2F(116.F, 50.F)));
+            FTK_CHECK(!models::isWipeTurnHeld(widget, ftk::V2F(100.F, 150.F)));
         }
 
         void WipeTest::_drag()

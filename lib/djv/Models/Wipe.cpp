@@ -121,7 +121,14 @@ namespace djv
             return snapWipeRotation(out, step);
         }
 
-        float snapWipeRotation(float value, bool step)
+        bool isWipeTurnHeld(
+            const WipeWidget& widget,
+            const ftk::V2F& pos)
+        {
+            return distance(pos, widget.center) < widget.radius * wipeMoveFraction;
+        }
+
+                float snapWipeRotation(float value, bool step)
         {
             const float increment = step ? 45.F : 90.F;
             const float nearest = std::round(value / increment) * increment;
