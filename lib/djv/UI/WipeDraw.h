@@ -25,7 +25,8 @@ namespace djv
         constexpr float wipeTouchReach = 22.F;
 
         //! Draw the wipe's handles so that they show on any picture: a
-        //! translucent dark band with faint light edges, which turns it,
+        //! translucent dark band with faint light edges and two ticks
+        //! where the seam crosses it, which turns it,
         //! and a light dot with a dark outline in the clear middle, which
         //! moves it from anywhere in the middle (see
         //! models::wipeMoveFraction). Like a widget, the part pointed at is

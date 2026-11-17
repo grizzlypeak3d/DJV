@@ -17,7 +17,7 @@ The tool bar has one button for the modes: it shows the mode chosen last and tur
 **Compare > Next** (<kbd>Shift+Page Down</kbd>) and **Compare > Previous** (<kbd>Shift+Page Up</kbd>) change the B file to the next or previous one in the file list.
 
 > [!NOTE]
-> The wipe has a dot at its center inside a translucent ring. Drag the dot, or anywhere in the clear middle around it, to move the wipe, and drag the ring, from anywhere on it, to turn it. It settles on level when it comes within two degrees of horizontal or vertical. Hold **Shift** while turning to turn it in steps of 45 degrees. The dot and the ring take the mouse before any mouse binding. They fade when the pointer rests or leaves the view, so they are not left over the seam, and come back when it moves; **Compare > Wipe Handles** hides them altogether, leaving the wipe to the mouse binding and the **Files** tool. **Alt** + left mouse button drags the wipe from anywhere.
+> The wipe has a dot at its center inside a translucent ring. Drag the dot, or anywhere in the clear middle around it, to move the wipe, and drag the ring, from anywhere on it, to turn it. Two ticks on the ring show the wipe's angle, for when **A** and **B** are too alike for the seam to show. It settles on level when it comes within two degrees of horizontal or vertical. Hold **Shift** while turning to turn it in steps of 45 degrees. The dot and the ring take the mouse before any mouse binding. They fade when the pointer rests or leaves the view, so they are not left over the seam, and come back when it moves; **Compare > Wipe Handles** hides them altogether, leaving the wipe to the mouse binding and the **Files** tool. **Alt** + left mouse button drags the wipe from anywhere.
 
 ## Compare modes
 

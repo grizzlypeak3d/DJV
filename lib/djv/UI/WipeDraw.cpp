@@ -116,6 +116,34 @@ namespace djv
             drawRing(render, cf, widget.radius, 1.F * s, faded(edgeColor, opacity));
             drawRing(render, cf, inner, 1.F * s, faded(edgeColor, opacity));
 
+            // Two ticks across the band where the seam crosses it, which
+            // show the wipe's angle when the seam itself does not: A and B
+            // the same, or nearly.
+            {
+                const float base = std::atan2(widget.rotate.y - cf.y, widget.rotate.x - cf.x);
+                const float r0 = inner + 2.F * s;
+                const float r1 = widget.radius - 2.F * s;
+                // A pixel and a half wide: one pixel lying on the pixel
+                // edges can drop out at some angles.
+                const float hw = .75F * s;
+                ftk::TriMesh2F mesh;
+                for (int i = 0; i < 2; ++i)
+                {
+                    const float a = base + i * ftk::pi;
+                    const ftk::V2F d(std::cos(a), std::sin(a));
+                    const ftk::V2F n(-d.y * hw, d.x * hw);
+                    const size_t b = mesh.v.size();
+                    mesh.v.emplace_back(cf.x + d.x * r0 + n.x, cf.y + d.y * r0 + n.y);
+                    mesh.v.emplace_back(cf.x + d.x * r1 + n.x, cf.y + d.y * r1 + n.y);
+                    mesh.v.emplace_back(cf.x + d.x * r1 - n.x, cf.y + d.y * r1 - n.y);
+                    mesh.v.emplace_back(cf.x + d.x * r0 - n.x, cf.y + d.y * r0 - n.y);
+                    // One-based, as the meshes take them.
+                    mesh.triangles.emplace_back(b + 1, b + 2, b + 3);
+                    mesh.triangles.emplace_back(b + 1, b + 3, b + 4);
+                }
+                render->drawMesh(mesh, faded(edgeColor, opacity));
+            }
+
             // The middle, lit faintly while it is pointed at or pressed,
             // so how much of it moves the wipe shows.
             const float middleLight =
