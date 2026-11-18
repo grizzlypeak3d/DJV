@@ -560,8 +560,22 @@ namespace djv
                     app->getFilesModel()->setCompareOptions(value);
                 });
 
+            // The thumbnails in the picture's color: with the input chosen
+            // in the settings, or otherwise each in its own media's, as the
+            // viewport draws each clip.
+            {
+                auto colorModel = app->getColorModel();
+                p.timelineWidget->setOCIOInputResolver(
+                    [colorModel](const std::string& path, const ftk::ImageTags& tags)
+                    {
+                        return colorModel->getOCIOOptions().input.empty() ?
+                            colorModel->resolveInput(path, tags) :
+                            std::string();
+                    });
+            }
+
             p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
-                app->getColorModel()->observeResolvedOCIOOptions(),
+                app->getColorModel()->observeOCIOOptions(),
                 [this](const tl::OCIOOptions& value)
                 {
                     auto options = _p->timelineWidget->getDisplayOptions();

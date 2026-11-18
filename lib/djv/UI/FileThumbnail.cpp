@@ -3,6 +3,7 @@
 
 #include <djv/UI/FileThumbnail.h>
 
+#include <tlRender/UI/ThumbnailColors.h>
 #include <tlRender/UI/ThumbnailSystem.h>
 
 #include <ftk/UI/DrawUtil.h>
@@ -51,6 +52,8 @@ namespace djv
                 std::shared_ptr<ftk::Image> image;
             };
             ThumbnailData thumbnail;
+
+            std::shared_ptr<tl::ui::ThumbnailColors> colors;
 
             std::function<void(const tl::IOInfo&)> infoCallback;
         };
@@ -110,6 +113,12 @@ namespace djv
             return ftk::Size2I(
                 p.thumbnail.height * 16 / 9,
                 p.thumbnail.height) + p.size.margin * 2;
+        }
+
+        void FileThumbnail::setColors(const std::shared_ptr<tl::ui::ThumbnailColors>& value)
+        {
+            _p->colors = value;
+            setDrawUpdate();
         }
 
         void FileThumbnail::tickEvent(
@@ -267,7 +276,7 @@ namespace djv
                 imageOptions.cache = false;
                 // Centered in the slot; see getSizeHint().
                 event.render->drawImage(
-                    p.thumbnail.image,
+                    p.colors ? p.colors->get(p.thumbnail.image) : p.thumbnail.image,
                     ftk::Box2I(
                         g.min.x + (g.w() - thumbnailSize.w) / 2,
                         g.min.y + (g.h() - thumbnailSize.h) / 2,

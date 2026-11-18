@@ -11,6 +11,14 @@
 
 #include <ftk/UI/IMouseWidget.h>
 
+namespace tl
+{
+    namespace ui
+    {
+        class ThumbnailColors;
+    }
+}
+
 #include <functional>
 
 namespace djv
@@ -57,6 +65,11 @@ namespace djv
             //! Get the thumbnail image, e.g. for a drag cursor. Null until
             //! the thumbnail has loaded.
             DJV_UI_API const std::shared_ptr<ftk::Image>& getThumbnail() const;
+
+            //! Set the colors to draw the thumbnail through, shared by the
+            //! thumbnails of a list. Set again when they change, to draw the
+            //! thumbnail again.
+            DJV_UI_API void setColors(const std::shared_ptr<tl::ui::ThumbnailColors>&);
 
             //! Set the callback for when the file's information arrives. It
             //! is read alongside the thumbnail, so a row states what the file

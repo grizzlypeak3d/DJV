@@ -57,6 +57,8 @@ Changes:
 * Read HEIC and HEIF images on macOS.
 * Read WebP images, still and animated (#867).
 * Show Display P3 colors on wide-gamut displays with the GPU renderer.
+* The thumbnails in the timeline and the Files tool are shown through the
+  color settings, each in its own file's color space.
 * Exported JPEG, PNG, and TIFF images include ICC profiles.
 * System Information shows the FFmpeg command line's version for writing as
   well as reading (#949).

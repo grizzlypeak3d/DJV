@@ -9,9 +9,11 @@
 
 #include <djv/App/App.h>
 #include <djv/UI/FileThumbnail.h>
+#include <djv/Models/ColorModel.h>
 #include <djv/Models/SettingsModel.h>
 
 #include <tlRender/Timeline/Util.h>
+#include <tlRender/UI/ThumbnailColors.h>
 
 #include <ftk/UI/Bellows.h>
 #include <ftk/UI/ButtonGroup.h>
@@ -100,6 +102,10 @@ namespace djv
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
             std::shared_ptr<ftk::ItemButtonList> fileList;
 
+            // The thumbnails are drawn in the picture's color, each with
+            // its own file's input.
+            std::shared_ptr<tl::ui::ThumbnailColors> thumbnailColors;
+
             // Where a dragged file would land: an index into the rows,
             // counting the gap after the last one, or -1 for nowhere.
             int dropTarget = -1;
@@ -121,6 +127,8 @@ namespace djv
             std::shared_ptr<ftk::Observer<tl::CompareTime> > compareTimeObserver;
             std::shared_ptr<ftk::Observer<bool> > wipeHandlesObserver;
             std::shared_ptr<ftk::Observer<std::optional<models::StoredFrame> > > frameStoreObserver;
+            std::shared_ptr<ftk::Observer<tl::OCIOOptions> > ocioOptionsObserver;
+            std::shared_ptr<ftk::Observer<tl::LUTOptions> > lutOptionsObserver;
         };
 
         void FilesTool::_init(
@@ -140,6 +148,7 @@ namespace djv
             FTK_P();
 
             p.settings = app->getSettings();
+            p.thumbnailColors = std::make_shared<tl::ui::ThumbnailColors>();
 
             p.rangeTimer = ftk::Timer::create(context);
 
@@ -440,6 +449,29 @@ namespace djv
                     p.frameStoreLabel->setText(value.has_value() ? value->label : std::string());
                     p.compareLayout->setRowVisible(p.frameStoreLayout, value.has_value());
                 });
+
+            auto colorModel = app->getColorModel();
+            p.thumbnailColors->setOCIOInputResolver(
+                [colorModel](const std::string& path, const ftk::ImageTags& tags)
+                {
+                    return colorModel->getOCIOOptions().input.empty() ?
+                        colorModel->resolveInput(path, tags) :
+                        std::string();
+                });
+            p.ocioOptionsObserver = ftk::Observer<tl::OCIOOptions>::create(
+                colorModel->observeOCIOOptions(),
+                [this](const tl::OCIOOptions& value)
+                {
+                    _p->thumbnailColors->setOCIOOptions(value);
+                    _thumbnailColorsUpdate();
+                });
+            p.lutOptionsObserver = ftk::Observer<tl::LUTOptions>::create(
+                colorModel->observeLUTOptions(),
+                [this](const tl::LUTOptions& value)
+                {
+                    _p->thumbnailColors->setLUTOptions(value);
+                    _thumbnailColorsUpdate();
+                });
         }
 
         FilesTool::FilesTool() :
@@ -488,6 +520,15 @@ namespace djv
                         p.rangeItem.reset();
                     }
                 });
+        }
+
+        void FilesTool::_thumbnailColorsUpdate()
+        {
+            FTK_P();
+            for (const auto& widget : p.widgets)
+            {
+                widget.thumbnail->setColors(p.thumbnailColors);
+            }
         }
 
         void FilesTool::_filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >& value)
@@ -543,6 +584,7 @@ namespace djv
             p.widgets.clear();
             p.bButtonGroup->clearButtons();
             p.fileList->clear();
+            p.thumbnailColors->prune();
             auto appWeak = _app;
             if (auto app = appWeak.lock())
             {
@@ -579,6 +621,7 @@ namespace djv
                             item,
                             app->getSettingsModel()->getIOOptions(),
                             rowLayout);
+                        widget.thumbnail->setColors(p.thumbnailColors);
                         ftk::setScreenshotTag(
                             widget.thumbnail,
                             ftk::Format("Files.FileThumbnail{0}").arg(row));
@@ -643,12 +686,17 @@ namespace djv
                             });
                         auto thumbnailWeak =
                             std::weak_ptr<ui::FileThumbnail>(widget.thumbnail);
+                        auto colorsWeak =
+                            std::weak_ptr<tl::ui::ThumbnailColors>(p.thumbnailColors);
                         widget.button->setDragDropCursorCallback(
-                            [thumbnailWeak]() -> std::shared_ptr<ftk::Image>
+                            [thumbnailWeak, colorsWeak]() -> std::shared_ptr<ftk::Image>
                             {
                                 auto thumbnail = thumbnailWeak.lock();
+                                auto colors = colorsWeak.lock();
                                 return thumbnail ?
-                                    thumbnail->getThumbnail() :
+                                    (colors ?
+                                        colors->get(thumbnail->getThumbnail()) :
+                                        thumbnail->getThumbnail()) :
                                     nullptr;
                             });
 

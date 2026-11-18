@@ -69,6 +69,7 @@ namespace djv
                 const std::optional<OTIO_NS::TimeRange>&,
                 const std::vector<std::string>&);
             void _filesUpdate(const std::vector<std::shared_ptr<models::FilesModelItem> >&);
+            void _thumbnailColorsUpdate();
             void _showRangePopup(
                 const std::shared_ptr<models::FilesModelItem>&,
                 const ftk::RangeI64&,
