@@ -212,9 +212,15 @@ namespace djv
             // back to; opened at its maximized size instead, it came back
             // filling the screen without being maximized, wherever the
             // platform chose to put it.
+            //
+            // The size again once it is there: the window is made on the
+            // primary display and fitted to it, so a size saved on a larger
+            // display came back cut down to the primary one. Asked for
+            // again, it is fitted to the display it was on.
             if (settings.hasPos)
             {
                 setPos(settings.pos);
+                setSize(settings.size);
             }
             if (settings.maximized)
             {
