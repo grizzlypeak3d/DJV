@@ -183,6 +183,7 @@ namespace djv
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto vLayout = ftk::VerticalLayout::create(context, p.layout);
             vLayout->setMarginRole(ftk::SizeRole::Margin);
+            vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout = ftk::FormLayout::create(context, vLayout);
             p.formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto typeButtonsLayout = ftk::HorizontalLayout::create(context);
@@ -210,8 +211,9 @@ namespace djv
             // default and the presets as much as for a typed width.
             // Only the chosen kind's rows, as tall as they are: the kinds
             // differ, and sized to the largest the shorter ones left a gap
-            // above the queue.
-            p.typeLayout = ftk::StackLayout::create(context, p.layout);
+            // above the queue. In the same margin as the rows above, so
+            // that it all reads as one form.
+            p.typeLayout = ftk::StackLayout::create(context, vLayout);
             p.typeLayout->setFitAll(false);
             p.imageWidget->setParent(p.typeLayout);
             p.seqWidget->setParent(p.typeLayout);

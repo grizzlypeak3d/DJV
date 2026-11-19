@@ -297,7 +297,8 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context);
 
             _setWidget(p.layout);
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            // No margin: the rows go on from the export widget's own, as
+            // one form.
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -500,7 +501,8 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context);
 
             _setWidget(p.layout);
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            // No margin: the rows go on from the export widget's own, as
+            // one form.
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             auto formLayout = ftk::FormLayout::create(context, p.layout);
             formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
@@ -764,7 +766,8 @@ namespace djv
             p.layout = ftk::VerticalLayout::create(context);
 
             _setWidget(p.layout);
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            // No margin: the rows go on from the export widget's own, as
+            // one form.
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout = ftk::FormLayout::create(context, p.layout);
             auto formLayout = p.formLayout;
