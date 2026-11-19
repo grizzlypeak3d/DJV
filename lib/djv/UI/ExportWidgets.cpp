@@ -796,7 +796,7 @@ namespace djv
             // #947).
             auto memoryLabel = ftk::Label::create(
                 context,
-                "Exports use memory beyond the frame cache, up to a few GB.",
+                "Exports use additional memory, up to a few GB.",
                 p.layout);
             memoryLabel->setTextRole(ftk::ColorRole::TextDisabled);
             ftk::setScreenshotTag(memoryLabel, "Export.MovieMemoryNote");
