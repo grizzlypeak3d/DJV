@@ -9,6 +9,7 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
+#include <ftk/UI/Spacer.h>
 #include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
 
@@ -238,7 +239,6 @@ namespace djv
         {
             std::weak_ptr<models::ExportQueue> queue;
             std::function<void(const ftk::Path&)> openCallback;
-            std::shared_ptr<ftk::Label> titleLabel;
             std::shared_ptr<ftk::ToolButton> clearButton;
             std::shared_ptr<ftk::VerticalLayout> jobsLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
@@ -256,24 +256,25 @@ namespace djv
 
             p.queue = queue;
 
-            p.titleLabel = ftk::Label::create(context, "Queue");
-            p.titleLabel->setHStretch(ftk::Stretch::Expanding);
-            p.titleLabel->setVAlign(ftk::VAlign::Center);
             p.clearButton = ftk::ToolButton::create(context, "Clear");
             p.clearButton->setTooltip("Remove the exports that have stopped from the list.");
             ftk::setScreenshotTag(p.clearButton, "Export.Queue.Clear");
 
+            // No title: the cards under the export button say what they
+            // are, and a title row pushed them down. Clear goes under them,
+            // where the list ends.
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             _setWidget(p.layout);
-            auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
-            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.titleLabel->setParent(hLayout);
-            p.clearButton->setParent(hLayout);
             p.jobsLayout = ftk::VerticalLayout::create(context, p.layout);
             p.jobsLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             ftk::setScreenshotTag(p.jobsLayout, "Export.Queue");
+            auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
+            hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, hLayout);
+            spacer->setHStretch(ftk::Stretch::Expanding);
+            p.clearButton->setParent(hLayout);
 
             p.clearButton->setClickedCallback(
                 [this]
