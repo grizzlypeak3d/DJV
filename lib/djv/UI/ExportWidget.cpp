@@ -22,6 +22,7 @@
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
 
+#include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DialogSystem.h>
@@ -31,8 +32,8 @@
 #include <ftk/UI/Label.h>
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
-#include <ftk/UI/TabBar.h>
-#include <ftk/UI/TabWidget.h>
+#include <ftk/UI/StackLayout.h>
+#include <ftk/UI/ToolButton.h>
 #include <tlRender/UI/OffscreenRender.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Path.h>
@@ -73,10 +74,12 @@ namespace djv
             // to show the custom size, which must not read as typed.
             bool sizeUpdating = false;
             std::shared_ptr<ftk::CheckBox> burnAnnotationsCheckBox;
+            std::shared_ptr<ftk::ButtonGroup> typeButtonGroup;
+            std::vector<std::shared_ptr<ftk::ToolButton> > typeButtons;
             std::shared_ptr<ImageExportWidget> imageWidget;
             std::shared_ptr<SeqExportWidget> seqWidget;
             std::shared_ptr<MovieExportWidget> movieWidget;
-            std::shared_ptr<ftk::TabWidget> tabWidget;
+            std::shared_ptr<ftk::StackLayout> typeLayout;
             std::shared_ptr<ExportQueueWidget> queueWidget;
             std::shared_ptr<ftk::FormLayout> formLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
@@ -153,6 +156,22 @@ namespace djv
                 "are on.");
             ftk::setScreenshotTag(p.burnAnnotationsCheckBox, "Export.BurnAnnotations");
 
+            // What kind of export, first, as one choice of three: the rows
+            // and the button under the settings are that kind's.
+            p.typeButtonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Radio);
+            for (const auto& i : std::vector<std::pair<std::string, std::string> >{
+                { "Image", "The current frame, as an image." },
+                { "Sequence", "The frames between the in and out points, as an image sequence." },
+                { "Movie", "The frames between the in and out points, as a movie." } })
+            {
+                auto button = ftk::ToolButton::create(context, i.first);
+                button->setCheckable(true);
+                button->setTooltip(i.second);
+                ftk::setScreenshotTag(button, "Export.Type." + i.first);
+                p.typeButtonGroup->addButton(button);
+                p.typeButtons.push_back(button);
+            }
+
             p.imageWidget = ImageExportWidget::create(
                 context, settingsModel);
             p.seqWidget = SeqExportWidget::create(
@@ -166,6 +185,14 @@ namespace djv
             vLayout->setMarginRole(ftk::SizeRole::Margin);
             p.formLayout = ftk::FormLayout::create(context, vLayout);
             p.formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            auto typeButtonsLayout = ftk::HorizontalLayout::create(context);
+            typeButtonsLayout->setSpacingRole(ftk::SizeRole::None);
+            ftk::setScreenshotTag(typeButtonsLayout, "Export.Type");
+            for (const auto& button : p.typeButtons)
+            {
+                button->setParent(typeButtonsLayout);
+            }
+            p.formLayout->addRow("Export:", typeButtonsLayout);
             p.formLayout->addRow("Directory:", p.dirEdit);
             p.formLayout->addRow("Render size:", p.renderSizeComboBox);
             // One row showing whichever applies: the size as a label, a
@@ -181,20 +208,21 @@ namespace djv
             // Under both of the ways of giving a width, since it is what
             // either of them comes to, and it is worth saying for the
             // default and the presets as much as for a typed width.
-            p.tabWidget = ftk::TabWidget::create(context, p.layout);
-            // Tag the tab bar rather than the whole tab widget so that
-            // screenshot annotations point at the tabs.
-            ftk::setScreenshotTag(p.tabWidget->getTabBar(), "Export.Tabs");
-            p.tabWidget->addTab("Image", p.imageWidget);
-            p.tabWidget->addTab("Sequence", p.seqWidget);
-            p.tabWidget->addTab("Movie", p.movieWidget);
+            // Only the chosen kind's rows, as tall as they are: the kinds
+            // differ, and sized to the largest the shorter ones left a gap
+            // above the queue.
+            p.typeLayout = ftk::StackLayout::create(context, p.layout);
+            p.typeLayout->setFitAll(false);
+            p.imageWidget->setParent(p.typeLayout);
+            p.seqWidget->setParent(p.typeLayout);
+            p.movieWidget->setParent(p.typeLayout);
 
             // Under the settings, the exports they made, which run on while
             // the work goes on.
             p.queueWidget = ExportQueueWidget::create(context, queue, p.layout);
 
-            // The form above the tabs and the one in each tab share a label
-            // width, so the controls stay put from one tab to the next.
+            // The form above and the chosen kind's share a label width, so
+            // the controls line up and stay put from one kind to the next.
             ftk::setFormGroup(p.layout, ftk::FormGroup::create());
 
             p.layout->setHStretch(ftk::Stretch::Expanding);
@@ -279,12 +307,14 @@ namespace djv
                     p.settings->setExport(options);
                 });
 
-            p.tabWidget->setCallback(
-                [this](int value)
+            p.typeButtonGroup->setCheckedCallback(
+                [this](int index, bool value)
                 {
                     FTK_P();
+                    if (!value)
+                        return;
                     auto options = p.settings->getExport();
-                    options.fileType = static_cast<models::ExportFileType>(value);
+                    options.fileType = static_cast<models::ExportFileType>(index);
                     p.settings->setExport(options);
                 });
 
@@ -503,7 +533,8 @@ namespace djv
             p.dirEdit->setPath(ftk::Path(settings.dir));
             p.renderSizeComboBox->setCurrentIndex(static_cast<int>(settings.renderSize));
             _sizeUpdate();
-            p.tabWidget->setCurrent(static_cast<int>(settings.fileType));
+            p.typeButtonGroup->setChecked(static_cast<int>(settings.fileType));
+            p.typeLayout->setCurrentIndex(static_cast<int>(settings.fileType));
         }
 
         OTIO_NS::TimeRange ExportWidget::_getExportRange(

@@ -1176,7 +1176,7 @@
       "id": "export-tool",
       "window": {
         "w": 900,
-        "h": 600,
+        "h": 680,
         "splitter2": 0.5
       },
       "crop": "MainWindow.Tools",
@@ -1194,7 +1194,7 @@
           "tool": "Export"
         },
         {
-          "tab": "Image"
+          "click": "Export.Type.Image"
         }
       ],
       "annotate": [
@@ -1211,8 +1211,8 @@
           "caption": "Size the export comes out at"
         },
         {
-          "id": "Export.Tabs",
-          "caption": "Image, sequence, and movie export"
+          "id": "Export.Type",
+          "caption": "Kind of export"
         },
         {
           "id": "Export.ImageFileName",
@@ -1236,7 +1236,7 @@
       "id": "export-tool-seq",
       "window": {
         "w": 900,
-        "h": 600,
+        "h": 680,
         "splitter2": 0.5
       },
       "crop": "MainWindow.Tools",
@@ -1254,7 +1254,7 @@
           "tool": "Export"
         },
         {
-          "tab": "Sequence"
+          "click": "Export.Type.Sequence"
         }
       ],
       "annotate": [
@@ -1284,7 +1284,7 @@
       "id": "export-tool-movie",
       "window": {
         "w": 900,
-        "h": 600,
+        "h": 680,
         "splitter2": 0.5
       },
       "crop": "MainWindow.Tools",
@@ -1302,7 +1302,7 @@
           "tool": "Export"
         },
         {
-          "tab": "Movie"
+          "click": "Export.Type.Movie"
         }
       ],
       "annotate": [
