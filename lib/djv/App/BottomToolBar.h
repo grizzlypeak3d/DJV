@@ -52,6 +52,10 @@ namespace djv
             //! Focus the current frame widget.
             DJV_APP_API void focusCurrentFrame();
 
+            //! Set what is told when a run of exports has stopped; see
+            //! ExportIndicator.
+            DJV_APP_API void setExportFinishedCallback(const std::function<void(const std::string&)>&);
+
             DJV_APP_API void setGeometry(const ftk::Box2I&) override;
             DJV_APP_API void sizeHintEvent(const ftk::SizeHintEvent&) override;
 

@@ -68,6 +68,10 @@ Changes:
 * Exports go into a queue and run while the work goes on: the file being
   exported can be closed, which frees its cache, and others queued behind
   it (#947).
+* A ring beside the status indicator shows how far the exports have got,
+  and stays full once they have finished, until the Export tool is opened;
+  the status bar says when they finish. A finished export can be opened
+  from the queue (#968).
 * With the display scale on Auto, each window follows the display it is on
   (#732).
 * Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command

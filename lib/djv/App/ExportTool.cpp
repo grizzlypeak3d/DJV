@@ -47,6 +47,18 @@ namespace djv
 
             _setWidget(p.widget);
 
+            // A finished export opened as any file is, to look at it; the
+            // sequence it belongs to is gathered from the first frame's name.
+            std::weak_ptr<App> appWeak(app);
+            p.widget->setOpenCallback(
+                [appWeak](const ftk::Path& path)
+                {
+                    if (auto app = appWeak.lock())
+                    {
+                        app->open(path);
+                    }
+                });
+
             p.playerObserver = ftk::Observer<std::shared_ptr<tl::Player> >::create(
                 app->observePlayer(),
                 [this](const std::shared_ptr<tl::Player>& value)

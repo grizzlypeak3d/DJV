@@ -340,6 +340,11 @@ namespace djv
             return out;
         }
 
+        void ExportWidget::setOpenCallback(const std::function<void(const ftk::Path&)>& value)
+        {
+            _p->queueWidget->setOpenCallback(value);
+        }
+
         void ExportWidget::setPlayer(const std::shared_ptr<tl::Player>& value)
         {
             FTK_P();

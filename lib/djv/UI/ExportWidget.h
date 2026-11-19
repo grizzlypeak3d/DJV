@@ -65,6 +65,9 @@ namespace djv
             //! Set the player.
             DJV_UI_API void setPlayer(const std::shared_ptr<tl::Player>&);
 
+            //! Set what opens a finished export, from the queue.
+            DJV_UI_API void setOpenCallback(const std::function<void(const ftk::Path&)>&);
+
             //! Export a movie with the current settings, as the Export Movie
             //! button does: it is added to the queue. An existing file is
             //! written over only when asked to: there is no one to answer

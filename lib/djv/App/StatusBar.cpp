@@ -66,7 +66,7 @@ namespace djv
             p.messagesLabel->setTooltip(
                 "Display messages.\n"
                 "\n"
-                "Click to open messages tool.");
+                "Click to show or hide the messages tool.");
 
             p.infoLabel = ftk::Label::create(context);
             p.infoLabel->setMarginRole(ftk::SizeRole::MarginSmall, ftk::SizeRole::MarginInside);
@@ -169,7 +169,21 @@ namespace djv
             return out;
         }
 
-            void StatusBar::setHint(const std::string& value)
+            void StatusBar::showMessage(const std::string& value)
+        {
+            FTK_P();
+            p.message = value;
+            _messagesUpdate();
+            p.messagesTimer->start(
+                std::chrono::seconds(5),
+                [this]
+                {
+                    _p->message = std::string();
+                    _messagesUpdate();
+                });
+        }
+
+        void StatusBar::setHint(const std::string& value)
         {
             FTK_P();
             if (value == p.hint)
@@ -296,7 +310,7 @@ namespace djv
             const std::string tooltipFormat =
                 "{0}\n"
                 "\n"
-                "Click to open the information tool.";
+                "Click to show or hide the information tool.";
             const std::string tooltipDefault =
                 "Display information about the current file.";
 

@@ -5,6 +5,7 @@
 
 #include <djv/App/App.h>
 #include <djv/App/AudioActions.h>
+#include <djv/App/ExportIndicator.h>
 #include <djv/App/FrameActions.h>
 #include <djv/App/PlaybackActions.h>
 #include <djv/App/ReviewActions.h>
@@ -57,6 +58,7 @@ namespace djv
             std::shared_ptr<ui::SpeedPopup> speedPopup;
             std::shared_ptr<ftk::ToolButton> audioButton;
             std::shared_ptr<ui::AudioPopup> audioPopup;
+            std::shared_ptr<ExportIndicator> exportIndicator;
             std::shared_ptr<ui::StatusIndicator> indicator;
             std::shared_ptr<ftk::ToolBar> reviewToolBar;
             std::shared_ptr<ftk::ToolBar> indicatorToolBar;
@@ -168,6 +170,8 @@ namespace djv
             p.audioButton->setPopupIcon(true);
             p.audioButton->setTooltip("Audio volume and controls.");
 
+            p.exportIndicator = ExportIndicator::create(context, app);
+            ftk::setScreenshotTag(p.exportIndicator, "Status.Export");
             p.indicator = app->createIndicator();
 
             p.layout = ftk::HorizontalLayout::create(context);
@@ -222,6 +226,7 @@ namespace djv
             ftk::Divider::create(context, ftk::Orientation::Horizontal, p.layout);
             p.indicatorToolBar = ftk::ToolBar::create(context, ftk::Orientation::Horizontal, p.layout);
             p.indicatorToolBar->setSpacingRole(ftk::SizeRole::None);
+            p.indicatorToolBar->addWidget(p.exportIndicator);
             p.indicatorToolBar->addWidget(p.indicator);
 
             p.loopWidget->setCallback(
@@ -419,6 +424,11 @@ namespace djv
                 p.stepWidths[2] = p.durationLabel->getSizeHint().w;
                 p.stepWidths[3] = p.speedButton->getSizeHint().w;
             }
+        }
+
+        void BottomToolBar::setExportFinishedCallback(const std::function<void(const std::string&)>& value)
+        {
+            _p->exportIndicator->setFinishedCallback(value);
         }
 
         void BottomToolBar::focusCurrentFrame()

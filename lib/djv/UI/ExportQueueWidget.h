@@ -7,6 +7,8 @@
 
 #include <ftk/UI/IContainer.h>
 
+#include <ftk/Core/Path.h>
+
 namespace djv
 {
     namespace models
@@ -18,8 +20,9 @@ namespace djv
     {
         //! The exports queued and running: one row each, with what it is
         //! called, how far it has got, and a button to cancel it, or to
-        //! take it off the list once it has stopped. Hidden while the queue
-        //! is empty.
+        //! take it off the list once it has stopped; one that has finished
+        //! can also be opened, to look at what was written. Hidden while
+        //! the queue is empty.
         class DJV_UI_API_TYPE ExportQueueWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ExportQueueWidget);
@@ -40,7 +43,13 @@ namespace djv
                 const std::shared_ptr<models::ExportQueue>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Set what opens a finished export; without it there is no
+            //! button for it.
+            DJV_UI_API void setOpenCallback(const std::function<void(const ftk::Path&)>&);
+
         private:
+            void _jobsUpdate();
+
             FTK_PRIVATE();
         };
     }

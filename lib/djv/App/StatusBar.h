@@ -45,6 +45,11 @@ namespace djv
             //! messages back.
             DJV_APP_API void setHint(const std::string&);
 
+            //! Show a message for a few seconds, as a warning or an error
+            //! from the log is shown, but without it going to the messages
+            //! tool: news, such as exports having finished.
+            DJV_APP_API void showMessage(const std::string&);
+
             DJV_APP_API ftk::Size2I getSizeHint() const override;
             DJV_APP_API void setGeometry(const ftk::Box2I&) override;
             DJV_APP_API void sizeHintEvent(const ftk::SizeHintEvent&) override;

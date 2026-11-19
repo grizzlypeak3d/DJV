@@ -372,6 +372,18 @@ namespace djv
             p.statusBar = StatusBar::create(context, app);
             ftk::setScreenshotTag(p.statusBar, "MainWindow.StatusBar");
 
+            // Exports having finished said in the status bar, once; the
+            // indicator beside the status letters stays.
+            std::weak_ptr<StatusBar> statusBarFinishedWeak(p.statusBar);
+            p.bottomToolBar->setExportFinishedCallback(
+                [statusBarFinishedWeak](const std::string& value)
+                {
+                    if (auto statusBar = statusBarFinishedWeak.lock())
+                    {
+                        statusBar->showMessage(value);
+                    }
+                });
+
             // The highlighted menu item's tooltip shows in the status bar,
             // flattened to the one line there is, unless tooltips are
             // turned off: it is the same text, and turning them off is

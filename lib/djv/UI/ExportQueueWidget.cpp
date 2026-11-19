@@ -88,6 +88,7 @@ namespace djv
                     const std::shared_ptr<ftk::Context>& context,
                     const std::shared_ptr<models::ExportQueue>& queue,
                     const std::shared_ptr<models::ExportJob>& job,
+                    const std::function<void(const ftk::Path&)>& openCallback,
                     const std::shared_ptr<ftk::IWidget>& parent)
                 {
                     ftk::IContainer::_init(context, "djv::ui::ExportJobWidget", parent);
@@ -111,6 +112,11 @@ namespace djv
                     _statusLabel->setTextRole(ftk::ColorRole::TextDisabled);
                     ftk::setScreenshotTag(_statusLabel, "Export.Queue.Status");
                     _progressBar = ProgressBar::create(context);
+                    _openButton = ftk::ToolButton::create(context);
+                    _openButton->setIcon("FileOpen");
+                    _openButton->setTooltip("Open the exported file.");
+                    _openButton->setVisible(false);
+                    ftk::setScreenshotTag(_openButton, "Export.Queue.Open");
                     _button = ftk::ToolButton::create(context);
                     _button->setIcon("CloseSmall");
                     ftk::setScreenshotTag(_button, "Export.Queue.Cancel");
@@ -125,8 +131,20 @@ namespace djv
                     _nameLabel->setParent(vLayout);
                     _statusLabel->setParent(vLayout);
                     _progressBar->setParent(vLayout);
+                    _openButton->setParent(layout);
+                    _openButton->setVAlign(ftk::VAlign::Top);
                     _button->setParent(layout);
                     _button->setVAlign(ftk::VAlign::Top);
+
+                    const ftk::Path path = options.path;
+                    _openButton->setClickedCallback(
+                        [openCallback, path]
+                        {
+                            if (openCallback)
+                            {
+                                openCallback(path);
+                            }
+                        });
 
                     std::weak_ptr<models::ExportQueue> queueWeak(queue);
                     std::weak_ptr<models::ExportJob> jobWeak(job);
@@ -150,7 +168,7 @@ namespace djv
 
                     _progressObserver = ftk::Observer<models::ExportProgress>::create(
                         job->observeProgress(),
-                        [this](const models::ExportProgress& value)
+                        [this, openCallback](const models::ExportProgress& value)
                         {
                             const std::string label = models::getLabel(value);
                             _statusLabel->setText(label);
@@ -168,6 +186,9 @@ namespace djv
                                 value.framesDone / static_cast<float>(value.frames) :
                                 0.F);
                             _progressBar->setVisible(models::ExportStatus::Running == value.status);
+                            _openButton->setVisible(
+                                openCallback &&
+                                models::ExportStatus::Finished == value.status);
                             const bool done = models::isDone(value.status);
                             _button->setTooltip(done ?
                                 "Remove the export from the list." :
@@ -180,10 +201,11 @@ namespace djv
                     const std::shared_ptr<ftk::Context>& context,
                     const std::shared_ptr<models::ExportQueue>& queue,
                     const std::shared_ptr<models::ExportJob>& job,
+                    const std::function<void(const ftk::Path&)>& openCallback,
                     const std::shared_ptr<ftk::IWidget>& parent = nullptr)
                 {
                     auto out = std::shared_ptr<JobWidget>(new JobWidget);
-                    out->_init(context, queue, job, parent);
+                    out->_init(context, queue, job, openCallback, parent);
                     return out;
                 }
 
@@ -206,6 +228,7 @@ namespace djv
                 std::shared_ptr<ftk::Label> _nameLabel;
                 std::shared_ptr<ftk::Label> _statusLabel;
                 std::shared_ptr<ProgressBar> _progressBar;
+                std::shared_ptr<ftk::ToolButton> _openButton;
                 std::shared_ptr<ftk::ToolButton> _button;
                 std::shared_ptr<ftk::Observer<models::ExportProgress> > _progressObserver;
             };
@@ -214,6 +237,7 @@ namespace djv
         struct ExportQueueWidget::Private
         {
             std::weak_ptr<models::ExportQueue> queue;
+            std::function<void(const ftk::Path&)> openCallback;
             std::shared_ptr<ftk::Label> titleLabel;
             std::shared_ptr<ftk::ToolButton> clearButton;
             std::shared_ptr<ftk::VerticalLayout> jobsLayout;
@@ -262,22 +286,35 @@ namespace djv
 
             p.jobsObserver = ftk::ListObserver<std::shared_ptr<models::ExportJob> >::create(
                 queue->observeJobs(),
-                [this](const std::vector<std::shared_ptr<models::ExportJob> >& value)
+                [this](const std::vector<std::shared_ptr<models::ExportJob> >&)
                 {
-                    FTK_P();
-                    p.jobsLayout->clear();
-                    if (auto context = getContext())
-                    {
-                        if (auto queue = p.queue.lock())
-                        {
-                            for (const auto& job : value)
-                            {
-                                JobWidget::create(context, queue, job, p.jobsLayout);
-                            }
-                        }
-                    }
-                    setVisible(!value.empty());
+                    _jobsUpdate();
                 });
+        }
+
+        void ExportQueueWidget::setOpenCallback(const std::function<void(const ftk::Path&)>& value)
+        {
+            _p->openCallback = value;
+            _jobsUpdate();
+        }
+
+        void ExportQueueWidget::_jobsUpdate()
+        {
+            FTK_P();
+            p.jobsLayout->clear();
+            std::vector<std::shared_ptr<models::ExportJob> > jobs;
+            if (auto queue = p.queue.lock())
+            {
+                jobs = queue->observeJobs()->get();
+                if (auto context = getContext())
+                {
+                    for (const auto& job : jobs)
+                    {
+                        JobWidget::create(context, queue, job, p.openCallback, p.jobsLayout);
+                    }
+                }
+            }
+            setVisible(!jobs.empty());
         }
 
         ExportQueueWidget::ExportQueueWidget() :

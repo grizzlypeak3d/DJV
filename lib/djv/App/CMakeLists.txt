@@ -18,6 +18,7 @@ set(HEADERS
     DiagTool.h
     DetectCuts.h
     DisplaysTool.h
+    ExportIndicator.h
     ExportTool.h
     FileActions.h
     FileMenu.h
@@ -84,6 +85,7 @@ set(SOURCE
     DiagTool.cpp
     DetectCuts.cpp
     DisplaysTool.cpp
+    ExportIndicator.cpp
     ExportTool.cpp
     FileActions.cpp
     FileMenu.cpp
