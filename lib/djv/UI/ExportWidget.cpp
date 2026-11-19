@@ -217,7 +217,7 @@ namespace djv
 
             // Under the settings, the exports they made, which run on while
             // the work goes on.
-            p.queueWidget = ExportQueueWidget::create(context, queue, p.layout);
+            p.queueWidget = ExportQueueWidget::create(context, queue, vLayout);
 
             // The form above and the chosen kind's share a label width, so
             // the controls line up and stay put from one kind to the next.

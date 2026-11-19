@@ -263,8 +263,9 @@ namespace djv
             // No title: the cards under the export button say what they
             // are, and a title row pushed them down. Clear goes under them,
             // where the list ends.
+            // No margin: the export widget puts it in its own, under the
+            // export button, which it goes with.
             p.layout = ftk::VerticalLayout::create(context);
-            p.layout->setMarginRole(ftk::SizeRole::Margin);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             _setWidget(p.layout);
             p.jobsLayout = ftk::VerticalLayout::create(context, p.layout);
