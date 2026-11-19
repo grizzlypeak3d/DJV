@@ -25,6 +25,7 @@
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DialogSystem.h>
+#include <ftk/UI/Divider.h>
 #include <ftk/UI/FileEdit.h>
 #include <ftk/UI/FormLayout.h>
 #include <ftk/UI/IntEdit.h>
@@ -177,7 +178,13 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            p.typeTabBar->setParent(p.layout);
+            // Tabs over a divider, as a tab widget has them: the tool's
+            // background goes on under them, so without it they do not
+            // read as heading what is below.
+            auto tabsLayout = ftk::VerticalLayout::create(context, p.layout);
+            tabsLayout->setSpacingRole(ftk::SizeRole::None);
+            p.typeTabBar->setParent(tabsLayout);
+            ftk::Divider::create(context, ftk::Orientation::Vertical, tabsLayout);
             auto vLayout = ftk::VerticalLayout::create(context, p.layout);
             vLayout->setMarginRole(ftk::SizeRole::Margin);
             vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
