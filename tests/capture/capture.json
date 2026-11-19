@@ -581,7 +581,7 @@
         { "click": "Export.ImageExport" },
         { "expect": "Export.Queue", "visible": true },
         { "wait": 3.0 },
-        { "expect": "Export.Queue.Name", "text": "Counter.0.png" },
+        { "expect": "Export.Queue.Name", "text": "Counter.png" },
         { "expect": "Export.Queue.Status", "text": "Done" },
         { "expect": "Export.Queue.Open", "visible": true }
       ]

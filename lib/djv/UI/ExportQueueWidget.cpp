@@ -310,9 +310,12 @@ namespace djv
                 jobs = queue->observeJobs()->get();
                 if (auto context = getContext())
                 {
-                    for (const auto& job : jobs)
+                    // Newest first, as a list of downloads has them: the
+                    // export just asked for comes in under the button that
+                    // asked for it, rather than at the end of the list.
+                    for (auto i = jobs.rbegin(); i != jobs.rend(); ++i)
                     {
-                        JobWidget::create(context, queue, job, p.openCallback, p.jobsLayout);
+                        JobWidget::create(context, queue, *i, p.openCallback, p.jobsLayout);
                     }
                 }
             }

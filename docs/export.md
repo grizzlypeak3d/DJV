@@ -54,7 +54,7 @@ The file that is written carries a color description: the display's when the exp
 
 ## The queue {#queue}
 
-The export button adds to the queue under it, which runs the exports one after another while the work goes on: playing, reviewing, opening other files, or closing the one being exported, which frees its cache. An export is made from the settings as they were when it was asked for — the color, the comparison, the in/out range, the drawings — so changing them afterwards changes nothing about an export already in the queue, and one file after another can be queued. An export to a file another one in the queue is writing is refused.
+The export button adds to the queue under it, newest first, which runs the exports one after another while the work goes on: playing, reviewing, opening other files, or closing the one being exported, which frees its cache. An export is made from the settings as they were when it was asked for — the color, the comparison, the in/out range, the drawings — so changing them afterwards changes nothing about an export already in the queue, and one file after another can be queued. An export to a file another one in the queue is writing is refused.
 
 Each row says how far its export has got and about how long it has left. The **×** beside it cancels it, leaving what has been written, and takes it off the list once it has stopped; **Clear** takes off every one that has stopped. A finished export can be opened from its row, to look at what was written. Quitting while exports are running asks first.
 
