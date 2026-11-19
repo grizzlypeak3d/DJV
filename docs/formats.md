@@ -30,7 +30,7 @@ The **ffmpeg location** and **ffprobe location** settings take a name or a locat
 Changes take effect on newly opened files; reload (<kbd>Ctrl+R</kbd>) to apply them to the current file.
 
 - **Software YUV conversion** - Convert YUV to RGB on the CPU instead of on the GPU. Off by default: the decoded YUV frame is uploaded directly and converted in the display shader, which is faster and avoids an extra frame copy. Enable this to perform the conversion in software before display.
-- **Hardware decoding** - Decode video on the GPU (VideoToolbox on macOS, Direct3D 11 on Windows) when the file is compatible. Off by default. Files that are not compatible will automatically fall back to software decoding.
+- **Hardware decoding** - Decode video on the GPU (VideoToolbox on macOS, Direct3D 11 on Windows, VAAPI or NVDEC on Linux) when the file is compatible. Off by default. Files that are not compatible will automatically fall back to software decoding, and the log says why. ProRes is hardware decoded only on macOS, and DNxHD, FFV1 and uncompressed video always use software decoding.
 - **Threads** - The number of threads used for decoding. The default, `0`, lets FFmpeg choose automatically based on the system.
 - **ffmpeg**, **ffprobe** — Where to find the external commands. Leave them as the command names to find an installed one automatically. Click the field to show the full path, or the folder icon to browse for it.
 
