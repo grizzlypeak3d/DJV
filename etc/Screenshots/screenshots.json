@@ -1284,7 +1284,7 @@
       "id": "export-tool-movie",
       "window": {
         "w": 900,
-        "h": 680,
+        "h": 720,
         "splitter2": 0.5
       },
       "crop": "MainWindow.Tools",
@@ -1333,6 +1333,10 @@
         {
           "id": "Export.MovieExport",
           "caption": "Export button"
+        },
+        {
+          "id": "Export.MovieMemoryNote",
+          "caption": "Memory use"
         }
       ]
     },

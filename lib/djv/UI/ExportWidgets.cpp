@@ -790,6 +790,16 @@ namespace djv
             formLayout->addRow("Range:", p.rangeLabel);
             p.layout->addSpacer(ftk::SizeRole::Spacing);
             p.exportButton->setParent(p.layout);
+            // The frame cache is not the whole of the memory: an encoder
+            // holds frames of its own, gigabytes for a long GOP codec at 4K,
+            // which a cache set for playback does not leave room for (DJV
+            // #947).
+            auto memoryLabel = ftk::Label::create(
+                context,
+                "Exports use memory beyond the frame cache, up to a few GB.",
+                p.layout);
+            memoryLabel->setTextRole(ftk::ColorRole::TextDisabled);
+            ftk::setScreenshotTag(memoryLabel, "Export.MovieMemoryNote");
 
             // The command line presets follow the ffmpeg application the
             // settings name. Before the export settings, which are checked
