@@ -140,8 +140,9 @@ namespace djv
             // Settings from a version that had "None" for the display and
             // the view, where OCIO was on and did nothing.
             defaultDisplayView(ocioOptions);
-            p.ocioOptions = ftk::Observable<tl::OCIOOptions>::create(ocioOptions);
             _ocioConfigUpdate(ocioOptions);
+            _fitToConfig(ocioOptions);
+            p.ocioOptions = ftk::Observable<tl::OCIOOptions>::create(ocioOptions);
             std::map<std::string, std::string> extColorSpaces;
             p.settings->getT(settingsKeys::colorOCIOExtColorSpaces, extColorSpaces);
             p.extColorSpaces = ftk::Observable<std::map<std::string, std::string> >::create(extColorSpaces);
@@ -227,12 +228,10 @@ namespace djv
                 // A configuration arriving without a display or a view, as
                 // from the command line, is shown the way it says to.
                 defaultDisplayView(options);
-            }
-            p.ocioOptions->setIfChanged(options);
-            if (configChanged)
-            {
                 _ocioConfigUpdate(options);
             }
+            _fitToConfig(options);
+            p.ocioOptions->setIfChanged(options);
             _resolvedUpdate();
         }
 
@@ -670,6 +669,96 @@ namespace djv
             }
 #endif // TLRENDER_OCIO
             return out;
+        }
+
+        void ColorModel::_fitToConfig(tl::OCIOOptions& options) const
+        {
+            FTK_P();
+#if defined(TLRENDER_OCIO)
+            if (!p.ocioConfig)
+                return;
+            std::vector<std::string> said;
+            try
+            {
+                // A role or an alias names a color space as well as its
+                // name does.
+                if (!options.input.empty() &&
+                    !p.ocioConfig->getColorSpace(options.input.c_str()))
+                {
+                    said.push_back(ftk::Format(
+                        "The input color space \"{0}\" is not in the OCIO "
+                        "configuration; it is chosen automatically.").
+                        arg(options.input));
+                    options.input = std::string();
+                }
+
+                bool displayFound = false;
+                for (int i = 0; i < p.ocioConfig->getNumDisplays(); ++i)
+                {
+                    displayFound |= options.display == p.ocioConfig->getDisplay(i);
+                }
+                if (!options.display.empty() && !displayFound)
+                {
+                    const char* display = p.ocioConfig->getDefaultDisplay();
+                    const std::string fallback = display ? display : std::string();
+                    said.push_back(ftk::Format(
+                        "The OCIO display \"{0}\" is not in the configuration; "
+                        "\"{1}\" is used.").
+                        arg(options.display).
+                        arg(fallback));
+                    options.display = fallback;
+                    const char* view = p.ocioConfig->getDefaultView(fallback.c_str());
+                    options.view = view ? view : std::string();
+                }
+                else if (!options.display.empty() && !options.view.empty())
+                {
+                    bool viewFound = false;
+                    for (int i = 0; i < p.ocioConfig->getNumViews(options.display.c_str()); ++i)
+                    {
+                        viewFound |= options.view == p.ocioConfig->getView(options.display.c_str(), i);
+                    }
+                    if (!viewFound)
+                    {
+                        const char* view = p.ocioConfig->getDefaultView(options.display.c_str());
+                        const std::string fallback = view ? view : std::string();
+                        said.push_back(ftk::Format(
+                            "The OCIO view \"{0}\" is not in the display \"{1}\"; "
+                            "\"{2}\" is used.").
+                            arg(options.view).
+                            arg(options.display).
+                            arg(fallback));
+                        options.view = fallback;
+                    }
+                }
+
+                if (!options.look.empty() &&
+                    !p.ocioConfig->getLook(options.look.c_str()))
+                {
+                    said.push_back(ftk::Format(
+                        "The OCIO look \"{0}\" is not in the configuration; "
+                        "none is used.").
+                        arg(options.look));
+                    options.look = std::string();
+                }
+            }
+            catch (const std::exception&)
+            {}
+            // Said when it would have shown: options that are off change
+            // nothing on the screen.
+            if (options.enabled)
+            {
+                if (auto logSystem = p.logSystem.lock())
+                {
+                    for (const auto& i : said)
+                    {
+                        logSystem->print(
+                            "djv::models::ColorModel",
+                            i,
+                            ftk::LogType::Warning);
+                    }
+                }
+            }
+#endif // TLRENDER_OCIO
         }
 
         void ColorModel::_ocioConfigUpdate(const tl::OCIOOptions& options)

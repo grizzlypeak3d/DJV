@@ -117,6 +117,13 @@ namespace djv
             DJV_MODELS_API void setLUTOptions(const tl::LUTOptions&);
 
         private:
+            //! Fit the options to the configuration: an input, a display, a
+            //! view, or a look it does not have -- settings saved with
+            //! another configuration, or another version of this one --
+            //! is replaced by automatic, its default, or none, and said
+            //! once, rather than OCIO failing on every frame while the
+            //! Color tool shows something else.
+            void _fitToConfig(tl::OCIOOptions&) const;
             void _resolvedUpdate();
             tl::OCIOOptions _resolvedOCIOOptions();
             void _logInput(const std::string& path, const std::string& label) const;

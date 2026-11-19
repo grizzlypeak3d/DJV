@@ -27,6 +27,52 @@ namespace djv
         {
             _resolve();
             _labels();
+            _fitToConfig();
+        }
+
+        // Options that name what the configuration does not have -- saved
+        // with another configuration, or another version of it -- are fitted
+        // to it: the input becomes automatic, the display and the view its
+        // defaults, the look none.
+        void ColorModelTest::_fitToConfig()
+        {
+#if defined(TLRENDER_OCIO)
+            auto settings = createTestSettings(_context);
+            auto model = models::ColorModel::create(_context, settings);
+            tl::OCIOOptions options = model->getOCIOOptions();
+            options.enabled = true;
+            const std::string display = options.display;
+            const std::string view = options.view;
+            FTK_CHECK(!display.empty());
+            FTK_CHECK(!view.empty());
+
+            options.input = "No such color space";
+            options.look = "No such look";
+            model->setOCIOOptions(options);
+            FTK_CHECK(model->getOCIOOptions().input.empty());
+            FTK_CHECK(model->getOCIOOptions().look.empty());
+            FTK_CHECK(display == model->getOCIOOptions().display);
+            FTK_CHECK(view == model->getOCIOOptions().view);
+
+            options.input = std::string();
+            options.look = std::string();
+            options.view = "No such view";
+            model->setOCIOOptions(options);
+            FTK_CHECK(display == model->getOCIOOptions().display);
+            FTK_CHECK(view == model->getOCIOOptions().view);
+
+            options.display = "No such display";
+            model->setOCIOOptions(options);
+            FTK_CHECK(display == model->getOCIOOptions().display);
+            FTK_CHECK(view == model->getOCIOOptions().view);
+
+            // A role names a color space, and stays.
+            options.display = display;
+            options.view = view;
+            options.input = "scene_linear";
+            model->setOCIOOptions(options);
+            FTK_CHECK("scene_linear" == model->getOCIOOptions().input);
+#endif // TLRENDER_OCIO
         }
 
         // The resolution order against the built-in configuration, which

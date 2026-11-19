@@ -22,6 +22,7 @@ namespace djv
         private:
             void _resolve();
             void _labels();
+            void _fitToConfig();
         };
     }
 }
