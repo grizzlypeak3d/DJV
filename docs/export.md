@@ -1,6 +1,6 @@
 # Exporting files
 
-The **Export** tool writes out the current file as a single still image, a numbered image sequence, or a movie. The kind of export is chosen first, with **Export**: **Image**, **Sequence**, or **Movie**; the options under it are that kind's, and so is the button that exports.
+The **Export** tool writes out the current file as a single still image, a numbered image sequence, or a movie. The tabs at the top choose the kind of export: **Image**, **Sequence**, or **Movie**. Everything under them is that kind's: the settings, which the three share, the options of its own, and the button that exports.
 
 Locations: **Tools** menu, **Tools** toolbar
 
@@ -8,7 +8,6 @@ Open it with **Tools > Export** (<kbd>F2</kbd>).
 
 ![Export tool](assets/export-tool.svg)
 
-- Export — The kind of export: a still image, an image sequence, or a movie.
 - Directory — Where the export is written.
 - Render size — **Default** for the size of what is being exported with no scaling; one of the preset widths, or **Width** for a width typed in, where the height follows the aspect ratio of what is being exported so nothing is squashed to fit; or **Custom** for a width and height typed in, used as they are. A height that follows from a width is rounded to an even number for a movie, which its codecs need; the source's own size and a custom size are used as they are, and the export says if the codec cannot take them.
 - Size — The size the export comes out at, with the edits for what can be typed.

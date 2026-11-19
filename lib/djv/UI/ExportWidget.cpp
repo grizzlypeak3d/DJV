@@ -22,7 +22,6 @@
 #include <tlRender/IO/FFmpeg.h>
 #endif // TLRENDER_FFMPEG_PLUGIN
 
-#include <ftk/UI/ButtonGroup.h>
 #include <ftk/UI/CheckBox.h>
 #include <ftk/UI/ComboBox.h>
 #include <ftk/UI/DialogSystem.h>
@@ -33,7 +32,7 @@
 #include <ftk/UI/RowLayout.h>
 #include <ftk/UI/ScreenshotTag.h>
 #include <ftk/UI/StackLayout.h>
-#include <ftk/UI/ToolButton.h>
+#include <ftk/UI/TabBar.h>
 #include <tlRender/UI/OffscreenRender.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/Path.h>
@@ -74,8 +73,7 @@ namespace djv
             // to show the custom size, which must not read as typed.
             bool sizeUpdating = false;
             std::shared_ptr<ftk::CheckBox> burnAnnotationsCheckBox;
-            std::shared_ptr<ftk::ButtonGroup> typeButtonGroup;
-            std::vector<std::shared_ptr<ftk::ToolButton> > typeButtons;
+            std::shared_ptr<ftk::TabBar> typeTabBar;
             std::shared_ptr<ImageExportWidget> imageWidget;
             std::shared_ptr<SeqExportWidget> seqWidget;
             std::shared_ptr<MovieExportWidget> movieWidget;
@@ -156,21 +154,19 @@ namespace djv
                 "are on.");
             ftk::setScreenshotTag(p.burnAnnotationsCheckBox, "Export.BurnAnnotations");
 
-            // What kind of export, first, as one choice of three: the rows
-            // and the button under the settings are that kind's.
-            p.typeButtonGroup = ftk::ButtonGroup::create(context, ftk::ButtonGroupType::Radio);
+            // What kind of export, as tabs across the top: everything
+            // under them is that kind's, the shared settings included.
+            p.typeTabBar = ftk::TabBar::create(context);
+            int tab = 0;
             for (const auto& i : std::vector<std::pair<std::string, std::string> >{
                 { "Image", "The current frame, as an image." },
                 { "Sequence", "The frames between the in and out points, as an image sequence." },
                 { "Movie", "The frames between the in and out points, as a movie." } })
             {
-                auto button = ftk::ToolButton::create(context, i.first);
-                button->setCheckable(true);
-                button->setTooltip(i.second);
-                ftk::setScreenshotTag(button, "Export.Type." + i.first);
-                p.typeButtonGroup->addButton(button);
-                p.typeButtons.push_back(button);
+                p.typeTabBar->addTab(i.first);
+                p.typeTabBar->setTabTooltip(tab++, i.second);
             }
+            ftk::setScreenshotTag(p.typeTabBar, "Export.Type");
 
             p.imageWidget = ImageExportWidget::create(
                 context, settingsModel);
@@ -181,19 +177,12 @@ namespace djv
 
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.typeTabBar->setParent(p.layout);
             auto vLayout = ftk::VerticalLayout::create(context, p.layout);
             vLayout->setMarginRole(ftk::SizeRole::Margin);
             vLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
             p.formLayout = ftk::FormLayout::create(context, vLayout);
             p.formLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
-            auto typeButtonsLayout = ftk::HorizontalLayout::create(context);
-            typeButtonsLayout->setSpacingRole(ftk::SizeRole::None);
-            ftk::setScreenshotTag(typeButtonsLayout, "Export.Type");
-            for (const auto& button : p.typeButtons)
-            {
-                button->setParent(typeButtonsLayout);
-            }
-            p.formLayout->addRow("Export:", typeButtonsLayout);
             p.formLayout->addRow("Directory:", p.dirEdit);
             p.formLayout->addRow("Render size:", p.renderSizeComboBox);
             // One row showing whichever applies: the size as a label, a
@@ -309,12 +298,10 @@ namespace djv
                     p.settings->setExport(options);
                 });
 
-            p.typeButtonGroup->setCheckedCallback(
-                [this](int index, bool value)
+            p.typeTabBar->setCallback(
+                [this](int index)
                 {
                     FTK_P();
-                    if (!value)
-                        return;
                     auto options = p.settings->getExport();
                     options.fileType = static_cast<models::ExportFileType>(index);
                     p.settings->setExport(options);
@@ -535,7 +522,7 @@ namespace djv
             p.dirEdit->setPath(ftk::Path(settings.dir));
             p.renderSizeComboBox->setCurrentIndex(static_cast<int>(settings.renderSize));
             _sizeUpdate();
-            p.typeButtonGroup->setChecked(static_cast<int>(settings.fileType));
+            p.typeTabBar->setCurrent(static_cast<int>(settings.fileType));
             p.typeLayout->setCurrentIndex(static_cast<int>(settings.fileType));
         }
 

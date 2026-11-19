@@ -1194,7 +1194,7 @@
           "tool": "Export"
         },
         {
-          "click": "Export.Type.Image"
+          "tab": "Image"
         }
       ],
       "annotate": [
@@ -1254,7 +1254,7 @@
           "tool": "Export"
         },
         {
-          "click": "Export.Type.Sequence"
+          "tab": "Sequence"
         }
       ],
       "annotate": [
@@ -1302,7 +1302,7 @@
           "tool": "Export"
         },
         {
-          "click": "Export.Type.Movie"
+          "tab": "Movie"
         }
       ],
       "annotate": [
