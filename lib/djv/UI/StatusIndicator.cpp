@@ -247,6 +247,8 @@ namespace djv
             // The options watched, which the models say what is on from;
             // see models::getStatus().
             models::StatusOptions options;
+            // Which frame is stored, for the tooltip.
+            std::string storedFrameLabel;
 
             std::weak_ptr<models::ViewportModel> viewportModel;
             std::weak_ptr<models::ToolsModel> toolsModel;
@@ -365,6 +367,7 @@ namespace djv
                 [this](const std::optional<models::StoredFrame>& value)
                 {
                     _p->options.storedFrame = value.has_value();
+                    _p->storedFrameLabel = value.has_value() ? value->label : std::string();
                     _indicatorUpdate();
                 });
 
@@ -527,12 +530,19 @@ namespace djv
                     if (item.group == group.id && i != values.end() && i->second)
                     {
                         // Compare and the frame store are each the only
-                        // item of their group, with its name: what is on
-                        // is how they are compared (DJV #969).
-                        on.push_back(
-                            "Compare" == item.id || "FrameStore" == item.id ?
-                            tl::getLabel(p.options.compare) :
-                            item.label);
+                        // item of their group, with its name, so what is
+                        // on is how the files are compared and which frame
+                        // is stored (DJV #969).
+                        std::string text = item.label;
+                        if ("Compare" == item.id)
+                        {
+                            text = tl::getLabel(p.options.compare);
+                        }
+                        else if ("FrameStore" == item.id && !p.storedFrameLabel.empty())
+                        {
+                            text = p.storedFrameLabel;
+                        }
+                        on.push_back(text);
                     }
                 }
                 letters.push_back(group.letter);
