@@ -8,7 +8,8 @@ C++ (CMake, C++20) on top of two libraries, built here as submodules:
 
 - `deps/tlRender`: timelines, players and file I/O, with OpenTimelineIO.
   It has its own AGENTS.md.
-- `deps/tlRender/deps/ftk`: feather-tk, the user interface toolkit.
+- `deps/tlRender/deps/ftk`: feather-tk, the user interface toolkit, with
+  the string, path and observable helpers. It has its own AGENTS.md.
 
 ## Where things are
 
@@ -23,8 +24,12 @@ C++ (CMake, C++20) on top of two libraries, built here as submodules:
 - `examples/python`: the Python example, which CI runs.
 - `tests`: `djv-test` (C++), `djv-c-test` (C), `djvPyTest` (Python), and
   screenshot captures of the running application (`tests/capture`).
-- `docs`: the HTML documentation. `command-line.html` is generated from the
-  application's `-helpJSON`; do not edit it by hand.
+- `docs`: the user documentation, Markdown with an HTML copy of each page
+  (the `djvDocsPages` target makes them). `llms.txt` indexes the pages:
+  read the one for the area being changed, which says how DJV is meant to
+  behave, and update it with the change. `actions.md` and
+  `command-line.html` are made from the application; do not edit them by
+  hand.
 
 ## Building and testing
 
