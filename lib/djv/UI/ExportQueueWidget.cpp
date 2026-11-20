@@ -90,6 +90,7 @@ namespace djv
                     const std::shared_ptr<models::ExportQueue>& queue,
                     const std::shared_ptr<models::ExportJob>& job,
                     const std::function<void(const ftk::Path&)>& openCallback,
+                    const std::function<void(bool)>& hoveredCallback,
                     const std::shared_ptr<ftk::IWidget>& parent)
                 {
                     ftk::IContainer::_init(context, "djv::ui::ExportJobWidget", parent);
@@ -118,9 +119,13 @@ namespace djv
                     _openButton->setTooltip("Open the exported file.");
                     _openButton->setVisible(false);
                     ftk::setScreenshotTag(_openButton, "Export.Queue.Open");
+                    // Stop while the export is queued or running, a cross
+                    // once it has stopped: cancelling leaves the row, and
+                    // a second click takes it off.
                     _button = ftk::ToolButton::create(context);
-                    _button->setIcon("CloseSmall");
                     ftk::setScreenshotTag(_button, "Export.Queue.Cancel");
+                    _openButton->setHoveredCallback(hoveredCallback);
+                    _button->setHoveredCallback(hoveredCallback);
 
                     auto layout = ftk::HorizontalLayout::create(context);
                     layout->setMarginRole(ftk::SizeRole::MarginSmall);
@@ -191,6 +196,7 @@ namespace djv
                                 openCallback &&
                                 models::ExportStatus::Finished == value.status);
                             const bool done = models::isDone(value.status);
+                            _button->setIcon(done ? "CloseSmall" : "StopSmall");
                             _button->setTooltip(done ?
                                 "Remove the export from the list." :
                                 "Cancel the export. What has been written is left.");
@@ -203,10 +209,11 @@ namespace djv
                     const std::shared_ptr<models::ExportQueue>& queue,
                     const std::shared_ptr<models::ExportJob>& job,
                     const std::function<void(const ftk::Path&)>& openCallback,
+                    const std::function<void(bool)>& hoveredCallback,
                     const std::shared_ptr<ftk::IWidget>& parent = nullptr)
                 {
                     auto out = std::shared_ptr<JobWidget>(new JobWidget);
-                    out->_init(context, queue, job, openCallback, parent);
+                    out->_init(context, queue, job, openCallback, hoveredCallback, parent);
                     return out;
                 }
 
@@ -253,6 +260,10 @@ namespace djv
             };
             std::vector<Item> items;
             std::vector<size_t> order;
+            //! Whether the pointer is on a row's button. The rows keep
+            //! their places while it is, so that a second click lands on
+            //! the row the first one did, not on the one moved under it.
+            bool hovered = false;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::ExportJob> > > jobsObserver;
             std::vector<std::shared_ptr<ftk::Observer<models::ExportProgress> > > statusObservers;
@@ -318,6 +329,7 @@ namespace djv
             p.statusObservers.clear();
             p.items.clear();
             p.order.clear();
+            p.hovered = false;
             p.jobsLayout->clear();
             std::vector<std::shared_ptr<models::ExportJob> > jobs;
             if (auto queue = p.queue.lock())
@@ -329,7 +341,20 @@ namespace djv
                     {
                         p.items.push_back({
                             job,
-                            JobWidget::create(context, queue, job, p.openCallback, p.jobsLayout),
+                            JobWidget::create(
+                                context,
+                                queue,
+                                job,
+                                p.openCallback,
+                                [this](bool value)
+                                {
+                                    _p->hovered = value;
+                                    if (!value)
+                                    {
+                                        _orderUpdate();
+                                    }
+                                },
+                                p.jobsLayout),
                             job->getProgress().status });
                     }
                     for (size_t i = 0; i < p.items.size(); ++i)
@@ -361,7 +386,7 @@ namespace djv
                 statuses.push_back(item.status);
             }
             const std::vector<size_t> order = models::getListOrder(statuses);
-            if (order != p.order)
+            if (order != p.order && (!p.hovered || p.order.empty()))
             {
                 p.order = order;
                 for (size_t i = 0; i < order.size(); ++i)
