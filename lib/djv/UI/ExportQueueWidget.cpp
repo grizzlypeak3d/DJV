@@ -243,7 +243,19 @@ namespace djv
             std::shared_ptr<ftk::VerticalLayout> jobsLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
 
+            //! The exports and their cards, in the order the queue runs
+            //! them, with the status each was last seen at.
+            struct Item
+            {
+                std::shared_ptr<models::ExportJob> job;
+                std::shared_ptr<JobWidget> widget;
+                models::ExportStatus status = models::ExportStatus::Queued;
+            };
+            std::vector<Item> items;
+            std::vector<size_t> order;
+
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::ExportJob> > > jobsObserver;
+            std::vector<std::shared_ptr<ftk::Observer<models::ExportProgress> > > statusObservers;
         };
 
         void ExportQueueWidget::_init(
@@ -303,6 +315,9 @@ namespace djv
         void ExportQueueWidget::_jobsUpdate()
         {
             FTK_P();
+            p.statusObservers.clear();
+            p.items.clear();
+            p.order.clear();
             p.jobsLayout->clear();
             std::vector<std::shared_ptr<models::ExportJob> > jobs;
             if (auto queue = p.queue.lock())
@@ -310,16 +325,50 @@ namespace djv
                 jobs = queue->observeJobs()->get();
                 if (auto context = getContext())
                 {
-                    // Newest first, as a list of downloads has them: the
-                    // export just asked for comes in under the button that
-                    // asked for it, rather than at the end of the list.
-                    for (auto i = jobs.rbegin(); i != jobs.rend(); ++i)
+                    for (const auto& job : jobs)
                     {
-                        JobWidget::create(context, queue, *i, p.openCallback, p.jobsLayout);
+                        p.items.push_back({
+                            job,
+                            JobWidget::create(context, queue, job, p.openCallback, p.jobsLayout),
+                            job->getProgress().status });
+                    }
+                    for (size_t i = 0; i < p.items.size(); ++i)
+                    {
+                        p.statusObservers.push_back(ftk::Observer<models::ExportProgress>::create(
+                            p.items[i].job->observeProgress(),
+                            [this, i](const models::ExportProgress& value)
+                            {
+                                FTK_P();
+                                if (i < p.items.size() && value.status != p.items[i].status)
+                                {
+                                    p.items[i].status = value.status;
+                                    _orderUpdate();
+                                }
+                            }));
                     }
                 }
             }
+            _orderUpdate();
             setVisible(!jobs.empty());
+        }
+
+        void ExportQueueWidget::_orderUpdate()
+        {
+            FTK_P();
+            std::vector<models::ExportStatus> statuses;
+            for (const auto& item : p.items)
+            {
+                statuses.push_back(item.status);
+            }
+            const std::vector<size_t> order = models::getListOrder(statuses);
+            if (order != p.order)
+            {
+                p.order = order;
+                for (size_t i = 0; i < order.size(); ++i)
+                {
+                    p.jobsLayout->moveToIndex(p.items[order[i]].widget, i);
+                }
+            }
         }
 
         ExportQueueWidget::ExportQueueWidget() :

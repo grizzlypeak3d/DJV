@@ -24,6 +24,7 @@ namespace djv
         void ExportQueueTest::run()
         {
             _labels();
+            _order();
             _queue();
         }
 
@@ -52,6 +53,26 @@ namespace djv
             FTK_CHECK("Failed: Disk full" == getLabel(progress));
             progress.status = ExportStatus::Cancelled;
             FTK_CHECK("Cancelled" == getLabel(progress));
+        }
+
+        void ExportQueueTest::_order()
+        {
+            using namespace models;
+            FTK_CHECK(getListOrder({}).empty());
+            // Two done, one running, two waiting, as the queue runs them.
+            const std::vector<size_t> order = getListOrder({
+                ExportStatus::Finished,
+                ExportStatus::Failed,
+                ExportStatus::Running,
+                ExportStatus::Queued,
+                ExportStatus::Queued });
+            FTK_CHECK(std::vector<size_t>({ 2, 3, 4, 1, 0 }) == order);
+            // A queued export cancelled before it ran goes with the
+            // stopped ones, by when it was asked for.
+            FTK_CHECK(std::vector<size_t>({ 1, 2, 0 }) == getListOrder({
+                ExportStatus::Finished,
+                ExportStatus::Running,
+                ExportStatus::Cancelled }));
         }
 
         void ExportQueueTest::_queue()

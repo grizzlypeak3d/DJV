@@ -21,6 +21,7 @@ namespace djv
 
         private:
             void _labels();
+            void _order();
             void _queue();
         };
     }

@@ -80,6 +80,15 @@ namespace djv
         //! Whether an export has stopped, one way or another.
         DJV_MODELS_API bool isDone(ExportStatus);
 
+        //! The order to list exports in, given their statuses in the order
+        //! they run: the running one first, so that "Am I done?" is
+        //! answered at the top; then the ones waiting, in the order they
+        //! will run; then the ones that have stopped, newest first. Returns
+        //! indexes into the statuses. (Newest first throughout, as a list
+        //! of downloads has it, put the running export under every one
+        //! waiting: downloads all run at once, exports one at a time.)
+        DJV_MODELS_API std::vector<size_t> getListOrder(const std::vector<ExportStatus>&);
+
         //! What an export's progress says in a line: "Frame 12 / 48, about a
         //! minute left", "Queued", "Failed: ...".
         DJV_MODELS_API std::string getLabel(const ExportProgress&);

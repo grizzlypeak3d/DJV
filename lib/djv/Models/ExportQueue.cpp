@@ -53,6 +53,37 @@ namespace djv
                 ExportStatus::Cancelled == value;
         }
 
+        std::vector<size_t> getListOrder(const std::vector<ExportStatus>& statuses)
+        {
+            std::vector<size_t> out(statuses.size());
+            for (size_t i = 0; i < out.size(); ++i)
+            {
+                out[i] = i;
+            }
+            auto rank = [&statuses](size_t i)
+            {
+                switch (statuses[i])
+                {
+                case ExportStatus::Running: return 0;
+                case ExportStatus::Queued: return 1;
+                default: break;
+                }
+                return 2;
+            };
+            std::sort(
+                out.begin(),
+                out.end(),
+                [&rank](size_t a, size_t b)
+                {
+                    const int ra = rank(a);
+                    const int rb = rank(b);
+                    if (ra != rb)
+                        return ra < rb;
+                    return 2 == ra ? a > b : a < b;
+                });
+            return out;
+        }
+
         std::string getLabel(const ExportProgress& value)
         {
             std::string out;

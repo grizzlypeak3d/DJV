@@ -18,11 +18,12 @@ namespace djv
 
     namespace ui
     {
-        //! The exports queued and running, newest first: one row each,
-        //! with what it is called, how far it has got, and a button to
-        //! cancel it, or to take it off the list once it has stopped; one
-        //! that has finished can also be opened, to look at what was
-        //! written. Hidden while the queue is empty.
+        //! The exports: the running one first, then the ones waiting in
+        //! the order they will run, then the ones that have stopped, newest
+        //! first. One row each, with what it is called, how far it has got,
+        //! and a button to cancel it, or to take it off the list once it
+        //! has stopped; one that has finished can also be opened, to look
+        //! at what was written. Hidden while the queue is empty.
         class DJV_UI_API_TYPE ExportQueueWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ExportQueueWidget);
@@ -49,6 +50,7 @@ namespace djv
 
         private:
             void _jobsUpdate();
+            void _orderUpdate();
 
             FTK_PRIVATE();
         };
