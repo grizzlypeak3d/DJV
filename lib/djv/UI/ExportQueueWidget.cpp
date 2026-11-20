@@ -260,10 +260,13 @@ namespace djv
             };
             std::vector<Item> items;
             std::vector<size_t> order;
-            //! Whether the pointer is on a row's button. The rows keep
-            //! their places while it is, so that a second click lands on
-            //! the row the first one did, not on the one moved under it.
-            bool hovered = false;
+            //! Whether the pointer is on the list, or on a button in it,
+            //! which takes the hover from the list. The rows keep their
+            //! places while it is, so that a second click lands on the row
+            //! the first one did, not on the one moved under it, and a row
+            //! does not move out from under the pointer.
+            bool listHovered = false;
+            bool buttonHovered = false;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<models::ExportJob> > > jobsObserver;
             std::vector<std::shared_ptr<ftk::Observer<models::ExportProgress> > > statusObservers;
@@ -329,7 +332,7 @@ namespace djv
             p.statusObservers.clear();
             p.items.clear();
             p.order.clear();
-            p.hovered = false;
+            p.buttonHovered = false;
             p.jobsLayout->clear();
             std::vector<std::shared_ptr<models::ExportJob> > jobs;
             if (auto queue = p.queue.lock())
@@ -348,7 +351,7 @@ namespace djv
                                 p.openCallback,
                                 [this](bool value)
                                 {
-                                    _p->hovered = value;
+                                    _p->buttonHovered = value;
                                     if (!value)
                                     {
                                         _orderUpdate();
@@ -386,7 +389,8 @@ namespace djv
                 statuses.push_back(item.status);
             }
             const std::vector<size_t> order = models::getListOrder(statuses);
-            if (order != p.order && (!p.hovered || p.order.empty()))
+            const bool hold = p.listHovered || p.buttonHovered;
+            if (order != p.order && (!hold || p.order.empty()))
             {
                 p.order = order;
                 for (size_t i = 0; i < order.size(); ++i)
@@ -394,6 +398,20 @@ namespace djv
                     p.jobsLayout->moveToIndex(p.items[order[i]].widget, i);
                 }
             }
+        }
+
+        void ExportQueueWidget::mouseEnterEvent(ftk::MouseEnterEvent& event)
+        {
+            IContainer::mouseEnterEvent(event);
+            event.accept = true;
+            _p->listHovered = true;
+        }
+
+        void ExportQueueWidget::mouseLeaveEvent()
+        {
+            IContainer::mouseLeaveEvent();
+            _p->listHovered = false;
+            _orderUpdate();
         }
 
         ExportQueueWidget::ExportQueueWidget() :

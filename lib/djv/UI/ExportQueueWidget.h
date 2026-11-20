@@ -48,6 +48,9 @@ namespace djv
             //! button for it.
             DJV_UI_API void setOpenCallback(const std::function<void(const ftk::Path&)>&);
 
+            DJV_UI_API void mouseEnterEvent(ftk::MouseEnterEvent&) override;
+            DJV_UI_API void mouseLeaveEvent() override;
+
         private:
             void _jobsUpdate();
             void _orderUpdate();
