@@ -199,7 +199,7 @@ namespace djv
                             _button->setIcon(done ? "CloseSmall" : "StopSmall");
                             _button->setTooltip(done ?
                                 "Remove the export from the list." :
-                                "Cancel the export. What has been written is left.");
+                                "Cancel the export.");
                         });
                 }
 
