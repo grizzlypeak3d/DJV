@@ -94,6 +94,8 @@ Fixes:
   Hiero writes them (tlRender #143).
 * Fix for the current frame being cut off when it has more than six digits
   (#959).
+* Fix for the status indicator's tooltip showing "Compare: Compare" (#969).
+* Fix for Close All resetting the compare settings (#970).
 
 ## 3.7.7
 

@@ -526,7 +526,13 @@ namespace djv
                     const auto i = values.find(item.id);
                     if (item.group == group.id && i != values.end() && i->second)
                     {
-                        on.push_back(item.label);
+                        // Compare and the frame store are each the only
+                        // item of their group, with its name: what is on
+                        // is how they are compared (DJV #969).
+                        on.push_back(
+                            "Compare" == item.id || "FrameStore" == item.id ?
+                            tl::getLabel(p.options.compare) :
+                            item.label);
                     }
                 }
                 letters.push_back(group.letter);

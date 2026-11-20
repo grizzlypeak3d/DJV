@@ -757,9 +757,11 @@ namespace djv
         void App::_closeReview()
         {
             FTK_P();
-            // Reset to the empty startup state.
+            // Reset to the empty startup state. Comparing stops, and the
+            // compare settings stay as they were, as when the files are
+            // closed one by one (DJV #970).
             p.filesModel->closeAll();
-            tl::CompareOptions compareOptions;
+            tl::CompareOptions compareOptions = p.filesModel->getCompareOptions();
             compareOptions.compare = tl::Compare::None;
             p.filesModel->setCompareOptions(compareOptions);
             p.markersModel->clear();
