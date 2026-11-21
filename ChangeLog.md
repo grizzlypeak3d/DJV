@@ -12,59 +12,6 @@ Changes:
 * Freehand annotations follow pen pressure.
 * Annotation widths and text sizes are given for an HD picture and scale
   with the picture, so they look the same at any resolution.
-* Add File > Export Still, for writing the current frame as an image in one
-  step (#696).
-* Add Timeline > Detect Cuts, for marking the cuts in an edit flattened to
-  one movie or image sequence.
-* Add a frame store, Compare > Store Frame, for comparing against a stored
-  frame: a still against a movie, or a frame against another of the same
-  clip (#627).
-* A still compared with a movie is shown at every frame.
-* Add a Displays tool, for where the picture goes: the secondary window
-  can fill a chosen monitor with the picture alone, and have an
-  OpenColorIO display and view of its own (#615).
-* Add a mouse tool option for choosing what the left mouse button does: pan,
-  compare wipe, color picker, or frame shuttle.
-* Add a Start at Zero option to the time units, for counting from the start
-  of a file rather than its frame numbers or timecode (#958).
-* Add Playback > Play Every Frame, for media that cannot play in real time:
-  playback waits for each frame rather than skipping it, with the audio
-  silent (#123).
-* Audio > Volume Up and Volume Down step by 5% (#649).
-* The status indicator shows a letter for each group of options (view,
-  color, compare, frame store, audio), lit while one of them is in use.
-* The compare wipe has a dot to move it, from anywhere in the middle around
-  it, and a ring to turn it, which settles on level, and Shift steps it by 45
-  degrees; the ring marks the angle and which side is A and which is B. They
-  fade while the pointer rests, and Compare > Wipe Handles hides them (#957,
-  #966, #967).
-* Double clicking the view frames the image.
-* Add a Dither view option.
-* Add a frame guide and safe areas, in the View menu and the View tool
-  (#962). The frame guide's aspect is typed as a ratio or a number, 16:9 or
-  2.39, and kept exactly (#963).
-* Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
-  Graphics or with the -renderer command line option. On an HDR display it
-  shows HDR pictures.
-* The Color Picker shows the luminance in nits.
-* Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
-* Movies that cannot be decoded in real time show the frames they can,
-  rather than freezing while the audio plays.
-* Faster playback of RGB images, such as PNG sequences and 16-bit RGB
-  movies, with NVIDIA graphics.
-* The file browser says how many frames a sequence is missing, and the
-  Information tool which ones.
-* Read HEIC and HEIF images on macOS.
-* Read WebP images, still and animated (#867).
-* Show Display P3 colors on wide-gamut displays with the GPU renderer.
-* The thumbnails in the timeline and the Files tool are shown through the
-  color settings, each in its own file's color space.
-* Exported JPEG, PNG, and TIFF images include ICC profiles.
-* System Information shows the FFmpeg command line's version for writing as
-  well as reading (#949).
-* The Export tool offers the FFmpeg command line presets only when the
-  installed ffmpeg has their encoder (#949).
-* The export progress says about how long is left (#943).
 * Exports go into a queue and run while the work goes on: the file being
   exported can be closed, which frees its cache, and others queued behind
   it (#947).
@@ -72,15 +19,68 @@ Changes:
   and stays full once they have finished, until the Export tool is opened;
   the status bar says when they finish. A finished export can be opened
   from the queue, which lists the running export first (#964, #968).
-* With the display scale on Auto, each window follows the display it is on
-  (#732).
-* Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command
-  line (#866).
-* The log ends with a line saying how the program ended: a clean exit, an
-  error, or a crash with a backtrace.
+* Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
+  Graphics or with the -renderer command line option. On an HDR display it
+  shows HDR pictures.
+* Add a Displays tool, for where the picture goes: the secondary window
+  can fill a chosen monitor with the picture alone, and have an
+  OpenColorIO display and view of its own (#615).
+* Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
+* Movies that cannot be decoded in real time show the frames they can,
+  rather than freezing while the audio plays.
+* Add Timeline > Detect Cuts, for marking the cuts in an edit flattened to
+  one movie or image sequence.
+* Add a frame store, Compare > Store Frame, for comparing against a stored
+  frame: a still against a movie, or a frame against another of the same
+  clip (#627).
+* A still compared with a movie is shown at every frame.
+* Add Playback > Play Every Frame, for media that cannot play in real time:
+  playback waits for each frame rather than skipping it, with the audio
+  silent (#123).
+* Add File > Export Still, for writing the current frame as an image in one
+  step (#696).
 * The documentation has a page for each part of the application and a
   reference of every menu item, and is installed with the application in
   HTML and Markdown, with an llms.txt for AI assistants.
+* Add a frame guide and safe areas, in the View menu and the View tool
+  (#962). The frame guide's aspect is typed as a ratio or a number, 16:9 or
+  2.39, and kept exactly (#963).
+* The compare wipe has a dot to move it, from anywhere in the middle around
+  it, and a ring to turn it, which settles on level, and Shift steps it by 45
+  degrees; the ring marks the angle and which side is A and which is B. They
+  fade while the pointer rests, and Compare > Wipe Handles hides them (#957,
+  #966, #967).
+* Read WebP images, still and animated (#867).
+* Read HEIC and HEIF images on macOS.
+* Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command
+  line (#866).
+* Show Display P3 colors on wide-gamut displays with the GPU renderer.
+* Faster playback of RGB images, such as PNG sequences and 16-bit RGB
+  movies, with NVIDIA graphics.
+* With the display scale on Auto, each window follows the display it is on
+  (#732).
+* The thumbnails in the timeline and the Files tool are shown through the
+  color settings, each in its own file's color space.
+* The file browser says how many frames a sequence is missing, and the
+  Information tool which ones.
+* Add a mouse tool option for choosing what the left mouse button does: pan,
+  compare wipe, color picker, or frame shuttle.
+* The status indicator shows a letter for each group of options (view,
+  color, compare, frame store, audio), lit while one of them is in use.
+* Add a Start at Zero option to the time units, for counting from the start
+  of a file rather than its frame numbers or timecode (#958).
+* Exported JPEG, PNG, and TIFF images include ICC profiles.
+* The export progress says about how long is left (#943).
+* The Export tool offers the FFmpeg command line presets only when the
+  installed ffmpeg has their encoder (#949).
+* System Information shows the FFmpeg command line's version for writing as
+  well as reading (#949).
+* The log ends with a line saying how the program ended: a clean exit, an
+  error, or a crash with a backtrace.
+* The Color Picker shows the luminance in nits.
+* Add a Dither view option.
+* Double clicking the view frames the image.
+* Audio > Volume Up and Volume Down step by 5% (#649).
 * Library updates:
     - FFmpeg 9.0.2
 
