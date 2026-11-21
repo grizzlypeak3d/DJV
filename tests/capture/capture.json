@@ -151,6 +151,26 @@
       ]
     },
     {
+      "id": "shortcuts-first-click",
+      "strict": true,
+      "window": { "w": 1200, "h": 800, "splitter2": 0.5 },
+      "setup": [
+        { "tool": "Settings", "expand": ["Shortcuts"] },
+        { "scroll": ["MainWindow.Tools", 0.5, 0.5], "delta": [0, -10] },
+        { "scroll": ["MainWindow.Tools", 0.5, 0.5], "delta": [0, -10] },
+        { "scroll": ["MainWindow.Tools", 0.5, 0.5], "delta": [0, -10] },
+        { "scroll": ["MainWindow.Tools", 0.5, 0.5], "delta": [0, -10] },
+        { "scroll": ["MainWindow.Tools", 0.5, 0.5], "delta": [0, -10] },
+        { "scroll": ["MainWindow.Tools", 0.5, 0.5], "delta": [0, -10] },
+        { "scroll": ["MainWindow.Tools", 0.5, 0.5], "delta": [0, -10] },
+        { "scroll": ["MainWindow.Tools", 0.5, 0.5], "delta": [0, -10] },
+        { "wait": 0.3 },
+        { "click": ["MainWindow.Tools", 0.55, 0.5] },
+        { "wait": 0.3 },
+        { "expect": "Shortcuts.Edit", "visible": true }
+      ]
+    },
+    {
       "id": "press-release",
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
