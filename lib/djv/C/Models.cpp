@@ -464,7 +464,12 @@ struct djv_models
         }
         if ((drawing || typing) && models::sameTime(strokeTime, *time))
         {
-            models::drawStroke(render, fontSystem, stroke, toScreen, scale, 1.F, typing && touched);
+            models::TextCaret caret;
+            if (typing && touched)
+            {
+                caret.cursor = static_cast<int>(stroke.text.size());
+            }
+            models::drawStroke(render, fontSystem, stroke, toScreen, scale, 1.F, caret);
         }
     }
 

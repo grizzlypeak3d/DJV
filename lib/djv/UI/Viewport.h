@@ -24,6 +24,7 @@ namespace djv
         class DrawModel;
         class FilesModel;
         class SettingsModel;
+        struct TextCaret;
         class TimeUnitsModel;
         class ViewportModel;
         struct DisplayColor;
@@ -166,6 +167,14 @@ namespace djv
             void _textBegin(const ftk::V2I& widgetPos);
             void _textEnd(bool commit);
 
+            //! The text being typed, from its editing model, drawn again.
+            void _textSync();
+
+            //! A press on the text being typed puts the caret there, and
+            //! a drag from it selects. False if the press is not on it.
+            bool _textPress(const ftk::V2I& widgetPos);
+            void _textDrag(const ftk::V2I& widgetPos);
+
             //! The select tool: a press picks the stroke under it and starts
             //! moving it, a press on nothing lets the selection go.
             void _selectPress(const ftk::V2I& widgetPos);
@@ -192,7 +201,7 @@ namespace djv
                 const models::ReviewStroke&,
                 float scale,
                 float alpha,
-                bool caret);
+                const models::TextCaret&);
 
             //! The cursor follows the drawing mode: a crosshair while the
             //! pointer is inside and drawing is enabled.

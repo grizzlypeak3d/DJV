@@ -166,6 +166,26 @@
       ]
     },
     {
+      "id": "review-text-cursor",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "Review" },
+        { "click": "Review.Text" },
+        { "click": ["MainWindow.Viewport", 0.3, 0.2] },
+        { "text": "Check the sky" },
+        { "key": "Left" },
+        { "key": "Left" },
+        { "key": "Left" },
+        { "text": "blue " },
+        { "key": "Right", "modifier": "Shift" },
+        { "key": "Right", "modifier": "Shift" },
+        { "key": "Right", "modifier": "Shift" },
+        { "expect": "Review.Undo", "enabled": false }
+      ]
+    },
+    {
       "id": "shortcuts-first-click",
       "strict": true,
       "window": { "w": 1200, "h": 800, "splitter2": 0.5 },

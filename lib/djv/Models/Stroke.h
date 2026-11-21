@@ -140,6 +140,24 @@ namespace djv
             const ReviewStroke&,
             const TextView& = TextView());
 
+        //! Where a byte offset into a text falls across it, from the
+        //! character boxes of the text: the left of the character it is
+        //! before, or the right of the last.
+        DJV_MODELS_API float textCursorX(
+            const std::string&,
+            const std::vector<ftk::Box2I>& boxes,
+            int cursor);
+
+        //! The byte offset into a text stroke's text that a position puts
+        //! the caret at: before the first character that does not end
+        //! left of it, measured as textBox() measures. The position is in
+        //! the pixels of the source image. The end of the text without a
+        //! font system to measure with.
+        DJV_MODELS_API int textCursorAt(
+            const ReviewStroke&,
+            const ftk::V2F& pos,
+            const TextView&);
+
         //! Where a source image is in a view: its box in render space
         //! (the view's pixels before the zoom and the pan), the size of the
         //! image, and whether it is mirrored. Strokes are kept in the

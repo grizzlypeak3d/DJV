@@ -23,7 +23,7 @@ namespace djv
             const std::function<ftk::V2F(const ftk::V2F&)>& toScreen,
             float scale,
             float alpha,
-            bool caret)
+            const TextCaret& caret)
         {
             if (stroke.points.empty())
             {
@@ -98,18 +98,37 @@ namespace djv
                         ftk::rect(box, static_cast<int>(std::round(mx * .5F))),
                         plate);
                 }
-                render->drawText(glyphs, fontMetrics, path.front(), color);
-                if (caret)
+                if (caret.cursor >= 0)
                 {
-                    // A bar where the next character goes.
-                    const int textW = stroke.text.empty() ? 0 : fontSystem->getSize(stroke.text, fontInfo).w;
+                    // The selection behind the text, then the text, then a
+                    // bar where the next character goes.
+                    const std::vector<ftk::Box2I> boxes = fontSystem->getBoxes(stroke.text, fontInfo);
+                    if (caret.selectionMin != caret.selectionMax)
+                    {
+                        const float x0 = textCursorX(stroke.text, boxes, caret.selectionMin);
+                        const float x1 = textCursorX(stroke.text, boxes, caret.selectionMax);
+                        ftk::Color4F selection = color;
+                        selection.a *= .35F;
+                        render->drawRect(
+                            ftk::Box2F(
+                                path.front().x + x0,
+                                path.front().y,
+                                x1 - x0,
+                                static_cast<float>(fontMetrics.lineHeight)),
+                            selection);
+                    }
+                    render->drawText(glyphs, fontMetrics, path.front(), color);
                     render->drawRect(
                         ftk::Box2F(
-                            path.front().x + textW,
+                            path.front().x + textCursorX(stroke.text, boxes, caret.cursor),
                             path.front().y,
                             std::max(1.F, fontInfo.size / 12.F),
                             static_cast<float>(fontMetrics.lineHeight)),
                         color);
+                }
+                else
+                {
+                    render->drawText(glyphs, fontMetrics, path.front(), color);
                 }
                 break;
             }

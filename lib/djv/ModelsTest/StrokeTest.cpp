@@ -36,6 +36,7 @@ namespace djv
             _mapping();
             _input();
             _move();
+            _cursor();
         }
 
         // Every index is one-based and inside the mesh, or the renderer
@@ -554,6 +555,67 @@ namespace djv
                 plated.text.clear();
                 FTK_CHECK(models::textBox(plated, measured).w() == 48.F);
             }
+        }
+
+        // A click on text being typed puts the caret before the character
+        // it lands on, as a line edit does; the caret is drawn at the left
+        // of the character it is before. The offsets are bytes (#984).
+        void StrokeTest::_cursor()
+        {
+            auto context = _context;
+            if (!context)
+            {
+                return;
+            }
+            models::TextView view;
+            view.fontSystem = context->getSystem<ftk::FontSystem>();
+            models::ReviewStroke text;
+            text.kind = models::ReviewStrokeKind::Text;
+            text.textSize = 48.F;
+            text.points.push_back(ftk::V2F(100.F, 100.F));
+            // A two byte character, an A with an umlaut.
+            text.text = "ka" "\xC3\x84" "putt";
+            ftk::FontInfo fontInfo;
+            fontInfo.size = 48;
+            const std::vector<ftk::Box2I> boxes = view.fontSystem->getBoxes(text.text, fontInfo);
+            FTK_CHECK(7 == boxes.size());
+
+            // Where each byte offset is drawn.
+            FTK_CHECK(models::textCursorX(text.text, boxes, 0) == boxes[0].min.x);
+            FTK_CHECK(models::textCursorX(text.text, boxes, 2) == boxes[2].min.x);
+            FTK_CHECK(models::textCursorX(text.text, boxes, 4) == boxes[3].min.x);
+            FTK_CHECK(models::textCursorX(text.text, boxes, static_cast<int>(text.text.size())) == boxes.back().max.x);
+            FTK_CHECK(models::textCursorX(std::string(), {}, 0) == 0.F);
+
+            // A click in the middle of a character's box goes before it.
+            auto middle = [&boxes](size_t i)
+            {
+                return (boxes[i].min.x + boxes[i].max.x) * .5F;
+            };
+            FTK_CHECK(0 == models::textCursorAt(text, ftk::V2F(100.F + middle(0), 110.F), view));
+            FTK_CHECK(2 == models::textCursorAt(text, ftk::V2F(100.F + middle(2), 110.F), view));
+            FTK_CHECK(4 == models::textCursorAt(text, ftk::V2F(100.F + middle(3), 110.F), view));
+            // Left of the text, the start; right of it, the end.
+            FTK_CHECK(0 == models::textCursorAt(text, ftk::V2F(50.F, 110.F), view));
+            FTK_CHECK(static_cast<int>(text.text.size()) ==
+                models::textCursorAt(text, ftk::V2F(100.F + boxes.back().max.x + 20.F, 110.F), view));
+
+            // Mirrored, the text runs the other way through the image.
+            models::TextView mirrored = view;
+            mirrored.mirrorX = true;
+            FTK_CHECK(2 == models::textCursorAt(text, ftk::V2F(100.F - middle(2), 110.F), mirrored));
+
+            // Twice the size in the image, the same offsets twice as far.
+            models::ReviewStroke large = text;
+            large.textSize = 96.F;
+            fontInfo.size = 96;
+            const std::vector<ftk::Box2I> largeBoxes = view.fontSystem->getBoxes(text.text, fontInfo);
+            const float largeMiddle = (largeBoxes[2].min.x + largeBoxes[2].max.x) * .5F;
+            FTK_CHECK(2 == models::textCursorAt(large, ftk::V2F(100.F + largeMiddle, 110.F), view));
+
+            // Without a font system to measure with, the end.
+            FTK_CHECK(static_cast<int>(text.text.size()) ==
+                models::textCursorAt(text, ftk::V2F(100.F, 110.F), models::TextView()));
         }
     }
 }

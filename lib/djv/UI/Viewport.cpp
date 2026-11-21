@@ -22,6 +22,7 @@
 
 #include <ftk/UI/ColorSwatch.h>
 #include <ftk/UI/IWindow.h>
+#include <ftk/UI/LineEditModel.h>
 #include <ftk/Core/FontSystem.h>
 #include <ftk/UI/Label.h>
 #include <ftk/UI/SysLogModel.h>
@@ -274,7 +275,8 @@ namespace djv
                 Draw,
                 Erase,
                 Select,
-                Wipe
+                Wipe,
+                Text
             };
             struct MouseData
             {
@@ -304,6 +306,11 @@ namespace djv
             //! is the selected stroke written again rather than a new one.
             bool textEditing = false;
             bool textEditingSelection = false;
+            //! The text being typed, its caret and selection, as a line edit
+            //! has them; made anew for each text, so that its undo is that
+            //! text's alone. A drag selecting in it starts at textDragStart.
+            std::shared_ptr<ftk::LineEditModel> textModel;
+            int textDragStart = 0;
             //! Whether the press under way is a finger's.
             bool touchInput = false;
             //! How many undo steps the eraser has made since the press, to
@@ -1012,6 +1019,9 @@ namespace djv
             case Private::MouseMode::Wipe:
                 _wipeMove(event.pos, event.keyModifiers);
                 break;
+            case Private::MouseMode::Text:
+                _textDrag(event.pos - getGeometry().min);
+                break;
             case Private::MouseMode::None:
             {
                 // The handle under the pointer, drawn larger.
@@ -1124,9 +1134,15 @@ namespace djv
                 takeKeyFocus();
                 const ftk::Box2I& g = getGeometry();
                 const ftk::V2I pos = event.pos - g.min;
-                // A click elsewhere finishes the text being typed.
+                // A click on the text being typed moves its caret; a click
+                // elsewhere finishes it.
                 if (p.textEditing)
                 {
+                    if (_textPress(pos))
+                    {
+                        p.mouse.mode = Private::MouseMode::Text;
+                        return;
+                    }
                     _textEnd(true);
                 }
                 switch (p.drawModel->getTool())
@@ -1478,10 +1494,18 @@ namespace djv
                 const int ctrlAlt =
                     static_cast<int>(ftk::KeyModifier::Control) |
                     static_cast<int>(ftk::KeyModifier::Alt);
+                // The editing keys a line edit has are the text's, though:
+                // select all, cut, copy, paste, undo and redo.
                 if (event.key != ftk::Key::Unknown &&
                     (event.modifiers & ctrlCmd) &&
                     (event.modifiers & ctrlAlt) != ctrlAlt)
                 {
+                    if (p.textModel->key(event.key, event.modifiers))
+                    {
+                        event.accept = true;
+                        _textSync();
+                        return;
+                    }
                     _textEnd(true);
                     tl::ui::Viewport::keyPressEvent(event);
                     return;
@@ -1498,20 +1522,12 @@ namespace djv
                 case ftk::Key::Escape:
                     _textEnd(false);
                     break;
-                case ftk::Key::Backspace:
-                    if (!p.stroke.text.empty())
-                    {
-                        // The last character, however many bytes it is.
-                        size_t i = p.stroke.text.size() - 1;
-                        while (i > 0 && (static_cast<uint8_t>(p.stroke.text[i]) & 0xC0) == 0x80)
-                        {
-                            --i;
-                        }
-                        p.stroke.text.erase(i);
-                        setDrawUpdate();
-                    }
+                default:
+                    // The arrows, Home and End, Backspace and Delete, as a
+                    // line edit has them.
+                    p.textModel->key(event.key, event.modifiers);
+                    _textSync();
                     break;
-                default: break;
                 }
                 return;
             }
@@ -1558,8 +1574,8 @@ namespace djv
             if (p.textEditing)
             {
                 event.accept = true;
-                p.stroke.text += event.text;
-                setDrawUpdate();
+                p.textModel->input(event.text);
+                _textSync();
                 return;
             }
             tl::ui::Viewport::textEvent(event);
@@ -1673,6 +1689,7 @@ namespace djv
             p.stroke.textSize = models::pictureDrawSize(drawModel->getTextSize(), pictureWidth);
             p.stroke.textBackground = drawModel->isTextBackground();
             p.stroke.points.push_back(hit.pos);
+            p.textModel = ftk::LineEditModel::create(getContext());
             p.textEditing = true;
             // The viewport takes the keyboard only while text is typed into
             // it: the rest of the time the keys are the application's. The
@@ -1727,6 +1744,56 @@ namespace djv
                 g.min.y + static_cast<int>(top.y),
                 1,
                 std::max(1, static_cast<int>(std::round(lineHeight + 8.F * _displayScale())))));
+        }
+
+        void Viewport::_textSync()
+        {
+            FTK_P();
+            p.stroke.text = p.textModel->getText();
+            setDrawUpdate();
+        }
+
+        bool Viewport::_textPress(const ftk::V2I& widgetPos)
+        {
+            FTK_P();
+            const SourceHit hit = _hitTest(widgetPos);
+            // Within reach on the screen, as a stroke is selected.
+            const float radius = _reach() / std::max(.001F, hit.scale * static_cast<float>(getZoom()));
+            if (hit.index != p.strokeSource ||
+                !models::strokeHit(p.stroke, hit.pos, radius, hit.textView))
+            {
+                return false;
+            }
+            const int cursor = models::textCursorAt(p.stroke, hit.pos, hit.textView);
+            p.textModel->setCursor(cursor);
+            p.textDragStart = cursor;
+            setDrawUpdate();
+            return true;
+        }
+
+        void Viewport::_textDrag(const ftk::V2I& widgetPos)
+        {
+            FTK_P();
+            if (!p.textEditing)
+            {
+                return;
+            }
+            // Held to the text's source, as a drag that leaves the picture
+            // goes on at its edge.
+            const std::optional<ftk::V2F> pos = _imagePosClamped(p.strokeSource, widgetPos);
+            if (!pos.has_value())
+            {
+                return;
+            }
+            models::TextView textView = _imageMapping(p.strokeSource).textView();
+            if (auto context = getContext())
+            {
+                textView.fontSystem = context->getSystem<ftk::FontSystem>();
+            }
+            const int cursor = models::textCursorAt(p.stroke, *pos, textView);
+            p.textModel->setCursor(cursor);
+            p.textModel->setSelection(ftk::LineEditSelection(p.textDragStart, cursor));
+            setDrawUpdate();
         }
 
         void Viewport::_textEnd(bool commit)
@@ -1967,6 +2034,9 @@ namespace djv
             p.strokeSource = p.selection->source;
             p.strokeTime = p.selection->time;
             p.stroke = strokes[p.selection->index];
+            // The caret at the end, where more would be typed.
+            p.textModel = ftk::LineEditModel::create(getContext(), p.stroke.text);
+            p.textModel->setCursor(static_cast<int>(p.stroke.text.size()));
             p.textEditing = true;
             p.textEditingSelection = true;
             setAcceptsKeyFocus(true);
@@ -2241,7 +2311,7 @@ namespace djv
                     {
                         continue;
                     }
-                    _drawStroke(event, index, stroke, scale, alpha, false);
+                    _drawStroke(event, index, stroke, scale, alpha, models::TextCaret());
                     if (selected)
                     {
                         _drawSelection(event, index, stroke, scale);
@@ -2252,14 +2322,25 @@ namespace djv
             // The stroke being moved.
             if (p.selection.has_value() && p.moving.has_value())
             {
-                _drawStroke(event, p.selection->source, *p.moving, sourceScale(p.selection->source), 1.F, false);
+                _drawStroke(event, p.selection->source, *p.moving, sourceScale(p.selection->source), 1.F, models::TextCaret());
                 _drawSelection(event, p.selection->source, *p.moving, sourceScale(p.selection->source));
             }
 
             // The stroke under the cursor, or the text being typed.
             if (p.strokeSource >= 0)
             {
-                _drawStroke(event, p.strokeSource, p.stroke, sourceScale(p.strokeSource), 1.F, p.textEditing);
+                models::TextCaret caret;
+                if (p.textEditing && p.textModel)
+                {
+                    caret.cursor = p.textModel->getCursor();
+                    const ftk::LineEditSelection& selection = p.textModel->getSelection();
+                    if (selection.isValid())
+                    {
+                        caret.selectionMin = selection.min();
+                        caret.selectionMax = selection.max();
+                    }
+                }
+                _drawStroke(event, p.strokeSource, p.stroke, sourceScale(p.strokeSource), 1.F, caret);
             }
 
             // The wipe's handles, over the drawings.
@@ -2352,7 +2433,7 @@ namespace djv
             const models::ReviewStroke& stroke,
             float scale,
             float alpha,
-            bool caret)
+            const models::TextCaret& caret)
         {
             // Nowhere to draw until the picture is there: a review opened
             // has its strokes before its first frame, and without the

@@ -33,6 +33,7 @@ namespace djv
             void _mapping();
             void _input();
             void _move();
+            void _cursor();
 
             // FTK_CHECK reports through the test, so the helpers are part of
             // it rather than free functions.

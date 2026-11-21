@@ -4,6 +4,7 @@
 #include <djv/Models/Stroke.h>
 
 #include <ftk/Core/FontSystem.h>
+#include <ftk/Core/String.h>
 
 #include <algorithm>
 #include <cmath>
@@ -630,6 +631,52 @@ namespace djv
                     out.h() + my * 2.F);
             }
             return out;
+        }
+
+        float textCursorX(
+            const std::string& text,
+            const std::vector<ftk::Box2I>& boxes,
+            int cursor)
+        {
+            // The boxes are per code point and the cursor is a byte offset,
+            // as ftk::LineEdit has them.
+            const size_t glyph = ftk::utf8Count(text, static_cast<size_t>(std::max(0, cursor)));
+            float out = 0.F;
+            if (glyph < boxes.size())
+            {
+                out = boxes[glyph].min.x;
+            }
+            else if (!boxes.empty())
+            {
+                out = boxes.back().max.x;
+            }
+            return out;
+        }
+
+        int textCursorAt(const ReviewStroke& stroke, const ftk::V2F& pos, const TextView& view)
+        {
+            const std::string& text = stroke.text;
+            if (stroke.points.empty() || text.empty() || !view.fontSystem)
+            {
+                return static_cast<int>(text.size());
+            }
+            ftk::FontInfo fontInfo;
+            fontInfo.size = std::max(1, static_cast<int>(std::round(stroke.textSize)));
+            const float k = stroke.textSize / fontInfo.size;
+            const std::vector<ftk::Box2I> boxes = view.fontSystem->getBoxes(text, fontInfo);
+            // Across the text on the screen, which runs the other way
+            // through the image where the view mirrors it.
+            const ftk::V2F& a = stroke.points.front();
+            const float x = (view.mirrorX ? a.x - pos.x : pos.x - a.x) / k;
+            size_t glyph = 0;
+            for (; glyph < boxes.size() && boxes[glyph].max.x < x; ++glyph)
+                ;
+            size_t out = 0;
+            for (size_t i = 0; i < glyph && out < text.size(); ++i)
+            {
+                out = ftk::utf8Next(text, out);
+            }
+            return static_cast<int>(out);
         }
 
         bool strokeHit(const ReviewStroke& stroke, const ftk::V2F& pos, float radius, const TextView& view)

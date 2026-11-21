@@ -19,6 +19,16 @@ namespace djv
         //! \name Annotation Drawing
         ///@{
 
+        //! Text being typed: where the caret is and what of the text is
+        //! selected, as byte offsets into it. No caret with the cursor -1,
+        //! and no selection where the two ends are the same.
+        struct DJV_MODELS_API_TYPE TextCaret
+        {
+            int cursor       = -1;
+            int selectionMin = 0;
+            int selectionMax = 0;
+        };
+
         //! Draw one stroke of an annotation.
         //!
         //! The stroke is in the pixels of its source image; toScreen maps a
@@ -34,7 +44,7 @@ namespace djv
             const std::function<ftk::V2F(const ftk::V2F&)>& toScreen,
             float scale,
             float alpha = 1.F,
-            bool caret = false);
+            const TextCaret& caret = TextCaret());
 
         //! Draw the frame of a selected stroke: a thin line a little
         //! outside what it covers, dark under light so that it reads on
