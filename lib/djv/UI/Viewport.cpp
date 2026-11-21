@@ -1468,9 +1468,27 @@ namespace djv
             FTK_P();
             if (p.textEditing)
             {
-                // Every key is the text's while it is being typed, so that
-                // a letter bound to a shortcut goes into the text and not to
-                // the application.
+                // A key with Ctrl or Cmd types nothing, so it is the
+                // application's: a shortcut to another tool, to save, to
+                // play. The text so far is kept first, as when the focus
+                // goes. Ctrl+Alt is AltGr on Windows, which types.
+                const int ctrlCmd =
+                    static_cast<int>(ftk::KeyModifier::Control) |
+                    static_cast<int>(ftk::KeyModifier::Super);
+                const int ctrlAlt =
+                    static_cast<int>(ftk::KeyModifier::Control) |
+                    static_cast<int>(ftk::KeyModifier::Alt);
+                if (event.key != ftk::Key::Unknown &&
+                    (event.modifiers & ctrlCmd) &&
+                    (event.modifiers & ctrlAlt) != ctrlAlt)
+                {
+                    _textEnd(true);
+                    tl::ui::Viewport::keyPressEvent(event);
+                    return;
+                }
+                // Every other key is the text's while it is being typed, so
+                // that a letter bound to a shortcut goes into the text and
+                // not to the application.
                 event.accept = true;
                 switch (event.key)
                 {
