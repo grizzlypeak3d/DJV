@@ -96,8 +96,8 @@ Fixes:
   (#959).
 * Fix for the status indicator's tooltip showing "Compare: Compare" (#969).
 * Fix for Close All resetting the compare settings (#970).
-* Fix for a playlist opened from the recent files opening only one of its
-  files (#979).
+* Fix for playlists being listed in the recent files, which opened them as
+  one timeline; they are in File > Recent Playlists (#979).
 * Fix for Ctrl+Tab not being accepted as a keyboard shortcut (#980).
 
 ## 3.7.7
