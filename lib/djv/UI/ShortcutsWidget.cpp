@@ -243,14 +243,19 @@ namespace djv
         {
             IMouseWidget::keyPressEvent(event);
             FTK_P();
-            switch (event.key)
+            // Tab and Shift+Tab move the focus on. With another modifier
+            // tab is a shortcut like any other key: Ctrl+Tab (#980).
+            const bool tabNavigates =
+                ftk::Key::Tab == event.key &&
+                (0 == event.modifiers ||
+                    static_cast<int>(ftk::KeyModifier::Shift) == event.modifiers);
+            switch (tabNavigates ? ftk::Key::Unknown : event.key)
             {
-            // Return and tab are not shortcuts: they are the way out of
-            // the field without a change. Escape is not, because it can be
-            // a shortcut.
+            // Return and focus navigation are not shortcuts: they are the
+            // way out of the field without a change. Escape is not,
+            // because it can be a shortcut.
             case ftk::Key::Unknown:
             case ftk::Key::Return:
-            case ftk::Key::Tab:
             case ftk::Key::CapsLock:
             case ftk::Key::ScrollLock:
             case ftk::Key::NumLock:
@@ -510,6 +515,7 @@ namespace djv
             if (auto context = getContext())
             {
                 auto widget = ShortcutEdit::create(context);
+                ftk::setScreenshotTag(widget, "Shortcuts.Edit");
                 widget->setShortcut(primary ? i->primary : i->secondary);
                 widget->setCallback(
                     [this, name, primary](const ftk::KeyShortcut& value)
