@@ -58,6 +58,8 @@ The export button adds to the queue under it, which runs the exports one after a
 
 The running export is at the top of the list, then the ones waiting, in the order they will run, then the ones that have stopped, newest first. Each row says how far its export has got and about how long it has left. The stop button beside a running or waiting export cancels it. What has been written is kept: the frames of a sequence so far, or a movie finished at the frame it got to, which plays. The **×** beside one that has stopped takes it off the list; **Clear** takes off every one that has stopped. The rows keep their places while the pointer is on the list, so that a second click does not land on the export moved up under it. A finished export can be opened from its row, to look at what was written. Quitting while exports are running asks first.
 
+![Export queue](assets/export-queue.svg)
+
 While the exports run, a ring beside the status indicator in the bottom tool bar fills with how far they have got, and its tooltip says which is running; the status bar says when they finish. The ring stays full until the Export tool is opened, red if any export failed, and clicking it shows or hides the tool.
 
 The exports run one at a time because an encoder needs memory of its own. The long GOP codecs, H.264, HEVC, and AV1, hold dozens of frames to compare them with and can use a few gigabytes at 4K, where ProRes and the other codecs that encode each frame on its own need a few hundred megabytes. On a machine short of memory, close the file once its export is queued, or lower the cache in the [settings](settings.html).

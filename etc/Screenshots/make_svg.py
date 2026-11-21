@@ -84,8 +84,11 @@ def load_sidecar(path):
         if isinstance(entry, str):
             annotate.append({"id": entry, "caption": entry})
         else:
+            # "index" picks one of the widgets sharing the tag (the rows of a
+            # list), counted from 0 in the order they were captured.
             annotate.append({"id": entry["id"],
-                             "caption": entry.get("caption", entry["id"])})
+                             "caption": entry.get("caption", entry["id"]),
+                             "index": entry.get("index")})
     # Device-pixel ratio: the capture's display scale. The PNG and the box
     # coordinates are in device pixels; dpr lets us recover the logical (CSS)
     # size so a 2x capture renders crisp at the same on-page size as a 1x one.
@@ -289,6 +292,9 @@ def build_svg(img_bytes, mime, iw, ih, boxes, annotate, scale, gutter, font,
     entries, missing = [], []
     for item in annotate:
         blist = boxes.get(item["id"])
+        index = item.get("index")
+        if blist and index is not None:
+            blist = blist[index:index + 1]
         if not blist:
             missing.append(item["id"])
             continue

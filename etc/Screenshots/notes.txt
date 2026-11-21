@@ -30,6 +30,10 @@ Setup verbs for interaction, in addition to open/tool/expand/tab/pick/zoom:
   the cursor is parked at the window's center for the first key when no
   step has placed it.
 
+An annotation points at every widget with its tag. Where several share one
+(the rows of a list), { "id": "Export.Queue.Open", "index": 0, "caption":
+"..." } points at one of them, counted from 0 in the order captured.
+
 A shot fails -- exit status 1 -- when a step cannot do what it says (an
 unknown step, a tag with no visible widget) or an expectation does not
 hold; with "strict": true an error in the log fails it too. The outputs

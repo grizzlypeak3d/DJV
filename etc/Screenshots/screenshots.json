@@ -1341,6 +1341,76 @@
       ]
     },
     {
+      "id": "export-queue",
+      "window": {
+        "w": 900,
+        "h": 820,
+        "splitter2": 0.5
+      },
+      "crop": "MainWindow.Tools",
+      "setup": [
+        {
+          "exportDir": "{output}"
+        },
+        {
+          "export": {
+            "ImageExt": ".png",
+            "SeqExt": ".png"
+          }
+        },
+        {
+          "open": "etc/SampleData/BART_2021-02-07.#.jpg"
+        },
+        {
+          "frame": 88
+        },
+        {
+          "tool": "Export"
+        },
+        {
+          "tab": "Image"
+        },
+        {
+          "click": "Export.ImageExport"
+        },
+        {
+          "tab": "Sequence"
+        },
+        {
+          "click": "Export.SeqExport"
+        },
+        {
+          "wait": 2.0
+        },
+        {
+          "tab": "Image"
+        },
+        {
+          "exportDir": "/tmp"
+        },
+        {
+          "expect": "Export.Queue.Status",
+          "text": "Done"
+        }
+      ],
+      "annotate": [
+        {
+          "id": "Export.Queue.Open",
+          "index": 0,
+          "caption": "Open what was written"
+        },
+        {
+          "id": "Export.Queue.Cancel",
+          "index": 1,
+          "caption": "Take it off the list"
+        },
+        {
+          "id": "Export.Queue.Clear",
+          "caption": "Take off every one that has stopped"
+        }
+      ]
+    },
+    {
       "id": "mouse-settings",
       "window": {
         "w": 900,
