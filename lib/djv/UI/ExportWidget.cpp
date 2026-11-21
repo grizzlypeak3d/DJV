@@ -698,7 +698,7 @@ namespace djv
                     options,
                     fileType,
                     static_cast<int64_t>(job.range.start_time().value()));
-                job.path = ftk::Path(options.dir, fileName);
+                job.path = models::getExportPath(options, fileType, fileName);
                 job.name = fileName;
                 // Two exports to one file would write over each other as
                 // they went.

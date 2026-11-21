@@ -973,6 +973,33 @@ namespace djv
                 std::string::npos == num.find_first_not_of('#');
         }
 
+        ftk::Path getExportPath(
+            const ExportSettings& settings,
+            ExportFileType fileType,
+            const std::string& fileName)
+        {
+            std::string name;
+            switch (fileType)
+            {
+            case ExportFileType::Image:
+                name = settings.imageFileName + settings.imageExt;
+                break;
+            case ExportFileType::Seq:
+                name = settings.seqFileName + settings.seqExt;
+                break;
+            case ExportFileType::Movie:
+                name = settings.movieFileName + settings.movieExt;
+                break;
+            default: break;
+            }
+            ftk::PathOptions pathOptions;
+            if (!isFrameTemplate(ftk::Path(name)))
+            {
+                pathOptions.seqMaxDigits = 0;
+            }
+            return ftk::Path(settings.dir, fileName, pathOptions);
+        }
+
         // A name typed or pasted with one of the extensions on it takes
         // that extension, rather than being written as "shot.exr.tif".
         bool splitExt(

@@ -152,6 +152,16 @@ namespace djv
             bool operator == (const ExportSettings&) const = default;
         };
 
+        //! The path an export of the given type is written to, given the
+        //! file name with any frame number put in. The writers put the
+        //! frame in place of the path's number, so a name typed without a
+        //! run of '#' is given a path without one: an image named
+        //! "shot_v002" is written as that, not with the frame's number.
+        DJV_MODELS_API ftk::Path getExportPath(
+            const ExportSettings&,
+            ExportFileType,
+            const std::string& fileName);
+
         //! File browser settings.
         struct DJV_MODELS_API_TYPE FileBrowserSettings
         {

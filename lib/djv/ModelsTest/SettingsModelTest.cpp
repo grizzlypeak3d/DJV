@@ -138,6 +138,31 @@ namespace djv
             // A version number is a name, not a frame slot.
             FTK_CHECK(models::getFileNameError(
                 "shot_v002", ".tif", models::ExportFileType::Image, exts).empty());
+
+            // And it is written with that name, whatever the frame.
+            {
+                models::ExportSettings settings;
+                settings.dir = "dir";
+                settings.imageFileName = "shot_v002";
+                settings.imageExt = ".tif";
+                const ftk::Path path = models::getExportPath(
+                    settings, models::ExportFileType::Image, "shot_v002.tif");
+                FTK_CHECK(!path.hasNum());
+                FTK_CHECK("shot_v002.tif" == path.getFileName());
+                FTK_CHECK(path.getFrame(88, true) == path.get());
+            }
+            // A frame slot is still one, after the frame has been put in.
+            {
+                models::ExportSettings settings;
+                settings.dir = "dir";
+                settings.seqFileName = "shot.####";
+                settings.seqExt = ".tif";
+                const ftk::Path path = models::getExportPath(
+                    settings, models::ExportFileType::Seq, "shot.0001.tif");
+                FTK_CHECK(path.hasNum());
+                FTK_CHECK("shot.0088.tif" ==
+                    ftk::Path(path.getFrame(88, true)).getFileName());
+            }
         }
 
         void SettingsModelTest::_stillFileName()
