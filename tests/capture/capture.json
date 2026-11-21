@@ -134,6 +134,23 @@
       ]
     },
     {
+      "id": "review-tool-shortcuts",
+      "strict": true,
+      "window": { "w": 1000, "h": 600, "splitter2": 0.55 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "Review" },
+        { "action": "Review/Text" },
+        { "expect": "Review.Text", "checked": true },
+        { "action": "Review/Select" },
+        { "expect": "Review.Select", "checked": true },
+        { "expect": "Review.Text", "checked": false },
+        { "action": "Review/Text" },
+        { "expect": "Review.Text", "checked": true },
+        { "expect": "Review.Select", "checked": false }
+      ]
+    },
+    {
       "id": "press-release",
       "strict": true,
       "window": { "w": 1000, "h": 600, "splitter2": 0.55 },

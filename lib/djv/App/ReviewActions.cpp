@@ -665,10 +665,24 @@ namespace djv
             auto drawModel = app->getDrawModel();
             const bool enabled = drawModel->isEnabled();
             const models::DrawTool tool = drawModel->getTool();
-            _actions["Draw"]->setChecked(
-                enabled && models::DrawTool::Pen == tool);
-            _actions["Erase"]->setChecked(
-                enabled && models::DrawTool::Eraser == tool);
+            // Every tool's action, so that the one left checked by the tool
+            // before does not take its next shortcut press to uncheck it
+            // (#981).
+            const std::vector<std::pair<std::string, models::DrawTool> > tools =
+            {
+                { "Draw", models::DrawTool::Pen },
+                { "Erase", models::DrawTool::Eraser },
+                { "Line", models::DrawTool::Line },
+                { "Arrow", models::DrawTool::Arrow },
+                { "Rectangle", models::DrawTool::Rectangle },
+                { "Ellipse", models::DrawTool::Ellipse },
+                { "Text", models::DrawTool::Text },
+                { "Select", models::DrawTool::Select }
+            };
+            for (const auto& i : tools)
+            {
+                _actions[i.first]->setChecked(enabled && i.second == tool);
+            }
         }
 
         void ReviewActions::_markersUpdate()

@@ -246,10 +246,17 @@ namespace djv
                 // what the action does beyond the command, such as the
                 // dialog it asks with, e.g.
                 //   { "action": "Color/Reset" }
+                // As a menu item or its shortcut does: the callback, then a
+                // checkable action toggled from the state it shows.
                 const std::string name = step.at("action").get<std::string>();
                 if (auto action = app->getMainWindow()->getAction(name))
                 {
                     action->doCallback();
+                    if (action->isCheckable())
+                    {
+                        action->setChecked(!action->isChecked());
+                        action->doCheckedCallback(action->isChecked());
+                    }
                 }
                 else
                 {
