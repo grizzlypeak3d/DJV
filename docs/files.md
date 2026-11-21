@@ -66,7 +66,7 @@ A floating browser closes when a file is chosen, the same as the dialog. Check *
 
 ![Recent files](assets/recent-files.svg)
 
-**File** > **Recent Files** lists the files opened recently, the most recent first, each with a thumbnail and the folder it is in. Type to search by name or folder; <kbd>Return</kbd> opens the first file found, and the down arrow moves into the list. Several files can be selected and opened together. A folder that was opened is listed as the folder, and opening it from the list opens its files again. Up to fifty are kept; the **Recent** menu shows the newest ten. The menu at the bottom switches between a list and tiles of larger thumbnails, as in the file browser.
+**File** > **Recent Files** lists the files opened recently, the most recent first; playlists are in **File > Recent Playlists**, and reviews in **Review > Recent**. Each is listed with a thumbnail and the folder it is in. Type to search by name or folder; <kbd>Return</kbd> opens the first file found, and the down arrow moves into the list. Several files can be selected and opened together. A folder that was opened is listed as the folder, and opening it from the list opens its files again. Up to fifty are kept; the **Recent** menu shows the newest ten. The menu at the bottom switches between a list and tiles of larger thumbnails, as in the file browser.
 
 **Clear** forgets the recent files, playlists, reviews and the folders the file browser remembers. **Clear on exit** does the same each time DJV exits, for a machine that is shared between clients.
 

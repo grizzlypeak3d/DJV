@@ -145,8 +145,10 @@ namespace djv
                     report);
 
                 models::playlistApply(playlist, p.filesModel);
+                // Not in the recent files, which open a ".otio" as a
+                // timeline in one tab: this one opens from the recent
+                // playlists, the way it was opened (#979).
                 p.recentPlaylistsModel->addRecent(path);
-                p.recentFilesModel->addRecent(path);
                 p.recentDirsModel->addRecent(ftk::Path(path.getDir()));
 
                 if (!report.empty())
