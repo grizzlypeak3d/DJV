@@ -145,9 +145,9 @@ namespace djv
                     report);
 
                 models::playlistApply(playlist, p.filesModel);
-                // Not in the recent files, which open a ".otio" as a
-                // timeline in one tab: this one opens from the recent
-                // playlists, the way it was opened (#979).
+                // In the recent playlists rather than the recent files,
+                // which open a ".otio" DJV did not save as a timeline in one
+                // tab: this one opens the way it was opened (#979).
                 p.recentPlaylistsModel->addRecent(path);
                 p.recentDirsModel->addRecent(ftk::Path(path.getDir()));
 
@@ -450,6 +450,11 @@ namespace djv
                 openReview(*review);
                 return;
             }
+            if (models::isPlaylist(path.get()))
+            {
+                openPlaylist(path);
+                return;
+            }
             // Added together rather than one at a time: each add makes its
             // file the current one, so a directory would be opened file by
             // file on the way to the last of them.
@@ -474,6 +479,15 @@ namespace djv
             std::optional<ftk::RangeI64> itemFrames = frames;
             for (const auto& path : paths)
             {
+                // A playlist DJV saved opens into the file list, in its
+                // place among the others (#986).
+                if (models::isPlaylist(path.get()))
+                {
+                    p.filesModel->add(items);
+                    items.clear();
+                    openPlaylist(path);
+                    continue;
+                }
                 const auto i = _openItems(path, audioPath, itemFrames, gatherSeq);
                 // The range describes one sequence, so it belongs to the
                 // first file named rather than to each of them.

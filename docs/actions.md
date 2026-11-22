@@ -24,7 +24,7 @@ The commands are how the menu items are run from outside the window: with
 | Close All | <kbd>Ctrl/Cmd+Shift+E</kbd> | `File/CloseAll` | Close all files. |
 | Reload | <kbd>Ctrl/Cmd+R</kbd> | `File/Reload` | Reload the current file. |
 | Export Still | <kbd>Ctrl/Cmd+Shift+S</kbd> | `File/ExportStill` | Write a still of the current frame, as the viewport shows it, into the Export tool's directory in its image format, named after the file and the time. |
-| Open Playlist (.otio) |  | `File/OpenPlaylist` | Open a playlist into the file list. Opening a ".otio" file normally plays it as a timeline. |
+| Open Playlist (.otio) |  | `File/OpenPlaylist` | Open a ".otio" file into the file list. A playlist DJV saved opens this way however it is opened; other timelines otherwise play as one. |
 | Save Playlist (.otio) |  | `File/SavePlaylist` | Save the file list as a ".otio" playlist. |
 | Next | <kbd>Ctrl+Page Down</kbd> | `File/Next` | Change to the next file. |
 | Previous | <kbd>Ctrl+Page Up</kbd> | `File/Prev` | Change to the previous file. |

@@ -179,6 +179,8 @@ namespace djv
             const std::string fileName = ftk::fromFileSystem(ftk::toFileSystem(dir) /
                 "djv-PlaylistTest.otio");
             models::playlistSave(fileName, playlist, 24.0);
+            // What DJV saved is a playlist wherever it is opened (#986).
+            FTK_CHECK(models::isPlaylist(fileName));
             std::vector<std::string> report;
             const models::Playlist result =
                 models::playlistOpen(fileName, report);
@@ -315,6 +317,21 @@ namespace djv
             const auto& metadata = clips.front()->metadata();
             FTK_CHECK(metadata.find("studio") != metadata.end());
             FTK_CHECK(metadata.find("djv") != metadata.end());
+
+            // A timeline DJV did not save is not a playlist: it plays as a
+            // timeline unless opened with Open Playlist (#986). Nor is what
+            // cannot be read.
+            {
+                const std::string fileName = ftk::fromFileSystem(
+                    std::filesystem::temp_directory_path() /
+                    "djv-PlaylistTest-foreign.otio");
+                FTK_CHECK(timeline->to_json_file(fileName));
+                FTK_CHECK(!models::isPlaylist(fileName));
+                std::filesystem::remove(ftk::toFileSystem(fileName));
+                FTK_CHECK(!models::isPlaylist(fileName));
+                FTK_CHECK(!models::isPlaylist("bundle.otioz"));
+                FTK_CHECK(!models::isPlaylist("movie.mov"));
+            }
 
             // A timeline of only audio opens its first audio track, since
             // the file list holds audio files the same as anything else.

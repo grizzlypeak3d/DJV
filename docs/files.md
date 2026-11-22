@@ -87,7 +87,7 @@ Locations: **File** menu, **Tab Bar**, **Files** tool
 
 Locations: **File** menu
 
-A playlist is a plain OTIO timeline — a single video track with one clip per file — so other applications can open it, and DJV's own state rides in metadata they ignore. Opening a `.otio` file with **File > Open** plays it as a timeline in one tab; **Open Playlist** is what expands it into the file list. Any timeline can be opened as a playlist: multiple video tracks are flattened, and whatever the file list cannot carry — transitions, effects, markers, audio tracks — is dropped and reported in the log. A timeline of only audio opens its first audio track. A clip with a range but no saved position starts at its in point. The file being opened is never modified.
+A playlist is a plain OTIO timeline — a single video track with one clip per file — so other applications can open it, and DJV's own state rides in metadata they ignore. A playlist DJV saved opens into the file list however it is opened — with **File > Open**, from the command line, or dropped on the window. Any other `.otio` file opened that way plays as a timeline in one tab; **Open Playlist** is what expands it into the file list. Any timeline can be opened as a playlist: multiple video tracks are flattened, and whatever the file list cannot carry — transitions, effects, markers, audio tracks — is dropped and reported in the log. A timeline of only audio opens its first audio track. A clip with a range but no saved position starts at its in point. The file being opened is never modified.
 
 A `.otioz` bundle opens as a timeline only: its media lives inside the bundle, so its clips cannot become entries in the file list.
 

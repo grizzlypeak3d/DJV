@@ -556,6 +556,18 @@
       ]
     },
     {
+      "id": "playlist-open",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": ["tests/capture/Playlist.otio", "etc/SampleData/Cubes.0001.exr"] },
+        { "tool": "Files" },
+        { "expect": "Files.FileThumbnail0", "visible": true },
+        { "expect": "Files.FileThumbnail1", "visible": true },
+        { "expect": "Files.FileThumbnail2", "visible": true }
+      ]
+    },
+    {
       "id": "wipe-handles",
       "strict": true,
       "window": { "w": 1000, "h": 600 },

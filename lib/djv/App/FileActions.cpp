@@ -405,8 +405,9 @@ namespace djv
             // shortcuts update does not put the command's plainer wording
             // back over it.
             _tooltips["OpenPlaylist"] =
-                "Open a playlist into the file list. Opening a \".otio\" "
-                "file normally plays it as a timeline.";
+                "Open a \".otio\" file into the file list. A playlist DJV "
+                "saved opens this way however it is opened; other timelines "
+                "otherwise play as one.";
             _actions["SavePlaylist"] = ftk::Action::create(
                 "Save Playlist (.otio)",
                 _command("SavePlaylist"));

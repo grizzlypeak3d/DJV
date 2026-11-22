@@ -100,6 +100,8 @@ Fixes:
 * Fix for playlists being listed in the recent files, which opened them as
   one timeline; they are in File > Recent Playlists (#979).
 * Fix for Ctrl+Tab not being accepted as a keyboard shortcut (#980).
+* Fix for a playlist dropped on the window, or opened with File > Open,
+  playing as one timeline; it opens into the file list (#986).
 
 ## 3.7.7
 

@@ -83,6 +83,14 @@ namespace djv
             const Playlist&,
             double defaultRate);
 
+        //! Whether an ".otio" file is a playlist DJV saved: its timeline
+        //! carries DJV's playlist version in its metadata. Such a file is
+        //! opened into the file list wherever it is opened, since that is
+        //! what it was saved for, while any other timeline plays as one
+        //! (#986). A file that cannot be read is not a playlist, and the
+        //! open that follows reports why.
+        DJV_MODELS_API bool isPlaylist(const std::string& fileName);
+
         //! Open a playlist from an ".otio" file.
         //!
         //! Throws on a file that cannot be read, and on a playlist written by

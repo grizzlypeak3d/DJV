@@ -516,6 +516,26 @@ namespace djv
             }
         }
 
+        bool isPlaylist(const std::string& fileName)
+        {
+            if (".otio" != ftk::toLower(ftk::fromFileSystem(
+                ftk::toFileSystem(fileName).extension())))
+            {
+                return false;
+            }
+            OTIO_NS::ErrorStatus errorStatus;
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> timeline(
+                dynamic_cast<OTIO_NS::Timeline*>(OTIO_NS::Timeline::from_json_file(
+                    fileName, &errorStatus)));
+            if (!timeline || OTIO_NS::is_error(errorStatus))
+            {
+                return false;
+            }
+            const auto djvT = getMeta(
+                timeline->metadata(), "djv", OTIO_NS::AnyDictionary());
+            return getMeta(djvT, "playlist", int64_t(0)) > 0;
+        }
+
         Playlist playlistOpen(
             const std::string& fileName,
             std::vector<std::string>& report)
