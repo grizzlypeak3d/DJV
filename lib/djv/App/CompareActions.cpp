@@ -79,7 +79,8 @@ namespace djv
 
             _addCheckCommand(
                 "Wipe",
-                "Wipe between the A and B files.",
+                "Wipe between the A and B files. Drag the dot to move the wipe and the "
+                "ring to turn it; hold Shift while turning to turn it in steps of 45 degrees.",
                 [appWeak](const nlohmann::json& args)
                 {
                     // Absent when run by name; see the "B" command above.

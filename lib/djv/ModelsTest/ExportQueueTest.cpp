@@ -47,6 +47,13 @@ namespace djv
             FTK_CHECK("Frame 12 / 48, about a minute left" == getLabel(progress));
             progress.status = ExportStatus::Finished;
             FTK_CHECK("Done" == getLabel(progress));
+            // How long it took, to compare one export with another (#976).
+            progress.seconds = 134.2;
+            FTK_CHECK("Done in 2 min 14 s" == getLabel(progress));
+            FTK_CHECK("8.3 s" == getExportElapsed(8.27));
+            FTK_CHECK("0.0 s" == getExportElapsed(-1.0));
+            FTK_CHECK("1 min 00 s" == getExportElapsed(59.96));
+            FTK_CHECK("1 h 02 min 05 s" == getExportElapsed(3725.0));
             progress.status = ExportStatus::Failed;
             FTK_CHECK("Failed" == getLabel(progress));
             progress.error = "Disk full";

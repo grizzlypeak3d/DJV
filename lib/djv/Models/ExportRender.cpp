@@ -259,6 +259,30 @@ namespace djv
             return out;
         }
 
+        std::string getExportElapsed(double seconds)
+        {
+            std::string out;
+            // Under a minute to a tenth of a second: what rounds up to a
+            // minute is shown as one.
+            const double tenths = std::round(std::max(seconds, 0.0) * 10.0) / 10.0;
+            if (tenths < 60.0)
+            {
+                out = ftk::Format("{0} s").arg(tenths, 1).str();
+            }
+            else
+            {
+                const int64_t whole = static_cast<int64_t>(std::round(seconds));
+                const int h = static_cast<int>(whole / 3600);
+                const int m = static_cast<int>((whole % 3600) / 60);
+                const int s = static_cast<int>(whole % 60);
+                out = h > 0 ?
+                    ftk::Format("{0} h {1} min {2} s").
+                        arg(h).arg(m, 2, '0').arg(s, 2, '0').str() :
+                    ftk::Format("{0} min {1} s").arg(m).arg(s, 2, '0').str();
+            }
+            return out;
+        }
+
         std::string getStillTimeLabel(
             const OTIO_NS::RationalTime& time,
             const OTIO_NS::TimeRange& range,

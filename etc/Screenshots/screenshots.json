@@ -1390,7 +1390,7 @@
         },
         {
           "expect": "Export.Queue.Status",
-          "text": "Done"
+          "contains": "Done in "
         }
       ],
       "annotate": [

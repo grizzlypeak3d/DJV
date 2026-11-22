@@ -103,7 +103,9 @@ namespace djv
                         arg(value.timeLeft).str();
                 break;
             case ExportStatus::Finished:
-                out = "Done";
+                out = value.seconds > 0.0 ?
+                    ftk::Format("Done in {0}").arg(getExportElapsed(value.seconds)).str() :
+                    std::string("Done");
                 break;
             case ExportStatus::Failed:
                 out = value.error.empty() ?
@@ -278,6 +280,8 @@ namespace djv
                 _release();
                 progress.framesDone = p.framesWritten;
                 progress.timeLeft.clear();
+                progress.seconds = std::chrono::duration<double>(
+                    std::chrono::steady_clock::now() - p.startTime).count();
                 p.progress->setIfChanged(progress);
                 return;
             }
@@ -359,10 +363,16 @@ namespace djv
             ExportProgress progress = p.progress->get();
             if (isDone(progress.status))
                 return;
+            const bool running = ExportStatus::Running == progress.status;
             _stop();
             _release();
             progress.status = ExportStatus::Cancelled;
             progress.timeLeft.clear();
+            if (running)
+            {
+                progress.seconds = std::chrono::duration<double>(
+                    std::chrono::steady_clock::now() - p.startTime).count();
+            }
             p.progress->setIfChanged(progress);
         }
 
@@ -511,6 +521,10 @@ namespace djv
             std::shared_ptr<ftk::Observable<bool> > busy;
             std::map<std::shared_ptr<ExportJob>, std::function<void(bool)> > callbacks;
             std::shared_ptr<ftk::Timer> timer;
+            //! Since when the queue has had work, and how many exports have
+            //! stopped since: a run of several is timed as a whole too.
+            std::chrono::steady_clock::time_point busySince;
+            size_t busyCount = 0;
         };
 
         void ExportQueue::_init(const std::shared_ptr<ftk::Context>& context)
@@ -730,7 +744,10 @@ namespace djv
                 case ExportStatus::Finished:
                     context->log(
                         "djv::models::ExportQueue",
-                        ftk::Format("Exported: \"{0}\"").arg(path));
+                        ftk::Format("Exported: \"{0}\", {1} frames in {2}").
+                            arg(path).
+                            arg(progress.framesDone).
+                            arg(getExportElapsed(progress.seconds)));
                     break;
                 case ExportStatus::Failed:
                     context->log(
@@ -741,11 +758,16 @@ namespace djv
                 case ExportStatus::Cancelled:
                     context->log(
                         "djv::models::ExportQueue",
-                        ftk::Format("Export cancelled: \"{0}\"").arg(path));
+                        progress.seconds > 0.0 ?
+                            ftk::Format("Export cancelled: \"{0}\", after {1}").
+                                arg(path).
+                                arg(getExportElapsed(progress.seconds)).str() :
+                            ftk::Format("Export cancelled: \"{0}\"").arg(path).str());
                     break;
                 default: break;
                 }
             }
+            ++p.busyCount;
             const auto i = p.callbacks.find(job);
             if (i != p.callbacks.end())
             {
@@ -766,6 +788,24 @@ namespace djv
                 {
                     busy = true;
                     break;
+                }
+            }
+            const bool wasBusy = p.busy->get();
+            if (busy && !wasBusy)
+            {
+                p.busySince = std::chrono::steady_clock::now();
+                p.busyCount = 0;
+            }
+            else if (!busy && wasBusy && p.busyCount > 1)
+            {
+                if (auto context = p.context.lock())
+                {
+                    context->log(
+                        "djv::models::ExportQueue",
+                        ftk::Format("{0} exports in {1}").
+                            arg(p.busyCount).
+                            arg(getExportElapsed(std::chrono::duration<double>(
+                                std::chrono::steady_clock::now() - p.busySince).count())));
                 }
             }
             p.busy->setIfChanged(busy);

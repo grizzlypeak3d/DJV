@@ -226,6 +226,10 @@ namespace djv
             int64_t framesTotal,
             double secondsElapsed);
 
+        //! How long an export took, to compare one with another: "8.3 s",
+        //! "2 min 14 s", "1 h 02 min 05 s" (#976).
+        DJV_MODELS_API std::string getExportElapsed(double seconds);
+
         //! The time part of a still's name, in the units the timeline shows
         //! so the name matches it, in a form that sorts in a folder and is
         //! not taken for a sequence's frame number: frames padded to the

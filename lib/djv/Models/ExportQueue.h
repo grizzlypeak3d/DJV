@@ -72,6 +72,8 @@ namespace djv
             //! "about 2 minutes left", once there is enough to go on; see
             //! getExportTimeLeft().
             std::string timeLeft;
+            //! How long it ran, once it has stopped.
+            double seconds = 0.0;
             std::string error;
 
             bool operator == (const ExportProgress&) const = default;

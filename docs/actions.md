@@ -75,7 +75,7 @@ The commands are how the menu items are run from outside the window: with
 | Next | <kbd>Shift+Page Down</kbd> | `Compare/Next` | Go to the next B file. |
 | Previous | <kbd>Shift+Page Up</kbd> | `Compare/Prev` | Go to the previous B file. |
 | B | <kbd>Ctrl+B</kbd> | `Compare/B` | Show the B file. |
-| Wipe | <kbd>Ctrl+W</kbd> | `Compare/Wipe` | Wipe between the A and B files. |
+| Wipe | <kbd>Ctrl+W</kbd> | `Compare/Wipe` | Wipe between the A and B files. Drag the dot to move the wipe and the ring to turn it; hold Shift while turning to turn it in steps of 45 degrees. |
 | Butterfly |  | `Compare/Butterfly` | Show the same half of the A and B files, one of them mirrored, so that they meet on the same picture. |
 | Overlay |  | `Compare/Overlay` | Overlay the A and B files. |
 | Difference |  | `Compare/Difference` | Show the difference between the A and B files. |
