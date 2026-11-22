@@ -71,8 +71,10 @@ namespace djv
                     options.compare != tl::Compare::None &&
                     options.bFiles &&
                     !options.storedFrame },
-                { "FrameStore",
-                    options.storedFrame && options.compare != tl::Compare::None },
+                // On while a frame is stored, drawn or not: it waits for the
+                // next compare mode, after the files it came from are closed
+                // too, and an indicator that went dark would hide it (#974).
+                { "FrameStore", options.storedFrame },
                 { "AudioOffset", options.audioOffset != 0.0 },
                 { "AudioChannel", options.audioChannel != -1 }
             };

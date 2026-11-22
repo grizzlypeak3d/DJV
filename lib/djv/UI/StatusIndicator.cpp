@@ -541,6 +541,10 @@ namespace djv
                         else if ("FrameStore" == item.id && !p.storedFrameLabel.empty())
                         {
                             text = p.storedFrameLabel;
+                            if (tl::Compare::None == p.options.compare)
+                            {
+                                text += " (not shown, compare is off)";
+                            }
                         }
                         on.push_back(text);
                     }

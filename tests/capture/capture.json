@@ -610,10 +610,12 @@
         { "wait": 0.5 },
         { "command": "Compare/StoreFrame" },
         { "tool": "Files", "expand": ["Compare"] },
-        { "expect": "Files.FrameStore", "visible": true },
         { "command": "File/CloseAll" },
         { "wait": 0.5 },
-        { "expect": "Files.FrameStore", "visible": false }
+        { "expect": "Status.Indicator", "checked": true },
+        { "expect": "Files.FrameStore", "contains": "Counter.0.png" },
+        { "command": "Compare/ClearFrameStore" },
+        { "expect": "Status.Indicator", "checked": false }
       ]
     },
     {

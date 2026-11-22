@@ -146,11 +146,11 @@ namespace djv
                 FTK_CHECK(only(options, "Color"));
             }
             {
-                // A stored frame is on while a compare mode draws it: with
-                // none the view is A alone, and the frame only waits.
+                // A stored frame is on while it is stored, drawn or not:
+                // with no compare mode it waits for the next one (#974).
                 models::StatusOptions options;
                 options.storedFrame = true;
-                FTK_CHECK(on(options).empty());
+                FTK_CHECK(only(options, "FrameStore"));
                 options.compare = tl::Compare::Wipe;
                 FTK_CHECK(only(options, "FrameStore"));
                 options.storedFrame = false;
@@ -167,6 +167,7 @@ namespace djv
                 options.storedFrame = true;
                 FTK_CHECK(only(options, "FrameStore"));
                 options.compare = tl::Compare::None;
+                FTK_CHECK(only(options, "FrameStore"));
                 options.storedFrame = false;
                 FTK_CHECK(on(options).empty());
             }

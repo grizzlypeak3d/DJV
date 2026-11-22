@@ -759,12 +759,8 @@ namespace djv
             FTK_P();
             // Reset to the empty startup state. Comparing stops, and the
             // compare settings stay as they were, as when the files are
-            // closed one by one (DJV #970). The frame store goes with the
-            // files: kept, it would come back as "B" with the next compare
-            // mode chosen, over the files opened since, while the status
-            // indicator showed nothing stored (DJV #974).
+            // closed one by one (DJV #970).
             p.filesModel->closeAll();
-            p.filesModel->setFrameStore(std::nullopt);
             tl::CompareOptions compareOptions = p.filesModel->getCompareOptions();
             compareOptions.compare = tl::Compare::None;
             p.filesModel->setCompareOptions(compareOptions);
