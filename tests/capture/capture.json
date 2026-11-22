@@ -602,6 +602,21 @@
       ]
     },
     {
+      "id": "frame-store-close-all",
+      "strict": true,
+      "window": { "w": 1000, "h": 600 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "wait": 0.5 },
+        { "command": "Compare/StoreFrame" },
+        { "tool": "Files", "expand": ["Compare"] },
+        { "expect": "Files.FrameStore", "visible": true },
+        { "command": "File/CloseAll" },
+        { "wait": 0.5 },
+        { "expect": "Files.FrameStore", "visible": false }
+      ]
+    },
+    {
       "id": "export-size",
       "strict": true,
       "window": { "w": 1000, "h": 700 },
