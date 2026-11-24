@@ -246,6 +246,7 @@ namespace djv
         {
             std::weak_ptr<models::ExportQueue> queue;
             std::function<void(const ftk::Path&)> openCallback;
+            std::shared_ptr<ftk::Label> totalLabel;
             std::shared_ptr<ftk::ToolButton> clearButton;
             std::shared_ptr<ftk::VerticalLayout> jobsLayout;
             std::shared_ptr<ftk::VerticalLayout> layout;
@@ -282,6 +283,14 @@ namespace djv
 
             p.queue = queue;
 
+            // The finished exports added up, beside Clear (#976).
+            p.totalLabel = ftk::Label::create(context);
+            p.totalLabel->setTextRole(ftk::ColorRole::TextDisabled);
+            p.totalLabel->setTooltip(
+                "How long the finished exports on the list took, added up. "
+                "Failed and cancelled exports are not counted.");
+            ftk::setScreenshotTag(p.totalLabel, "Export.Queue.Total");
+
             p.clearButton = ftk::ToolButton::create(context, "Clear");
             p.clearButton->setTooltip("Remove the exports that have stopped from the list.");
             ftk::setScreenshotTag(p.clearButton, "Export.Queue.Clear");
@@ -299,6 +308,8 @@ namespace djv
             ftk::setScreenshotTag(p.jobsLayout, "Export.Queue");
             auto hLayout = ftk::HorizontalLayout::create(context, p.layout);
             hLayout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.totalLabel->setParent(hLayout);
+            p.totalLabel->setVAlign(ftk::VAlign::Center);
             auto spacer = ftk::Spacer::create(context, ftk::Orientation::Horizontal, hLayout);
             spacer->setHStretch(ftk::Stretch::Expanding);
             p.clearButton->setParent(hLayout);
@@ -371,12 +382,14 @@ namespace djv
                                 {
                                     p.items[i].status = value.status;
                                     _orderUpdate();
+                                    _totalUpdate();
                                 }
                             }));
                     }
                 }
             }
             _orderUpdate();
+            _totalUpdate();
             setVisible(!jobs.empty());
         }
 
@@ -398,6 +411,19 @@ namespace djv
                     p.jobsLayout->moveToIndex(p.items[order[i]].widget, i);
                 }
             }
+        }
+
+        void ExportQueueWidget::_totalUpdate()
+        {
+            FTK_P();
+            std::vector<models::ExportProgress> progress;
+            for (const auto& item : p.items)
+            {
+                progress.push_back(item.job->getProgress());
+            }
+            const std::string text = models::getTotalLabel(progress);
+            p.totalLabel->setText(text);
+            p.totalLabel->setVisible(!text.empty());
         }
 
         void ExportQueueWidget::mouseEnterEvent(ftk::MouseEnterEvent& event)

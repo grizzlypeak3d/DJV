@@ -34,9 +34,11 @@ namespace djv
                 .def_rw("framesDone", &ExportProgress::framesDone)
                 .def_rw("frames", &ExportProgress::frames)
                 .def_rw("timeLeft", &ExportProgress::timeLeft)
+                .def_rw("seconds", &ExportProgress::seconds)
                 .def_rw("error", &ExportProgress::error);
 
             m.def("getLabel", nb::overload_cast<const ExportProgress&>(&getLabel), nb::arg("progress"));
+            m.def("getTotalLabel", &getTotalLabel, nb::arg("progress"));
 
             nb::class_<ExportJob>(m, "ExportJob")
                 .def_prop_ro("name", [](const ExportJob& job) { return job.getOptions().name; })

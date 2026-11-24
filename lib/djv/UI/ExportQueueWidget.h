@@ -23,7 +23,9 @@ namespace djv
         //! first. One row each, with what it is called, how far it has got,
         //! and a button to cancel it, or to take it off the list once it
         //! has stopped; one that has finished can also be opened, to look
-        //! at what was written. Hidden while the queue is empty.
+        //! at what was written. Under them, once two have finished, how
+        //! long the finished ones took in all. Hidden while the queue is
+        //! empty.
         class DJV_UI_API_TYPE ExportQueueWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ExportQueueWidget);
@@ -54,6 +56,7 @@ namespace djv
         private:
             void _jobsUpdate();
             void _orderUpdate();
+            void _totalUpdate();
 
             FTK_PRIVATE();
         };

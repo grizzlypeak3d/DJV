@@ -18,8 +18,8 @@ Changes:
 * A ring beside the status indicator shows how far the exports have got,
   and stays full once they have finished, until the Export tool is opened;
   the status bar says when they finish. A finished export can be opened
-  from the queue, which lists the running export first and how long each
-  one took (#964, #968, #976).
+  from the queue, which lists the running export first, how long each one
+  took, and how long the finished ones took in all (#964, #968, #976).
 * Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
   Graphics or with the -renderer command line option. On an HDR display it
   shows HDR pictures.

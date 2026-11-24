@@ -95,6 +95,11 @@ namespace djv
         //! minute left", "Queued", "Failed: ...".
         DJV_MODELS_API std::string getLabel(const ExportProgress&);
 
+        //! The time the finished exports took, added up: "3 done, 6 min 02 s
+        //! in all". Empty with fewer than two, whose own rows say it. Failed
+        //! and cancelled exports are not counted (#976).
+        DJV_MODELS_API std::string getTotalLabel(const std::vector<ExportProgress>&);
+
         //! One export. The frames are asked for and rendered on the thread
         //! the queue runs on, which has the graphics context, a few ahead
         //! so that reading, rendering and writing overlap; they are written

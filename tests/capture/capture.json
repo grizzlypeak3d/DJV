@@ -684,7 +684,8 @@
         { "wait": 3.0 },
         { "expect": "Export.Queue.Name", "text": "Counter.png" },
         { "expect": "Export.Queue.Status", "contains": "Done in " },
-        { "expect": "Export.Queue.Open", "visible": true }
+        { "expect": "Export.Queue.Open", "visible": true },
+        { "expect": "Export.Queue.Total", "contains": "2 done, " }
       ]
     },
     {
@@ -701,6 +702,7 @@
         { "click": "Export.ImageExport" },
         { "wait": 2.0 },
         { "expect": "Export.Queue.Status", "contains": "Done in " },
+        { "expect": "Export.Queue.Total", "visible": false },
         { "click": "Export.Queue.Cancel" },
         { "expect": "Export.Queue", "visible": false }
       ]

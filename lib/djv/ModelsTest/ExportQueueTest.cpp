@@ -60,6 +60,22 @@ namespace djv
             FTK_CHECK("Failed: Disk full" == getLabel(progress));
             progress.status = ExportStatus::Cancelled;
             FTK_CHECK("Cancelled" == getLabel(progress));
+
+            // The finished ones added up, once there are two (#976).
+            ExportProgress finished;
+            finished.status = ExportStatus::Finished;
+            finished.seconds = 50.0;
+            ExportProgress finished2 = finished;
+            finished2.seconds = 70.4;
+            ExportProgress cancelled;
+            cancelled.status = ExportStatus::Cancelled;
+            cancelled.seconds = 30.0;
+            ExportProgress running;
+            running.status = ExportStatus::Running;
+            FTK_CHECK(getTotalLabel({}).empty());
+            FTK_CHECK(getTotalLabel({ finished, cancelled, running }).empty());
+            FTK_CHECK("2 done, 2 min 00 s in all" ==
+                getTotalLabel({ running, finished, cancelled, finished2 }));
         }
 
         void ExportQueueTest::_order()

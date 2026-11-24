@@ -120,6 +120,25 @@ namespace djv
             return out;
         }
 
+        std::string getTotalLabel(const std::vector<ExportProgress>& values)
+        {
+            size_t count = 0;
+            double seconds = 0.0;
+            for (const auto& value : values)
+            {
+                if (ExportStatus::Finished == value.status)
+                {
+                    ++count;
+                    seconds += value.seconds;
+                }
+            }
+            return count > 1 ?
+                ftk::Format("{0} done, {1} in all").
+                    arg(count).
+                    arg(getExportElapsed(seconds)).str() :
+                std::string();
+        }
+
         struct ExportJob::Private
         {
             std::weak_ptr<ftk::Context> context;
