@@ -250,6 +250,7 @@ Fixes:
   their own size.
 * Audio no longer crackles when playing faster or slower.
 * A playlist restores a tiled comparison with all of its files.
+* The Settings tool's Reset button also resets the renderer.
 
 ## 3.6.0
 

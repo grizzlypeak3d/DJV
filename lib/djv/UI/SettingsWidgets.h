@@ -13,6 +13,7 @@
 
 namespace ftk
 {
+    class App;
     struct TableIndex;
 }
 
@@ -315,6 +316,7 @@ namespace djv
         protected:
             void _init(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<ftk::App>&,
                 const std::shared_ptr<IWidget>& parent);
 
             GraphicsSettingsWidget();
@@ -324,12 +326,8 @@ namespace djv
 
             DJV_UI_API static std::shared_ptr<GraphicsSettingsWidget> create(
                 const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<ftk::App>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
-
-            DJV_UI_API void tickEvent(
-                bool parentsVisible,
-                bool parentsEnabled,
-                const ftk::TickEvent&) override;
 
         private:
             FTK_PRIVATE();

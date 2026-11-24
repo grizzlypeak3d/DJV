@@ -70,6 +70,7 @@ namespace djv
                 .def(
                     nb::new_(&GraphicsSettingsWidget::create),
                     nb::arg("context"),
+                    nb::arg("app"),
                     nb::arg("parent") = nullptr);
 #endif // FTK_GPU
 

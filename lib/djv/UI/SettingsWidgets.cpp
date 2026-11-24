@@ -322,17 +322,24 @@ namespace djv
 
         struct GraphicsSettingsWidget::Private
         {
+            std::weak_ptr<ftk::App> app;
+
             std::shared_ptr<ftk::ComboBox> rendererComboBox;
             std::shared_ptr<ftk::Label> currentLabel;
             std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<ftk::Renderer> > rendererObserver;
         };
 
         void GraphicsSettingsWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<ftk::App>& app,
             const std::shared_ptr<IWidget>& parent)
         {
             ISettingsWidget::_init(context, "djv::ui::GraphicsSettingsWidget", parent);
             FTK_P();
+
+            p.app = app;
 
             // In the order of ftk::Renderer. The other renderer is named
             // for what it is here, which is one thing on each system.
@@ -347,6 +354,7 @@ namespace djv
 #endif // __APPLE__
                     }));
             p.rendererComboBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.rendererComboBox, "Settings.Graphics.Renderer");
             p.rendererComboBox->setTooltip(
                 "What the windows are drawn with. The other renderer is\n"
                 "new, and is what HDR needs; where it cannot draw, OpenGL\n"
@@ -393,13 +401,17 @@ namespace djv
             p.rendererComboBox->setIndexCallback(
                 [this](int value)
                 {
-                    if (auto window = getWindow())
+                    if (auto app = _p->app.lock())
                     {
-                        if (auto app = window->getApp())
-                        {
-                            app->setRenderer(static_cast<ftk::Renderer>(value));
-                        }
+                        app->setRenderer(static_cast<ftk::Renderer>(value));
                     }
+                });
+
+            p.rendererObserver = ftk::Observer<ftk::Renderer>::create(
+                app->observeRenderer(),
+                [this](ftk::Renderer value)
+                {
+                    _p->rendererComboBox->setCurrentIndex(static_cast<int>(value));
                 });
         }
 
@@ -412,30 +424,12 @@ namespace djv
 
         std::shared_ptr<GraphicsSettingsWidget> GraphicsSettingsWidget::create(
             const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<ftk::App>& app,
             const std::shared_ptr<IWidget>& parent)
         {
             auto out = std::shared_ptr<GraphicsSettingsWidget>(new GraphicsSettingsWidget);
-            out->_init(context, parent);
+            out->_init(context, app, parent);
             return out;
-        }
-
-        void GraphicsSettingsWidget::tickEvent(
-            bool parentsVisible,
-            bool parentsEnabled,
-            const ftk::TickEvent& event)
-        {
-            ISettingsWidget::tickEvent(parentsVisible, parentsEnabled, event);
-            FTK_P();
-            // The application keeps the setting, and is reached through
-            // the window, which there is not yet when this is made.
-            if (auto window = getWindow())
-            {
-                if (auto app = window->getApp())
-                {
-                    p.rendererComboBox->setCurrentIndex(
-                        static_cast<int>(app->getRenderer()));
-                }
-            }
         }
 
         struct FileBrowserSettingsWidget::Private

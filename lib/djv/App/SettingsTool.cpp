@@ -126,8 +126,9 @@ namespace djv
                 context,
                 "Changes are applied when the application is restarted.",
                 vLayout2);
-            ui::GraphicsSettingsWidget::create(context, vLayout2);
+            ui::GraphicsSettingsWidget::create(context, app, vLayout2);
             p.bellows["Graphics"]->setWidget(vLayout2);
+            ftk::setScreenshotTag(p.bellows["Graphics"], "Settings.Graphics");
 #endif // FTK_GPU
 
             p.bellows["Time"] = ftk::Bellows::create(context, "Time", vLayout);
@@ -171,6 +172,7 @@ namespace djv
 
             p.resetButton = ftk::PushButton::create(context, "Reset");
             p.resetButton->setTooltip("Restore settings to default values.");
+            ftk::setScreenshotTag(p.resetButton, "Settings.Reset");
 
             p.layout = ftk::VerticalLayout::create(context);
             p.layout->setSpacingRole(ftk::SizeRole::None);
@@ -219,6 +221,12 @@ namespace djv
                                         if (auto app = appWeak.lock())
                                         {
                                             app->getSettingsModel()->reset();
+                                            // The renderer is the
+                                            // application's setting rather
+                                            // than the model's, so the
+                                            // model's reset cannot cover it.
+                                            app->setRenderer(
+                                                ftk::Renderer::OpenGL);
                                         }
                                     }
                                 });

@@ -720,6 +720,24 @@
       ]
     },
     {
+      "id": "settings-reset-renderer",
+      "strict": true,
+      "requires": ["ftk_GPU"],
+      "window": { "w": 1000, "h": 700 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "Settings", "expand": ["Graphics"] },
+        { "expect": "Settings.Graphics.Renderer", "text": "OpenGL" },
+        { "click": "Settings.Graphics.Renderer" },
+        { "key": "Down" },
+        { "key": "Return" },
+        { "expect": "Settings.Graphics.Renderer", "contains": "experimental" },
+        { "click": "Settings.Reset" },
+        { "click": "ConfirmDialog.OK" },
+        { "expect": "Settings.Graphics.Renderer", "text": "OpenGL" }
+      ]
+    },
+    {
       "id": "frame-guide-aspect",
       "strict": true,
       "window": { "w": 1000, "h": 700 },
