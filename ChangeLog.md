@@ -7,50 +7,33 @@ Changes:
 * Annotations and markers record an author name, set in the settings.
 * A marker's name and frames can be edited in the Review tool.
 * Annotations can be burned into exported images and movies.
-* Text annotations are drawn on a background, so they read over any picture;
-  it can be turned off.
 * Freehand annotations follow pen pressure.
 * Annotation widths and text sizes are given for an HD picture and scale
   with the picture, so they look the same at any resolution.
 * Exports go into a queue and run while the work goes on: the file being
   exported can be closed, which frees its cache, and others queued behind
   it (#947).
-* A ring beside the status indicator shows how far the exports have got,
-  and stays full once they have finished, until the Export tool is opened;
-  the status bar says when they finish. A finished export can be opened
-  from the queue, which lists the running export first, how long each one
-  took, and how long the finished ones took in all (#964, #968, #976).
+* A ring beside the status indicator shows the export progress, a finished export can
+  be opened from the queue, and the export times are shown (#964, #968, #976).
 * Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
   Graphics or with the -renderer command line option. On an HDR display it
   shows HDR pictures.
-* Add a Displays tool, for where the picture goes: the secondary window
-  can fill a chosen monitor with the picture alone, and have an
-  OpenColorIO display and view of its own (#615).
+* Add a Displays tool for controlling a secondary window including fullscreen
+  and OpenColorIO settings.
 * Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.
-* Movies that cannot be decoded in real time show the frames they can,
-  rather than freezing while the audio plays.
-* Add Timeline > Detect Cuts, for marking the cuts in an edit flattened to
-  one movie or image sequence.
+* Add Timeline > Detect Cuts, for marking the cuts with automatic detection.
 * Add a frame store, Compare > Store Frame, for comparing against a stored
   frame: a still against a movie, or a frame against another of the same
   clip (#627).
-* A still compared with a movie is shown at every frame.
 * Add Playback > Play Every Frame, for media that cannot play in real time:
   playback waits for each frame rather than skipping it, with the audio
   silent (#123).
 * Add File > Export Still, for writing the current frame as an image in one
   step (#696).
-* The documentation has a page for each part of the application and a
-  reference of every menu item, and is installed with the application in
-  HTML and Markdown, with an llms.txt for AI assistants.
+* The documentation now contains an llms.txt for AI assistants.
 * Add a frame guide and safe areas, in the View menu and the View tool
-  (#962). The frame guide's aspect is typed as a ratio or a number, 16:9 or
-  2.39, and kept exactly (#963).
-* The compare wipe has a dot to move it, from anywhere in the middle around
-  it, and a ring to turn it, which settles on level, and Shift steps it by 45
-  degrees; the ring marks the angle and which side is A and which is B. They
-  fade while the pointer rests, and Compare > Wipe Handles hides them (#957,
-  #966, #967).
+  (#962).
+* Add a widget to control the compare wipe (#957, #966, #967).
 * Read WebP images, still and animated (#867).
 * Read HEIC and HEIF images on macOS.
 * Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command
@@ -71,7 +54,6 @@ Changes:
 * Add a Start at Zero option to the time units, for counting from the start
   of a file rather than its frame numbers or timecode (#958).
 * Exported JPEG, PNG, and TIFF images include ICC profiles.
-* The export progress says about how long is left (#943).
 * The Export tool offers the FFmpeg command line presets only when the
   installed ffmpeg has their encoder (#949).
 * System Information shows the FFmpeg command line's version for writing as
@@ -84,6 +66,7 @@ Changes:
 * Audio > Volume Up and Volume Down step by 5% (#649).
 * Library updates:
     - FFmpeg 9.0.2
+* The minimum macOS version is 12 (Monterey), on Apple silicon and Intel.
 
 Fixes:
 * Fix for jumping one second at 23.976, 29.97, and 59.94 fps landing a frame
