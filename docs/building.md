@@ -24,7 +24,7 @@ Requirements: Git and CMake 3.31.
 Install the system packages:
 
 ```
-sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev
+sudo apt-get install build-essential git cmake pkg-config xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev
 ```
 
 The Wayland packages are optional; without them SDL is built with X11 only and runs through XWayland on a Wayland desktop.
@@ -32,7 +32,7 @@ The Wayland packages are optional; without them SDL is built with X11 only and r
 ### Rocky 9
 
 ```
-sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel libdecor-devel
+sudo dnf install git pkgconf-pkg-config libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel libdecor-devel
 ```
 
 Rocky 9 packages CMake 3.26, and OpenTimelineIO needs 3.31. A newer one can be installed with pip; the cmake.org `.sh` file is an installer that takes a prefix, and either way the result has to be on the path ahead of the system's:
@@ -45,7 +45,7 @@ export PATH=$HOME/.local/bin:$PATH
 ### Rocky 8
 
 ```
-sudo dnf install git libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel
+sudo dnf install git pkgconf-pkg-config libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel mesa-libGL-devel pipewire-devel libva-devel libdrm-devel wayland-devel wayland-protocols-devel libxkbcommon-devel mesa-libEGL-devel
 ```
 
 Rocky 8 also needs a newer compiler, installed and then enabled for the shell that builds:
@@ -115,7 +115,7 @@ What differs from a desktop:
 
 ## macOS
 
-Requirements: Git, Xcode, and CMake 3.31.
+Requirements: Git, Xcode, CMake 3.31, and pkg-config (`brew install pkgconf`).
 
 Clone the repository and run the super build script:
 
@@ -204,7 +204,7 @@ On Linux the dependencies can come from the distribution instead of the super bu
 Install the system packages:
 
 ```
-sudo apt-get install build-essential git cmake xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev pkg-config zlib1g-dev libpng-dev libfreetype-dev nlohmann-json3-dev libsdl3-dev libimath-dev libopenexr-dev libopencolorio-dev libopenimageio-dev openimageio-tools libopentimelineio-dev libminizip-ng-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
+sudo apt-get install build-essential git cmake pkg-config xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils libasound2-dev libpulse-dev libva-dev libdrm-dev libwayland-dev wayland-protocols libxkbcommon-dev libegl1-mesa-dev libdecor-0-dev pkg-config zlib1g-dev libpng-dev libfreetype-dev nlohmann-json3-dev libsdl3-dev libimath-dev libopenexr-dev libopencolorio-dev libopenimageio-dev openimageio-tools libopentimelineio-dev libminizip-ng-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
 ```
 
 The OpenImageIO tools are listed because the library's CMake configuration names them, and configuring fails without them. lunasvg has no package and is built from source, into a prefix beside the build:
