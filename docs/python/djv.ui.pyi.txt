@@ -35,7 +35,12 @@ class LUTWidget(feather_tk._feather_tk.IContainer):
     def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox: ...
 
 class ColorWidget(feather_tk._feather_tk.IContainer):
-    def __init__(self, context: feather_tk._feather_tk.Context, viewportModel: djv._djv.models.ViewportModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
+    """Color widget.
+
+    Add support for displaying pixel types like U8, U16, etc.?
+    """
+    def __init__(self, context: feather_tk._feather_tk.Context, viewportModel: djv._djv.models.ViewportModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None:
+        """Create a new widget."""
 
     @property
     def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox: ...

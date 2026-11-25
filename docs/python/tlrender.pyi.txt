@@ -37,6 +37,7 @@ VERSION_DEV: str = '-dev'
 VERSION_FULL: str = '0.29.0-dev'
 
 class AudioType(enum.Enum):
+    """Audio data types."""
     S8 = 1
 
     S16 = 2
@@ -47,184 +48,406 @@ class AudioType(enum.Enum):
 
     F64 = 5
 
-def getAudioTypeEnums() -> list[AudioType]: ...
+def getAudioTypeEnums() -> list[AudioType]:
+    """Get every value of AudioType."""
 
 @overload
-def getLabel(arg: AudioType, /) -> str: ...
+def getLabel(arg: AudioType, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: HDR_EOTF, /) -> str: ...
+def getLabel(arg: HDR_EOTF, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: HDRPrimaries, /) -> str: ...
+def getLabel(arg: HDRPrimaries, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: MissingFrames, /) -> str: ...
+def getLabel(arg: MissingFrames, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: Background, /) -> str: ...
+def getLabel(arg: Background, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: OCIOConfig, /) -> str: ...
+def getLabel(arg: OCIOConfig, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: LUTDirection, /) -> str: ...
+def getLabel(arg: LUTDirection, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: LUTOrder, /) -> str: ...
+def getLabel(arg: LUTOrder, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: Compare, /) -> str: ...
+def getLabel(arg: Compare, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: CompareTime, /) -> str: ...
+def getLabel(arg: CompareTime, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: AspectRatio, /) -> str: ...
+def getLabel(arg: AspectRatio, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: AspectRatioType, /) -> str: ...
+def getLabel(arg: AspectRatioType, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: AspectRatioOptions, /) -> str: ...
+def getLabel(arg: AspectRatioOptions, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: GridCellMode, /) -> str: ...
+def getLabel(arg: GridCellMode, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: ClippingWarningMode, /) -> str: ...
+def getLabel(arg: ClippingWarningMode, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: TimeUnits, /) -> str: ...
+def getLabel(arg: TimeUnits, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: ImageSeqAudio, /) -> str: ...
+def getLabel(arg: ImageSeqAudio, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: Playback, /) -> str: ...
+def getLabel(arg: Playback, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: Loop, /) -> str: ...
+def getLabel(arg: Loop, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: TimeAction, /) -> str: ...
+def getLabel(arg: TimeAction, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def getLabel(arg: Transition, /) -> str: ...
+def getLabel(arg: Transition, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def to_string(arg: AudioType, /) -> str: ...
+def to_string(arg: AudioType, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: HDR_EOTF, /) -> str: ...
+def to_string(arg: HDR_EOTF, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: HDRPrimaries, /) -> str: ...
+def to_string(arg: HDRPrimaries, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: MissingFrames, /) -> str: ...
+def to_string(arg: MissingFrames, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: Background, /) -> str: ...
+def to_string(arg: Background, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: OCIOConfig, /) -> str: ...
+def to_string(arg: OCIOConfig, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: LUTDirection, /) -> str: ...
+def to_string(arg: LUTDirection, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: LUTOrder, /) -> str: ...
+def to_string(arg: LUTOrder, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: Compare, /) -> str: ...
+def to_string(arg: Compare, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: CompareTime, /) -> str: ...
+def to_string(arg: CompareTime, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: AspectRatioType, /) -> str: ...
+def to_string(arg: AspectRatioType, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: GridCellMode, /) -> str: ...
+def to_string(arg: GridCellMode, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: ClippingWarningMode, /) -> str: ...
+def to_string(arg: ClippingWarningMode, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: TimeUnits, /) -> str: ...
+def to_string(arg: TimeUnits, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: ImageSeqAudio, /) -> str: ...
+def to_string(arg: ImageSeqAudio, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: Playback, /) -> str: ...
+def to_string(arg: Playback, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: Loop, /) -> str: ...
+def to_string(arg: Loop, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: TimeAction, /) -> str: ...
+def to_string(arg: TimeAction, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: Transition, /) -> str: ...
+def to_string(arg: Transition, /) -> str:
+    """Convert to a string."""
 
 @overload
-def from_string(arg0: str, arg1: AudioType, /) -> bool: ...
+def from_string(arg0: str, arg1: AudioType, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: HDR_EOTF, /) -> bool: ...
+def from_string(arg0: str, arg1: HDR_EOTF, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: HDRPrimaries, /) -> bool: ...
+def from_string(arg0: str, arg1: HDRPrimaries, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: MissingFrames, /) -> bool: ...
+def from_string(arg0: str, arg1: MissingFrames, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: Background, /) -> bool: ...
+def from_string(arg0: str, arg1: Background, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: OCIOConfig, /) -> bool: ...
+def from_string(arg0: str, arg1: OCIOConfig, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: LUTDirection, /) -> bool: ...
+def from_string(arg0: str, arg1: LUTDirection, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: LUTOrder, /) -> bool: ...
+def from_string(arg0: str, arg1: LUTOrder, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: Compare, /) -> bool: ...
+def from_string(arg0: str, arg1: Compare, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: CompareTime, /) -> bool: ...
+def from_string(arg0: str, arg1: CompareTime, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: AspectRatioType, /) -> bool: ...
+def from_string(arg0: str, arg1: AspectRatioType, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: GridCellMode, /) -> bool: ...
+def from_string(arg0: str, arg1: GridCellMode, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: ClippingWarningMode, /) -> bool: ...
+def from_string(arg0: str, arg1: ClippingWarningMode, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: TimeUnits, /) -> bool: ...
+def from_string(arg0: str, arg1: TimeUnits, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: ImageSeqAudio, /) -> bool: ...
+def from_string(arg0: str, arg1: ImageSeqAudio, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: Playback, /) -> bool: ...
+def from_string(arg0: str, arg1: Playback, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: Loop, /) -> bool: ...
+def from_string(arg0: str, arg1: Loop, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: TimeAction, /) -> bool: ...
+def from_string(arg0: str, arg1: TimeAction, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: Transition, /) -> bool: ...
+def from_string(arg0: str, arg1: Transition, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 def getByteCount(arg: AudioType, /) -> int:
     """Get the byte count for the given data type."""
@@ -240,25 +463,29 @@ class AudioInfo:
     def __init__(self) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """Audio name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def channelCount(self) -> int: ...
+    def channelCount(self) -> int:
+        """Number of channels."""
 
     @channelCount.setter
     def channelCount(self, arg: int, /) -> None: ...
 
     @property
-    def type(self) -> AudioType: ...
+    def type(self) -> AudioType:
+        """Sample data type."""
 
     @type.setter
     def type(self, arg: AudioType, /) -> None: ...
 
     @property
-    def sampleRate(self) -> int: ...
+    def sampleRate(self) -> int:
+        """Sample rate in hertz."""
 
     @sampleRate.setter
     def sampleRate(self, arg: int, /) -> None: ...
@@ -336,15 +563,19 @@ class AudioResample:
         """Flush any remaining data."""
 
 class HDR_EOTF(enum.Enum):
+    """HDR EOTF."""
     SDR = 0
 
     HDR = 1
 
     ST2084 = 2
+    """SMPTE ST 2084 (PQ)."""
 
-def getHDR_EOTFEnums() -> list[HDR_EOTF]: ...
+def getHDR_EOTFEnums() -> list[HDR_EOTF]:
+    """Get every value of HDR_EOTF."""
 
 class HDRPrimaries(enum.Enum):
+    """HDR color primaries."""
     Red = 0
 
     Green = 1
@@ -353,38 +584,44 @@ class HDRPrimaries(enum.Enum):
 
     White = 3
 
-def getHDRPrimariesEnums() -> list[HDRPrimaries]: ...
+def getHDRPrimariesEnums() -> list[HDRPrimaries]:
+    """Get every value of HDRPrimaries."""
 
 class HDRData:
     """HDR data."""
     def __init__(self) -> None: ...
 
     @property
-    def eotf(self) -> HDR_EOTF: ...
+    def eotf(self) -> HDR_EOTF:
+        """Electro-optical transfer function."""
 
     @eotf.setter
     def eotf(self, arg: HDR_EOTF, /) -> None: ...
 
     @property
-    def primaries(self) -> list[feather_tk._feather_tk.V2F]: ...
+    def primaries(self) -> list[feather_tk._feather_tk.V2F]:
+        """Default Rec. 2020 color primaries (red, green, blue, white)."""
 
     @primaries.setter
     def primaries(self, arg: Sequence[feather_tk._feather_tk.V2F], /) -> None: ...
 
     @property
-    def displayMasteringLuminance(self) -> feather_tk._feather_tk.RangeF: ...
+    def displayMasteringLuminance(self) -> feather_tk._feather_tk.RangeF:
+        """Mastering display luminance, minimum to maximum, in nits."""
 
     @displayMasteringLuminance.setter
     def displayMasteringLuminance(self, arg: feather_tk._feather_tk.RangeF, /) -> None: ...
 
     @property
-    def maxCLL(self) -> float: ...
+    def maxCLL(self) -> float:
+        """Maximum content light level in nits."""
 
     @maxCLL.setter
     def maxCLL(self, arg: float, /) -> None: ...
 
     @property
-    def maxFALL(self) -> float: ...
+    def maxFALL(self) -> float:
+        """Maximum frame-average light level in nits."""
 
     @maxFALL.setter
     def maxFALL(self, arg: float, /) -> None: ...
@@ -488,17 +725,39 @@ class IIOPlugin:
         """Get the supported file extensions."""
 
 class MissingFrames(enum.Enum):
+    """What to do about a frame a sequence does not have.
+
+    The first three match OTIO's image sequence reference policies, which is
+    where the value comes from when the sequence is described by a timeline.
+    They are decided per read: the sequence keeps its length and each of them
+    says what fills a gap.
+
+    The last two are different in kind. They do not fill anything; they say
+    what the timeline is built out of, so a clip covers each run of frames that
+    are there and no read ever asks for a frame that is not. That makes them
+    structural: they are settled when the sequence is opened, and changing one
+    means opening it again. Because the frames are found in order to build the
+    clips, they only apply to an image sequence opened directly -- a timeline
+    that was authored already says what its clips are, and those are not ours
+    to rewrite.
+    """
     Error = 0
+    """The frame does not read."""
 
     Hold = 1
+    """Repeat the nearest frame before it."""
 
     Black = 2
+    """A blank frame."""
 
     Skip = 3
+    """Leave it out; only the frames that are there play."""
 
     Gaps = 4
+    """Leave a hole, so the frames keep the times they had."""
 
-def getMissingFramesEnums() -> list[MissingFrames]: ...
+def getMissingFramesEnums() -> list[MissingFrames]:
+    """Get every value of MissingFrames."""
 
 def isStructural(missingFrames: MissingFrames) -> bool:
     """Get whether a policy is settled when the sequence is opened, by deciding
@@ -516,13 +775,17 @@ class SeqOptions:
     def __init__(self) -> None: ...
 
     @property
-    def defaultSpeed(self) -> float: ...
+    def defaultSpeed(self) -> float:
+        """Frame rate, in frames per second, of a sequence whose files do not
+        give one.
+        """
 
     @defaultSpeed.setter
     def defaultSpeed(self, arg: float, /) -> None: ...
 
     @property
-    def missingFrames(self) -> MissingFrames: ...
+    def missingFrames(self) -> MissingFrames:
+        """What to do about a frame the sequence does not have."""
 
     @missingFrames.setter
     def missingFrames(self, arg: MissingFrames, /) -> None: ...
@@ -696,7 +959,10 @@ class AudioLayer:
     def __init__(self) -> None: ...
 
     @property
-    def audio(self) -> Audio: ...
+    def audio(self) -> Audio:
+        """Audio data: one second of it, silent where the clip does not cover
+        the second.
+        """
 
     @audio.setter
     def audio(self, arg: Audio, /) -> None: ...
@@ -710,13 +976,19 @@ class AudioFrame:
     def __init__(self) -> None: ...
 
     @property
-    def seconds(self) -> float: ...
+    def seconds(self) -> float:
+        """Time the frame starts at, in seconds. A frame is one second of
+        audio.
+        """
 
     @seconds.setter
     def seconds(self, arg: float, /) -> None: ...
 
     @property
-    def layers(self) -> list[AudioLayer]: ...
+    def layers(self) -> list[AudioLayer]:
+        """One layer for each audio clip under the frame's second, or one
+        silent layer when there are none.
+        """
 
     @layers.setter
     def layers(self, arg: Sequence[AudioLayer], /) -> None: ...
@@ -800,23 +1072,35 @@ class ObservableAudioFrameList(IObservableAudioFrameList):
         """Get the index of the given item."""
 
 @overload
-def isTimeEqual(arg0: AudioFrame, arg1: AudioFrame, /) -> bool: ...
+def isTimeEqual(arg0: AudioFrame, arg1: AudioFrame, /) -> bool:
+    """Compare the time values of audio frames.
+
+    Compare the time values of video frames.
+    """
 
 @overload
-def isTimeEqual(arg0: VideoFrame, arg1: VideoFrame, /) -> bool: ...
+def isTimeEqual(arg0: VideoFrame, arg1: VideoFrame, /) -> bool:
+    """Compare the time values of audio frames.
+
+    Compare the time values of video frames.
+    """
 
 class AudioDeviceID:
     """Audio device ID."""
     def __init__(self) -> None: ...
 
     @property
-    def number(self) -> int: ...
+    def number(self) -> int:
+        """Device number, as the audio driver gives it; -1 is the default
+        device.
+        """
 
     @number.setter
     def number(self, arg: int, /) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """Device name, as the audio driver gives it."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
@@ -929,13 +1213,15 @@ class AudioDeviceInfo:
     def __init__(self) -> None: ...
 
     @property
-    def id(self) -> AudioDeviceID: ...
+    def id(self) -> AudioDeviceID:
+        """Device ID."""
 
     @id.setter
     def id(self, arg: AudioDeviceID, /) -> None: ...
 
     @property
-    def info(self) -> AudioInfo: ...
+    def info(self) -> AudioInfo:
+        """The device's audio format."""
 
     @info.setter
     def info(self, arg: AudioInfo, /) -> None: ...
@@ -1082,32 +1368,37 @@ class AudioSystem(feather_tk._feather_tk.ISystem):
         """Observe the default audio device."""
 
 class Background(enum.Enum):
+    """Background type."""
     Solid = 0
 
     Checkers = 1
 
     Gradient = 2
 
-def getBackgroundEnums() -> list[Background]: ...
+def getBackgroundEnums() -> list[Background]:
+    """Get every value of Background."""
 
 class Outline:
     """Outline."""
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether an outline is drawn around each image shown."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def width(self) -> int: ...
+    def width(self) -> int:
+        """The outline width, in view pixels, outside the image's edge."""
 
     @width.setter
     def width(self, arg: int, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The outline color."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
@@ -1121,37 +1412,43 @@ class BackgroundOptions:
     def __init__(self) -> None: ...
 
     @property
-    def type(self) -> Background: ...
+    def type(self) -> Background:
+        """The background type."""
 
     @type.setter
     def type(self, arg: Background, /) -> None: ...
 
     @property
-    def solidColor(self) -> feather_tk._feather_tk.Color4F: ...
+    def solidColor(self) -> feather_tk._feather_tk.Color4F:
+        """The color for Background::Solid."""
 
     @solidColor.setter
     def solidColor(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
 
     @property
-    def checkersColor(self) -> tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F]: ...
+    def checkersColor(self) -> tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F]:
+        """The two checker colors, for Background::Checkers."""
 
     @checkersColor.setter
     def checkersColor(self, arg: tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F], /) -> None: ...
 
     @property
-    def checkersSize(self) -> feather_tk._feather_tk.Size2I: ...
+    def checkersSize(self) -> feather_tk._feather_tk.Size2I:
+        """The size of each checker, in view pixels."""
 
     @checkersSize.setter
     def checkersSize(self, arg: feather_tk._feather_tk.Size2I, /) -> None: ...
 
     @property
-    def gradientColor(self) -> tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F]: ...
+    def gradientColor(self) -> tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F]:
+        """The top and bottom colors, for Background::Gradient."""
 
     @gradientColor.setter
     def gradientColor(self, arg: tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F], /) -> None: ...
 
     @property
-    def outline(self) -> Outline: ...
+    def outline(self) -> Outline:
+        """The outline around the images."""
 
     @outline.setter
     def outline(self, arg: Outline, /) -> None: ...
@@ -1186,140 +1483,336 @@ class ObservableBackgroundOptions(IObservableBackgroundOptions):
         """Get the value."""
 
 @overload
-def to_json(arg: Background, /) -> str: ...
+def to_json(arg: Background, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: Outline, /) -> str: ...
+def to_json(arg: Outline, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: BackgroundOptions, /) -> str: ...
+def to_json(arg: BackgroundOptions, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: OCIOOptions, /) -> str: ...
+def to_json(arg: OCIOOptions, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: LUTOptions, /) -> str: ...
+def to_json(arg: LUTOptions, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: CompareOptions, /) -> str: ...
+def to_json(arg: CompareOptions, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: Color, /) -> str: ...
+def to_json(arg: Color, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: Levels, /) -> str: ...
+def to_json(arg: Levels, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: Exposure, /) -> str: ...
+def to_json(arg: Exposure, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: SoftClip, /) -> str: ...
+def to_json(arg: SoftClip, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: DisplayOptions, /) -> str: ...
+def to_json(arg: DisplayOptions, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: Grid, /) -> str: ...
+def to_json(arg: Grid, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: ForegroundOptions, /) -> str: ...
+def to_json(arg: ForegroundOptions, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def to_json(arg: PlayerCacheOptions, /) -> str: ...
+def to_json(arg: PlayerCacheOptions, /) -> str:
+    """Serialize a path.
+
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
 
 @overload
-def from_json(arg0: str, arg1: Background, /) -> None: ...
+def from_json(arg0: str, arg1: Background, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: Outline, /) -> None: ...
+def from_json(arg0: str, arg1: Outline, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: BackgroundOptions, /) -> None: ...
+def from_json(arg0: str, arg1: BackgroundOptions, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: OCIOOptions, /) -> None: ...
+def from_json(arg0: str, arg1: OCIOOptions, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: LUTOptions, /) -> None: ...
+def from_json(arg0: str, arg1: LUTOptions, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: CompareOptions, /) -> None: ...
+def from_json(arg0: str, arg1: CompareOptions, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: Color, /) -> None: ...
+def from_json(arg0: str, arg1: Color, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: Levels, /) -> None: ...
+def from_json(arg0: str, arg1: Levels, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: Exposure, /) -> None: ...
+def from_json(arg0: str, arg1: Exposure, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: SoftClip, /) -> None: ...
+def from_json(arg0: str, arg1: SoftClip, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: DisplayOptions, /) -> None: ...
+def from_json(arg0: str, arg1: DisplayOptions, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: Grid, /) -> None: ...
+def from_json(arg0: str, arg1: Grid, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: ForegroundOptions, /) -> None: ...
+def from_json(arg0: str, arg1: ForegroundOptions, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 @overload
-def from_json(arg0: str, arg1: PlayerCacheOptions, /) -> None: ...
+def from_json(arg0: str, arg1: PlayerCacheOptions, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 class OCIOConfig(enum.Enum):
+    """OpenColorIO configuration options."""
     BuiltIn = 0
+    """The configuration built into OpenColorIO, "ocio://default"."""
 
     EnvironmentVariable = 1
 
     File = 2
+    """The configuration file in OCIOOptions::fileName."""
 
-def getOCIOConfigEnums() -> list[OCIOConfig]: ...
+def getOCIOConfigEnums() -> list[OCIOConfig]:
+    """Get every value of OCIOConfig."""
 
 class OCIOOptions:
     """OpenColorIO options."""
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether OpenColorIO color management is applied. It takes effect
+        only with a display, a view, and an input color space (this one's or
+        DisplayOptions::ocioInput).
+        """
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def config(self) -> OCIOConfig: ...
+    def config(self) -> OCIOConfig:
+        """Where the configuration comes from."""
 
     @config.setter
     def config(self, arg: OCIOConfig, /) -> None: ...
 
     @property
-    def fileName(self) -> str: ...
+    def fileName(self) -> str:
+        """The configuration file, for OCIOConfig::File."""
 
     @fileName.setter
     def fileName(self, arg: str, /) -> None: ...
 
     @property
-    def input(self) -> str: ...
+    def input(self) -> str:
+        """The input color space, by name in the configuration."""
 
     @input.setter
     def input(self, arg: str, /) -> None: ...
 
     @property
-    def display(self) -> str: ...
+    def display(self) -> str:
+        """The display, by name in the configuration."""
 
     @display.setter
     def display(self, arg: str, /) -> None: ...
 
     @property
-    def view(self) -> str: ...
+    def view(self) -> str:
+        """The view, by name in the configuration."""
 
     @view.setter
     def view(self, arg: str, /) -> None: ...
 
     @property
-    def look(self) -> str: ...
+    def look(self) -> str:
+        """The look, by name in the configuration; empty for none."""
 
     @look.setter
     def look(self, arg: str, /) -> None: ...
@@ -1354,43 +1847,62 @@ class ObservableOCIOOptions(IObservableOCIOOptions):
         """Get the value."""
 
 class LUTDirection(enum.Enum):
+    """LUT direction.
+
+    Forward is the direction the file itself reads. An ICC monitor profile
+    reads from the monitor's code values, so correcting the display with one
+    takes Inverse.
+    """
     Forward = 0
 
     Inverse = 1
 
-def getLUTDirectionEnums() -> list[LUTDirection]: ...
+def getLUTDirectionEnums() -> list[LUTDirection]:
+    """Get every value of LUTDirection."""
 
 class LUTOrder(enum.Enum):
+    """LUT operation order."""
     PostConfig = 0
+    """Applied after the color adjustments and the OpenColorIO display
+    transform.
+    """
 
     PreConfig = 1
+    """Applied before the OpenColorIO input conversion and the color
+    adjustments.
+    """
 
-def getLUTOrderEnums() -> list[LUTOrder]: ...
+def getLUTOrderEnums() -> list[LUTOrder]:
+    """Get every value of LUTOrder."""
 
 class LUTOptions:
     """LUT options."""
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the LUT is applied."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def fileName(self) -> str: ...
+    def fileName(self) -> str:
+        """The LUT file, in any of the formats getLUTFormatNames() lists."""
 
     @fileName.setter
     def fileName(self, arg: str, /) -> None: ...
 
     @property
-    def direction(self) -> LUTDirection: ...
+    def direction(self) -> LUTDirection:
+        """The direction the LUT is applied in."""
 
     @direction.setter
     def direction(self, arg: LUTDirection, /) -> None: ...
 
     @property
-    def order(self) -> LUTOrder: ...
+    def order(self) -> LUTOrder:
+        """Where the LUT is applied among the display's color operations."""
 
     @order.setter
     def order(self, arg: LUTOrder, /) -> None: ...
@@ -1431,11 +1943,17 @@ def getLUTFormatExts() -> list[str]:
     """Get the list of LUT format file extensions."""
 
 class Compare(enum.Enum):
+    """Comparison modes."""
     B = 1
 
     Wipe = 2
 
     Butterfly = 3
+    """The same half of each file, one of them mirrored, so that the two meet
+    at the middle on the same picture. What a side by side comparison cannot do
+    is put the same thing next to itself, which is what judging a colour
+    adjustment needs.
+    """
 
     Overlay = 4
 
@@ -1447,14 +1965,19 @@ class Compare(enum.Enum):
 
     Tile = 8
 
-def getCompareEnums() -> list[Compare]: ...
+def getCompareEnums() -> list[Compare]:
+    """Get every value of Compare."""
 
 class CompareTime(enum.Enum):
+    """Comparison time modes."""
     Relative = 0
+    """Each file at the same offset from the start of its time range."""
 
     Absolute = 1
+    """Each file at the same time, whatever its time range."""
 
-def getCompareTimeEnums() -> list[CompareTime]: ...
+def getCompareTimeEnums() -> list[CompareTime]:
+    """Get every value of CompareTime."""
 
 def getCompareTime(sourceTime: opentimelineio.opentime.RationalTime, sourceTimeRange: opentimelineio.opentime.TimeRange, compareTimeRange: opentimelineio.opentime.TimeRange, compareTime: CompareTime = CompareTime.Relative) -> opentimelineio.opentime.RationalTime:
     """
@@ -1469,25 +1992,33 @@ class CompareOptions:
     def __init__(self) -> None: ...
 
     @property
-    def compare(self) -> Compare: ...
+    def compare(self) -> Compare:
+        """The comparison mode."""
 
     @compare.setter
     def compare(self, arg: Compare, /) -> None: ...
 
     @property
-    def wipeCenter(self) -> feather_tk._feather_tk.V2F: ...
+    def wipeCenter(self) -> feather_tk._feather_tk.V2F:
+        """The wipe center, as a fraction of the first image's width and
+        height; (0, 0) is the top left.
+        """
 
     @wipeCenter.setter
     def wipeCenter(self, arg: feather_tk._feather_tk.V2F, /) -> None: ...
 
     @property
-    def wipeRotation(self) -> float: ...
+    def wipeRotation(self) -> float:
+        """The wipe rotation, in degrees. At zero the wipe line is vertical,
+        with A on the left and B on the right.
+        """
 
     @wipeRotation.setter
     def wipeRotation(self, arg: float, /) -> None: ...
 
     @property
-    def overlay(self) -> float: ...
+    def overlay(self) -> float:
+        """The opacity of A over B in the overlay comparison, from 0 to 1."""
 
     @overlay.setter
     def overlay(self, arg: float, /) -> None: ...
@@ -1504,7 +2035,12 @@ class CompareOptions:
     def differenceGain(self, arg: float, /) -> None: ...
 
     @property
-    def sameSize(self) -> bool: ...
+    def sameSize(self) -> bool:
+        """Whether the other files are sized to the first: fitted to its box
+        where they are drawn over it, as tall as it side by side, as wide as it
+        one above the other, and fitted to tiles its size. Otherwise each keeps
+        its own size, and the tiles are as large as the largest file.
+        """
 
     @sameSize.setter
     def sameSize(self, arg: bool, /) -> None: ...
@@ -1543,37 +2079,47 @@ class Color:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the color values are applied."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def add(self) -> feather_tk._feather_tk.V3F: ...
+    def add(self) -> feather_tk._feather_tk.V3F:
+        """Added to the red, green, and blue before the other values are
+        applied; zero does nothing.
+        """
 
     @add.setter
     def add(self, arg: feather_tk._feather_tk.V3F, /) -> None: ...
 
     @property
-    def brightness(self) -> feather_tk._feather_tk.V3F: ...
+    def brightness(self) -> feather_tk._feather_tk.V3F:
+        """Brightness, a multiplier for each channel; one does nothing."""
 
     @brightness.setter
     def brightness(self, arg: feather_tk._feather_tk.V3F, /) -> None: ...
 
     @property
-    def contrast(self) -> feather_tk._feather_tk.V3F: ...
+    def contrast(self) -> feather_tk._feather_tk.V3F:
+        """Contrast for each channel, pivoting on 0.5; one does nothing."""
 
     @contrast.setter
     def contrast(self, arg: feather_tk._feather_tk.V3F, /) -> None: ...
 
     @property
-    def saturation(self) -> feather_tk._feather_tk.V3F: ...
+    def saturation(self) -> feather_tk._feather_tk.V3F:
+        """Saturation for each channel; one does nothing and zero is gray."""
 
     @saturation.setter
     def saturation(self, arg: feather_tk._feather_tk.V3F, /) -> None: ...
 
     @property
-    def hue(self) -> float: ...
+    def hue(self) -> float:
+        """Hue rotation in turns: 0.5 is half way round the color wheel, and
+        zero does nothing.
+        """
 
     @hue.setter
     def hue(self, arg: float, /) -> None: ...
@@ -1583,44 +2129,56 @@ class Color:
     def __ne__(self, arg: Color, /) -> bool: ...
 
 def color(arg: Color, /) -> feather_tk._feather_tk.M44F:
-    """Get a color matrix."""
+    """Marker color; see getMarkerColor()."""
 
 class Levels:
     """Levels values."""
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the levels are applied."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def inLow(self) -> float: ...
+    def inLow(self) -> float:
+        """The input low value, subtracted from each channel first."""
 
     @inLow.setter
     def inLow(self, arg: float, /) -> None: ...
 
     @property
-    def inHigh(self) -> float: ...
+    def inHigh(self) -> float:
+        """The input high value. Each channel is divided by it after inLow is
+        subtracted, so the input range ends at inLow plus inHigh.
+        """
 
     @inHigh.setter
     def inHigh(self, arg: float, /) -> None: ...
 
     @property
-    def gamma(self) -> float: ...
+    def gamma(self) -> float:
+        """The gamma: after the input range, each value that is not negative is
+        raised to one over it, so above one brightens the midtones.
+        """
 
     @gamma.setter
     def gamma(self, arg: float, /) -> None: ...
 
     @property
-    def outLow(self) -> float: ...
+    def outLow(self) -> float:
+        """The output low value, added last."""
 
     @outLow.setter
     def outLow(self, arg: float, /) -> None: ...
 
     @property
-    def outHigh(self) -> float: ...
+    def outHigh(self) -> float:
+        """The output high value. The values are multiplied by it before outLow
+        is added, so the output range ends at outLow plus outHigh.
+        """
 
     @outHigh.setter
     def outHigh(self, arg: float, /) -> None: ...
@@ -1638,13 +2196,15 @@ class Exposure:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the exposure is applied."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def exposure(self) -> float: ...
+    def exposure(self) -> float:
+        """The exposure, in stops."""
 
     @exposure.setter
     def exposure(self, arg: float, /) -> None: ...
@@ -1658,13 +2218,17 @@ class SoftClip:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the soft clip is applied."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """The amount, from 0 to 1: values above one minus the amount are
+        rolled off toward one rather than passing it. Zero does nothing.
+        """
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
@@ -1682,18 +2246,21 @@ class AspectRatio:
     def __init__(self, num: float, den: float = 1.0) -> None: ...
 
     @property
-    def num(self) -> float: ...
+    def num(self) -> float:
+        """The numerator, the width part of the ratio."""
 
     @num.setter
     def num(self, arg: float, /) -> None: ...
 
     @property
-    def den(self) -> float: ...
+    def den(self) -> float:
+        """The denominator, the height part of the ratio."""
 
     @den.setter
     def den(self, arg: float, /) -> None: ...
 
-    def isValid(self) -> bool: ...
+    def isValid(self) -> bool:
+        """Whether both parts are positive."""
 
     def __float__(self) -> float: ...
 
@@ -1702,11 +2269,15 @@ class AspectRatio:
     def __ne__(self, arg: AspectRatio, /) -> bool: ...
 
 class AspectRatioType(enum.Enum):
+    """Aspect ratio types."""
     Pixel = 0
+    """The value is the pixel aspect ratio, in place of the image's own."""
 
     Display = 1
+    """The value is the aspect ratio of the whole picture."""
 
-def getAspectRatioTypeEnums() -> list[AspectRatioType]: ...
+def getAspectRatioTypeEnums() -> list[AspectRatioType]:
+    """Get every value of AspectRatioType."""
 
 class AspectRatioOptions:
     """Aspect ratio options."""
@@ -1717,13 +2288,17 @@ class AspectRatioOptions:
     def __init__(self, value: AspectRatio, type: AspectRatioType) -> None: ...
 
     @property
-    def value(self) -> AspectRatio: ...
+    def value(self) -> AspectRatio:
+        """The aspect ratio. One that is not valid, as the default 0:0 is,
+        leaves the image's own.
+        """
 
     @value.setter
     def value(self, arg: AspectRatio, /) -> None: ...
 
     @property
-    def type(self) -> AspectRatioType: ...
+    def type(self) -> AspectRatioType:
+        """Whether the value is a pixel or a picture aspect ratio."""
 
     @type.setter
     def type(self, arg: AspectRatioType, /) -> None: ...
@@ -1737,43 +2312,54 @@ class DisplayOptions:
     def __init__(self) -> None: ...
 
     @property
-    def channels(self) -> feather_tk._feather_tk.ChannelDisplay: ...
+    def channels(self) -> feather_tk._feather_tk.ChannelDisplay:
+        """The channels shown: the color, or one of red, green, blue and alpha
+        as gray. Applied last, after the color management.
+        """
 
     @channels.setter
     def channels(self, arg: feather_tk._feather_tk.ChannelDisplay, /) -> None: ...
 
     @property
-    def negative(self) -> bool: ...
+    def negative(self) -> bool:
+        """Whether the color is inverted, one minus each of red, green and
+        blue. Applied first, before the other adjustments.
+        """
 
     @negative.setter
     def negative(self, arg: bool, /) -> None: ...
 
     @property
-    def mirror(self) -> feather_tk._feather_tk.ImageMirror: ...
+    def mirror(self) -> feather_tk._feather_tk.ImageMirror:
+        """How the picture is mirrored: across (x), down (y), or both."""
 
     @mirror.setter
     def mirror(self, arg: feather_tk._feather_tk.ImageMirror, /) -> None: ...
 
     @property
-    def color(self) -> Color: ...
+    def color(self) -> Color:
+        """The color adjustments."""
 
     @color.setter
     def color(self, arg: Color, /) -> None: ...
 
     @property
-    def levels(self) -> Levels: ...
+    def levels(self) -> Levels:
+        """The levels adjustment."""
 
     @levels.setter
     def levels(self, arg: Levels, /) -> None: ...
 
     @property
-    def exposure(self) -> Exposure: ...
+    def exposure(self) -> Exposure:
+        """The exposure adjustment."""
 
     @exposure.setter
     def exposure(self, arg: Exposure, /) -> None: ...
 
     @property
-    def softClip(self) -> SoftClip: ...
+    def softClip(self) -> SoftClip:
+        """The soft clip."""
 
     @softClip.setter
     def softClip(self, arg: SoftClip, /) -> None: ...
@@ -1882,48 +2468,58 @@ class ObservableDisplayOptionsList(IObservableDisplayOptionsList):
         """Get the index of the given item."""
 
 class GridCellMode(enum.Enum):
+    """Grid cell modes."""
     CellSize = 0
 
     CellCount = 1
 
-def getGridCellModeEnums() -> list[GridCellMode]: ...
+def getGridCellModeEnums() -> list[GridCellMode]:
+    """Get every value of GridCellMode."""
 
 class Grid:
     """Grid."""
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the grid is drawn. It is left out while its cells are no
+        more than the line width plus ten view pixels across.
+        """
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def cellMode(self) -> GridCellMode: ...
+    def cellMode(self) -> GridCellMode:
+        """Whether the cells are a size (cellSize) or a number (cellCount)."""
 
     @cellMode.setter
     def cellMode(self, arg: GridCellMode, /) -> None: ...
 
     @property
-    def cellSize(self) -> int: ...
+    def cellSize(self) -> int:
+        """The cell size, in image pixels, for GridCellMode::CellSize."""
 
     @cellSize.setter
     def cellSize(self, arg: int, /) -> None: ...
 
     @property
-    def cellCount(self) -> feather_tk._feather_tk.V2I: ...
+    def cellCount(self) -> feather_tk._feather_tk.V2I:
+        """The number of columns and rows, for GridCellMode::CellCount."""
 
     @cellCount.setter
     def cellCount(self, arg: feather_tk._feather_tk.V2I, /) -> None: ...
 
     @property
-    def lineWidth(self) -> int: ...
+    def lineWidth(self) -> int:
+        """The line width, in view pixels."""
 
     @lineWidth.setter
     def lineWidth(self, arg: int, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The line color."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
@@ -1937,25 +2533,31 @@ class CenterMarker:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the center marker is drawn."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def size(self) -> int: ...
+    def size(self) -> int:
+        """How far the cross reaches from the center, in view pixels. The arms
+        start a third of the way out, leaving the center clear.
+        """
 
     @size.setter
     def size(self, arg: int, /) -> None: ...
 
     @property
-    def width(self) -> int: ...
+    def width(self) -> int:
+        """The line width, in view pixels."""
 
     @width.setter
     def width(self, arg: int, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The marker color."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
@@ -1982,19 +2584,22 @@ class MissingIndicator:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the indicator is drawn."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def width(self) -> int: ...
+    def width(self) -> int:
+        """The line width of the cross, in view pixels."""
 
     @width.setter
     def width(self, arg: int, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The cross color."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
@@ -2004,13 +2609,15 @@ class MissingIndicator:
     def __ne__(self, arg: MissingIndicator, /) -> bool: ...
 
 class ClippingWarningMode(enum.Enum):
+    """What the clipping warning compares with its range."""
     AnyChannel = 0
 
     AllChannels = 1
 
     Luminance = 2
 
-def getClippingWarningModeEnums() -> list[ClippingWarningMode]: ...
+def getClippingWarningModeEnums() -> list[ClippingWarningMode]:
+    """Get every value of ClippingWarningMode."""
 
 class ClippingWarning:
     """Clipping warning: a pixel outside the range is covered with a warning
@@ -2025,25 +2632,29 @@ class ClippingWarning:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the clipping warning is drawn."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def mode(self) -> ClippingWarningMode: ...
+    def mode(self) -> ClippingWarningMode:
+        """What is compared with the range."""
 
     @mode.setter
     def mode(self, arg: ClippingWarningMode, /) -> None: ...
 
     @property
-    def low(self) -> float: ...
+    def low(self) -> float:
+        """The bottom of the range; what is below it is marked magenta."""
 
     @low.setter
     def low(self, arg: float, /) -> None: ...
 
     @property
-    def high(self) -> float: ...
+    def high(self) -> float:
+        """The top of the range; what is above it is marked red."""
 
     @high.setter
     def high(self, arg: float, /) -> None: ...
@@ -2061,31 +2672,38 @@ class FrameGuide:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the frame guide is drawn."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def aspect(self) -> AspectRatio: ...
+    def aspect(self) -> AspectRatio:
+        """The aspect ratio of the frame. One that is not valid draws no guide.
+        """
 
     @aspect.setter
     def aspect(self, arg: AspectRatio, /) -> None: ...
 
     @property
-    def maskOpacity(self) -> float: ...
+    def maskOpacity(self) -> float:
+        """The opacity of the black mask outside the frame, from 0 to 1."""
 
     @maskOpacity.setter
     def maskOpacity(self, arg: float, /) -> None: ...
 
     @property
-    def lineWidth(self) -> int: ...
+    def lineWidth(self) -> int:
+        """The width of the frame's outline, in view pixels, inside the frame.
+        """
 
     @lineWidth.setter
     def lineWidth(self, arg: int, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The outline color."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
@@ -2101,31 +2719,38 @@ class SafeAreas:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the safe areas are drawn."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def action(self) -> float: ...
+    def action(self) -> float:
+        """The action safe area, as a fraction of the frame's width and height.
+        """
 
     @action.setter
     def action(self, arg: float, /) -> None: ...
 
     @property
-    def title(self) -> float: ...
+    def title(self) -> float:
+        """The title safe area, as a fraction of the frame's width and height.
+        """
 
     @title.setter
     def title(self, arg: float, /) -> None: ...
 
     @property
-    def lineWidth(self) -> int: ...
+    def lineWidth(self) -> int:
+        """The line width, in view pixels."""
 
     @lineWidth.setter
     def lineWidth(self, arg: int, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The line color."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
@@ -2143,19 +2768,22 @@ class DataWindow:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the data window is drawn."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def lineWidth(self) -> int: ...
+    def lineWidth(self) -> int:
+        """The line width, in view pixels, inside the data window's edge."""
 
     @lineWidth.setter
     def lineWidth(self, arg: int, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The line color."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
@@ -2169,43 +2797,50 @@ class ForegroundOptions:
     def __init__(self) -> None: ...
 
     @property
-    def grid(self) -> Grid: ...
+    def grid(self) -> Grid:
+        """The grid."""
 
     @grid.setter
     def grid(self, arg: Grid, /) -> None: ...
 
     @property
-    def centerMarker(self) -> CenterMarker: ...
+    def centerMarker(self) -> CenterMarker:
+        """The center marker."""
 
     @centerMarker.setter
     def centerMarker(self, arg: CenterMarker, /) -> None: ...
 
     @property
-    def missingIndicator(self) -> MissingIndicator: ...
+    def missingIndicator(self) -> MissingIndicator:
+        """The missing frame indicator."""
 
     @missingIndicator.setter
     def missingIndicator(self, arg: MissingIndicator, /) -> None: ...
 
     @property
-    def clippingWarning(self) -> ClippingWarning: ...
+    def clippingWarning(self) -> ClippingWarning:
+        """The clipping warning."""
 
     @clippingWarning.setter
     def clippingWarning(self, arg: ClippingWarning, /) -> None: ...
 
     @property
-    def frameGuide(self) -> FrameGuide: ...
+    def frameGuide(self) -> FrameGuide:
+        """The frame guide."""
 
     @frameGuide.setter
     def frameGuide(self, arg: FrameGuide, /) -> None: ...
 
     @property
-    def safeAreas(self) -> SafeAreas: ...
+    def safeAreas(self) -> SafeAreas:
+        """The safe areas."""
 
     @safeAreas.setter
     def safeAreas(self, arg: SafeAreas, /) -> None: ...
 
     @property
-    def dataWindow(self) -> DataWindow: ...
+    def dataWindow(self) -> DataWindow:
+        """The data window outline."""
 
     @dataWindow.setter
     def dataWindow(self, arg: DataWindow, /) -> None: ...
@@ -2240,13 +2875,15 @@ class ObservableForegroundOptions(IObservableForegroundOptions):
         """Get the value."""
 
 class TimeUnits(enum.Enum):
+    """Time units."""
     Frames = 0
 
     Seconds = 1
 
     Timecode = 2
 
-def getTimeUnitsEnums() -> list[TimeUnits]: ...
+def getTimeUnitsEnums() -> list[TimeUnits]:
+    """Get every value of TimeUnits."""
 
 class TimeUnitsObserver:
     """Value observer."""
@@ -2316,11 +2953,15 @@ class TimeUnitsModel(ITimeUnitsModel):
         """Observe the time units."""
 
 class ImageSeqAudio(enum.Enum):
+    """Image sequence audio options."""
     Ext = 1
+    """Search for an audio file by extension"""
 
     FileName = 2
+    """Use the given audio file name"""
 
-def getImageSeqAudioEnums() -> list[ImageSeqAudio]: ...
+def getImageSeqAudioEnums() -> list[ImageSeqAudio]:
+    """Get every value of ImageSeqAudio."""
 
 class Options:
     """Timeline options."""
@@ -2448,7 +3089,8 @@ class Timeline:
         """Get the context."""
 
     @property
-    def otioTimeline(self) -> object: ...
+    def otioTimeline(self) -> object:
+        """Get the OTIO timeline."""
 
     @property
     def path(self) -> feather_tk._feather_tk.Path:
@@ -2596,13 +3238,15 @@ class CutScore:
     def __init__(self) -> None: ...
 
     @property
-    def score(self) -> float: ...
+    def score(self) -> float:
+        """How different the frame is from the one before, from 0 to 1."""
 
     @score.setter
     def score(self, arg: float, /) -> None: ...
 
     @property
-    def luma(self) -> float: ...
+    def luma(self) -> float:
+        """Average luma of the frame, from 0 to 1."""
 
     @luma.setter
     def luma(self, arg: float, /) -> None: ...
@@ -2764,24 +3408,29 @@ class PlayerCacheInfo:
     def __ne__(self, arg: PlayerCacheInfo, /) -> bool: ...
 
 class Playback(enum.Enum):
+    """Playback modes."""
     Stop = 0
 
     Forward = 1
 
     Reverse = 2
 
-def getPlaybackEnums() -> list[Playback]: ...
+def getPlaybackEnums() -> list[Playback]:
+    """Get every value of Playback."""
 
 class Loop(enum.Enum):
+    """Playback loop modes."""
     Loop = 0
 
     Once = 1
 
     PingPong = 2
 
-def getLoopEnums() -> list[Loop]: ...
+def getLoopEnums() -> list[Loop]:
+    """Get every value of Loop."""
 
 class TimeAction(enum.Enum):
+    """Time actions."""
     Start = 0
 
     End = 1
@@ -2806,7 +3455,8 @@ class TimeAction(enum.Enum):
 
     JumpForward10s = 11
 
-def getTimeActionEnums() -> list[TimeAction]: ...
+def getTimeActionEnums() -> list[TimeAction]:
+    """Get every value of TimeAction."""
 
 class PlaybackObserver:
     """Value observer."""
@@ -3454,9 +4104,11 @@ class Player:
         """Clear the cache."""
 
 class Transition(enum.Enum):
+    """Transitions."""
     Dissolve = 1
 
-def getTransitionEnums() -> list[Transition]: ...
+def getTransitionEnums() -> list[Transition]:
+    """Get every value of Transition."""
 
 def toTransition(arg: str, /) -> Transition:
     """Convert to a transition."""
@@ -3469,13 +4121,15 @@ class ExtGroup:
     def __init__(self) -> None: ...
 
     @property
-    def label(self) -> str: ...
+    def label(self) -> str:
+        """The name of the group, e.g. "Images"."""
 
     @label.setter
     def label(self, arg: str, /) -> None: ...
 
     @property
-    def exts(self) -> list[str]: ...
+    def exts(self) -> list[str]:
+        """The file extensions, with the leading period."""
 
     @exts.setter
     def exts(self, arg: Sequence[str], /) -> None: ...
@@ -3500,13 +4154,19 @@ class VideoLayer:
     def __init__(self) -> None: ...
 
     @property
-    def image(self) -> feather_tk._feather_tk.Image: ...
+    def image(self) -> feather_tk._feather_tk.Image:
+        """The image, or null when there is none. During a transition, the
+        image of the clip going out.
+        """
 
     @image.setter
     def image(self, arg: feather_tk._feather_tk.Image, /) -> None: ...
 
     @property
-    def imageOptions(self) -> feather_tk._feather_tk.ImageOptions: ...
+    def imageOptions(self) -> feather_tk._feather_tk.ImageOptions:
+        """The options "image" is drawn with when the renderer is not given
+        options of its own.
+        """
 
     @imageOptions.setter
     def imageOptions(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None: ...
@@ -3521,19 +4181,26 @@ class VideoLayer:
     def imageB(self, arg: feather_tk._feather_tk.Image, /) -> None: ...
 
     @property
-    def imageOptionsB(self) -> feather_tk._feather_tk.ImageOptions: ...
+    def imageOptionsB(self) -> feather_tk._feather_tk.ImageOptions:
+        """The options "imageB" is drawn with when the renderer is not given
+        options of its own.
+        """
 
     @imageOptionsB.setter
     def imageOptionsB(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None: ...
 
     @property
-    def transition(self) -> Transition: ...
+    def transition(self) -> Transition:
+        """The transition the layer is in at this time, or None."""
 
     @transition.setter
     def transition(self, arg: Transition, /) -> None: ...
 
     @property
-    def transitionValue(self) -> float: ...
+    def transitionValue(self) -> float:
+        """How far through the transition the frame is, from zero at its start
+        to one at its end.
+        """
 
     @transitionValue.setter
     def transitionValue(self, arg: float, /) -> None: ...
@@ -3550,19 +4217,26 @@ class VideoFrame:
     def __init__(self) -> None: ...
 
     @property
-    def size(self) -> feather_tk._feather_tk.Size2I: ...
+    def size(self) -> feather_tk._feather_tk.Size2I:
+        """The size of the timeline's video, from its I/O information
+        (Timeline::getIOInfo()). The layer images may be other sizes.
+        """
 
     @size.setter
     def size(self, arg: feather_tk._feather_tk.Size2I, /) -> None: ...
 
     @property
-    def time(self) -> opentimelineio.opentime.RationalTime: ...
+    def time(self) -> opentimelineio.opentime.RationalTime:
+        """The time on the timeline the frame is for."""
 
     @time.setter
     def time(self, arg: opentimelineio.opentime.RationalTime, /) -> None: ...
 
     @property
-    def layers(self) -> list[VideoLayer]: ...
+    def layers(self) -> list[VideoLayer]:
+        """The layers, one for each enabled video track with an item at the
+        time, in track order.
+        """
 
     @layers.setter
     def layers(self, arg: Sequence[VideoLayer], /) -> None: ...

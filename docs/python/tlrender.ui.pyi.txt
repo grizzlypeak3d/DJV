@@ -22,52 +22,93 @@ def init(context: feather_tk._feather_tk.Context) -> None:
     """
 
 class InOutDisplay(enum.Enum):
+    """In/out points display options."""
     InsideRange = 0
+    """Mark the range between the in and out points."""
 
     OutsideRange = 1
+    """Mark the parts of the timeline outside the in and out points."""
 
-def getInOutDisplayEnums() -> list[InOutDisplay]: ...
-
-@overload
-def getLabel(arg: InOutDisplay, /) -> str: ...
-
-@overload
-def getLabel(arg: CacheDisplay, /) -> str: ...
+def getInOutDisplayEnums() -> list[InOutDisplay]:
+    """Get every value of InOutDisplay."""
 
 @overload
-def getLabel(arg: WaveformPrim, /) -> str: ...
+def getLabel(arg: InOutDisplay, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def to_string(arg: InOutDisplay, /) -> str: ...
+def getLabel(arg: CacheDisplay, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def to_string(arg: CacheDisplay, /) -> str: ...
+def getLabel(arg: WaveformPrim, /) -> str:
+    """Get an audio information label.
+
+    Get a label.
+
+    Get a grid label.
+    """
 
 @overload
-def to_string(arg: WaveformPrim, /) -> str: ...
+def to_string(arg: InOutDisplay, /) -> str:
+    """Convert to a string."""
 
 @overload
-def from_string(arg0: str, arg1: InOutDisplay, /) -> bool: ...
+def to_string(arg: CacheDisplay, /) -> str:
+    """Convert to a string."""
 
 @overload
-def from_string(arg0: str, arg1: CacheDisplay, /) -> bool: ...
+def to_string(arg: WaveformPrim, /) -> str:
+    """Convert to a string."""
 
 @overload
-def from_string(arg0: str, arg1: WaveformPrim, /) -> bool: ...
+def from_string(arg0: str, arg1: InOutDisplay, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
+
+@overload
+def from_string(arg0: str, arg1: CacheDisplay, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
+
+@overload
+def from_string(arg0: str, arg1: WaveformPrim, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 class CacheDisplay(enum.Enum):
+    """Cache display options."""
     VideoAndAudio = 0
 
     VideoOnly = 1
 
-def getCacheDisplayEnums() -> list[CacheDisplay]: ...
+def getCacheDisplayEnums() -> list[CacheDisplay]:
+    """Get every value of CacheDisplay."""
 
 class WaveformPrim(enum.Enum):
+    """Waveform primitive type."""
     Mesh = 0
 
     Image = 1
 
-def getWaveformPrimEnums() -> list[WaveformPrim]: ...
+def getWaveformPrimEnums() -> list[WaveformPrim]:
+    """Get every value of WaveformPrim."""
 
 class ItemData:
     """
@@ -77,25 +118,33 @@ class ItemData:
     def __init__(self) -> None: ...
 
     @property
-    def speed(self) -> float: ...
+    def speed(self) -> float:
+        """The timeline's frame rate, which durations are shown at."""
 
     @speed.setter
     def speed(self, arg: float, /) -> None: ...
 
     @property
-    def dir(self) -> str: ...
+    def dir(self) -> str:
+        """The directory relative media paths are read against: the timeline's
+        protocol and directory.
+        """
 
     @dir.setter
     def dir(self, arg: str, /) -> None: ...
 
     @property
-    def options(self) -> tlrender._tlrender.Options: ...
+    def options(self) -> tlrender._tlrender.Options:
+        """The options the timeline was opened with. The items read their
+        thumbnails and waveforms with its path and I/O options.
+        """
 
     @options.setter
     def options(self, arg: tlrender._tlrender.Options, /) -> None: ...
 
     @property
-    def timeUnitsModel(self) -> tlrender._tlrender.ITimeUnitsModel: ...
+    def timeUnitsModel(self) -> tlrender._tlrender.ITimeUnitsModel:
+        """The time units model the time and duration labels are shown in."""
 
     @timeUnitsModel.setter
     def timeUnitsModel(self, arg: tlrender._tlrender.ITimeUnitsModel, /) -> None: ...
@@ -117,7 +166,10 @@ class ItemOptions:
     def __init__(self) -> None: ...
 
     @property
-    def inputEnabled(self) -> bool: ...
+    def inputEnabled(self) -> bool:
+        """Whether the items take the mouse and keyboard, to seek, scroll, and
+        zoom. Off for a timeline that is only looked at.
+        """
 
     @inputEnabled.setter
     def inputEnabled(self, arg: bool, /) -> None: ...
@@ -132,19 +184,22 @@ class Marker:
     def __init__(self) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """Marker name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """Marker color; see getMarkerColor()."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
 
     @property
-    def range(self) -> opentimelineio.opentime.TimeRange: ...
+    def range(self) -> opentimelineio.opentime.TimeRange:
+        """The marked range, in the time of the item the marker is on."""
 
     @range.setter
     def range(self, arg: opentimelineio.opentime.TimeRange, /) -> None: ...
@@ -161,79 +216,103 @@ class DisplayOptions:
     def __init__(self) -> None: ...
 
     @property
-    def inOutDisplay(self) -> InOutDisplay: ...
+    def inOutDisplay(self) -> InOutDisplay:
+        """How the in and out points are drawn on the ruler."""
 
     @inOutDisplay.setter
     def inOutDisplay(self, arg: InOutDisplay, /) -> None: ...
 
     @property
-    def cacheDisplay(self) -> CacheDisplay: ...
+    def cacheDisplay(self) -> CacheDisplay:
+        """Which of the cache is drawn on the ruler."""
 
     @cacheDisplay.setter
     def cacheDisplay(self, arg: CacheDisplay, /) -> None: ...
 
     @property
-    def minimize(self) -> bool: ...
+    def minimize(self) -> bool:
+        """Show only the first video and first audio track, as strips without
+        labels, and scroll horizontally only.
+        """
 
     @minimize.setter
     def minimize(self, arg: bool, /) -> None: ...
 
     @property
-    def clipColors(self) -> bool: ...
+    def clipColors(self) -> bool:
+        """Color items using the color the OTIO item carries, where it has one.
+        Items without a color are unaffected.
+        """
 
     @clipColors.setter
     def clipColors(self, arg: bool, /) -> None: ...
 
     @property
-    def thumbnails(self) -> bool: ...
+    def thumbnails(self) -> bool:
+        """Whether video clips show thumbnails."""
 
     @thumbnails.setter
     def thumbnails(self, arg: bool, /) -> None: ...
 
     @property
-    def thumbnailHeight(self) -> int: ...
+    def thumbnailHeight(self) -> int:
+        """Thumbnail height in pixels, not scaled by the display scale. The
+        width follows from the media's aspect ratio.
+        """
 
     @thumbnailHeight.setter
     def thumbnailHeight(self, arg: int, /) -> None: ...
 
     @property
-    def waveforms(self) -> bool: ...
+    def waveforms(self) -> bool:
+        """Whether audio clips show waveforms."""
 
     @waveforms.setter
     def waveforms(self, arg: bool, /) -> None: ...
 
     @property
-    def waveformWidth(self) -> int: ...
+    def waveformWidth(self) -> int:
+        """Width in pixels of each waveform tile."""
 
     @waveformWidth.setter
     def waveformWidth(self, arg: int, /) -> None: ...
 
     @property
-    def waveformHeight(self) -> int: ...
+    def waveformHeight(self) -> int:
+        """Waveform height in pixels, not scaled by the display scale."""
 
     @waveformHeight.setter
     def waveformHeight(self, arg: int, /) -> None: ...
 
     @property
-    def waveformPrim(self) -> WaveformPrim: ...
+    def waveformPrim(self) -> WaveformPrim:
+        """Waveform primitive type. Waveforms are drawn as meshes whatever it
+        is set to; a change only requests them again.
+        """
 
     @waveformPrim.setter
     def waveformPrim(self, arg: WaveformPrim, /) -> None: ...
 
     @property
-    def clipRectScale(self) -> float: ...
+    def clipRectScale(self) -> float:
+        """The size of the band thumbnails and waveforms are requested for, as
+        a multiple of the visible area about its center, so that scrolling
+        finds them started. Items that leave the band let theirs go.
+        """
 
     @clipRectScale.setter
     def clipRectScale(self, arg: float, /) -> None: ...
 
     @property
-    def ocio(self) -> tlrender._tlrender.OCIOOptions: ...
+    def ocio(self) -> tlrender._tlrender.OCIOOptions:
+        """The OpenColorIO options thumbnails are colored with."""
 
     @ocio.setter
     def ocio(self, arg: tlrender._tlrender.OCIOOptions, /) -> None: ...
 
     @property
-    def lut(self) -> tlrender._tlrender.LUTOptions: ...
+    def lut(self) -> tlrender._tlrender.LUTOptions:
+        """The LUT options thumbnails are colored with."""
 
     @lut.setter
     def lut(self, arg: tlrender._tlrender.LUTOptions, /) -> None: ...
@@ -342,13 +421,19 @@ class TimeMap:
     def __init__(self) -> None: ...
 
     @property
-    def toMedia(self) -> Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime]: ...
+    def toMedia(self) -> Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime]:
+        """Convert a player time to the media time shown. Not used when the
+        time units model counts from zero.
+        """
 
     @toMedia.setter
     def toMedia(self, arg: Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime], /) -> None: ...
 
     @property
-    def fromMedia(self) -> Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime]: ...
+    def fromMedia(self) -> Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime]:
+        """Convert a media time, as typed, back to the player time. Not used
+        when the time units model counts from zero.
+        """
 
     @fromMedia.setter
     def fromMedia(self, arg: Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime], /) -> None: ...
@@ -708,76 +793,102 @@ class Viewport(feather_tk._feather_tk.IWidget):
     def __init__(self, context: feather_tk._feather_tk.Context, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
     @property
-    def compareOptions(self) -> tlrender._tlrender.CompareOptions: ...
+    def compareOptions(self) -> tlrender._tlrender.CompareOptions:
+        """Get the comparison options."""
 
     @compareOptions.setter
     def compareOptions(self, arg: tlrender._tlrender.CompareOptions, /) -> None: ...
 
     @property
-    def observeCompareOptions(self) -> tlrender._tlrender.IObservableCompareOptions: ...
+    def observeCompareOptions(self) -> tlrender._tlrender.IObservableCompareOptions:
+        """Observe the comparison options."""
 
     @property
-    def ocioOptions(self) -> tlrender._tlrender.OCIOOptions: ...
+    def ocioOptions(self) -> tlrender._tlrender.OCIOOptions:
+        """Get the OpenColorIO options."""
 
     @ocioOptions.setter
     def ocioOptions(self, arg: tlrender._tlrender.OCIOOptions, /) -> None: ...
 
     @property
-    def observeOCIOOptions(self) -> tlrender._tlrender.IObservableOCIOOptions: ...
+    def observeOCIOOptions(self) -> tlrender._tlrender.IObservableOCIOOptions:
+        """Observe the OpenColorIO options."""
 
     @property
-    def LUTOptions(self) -> tlrender._tlrender.LUTOptions: ...
+    def LUTOptions(self) -> tlrender._tlrender.LUTOptions:
+        """Get the LUT options."""
 
     @LUTOptions.setter
     def LUTOptions(self, arg: tlrender._tlrender.LUTOptions, /) -> None: ...
 
     @property
-    def observeLUTOptions(self) -> tlrender._tlrender.IObservableLUTOptions: ...
+    def observeLUTOptions(self) -> tlrender._tlrender.IObservableLUTOptions:
+        """Observe the LUT options."""
 
     @property
-    def imageOptions(self) -> list[feather_tk._feather_tk.ImageOptions]: ...
+    def imageOptions(self) -> list[feather_tk._feather_tk.ImageOptions]:
+        """Get the image options, one for each of the player's current video
+        frames: the first for the player's own timeline, the rest for the
+        timelines compared with it. A frame without one is drawn with its
+        layers' own options.
+        """
 
     @imageOptions.setter
     def imageOptions(self, arg: Sequence[feather_tk._feather_tk.ImageOptions], /) -> None: ...
 
     @property
-    def observeImageOptions(self) -> IObservableImageOptionsList: ...
+    def observeImageOptions(self) -> IObservableImageOptionsList:
+        """Observe the image options."""
 
     @property
-    def displayOptions(self) -> list[tlrender._tlrender.DisplayOptions]: ...
+    def displayOptions(self) -> list[tlrender._tlrender.DisplayOptions]:
+        """Get the display options, one for each of the player's current video
+        frames as for the image options. A frame without one is drawn with the
+        defaults. The first one's aspect ratio lays out the comparison.
+        """
 
     @displayOptions.setter
     def displayOptions(self, arg: Sequence[tlrender._tlrender.DisplayOptions], /) -> None: ...
 
     @property
-    def observeDisplayOptions(self) -> tlrender._tlrender.IObservableDisplayOptionsList: ...
+    def observeDisplayOptions(self) -> tlrender._tlrender.IObservableDisplayOptionsList:
+        """Observe the display options."""
 
     @property
-    def backgroundOptions(self) -> tlrender._tlrender.BackgroundOptions: ...
+    def backgroundOptions(self) -> tlrender._tlrender.BackgroundOptions:
+        """Get the background options."""
 
     @backgroundOptions.setter
     def backgroundOptions(self, arg: tlrender._tlrender.BackgroundOptions, /) -> None: ...
 
     @property
-    def observeBackgroundOptions(self) -> tlrender._tlrender.IObservableBackgroundOptions: ...
+    def observeBackgroundOptions(self) -> tlrender._tlrender.IObservableBackgroundOptions:
+        """Observe the background options."""
 
     @property
-    def foregroundOptions(self) -> tlrender._tlrender.ForegroundOptions: ...
+    def foregroundOptions(self) -> tlrender._tlrender.ForegroundOptions:
+        """Get the foreground options."""
 
     @foregroundOptions.setter
     def foregroundOptions(self, arg: tlrender._tlrender.ForegroundOptions, /) -> None: ...
 
     @property
-    def observeForegroundOptions(self) -> tlrender._tlrender.IObservableForegroundOptions: ...
+    def observeForegroundOptions(self) -> tlrender._tlrender.IObservableForegroundOptions:
+        """Observe the foreground options."""
 
     @property
-    def colorBuffer(self) -> feather_tk._feather_tk.ImageType: ...
+    def colorBuffer(self) -> feather_tk._feather_tk.ImageType:
+        """Get the type of the buffer the viewport draws into, one of
+        getViewportColorBuffers(). The default is
+        getViewportColorBufferDefault().
+        """
 
     @colorBuffer.setter
     def colorBuffer(self, arg: feather_tk._feather_tk.ImageType, /) -> None: ...
 
     @property
-    def observeColorBuffer(self) -> feather_tk._feather_tk.IObservableImageType: ...
+    def observeColorBuffer(self) -> feather_tk._feather_tk.IObservableImageType:
+        """Observe the type of the buffer the viewport draws into."""
 
     @property
     def player(self) -> tlrender._tlrender.Player:

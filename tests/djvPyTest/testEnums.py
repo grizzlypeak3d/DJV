@@ -35,5 +35,30 @@ class EnumsTest(unittest.TestCase):
         walk(djv, "djv")
         self.assertGreater(len(seen), 0)
 
+    def test_complete(self):
+        """
+        Every value of every bound enum, up to the C++ Count: each
+        get<Enum>Enums() lists them all, and fails on one the binding
+        does not have. The gaps test above cannot see a value missing
+        at the end (this is how ImageType was found missing RGB_F16_P).
+        """
+        count = 0
+        seen = set()
+        def walk(mod, prefix):
+            for name in dir(mod):
+                obj = getattr(mod, name)
+                if name.startswith("get") and name.endswith("Enums") and callable(obj):
+                    nonlocal count
+                    count += 1
+                    try:
+                        obj()
+                    except ValueError as e:
+                        self.fail(f"{prefix}.{name}(): {e}")
+                elif isinstance(obj, type(djv)) and obj.__name__.startswith("djv") and id(obj) not in seen:
+                    seen.add(id(obj))
+                    walk(obj, f"{prefix}.{name}")
+        walk(djv, "djv")
+        self.assertGreater(count, 0)
+
 if __name__ == "__main__":
     unittest.main()

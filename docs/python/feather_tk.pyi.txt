@@ -708,6 +708,7 @@ class ObservableStringIntMap(IObservableStringIntMap):
         """Get the map."""
 
 class Box2I:
+    """Two-dimensional box."""
     @overload
     def __init__(self) -> None: ...
 
@@ -757,6 +758,7 @@ class Box2I:
     def __repr__(self) -> str: ...
 
 class Box2F:
+    """Two-dimensional box."""
     @overload
     def __init__(self) -> None: ...
 
@@ -806,6 +808,7 @@ class Box2F:
     def __repr__(self) -> str: ...
 
 class Box3F:
+    """Three-dimensional box."""
     @overload
     def __init__(self) -> None: ...
 
@@ -861,178 +864,389 @@ class Box3F:
     def __repr__(self) -> str: ...
 
 @overload
-def center(arg: Box2I, /) -> V2I: ...
+def center(arg: Box2I, /) -> V2I:
+    """Get the center of a box."""
 
 @overload
-def center(arg: Box2F, /) -> V2F: ...
+def center(arg: Box2F, /) -> V2F:
+    """Get the center of a box."""
 
 @overload
-def center(arg: Box3F, /) -> V3F: ...
+def center(arg: Box3F, /) -> V3F:
+    """Get the center of a box."""
 
 @overload
-def area(arg: Box2I, /) -> float: ...
+def area(arg: Box2I, /) -> float:
+    """Get the area of a box.
+
+    Get the area of the given size.
+    """
 
 @overload
-def area(arg: Box2F, /) -> float: ...
+def area(arg: Box2F, /) -> float:
+    """Get the area of a box.
+
+    Get the area of the given size.
+    """
 
 @overload
-def area(arg: Size2I, /) -> float: ...
+def area(arg: Size2I, /) -> float:
+    """Get the area of a box.
+
+    Get the area of the given size.
+    """
 
 @overload
-def area(arg: Size2F, /) -> float: ...
+def area(arg: Size2F, /) -> float:
+    """Get the area of a box.
+
+    Get the area of the given size.
+    """
 
 @overload
-def volume(arg: Box3F, /) -> float: ...
+def volume(arg: Box3F, /) -> float:
+    """Get the volume of a box.
+
+    Get the volume of the given size.
+    """
 
 @overload
-def volume(arg: Size3F, /) -> float: ...
+def volume(arg: Size3F, /) -> float:
+    """Get the volume of a box.
+
+    Get the volume of the given size.
+    """
 
 @overload
-def move(arg0: Box2I, arg1: V2I, /) -> Box2I: ...
+def move(arg0: Box2I, arg1: V2I, /) -> Box2I:
+    """Move a box."""
 
 @overload
-def move(arg0: Box2F, arg1: V2F, /) -> Box2F: ...
+def move(arg0: Box2F, arg1: V2F, /) -> Box2F:
+    """Move a box."""
 
 @overload
-def move(arg0: Box3F, arg1: V3F, /) -> Box3F: ...
+def move(arg0: Box3F, arg1: V3F, /) -> Box3F:
+    """Move a box."""
 
 @overload
-def contains(arg0: Box2I, arg1: Box2I, /) -> bool: ...
+def contains(arg0: Box2I, arg1: Box2I, /) -> bool:
+    """Do the settings contain the given value?"""
 
 @overload
-def contains(arg0: Box2F, arg1: Box2F, /) -> bool: ...
+def contains(arg0: Box2F, arg1: Box2F, /) -> bool:
+    """Do the settings contain the given value?"""
 
 @overload
-def contains(arg0: Box2I, arg1: V2I, /) -> bool: ...
+def contains(arg0: Box2I, arg1: V2I, /) -> bool:
+    """Do the settings contain the given value?"""
 
 @overload
-def contains(arg0: Box2F, arg1: V2F, /) -> bool: ...
+def contains(arg0: Box2F, arg1: V2F, /) -> bool:
+    """Do the settings contain the given value?"""
 
 @overload
-def contains(arg0: RangeI, arg1: int, /) -> bool: ...
+def contains(arg0: RangeI, arg1: int, /) -> bool:
+    """Do the settings contain the given value?"""
 
 @overload
-def contains(arg0: RangeI64, arg1: int, /) -> bool: ...
+def contains(arg0: RangeI64, arg1: int, /) -> bool:
+    """Do the settings contain the given value?"""
 
 @overload
-def contains(arg0: RangeF, arg1: float, /) -> bool: ...
+def contains(arg0: RangeF, arg1: float, /) -> bool:
+    """Do the settings contain the given value?"""
 
 @overload
-def contains(arg0: RangeD, arg1: float, /) -> bool: ...
+def contains(arg0: RangeD, arg1: float, /) -> bool:
+    """Do the settings contain the given value?"""
 
 @overload
-def intersects(arg0: Box2I, arg1: Box2I, /) -> bool: ...
+def intersects(arg0: Box2I, arg1: Box2I, /) -> bool:
+    """Does a box intersect another box?
+
+    Does the range interset the given range?
+    """
 
 @overload
-def intersects(arg0: Box2F, arg1: Box2F, /) -> bool: ...
+def intersects(arg0: Box2F, arg1: Box2F, /) -> bool:
+    """Does a box intersect another box?
+
+    Does the range interset the given range?
+    """
 
 @overload
-def intersects(arg0: RangeI, arg1: RangeI, /) -> bool: ...
+def intersects(arg0: RangeI, arg1: RangeI, /) -> bool:
+    """Does a box intersect another box?
+
+    Does the range interset the given range?
+    """
 
 @overload
-def intersects(arg0: RangeI64, arg1: RangeI64, /) -> bool: ...
+def intersects(arg0: RangeI64, arg1: RangeI64, /) -> bool:
+    """Does a box intersect another box?
+
+    Does the range interset the given range?
+    """
 
 @overload
-def intersects(arg0: RangeF, arg1: RangeF, /) -> bool: ...
+def intersects(arg0: RangeF, arg1: RangeF, /) -> bool:
+    """Does a box intersect another box?
+
+    Does the range interset the given range?
+    """
 
 @overload
-def intersects(arg0: RangeD, arg1: RangeD, /) -> bool: ...
+def intersects(arg0: RangeD, arg1: RangeD, /) -> bool:
+    """Does a box intersect another box?
+
+    Does the range interset the given range?
+    """
 
 @overload
-def intersect(arg0: Box2I, arg1: Box2I, /) -> Box2I: ...
+def intersect(arg0: Box2I, arg1: Box2I, /) -> Box2I:
+    """Get the intersection of the boxes."""
 
 @overload
-def intersect(arg0: Box2F, arg1: Box2F, /) -> Box2F: ...
+def intersect(arg0: Box2F, arg1: Box2F, /) -> Box2F:
+    """Get the intersection of the boxes."""
 
 @overload
-def expand(arg0: Box2I, arg1: Box2I, /) -> Box2I: ...
+def expand(arg0: Box2I, arg1: Box2I, /) -> Box2I:
+    """Expand a box with another box.
+
+    Expand a box with a vector.
+
+    Expand the range to include the given number.
+
+    Expand the range to include the given range.
+    """
 
 @overload
-def expand(arg0: Box2F, arg1: Box2F, /) -> Box2F: ...
+def expand(arg0: Box2F, arg1: Box2F, /) -> Box2F:
+    """Expand a box with another box.
+
+    Expand a box with a vector.
+
+    Expand the range to include the given number.
+
+    Expand the range to include the given range.
+    """
 
 @overload
-def expand(arg0: Box2I, arg1: V2I, /) -> Box2I: ...
+def expand(arg0: Box2I, arg1: V2I, /) -> Box2I:
+    """Expand a box with another box.
+
+    Expand a box with a vector.
+
+    Expand the range to include the given number.
+
+    Expand the range to include the given range.
+    """
 
 @overload
-def expand(arg0: Box2F, arg1: V2F, /) -> Box2F: ...
+def expand(arg0: Box2F, arg1: V2F, /) -> Box2F:
+    """Expand a box with another box.
+
+    Expand a box with a vector.
+
+    Expand the range to include the given number.
+
+    Expand the range to include the given range.
+    """
 
 @overload
-def expand(arg0: RangeI, arg1: int, /) -> RangeI: ...
+def expand(arg0: RangeI, arg1: int, /) -> RangeI:
+    """Expand a box with another box.
+
+    Expand a box with a vector.
+
+    Expand the range to include the given number.
+
+    Expand the range to include the given range.
+    """
 
 @overload
-def expand(arg0: RangeI64, arg1: int, /) -> RangeI64: ...
+def expand(arg0: RangeI64, arg1: int, /) -> RangeI64:
+    """Expand a box with another box.
+
+    Expand a box with a vector.
+
+    Expand the range to include the given number.
+
+    Expand the range to include the given range.
+    """
 
 @overload
-def expand(arg0: RangeF, arg1: float, /) -> RangeF: ...
+def expand(arg0: RangeF, arg1: float, /) -> RangeF:
+    """Expand a box with another box.
+
+    Expand a box with a vector.
+
+    Expand the range to include the given number.
+
+    Expand the range to include the given range.
+    """
 
 @overload
-def expand(arg0: RangeD, arg1: float, /) -> RangeD: ...
+def expand(arg0: RangeD, arg1: float, /) -> RangeD:
+    """Expand a box with another box.
+
+    Expand a box with a vector.
+
+    Expand the range to include the given number.
+
+    Expand the range to include the given range.
+    """
 
 @overload
-def margin(arg0: Box2I, arg1: V2I, /) -> Box2I: ...
+def margin(arg0: Box2I, arg1: V2I, /) -> Box2I:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Box2F, arg1: V2F, /) -> Box2F: ...
+def margin(arg0: Box2F, arg1: V2F, /) -> Box2F:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Box2I, arg1: int, /) -> Box2I: ...
+def margin(arg0: Box2I, arg1: int, /) -> Box2I:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Box2F, arg1: float, /) -> Box2F: ...
+def margin(arg0: Box2F, arg1: float, /) -> Box2F:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Box2I, arg1: int, arg2: int, arg3: int, arg4: int, /) -> Box2I: ...
+def margin(arg0: Box2I, arg1: int, arg2: int, arg3: int, arg4: int, /) -> Box2I:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Box2F, arg1: float, arg2: float, arg3: float, arg4: float, /) -> Box2F: ...
+def margin(arg0: Box2F, arg1: float, arg2: float, arg3: float, arg4: float, /) -> Box2F:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Size2I, arg1: int, /) -> Size2I: ...
+def margin(arg0: Size2I, arg1: int, /) -> Size2I:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Size2F, arg1: float, /) -> Size2F: ...
+def margin(arg0: Size2F, arg1: float, /) -> Size2F:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Size2I, arg1: int, arg2: int, /) -> Size2I: ...
+def margin(arg0: Size2I, arg1: int, arg2: int, /) -> Size2I:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def margin(arg0: Size2F, arg1: float, arg2: float, /) -> Size2F: ...
+def margin(arg0: Size2F, arg1: float, arg2: float, /) -> Size2F:
+    """Add a margin to a box.
+
+    Add a margin to a size.
+    """
 
 @overload
-def bbox(arg: Sequence[Box2I], /) -> Box2I: ...
+def bbox(arg: Sequence[Box2I], /) -> Box2I:
+    """Get the bounding box.
+
+    Compute the bounding box of a mesh.
+    """
 
 @overload
-def bbox(arg: Sequence[Box2F], /) -> Box2F: ...
+def bbox(arg: Sequence[Box2F], /) -> Box2F:
+    """Get the bounding box.
+
+    Compute the bounding box of a mesh.
+    """
 
 @overload
-def bbox(arg: Sequence[Box3F], /) -> Box3F: ...
+def bbox(arg: Sequence[Box3F], /) -> Box3F:
+    """Get the bounding box.
+
+    Compute the bounding box of a mesh.
+    """
 
 @overload
-def bbox(arg: Sequence[V2I], /) -> Box2I: ...
+def bbox(arg: Sequence[V2I], /) -> Box2I:
+    """Get the bounding box.
+
+    Compute the bounding box of a mesh.
+    """
 
 @overload
-def bbox(arg: Sequence[V2F], /) -> Box2F: ...
+def bbox(arg: Sequence[V2F], /) -> Box2F:
+    """Get the bounding box.
+
+    Compute the bounding box of a mesh.
+    """
 
 @overload
-def bbox(arg: Sequence[V3F], /) -> Box3F: ...
+def bbox(arg: Sequence[V3F], /) -> Box3F:
+    """Get the bounding box.
+
+    Compute the bounding box of a mesh.
+    """
 
 @overload
-def bbox(arg: TriMesh3F, /) -> Box3F: ...
+def bbox(arg: TriMesh3F, /) -> Box3F:
+    """Get the bounding box.
+
+    Compute the bounding box of a mesh.
+    """
 
 @overload
-def points(arg: Box2I, /) -> list[V2I]: ...
+def points(arg: Box2I, /) -> list[V2I]:
+    """Get the points of a box."""
 
 @overload
-def points(arg: Box2F, /) -> list[V2F]: ...
+def points(arg: Box2F, /) -> list[V2F]:
+    """Get the points of a box."""
 
 @overload
-def points(arg: Box3F, /) -> list[V3F]: ...
+def points(arg: Box3F, /) -> list[V3F]:
+    """Get the points of a box."""
 
 @overload
-def convert(arg: Box2I, /) -> Box2F: ...
+def convert(arg: Box2I, /) -> Box2F:
+    """Convert box types.
+
+    Convert command line arguments.
+
+    Convert vector types.
+    """
 
 @overload
-def convert(arg: V2I, /) -> V2F: ...
+def convert(arg: V2I, /) -> V2F:
+    """Convert box types.
+
+    Convert command line arguments.
+
+    Convert vector types.
+    """
 
 @overload
 def to_string(arg: Box2I, /) -> str:
@@ -1195,121 +1409,160 @@ def to_string(arg: ScrollType, /) -> str:
     """Convert to a string."""
 
 @overload
-def from_string(arg0: str, arg1: Box2I, /) -> None: ...
+def from_string(arg0: str, arg1: Box2I, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Box2F, /) -> None: ...
+def from_string(arg0: str, arg1: Box2F, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Box3F, /) -> None: ...
+def from_string(arg0: str, arg1: Box3F, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: FontType, /) -> bool: ...
+def from_string(arg0: str, arg1: FontType, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: ImageType, /) -> bool: ...
+def from_string(arg0: str, arg1: ImageType, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: VideoLevels, /) -> bool: ...
+def from_string(arg0: str, arg1: VideoLevels, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: YUVCoefficients, /) -> bool: ...
+def from_string(arg0: str, arg1: YUVCoefficients, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: LogType, /) -> bool: ...
+def from_string(arg0: str, arg1: LogType, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Endian, /) -> bool: ...
+def from_string(arg0: str, arg1: Endian, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: UserPath, /) -> bool: ...
+def from_string(arg0: str, arg1: UserPath, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: DirListSort, /) -> bool: ...
+def from_string(arg0: str, arg1: DirListSort, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: ChannelDisplay, /) -> bool: ...
+def from_string(arg0: str, arg1: ChannelDisplay, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: InputVideoLevels, /) -> bool: ...
+def from_string(arg0: str, arg1: InputVideoLevels, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: AlphaBlend, /) -> bool: ...
+def from_string(arg0: str, arg1: AlphaBlend, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: ImageFilter, /) -> bool: ...
+def from_string(arg0: str, arg1: ImageFilter, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Size2I, /) -> None: ...
+def from_string(arg0: str, arg1: Size2I, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Size2F, /) -> None: ...
+def from_string(arg0: str, arg1: Size2F, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Size3F, /) -> None: ...
+def from_string(arg0: str, arg1: Size3F, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: V2I, /) -> None: ...
+def from_string(arg0: str, arg1: V2I, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: V2F, /) -> None: ...
+def from_string(arg0: str, arg1: V2F, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: V3F, /) -> None: ...
+def from_string(arg0: str, arg1: V3F, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: V4F, /) -> None: ...
+def from_string(arg0: str, arg1: V4F, /) -> None:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: TextureType, /) -> bool: ...
+def from_string(arg0: str, arg1: TextureType, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: SizeRole, /) -> bool: ...
+def from_string(arg0: str, arg1: SizeRole, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: ColorRole, /) -> bool: ...
+def from_string(arg0: str, arg1: ColorRole, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: MouseButton, /) -> bool: ...
+def from_string(arg0: str, arg1: MouseButton, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Key, /) -> bool: ...
+def from_string(arg0: str, arg1: Key, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Orientation, /) -> bool: ...
+def from_string(arg0: str, arg1: Orientation, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Stretch, /) -> bool: ...
+def from_string(arg0: str, arg1: Stretch, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: HAlign, /) -> bool: ...
+def from_string(arg0: str, arg1: HAlign, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: VAlign, /) -> bool: ...
+def from_string(arg0: str, arg1: VAlign, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: DialogSize, /) -> bool: ...
+def from_string(arg0: str, arg1: DialogSize, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: ActionGroupType, /) -> bool: ...
+def from_string(arg0: str, arg1: ActionGroupType, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: ColorStyle, /) -> bool: ...
+def from_string(arg0: str, arg1: ColorStyle, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: Renderer, /) -> bool: ...
+def from_string(arg0: str, arg1: Renderer, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: ButtonGroupType, /) -> bool: ...
+def from_string(arg0: str, arg1: ButtonGroupType, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: FileBrowserMode, /) -> bool: ...
+def from_string(arg0: str, arg1: FileBrowserMode, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: MDIResize, /) -> bool: ...
+def from_string(arg0: str, arg1: MDIResize, /) -> bool:
+    """Convert from a string."""
 
 @overload
-def from_string(arg0: str, arg1: ScrollType, /) -> bool: ...
+def from_string(arg0: str, arg1: ScrollType, /) -> bool:
+    """Convert from a string."""
 
 class ICmdLineOption:
     """Base class for command line options."""
@@ -1452,6 +1705,7 @@ class CmdLineListArgString(ICmdLineArg):
     def list(self) -> list[str]: ...
 
 class Color1F:
+    """One channel color (luminance)."""
     @overload
     def __init__(self) -> None: ...
 
@@ -1475,6 +1729,7 @@ class Color1F:
     def __repr__(self) -> str: ...
 
 class Color2F:
+    """Two channel color (luminance and alpha)."""
     @overload
     def __init__(self) -> None: ...
 
@@ -1507,6 +1762,7 @@ class Color2F:
     def __repr__(self) -> str: ...
 
 class Color3F:
+    """Three channel color (RGB)."""
     @overload
     def __init__(self) -> None: ...
 
@@ -1542,6 +1798,7 @@ class Color3F:
     def __repr__(self) -> str: ...
 
 class Color4F:
+    """Four channel color (RGBA)."""
     @overload
     def __init__(self) -> None: ...
 
@@ -1727,6 +1984,7 @@ class FileLogSystem(ISystem):
         """Create a new system."""
 
 class FontType(enum.Enum):
+    """Font types."""
     Regular = 0
 
     Bold = 1
@@ -1735,7 +1993,8 @@ class FontType(enum.Enum):
 
     Symbols = 3
 
-def getFontTypeEnums() -> list[FontType]: ...
+def getFontTypeEnums() -> list[FontType]:
+    """Get every value of FontType."""
 
 @overload
 def getLabel(arg: FontType, /) -> str:
@@ -2145,7 +2404,22 @@ class ImageType(enum.Enum):
     YUV_420SP_U16 = 29
     """Semi-planar 4:2:0 16-bit (e.g. hardware-decoded P010)"""
 
-def getImageTypeEnums() -> list[ImageType]: ...
+    RGB_F16_P = 30
+    """Planar three channel half float: red, then green, then blue, each its
+    own plane.
+
+    The same bytes as RGB_F16 in a different order, uploaded as three single
+    channel textures rather than one three channel one. There is no three
+    channel half format on Metal, so a RGB_F16 texture is backed by a four
+    channel one and every upload of it is widened by the driver; three single
+    channel textures are each a format that does exist, so nothing is widened.
+
+    Added at the end deliberately: the shaders carry these values as literals,
+    so inserting one anywhere else renumbers them.
+    """
+
+def getImageTypeEnums() -> list[ImageType]:
+    """Get every value of ImageType."""
 
 class ImageTypeObserver:
     """Value observer."""
@@ -2179,20 +2453,24 @@ def getBitDepth(arg: ImageType, /) -> int:
     """Get the bit-depth for the given image type."""
 
 class VideoLevels(enum.Enum):
+    """Video levels."""
     FullRange = 0
 
     LegalRange = 1
 
-def getVideoLevelsEnums() -> list[VideoLevels]: ...
+def getVideoLevelsEnums() -> list[VideoLevels]:
+    """Get every value of VideoLevels."""
 
 class YUVCoefficients(enum.Enum):
+    """YUV coefficients."""
     REC709 = 0
 
     BT2020 = 1
 
     BT601 = 2
 
-def getYUVCoefficientsEnums() -> list[YUVCoefficients]: ...
+def getYUVCoefficientsEnums() -> list[YUVCoefficients]:
+    """Get every value of YUVCoefficients."""
 
 def getYUVCoefficients(arg: YUVCoefficients, /) -> V4F:
     """Get YUV coefficients."""
@@ -2393,13 +2671,15 @@ class Image:
     def __array__(self, dtype: object | None = None, copy: object | None = None) -> object: ...
 
 class LogType(enum.Enum):
+    """Log types."""
     Message = 0
 
     Warning = 1
 
     Error = 2
 
-def getLogTypeEnums() -> list[LogType]: ...
+def getLogTypeEnums() -> list[LogType]:
+    """Get every value of LogType."""
 
 class LogItem:
     """Log item."""
@@ -2570,6 +2850,7 @@ def fuzzyCompare(arg0: float, arg1: float, arg2: float, /) -> bool:
     """
 
 class M33F:
+    """3x3 matrix."""
     @overload
     def __init__(self) -> None: ...
 
@@ -2597,6 +2878,7 @@ class M33F:
     def __repr__(self) -> str: ...
 
 class M44F:
+    """4x4 matrix."""
     @overload
     def __init__(self) -> None: ...
 
@@ -2627,10 +2909,12 @@ class M44F:
     def __repr__(self) -> str: ...
 
 @overload
-def translate(arg: V2F, /) -> M33F: ...
+def translate(arg: V2F, /) -> M33F:
+    """Create a translation matrix."""
 
 @overload
-def translate(arg: V3F, /) -> M44F: ...
+def translate(arg: V3F, /) -> M44F:
+    """Create a translation matrix."""
 
 def rotateX(arg: float, /) -> M44F:
     """Create a X rotation matrix."""
@@ -2641,13 +2925,38 @@ def rotateY(arg: float, /) -> M44F:
 def rotateZ(arg: float, /) -> M44F:
     """Create a Z rotation matrix."""
 
-def rotate(arg0: float, arg1: V3F, /) -> M44F: ...
+def rotate(arg0: float, arg1: V3F, /) -> M44F:
+    """Create a rotation matrix about an arbitrary axis.
 
-def rotateXYZ(arg: V3F, /) -> M44F: ...
+    The axis is normalized; a zero-length one gives the identity.
+    """
 
-def getRotateXYZ(arg0: M44F, arg1: V3F, /) -> V3F: ...
+def rotateXYZ(arg: V3F, /) -> M44F:
+    """Create a rotation matrix from angles about the X, Y and Z axes, applied
+    in that order.
+    """
 
-def scale(arg: V3F, /) -> M44F: ...
+def getRotateXYZ(arg0: M44F, arg1: V3F, /) -> V3F:
+    """Get angles rotateXYZ() builds the given rotation from.
+
+    Two sets of angles describe any rotation, and each of those has more
+    versions of itself whole turns apart, so which one to return cannot be
+    derived -- it has to be asked for. The one returned is whichever is nearest
+    nearAngles.
+
+    A manipulator dragging a rotation passes the angles its last move wrote.
+    That is what keeps a gesture round and round winding past a full turn
+    rather than starting again at zero, and what stops a drag crossing the pose
+    where the Y angle folds back from taking the long way round to describe it.
+    Somewhere with no previous answer to be near -- reading a matrix that
+    arrived from elsewhere -- can pass zero.
+
+    Straight up or straight down the Y axis, the X and Z rotations are about
+    the same axis and only their sum is decided; it is given to Z.
+    """
+
+def scale(arg: V3F, /) -> M44F:
+    """Create a scale matrix."""
 
 def ortho(arg0: float, arg1: float, arg2: float, arg3: float, arg4: float, arg5: float, /) -> M44F:
     """Create an orthographic matrix."""
@@ -2655,7 +2964,8 @@ def ortho(arg0: float, arg1: float, arg2: float, arg3: float, arg4: float, arg5:
 def perspective(arg0: float, arg1: float, arg2: float, arg3: float, /) -> M44F:
     """Create a perspective matrix."""
 
-def invert(arg0: M44F, arg1: M44F, /) -> bool: ...
+def invert(arg0: M44F, arg1: M44F, /) -> bool:
+    """Invert a matrix."""
 
 kilobyte: int = 1024
 
@@ -2666,17 +2976,20 @@ gigabyte: int = 1073741824
 terabyte: int = 1099511627776
 
 class Endian(enum.Enum):
+    """Endian type."""
     MSB = 0
+    """Most siginificant byte first"""
 
     LSB = 1
+    """Least significant byte first"""
 
-def getEndianEnums() -> list[Endian]: ...
+def getEndianEnums() -> list[Endian]:
+    """Get every value of Endian."""
 
 def getEndian() -> Endian:
     """Get the current endian."""
 
-def oppositeEndian(arg: Endian, /) -> Endian:
-    """Get the opposite of the given endian."""
+def oppositeEndian(arg: Endian, /) -> Endian: ...
 
 class Vertex2:
     """Two-dimensional vertex."""
@@ -2780,6 +3093,7 @@ class Triangle3:
     def v(self, arg: Sequence[Vertex3], /) -> None: ...
 
 class TriMesh2F:
+    """Two-dimensional triangle mesh."""
     def __init__(self) -> None: ...
 
     @property
@@ -2809,6 +3123,7 @@ class TriMesh2F:
     def getByteCount(self) -> int: ...
 
 class TriMesh3F:
+    """Three-dimensional triangle mesh."""
     def __init__(self) -> None: ...
 
     @property
@@ -2843,21 +3158,27 @@ class TriMesh3F:
 
     def getByteCount(self) -> int: ...
 
-def edge(arg0: V2F, arg1: V2F, arg2: V2F, /) -> float: ...
+def edge(arg0: V2F, arg1: V2F, arg2: V2F, /) -> float:
+    """Edge function."""
 
 @overload
-def mesh(arg: Box2I, /) -> TriMesh2F: ...
+def mesh(arg: Box2I, /) -> TriMesh2F:
+    """Create a mesh from a box."""
 
 @overload
-def mesh(arg0: Box2I, arg1: bool, /) -> TriMesh2F: ...
+def mesh(arg0: Box2I, arg1: bool, /) -> TriMesh2F:
+    """Create a mesh from a box."""
 
 @overload
-def mesh(arg: Box2F, /) -> TriMesh2F: ...
+def mesh(arg: Box2F, /) -> TriMesh2F:
+    """Create a mesh from a box."""
 
 @overload
-def mesh(arg0: Box2F, arg1: bool, /) -> TriMesh2F: ...
+def mesh(arg0: Box2F, arg1: bool, /) -> TriMesh2F:
+    """Create a mesh from a box."""
 
-def checkers(arg0: Box2I, arg1: Color4F, arg2: Color4F, arg3: Size2I, /) -> TriMesh2F: ...
+def checkers(arg0: Box2I, arg1: Color4F, arg2: Color4F, arg3: Size2I, /) -> TriMesh2F:
+    """Create a mesh for drawing checkers."""
 
 def sphere(arg0: float, arg1: int, arg2: int, /) -> TriMesh3F:
     """Create a sphere triangle mesh."""
@@ -2919,13 +3240,16 @@ def isDotFile(arg: str, /) -> bool:
     """Does the file name start with a dot?"""
 
 def split(arg: str, /) -> list[str]:
-    """The directory to open at. Empty stays wherever the browser was last
-    left.
+    """Split a path.
+
+    Split a string.
     """
 
-def getDrives() -> list[str]: ...
+def getDrives() -> list[str]:
+    """Get the list of file system drives."""
 
 class UserPath(enum.Enum):
+    """User paths."""
     Home = 0
 
     Desktop = 1
@@ -2935,8 +3259,15 @@ class UserPath(enum.Enum):
     Downloads = 3
 
     Config = 4
+    """Where an application keeps its own files -- settings, logs, recovery
+    state: "Application Support" on macOS, the roaming AppData directory on
+    Windows, XDG_CONFIG_HOME or ~/.config elsewhere. Not Documents, which cloud
+    drives sync and macOS gates behind a permission prompt; a log rewritten on
+    every launch trips over both.
+    """
 
-def getUserPathEnums() -> list[UserPath]: ...
+def getUserPathEnums() -> list[UserPath]:
+    """Get every value of UserPath."""
 
 def getUserPath(arg: UserPath, /) -> str:
     """Get a user path."""
@@ -3202,6 +3533,7 @@ class Path:
     def __ne__(self, arg: Path, /) -> bool: ...
 
 class DirListSort(enum.Enum):
+    """Directory list sorting."""
     Name = 0
 
     Extension = 1
@@ -3210,7 +3542,8 @@ class DirListSort(enum.Enum):
 
     Time = 3
 
-def getDirListSortEnums() -> list[DirListSort]: ...
+def getDirListSortEnums() -> list[DirListSort]:
+    """Get every value of DirListSort."""
 
 class DirListOptions:
     """Directory list options."""
@@ -3328,8 +3661,13 @@ class DirEntry:
     def __ne__(self, arg: DirEntry, /) -> bool: ...
 
 def dirList(path: str, options: DirListOptions = ...) -> list[DirEntry]:
-    """The directory to open at. Empty stays wherever the browser was last
-    left.
+    """List directory contents.
+
+    List directory contents.
+
+    The name is UTF-8, which is what the paths ftk hands out hold. Without this
+    overload the conversion is left to the implementation, and on Windows that
+    reads a narrow string as the active code page.
     """
 
 def expandSeq(path: Path, pathOptions: PathOptions = ...) -> Path:
@@ -3397,6 +3735,7 @@ class Random:
         """
 
 class RangeI:
+    """Numeric range."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3421,6 +3760,7 @@ class RangeI:
     def __repr__(self) -> str: ...
 
 class RangeI64:
+    """Numeric range."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3445,6 +3785,7 @@ class RangeI64:
     def __repr__(self) -> str: ...
 
 class RangeF:
+    """Numeric range."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3469,6 +3810,7 @@ class RangeF:
     def __repr__(self) -> str: ...
 
 class RangeD:
+    """Numeric range."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3563,6 +3905,7 @@ class LineOptions:
     def __ne__(self, arg: LineOptions, /) -> bool: ...
 
 class ChannelDisplay(enum.Enum):
+    """Channel display."""
     Color = 0
 
     Red = 1
@@ -3573,32 +3916,48 @@ class ChannelDisplay(enum.Enum):
 
     Alpha = 4
 
-def getChannelDisplayEnums() -> list[ChannelDisplay]: ...
+def getChannelDisplayEnums() -> list[ChannelDisplay]:
+    """Get every value of ChannelDisplay."""
 
 class InputVideoLevels(enum.Enum):
+    """Input video levels."""
     FromFile = 0
 
     FullRange = 1
 
     LegalRange = 2
 
-def getInputVideoLevelsEnums() -> list[InputVideoLevels]: ...
+def getInputVideoLevelsEnums() -> list[InputVideoLevels]:
+    """Get every value of InputVideoLevels."""
 
 class AlphaBlend(enum.Enum):
+    """Alpha channel blending.
+
+    References:
+    - https://microsoft.github.io/Win2D/html/PremultipliedAlpha.htm
+    """
     Straight = 1
 
     Premultiplied = 2
 
-def getAlphaBlendEnums() -> list[AlphaBlend]: ...
+def getAlphaBlendEnums() -> list[AlphaBlend]:
+    """Get every value of AlphaBlend."""
 
 class ImageFilter(enum.Enum):
+    """Image filtering."""
     Nearest = 0
 
     Linear = 1
 
     HighQuality = 2
+    """A separable two pass resample with a wide kernel, rather than the four
+    texels Linear reads. What it is for is minification: scaling an image down
+    far enough that Linear misses most of it, which is what a thumbnail does
+    and what the view does when it is zoomed out.
+    """
 
-def getImageFilterEnums() -> list[ImageFilter]: ...
+def getImageFilterEnums() -> list[ImageFilter]:
+    """Get every value of ImageFilter."""
 
 class ImageFilters:
     """Image filters."""
@@ -3659,6 +4018,7 @@ class ImageOptions:
     def __ne__(self, arg: ImageOptions, /) -> bool: ...
 
 class Size2I:
+    """Two-dimensional size."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3699,6 +4059,7 @@ class Size2I:
     def __repr__(self) -> str: ...
 
 class Size2F:
+    """Two-dimensional size."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3739,6 +4100,7 @@ class Size2F:
     def __repr__(self) -> str: ...
 
 class Size3F:
+    """Three-dimensional size."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3785,10 +4147,12 @@ class Size3F:
     def __repr__(self) -> str: ...
 
 @overload
-def aspectRatio(arg: Size2I, /) -> float: ...
+def aspectRatio(arg: Size2I, /) -> float:
+    """Get the aspect ratio of the given size."""
 
 @overload
-def aspectRatio(arg: Size2F, /) -> float: ...
+def aspectRatio(arg: Size2F, /) -> float:
+    """Get the aspect ratio of the given size."""
 
 class ElideMode(enum.Enum):
     """Which end of an elided string to keep."""
@@ -3854,6 +4218,7 @@ class Timer:
         """Get the timeout."""
 
 class V2I:
+    """Two-dimensional vector."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3899,6 +4264,7 @@ class V2I:
     def __repr__(self) -> str: ...
 
 class V2F:
+    """Two-dimensional vector."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3944,6 +4310,7 @@ class V2F:
     def __repr__(self) -> str: ...
 
 class V3F:
+    """Three-dimensional vector."""
     @overload
     def __init__(self) -> None: ...
 
@@ -3995,6 +4362,7 @@ class V3F:
     def __repr__(self) -> str: ...
 
 class V4F:
+    """Four-dimensional vector."""
     @overload
     def __init__(self) -> None: ...
 
@@ -4052,54 +4420,80 @@ class V4F:
     def __repr__(self) -> str: ...
 
 @overload
-def length(arg: V2I, /) -> int: ...
+def length(arg: V2I, /) -> int:
+    """Get the length of a vector."""
 
 @overload
-def length(arg: V2F, /) -> float: ...
+def length(arg: V2F, /) -> float:
+    """Get the length of a vector."""
 
 @overload
-def length(arg: V3F, /) -> float: ...
+def length(arg: V3F, /) -> float:
+    """Get the length of a vector."""
 
 @overload
-def length(arg: V4F, /) -> float: ...
+def length(arg: V4F, /) -> float:
+    """Get the length of a vector."""
 
 @overload
-def normalize(arg: V2F, /) -> V2F: ...
+def normalize(arg: V2F, /) -> V2F:
+    """Normalize the given vector."""
 
 @overload
-def normalize(arg: V3F, /) -> V3F: ...
+def normalize(arg: V3F, /) -> V3F:
+    """Normalize the given vector."""
 
 @overload
-def normalize(arg: V4F, /) -> V4F: ...
+def normalize(arg: V4F, /) -> V4F:
+    """Normalize the given vector."""
 
 @overload
-def dot(arg0: V2F, arg1: V2F, /) -> float: ...
+def dot(arg0: V2F, arg1: V2F, /) -> float:
+    """Get the vector dot product."""
 
 @overload
-def dot(arg0: V3F, arg1: V3F, /) -> float: ...
+def dot(arg0: V3F, arg1: V3F, /) -> float:
+    """Get the vector dot product."""
 
 @overload
-def dot(arg0: V4F, arg1: V4F, /) -> float: ...
+def dot(arg0: V4F, arg1: V4F, /) -> float:
+    """Get the vector dot product."""
 
-def cross(arg0: V3F, arg1: V3F, /) -> V3F: ...
-
-@overload
-def perpCW(arg: V2I, /) -> V2I: ...
-
-@overload
-def perpCW(arg: V2F, /) -> V2F: ...
+def cross(arg0: V3F, arg1: V3F, /) -> V3F:
+    """Get the vector cross product."""
 
 @overload
-def perpCCW(arg: V2I, /) -> V2I: ...
+def perpCW(arg: V2I, /) -> V2I:
+    """Get a vector perpindicular to the given vector in the clockwise
+    direction.
+    """
 
 @overload
-def perpCCW(arg: V2F, /) -> V2F: ...
+def perpCW(arg: V2F, /) -> V2F:
+    """Get a vector perpindicular to the given vector in the clockwise
+    direction.
+    """
 
-def round(arg: V2F, /) -> V2F: ...
+@overload
+def perpCCW(arg: V2I, /) -> V2I:
+    """Get a vector perpindicular to the given vector in the counter-clockwise
+    direction.
+    """
 
-def floor(arg: V2F, /) -> V2F: ...
+@overload
+def perpCCW(arg: V2F, /) -> V2F:
+    """Get a vector perpindicular to the given vector in the counter-clockwise
+    direction.
+    """
 
-def ceil(arg: V2F, /) -> V2F: ...
+def round(arg: V2F, /) -> V2F:
+    """Round vector components."""
+
+def floor(arg: V2F, /) -> V2F:
+    """Round vector components."""
+
+def ceil(arg: V2F, /) -> V2F:
+    """Round vector components."""
 
 VERSION_MAJOR: int = 0
 
@@ -4168,7 +4562,8 @@ class TextureType(enum.Enum):
 
     RGBA_F32 = 21
 
-def getTextureTypeEnums() -> list[TextureType]: ...
+def getTextureTypeEnums() -> list[TextureType]:
+    """Get every value of TextureType."""
 
 class TextureTypeObserver:
     """Value observer."""
@@ -4196,6 +4591,7 @@ class ObservableTextureType(IObservableTextureType):
         """Get the value."""
 
 class SizeRole(enum.Enum):
+    """Size roles."""
     Margin = 1
 
     MarginSmall = 2
@@ -4242,9 +4638,11 @@ class SizeRole(enum.Enum):
 
     CornerRadius = 23
 
-def getSizeRoleEnums() -> list[SizeRole]: ...
+def getSizeRoleEnums() -> list[SizeRole]:
+    """Get every value of SizeRole."""
 
 class ColorRole(enum.Enum):
+    """Color roles."""
     Window = 1
 
     Base = 2
@@ -4289,7 +4687,8 @@ class ColorRole(enum.Enum):
 
     Yellow = 22
 
-def getColorRoleEnums() -> list[ColorRole]: ...
+def getColorRoleEnums() -> list[ColorRole]:
+    """Get every value of ColorRole."""
 
 class ChildAddEvent:
     """Child added event."""
@@ -4470,6 +4869,7 @@ class MouseMoveEvent:
     def dragDropCursorHotspot(self, arg: V2I, /) -> None: ...
 
 class MouseButton(enum.Enum):
+    """Mouse buttons."""
     Left = 1
 
     Middle = 2
@@ -4480,7 +4880,8 @@ class MouseButton(enum.Enum):
 
     Extra2 = 5
 
-def getMouseButtonEnums() -> list[MouseButton]: ...
+def getMouseButtonEnums() -> list[MouseButton]:
+    """Get every value of MouseButton."""
 
 class KeyModifier(enum.Enum):
     """Keyboard modifiers.
@@ -4607,6 +5008,7 @@ class GestureEvent:
     def accept(self, arg: bool, /) -> None: ...
 
 class Key(enum.Enum):
+    """Keys."""
     Unknown = 0
 
     Return = 1
@@ -4837,7 +5239,8 @@ class Key(enum.Enum):
 
     KeypadEquals = 124
 
-def getKeyEnums() -> list[Key]: ...
+def getKeyEnums() -> list[Key]:
+    """Get every value of Key."""
 
 def getShortcutLabel(key: Key, modifiers: int) -> str:
     """Get a keyboard shortcut label."""
@@ -4926,20 +5329,25 @@ class DragDropEvent:
     def accept(self, arg: bool, /) -> None: ...
 
 class Orientation(enum.Enum):
+    """Orientation."""
     Horizontal = 0
 
     Vertical = 1
 
-def getOrientationEnums() -> list[Orientation]: ...
+def getOrientationEnums() -> list[Orientation]:
+    """Get every value of Orientation."""
 
 class Stretch(enum.Enum):
+    """Layout stretch."""
     Fixed = 0
 
     Expanding = 1
 
-def getStretchEnums() -> list[Stretch]: ...
+def getStretchEnums() -> list[Stretch]:
+    """Get every value of Stretch."""
 
 class HAlign(enum.Enum):
+    """Horizontal alignment."""
     Fill = 0
 
     Left = 1
@@ -4948,9 +5356,11 @@ class HAlign(enum.Enum):
 
     Right = 3
 
-def getHAlignEnums() -> list[HAlign]: ...
+def getHAlignEnums() -> list[HAlign]:
+    """Get every value of HAlign."""
 
 class VAlign(enum.Enum):
+    """Vertical alignment."""
     Fill = 0
 
     Top = 1
@@ -4959,7 +5369,8 @@ class VAlign(enum.Enum):
 
     Bottom = 3
 
-def getVAlignEnums() -> list[VAlign]: ...
+def getVAlignEnums() -> list[VAlign]:
+    """Get every value of VAlign."""
 
 class IWidget:
     """Base class for widgets."""
@@ -5263,6 +5674,7 @@ class IContainer(IWidget):
         """Get the child filling this widget."""
 
 class WindowBufferType(enum.Enum):
+    """Window offscreen buffer types."""
     U8 = 0
 
     F16 = 1
@@ -5471,13 +5883,28 @@ class IPopup(IWidget):
         """Close the popup."""
 
 class DialogSize(enum.Enum):
+    """How a dialog is sized in the window it opens in. Never larger than the
+    window, whichever it is.
+    """
     Fit = 0
+    """As big as its content asks for, or across the window in a direction the
+    content's stretch expands in. For messages, questions and settings.
+    """
 
     Text = 1
+    """A column of text: as wide as the text width, or as the content if that
+    is wider, and the height of the window. For agreements, notes and help,
+    which are read rather than glanced at, and whose lines are hard to follow
+    when they run across a wide window.
+    """
 
     Full = 2
+    """The window, less the dialog margin. For lists and reports, which use
+    whatever room there is.
+    """
 
-def getDialogSizeEnums() -> list[DialogSize]: ...
+def getDialogSizeEnums() -> list[DialogSize]:
+    """Get every value of DialogSize."""
 
 class IDialog(IPopup):
     """Base class for dialog widgets."""
@@ -5721,9 +6148,17 @@ class Window(IWindow):
     def normalGeometry(self) -> Box2I: ...
 
 class ActionCheckType(enum.Enum):
+    """How an action carries a checked state."""
     Check = 1
+    """A switch. Picking it turns something on or off."""
 
     Radio = 2
+    """One of several. Picking it selects; picking the one already selected
+    leaves it selected, because there is no such thing as none of them.
+
+    Set by ActionGroup rather than by hand: an action is one of many only in
+    the company of the others.
+    """
 
 class ActionCheckTypeObserver:
     """Value observer."""
@@ -5883,6 +6318,7 @@ class Action:
     def observeTooltip(self) -> IObservableString: ...
 
 class ActionGroupType(enum.Enum):
+    """Action group type."""
     Click = 0
 
     Check = 1
@@ -5891,7 +6327,8 @@ class ActionGroupType(enum.Enum):
 
     Toggle = 3
 
-def getActionGroupTypeEnums() -> list[ActionGroupType]: ...
+def getActionGroupTypeEnums() -> list[ActionGroupType]:
+    """Get every value of ActionGroupType."""
 
 class ActionGroup:
     """A group of related actions.
@@ -5936,18 +6373,25 @@ class ActionGroup:
         """
 
 class ColorStyle(enum.Enum):
+    """Color style."""
     Dark = 0
 
     Light = 1
 
-def getColorStyleEnums() -> list[ColorStyle]: ...
+def getColorStyleEnums() -> list[ColorStyle]:
+    """Get every value of ColorStyle."""
 
 class Renderer(enum.Enum):
+    """What an application's windows are drawn with."""
     OpenGL = 0
 
     GPU = 1
+    """The GPU renderer, Metal or Vulkan, where it is built and a device can be
+    made for it, and OpenGL otherwise.
+    """
 
-def getRendererEnums() -> list[Renderer]: ...
+def getRendererEnums() -> list[Renderer]:
+    """Get every value of Renderer."""
 
 class ColorControls:
     """Color controls."""
@@ -6332,6 +6776,7 @@ class Bellows(IContainer):
         """Set the open callback."""
 
 class ButtonGroupType(enum.Enum):
+    """Button group type."""
     Click = 0
 
     Check = 1
@@ -6340,7 +6785,8 @@ class ButtonGroupType(enum.Enum):
 
     Toggle = 3
 
-def getButtonGroupTypeEnums() -> list[ButtonGroupType]: ...
+def getButtonGroupTypeEnums() -> list[ButtonGroupType]:
+    """Get every value of ButtonGroupType."""
 
 class ButtonGroup:
     """Button group."""
@@ -7239,13 +7685,15 @@ class DrivesModel:
         """Observe the list of drives."""
 
 class FileBrowserMode(enum.Enum):
+    """File browser mode."""
     Open = 0
 
     Save = 1
 
     Dir = 2
 
-def getFileBrowserModeEnums() -> list[FileBrowserMode]: ...
+def getFileBrowserModeEnums() -> list[FileBrowserMode]:
+    """Get every value of FileBrowserMode."""
 
 class FileSystemPathObserver:
     """Value observer."""
@@ -7614,9 +8062,22 @@ class FileBrowserSystem(ISystem):
     @recentDirsModel.setter
     def recentDirsModel(self, arg: RecentFilesModel, /) -> None: ...
 
-def to_json(arg: FileBrowserOptions, /) -> str: ...
+def to_json(arg: FileBrowserOptions, /) -> str:
+    """Serialize a path.
 
-def from_json(arg0: str, arg1: FileBrowserOptions, /) -> None: ...
+    The frames a path covers are its own state rather than part of its name, so
+    a path written as its name alone comes back naming one file. This writes
+    them beside it, as data: a sequence has a run for each hole in it, with a
+    step as well as a range, and a name made to carry all of that would have to
+    be parsed back out again.
+
+    A path whose name already says what it covers -- a single file, or one
+    frame -- is written as that name, so the ordinary case reads and writes as
+    it always did.
+    """
+
+def from_json(arg0: str, arg1: FileBrowserOptions, /) -> None:
+    """Convert from JSON, given as a string, into the given value."""
 
 class FileBrowserPath(IContainer):
     """File browser path widget."""
@@ -9413,6 +9874,7 @@ class MDIMiniMap(IWidget):
     def childColorRole(self, arg: ColorRole, /) -> None: ...
 
 class MDIResize(enum.Enum):
+    """MDI resize directions."""
     North = 1
 
     NorthEast = 2
@@ -9429,7 +9891,8 @@ class MDIResize(enum.Enum):
 
     NorthWest = 8
 
-def getMDIResizeEnums() -> list[MDIResize]: ...
+def getMDIResizeEnums() -> list[MDIResize]:
+    """Get every value of MDIResize."""
 
 class MDIWidget(IWidget):
     """MDI widget."""
@@ -9919,6 +10382,7 @@ def getScreenshotTag(widget: IWidget) -> str:
     """Get a widget's screenshot tag, or an empty string if it has none."""
 
 class ScrollType(enum.Enum):
+    """Scroll type."""
     Both = 0
 
     Horizontal = 1
@@ -9927,7 +10391,8 @@ class ScrollType(enum.Enum):
 
     Menu = 3
 
-def getScrollTypeEnums() -> list[ScrollType]: ...
+def getScrollTypeEnums() -> list[ScrollType]:
+    """Get every value of ScrollType."""
 
 class ScrollArea(IWidget):
     """Scroll area."""

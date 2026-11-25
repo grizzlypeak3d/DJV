@@ -1774,7 +1774,7 @@ class Playlist:
     def compareTime(self, arg: tlrender._tlrender.CompareTime, /) -> None: ...
 
 def playlistSave(fileName: str, playlist: Playlist, defaultRate: float = 24.0) -> None:
-    """A suggested file name for saving."""
+    """Save a playlist to an ".otio" file."""
 
 def playlistApply(playlist: Playlist, filesModel: FilesModel) -> None:
     """Open a playlist's files in the file list, after what is already open,
@@ -1788,7 +1788,12 @@ def playlistApply(playlist: Playlist, filesModel: FilesModel) -> None:
     """
 
 def playlistOpen(fileName: str) -> tuple:
-    """A suggested file name for saving."""
+    """Open a playlist from an ".otio" file.
+
+    Throws on a file that cannot be read, and on a playlist written by a newer
+    DJV, since silently dropping what the newer version wrote would corrupt it
+    on the next save.
+    """
 
 class RecentFilesModel(feather_tk._feather_tk.RecentFilesModel):
     """Recent files model."""
@@ -2135,7 +2140,12 @@ def reviewGenericPath(path: str) -> str:
     document legible -- and diffable -- when it travels.
     """
 
-def resolveReviewPath(relative: str, absolute: str, base: str | os.PathLike, substituteRoot: str | os.PathLike = ..., pathOptions: feather_tk._feather_tk.PathOptions = ...) -> tuple[pathlib.Path, bool]: ...
+def resolveReviewPath(relative: str, absolute: str, base: str | os.PathLike, substituteRoot: str | os.PathLike = ..., pathOptions: feather_tk._feather_tk.PathOptions = ...) -> tuple[pathlib.Path, bool]:
+    """Resolve a stored relative/absolute path pair to a path on disk,
+    preferring the relative form, then the absolute form, then the file's name
+    inside an optional substitute root (used by the relocation dialog). Reports
+    whether the target exists.
+    """
 
 class AudioSettings:
     """Audio settings."""
@@ -2156,49 +2166,84 @@ class AudioSettings:
     def __ne__(self, arg: AudioSettings, /) -> bool: ...
 
 class ExportRenderSize(enum.Enum):
+    """Export render size: the source's own, a preset width, a width typed in,
+    or a width and height typed in. A width alone has the height follow the
+    aspect ratio of what is being exported.
+    """
     Source = 0
 
     Width = 4
 
     Custom = 5
 
-def getExportRenderSizeEnums() -> list[ExportRenderSize]: ...
+def getExportRenderSizeEnums() -> list[ExportRenderSize]:
+    """Get every value of ExportRenderSize."""
 
 @overload
-def to_string(arg: ExportRenderSize, /) -> str: ...
+def to_string(arg: ExportRenderSize, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: ExportFileType, /) -> str: ...
+def to_string(arg: ExportFileType, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: MouseAction, /) -> str: ...
+def to_string(arg: MouseAction, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: TimelineThumbnailSize, /) -> str: ...
+def to_string(arg: TimelineThumbnailSize, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: HUDItem, /) -> str: ...
+def to_string(arg: HUDItem, /) -> str:
+    """Convert to a string."""
 
 @overload
-def to_string(arg: HUDPos, /) -> str: ...
+def to_string(arg: HUDPos, /) -> str:
+    """Convert to a string."""
 
 @overload
-def from_string(arg0: str, arg1: ExportRenderSize, /) -> bool: ...
+def from_string(arg0: str, arg1: ExportRenderSize, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: ExportFileType, /) -> bool: ...
+def from_string(arg0: str, arg1: ExportFileType, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: MouseAction, /) -> bool: ...
+def from_string(arg0: str, arg1: MouseAction, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: TimelineThumbnailSize, /) -> bool: ...
+def from_string(arg0: str, arg1: TimelineThumbnailSize, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: HUDItem, /) -> bool: ...
+def from_string(arg0: str, arg1: HUDItem, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 @overload
-def from_string(arg0: str, arg1: HUDPos, /) -> bool: ...
+def from_string(arg0: str, arg1: HUDPos, /) -> bool:
+    """Convert from a string into the given object, returning whether the
+    string names a value. A Python enum cannot be changed in place, so for one
+    this only says whether the string is valid.
+    """
 
 def getWidth(renderSize: ExportRenderSize) -> int:
     """Get an export render width, or zero for the sizes that are not one of
@@ -2206,13 +2251,15 @@ def getWidth(renderSize: ExportRenderSize) -> int:
     """
 
 class ExportFileType(enum.Enum):
+    """Export file type."""
     Image = 0
 
     Seq = 1
 
     Movie = 2
 
-def getExportFileTypeEnums() -> list[ExportFileType]: ...
+def getExportFileTypeEnums() -> list[ExportFileType]:
+    """Get every value of ExportFileType."""
 
 class ExportSettings:
     """Export settings."""
@@ -2434,6 +2481,7 @@ class MiscSettings:
     def __ne__(self, arg: MiscSettings, /) -> bool: ...
 
 class MouseAction(enum.Enum):
+    """Mouse actions."""
     PanView = 0
 
     CompareWipe = 1
@@ -2442,7 +2490,8 @@ class MouseAction(enum.Enum):
 
     FrameShuttle = 3
 
-def getMouseActionEnums() -> list[MouseAction]: ...
+def getMouseActionEnums() -> list[MouseAction]:
+    """Get every value of MouseAction."""
 
 class MouseActionBinding:
     """Mouse action binding."""
@@ -2560,13 +2609,15 @@ class StyleSettings:
     def __ne__(self, arg: StyleSettings, /) -> bool: ...
 
 class TimelineThumbnailSize(enum.Enum):
+    """Timeline thumbnails."""
     Small = 0
 
     Medium = 1
 
     Large = 2
 
-def getTimelineThumbnailSizeEnums() -> list[TimelineThumbnailSize]: ...
+def getTimelineThumbnailSizeEnums() -> list[TimelineThumbnailSize]:
+    """Get every value of TimelineThumbnailSize."""
 
 def getTimelineThumbnailSize(thumbnailSize: TimelineThumbnailSize) -> int:
     """Get the timeline thumbnails size."""
@@ -3199,7 +3250,10 @@ class SettingsModel:
     def observeWindow(self) -> IObservableWindowSettings: ...
 
     @property
-    def ioOptions(self) -> dict[str, str]: ...
+    def ioOptions(self) -> dict[str, str]:
+        """Observe the I/O options: the image sequence, FFmpeg and USD settings
+        together, as they are given to what reads files.
+        """
 
     @property
     def observeIOOptions(self) -> feather_tk._feather_tk.IObservableStringMap:
@@ -3344,7 +3398,11 @@ class AspectRatioOptions:
     def __ne__(self, arg: AspectRatioOptions, /) -> bool: ...
 
 class HUDItem(enum.Enum):
+    """HUD items."""
     FileName = 0
+    """The options map is serialized with the enumeration index as the key, so
+    changing this order requires a new settings version.
+    """
 
     Information = 1
 
@@ -3360,9 +3418,11 @@ class HUDItem(enum.Enum):
 
     LUT = 7
 
-def getHUDItemEnums() -> list[HUDItem]: ...
+def getHUDItemEnums() -> list[HUDItem]:
+    """Get every value of HUDItem."""
 
 class HUDPos(enum.Enum):
+    """HUD positions."""
     TopLeft = 1
 
     TopRight = 2
@@ -3371,7 +3431,8 @@ class HUDPos(enum.Enum):
 
     BottomRight = 4
 
-def getHUDPosEnums() -> list[HUDPos]: ...
+def getHUDPosEnums() -> list[HUDPos]:
+    """Get every value of HUDPos."""
 
 class HUDOptions:
     """HUD options."""

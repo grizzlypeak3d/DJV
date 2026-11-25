@@ -44,15 +44,29 @@ class HeaderDocs:
         self.byShortName = {}
         # Qualified class -> its base classes' names, as written.
         self.bases = {}
+        self.membersByCase = {}
+        # Qualified alias -> the name it is for, as written.
+        self.aliases = {}
+        # Qualified class -> the header it is declared in, for the report.
+        self.files = {}
+        self.file = None
+
+    def addAlias(self, qualified, target):
+        self.aliases[qualified] = target
+        self.byShortName.setdefault(qualified.split("::")[-1], set()).add(qualified)
 
     def addClass(self, qualified, doc):
         if doc and qualified not in self.classes:
             self.classes[qualified] = doc
+        self.files.setdefault(qualified, self.file)
         self.byShortName.setdefault(qualified.split("::")[-1], set()).add(qualified)
 
     def addMember(self, scope, name, doc):
         if not doc:
             return
+        # And without case, for a Python name whose acronym is written
+        # otherwise: otioTimeline for getOTIOTimeline().
+        self.membersByCase.setdefault((scope, name.lower()), doc)
         key = (scope, name)
         prev = self.members.get(key)
         if prev is None:
@@ -63,7 +77,20 @@ class HeaderDocs:
 
 
 _CLASS_RE = re.compile(
-    r"^\s*(?:template\s*<[^>]*>\s*)?(class|struct)\s+(?:[A-Z_][A-Z0-9_]*\s+)*([A-Za-z_]\w*)\s*(?:final\s*)?(?::[^{;]*)?(\{|$)")
+    r"^\s*(?:template\s*<[^>]*>\s*)?(class|struct)\s+(?:[A-Z_][A-Z0-9_]*\s+)*([A-Za-z_]\w*)\s*(<[^{;]*>)?\s*(?:final\s*)?(?::[^{;]*)?(\{|$)")
+# "typedef Box<2, int> Box2I;" and "using Box2I = Box<2, int>;": a name
+# for a template's instance, which is what the bindings name.
+_TYPEDEF_RE = re.compile(r"^\s*typedef\s+([\w:]+)\s*(<.*>)?\s+([A-Za-z_]\w*)\s*;")
+_USING_RE = re.compile(r"^\s*using\s+([A-Za-z_]\w*)\s*=\s*([\w:]+)\s*(<.*>)?\s*;")
+
+
+def _specialization(name, args):
+    """A template's specialization or instance by its first argument,
+    "Box<2>" for Box<2, T> and Box<2, int>; the name alone without one."""
+    if not args:
+        return name
+    first = args.strip()[1:-1].split(",")[0].strip()
+    return "%s<%s>" % (name, first)
 _ENUM_RE = re.compile(
     r"^\s*enum\s+(?:class|struct)?\s*(?:[A-Z_][A-Z0-9_]*\s+)*([A-Za-z_]\w*)\s*(?::\s*[\w:]+\s*)?(\{|$)")
 _NAMESPACE_RE = re.compile(r"^\s*namespace\s+([A-Za-z_][\w:]*)\s*(\{|$)")
@@ -122,6 +149,12 @@ def _declName(decl):
         return None
     if "operator" in decl:
         return None
+    # Template arguments out, nested ones too, so that a parenthesis in
+    # them is not taken for a function's.
+    prev = None
+    while prev != decl:
+        prev = decl
+        decl = re.sub(r"<[^<>]*>", "", decl)
     m = re.match(r"^[^(=;{]*?([A-Za-z_~]\w*)\s*\(", decl)
     if m:
         return m.group(1)
@@ -143,6 +176,7 @@ def readHeaders(dirs):
 
 
 def _readHeader(path, docs):
+    docs.file = path
     with open(path, encoding="utf-8", errors="replace") as f:
         lines = f.read().splitlines()
 
@@ -189,6 +223,13 @@ def _readHeader(path, docs):
         comment = []
 
         opened = None
+        alias = _TYPEDEF_RE.match(line)
+        if alias:
+            docs.addAlias(qualified(alias.group(3)), _specialization(alias.group(1), alias.group(2)))
+        else:
+            alias = _USING_RE.match(line)
+            if alias and scopes and scopes[-1][0] in ("namespace", "class"):
+                docs.addAlias(qualified(alias.group(1)), _specialization(alias.group(2), alias.group(3)))
         m = _NAMESPACE_RE.match(line)
         if m:
             opened = ("namespace", m.group(1))
@@ -200,8 +241,13 @@ def _readHeader(path, docs):
             else:
                 m = _CLASS_RE.match(line)
                 if m and not line.rstrip().endswith(";"):
-                    opened = ("class", m.group(2))
-                    docs.addClass(qualified(m.group(2)), doc)
+                    # A specialization is a class of its own, "Box<2>",
+                    # and its members are its own.
+                    name = _specialization(m.group(2), m.group(3))
+                    opened = ("class", name)
+                    docs.addClass(qualified(name), doc)
+                    if name != m.group(2):
+                        docs.addClass(qualified(m.group(2)), None)
                     inherit = re.search(r":\s*(.*?)(\{|$)", line[m.end(2):])
                     if inherit:
                         bases = re.findall(
@@ -214,9 +260,16 @@ def _readHeader(path, docs):
                     if em and doc:
                         docs.addMember(qualified(), em.group(1), doc)
                 elif scopes and scopes[-1][0] in ("class", "namespace"):
-                    # A declaration may run over several lines; its name is
-                    # on the first.
-                    name = _declName(line)
+                    # A declaration may run over several lines: joined up to
+                    # its end, "std::function<\n    R(A)> name;".
+                    decl = line
+                    j = i
+                    while (doc and ";" not in decl and "{" not in decl and
+                           not re.search(r"\)\s*(const)?\s*$", decl) and
+                           j + 1 < len(lines) and j < i + 6):
+                        j += 1
+                        decl += " " + lines[j].strip()
+                    name = _declName(decl)
                     if name and doc:
                         docs.addMember(qualified(), name, doc)
 
@@ -259,6 +312,8 @@ _BIND_CLASS_RE = re.compile(
 _BIND_MEMBER_RE = re.compile(
     r"\.(def|def_static|def_prop_ro|def_prop_rw|def_rw|def_ro|value)\s*\(\s*\"(\w+)\"\s*,\s*([^,)]*)")
 _MODULE_FUNC_RE = re.compile(r"\bm\s*\.\s*def\s*\(\s*\"(\w+)\"\s*,")
+# An enum bound by feather-tk's macro, its values named from its labels.
+_ENUM_PY_RE = re.compile(r"\bFTK_ENUM_PY\s*\(\s*\w+\s*,\s*([\w:]+)\s*\)")
 
 
 def _candidates(kind, pyName, target):
@@ -310,16 +365,33 @@ def _readBinding(path, bindings, functions):
         if re.search(r"nb::new_\s*\(\s*&[\w:]+::create", block):
             b.members.setdefault("__init__", ["create"])
         bindings.append(b)
+    for m in _ENUM_PY_RE.finditer(text):
+        bindings.append(Binding(m.group(1).split("::")[-1], m.group(1), namespaces))
     for m in _MODULE_FUNC_RE.finditer(text):
         # The function bound: the first "&name" in the call, through an
         # overload_cast or not; a lambda has none, and goes by its name.
         rest = text[m.end():m.end() + 400]
         rest = rest[:rest.find(".def") if ".def" in rest else len(rest)]
-        target = re.search(r"&\s*([\w:]+)", rest)
+        target = re.search(r"[(,]\s*&\s*([A-Za-z_][\w:]*)", rest)
         functions.append((m.group(1), target.group(1) if target else m.group(1), namespaces))
 
 
-def _resolve(docs, cppType, namespaces):
+def _resolve(docs, cppType, namespaces, depth=0):
+    """The qualified C++ name a binding's type is, through any aliases."""
+    q = _resolveName(docs, cppType, namespaces)
+    if q in docs.aliases and depth < 4:
+        target = docs.aliases[q]
+        ns = q.split("::")[:-1]
+        r = _resolve(docs, target, namespaces + ns, depth + 1)
+        if not r and "<" in target:
+            # No such specialization: the template itself.
+            r = _resolve(docs, target.split("<")[0], namespaces + ns, depth + 1)
+        if r:
+            return r
+    return q
+
+
+def _resolveName(docs, cppType, namespaces):
     """The qualified C++ name a binding's type is."""
     if cppType in docs.classes or "::" in cppType and any(
             q.endswith("::" + cppType) or q == cppType for q in docs.classes):
@@ -328,16 +400,23 @@ def _resolve(docs, cppType, namespaces):
                 return q
     short = cppType.split("::")[-1]
     candidates = sorted(docs.byShortName.get(short, ()))
+    # A class over an alias of the same short name.
+    classes = [c for c in candidates if c in docs.classes]
+    if classes and len(classes) < len(candidates) and not any(
+            c in docs.aliases for c in candidates if c not in classes):
+        candidates = classes
     if not candidates:
         return None
     if len(candidates) == 1:
         return candidates[0]
-    # The namespaces the binding file is in and uses.
-    for ns in reversed(namespaces):
-        for q in candidates:
-            if ("::" + ns + "::") in ("::" + q):
-                return q
-    return candidates[0]
+    # The one whose namespaces the binding file is in and uses the most of:
+    # tl::ui::DisplayOptions over tl::DisplayOptions from a file in both.
+    used = set(namespaces)
+
+    def score(q):
+        parts = q.split("::")[:-1]
+        return (sum(1 for p in parts if p in used), -len(parts))
+    return max(candidates, key=score)
 
 
 # Stubs
@@ -386,6 +465,9 @@ def _isSetter(node):
 
 
 class Docs:
+    # The submodules the packages have, which are C++ namespaces too.
+    submodules = {"ui", "models", "app"}
+
     def __init__(self, headers, bindings, functions):
         self.headers = headers
         self.byPyName = {}
@@ -417,10 +499,14 @@ class Docs:
                     return Binding(pyName, cppType, ["ftk"])
         if len(found) > 1:
             # The same Python name in two modules: the one whose C++
-            # namespaces have the module's name.
+            # namespaces have the module's name, and for the top module the
+            # one that is in no submodule's.
             last = module.split(".")[-1]
             for b in found:
                 if last in b.namespaces or last in b.cppType:
+                    return b
+            for b in found:
+                if not any(ns in self.submodules for ns in b.namespaces):
                     return b
         return found[0] if found else None
 
@@ -446,16 +532,44 @@ class Docs:
             seen.add(cls)
             for name in names:
                 doc = self.headers.members.get((cls, name))
+                if not doc:
+                    doc = self.headers.membersByCase.get((cls, name.lower()))
                 if doc:
                     return doc
             ns = cls.split("::")[:-1]
+            if "<" in cls:
+                # What a specialization does not say, the template may.
+                todo.append(cls.split("<")[0])
             for base in self.headers.bases.get(cls, []):
                 r = _resolve(self.headers, base, ns + b.namespaces)
                 if r:
                     todo.append(r)
         return None
 
+    # The functions feather-tk's FTK_ENUM declares for every enum, bound by
+    # its enum binding macro: the same for each, so described once here.
+    _ENUM_HELPERS = [
+        (r"^to_string$", "Convert to a string."),
+        (r"^from_string$", "Convert from a string into the given object, returning whether the string names a value. A Python enum cannot be changed in place, so for one this only says whether the string is valid."),
+        (r"^getLabel$", "Get a value's label, as the interface shows it."),
+        (r"^get(\w+)Enums$", "Get every value of {0}."),
+        (r"^get(\w+)Labels$", "Get the labels of every value of {0}."),
+        # And the JSON conversions the bindings add beside them.
+        (r"^to_json$", "Convert to JSON, as a string."),
+        (r"^from_json$", "Convert from JSON, given as a string, into the given value."),
+    ]
+
     def functionDoc(self, pyName):
+        doc = self._functionDoc(pyName)
+        if doc:
+            return doc
+        for pattern, text in self._ENUM_HELPERS:
+            m = re.match(pattern, pyName)
+            if m:
+                return text.format(*m.groups())
+        return None
+
+    def _functionDoc(self, pyName):
         for target, namespaces in self.functions.get(pyName, []):
             parts = target.split("::")
             name = parts[-1]
@@ -479,12 +593,19 @@ def docStub(path, docs, report):
     edits = []
     counts = [0, 0]
 
-    def note(name, doc):
+    def note(name, doc, ctx=None):
         counts[1] += 1
         if doc:
             counts[0] += 1
         else:
-            report.append("%s: %s" % (os.path.basename(path), name))
+            # Where the comment would go, when the class is known.
+            header = ""
+            if ctx and ctx[1]:
+                header = docs.headers.files.get(ctx[1]) or ""
+                for top in docs.headerDirs:
+                    if header.startswith(top):
+                        header = os.path.relpath(header, os.path.dirname(top))
+            report.append("%s: %s%s" % (os.path.basename(path), name, (" (%s)" % header) if header else ""))
 
     def addDoc(node, doc, indent):
         # A docstring as the first thing in the body. A one-line
@@ -501,7 +622,7 @@ def docStub(path, docs, report):
 
     def visitClass(node, ctxName):
         doc, ctx = docs.classDoc(node.name, module)
-        note(ctxName + node.name, doc)
+        note(ctxName + node.name, doc, ctx)
         if doc and not _hasDocstring(node):
             addDoc(node, doc, node.col_offset + 4)
         for i, child in enumerate(node.body):
@@ -511,7 +632,7 @@ def docStub(path, docs, report):
                 d = docs.memberDoc(ctx, child.name) if ctx else None
                 if child.name == "__init__" and not d:
                     continue
-                note(ctxName + node.name + "." + child.name, d)
+                note(ctxName + node.name + "." + child.name, d or _hasDocstring(child), ctx)
                 if d and not _hasDocstring(child):
                     addDoc(child, d, child.col_offset + 4)
             elif isinstance(child, ast.ClassDef):
@@ -532,7 +653,7 @@ def docStub(path, docs, report):
             visitClass(node, "")
         elif isinstance(node, ast.FunctionDef):
             d = docs.functionDoc(node.name)
-            note(node.name, d)
+            note(node.name, d or _hasDocstring(node))
             if d and not _hasDocstring(node):
                 addDoc(node, d, node.col_offset + 4)
 
@@ -570,6 +691,7 @@ def main():
     headers = readHeaders(args.headers)
     bindings, functions = readBindings(args.bindings)
     docs = Docs(headers, bindings, functions)
+    docs.headerDirs = [os.path.abspath(d) for d in args.headers]
     report = []
     total = [0, 0]
     for stub in args.stubs:
