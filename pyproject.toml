@@ -98,5 +98,5 @@ repair-wheel-command = "python {project}/etc/Python/repair_wheel.py {wheel} {des
 before-all = "dnf install -y mesa-libGL-devel mesa-libEGL-devel"
 
 [tool.cibuildwheel.macos]
-environment = { MACOSX_DEPLOYMENT_TARGET = "10.15" }
+environment = { MACOSX_DEPLOYMENT_TARGET = "12.0" }
 repair-wheel-command = "python {project}/etc/Python/repair_wheel.py {wheel} {dest_dir} {delocate_archs}"

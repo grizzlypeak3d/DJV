@@ -7,7 +7,7 @@
 # source build wants, so a release has to ask for this one by name.
 set(DJV_MACOS_PACKAGE ON CACHE BOOL "" FORCE)
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "12" CACHE STRING "")
 set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/package.cmake")

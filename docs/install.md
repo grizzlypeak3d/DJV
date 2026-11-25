@@ -6,7 +6,7 @@ The packages require:
 
 - **Linux** — Rocky Linux 8 or newer (glibc 2.28), x86-64
 - **Windows** — Windows 10 or newer, 64-bit
-- **macOS** — macOS 11 or newer on Apple silicon, or macOS 10.15 or newer on Intel
+- **macOS** — macOS 12 (Monterey) or newer, on Apple silicon or Intel
 - A graphics driver with OpenGL 4.1, or OpenGL ES 3
 
 Other systems can build from source; see the [README](https://github.com/grizzlypeak3d/DJV).
@@ -60,7 +60,7 @@ DJV builds and bundles its own libraries, so it runs whatever versions a facilit
 | OpenEXR | 3.4 | 3.4 | 3.5 |
 | Imath | 3.2 | 3.2 | 3.2 |
 | Linux (glibc) | 2.28 or newer | 2.28 | 2.34 |
-| macOS | 11 or newer (10.15 on Intel) | 14 | 14 |
+| macOS | 12 or newer | 14 | 14 |
 
 DJV matches CY2026. The Python modules are built for Python's stable ABI, so one install works with 3.12, 3.13 and newer.
 
