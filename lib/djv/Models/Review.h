@@ -37,17 +37,16 @@ namespace djv
 {
     namespace models
     {
-        //! Current review file format version.
+        //! The newest review document version this DJV reads and writes.
+        //! Version 2 added strokes that are shapes or text; a document with
+        //! only freehand strokes is written as version 1, which older versions
+        //! read (see reviewVersionFor()).
         //!
-        //! Incremented only when a document this version writes can no longer be
-        //! read correctly by an older DJV. Additive changes -- a new key, a new
-        //! section -- keep the version, because the reader ignores what it does
-        //! not recognize. A reader that meets a higher version refuses the
+        //! Incremented only when a document this version writes can no longer
+        //! be read correctly by an older DJV. Additive changes -- a new key, a
+        //! new section -- keep the version, because the reader ignores what it
+        //! does not recognize. A reader that meets a higher version refuses the
         //! document rather than guess at it. See docs/review-format.md.
-        //! The newest document version this DJV reads and writes. Version 2
-        //! added strokes that are shapes or text; a document with only
-        //! freehand strokes is written as version 1, which older versions
-        //! read. See reviewVersionFor().
         constexpr int reviewVersion = 2;
 
         //! Whether this build can read a review document of the given version.
@@ -66,9 +65,13 @@ namespace djv
         //! and two annotations on different frames would compare equal.
         ///@{
 
+        //! Whether two optional times are the same: both unset, or the same
+        //! value at the same rate.
         DJV_MODELS_API bool sameTime(
             const std::optional<OTIO_NS::RationalTime>&,
             const std::optional<OTIO_NS::RationalTime>&);
+        //! Whether two optional time ranges are the same: both unset, or the
+        //! same start and duration at the same rate.
         DJV_MODELS_API bool sameRange(
             const std::optional<OTIO_NS::TimeRange>&,
             const std::optional<OTIO_NS::TimeRange>&);
@@ -85,15 +88,13 @@ namespace djv
         //! The current UTC time, ISO 8601 (e.g. "2026-07-26T18:05:00Z").
         DJV_MODELS_API std::string timestamp();
 
-        //! The current user, for attributing notes and annotations.
-        //!
-        //! Taken from the environment -- USERNAME on Windows, USER elsewhere --
-        //! and empty when neither is set. DJV has no accounts and reviews are
-        //! passed from hand to hand, so this is a label rather than an identity:
-        //! it says who wrote a note when a session comes back from someone else.
         //! Who is making the markers and the drawings: the author set with
-        //! setReviewAuthor(), and the user name the system gives where none
-        //! is set, except on the iPad, whose user is the same for everyone.
+        //! setReviewAuthor(), and where none is set the user name the system
+        //! gives (USERNAME on Windows, USER elsewhere), except on the iPad,
+        //! whose user is the same for everyone. DJV has no accounts and
+        //! reviews are passed from hand to hand, so this is a label rather
+        //! than an identity: it says who wrote a note when a session comes
+        //! back from someone else.
         DJV_MODELS_API std::string reviewAuthor();
 
         //! Set the author, from the settings. Empty goes back to the user
@@ -103,6 +104,8 @@ namespace djv
         //! A single file entry in a review.
         struct DJV_MODELS_API_TYPE ReviewFile
         {
+            //! The file's identifier, which the rest of the review refers to it
+            //! by.
             std::string id;
             std::string path;          //!< Preferred: relative to the .djvr.
             std::string pathAbsolute;  //!< Fallback: absolute path.
@@ -110,12 +113,18 @@ namespace djv
             //! Separate audio, resolved like the file above: the relative form
             //! is preferred, the absolute one is the fallback.
             std::string audioPath;
+            //! The separate audio's absolute path.
             std::string audioPathAbsolute;
+            //! The video layer shown, by index.
             int         videoLayer = 0;
             //! The media reference key; empty for the authored references.
             std::string mediaReferenceKey;
+            //! The playback speed, in frames per second. Negative is none
+            //! saved, and the file plays at its own speed.
             double      speed = -1.0;
+            //! The current time. Unset when the file had not been played.
             std::optional<OTIO_NS::RationalTime> currentTime;
+            //! The in/out points. Unset when the file had not been played.
             std::optional<OTIO_NS::TimeRange>    inOutRange;
         };
 
@@ -124,7 +133,9 @@ namespace djv
         {
             std::string              aId;   //!< The "A" file, by ReviewFile::id.
             std::vector<std::string> bIds;  //!< The "B" files, by ReviewFile::id.
+            //! The compare options.
             tl::CompareOptions       options;
+            //! The compare time mode.
             tl::CompareTime          time = tl::CompareTime::Relative;
         };
 
@@ -132,19 +143,28 @@ namespace djv
         struct DJV_MODELS_API_TYPE ReviewView
         {
             bool     frameView = true;  //!< If true, pos/zoom are ignored on load.
+            //! Where the image's origin is in the view, in pixels of the view.
             ftk::V2I pos;
+            //! The view zoom: the pixels of the view to a pixel of the image.
             double   zoom = 1.0;
         };
 
         //! Color and image display state for a review.
         struct DJV_MODELS_API_TYPE ReviewColor
         {
+            //! The OCIO options.
             tl::OCIOOptions       ocio;
+            //! The LUT options.
             tl::LUTOptions        lut;
+            //! The display options.
             tl::DisplayOptions    display;
+            //! The background options.
             tl::BackgroundOptions background;
+            //! The foreground options.
             tl::ForegroundOptions foreground;
+            //! The aspect ratio options.
             AspectRatioOptions    aspectRatio;
+            //! The HUD options.
             HUDOptions            hud;
         };
 
@@ -187,9 +207,13 @@ namespace djv
         //! document version 2; see reviewVersionFor().
         struct DJV_MODELS_API_TYPE ReviewStroke
         {
+            //! What the stroke is.
             ReviewStrokeKind      kind = ReviewStrokeKind::Freehand;
+            //! The color, orange by default.
             ftk::Color4F          color = ftk::Color4F(1.F, .365F, .02F, 1.F);
+            //! The width of the line, in the pixels of the source image.
             float                 width = 4.F;
+            //! The points, in the pixels of the source image.
             std::vector<ftk::V2F> points;
             //! How hard a pen pressed at each point, zero to one, for a
             //! freehand stroke drawn with one; empty for a mouse or a
@@ -200,6 +224,7 @@ namespace djv
             //! The text, for a text stroke, and its height in the pixels of
             //! the source image.
             std::string           text;
+            //! The height of the text, in the pixels of the source image.
             float                 textSize = 48.F;
 
             //! Whether text is drawn on a plate, dark behind light text and
@@ -213,6 +238,7 @@ namespace djv
         //! The drawing on one frame of one source.
         struct DJV_MODELS_API_TYPE ReviewAnnotation
         {
+            //! The annotation's identifier.
             std::string id;
 
             //! The source the drawing belongs to, by ReviewFile::id.
@@ -225,8 +251,10 @@ namespace djv
             //! Who drew it, and when, ISO 8601. Both are optional: a document
             //! written before they existed simply leaves them empty.
             std::string author;
+            //! When it was drawn, ISO 8601.
             std::string created;
 
+            //! The strokes, in the order they were drawn.
             std::vector<ReviewStroke> strokes;
 
             DJV_MODELS_API bool operator == (const ReviewAnnotation&) const;
@@ -262,6 +290,7 @@ namespace djv
         //! source: the frames locate them. See docs/review-format.md.
         struct DJV_MODELS_API_TYPE ReviewMarker
         {
+            //! The marker's identifier.
             std::string id;
 
             //! Short label. Optional: the interface shows the frames when
@@ -273,6 +302,7 @@ namespace djv
             //! about the whole review.
             std::optional<OTIO_NS::TimeRange> range;
 
+            //! The color, green by default.
             ftk::Color4F color = reviewMarkerColor();
 
             //! The body.
@@ -296,15 +326,24 @@ namespace djv
             //! The version the document was read as. It is written as
             //! reviewVersionFor() says.
             int         version = reviewVersion;
+            //! The application and version that wrote the document.
             std::string app;
+            //! When the document was written, ISO 8601 UTC.
             std::string created;
 
+            //! The files, in tab order.
             std::vector<ReviewFile> files;
+            //! The A/B comparison: the files, the options and the time mode.
             ReviewCompare           compare;
+            //! The view's framing, pan and zoom.
             ReviewView              view;
+            //! The color and image display options.
             ReviewColor             color;
+            //! The interface state: the open tools.
             ReviewUI                ui;
+            //! The drawings, by file and frame.
             std::vector<ReviewAnnotation> annotations;
+            //! The markers.
             std::vector<ReviewMarker> markers;
 
             //! The document as loaded, verbatim. Used to carry unknown top-level

@@ -22,10 +22,15 @@ namespace djv
         //! Tool information.
         struct DJV_MODELS_API_TYPE ToolInfo
         {
+            //! The tool's name, which its action and its menu item have too.
             std::string      name;
+            //! The name of the tool's icon.
             std::string      icon;
+            //! What the Tools menu and the tools tool bar sort the tool by.
             std::string      sort;
+            //! Whether the tool has a button on the tools tool bar.
             bool             toolBar = false;
+            //! The tool's default keyboard shortcut.
             ftk::KeyShortcut shortcut;
         };
 

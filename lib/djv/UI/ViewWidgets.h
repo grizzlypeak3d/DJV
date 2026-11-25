@@ -151,6 +151,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the outline on and off, which the
+            //! View tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
@@ -178,6 +180,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the grid on and off, which the View
+            //! tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
@@ -205,6 +209,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the center marker on and off, which
+            //! the View tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
@@ -232,6 +238,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the frame guide on and off, which
+            //! the View tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
@@ -259,6 +267,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the safe areas on and off, which
+            //! the View tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
@@ -286,6 +296,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the data window outline on and off,
+            //! which the View tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
@@ -313,6 +325,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the clipping warning on and off,
+            //! which the View tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
@@ -340,6 +354,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the HUD on and off, which the View
+            //! tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:

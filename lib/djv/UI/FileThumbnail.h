@@ -34,12 +34,15 @@ namespace djv
             DJV_UI_API FileDragDropData(const std::shared_ptr<models::FilesModelItem>&);
             DJV_UI_API virtual ~FileDragDropData();
 
+            //! Get the file being dragged.
             DJV_UI_API const std::shared_ptr<models::FilesModelItem>& getItem() const;
 
         private:
             std::shared_ptr<models::FilesModelItem> _item;
         };
 
+        //! A file's thumbnail, as the Files tool shows it. It is read while it
+        //! can be seen.
         class DJV_UI_API_TYPE FileThumbnail : public ftk::IMouseWidget
         {
             FTK_NON_COPYABLE(FileThumbnail);

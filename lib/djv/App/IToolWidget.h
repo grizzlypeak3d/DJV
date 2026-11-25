@@ -38,6 +38,8 @@ namespace djv
         public:
             DJV_APP_API virtual ~IToolWidget() = 0;
 
+            //! Get the tool's name, the one its ToolInfo in the tools model
+            //! has.
             DJV_APP_API const std::string& getToolName() const;
 
             //! Scroll to the named section. Tools that lay their content out in
@@ -91,6 +93,9 @@ namespace djv
 
             DJV_APP_API static std::shared_ptr<ToolWidgetFactory> create();
 
+            //! Add the function that makes a tool's widget, by the name of the
+            //! tool's ToolInfo in the tools model. The widget is made when the
+            //! tool is first opened.
             DJV_APP_API void addTool(const std::string& name, const ToolWidgetFnc&);
 
             DJV_APP_API std::shared_ptr<IToolWidget> createTool(

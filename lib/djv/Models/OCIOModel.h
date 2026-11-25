@@ -21,17 +21,32 @@ namespace djv
         //! OpenColorIO model data.
         struct DJV_MODELS_API_TYPE OCIOModelData
         {
+            //! Whether OpenColorIO is enabled.
             bool enabled = false;
+            //! Which configuration is used.
             tl::OCIOConfig config = tl::OCIOConfig::First;
+            //! The configuration file, for File.
             std::string fileName;
+            //! The configuration's name, or where it has none the file's, or
+            //! for a "config.ocio" its directory's.
             std::string name;
+            //! The input color spaces. The first is "Automatic", which resolves
+            //! each file's from the extension assignments, what the file
+            //! declares, and the configuration's file rules.
             std::vector<std::string> inputs;
+            //! The input color space in use, an index into the inputs.
             size_t inputIndex = 0;
+            //! The configuration's displays.
             std::vector<std::string> displays;
+            //! The display in use, an index into the displays.
             size_t displayIndex = 0;
+            //! The views of the display in use.
             std::vector<std::string> views;
+            //! The view in use, an index into the views.
             size_t viewIndex = 0;
+            //! The configuration's looks. The first is "None".
             std::vector<std::string> looks;
+            //! The look in use, an index into the looks.
             size_t lookIndex = 0;
 
             //! Whether the display and view give HDR video: the display's
@@ -43,11 +58,14 @@ namespace djv
             bool operator == (const OCIOModelData&) const = default;
         };
 
-        //! OpenColorIO model.
         //! Get the OpenColorIO version, or an empty string when OpenColorIO
         //! is not built in.
         DJV_MODELS_API std::string getOCIOVersion();
 
+        //! OpenColorIO model: a configuration's color spaces, displays, views
+        //! and looks, and the options chosen from them. The application's color
+        //! options are the color model's; a color widget keeps a model of its
+        //! own in step with them.
         class DJV_MODELS_API_TYPE OCIOModel : public std::enable_shared_from_this<OCIOModel>
         {
             FTK_NON_COPYABLE(OCIOModel);

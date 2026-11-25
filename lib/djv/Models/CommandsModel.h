@@ -29,7 +29,10 @@ namespace djv
         //! Command information.
         struct DJV_MODELS_API_TYPE CommandInfo
         {
+            //! The command's name, the group and the action:
+            //! "Timeline/DetectCuts".
             std::string name;
+            //! What the command does.
             std::string doc;
         };
 

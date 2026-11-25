@@ -144,7 +144,6 @@ namespace djv
             DJV_APP_API void showTour();
 
             //! Show the about dialog.
-
             DJV_APP_API void showAboutDialog();
 
             //! Show the system information dialog.

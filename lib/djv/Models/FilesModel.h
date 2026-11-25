@@ -32,10 +32,16 @@ namespace djv
             //! rather than by list index. See models::generateId().
             std::string              id;
 
+            //! The file's path.
             ftk::Path                path;
+            //! A separate audio file played with it, as File > Open With Audio
+            //! opens one; empty for none.
             ftk::Path                audioPath;
 
+            //! The names of the file's video layers, filled in when it is
+            //! opened.
             std::vector<std::string> videoLayers;
+            //! The video layer shown, an index into the layers.
             size_t                   videoLayer  = 0;
 
             //! The media reference keys the file's clips use, from an OTIO
@@ -55,11 +61,15 @@ namespace djv
             //! The audio channel to play, or -1 for all of the channels.
             int                      audioChannel = -1;
 
+            //! The playback speed, in frames per second, when the file last
+            //! lost focus. Negative until then, and the file plays at its own
+            //! speed.
             double                   speed       = -1.0;
 
             //! Where playback had got to, and the in/out points, when the
             //! file last lost focus. Unset until it has been played.
             std::optional<OTIO_NS::RationalTime> currentTime;
+            //! The in/out points, kept the same way as the current time.
             std::optional<OTIO_NS::TimeRange>    inOutRange;
 
             //! The range the file turned out to have when it was opened. For
@@ -81,6 +91,9 @@ namespace djv
             //! looks again.
             bool                     framesListed = false;
 
+            //! Whether the file has just been opened and not yet been the
+            //! current file. Playback starts on a new file when the playback
+            //! settings say so.
             bool                     newFile = true;
 
             //! Metadata carried from the playlist clip this item came from,
@@ -90,7 +103,6 @@ namespace djv
             OTIO_NS::AnyDictionary   metadata;
         };
 
-        //! Files model.
         //! The frame in the frame store, to compare against (Compare >
         //! Store Frame): the frame, and what it is, the file and the time,
         //! for saying so. Kept as decoded, so the color settings apply to it
@@ -103,6 +115,8 @@ namespace djv
             bool operator == (const StoredFrame&) const = default;
         };
 
+        //! Files model: the open files, the "A" file, which is the current one,
+        //! and the "B" files it is compared with.
         class DJV_MODELS_API_TYPE FilesModel : public std::enable_shared_from_this<FilesModel>
         {
             FTK_NON_COPYABLE(FilesModel);
@@ -300,7 +314,9 @@ namespace djv
             //! dot that moves it and the ring that turns it. Hidden, the
             //! wipe is moved with the mouse binding and the Files tool.
             DJV_MODELS_API bool getWipeHandles() const;
+            //! Observe whether the wipe's handles are shown.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeWipeHandles() const;
+            //! Set whether the wipe's handles are shown.
             DJV_MODELS_API void setWipeHandles(bool);
 
             //! Get the stored frame.

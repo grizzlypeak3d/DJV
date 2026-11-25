@@ -68,27 +68,32 @@ namespace djv
             //! Is drawing active? While it is, the viewport draws instead of
             //! shuttling frames with the left mouse button.
             DJV_MODELS_API bool isEnabled() const;
+            //! Observe whether drawing is active.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeEnabled() const;
             DJV_MODELS_API void setEnabled(bool);
 
             //! The current tool.
             DJV_MODELS_API DrawTool getTool() const;
+            //! Observe the current tool.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<DrawTool> > observeTool() const;
             DJV_MODELS_API void setTool(DrawTool);
 
             //! The stroke colour.
             DJV_MODELS_API const ftk::Color4F& getColor() const;
+            //! Observe the stroke color.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<ftk::Color4F> > observeColor() const;
             DJV_MODELS_API void setColor(const ftk::Color4F&);
 
             //! The stroke width, on an HD picture; pictureDrawSize() gives it
             //! in the pixels of the picture drawn on.
             DJV_MODELS_API float getSize() const;
+            //! Observe the stroke width.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<float> > observeSize() const;
             DJV_MODELS_API void setSize(float);
 
             //! The height of text, on an HD picture, as the width is.
             DJV_MODELS_API float getTextSize() const;
+            //! Observe the height of text.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<float> > observeTextSize() const;
             DJV_MODELS_API void setTextSize(float);
 
@@ -96,6 +101,8 @@ namespace djv
             //! faded, behind this frame's: where the last frame's note was is
             //! what a note about motion is drawn against.
             DJV_MODELS_API bool isOnionSkin() const;
+            //! Observe whether the drawings on the frames before and after are
+            //! shown.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeOnionSkin() const;
             DJV_MODELS_API void setOnionSkin(bool);
 
@@ -103,12 +110,14 @@ namespace djv
             //! arrow to a multiple of forty-five degrees, as Shift holds it:
             //! for a touch screen, which has no Shift to hold.
             DJV_MODELS_API bool isConstrain() const;
+            //! Observe whether shapes and lines are constrained.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeConstrain() const;
             DJV_MODELS_API void setConstrain(bool);
 
             //! Whether new text is drawn on a background plate, so it reads
             //! over any picture. On by default.
             DJV_MODELS_API bool isTextBackground() const;
+            //! Observe whether new text is drawn on a background plate.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeTextBackground() const;
             DJV_MODELS_API void setTextBackground(bool);
 

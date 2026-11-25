@@ -21,9 +21,14 @@ namespace djv
                 const ftk::KeyShortcut& primary = ftk::KeyShortcut(),
                 const ftk::KeyShortcut& secondary = ftk::KeyShortcut());
 
+            //! The name of the action, its group and its own:
+            //! "Playback/Toggle".
             std::string      name;
+            //! The action's label, as the keyboard shortcuts settings show it.
             std::string      text;
+            //! The primary shortcut; a key of Unknown is none.
             ftk::KeyShortcut primary;
+            //! The secondary shortcut; a key of Unknown is none.
             ftk::KeyShortcut secondary;
 
             bool operator == (const Shortcut&) const = default;

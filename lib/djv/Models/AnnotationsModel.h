@@ -147,9 +147,13 @@ namespace djv
             //! \name Undo
             ///@{
 
+            //! Observe whether there is a change to undo.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeHasUndo() const;
+            //! Observe whether there is an undone change to redo.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<bool> > observeHasRedo() const;
+            //! Undo the last change to the annotations.
             DJV_MODELS_API void undo();
+            //! Redo the last change undone.
             DJV_MODELS_API void redo();
 
             ///@}

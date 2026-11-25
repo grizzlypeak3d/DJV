@@ -38,6 +38,8 @@ namespace djv
                 double defaultSpeed,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Set the callback for when a speed is chosen from the list, in
+            //! frames per second.
             DJV_UI_API void setCallback(const std::function<void(double)>&);
 
             DJV_UI_API void open(

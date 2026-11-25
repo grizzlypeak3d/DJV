@@ -66,14 +66,18 @@ namespace djv
         //! How far an export has got.
         struct DJV_MODELS_API_TYPE ExportProgress
         {
+            //! What the export is doing.
             ExportStatus status = ExportStatus::Queued;
+            //! The number of frames written so far.
             int64_t framesDone = 0;
+            //! The number of frames to write.
             int64_t frames = 0;
             //! "about 2 minutes left", once there is enough to go on; see
             //! getExportTimeLeft().
             std::string timeLeft;
             //! How long it ran, once it has stopped.
             double seconds = 0.0;
+            //! Why the export failed.
             std::string error;
 
             bool operator == (const ExportProgress&) const = default;
@@ -123,9 +127,12 @@ namespace djv
                 const std::shared_ptr<ftk::Context>&,
                 const ExportJobOptions&);
 
+            //! Get the options the export was made from.
             DJV_MODELS_API const ExportJobOptions& getOptions() const;
 
+            //! Get how far the export has got.
             DJV_MODELS_API const ExportProgress& getProgress() const;
+            //! Observe how far the export has got.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<ExportProgress> > observeProgress() const;
 
             //! Open the timelines, the renderer, and the writer, and start

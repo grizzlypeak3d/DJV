@@ -31,7 +31,10 @@ namespace djv
             //! \name Name
             ///@{
 
+            //! Get the application's name, "DJV", or the one an application
+            //! built on DJV gives.
             DJV_MODELS_API virtual std::string getFullName() const;
+            //! Get the application's short name, in lower case: "djv".
             DJV_MODELS_API virtual std::string getShortName() const;
 
             //! Get the name of the directory, under the user's application
@@ -46,10 +49,17 @@ namespace djv
             //! \name Version
             ///@{
 
+            //! Get the major version number.
             DJV_MODELS_API virtual int getVersionMajor() const;
+            //! Get the minor version number.
             DJV_MODELS_API virtual int getVersionMinor() const;
+            //! Get the patch version number.
             DJV_MODELS_API virtual int getVersionPatch() const;
+            //! Get the development suffix: "-dev" for a development version,
+            //! empty for a release.
             DJV_MODELS_API virtual std::string getVersionDev() const;
+            //! Get the version: the major, minor and patch numbers and the
+            //! development suffix, such as "3.8.0-dev".
             DJV_MODELS_API virtual std::string getVersion() const;
 
             //! Get the date of the commit the build was made from.
@@ -110,6 +120,7 @@ namespace djv
             //! \name License
             ///@{
 
+            //! Get the application's license text.
             DJV_MODELS_API virtual std::string getLicense() const;
 
             //! Get the licenses page installed beside the application, as a

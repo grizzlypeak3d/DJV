@@ -26,6 +26,8 @@ namespace djv
 
     namespace ui
     {
+        //! The OCIO section of the Color tool: the configuration, the input
+        //! color space, the display, the view and the look.
         class DJV_UI_API_TYPE OCIOWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(OCIOWidget);
@@ -46,6 +48,8 @@ namespace djv
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns OpenColorIO on and off, which the
+            //! Color tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
@@ -54,6 +58,8 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! The LUT section of the Color tool: the LUT file, and the order and
+        //! direction it is applied in.
         class DJV_UI_API_TYPE LUTWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(LUTWidget);
@@ -74,12 +80,16 @@ namespace djv
                 const std::shared_ptr<models::ColorModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the LUT on and off, which the Color
+            //! tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();
         };
 
+        //! The Color section of the Color tool: the color values, exposure and
+        //! soft clip.
         class DJV_UI_API_TYPE ColorWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(ColorWidget);
@@ -100,12 +110,16 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the color values, exposure and soft
+            //! clip on and off together, which the Color tool puts in the
+            //! section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:
             FTK_PRIVATE();
         };
 
+        //! The Levels section of the Color tool.
         class DJV_UI_API_TYPE LevelsWidget : public ftk::IContainer
         {
             FTK_NON_COPYABLE(LevelsWidget);
@@ -128,6 +142,8 @@ namespace djv
                 const std::shared_ptr<models::ViewportModel>&,
                 const std::shared_ptr<IWidget>& parent = nullptr);
 
+            //! Get the check box that turns the levels on and off, which the
+            //! Color tool puts in the section's title.
             DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
 
         private:

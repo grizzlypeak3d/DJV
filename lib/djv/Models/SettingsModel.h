@@ -123,23 +123,36 @@ namespace djv
         //! Export settings.
         struct DJV_MODELS_API_TYPE ExportSettings
         {
+            //! The directory the exports are written to. One that is empty when
+            //! the settings are read is set to the home directory.
             std::string dir;
+            //! The size the export is rendered at.
             ExportRenderSize renderSize = ExportRenderSize::Source;
             //! The width typed in, for Width and Custom, and the height for
             //! Custom, used as they are.
             int customWidth = 1920;
+            //! The height typed in, for Custom.
             int customHeight = 1080;
+            //! The kind of export, as the tabs of the Export tool choose it.
             ExportFileType fileType = ExportFileType::Image;
 
             //! The output file names, without their extensions. A run of '#'
             //! is where the frame number goes, as many digits wide as there
             //! are '#'; digits are always part of the name.
             std::string imageFileName = "render";
+            //! The extension of an image export, which chooses its file format.
             std::string imageExt = ".tif";
+            //! The name of a sequence export.
             std::string seqFileName = "render.####";
+            //! The extension of a sequence export, which chooses its file
+            //! format.
             std::string seqExt = ".tif";
+            //! The name of a movie export.
             std::string movieFileName = "render";
+            //! The extension of a movie export: one of those the preset writes.
             std::string movieExt = ".mov";
+            //! The audio codec of a movie export, by its codec name, such as
+            //! "aac". "Auto" leaves it to the file format.
             std::string movieAudioCodec = "Auto";
             //! The movie export preset. Presets are the whole surface:
             //! what they cannot express is what tlbake and the command
@@ -165,14 +178,25 @@ namespace djv
         //! File browser settings.
         struct DJV_MODELS_API_TYPE FileBrowserSettings
         {
+            //! Whether files are chosen with the platform's own file dialog
+            //! rather than the built-in file browser. Where the build has no
+            //! native dialog it is kept but does nothing.
             bool nativeFileDialog = true;
             bool floating = false;
             bool pinned = false;
             //! The size a floating file browser opens at. Unset until one
             //! has been opened, leaving the size to the file browser.
             ftk::Size2I windowSize;
+            //! The directory the built-in file browser is in. It is given to
+            //! the file browser at startup and read back from it when the
+            //! settings are saved, so setting it does not move the file
+            //! browser.
             std::string path;
+            //! The built-in file browser's options, kept the same way as the
+            //! path.
             ftk::FileBrowserOptions options;
+            //! The extension the built-in file browser filters by, kept the
+            //! same way as the path.
             std::string ext;
 
             bool operator == (const FileBrowserSettings&) const = default;
@@ -181,9 +205,18 @@ namespace djv
         //! Image sequence settings.
         struct DJV_MODELS_API_TYPE ImageSeqSettings
         {
+            //! How an image sequence finds its audio: not at all, by extension,
+            //! or by file name.
             tl::ImageSeqAudio audio = tl::Options().imageSeqAudio;
+            //! The audio file extensions looked for, by extension: first a file
+            //! with the sequence's base name, then the first such file in its
+            //! directory.
             std::vector<std::string> audioExts = tl::Options().imageSeqAudioExts;
+            //! The audio file opened with a sequence, by file name, in the
+            //! sequence's directory.
             std::string audioFileName = tl::Options().imageSeqAudioFileName;
+            //! The most digits a frame number can have. A file name ending in
+            //! more is not read as a frame of a sequence.
             size_t maxDigits = 9;
 
             //! How many frames are decoded at once. This is a timeline
@@ -191,6 +224,8 @@ namespace djv
             //! decodes sequences.
             size_t readThreadCount = tl::getDefaultReadThreadCount();
 
+            //! The sequence read options: the default speed and what to do
+            //! about a missing frame.
             tl::SeqOptions io;
 
             bool operator == (const ImageSeqSettings&) const = default;
@@ -200,6 +235,8 @@ namespace djv
         struct DJV_MODELS_API_TYPE OTIOSettings
         {
             tl::Spatial spatial = tl::Options().spatial;
+            //! Whether to work around timelines that do not conform exactly to
+            //! the specification.
             bool compat = tl::Options().compat;
 
             bool operator == (const OTIOSettings&) const = default;
@@ -208,7 +245,11 @@ namespace djv
         //! Miscellaneous settings.
         struct DJV_MODELS_API_TYPE MiscSettings
         {
+            //! Whether tooltips are shown. Always off in the tablet build,
+            //! where nothing hovers.
             bool tooltipsEnabled = true;
+            //! Whether the tour is shown at startup. It is turned off when the
+            //! tour is shown, so a first start shows it once.
             bool showSetup = true;
 
             //! Forget the recent files, playlists, reviews and directories
@@ -269,7 +310,9 @@ namespace djv
                 ftk::MouseButton,
                 ftk::KeyModifier modifier = ftk::KeyModifier::None);
 
+            //! The mouse button.
             ftk::MouseButton button = ftk::MouseButton::None;
+            //! The modifier key held with the button.
             ftk::KeyModifier modifier = ftk::KeyModifier::None;
 
             bool operator == (const MouseActionBinding&) const = default;
@@ -278,6 +321,7 @@ namespace djv
         //! Mouse settings.
         struct DJV_MODELS_API_TYPE MouseSettings
         {
+            //! The mouse button and modifier key bound to each action.
             std::map<MouseAction, MouseActionBinding> bindings =
             {
                 {
@@ -305,7 +349,11 @@ namespace djv
                 { WheelAction::Scrub, ftk::KeyModifier::Control }
             };
 
+            //! The factor one click of the mouse wheel zooms the view and the
+            //! timeline by. The Settings tool allows 0.5 to 5.
             float wheelScale = 1.1F;
+            //! How fast the frame shuttle steps: at one, a frame each 20 pixels
+            //! dragged. The Settings tool allows 0.1 to 10.
             float frameShuttleScale = 1.F;
 
             bool operator == (const MouseSettings&) const = default;
@@ -314,6 +362,7 @@ namespace djv
         //! Playback settings.
         struct DJV_MODELS_API_TYPE PlaybackSettings
         {
+            //! Whether playback starts when a file is opened.
             bool startPlayback = false;
 
             //! Wait for each frame rather than drop the ones the cache does
@@ -339,6 +388,8 @@ namespace djv
         {
             DJV_MODELS_API ShortcutsSettings();
 
+            //! The keyboard shortcuts of the actions, with the keys they have
+            //! now.
             std::vector<Shortcut> shortcuts;
 
             bool operator == (const ShortcutsSettings&) const = default;
@@ -359,7 +410,9 @@ namespace djv
         {
             //! Zero follows the display.
             float displayScale = 0.F;
+            //! The brightness and contrast of the interface.
             ftk::ColorControls colorControls;
+            //! The interface colors, dark or light.
             ftk::ColorStyle colorStyle = ftk::ColorStyle::Dark;
 
             bool operator == (const StyleSettings&) const = default;
@@ -386,10 +439,20 @@ namespace djv
         //! Timeline settings.
         struct DJV_MODELS_API_TYPE TimelineSettings
         {
+            //! Whether the timeline shows only the first video and audio track:
+            //! Timeline > Minimize.
             bool minimize = true;
+            //! Whether the timeline is zoomed to show the whole of it:
+            //! Timeline > Frame View. Panning the timeline turns it off.
             bool frameView = true;
+            //! Whether a zoomed timeline has scroll bars:
+            //! Timeline > Scroll Bars.
             bool scrollBars = true;
+            //! Whether the timeline scrolls to keep the current frame in sight
+            //! while playing: Timeline > Auto Scroll.
             bool autoScroll = true;
+            //! Whether scrubbing stops playback, rather than pausing it while
+            //! the button is held: Timeline > Stop Playback When Scrubbing.
             bool stopOnScrub = false;
             //! A preview of the frame under the cursor.
             bool preview = true;
@@ -399,10 +462,20 @@ namespace djv
             // Whether media is shown in the timeline at all. Separate from
             // the two below rather than setting them, so that turning it off
             // and on again does not forget which of them was wanted.
+            //! Whether the video thumbnails and audio waveforms are shown at
+            //! all: Timeline > Track Media.
             bool trackMedia = true;
+            //! Whether the video thumbnails are shown, with track media on:
+            //! Timeline > Video Thumbnails.
             bool thumbnails = true;
+            //! The height of the video thumbnails:
+            //! Timeline > Video Thumbnail Size.
             TimelineThumbnailSize thumbnailSize = TimelineThumbnailSize::Small;
+            //! Whether the audio waveforms are shown, with track media on:
+            //! Timeline > Audio Waveforms.
             bool waveforms = true;
+            //! The height of the audio waveforms:
+            //! Timeline > Audio Waveform Size.
             TimelineThumbnailSize waveformSize = TimelineThumbnailSize::Small;
 
             bool operator == (const TimelineSettings&) const = default;
@@ -416,19 +489,41 @@ namespace djv
             //! Where the window was, once it has been somewhere: until then
             //! the platform places it.
             ftk::V2I pos;
+            //! Whether there is a position to put the window at.
             bool hasPos = false;
+            //! Whether the window is maximized. The position, size and
+            //! maximized state are applied when the main window is made, and
+            //! saved from it.
             bool maximized = false;
+            //! Whether the file tool bar is shown: Window > File Tool Bar.
             bool fileToolBar = true;
+            //! Whether the compare tool bar is shown:
+            //! Window > Compare Tool Bar.
             bool compareToolBar = true;
+            //! Whether the window tool bar is shown: Window > Window Tool Bar.
             bool windowToolBar = true;
+            //! Whether the view tool bar is shown: Window > View Tool Bar.
             bool viewToolBar = true;
+            //! Whether the tools tool bar is shown: Window > Tools Tool Bar.
             bool toolsToolBar = true;
+            //! Whether the tab bar is shown: Window > Tab Bar.
             bool tabBar = true;
+            //! Whether the timeline is shown, when a file is open:
+            //! Window > Timeline.
             bool timeline = true;
+            //! Whether the bottom tool bar is shown: Window > Bottom Tool Bar.
             bool bottomToolBar = true;
+            //! Whether the status bar is shown: Window > Status Tool Bar.
             bool statusToolBar = true;
+            //! Whether the tools panel is shown, when a tool is open:
+            //! Window > Tools.
             bool tools = true;
+            //! The share of the height the view has above the timeline, from
+            //! zero to one. The splitters are applied when the main window is
+            //! made.
             float splitter = .7F;
+            //! The share of the width the view has beside the tools panel, from
+            //! zero to one.
             float splitter2 = .7F;
 
             bool operator == (const WindowSettings&) const = default;
@@ -463,8 +558,11 @@ namespace djv
             //! \name Audio
             ///@{
 
+            //! Get the audio settings.
             DJV_MODELS_API const AudioSettings& getAudio() const;
+            //! Observe the audio settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<AudioSettings> > observeAudio() const;
+            //! Set the audio settings.
             DJV_MODELS_API void setAudio(const AudioSettings&);
 
             ///@}
@@ -484,8 +582,14 @@ namespace djv
             //! quarter of RAM for the video.
             DJV_MODELS_API static tl::PlayerCacheOptions getDefaultCache();
 
+            //! Get the cache settings: the sizes of the video and audio caches,
+            //! in gigabytes, and how much is read behind the current frame.
+            //! Sizes above getMaxCacheGB() are lowered to it when the settings
+            //! are read.
             DJV_MODELS_API const tl::PlayerCacheOptions& getCache() const;
+            //! Observe the cache settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<tl::PlayerCacheOptions> > observeCache() const;
+            //! Set the cache settings.
             DJV_MODELS_API void setCache(const tl::PlayerCacheOptions&);
 
             DJV_MODELS_API const tl::ui::ThumbnailCacheOptions& getThumbnailCache() const;
@@ -497,8 +601,11 @@ namespace djv
             //! \name Export
             ///@{
 
+            //! Get the export settings.
             DJV_MODELS_API const ExportSettings& getExport() const;
+            //! Observe the export settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<ExportSettings> > observeExport() const;
+            //! Set the export settings.
             DJV_MODELS_API void setExport(const ExportSettings&);
 
             ///@}
@@ -506,8 +613,13 @@ namespace djv
             //! \name File Browser
             ///@{
 
+            //! Get the file browser settings.
             DJV_MODELS_API const FileBrowserSettings& getFileBrowser() const;
+            //! Observe the file browser settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<FileBrowserSettings> > observeFileBrowser() const;
+            //! Set the file browser settings. Of these, whether the native file
+            //! dialog is used, and whether the built-in one floats, apply at
+            //! once.
             DJV_MODELS_API void setFileBrowser(const FileBrowserSettings&);
 
             ///@}
@@ -515,8 +627,12 @@ namespace djv
             //! \name Image Sequences
             ///@{
 
+            //! Get the image sequence settings. They are taken when a file is
+            //! opened.
             DJV_MODELS_API const ImageSeqSettings& getImageSeq() const;
+            //! Observe the image sequence settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<ImageSeqSettings> > observeImageSeq() const;
+            //! Set the image sequence settings.
             DJV_MODELS_API void setImageSeq(const ImageSeqSettings&);
 
             ///@}
@@ -524,8 +640,11 @@ namespace djv
             //! \name OTIO
             ///@{
 
+            //! Get the OTIO settings. They are taken when a file is opened.
             DJV_MODELS_API const OTIOSettings& getOTIO() const;
+            //! Observe the OTIO settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<OTIOSettings> > observeOTIO() const;
+            //! Set the OTIO settings.
             DJV_MODELS_API void setOTIO(const OTIOSettings&);
 
             ///@}
@@ -533,8 +652,11 @@ namespace djv
             //! \name Miscellaneous
             ///@{
 
+            //! Get the miscellaneous settings.
             DJV_MODELS_API const MiscSettings& getMisc() const;
+            //! Observe the miscellaneous settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<MiscSettings> > observeMisc() const;
+            //! Set the miscellaneous settings.
             DJV_MODELS_API void setMisc(const MiscSettings&);
 
             ///@}
@@ -542,8 +664,11 @@ namespace djv
             //! \name Mouse
             ///@{
 
+            //! Get the mouse settings.
             DJV_MODELS_API const MouseSettings& getMouse() const;
+            //! Observe the mouse settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<MouseSettings> > observeMouse() const;
+            //! Set the mouse settings.
             DJV_MODELS_API void setMouse(const MouseSettings&);
 
             ///@}
@@ -551,12 +676,18 @@ namespace djv
             //! \name Playback
             ///@{
 
+            //! Get the playback settings.
             DJV_MODELS_API const PlaybackSettings& getPlayback() const;
+            //! Observe the playback settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<PlaybackSettings> > observePlayback() const;
+            //! Set the playback settings.
             DJV_MODELS_API void setPlayback(const PlaybackSettings&);
 
+            //! Get the review settings.
             DJV_MODELS_API const ReviewSettings& getReview() const;
+            //! Observe the review settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<ReviewSettings> > observeReview() const;
+            //! Set the review settings.
             DJV_MODELS_API void setReview(const ReviewSettings&);
 
             ///@}
@@ -564,8 +695,11 @@ namespace djv
             //! \name Keyboard Shortcuts
             ///@{
 
+            //! Get the keyboard shortcuts settings.
             DJV_MODELS_API const ShortcutsSettings& getShortcuts() const;
+            //! Observe the keyboard shortcuts settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<ShortcutsSettings> > observeShortcuts() const;
+            //! Set the keyboard shortcuts settings.
             DJV_MODELS_API void setShortcuts(const ShortcutsSettings&);
 
             //! Add keyboard shortcuts. Any saved key bindings are applied to
@@ -577,8 +711,11 @@ namespace djv
             //! \name Style
             ///@{
 
+            //! Get the style settings.
             DJV_MODELS_API const StyleSettings& getStyle() const;
+            //! Observe the style settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<StyleSettings> > observeStyle() const;
+            //! Set the style settings.
             DJV_MODELS_API void setStyle(const StyleSettings&);
 
             ///@}
@@ -586,8 +723,11 @@ namespace djv
             //! \name Timeline
             ///@{
 
+            //! Get the timeline settings.
             DJV_MODELS_API const TimelineSettings& getTimeline() const;
+            //! Observe the timeline settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<TimelineSettings> > observeTimeline() const;
+            //! Set the timeline settings.
             DJV_MODELS_API void setTimeline(const TimelineSettings&);
 
             ///@}
@@ -595,8 +735,11 @@ namespace djv
             //! \name Window
             ///@{
 
+            //! Get the window settings.
             DJV_MODELS_API const WindowSettings& getWindow() const;
+            //! Observe the window settings.
             DJV_MODELS_API std::shared_ptr<ftk::IObservable<WindowSettings> > observeWindow() const;
+            //! Set the window settings.
             DJV_MODELS_API void setWindow(const WindowSettings&);
 
             ///@}

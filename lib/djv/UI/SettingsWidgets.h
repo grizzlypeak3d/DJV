@@ -106,7 +106,6 @@ namespace djv
             FTK_PRIVATE();
         };
 
-        //! Image sequence settings widget.
         //! OTIO settings widget.
         class DJV_UI_API_TYPE OTIOSettingsWidget : public ISettingsWidget
         {
@@ -132,6 +131,7 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! Image sequence settings widget.
         class DJV_UI_API_TYPE ImageSeqSettingsWidget : public ISettingsWidget
         {
             FTK_NON_COPYABLE(ImageSeqSettingsWidget);

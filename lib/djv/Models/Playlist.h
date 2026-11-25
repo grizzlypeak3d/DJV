@@ -20,12 +20,17 @@ namespace djv
         //! and window state stay in the settings.
         struct DJV_MODELS_API_TYPE Playlist
         {
+            //! The files, in order.
             std::vector<std::shared_ptr<FilesModelItem> > items;
 
+            //! The "A" file, an index into the items; -1 for none.
             int              aIndex = -1;
+            //! The "B" files, as indexes into the items.
             std::vector<int> bIndexes;
 
+            //! The compare options.
             tl::CompareOptions compareOptions;
+            //! The compare time mode.
             tl::CompareTime    compareTime = tl::CompareTime::Relative;
         };
 

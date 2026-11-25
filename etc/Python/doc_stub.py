@@ -308,9 +308,10 @@ class Binding:
 
 
 _BIND_CLASS_RE = re.compile(
-    r"nb::(class_|enum_)\s*<\s*([\w:]+)[^>]*>\s*\(\s*\w+\s*,\s*\"(\w+)\"")
+    r"(?:nb|nanobind)::(class_|enum_)\s*<\s*([\w:]+)[^>]*>\s*(?:\w+\s*)?\(\s*\w+\s*,\s*\"(\w+)\"")
+# The "." of a chained call may end the line before.
 _BIND_MEMBER_RE = re.compile(
-    r"\.(def|def_static|def_prop_ro|def_prop_rw|def_rw|def_ro|value)\s*\(\s*\"(\w+)\"\s*,\s*([^,)]*)")
+    r"\.\s*(def|def_static|def_prop_ro|def_prop_rw|def_rw|def_ro|value)\s*\(\s*\"(\w+)\"\s*,\s*([^,)]*)")
 _MODULE_FUNC_RE = re.compile(r"\bm\s*\.\s*def\s*\(\s*\"(\w+)\"\s*,")
 # An enum bound by feather-tk's macro, its values named from its labels.
 _ENUM_PY_RE = re.compile(r"\bFTK_ENUM_PY\s*\(\s*\w+\s*,\s*([\w:]+)\s*\)")
@@ -318,7 +319,8 @@ _ENUM_PY_RE = re.compile(r"\bFTK_ENUM_PY\s*\(\s*\w+\s*,\s*([\w:]+)\s*\)")
 
 def _candidates(kind, pyName, target):
     out = []
-    m = re.match(r"^\s*&?([\w:]+)::(\w+)\s*$", target)
+    # The member bound, "&X::name", through an overload_cast or not.
+    m = re.search(r"&\s*([\w:]+)::(\w+)", target)
     if m:
         out.append(m.group(2))
     elif kind == "value":
@@ -349,6 +351,8 @@ def readBindings(dirs):
 def _readBinding(path, bindings, functions):
     with open(path, encoding="utf-8", errors="replace") as f:
         text = f.read()
+    # Commented out bindings are none: line comments taken out.
+    text = re.sub(r"//[^\n]*", "", text)
     namespaces = re.findall(r"using\s+namespace\s+([\w:]+)\s*;", text)
     namespaces += re.findall(r"namespace\s+(\w+)\s*\{", text)
     starts = [(m.start(), m) for m in _BIND_CLASS_RE.finditer(text)]
@@ -400,10 +404,10 @@ def _resolveName(docs, cppType, namespaces):
                 return q
     short = cppType.split("::")[-1]
     candidates = sorted(docs.byShortName.get(short, ()))
-    # A class over an alias of the same short name.
-    classes = [c for c in candidates if c in docs.classes]
-    if classes and len(classes) < len(candidates) and not any(
-            c in docs.aliases for c in candidates if c not in classes):
+    # A class over an alias of the same short name; a class without a
+    # comment is still a class.
+    classes = [c for c in candidates if c not in docs.aliases]
+    if classes and len(classes) < len(candidates):
         candidates = classes
     if not candidates:
         return None
