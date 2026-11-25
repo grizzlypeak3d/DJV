@@ -23,33 +23,51 @@ def initIcons(context: feather_tk._feather_tk.Context) -> None:
     """
 
 class OCIOWidget(feather_tk._feather_tk.IContainer):
+    """The OCIO section of the Color tool: the configuration, the input color
+    space, the display, the view and the look.
+    """
     def __init__(self, context: feather_tk._feather_tk.Context, colorModel: djv._djv.models.ColorModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
     @property
-    def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox: ...
+    def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox:
+        """Get the check box that turns OpenColorIO on and off, which the Color
+        tool puts in the section's title.
+        """
 
 class LUTWidget(feather_tk._feather_tk.IContainer):
+    """The LUT section of the Color tool: the LUT file, and the order and
+    direction it is applied in.
+    """
     def __init__(self, context: feather_tk._feather_tk.Context, colorModel: djv._djv.models.ColorModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
     @property
-    def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox: ...
+    def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox:
+        """Get the check box that turns the LUT on and off, which the Color
+        tool puts in the section's title.
+        """
 
 class ColorWidget(feather_tk._feather_tk.IContainer):
-    """Color widget.
-
-    Add support for displaying pixel types like U8, U16, etc.?
+    """The Color section of the Color tool: the color values, exposure and soft
+    clip.
     """
-    def __init__(self, context: feather_tk._feather_tk.Context, viewportModel: djv._djv.models.ViewportModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None:
-        """Create a new widget."""
+    def __init__(self, context: feather_tk._feather_tk.Context, viewportModel: djv._djv.models.ViewportModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
     @property
-    def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox: ...
+    def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox:
+        """Get the check box that turns the color values, exposure and soft
+        clip on and off together, which the Color tool puts in the section's
+        title.
+        """
 
 class LevelsWidget(feather_tk._feather_tk.IContainer):
+    """The Levels section of the Color tool."""
     def __init__(self, context: feather_tk._feather_tk.Context, settings: feather_tk._feather_tk.Settings, viewportModel: djv._djv.models.ViewportModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
     @property
-    def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox: ...
+    def enabledCheckBox(self) -> feather_tk._feather_tk.CheckBox:
+        """Get the check box that turns the levels on and off, which the Color
+        tool puts in the section's title.
+        """
 
 class ViewOptionsWidget(feather_tk._feather_tk.IContainer):
     def __init__(self, context: feather_tk._feather_tk.Context, viewportModel: djv._djv.models.ViewportModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
@@ -164,6 +182,7 @@ class GraphicsSettingsWidget(ISettingsWidget):
     def __init__(self, context: feather_tk._feather_tk.Context, app: feather_tk._feather_tk.App, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
 class ImageSeqSettingsWidget(ISettingsWidget):
+    """Image sequence settings widget."""
     def __init__(self, context: feather_tk._feather_tk.Context, settingsModel: djv._djv.models.SettingsModel, viewportModel: djv._djv.models.ViewportModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
 class TimeSettingsWidget(ISettingsWidget):
@@ -181,9 +200,13 @@ class FileDragDropData(feather_tk._feather_tk.IDragDropData):
     def __init__(self, item: djv._djv.models.FilesModelItem) -> None: ...
 
     @property
-    def item(self) -> djv._djv.models.FilesModelItem: ...
+    def item(self) -> djv._djv.models.FilesModelItem:
+        """Get the file being dragged."""
 
 class FileThumbnail(feather_tk._feather_tk.IWidget):
+    """A file's thumbnail, as the Files tool shows it. It is read while it can
+    be seen.
+    """
     def __init__(self, context: feather_tk._feather_tk.Context, item: djv._djv.models.FilesModelItem, ioOptions: Mapping[str, str], parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
     @property
@@ -224,7 +247,10 @@ class SpeedPopup(feather_tk._feather_tk.IWidgetPopup):
     """Speed popup."""
     def __init__(self, context: feather_tk._feather_tk.Context, model: feather_tk._feather_tk.DoubleModel, defaultSpeed: float, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback for when a speed is chosen from the list, in frames
+        per second.
+        """
 
 class StatusIndicator(feather_tk._feather_tk.IContainer):
     """Status indicator widget.

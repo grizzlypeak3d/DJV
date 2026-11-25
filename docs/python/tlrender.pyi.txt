@@ -2144,15 +2144,15 @@ class Levels:
 
     @property
     def inLow(self) -> float:
-        """The input low value, subtracted from each channel first."""
+        """The input black point: the value that becomes outLow."""
 
     @inLow.setter
     def inLow(self, arg: float, /) -> None: ...
 
     @property
     def inHigh(self) -> float:
-        """The input high value. Each channel is divided by it after inLow is
-        subtracted, so the input range ends at inLow plus inHigh.
+        """The input white point: the value that becomes outHigh. Values
+        outside the input range are not clamped.
         """
 
     @inHigh.setter
@@ -2169,16 +2169,14 @@ class Levels:
 
     @property
     def outLow(self) -> float:
-        """The output low value, added last."""
+        """The output black point."""
 
     @outLow.setter
     def outLow(self, arg: float, /) -> None: ...
 
     @property
     def outHigh(self) -> float:
-        """The output high value. The values are multiplied by it before outLow
-        is added, so the output range ends at outLow plus outHigh.
-        """
+        """The output white point."""
 
     @outHigh.setter
     def outHigh(self, arg: float, /) -> None: ...

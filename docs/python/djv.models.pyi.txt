@@ -49,25 +49,29 @@ class ReviewStroke:
     def __init__(self) -> None: ...
 
     @property
-    def kind(self) -> ReviewStrokeKind: ...
+    def kind(self) -> ReviewStrokeKind:
+        """What the stroke is."""
 
     @kind.setter
     def kind(self, arg: ReviewStrokeKind, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The color, orange by default."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
 
     @property
-    def width(self) -> float: ...
+    def width(self) -> float:
+        """The width of the line, in the pixels of the source image."""
 
     @width.setter
     def width(self, arg: float, /) -> None: ...
 
     @property
-    def points(self) -> list[feather_tk._feather_tk.V2F]: ...
+    def points(self) -> list[feather_tk._feather_tk.V2F]:
+        """The points, in the pixels of the source image."""
 
     @points.setter
     def points(self, arg: Sequence[feather_tk._feather_tk.V2F], /) -> None: ...
@@ -82,7 +86,8 @@ class ReviewStroke:
     def text(self, arg: str, /) -> None: ...
 
     @property
-    def textSize(self) -> float: ...
+    def textSize(self) -> float:
+        """The height of the text, in the pixels of the source image."""
 
     @textSize.setter
     def textSize(self, arg: float, /) -> None: ...
@@ -106,7 +111,8 @@ class ReviewAnnotation:
     def __init__(self) -> None: ...
 
     @property
-    def id(self) -> str: ...
+    def id(self) -> str:
+        """The annotation's identifier."""
 
     @id.setter
     def id(self, arg: str, /) -> None: ...
@@ -137,13 +143,15 @@ class ReviewAnnotation:
     def author(self, arg: str, /) -> None: ...
 
     @property
-    def created(self) -> str: ...
+    def created(self) -> str:
+        """When it was drawn, ISO 8601."""
 
     @created.setter
     def created(self, arg: str, /) -> None: ...
 
     @property
-    def strokes(self) -> list[ReviewStroke]: ...
+    def strokes(self) -> list[ReviewStroke]:
+        """The strokes, in the order they were drawn."""
 
     @strokes.setter
     def strokes(self, arg: Sequence[ReviewStroke], /) -> None: ...
@@ -274,14 +282,18 @@ class AnnotationsModel:
         """Remove all the annotations, clearing the undo history."""
 
     @property
-    def observeHasUndo(self) -> feather_tk._feather_tk.IObservableBool: ...
+    def observeHasUndo(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether there is a change to undo."""
 
     @property
-    def observeHasRedo(self) -> feather_tk._feather_tk.IObservableBool: ...
+    def observeHasRedo(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether there is an undone change to redo."""
 
-    def undo(self) -> None: ...
+    def undo(self) -> None:
+        """Undo the last change to the annotations."""
 
-    def redo(self) -> None: ...
+    def redo(self) -> None:
+        """Redo the last change undone."""
 
 class ExportStatus(enum.Enum):
     """What an export is doing."""
@@ -300,19 +312,22 @@ class ExportProgress:
     def __init__(self) -> None: ...
 
     @property
-    def status(self) -> ExportStatus: ...
+    def status(self) -> ExportStatus:
+        """What the export is doing."""
 
     @status.setter
     def status(self, arg: ExportStatus, /) -> None: ...
 
     @property
-    def framesDone(self) -> int: ...
+    def framesDone(self) -> int:
+        """The number of frames written so far."""
 
     @framesDone.setter
     def framesDone(self, arg: int, /) -> None: ...
 
     @property
-    def frames(self) -> int: ...
+    def frames(self) -> int:
+        """The number of frames to write."""
 
     @frames.setter
     def frames(self, arg: int, /) -> None: ...
@@ -334,7 +349,8 @@ class ExportProgress:
     def seconds(self, arg: float, /) -> None: ...
 
     @property
-    def error(self) -> str: ...
+    def error(self) -> str:
+        """Why the export failed."""
 
     @error.setter
     def error(self, arg: str, /) -> None: ...
@@ -401,7 +417,8 @@ class ExportJob:
     def path(self) -> str: ...
 
     @property
-    def progress(self) -> ExportProgress: ...
+    def progress(self) -> ExportProgress:
+        """Get how far the export has got."""
 
 class ExportQueue:
     """The exports, run one at a time in the order they were asked for. One at
@@ -432,9 +449,13 @@ class AppInfoModel:
     """Application information model."""
     def __init__(self) -> None: ...
 
-    def getFullName(self) -> str: ...
+    def getFullName(self) -> str:
+        """Get the application's name, "DJV", or the one an application built
+        on DJV gives.
+        """
 
-    def getShortName(self) -> str: ...
+    def getShortName(self) -> str:
+        """Get the application's short name, in lower case: "djv"."""
 
     def getDocsDirName(self) -> str:
         """Get the name of the directory, under the user's application support
@@ -465,10 +486,14 @@ class AppInfoModel:
         """
 
     @property
-    def fullName(self) -> str: ...
+    def fullName(self) -> str:
+        """Get the application's name, "DJV", or the one an application built
+        on DJV gives.
+        """
 
     @property
-    def shortName(self) -> str: ...
+    def shortName(self) -> str:
+        """Get the application's short name, in lower case: "djv"."""
 
     @property
     def docsDirName(self) -> str:
@@ -479,19 +504,28 @@ class AppInfoModel:
         """
 
     @property
-    def versionMajor(self) -> int: ...
+    def versionMajor(self) -> int:
+        """Get the major version number."""
 
     @property
-    def versionMinor(self) -> int: ...
+    def versionMinor(self) -> int:
+        """Get the minor version number."""
 
     @property
-    def versionPatch(self) -> int: ...
+    def versionPatch(self) -> int:
+        """Get the patch version number."""
 
     @property
-    def versionDev(self) -> str: ...
+    def versionDev(self) -> str:
+        """Get the development suffix: "-dev" for a development version, empty
+        for a release.
+        """
 
     @property
-    def version(self) -> str: ...
+    def version(self) -> str:
+        """Get the version: the major, minor and patch numbers and the
+        development suffix, such as "3.8.0-dev".
+        """
 
     @property
     def commitDate(self) -> str:
@@ -531,7 +565,8 @@ class AppInfoModel:
         """
 
     @property
-    def license(self) -> str: ...
+    def license(self) -> str:
+        """Get the application's license text."""
 
     @property
     def licensesURL(self) -> str:
@@ -721,13 +756,16 @@ class CommandInfo:
     def __init__(self) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The command's name, the group and the action: "Timeline/DetectCuts".
+        """
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def doc(self) -> str: ...
+    def doc(self) -> str:
+        """What the command does."""
 
     @doc.setter
     def doc(self, arg: str, /) -> None: ...
@@ -847,7 +885,8 @@ class DrawModel:
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def observeEnabled(self) -> feather_tk._feather_tk.IObservableBool: ...
+    def observeEnabled(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether drawing is active."""
 
     @property
     def tool(self) -> DrawTool:
@@ -857,7 +896,8 @@ class DrawModel:
     def tool(self, arg: DrawTool, /) -> None: ...
 
     @property
-    def observeTool(self) -> IObservableDrawTool: ...
+    def observeTool(self) -> IObservableDrawTool:
+        """Observe the current tool."""
 
     @property
     def color(self) -> feather_tk._feather_tk.Color4F:
@@ -867,7 +907,8 @@ class DrawModel:
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
 
     @property
-    def observeColor(self) -> IObservableColor4F: ...
+    def observeColor(self) -> IObservableColor4F:
+        """Observe the stroke color."""
 
     @property
     def size(self) -> float:
@@ -879,7 +920,8 @@ class DrawModel:
     def size(self, arg: float, /) -> None: ...
 
     @property
-    def observeSize(self) -> feather_tk._feather_tk.IObservableFloat: ...
+    def observeSize(self) -> feather_tk._feather_tk.IObservableFloat:
+        """Observe the stroke width."""
 
     @property
     def textSize(self) -> float:
@@ -889,7 +931,8 @@ class DrawModel:
     def textSize(self, arg: float, /) -> None: ...
 
     @property
-    def observeTextSize(self) -> feather_tk._feather_tk.IObservableFloat: ...
+    def observeTextSize(self) -> feather_tk._feather_tk.IObservableFloat:
+        """Observe the height of text."""
 
     @property
     def onionSkin(self) -> bool:
@@ -902,7 +945,10 @@ class DrawModel:
     def onionSkin(self, arg: bool, /) -> None: ...
 
     @property
-    def observeOnionSkin(self) -> feather_tk._feather_tk.IObservableBool: ...
+    def observeOnionSkin(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether the drawings on the frames before and after are
+        shown.
+        """
 
     @property
     def constrain(self) -> bool:
@@ -915,7 +961,8 @@ class DrawModel:
     def constrain(self, arg: bool, /) -> None: ...
 
     @property
-    def observeConstrain(self) -> feather_tk._feather_tk.IObservableBool: ...
+    def observeConstrain(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether shapes and lines are constrained."""
 
     @property
     def textBackground(self) -> bool:
@@ -927,7 +974,8 @@ class DrawModel:
     def textBackground(self, arg: bool, /) -> None: ...
 
     @property
-    def observeTextBackground(self) -> feather_tk._feather_tk.IObservableBool: ...
+    def observeTextBackground(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether new text is drawn on a background plate."""
 
 class FilesModelItem:
     """Files model item."""
@@ -944,25 +992,32 @@ class FilesModelItem:
     def id(self, arg: str, /) -> None: ...
 
     @property
-    def path(self) -> feather_tk._feather_tk.Path: ...
+    def path(self) -> feather_tk._feather_tk.Path:
+        """The file's path."""
 
     @path.setter
     def path(self, arg: feather_tk._feather_tk.Path, /) -> None: ...
 
     @property
-    def audioPath(self) -> feather_tk._feather_tk.Path: ...
+    def audioPath(self) -> feather_tk._feather_tk.Path:
+        """A separate audio file played with it, as File > Open With Audio
+        opens one; empty for none.
+        """
 
     @audioPath.setter
     def audioPath(self, arg: feather_tk._feather_tk.Path, /) -> None: ...
 
     @property
-    def videoLayers(self) -> list[str]: ...
+    def videoLayers(self) -> list[str]:
+        """The names of the file's video layers, filled in when it is opened.
+        """
 
     @videoLayers.setter
     def videoLayers(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def videoLayer(self) -> int: ...
+    def videoLayer(self) -> int:
+        """The video layer shown, an index into the layers."""
 
     @videoLayer.setter
     def videoLayer(self, arg: int, /) -> None: ...
@@ -1003,7 +1058,10 @@ class FilesModelItem:
     def audioChannel(self, arg: int, /) -> None: ...
 
     @property
-    def speed(self) -> float: ...
+    def speed(self) -> float:
+        """The playback speed, in frames per second, when the file last lost
+        focus. Negative until then, and the file plays at its own speed.
+        """
 
     @speed.setter
     def speed(self, arg: float, /) -> None: ...
@@ -1018,7 +1076,8 @@ class FilesModelItem:
     def currentTime(self, arg: opentimelineio.opentime.RationalTime | None, /) -> None: ...
 
     @property
-    def inOutRange(self) -> opentimelineio.opentime.TimeRange | None: ...
+    def inOutRange(self) -> opentimelineio.opentime.TimeRange | None:
+        """The in/out points, kept the same way as the current time."""
 
     @inOutRange.setter
     def inOutRange(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
@@ -1046,7 +1105,10 @@ class FilesModelItem:
     def framesStated(self, arg: bool, /) -> None: ...
 
     @property
-    def newFile(self) -> bool: ...
+    def newFile(self) -> bool:
+        """Whether the file has just been opened and not yet been the current
+        file. Playback starts on a new file when the playback settings say so.
+        """
 
     @newFile.setter
     def newFile(self, arg: bool, /) -> None: ...
@@ -1151,6 +1213,9 @@ class ObservableFilesModelItemList(IObservableFilesModelItemList):
         """Get the index of the given item."""
 
 class FilesModel:
+    """Files model: the open files, the "A" file, which is the current one, and
+    the "B" files it is compared with.
+    """
     def __init__(self, settings: feather_tk._feather_tk.Settings) -> None:
         """Create a new model."""
 
@@ -1383,7 +1448,8 @@ class FilesModel:
     def wipeHandles(self, arg: bool, /) -> None: ...
 
     @property
-    def observeWipeHandles(self) -> feather_tk._feather_tk.IObservableBool: ...
+    def observeWipeHandles(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether the wipe's handles are shown."""
 
 def getCompareTimeLabels() -> list[str]:
     """Labels for the comparison time, as shown to the user. The enumeration's
@@ -1408,7 +1474,8 @@ class ReviewMarker:
     def __init__(self) -> None: ...
 
     @property
-    def id(self) -> str: ...
+    def id(self) -> str:
+        """The marker's identifier."""
 
     @id.setter
     def id(self, arg: str, /) -> None: ...
@@ -1433,7 +1500,8 @@ class ReviewMarker:
     def range(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
 
     @property
-    def color(self) -> feather_tk._feather_tk.Color4F: ...
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The color, green by default."""
 
     @color.setter
     def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
@@ -1584,73 +1652,90 @@ class OCIOModelData:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether OpenColorIO is enabled."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def config(self) -> tlrender._tlrender.OCIOConfig: ...
+    def config(self) -> tlrender._tlrender.OCIOConfig:
+        """Which configuration is used."""
 
     @config.setter
     def config(self, arg: tlrender._tlrender.OCIOConfig, /) -> None: ...
 
     @property
-    def fileName(self) -> str: ...
+    def fileName(self) -> str:
+        """The configuration file, for File."""
 
     @fileName.setter
     def fileName(self, arg: str, /) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The configuration's name, or where it has none the file's, or for a
+        "config.ocio" its directory's.
+        """
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def inputs(self) -> list[str]: ...
+    def inputs(self) -> list[str]:
+        """The input color spaces. The first is "Automatic", which resolves
+        each file's from the extension assignments, what the file declares, and
+        the configuration's file rules.
+        """
 
     @inputs.setter
     def inputs(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def inputIndex(self) -> int: ...
+    def inputIndex(self) -> int:
+        """The input color space in use, an index into the inputs."""
 
     @inputIndex.setter
     def inputIndex(self, arg: int, /) -> None: ...
 
     @property
-    def displays(self) -> list[str]: ...
+    def displays(self) -> list[str]:
+        """The configuration's displays."""
 
     @displays.setter
     def displays(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def displayIndex(self) -> int: ...
+    def displayIndex(self) -> int:
+        """The display in use, an index into the displays."""
 
     @displayIndex.setter
     def displayIndex(self, arg: int, /) -> None: ...
 
     @property
-    def views(self) -> list[str]: ...
+    def views(self) -> list[str]:
+        """The views of the display in use."""
 
     @views.setter
     def views(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def viewIndex(self) -> int: ...
+    def viewIndex(self) -> int:
+        """The view in use, an index into the views."""
 
     @viewIndex.setter
     def viewIndex(self, arg: int, /) -> None: ...
 
     @property
-    def looks(self) -> list[str]: ...
+    def looks(self) -> list[str]:
+        """The configuration's looks. The first is "None"."""
 
     @looks.setter
     def looks(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def lookIndex(self) -> int: ...
+    def lookIndex(self) -> int:
+        """The look in use, an index into the looks."""
 
     @lookIndex.setter
     def lookIndex(self, arg: int, /) -> None: ...
@@ -1685,6 +1770,11 @@ class ObservableOCIOModelData(IObservableOCIOModelData):
         """Get the value."""
 
 class OCIOModel:
+    """OpenColorIO model: a configuration's color spaces, displays, views and
+    looks, and the options chosen from them. The application's color options
+    are the color model's; a color widget keeps a model of its own in step with
+    them.
+    """
     def __init__(self, context: feather_tk._feather_tk.Context) -> None:
         """Create a new model."""
 
@@ -1744,31 +1834,36 @@ class Playlist:
     def __init__(self) -> None: ...
 
     @property
-    def items(self) -> list[FilesModelItem]: ...
+    def items(self) -> list[FilesModelItem]:
+        """The files, in order."""
 
     @items.setter
     def items(self, arg: Sequence[FilesModelItem], /) -> None: ...
 
     @property
-    def aIndex(self) -> int: ...
+    def aIndex(self) -> int:
+        """The "A" file, an index into the items; -1 for none."""
 
     @aIndex.setter
     def aIndex(self, arg: int, /) -> None: ...
 
     @property
-    def bIndexes(self) -> list[int]: ...
+    def bIndexes(self) -> list[int]:
+        """The "B" files, as indexes into the items."""
 
     @bIndexes.setter
     def bIndexes(self, arg: Sequence[int], /) -> None: ...
 
     @property
-    def compareOptions(self) -> tlrender._tlrender.CompareOptions: ...
+    def compareOptions(self) -> tlrender._tlrender.CompareOptions:
+        """The compare options."""
 
     @compareOptions.setter
     def compareOptions(self, arg: tlrender._tlrender.CompareOptions, /) -> None: ...
 
     @property
-    def compareTime(self) -> tlrender._tlrender.CompareTime: ...
+    def compareTime(self) -> tlrender._tlrender.CompareTime:
+        """The compare time mode."""
 
     @compareTime.setter
     def compareTime(self, arg: tlrender._tlrender.CompareTime, /) -> None: ...
@@ -1825,9 +1920,15 @@ def reviewVersionFor(review: Review) -> int:
 def reviewExtension() -> str:
     """The review file extension (".djvr")."""
 
-def sameTime(arg0: opentimelineio.opentime.RationalTime | None, arg1: opentimelineio.opentime.RationalTime | None, /) -> bool: ...
+def sameTime(arg0: opentimelineio.opentime.RationalTime | None, arg1: opentimelineio.opentime.RationalTime | None, /) -> bool:
+    """Whether two optional times are the same: both unset, or the same value
+    at the same rate.
+    """
 
-def sameRange(arg0: opentimelineio.opentime.TimeRange | None, arg1: opentimelineio.opentime.TimeRange | None, /) -> bool: ...
+def sameRange(arg0: opentimelineio.opentime.TimeRange | None, arg1: opentimelineio.opentime.TimeRange | None, /) -> bool:
+    """Whether two optional time ranges are the same: both unset, or the same
+    start and duration at the same rate.
+    """
 
 def generateId() -> str:
     """Generate a stable, unique identifier for a review file entry.
@@ -1841,15 +1942,12 @@ def timestamp() -> str:
     """The current UTC time, ISO 8601 (e.g. "2026-07-26T18:05:00Z")."""
 
 def reviewAuthor() -> str:
-    """The current user, for attributing notes and annotations.
-
-    Taken from the environment -- USERNAME on Windows, USER elsewhere -- and
-    empty when neither is set. DJV has no accounts and reviews are passed from
-    hand to hand, so this is a label rather than an identity: it says who wrote
-    a note when a session comes back from someone else. Who is making the
-    markers and the drawings: the author set with setReviewAuthor(), and the
-    user name the system gives where none is set, except on the iPad, whose
-    user is the same for everyone.
+    """Who is making the markers and the drawings: the author set with
+    setReviewAuthor(), and where none is set the user name the system gives
+    (USERNAME on Windows, USER elsewhere), except on the iPad, whose user is
+    the same for everyone. DJV has no accounts and reviews are passed from hand
+    to hand, so this is a label rather than an identity: it says who wrote a
+    note when a session comes back from someone else.
     """
 
 class ReviewFile:
@@ -1857,7 +1955,9 @@ class ReviewFile:
     def __init__(self) -> None: ...
 
     @property
-    def id(self) -> str: ...
+    def id(self) -> str:
+        """The file's identifier, which the rest of the review refers to it by.
+        """
 
     @id.setter
     def id(self, arg: str, /) -> None: ...
@@ -1886,31 +1986,38 @@ class ReviewFile:
     def audioPath(self, arg: str, /) -> None: ...
 
     @property
-    def audioPathAbsolute(self) -> str: ...
+    def audioPathAbsolute(self) -> str:
+        """The separate audio's absolute path."""
 
     @audioPathAbsolute.setter
     def audioPathAbsolute(self, arg: str, /) -> None: ...
 
     @property
-    def videoLayer(self) -> int: ...
+    def videoLayer(self) -> int:
+        """The video layer shown, by index."""
 
     @videoLayer.setter
     def videoLayer(self, arg: int, /) -> None: ...
 
     @property
-    def speed(self) -> float: ...
+    def speed(self) -> float:
+        """The playback speed, in frames per second. Negative is none saved,
+        and the file plays at its own speed.
+        """
 
     @speed.setter
     def speed(self, arg: float, /) -> None: ...
 
     @property
-    def currentTime(self) -> opentimelineio.opentime.RationalTime | None: ...
+    def currentTime(self) -> opentimelineio.opentime.RationalTime | None:
+        """The current time. Unset when the file had not been played."""
 
     @currentTime.setter
     def currentTime(self, arg: opentimelineio.opentime.RationalTime | None, /) -> None: ...
 
     @property
-    def inOutRange(self) -> opentimelineio.opentime.TimeRange | None: ...
+    def inOutRange(self) -> opentimelineio.opentime.TimeRange | None:
+        """The in/out points. Unset when the file had not been played."""
 
     @inOutRange.setter
     def inOutRange(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
@@ -1934,13 +2041,15 @@ class ReviewCompare:
     def bIds(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def options(self) -> tlrender._tlrender.CompareOptions: ...
+    def options(self) -> tlrender._tlrender.CompareOptions:
+        """The compare options."""
 
     @options.setter
     def options(self, arg: tlrender._tlrender.CompareOptions, /) -> None: ...
 
     @property
-    def time(self) -> tlrender._tlrender.CompareTime: ...
+    def time(self) -> tlrender._tlrender.CompareTime:
+        """The compare time mode."""
 
     @time.setter
     def time(self, arg: tlrender._tlrender.CompareTime, /) -> None: ...
@@ -1957,13 +2066,15 @@ class ReviewView:
     def frameView(self, arg: bool, /) -> None: ...
 
     @property
-    def pos(self) -> feather_tk._feather_tk.V2I: ...
+    def pos(self) -> feather_tk._feather_tk.V2I:
+        """Where the image's origin is in the view, in pixels of the view."""
 
     @pos.setter
     def pos(self, arg: feather_tk._feather_tk.V2I, /) -> None: ...
 
     @property
-    def zoom(self) -> float: ...
+    def zoom(self) -> float:
+        """The view zoom: the pixels of the view to a pixel of the image."""
 
     @zoom.setter
     def zoom(self, arg: float, /) -> None: ...
@@ -1973,43 +2084,50 @@ class ReviewColor:
     def __init__(self) -> None: ...
 
     @property
-    def ocio(self) -> tlrender._tlrender.OCIOOptions: ...
+    def ocio(self) -> tlrender._tlrender.OCIOOptions:
+        """The OCIO options."""
 
     @ocio.setter
     def ocio(self, arg: tlrender._tlrender.OCIOOptions, /) -> None: ...
 
     @property
-    def lut(self) -> tlrender._tlrender.LUTOptions: ...
+    def lut(self) -> tlrender._tlrender.LUTOptions:
+        """The LUT options."""
 
     @lut.setter
     def lut(self, arg: tlrender._tlrender.LUTOptions, /) -> None: ...
 
     @property
-    def display(self) -> tlrender._tlrender.DisplayOptions: ...
+    def display(self) -> tlrender._tlrender.DisplayOptions:
+        """The display options."""
 
     @display.setter
     def display(self, arg: tlrender._tlrender.DisplayOptions, /) -> None: ...
 
     @property
-    def background(self) -> tlrender._tlrender.BackgroundOptions: ...
+    def background(self) -> tlrender._tlrender.BackgroundOptions:
+        """The background options."""
 
     @background.setter
     def background(self, arg: tlrender._tlrender.BackgroundOptions, /) -> None: ...
 
     @property
-    def foreground(self) -> tlrender._tlrender.ForegroundOptions: ...
+    def foreground(self) -> tlrender._tlrender.ForegroundOptions:
+        """The foreground options."""
 
     @foreground.setter
     def foreground(self, arg: tlrender._tlrender.ForegroundOptions, /) -> None: ...
 
     @property
-    def aspectRatio(self) -> AspectRatioOptions: ...
+    def aspectRatio(self) -> AspectRatioOptions:
+        """The aspect ratio options."""
 
     @aspectRatio.setter
     def aspectRatio(self, arg: AspectRatioOptions, /) -> None: ...
 
     @property
-    def hud(self) -> HUDOptions: ...
+    def hud(self) -> HUDOptions:
+        """The HUD options."""
 
     @hud.setter
     def hud(self, arg: HUDOptions, /) -> None: ...
@@ -2044,55 +2162,64 @@ class Review:
     def version(self, arg: int, /) -> None: ...
 
     @property
-    def app(self) -> str: ...
+    def app(self) -> str:
+        """The application and version that wrote the document."""
 
     @app.setter
     def app(self, arg: str, /) -> None: ...
 
     @property
-    def created(self) -> str: ...
+    def created(self) -> str:
+        """When the document was written, ISO 8601 UTC."""
 
     @created.setter
     def created(self, arg: str, /) -> None: ...
 
     @property
-    def files(self) -> list[ReviewFile]: ...
+    def files(self) -> list[ReviewFile]:
+        """The files, in tab order."""
 
     @files.setter
     def files(self, arg: Sequence[ReviewFile], /) -> None: ...
 
     @property
-    def compare(self) -> ReviewCompare: ...
+    def compare(self) -> ReviewCompare:
+        """The A/B comparison: the files, the options and the time mode."""
 
     @compare.setter
     def compare(self, arg: ReviewCompare, /) -> None: ...
 
     @property
-    def view(self) -> ReviewView: ...
+    def view(self) -> ReviewView:
+        """The view's framing, pan and zoom."""
 
     @view.setter
     def view(self, arg: ReviewView, /) -> None: ...
 
     @property
-    def color(self) -> ReviewColor: ...
+    def color(self) -> ReviewColor:
+        """The color and image display options."""
 
     @color.setter
     def color(self, arg: ReviewColor, /) -> None: ...
 
     @property
-    def ui(self) -> ReviewUI: ...
+    def ui(self) -> ReviewUI:
+        """The interface state: the open tools."""
 
     @ui.setter
     def ui(self, arg: ReviewUI, /) -> None: ...
 
     @property
-    def annotations(self) -> list[ReviewAnnotation]: ...
+    def annotations(self) -> list[ReviewAnnotation]:
+        """The drawings, by file and frame."""
 
     @annotations.setter
     def annotations(self, arg: Sequence[ReviewAnnotation], /) -> None: ...
 
     @property
-    def markers(self) -> list[ReviewMarker]: ...
+    def markers(self) -> list[ReviewMarker]:
+        """The markers."""
 
     @markers.setter
     def markers(self, arg: Sequence[ReviewMarker], /) -> None: ...
@@ -2266,13 +2393,17 @@ class ExportSettings:
     def __init__(self) -> None: ...
 
     @property
-    def dir(self) -> str: ...
+    def dir(self) -> str:
+        """The directory the exports are written to. One that is empty when the
+        settings are read is set to the home directory.
+        """
 
     @dir.setter
     def dir(self, arg: str, /) -> None: ...
 
     @property
-    def renderSize(self) -> ExportRenderSize: ...
+    def renderSize(self) -> ExportRenderSize:
+        """The size the export is rendered at."""
 
     @renderSize.setter
     def renderSize(self, arg: ExportRenderSize, /) -> None: ...
@@ -2287,13 +2418,15 @@ class ExportSettings:
     def customWidth(self, arg: int, /) -> None: ...
 
     @property
-    def customHeight(self) -> int: ...
+    def customHeight(self) -> int:
+        """The height typed in, for Custom."""
 
     @customHeight.setter
     def customHeight(self, arg: int, /) -> None: ...
 
     @property
-    def fileType(self) -> ExportFileType: ...
+    def fileType(self) -> ExportFileType:
+        """The kind of export, as the tabs of the Export tool choose it."""
 
     @fileType.setter
     def fileType(self, arg: ExportFileType, /) -> None: ...
@@ -2309,31 +2442,37 @@ class ExportSettings:
     def imageFileName(self, arg: str, /) -> None: ...
 
     @property
-    def imageExt(self) -> str: ...
+    def imageExt(self) -> str:
+        """The extension of an image export, which chooses its file format."""
 
     @imageExt.setter
     def imageExt(self, arg: str, /) -> None: ...
 
     @property
-    def seqFileName(self) -> str: ...
+    def seqFileName(self) -> str:
+        """The name of a sequence export."""
 
     @seqFileName.setter
     def seqFileName(self, arg: str, /) -> None: ...
 
     @property
-    def seqExt(self) -> str: ...
+    def seqExt(self) -> str:
+        """The extension of a sequence export, which chooses its file format.
+        """
 
     @seqExt.setter
     def seqExt(self, arg: str, /) -> None: ...
 
     @property
-    def movieFileName(self) -> str: ...
+    def movieFileName(self) -> str:
+        """The name of a movie export."""
 
     @movieFileName.setter
     def movieFileName(self, arg: str, /) -> None: ...
 
     @property
-    def movieExt(self) -> str: ...
+    def movieExt(self) -> str:
+        """The extension of a movie export: one of those the preset writes."""
 
     @movieExt.setter
     def movieExt(self, arg: str, /) -> None: ...
@@ -2349,7 +2488,10 @@ class ExportSettings:
     def moviePreset(self, arg: str, /) -> None: ...
 
     @property
-    def movieAudioCodec(self) -> str: ...
+    def movieAudioCodec(self) -> str:
+        """The audio codec of a movie export, by its codec name, such as "aac".
+        "Auto" leaves it to the file format.
+        """
 
     @movieAudioCodec.setter
     def movieAudioCodec(self, arg: str, /) -> None: ...
@@ -2363,25 +2505,38 @@ class FileBrowserSettings:
     def __init__(self) -> None: ...
 
     @property
-    def nativeFileDialog(self) -> bool: ...
+    def nativeFileDialog(self) -> bool:
+        """Whether files are chosen with the platform's own file dialog rather
+        than the built-in file browser. Where the build has no native dialog it
+        is kept but does nothing.
+        """
 
     @nativeFileDialog.setter
     def nativeFileDialog(self, arg: bool, /) -> None: ...
 
     @property
-    def path(self) -> str: ...
+    def path(self) -> str:
+        """The directory the built-in file browser is in. It is given to the
+        file browser at startup and read back from it when the settings are
+        saved, so setting it does not move the file browser.
+        """
 
     @path.setter
     def path(self, arg: str, /) -> None: ...
 
     @property
-    def options(self) -> feather_tk._feather_tk.FileBrowserOptions: ...
+    def options(self) -> feather_tk._feather_tk.FileBrowserOptions:
+        """The built-in file browser's options, kept the same way as the path.
+        """
 
     @options.setter
     def options(self, arg: feather_tk._feather_tk.FileBrowserOptions, /) -> None: ...
 
     @property
-    def ext(self) -> str: ...
+    def ext(self) -> str:
+        """The extension the built-in file browser filters by, kept the same
+        way as the path.
+        """
 
     @ext.setter
     def ext(self, arg: str, /) -> None: ...
@@ -2395,25 +2550,38 @@ class ImageSeqSettings:
     def __init__(self) -> None: ...
 
     @property
-    def audio(self) -> tlrender._tlrender.ImageSeqAudio: ...
+    def audio(self) -> tlrender._tlrender.ImageSeqAudio:
+        """How an image sequence finds its audio: not at all, by extension, or
+        by file name.
+        """
 
     @audio.setter
     def audio(self, arg: tlrender._tlrender.ImageSeqAudio, /) -> None: ...
 
     @property
-    def audioExts(self) -> list[str]: ...
+    def audioExts(self) -> list[str]:
+        """The audio file extensions looked for, by extension: first a file
+        with the sequence's base name, then the first such file in its
+        directory.
+        """
 
     @audioExts.setter
     def audioExts(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def audioFileName(self) -> str: ...
+    def audioFileName(self) -> str:
+        """The audio file opened with a sequence, by file name, in the
+        sequence's directory.
+        """
 
     @audioFileName.setter
     def audioFileName(self, arg: str, /) -> None: ...
 
     @property
-    def maxDigits(self) -> int: ...
+    def maxDigits(self) -> int:
+        """The most digits a frame number can have. A file name ending in more
+        is not read as a frame of a sequence.
+        """
 
     @maxDigits.setter
     def maxDigits(self, arg: int, /) -> None: ...
@@ -2428,7 +2596,10 @@ class ImageSeqSettings:
     def readThreadCount(self, arg: int, /) -> None: ...
 
     @property
-    def io(self) -> tlrender._tlrender.SeqOptions: ...
+    def io(self) -> tlrender._tlrender.SeqOptions:
+        """The sequence read options: the default speed and what to do about a
+        missing frame.
+        """
 
     @io.setter
     def io(self, arg: tlrender._tlrender.SeqOptions, /) -> None: ...
@@ -2442,7 +2613,10 @@ class OTIOSettings:
     def __init__(self) -> None: ...
 
     @property
-    def compat(self) -> bool: ...
+    def compat(self) -> bool:
+        """Whether to work around timelines that do not conform exactly to the
+        specification.
+        """
 
     @compat.setter
     def compat(self, arg: bool, /) -> None: ...
@@ -2456,13 +2630,19 @@ class MiscSettings:
     def __init__(self) -> None: ...
 
     @property
-    def tooltipsEnabled(self) -> bool: ...
+    def tooltipsEnabled(self) -> bool:
+        """Whether tooltips are shown. Always off in the tablet build, where
+        nothing hovers.
+        """
 
     @tooltipsEnabled.setter
     def tooltipsEnabled(self, arg: bool, /) -> None: ...
 
     @property
-    def showSetup(self) -> bool: ...
+    def showSetup(self) -> bool:
+        """Whether the tour is shown at startup. It is turned off when the tour
+        is shown, so a first start shows it once.
+        """
 
     @showSetup.setter
     def showSetup(self, arg: bool, /) -> None: ...
@@ -2502,13 +2682,15 @@ class MouseActionBinding:
     def __init__(self, button: feather_tk._feather_tk.MouseButton, modifier: feather_tk._feather_tk.KeyModifier = feather_tk._feather_tk.KeyModifier._None) -> None: ...
 
     @property
-    def button(self) -> feather_tk._feather_tk.MouseButton: ...
+    def button(self) -> feather_tk._feather_tk.MouseButton:
+        """The mouse button."""
 
     @button.setter
     def button(self, arg: feather_tk._feather_tk.MouseButton, /) -> None: ...
 
     @property
-    def modifier(self) -> feather_tk._feather_tk.KeyModifier: ...
+    def modifier(self) -> feather_tk._feather_tk.KeyModifier:
+        """The modifier key held with the button."""
 
     @modifier.setter
     def modifier(self, arg: feather_tk._feather_tk.KeyModifier, /) -> None: ...
@@ -2522,19 +2704,26 @@ class MouseSettings:
     def __init__(self) -> None: ...
 
     @property
-    def bindings(self) -> dict[MouseAction, MouseActionBinding]: ...
+    def bindings(self) -> dict[MouseAction, MouseActionBinding]:
+        """The mouse button and modifier key bound to each action."""
 
     @bindings.setter
     def bindings(self, arg: Mapping[MouseAction, MouseActionBinding], /) -> None: ...
 
     @property
-    def wheelScale(self) -> float: ...
+    def wheelScale(self) -> float:
+        """The factor one click of the mouse wheel zooms the view and the
+        timeline by. The Settings tool allows 0.5 to 5.
+        """
 
     @wheelScale.setter
     def wheelScale(self, arg: float, /) -> None: ...
 
     @property
-    def frameShuttleScale(self) -> float: ...
+    def frameShuttleScale(self) -> float:
+        """How fast the frame shuttle steps: at one, a frame each 20 pixels
+        dragged. The Settings tool allows 0.1 to 10.
+        """
 
     @frameShuttleScale.setter
     def frameShuttleScale(self, arg: float, /) -> None: ...
@@ -2548,7 +2737,8 @@ class PlaybackSettings:
     def __init__(self) -> None: ...
 
     @property
-    def startPlayback(self) -> bool: ...
+    def startPlayback(self) -> bool:
+        """Whether playback starts when a file is opened."""
 
     @startPlayback.setter
     def startPlayback(self, arg: bool, /) -> None: ...
@@ -2572,7 +2762,9 @@ class ShortcutsSettings:
     def __init__(self) -> None: ...
 
     @property
-    def shortcuts(self) -> list[Shortcut]: ...
+    def shortcuts(self) -> list[Shortcut]:
+        """The keyboard shortcuts of the actions, with the keys they have now.
+        """
 
     @shortcuts.setter
     def shortcuts(self, arg: Sequence[Shortcut], /) -> None: ...
@@ -2593,13 +2785,15 @@ class StyleSettings:
     def displayScale(self, arg: float, /) -> None: ...
 
     @property
-    def colorControls(self) -> feather_tk._feather_tk.ColorControls: ...
+    def colorControls(self) -> feather_tk._feather_tk.ColorControls:
+        """The brightness and contrast of the interface."""
 
     @colorControls.setter
     def colorControls(self, arg: feather_tk._feather_tk.ColorControls, /) -> None: ...
 
     @property
-    def colorStyle(self) -> feather_tk._feather_tk.ColorStyle: ...
+    def colorStyle(self) -> feather_tk._feather_tk.ColorStyle:
+        """The interface colors, dark or light."""
 
     @colorStyle.setter
     def colorStyle(self, arg: feather_tk._feather_tk.ColorStyle, /) -> None: ...
@@ -2630,19 +2824,27 @@ class TimelineSettings:
     def __init__(self) -> None: ...
 
     @property
-    def minimize(self) -> bool: ...
+    def minimize(self) -> bool:
+        """Whether the timeline shows only the first video and audio track:
+        Timeline > Minimize.
+        """
 
     @minimize.setter
     def minimize(self, arg: bool, /) -> None: ...
 
     @property
-    def frameView(self) -> bool: ...
+    def frameView(self) -> bool:
+        """Whether the timeline is zoomed to show the whole of it: Timeline >
+        Frame View. Panning the timeline turns it off.
+        """
 
     @frameView.setter
     def frameView(self, arg: bool, /) -> None: ...
 
     @property
-    def scrollBars(self) -> bool: ...
+    def scrollBars(self) -> bool:
+        """Whether a zoomed timeline has scroll bars: Timeline > Scroll Bars.
+        """
 
     @scrollBars.setter
     def scrollBars(self, arg: bool, /) -> None: ...
@@ -2656,13 +2858,19 @@ class TimelineSettings:
     def compareTimelines(self, arg: bool, /) -> None: ...
 
     @property
-    def autoScroll(self) -> bool: ...
+    def autoScroll(self) -> bool:
+        """Whether the timeline scrolls to keep the current frame in sight
+        while playing: Timeline > Auto Scroll.
+        """
 
     @autoScroll.setter
     def autoScroll(self, arg: bool, /) -> None: ...
 
     @property
-    def stopOnScrub(self) -> bool: ...
+    def stopOnScrub(self) -> bool:
+        """Whether scrubbing stops playback, rather than pausing it while the
+        button is held: Timeline > Stop Playback When Scrubbing.
+        """
 
     @stopOnScrub.setter
     def stopOnScrub(self, arg: bool, /) -> None: ...
@@ -2675,31 +2883,44 @@ class TimelineSettings:
     def preview(self, arg: bool, /) -> None: ...
 
     @property
-    def trackMedia(self) -> bool: ...
+    def trackMedia(self) -> bool:
+        """Whether the video thumbnails and audio waveforms are shown at all:
+        Timeline > Track Media.
+        """
 
     @trackMedia.setter
     def trackMedia(self, arg: bool, /) -> None: ...
 
     @property
-    def thumbnails(self) -> bool: ...
+    def thumbnails(self) -> bool:
+        """Whether the video thumbnails are shown, with track media on:
+        Timeline > Video Thumbnails.
+        """
 
     @thumbnails.setter
     def thumbnails(self, arg: bool, /) -> None: ...
 
     @property
-    def thumbnailSize(self) -> TimelineThumbnailSize: ...
+    def thumbnailSize(self) -> TimelineThumbnailSize:
+        """The height of the video thumbnails: Timeline > Video Thumbnail Size.
+        """
 
     @thumbnailSize.setter
     def thumbnailSize(self, arg: TimelineThumbnailSize, /) -> None: ...
 
     @property
-    def waveforms(self) -> bool: ...
+    def waveforms(self) -> bool:
+        """Whether the audio waveforms are shown, with track media on: Timeline
+        > Audio Waveforms.
+        """
 
     @waveforms.setter
     def waveforms(self, arg: bool, /) -> None: ...
 
     @property
-    def waveformSize(self) -> TimelineThumbnailSize: ...
+    def waveformSize(self) -> TimelineThumbnailSize:
+        """The height of the audio waveforms: Timeline > Audio Waveform Size.
+        """
 
     @waveformSize.setter
     def waveformSize(self, arg: TimelineThumbnailSize, /) -> None: ...
@@ -2729,85 +2950,109 @@ class WindowSettings:
     def pos(self, arg: feather_tk._feather_tk.V2I, /) -> None: ...
 
     @property
-    def hasPos(self) -> bool: ...
+    def hasPos(self) -> bool:
+        """Whether there is a position to put the window at."""
 
     @hasPos.setter
     def hasPos(self, arg: bool, /) -> None: ...
 
     @property
-    def maximized(self) -> bool: ...
+    def maximized(self) -> bool:
+        """Whether the window is maximized. The position, size and maximized
+        state are applied when the main window is made, and saved from it.
+        """
 
     @maximized.setter
     def maximized(self, arg: bool, /) -> None: ...
 
     @property
-    def fileToolBar(self) -> bool: ...
+    def fileToolBar(self) -> bool:
+        """Whether the file tool bar is shown: Window > File Tool Bar."""
 
     @fileToolBar.setter
     def fileToolBar(self, arg: bool, /) -> None: ...
 
     @property
-    def compareToolBar(self) -> bool: ...
+    def compareToolBar(self) -> bool:
+        """Whether the compare tool bar is shown: Window > Compare Tool Bar."""
 
     @compareToolBar.setter
     def compareToolBar(self, arg: bool, /) -> None: ...
 
     @property
-    def windowToolBar(self) -> bool: ...
+    def windowToolBar(self) -> bool:
+        """Whether the window tool bar is shown: Window > Window Tool Bar."""
 
     @windowToolBar.setter
     def windowToolBar(self, arg: bool, /) -> None: ...
 
     @property
-    def viewToolBar(self) -> bool: ...
+    def viewToolBar(self) -> bool:
+        """Whether the view tool bar is shown: Window > View Tool Bar."""
 
     @viewToolBar.setter
     def viewToolBar(self, arg: bool, /) -> None: ...
 
     @property
-    def toolsToolBar(self) -> bool: ...
+    def toolsToolBar(self) -> bool:
+        """Whether the tools tool bar is shown: Window > Tools Tool Bar."""
 
     @toolsToolBar.setter
     def toolsToolBar(self, arg: bool, /) -> None: ...
 
     @property
-    def tabBar(self) -> bool: ...
+    def tabBar(self) -> bool:
+        """Whether the tab bar is shown: Window > Tab Bar."""
 
     @tabBar.setter
     def tabBar(self, arg: bool, /) -> None: ...
 
     @property
-    def timeline(self) -> bool: ...
+    def timeline(self) -> bool:
+        """Whether the timeline is shown, when a file is open: Window >
+        Timeline.
+        """
 
     @timeline.setter
     def timeline(self, arg: bool, /) -> None: ...
 
     @property
-    def bottomToolBar(self) -> bool: ...
+    def bottomToolBar(self) -> bool:
+        """Whether the bottom tool bar is shown: Window > Bottom Tool Bar."""
 
     @bottomToolBar.setter
     def bottomToolBar(self, arg: bool, /) -> None: ...
 
     @property
-    def statusToolBar(self) -> bool: ...
+    def statusToolBar(self) -> bool:
+        """Whether the status bar is shown: Window > Status Tool Bar."""
 
     @statusToolBar.setter
     def statusToolBar(self, arg: bool, /) -> None: ...
 
     @property
-    def tools(self) -> bool: ...
+    def tools(self) -> bool:
+        """Whether the tools panel is shown, when a tool is open: Window >
+        Tools.
+        """
 
     @tools.setter
     def tools(self, arg: bool, /) -> None: ...
 
     @property
-    def splitter(self) -> float: ...
+    def splitter(self) -> float:
+        """The share of the height the view has above the timeline, from zero
+        to one. The splitters are applied when the main window is made.
+        """
 
     @splitter.setter
     def splitter(self, arg: float, /) -> None: ...
 
     @property
-    def splitter2(self) -> float: ...
+    def splitter2(self) -> float:
+        """The share of the width the view has beside the tools panel, from
+        zero to one.
+        """
 
     @splitter2.setter
     def splitter2(self, arg: float, /) -> None: ...
@@ -3128,94 +3373,119 @@ class SettingsModel:
         """Reset to default values."""
 
     @property
-    def audio(self) -> AudioSettings: ...
+    def audio(self) -> AudioSettings:
+        """Get the audio settings."""
 
     @audio.setter
     def audio(self, arg: AudioSettings, /) -> None: ...
 
     @property
-    def observeAudio(self) -> IObservableAudioSettings: ...
+    def observeAudio(self) -> IObservableAudioSettings:
+        """Observe the audio settings."""
 
     @property
-    def cache(self) -> tlrender._tlrender.PlayerCacheOptions: ...
+    def cache(self) -> tlrender._tlrender.PlayerCacheOptions:
+        """Get the cache settings: the sizes of the video and audio caches, in
+        gigabytes, and how much is read behind the current frame. Sizes above
+        getMaxCacheGB() are lowered to it when the settings are read.
+        """
 
     @cache.setter
     def cache(self, arg: tlrender._tlrender.PlayerCacheOptions, /) -> None: ...
 
     @property
-    def observeCache(self) -> tlrender._tlrender.IObservablePlayerCacheOptions: ...
+    def observeCache(self) -> tlrender._tlrender.IObservablePlayerCacheOptions:
+        """Observe the cache settings."""
 
     @property
-    def export(self) -> ExportSettings: ...
+    def export(self) -> ExportSettings:
+        """Get the export settings."""
 
     @export.setter
     def export(self, arg: ExportSettings, /) -> None: ...
 
     @property
-    def observeExport(self) -> IObservableExportSettings: ...
+    def observeExport(self) -> IObservableExportSettings:
+        """Observe the export settings."""
 
     @property
-    def fileBrowser(self) -> FileBrowserSettings: ...
+    def fileBrowser(self) -> FileBrowserSettings:
+        """Get the file browser settings."""
 
     @fileBrowser.setter
     def fileBrowser(self, arg: FileBrowserSettings, /) -> None: ...
 
     @property
-    def observeFileBrowser(self) -> IObservableFileBrowserSettings: ...
+    def observeFileBrowser(self) -> IObservableFileBrowserSettings:
+        """Observe the file browser settings."""
 
     @property
-    def imageSeq(self) -> ImageSeqSettings: ...
+    def imageSeq(self) -> ImageSeqSettings:
+        """Get the image sequence settings. They are taken when a file is
+        opened.
+        """
 
     @imageSeq.setter
     def imageSeq(self, arg: ImageSeqSettings, /) -> None: ...
 
     @property
-    def observeImageSeq(self) -> IObservableImageSeqSettings: ...
+    def observeImageSeq(self) -> IObservableImageSeqSettings:
+        """Observe the image sequence settings."""
 
     @property
-    def otio(self) -> OTIOSettings: ...
+    def otio(self) -> OTIOSettings:
+        """Get the OTIO settings. They are taken when a file is opened."""
 
     @otio.setter
     def otio(self, arg: OTIOSettings, /) -> None: ...
 
     @property
-    def observeOTIO(self) -> IObservableOTIOSettings: ...
+    def observeOTIO(self) -> IObservableOTIOSettings:
+        """Observe the OTIO settings."""
 
     @property
-    def misc(self) -> MiscSettings: ...
+    def misc(self) -> MiscSettings:
+        """Get the miscellaneous settings."""
 
     @misc.setter
     def misc(self, arg: MiscSettings, /) -> None: ...
 
     @property
-    def observeMisc(self) -> IObservableMiscSettings: ...
+    def observeMisc(self) -> IObservableMiscSettings:
+        """Observe the miscellaneous settings."""
 
     @property
-    def mouse(self) -> MouseSettings: ...
+    def mouse(self) -> MouseSettings:
+        """Get the mouse settings."""
 
     @mouse.setter
     def mouse(self, arg: MouseSettings, /) -> None: ...
 
     @property
-    def observeMouse(self) -> IObservableMouseSettings: ...
+    def observeMouse(self) -> IObservableMouseSettings:
+        """Observe the mouse settings."""
 
     @property
-    def playback(self) -> PlaybackSettings: ...
+    def playback(self) -> PlaybackSettings:
+        """Get the playback settings."""
 
     @playback.setter
     def playback(self, arg: PlaybackSettings, /) -> None: ...
 
     @property
-    def observePlayback(self) -> IObservablePlaybackSettings: ...
+    def observePlayback(self) -> IObservablePlaybackSettings:
+        """Observe the playback settings."""
 
     @property
-    def shortcuts(self) -> ShortcutsSettings: ...
+    def shortcuts(self) -> ShortcutsSettings:
+        """Get the keyboard shortcuts settings."""
 
     @shortcuts.setter
     def shortcuts(self, arg: ShortcutsSettings, /) -> None: ...
 
     @property
-    def observeShortcuts(self) -> IObservableShortcutsSettings: ...
+    def observeShortcuts(self) -> IObservableShortcutsSettings:
+        """Observe the keyboard shortcuts settings."""
 
     def addShortcuts(self, shortcuts: Sequence[Shortcut]) -> None:
         """Add keyboard shortcuts. Any saved key bindings are applied to the
@@ -3223,31 +3493,37 @@ class SettingsModel:
         """
 
     @property
-    def style(self) -> StyleSettings: ...
+    def style(self) -> StyleSettings:
+        """Get the style settings."""
 
     @style.setter
     def style(self, arg: StyleSettings, /) -> None: ...
 
     @property
-    def observeStyle(self) -> IObservableStyleSettings: ...
+    def observeStyle(self) -> IObservableStyleSettings:
+        """Observe the style settings."""
 
     @property
-    def timeline(self) -> TimelineSettings: ...
+    def timeline(self) -> TimelineSettings:
+        """Get the timeline settings."""
 
     @timeline.setter
     def timeline(self, arg: TimelineSettings, /) -> None: ...
 
     @property
-    def observeTimeline(self) -> IObservableTimelineSettings: ...
+    def observeTimeline(self) -> IObservableTimelineSettings:
+        """Observe the timeline settings."""
 
     @property
-    def window(self) -> WindowSettings: ...
+    def window(self) -> WindowSettings:
+        """Get the window settings."""
 
     @window.setter
     def window(self, arg: WindowSettings, /) -> None: ...
 
     @property
-    def observeWindow(self) -> IObservableWindowSettings: ...
+    def observeWindow(self) -> IObservableWindowSettings:
+        """Observe the window settings."""
 
     @property
     def ioOptions(self) -> dict[str, str]:
@@ -3270,25 +3546,29 @@ class Shortcut:
     def __init__(self, name: str, text: str, primary: feather_tk._feather_tk.KeyShortcut = ..., secondary: feather_tk._feather_tk.KeyShortcut = ...) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The name of the action, its group and its own: "Playback/Toggle"."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """The action's label, as the keyboard shortcuts settings show it."""
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
 
     @property
-    def primary(self) -> feather_tk._feather_tk.KeyShortcut: ...
+    def primary(self) -> feather_tk._feather_tk.KeyShortcut:
+        """The primary shortcut; a key of Unknown is none."""
 
     @primary.setter
     def primary(self, arg: feather_tk._feather_tk.KeyShortcut, /) -> None: ...
 
     @property
-    def secondary(self) -> feather_tk._feather_tk.KeyShortcut: ...
+    def secondary(self) -> feather_tk._feather_tk.KeyShortcut:
+        """The secondary shortcut; a key of Unknown is none."""
 
     @secondary.setter
     def secondary(self, arg: feather_tk._feather_tk.KeyShortcut, /) -> None: ...
@@ -3310,31 +3590,36 @@ class ToolInfo:
     def __init__(self) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The tool's name, which its action and its menu item have too."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def icon(self) -> str: ...
+    def icon(self) -> str:
+        """The name of the tool's icon."""
 
     @icon.setter
     def icon(self, arg: str, /) -> None: ...
 
     @property
-    def sort(self) -> str: ...
+    def sort(self) -> str:
+        """What the Tools menu and the tools tool bar sort the tool by."""
 
     @sort.setter
     def sort(self, arg: str, /) -> None: ...
 
     @property
-    def toolBar(self) -> bool: ...
+    def toolBar(self) -> bool:
+        """Whether the tool has a button on the tools tool bar."""
 
     @toolBar.setter
     def toolBar(self, arg: bool, /) -> None: ...
 
     @property
-    def shortcut(self) -> feather_tk._feather_tk.KeyShortcut: ...
+    def shortcut(self) -> feather_tk._feather_tk.KeyShortcut:
+        """The tool's default keyboard shortcut."""
 
     @shortcut.setter
     def shortcut(self, arg: feather_tk._feather_tk.KeyShortcut, /) -> None: ...
@@ -3382,13 +3667,19 @@ class AspectRatioOptions:
     def __init__(self) -> None: ...
 
     @property
-    def index(self) -> int: ...
+    def index(self) -> int:
+        """The entry in use: zero is Default, the file's own aspect ratio, and
+        the others are the custom entries.
+        """
 
     @index.setter
     def index(self, arg: int, /) -> None: ...
 
     @property
-    def options(self) -> list[tlrender._tlrender.AspectRatioOptions]: ...
+    def options(self) -> list[tlrender._tlrender.AspectRatioOptions]:
+        """The entries: Default, which leaves the file's own aspect ratio, then
+        the custom ones, which the View tool edits.
+        """
 
     @options.setter
     def options(self, arg: Sequence[tlrender._tlrender.AspectRatioOptions], /) -> None: ...
@@ -3439,13 +3730,17 @@ class HUDOptions:
     def __init__(self) -> None: ...
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Whether the HUD is shown: View > HUD / Information Display."""
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def items(self) -> dict[HUDItem, HUDPos]: ...
+    def items(self) -> dict[HUDItem, HUDPos]:
+        """The corner each item is shown in. An item that is not in the map, or
+        is at None, is not shown.
+        """
 
     @items.setter
     def items(self, arg: Mapping[HUDItem, HUDPos], /) -> None: ...
@@ -3538,79 +3833,107 @@ class ViewportModel:
         """Save the settings."""
 
     @property
-    def imageOptions(self) -> feather_tk._feather_tk.ImageOptions: ...
+    def imageOptions(self) -> feather_tk._feather_tk.ImageOptions:
+        """Get the image options: the minify and magnify filters, the video
+        levels and the alpha blend the picture is drawn with.
+        """
 
     @imageOptions.setter
     def imageOptions(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None: ...
 
     @property
-    def observeImageOptions(self) -> IObservableImageOptions: ...
+    def observeImageOptions(self) -> IObservableImageOptions:
+        """Observe the image options."""
 
     @property
-    def displayOptions(self) -> tlrender._tlrender.DisplayOptions: ...
+    def displayOptions(self) -> tlrender._tlrender.DisplayOptions:
+        """Get the display options: the channels, the mirroring, the negative
+        and the color adjustments.
+        """
 
     @displayOptions.setter
     def displayOptions(self, arg: tlrender._tlrender.DisplayOptions, /) -> None: ...
 
     @property
-    def observeDisplayOptions(self) -> tlrender._tlrender.IObservableDisplayOptions: ...
+    def observeDisplayOptions(self) -> tlrender._tlrender.IObservableDisplayOptions:
+        """Observe the display options."""
 
     @property
-    def aspectRatioOptions(self) -> AspectRatioOptions: ...
+    def aspectRatioOptions(self) -> AspectRatioOptions:
+        """Get the aspect ratio options."""
 
     @aspectRatioOptions.setter
     def aspectRatioOptions(self, arg: AspectRatioOptions, /) -> None: ...
 
     @property
-    def observeAspectRatioOptions(self) -> IObservableAspectRatioOptions: ...
+    def observeAspectRatioOptions(self) -> IObservableAspectRatioOptions:
+        """Observe the aspect ratio options."""
 
     @property
-    def backgroundOptions(self) -> tlrender._tlrender.BackgroundOptions: ...
+    def backgroundOptions(self) -> tlrender._tlrender.BackgroundOptions:
+        """Get the background options: what is drawn behind the picture, and
+        the outline around it.
+        """
 
     @backgroundOptions.setter
     def backgroundOptions(self, arg: tlrender._tlrender.BackgroundOptions, /) -> None: ...
 
     @property
-    def observeBackgroundOptions(self) -> tlrender._tlrender.IObservableBackgroundOptions: ...
+    def observeBackgroundOptions(self) -> tlrender._tlrender.IObservableBackgroundOptions:
+        """Observe the background options."""
 
     @property
-    def foregroundOptions(self) -> tlrender._tlrender.ForegroundOptions: ...
+    def foregroundOptions(self) -> tlrender._tlrender.ForegroundOptions:
+        """Get the foreground options: the grid, the center marker, the missing
+        frame indicator, the clipping warning, the frame guide, the safe areas
+        and the data window outline.
+        """
 
     @foregroundOptions.setter
     def foregroundOptions(self, arg: tlrender._tlrender.ForegroundOptions, /) -> None: ...
 
     @property
-    def observeForegroundOptions(self) -> tlrender._tlrender.IObservableForegroundOptions: ...
+    def observeForegroundOptions(self) -> tlrender._tlrender.IObservableForegroundOptions:
+        """Observe the foreground options."""
 
     @property
-    def hudOptions(self) -> HUDOptions: ...
+    def hudOptions(self) -> HUDOptions:
+        """Get the HUD options."""
 
     @hudOptions.setter
     def hudOptions(self, arg: HUDOptions, /) -> None: ...
 
     @property
-    def observeHUDOptions(self) -> IObservableHUDOptions: ...
+    def observeHUDOptions(self) -> IObservableHUDOptions:
+        """Observe the HUD options."""
 
     @property
-    def hdrTransfer(self) -> tlrender._tlrender.HDR_EOTF: ...
+    def hdrTransfer(self) -> tlrender._tlrender.HDR_EOTF:
+        """Get what the picture is display encoded for, SDR by default."""
 
     @hdrTransfer.setter
     def hdrTransfer(self, arg: tlrender._tlrender.HDR_EOTF, /) -> None: ...
 
     @property
-    def hdrWhite(self) -> float: ...
+    def hdrWhite(self) -> float:
+        """Get the luminance the window's white stands for, in nits; 203 by
+        default. It is used where the system does not say.
+        """
 
     @hdrWhite.setter
     def hdrWhite(self, arg: float, /) -> None: ...
 
     @property
-    def observeHDRWhite(self) -> feather_tk._feather_tk.IObservableFloat: ...
+    def observeHDRWhite(self) -> feather_tk._feather_tk.IObservableFloat:
+        """Observe the luminance the window's white stands for."""
 
     @property
-    def dither(self) -> bool: ...
+    def dither(self) -> bool:
+        """Get whether the picture is dithered."""
 
     @dither.setter
     def dither(self, arg: bool, /) -> None: ...
 
     @property
-    def observeDither(self) -> feather_tk._feather_tk.IObservableBool: ...
+    def observeDither(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether the picture is dithered."""

@@ -55,7 +55,8 @@ class MainWindow(feather_tk._feather_tk.Window):
         used by the documentation screenshot capture.
         """
 
-    def showAboutDialog(self) -> None: ...
+    def showAboutDialog(self) -> None:
+        """Show the about dialog."""
 
     def showSysInfoDialog(self) -> None:
         """Show the system information dialog."""
@@ -65,7 +66,8 @@ class IToolWidget(feather_tk._feather_tk.IWidget):
     def __init__(self, context: feather_tk._feather_tk.Context, app: App, mainWindow: MainWindow, name: str, icon: str, objectName: str = '', parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
 
     @property
-    def toolName(self) -> str: ...
+    def toolName(self) -> str:
+        """Get the tool's name, the one its ToolInfo in the tools model has."""
 
     def setWidget(self, widget: feather_tk._feather_tk.IWidget) -> None: ...
 
@@ -80,7 +82,11 @@ class IToolWidget(feather_tk._feather_tk.IWidget):
 
 class ToolWidgetFactory:
     """Tool widget factory."""
-    def addTool(self, name: str, func: Callable[[feather_tk._feather_tk.Context, App, MainWindow, feather_tk._feather_tk.IWidget], IToolWidget]) -> None: ...
+    def addTool(self, name: str, func: Callable[[feather_tk._feather_tk.Context, App, MainWindow, feather_tk._feather_tk.IWidget], IToolWidget]) -> None:
+        """Add the function that makes a tool's widget, by the name of the
+        tool's ToolInfo in the tools model. The widget is made when the tool is
+        first opened.
+        """
 
 class App(feather_tk._feather_tk.App):
     """Application."""

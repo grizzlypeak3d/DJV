@@ -1717,7 +1717,8 @@ class Color1F:
     def __getitem__(self, arg: int, /) -> float: ...
 
     @property
-    def l(self) -> float: ...
+    def l(self) -> float:
+        """The luminance."""
 
     @l.setter
     def l(self, arg: float, /) -> None: ...
@@ -1744,13 +1745,15 @@ class Color2F:
     def __getitem__(self, arg: int, /) -> float: ...
 
     @property
-    def l(self) -> float: ...
+    def l(self) -> float:
+        """The luminance."""
 
     @l.setter
     def l(self, arg: float, /) -> None: ...
 
     @property
-    def a(self) -> float: ...
+    def a(self) -> float:
+        """The alpha."""
 
     @a.setter
     def a(self, arg: float, /) -> None: ...
@@ -1774,19 +1777,22 @@ class Color3F:
     def __getitem__(self, arg: int, /) -> float: ...
 
     @property
-    def r(self) -> float: ...
+    def r(self) -> float:
+        """The red channel."""
 
     @r.setter
     def r(self, arg: float, /) -> None: ...
 
     @property
-    def g(self) -> float: ...
+    def g(self) -> float:
+        """The green channel."""
 
     @g.setter
     def g(self, arg: float, /) -> None: ...
 
     @property
-    def b(self) -> float: ...
+    def b(self) -> float:
+        """The blue channel."""
 
     @b.setter
     def b(self, arg: float, /) -> None: ...
@@ -1813,25 +1819,29 @@ class Color4F:
     def __getitem__(self, arg: int, /) -> float: ...
 
     @property
-    def r(self) -> float: ...
+    def r(self) -> float:
+        """The red channel."""
 
     @r.setter
     def r(self, arg: float, /) -> None: ...
 
     @property
-    def g(self) -> float: ...
+    def g(self) -> float:
+        """The green channel."""
 
     @g.setter
     def g(self, arg: float, /) -> None: ...
 
     @property
-    def b(self) -> float: ...
+    def b(self) -> float:
+        """The blue channel."""
 
     @b.setter
     def b(self, arg: float, /) -> None: ...
 
     @property
-    def a(self) -> float: ...
+    def a(self) -> float:
+        """The alpha."""
 
     @a.setter
     def a(self, arg: float, /) -> None: ...
@@ -1846,9 +1856,13 @@ class ICommand:
     """Base class for commands."""
     def __init__(self) -> None: ...
 
-    def exec(self) -> None: ...
+    def exec(self) -> None:
+        """Execute the command. A command stack calls this when the command is
+        pushed, and again when it is redone.
+        """
 
-    def undo(self) -> None: ...
+    def undo(self) -> None:
+        """Undo the command."""
 
 class CommandStack:
     """Command stack."""
@@ -1908,7 +1922,10 @@ class DiagFormat:
     def __init__(self) -> None: ...
 
     @property
-    def divisor(self) -> float: ...
+    def divisor(self) -> float:
+        """What a sample is divided by before it is formatted. It is only used
+        when the precision is zero or more.
+        """
 
     @divisor.setter
     def divisor(self, arg: float, /) -> None: ...
@@ -2129,13 +2146,18 @@ class FontInfo:
     def __init__(self, arg0: str, arg1: int, /) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The font name: a built-in font (see getDefaultFont()) or one added
+        to the font system. A name the font system does not have is drawn with
+        the default regular font.
+        """
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def size(self) -> int: ...
+    def size(self) -> int:
+        """The font size, in pixels."""
 
     @size.setter
     def size(self, arg: int, /) -> None: ...
@@ -2149,19 +2171,25 @@ class FontInfo:
 class FontMetrics:
     """Font metrics."""
     @property
-    def ascender(self) -> int: ...
+    def ascender(self) -> int:
+        """The distance from the baseline up to the top of the font, in pixels.
+        """
 
     @ascender.setter
     def ascender(self, arg: int, /) -> None: ...
 
     @property
-    def descender(self) -> int: ...
+    def descender(self) -> int:
+        """The distance from the baseline to the bottom of the font, in pixels.
+        It is below the baseline, so it is usually negative.
+        """
 
     @descender.setter
     def descender(self, arg: int, /) -> None: ...
 
     @property
-    def lineHeight(self) -> int: ...
+    def lineHeight(self) -> int:
+        """The distance from one baseline to the next, in pixels."""
 
     @lineHeight.setter
     def lineHeight(self, arg: int, /) -> None: ...
@@ -2175,13 +2203,15 @@ class GlyphInfo:
     def __init__(self, arg0: int, arg1: FontInfo, /) -> None: ...
 
     @property
-    def code(self) -> int: ...
+    def code(self) -> int:
+        """The Unicode code point."""
 
     @code.setter
     def code(self, arg: int, /) -> None: ...
 
     @property
-    def fontInfo(self) -> FontInfo: ...
+    def fontInfo(self) -> FontInfo:
+        """The font."""
 
     @fontInfo.setter
     def fontInfo(self, arg: FontInfo, /) -> None: ...
@@ -2195,37 +2225,53 @@ class GlyphInfo:
 class Glyph:
     """Font glyph."""
     @property
-    def info(self) -> GlyphInfo: ...
+    def info(self) -> GlyphInfo:
+        """The code point and font the glyph is for."""
 
     @info.setter
     def info(self, arg: GlyphInfo, /) -> None: ...
 
     @property
-    def image(self) -> Image: ...
+    def image(self) -> Image:
+        """The rendered glyph: one channel of 8-bit coverage. Null when no font
+        has the glyph or it cannot be rendered.
+        """
 
     @image.setter
     def image(self, arg: Image, /) -> None: ...
 
     @property
-    def offset(self) -> V2I: ...
+    def offset(self) -> V2I:
+        """Where the top left of the image is from the pen position on the
+        baseline, in pixels, with y up.
+        """
 
     @offset.setter
     def offset(self, arg: V2I, /) -> None: ...
 
     @property
-    def advance(self) -> int: ...
+    def advance(self) -> int:
+        """How far the pen moves on to the next glyph, in pixels."""
 
     @advance.setter
     def advance(self, arg: int, /) -> None: ...
 
     @property
-    def lsbDelta(self) -> int: ...
+    def lsbDelta(self) -> int:
+        """The change hinting made to the left side bearing, in 64ths of a
+        pixel. Text layout compares it with the previous glyph's rsbDelta and
+        moves the glyph a pixel when they differ by more than about half a
+        pixel.
+        """
 
     @lsbDelta.setter
     def lsbDelta(self, arg: int, /) -> None: ...
 
     @property
-    def rsbDelta(self) -> int: ...
+    def rsbDelta(self) -> int:
+        """The change hinting made to the right side bearing, in 64ths of a
+        pixel.
+        """
 
     @rsbDelta.setter
     def rsbDelta(self, arg: int, /) -> None: ...
@@ -2241,17 +2287,29 @@ class FontSystem(ISystem):
         """Create a new system."""
 
     @property
-    def fonts(self) -> list[str]: ...
+    def fonts(self) -> list[str]:
+        """Get the names of the fonts."""
 
-    def addFont(self, name: str, fileName: str) -> bool: ...
+    def addFont(self, name: str, fileName: str) -> bool:
+        """Add a font from a file, under the given name.
+
+        Add a font from data in memory, which is copied, under the given name.
+        Returns whether the font could be read.
+        """
 
     @property
-    def glyphCacheSize(self) -> int: ...
+    def glyphCacheSize(self) -> int:
+        """Get the number of glyphs in the cache. It is updated once a second.
+        """
 
-    def observeGlyphCacheSize(self) -> IObservableSizeT: ...
+    def observeGlyphCacheSize(self) -> IObservableSizeT:
+        """Observe the number of glyphs in the cache."""
 
     @property
-    def glyphCachePercentage(self) -> float: ...
+    def glyphCachePercentage(self) -> float:
+        """Get how full the glyph cache is, as a percentage of its maximum. It
+        is updated once a second.
+        """
 
     def getMetrics(self, fontInfo: FontInfo) -> FontMetrics:
         """Get font metrics."""
@@ -2484,13 +2542,20 @@ class ImageMirror:
     def __init__(self, arg0: bool, arg1: bool, /) -> None: ...
 
     @property
-    def x(self) -> bool: ...
+    def x(self) -> bool:
+        """Whether the image is mirrored horizontally: each row is stored right
+        to left.
+        """
 
     @x.setter
     def x(self, arg: bool, /) -> None: ...
 
     @property
-    def y(self) -> bool: ...
+    def y(self) -> bool:
+        """Whether the image is mirrored vertically: the rows are stored top
+        down. By default they are stored bottom up, the first row in memory
+        being the bottom of the image.
+        """
 
     @y.setter
     def y(self, arg: bool, /) -> None: ...
@@ -2508,19 +2573,26 @@ class ImageLayout:
     def __init__(self, arg0: ImageMirror, arg1: int, arg2: Endian, /) -> None: ...
 
     @property
-    def mirror(self) -> ImageMirror: ...
+    def mirror(self) -> ImageMirror:
+        """How the data is mirrored."""
 
     @mirror.setter
     def mirror(self, arg: ImageMirror, /) -> None: ...
 
     @property
-    def alignment(self) -> int: ...
+    def alignment(self) -> int:
+        """The row alignment, in bytes: each row of data is padded to a
+        multiple of it. The planar YUV types are not padded.
+        """
 
     @alignment.setter
     def alignment(self, arg: int, /) -> None: ...
 
     @property
-    def endian(self) -> Endian: ...
+    def endian(self) -> Endian:
+        """The byte order of samples larger than a byte. The default is the
+        machine's own.
+        """
 
     @endian.setter
     def endian(self, arg: Endian, /) -> None: ...
@@ -2541,37 +2613,45 @@ class ImageInfo:
     def __init__(self, arg0: int, arg1: int, arg2: ImageType, /) -> None: ...
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The image name, such as the name of the layer it was read from."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def size(self) -> Size2I: ...
+    def size(self) -> Size2I:
+        """The size, in pixels."""
 
     @size.setter
     def size(self, arg: Size2I, /) -> None: ...
 
     @property
-    def type(self) -> ImageType: ...
+    def type(self) -> ImageType:
+        """The pixel type. The information is not valid while it is None."""
 
     @type.setter
     def type(self, arg: ImageType, /) -> None: ...
 
     @property
-    def pixelAspectRatio(self) -> float: ...
+    def pixelAspectRatio(self) -> float:
+        """The pixel aspect ratio: the width of a pixel over its height."""
 
     @pixelAspectRatio.setter
     def pixelAspectRatio(self, arg: float, /) -> None: ...
 
     @property
-    def videoLevels(self) -> VideoLevels: ...
+    def videoLevels(self) -> VideoLevels:
+        """The range the samples use. The renderers expand legal range to full,
+        unless ImageOptions::videoLevels says otherwise.
+        """
 
     @videoLevels.setter
     def videoLevels(self, arg: VideoLevels, /) -> None: ...
 
     @property
-    def yuvCoefficients(self) -> YUVCoefficients: ...
+    def yuvCoefficients(self) -> YUVCoefficients:
+        """The coefficients the YUV types are converted to RGB with."""
 
     @yuvCoefficients.setter
     def yuvCoefficients(self, arg: YUVCoefficients, /) -> None: ...
@@ -2588,7 +2668,8 @@ class ImageInfo:
     def depth(self, arg: int, /) -> None: ...
 
     @property
-    def layout(self) -> ImageLayout: ...
+    def layout(self) -> ImageLayout:
+        """The data layout: mirroring, row alignment, and byte order."""
 
     @layout.setter
     def layout(self, arg: ImageLayout, /) -> None: ...
@@ -2696,19 +2777,22 @@ class LogItem:
     def time(self, arg: datetime.datetime | datetime.date | datetime.time, /) -> None: ...
 
     @property
-    def prefix(self) -> str: ...
+    def prefix(self) -> str:
+        """What logged the item, such as "ftk::FontSystem"."""
 
     @prefix.setter
     def prefix(self, arg: str, /) -> None: ...
 
     @property
-    def message(self) -> str: ...
+    def message(self) -> str:
+        """The message."""
 
     @message.setter
     def message(self, arg: str, /) -> None: ...
 
     @property
-    def type(self) -> LogType: ...
+    def type(self) -> LogType:
+        """Whether the item is a message, a warning, or an error."""
 
     @type.setter
     def type(self, arg: LogType, /) -> None: ...
@@ -3191,7 +3275,11 @@ class Noise:
     """
     def __init__(self) -> None: ...
 
-    def get(self, x: float, y: float, z: float) -> float: ...
+    def get(self, x: float, y: float, z: float) -> float:
+        """Get the noise at a point, roughly between -1 and 1. It is zero where
+        x, y and z are all whole numbers, and repeats every 256 units on each
+        axis. Every Noise gives the same values.
+        """
 
 def openURL(url: str) -> None:
     """Open a URL in an external application."""
@@ -3199,25 +3287,29 @@ def openURL(url: str) -> None:
 class SystInfo:
     """Operating system information."""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The operating system name and version."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def cores(self) -> int: ...
+    def cores(self) -> int:
+        """The number of hardware threads, or zero when it is not known."""
 
     @cores.setter
     def cores(self, arg: int, /) -> None: ...
 
     @property
-    def ram(self) -> int: ...
+    def ram(self) -> int:
+        """The amount of RAM, in bytes."""
 
     @ram.setter
     def ram(self, arg: int, /) -> None: ...
 
     @property
-    def ramGB(self) -> int: ...
+    def ramGB(self) -> int:
+        """The amount of RAM in gigabytes (1024^3 bytes), rounded up."""
 
     @ramGB.setter
     def ramGB(self, arg: int, /) -> None: ...
@@ -3280,13 +3372,19 @@ class PathOptions:
     def __init__(self) -> None: ...
 
     @property
-    def seqNegative(self) -> bool: ...
+    def seqNegative(self) -> bool:
+        """Whether a minus in front of a frame number makes it negative. A
+        minus in front of a number padded with zeros is part of the base name.
+        """
 
     @seqNegative.setter
     def seqNegative(self, arg: bool, /) -> None: ...
 
     @property
-    def seqMaxDigits(self) -> int: ...
+    def seqMaxDigits(self) -> int:
+        """The most digits a frame number can have. A longer run of digits is
+        not taken for a frame number.
+        """
 
     @seqMaxDigits.setter
     def seqMaxDigits(self, arg: int, /) -> None: ...
@@ -3310,13 +3408,16 @@ class FrameSeq:
     def __init__(self, frame: int) -> None: ...
 
     @property
-    def range(self) -> RangeI64: ...
+    def range(self) -> RangeI64:
+        """The first and last frames."""
 
     @range.setter
     def range(self, arg: RangeI64, /) -> None: ...
 
     @property
-    def inc(self) -> int: ...
+    def inc(self) -> int:
+        """The step between frames: 1 for every frame, 2 for every other one.
+        """
 
     @inc.setter
     def inc(self, arg: int, /) -> None: ...
@@ -3350,12 +3451,11 @@ def getFrameCount(seq: Sequence[FrameSeq]) -> int:
     """
 
 def getRange(seq: Sequence[FrameSeq]) -> RangeI64 | None:
-    """Get the range."""
+    """Get the range the value is kept within."""
 
 def getStep(seq: Sequence[FrameSeq]) -> int:
-    """Get the step of a list of frame sequences: the smallest spacing between
-    its frames, which is one for a sequence of every frame and two for one
-    rendered on twos. One for a single frame or none.
+    """Get the step: how much the up and down arrow keys, the increment
+    buttons, and the scroll wheel change the value by.
     """
 
 def getMissingCount(seq: Sequence[FrameSeq]) -> int:
@@ -3394,82 +3494,111 @@ class Path:
     @overload
     def __init__(self, arg0: str, arg1: PathOptions, /) -> None: ...
 
-    def get(self) -> str: ...
+    def get(self) -> str:
+        """Get the path as a string."""
 
     @property
-    def isEmpty(self) -> bool: ...
+    def isEmpty(self) -> bool:
+        """Get whether the path is empty."""
 
     @property
-    def hasProtocol(self) -> bool: ...
+    def hasProtocol(self) -> bool:
+        """Get whether the path has a protocol."""
 
     @property
     def hasSeqWildcard(self) -> bool:
         """Get whether this has a sequence wildcard ('#')."""
 
     @property
-    def hasDir(self) -> bool: ...
+    def hasDir(self) -> bool:
+        """Get whether the path has a directory."""
 
     @property
-    def hasBase(self) -> bool: ...
+    def hasBase(self) -> bool:
+        """Get whether the path has a base name."""
 
     @property
-    def hasNum(self) -> bool: ...
+    def hasNum(self) -> bool:
+        """Get whether the path has a frame number, or a "#" wildcard."""
 
     @property
-    def hasExt(self) -> bool: ...
+    def hasExt(self) -> bool:
+        """Get whether the path has an extension."""
 
     @property
-    def hasRequest(self) -> bool: ...
+    def hasRequest(self) -> bool:
+        """Get whether the path has a request."""
 
     @property
-    def protocol(self) -> str: ...
+    def protocol(self) -> str:
+        """Get the protocol, such as "file://"."""
 
     @protocol.setter
     def protocol(self, arg: str, /) -> None: ...
 
     @property
-    def dir(self) -> str: ...
+    def dir(self) -> str:
+        """Get the directory, with its trailing separator, such as "/tmp/"."""
 
     @dir.setter
     def dir(self, arg: str, /) -> None: ...
 
     @property
-    def base(self) -> str: ...
+    def base(self) -> str:
+        """Get the base name: what comes before the frame number and the
+        extension, such as "render.".
+        """
 
     @base.setter
     def base(self, arg: str, /) -> None: ...
 
     @property
-    def num(self) -> str: ...
+    def num(self) -> str:
+        """Get the frame number as it is written, such as "0001", or the "#"
+        wildcard.
+        """
 
     @num.setter
     def num(self, arg: str, /) -> None: ...
 
     @property
-    def pad(self) -> int: ...
+    def pad(self) -> int:
+        """Get the frame number padding: the number of digits when the number
+        starts with a zero or is a wildcard, and zero otherwise.
+        """
 
     @pad.setter
     def pad(self, arg: int, /) -> None: ...
 
     @property
-    def ext(self) -> str: ...
+    def ext(self) -> str:
+        """Get the extension, with its dot, such as ".exr"."""
 
     @ext.setter
     def ext(self, arg: str, /) -> None: ...
 
     @property
-    def request(self) -> str: ...
+    def request(self) -> str:
+        """Get the request, with its question mark, such as "?user=foo"."""
 
     @request.setter
     def request(self, arg: str, /) -> None: ...
 
     @property
-    def fileName(self) -> str: ...
+    def fileName(self) -> str:
+        """Get the file name: the base name, frame number and extension, after
+        the directory when dir is true. The protocol and the request are left
+        out.
+        """
 
     @fileName.setter
     def fileName(self, arg: str, /) -> None: ...
 
-    def getFileName(self, dir: bool = False) -> str: ...
+    def getFileName(self, dir: bool = False) -> str:
+        """Get the file name: the base name, frame number and extension, after
+        the directory when dir is true. The protocol and the request are left
+        out.
+        """
 
     @property
     def frames(self) -> RangeI64 | None:
@@ -3524,9 +3653,13 @@ class Path:
     def testExt(self, arg: Sequence[str], /) -> bool:
         """Test whether this extension matches one in the given list."""
 
-    def getNumbers() -> str: ...
+    def getNumbers() -> str:
+        """Get the characters a frame number is made of: the digits and "#"."""
 
-    def getPathSeparators() -> str: ...
+    def getPathSeparators() -> str:
+        """Get the characters that separate directories: forward slash and
+        backslash.
+        """
 
     def __eq__(self, arg: Path, /) -> bool: ...
 
@@ -3550,13 +3683,17 @@ class DirListOptions:
     def __init__(self) -> None: ...
 
     @property
-    def sort(self) -> DirListSort: ...
+    def sort(self) -> DirListSort:
+        """How the entries are sorted. Directories come first whatever the
+        sort.
+        """
 
     @sort.setter
     def sort(self, arg: DirListSort, /) -> None: ...
 
     @property
-    def sortReverse(self) -> bool: ...
+    def sortReverse(self) -> bool:
+        """Whether the sort is reversed."""
 
     @sortReverse.setter
     def sortReverse(self, arg: bool, /) -> None: ...
@@ -3574,43 +3711,62 @@ class DirListOptions:
     def filter(self, arg: str, /) -> None: ...
 
     @property
-    def filterFiles(self) -> bool: ...
+    def filterFiles(self) -> bool:
+        """Whether to leave the files out, listing only directories."""
 
     @filterFiles.setter
     def filterFiles(self, arg: bool, /) -> None: ...
 
     @property
-    def filterExt(self) -> list[str]: ...
+    def filterExt(self) -> list[str]:
+        """The extensions of the files to list, lower case with the dot, such
+        as ".exr". Empty lists every file. Directories are not filtered.
+        """
 
     @filterExt.setter
     def filterExt(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def seq(self) -> bool: ...
+    def seq(self) -> bool:
+        """Whether numbered files are grouped into sequences, each listed as
+        one entry.
+        """
 
     @seq.setter
     def seq(self, arg: bool, /) -> None: ...
 
     @property
-    def seqExts(self) -> list[str]: ...
+    def seqExts(self) -> list[str]:
+        """The extensions of the files that are grouped into sequences, lower
+        case with the dot. Empty groups any file.
+        """
 
     @seqExts.setter
     def seqExts(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def seqNegative(self) -> bool: ...
+    def seqNegative(self) -> bool:
+        """Whether a minus in front of a frame number makes it negative; see
+        PathOptions::seqNegative.
+        """
 
     @seqNegative.setter
     def seqNegative(self, arg: bool, /) -> None: ...
 
     @property
-    def seqMaxDigits(self) -> int: ...
+    def seqMaxDigits(self) -> int:
+        """The most digits a frame number can have; see
+        PathOptions::seqMaxDigits.
+        """
 
     @seqMaxDigits.setter
     def seqMaxDigits(self, arg: int, /) -> None: ...
 
     @property
-    def hidden(self) -> bool: ...
+    def hidden(self) -> bool:
+        """Whether to list the files and directories whose names start with a
+        dot.
+        """
 
     @hidden.setter
     def hidden(self, arg: bool, /) -> None: ...
@@ -3633,25 +3789,35 @@ class DirListOptions:
 class DirEntry:
     """Directory list entry."""
     @property
-    def path(self) -> Path: ...
+    def path(self) -> Path:
+        """The path. For a sequence it names the first frame and holds the
+        frames found.
+        """
 
     @path.setter
     def path(self, arg: Path, /) -> None: ...
 
     @property
-    def isDir(self) -> bool: ...
+    def isDir(self) -> bool:
+        """Whether the entry is a directory."""
 
     @isDir.setter
     def isDir(self, arg: bool, /) -> None: ...
 
     @property
-    def size(self) -> int: ...
+    def size(self) -> int:
+        """The size, in bytes: for a sequence the total of its files, and zero
+        for a directory.
+        """
 
     @size.setter
     def size(self, arg: int, /) -> None: ...
 
     @property
-    def time(self) -> datetime.datetime: ...
+    def time(self) -> datetime.datetime:
+        """When the entry was last written. For a sequence, the latest of its
+        files.
+        """
 
     @time.setter
     def time(self, arg: datetime.datetime | datetime.date | datetime.time, /) -> None: ...
@@ -3661,13 +3827,7 @@ class DirEntry:
     def __ne__(self, arg: DirEntry, /) -> bool: ...
 
 def dirList(path: str, options: DirListOptions = ...) -> list[DirEntry]:
-    """List directory contents.
-
-    List directory contents.
-
-    The name is UTF-8, which is what the paths ftk hands out hold. Without this
-    overload the conversion is left to the implementation, and on Windows that
-    reads a narrow string as the active code page.
+    """How the directory is listed: the sort order, sequences and hidden files.
     """
 
 def expandSeq(path: Path, pathOptions: PathOptions = ...) -> Path:
@@ -3895,7 +4055,8 @@ class LineOptions:
     def __init__(self) -> None: ...
 
     @property
-    def width(self) -> float: ...
+    def width(self) -> float:
+        """The line width, in pixels."""
 
     @width.setter
     def width(self, arg: float, /) -> None: ...
@@ -3964,13 +4125,15 @@ class ImageFilters:
     def __init__(self) -> None: ...
 
     @property
-    def minify(self) -> ImageFilter: ...
+    def minify(self) -> ImageFilter:
+        """The filter for drawing an image smaller than it is."""
 
     @minify.setter
     def minify(self, arg: ImageFilter, /) -> None: ...
 
     @property
-    def magnify(self) -> ImageFilter: ...
+    def magnify(self) -> ImageFilter:
+        """The filter for drawing an image larger than it is."""
 
     @magnify.setter
     def magnify(self, arg: ImageFilter, /) -> None: ...
@@ -3984,31 +4147,44 @@ class ImageOptions:
     def __init__(self) -> None: ...
 
     @property
-    def channelDisplay(self) -> ChannelDisplay: ...
+    def channelDisplay(self) -> ChannelDisplay:
+        """Which channels are shown: the color, or one channel alone."""
 
     @channelDisplay.setter
     def channelDisplay(self, arg: ChannelDisplay, /) -> None: ...
 
     @property
-    def videoLevels(self) -> InputVideoLevels: ...
+    def videoLevels(self) -> InputVideoLevels:
+        """The video levels the image is taken to have. FromFile uses the
+        image's own, ImageInfo::videoLevels.
+        """
 
     @videoLevels.setter
     def videoLevels(self, arg: InputVideoLevels, /) -> None: ...
 
     @property
-    def alphaBlend(self) -> AlphaBlend: ...
+    def alphaBlend(self) -> AlphaBlend:
+        """How the image is blended with what is under it. None draws it
+        opaque.
+        """
 
     @alphaBlend.setter
     def alphaBlend(self, arg: AlphaBlend, /) -> None: ...
 
     @property
-    def imageFilters(self) -> ImageFilters: ...
+    def imageFilters(self) -> ImageFilters:
+        """The filters for drawing the image smaller or larger than it is."""
 
     @imageFilters.setter
     def imageFilters(self, arg: ImageFilters, /) -> None: ...
 
     @property
-    def cache(self) -> bool: ...
+    def cache(self) -> bool:
+        """Whether the image's textures are kept in the texture cache, so that
+        drawing the same image again does not copy it again. Off, they come
+        from a pool shared by images of the same size and type, and the image
+        is copied each time it is drawn unless reuse is on.
+        """
 
     @cache.setter
     def cache(self, arg: bool, /) -> None: ...
@@ -4520,6 +4696,7 @@ def findWidget(widget: IWidget, id: str) -> IWidget:
     """Find a widget by the id it was given in the JSON."""
 
 class TextureType(enum.Enum):
+    """OpenGL texture types."""
     L_U8 = 1
 
     L_U16 = 2
@@ -4695,7 +4872,8 @@ class ChildAddEvent:
     def __init__(self, arg: IWidget, /) -> None: ...
 
     @property
-    def child(self) -> IWidget: ...
+    def child(self) -> IWidget:
+        """The child that was added, now the last of the parent's children."""
 
     @child.setter
     def child(self, arg: IWidget, /) -> None: ...
@@ -4705,13 +4883,15 @@ class ChildRemoveEvent:
     def __init__(self, arg0: IWidget, arg1: int, /) -> None: ...
 
     @property
-    def child(self) -> IWidget: ...
+    def child(self) -> IWidget:
+        """The child that was removed."""
 
     @child.setter
     def child(self, arg: IWidget, /) -> None: ...
 
     @property
-    def index(self) -> int: ...
+    def index(self) -> int:
+        """The index the child had among the parent's children."""
 
     @index.setter
     def index(self, arg: int, /) -> None: ...
@@ -4723,25 +4903,29 @@ class TickEvent:
 class StyleEvent:
     """Style event."""
     @property
-    def displayScaleChange(self) -> bool: ...
+    def displayScaleChange(self) -> bool:
+        """Whether the display scale has changed."""
 
     @displayScaleChange.setter
     def displayScaleChange(self, arg: bool, /) -> None: ...
 
     @property
-    def sizeRoleChange(self) -> bool: ...
+    def sizeRoleChange(self) -> bool:
+        """Whether the style's size roles have changed."""
 
     @sizeRoleChange.setter
     def sizeRoleChange(self, arg: bool, /) -> None: ...
 
     @property
-    def colorRoleChange(self) -> bool: ...
+    def colorRoleChange(self) -> bool:
+        """Whether the style's color roles have changed."""
 
     @colorRoleChange.setter
     def colorRoleChange(self, arg: bool, /) -> None: ...
 
     @property
-    def fontChange(self) -> bool: ...
+    def fontChange(self) -> bool:
+        """Whether the style's fonts have changed."""
 
     @fontChange.setter
     def fontChange(self, arg: bool, /) -> None: ...
@@ -4751,25 +4935,29 @@ class SizeHintEvent:
     def __init__(self, arg0: FontSystem, arg1: IconSystem, arg2: float, arg3: Style, /) -> None: ...
 
     @property
-    def fontSystem(self) -> FontSystem: ...
+    def fontSystem(self) -> FontSystem:
+        """The font system, for measuring text."""
 
     @fontSystem.setter
     def fontSystem(self, arg: FontSystem, /) -> None: ...
 
     @property
-    def iconSystem(self) -> IconSystem: ...
+    def iconSystem(self) -> IconSystem:
+        """The icon system, for getting icon images by name."""
 
     @iconSystem.setter
     def iconSystem(self, arg: IconSystem, /) -> None: ...
 
     @property
-    def displayScale(self) -> float: ...
+    def displayScale(self) -> float:
+        """The display scale to size the widget for."""
 
     @displayScale.setter
     def displayScale(self, arg: float, /) -> None: ...
 
     @property
-    def style(self) -> Style: ...
+    def style(self) -> Style:
+        """The style, for the size roles, color roles and fonts."""
 
     @style.setter
     def style(self, arg: Style, /) -> None: ...
@@ -4779,31 +4967,36 @@ class DrawEvent:
     def __init__(self, arg0: FontSystem, arg1: IconSystem, arg2: float, arg3: Style, arg4: IRender, /) -> None: ...
 
     @property
-    def fontSystem(self) -> FontSystem: ...
+    def fontSystem(self) -> FontSystem:
+        """The font system, for the text to draw."""
 
     @fontSystem.setter
     def fontSystem(self, arg: FontSystem, /) -> None: ...
 
     @property
-    def iconSystem(self) -> IconSystem: ...
+    def iconSystem(self) -> IconSystem:
+        """The icon system, for getting icon images by name."""
 
     @iconSystem.setter
     def iconSystem(self, arg: IconSystem, /) -> None: ...
 
     @property
-    def displayScale(self) -> float: ...
+    def displayScale(self) -> float:
+        """The display scale to draw the widget at."""
 
     @displayScale.setter
     def displayScale(self, arg: float, /) -> None: ...
 
     @property
-    def style(self) -> Style: ...
+    def style(self) -> Style:
+        """The style, for the size roles, color roles and fonts."""
 
     @style.setter
     def style(self, arg: Style, /) -> None: ...
 
     @property
-    def render(self) -> IRender: ...
+    def render(self) -> IRender:
+        """The renderer to draw with."""
 
     @render.setter
     def render(self, arg: IRender, /) -> None: ...
@@ -4817,13 +5010,20 @@ class MouseEnterEvent:
     def __init__(self, arg: V2I, /) -> None: ...
 
     @property
-    def pos(self) -> V2I: ...
+    def pos(self) -> V2I:
+        """The cursor position, in pixels from the top left of the window: the
+        coordinates widget geometry is in.
+        """
 
     @pos.setter
     def pos(self, arg: V2I, /) -> None: ...
 
     @property
-    def accept(self) -> bool: ...
+    def accept(self) -> bool:
+        """Set by the widget to take the hover: it is then sent the mouse
+        moves, and a leave event when the cursor goes. Left unset, the widgets
+        it is inside are asked in turn.
+        """
 
     @accept.setter
     def accept(self, arg: bool, /) -> None: ...
@@ -4833,37 +5033,56 @@ class MouseMoveEvent:
     def __init__(self, arg0: V2I, arg1: V2I, /) -> None: ...
 
     @property
-    def pos(self) -> V2I: ...
+    def pos(self) -> V2I:
+        """The cursor position, in pixels from the top left of the window: the
+        coordinates widget geometry is in.
+        """
 
     @pos.setter
     def pos(self, arg: V2I, /) -> None: ...
 
     @property
-    def prev(self) -> V2I: ...
+    def prev(self) -> V2I:
+        """The cursor position before the move, in the same coordinates."""
 
     @prev.setter
     def prev(self, arg: V2I, /) -> None: ...
 
     @property
-    def accept(self) -> bool: ...
+    def accept(self) -> bool:
+        """Set by a widget that handles the move. The window does not read it:
+        a move goes to the pressed widget, or else to the hovered one, whatever
+        this says.
+        """
 
     @accept.setter
     def accept(self, arg: bool, /) -> None: ...
 
     @property
-    def dragDropData(self) -> IDragDropData: ...
+    def dragDropData(self) -> IDragDropData:
+        """Set by the pressed widget, as it is sent a move, to start a drag and
+        drop of this data. The widget is then sent a release and a leave, and
+        the widgets under the cursor are sent the drag events until the button
+        is released.
+        """
 
     @dragDropData.setter
     def dragDropData(self, arg: IDragDropData, /) -> None: ...
 
     @property
-    def dragDropCursor(self) -> Image: ...
+    def dragDropCursor(self) -> Image:
+        """An image drawn at the cursor while the drag and drop lasts, set with
+        the data.
+        """
 
     @dragDropCursor.setter
     def dragDropCursor(self, arg: Image, /) -> None: ...
 
     @property
-    def dragDropCursorHotspot(self) -> V2I: ...
+    def dragDropCursorHotspot(self) -> V2I:
+        """The point in the cursor image that is put at the cursor, in pixels
+        of the image.
+        """
 
     @dragDropCursorHotspot.setter
     def dragDropCursorHotspot(self, arg: V2I, /) -> None: ...
@@ -4912,25 +5131,36 @@ class MouseClickEvent:
     def __init__(self, arg0: MouseButton, arg1: int, arg2: V2I, /) -> None: ...
 
     @property
-    def button(self) -> MouseButton: ...
+    def button(self) -> MouseButton:
+        """The button pressed or released."""
 
     @button.setter
     def button(self, arg: MouseButton, /) -> None: ...
 
     @property
-    def modifiers(self) -> int: ...
+    def modifiers(self) -> int:
+        """The keyboard modifiers held, as KeyModifier flags."""
 
     @modifiers.setter
     def modifiers(self, arg: int, /) -> None: ...
 
     @property
-    def pos(self) -> V2I: ...
+    def pos(self) -> V2I:
+        """The cursor position, in pixels from the top left of the window: the
+        coordinates widget geometry is in.
+        """
 
     @pos.setter
     def pos(self, arg: V2I, /) -> None: ...
 
     @property
-    def accept(self) -> bool: ...
+    def accept(self) -> bool:
+        """Set by a widget to take the press: it becomes the pressed widget,
+        which is sent the mouse moves and the release wherever the cursor goes.
+        Left unset, the widgets under the cursor are asked in turn, deepest
+        first, and if none takes it a right button can open a context menu. The
+        release does not read it.
+        """
 
     @accept.setter
     def accept(self, arg: bool, /) -> None: ...
@@ -4951,25 +5181,35 @@ class ScrollEvent:
     def __init__(self, arg0: V2F, arg1: int, arg2: V2I, /) -> None: ...
 
     @property
-    def value(self) -> V2F: ...
+    def value(self) -> V2F:
+        """The amount scrolled, in mouse wheel steps rather than pixels: x
+        across and y up and down.
+        """
 
     @value.setter
     def value(self, arg: V2F, /) -> None: ...
 
     @property
-    def modifiers(self) -> int: ...
+    def modifiers(self) -> int:
+        """The keyboard modifiers held, as KeyModifier flags."""
 
     @modifiers.setter
     def modifiers(self, arg: int, /) -> None: ...
 
     @property
-    def pos(self) -> V2I: ...
+    def pos(self) -> V2I:
+        """The cursor position, in pixels from the top left of the window: the
+        coordinates widget geometry is in.
+        """
 
     @pos.setter
     def pos(self, arg: V2I, /) -> None: ...
 
     @property
-    def accept(self) -> bool: ...
+    def accept(self) -> bool:
+        """Set by a widget that takes the scroll. Left unset, the widgets under
+        the cursor are asked in turn, deepest first, as far as a dialog.
+        """
 
     @accept.setter
     def accept(self, arg: bool, /) -> None: ...
@@ -5002,7 +5242,11 @@ class GestureEvent:
     def zoom(self, arg: float, /) -> None: ...
 
     @property
-    def accept(self) -> bool: ...
+    def accept(self) -> bool:
+        """Set by a widget to take the gesture as it starts: the rest of it
+        goes to that widget, wherever the fingers go. Left unset, the widgets
+        under the fingers are asked in turn, deepest first, as far as a dialog.
+        """
 
     @accept.setter
     def accept(self, arg: bool, /) -> None: ...
@@ -5254,25 +5498,35 @@ class KeyEvent:
     def __init__(self, arg0: Key, arg1: int, arg2: V2I, /) -> None: ...
 
     @property
-    def key(self) -> Key: ...
+    def key(self) -> Key:
+        """The key."""
 
     @key.setter
     def key(self, arg: Key, /) -> None: ...
 
     @property
-    def modifiers(self) -> int: ...
+    def modifiers(self) -> int:
+        """The keyboard modifiers held, as KeyModifier flags."""
 
     @modifiers.setter
     def modifiers(self, arg: int, /) -> None: ...
 
     @property
-    def pos(self) -> V2I: ...
+    def pos(self) -> V2I:
+        """The cursor position, in pixels from the top left of the window: the
+        coordinates widget geometry is in.
+        """
 
     @pos.setter
     def pos(self, arg: V2I, /) -> None: ...
 
     @property
-    def accept(self) -> bool: ...
+    def accept(self) -> bool:
+        """Set by a widget that takes the key: it is sent the release, and no
+        other widget is asked. Left unset, the key focus widget and its parents
+        are asked in turn, as far as a dialog, then the widgets under the
+        cursor, deepest first; a Tab that none takes moves the key focus.
+        """
 
     @accept.setter
     def accept(self, arg: bool, /) -> None: ...
@@ -5282,13 +5536,17 @@ class TextEvent:
     def __init__(self, arg: str, /) -> None: ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """The text entered, in UTF-8."""
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
 
     @property
-    def accept(self) -> bool: ...
+    def accept(self) -> bool:
+        """Set by a widget that takes the text. The text goes to the key focus
+        widget and, while this is unset, on to its parents in turn.
+        """
 
     @accept.setter
     def accept(self, arg: bool, /) -> None: ...
@@ -5298,32 +5556,47 @@ class DragDropTextData(IDragDropData):
     def __init__(self, arg: Sequence[str], /) -> None: ...
 
     @property
-    def text(self) -> list[str]: ...
+    def text(self) -> list[str]:
+        """Get the text. For files dropped on the application from outside,
+        their paths.
+        """
 
 class DragDropEvent:
     """Drag and drop event."""
     def __init__(self, arg0: V2I, arg1: V2I, arg2: IDragDropData, /) -> None: ...
 
     @property
-    def pos(self) -> V2I: ...
+    def pos(self) -> V2I:
+        """The cursor position, in pixels from the top left of the window: the
+        coordinates widget geometry is in.
+        """
 
     @pos.setter
     def pos(self, arg: V2I, /) -> None: ...
 
     @property
-    def prev(self) -> V2I: ...
+    def prev(self) -> V2I:
+        """The previous cursor position, in the same coordinates; for files
+        dropped from outside the application, the same as pos.
+        """
 
     @prev.setter
     def prev(self, arg: V2I, /) -> None: ...
 
     @property
-    def data(self) -> IDragDropData: ...
+    def data(self) -> IDragDropData:
+        """The data being dragged."""
 
     @data.setter
     def data(self, arg: IDragDropData, /) -> None: ...
 
     @property
-    def accept(self) -> bool: ...
+    def accept(self) -> bool:
+        """Set by a widget, as it is sent the drag enter event, to be the drop
+        target: it is then sent the drag moves, the drop and a leave. For files
+        dropped from outside the application, set in the drop event to stop the
+        widgets further out being asked.
+        """
 
     @accept.setter
     def accept(self, arg: bool, /) -> None: ...
@@ -5381,13 +5654,19 @@ class IWidget:
         """Get the context."""
 
     @property
-    def objectName(self) -> str: ...
+    def objectName(self) -> str:
+        """Get the object name. Widgets are given their class name when they
+        are made, e.g. "ftk::PushButton".
+        """
 
     @objectName.setter
     def objectName(self, arg: str, /) -> None: ...
 
     @property
-    def objectPath(self) -> str: ...
+    def objectPath(self) -> str:
+        """Get the object path: the object names of the widget's parents and
+        the widget, joined by "/".
+        """
 
     @property
     def backgroundRole(self) -> ColorRole:
@@ -5709,98 +5988,141 @@ class ObservableWindowBufferType(IObservableWindowBufferType):
 class IWindow(IWidget):
     """Base class for windows."""
     @property
-    def app(self) -> App: ...
+    def app(self) -> App:
+        """Get the application."""
 
     @property
-    def windowID(self) -> int: ...
+    def windowID(self) -> int:
+        """Get the window ID."""
 
     @property
-    def screen(self) -> int: ...
+    def screen(self) -> int:
+        """Get which screen the window is on."""
 
     @property
-    def title(self) -> str: ...
+    def title(self) -> str:
+        """Get the window title."""
 
     @title.setter
     def title(self, arg: str, /) -> None: ...
 
     @property
-    def size(self) -> Size2I: ...
+    def size(self) -> Size2I:
+        """Get the window size, in the units the window system sizes windows
+        in, which are not pixels everywhere; see getPixelDensity().
+        """
 
     @size.setter
     def size(self, arg: Size2I, /) -> None: ...
 
     @property
-    def minSize(self) -> Size2I: ...
+    def minSize(self) -> Size2I:
+        """Get the minimum window size, in the same units."""
 
     @minSize.setter
     def minSize(self, arg: Size2I, /) -> None: ...
 
     @property
-    def fullScreen(self) -> bool: ...
+    def fullScreen(self) -> bool:
+        """Get whether the window has been set to full screen with
+        setFullScreen().
+        """
 
     @fullScreen.setter
     def fullScreen(self, arg: bool, /) -> None: ...
 
     @property
-    def observeFullScreen(self) -> IObservableBool: ...
+    def observeFullScreen(self) -> IObservableBool:
+        """Observe whether the window has been set to full screen."""
 
     @property
-    def floatOnTop(self) -> bool: ...
+    def floatOnTop(self) -> bool:
+        """Get whether the window is set to float on top of the other windows.
+        """
 
     @floatOnTop.setter
     def floatOnTop(self, arg: bool, /) -> None: ...
 
     @property
-    def observeFloatOnTop(self) -> IObservableBool: ...
+    def observeFloatOnTop(self) -> IObservableBool:
+        """Observe whether the window floats on top."""
 
     def getWindowInfo(self) -> list[tuple[str, str]]:
         """Get the window information."""
 
     @property
-    def bufferSize(self) -> Size2I: ...
+    def bufferSize(self) -> Size2I:
+        """Get the size of the window's buffer, in pixels: what the widgets are
+        laid out and drawn in.
+        """
 
     @property
-    def bufferType(self) -> WindowBufferType: ...
+    def bufferType(self) -> WindowBufferType:
+        """Get the type of the offscreen buffer the window is drawn into."""
 
     @bufferType.setter
     def bufferType(self, arg: WindowBufferType, /) -> None: ...
 
     @property
-    def observeBufferType(self) -> IObservableWindowBufferType: ...
+    def observeBufferType(self) -> IObservableWindowBufferType:
+        """Observe the offscreen buffer type."""
 
     @property
-    def contentScale(self) -> float: ...
+    def contentScale(self) -> float:
+        """Get the ratio of the buffer size to the window size, or zero before
+        the window has a size.
+        """
 
     @property
-    def displayScale(self) -> float: ...
+    def displayScale(self) -> float:
+        """Get the display scale the window's widgets are sized and drawn at.
+        The application sets it; see App::getWindowDisplayScale().
+        """
 
     @displayScale.setter
     def displayScale(self, arg: float, /) -> None: ...
 
     @property
-    def observeDisplayScale(self) -> IObservableFloat: ...
+    def observeDisplayScale(self) -> IObservableFloat:
+        """Observe the display scale."""
 
     @property
-    def keyFocus(self) -> IWidget: ...
+    def keyFocus(self) -> IWidget:
+        """Get the widget with the key focus, or null for none."""
 
     @keyFocus.setter
     def keyFocus(self, arg: IWidget, /) -> None: ...
 
-    def getNextKeyFocus(self, arg: IWidget, /) -> IWidget: ...
+    def getNextKeyFocus(self, arg: IWidget, /) -> IWidget:
+        """Get the widget after the given one in the order Tab moves the key
+        focus in: the enabled widgets that accept the focus, in the window's
+        last child, the one on top. It wraps around, gives the first widget for
+        one not in the order, and null when the order is empty.
+        """
 
-    def getPrevKeyFocus(self, arg: IWidget, /) -> IWidget: ...
+    def getPrevKeyFocus(self, arg: IWidget, /) -> IWidget:
+        """Get the widget before the given one in the key focus order; see
+        getNextKeyFocus(). It gives the last widget for one not in the order.
+        """
 
     @property
-    def tooltipsEnabled(self) -> bool: ...
+    def tooltipsEnabled(self) -> bool:
+        """Get whether tooltips are shown in the window."""
 
     @tooltipsEnabled.setter
     def tooltipsEnabled(self, arg: bool, /) -> None: ...
 
     @property
-    def cursorPos(self) -> V2I: ...
+    def cursorPos(self) -> V2I:
+        """Get the cursor position."""
 
     @property
-    def dragDropActive(self) -> bool: ...
+    def dragDropActive(self) -> bool:
+        """Get whether a drag and drop is in progress. Drag events only reach
+        the widget under the cursor, so a widget that reacts to a drag being
+        anywhere near it -- a scroll area moving a drop target into reach --
+        asks here.
+        """
 
     def layout(self, size: Size2I) -> None:
         """Lay the window out at a size, as a resize from the window system
@@ -5812,7 +6134,8 @@ class IWindow(IWidget):
         fail; it passes, having checked nothing.
         """
 
-    def click(self, pos: V2I, button: MouseButton = MouseButton.Left, modifiers: int = 0) -> None: ...
+    def click(self, pos: V2I, button: MouseButton = MouseButton.Left, modifiers: int = 0) -> None:
+        """Move the cursor there, then press and release a mouse button."""
 
     def drag(self, path: Sequence[V2I], modifiers: int = 0, release: bool = True, holdModifiers: int = 0) -> None:
         """Press at the first point, move through the rest, release.
@@ -6133,19 +6456,26 @@ class Window(IWindow):
     def __init__(self, context: Context, app: App, name: str, size: Size2I = ...) -> None: ...
 
     @property
-    def pos(self) -> V2I: ...
+    def pos(self) -> V2I:
+        """Get the window position, in screen coordinates; zero where the
+        platform keeps it to itself.
+        """
 
     @pos.setter
     def pos(self, arg: V2I, /) -> None: ...
 
     @property
-    def maximized(self) -> bool: ...
+    def maximized(self) -> bool:
+        """Get whether the window is maximized."""
 
     @maximized.setter
     def maximized(self, arg: bool, /) -> None: ...
 
     @property
-    def normalGeometry(self) -> Box2I: ...
+    def normalGeometry(self) -> Box2I:
+        """Get the position and size the window has when it is neither
+        maximized nor full screen: what to remember it by.
+        """
 
 class ActionCheckType(enum.Enum):
     """How an action carries a checked state."""
@@ -6203,13 +6533,15 @@ class KeyShortcut:
     def __init__(self, key: Key, modifiers: int = 0) -> None: ...
 
     @property
-    def key(self) -> Key: ...
+    def key(self) -> Key:
+        """The key, or Unknown for none."""
 
     @key.setter
     def key(self, arg: Key, /) -> None: ...
 
     @property
-    def modifiers(self) -> int: ...
+    def modifiers(self) -> int:
+        """The keyboard modifiers held, as KeyModifier flags."""
 
     @modifiers.setter
     def modifiers(self, arg: int, /) -> None: ...
@@ -6241,42 +6573,60 @@ class Action:
     def __init__(self, text: str, icon: str, shortcut: KeyShortcut, checkedCallback: Callable[[bool], None]) -> None: ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """Get the text, shown in menus and on buttons."""
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
 
     @property
-    def observeText(self) -> IObservableString: ...
+    def observeText(self) -> IObservableString:
+        """Observe the text."""
 
     @property
-    def icon(self) -> str: ...
+    def icon(self) -> str:
+        """Get the name of the icon; empty for none."""
 
     @icon.setter
     def icon(self, arg: str, /) -> None: ...
 
     @property
-    def observeIcon(self) -> IObservableString: ...
+    def observeIcon(self) -> IObservableString:
+        """Observe the icon."""
 
     @property
-    def checkedIcon(self) -> str: ...
+    def checkedIcon(self) -> str:
+        """Get the name of the icon shown while the action is checked; empty to
+        show the other icon.
+        """
 
     @checkedIcon.setter
     def checkedIcon(self, arg: str, /) -> None: ...
 
     @property
-    def observeCheckedIcon(self) -> IObservableString: ...
+    def observeCheckedIcon(self) -> IObservableString:
+        """Observe the checked icon."""
 
     @property
-    def shortcuts(self) -> list[KeyShortcut]: ...
+    def shortcuts(self) -> list[KeyShortcut]:
+        """Get the keyboard shortcuts. An action made without one has a single
+        shortcut with no key.
+        """
 
     @shortcuts.setter
     def shortcuts(self, arg: Sequence[KeyShortcut], /) -> None: ...
 
-    def doCallback(self) -> None: ...
+    def doCallback(self) -> None:
+        """Call the callback, if the action has one. Menus and tool buttons
+        call it when the action is picked, checkable or not.
+        """
 
     @property
-    def checkType(self) -> ActionCheckType: ...
+    def checkType(self) -> ActionCheckType:
+        """Get how the action carries a checked state: Check when it was made
+        with a checked callback, None otherwise. An ActionGroup sets it for the
+        actions added to it.
+        """
 
     @checkType.setter
     def checkType(self, arg: ActionCheckType, /) -> None: ...
@@ -6286,36 +6636,48 @@ class Action:
         """Whether the action carries a checked state at all."""
 
     @property
-    def checked(self) -> bool: ...
+    def checked(self) -> bool:
+        """Get whether the action is checked."""
 
     @checked.setter
     def checked(self, arg: bool, /) -> None: ...
 
     @property
-    def observeCheckType(self) -> IObservableActionCheckType: ...
+    def observeCheckType(self) -> IObservableActionCheckType:
+        """Observe the check type."""
 
     @property
-    def observeChecked(self) -> IObservableBool: ...
+    def observeChecked(self) -> IObservableBool:
+        """Observe whether the action is checked."""
 
-    def doCheckedCallback(self, arg: bool, /) -> None: ...
+    def doCheckedCallback(self, arg: bool, /) -> None:
+        """Call the checked callback with the given state, if the action has
+        one. The checked state is not changed; see setChecked().
+        """
 
     @property
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Get whether the action is enabled. The menus and buttons showing it
+        follow it, and the shortcut of a disabled action does nothing.
+        """
 
     @enabled.setter
     def enabled(self, arg: bool, /) -> None: ...
 
     @property
-    def observeEnabled(self) -> IObservableBool: ...
+    def observeEnabled(self) -> IObservableBool:
+        """Observe whether the action is enabled."""
 
     @property
-    def tooltip(self) -> str: ...
+    def tooltip(self) -> str:
+        """Get the tooltip."""
 
     @tooltip.setter
     def tooltip(self, arg: str, /) -> None: ...
 
     @property
-    def observeTooltip(self) -> IObservableString: ...
+    def observeTooltip(self) -> IObservableString:
+        """Observe the tooltip."""
 
 class ActionGroupType(enum.Enum):
     """Action group type."""
@@ -6359,12 +6721,16 @@ class ActionGroup:
         """Remove every action, leaving them as they are."""
 
     @property
-    def checked(self) -> int: ...
+    def checked(self) -> int:
+        """Get the index of the checked action, or -1 for none. Only a radio
+        group keeps it as the actions are picked.
+        """
 
     @checked.setter
     def checked(self, arg: int, /) -> None: ...
 
-    def observeChecked(self) -> IObservableInt: ...
+    def observeChecked(self) -> IObservableInt:
+        """Observe the index of the checked action."""
 
     def setCheckedCallback(self, arg: Callable[[int, bool], None], /) -> None:
         """Set the callback. The index is which action, the bool its new state;
@@ -6398,13 +6764,18 @@ class ColorControls:
     def __init__(self) -> None: ...
 
     @property
-    def brightness(self) -> float: ...
+    def brightness(self) -> float:
+        """The brightness the color roles are given, as a multiplier; one
+        leaves them as they are.
+        """
 
     @brightness.setter
     def brightness(self, arg: float, /) -> None: ...
 
     @property
-    def contrast(self) -> float: ...
+    def contrast(self) -> float:
+        """The contrast the color roles are given; one leaves them as they are.
+        """
 
     @contrast.setter
     def contrast(self, arg: float, /) -> None: ...
@@ -6426,18 +6797,25 @@ class ColorControls:
 class Style:
     """Style."""
     @property
-    def colorControls(self) -> ColorControls: ...
+    def colorControls(self) -> ColorControls:
+        """Get the color controls: the brightness and contrast of the color
+        roles, and the alpha of disabled widgets.
+        """
 
     @colorControls.setter
     def colorControls(self, arg: ColorControls, /) -> None: ...
 
     @property
-    def fonts(self) -> dict[FontType, str]: ...
+    def fonts(self) -> dict[FontType, str]:
+        """Get the font names, by font type."""
 
     @fonts.setter
     def fonts(self, arg: Mapping[FontType, str], /) -> None: ...
 
-    def getSizeRole(self, role: SizeRole, scale: float) -> int: ...
+    def getSizeRole(self, role: SizeRole, scale: float) -> int:
+        """Get a size role in pixels at the given display scale; zero for a
+        role the style has no size for.
+        """
 
     def getColorRole(self, role: ColorRole) -> Color4F:
         """Get a color role for a widget state. When enabled is false the
@@ -6473,31 +6851,40 @@ class ObservableColorStyle(IObservableColorStyle):
 class MonitorInfo:
     """Monitor information."""
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """The monitor's name."""
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
 
     @property
-    def size(self) -> Size2I: ...
+    def size(self) -> Size2I:
+        """The size of the monitor's current display mode."""
 
     @size.setter
     def size(self, arg: Size2I, /) -> None: ...
 
     @property
-    def refreshRate(self) -> int: ...
+    def refreshRate(self) -> int:
+        """The refresh rate of the current display mode, in hertz; zero where
+        it is not known.
+        """
 
     @refreshRate.setter
     def refreshRate(self, arg: int, /) -> None: ...
 
     @property
-    def dpi(self) -> V2F: ...
+    def dpi(self) -> V2F:
+        """The horizontal and vertical dots per inch. Not set in SDL3 builds,
+        where it is zero.
+        """
 
     @dpi.setter
     def dpi(self, arg: V2F, /) -> None: ...
 
     @property
-    def bounds(self) -> Box2I: ...
+    def bounds(self) -> Box2I:
+        """The monitor's area of the desktop, in screen coordinates."""
 
     @bounds.setter
     def bounds(self, arg: Box2I, /) -> None: ...
@@ -6621,71 +7008,100 @@ class App(IApp):
     def __init__(self, context: Context, argv: Sequence[str], name: str, summary: str, cmdLineArgs: Sequence[ICmdLineArg] = [], cmdLineOptions: Sequence[ICmdLineOption] = [], appFiles: AppFiles = ...) -> None: ...
 
     @property
-    def settings(self) -> Settings: ...
+    def settings(self) -> Settings:
+        """Get the settings. Null when no AppFiles was given."""
 
     @property
-    def settingsPath(self) -> pathlib.Path: ...
+    def settingsPath(self) -> pathlib.Path:
+        """Get the settings file path. Empty when no AppFiles was given."""
 
     @property
-    def logFilePath(self) -> pathlib.Path: ...
+    def logFilePath(self) -> pathlib.Path:
+        """Get the log file path. Empty when no AppFiles was given."""
 
     @property
-    def windows(self) -> list[IWindow]: ...
+    def windows(self) -> list[IWindow]:
+        """Get the windows."""
 
     @property
     def observeMonitors(self) -> IObservableMonitorInfoList:
         """Observe the monitors."""
 
     @property
-    def fontSystem(self) -> FontSystem: ...
+    def fontSystem(self) -> FontSystem:
+        """Get the font system."""
 
     @property
-    def iconSystem(self) -> IconSystem: ...
+    def iconSystem(self) -> IconSystem:
+        """Get the icon system."""
 
     @property
-    def style(self) -> Style: ...
+    def style(self) -> Style:
+        """Get the style."""
 
     @property
-    def colorStyle(self) -> ColorStyle: ...
+    def colorStyle(self) -> ColorStyle:
+        """Get the color style. Dark unless the -colorStyle command line option
+        or setColorStyle() says otherwise.
+        """
 
     @colorStyle.setter
     def colorStyle(self, arg: ColorStyle, /) -> None: ...
 
     @property
-    def renderer(self) -> Renderer: ...
+    def renderer(self) -> Renderer:
+        """Get the renderer that is set, which is OpenGL unless the other is
+        asked for. What draws is said by gpu::isEnabled(): this is what is kept
+        with the settings, and where the GPU renderer cannot draw OpenGL does
+        whatever was asked.
+        """
 
     @renderer.setter
     def renderer(self, arg: Renderer, /) -> None: ...
 
     @property
-    def observeRenderer(self) -> "ftk::IObservable<ftk::Renderer>": ...
+    def observeRenderer(self) -> "ftk::IObservable<ftk::Renderer>":
+        """Observe the renderer that is set."""
 
     @property
-    def observeColorStyle(self) -> IObservableColorStyle: ...
+    def observeColorStyle(self) -> IObservableColorStyle:
+        """Observe the color style."""
 
     @property
-    def defaultDisplayScale(self) -> float: ...
+    def defaultDisplayScale(self) -> float:
+        """Get the display scale found at startup: the first display's, or the
+        -displayScale command line option's, and never less than one.
+        """
 
     @property
-    def autoDisplayScale(self) -> float: ...
+    def autoDisplayScale(self) -> float:
+        """Get the display scale that setDisplayScale(0) gives: the window's
+        once there is one, else the display's.
+        """
 
     @property
-    def displayScale(self) -> float: ...
+    def displayScale(self) -> float:
+        """Get the display scale. A window on a display of another scale can
+        draw at that one instead; see getWindowDisplayScale().
+        """
 
     @displayScale.setter
     def displayScale(self, arg: float, /) -> None: ...
 
     @property
-    def observeDisplayScale(self) -> IObservableFloat: ...
+    def observeDisplayScale(self) -> IObservableFloat:
+        """Observe the display scale."""
 
     @property
-    def tooltipsEnabled(self) -> bool: ...
+    def tooltipsEnabled(self) -> bool:
+        """Get whether tooltips are shown. On by default, for every window."""
 
     @tooltipsEnabled.setter
     def tooltipsEnabled(self, arg: bool, /) -> None: ...
 
     @property
-    def observeTooltipsEnabled(self) -> IObservableBool: ...
+    def observeTooltipsEnabled(self) -> IObservableBool:
+        """Observe whether tooltips are shown."""
 
     @staticmethod
     def setOffscreenDefault(value: bool) -> None:
@@ -6938,13 +7354,15 @@ class ComboBoxItem:
     def __init__(self, text: str, icon: str = '') -> None: ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """The text shown for the item."""
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
 
     @property
-    def icon(self) -> str: ...
+    def icon(self) -> str:
+        """The name of the item's icon; empty for none."""
 
     @icon.setter
     def icon(self, arg: str, /) -> None: ...
@@ -7243,33 +7661,54 @@ class DocumentModel:
     def __init__(self, context: Context) -> None:
         """Create a new document model."""
 
-    def getList(self) -> list[IDocument]: ...
+    def getList(self) -> list[IDocument]:
+        """Get the documents."""
 
-    def observeList(self) -> IObservableIDocumentList: ...
+    def observeList(self) -> IObservableIDocumentList:
+        """Observe the documents."""
 
-    def add(self, document: IDocument) -> None: ...
+    def add(self, document: IDocument) -> None:
+        """Add a document. It becomes the current document."""
 
-    def observeAdd(self) -> IObservableWeakIDocument: ...
+    def observeAdd(self) -> IObservableWeakIDocument:
+        """Observe the documents as they are added."""
 
-    def close(self, index: int) -> None: ...
+    def close(self, index: int) -> None:
+        """Close the document at the given index; an index out of range is
+        ignored. Closing the current document makes the next one current, or
+        the last one when it was the last.
+        """
 
-    def closeAll(self) -> None: ...
+    def closeAll(self) -> None:
+        """Close all of the documents. This sends observeCloseAll(), not
+        observeClose() for each.
+        """
 
-    def observeClose(self) -> IObservableWeakIDocument: ...
+    def observeClose(self) -> IObservableWeakIDocument:
+        """Observe the documents as close() closes them: each one is sent
+        before it is removed.
+        """
 
-    def observeCloseAll(self) -> IObservableBool: ...
+    def observeCloseAll(self) -> IObservableBool:
+        """Observe closeAll(): true is sent each time it is called."""
 
-    def getCurrent(self) -> IDocument: ...
+    def getCurrent(self) -> IDocument:
+        """Get the current document, or null for none."""
 
     @property
-    def currentIndex(self) -> int: ...
+    def currentIndex(self) -> int:
+        """Get the index of the current document, or -1 for none. An index set
+        is clamped to the documents.
+        """
 
     @currentIndex.setter
     def currentIndex(self, arg: int, /) -> None: ...
 
-    def observeCurrent(self) -> IObservableIDocument: ...
+    def observeCurrent(self) -> IObservableIDocument:
+        """Observe the current document."""
 
-    def observeCurrentIndex(self) -> IObservableInt: ...
+    def observeCurrentIndex(self) -> IObservableInt:
+        """Observe the index of the current document."""
 
 class DoubleModel:
     """Double precision floating point value model."""
@@ -7277,7 +7716,8 @@ class DoubleModel:
         """Create a new model."""
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
@@ -7288,15 +7728,18 @@ class DoubleModel:
         setValue(), which always clamps, so they cannot run the range away.
         """
 
-    def observeValue(self) -> IObservableDouble: ...
+    def observeValue(self) -> IObservableDouble:
+        """Observe the value."""
 
     @property
-    def range(self) -> RangeD: ...
+    def range(self) -> RangeD:
+        """Get the range the value is kept within. The default is 0 to 1."""
 
     @range.setter
     def range(self, arg: RangeD, /) -> None: ...
 
-    def observeRange(self) -> IObservableRangeD: ...
+    def observeRange(self) -> IObservableRangeD:
+        """Observe the range."""
 
     @property
     def rangeSoft(self) -> bool:
@@ -7309,24 +7752,30 @@ class DoubleModel:
 
     @property
     def step(self) -> float:
-        """Increment the value by a step."""
+        """Get the step, the amount a step increments or decrements the value
+        by. The default is 0.1.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
     def largeStep(self) -> float:
-        """Increment the value by a large step."""
+        """Get the large step, the amount a large step increments or decrements
+        the value by. The default is 1.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
-    def stepInc(self) -> None: ...
+    def stepInc(self) -> None:
+        """Increment the value by a step."""
 
     def stepDec(self) -> None:
         """Decrement the value by a step."""
 
-    def largeStepInc(self) -> None: ...
+    def largeStepInc(self) -> None:
+        """Increment the value by a large step."""
 
     def largeStepDec(self) -> None:
         """Decrement the value by a large step."""
@@ -7366,35 +7815,52 @@ class DoubleEdit(IContainer):
     def __init__(self, context: Context, model: DoubleModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from setValue() and from other widgets that share the model.
+        Typed text is applied when Enter is pressed or the key focus is lost.
+        """
 
     @property
-    def range(self) -> RangeD: ...
+    def range(self) -> RangeD:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeD, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step: how much the up and down arrow keys, the increment
+        buttons, and the scroll wheel change the value by.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
     @property
-    def defaultValue(self) -> float: ...
+    def defaultValue(self) -> float:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: float, /) -> None: ...
@@ -7410,7 +7876,8 @@ class DoubleEdit(IContainer):
     def precision(self, arg: int, /) -> None: ...
 
     @property
-    def font(self) -> FontType: ...
+    def font(self) -> FontType:
+        """Get the font, the monospace font by default."""
 
     @font.setter
     def font(self, arg: FontType, /) -> None: ...
@@ -7431,35 +7898,52 @@ class DoubleEditSlider(IContainer):
     def __init__(self, context: Context, model: DoubleModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edit, on every move while the slider is dragged,
+        from setValue(), and from other widgets that share the model.
+        """
 
     @property
-    def range(self) -> RangeD: ...
+    def range(self) -> RangeD:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeD, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step: how much the arrow keys, the increment buttons, and
+        the scroll wheel change the value by.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
     @property
-    def defaultValue(self) -> float: ...
+    def defaultValue(self) -> float:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: float, /) -> None: ...
@@ -7495,12 +7979,17 @@ class DoubleEditShuttle(IContainer):
     def __init__(self, context: Context, model: DoubleModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edit, on every notch while the shuttle is dragged,
+        from setValue(), and from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[float, bool], None], /) -> None:
         """Set the value callback with a flag for whether the shuttle is
@@ -7508,27 +7997,40 @@ class DoubleEditShuttle(IContainer):
         """
 
     @property
-    def range(self) -> RangeD: ...
+    def range(self) -> RangeD:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeD, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step: how much the up and down arrow keys, the increment
+        buttons, the scroll wheel, and each notch of the shuttle change the
+        value by. With Control held the shuttle moves by a tenth of it.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel or the shuttle with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
     @property
-    def defaultValue(self) -> float: ...
+    def defaultValue(self) -> float:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: float, /) -> None: ...
@@ -7553,12 +8055,17 @@ class DoubleEditShuttle(IContainer):
 class IDoubleSlider(IMouseWidget):
     """Base class for double precision floating point sliders."""
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including on every move while the slider is dragged, from setValue(),
+        and from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[float, bool], None], /) -> None:
         """Set the value callback with a flag for whether the slider is
@@ -7566,27 +8073,39 @@ class IDoubleSlider(IMouseWidget):
         """
 
     @property
-    def range(self) -> RangeD: ...
+    def range(self) -> RangeD:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeD, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step: how much the arrow keys and the scroll wheel change
+        the value by.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
     @property
-    def defaultValue(self) -> float: ...
+    def defaultValue(self) -> float:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: float, /) -> None: ...
@@ -7725,7 +8244,8 @@ class FileBrowserOpenOptions:
     def __init__(self) -> None: ...
 
     @property
-    def title(self) -> str: ...
+    def title(self) -> str:
+        """The title of the browser."""
 
     @title.setter
     def title(self, arg: str, /) -> None: ...
@@ -7740,7 +8260,8 @@ class FileBrowserOpenOptions:
     def path(self, arg: str | os.PathLike, /) -> None: ...
 
     @property
-    def mode(self) -> FileBrowserMode: ...
+    def mode(self) -> FileBrowserMode:
+        """Whether a file is opened or saved, or a directory chosen."""
 
     @mode.setter
     def mode(self, arg: FileBrowserMode, /) -> None: ...
@@ -7784,25 +8305,35 @@ class FileBrowserOptions:
     def __init__(self) -> None: ...
 
     @property
-    def dirList(self) -> DirListOptions: ...
+    def dirList(self) -> DirListOptions:
+        """How the directory is listed: the sort order, sequences and hidden
+        files.
+        """
 
     @dirList.setter
     def dirList(self, arg: DirListOptions, /) -> None: ...
 
     @property
-    def panel(self) -> bool: ...
+    def panel(self) -> bool:
+        """Whether the side panel is shown, with the drives, shortcuts, recent
+        directories and settings.
+        """
 
     @panel.setter
     def panel(self, arg: bool, /) -> None: ...
 
     @property
-    def pathEditable(self) -> bool: ...
+    def pathEditable(self) -> bool:
+        """Whether the path is shown as text to edit rather than as a button
+        for each directory.
+        """
 
     @pathEditable.setter
     def pathEditable(self, arg: bool, /) -> None: ...
 
     @property
-    def bellows(self) -> dict[str, bool]: ...
+    def bellows(self) -> dict[str, bool]:
+        """Which sections of the side panel are open, by name."""
 
     @bellows.setter
     def bellows(self, arg: Mapping[str, bool], /) -> None: ...
@@ -7837,9 +8368,7 @@ class ObservableFileBrowserOptions(IObservableFileBrowserOptions):
         """Get the value."""
 
 class FileBrowserExtGroup:
-    """File browser model. A group of file extensions offered as one choice,
-    e.g. "Images".
-    """
+    """A group of file extensions offered as one choice, e.g. "Images"."""
     @overload
     def __init__(self) -> None: ...
 
@@ -7847,13 +8376,15 @@ class FileBrowserExtGroup:
     def __init__(self, label: str, exts: Sequence[str]) -> None: ...
 
     @property
-    def label(self) -> str: ...
+    def label(self) -> str:
+        """The name the group is offered under, e.g. "Images"."""
 
     @label.setter
     def label(self, arg: str, /) -> None: ...
 
     @property
-    def exts(self) -> list[str]: ...
+    def exts(self) -> list[str]:
+        """The extensions in the group, e.g. ".png"."""
 
     @exts.setter
     def exts(self, arg: Sequence[str], /) -> None: ...
@@ -7937,6 +8468,9 @@ class ObservableFileBrowserExtGroupList(IObservableFileBrowserExtGroupList):
         """Get the index of the given item."""
 
 class FileBrowserModel:
+    """File browser model: the current path and its history, the options and
+    the extensions.
+    """
     def __init__(self, context: Context) -> None:
         """Create a new model."""
 
@@ -8222,7 +8756,8 @@ class FloatModel:
         """Create a new model."""
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
@@ -8233,15 +8768,18 @@ class FloatModel:
         setValue(), which always clamps, so they cannot run the range away.
         """
 
-    def observeValue(self) -> IObservableFloat: ...
+    def observeValue(self) -> IObservableFloat:
+        """Observe the value."""
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within. The default is 0 to 1."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def observeRange(self) -> IObservableRangeF: ...
+    def observeRange(self) -> IObservableRangeF:
+        """Observe the range."""
 
     @property
     def rangeSoft(self) -> bool:
@@ -8254,24 +8792,30 @@ class FloatModel:
 
     @property
     def step(self) -> float:
-        """Increment the value by a step."""
+        """Get the step, the amount a step increments or decrements the value
+        by. The default is 0.1.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
     def largeStep(self) -> float:
-        """Increment the value by a large step."""
+        """Get the large step, the amount a large step increments or decrements
+        the value by. The default is 1.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
-    def stepInc(self) -> None: ...
+    def stepInc(self) -> None:
+        """Increment the value by a step."""
 
     def stepDec(self) -> None:
         """Decrement the value by a step."""
 
-    def largeStepInc(self) -> None: ...
+    def largeStepInc(self) -> None:
+        """Increment the value by a large step."""
 
     def largeStepDec(self) -> None:
         """Decrement the value by a large step."""
@@ -8311,35 +8855,52 @@ class FloatEdit(IContainer):
     def __init__(self, context: Context, model: FloatModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from setValue() and from other widgets that share the model.
+        Typed text is applied when Enter is pressed or the key focus is lost.
+        """
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step: how much the up and down arrow keys, the increment
+        buttons, and the scroll wheel change the value by.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
     @property
-    def defaultValue(self) -> float: ...
+    def defaultValue(self) -> float:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: float, /) -> None: ...
@@ -8355,7 +8916,8 @@ class FloatEdit(IContainer):
     def precision(self, arg: int, /) -> None: ...
 
     @property
-    def font(self) -> FontType: ...
+    def font(self) -> FontType:
+        """Get the font, the monospace font by default."""
 
     @font.setter
     def font(self, arg: FontType, /) -> None: ...
@@ -8369,35 +8931,52 @@ class FloatEditSlider(IContainer):
     def __init__(self, context: Context, model: FloatModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edit, on every move while the slider is dragged,
+        from setValue(), and from other widgets that share the model.
+        """
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step: how much the arrow keys, the increment buttons, and
+        the scroll wheel change the value by.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
     @property
-    def defaultValue(self) -> float: ...
+    def defaultValue(self) -> float:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: float, /) -> None: ...
@@ -8433,12 +9012,17 @@ class FloatEditShuttle(IContainer):
     def __init__(self, context: Context, model: FloatModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edit, on every notch while the shuttle is dragged,
+        from setValue(), and from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[float, bool], None], /) -> None:
         """Set the value callback with a flag for whether the shuttle is
@@ -8446,27 +9030,40 @@ class FloatEditShuttle(IContainer):
         """
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step: how much the up and down arrow keys, the increment
+        buttons, the scroll wheel, and each notch of the shuttle change the
+        value by. With Control held the shuttle moves by a tenth of it.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel or the shuttle with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
     @property
-    def defaultValue(self) -> float: ...
+    def defaultValue(self) -> float:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: float, /) -> None: ...
@@ -8491,12 +9088,17 @@ class FloatEditShuttle(IContainer):
 class IFloatSlider(IMouseWidget):
     """Base class for floating point sliders."""
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including on every move while the slider is dragged, from setValue(),
+        and from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[float, bool], None], /) -> None:
         """Set the value callback with a flag for whether the slider is
@@ -8504,27 +9106,39 @@ class IFloatSlider(IMouseWidget):
         """
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step: how much the arrow keys and the scroll wheel change
+        the value by.
+        """
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
 
     @property
-    def defaultValue(self) -> float: ...
+    def defaultValue(self) -> float:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: float, /) -> None: ...
@@ -8645,25 +9259,32 @@ class FormLayout(IContainer):
     def group(self, value: FormGroup | None) -> None: ...
 
 class GraphLabel:
-    """One line on a graph: its colour, the format string for its readout, and
+    """One line on a graph: its color, the format string for its readout, and
     how the sample is turned into the number that format expects.
     """
     def __init__(self) -> None: ...
 
     @property
-    def colorRole(self) -> ColorRole: ...
+    def colorRole(self) -> ColorRole:
+        """The color role the line is drawn in. It also names the line to
+        setSamples() and addSample().
+        """
 
     @colorRole.setter
     def colorRole(self, arg: ColorRole, /) -> None: ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """The format string for the line's readout, with {0} for the latest
+        sample.
+        """
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
 
     @property
-    def format(self) -> DiagFormat: ...
+    def format(self) -> DiagFormat:
+        """How the sample is turned into the number the readout shows."""
 
     @format.setter
     def format(self, arg: DiagFormat, /) -> None: ...
@@ -8742,7 +9363,9 @@ class GridLayout(IWidget):
         between columns and the vertical spacing is between rows.
         """
 
-    def clear(self) -> None: ...
+    def clear(self) -> None:
+        """Remove the children, and the background roles set for single rows.
+        """
 
 class GroupBox(IWidget):
     """Group box."""
@@ -8847,7 +9470,8 @@ class IntModel:
         """Create a new model."""
 
     @property
-    def value(self) -> int: ...
+    def value(self) -> int:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: int, /) -> None: ...
@@ -8858,15 +9482,18 @@ class IntModel:
         setValue(), which always clamps, so they cannot run the range away.
         """
 
-    def observeValue(self) -> IObservableInt: ...
+    def observeValue(self) -> IObservableInt:
+        """Observe the value."""
 
     @property
-    def range(self) -> RangeI: ...
+    def range(self) -> RangeI:
+        """Get the range the value is kept within. The default is 0 to 100."""
 
     @range.setter
     def range(self, arg: RangeI, /) -> None: ...
 
-    def observeRange(self) -> IObservableRangeI: ...
+    def observeRange(self) -> IObservableRangeI:
+        """Observe the range."""
 
     @property
     def rangeSoft(self) -> bool:
@@ -8879,24 +9506,30 @@ class IntModel:
 
     @property
     def step(self) -> int:
-        """Increment the value by a step."""
+        """Get the step, the amount a step increments or decrements the value
+        by. The default is 1.
+        """
 
     @step.setter
     def step(self, arg: int, /) -> None: ...
 
     @property
     def largeStep(self) -> int:
-        """Increment the value by a large step."""
+        """Get the large step, the amount a large step increments or decrements
+        the value by. The default is 10.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: int, /) -> None: ...
 
-    def stepInc(self) -> None: ...
+    def stepInc(self) -> None:
+        """Increment the value by a step."""
 
     def stepDec(self) -> None:
         """Decrement the value by a step."""
 
-    def largeStepInc(self) -> None: ...
+    def largeStepInc(self) -> None:
+        """Increment the value by a large step."""
 
     def largeStepDec(self) -> None:
         """Decrement the value by a large step."""
@@ -8936,35 +9569,52 @@ class IntEdit(IContainer):
     def __init__(self, context: Context, model: IntModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> int: ...
+    def value(self) -> int:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: int, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[int], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[int], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from setValue() and from other widgets that share the model.
+        Typed text is applied when Enter is pressed or the key focus is lost.
+        """
 
     @property
-    def range(self) -> RangeI: ...
+    def range(self) -> RangeI:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeI, /) -> None: ...
 
-    def setRange(self, arg0: int, arg1: int, /) -> None: ...
+    def setRange(self, arg0: int, arg1: int, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> int: ...
+    def step(self) -> int:
+        """Get the step: how much the up and down arrow keys, the increment
+        buttons, and the scroll wheel change the value by.
+        """
 
     @step.setter
     def step(self, arg: int, /) -> None: ...
 
     @property
-    def largeStep(self) -> int: ...
+    def largeStep(self) -> int:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: int, /) -> None: ...
 
     @property
-    def defaultValue(self) -> int: ...
+    def defaultValue(self) -> int:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: int, /) -> None: ...
@@ -8973,7 +9623,8 @@ class IntEdit(IContainer):
         """Get the model."""
 
     @property
-    def font(self) -> FontType: ...
+    def font(self) -> FontType:
+        """Get the font, the monospace font by default."""
 
     @font.setter
     def font(self, arg: FontType, /) -> None: ...
@@ -8987,35 +9638,52 @@ class IntEditSlider(IContainer):
     def __init__(self, context: Context, model: IntModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> int: ...
+    def value(self) -> int:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: int, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[int], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[int], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edit, on every move while the slider is dragged,
+        from setValue(), and from other widgets that share the model.
+        """
 
     @property
-    def range(self) -> RangeI: ...
+    def range(self) -> RangeI:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeI, /) -> None: ...
 
-    def setRange(self, arg0: int, arg1: int, /) -> None: ...
+    def setRange(self, arg0: int, arg1: int, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> int: ...
+    def step(self) -> int:
+        """Get the step: how much the arrow keys, the increment buttons, and
+        the scroll wheel change the value by.
+        """
 
     @step.setter
     def step(self, arg: int, /) -> None: ...
 
     @property
-    def largeStep(self) -> int: ...
+    def largeStep(self) -> int:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: int, /) -> None: ...
 
     @property
-    def defaultValue(self) -> int: ...
+    def defaultValue(self) -> int:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: int, /) -> None: ...
@@ -9044,12 +9712,17 @@ class IntEditShuttle(IContainer):
     def __init__(self, context: Context, model: IntModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> int: ...
+    def value(self) -> int:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: int, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[int], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[int], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edit, on every notch while the shuttle is dragged,
+        from setValue(), and from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[int, bool], None], /) -> None:
         """Set the value callback with a flag for whether the shuttle is
@@ -9057,27 +9730,41 @@ class IntEditShuttle(IContainer):
         """
 
     @property
-    def range(self) -> RangeI: ...
+    def range(self) -> RangeI:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeI, /) -> None: ...
 
-    def setRange(self, arg0: int, arg1: int, /) -> None: ...
+    def setRange(self, arg0: int, arg1: int, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> int: ...
+    def step(self) -> int:
+        """Get the step: how much the up and down arrow keys, the increment
+        buttons, the scroll wheel, and each notch of the shuttle change the
+        value by. With Control held the shuttle moves by a tenth of it, but at
+        least one.
+        """
 
     @step.setter
     def step(self, arg: int, /) -> None: ...
 
     @property
-    def largeStep(self) -> int: ...
+    def largeStep(self) -> int:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel or the shuttle with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: int, /) -> None: ...
 
     @property
-    def defaultValue(self) -> int: ...
+    def defaultValue(self) -> int:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: int, /) -> None: ...
@@ -9095,12 +9782,17 @@ class IntEditShuttle(IContainer):
 class IIntSlider(IMouseWidget):
     """Base class for integer sliders."""
     @property
-    def value(self) -> int: ...
+    def value(self) -> int:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: int, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[int], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[int], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including on every move while the slider is dragged, from setValue(),
+        and from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[int, bool], None], /) -> None:
         """Set the value callback with a flag for whether the slider is
@@ -9108,27 +9800,39 @@ class IIntSlider(IMouseWidget):
         """
 
     @property
-    def range(self) -> RangeI: ...
+    def range(self) -> RangeI:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeI, /) -> None: ...
 
-    def setRange(self, arg0: int, arg1: int, /) -> None: ...
+    def setRange(self, arg0: int, arg1: int, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     @property
-    def step(self) -> int: ...
+    def step(self) -> int:
+        """Get the step: how much the arrow keys and the scroll wheel change
+        the value by.
+        """
 
     @step.setter
     def step(self, arg: int, /) -> None: ...
 
     @property
-    def largeStep(self) -> int: ...
+    def largeStep(self) -> int:
+        """Get the large step: how much Page Up and Page Down, and the scroll
+        wheel with Shift held, change the value by.
+        """
 
     @largeStep.setter
     def largeStep(self, arg: int, /) -> None: ...
 
     @property
-    def defaultValue(self) -> int: ...
+    def defaultValue(self) -> int:
+        """Get the default value."""
 
     @defaultValue.setter
     def defaultValue(self, arg: int, /) -> None: ...
@@ -9167,12 +9871,17 @@ class ColorIntEditSlider(IContainer):
         """Set the colors."""
 
     @property
-    def value(self) -> int: ...
+    def value(self) -> int:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: int, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[int], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[int], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edit, on every move while the slider is dragged,
+        from setValue(), and from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[int, bool], None], /) -> None:
         """Set the value callback with a flag for whether the slider is
@@ -9180,12 +9889,17 @@ class ColorIntEditSlider(IContainer):
         """
 
     @property
-    def range(self) -> RangeI: ...
+    def range(self) -> RangeI:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeI, /) -> None: ...
 
-    def setRange(self, arg0: int, arg1: int, /) -> None: ...
+    def setRange(self, arg0: int, arg1: int, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
 class ColorFloatSlider(IFloatSlider):
     """Color floating point slider."""
@@ -9210,12 +9924,17 @@ class ColorFloatEditSlider(IContainer):
         """Set the colors."""
 
     @property
-    def value(self) -> float: ...
+    def value(self) -> float:
+        """Get the value, which is kept within the range."""
 
     @value.setter
     def value(self, arg: float, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[float], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[float], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edit, on every move while the slider is dragged,
+        from setValue(), and from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[float, bool], None], /) -> None:
         """Set the value callback with a flag for whether the slider is
@@ -9223,12 +9942,17 @@ class ColorFloatEditSlider(IContainer):
         """
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
 class Label(IWidget):
     """Text label."""
@@ -9341,29 +10065,37 @@ class LevelsModel:
         """Create a new model."""
 
     @property
-    def value(self) -> RangeF: ...
+    def value(self) -> RangeF:
+        """Get the value, the minimum and maximum levels, which are kept within
+        the range. The default is 0 to 1.
+        """
 
     @value.setter
     def value(self, arg: RangeF, /) -> None: ...
 
-    def observeValue(self) -> IObservableRangeF: ...
+    def observeValue(self) -> IObservableRangeF:
+        """Observe the value."""
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within. The default is 0 to 1."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def observeRange(self) -> IObservableRangeF: ...
+    def observeRange(self) -> IObservableRangeF:
+        """Observe the range."""
 
     @property
-    def step(self) -> float: ...
+    def step(self) -> float:
+        """Get the step. The default is 0.1."""
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
     @property
-    def largeStep(self) -> float: ...
+    def largeStep(self) -> float:
+        """Get the large step. The default is 1."""
 
     @largeStep.setter
     def largeStep(self, arg: float, /) -> None: ...
@@ -9403,12 +10135,19 @@ class LevelsSlider(IMouseWidget):
     def __init__(self, context: Context, model: LevelsModel, parent: IWidget | None = None) -> None: ...
 
     @property
-    def value(self) -> RangeF: ...
+    def value(self) -> RangeF:
+        """Get the value, the minimum and maximum levels, which are kept within
+        the range. Dragging one handle past the other moves the other with it.
+        """
 
     @value.setter
     def value(self, arg: RangeF, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[RangeF], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[RangeF], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including on every move while a handle is dragged, from setValue(), and
+        from other widgets that share the model.
+        """
 
     def setPressedCallback(self, arg: Callable[[RangeF, bool], None], /) -> None:
         """Set the value callback with a flag for whether the slider is
@@ -9416,12 +10155,17 @@ class LevelsSlider(IMouseWidget):
         """
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     def getModel(self) -> LevelsModel:
         """Get the model."""
@@ -9432,12 +10176,20 @@ class LevelsEditSlider(IContainer):
         """Create a new widget."""
 
     @property
-    def value(self) -> RangeF: ...
+    def value(self) -> RangeF:
+        """Get the value, the minimum and maximum levels, which are kept within
+        the range. Dragging or typing one past the other moves the other with
+        it.
+        """
 
     @value.setter
     def value(self, arg: RangeF, /) -> None: ...
 
-    def setCallback(self, arg: Callable[[RangeF], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[RangeF], None], /) -> None:
+        """Set the callback, called with the value whenever it changes,
+        including from the edits, on every move while a handle is dragged, and
+        from setValue().
+        """
 
     def setPressedCallback(self, arg: Callable[[RangeF, bool], None], /) -> None:
         """Set the value callback with a flag for whether the slider is
@@ -9445,12 +10197,17 @@ class LevelsEditSlider(IContainer):
         """
 
     @property
-    def range(self) -> RangeF: ...
+    def range(self) -> RangeF:
+        """Get the range the value is kept within."""
 
     @range.setter
     def range(self, arg: RangeF, /) -> None: ...
 
-    def setRange(self, arg0: float, arg1: float, /) -> None: ...
+    def setRange(self, arg0: float, arg1: float, /) -> None:
+        """Set the range. The value is clamped to the new range.
+
+        Set the range from its minimum and maximum.
+        """
 
     def getModel(self) -> LevelsModel:
         """Get the model."""
@@ -9481,13 +10238,19 @@ class LineEditSelection:
     def __init__(self, first: int, second: int) -> None: ...
 
     @property
-    def first(self) -> int: ...
+    def first(self) -> int:
+        """The end the selection started from, as a byte offset into the text,
+        or -1 for none.
+        """
 
     @first.setter
     def first(self, arg: int, /) -> None: ...
 
     @property
-    def second(self) -> int: ...
+    def second(self) -> int:
+        """The end the selection extends to, as a byte offset into the text, or
+        -1 for none.
+        """
 
     @second.setter
     def second(self, arg: int, /) -> None: ...
@@ -9531,59 +10294,83 @@ class ObservableLineEditSelection(IObservableLineEditSelection):
         """Get the value."""
 
 class LineEditModel:
-    """Line edit model.
-
-    Implement undo/redo.
-    """
+    """Line edit model."""
     def __init__(self, context: Context, text: str = '') -> None: ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """Get the text."""
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
 
-    def observeText(self) -> IObservableString: ...
+    def observeText(self) -> IObservableString:
+        """Observe the text."""
 
-    def clearText(self) -> None: ...
+    def clearText(self) -> None:
+        """Clear the text. Like setting the text, this also clears the undo
+        history.
+        """
 
     @property
-    def readOnly(self) -> bool: ...
+    def readOnly(self) -> bool:
+        """Get whether the text is read only. Read only text can still be
+        selected and copied, but not edited.
+        """
 
     @readOnly.setter
     def readOnly(self, arg: bool, /) -> None: ...
 
-    def observeReadOnly(self) -> IObservableBool: ...
+    def observeReadOnly(self) -> IObservableBool:
+        """Observe whether the text is read only."""
 
     @property
-    def cursor(self) -> int: ...
+    def cursor(self) -> int:
+        """Get the cursor position, as a byte offset into the text."""
 
     @cursor.setter
     def cursor(self, arg: int, /) -> None: ...
 
-    def observeCursor(self) -> IObservableInt: ...
+    def observeCursor(self) -> IObservableInt:
+        """Observe the cursor position."""
 
     @property
-    def selection(self) -> LineEditSelection: ...
+    def selection(self) -> LineEditSelection:
+        """Get the selection."""
 
     @selection.setter
     def selection(self, arg: LineEditSelection, /) -> None: ...
 
-    def observeSelection(self) -> IObservableLineEditSelection: ...
+    def observeSelection(self) -> IObservableLineEditSelection:
+        """Observe the selection."""
 
-    def selectAll(self) -> None: ...
+    def selectAll(self) -> None:
+        """Select all of the text."""
 
-    def clearSelection(self) -> None: ...
+    def clearSelection(self) -> None:
+        """Clear the selection."""
 
-    def undo(self) -> None: ...
+    def undo(self) -> None:
+        """Undo the last edit. Nothing is done while the text is read only."""
 
-    def redo(self) -> None: ...
+    def redo(self) -> None:
+        """Redo the last edit that was undone. Nothing is done while the text
+        is read only.
+        """
 
-    def cut(self) -> None: ...
+    def cut(self) -> None:
+        """Copy the selection to the clipboard and remove it. Nothing is done
+        while the text is read only.
+        """
 
-    def copy(self) -> None: ...
+    def copy(self) -> None:
+        """Copy the selection to the clipboard."""
 
-    def paste(self) -> None: ...
+    def paste(self) -> None:
+        """Paste the clipboard's text over the selection, or at the cursor.
+        Text that does not match the regular expression is not pasted, and
+        nothing is done while the text is read only.
+        """
 
     def input(self, text: str) -> None:
         """Handle text input."""
@@ -9613,12 +10400,14 @@ class LineEdit(IWidget):
         """Get the model."""
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """Get the text."""
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
 
-    def clearText(self) -> None: ...
+    def clearText(self) -> None:
+        """Clear the text."""
 
     def setCallback(self, arg: Callable[[str], None], /) -> None:
         """Set the callback. The callback is triggered when the enter key is
@@ -9648,7 +10437,10 @@ class LineEdit(IWidget):
         """Set the focus callback."""
 
     @property
-    def readOnly(self) -> bool: ...
+    def readOnly(self) -> bool:
+        """Get whether the text is read only. Read only text can still be
+        selected and copied.
+        """
 
     @readOnly.setter
     def readOnly(self, arg: bool, /) -> None: ...
@@ -9666,18 +10458,24 @@ class LineEdit(IWidget):
         text is being composed.
         """
 
-    def selectAll(self) -> None: ...
+    def selectAll(self) -> None:
+        """Select all of the text."""
 
-    def clearSelection(self) -> None: ...
+    def clearSelection(self) -> None:
+        """Clear the selection."""
 
     @property
-    def font(self) -> FontType: ...
+    def font(self) -> FontType:
+        """Get the font."""
 
     @font.setter
     def font(self, arg: FontType, /) -> None: ...
 
     @property
-    def borderRole(self) -> ColorRole: ...
+    def borderRole(self) -> ColorRole:
+        """Get the border color role. The key focus color is drawn in its place
+        while the edit has the key focus.
+        """
 
     @borderRole.setter
     def borderRole(self, arg: ColorRole, /) -> None: ...
@@ -9698,13 +10496,15 @@ class ListItem:
     def __init__(self, text: str, tooltip: str = '') -> None: ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """The text shown for the item."""
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
 
     @property
-    def tooltip(self) -> str: ...
+    def tooltip(self) -> str:
+        """The item's tooltip, or empty for none."""
 
     @tooltip.setter
     def tooltip(self, arg: str, /) -> None: ...
@@ -10041,13 +10841,17 @@ class PieChartData:
     def __init__(self, percentage: float, color: Color4F) -> None: ...
 
     @property
-    def percentage(self) -> float: ...
+    def percentage(self) -> float:
+        """The size of the slice, as a percentage of the whole circle. Slices
+        follow each other clockwise from the top.
+        """
 
     @percentage.setter
     def percentage(self, arg: float, /) -> None: ...
 
     @property
-    def color(self) -> Color4F: ...
+    def color(self) -> Color4F:
+        """The color of the slice."""
 
     @color.setter
     def color(self, arg: Color4F, /) -> None: ...
@@ -10070,7 +10874,7 @@ class PieChart(IWidget):
 
     @property
     def sizeMult(self) -> int:
-        """Set the size multiplier."""
+        """Get the size multiplier."""
 
     @sizeMult.setter
     def sizeMult(self, arg: int, /) -> None: ...
@@ -10254,25 +11058,29 @@ class RowMargins:
     def __init__(self, left: SizeRole, top: SizeRole, right: SizeRole, bottom: SizeRole) -> None: ...
 
     @property
-    def left(self) -> SizeRole: ...
+    def left(self) -> SizeRole:
+        """The left margin, as a size role."""
 
     @left.setter
     def left(self, arg: SizeRole, /) -> None: ...
 
     @property
-    def top(self) -> SizeRole: ...
+    def top(self) -> SizeRole:
+        """The top margin, as a size role."""
 
     @top.setter
     def top(self, arg: SizeRole, /) -> None: ...
 
     @property
-    def right(self) -> SizeRole: ...
+    def right(self) -> SizeRole:
+        """The right margin, as a size role."""
 
     @right.setter
     def right(self, arg: SizeRole, /) -> None: ...
 
     @property
-    def bottom(self) -> SizeRole: ...
+    def bottom(self) -> SizeRole:
+        """The bottom margin, as a size role."""
 
     @bottom.setter
     def bottom(self, arg: SizeRole, /) -> None: ...
@@ -10400,23 +11208,33 @@ class ScrollArea(IWidget):
         """Create a new widget."""
 
     @property
-    def scrollType(self) -> ScrollType: ...
+    def scrollType(self) -> ScrollType:
+        """Get the directions the contents scroll in."""
 
     @scrollType.setter
     def scrollType(self, arg: ScrollType, /) -> None: ...
 
     @property
-    def scrollSize(self) -> Size2I: ...
+    def scrollSize(self) -> Size2I:
+        """Get the size of the scrolled contents."""
 
-    def setScrollSizeCallback(self, arg: Callable[[Size2I], None], /) -> None: ...
+    def setScrollSizeCallback(self, arg: Callable[[Size2I], None], /) -> None:
+        """Set a callback for when the size of the scrolled contents changes.
+        """
 
     @property
-    def scrollPos(self) -> V2I: ...
+    def scrollPos(self) -> V2I:
+        """Get the scroll position: how far the contents are scrolled, in
+        pixels.
+        """
 
     @scrollPos.setter
     def scrollPos(self, arg0: V2I, arg1: bool, /) -> None: ...
 
-    def setScrollPosCallback(self, arg: Callable[[V2I], None], /) -> None: ...
+    def setScrollPosCallback(self, arg: Callable[[V2I], None], /) -> None:
+        """Set a callback for when the scroll position changes, including from
+        setScrollPos() and scrollTo().
+        """
 
     def scrollTo(self, arg: Box2I, /) -> None:
         """Scroll to make the given box visible."""
@@ -10441,37 +11259,48 @@ class ScrollBar(IWidget):
         """Create a new widget."""
 
     @property
-    def scrollSize(self) -> int: ...
+    def scrollSize(self) -> int:
+        """Get the scroll size, the length of the scrolled contents in pixels.
+        """
 
     @scrollSize.setter
     def scrollSize(self, arg: int, /) -> None: ...
 
     @property
-    def scrollPos(self) -> int: ...
+    def scrollPos(self) -> int:
+        """Get the scroll position, in pixels."""
 
     @scrollPos.setter
     def scrollPos(self, arg: int, /) -> None: ...
 
-    def setScrollPosCallback(self, arg: Callable[[int], None], /) -> None: ...
+    def setScrollPosCallback(self, arg: Callable[[int], None], /) -> None:
+        """Set a callback for when the scroll position is changed by dragging
+        the handle or clicking the bar.
+        """
 
 class ScrollInfo:
     """Scroll widget information."""
     def __init__(self) -> None: ...
 
     @property
-    def viewport(self) -> Box2I: ...
+    def viewport(self) -> Box2I:
+        """The geometry of the area the widget is seen through, in window
+        coordinates.
+        """
 
     @viewport.setter
     def viewport(self, arg: Box2I, /) -> None: ...
 
     @property
-    def scrollSize(self) -> Size2I: ...
+    def scrollSize(self) -> Size2I:
+        """The size of the widget being scrolled, in pixels."""
 
     @scrollSize.setter
     def scrollSize(self, arg: Size2I, /) -> None: ...
 
     @property
-    def scrollPos(self) -> V2I: ...
+    def scrollPos(self) -> V2I:
+        """The scroll position: how far the widget is scrolled, in pixels."""
 
     @scrollPos.setter
     def scrollPos(self, arg: V2I, /) -> None: ...
@@ -10486,28 +11315,37 @@ class ScrollWidget(IWidget):
         """Create a new widget."""
 
     @property
-    def widget(self) -> IWidget: ...
+    def widget(self) -> IWidget:
+        """Get the widget that is scrolled."""
 
     @widget.setter
     def widget(self, arg: IWidget, /) -> None: ...
 
     @property
-    def scrollType(self) -> ScrollType: ...
+    def scrollType(self) -> ScrollType:
+        """Get which ways the widget scrolls."""
 
     @scrollType.setter
     def scrollType(self, arg: ScrollType, /) -> None: ...
 
     @property
-    def scrollSize(self) -> Size2I: ...
+    def scrollSize(self) -> Size2I:
+        """Get the size of the widget being scrolled, in pixels."""
 
-    def setScrollSizeCallback(self, arg: Callable[[Size2I], None], /) -> None: ...
+    def setScrollSizeCallback(self, arg: Callable[[Size2I], None], /) -> None:
+        """Set a callback for when the scroll size changes."""
 
-    def setScrollPos(self, value: V2I, clamp: bool = True) -> None: ...
+    def setScrollPos(self, value: V2I, clamp: bool = True) -> None:
+        """Set the scroll position. With clamp it is kept between zero and the
+        scroll size less the size of the view.
+        """
 
     @property
-    def scrollPos(self) -> V2I: ...
+    def scrollPos(self) -> V2I:
+        """Get the scroll position, in pixels."""
 
-    def setScrollPosCallback(self, arg: Callable[[V2I], None], /) -> None: ...
+    def setScrollPosCallback(self, arg: Callable[[V2I], None], /) -> None:
+        """Set a callback for when the scroll position changes."""
 
     def scrollTo(self, arg: Box2I, /) -> None:
         """Scroll to make the given box visible."""
@@ -10613,7 +11451,8 @@ class SearchBox(IContainer):
 
 class ShuttleWidget(IMouseWidget):
     """Shuttle widget."""
-    def __init__(self, context: Context, parent: IWidget | None = None) -> None: ...
+    def __init__(self, context: Context, parent: IWidget | None = None) -> None:
+        """Create a new widget."""
 
     @property
     def modifiers(self) -> int:
@@ -10621,11 +11460,21 @@ class ShuttleWidget(IMouseWidget):
         delta callback by anything that scales what a notch is worth.
         """
 
-    def setCallback(self, arg: Callable[[int], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[int], None], /) -> None:
+        """Set the callback, called while the shuttle is dragged with the
+        number of notches it has moved since it was pressed, negative to the
+        left. A notch is a quarter of the widget's height.
+        """
 
-    def setDeltaCallback(self, arg: Callable[[int], None], /) -> None: ...
+    def setDeltaCallback(self, arg: Callable[[int], None], /) -> None:
+        """Set the delta callback, called while the shuttle is dragged with the
+        number of notches it has moved since the last call.
+        """
 
-    def setActiveCallback(self, arg: Callable[[bool], None], /) -> None: ...
+    def setActiveCallback(self, arg: Callable[[bool], None], /) -> None:
+        """Set the active callback, called with true when the shuttle is
+        pressed and false when it is released.
+        """
 
 class Spacer(IWidget):
     """Spacer widget."""
@@ -10943,7 +11792,8 @@ class TableCell:
     def __init__(self, text: str, editable: bool = False, colorRole: ColorRole = ColorRole._None) -> None: ...
 
     @property
-    def text(self) -> str: ...
+    def text(self) -> str:
+        """The text shown in the cell."""
 
     @text.setter
     def text(self, arg: str, /) -> None: ...
@@ -10977,7 +11827,8 @@ class TableRow:
     def __init__(self, cells: Sequence[TableCell], heading: bool = False) -> None: ...
 
     @property
-    def cells(self) -> list[TableCell]: ...
+    def cells(self) -> list[TableCell]:
+        """The cells, one for each column."""
 
     @cells.setter
     def cells(self, arg: Sequence[TableCell], /) -> None: ...
@@ -10992,7 +11843,10 @@ class TableRow:
     def heading(self, arg: bool, /) -> None: ...
 
     @property
-    def visible(self) -> bool: ...
+    def visible(self) -> bool:
+        """Whether the row is shown. A hidden row takes no space and keeps its
+        index.
+        """
 
     @visible.setter
     def visible(self, arg: bool, /) -> None: ...
@@ -11010,18 +11864,23 @@ class TableIndex:
     def __init__(self, row: int, column: int) -> None: ...
 
     @property
-    def row(self) -> int: ...
+    def row(self) -> int:
+        """The row, or -1 for none."""
 
     @row.setter
     def row(self, arg: int, /) -> None: ...
 
     @property
-    def column(self) -> int: ...
+    def column(self) -> int:
+        """The column, or -1 for none."""
 
     @column.setter
     def column(self, arg: int, /) -> None: ...
 
-    def isValid(self) -> bool: ...
+    def isValid(self) -> bool:
+        """Get whether the index is of a cell: the row and the column are both
+        zero or more.
+        """
 
     def __eq__(self, arg: TableIndex, /) -> bool: ...
 
@@ -11134,18 +11993,23 @@ class TextEditPos:
     def __init__(self, line: int, chr: int) -> None: ...
 
     @property
-    def line(self) -> int: ...
+    def line(self) -> int:
+        """The line, or -1 for none."""
 
     @line.setter
     def line(self, arg: int, /) -> None: ...
 
     @property
-    def chr(self) -> int: ...
+    def chr(self) -> int:
+        """The character, as a byte offset into the line, or -1 for none."""
 
     @chr.setter
     def chr(self, arg: int, /) -> None: ...
 
-    def isValid(self) -> bool: ...
+    def isValid(self) -> bool:
+        """Get whether the position is valid: neither the line nor the
+        character is -1.
+        """
 
     def __eq__(self, arg: TextEditPos, /) -> bool: ...
 
@@ -11167,13 +12031,15 @@ class TextEditSelection:
     def __init__(self, first: TextEditPos, second: TextEditPos) -> None: ...
 
     @property
-    def first(self) -> TextEditPos: ...
+    def first(self) -> TextEditPos:
+        """The end the selection started from."""
 
     @first.setter
     def first(self, arg: TextEditPos, /) -> None: ...
 
     @property
-    def second(self) -> TextEditPos: ...
+    def second(self) -> TextEditPos:
+        """The end the selection extends to."""
 
     @second.setter
     def second(self, arg: TextEditPos, /) -> None: ...
@@ -11196,7 +12062,10 @@ class TextEditModelOptions:
     def __init__(self) -> None: ...
 
     @property
-    def tabSpaces(self) -> int: ...
+    def tabSpaces(self) -> int:
+        """The number of spaces the Tab key inserts, and that it indents or,
+        with Shift held, un-indents the selected lines by.
+        """
 
     @tabSpaces.setter
     def tabSpaces(self, arg: int, /) -> None: ...
@@ -11281,51 +12150,64 @@ class ObservableTextEditSelection(IObservableTextEditSelection):
         """Get the value."""
 
 class TextEditModel:
-    """Text edit model.
-
-    Implement undo/redo.
-    """
+    """Text edit model."""
     def __init__(self, context: Context, text: Sequence[str] = []) -> None: ...
 
     @property
-    def text(self) -> list[str]: ...
+    def text(self) -> list[str]:
+        """Get the text, one string for each line."""
 
     @text.setter
     def text(self, arg: Sequence[str], /) -> None: ...
 
-    def observeText(self) -> IObservableStringList: ...
+    def observeText(self) -> IObservableStringList:
+        """Observe the text."""
 
-    def clearText(self) -> None: ...
+    def clearText(self) -> None:
+        """Clear the text, leaving one empty line. Like setting the text, this
+        also clears the undo history.
+        """
 
     @property
-    def readOnly(self) -> bool: ...
+    def readOnly(self) -> bool:
+        """Get whether the text is read only. Read only text can still be
+        selected and copied, but not edited.
+        """
 
     @readOnly.setter
     def readOnly(self, arg: bool, /) -> None: ...
 
-    def observeReadOnly(self) -> IObservableBool: ...
+    def observeReadOnly(self) -> IObservableBool:
+        """Observe whether the text is read only."""
 
     @property
-    def cursor(self) -> TextEditPos: ...
+    def cursor(self) -> TextEditPos:
+        """Get the cursor position."""
 
     @cursor.setter
     def cursor(self, arg: TextEditPos, /) -> None: ...
 
-    def observeCursor(self) -> IObservableTextEditPos: ...
+    def observeCursor(self) -> IObservableTextEditPos:
+        """Observe the cursor position."""
 
     @property
-    def selection(self) -> TextEditSelection: ...
+    def selection(self) -> TextEditSelection:
+        """Get the selection."""
 
     @selection.setter
     def selection(self, arg: TextEditSelection, /) -> None: ...
 
-    def observeSelection(self) -> IObservableTextEditSelection: ...
+    def observeSelection(self) -> IObservableTextEditSelection:
+        """Observe the selection."""
 
-    def selectAll(self) -> None: ...
+    def selectAll(self) -> None:
+        """Select all of the text."""
 
-    def clearSelection(self) -> None: ...
+    def clearSelection(self) -> None:
+        """Clear the selection."""
 
-    def undo(self) -> None: ...
+    def undo(self) -> None:
+        """Undo the last edit. Nothing is done while the text is read only."""
 
     def observeHasUndo(self) -> IObservableBool:
         """Observe whether there is a command to undo."""
@@ -11333,13 +12215,23 @@ class TextEditModel:
     def observeHasRedo(self) -> IObservableBool:
         """Observe whether there is a command to redo."""
 
-    def redo(self) -> None: ...
+    def redo(self) -> None:
+        """Redo the last edit that was undone. Nothing is done while the text
+        is read only.
+        """
 
-    def cut(self) -> None: ...
+    def cut(self) -> None:
+        """Copy the selection to the clipboard and remove it. Nothing is done
+        while the text is read only.
+        """
 
-    def copy(self) -> None: ...
+    def copy(self) -> None:
+        """Copy the selection to the clipboard."""
 
-    def paste(self) -> None: ...
+    def paste(self) -> None:
+        """Paste the clipboard's text over the selection, or at the cursor.
+        Nothing is done while the text is read only.
+        """
 
     def input(self, text: str) -> None:
         """Handle text input."""
@@ -11348,12 +12240,14 @@ class TextEditModel:
         """Handle key input."""
 
     @property
-    def options(self) -> TextEditModelOptions: ...
+    def options(self) -> TextEditModelOptions:
+        """Get the options."""
 
     @options.setter
     def options(self, arg: TextEditModelOptions, /) -> None: ...
 
-    def observeOptions(self) -> IObservableTextEditModelOptions: ...
+    def observeOptions(self) -> IObservableTextEditModelOptions:
+        """Observe the options."""
 
     def setPageRows(self, rows: int) -> None:
         """Set the number of rows in a page."""
@@ -11363,19 +12257,26 @@ class TextEditOptions:
     def __init__(self) -> None: ...
 
     @property
-    def fontInfo(self) -> FontInfo: ...
+    def fontInfo(self) -> FontInfo:
+        """The font. Its size is scaled by the display scale."""
 
     @fontInfo.setter
     def fontInfo(self, arg: FontInfo, /) -> None: ...
 
     @property
-    def cursorBlink(self) -> float: ...
+    def cursorBlink(self) -> float:
+        """How long, in seconds, the cursor is shown and then hidden as it
+        blinks.
+        """
 
     @cursorBlink.setter
     def cursorBlink(self, arg: float, /) -> None: ...
 
     @property
-    def autoScrollTimeout(self) -> float: ...
+    def autoScrollTimeout(self) -> float:
+        """The time, in seconds, between the steps of the scrolling while a
+        selection is dragged past the edge.
+        """
 
     @autoScrollTimeout.setter
     def autoScrollTimeout(self, arg: float, /) -> None: ...
@@ -11427,14 +12328,19 @@ class TextEdit(IWidget):
         """Get the scroll widget."""
 
     @property
-    def text(self) -> list[str]: ...
+    def text(self) -> list[str]:
+        """Get the text, one string for each line."""
 
     @text.setter
     def text(self, arg: Sequence[str], /) -> None: ...
 
-    def clearText(self) -> None: ...
+    def clearText(self) -> None:
+        """Clear the text."""
 
-    def setCallback(self, arg: Callable[[Sequence[str]], None], /) -> None: ...
+    def setCallback(self, arg: Callable[[Sequence[str]], None], /) -> None:
+        """Set the callback, called with the text whenever it changes: on every
+        edit, and from setting the text.
+        """
 
     def setFocusCallback(self, arg: Callable[[bool], None], /) -> None:
         """Set a callback for when the editing widget inside gains or loses the
@@ -11442,31 +12348,45 @@ class TextEdit(IWidget):
         """
 
     @property
-    def readOnly(self) -> bool: ...
+    def readOnly(self) -> bool:
+        """Get whether the text is read only. Read only text can still be
+        selected and copied.
+        """
 
     @readOnly.setter
     def readOnly(self, arg: bool, /) -> None: ...
 
-    def selectAll(self) -> None: ...
+    def selectAll(self) -> None:
+        """Select all of the text."""
 
-    def clearSelection(self) -> None: ...
+    def clearSelection(self) -> None:
+        """Clear the selection."""
 
     @property
-    def options(self) -> TextEditOptions: ...
+    def options(self) -> TextEditOptions:
+        """Get the options."""
 
     @options.setter
     def options(self, arg: TextEditOptions, /) -> None: ...
 
-    def observeOptions(self) -> IObservableTextEditOptions: ...
+    def observeOptions(self) -> IObservableTextEditOptions:
+        """Observe the options."""
 
     @property
-    def sizeHintRole(self) -> SizeRole: ...
+    def sizeHintRole(self) -> SizeRole:
+        """Get the size hint role, the size the text is given to scroll in.
+        "None" asks for the height of the text instead, so that the edit does
+        not scroll vertically.
+        """
 
     @sizeHintRole.setter
     def sizeHintRole(self, arg: SizeRole, /) -> None: ...
 
     @property
-    def marginRole(self) -> SizeRole: ...
+    def marginRole(self) -> SizeRole:
+        """Get the margin role, the room kept around the edit outside its
+        border. The default is none.
+        """
 
     @marginRole.setter
     def marginRole(self, arg: SizeRole, /) -> None: ...
