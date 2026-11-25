@@ -40,14 +40,19 @@
 <h1>Python</h1>
 <div class="toc">
 <ul>
+<li><a href="#installing">Installing</a></li>
 <li><a href="#the-modules">The modules</a></li>
+<li><a href="#reference">API reference</a></li>
 <li><a href="#building">Building</a></li>
 <li><a href="#running">Running</a></li>
 <li><a href="#the-application">The application</a></li>
 <li><a href="#modifying">Extending it</a></li>
 </ul>
 </div>
-<p>The libraries DJV is built from have Python bindings, and there is a version of the DJV application written in Python on top of them. This page describes what is there, how to run it, and how to modify it. It is not an API reference — the bindings follow the C++ headers closely, so the headers and the Python examples are the reference.</p>
+<p>The libraries DJV is built from have Python bindings, and the DJV application itself can be run, scripted and extended from Python. This page describes what is there, how to get it, and how to use it; the <a href="#reference">API reference</a> below lists every class and method.</p>
+<h2 id="installing">Installing</h2>
+<pre><code>pip install DJV-viewer</code></pre>
+<p>That is DJV with its Python modules, and tlRender, feather-tk and OpenTimelineIO with it, for Python 3.12 or newer on Linux, macOS and Windows. <code>djv</code> on the command line runs the application. The pip install has the same codecs as the packages: see <a href="install.md#pip">Download and install</a>. <a href="#building">Building</a> from source gives the modules with everything compiled in.</p>
 <h2 id="the-modules">The modules</h2>
 <p>Four modules make up the stack:</p>
 <ul><li><strong>feather_tk</strong> — the <a target="_blank" href="https://github.com/darbyjohnston/feather-tk">feather-tk</a> user interface toolkit: widgets, layouts, observables, and the application classes.</li><li><strong>tlrender</strong> — timelines, players, and file I/O, with the timeline and viewport widgets in the <code>tl.ui</code> submodule.</li><li><strong>djv</strong> — DJV itself: the data models in the <code>djv.models</code> submodule — files, settings, color, audio, viewport, and tools — and the application's widgets in the <code>djv.ui</code> submodule — the viewport with its HUD and color picking, and the color, view, settings, export, and magnify widgets.</li><li><strong>opentimelineio</strong> — the standard OTIO package. Its time types pass directly through the tlRender bindings, so a <code>RationalTime</code> from OTIO seeks a player.</li></ul>
@@ -56,6 +61,11 @@
 import feather_tk as ftk
 import tlrender as tl
 import djv</code></pre>
+<h2 id="reference">API reference</h2>
+<p>Each module comes with type stubs, <code>.pyi</code> files beside it, which list every class, method and property with its signature and its description. The descriptions are the comments in the C++ headers, which the bindings follow closely. Editors read the stubs for completion and for help on hover, and so does a coding agent working in a project that has the modules installed. In Python itself, <code>help()</code> shows the signatures only: the descriptions are in the stubs.</p>
+<p>The same stubs, to read here:</p>
+<ul><li><a href="python/feather_tk.pyi.txt">feather_tk</a> — the toolkit: images, observables, widgets and the application classes</li><li><a href="python/tlrender.pyi.txt">tlrender</a> and <a href="python/tlrender.ui.pyi.txt">tlrender.ui</a> — timelines, players, file I/O and rendering, and the timeline and viewport widgets</li><li><a href="python/djv.models.pyi.txt">djv.models</a>, <a href="python/djv.ui.pyi.txt">djv.ui</a> and <a href="python/djv.app.pyi.txt">djv.app</a> — DJV's models, widgets and application</li></ul>
+<p>About two thirds of the entries have a description. Most of the rest are fields and constructors whose names say what they are, and the headers are the full reference for those: <a target="_blank" href="https://github.com/grizzlypeak3d/feather-tk/tree/main/lib/ftk">feather-tk's</a>, <a target="_blank" href="https://github.com/grizzlypeak3d/tlRender/tree/main/lib/tlRender">tlRender's</a> and <a target="_blank" href="https://github.com/grizzlypeak3d/DJV/tree/main/lib/djv">DJV's</a>.</p>
 <h2 id="building">Building</h2>
 <p>One switch builds all of it. In <code>etc/Config/local.cmake</code>:</p>
 <pre><code>set(DJV_PYTHON ON CACHE BOOL "")</code></pre>

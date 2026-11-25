@@ -452,6 +452,13 @@ jobs:
       run: |
         cd build-Debug
         ctest --verbose --rerun-failed --output-on-failure --timeout 600 -C Debug
+
+    # The Python API reference in docs/python against this build's stubs:
+    # a binding or a header comment changed without the copies made again
+    # fails here. Only on this job, which is where they are made from.
+    - name: Python API reference check
+      run: |
+        cmake --build build-Debug --target djvDocsPythonStubsCheck
   # Both architectures on the one kind of runner: the Intel package is cross
   # compiled, as it is in a release made by hand. Neither is signed. The
   # signing identity is not kept here; etc/macOS/sign-release.sh signs and

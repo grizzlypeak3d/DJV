@@ -1,0 +1,965 @@
+# The Python API of tlrender.ui: generated from the bindings by nanobind's
+# stubgen, with each description taken from the C++ headers. Do not edit:
+# see docs/pythonstubs.py. Import it as "import tlrender".
+
+"""
+Widgets for playing timelines, built on feather-tk: a Viewport that draws a Player's frames, a TimelineWidget, and tool bars and time widgets for the transport. They go in a feather_tk.App window, whose loop ticks the context and draws; tlrender.ui.init() comes first.
+"""
+
+from collections.abc import Callable, Mapping, Sequence
+import enum
+from typing import overload
+
+import feather_tk._feather_tk
+import opentimelineio.opentime
+
+import tlrender._tlrender
+
+
+def init(context: feather_tk._feather_tk.Context) -> None:
+    """
+    Initialize the library, and tlRender's core with it: call it instead of tlrender.init() before making any of the widgets.
+    """
+
+class InOutDisplay(enum.Enum):
+    InsideRange = 0
+
+    OutsideRange = 1
+
+def getInOutDisplayEnums() -> list[InOutDisplay]: ...
+
+@overload
+def getLabel(arg: InOutDisplay, /) -> str: ...
+
+@overload
+def getLabel(arg: CacheDisplay, /) -> str: ...
+
+@overload
+def getLabel(arg: WaveformPrim, /) -> str: ...
+
+@overload
+def to_string(arg: InOutDisplay, /) -> str: ...
+
+@overload
+def to_string(arg: CacheDisplay, /) -> str: ...
+
+@overload
+def to_string(arg: WaveformPrim, /) -> str: ...
+
+@overload
+def from_string(arg0: str, arg1: InOutDisplay, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: CacheDisplay, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: WaveformPrim, /) -> bool: ...
+
+class CacheDisplay(enum.Enum):
+    VideoAndAudio = 0
+
+    VideoOnly = 1
+
+def getCacheDisplayEnums() -> list[CacheDisplay]: ...
+
+class WaveformPrim(enum.Enum):
+    Mesh = 0
+
+    Image = 1
+
+def getWaveformPrimEnums() -> list[WaveformPrim]: ...
+
+class ItemData:
+    """
+    What the items of a timeline widget share: the speed, the directory relative media paths are read against, the options and the time units model. TimelineWidget makes its own; a TimelineRuler is given one.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def speed(self) -> float: ...
+
+    @speed.setter
+    def speed(self, arg: float, /) -> None: ...
+
+    @property
+    def dir(self) -> str: ...
+
+    @dir.setter
+    def dir(self, arg: str, /) -> None: ...
+
+    @property
+    def options(self) -> tlrender._tlrender.Options: ...
+
+    @options.setter
+    def options(self, arg: tlrender._tlrender.Options, /) -> None: ...
+
+    @property
+    def timeUnitsModel(self) -> tlrender._tlrender.ITimeUnitsModel: ...
+
+    @timeUnitsModel.setter
+    def timeUnitsModel(self, arg: tlrender._tlrender.ITimeUnitsModel, /) -> None: ...
+
+    @property
+    def toMediaTime(self) -> Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime]:
+        """
+        How to turn a time on the timeline into the time shown for it; see TimeMap. Only positions go through it, a duration being a length either way. Unset, the two are the same.
+        """
+
+    @toMediaTime.setter
+    def toMediaTime(self, arg: Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime], /) -> None: ...
+
+class ItemOptions:
+    """
+    Options for timeline items. inputEnabled off makes them ignore the mouse and keyboard, for a timeline that is only looked at.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def inputEnabled(self) -> bool: ...
+
+    @inputEnabled.setter
+    def inputEnabled(self, arg: bool, /) -> None: ...
+
+    def __eq__(self, arg: ItemOptions, /) -> bool: ...
+
+    def __ne__(self, arg: ItemOptions, /) -> bool: ...
+
+class Marker:
+    """A named, colored range drawn on the timeline."""
+
+    def __init__(self) -> None: ...
+
+    @property
+    def name(self) -> str: ...
+
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    @property
+    def range(self) -> opentimelineio.opentime.TimeRange: ...
+
+    @range.setter
+    def range(self, arg: opentimelineio.opentime.TimeRange, /) -> None: ...
+
+    def __eq__(self, arg: Marker, /) -> bool: ...
+
+    def __ne__(self, arg: Marker, /) -> bool: ...
+
+class DisplayOptions:
+    """
+    How a timeline widget draws: in and out points, the cache, thumbnails and waveforms and their sizes, clip colors, and the OCIO and LUT options thumbnails are made with.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def inOutDisplay(self) -> InOutDisplay: ...
+
+    @inOutDisplay.setter
+    def inOutDisplay(self, arg: InOutDisplay, /) -> None: ...
+
+    @property
+    def cacheDisplay(self) -> CacheDisplay: ...
+
+    @cacheDisplay.setter
+    def cacheDisplay(self, arg: CacheDisplay, /) -> None: ...
+
+    @property
+    def minimize(self) -> bool: ...
+
+    @minimize.setter
+    def minimize(self, arg: bool, /) -> None: ...
+
+    @property
+    def clipColors(self) -> bool: ...
+
+    @clipColors.setter
+    def clipColors(self, arg: bool, /) -> None: ...
+
+    @property
+    def thumbnails(self) -> bool: ...
+
+    @thumbnails.setter
+    def thumbnails(self, arg: bool, /) -> None: ...
+
+    @property
+    def thumbnailHeight(self) -> int: ...
+
+    @thumbnailHeight.setter
+    def thumbnailHeight(self, arg: int, /) -> None: ...
+
+    @property
+    def waveforms(self) -> bool: ...
+
+    @waveforms.setter
+    def waveforms(self, arg: bool, /) -> None: ...
+
+    @property
+    def waveformWidth(self) -> int: ...
+
+    @waveformWidth.setter
+    def waveformWidth(self, arg: int, /) -> None: ...
+
+    @property
+    def waveformHeight(self) -> int: ...
+
+    @waveformHeight.setter
+    def waveformHeight(self, arg: int, /) -> None: ...
+
+    @property
+    def waveformPrim(self) -> WaveformPrim: ...
+
+    @waveformPrim.setter
+    def waveformPrim(self, arg: WaveformPrim, /) -> None: ...
+
+    @property
+    def clipRectScale(self) -> float: ...
+
+    @clipRectScale.setter
+    def clipRectScale(self, arg: float, /) -> None: ...
+
+    @property
+    def ocio(self) -> tlrender._tlrender.OCIOOptions: ...
+
+    @ocio.setter
+    def ocio(self, arg: tlrender._tlrender.OCIOOptions, /) -> None: ...
+
+    @property
+    def lut(self) -> tlrender._tlrender.LUTOptions: ...
+
+    @lut.setter
+    def lut(self, arg: tlrender._tlrender.LUTOptions, /) -> None: ...
+
+    def __eq__(self, arg: DisplayOptions, /) -> bool: ...
+
+    def __ne__(self, arg: DisplayOptions, /) -> bool: ...
+
+class DisplayOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableDisplayOptions, callback: Callable[[DisplayOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableDisplayOptions:
+    """Base class for observable values."""
+    def get(self) -> DisplayOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableDisplayOptions(IObservableDisplayOptions):
+    """Observable value."""
+    def __init__(self, arg: DisplayOptions, /) -> None: ...
+
+    def setAlways(self, arg: DisplayOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: DisplayOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> DisplayOptions:
+        """Get the value."""
+
+class FrameToolBar(feather_tk._feather_tk.ToolBar):
+    """
+    Buttons for the start, previous, next and end frames of the player. actions has them by name, for menus and shortcuts.
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context, parent: feather_tk._feather_tk.IWidget | None = None) -> None:
+        """Create a new widget."""
+
+    @property
+    def actions(self) -> dict[str, feather_tk._feather_tk.Action]:
+        """Get the actions."""
+
+    @property
+    def player(self) -> tlrender._tlrender.Player:
+        """Get the player."""
+
+    @player.setter
+    def player(self, value: tlrender._tlrender.Player | None) -> None: ...
+
+class PlaybackToolBar(feather_tk._feather_tk.ToolBar):
+    """
+    Buttons for the player's playback: reverse, stop and forward, and its loop mode. actions has them by name, for menus and shortcuts.
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context, parent: feather_tk._feather_tk.IWidget | None = None) -> None:
+        """Create a new widget."""
+
+    @property
+    def actions(self) -> dict[str, feather_tk._feather_tk.Action]:
+        """Get the actions."""
+
+    @property
+    def player(self) -> tlrender._tlrender.Player:
+        """Get the player."""
+
+    @player.setter
+    def player(self, value: tlrender._tlrender.Player | None) -> None: ...
+
+class PlaybackLoopWidget(feather_tk._feather_tk.IContainer):
+    """Chooses a loop mode: loop, once or ping-pong."""
+
+    def __init__(self, context: feather_tk._feather_tk.Context, parent: feather_tk._feather_tk.IWidget | None = None) -> None:
+        """Create a new widget."""
+
+    @property
+    def loop(self) -> tlrender._tlrender.Loop:
+        """Get the playback loop."""
+
+    @loop.setter
+    def loop(self, arg: tlrender._tlrender.Loop, /) -> None: ...
+
+    def setCallback(self, arg: Callable[[tlrender._tlrender.Loop], None], /) -> None:
+        """Set the callback."""
+
+class ThumbnailSystem(feather_tk._feather_tk.ISystem):
+    """
+    Makes the thumbnails and audio waveforms the timeline widget draws, on threads of its own, and keeps them. tlrender.ui.init() creates it. Only the cache is reached from Python.
+    """
+
+    def clearCache(self) -> None:
+        """
+        Clear the thumbnails and waveforms made so far, to free their memory. A file changed on disk does not need it: its modification time is part of what they are kept by, so it is read again.
+        """
+
+def setFileBrowserIOOptions(context: feather_tk._feather_tk.Context, options: Mapping[str, str]) -> None:
+    """Set the I/O options the file browser reads its thumbnails with."""
+
+class TimeMap:
+    """
+    Maps between the time a player runs on and the time shown for it, which are not always the same: a sequence read with its missing frames left out plays at the length of the frames it has, so counting from the start does not name the frame, and the media's own time does. toMedia and fromMedia are functions of a RationalTime; left unset the two times are the same.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def toMedia(self) -> Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime]: ...
+
+    @toMedia.setter
+    def toMedia(self, arg: Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime], /) -> None: ...
+
+    @property
+    def fromMedia(self) -> Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime]: ...
+
+    @fromMedia.setter
+    def fromMedia(self, arg: Callable[[opentimelineio.opentime.RationalTime], opentimelineio.opentime.RationalTime], /) -> None: ...
+
+class TimeEdit(feather_tk._feather_tk.IWidget):
+    """
+    Edits a time, as text in the time units model's units: frames, seconds or timecode.
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context, timeUnitsModel: tlrender._tlrender.TimeUnitsModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
+
+    @property
+    def value(self) -> opentimelineio.opentime.RationalTime | None:
+        """Get the time value, unset when the edit has none."""
+
+    @value.setter
+    def value(self, arg: opentimelineio.opentime.RationalTime | None, /) -> None: ...
+
+    def setCallback(self, arg: Callable[[opentimelineio.opentime.RationalTime], None], /) -> None:
+        """Set the time value callback."""
+
+    def setTimeMap(self, arg: TimeMap, /) -> None:
+        """
+        Set the mapping between the value and the time shown. The value, and the callback, stay in the player's time.
+        """
+
+    def setRange(self, range: opentimelineio.opentime.TimeRange | None) -> None:
+        """
+        Set the times the value can take, in the player's time, so the edit is wide enough for any of them.
+        """
+
+    def selectAll(self) -> None:
+        """Select all."""
+
+class TimeLabel(feather_tk._feather_tk.IWidget):
+    """
+    Shows a time in the time units model's units: frames, seconds or timecode.
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context, timeUnitsModel: tlrender._tlrender.TimeUnitsModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
+
+    @property
+    def value(self) -> opentimelineio.opentime.RationalTime | None:
+        """Get the time value, unset when the label has none."""
+
+    @value.setter
+    def value(self, arg: opentimelineio.opentime.RationalTime | None, /) -> None: ...
+
+    def setMarginRole(self, arg: feather_tk._feather_tk.SizeRole, /) -> None:
+        """Set the margin role."""
+
+class TimeUnitsWidget(feather_tk._feather_tk.IWidget):
+    """
+    Chooses the time units model's units, which the time widgets sharing the model then show.
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context, timeUnitsModel: tlrender._tlrender.TimeUnitsModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
+
+class TimelineWidget(feather_tk._feather_tk.IWidget):
+    """
+    Draws a Player's timeline -- tracks, clips, transitions, markers, thumbnails and audio waveforms -- under a ruler that scrubs it, with the timelines the player compares against drawn beside it. Give it a player; it follows the player's time. Thumbnails and waveforms are made on other threads by the ThumbnailSystem and fill in as they arrive.
+    """
+
+    @overload
+    def __init__(self, context: feather_tk._feather_tk.Context, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
+
+    @overload
+    def __init__(self, context: feather_tk._feather_tk.Context, timeUnitsModel: tlrender._tlrender.ITimeUnitsModel, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
+
+    @property
+    def timeUnitsModel(self) -> tlrender._tlrender.ITimeUnitsModel:
+        """Get the time units model."""
+
+    @property
+    def player(self) -> tlrender._tlrender.Player:
+        """The player whose timeline is drawn, or None."""
+
+    @player.setter
+    def player(self, value: tlrender._tlrender.Player | None) -> None: ...
+
+    @property
+    def displayOptions(self) -> DisplayOptions:
+        """Get the display options."""
+
+    @displayOptions.setter
+    def displayOptions(self, arg: DisplayOptions, /) -> None: ...
+
+    @property
+    def observeDisplayOptions(self) -> IObservableDisplayOptions:
+        """Observe the display options."""
+
+    def setTimelines(self, timelines: Sequence[tlrender._tlrender.Timeline] | None) -> None:
+        """
+        Set the timelines drawn beside the player's own. None, the default, draws the player's compare timelines; a list draws those instead, for showing timelines the picture is not comparing.
+        """
+
+    @property
+    def frameMarkers(self) -> list[int]:
+        """Get the frame markers."""
+
+    @frameMarkers.setter
+    def frameMarkers(self, arg: Sequence[int], /) -> None: ...
+
+    @property
+    def markers(self) -> list[Marker]:
+        """Get the markers."""
+
+    @markers.setter
+    def markers(self, arg: Sequence[Marker], /) -> None: ...
+
+    @property
+    def frameView(self) -> bool:
+        """
+        Whether the view is framed automatically: the whole timeline fitted to the widget's width.
+        """
+
+    @frameView.setter
+    def frameView(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeFrameView(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether the view is framed automatically."""
+
+    @property
+    def scrollBarsVisible(self) -> bool:
+        """Get whether the scroll bars are visible."""
+
+    @scrollBarsVisible.setter
+    def scrollBarsVisible(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeScrollBarsVisible(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether the scroll bars are visible."""
+
+    @property
+    def autoScroll(self) -> bool:
+        """
+        Whether the view scrolls to keep the current time in view during playback.
+        """
+
+    @autoScroll.setter
+    def autoScroll(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeAutoScroll(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether auto-scroll is enabled."""
+
+    @property
+    def stopOnScrub(self) -> bool:
+        """Whether scrubbing stops playback."""
+
+    @stopOnScrub.setter
+    def stopOnScrub(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeStopOnScrub(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether to stop playback when scrubbing."""
+
+class TimelineRuler(feather_tk._feather_tk.IMouseWidget):
+    """
+    The time ruler a TimelineWidget draws above its timelines, with the player's in and out points, frame markers and cache. TimelineWidget makes and places its own; this is for a layout of one's own, which then sets the scale and scroll position as the timelines move.
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context, itemData: ItemData, parent: feather_tk._feather_tk.IWidget | None = None) -> None:
+        """Create a new widget."""
+
+    def setItemData(self, arg: ItemData, /) -> None:
+        """Set the item data, which the labels are named through."""
+
+    def setPlayer(self, player: tlrender._tlrender.Player | None) -> None:
+        """Set the player."""
+
+    def setScale(self, arg: float, /) -> None:
+        """Set the scale, in pixels per second."""
+
+    def setScrollPos(self, arg: int, /) -> None:
+        """Set how far the timelines are scrolled, so that the ruler is over
+        the part of them it names.
+        """
+
+    def setOffset(self, arg: opentimelineio.opentime.RationalTime, /) -> None:
+        """Set how far along the timeline is drawn."""
+
+    def setFrameMarkers(self, arg: Sequence[int], /) -> None:
+        """Set the frame markers."""
+
+    def setDisplayOptions(self, arg: DisplayOptions, /) -> None:
+        """Set the display options."""
+
+    def setOptions(self, arg: ItemOptions, /) -> None:
+        """Set the options."""
+
+    def setStopOnScrub(self, arg: bool, /) -> None:
+        """Set whether playback stops when scrubbing."""
+
+    @property
+    def observeScrub(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether scrubbing is in progress."""
+
+    def timeToPos(self, arg: opentimelineio.opentime.RationalTime, /) -> int:
+        """Convert a time to a position."""
+
+class ImageOptionsListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableImageOptionsList, callback: Callable[[Sequence[feather_tk._feather_tk.ImageOptions]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableImageOptionsList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableImageOptionsList(IObservableImageOptionsList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[feather_tk._feather_tk.ImageOptions], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[feather_tk._feather_tk.ImageOptions], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[feather_tk._feather_tk.ImageOptions], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: feather_tk._feather_tk.ImageOptions) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: feather_tk._feather_tk.ImageOptions) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[feather_tk._feather_tk.ImageOptions], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: feather_tk._feather_tk.ImageOptions) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[feather_tk._feather_tk.ImageOptions]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[feather_tk._feather_tk.ImageOptions]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[feather_tk._feather_tk.ImageOptions]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> feather_tk._feather_tk.ImageOptions:
+        """Get a list item."""
+
+    def contains(self, arg: feather_tk._feather_tk.ImageOptions, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: feather_tk._feather_tk.ImageOptions, /) -> int:
+        """Get the index of the given item."""
+
+class ViewPosAndZoomObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableViewPosAndZoom, callback: Callable[[tuple[feather_tk._feather_tk.V2I, float]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableViewPosAndZoom:
+    """Base class for observable values."""
+    def get(self) -> tuple[feather_tk._feather_tk.V2I, float]:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableViewPosAndZoom(IObservableViewPosAndZoom):
+    """Observable value."""
+    def __init__(self, arg: tuple[feather_tk._feather_tk.V2I, float], /) -> None: ...
+
+    def setAlways(self, arg: tuple[feather_tk._feather_tk.V2I, float], /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: tuple[feather_tk._feather_tk.V2I, float], /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> tuple[feather_tk._feather_tk.V2I, float]:
+        """Get the value."""
+
+class OptionalV2IObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableOptionalV2I, callback: Callable[[feather_tk._feather_tk.V2I | None], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableOptionalV2I:
+    """Base class for observable values."""
+    def get(self) -> feather_tk._feather_tk.V2I | None:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableOptionalV2I(IObservableOptionalV2I):
+    """Observable value."""
+    def __init__(self, arg: feather_tk._feather_tk.V2I | None, /) -> None: ...
+
+    def setAlways(self, arg: feather_tk._feather_tk.V2I | None, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: feather_tk._feather_tk.V2I | None, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> feather_tk._feather_tk.V2I | None:
+        """Get the value."""
+
+class OptionalColor4FObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableOptionalColor4F, callback: Callable[[feather_tk._feather_tk.Color4F | None], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableOptionalColor4F:
+    """Base class for observable values."""
+    def get(self) -> feather_tk._feather_tk.Color4F | None:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableOptionalColor4F(IObservableOptionalColor4F):
+    """Observable value."""
+    def __init__(self, arg: feather_tk._feather_tk.Color4F | None, /) -> None: ...
+
+    def setAlways(self, arg: feather_tk._feather_tk.Color4F | None, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: feather_tk._feather_tk.Color4F | None, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> feather_tk._feather_tk.Color4F | None:
+        """Get the value."""
+
+class Viewport(feather_tk._feather_tk.IWidget):
+    """
+    Draws a Player's current frames, a comparison included, with the OCIO, LUT, image and display options applied, and lets the mouse pan, zoom and wipe. Give it a player and it redraws whenever the player presents a frame. For the same picture without a window, as an image, see OffscreenRender.
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context, parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
+
+    @property
+    def compareOptions(self) -> tlrender._tlrender.CompareOptions: ...
+
+    @compareOptions.setter
+    def compareOptions(self, arg: tlrender._tlrender.CompareOptions, /) -> None: ...
+
+    @property
+    def observeCompareOptions(self) -> tlrender._tlrender.IObservableCompareOptions: ...
+
+    @property
+    def ocioOptions(self) -> tlrender._tlrender.OCIOOptions: ...
+
+    @ocioOptions.setter
+    def ocioOptions(self, arg: tlrender._tlrender.OCIOOptions, /) -> None: ...
+
+    @property
+    def observeOCIOOptions(self) -> tlrender._tlrender.IObservableOCIOOptions: ...
+
+    @property
+    def LUTOptions(self) -> tlrender._tlrender.LUTOptions: ...
+
+    @LUTOptions.setter
+    def LUTOptions(self, arg: tlrender._tlrender.LUTOptions, /) -> None: ...
+
+    @property
+    def observeLUTOptions(self) -> tlrender._tlrender.IObservableLUTOptions: ...
+
+    @property
+    def imageOptions(self) -> list[feather_tk._feather_tk.ImageOptions]: ...
+
+    @imageOptions.setter
+    def imageOptions(self, arg: Sequence[feather_tk._feather_tk.ImageOptions], /) -> None: ...
+
+    @property
+    def observeImageOptions(self) -> IObservableImageOptionsList: ...
+
+    @property
+    def displayOptions(self) -> list[tlrender._tlrender.DisplayOptions]: ...
+
+    @displayOptions.setter
+    def displayOptions(self, arg: Sequence[tlrender._tlrender.DisplayOptions], /) -> None: ...
+
+    @property
+    def observeDisplayOptions(self) -> tlrender._tlrender.IObservableDisplayOptionsList: ...
+
+    @property
+    def backgroundOptions(self) -> tlrender._tlrender.BackgroundOptions: ...
+
+    @backgroundOptions.setter
+    def backgroundOptions(self, arg: tlrender._tlrender.BackgroundOptions, /) -> None: ...
+
+    @property
+    def observeBackgroundOptions(self) -> tlrender._tlrender.IObservableBackgroundOptions: ...
+
+    @property
+    def foregroundOptions(self) -> tlrender._tlrender.ForegroundOptions: ...
+
+    @foregroundOptions.setter
+    def foregroundOptions(self, arg: tlrender._tlrender.ForegroundOptions, /) -> None: ...
+
+    @property
+    def observeForegroundOptions(self) -> tlrender._tlrender.IObservableForegroundOptions: ...
+
+    @property
+    def colorBuffer(self) -> feather_tk._feather_tk.ImageType: ...
+
+    @colorBuffer.setter
+    def colorBuffer(self, arg: feather_tk._feather_tk.ImageType, /) -> None: ...
+
+    @property
+    def observeColorBuffer(self) -> feather_tk._feather_tk.IObservableImageType: ...
+
+    @property
+    def player(self) -> tlrender._tlrender.Player:
+        """The player whose frames are drawn, or None."""
+
+    @player.setter
+    def player(self, value: tlrender._tlrender.Player | None) -> None: ...
+
+    @property
+    def viewPos(self) -> feather_tk._feather_tk.V2I:
+        """Get the view position."""
+
+    @property
+    def observeViewPos(self) -> feather_tk._feather_tk.IObservableV2I:
+        """Observe the view position."""
+
+    @property
+    def zoom(self) -> float:
+        """Get the view zoom."""
+
+    @property
+    def observeZoom(self) -> feather_tk._feather_tk.IObservableDouble:
+        """Observe the view zoom."""
+
+    @property
+    def viewPosAndZoom(self) -> tuple[feather_tk._feather_tk.V2I, float]:
+        """Get the view position and zoom."""
+
+    def setViewPosAndZoom(self, pos: feather_tk._feather_tk.V2I, zoom: float) -> None:
+        """Set the view position and zoom."""
+
+    @property
+    def observeViewPosAndZoom(self) -> IObservableViewPosAndZoom:
+        """Observe the view position and zoom."""
+
+    def setZoom(self, zoom: float, focus: feather_tk._feather_tk.V2I = ...) -> None:
+        """Set the view zoom."""
+
+    @overload
+    def center(self) -> None:
+        """Center the view."""
+
+    @overload
+    def center(self) -> None:
+        """Center the view."""
+
+    @overload
+    def resetZoom(self) -> None:
+        """Reset the view zoom to 1:1."""
+
+    @overload
+    def resetZoom(self) -> None:
+        """Reset the view zoom to 1:1."""
+
+    @overload
+    def zoomIn(self) -> None:
+        """Zoom the view in."""
+
+    @overload
+    def zoomIn(self) -> None:
+        """Zoom the view in."""
+
+    @overload
+    def zoomOut(self) -> None:
+        """Zoom the view out."""
+
+    @overload
+    def zoomOut(self) -> None:
+        """Zoom the view out."""
+
+    @property
+    def zoomRange(self) -> feather_tk._feather_tk.RangeD:
+        """Get the view zoom range."""
+
+    @zoomRange.setter
+    def zoomRange(self, arg: feather_tk._feather_tk.RangeD, /) -> None: ...
+
+    @property
+    def frameView(self) -> bool:
+        """
+        Whether the view is framed automatically: the picture fitted to the viewport, again as either changes size.
+        """
+
+    @frameView.setter
+    def frameView(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeFrameView(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether the view is framed automatically."""
+
+    @property
+    def observeFramed(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe when the view is framed."""
+
+    @property
+    def FPS(self) -> float:
+        """
+        The frames per second the player presents while it plays, measured about once a second; zero when stopped. In an App, where each tick also draws, that is the rate frames are shown. A script that calls Context.tick() more often than it draws measures the frames presented, not the frames drawn.
+        """
+
+    @property
+    def observeFPS(self) -> feather_tk._feather_tk.IObservableDouble:
+        """Observe the frames per second."""
+
+    @property
+    def droppedFrames(self) -> int:
+        """
+        The player's dropped frames: see Player.droppedFrames. Frames the player presented that were never drawn are not counted; in an App they cannot happen, since the player presents at most one frame between draws.
+        """
+
+    @property
+    def observeDroppedFrames(self) -> feather_tk._feather_tk.IObservableSizeT:
+        """Observe the number of dropped frames during playback."""
+
+    def getColorSample(self, arg: feather_tk._feather_tk.V2I, /) -> feather_tk._feather_tk.Color4F:
+        """
+        Sample a color, at a position in the viewport's own coordinates. It is read back from the buffer the viewport drew into, so it is the frame before the one being drawn, and the read waits for the GPU: sampling every frame stalls the playback being sampled.
+        """
+
+    def getColorSampleDisplay(self, color: feather_tk._feather_tk.Color4F) -> feather_tk._feather_tk.Color4F:
+        """Get the color a sample is shown as in the window. It is the sample
+        itself but for a PQ picture drawn with the GPU renderer, which is taken
+        into what the window holds as it is drawn there.
+        """
+
+    def getColorSampleNits(self, color: feather_tk._feather_tk.Color4F) -> float | None:
+        """Get the luminance, in nits, that a sample stands for: what a PQ
+        picture's code values say, or what an HDR window makes of an SDR
+        picture. Unset where nothing says, which is an SDR picture in an SDR
+        window.
+        """
+
+    @property
+    def hdrTransfer(self) -> tlrender._tlrender.HDR_EOTF:
+        """Get what the picture is display encoded for."""
+
+    @hdrTransfer.setter
+    def hdrTransfer(self, arg: tlrender._tlrender.HDR_EOTF, /) -> None: ...
+
+    @property
+    def hdrWhite(self) -> float:
+        """Get the luminance that white in the window stands for."""
+
+    @hdrWhite.setter
+    def hdrWhite(self, arg: float, /) -> None: ...
+
+    @property
+    def observeSamplePos(self) -> feather_tk._feather_tk.IObservableV2I:
+        """Observe the sample position, in the viewport's own coordinates."""
+
+    @property
+    def observePick(self) -> IObservableOptionalV2I:
+        """Observe picking. Unset when the position is not over an image, where
+        there is no pixel to name.
+        """
+
+    @property
+    def observeColorSample(self) -> IObservableOptionalColor4F:
+        """Observe the color sample. Unset when the position is not over an
+        image.
+        """
+
+    def pick(self, imagePos: feather_tk._feather_tk.V2I) -> None:
+        """
+        Sample the image at an image pixel, as the pick mouse action would; the result arrives through observeColorSample.
+        """
+
+    @property
+    def inputEnabled(self) -> bool:
+        """Get whether input is enabled."""
+
+    @inputEnabled.setter
+    def inputEnabled(self, arg: bool, /) -> None: ...
+
+    def setPanBinding(self, button: feather_tk._feather_tk.MouseButton, modifier: feather_tk._feather_tk.KeyModifier) -> None:
+        """Set the pan binding."""
+
+    def setWipeBinding(self, button: feather_tk._feather_tk.MouseButton, modifier: feather_tk._feather_tk.KeyModifier) -> None:
+        """Set the wipe binding."""
+
+    def setPickBinding(self, button: feather_tk._feather_tk.MouseButton, modifier: feather_tk._feather_tk.KeyModifier) -> None:
+        """Set the pick binding. Unbound by default."""
+
+    def setMouseWheelScale(self, arg: float, /) -> None:
+        """Set the mouse wheel scale."""

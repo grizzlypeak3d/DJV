@@ -42,6 +42,8 @@ Changes:
 * The Information tool shows a movie's container, codec, and stream details:
   profile, FourCC, bit rate and depth, field order, rotation, HDR mastering
   metadata, and the audio channel layout.
+* The Python modules' type stubs describe each class and method, and the
+  documentation has them as a Python API reference.
 * Read WebP images, still and animated (#867).
 * Read HEIC and HEIF images on macOS.
 * Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command

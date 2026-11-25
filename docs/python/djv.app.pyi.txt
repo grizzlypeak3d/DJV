@@ -1,0 +1,182 @@
+# The Python API of djv.app: generated from the bindings by nanobind's
+# stubgen, with each description taken from the C++ headers. Do not edit:
+# see docs/pythonstubs.py. Import it as "import djv".
+
+"""
+The application: the C++ one, which a Python program starts and extends with tools and commands of its own.
+"""
+
+from collections.abc import Callable, Sequence
+
+import feather_tk._feather_tk
+import tlrender._tlrender
+import tlrender._tlrender.ui
+
+import djv._djv.models
+import djv._djv.ui
+
+
+class MainWindow(feather_tk._feather_tk.Window):
+    """Main window."""
+    def getMenuBar(self) -> feather_tk._feather_tk.MenuBar:
+        """Get the menu bar."""
+
+    def getViewport(self) -> djv._djv.ui.Viewport:
+        """Get the viewport."""
+
+    def getTimelineWidget(self) -> tlrender._tlrender.ui.TimelineWidget:
+        """Get the timeline widget."""
+
+    def getAction(self, name: str) -> feather_tk._feather_tk.Action:
+        """Get a menu action by the name of its command, e.g. "Color/Reset";
+        null when there is none. For the capture harness: an action can do more
+        than its command, such as asking first.
+        """
+
+    def getToolWidget(self, name: str) -> IToolWidget:
+        """Get the active tool widget, or null if no tool is active. Get an
+        open tool by name, or null when it is not open.
+        """
+
+    @property
+    def presentMode(self) -> bool:
+        """Get whether presentation mode is enabled."""
+
+    @presentMode.setter
+    def presentMode(self, arg: bool, /) -> None: ...
+
+    @property
+    def observePresentMode(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether presentation mode is enabled."""
+
+    def setSplitters(self, splitter: float, splitter2: float) -> None:
+        """Set the two splitter positions (0-1). The settings store these but
+        only apply them at construction, so this moves the widgets directly --
+        used by the documentation screenshot capture.
+        """
+
+    def showAboutDialog(self) -> None: ...
+
+    def showSysInfoDialog(self) -> None:
+        """Show the system information dialog."""
+
+class IToolWidget(feather_tk._feather_tk.IWidget):
+    """Base class for tool widgets."""
+    def __init__(self, context: feather_tk._feather_tk.Context, app: App, mainWindow: MainWindow, name: str, icon: str, objectName: str = '', parent: feather_tk._feather_tk.IWidget | None = None) -> None: ...
+
+    @property
+    def toolName(self) -> str: ...
+
+    def setWidget(self, widget: feather_tk._feather_tk.IWidget) -> None: ...
+
+    def scrollTo(self, section: str) -> None:
+        """Scroll to the named section. Tools that lay their content out in
+        scrollable sections (e.g. bellows) override this; the default does
+        nothing.
+        """
+
+    def openSection(self, section: str) -> None:
+        """Open the named section and scroll to it."""
+
+class ToolWidgetFactory:
+    """Tool widget factory."""
+    def addTool(self, name: str, func: Callable[[feather_tk._feather_tk.Context, App, MainWindow, feather_tk._feather_tk.IWidget], IToolWidget]) -> None: ...
+
+class App(feather_tk._feather_tk.App):
+    """Application."""
+    def __init__(self, context: feather_tk._feather_tk.Context, argv: Sequence[str], appInfoModel: djv._djv.models.AppInfoModel | None = None) -> None: ...
+
+    def getAppInfoModel(self) -> djv._djv.models.AppInfoModel:
+        """Get the application information model."""
+
+    def getSettingsModel(self) -> djv._djv.models.SettingsModel:
+        """Get the settings model."""
+
+    def getSysLogModel(self) -> feather_tk._feather_tk.SysLogModel:
+        """Get the system log model."""
+
+    def getTimeUnitsModel(self) -> djv._djv.models.TimeUnitsModel:
+        """Get the time units model."""
+
+    def getFilesModel(self) -> djv._djv.models.FilesModel:
+        """Get the files model."""
+
+    def getRecentFilesModel(self) -> djv._djv.models.RecentFilesModel:
+        """Get the recent files model."""
+
+    def getColorModel(self) -> djv._djv.models.ColorModel:
+        """Get the color model."""
+
+    def getViewportModel(self) -> djv._djv.models.ViewportModel:
+        """Get the viewport model."""
+
+    def getAudioModel(self) -> djv._djv.models.AudioModel:
+        """Get the audio model."""
+
+    def getToolsModel(self) -> djv._djv.models.ToolsModel:
+        """Get the tools model."""
+
+    def getCommandsModel(self) -> djv._djv.models.CommandsModel:
+        """Get the commands model."""
+
+    def getMarkersModel(self) -> djv._djv.models.MarkersModel:
+        """Get the review markers model."""
+
+    def getAnnotationsModel(self) -> djv._djv.models.AnnotationsModel:
+        """Get the review annotations model."""
+
+    def getExportQueue(self) -> djv._djv.models.ExportQueue:
+        """Get the export queue."""
+
+    def getDrawModel(self) -> djv._djv.models.DrawModel:
+        """Get the drawing state model."""
+
+    def getToolWidgetFactory(self) -> ToolWidgetFactory:
+        """Get the tool widget factory."""
+
+    def getMainWindow(self) -> MainWindow:
+        """Get the main window."""
+
+    @property
+    def observePlayer(self) -> tlrender._tlrender.IObservablePlayer:
+        """Observe the timeline player."""
+
+    def open(self, path: feather_tk._feather_tk.Path) -> None:
+        """Open a file.
+
+        The frame range, when given, is the range an image sequence is meant to
+        cover, which need not be the frames on disk: a render in progress is
+        watched over the range it will have when it finishes. It applies to the
+        first file opened, since a directory holds sequences that each have
+        their own.
+
+        Set gatherSeq to false to open the file named rather than the sequence
+        it belongs to. A path cannot say which is meant -- a frame parsed out
+        of a file name looks exactly like a range of one -- so it is the caller
+        that knows: a browser listing the frames one by one, or a recent file,
+        is naming the file.
+
+        Open several files as one change. Opening them one at a time would make
+        each of them the current file on the way to the last, and the current
+        file is what gets read.
+        """
+
+    def openDialog(self) -> None:
+        """Open a file dialog."""
+
+    def closeFile(self, index: int = -1) -> None:
+        """Close a file: the one given, or the current one.
+
+        The last file takes the review with it. A review is about its files, so
+        one with none left has nothing to be about, and its notes and drawings
+        would otherwise sit in the document pointing at frames that are no
+        longer there. Unsaved feedback is asked about first, the same as
+        closing the review from the menu; the file itself stays in the recent
+        list either way.
+        """
+
+    def closeAllFiles(self) -> None:
+        """Close every file, which is to say close the review."""
+
+    def reload(self) -> None:
+        """Reload the active files."""

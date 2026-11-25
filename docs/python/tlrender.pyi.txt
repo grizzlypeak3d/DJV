@@ -1,0 +1,3710 @@
+# The Python API of tlrender: generated from the bindings by nanobind's
+# stubgen, with each description taken from the C++ headers. Do not edit:
+# see docs/pythonstubs.py. Import it as "import tlrender".
+
+"""
+tlRender is an open source library for building playback and review applications for visual effects, film, and animation.
+
+Start with init(context), then:
+
+- Timeline: a timeline, movie or image sequence opened for playback, from a file or an opentimelineio Timeline object. getVideo(time) returns a decoded frame, for a script that wants frames rather than playback.
+- Player: plays a Timeline; currentVideo has its decoded frames, one per timeline when comparing. Nothing updates without Context.tick(), which does not wait for decoding: sleep a little between calls.
+- OffscreenRender: draws those frames to an image without a window, a tile or wipe compare included -- headless on Linux with SDL_VIDEO_DRIVER=offscreen.
+- WriteSystem: writes images and movies.
+
+An image's pixels are numpy.asarray(image), row zero at the top. The ui module has the widgets: Viewport, TimelineWidget and the rest.
+"""
+
+from collections.abc import Callable, Mapping, Sequence
+import datetime
+import enum
+from typing import overload
+
+import feather_tk._feather_tk
+import opentimelineio.opentime
+
+from tlrender._tlrender import ui as ui
+
+
+VERSION_MAJOR: int = 0
+
+VERSION_MINOR: int = 29
+
+VERSION_PATCH: int = 0
+
+VERSION_DEV: str = '-dev'
+
+VERSION_FULL: str = '0.29.0-dev'
+
+class AudioType(enum.Enum):
+    S8 = 1
+
+    S16 = 2
+
+    S32 = 3
+
+    F32 = 4
+
+    F64 = 5
+
+def getAudioTypeEnums() -> list[AudioType]: ...
+
+@overload
+def getLabel(arg: AudioType, /) -> str: ...
+
+@overload
+def getLabel(arg: HDR_EOTF, /) -> str: ...
+
+@overload
+def getLabel(arg: HDRPrimaries, /) -> str: ...
+
+@overload
+def getLabel(arg: MissingFrames, /) -> str: ...
+
+@overload
+def getLabel(arg: Background, /) -> str: ...
+
+@overload
+def getLabel(arg: OCIOConfig, /) -> str: ...
+
+@overload
+def getLabel(arg: LUTDirection, /) -> str: ...
+
+@overload
+def getLabel(arg: LUTOrder, /) -> str: ...
+
+@overload
+def getLabel(arg: Compare, /) -> str: ...
+
+@overload
+def getLabel(arg: CompareTime, /) -> str: ...
+
+@overload
+def getLabel(arg: AspectRatio, /) -> str: ...
+
+@overload
+def getLabel(arg: AspectRatioType, /) -> str: ...
+
+@overload
+def getLabel(arg: AspectRatioOptions, /) -> str: ...
+
+@overload
+def getLabel(arg: GridCellMode, /) -> str: ...
+
+@overload
+def getLabel(arg: ClippingWarningMode, /) -> str: ...
+
+@overload
+def getLabel(arg: TimeUnits, /) -> str: ...
+
+@overload
+def getLabel(arg: ImageSeqAudio, /) -> str: ...
+
+@overload
+def getLabel(arg: Playback, /) -> str: ...
+
+@overload
+def getLabel(arg: Loop, /) -> str: ...
+
+@overload
+def getLabel(arg: TimeAction, /) -> str: ...
+
+@overload
+def getLabel(arg: Transition, /) -> str: ...
+
+@overload
+def to_string(arg: AudioType, /) -> str: ...
+
+@overload
+def to_string(arg: HDR_EOTF, /) -> str: ...
+
+@overload
+def to_string(arg: HDRPrimaries, /) -> str: ...
+
+@overload
+def to_string(arg: MissingFrames, /) -> str: ...
+
+@overload
+def to_string(arg: Background, /) -> str: ...
+
+@overload
+def to_string(arg: OCIOConfig, /) -> str: ...
+
+@overload
+def to_string(arg: LUTDirection, /) -> str: ...
+
+@overload
+def to_string(arg: LUTOrder, /) -> str: ...
+
+@overload
+def to_string(arg: Compare, /) -> str: ...
+
+@overload
+def to_string(arg: CompareTime, /) -> str: ...
+
+@overload
+def to_string(arg: AspectRatioType, /) -> str: ...
+
+@overload
+def to_string(arg: GridCellMode, /) -> str: ...
+
+@overload
+def to_string(arg: ClippingWarningMode, /) -> str: ...
+
+@overload
+def to_string(arg: TimeUnits, /) -> str: ...
+
+@overload
+def to_string(arg: ImageSeqAudio, /) -> str: ...
+
+@overload
+def to_string(arg: Playback, /) -> str: ...
+
+@overload
+def to_string(arg: Loop, /) -> str: ...
+
+@overload
+def to_string(arg: TimeAction, /) -> str: ...
+
+@overload
+def to_string(arg: Transition, /) -> str: ...
+
+@overload
+def from_string(arg0: str, arg1: AudioType, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: HDR_EOTF, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: HDRPrimaries, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: MissingFrames, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: Background, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: OCIOConfig, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: LUTDirection, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: LUTOrder, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: Compare, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: CompareTime, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: AspectRatioType, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: GridCellMode, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: ClippingWarningMode, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: TimeUnits, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: ImageSeqAudio, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: Playback, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: Loop, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: TimeAction, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: Transition, /) -> bool: ...
+
+def getByteCount(arg: AudioType, /) -> int:
+    """Get the byte count for the given data type."""
+
+def getIntAudioType(arg: int, /) -> AudioType:
+    """Determine the integer data type for a given byte count."""
+
+def getFloatAudioType(arg: int, /) -> AudioType:
+    """Determine the floating point data type for a given byte count."""
+
+class AudioInfo:
+    """Audio data information."""
+    def __init__(self) -> None: ...
+
+    @property
+    def name(self) -> str: ...
+
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
+
+    @property
+    def channelCount(self) -> int: ...
+
+    @channelCount.setter
+    def channelCount(self, arg: int, /) -> None: ...
+
+    @property
+    def type(self) -> AudioType: ...
+
+    @type.setter
+    def type(self, arg: AudioType, /) -> None: ...
+
+    @property
+    def sampleRate(self) -> int: ...
+
+    @sampleRate.setter
+    def sampleRate(self, arg: int, /) -> None: ...
+
+    @property
+    def isValid(self) -> bool:
+        """Is the audio valid?"""
+
+    @property
+    def byteCount(self) -> int:
+        """Get the byte count."""
+
+    def __eq__(self, arg: AudioInfo, /) -> bool: ...
+
+    def __ne__(self, arg: AudioInfo, /) -> bool: ...
+
+class Audio:
+    """Audio data."""
+    def __init__(self, info: AudioInfo, sampleCount: int) -> None:
+        """Create new audio."""
+
+    @property
+    def info(self) -> AudioInfo:
+        """Get the audio information."""
+
+    @property
+    def channelCount(self) -> int:
+        """Get the audio channel count."""
+
+    @property
+    def type(self) -> AudioType:
+        """Get the audio data type."""
+
+    @property
+    def sampleRate(self) -> int:
+        """Get the audio sample rate."""
+
+    @property
+    def sampleCount(self) -> int:
+        """Get the audio sample count."""
+
+    @property
+    def isValid(self) -> bool:
+        """Is the audio valid?"""
+
+    @property
+    def byteCount(self) -> int:
+        """Get the audio data byte count."""
+
+    def zero(self) -> None:
+        """Zero the audio data."""
+
+class AudioResample:
+    """Resample audio data."""
+    def __init__(self, input: AudioInfo, output: AudioInfo) -> None:
+        """Create a new resampler."""
+
+    @property
+    def inputInfo(self) -> AudioInfo:
+        """Get the input audio information."""
+
+    @property
+    def outputInfo(self) -> AudioInfo:
+        """Get the output audio information."""
+
+    def process(self, audio: Audio) -> Audio:
+        """Resample audio data.
+
+        Resample audio data into a buffer with room for
+        getOutputSampleCountMax() samples, and return how many were written.
+        Nothing is allocated, which is what the audio thread needs.
+        """
+
+    def flush(self) -> None:
+        """Flush any remaining data."""
+
+class HDR_EOTF(enum.Enum):
+    SDR = 0
+
+    HDR = 1
+
+    ST2084 = 2
+
+def getHDR_EOTFEnums() -> list[HDR_EOTF]: ...
+
+class HDRPrimaries(enum.Enum):
+    Red = 0
+
+    Green = 1
+
+    Blue = 2
+
+    White = 3
+
+def getHDRPrimariesEnums() -> list[HDRPrimaries]: ...
+
+class HDRData:
+    """HDR data."""
+    def __init__(self) -> None: ...
+
+    @property
+    def eotf(self) -> HDR_EOTF: ...
+
+    @eotf.setter
+    def eotf(self, arg: HDR_EOTF, /) -> None: ...
+
+    @property
+    def primaries(self) -> list[feather_tk._feather_tk.V2F]: ...
+
+    @primaries.setter
+    def primaries(self, arg: Sequence[feather_tk._feather_tk.V2F], /) -> None: ...
+
+    @property
+    def displayMasteringLuminance(self) -> feather_tk._feather_tk.RangeF: ...
+
+    @displayMasteringLuminance.setter
+    def displayMasteringLuminance(self, arg: feather_tk._feather_tk.RangeF, /) -> None: ...
+
+    @property
+    def maxCLL(self) -> float: ...
+
+    @maxCLL.setter
+    def maxCLL(self, arg: float, /) -> None: ...
+
+    @property
+    def maxFALL(self) -> float: ...
+
+    @maxFALL.setter
+    def maxFALL(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: HDRData, /) -> bool: ...
+
+    def __ne__(self, arg: HDRData, /) -> bool: ...
+
+def getURLScheme(url: str) -> str:
+    """Get the URL scheme."""
+
+def encodeURL(url: str) -> str:
+    """Encode a URL."""
+
+def decodeURL(url: str) -> str:
+    """Decode a URL."""
+
+class FileType(enum.IntFlag):
+    """File types. The values are a bit mask; getExts() takes a combination of
+    them.
+    """
+    __str__ = __repr__
+
+    def __repr__(self, /):
+        """Return repr(self)."""
+
+    Unknown = 0
+
+    Media = 1
+
+    Seq = 2
+
+    Audio = 4
+
+class IOInfo:
+    """I/O information."""
+    def __init__(self) -> None: ...
+
+    @property
+    def video(self) -> list[feather_tk._feather_tk.ImageInfo]:
+        """Video layer information."""
+
+    @video.setter
+    def video(self, arg: Sequence[feather_tk._feather_tk.ImageInfo], /) -> None: ...
+
+    @property
+    def videoTime(self) -> opentimelineio.opentime.TimeRange | None:
+        """Video time range, unset when there is no video."""
+
+    @videoTime.setter
+    def videoTime(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
+
+    @property
+    def audio(self) -> AudioInfo:
+        """Audio information."""
+
+    @audio.setter
+    def audio(self, arg: AudioInfo, /) -> None: ...
+
+    @property
+    def audioTime(self) -> opentimelineio.opentime.TimeRange | None:
+        """Audio time range, unset when there is no audio."""
+
+    @audioTime.setter
+    def audioTime(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
+
+    @property
+    def tags(self) -> dict[str, str]:
+        """Metadata tags read from the file. Only what the file itself carries:
+        the information describing the video and the audio is above, not mixed
+        in here.
+        """
+
+    @tags.setter
+    def tags(self, arg: Mapping[str, str], /) -> None: ...
+
+    def __eq__(self, arg: IOInfo, /) -> bool: ...
+
+    def __ne__(self, arg: IOInfo, /) -> bool: ...
+
+class IIO:
+    """Base class for readers and writers."""
+    @property
+    def path(self) -> feather_tk._feather_tk.Path:
+        """Get the path."""
+
+    @staticmethod
+    def getObjectCount() -> int:
+        """Get the number of objects currenty instantiated."""
+
+class IIOPlugin:
+    """Base class for I/O plugins."""
+    @property
+    def pluginName(self) -> str:
+        """Get the plugin name."""
+
+    def getPluginInfo(self, options: Mapping[str, str] = {}) -> str:
+        """Get the plugin information."""
+
+    def getExts(self, types: int = 7) -> set[str]:
+        """Get the supported file extensions."""
+
+class MissingFrames(enum.Enum):
+    Error = 0
+
+    Hold = 1
+
+    Black = 2
+
+    Skip = 3
+
+    Gaps = 4
+
+def getMissingFramesEnums() -> list[MissingFrames]: ...
+
+def isStructural(missingFrames: MissingFrames) -> bool:
+    """Get whether a policy is settled when the sequence is opened, by deciding
+    the clips, rather than per read.
+    """
+
+class SeqOptions:
+    """Sequence I/O options.
+
+    The default speed is the rate of a sequence whose files do not say what
+    theirs is. The options can also give "SeqIO/Speed", the rate when something
+    more specific than the files says what it is, such as a timeline's image
+    sequence reference. That one is used whatever the files say.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def defaultSpeed(self) -> float: ...
+
+    @defaultSpeed.setter
+    def defaultSpeed(self, arg: float, /) -> None: ...
+
+    @property
+    def missingFrames(self) -> MissingFrames: ...
+
+    @missingFrames.setter
+    def missingFrames(self, arg: MissingFrames, /) -> None: ...
+
+    def __eq__(self, arg: SeqOptions, /) -> bool: ...
+
+    def __ne__(self, arg: SeqOptions, /) -> bool: ...
+
+class IRead(IIO):
+    """Base class for readers.
+
+    A reader is stateful -- a movie carries a demuxer position -- which is what
+    separates it from a decoder. What it reads is video or audio, one of the
+    two classes below: they share nothing but the file, and plenty of files
+    have only one of them.
+    """
+    def cancelRequests(self) -> None:
+        """Cancel pending requests."""
+
+    @property
+    def error(self) -> str:
+        """Get the first error encountered while reading, or an empty string.
+        Errors are also sent to the log. The default implementation returns an
+        empty string.
+        """
+
+    @property
+    def errorCount(self) -> int:
+        """Get the number of errors encountered while reading. The default
+        implementation returns zero.
+        """
+
+class IVideoRead(IRead):
+    """Base class for video readers."""
+    pass
+
+class IAudioRead(IRead):
+    """Base class for audio readers."""
+    pass
+
+class IReadPlugin(IIOPlugin):
+    """Base class for read plugins."""
+    def videoRead(self, path: feather_tk._feather_tk.Path, options: Mapping[str, str] = {}) -> IVideoRead:
+        """Create a video reader for the given path, or null when this format
+        has no video, or is decoded rather than read: a sequence of stateless
+        files needs no reader, and decode() returns one for it instead.
+
+        Create a video reader for the given path and memory locations.
+        """
+
+    def audioRead(self, path: feather_tk._feather_tk.Path, options: Mapping[str, str] = {}) -> IAudioRead:
+        """Create an audio reader for the given path, or null when this format
+        has no audio.
+
+        Create an audio reader for the given path and memory locations.
+        """
+
+class IWrite(IIO):
+    """Base class for writers."""
+    def writeVideo(self, time: opentimelineio.opentime.RationalTime, image: feather_tk._feather_tk.Image, options: Mapping[str, str] = {}) -> None:
+        """Write video data."""
+
+    def writeAudio(self, timeRange: opentimelineio.opentime.TimeRange, audio: Audio, options: Mapping[str, str] = {}) -> None:
+        """Write audio data. The default implementation does nothing; writers
+        that support audio should override this. Audio is expected to be
+        written sequentially, starting at the beginning of the audio time range
+        given in the IOInfo.
+        """
+
+    def finish(self) -> None:
+        """Finish writing, flushing any buffered data and finalizing the file.
+        This is called automatically by the destructor, but since destructors
+        cannot throw, errors that occur while finalizing are only logged. Call
+        finish() explicitly to have those errors reported as exceptions.
+        """
+
+class IWritePlugin(IIOPlugin):
+    """Base class for write plugins."""
+    def getInfo(self, info: feather_tk._feather_tk.ImageInfo, options: Mapping[str, str] = {}) -> feather_tk._feather_tk.ImageInfo:
+        """Get information for writing."""
+
+    def write(self, path: feather_tk._feather_tk.Path, info: IOInfo, options: Mapping[str, str] = {}) -> IWrite:
+        """Create a writer for the given path."""
+
+class ReadSystem(feather_tk._feather_tk.ISystem):
+    """Read system."""
+    def __init__(self, context: feather_tk._feather_tk.Context) -> None:
+        """Create a new system."""
+
+    @property
+    def plugins(self) -> list[IReadPlugin]:
+        """Get the list of plugins."""
+
+    def addPlugin(self, plugin: IReadPlugin) -> None:
+        """Add a plugin."""
+
+    def removePlugin(self, plugin: IReadPlugin) -> None:
+        """Remove a plugin."""
+
+    def getPlugin(self, path: feather_tk._feather_tk.Path) -> IReadPlugin:
+        """Get a plugin.
+
+        Get a plugin for the given path.
+        """
+
+    @property
+    def names(self) -> list[str]:
+        """Get the plugin names."""
+
+    def getExts(self, types: int = 3) -> set[str]:
+        """Get the supported file extensions."""
+
+    def getFileType(self, extension: str) -> FileType:
+        """Get the file type for the given extension."""
+
+    def videoRead(self, path: feather_tk._feather_tk.Path, options: Mapping[str, str] = {}) -> IVideoRead:
+        """Create a video reader for the given path, or null when the format
+        has no video or is decoded rather than read.
+
+        Create a video reader for the given path and memory locations.
+        """
+
+    def audioRead(self, path: feather_tk._feather_tk.Path, options: Mapping[str, str] = {}) -> IAudioRead:
+        """Create an audio reader for the given path, or null when the format
+        has no audio.
+
+        Create an audio reader for the given path and memory locations.
+        """
+
+class WriteSystem(feather_tk._feather_tk.ISystem):
+    """Write system."""
+    def __init__(self, context: feather_tk._feather_tk.Context) -> None:
+        """Create a new system."""
+
+    @property
+    def plugins(self) -> list[IWritePlugin]:
+        """Get the list of plugins."""
+
+    def addPlugin(self, plugin: IWritePlugin) -> None:
+        """Add a plugin."""
+
+    def removePlugin(self, plugin: IWritePlugin) -> None:
+        """Remove a plugin."""
+
+    def getPlugin(self, path: feather_tk._feather_tk.Path) -> IWritePlugin:
+        """Get a plugin.
+
+        Get a plugin for the given path.
+        """
+
+    @property
+    def names(self) -> list[str]:
+        """Get the plugin names."""
+
+    def getExts(self, types: int = 3) -> set[str]:
+        """Get the supported file extensions."""
+
+    def getFileType(self, extension: str) -> FileType:
+        """Get the file type for the given extension."""
+
+    def write(self, path: feather_tk._feather_tk.Path, info: IOInfo, options: Mapping[str, str] = {}) -> IWrite:
+        """Create a writer for the given path."""
+
+def init(context: feather_tk._feather_tk.Context) -> None:
+    """
+    Initialize the library: the I/O, audio and render systems, added to the context. Once, before making timelines or players. Without a display or sound card -- a container, a render farm -- set SDL_AUDIO_DRIVER=dummy in the environment first: audio then goes nowhere, and the system's audio libraries are not asked for devices, which is what prints their errors when there are none.
+    """
+
+class AudioLayer:
+    """Audio layer."""
+    def __init__(self) -> None: ...
+
+    @property
+    def audio(self) -> Audio: ...
+
+    @audio.setter
+    def audio(self, arg: Audio, /) -> None: ...
+
+    def __eq__(self, arg: AudioLayer, /) -> bool: ...
+
+    def __ne__(self, arg: AudioLayer, /) -> bool: ...
+
+class AudioFrame:
+    """Audio frame."""
+    def __init__(self) -> None: ...
+
+    @property
+    def seconds(self) -> float: ...
+
+    @seconds.setter
+    def seconds(self, arg: float, /) -> None: ...
+
+    @property
+    def layers(self) -> list[AudioLayer]: ...
+
+    @layers.setter
+    def layers(self, arg: Sequence[AudioLayer], /) -> None: ...
+
+    def __eq__(self, arg: AudioFrame, /) -> bool: ...
+
+    def __ne__(self, arg: AudioFrame, /) -> bool: ...
+
+class AudioFrameListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableAudioFrameList, callback: Callable[[Sequence[AudioFrame]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableAudioFrameList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableAudioFrameList(IObservableAudioFrameList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[AudioFrame], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[AudioFrame], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[AudioFrame], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: AudioFrame) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: AudioFrame) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: AudioFrame, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[AudioFrame], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: AudioFrame) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[AudioFrame]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[AudioFrame]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[AudioFrame]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> AudioFrame:
+        """Get a list item."""
+
+    def contains(self, arg: AudioFrame, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: AudioFrame, /) -> int:
+        """Get the index of the given item."""
+
+@overload
+def isTimeEqual(arg0: AudioFrame, arg1: AudioFrame, /) -> bool: ...
+
+@overload
+def isTimeEqual(arg0: VideoFrame, arg1: VideoFrame, /) -> bool: ...
+
+class AudioDeviceID:
+    """Audio device ID."""
+    def __init__(self) -> None: ...
+
+    @property
+    def number(self) -> int: ...
+
+    @number.setter
+    def number(self, arg: int, /) -> None: ...
+
+    @property
+    def name(self) -> str: ...
+
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
+
+    def __eq__(self, arg: AudioDeviceID, /) -> bool: ...
+
+    def __ne__(self, arg: AudioDeviceID, /) -> bool: ...
+
+class AudioDeviceIDObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableAudioDeviceID, callback: Callable[[AudioDeviceID], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableAudioDeviceID:
+    """Base class for observable values."""
+    def get(self) -> AudioDeviceID:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableAudioDeviceID(IObservableAudioDeviceID):
+    """Observable value."""
+    def __init__(self, arg: AudioDeviceID, /) -> None: ...
+
+    def setAlways(self, arg: AudioDeviceID, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: AudioDeviceID, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> AudioDeviceID:
+        """Get the value."""
+
+class AudioDeviceIDListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableAudioDeviceIDList, callback: Callable[[Sequence[AudioDeviceID]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableAudioDeviceIDList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableAudioDeviceIDList(IObservableAudioDeviceIDList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[AudioDeviceID], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[AudioDeviceID], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[AudioDeviceID], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: AudioDeviceID) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: AudioDeviceID) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: AudioDeviceID, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[AudioDeviceID], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: AudioDeviceID) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[AudioDeviceID]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[AudioDeviceID]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[AudioDeviceID]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> AudioDeviceID:
+        """Get a list item."""
+
+    def contains(self, arg: AudioDeviceID, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: AudioDeviceID, /) -> int:
+        """Get the index of the given item."""
+
+class AudioDeviceInfo:
+    """Audio device information."""
+    def __init__(self) -> None: ...
+
+    @property
+    def id(self) -> AudioDeviceID: ...
+
+    @id.setter
+    def id(self, arg: AudioDeviceID, /) -> None: ...
+
+    @property
+    def info(self) -> AudioInfo: ...
+
+    @info.setter
+    def info(self, arg: AudioInfo, /) -> None: ...
+
+    def __eq__(self, arg: AudioDeviceInfo, /) -> bool: ...
+
+    def __ne__(self, arg: AudioDeviceInfo, /) -> bool: ...
+
+class AudioDeviceInfoObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableAudioDeviceInfo, callback: Callable[[AudioDeviceInfo], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableAudioDeviceInfo:
+    """Base class for observable values."""
+    def get(self) -> AudioDeviceInfo:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableAudioDeviceInfo(IObservableAudioDeviceInfo):
+    """Observable value."""
+    def __init__(self, arg: AudioDeviceInfo, /) -> None: ...
+
+    def setAlways(self, arg: AudioDeviceInfo, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: AudioDeviceInfo, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> AudioDeviceInfo:
+        """Get the value."""
+
+class AudioDeviceInfoListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableAudioDeviceInfoList, callback: Callable[[Sequence[AudioDeviceInfo]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableAudioDeviceInfoList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableAudioDeviceInfoList(IObservableAudioDeviceInfoList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[AudioDeviceInfo], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[AudioDeviceInfo], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[AudioDeviceInfo], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: AudioDeviceInfo) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: AudioDeviceInfo) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: AudioDeviceInfo, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[AudioDeviceInfo], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: AudioDeviceInfo) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[AudioDeviceInfo]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[AudioDeviceInfo]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[AudioDeviceInfo]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> AudioDeviceInfo:
+        """Get a list item."""
+
+    def contains(self, arg: AudioDeviceInfo, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: AudioDeviceInfo, /) -> int:
+        """Get the index of the given item."""
+
+class AudioSystem(feather_tk._feather_tk.ISystem):
+    """Audio system."""
+    def __init__(self, context: feather_tk._feather_tk.Context) -> None:
+        """Create a new system."""
+
+    @property
+    def drivers(self) -> list[str]:
+        """Get the list of audio drivers."""
+
+    @property
+    def currentDriver(self) -> str:
+        """Get the current audio driver."""
+
+    @property
+    def bufferFrameCount(self) -> int:
+        """Get the size of the buffer the audio device is asked for, in sample
+        frames. Zero is the device's own default.
+        """
+
+    @bufferFrameCount.setter
+    def bufferFrameCount(self, arg: int, /) -> None: ...
+
+    @property
+    def devices(self) -> list[AudioDeviceInfo]:
+        """Get the list of audio devices."""
+
+    @property
+    def observeDevices(self) -> IObservableAudioDeviceInfoList:
+        """Observe the list of audio devices."""
+
+    @property
+    def defaultDevice(self) -> AudioDeviceInfo:
+        """Get the default audio device."""
+
+    @property
+    def observeDefaultDevice(self) -> IObservableAudioDeviceInfo:
+        """Observe the default audio device."""
+
+class Background(enum.Enum):
+    Solid = 0
+
+    Checkers = 1
+
+    Gradient = 2
+
+def getBackgroundEnums() -> list[Background]: ...
+
+class Outline:
+    """Outline."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def width(self) -> int: ...
+
+    @width.setter
+    def width(self, arg: int, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    def __eq__(self, arg: Outline, /) -> bool: ...
+
+    def __ne__(self, arg: Outline, /) -> bool: ...
+
+class BackgroundOptions:
+    """Background options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def type(self) -> Background: ...
+
+    @type.setter
+    def type(self, arg: Background, /) -> None: ...
+
+    @property
+    def solidColor(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @solidColor.setter
+    def solidColor(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    @property
+    def checkersColor(self) -> tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F]: ...
+
+    @checkersColor.setter
+    def checkersColor(self, arg: tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F], /) -> None: ...
+
+    @property
+    def checkersSize(self) -> feather_tk._feather_tk.Size2I: ...
+
+    @checkersSize.setter
+    def checkersSize(self, arg: feather_tk._feather_tk.Size2I, /) -> None: ...
+
+    @property
+    def gradientColor(self) -> tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F]: ...
+
+    @gradientColor.setter
+    def gradientColor(self, arg: tuple[feather_tk._feather_tk.Color4F, feather_tk._feather_tk.Color4F], /) -> None: ...
+
+    @property
+    def outline(self) -> Outline: ...
+
+    @outline.setter
+    def outline(self, arg: Outline, /) -> None: ...
+
+    def __eq__(self, arg: BackgroundOptions, /) -> bool: ...
+
+    def __ne__(self, arg: BackgroundOptions, /) -> bool: ...
+
+class BackgroundOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableBackgroundOptions, callback: Callable[[BackgroundOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableBackgroundOptions:
+    """Base class for observable values."""
+    def get(self) -> BackgroundOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableBackgroundOptions(IObservableBackgroundOptions):
+    """Observable value."""
+    def __init__(self, arg: BackgroundOptions, /) -> None: ...
+
+    def setAlways(self, arg: BackgroundOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: BackgroundOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> BackgroundOptions:
+        """Get the value."""
+
+@overload
+def to_json(arg: Background, /) -> str: ...
+
+@overload
+def to_json(arg: Outline, /) -> str: ...
+
+@overload
+def to_json(arg: BackgroundOptions, /) -> str: ...
+
+@overload
+def to_json(arg: OCIOOptions, /) -> str: ...
+
+@overload
+def to_json(arg: LUTOptions, /) -> str: ...
+
+@overload
+def to_json(arg: CompareOptions, /) -> str: ...
+
+@overload
+def to_json(arg: Color, /) -> str: ...
+
+@overload
+def to_json(arg: Levels, /) -> str: ...
+
+@overload
+def to_json(arg: Exposure, /) -> str: ...
+
+@overload
+def to_json(arg: SoftClip, /) -> str: ...
+
+@overload
+def to_json(arg: DisplayOptions, /) -> str: ...
+
+@overload
+def to_json(arg: Grid, /) -> str: ...
+
+@overload
+def to_json(arg: ForegroundOptions, /) -> str: ...
+
+@overload
+def to_json(arg: PlayerCacheOptions, /) -> str: ...
+
+@overload
+def from_json(arg0: str, arg1: Background, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: Outline, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: BackgroundOptions, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: OCIOOptions, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: LUTOptions, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: CompareOptions, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: Color, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: Levels, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: Exposure, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: SoftClip, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: DisplayOptions, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: Grid, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: ForegroundOptions, /) -> None: ...
+
+@overload
+def from_json(arg0: str, arg1: PlayerCacheOptions, /) -> None: ...
+
+class OCIOConfig(enum.Enum):
+    BuiltIn = 0
+
+    EnvironmentVariable = 1
+
+    File = 2
+
+def getOCIOConfigEnums() -> list[OCIOConfig]: ...
+
+class OCIOOptions:
+    """OpenColorIO options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def config(self) -> OCIOConfig: ...
+
+    @config.setter
+    def config(self, arg: OCIOConfig, /) -> None: ...
+
+    @property
+    def fileName(self) -> str: ...
+
+    @fileName.setter
+    def fileName(self, arg: str, /) -> None: ...
+
+    @property
+    def input(self) -> str: ...
+
+    @input.setter
+    def input(self, arg: str, /) -> None: ...
+
+    @property
+    def display(self) -> str: ...
+
+    @display.setter
+    def display(self, arg: str, /) -> None: ...
+
+    @property
+    def view(self) -> str: ...
+
+    @view.setter
+    def view(self, arg: str, /) -> None: ...
+
+    @property
+    def look(self) -> str: ...
+
+    @look.setter
+    def look(self, arg: str, /) -> None: ...
+
+    def __eq__(self, arg: OCIOOptions, /) -> bool: ...
+
+    def __ne__(self, arg: OCIOOptions, /) -> bool: ...
+
+class OCIOOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableOCIOOptions, callback: Callable[[OCIOOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableOCIOOptions:
+    """Base class for observable values."""
+    def get(self) -> OCIOOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableOCIOOptions(IObservableOCIOOptions):
+    """Observable value."""
+    def __init__(self, arg: OCIOOptions, /) -> None: ...
+
+    def setAlways(self, arg: OCIOOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: OCIOOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> OCIOOptions:
+        """Get the value."""
+
+class LUTDirection(enum.Enum):
+    Forward = 0
+
+    Inverse = 1
+
+def getLUTDirectionEnums() -> list[LUTDirection]: ...
+
+class LUTOrder(enum.Enum):
+    PostConfig = 0
+
+    PreConfig = 1
+
+def getLUTOrderEnums() -> list[LUTOrder]: ...
+
+class LUTOptions:
+    """LUT options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def fileName(self) -> str: ...
+
+    @fileName.setter
+    def fileName(self, arg: str, /) -> None: ...
+
+    @property
+    def direction(self) -> LUTDirection: ...
+
+    @direction.setter
+    def direction(self, arg: LUTDirection, /) -> None: ...
+
+    @property
+    def order(self) -> LUTOrder: ...
+
+    @order.setter
+    def order(self, arg: LUTOrder, /) -> None: ...
+
+    def __eq__(self, arg: LUTOptions, /) -> bool: ...
+
+    def __ne__(self, arg: LUTOptions, /) -> bool: ...
+
+class LUTOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableLUTOptions, callback: Callable[[LUTOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableLUTOptions:
+    """Base class for observable values."""
+    def get(self) -> LUTOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableLUTOptions(IObservableLUTOptions):
+    """Observable value."""
+    def __init__(self, arg: LUTOptions, /) -> None: ...
+
+    def setAlways(self, arg: LUTOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: LUTOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> LUTOptions:
+        """Get the value."""
+
+def getLUTFormatNames() -> list[str]:
+    """Get the list of LUT format names."""
+
+def getLUTFormatExts() -> list[str]:
+    """Get the list of LUT format file extensions."""
+
+class Compare(enum.Enum):
+    B = 1
+
+    Wipe = 2
+
+    Butterfly = 3
+
+    Overlay = 4
+
+    Difference = 5
+
+    Horizontal = 6
+
+    Vertical = 7
+
+    Tile = 8
+
+def getCompareEnums() -> list[Compare]: ...
+
+class CompareTime(enum.Enum):
+    Relative = 0
+
+    Absolute = 1
+
+def getCompareTimeEnums() -> list[CompareTime]: ...
+
+def getCompareTime(sourceTime: opentimelineio.opentime.RationalTime, sourceTimeRange: opentimelineio.opentime.TimeRange, compareTimeRange: opentimelineio.opentime.TimeRange, compareTime: CompareTime = CompareTime.Relative) -> opentimelineio.opentime.RationalTime:
+    """
+    The time in a compared timeline for a time in this one, as a Player finds it: Relative counts from each timeline's start, in the compared one's rate, Absolute takes the time as it is. For Timeline.getVideo() on the compared timeline.
+    """
+
+class CompareOptions:
+    """
+    How compared timelines are drawn together: compare is the mode (None for this timeline alone, B, Wipe, Butterfly, Overlay, Difference, Horizontal, Vertical, Tile), and the other fields are the settings for the modes that have them. Read by whatever draws the frames, a viewport or a renderer; which frames there are is the Player's compare.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def compare(self) -> Compare: ...
+
+    @compare.setter
+    def compare(self, arg: Compare, /) -> None: ...
+
+    @property
+    def wipeCenter(self) -> feather_tk._feather_tk.V2F: ...
+
+    @wipeCenter.setter
+    def wipeCenter(self, arg: feather_tk._feather_tk.V2F, /) -> None: ...
+
+    @property
+    def wipeRotation(self) -> float: ...
+
+    @wipeRotation.setter
+    def wipeRotation(self, arg: float, /) -> None: ...
+
+    @property
+    def overlay(self) -> float: ...
+
+    @overlay.setter
+    def overlay(self, arg: float, /) -> None: ...
+
+    @property
+    def differenceGain(self) -> float:
+        """What the difference is multiplied by before it is shown. The
+        differences worth looking for are often a code value or two -- what a
+        compressed version differs from its source by -- and at their own size
+        they are indistinguishable from black.
+        """
+
+    @differenceGain.setter
+    def differenceGain(self, arg: float, /) -> None: ...
+
+    @property
+    def sameSize(self) -> bool: ...
+
+    @sameSize.setter
+    def sameSize(self, arg: bool, /) -> None: ...
+
+    def __eq__(self, arg: CompareOptions, /) -> bool: ...
+
+    def __ne__(self, arg: CompareOptions, /) -> bool: ...
+
+class CompareOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableCompareOptions, callback: Callable[[CompareOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableCompareOptions:
+    """Base class for observable values."""
+    def get(self) -> CompareOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableCompareOptions(IObservableCompareOptions):
+    """Observable value."""
+    def __init__(self, arg: CompareOptions, /) -> None: ...
+
+    def setAlways(self, arg: CompareOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: CompareOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> CompareOptions:
+        """Get the value."""
+
+class Color:
+    """Color values."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def add(self) -> feather_tk._feather_tk.V3F: ...
+
+    @add.setter
+    def add(self, arg: feather_tk._feather_tk.V3F, /) -> None: ...
+
+    @property
+    def brightness(self) -> feather_tk._feather_tk.V3F: ...
+
+    @brightness.setter
+    def brightness(self, arg: feather_tk._feather_tk.V3F, /) -> None: ...
+
+    @property
+    def contrast(self) -> feather_tk._feather_tk.V3F: ...
+
+    @contrast.setter
+    def contrast(self, arg: feather_tk._feather_tk.V3F, /) -> None: ...
+
+    @property
+    def saturation(self) -> feather_tk._feather_tk.V3F: ...
+
+    @saturation.setter
+    def saturation(self, arg: feather_tk._feather_tk.V3F, /) -> None: ...
+
+    @property
+    def hue(self) -> float: ...
+
+    @hue.setter
+    def hue(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: Color, /) -> bool: ...
+
+    def __ne__(self, arg: Color, /) -> bool: ...
+
+def color(arg: Color, /) -> feather_tk._feather_tk.M44F:
+    """Get a color matrix."""
+
+class Levels:
+    """Levels values."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def inLow(self) -> float: ...
+
+    @inLow.setter
+    def inLow(self, arg: float, /) -> None: ...
+
+    @property
+    def inHigh(self) -> float: ...
+
+    @inHigh.setter
+    def inHigh(self, arg: float, /) -> None: ...
+
+    @property
+    def gamma(self) -> float: ...
+
+    @gamma.setter
+    def gamma(self, arg: float, /) -> None: ...
+
+    @property
+    def outLow(self) -> float: ...
+
+    @outLow.setter
+    def outLow(self, arg: float, /) -> None: ...
+
+    @property
+    def outHigh(self) -> float: ...
+
+    @outHigh.setter
+    def outHigh(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: Levels, /) -> bool: ...
+
+    def __ne__(self, arg: Levels, /) -> bool: ...
+
+class Exposure:
+    """A plain stop adjustment: the value scales the image by 2^stops, so zero
+    is neutral. The old exrdisplay-style defog, knee, and gamma are gone --
+    SoftClip and Levels cover them, and the exrdisplay formula was never
+    neutral at its defaults.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def exposure(self) -> float: ...
+
+    @exposure.setter
+    def exposure(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: Exposure, /) -> bool: ...
+
+    def __ne__(self, arg: Exposure, /) -> bool: ...
+
+class SoftClip:
+    """Soft clip."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def value(self) -> float: ...
+
+    @value.setter
+    def value(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: SoftClip, /) -> bool: ...
+
+    def __ne__(self, arg: SoftClip, /) -> bool: ...
+
+class AspectRatio:
+    """Aspect ratio."""
+    @overload
+    def __init__(self) -> None: ...
+
+    @overload
+    def __init__(self, num: float, den: float = 1.0) -> None: ...
+
+    @property
+    def num(self) -> float: ...
+
+    @num.setter
+    def num(self, arg: float, /) -> None: ...
+
+    @property
+    def den(self) -> float: ...
+
+    @den.setter
+    def den(self, arg: float, /) -> None: ...
+
+    def isValid(self) -> bool: ...
+
+    def __float__(self) -> float: ...
+
+    def __eq__(self, arg: AspectRatio, /) -> bool: ...
+
+    def __ne__(self, arg: AspectRatio, /) -> bool: ...
+
+class AspectRatioType(enum.Enum):
+    Pixel = 0
+
+    Display = 1
+
+def getAspectRatioTypeEnums() -> list[AspectRatioType]: ...
+
+class AspectRatioOptions:
+    """Aspect ratio options."""
+    @overload
+    def __init__(self) -> None: ...
+
+    @overload
+    def __init__(self, value: AspectRatio, type: AspectRatioType) -> None: ...
+
+    @property
+    def value(self) -> AspectRatio: ...
+
+    @value.setter
+    def value(self, arg: AspectRatio, /) -> None: ...
+
+    @property
+    def type(self) -> AspectRatioType: ...
+
+    @type.setter
+    def type(self, arg: AspectRatioType, /) -> None: ...
+
+    def __eq__(self, arg: AspectRatioOptions, /) -> bool: ...
+
+    def __ne__(self, arg: AspectRatioOptions, /) -> bool: ...
+
+class DisplayOptions:
+    """Display options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def channels(self) -> feather_tk._feather_tk.ChannelDisplay: ...
+
+    @channels.setter
+    def channels(self, arg: feather_tk._feather_tk.ChannelDisplay, /) -> None: ...
+
+    @property
+    def negative(self) -> bool: ...
+
+    @negative.setter
+    def negative(self, arg: bool, /) -> None: ...
+
+    @property
+    def mirror(self) -> feather_tk._feather_tk.ImageMirror: ...
+
+    @mirror.setter
+    def mirror(self, arg: feather_tk._feather_tk.ImageMirror, /) -> None: ...
+
+    @property
+    def color(self) -> Color: ...
+
+    @color.setter
+    def color(self, arg: Color, /) -> None: ...
+
+    @property
+    def levels(self) -> Levels: ...
+
+    @levels.setter
+    def levels(self, arg: Levels, /) -> None: ...
+
+    @property
+    def exposure(self) -> Exposure: ...
+
+    @exposure.setter
+    def exposure(self, arg: Exposure, /) -> None: ...
+
+    @property
+    def softClip(self) -> SoftClip: ...
+
+    @softClip.setter
+    def softClip(self, arg: SoftClip, /) -> None: ...
+
+    def __eq__(self, arg: DisplayOptions, /) -> bool: ...
+
+    def __ne__(self, arg: DisplayOptions, /) -> bool: ...
+
+class DisplayOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableDisplayOptions, callback: Callable[[DisplayOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableDisplayOptions:
+    """Base class for observable values."""
+    def get(self) -> DisplayOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableDisplayOptions(IObservableDisplayOptions):
+    """Observable value."""
+    def __init__(self, arg: DisplayOptions, /) -> None: ...
+
+    def setAlways(self, arg: DisplayOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: DisplayOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> DisplayOptions:
+        """Get the value."""
+
+class DisplayOptionsListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableDisplayOptionsList, callback: Callable[[Sequence[DisplayOptions]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableDisplayOptionsList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableDisplayOptionsList(IObservableDisplayOptionsList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[DisplayOptions], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[DisplayOptions], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[DisplayOptions], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: DisplayOptions) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: DisplayOptions) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: DisplayOptions, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[DisplayOptions], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: DisplayOptions) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[DisplayOptions]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[DisplayOptions]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[DisplayOptions]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> DisplayOptions:
+        """Get a list item."""
+
+    def contains(self, arg: DisplayOptions, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: DisplayOptions, /) -> int:
+        """Get the index of the given item."""
+
+class GridCellMode(enum.Enum):
+    CellSize = 0
+
+    CellCount = 1
+
+def getGridCellModeEnums() -> list[GridCellMode]: ...
+
+class Grid:
+    """Grid."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def cellMode(self) -> GridCellMode: ...
+
+    @cellMode.setter
+    def cellMode(self, arg: GridCellMode, /) -> None: ...
+
+    @property
+    def cellSize(self) -> int: ...
+
+    @cellSize.setter
+    def cellSize(self, arg: int, /) -> None: ...
+
+    @property
+    def cellCount(self) -> feather_tk._feather_tk.V2I: ...
+
+    @cellCount.setter
+    def cellCount(self, arg: feather_tk._feather_tk.V2I, /) -> None: ...
+
+    @property
+    def lineWidth(self) -> int: ...
+
+    @lineWidth.setter
+    def lineWidth(self, arg: int, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    def __eq__(self, arg: Grid, /) -> bool: ...
+
+    def __ne__(self, arg: Grid, /) -> bool: ...
+
+class CenterMarker:
+    """Center marker."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def size(self) -> int: ...
+
+    @size.setter
+    def size(self, arg: int, /) -> None: ...
+
+    @property
+    def width(self) -> int: ...
+
+    @width.setter
+    def width(self, arg: int, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    def __eq__(self, arg: CenterMarker, /) -> bool: ...
+
+    def __ne__(self, arg: CenterMarker, /) -> bool: ...
+
+class MissingIndicator:
+    """Missing frame indicator.
+
+    Marks a picture that stands in for a frame the media does not have, so a
+    held or blank frame is not taken for the frame that was asked for.
+
+    Drawn as a cross over the image. The other overlays -- the grid, the centre
+    marker, the outline -- are aids for measuring a picture, and a mark that
+    reads like one of them says the wrong thing about a frame that is not the
+    frame asked for. A cross cannot be taken for a guide.
+
+    It covers the part of the image that can be seen rather than the image
+    itself, so zooming into the middle of the picture cannot hide it, the way
+    it hides the outline.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def width(self) -> int: ...
+
+    @width.setter
+    def width(self, arg: int, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    def __eq__(self, arg: MissingIndicator, /) -> bool: ...
+
+    def __ne__(self, arg: MissingIndicator, /) -> bool: ...
+
+class ClippingWarningMode(enum.Enum):
+    AnyChannel = 0
+
+    AllChannels = 1
+
+    Luminance = 2
+
+def getClippingWarningModeEnums() -> list[ClippingWarningMode]: ...
+
+class ClippingWarning:
+    """Clipping warning: a pixel outside the range is covered with a warning
+    color, red above and magenta below (the false color convention of the
+    camera makers). The mode says what is outside: any channel, all three, or
+    the luminance. The range is in displayed values, so the default marks what
+    the display cannot show; 16/255 to 235/255 marks the video legal range.
+
+    An overlay rather than a display adjustment so the picked color is the
+    color under the warning, not the warning.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def mode(self) -> ClippingWarningMode: ...
+
+    @mode.setter
+    def mode(self, arg: ClippingWarningMode, /) -> None: ...
+
+    @property
+    def low(self) -> float: ...
+
+    @low.setter
+    def low(self, arg: float, /) -> None: ...
+
+    @property
+    def high(self) -> float: ...
+
+    @high.setter
+    def high(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: ClippingWarning, /) -> bool: ...
+
+    def __ne__(self, arg: ClippingWarning, /) -> bool: ...
+
+class FrameGuide:
+    """Frame guide: the frame of another aspect ratio within the picture, 2.39
+    in a 16:9 picture say, outlined, with the rest masked. The lines are view
+    pixels wide, so they stay one width however far the picture is zoomed. The
+    aspect is kept as a ratio, so 16:9 is exactly that rather than 1.78.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def aspect(self) -> AspectRatio: ...
+
+    @aspect.setter
+    def aspect(self, arg: AspectRatio, /) -> None: ...
+
+    @property
+    def maskOpacity(self) -> float: ...
+
+    @maskOpacity.setter
+    def maskOpacity(self, arg: float, /) -> None: ...
+
+    @property
+    def lineWidth(self) -> int: ...
+
+    @lineWidth.setter
+    def lineWidth(self, arg: int, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    def __eq__(self, arg: FrameGuide, /) -> bool: ...
+
+    def __ne__(self, arg: FrameGuide, /) -> bool: ...
+
+class SafeAreas:
+    """Safe areas: the action and title safe areas, as fractions of the frame
+    -- the frame guide's when it is on, the picture's otherwise.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def action(self) -> float: ...
+
+    @action.setter
+    def action(self, arg: float, /) -> None: ...
+
+    @property
+    def title(self) -> float: ...
+
+    @title.setter
+    def title(self, arg: float, /) -> None: ...
+
+    @property
+    def lineWidth(self) -> int: ...
+
+    @lineWidth.setter
+    def lineWidth(self, arg: int, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    def __eq__(self, arg: SafeAreas, /) -> bool: ...
+
+    def __ne__(self, arg: SafeAreas, /) -> bool: ...
+
+class DataWindow:
+    """Data window: the outline of the pixels a file holds, which can be
+    smaller than the picture, or reach outside it, as an OpenEXR data window
+    can. Drawn for images whose tags give one (see tl::getDataWindow()). The
+    lines are view pixels wide.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def lineWidth(self) -> int: ...
+
+    @lineWidth.setter
+    def lineWidth(self, arg: int, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    def __eq__(self, arg: DataWindow, /) -> bool: ...
+
+    def __ne__(self, arg: DataWindow, /) -> bool: ...
+
+class ForegroundOptions:
+    """Foreground options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def grid(self) -> Grid: ...
+
+    @grid.setter
+    def grid(self, arg: Grid, /) -> None: ...
+
+    @property
+    def centerMarker(self) -> CenterMarker: ...
+
+    @centerMarker.setter
+    def centerMarker(self, arg: CenterMarker, /) -> None: ...
+
+    @property
+    def missingIndicator(self) -> MissingIndicator: ...
+
+    @missingIndicator.setter
+    def missingIndicator(self, arg: MissingIndicator, /) -> None: ...
+
+    @property
+    def clippingWarning(self) -> ClippingWarning: ...
+
+    @clippingWarning.setter
+    def clippingWarning(self, arg: ClippingWarning, /) -> None: ...
+
+    @property
+    def frameGuide(self) -> FrameGuide: ...
+
+    @frameGuide.setter
+    def frameGuide(self, arg: FrameGuide, /) -> None: ...
+
+    @property
+    def safeAreas(self) -> SafeAreas: ...
+
+    @safeAreas.setter
+    def safeAreas(self, arg: SafeAreas, /) -> None: ...
+
+    @property
+    def dataWindow(self) -> DataWindow: ...
+
+    @dataWindow.setter
+    def dataWindow(self, arg: DataWindow, /) -> None: ...
+
+    def __eq__(self, arg: ForegroundOptions, /) -> bool: ...
+
+    def __ne__(self, arg: ForegroundOptions, /) -> bool: ...
+
+class ForegroundOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableForegroundOptions, callback: Callable[[ForegroundOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableForegroundOptions:
+    """Base class for observable values."""
+    def get(self) -> ForegroundOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableForegroundOptions(IObservableForegroundOptions):
+    """Observable value."""
+    def __init__(self, arg: ForegroundOptions, /) -> None: ...
+
+    def setAlways(self, arg: ForegroundOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: ForegroundOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> ForegroundOptions:
+        """Get the value."""
+
+class TimeUnits(enum.Enum):
+    Frames = 0
+
+    Seconds = 1
+
+    Timecode = 2
+
+def getTimeUnitsEnums() -> list[TimeUnits]: ...
+
+class TimeUnitsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableTimeUnits, callback: Callable[[TimeUnits], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableTimeUnits:
+    """Base class for observable values."""
+    def get(self) -> TimeUnits:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableTimeUnits(IObservableTimeUnits):
+    """Observable value."""
+    def __init__(self, arg: TimeUnits, /) -> None: ...
+
+    def setAlways(self, arg: TimeUnits, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: TimeUnits, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> TimeUnits:
+        """Get the value."""
+
+def timeToText(time: opentimelineio.opentime.RationalTime | None, units: TimeUnits, dropFrame: bool = False) -> str:
+    """Convert a time value to text. An unset time gives the placeholder text
+    for the units, so a widget with no value still reads as a time. Timecode is
+    drop frame only when asked for: 29.97 is not drop frame unless the media
+    says so.
+    """
+
+def isDropFrame(timecode: str) -> bool:
+    """Get whether a timecode is drop frame, which the ';' before the frames
+    says.
+    """
+
+class ITimeUnitsModel:
+    """Base class for time units models."""
+    def getLabel(self, time: opentimelineio.opentime.RationalTime | None) -> str:
+        """Get a time label in the current time units. An unset time gives the
+        placeholder text for the units.
+        """
+
+class TimeUnitsModel(ITimeUnitsModel):
+    """Time units model."""
+    def __init__(self, context: feather_tk._feather_tk.Context) -> None:
+        """Create a new model."""
+
+    @property
+    def timeUnits(self) -> TimeUnits:
+        """Get the time units."""
+
+    @timeUnits.setter
+    def timeUnits(self, arg: TimeUnits, /) -> None: ...
+
+    @property
+    def dropFrame(self) -> bool:
+        """Get whether timecode is shown as drop frame."""
+
+    @dropFrame.setter
+    def dropFrame(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeTimeUnits(self) -> IObservableTimeUnits:
+        """Observe the time units."""
+
+class ImageSeqAudio(enum.Enum):
+    Ext = 1
+
+    FileName = 2
+
+def getImageSeqAudioEnums() -> list[ImageSeqAudio]: ...
+
+class Options:
+    """Timeline options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def imageSeqAudio(self) -> ImageSeqAudio:
+        """Image sequence audio."""
+
+    @imageSeqAudio.setter
+    def imageSeqAudio(self, arg: ImageSeqAudio, /) -> None: ...
+
+    @property
+    def imageSeqAudioExts(self) -> list[str]:
+        """Image sequence audio extensions."""
+
+    @imageSeqAudioExts.setter
+    def imageSeqAudioExts(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def imageSeqAudioFileName(self) -> str:
+        """Image sequence audio file name."""
+
+    @imageSeqAudioFileName.setter
+    def imageSeqAudioFileName(self, arg: str, /) -> None: ...
+
+    @property
+    def compat(self) -> bool:
+        """Enable workarounds for timelines that may not conform exactly to
+        specification.
+        """
+
+    @compat.setter
+    def compat(self, arg: bool, /) -> None: ...
+
+    @property
+    def threaded(self) -> bool:
+        """Run the timeline on its own thread.
+
+        When this is false the timeline has no thread and no read pool: a
+        request is filled by the call that makes it, and the future it returns
+        is already resolved. That is what a caller that only wants a frame or
+        two wants, and it is what lets a thumbnail be taken without a thread
+        per file.
+        """
+
+    @threaded.setter
+    def threaded(self, arg: bool, /) -> None: ...
+
+    @property
+    def readThreadCount(self) -> int:
+        """How many sequence frames the timeline decodes at once.
+
+        This is the one place the decoding concurrency is set. How many video
+        requests are in flight follows from it, so that raising it is not
+        silently undone by a separate limit.
+        """
+
+    @readThreadCount.setter
+    def readThreadCount(self, arg: int, /) -> None: ...
+
+    @property
+    def audioRequestMax(self) -> int:
+        """Maximum number of audio requests in flight.
+
+        Unlike video, this does not follow readThreadCount: audio is not
+        decoded by the timeline's pool. It comes from a reader that does its
+        own threading, so there is no thread count here for it to follow and
+        this is the only limit on how much audio is being assembled at once.
+        """
+
+    @audioRequestMax.setter
+    def audioRequestMax(self, arg: int, /) -> None: ...
+
+    @property
+    def ioOptions(self) -> dict[str, str]:
+        """I/O options."""
+
+    @ioOptions.setter
+    def ioOptions(self, arg: Mapping[str, str], /) -> None: ...
+
+    @property
+    def pathOptions(self) -> feather_tk._feather_tk.PathOptions:
+        """Path options."""
+
+    @pathOptions.setter
+    def pathOptions(self, arg: feather_tk._feather_tk.PathOptions, /) -> None: ...
+
+    def __eq__(self, arg: Options, /) -> bool: ...
+
+    def __ne__(self, arg: Options, /) -> bool: ...
+
+class System(feather_tk._feather_tk.ISystem):
+    """Timeline system."""
+    def __init__(self, context: feather_tk._feather_tk.Context) -> None:
+        """Create a new system."""
+
+class Timeline:
+    """
+    A timeline opened for playback: an OpenTimelineIO file, a movie, an image sequence, or an opentimelineio Timeline object, with its media found and its video and audio described in ioInfo. Played by a Player.
+
+    One frame of a sequence, such as render.0001.exr, opens that frame alone. For the whole sequence pass ftk.expandSeq(path, ftk.PathOptions()), which finds the frames beside it on disk.
+    """
+
+    @overload
+    def __init__(self, context: feather_tk._feather_tk.Context, path: feather_tk._feather_tk.Path, options: Options = ...) -> None: ...
+
+    @overload
+    def __init__(self, context: feather_tk._feather_tk.Context, path: feather_tk._feather_tk.Path, audioPath: feather_tk._feather_tk.Path, options: Options = ...) -> None: ...
+
+    @overload
+    def __init__(self, context: feather_tk._feather_tk.Context, fileName: str, options: Options = ...) -> None: ...
+
+    @overload
+    def __init__(self, context: feather_tk._feather_tk.Context, fileName: str, audioFileName: str, options: Options = ...) -> None: ...
+
+    @overload
+    def __init__(self, context: feather_tk._feather_tk.Context, otioTimeline: object, options: Options = ...) -> None:
+        """
+        From an opentimelineio Timeline object, without a file: a timeline built or edited in Python is played as it is. The object is copied, so later changes to it are not seen; make a new Timeline from it again.
+        """
+
+    @property
+    def context(self) -> feather_tk._feather_tk.Context:
+        """Get the context."""
+
+    @property
+    def otioTimeline(self) -> object: ...
+
+    @property
+    def path(self) -> feather_tk._feather_tk.Path:
+        """Get the file path."""
+
+    @property
+    def audioPath(self) -> feather_tk._feather_tk.Path:
+        """Get the audio file path."""
+
+    @property
+    def options(self) -> Options:
+        """Get the timeline options."""
+
+    @property
+    def timeRange(self) -> opentimelineio.opentime.TimeRange:
+        """Get the time range."""
+
+    @property
+    def duration(self) -> opentimelineio.opentime.RationalTime:
+        """Get the duration."""
+
+    @property
+    def ioInfo(self) -> IOInfo:
+        """Get the I/O information. This information is retrieved from the
+        first clip in the timeline.
+
+        The video information follows the media reference the clip is being
+        read from, so that it describes the media on screen rather than the
+        media that was active when the timeline was read.
+        """
+
+    def getMediaTime(self, time: opentimelineio.opentime.RationalTime) -> opentimelineio.opentime.RationalTime | None:
+        """The media time that names the frame shown at a timeline time.
+
+        This is the time to show someone watching, whatever units they read it
+        in: it matches the file on disk, where the timeline's own time only
+        counts off the frames that are being played.
+        """
+
+    def getTimelineTime(self, time: opentimelineio.opentime.RationalTime, mediaTime: opentimelineio.opentime.RationalTime) -> opentimelineio.opentime.RationalTime | None:
+        """The timeline time that shows the given media time, taking the clip
+        from the given time.
+        """
+
+    def getMediaFrame(self, time: opentimelineio.opentime.RationalTime) -> int | None:
+        """The frame number the media gives to a timeline time."""
+
+    def getMediaFrameTime(self, time: opentimelineio.opentime.RationalTime, frame: int) -> opentimelineio.opentime.RationalTime | None:
+        """The timeline time that reads the given media frame number, taking
+        the clip from the given time.
+
+        A frame the media does not have snaps as the media requires, so there
+        is always an answer for a clip that was found.
+        """
+
+    def isMediaTimeContinuous(self) -> bool:
+        """Whether media times increase over the whole timeline, which is what
+        makes them worth showing in place of it.
+
+        They do when every video clip reads the same media and takes a later
+        part of it than the one before: one file played through, in one piece
+        or in the runs a sparse sequence is cut into. Cutting between media, or
+        playing the same media twice, restarts the numbering.
+        """
+
+    def getVideo(self, time: opentimelineio.opentime.RationalTime, options: Mapping[str, str] = {}) -> VideoFrame:
+        """
+        The video at a time, decoded: returns once it is, with no Player and no Context.tick(). For a script that wants frames rather than playback. Each call decodes its frame; nothing is read ahead or kept, as a Player does for playback. Frames for OffscreenRender.render() are a list of these, one per timeline. A time with no clip gives a frame with no layers, and a frame that cannot be read a layer whose image is None.
+        """
+
+class DetectCutsOptions:
+    """
+    Options for finding the cuts in a timeline. The defaults come from two films' edits checked against what was found.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def width(self) -> int:
+        """The width frames are scored at."""
+
+    @width.setter
+    def width(self, arg: int, /) -> None: ...
+
+    @property
+    def threshold(self) -> float:
+        """A cut is a frame scoring at least this, from 0 to 1."""
+
+    @threshold.setter
+    def threshold(self, arg: float, /) -> None: ...
+
+    @property
+    def blackThreshold(self) -> float:
+        """
+        The threshold after a black frame: a cut out of black scores lower than other cuts.
+        """
+
+    @blackThreshold.setter
+    def blackThreshold(self, arg: float, /) -> None: ...
+
+    @property
+    def blackLevel(self) -> float:
+        """A frame is black when its average luma is at most this."""
+
+    @blackLevel.setter
+    def blackLevel(self, arg: float, /) -> None: ...
+
+    @property
+    def relativeMin(self) -> float:
+        """
+        A frame under the threshold is still a cut when it scores at least this, and relativeRatio times the frames around it.
+        """
+
+    @relativeMin.setter
+    def relativeMin(self, arg: float, /) -> None: ...
+
+    @property
+    def relativeRatio(self) -> float:
+        """How far above the frames around it; zero turns it off."""
+
+    @relativeRatio.setter
+    def relativeRatio(self, arg: float, /) -> None: ...
+
+    @property
+    def relativeWindow(self) -> int:
+        """How many frames on either side are around it."""
+
+    @relativeWindow.setter
+    def relativeWindow(self, arg: int, /) -> None: ...
+
+    @property
+    def minLength(self) -> int:
+        """Cuts closer together than this many frames are one, the first of them."""
+
+    @minLength.setter
+    def minLength(self, arg: int, /) -> None: ...
+
+    def __eq__(self, arg: DetectCutsOptions, /) -> bool: ...
+
+class CutScore:
+    """
+    How different a frame is from the one before, from 0 to 1, as FFmpeg's scene filter scores it, and its average luma.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def score(self) -> float: ...
+
+    @score.setter
+    def score(self, arg: float, /) -> None: ...
+
+    @property
+    def luma(self) -> float: ...
+
+    @luma.setter
+    def luma(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: CutScore, /) -> bool: ...
+
+def findCuts(scores: Sequence[CutScore], options: DetectCutsOptions = ...) -> list[int]:
+    """
+    The indexes of the frames that are cut to, from a list of scores; for trying other rules on scores already made.
+    """
+
+def scoreFrames(timeline: Timeline, range: opentimelineio.opentime.TimeRange, options: DetectCutsOptions = ...) -> list[CutScore]:
+    """
+    Score each frame of a timeline over a range against the one before it. Reads every frame; give it a timeline of its own.
+    """
+
+def detectCuts(timeline: Timeline, range: opentimelineio.opentime.TimeRange, options: DetectCutsOptions = ...) -> list[opentimelineio.opentime.RationalTime]:
+    """
+    The times of the frames that are cut to, over a range: the cuts in an edit flattened to one movie or image sequence. Hard cuts only. Reads every frame; give it a timeline of its own.
+    """
+
+class PlayerCacheOptions:
+    """Timeline player cache options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def videoGB(self) -> float:
+        """Video cache size in gigabytes."""
+
+    @videoGB.setter
+    def videoGB(self, arg: float, /) -> None: ...
+
+    @property
+    def audioGB(self) -> float:
+        """Audio cache size in gigabytes."""
+
+    @audioGB.setter
+    def audioGB(self, arg: float, /) -> None: ...
+
+    @property
+    def readBehind(self) -> float:
+        """Number of seconds to read behind the current frame."""
+
+    @readBehind.setter
+    def readBehind(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: PlayerCacheOptions, /) -> bool: ...
+
+    def __ne__(self, arg: PlayerCacheOptions, /) -> bool: ...
+
+class PlayerOptions:
+    """Timeline player options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def audioDevice(self) -> AudioDeviceID:
+        """Audio device index."""
+
+    @audioDevice.setter
+    def audioDevice(self, arg: AudioDeviceID, /) -> None: ...
+
+    @property
+    def cache(self) -> PlayerCacheOptions:
+        """Cache options."""
+
+    @cache.setter
+    def cache(self, arg: PlayerCacheOptions, /) -> None: ...
+
+    @property
+    def videoRequestMax(self) -> int:
+        """How far ahead the player asks for frames while filling its cache.
+
+        This is the player expressing demand, not a limit on how much is
+        decoded at once; the timeline decides that. Keep it at or above the
+        timeline's readThreadCount, or the decoding threads run out of work to
+        do.
+        """
+
+    @videoRequestMax.setter
+    def videoRequestMax(self, arg: int, /) -> None: ...
+
+    @property
+    def audioRequestMax(self) -> int:
+        """How far ahead the player asks for audio while filling its cache.
+
+        The player expressing demand, as with videoRequestMax above; the
+        timeline decides how much of it is in flight.
+        """
+
+    @audioRequestMax.setter
+    def audioRequestMax(self, arg: int, /) -> None: ...
+
+    @property
+    def audioBufferFrameCount(self) -> int:
+        """Audio buffer frame count."""
+
+    @audioBufferFrameCount.setter
+    def audioBufferFrameCount(self, arg: int, /) -> None: ...
+
+    @property
+    def muteTimeout(self) -> datetime.timedelta:
+        """Timeout for muting the audio when playback stutters."""
+
+    @muteTimeout.setter
+    def muteTimeout(self, arg: datetime.timedelta, /) -> None: ...
+
+    @property
+    def sleepTimeout(self) -> datetime.timedelta:
+        """Timeout to sleep each tick."""
+
+    @sleepTimeout.setter
+    def sleepTimeout(self, arg: datetime.timedelta, /) -> None: ...
+
+    @property
+    def currentTime(self) -> opentimelineio.opentime.RationalTime | None:
+        """Current time to start at. Unset starts at the beginning."""
+
+    @currentTime.setter
+    def currentTime(self, arg: opentimelineio.opentime.RationalTime | None, /) -> None: ...
+
+    def __eq__(self, arg: PlayerOptions, /) -> bool: ...
+
+    def __ne__(self, arg: PlayerOptions, /) -> bool: ...
+
+class PlayerCacheInfo:
+    """Timeline player cache information."""
+    def __init__(self) -> None: ...
+
+    @property
+    def videoPercentage(self) -> float:
+        """Percentage used of the video cache."""
+
+    @videoPercentage.setter
+    def videoPercentage(self, arg: float, /) -> None: ...
+
+    @property
+    def audioPercentage(self) -> float:
+        """Percentage used of the audio cache."""
+
+    @audioPercentage.setter
+    def audioPercentage(self, arg: float, /) -> None: ...
+
+    @property
+    def video(self) -> list[opentimelineio.opentime.TimeRange]:
+        """Cached video."""
+
+    @video.setter
+    def video(self, arg: Sequence[opentimelineio.opentime.TimeRange], /) -> None: ...
+
+    @property
+    def audio(self) -> list[opentimelineio.opentime.TimeRange]:
+        """Cached audio."""
+
+    @audio.setter
+    def audio(self, arg: Sequence[opentimelineio.opentime.TimeRange], /) -> None: ...
+
+    def __eq__(self, arg: PlayerCacheInfo, /) -> bool: ...
+
+    def __ne__(self, arg: PlayerCacheInfo, /) -> bool: ...
+
+class Playback(enum.Enum):
+    Stop = 0
+
+    Forward = 1
+
+    Reverse = 2
+
+def getPlaybackEnums() -> list[Playback]: ...
+
+class Loop(enum.Enum):
+    Loop = 0
+
+    Once = 1
+
+    PingPong = 2
+
+def getLoopEnums() -> list[Loop]: ...
+
+class TimeAction(enum.Enum):
+    Start = 0
+
+    End = 1
+
+    FramePrevious = 2
+
+    FramePreviousX10 = 3
+
+    FramePreviousX100 = 4
+
+    FrameNext = 5
+
+    FrameNextX10 = 6
+
+    FrameNextX100 = 7
+
+    JumpBack1s = 8
+
+    JumpBack10s = 9
+
+    JumpForward1s = 10
+
+    JumpForward10s = 11
+
+def getTimeActionEnums() -> list[TimeAction]: ...
+
+class PlaybackObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservablePlayback, callback: Callable[[Playback], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservablePlayback:
+    """Base class for observable values."""
+    def get(self) -> Playback:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservablePlayback(IObservablePlayback):
+    """Observable value."""
+    def __init__(self, arg: Playback, /) -> None: ...
+
+    def setAlways(self, arg: Playback, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: Playback, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> Playback:
+        """Get the value."""
+
+class LoopObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableLoop, callback: Callable[[Loop], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableLoop:
+    """Base class for observable values."""
+    def get(self) -> Loop:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableLoop(IObservableLoop):
+    """Observable value."""
+    def __init__(self, arg: Loop, /) -> None: ...
+
+    def setAlways(self, arg: Loop, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: Loop, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> Loop:
+        """Get the value."""
+
+class PlayerCacheOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservablePlayerCacheOptions, callback: Callable[[PlayerCacheOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservablePlayerCacheOptions:
+    """Base class for observable values."""
+    def get(self) -> PlayerCacheOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservablePlayerCacheOptions(IObservablePlayerCacheOptions):
+    """Observable value."""
+    def __init__(self, arg: PlayerCacheOptions, /) -> None: ...
+
+    def setAlways(self, arg: PlayerCacheOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: PlayerCacheOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> PlayerCacheOptions:
+        """Get the value."""
+
+class PlayerCacheInfoObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservablePlayerCacheInfo, callback: Callable[[PlayerCacheInfo], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservablePlayerCacheInfo:
+    """Base class for observable values."""
+    def get(self) -> PlayerCacheInfo:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservablePlayerCacheInfo(IObservablePlayerCacheInfo):
+    """Observable value."""
+    def __init__(self, arg: PlayerCacheInfo, /) -> None: ...
+
+    def setAlways(self, arg: PlayerCacheInfo, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: PlayerCacheInfo, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> PlayerCacheInfo:
+        """Get the value."""
+
+class RationalTimeObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableRationalTime, callback: Callable[[opentimelineio.opentime.RationalTime], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableRationalTime:
+    """Base class for observable values."""
+    def get(self) -> opentimelineio.opentime.RationalTime:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableRationalTime(IObservableRationalTime):
+    """Observable value."""
+    def __init__(self, arg: opentimelineio.opentime.RationalTime, /) -> None: ...
+
+    def setAlways(self, arg: opentimelineio.opentime.RationalTime, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: opentimelineio.opentime.RationalTime, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> opentimelineio.opentime.RationalTime:
+        """Get the value."""
+
+class TimeRangeObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableTimeRange, callback: Callable[[opentimelineio.opentime.TimeRange], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableTimeRange:
+    """Base class for observable values."""
+    def get(self) -> opentimelineio.opentime.TimeRange:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableTimeRange(IObservableTimeRange):
+    """Observable value."""
+    def __init__(self, arg: opentimelineio.opentime.TimeRange, /) -> None: ...
+
+    def setAlways(self, arg: opentimelineio.opentime.TimeRange, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: opentimelineio.opentime.TimeRange, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> opentimelineio.opentime.TimeRange:
+        """Get the value."""
+
+class PlayerObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservablePlayer, callback: Callable[[Player], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservablePlayer:
+    """Base class for observable values."""
+    def get(self) -> Player:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservablePlayer(IObservablePlayer):
+    """Observable value."""
+    def __init__(self, value: Player | None) -> None: ...
+
+    def setAlways(self, value: Player | None) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, value: Player | None) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> Player:
+        """Get the value."""
+
+class TimelineListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableTimelineList, callback: Callable[[Sequence[Timeline]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableTimelineList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableTimelineList(IObservableTimelineList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[Timeline], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[Timeline], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[Timeline], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: Timeline) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: Timeline) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: Timeline, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[Timeline], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: Timeline) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[Timeline]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[Timeline]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[Timeline]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> Timeline:
+        """Get a list item."""
+
+    def contains(self, arg: Timeline, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: Timeline, /) -> int:
+        """Get the index of the given item."""
+
+class CompareTimeObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableCompareTime, callback: Callable[[CompareTime], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableCompareTime:
+    """Base class for observable values."""
+    def get(self) -> CompareTime:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableCompareTime(IObservableCompareTime):
+    """Observable value."""
+    def __init__(self, arg: CompareTime, /) -> None: ...
+
+    def setAlways(self, arg: CompareTime, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: CompareTime, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> CompareTime:
+        """Get the value."""
+
+class Player:
+    """
+    Plays a timeline: decodes its video and audio, ahead of the current time, on threads of its own. What it has decoded reaches currentVideo and the observers only in Context.tick(), so a script calls tick() while it waits, sleeping a few milliseconds between calls: tick() does not wait for the threads. For frames without playback, Timeline.getVideo() needs neither.
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context, timeline: Timeline, options: PlayerOptions = ...) -> None: ...
+
+    @property
+    def context(self) -> feather_tk._feather_tk.Context:
+        """Get the context."""
+
+    @property
+    def timeline(self) -> Timeline:
+        """Get the timeline."""
+
+    @property
+    def path(self) -> feather_tk._feather_tk.Path:
+        """Get the path."""
+
+    @property
+    def audioPath(self) -> feather_tk._feather_tk.Path:
+        """Get the audio path."""
+
+    @property
+    def playerOptions(self) -> PlayerOptions:
+        """Get the timeline player options."""
+
+    @property
+    def options(self) -> Options:
+        """Get the timeline options."""
+
+    @property
+    def timeRange(self) -> opentimelineio.opentime.TimeRange:
+        """Get the time range."""
+
+    @property
+    def duration(self) -> opentimelineio.opentime.RationalTime:
+        """Get the duration."""
+
+    @property
+    def ioInfo(self) -> IOInfo:
+        """Get the I/O information. The information is retrieved from the first
+        clip in the timeline.
+        """
+
+    @property
+    def defaultSpeed(self) -> float:
+        """Get the default playback speed."""
+
+    @property
+    def speed(self) -> float:
+        """Get the playback speed."""
+
+    @speed.setter
+    def speed(self, arg: float, /) -> None: ...
+
+    @property
+    def observeSpeed(self) -> feather_tk._feather_tk.IObservableDouble:
+        """Observe the playback speed."""
+
+    @property
+    def observeActualSpeed(self) -> feather_tk._feather_tk.IObservableDouble:
+        """Observe the actual playback speed (speed * speed multiplier)."""
+
+    @property
+    def speedMult(self) -> float:
+        """Get the playback speed multiplier."""
+
+    @speedMult.setter
+    def speedMult(self, arg: float, /) -> None: ...
+
+    @property
+    def observeSpeedMult(self) -> feather_tk._feather_tk.IObservableDouble:
+        """Observe the playback speed multiplier."""
+
+    @property
+    def playback(self) -> Playback:
+        """
+        Stop, Forward or Reverse. Setting the direction it is already playing in doubles the speed, up to 64 times, as pressing play again does in a player; the other direction then halves it rather than turning round, and Stop returns it to normal. A script that only wants it playing checks playback first.
+        """
+
+    @playback.setter
+    def playback(self, arg: Playback, /) -> None: ...
+
+    @property
+    def observePlayback(self) -> IObservablePlayback:
+        """Observe the playback mode."""
+
+    def togglePlayback(self) -> None:
+        """Toggle the playback mode."""
+
+    @property
+    def isStopped(self) -> bool:
+        """Get whether playback is stopped."""
+
+    def stop(self) -> None:
+        """Stop playback."""
+
+    def forward(self) -> None:
+        """Play forward: playback = Forward, speeding up when it already is."""
+
+    def reverse(self) -> None:
+        """Play in reverse: playback = Reverse, speeding up when it already is."""
+
+    @property
+    def droppedFrames(self) -> int:
+        """
+        The frames playback passed without presenting, because decoding or reading could not keep up. Counted only at normal speed or slower, and reset when playback starts or stops. Frames presented but never drawn are a viewer's to count; see Viewport.FPS.
+        """
+
+    @property
+    def observeDroppedFrames(self) -> feather_tk._feather_tk.IObservableSizeT:
+        """Observe the number of frames dropped during playback."""
+
+    @property
+    def loop(self) -> Loop:
+        """Get the playback loop."""
+
+    @loop.setter
+    def loop(self, arg: Loop, /) -> None: ...
+
+    @property
+    def observeLoop(self) -> IObservableLoop:
+        """Observe the playback loop mode."""
+
+    @property
+    def playEveryFrame(self) -> bool:
+        """
+        Wait for each frame to be shown rather than pass frames the cache does not have yet, with the audio silent.
+        """
+
+    @playEveryFrame.setter
+    def playEveryFrame(self, arg: bool, /) -> None: ...
+
+    @property
+    def observePlayEveryFrame(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe whether every frame is played."""
+
+    @property
+    def currentTime(self) -> opentimelineio.opentime.RationalTime:
+        """
+        The current time. Setting it seeks: the time changes at once, and the frame for it arrives in currentVideo once it is decoded.
+        """
+
+    @currentTime.setter
+    def currentTime(self, arg: opentimelineio.opentime.RationalTime, /) -> None: ...
+
+    @property
+    def observeCurrentTime(self) -> IObservableRationalTime:
+        """Observe the current time."""
+
+    @property
+    def observeSeek(self) -> IObservableRationalTime:
+        """Observe seeking."""
+
+    def timeAction(self, arg: TimeAction, /) -> None:
+        """Time action."""
+
+    def gotoStart(self) -> None:
+        """Go to the start time."""
+
+    def gotoEnd(self) -> None:
+        """Go to the end time."""
+
+    def framePrev(self) -> None:
+        """Go to the previous frame."""
+
+    def frameNext(self) -> None:
+        """Go to the next frame."""
+
+    @property
+    def inOutRange(self) -> opentimelineio.opentime.TimeRange:
+        """Get the in/out points range."""
+
+    @inOutRange.setter
+    def inOutRange(self, arg: opentimelineio.opentime.TimeRange, /) -> None: ...
+
+    @property
+    def observeInOutRange(self) -> IObservableTimeRange:
+        """Observe the in/out points range."""
+
+    def setInPoint(self) -> None:
+        """Set the in point to the current time."""
+
+    def resetInPoint(self) -> None:
+        """Reset the in point"""
+
+    def setOutPoint(self) -> None:
+        """Set the out point to the current time."""
+
+    def resetOutPoint(self) -> None:
+        """Reset the out point"""
+
+    @property
+    def compare(self) -> list[Timeline]:
+        """
+        Timelines to compare with this one. currentVideo then has a frame for each, at the time compareTime says. How they are drawn together is CompareOptions, which the player does not use.
+        """
+
+    @compare.setter
+    def compare(self, arg: Sequence[Timeline], /) -> None: ...
+
+    @property
+    def observeCompare(self) -> IObservableTimelineList:
+        """Observe the timelines for comparison."""
+
+    @property
+    def compareTime(self) -> CompareTime:
+        """Get the comparison time mode."""
+
+    @compareTime.setter
+    def compareTime(self, arg: CompareTime, /) -> None: ...
+
+    @property
+    def observeCompareTime(self) -> IObservableCompareTime:
+        """Observe the comparison time mode."""
+
+    @property
+    def ioOptions(self) -> dict[str, str]:
+        """Get the I/O options."""
+
+    @ioOptions.setter
+    def ioOptions(self, arg: Mapping[str, str], /) -> None: ...
+
+    @property
+    def observeIOOptions(self) -> feather_tk._feather_tk.IObservableStringMap:
+        """Observe the I/O options."""
+
+    @property
+    def mediaReferenceKey(self) -> str:
+        """Get the media reference key. An empty key, the default, leaves every
+        clip on the media reference that OTIO has active.
+        """
+
+    @mediaReferenceKey.setter
+    def mediaReferenceKey(self, arg: str, /) -> None: ...
+
+    @property
+    def observeMediaReferenceKey(self) -> feather_tk._feather_tk.IObservableString:
+        """Observe the media reference key."""
+
+    @property
+    def mediaReferenceKeys(self) -> list[str]:
+        """Get the media reference keys used by the timeline and any comparison
+        timelines, sorted and without duplicates.
+        """
+
+    @property
+    def compareMediaReferenceKeys(self) -> list[str]:
+        """Get the comparison media reference keys."""
+
+    @compareMediaReferenceKeys.setter
+    def compareMediaReferenceKeys(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def observeCompareMediaReferenceKeys(self) -> feather_tk._feather_tk.IObservableStringList:
+        """Observe the comparison media reference keys."""
+
+    @property
+    def videoLayer(self) -> int:
+        """Get the video layer."""
+
+    @videoLayer.setter
+    def videoLayer(self, arg: int, /) -> None: ...
+
+    @property
+    def observeVideoLayer(self) -> feather_tk._feather_tk.IObservableInt:
+        """Observer the video layer."""
+
+    @property
+    def compareVideoLayers(self) -> list[int]:
+        """Get the comparison video layers."""
+
+    @compareVideoLayers.setter
+    def compareVideoLayers(self, arg: Sequence[int], /) -> None: ...
+
+    @property
+    def observeCompareVideoLayers(self) -> feather_tk._feather_tk.IObservableIntList:
+        """Observe the comparison video layers."""
+
+    @property
+    def currentVideo(self) -> list[VideoFrame]:
+        """
+        The video frames last decoded: one for this timeline, then one for each compare timeline. Updated only in Context.tick(), which does not wait for decoding, so it is empty until the first frame is in; sleep between ticks. No playback, clock or audio device is needed: a stopped player decodes the frame at its current time. After a seek it holds the previous frame until the new one is decoded, as a viewer keeps showing it, so check each frame's time against the time wanted rather than taking the first one that arrives.
+        """
+
+    @property
+    def observeCurrentVideo(self) -> IObservableVideoFrameList:
+        """Observe the current video frame."""
+
+    @property
+    def audioDevice(self) -> AudioDeviceID:
+        """Get the audio device."""
+
+    @audioDevice.setter
+    def audioDevice(self, arg: AudioDeviceID, /) -> None: ...
+
+    @property
+    def observeAudioDevice(self) -> IObservableAudioDeviceID:
+        """Observe the audio devices."""
+
+    @property
+    def volume(self) -> float:
+        """Get the volume."""
+
+    @volume.setter
+    def volume(self, arg: float, /) -> None: ...
+
+    @property
+    def observeVolume(self) -> feather_tk._feather_tk.IObservableFloat:
+        """Observe the audio volume."""
+
+    @property
+    def mute(self) -> bool:
+        """Get the audio mute."""
+
+    @mute.setter
+    def mute(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeMute(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe the audio mute."""
+
+    @property
+    def channelMute(self) -> list[bool]:
+        """Get the audio channels mute."""
+
+    @channelMute.setter
+    def channelMute(self, arg: Sequence[bool], /) -> None: ...
+
+    @property
+    def observeChannelMute(self) -> feather_tk._feather_tk.IObservableBoolList:
+        """Observe the audio channels mute."""
+
+    @property
+    def audioOffset(self) -> float:
+        """Get the audio sync offset (in seconds)."""
+
+    @audioOffset.setter
+    def audioOffset(self, arg: float, /) -> None: ...
+
+    @property
+    def observeAudioOffset(self) -> feather_tk._feather_tk.IObservableDouble:
+        """Observe the audio sync offset (in seconds)."""
+
+    @property
+    def getCurrentAudio(self) -> list[AudioFrame]:
+        """Get the current audio frames."""
+
+    @property
+    def observeCurrentAudio(self) -> IObservableAudioFrameList:
+        """Observe the current audio frames."""
+
+    @property
+    def cacheOptions(self) -> PlayerCacheOptions:
+        """Get the cache options."""
+
+    @cacheOptions.setter
+    def cacheOptions(self, arg: PlayerCacheOptions, /) -> None: ...
+
+    @property
+    def observeCacheOptions(self) -> IObservablePlayerCacheOptions:
+        """Observe the cache options."""
+
+    @property
+    def observeCacheInfo(self) -> IObservablePlayerCacheInfo:
+        """Observe the cache information."""
+
+    def clearCache(self) -> None:
+        """Clear the cache."""
+
+class Transition(enum.Enum):
+    Dissolve = 1
+
+def getTransitionEnums() -> list[Transition]: ...
+
+def toTransition(arg: str, /) -> Transition:
+    """Convert to a transition."""
+
+def getExts(context: feather_tk._feather_tk.Context, types: int = 7) -> list[str]:
+    """Get the supported file extensions."""
+
+class ExtGroup:
+    """A named group of timeline file extensions, e.g. "Images"."""
+    def __init__(self) -> None: ...
+
+    @property
+    def label(self) -> str: ...
+
+    @label.setter
+    def label(self, arg: str, /) -> None: ...
+
+    @property
+    def exts(self) -> list[str]: ...
+
+    @exts.setter
+    def exts(self, arg: Sequence[str], /) -> None: ...
+
+    def __eq__(self, arg: ExtGroup, /) -> bool: ...
+
+    def __ne__(self, arg: ExtGroup, /) -> bool: ...
+
+def getExtGroups(context: feather_tk._feather_tk.Context) -> list[ExtGroup]:
+    """Get named groups among the supported file extensions, for formats the
+    plugin knows to belong together, e.g. "Camera Raw".
+    """
+
+def getPaths(context: feather_tk._feather_tk.Context, path: feather_tk._feather_tk.Path, options: feather_tk._feather_tk.DirListOptions = ...) -> list[feather_tk._feather_tk.Path]:
+    """Get a list of paths to open from the given path."""
+
+class VideoLayer:
+    """
+    One track's image at a time: image, and imageB when a transition is blending into the next clip.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def image(self) -> feather_tk._feather_tk.Image: ...
+
+    @image.setter
+    def image(self, arg: feather_tk._feather_tk.Image, /) -> None: ...
+
+    @property
+    def imageOptions(self) -> feather_tk._feather_tk.ImageOptions: ...
+
+    @imageOptions.setter
+    def imageOptions(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None: ...
+
+    @property
+    def imageB(self) -> feather_tk._feather_tk.Image:
+        """
+        The image a transition blends into, by transitionValue: the clip after a dissolve. Empty otherwise -- a compared timeline is a VideoFrame of its own in Player.currentVideo, not an imageB.
+        """
+
+    @imageB.setter
+    def imageB(self, arg: feather_tk._feather_tk.Image, /) -> None: ...
+
+    @property
+    def imageOptionsB(self) -> feather_tk._feather_tk.ImageOptions: ...
+
+    @imageOptionsB.setter
+    def imageOptionsB(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None: ...
+
+    @property
+    def transition(self) -> Transition: ...
+
+    @transition.setter
+    def transition(self, arg: Transition, /) -> None: ...
+
+    @property
+    def transitionValue(self) -> float: ...
+
+    @transitionValue.setter
+    def transitionValue(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: VideoLayer, /) -> bool: ...
+
+    def __ne__(self, arg: VideoLayer, /) -> bool: ...
+
+class VideoFrame:
+    """
+    A timeline's video at a time: a layer for each enabled video track with a clip there, bottom track first. Player.currentVideo has one for each timeline, compared ones included.
+    """
+
+    def __init__(self) -> None: ...
+
+    @property
+    def size(self) -> feather_tk._feather_tk.Size2I: ...
+
+    @size.setter
+    def size(self, arg: feather_tk._feather_tk.Size2I, /) -> None: ...
+
+    @property
+    def time(self) -> opentimelineio.opentime.RationalTime: ...
+
+    @time.setter
+    def time(self, arg: opentimelineio.opentime.RationalTime, /) -> None: ...
+
+    @property
+    def layers(self) -> list[VideoLayer]: ...
+
+    @layers.setter
+    def layers(self, arg: Sequence[VideoLayer], /) -> None: ...
+
+    def __eq__(self, arg: VideoFrame, /) -> bool: ...
+
+    def __ne__(self, arg: VideoFrame, /) -> bool: ...
+
+class VideoFrameListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableVideoFrameList, callback: Callable[[Sequence[VideoFrame]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableVideoFrameList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableVideoFrameList(IObservableVideoFrameList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[VideoFrame], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[VideoFrame], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[VideoFrame], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: VideoFrame) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: VideoFrame) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: VideoFrame, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[VideoFrame], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: VideoFrame) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[VideoFrame]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[VideoFrame]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[VideoFrame]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> VideoFrame:
+        """Get a list item."""
+
+    def contains(self, arg: VideoFrame, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: VideoFrame, /) -> int:
+        """Get the index of the given item."""
+
+class IRender(feather_tk._feather_tk.IRender):
+    """
+    The interface a timeline renderer implements, for the renderers made in C++ and the widgets that draw with them. To render frames from Python, use OffscreenRender, which needs no window.
+    """
+
+    def setOCIOOptions(self, arg: OCIOOptions, /) -> None:
+        """Set the OpenColorIO options."""
+
+    def setOCIOInputResolver(self, arg: Callable[[str, Mapping[str, str]], str], /) -> None:
+        """Set a resolver for per layer OCIO input color spaces: given the path
+        of the media a layer came from and the image's metadata tags, it names
+        the input color space, or nothing. Layers whose own input is empty are
+        resolved through it, so each clip of a timeline can be drawn through
+        its own input. The results are cached per path until the options
+        change.
+        """
+
+    def drawBackground(self, arg0: Sequence[feather_tk._feather_tk.Box2I], arg1: feather_tk._feather_tk.M44F, arg2: BackgroundOptions, arg3: CompareOptions, /) -> None:
+        """Draw the background."""
+
+    def drawForeground(self, arg0: Sequence[feather_tk._feather_tk.Box2I], arg1: feather_tk._feather_tk.M44F, arg2: ForegroundOptions, arg3: CompareOptions, /) -> None:
+        """Draw the foreground."""
+
+    def drawClippingWarning(self, arg0: int, arg1: feather_tk._feather_tk.Box2I, arg2: bool, arg3: Sequence[feather_tk._feather_tk.Box2I], arg4: feather_tk._feather_tk.M44F, arg5: ClippingWarning, /) -> None:
+        """Draw the clipping warning over the rendered video, given as a
+        texture drawn in the rectangle. Only the video boxes are covered; the
+        empty part of the texture is not the video.
+        """
+
+class OffscreenRender:
+    """
+    Renders video frames to an image without a window: what a viewport would draw, a tile or wipe compare included, as an ftk.Image to write with WriteSystem or read with numpy.asarray(). The video alone is drawn, with no background or overlays; where no frame covers the image it is transparent. The OpenGL context is a hidden window's. On Linux with no display -- a container, a render farm, continuous integration -- set SDL_VIDEO_DRIVER=offscreen in the environment, which makes it an EGL context with no window system; that needs Mesa's EGL and DRI drivers, and uses the GPU where there is one and llvmpipe where there is not. Keep one and render the same frames again with other options -- a wipe position, a size, a look -- and the frames stay on the GPU instead of being copied in each time; see cacheByteCount and clearCache().
+    """
+
+    def __init__(self, context: feather_tk._feather_tk.Context) -> None:
+        """Create a new renderer. Throws when there is no OpenGL context to be
+        had.
+        """
+
+    def setOCIOOptions(self, options: OCIOOptions) -> None:
+        """Set the OpenColorIO options."""
+
+    def setLUTOptions(self, options: LUTOptions) -> None:
+        """Set the LUT options."""
+
+    @property
+    def cacheByteCount(self) -> int:
+        """
+        The most bytes of frames kept as textures, so that rendering the same frames again -- with other compare options, another size or look -- does not copy them in again. Frames are told apart by the image, not its pixels. Zero keeps none, for frames each rendered once.
+        """
+
+    @cacheByteCount.setter
+    def cacheByteCount(self, arg: int, /) -> None: ...
+
+    def clearCache(self) -> None:
+        """
+        Clear the frames kept as textures: after changing an image's pixels in place, which otherwise renders as it was.
+        """
+
+    def render(self, videoFrames: Sequence[VideoFrame], compareOptions: CompareOptions = ..., size: feather_tk._feather_tk.Size2I = ..., imageOptions: Sequence[feather_tk._feather_tk.ImageOptions] = [], displayOptions: Sequence[DisplayOptions] = [], type: feather_tk._feather_tk.ImageType = feather_tk._feather_tk.ImageType.RGBA_U8) -> feather_tk._feather_tk.Image:
+        """
+        Render video frames -- the first and then one for each compared timeline, as Player.currentVideo has them -- laid out by compareOptions. The image is the size the comparison needs at the frames' own resolution, or the size given with the comparison fitted into it. type is what is read back: RGBA_U8 for a file or a look, RGBA_F32 to measure values past one where OpenGL can read it back -- OpenGL ES reads back bytes only, and a type that cannot be read back raises.
+        """

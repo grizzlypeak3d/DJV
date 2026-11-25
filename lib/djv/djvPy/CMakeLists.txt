@@ -68,6 +68,32 @@ else()
     set(DJV_STUBGEN ${NB_DIR}/stubgen.py)
 endif()
 set(DJV_PYTHON_STUB ${DJV_PYTHON_PACKAGE_DIR}/_djv/__init__.pyi)
+# Where a library's headers are, from its target's include directories:
+# the one that has the given header in it. A source build's and an
+# installed package's alike, for doc_stub.py.
+function(djv_find_headers out target header)
+    set(found)
+    if(TARGET ${target})
+        get_target_property(dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
+        foreach(dir ${dirs})
+            string(REGEX REPLACE "^\\$<BUILD_INTERFACE:(.*)>$" "\\1" dir "${dir}")
+            if(NOT dir MATCHES "^\\$<" AND EXISTS ${dir}/${header})
+                get_filename_component(found ${dir}/${header} DIRECTORY)
+                get_filename_component(found ${found}/.. ABSOLUTE)
+                break()
+            endif()
+        endforeach()
+    endif()
+    set(${out} ${found} PARENT_SCOPE)
+endfunction()
+# tlRender's and feather-tk's, for their classes the stubs have: the
+# observables of DJV's types.
+djv_find_headers(DJV_TL_HEADERS tlRender::tlCore tlRender/Core/Time.h)
+djv_find_headers(DJV_FTK_HEADERS ftk::ftkCore ftk/Core/Observable.h)
+set(DJV_DOC_HEADERS --headers ${PROJECT_SOURCE_DIR}/lib/djv)
+foreach(dir ${DJV_TL_HEADERS} ${DJV_FTK_HEADERS})
+    list(APPEND DJV_DOC_HEADERS --headers ${dir})
+endforeach()
 # The GPU renderers' libraries as well, where they are built: the UI
 # libraries load them, and the module could not be imported without their
 # being found.
@@ -110,6 +136,16 @@ add_custom_command(
         # in the build environment instead.
         -i ${CMAKE_INSTALL_PREFIX}/python
         -O ${DJV_PYTHON_PACKAGE_DIR}
+    # The headers' comments, as the stubs' docstrings: the bindings have
+    # almost none of their own. See etc/Python/doc_stub.py.
+    COMMAND ${Python_EXECUTABLE}
+        ${PROJECT_SOURCE_DIR}/etc/Python/doc_stub.py
+        ${DJV_DOC_HEADERS}
+        --bindings ${PROJECT_SOURCE_DIR}/lib/djv
+        ${DJV_PYTHON_PACKAGE_DIR}/_djv/__init__.pyi
+        ${DJV_PYTHON_PACKAGE_DIR}/_djv/models.pyi
+        ${DJV_PYTHON_PACKAGE_DIR}/_djv/ui.pyi
+        ${DJV_PYTHON_PACKAGE_DIR}/_djv/app.pyi
     # The modules this one imports, where they are built here rather
     # than installed: they have to exist by the time it is imported.
     DEPENDS
@@ -118,6 +154,7 @@ add_custom_command(
         $<TARGET_NAME_IF_EXISTS:_feather_tk>
         ${DJV_STUBGEN}
         ${PROJECT_SOURCE_DIR}/etc/Python/make_stub.py
+        ${PROJECT_SOURCE_DIR}/etc/Python/doc_stub.py
     COMMENT "Generating the djv type stubs")
 add_custom_target(_djv_stub ALL DEPENDS ${DJV_PYTHON_STUB})
 file(TOUCH ${DJV_PYTHON_PACKAGE_DIR}/py.typed)

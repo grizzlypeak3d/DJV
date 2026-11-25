@@ -26,7 +26,13 @@ The pages name menu items as **Menu > Item** and commands as `Group/Name`. Every
 - [Actions reference](actions.md): every menu item with its default keys, command name, and description, made from the application
 - [Command line](command-line.html): the command line options, from the application's own help (`djv -help`)
 - [Automation](automation.md): running commands from the command line and from scripts
-- [Python](python.md): the Python bindings and the Python version of the application
+- [Python](python.md): the Python bindings, installing them with pip, running and extending the application from Python, and the API reference below
+- [Python API: feather_tk](python/feather_tk.pyi.txt): type stubs, every class and method of the toolkit with its signature and description
+- [Python API: tlrender](python/tlrender.pyi.txt): type stubs for timelines, players, file I/O and rendering
+- [Python API: tlrender.ui](python/tlrender.ui.pyi.txt): type stubs for the timeline and viewport widgets
+- [Python API: djv.models](python/djv.models.pyi.txt): type stubs for DJV's data models
+- [Python API: djv.ui](python/djv.ui.pyi.txt): type stubs for DJV's widgets
+- [Python API: djv.app](python/djv.app.pyi.txt): type stubs for the application class, its main window and tools
 - [Review file format](review-format.md): the `.djvr` review file
 
 ## Optional

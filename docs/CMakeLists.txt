@@ -19,6 +19,7 @@ install(
         PATTERN "*.html"
         PATTERN "*.md"
         PATTERN "llms.txt"
+        PATTERN "*.pyi.txt"
         PATTERN "*.css"
         PATTERN "*.svg"
         PATTERN "*.png"
@@ -178,6 +179,28 @@ if(Python3_Interpreter_FOUND)
             COMMENT "Documentation actions reference check")
         set_target_properties(djvDocsActionsCheck PROPERTIES FOLDER docs)
     endif()
+endif()
+
+# The Python API reference: the modules' type stubs, with the headers'
+# descriptions in them, copied into docs/python from a build with the
+# bindings, and the check that they are current (see pythonstubs.py).
+if(DJV_PYTHON AND Python3_Interpreter_FOUND)
+    set(DJV_DOCS_STUB_SEARCH
+        ${CMAKE_BINARY_DIR}/python
+        ${CMAKE_INSTALL_PREFIX}/python
+        ${CMAKE_INSTALL_PREFIX}/lib)
+    add_custom_target(djvDocsPythonStubs
+        COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/pythonstubs.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/python ${DJV_DOCS_STUB_SEARCH}
+        COMMENT "Documentation Python API reference")
+    add_dependencies(djvDocsPythonStubs _djv_stub)
+    set_target_properties(djvDocsPythonStubs PROPERTIES FOLDER docs)
+    add_custom_target(djvDocsPythonStubsCheck
+        COMMAND ${Python3_EXECUTABLE} -I ${CMAKE_CURRENT_SOURCE_DIR}/pythonstubs.py --check
+            ${CMAKE_CURRENT_SOURCE_DIR}/python ${DJV_DOCS_STUB_SEARCH}
+        COMMENT "Documentation Python API reference check")
+    add_dependencies(djvDocsPythonStubsCheck _djv_stub)
+    set_target_properties(djvDocsPythonStubsCheck PROPERTIES FOLDER docs)
 endif()
 
 add_custom_target(djvDocsNavCheck

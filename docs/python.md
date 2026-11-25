@@ -1,6 +1,14 @@
 # Python
 
-The libraries DJV is built from have Python bindings, and there is a version of the DJV application written in Python on top of them. This page describes what is there, how to run it, and how to modify it. It is not an API reference — the bindings follow the C++ headers closely, so the headers and the Python examples are the reference.
+The libraries DJV is built from have Python bindings, and the DJV application itself can be run, scripted and extended from Python. This page describes what is there, how to get it, and how to use it; the [API reference](#reference) below lists every class and method.
+
+## Installing
+
+```
+pip install DJV-viewer
+```
+
+That is DJV with its Python modules, and tlRender, feather-tk and OpenTimelineIO with it, for Python 3.12 or newer on Linux, macOS and Windows. `djv` on the command line runs the application. The pip install has the same codecs as the packages: see [Download and install](install.md#pip). [Building](#building) from source gives the modules with everything compiled in.
 
 ## The modules
 
@@ -20,7 +28,19 @@ import tlrender as tl
 import djv
 ```
 
-## Building
+## API reference {#reference}
+
+Each module comes with type stubs, `.pyi` files beside it, which list every class, method and property with its signature and its description. The descriptions are the comments in the C++ headers, which the bindings follow closely. Editors read the stubs for completion and for help on hover, and so does a coding agent working in a project that has the modules installed. In Python itself, `help()` shows the signatures only: the descriptions are in the stubs.
+
+The same stubs, to read here:
+
+- [feather_tk](python/feather_tk.pyi.txt) — the toolkit: images, observables, widgets and the application classes
+- [tlrender](python/tlrender.pyi.txt) and [tlrender.ui](python/tlrender.ui.pyi.txt) — timelines, players, file I/O and rendering, and the timeline and viewport widgets
+- [djv.models](python/djv.models.pyi.txt), [djv.ui](python/djv.ui.pyi.txt) and [djv.app](python/djv.app.pyi.txt) — DJV's models, widgets and application
+
+About two thirds of the entries have a description. Most of the rest are fields and constructors whose names say what they are, and the headers are the full reference for those: [feather-tk's](https://github.com/grizzlypeak3d/feather-tk/tree/main/lib/ftk), [tlRender's](https://github.com/grizzlypeak3d/tlRender/tree/main/lib/tlRender) and [DJV's](https://github.com/grizzlypeak3d/DJV/tree/main/lib/djv).
+
+## Building {#building}
 
 One switch builds all of it. In `etc/Config/local.cmake`:
 

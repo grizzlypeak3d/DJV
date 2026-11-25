@@ -1,0 +1,3555 @@
+# The Python API of djv.models: generated from the bindings by nanobind's
+# stubgen, with each description taken from the C++ headers. Do not edit:
+# see docs/pythonstubs.py. Import it as "import djv".
+
+"""Data models"""
+
+from collections.abc import Callable, Mapping, Sequence
+import enum
+import os
+import pathlib
+from typing import overload
+
+import feather_tk._feather_tk
+import opentimelineio.opentime
+import tlrender._tlrender
+
+
+class ReviewStrokeKind(enum.Enum):
+    """What a stroke is: freehand ink along its points, a shape between them,
+    or text at one of them.
+    """
+    Freehand = 0
+
+    Line = 1
+
+    Arrow = 2
+
+    Rectangle = 3
+
+    Ellipse = 4
+
+    Text = 5
+
+class ReviewStroke:
+    """A single stroke of an annotation: freehand ink, a shape, or text.
+
+    The points and the width are expressed in the pixels of the source image,
+    so a stroke keeps its position and its weight whatever the zoom, the pan or
+    the comparison mode. Both are written with the space they are expressed in,
+    and a stroke in a space this version does not know is skipped rather than
+    misplaced. See docs/review-format.md.
+
+    What the points are depends on the kind: the path of freehand ink; the two
+    ends of a line or an arrow, the head at the second; two opposite corners of
+    a rectangle or of the box an ellipse fills; the top left of text. A stroke
+    of a kind other than freehand makes the document version 2; see
+    reviewVersionFor().
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def kind(self) -> ReviewStrokeKind: ...
+
+    @kind.setter
+    def kind(self, arg: ReviewStrokeKind, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    @property
+    def width(self) -> float: ...
+
+    @width.setter
+    def width(self, arg: float, /) -> None: ...
+
+    @property
+    def points(self) -> list[feather_tk._feather_tk.V2F]: ...
+
+    @points.setter
+    def points(self, arg: Sequence[feather_tk._feather_tk.V2F], /) -> None: ...
+
+    @property
+    def text(self) -> str:
+        """The text, for a text stroke, and its height in the pixels of the
+        source image.
+        """
+
+    @text.setter
+    def text(self, arg: str, /) -> None: ...
+
+    @property
+    def textSize(self) -> float: ...
+
+    @textSize.setter
+    def textSize(self, arg: float, /) -> None: ...
+
+    @property
+    def textBackground(self) -> bool:
+        """Whether text is drawn on a plate, dark behind light text and light
+        behind dark, so it reads over any picture. A reader that does not know
+        it draws the text alone.
+        """
+
+    @textBackground.setter
+    def textBackground(self, arg: bool, /) -> None: ...
+
+    def __eq__(self, arg: ReviewStroke, /) -> bool: ...
+
+    def __ne__(self, arg: ReviewStroke, /) -> bool: ...
+
+class ReviewAnnotation:
+    """The drawing on one frame of one source."""
+    def __init__(self) -> None: ...
+
+    @property
+    def id(self) -> str: ...
+
+    @id.setter
+    def id(self, arg: str, /) -> None: ...
+
+    @property
+    def sourceId(self) -> str:
+        """The source the drawing belongs to, by ReviewFile::id."""
+
+    @sourceId.setter
+    def sourceId(self, arg: str, /) -> None: ...
+
+    @property
+    def time(self) -> opentimelineio.opentime.RationalTime | None:
+        """The frame the drawing appears on. A drawing is visible on this frame
+        only.
+        """
+
+    @time.setter
+    def time(self, arg: opentimelineio.opentime.RationalTime | None, /) -> None: ...
+
+    @property
+    def author(self) -> str:
+        """Who drew it, and when, ISO 8601. Both are optional: a document
+        written before they existed simply leaves them empty.
+        """
+
+    @author.setter
+    def author(self, arg: str, /) -> None: ...
+
+    @property
+    def created(self) -> str: ...
+
+    @created.setter
+    def created(self, arg: str, /) -> None: ...
+
+    @property
+    def strokes(self) -> list[ReviewStroke]: ...
+
+    @strokes.setter
+    def strokes(self, arg: Sequence[ReviewStroke], /) -> None: ...
+
+    def __eq__(self, arg: ReviewAnnotation, /) -> bool: ...
+
+    def __ne__(self, arg: ReviewAnnotation, /) -> bool: ...
+
+class ReviewAnnotationListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableReviewAnnotationList, callback: Callable[[Sequence[ReviewAnnotation]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableReviewAnnotationList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableReviewAnnotationList(IObservableReviewAnnotationList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[ReviewAnnotation], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[ReviewAnnotation], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[ReviewAnnotation], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: ReviewAnnotation) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: ReviewAnnotation) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: ReviewAnnotation, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[ReviewAnnotation], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: ReviewAnnotation) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[ReviewAnnotation]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[ReviewAnnotation]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[ReviewAnnotation]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> ReviewAnnotation:
+        """Get a list item."""
+
+    def contains(self, arg: ReviewAnnotation, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: ReviewAnnotation, /) -> int:
+        """Get the index of the given item."""
+
+class AnnotationsModel:
+    """The drawing annotations of a review.
+
+    Adding and erasing strokes go through a command stack, so they can be
+    undone and redone. Annotations are session state: they live in the review
+    file, not in the application settings.
+    """
+    def __init__(self) -> None:
+        """Create a new model."""
+
+    @property
+    def annotations(self) -> list[ReviewAnnotation]:
+        """Get the annotations."""
+
+    @property
+    def observeAnnotations(self) -> IObservableReviewAnnotationList:
+        """Observe the annotations."""
+
+    def getStrokes(self, sourceId: str, time: opentimelineio.opentime.RationalTime) -> list[ReviewStroke]:
+        """Get the strokes drawn on the given source and frame, or an empty
+        list if there are none.
+        """
+
+    def setAnnotations(self, annotations: Sequence[ReviewAnnotation]) -> None:
+        """Replace all the annotations, e.g. when a review is opened. This
+        clears the undo history.
+        """
+
+    def addStroke(self, sourceId: str, time: opentimelineio.opentime.RationalTime, stroke: ReviewStroke) -> None:
+        """Add a stroke to the given source and frame."""
+
+    def eraseStrokes(self, sourceId: str, time: opentimelineio.opentime.RationalTime, pos: feather_tk._feather_tk.V2F, radius: float) -> None:
+        """Erase the strokes of the given source and frame whose path passes
+        within the radius of the position. The position and the radius are in
+        the pixels of the source image, and text covers what textBox() has it
+        cover in the view.
+        """
+
+    def clearFrame(self, sourceIds: Sequence[str], time: opentimelineio.opentime.RationalTime) -> None:
+        """Remove every stroke of the given sources and frame. One call for all
+        of the sources, so that clearing a compared frame is a single undo
+        step.
+        """
+
+    def clear(self) -> None:
+        """Remove all the annotations, clearing the undo history."""
+
+    @property
+    def observeHasUndo(self) -> feather_tk._feather_tk.IObservableBool: ...
+
+    @property
+    def observeHasRedo(self) -> feather_tk._feather_tk.IObservableBool: ...
+
+    def undo(self) -> None: ...
+
+    def redo(self) -> None: ...
+
+class ExportStatus(enum.Enum):
+    """What an export is doing."""
+    Queued = 0
+
+    Running = 1
+
+    Finished = 2
+
+    Failed = 3
+
+    Cancelled = 4
+
+class ExportProgress:
+    """How far an export has got."""
+    def __init__(self) -> None: ...
+
+    @property
+    def status(self) -> ExportStatus: ...
+
+    @status.setter
+    def status(self, arg: ExportStatus, /) -> None: ...
+
+    @property
+    def framesDone(self) -> int: ...
+
+    @framesDone.setter
+    def framesDone(self, arg: int, /) -> None: ...
+
+    @property
+    def frames(self) -> int: ...
+
+    @frames.setter
+    def frames(self, arg: int, /) -> None: ...
+
+    @property
+    def timeLeft(self) -> str:
+        """"about 2 minutes left", once there is enough to go on; see
+        getExportTimeLeft().
+        """
+
+    @timeLeft.setter
+    def timeLeft(self, arg: str, /) -> None: ...
+
+    @property
+    def seconds(self) -> float:
+        """How long it ran, once it has stopped."""
+
+    @seconds.setter
+    def seconds(self, arg: float, /) -> None: ...
+
+    @property
+    def error(self) -> str: ...
+
+    @error.setter
+    def error(self, arg: str, /) -> None: ...
+
+@overload
+def getLabel(progress: ExportProgress) -> str:
+    """What an export's progress says in a line: "Frame 12 / 48, about a minute
+    left", "Queued", "Failed: ...".
+    """
+
+@overload
+def getLabel(arg: ExportRenderSize, /) -> str:
+    """What an export's progress says in a line: "Frame 12 / 48, about a minute
+    left", "Queued", "Failed: ...".
+    """
+
+@overload
+def getLabel(arg: ExportFileType, /) -> str:
+    """What an export's progress says in a line: "Frame 12 / 48, about a minute
+    left", "Queued", "Failed: ...".
+    """
+
+@overload
+def getLabel(arg: MouseAction, /) -> str:
+    """What an export's progress says in a line: "Frame 12 / 48, about a minute
+    left", "Queued", "Failed: ...".
+    """
+
+@overload
+def getLabel(arg: TimelineThumbnailSize, /) -> str:
+    """What an export's progress says in a line: "Frame 12 / 48, about a minute
+    left", "Queued", "Failed: ...".
+    """
+
+@overload
+def getLabel(arg: HUDItem, /) -> str:
+    """What an export's progress says in a line: "Frame 12 / 48, about a minute
+    left", "Queued", "Failed: ...".
+    """
+
+@overload
+def getLabel(arg: HUDPos, /) -> str:
+    """What an export's progress says in a line: "Frame 12 / 48, about a minute
+    left", "Queued", "Failed: ...".
+    """
+
+def getTotalLabel(progress: Sequence[ExportProgress]) -> str:
+    """The time the finished exports took, added up: "3 done, 6 min 02 s in
+    all". Empty with fewer than two, whose own rows say it. Failed and
+    cancelled exports are not counted (#976).
+    """
+
+class ExportJob:
+    """One export. The frames are asked for and rendered on the thread the
+    queue runs on, which has the graphics context, a few ahead so that reading,
+    rendering and writing overlap; they are written on a thread of the export's
+    own, so that an encoder slower than the frames arrive does not hold up the
+    application.
+    """
+    @property
+    def name(self) -> str: ...
+
+    @property
+    def path(self) -> str: ...
+
+    @property
+    def progress(self) -> ExportProgress: ...
+
+class ExportQueue:
+    """The exports, run one at a time in the order they were asked for. One at
+    a time is the point: each encoder has memory of its own, gigabytes for a
+    long GOP codec at 4K.
+    """
+    @property
+    def jobs(self) -> list[ExportJob]:
+        """Observe the exports, in the order they run."""
+
+    @property
+    def busy(self) -> bool:
+        """Observe whether any export is queued or running."""
+
+    def cancel(self, job: ExportJob) -> None:
+        """Cancel an export, queued or running."""
+
+    def cancelAll(self) -> None:
+        """Cancel every export."""
+
+    def remove(self, job: ExportJob) -> None:
+        """Remove an export that has stopped from the list."""
+
+    def clearDone(self) -> None:
+        """Remove every export that has stopped."""
+
+class AppInfoModel:
+    """Application information model."""
+    def __init__(self) -> None: ...
+
+    def getFullName(self) -> str: ...
+
+    def getShortName(self) -> str: ...
+
+    def getDocsDirName(self) -> str:
+        """Get the name of the directory, under the user's application support
+        directory, where the settings and log file are kept. Defaults to the
+        full name; a suite of applications built on DJV overrides it so that
+        they share one directory instead of scattering one apiece.
+        """
+
+    def getTitle(self) -> str:
+        """Get the window title: the name and the version, and for a
+        development build the commit date and hash as well, so that two of them
+        can be told apart. A release is identified by its version, and the rest
+        would be noise.
+        """
+
+    def getStudioURL(self) -> str:
+        """Get the web site for DJV Studio, the commercial version. A brief
+        mention with this link appears in the setup dialog and the Help menu;
+        returning an empty string hides it, which is what the commercial
+        applications themselves do.
+        """
+
+    def getDocsSearchPath(self) -> str:
+        """Get the directory the documentation search starts from: the
+        executable's own, unless an application says otherwise. The Python
+        application does -- its executable is the interpreter, which lives
+        nowhere near the install.
+        """
+
+    @property
+    def fullName(self) -> str: ...
+
+    @property
+    def shortName(self) -> str: ...
+
+    @property
+    def docsDirName(self) -> str:
+        """Get the name of the directory, under the user's application support
+        directory, where the settings and log file are kept. Defaults to the
+        full name; a suite of applications built on DJV overrides it so that
+        they share one directory instead of scattering one apiece.
+        """
+
+    @property
+    def versionMajor(self) -> int: ...
+
+    @property
+    def versionMinor(self) -> int: ...
+
+    @property
+    def versionPatch(self) -> int: ...
+
+    @property
+    def versionDev(self) -> str: ...
+
+    @property
+    def version(self) -> str: ...
+
+    @property
+    def commitDate(self) -> str:
+        """Get the date of the commit the build was made from."""
+
+    @property
+    def gitCommit(self) -> str:
+        """Get the commit the build was made from, marked "-dirty" when
+        anything was uncommitted.
+        """
+
+    @property
+    def title(self) -> str:
+        """Get the window title: the name and the version, and for a
+        development build the commit date and hash as well, so that two of them
+        can be told apart. A release is identified by its version, and the rest
+        would be noise.
+        """
+
+    @property
+    def docsURL(self) -> str:
+        """Get the documentation installed beside the application, as a file
+        URL, or empty when there is none.
+
+        Installed rather than on the web, so that what it describes is the
+        version that is running. A build that was not installed -- a
+        developer's -- has none, and the menu item says so rather than opening
+        nothing.
+        """
+
+    @property
+    def docsSearchPath(self) -> str:
+        """Get the directory the documentation search starts from: the
+        executable's own, unless an application says otherwise. The Python
+        application does -- its executable is the interpreter, which lives
+        nowhere near the install.
+        """
+
+    @property
+    def license(self) -> str: ...
+
+    @property
+    def licensesURL(self) -> str:
+        """Get the licenses page installed beside the application, as a file
+        URL, or empty when there is none.
+
+        The notices ship with the build they describe, the way the
+        documentation does, so what is listed is what is installed. A link to a
+        repository is a list of what some other build carries, which for an
+        application built on this library is the wrong list entirely.
+        """
+
+    @property
+    def studioURL(self) -> str:
+        """Get the web site for DJV Studio, the commercial version. A brief
+        mention with this link appears in the setup dialog and the Help menu;
+        returning an empty string hides it, which is what the commercial
+        applications themselves do.
+        """
+
+class AudioModel:
+    """Audio model."""
+    def __init__(self, context: feather_tk._feather_tk.Context, settings: feather_tk._feather_tk.Settings) -> None:
+        """Create a new model."""
+
+    @property
+    def devices(self) -> list[tlrender._tlrender.AudioDeviceID]:
+        """Get the output devices."""
+
+    @property
+    def observeDevices(self) -> tlrender._tlrender.IObservableAudioDeviceIDList:
+        """Observe the output devices."""
+
+    @property
+    def device(self) -> tlrender._tlrender.AudioDeviceID:
+        """Get the output device."""
+
+    @device.setter
+    def device(self, arg: tlrender._tlrender.AudioDeviceID, /) -> None: ...
+
+    @property
+    def observeDevice(self) -> tlrender._tlrender.IObservableAudioDeviceID:
+        """Observe the output device."""
+
+    @property
+    def volume(self) -> float:
+        """Get the volume."""
+
+    @volume.setter
+    def volume(self, arg: float, /) -> None: ...
+
+    @property
+    def observeVolume(self) -> feather_tk._feather_tk.IObservableFloat:
+        """Observe the volume."""
+
+    def save(self) -> None:
+        """Save the settings."""
+
+    def volumeUp(self) -> None:
+        """Increase the volume to the next multiple of 5%."""
+
+    def volumeDown(self) -> None:
+        """Decrease the volume to the next multiple of 5% down."""
+
+    @property
+    def mute(self) -> bool:
+        """Get the audio mute."""
+
+    @mute.setter
+    def mute(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeMute(self) -> feather_tk._feather_tk.IObservableBool:
+        """Observe the audio mute."""
+
+    @property
+    def syncOffset(self) -> float:
+        """Get the audio sync offset."""
+
+    @syncOffset.setter
+    def syncOffset(self, arg: float, /) -> None: ...
+
+    @property
+    def observeSyncOffset(self) -> feather_tk._feather_tk.IObservableDouble:
+        """Set the audio sync offset."""
+
+class StringVectorObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableStringVector, callback: Callable[[Sequence[str]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableStringVector:
+    """Base class for observable values."""
+    def get(self) -> list[str]:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableStringVector(IObservableStringVector):
+    """Observable value."""
+    def __init__(self, arg: Sequence[str], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[str], /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: Sequence[str], /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> list[str]:
+        """Get the value."""
+
+class ColorModel:
+    """Color model."""
+    def __init__(self, context: feather_tk._feather_tk.Context, settings: feather_tk._feather_tk.Settings) -> None:
+        """Create a new model."""
+
+    def save(self) -> None:
+        """Save the settings."""
+
+    @property
+    def ocioOptions(self) -> tlrender._tlrender.OCIOOptions:
+        """Get the OpenColorIO options."""
+
+    @ocioOptions.setter
+    def ocioOptions(self, arg: tlrender._tlrender.OCIOOptions, /) -> None: ...
+
+    @property
+    def observeOCIOOptions(self) -> tlrender._tlrender.IObservableOCIOOptions:
+        """Observe the OpenColorIO options."""
+
+    @property
+    def observeResolvedOCIOOptions(self) -> tlrender._tlrender.IObservableOCIOOptions:
+        """Observe the OpenColorIO options with the input color space resolved
+        for the active file. This is what rendering should use;
+        observeOCIOOptions() is the settings as the user wrote them.
+        """
+
+    def setActiveFiles(self, arg: Sequence[tuple[str, Mapping[str, str]]], /) -> None:
+        """Set the files that input color spaces are resolved for -- the active
+        file first, then the compare files -- with the metadata tags each was
+        read with.
+        """
+
+    def resolveInput(self, path: str, tags: Mapping[str, str] = {}) -> str:
+        """Resolve an input color space for a file: the extension assignments,
+        then what the file declares, then the configuration's file rules. Empty
+        when nothing resolves.
+        """
+
+    @property
+    def observeResolvedInputs(self) -> IObservableStringVector:
+        """Observe the input color space resolved for each of the active files,
+        in their order; empty entries resolve nothing and use the options'
+        input. For the per item display options overrides.
+        """
+
+    @property
+    def observeResolvedInput(self) -> feather_tk._feather_tk.IObservableString:
+        """Observe the resolved input color space and where it came from, for
+        display; e.g., "sRGB (extension)". Empty when nothing is resolved.
+        """
+
+    @property
+    def extColorSpaces(self) -> dict[str, str]:
+        """Get the file name extension color spaces."""
+
+    @extColorSpaces.setter
+    def extColorSpaces(self, arg: Mapping[str, str], /) -> None: ...
+
+    @property
+    def observeExtColorSpaces(self) -> feather_tk._feather_tk.IObservableStringMap:
+        """Observe the file name extension color spaces."""
+
+    @property
+    def lutOptions(self) -> tlrender._tlrender.LUTOptions:
+        """Get the LUT options."""
+
+    @lutOptions.setter
+    def lutOptions(self, arg: tlrender._tlrender.LUTOptions, /) -> None: ...
+
+    @property
+    def observeLUTOptions(self) -> tlrender._tlrender.IObservableLUTOptions:
+        """Observe the LUT options."""
+
+class CommandInfo:
+    """Command information."""
+    def __init__(self) -> None: ...
+
+    @property
+    def name(self) -> str: ...
+
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
+
+    @property
+    def doc(self) -> str: ...
+
+    @doc.setter
+    def doc(self, arg: str, /) -> None: ...
+
+class CommandsModel:
+    """Commands model.
+
+    Commands are named, scriptable operations that manipulate the application.
+    Menu actions, keyboard shortcuts, and automation (e.g., screenshot capture)
+    share this single entry point for invoking application functionality.
+    """
+    def __init__(self, context: feather_tk._feather_tk.Context) -> None:
+        """Create a new model."""
+
+    def add(self, name: str, doc: str, func: Callable[[str], None]) -> None:
+        """Add a command."""
+
+    def remove(self, name: str) -> None:
+        """Remove a command."""
+
+    @property
+    def commands(self) -> list[CommandInfo]:
+        """Get information about the commands, sorted by name."""
+
+    def exec(self, name: str, args: str = 'null') -> bool:
+        """Execute a command. Errors are logged and false is returned."""
+
+class DrawTool(enum.Enum):
+    """Drawing tools."""
+    Pen = 0
+
+    Eraser = 1
+
+    Line = 2
+
+    Arrow = 3
+
+    Rectangle = 4
+
+    Ellipse = 5
+
+    Text = 6
+
+    Select = 7
+
+def getStrokeKind(tool: DrawTool) -> ReviewStrokeKind:
+    """The kind of stroke a tool makes. The eraser and the select tool make
+    none and give freehand.
+    """
+
+class DrawToolObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableDrawTool, callback: Callable[[DrawTool], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableDrawTool:
+    """Base class for observable values."""
+    def get(self) -> DrawTool:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableDrawTool(IObservableDrawTool):
+    """Observable value."""
+    def __init__(self, arg: DrawTool, /) -> None: ...
+
+    def setAlways(self, arg: DrawTool, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: DrawTool, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> DrawTool:
+        """Get the value."""
+
+class Color4FObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableColor4F, callback: Callable[[feather_tk._feather_tk.Color4F], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableColor4F:
+    """Base class for observable values."""
+    def get(self) -> feather_tk._feather_tk.Color4F:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableColor4F(IObservableColor4F):
+    """Observable value."""
+    def __init__(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    def setAlways(self, arg: feather_tk._feather_tk.Color4F, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: feather_tk._feather_tk.Color4F, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> feather_tk._feather_tk.Color4F:
+        """Get the value."""
+
+class DrawModel:
+    """The drawing state: whether drawing is active, and with what.
+
+    These are preferences rather than review contents, so they are kept in the
+    settings and not in the review file.
+    """
+    def __init__(self, settings: feather_tk._feather_tk.Settings) -> None:
+        """Create a new model."""
+
+    @property
+    def enabled(self) -> bool:
+        """Is drawing active? While it is, the viewport draws instead of
+        shuttling frames with the left mouse button.
+        """
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeEnabled(self) -> feather_tk._feather_tk.IObservableBool: ...
+
+    @property
+    def tool(self) -> DrawTool:
+        """The current tool."""
+
+    @tool.setter
+    def tool(self, arg: DrawTool, /) -> None: ...
+
+    @property
+    def observeTool(self) -> IObservableDrawTool: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F:
+        """The stroke colour."""
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    @property
+    def observeColor(self) -> IObservableColor4F: ...
+
+    @property
+    def size(self) -> float:
+        """The stroke width, on an HD picture; pictureDrawSize() gives it in
+        the pixels of the picture drawn on.
+        """
+
+    @size.setter
+    def size(self, arg: float, /) -> None: ...
+
+    @property
+    def observeSize(self) -> feather_tk._feather_tk.IObservableFloat: ...
+
+    @property
+    def textSize(self) -> float:
+        """The height of text, on an HD picture, as the width is."""
+
+    @textSize.setter
+    def textSize(self, arg: float, /) -> None: ...
+
+    @property
+    def observeTextSize(self) -> feather_tk._feather_tk.IObservableFloat: ...
+
+    @property
+    def onionSkin(self) -> bool:
+        """Whether the drawings on the frames before and after are shown,
+        faded, behind this frame's: where the last frame's note was is what a
+        note about motion is drawn against.
+        """
+
+    @onionSkin.setter
+    def onionSkin(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeOnionSkin(self) -> feather_tk._feather_tk.IObservableBool: ...
+
+    @property
+    def constrain(self) -> bool:
+        """Whether a shape is held square or round, and a line or an arrow to a
+        multiple of forty-five degrees, as Shift holds it: for a touch screen,
+        which has no Shift to hold.
+        """
+
+    @constrain.setter
+    def constrain(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeConstrain(self) -> feather_tk._feather_tk.IObservableBool: ...
+
+    @property
+    def textBackground(self) -> bool:
+        """Whether new text is drawn on a background plate, so it reads over
+        any picture. On by default.
+        """
+
+    @textBackground.setter
+    def textBackground(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeTextBackground(self) -> feather_tk._feather_tk.IObservableBool: ...
+
+class FilesModelItem:
+    """Files model item."""
+    def __init__(self) -> None: ...
+
+    @property
+    def id(self) -> str:
+        """Stable, unique identifier. Assigned when the file is opened so that
+        reviews and annotations can reference the file by identity rather than
+        by list index. See models::generateId().
+        """
+
+    @id.setter
+    def id(self, arg: str, /) -> None: ...
+
+    @property
+    def path(self) -> feather_tk._feather_tk.Path: ...
+
+    @path.setter
+    def path(self, arg: feather_tk._feather_tk.Path, /) -> None: ...
+
+    @property
+    def audioPath(self) -> feather_tk._feather_tk.Path: ...
+
+    @audioPath.setter
+    def audioPath(self, arg: feather_tk._feather_tk.Path, /) -> None: ...
+
+    @property
+    def videoLayers(self) -> list[str]: ...
+
+    @videoLayers.setter
+    def videoLayers(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def videoLayer(self) -> int: ...
+
+    @videoLayer.setter
+    def videoLayer(self, arg: int, /) -> None: ...
+
+    @property
+    def mediaReferenceKeys(self) -> list[str]:
+        """The media reference keys the file's clips use, from an OTIO timeline
+        whose clips carry several versions of their media (e.g., "Full" and
+        "Proxy"). Filled in when the file is opened.
+        """
+
+    @mediaReferenceKeys.setter
+    def mediaReferenceKeys(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def mediaReferenceKey(self) -> str:
+        """The media reference key the file is read with. Empty, the default,
+        leaves each clip on the reference it was authored with.
+        """
+
+    @mediaReferenceKey.setter
+    def mediaReferenceKey(self, arg: str, /) -> None: ...
+
+    @property
+    def mediaReferenceKeysKnown(self) -> bool:
+        """Whether the keys above are known, which is once the file has been
+        opened. Until then a key cannot be checked.
+        """
+
+    @mediaReferenceKeysKnown.setter
+    def mediaReferenceKeysKnown(self, arg: bool, /) -> None: ...
+
+    @property
+    def audioChannel(self) -> int:
+        """The audio channel to play, or -1 for all of the channels."""
+
+    @audioChannel.setter
+    def audioChannel(self, arg: int, /) -> None: ...
+
+    @property
+    def speed(self) -> float: ...
+
+    @speed.setter
+    def speed(self, arg: float, /) -> None: ...
+
+    @property
+    def currentTime(self) -> opentimelineio.opentime.RationalTime | None:
+        """Where playback had got to, and the in/out points, when the file last
+        lost focus. Unset until it has been played.
+        """
+
+    @currentTime.setter
+    def currentTime(self, arg: opentimelineio.opentime.RationalTime | None, /) -> None: ...
+
+    @property
+    def inOutRange(self) -> opentimelineio.opentime.TimeRange | None: ...
+
+    @inOutRange.setter
+    def inOutRange(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
+
+    @property
+    def timeRange(self) -> opentimelineio.opentime.TimeRange | None:
+        """The range the file turned out to have when it was opened. For an
+        image sequence this is the frames that were found, which the path does
+        not carry when it names a single file. Unset until the file has been
+        opened.
+        """
+
+    @timeRange.setter
+    def timeRange(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
+
+    @property
+    def framesStated(self) -> bool:
+        """Whether the range on the path was asked for rather than found. A
+        stated range is used as it is; an unstated one is looked for on disk
+        each time the file is opened, so that frames rendered since last time
+        are picked up.
+        """
+
+    @framesStated.setter
+    def framesStated(self, arg: bool, /) -> None: ...
+
+    @property
+    def newFile(self) -> bool: ...
+
+    @newFile.setter
+    def newFile(self, arg: bool, /) -> None: ...
+
+class FilesModelItemObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableFilesModelItem, callback: Callable[[FilesModelItem], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableFilesModelItem:
+    """Base class for observable values."""
+    def get(self) -> FilesModelItem:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableFilesModelItem(IObservableFilesModelItem):
+    """Observable value."""
+    def __init__(self, value: FilesModelItem | None) -> None: ...
+
+    def setAlways(self, value: FilesModelItem | None) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, value: FilesModelItem | None) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> FilesModelItem:
+        """Get the value."""
+
+class FilesModelItemListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableFilesModelItemList, callback: Callable[[Sequence[FilesModelItem]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableFilesModelItemList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableFilesModelItemList(IObservableFilesModelItemList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[FilesModelItem], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[FilesModelItem], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[FilesModelItem], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: FilesModelItem) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: FilesModelItem) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: FilesModelItem, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[FilesModelItem], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: FilesModelItem) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[FilesModelItem]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[FilesModelItem]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[FilesModelItem]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> FilesModelItem:
+        """Get a list item."""
+
+    def contains(self, arg: FilesModelItem, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: FilesModelItem, /) -> int:
+        """Get the index of the given item."""
+
+class FilesModel:
+    def __init__(self, settings: feather_tk._feather_tk.Settings) -> None:
+        """Create a new model."""
+
+    def save(self) -> None:
+        """Save the settings."""
+
+    @property
+    def files(self) -> list[FilesModelItem]:
+        """Get the files."""
+
+    @property
+    def observeFiles(self) -> IObservableFilesModelItemList:
+        """Observe the files."""
+
+    @property
+    def a(self) -> FilesModelItem:
+        """Get the "A" file."""
+
+    @property
+    def observeA(self) -> IObservableFilesModelItem:
+        """Observe the "A" file."""
+
+    @property
+    def aIndex(self) -> int:
+        """Get the "A" file index."""
+
+    @property
+    def observeAIndex(self) -> feather_tk._feather_tk.IObservableInt:
+        """Observe the "A" file index."""
+
+    @property
+    def b(self) -> list[FilesModelItem]:
+        """Get the "B" files."""
+
+    @property
+    def observeB(self) -> IObservableFilesModelItemList:
+        """Observe the "B" files."""
+
+    @property
+    def bIndexes(self) -> list[int]:
+        """Get the "B" file indexes."""
+
+    @property
+    def observeBIndexes(self) -> feather_tk._feather_tk.IObservableIntList:
+        """Observe the "B" file indexes."""
+
+    @property
+    def active(self) -> list[FilesModelItem]:
+        """Get the active files. The active files are the "A" file and "B"
+        files.
+        """
+
+    @property
+    def observeActive(self) -> IObservableFilesModelItemList:
+        """Observe the active files. The active files are the "A" file and "B"
+        files.
+        """
+
+    @overload
+    def add(self, arg: FilesModelItem, /) -> None:
+        """Add a file.
+
+        Add files together, with the "A" file changing once at the end. Adding
+        a list one file at a time would make each of them "A" along the way,
+        and everything watching would open each of them along the way too.
+        """
+
+    @overload
+    def add(self, arg: Sequence[FilesModelItem], /) -> None:
+        """Add a file.
+
+        Add files together, with the "A" file changing once at the end. Adding
+        a list one file at a time would make each of them "A" along the way,
+        and everything watching would open each of them along the way too.
+        """
+
+    def move(self, fromIndex: int, toIndex: int) -> None:
+        """Move a file so it ends at the given index. The "A" and "B" choices
+        follow the file: reordering changes where things are, not what is being
+        looked at.
+        """
+
+    @overload
+    def close(self) -> None:
+        """Close the current "A" file.
+
+        Close the given file.
+        """
+
+    @overload
+    def close(self, index: int) -> None:
+        """Close the current "A" file.
+
+        Close the given file.
+        """
+
+    def closeAll(self) -> None:
+        """Close all the files."""
+
+    def setA(self, index: int) -> None:
+        """Set the "A" file."""
+
+    def setB(self, index: int, value: bool) -> None:
+        """Set the "B" files."""
+
+    def toggleB(self, index: int) -> None:
+        """Toggle a "B" file."""
+
+    def clearB(self) -> None:
+        """Clear the "B" files."""
+
+    def first(self) -> None:
+        """Set the "A" file to the first file."""
+
+    def last(self) -> None:
+        """Set the "A" file to the last file."""
+
+    def next(self) -> None:
+        """Set the "A" file to the next file."""
+
+    def prev(self) -> None:
+        """Set the "A" file to the previous file."""
+
+    def firstB(self) -> None:
+        """Set the "B" file to the first file."""
+
+    def lastB(self) -> None:
+        """Set the "B" file to the last file."""
+
+    def nextB(self) -> None:
+        """Set the "B" file to the next file."""
+
+    def prevB(self) -> None:
+        """Set the "B" file to the previous file."""
+
+    @property
+    def observeLayers(self) -> feather_tk._feather_tk.IObservableIntList:
+        """Observe the layers."""
+
+    def setLayer(self, item: FilesModelItem, layer: int) -> None:
+        """Set a layer."""
+
+    @property
+    def observeMediaReferenceKeys(self) -> feather_tk._feather_tk.IObservableStringList:
+        """Observe the media reference key of each file, in order."""
+
+    def setMediaReferenceKey(self, item: FilesModelItem, key: str) -> None:
+        """Set a file's media reference key; empty for the references the clips
+        were authored with. A key the file does not use is ignored. A file that
+        has not been opened yet has no keys to check against, so any key is
+        taken, and checked when it opens (see
+        FilesModelItem::mediaReferenceKeysKnown).
+        """
+
+    def nextMediaReferenceKey(self) -> None:
+        """Set the "A" file to its next media reference key. The empty key is
+        not part of the cycle; it is chosen from the menu.
+        """
+
+    def setFrames(self, item: FilesModelItem, range: feather_tk._feather_tk.RangeI64) -> None:
+        """Set the frame range of an image sequence. This is the range the
+        sequence is meant to cover, which need not be the frames that are on
+        disk: a render in progress is watched over the range it will have when
+        it finishes. The file is reopened, since everything about a timeline is
+        derived from its path.
+        """
+
+    @property
+    def observeReload(self) -> IObservableFilesModelItem:
+        """Observe files that have to be reopened."""
+
+    def refresh(self) -> None:
+        """Announce the files again, for a change to what an item holds rather
+        than to which items there are. The items are shared and written to in
+        place -- the frame range and the layers are filled in once the file has
+        been opened -- and the list itself does not change when they are, so
+        nothing else says so.
+
+        The "A" file is announced again too, for the observers that take it
+        directly rather than through the list.
+        """
+
+    def nextLayer(self) -> None:
+        """Set the "A" file to the next layer."""
+
+    def prevLayer(self) -> None:
+        """Set the "A" file to the previous layer."""
+
+    @property
+    def audioChannel(self) -> int:
+        """Get the "A" file's audio channel, or -1 for all of the channels."""
+
+    @property
+    def observeAudioChannel(self) -> feather_tk._feather_tk.IObservableInt:
+        """Observe the "A" file's audio channel."""
+
+    def setAudioChannel(self, item: FilesModelItem, channel: int) -> None:
+        """Set a file's audio channel, or -1 for all of the channels."""
+
+    @property
+    def compareOptions(self) -> tlrender._tlrender.CompareOptions:
+        """Get the compare options."""
+
+    @compareOptions.setter
+    def compareOptions(self, arg: tlrender._tlrender.CompareOptions, /) -> None: ...
+
+    @property
+    def observeCompareOptions(self) -> tlrender._tlrender.IObservableCompareOptions:
+        """Observe the compare options."""
+
+    @property
+    def compareTime(self) -> tlrender._tlrender.CompareTime:
+        """Get the compare time mode."""
+
+    @compareTime.setter
+    def compareTime(self, arg: tlrender._tlrender.CompareTime, /) -> None: ...
+
+    @property
+    def observeCompareTime(self) -> tlrender._tlrender.IObservableCompareTime:
+        """Observe the compare time mode."""
+
+    @property
+    def wipeHandles(self) -> bool:
+        """Whether the wipe's handles are shown over the picture: the dot that
+        moves it and the ring that turns it. Hidden, the wipe is moved with the
+        mouse binding and the Files tool.
+        """
+
+    @wipeHandles.setter
+    def wipeHandles(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeWipeHandles(self) -> feather_tk._feather_tk.IObservableBool: ...
+
+def getCompareTimeLabels() -> list[str]:
+    """Labels for the comparison time, as shown to the user. The enumeration's
+    own labels name the setting where it is stored and in the keyboard
+    shortcuts, so they say what the values are rather than what they do, and
+    are not these.
+    """
+
+def reviewMarkerColor() -> feather_tk._feather_tk.Color4F:
+    """The default marker color."""
+
+class ReviewMarker:
+    """Review feedback: a marker anchored to a span of frames.
+
+    One type covers what used to be two: a note is a marker with text and a
+    one-frame span, a named range is a marker with a name and a wider one, and
+    a marker may be both. The fields map one to one onto OTIO markers, so
+    import and export are lossless by construction. Markers belong to the
+    review rather than to a source: the frames locate them. See
+    docs/review-format.md.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def id(self) -> str: ...
+
+    @id.setter
+    def id(self, arg: str, /) -> None: ...
+
+    @property
+    def name(self) -> str:
+        """Short label. Optional: the interface shows the frames when there is
+        no name to show.
+        """
+
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
+
+    @property
+    def range(self) -> opentimelineio.opentime.TimeRange | None:
+        """The frames the marker is about; a single frame is a one-frame span.
+        Optional: a marker about no frame in particular speaks about the whole
+        review.
+        """
+
+    @range.setter
+    def range(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
+
+    @property
+    def color(self) -> feather_tk._feather_tk.Color4F: ...
+
+    @color.setter
+    def color(self, arg: feather_tk._feather_tk.Color4F, /) -> None: ...
+
+    @property
+    def text(self) -> str:
+        """The body."""
+
+    @text.setter
+    def text(self, arg: str, /) -> None: ...
+
+    @property
+    def author(self) -> str:
+        """Who wrote it. Optional: empty when the environment does not say."""
+
+    @author.setter
+    def author(self, arg: str, /) -> None: ...
+
+    @property
+    def created(self) -> str:
+        """When the marker was made, ISO 8601."""
+
+    @created.setter
+    def created(self, arg: str, /) -> None: ...
+
+    def __eq__(self, arg: ReviewMarker, /) -> bool: ...
+
+    def __ne__(self, arg: ReviewMarker, /) -> bool: ...
+
+class ReviewMarkerListObserver:
+    """List observer."""
+    def __init__(self, observableList: IObservableReviewMarkerList, callback: Callable[[Sequence[ReviewMarker]], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableReviewMarkerList:
+    """Base class for observable lists."""
+    pass
+
+class ObservableReviewMarkerList(IObservableReviewMarkerList):
+    """Observable list."""
+    def __init__(self, arg: Sequence[ReviewMarker], /) -> None: ...
+
+    def setAlways(self, arg: Sequence[ReviewMarker], /) -> None:
+        """Set the list."""
+
+    def setIfChanged(self, arg: Sequence[ReviewMarker], /) -> bool:
+        """Set the list only if it has changed."""
+
+    def clear(self) -> None:
+        """Clear the list."""
+
+    def setItem(self, index: int, value: ReviewMarker) -> None:
+        """Set an item."""
+
+    def setItemOnlyIfChanged(self, index: int, value: ReviewMarker) -> bool:
+        """Set an item only if it has changed."""
+
+    @overload
+    def pushBack(self, arg: ReviewMarker, /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    @overload
+    def pushBack(self, arg: Sequence[ReviewMarker], /) -> None:
+        """Append an item.
+
+        Append a range of items.
+        """
+
+    def insertItem(self, index: int, value: ReviewMarker) -> None:
+        """Insert an item."""
+
+    def insertItems(self, index: int, list: Sequence[ReviewMarker]) -> None:
+        """Insert a range of items."""
+
+    def removeItem(self, index: int) -> None:
+        """Remove an item."""
+
+    def removeItems(self, start: int, end: int) -> None:
+        """Remove a range of items."""
+
+    def replaceItems(self, start: int, end: int, list: Sequence[ReviewMarker]) -> None:
+        """Replace a range of items."""
+
+    def get(self) -> list[ReviewMarker]:
+        """Get the list."""
+
+    def getSize(self) -> int:
+        """Get the list size."""
+
+    def isEmpty(self) -> bool:
+        """Get whether the list is empty."""
+
+    def getItem(self, arg: int, /) -> ReviewMarker:
+        """Get a list item."""
+
+    def contains(self, arg: ReviewMarker, /) -> bool:
+        """Does the list contain the given item?"""
+
+    def indexOf(self, arg: ReviewMarker, /) -> int:
+        """Get the index of the given item."""
+
+class MarkersModel:
+    """The review markers.
+
+    Markers are session state: they live in the review file, not in the
+    application settings. The list is kept in time order with the markers about
+    no frame in particular first, so every reader shows the same feedback in
+    the same order.
+    """
+    def __init__(self) -> None:
+        """Create a new model."""
+
+    @property
+    def markers(self) -> list[ReviewMarker]:
+        """Get the markers."""
+
+    @property
+    def observeMarkers(self) -> IObservableReviewMarkerList:
+        """Observe the markers."""
+
+    def setMarkers(self, markers: Sequence[ReviewMarker]) -> None:
+        """Replace all the markers, e.g. when a review is opened."""
+
+    def add(self, range: opentimelineio.opentime.TimeRange | None, name: str, text: str) -> str:
+        """Add a marker, returning its identifier. The identifier, creation
+        time and author are filled in here, so callers only provide the rest.
+        """
+
+    def update(self, id: str, text: str) -> None:
+        """Replace the text of the marker with the given identifier. The
+        creation time and author stay: they say who raised the point and when,
+        not who last touched the wording.
+        """
+
+    def updateColor(self, id: str, color: feather_tk._feather_tk.Color4F) -> None:
+        """Replace the color of the marker with the given identifier."""
+
+    def remove(self, id: str) -> None:
+        """Remove the marker with the given identifier."""
+
+    def clear(self) -> None:
+        """Remove all the markers."""
+
+class OCIOModelData:
+    """OpenColorIO model data."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def config(self) -> tlrender._tlrender.OCIOConfig: ...
+
+    @config.setter
+    def config(self, arg: tlrender._tlrender.OCIOConfig, /) -> None: ...
+
+    @property
+    def fileName(self) -> str: ...
+
+    @fileName.setter
+    def fileName(self, arg: str, /) -> None: ...
+
+    @property
+    def name(self) -> str: ...
+
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
+
+    @property
+    def inputs(self) -> list[str]: ...
+
+    @inputs.setter
+    def inputs(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def inputIndex(self) -> int: ...
+
+    @inputIndex.setter
+    def inputIndex(self, arg: int, /) -> None: ...
+
+    @property
+    def displays(self) -> list[str]: ...
+
+    @displays.setter
+    def displays(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def displayIndex(self) -> int: ...
+
+    @displayIndex.setter
+    def displayIndex(self, arg: int, /) -> None: ...
+
+    @property
+    def views(self) -> list[str]: ...
+
+    @views.setter
+    def views(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def viewIndex(self) -> int: ...
+
+    @viewIndex.setter
+    def viewIndex(self, arg: int, /) -> None: ...
+
+    @property
+    def looks(self) -> list[str]: ...
+
+    @looks.setter
+    def looks(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def lookIndex(self) -> int: ...
+
+    @lookIndex.setter
+    def lookIndex(self, arg: int, /) -> None: ...
+
+    def __eq__(self, arg: OCIOModelData, /) -> bool: ...
+
+    def __ne__(self, arg: OCIOModelData, /) -> bool: ...
+
+class OCIOModelDataObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableOCIOModelData, callback: Callable[[OCIOModelData], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableOCIOModelData:
+    """Base class for observable values."""
+    def get(self) -> OCIOModelData:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableOCIOModelData(IObservableOCIOModelData):
+    """Observable value."""
+    def __init__(self, arg: OCIOModelData, /) -> None: ...
+
+    def setAlways(self, arg: OCIOModelData, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: OCIOModelData, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> OCIOModelData:
+        """Get the value."""
+
+class OCIOModel:
+    def __init__(self, context: feather_tk._feather_tk.Context) -> None:
+        """Create a new model."""
+
+    def setOptions(self, arg: tlrender._tlrender.OCIOOptions, /) -> None:
+        """Set the options."""
+
+    @property
+    def observeOptions(self) -> tlrender._tlrender.IObservableOCIOOptions:
+        """Observe the options."""
+
+    @property
+    def observeData(self) -> IObservableOCIOModelData:
+        """Observe the model data."""
+
+    def setEnabled(self, arg: bool, /) -> None:
+        """Set whether the color configuration is enabled."""
+
+    def setConfig(self, arg: tlrender._tlrender.OCIOConfig, /) -> None:
+        """Set the color configuration."""
+
+    def setFileName(self, fileName: str) -> None:
+        """Set the color configuration file."""
+
+    def setInputIndex(self, arg: int, /) -> None:
+        """Set the input index."""
+
+    def setDisplayIndex(self, arg: int, /) -> None:
+        """Set the display index."""
+
+    def setViewIndex(self, arg: int, /) -> None:
+        """Set the view index."""
+
+    def setLookIndex(self, arg: int, /) -> None:
+        """Set the look index."""
+
+def parseFrameRange(value: str) -> feather_tk._feather_tk.RangeI64:
+    """Parse a frame range such as "1-100", and "-10-20" for a sequence
+    starting before zero: the separator is the first dash after the first
+    character, so a negative start is not mistaken for it. Throws on anything
+    else.
+    """
+
+def parseTime(name: str, value: str, speed: float, units: tlrender._tlrender.TimeUnits) -> opentimelineio.opentime.RationalTime:
+    """Parse a time in the given units. The name is for the error message ("in
+    point", "seek time"), which is thrown.
+    """
+
+class Playlist:
+    """A playlist: the open file list and the compare state, as saved to and
+    opened from an ".otio" file.
+
+    A playlist is deliberately not a session. What belongs here is what stops
+    making sense when the set of open files changes -- the order, the per-file
+    state, and the A/B comparison. Color, view, and window state stay in the
+    settings.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def items(self) -> list[FilesModelItem]: ...
+
+    @items.setter
+    def items(self, arg: Sequence[FilesModelItem], /) -> None: ...
+
+    @property
+    def aIndex(self) -> int: ...
+
+    @aIndex.setter
+    def aIndex(self, arg: int, /) -> None: ...
+
+    @property
+    def bIndexes(self) -> list[int]: ...
+
+    @bIndexes.setter
+    def bIndexes(self, arg: Sequence[int], /) -> None: ...
+
+    @property
+    def compareOptions(self) -> tlrender._tlrender.CompareOptions: ...
+
+    @compareOptions.setter
+    def compareOptions(self, arg: tlrender._tlrender.CompareOptions, /) -> None: ...
+
+    @property
+    def compareTime(self) -> tlrender._tlrender.CompareTime: ...
+
+    @compareTime.setter
+    def compareTime(self, arg: tlrender._tlrender.CompareTime, /) -> None: ...
+
+def playlistSave(fileName: str, playlist: Playlist, defaultRate: float = 24.0) -> None:
+    """A suggested file name for saving."""
+
+def playlistApply(playlist: Playlist, filesModel: FilesModel) -> None:
+    """Open a playlist's files in the file list, after what is already open,
+    with its "A" and "B" files and its compare state.
+
+    The comparison replaces the one in the file list, and is rebuilt in the
+    order the review does it: the compare state first, since in a mode that
+    shows one "B" file each new "B" replaces the last -- a tiled comparison set
+    before its mode came back as one "B" -- then the "B" files, cleared first
+    of the one the mode picks for itself, then the "A" file.
+    """
+
+def playlistOpen(fileName: str) -> tuple:
+    """A suggested file name for saving."""
+
+class RecentFilesModel(feather_tk._feather_tk.RecentFilesModel):
+    """Recent files model."""
+    def __init__(self, context: feather_tk._feather_tk.Context, settings: feather_tk._feather_tk.Settings, settingsGroup: str = 'Files', recentMax: int = 10) -> None:
+        """Create a new model; "recentMax" is how many are kept unless another
+        number was saved. The settings group is the prefix under which the
+        recent list is persisted, e.g. "Files" -> "/Files/Recent".
+        """
+
+    def save(self) -> None:
+        """Save the settings."""
+
+reviewVersion: int = 2
+
+def reviewVersionSupported(version: int) -> bool:
+    """Whether this build can read a review document of the given version.
+
+    False means the document was written by a newer DJV. Reading it anyway
+    would drop what this build does not understand, and the next save would
+    write that loss back over the user's file.
+    """
+
+def reviewVersionFor(review: Review) -> int:
+    """The version a review is written as: the lowest one that reads everything
+    in it, so that a document stays open to older versions until it holds
+    something they would get wrong.
+    """
+
+def reviewExtension() -> str:
+    """The review file extension (".djvr")."""
+
+def sameTime(arg0: opentimelineio.opentime.RationalTime | None, arg1: opentimelineio.opentime.RationalTime | None, /) -> bool: ...
+
+def sameRange(arg0: opentimelineio.opentime.TimeRange | None, arg1: opentimelineio.opentime.TimeRange | None, /) -> bool: ...
+
+def generateId() -> str:
+    """Generate a stable, unique identifier for a review file entry.
+
+    Assigned when a file is opened so that annotations and notes (phase 3) can
+    reference a file by identity rather than by list index, which is not stable
+    across close/reorder.
+    """
+
+def timestamp() -> str:
+    """The current UTC time, ISO 8601 (e.g. "2026-07-26T18:05:00Z")."""
+
+def reviewAuthor() -> str:
+    """The current user, for attributing notes and annotations.
+
+    Taken from the environment -- USERNAME on Windows, USER elsewhere -- and
+    empty when neither is set. DJV has no accounts and reviews are passed from
+    hand to hand, so this is a label rather than an identity: it says who wrote
+    a note when a session comes back from someone else. Who is making the
+    markers and the drawings: the author set with setReviewAuthor(), and the
+    user name the system gives where none is set, except on the iPad, whose
+    user is the same for everyone.
+    """
+
+class ReviewFile:
+    """A single file entry in a review."""
+    def __init__(self) -> None: ...
+
+    @property
+    def id(self) -> str: ...
+
+    @id.setter
+    def id(self, arg: str, /) -> None: ...
+
+    @property
+    def path(self) -> str:
+        """Preferred: relative to the .djvr."""
+
+    @path.setter
+    def path(self, arg: str, /) -> None: ...
+
+    @property
+    def pathAbsolute(self) -> str:
+        """Fallback: absolute path."""
+
+    @pathAbsolute.setter
+    def pathAbsolute(self, arg: str, /) -> None: ...
+
+    @property
+    def audioPath(self) -> str:
+        """Separate audio, resolved like the file above: the relative form is
+        preferred, the absolute one is the fallback.
+        """
+
+    @audioPath.setter
+    def audioPath(self, arg: str, /) -> None: ...
+
+    @property
+    def audioPathAbsolute(self) -> str: ...
+
+    @audioPathAbsolute.setter
+    def audioPathAbsolute(self, arg: str, /) -> None: ...
+
+    @property
+    def videoLayer(self) -> int: ...
+
+    @videoLayer.setter
+    def videoLayer(self, arg: int, /) -> None: ...
+
+    @property
+    def speed(self) -> float: ...
+
+    @speed.setter
+    def speed(self, arg: float, /) -> None: ...
+
+    @property
+    def currentTime(self) -> opentimelineio.opentime.RationalTime | None: ...
+
+    @currentTime.setter
+    def currentTime(self, arg: opentimelineio.opentime.RationalTime | None, /) -> None: ...
+
+    @property
+    def inOutRange(self) -> opentimelineio.opentime.TimeRange | None: ...
+
+    @inOutRange.setter
+    def inOutRange(self, arg: opentimelineio.opentime.TimeRange | None, /) -> None: ...
+
+class ReviewCompare:
+    """Comparison setup for a review."""
+    def __init__(self) -> None: ...
+
+    @property
+    def aId(self) -> str:
+        """The "A" file, by ReviewFile::id."""
+
+    @aId.setter
+    def aId(self, arg: str, /) -> None: ...
+
+    @property
+    def bIds(self) -> list[str]:
+        """The "B" files, by ReviewFile::id."""
+
+    @bIds.setter
+    def bIds(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def options(self) -> tlrender._tlrender.CompareOptions: ...
+
+    @options.setter
+    def options(self, arg: tlrender._tlrender.CompareOptions, /) -> None: ...
+
+    @property
+    def time(self) -> tlrender._tlrender.CompareTime: ...
+
+    @time.setter
+    def time(self, arg: tlrender._tlrender.CompareTime, /) -> None: ...
+
+class ReviewView:
+    """Viewport view state for a review."""
+    def __init__(self) -> None: ...
+
+    @property
+    def frameView(self) -> bool:
+        """If true, pos/zoom are ignored on load."""
+
+    @frameView.setter
+    def frameView(self, arg: bool, /) -> None: ...
+
+    @property
+    def pos(self) -> feather_tk._feather_tk.V2I: ...
+
+    @pos.setter
+    def pos(self, arg: feather_tk._feather_tk.V2I, /) -> None: ...
+
+    @property
+    def zoom(self) -> float: ...
+
+    @zoom.setter
+    def zoom(self, arg: float, /) -> None: ...
+
+class ReviewColor:
+    """Color and image display state for a review."""
+    def __init__(self) -> None: ...
+
+    @property
+    def ocio(self) -> tlrender._tlrender.OCIOOptions: ...
+
+    @ocio.setter
+    def ocio(self, arg: tlrender._tlrender.OCIOOptions, /) -> None: ...
+
+    @property
+    def lut(self) -> tlrender._tlrender.LUTOptions: ...
+
+    @lut.setter
+    def lut(self, arg: tlrender._tlrender.LUTOptions, /) -> None: ...
+
+    @property
+    def display(self) -> tlrender._tlrender.DisplayOptions: ...
+
+    @display.setter
+    def display(self, arg: tlrender._tlrender.DisplayOptions, /) -> None: ...
+
+    @property
+    def background(self) -> tlrender._tlrender.BackgroundOptions: ...
+
+    @background.setter
+    def background(self, arg: tlrender._tlrender.BackgroundOptions, /) -> None: ...
+
+    @property
+    def foreground(self) -> tlrender._tlrender.ForegroundOptions: ...
+
+    @foreground.setter
+    def foreground(self, arg: tlrender._tlrender.ForegroundOptions, /) -> None: ...
+
+    @property
+    def aspectRatio(self) -> AspectRatioOptions: ...
+
+    @aspectRatio.setter
+    def aspectRatio(self, arg: AspectRatioOptions, /) -> None: ...
+
+    @property
+    def hud(self) -> HUDOptions: ...
+
+    @hud.setter
+    def hud(self, arg: HUDOptions, /) -> None: ...
+
+class ReviewUI:
+    """Interface state for a review. The window layout is deliberately absent:
+    it belongs to the reader, not the session.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def openTools(self) -> list[str]:
+        """The open tool panels, in their listed order."""
+
+    @openTools.setter
+    def openTools(self, arg: Sequence[str], /) -> None: ...
+
+class Review:
+    """A complete review: files, comparison, view, color and interface state.
+
+    Serialized to a versioned JSON document with the ".djvr" extension.
+    """
+    def __init__(self) -> None: ...
+
+    @property
+    def version(self) -> int:
+        """The version the document was read as. It is written as
+        reviewVersionFor() says.
+        """
+
+    @version.setter
+    def version(self, arg: int, /) -> None: ...
+
+    @property
+    def app(self) -> str: ...
+
+    @app.setter
+    def app(self, arg: str, /) -> None: ...
+
+    @property
+    def created(self) -> str: ...
+
+    @created.setter
+    def created(self, arg: str, /) -> None: ...
+
+    @property
+    def files(self) -> list[ReviewFile]: ...
+
+    @files.setter
+    def files(self, arg: Sequence[ReviewFile], /) -> None: ...
+
+    @property
+    def compare(self) -> ReviewCompare: ...
+
+    @compare.setter
+    def compare(self, arg: ReviewCompare, /) -> None: ...
+
+    @property
+    def view(self) -> ReviewView: ...
+
+    @view.setter
+    def view(self, arg: ReviewView, /) -> None: ...
+
+    @property
+    def color(self) -> ReviewColor: ...
+
+    @color.setter
+    def color(self, arg: ReviewColor, /) -> None: ...
+
+    @property
+    def ui(self) -> ReviewUI: ...
+
+    @ui.setter
+    def ui(self, arg: ReviewUI, /) -> None: ...
+
+    @property
+    def annotations(self) -> list[ReviewAnnotation]: ...
+
+    @annotations.setter
+    def annotations(self, arg: Sequence[ReviewAnnotation], /) -> None: ...
+
+    @property
+    def markers(self) -> list[ReviewMarker]: ...
+
+    @markers.setter
+    def markers(self, arg: Sequence[ReviewMarker], /) -> None: ...
+
+    @property
+    def unreadSections(self) -> list[str]:
+        """The top-level sections that were present but could not be read, by
+        name.
+
+        A section is written by a serializer that requires every key it knows,
+        so a single key added upstream makes the whole section fail. Letting
+        that failure through would cost the user the rest of the document --
+        the annotations and the notes above all -- so the section is skipped
+        instead, and saving copies it back out of the raw document untouched
+        rather than overwriting it with defaults.
+        """
+
+    def carryUnread(self, other: Review) -> None: ...
+
+def reviewOpen(fileName: str) -> Review:
+    """Open a review from a ".djvr" file.
+
+    Throws on a file that cannot be read, and on a review written by a newer
+    DJV, since silently dropping what the newer version wrote would corrupt it
+    on the next save. The sections that were present but could not be read are
+    in Review::unreadSections.
+    """
+
+def reviewSave(fileName: str, review: Review) -> None:
+    """Save a review to a ".djvr" file. Throws on a file that cannot be
+    written. The document as written becomes Review::raw, so a following save
+    carries forward from this one.
+    """
+
+def reviewRelativePath(path: str, base: str | os.PathLike) -> str:
+    """Make an absolute path string relative to the review's directory, falling
+    back to the absolute form when no relative path exists (e.g. a different
+    drive on Windows).
+    """
+
+def reviewGenericPath(path: str) -> str:
+    """Store a path with forward slashes, whatever the platform wrote.
+
+    Windows accepts either separator, so this costs nothing there and keeps a
+    document legible -- and diffable -- when it travels.
+    """
+
+def resolveReviewPath(relative: str, absolute: str, base: str | os.PathLike, substituteRoot: str | os.PathLike = ..., pathOptions: feather_tk._feather_tk.PathOptions = ...) -> tuple[pathlib.Path, bool]: ...
+
+class AudioSettings:
+    """Audio settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def bufferFrameCount(self) -> int:
+        """The size of the buffer the audio device is asked for, in sample
+        frames; zero is the device's own default. Larger buffers are less
+        likely to underrun and produce glitches; smaller ones reduce latency.
+        """
+
+    @bufferFrameCount.setter
+    def bufferFrameCount(self, arg: int, /) -> None: ...
+
+    def __eq__(self, arg: AudioSettings, /) -> bool: ...
+
+    def __ne__(self, arg: AudioSettings, /) -> bool: ...
+
+class ExportRenderSize(enum.Enum):
+    Source = 0
+
+    Width = 4
+
+    Custom = 5
+
+def getExportRenderSizeEnums() -> list[ExportRenderSize]: ...
+
+@overload
+def to_string(arg: ExportRenderSize, /) -> str: ...
+
+@overload
+def to_string(arg: ExportFileType, /) -> str: ...
+
+@overload
+def to_string(arg: MouseAction, /) -> str: ...
+
+@overload
+def to_string(arg: TimelineThumbnailSize, /) -> str: ...
+
+@overload
+def to_string(arg: HUDItem, /) -> str: ...
+
+@overload
+def to_string(arg: HUDPos, /) -> str: ...
+
+@overload
+def from_string(arg0: str, arg1: ExportRenderSize, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: ExportFileType, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: MouseAction, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: TimelineThumbnailSize, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: HUDItem, /) -> bool: ...
+
+@overload
+def from_string(arg0: str, arg1: HUDPos, /) -> bool: ...
+
+def getWidth(renderSize: ExportRenderSize) -> int:
+    """Get an export render width, or zero for the sizes that are not one of
+    the presets.
+    """
+
+class ExportFileType(enum.Enum):
+    Image = 0
+
+    Seq = 1
+
+    Movie = 2
+
+def getExportFileTypeEnums() -> list[ExportFileType]: ...
+
+class ExportSettings:
+    """Export settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def dir(self) -> str: ...
+
+    @dir.setter
+    def dir(self, arg: str, /) -> None: ...
+
+    @property
+    def renderSize(self) -> ExportRenderSize: ...
+
+    @renderSize.setter
+    def renderSize(self, arg: ExportRenderSize, /) -> None: ...
+
+    @property
+    def customWidth(self) -> int:
+        """The width typed in, for Width and Custom, and the height for Custom,
+        used as they are.
+        """
+
+    @customWidth.setter
+    def customWidth(self, arg: int, /) -> None: ...
+
+    @property
+    def customHeight(self) -> int: ...
+
+    @customHeight.setter
+    def customHeight(self, arg: int, /) -> None: ...
+
+    @property
+    def fileType(self) -> ExportFileType: ...
+
+    @fileType.setter
+    def fileType(self, arg: ExportFileType, /) -> None: ...
+
+    @property
+    def imageFileName(self) -> str:
+        """The output file names, without their extensions. A run of '#' is
+        where the frame number goes, as many digits wide as there are '#';
+        digits are always part of the name.
+        """
+
+    @imageFileName.setter
+    def imageFileName(self, arg: str, /) -> None: ...
+
+    @property
+    def imageExt(self) -> str: ...
+
+    @imageExt.setter
+    def imageExt(self, arg: str, /) -> None: ...
+
+    @property
+    def seqFileName(self) -> str: ...
+
+    @seqFileName.setter
+    def seqFileName(self, arg: str, /) -> None: ...
+
+    @property
+    def seqExt(self) -> str: ...
+
+    @seqExt.setter
+    def seqExt(self, arg: str, /) -> None: ...
+
+    @property
+    def movieFileName(self) -> str: ...
+
+    @movieFileName.setter
+    def movieFileName(self, arg: str, /) -> None: ...
+
+    @property
+    def movieExt(self) -> str: ...
+
+    @movieExt.setter
+    def movieExt(self, arg: str, /) -> None: ...
+
+    @property
+    def moviePreset(self) -> str:
+        """The movie export preset. Presets are the whole surface: what they
+        cannot express is what tlbake and the command line writer's options are
+        for.
+        """
+
+    @moviePreset.setter
+    def moviePreset(self, arg: str, /) -> None: ...
+
+    @property
+    def movieAudioCodec(self) -> str: ...
+
+    @movieAudioCodec.setter
+    def movieAudioCodec(self, arg: str, /) -> None: ...
+
+    def __eq__(self, arg: ExportSettings, /) -> bool: ...
+
+    def __ne__(self, arg: ExportSettings, /) -> bool: ...
+
+class FileBrowserSettings:
+    """File browser settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def nativeFileDialog(self) -> bool: ...
+
+    @nativeFileDialog.setter
+    def nativeFileDialog(self, arg: bool, /) -> None: ...
+
+    @property
+    def path(self) -> str: ...
+
+    @path.setter
+    def path(self, arg: str, /) -> None: ...
+
+    @property
+    def options(self) -> feather_tk._feather_tk.FileBrowserOptions: ...
+
+    @options.setter
+    def options(self, arg: feather_tk._feather_tk.FileBrowserOptions, /) -> None: ...
+
+    @property
+    def ext(self) -> str: ...
+
+    @ext.setter
+    def ext(self, arg: str, /) -> None: ...
+
+    def __eq__(self, arg: FileBrowserSettings, /) -> bool: ...
+
+    def __ne__(self, arg: FileBrowserSettings, /) -> bool: ...
+
+class ImageSeqSettings:
+    """Image sequence settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def audio(self) -> tlrender._tlrender.ImageSeqAudio: ...
+
+    @audio.setter
+    def audio(self, arg: tlrender._tlrender.ImageSeqAudio, /) -> None: ...
+
+    @property
+    def audioExts(self) -> list[str]: ...
+
+    @audioExts.setter
+    def audioExts(self, arg: Sequence[str], /) -> None: ...
+
+    @property
+    def audioFileName(self) -> str: ...
+
+    @audioFileName.setter
+    def audioFileName(self, arg: str, /) -> None: ...
+
+    @property
+    def maxDigits(self) -> int: ...
+
+    @maxDigits.setter
+    def maxDigits(self, arg: int, /) -> None: ...
+
+    @property
+    def readThreadCount(self) -> int:
+        """How many frames are decoded at once. This is a timeline setting
+        rather than a per format one: the timeline is what decodes sequences.
+        """
+
+    @readThreadCount.setter
+    def readThreadCount(self, arg: int, /) -> None: ...
+
+    @property
+    def io(self) -> tlrender._tlrender.SeqOptions: ...
+
+    @io.setter
+    def io(self, arg: tlrender._tlrender.SeqOptions, /) -> None: ...
+
+    def __eq__(self, arg: ImageSeqSettings, /) -> bool: ...
+
+    def __ne__(self, arg: ImageSeqSettings, /) -> bool: ...
+
+class OTIOSettings:
+    """OTIO settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def compat(self) -> bool: ...
+
+    @compat.setter
+    def compat(self, arg: bool, /) -> None: ...
+
+    def __eq__(self, arg: OTIOSettings, /) -> bool: ...
+
+    def __ne__(self, arg: OTIOSettings, /) -> bool: ...
+
+class MiscSettings:
+    """Miscellaneous settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def tooltipsEnabled(self) -> bool: ...
+
+    @tooltipsEnabled.setter
+    def tooltipsEnabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def showSetup(self) -> bool: ...
+
+    @showSetup.setter
+    def showSetup(self, arg: bool, /) -> None: ...
+
+    @property
+    def clearRecentOnExit(self) -> bool:
+        """Forget the recent files, playlists, reviews and directories when the
+        application exits (DJV #909).
+        """
+
+    @clearRecentOnExit.setter
+    def clearRecentOnExit(self, arg: bool, /) -> None: ...
+
+    def __eq__(self, arg: MiscSettings, /) -> bool: ...
+
+    def __ne__(self, arg: MiscSettings, /) -> bool: ...
+
+class MouseAction(enum.Enum):
+    PanView = 0
+
+    CompareWipe = 1
+
+    Pick = 2
+
+    FrameShuttle = 3
+
+def getMouseActionEnums() -> list[MouseAction]: ...
+
+class MouseActionBinding:
+    """Mouse action binding."""
+    @overload
+    def __init__(self) -> None: ...
+
+    @overload
+    def __init__(self, button: feather_tk._feather_tk.MouseButton, modifier: feather_tk._feather_tk.KeyModifier = feather_tk._feather_tk.KeyModifier._None) -> None: ...
+
+    @property
+    def button(self) -> feather_tk._feather_tk.MouseButton: ...
+
+    @button.setter
+    def button(self, arg: feather_tk._feather_tk.MouseButton, /) -> None: ...
+
+    @property
+    def modifier(self) -> feather_tk._feather_tk.KeyModifier: ...
+
+    @modifier.setter
+    def modifier(self, arg: feather_tk._feather_tk.KeyModifier, /) -> None: ...
+
+    def __eq__(self, arg: MouseActionBinding, /) -> bool: ...
+
+    def __ne__(self, arg: MouseActionBinding, /) -> bool: ...
+
+class MouseSettings:
+    """Mouse settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def bindings(self) -> dict[MouseAction, MouseActionBinding]: ...
+
+    @bindings.setter
+    def bindings(self, arg: Mapping[MouseAction, MouseActionBinding], /) -> None: ...
+
+    @property
+    def wheelScale(self) -> float: ...
+
+    @wheelScale.setter
+    def wheelScale(self, arg: float, /) -> None: ...
+
+    @property
+    def frameShuttleScale(self) -> float: ...
+
+    @frameShuttleScale.setter
+    def frameShuttleScale(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: MouseSettings, /) -> bool: ...
+
+    def __ne__(self, arg: MouseSettings, /) -> bool: ...
+
+class PlaybackSettings:
+    """Playback settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def startPlayback(self) -> bool: ...
+
+    @startPlayback.setter
+    def startPlayback(self, arg: bool, /) -> None: ...
+
+    @property
+    def playEveryFrame(self) -> bool:
+        """Wait for each frame rather than drop the ones the cache does not
+        have in time, with the audio silent; see
+        tl::Player::setPlayEveryFrame().
+        """
+
+    @playEveryFrame.setter
+    def playEveryFrame(self, arg: bool, /) -> None: ...
+
+    def __eq__(self, arg: PlaybackSettings, /) -> bool: ...
+
+    def __ne__(self, arg: PlaybackSettings, /) -> bool: ...
+
+class ShortcutsSettings:
+    """Keyboard shortcuts settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def shortcuts(self) -> list[Shortcut]: ...
+
+    @shortcuts.setter
+    def shortcuts(self, arg: Sequence[Shortcut], /) -> None: ...
+
+    def __eq__(self, arg: ShortcutsSettings, /) -> bool: ...
+
+    def __ne__(self, arg: ShortcutsSettings, /) -> bool: ...
+
+class StyleSettings:
+    """Style settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def displayScale(self) -> float:
+        """Zero follows the display."""
+
+    @displayScale.setter
+    def displayScale(self, arg: float, /) -> None: ...
+
+    @property
+    def colorControls(self) -> feather_tk._feather_tk.ColorControls: ...
+
+    @colorControls.setter
+    def colorControls(self, arg: feather_tk._feather_tk.ColorControls, /) -> None: ...
+
+    @property
+    def colorStyle(self) -> feather_tk._feather_tk.ColorStyle: ...
+
+    @colorStyle.setter
+    def colorStyle(self, arg: feather_tk._feather_tk.ColorStyle, /) -> None: ...
+
+    def __eq__(self, arg: StyleSettings, /) -> bool: ...
+
+    def __ne__(self, arg: StyleSettings, /) -> bool: ...
+
+class TimelineThumbnailSize(enum.Enum):
+    Small = 0
+
+    Medium = 1
+
+    Large = 2
+
+def getTimelineThumbnailSizeEnums() -> list[TimelineThumbnailSize]: ...
+
+def getTimelineThumbnailSize(thumbnailSize: TimelineThumbnailSize) -> int:
+    """Get the timeline thumbnails size."""
+
+def getTimelineWaveformSize(thumbnailSize: TimelineThumbnailSize) -> int:
+    """Get the timeline waveform size."""
+
+class TimelineSettings:
+    """Timeline settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def minimize(self) -> bool: ...
+
+    @minimize.setter
+    def minimize(self, arg: bool, /) -> None: ...
+
+    @property
+    def frameView(self) -> bool: ...
+
+    @frameView.setter
+    def frameView(self, arg: bool, /) -> None: ...
+
+    @property
+    def scrollBars(self) -> bool: ...
+
+    @scrollBars.setter
+    def scrollBars(self, arg: bool, /) -> None: ...
+
+    @property
+    def compareTimelines(self) -> bool:
+        """The timeline of each file being compared, under the current file's.
+        """
+
+    @compareTimelines.setter
+    def compareTimelines(self, arg: bool, /) -> None: ...
+
+    @property
+    def autoScroll(self) -> bool: ...
+
+    @autoScroll.setter
+    def autoScroll(self, arg: bool, /) -> None: ...
+
+    @property
+    def stopOnScrub(self) -> bool: ...
+
+    @stopOnScrub.setter
+    def stopOnScrub(self, arg: bool, /) -> None: ...
+
+    @property
+    def preview(self) -> bool:
+        """A preview of the frame under the cursor."""
+
+    @preview.setter
+    def preview(self, arg: bool, /) -> None: ...
+
+    @property
+    def trackMedia(self) -> bool: ...
+
+    @trackMedia.setter
+    def trackMedia(self, arg: bool, /) -> None: ...
+
+    @property
+    def thumbnails(self) -> bool: ...
+
+    @thumbnails.setter
+    def thumbnails(self, arg: bool, /) -> None: ...
+
+    @property
+    def thumbnailSize(self) -> TimelineThumbnailSize: ...
+
+    @thumbnailSize.setter
+    def thumbnailSize(self, arg: TimelineThumbnailSize, /) -> None: ...
+
+    @property
+    def waveforms(self) -> bool: ...
+
+    @waveforms.setter
+    def waveforms(self, arg: bool, /) -> None: ...
+
+    @property
+    def waveformSize(self) -> TimelineThumbnailSize: ...
+
+    @waveformSize.setter
+    def waveformSize(self, arg: TimelineThumbnailSize, /) -> None: ...
+
+    def __eq__(self, arg: TimelineSettings, /) -> bool: ...
+
+    def __ne__(self, arg: TimelineSettings, /) -> bool: ...
+
+class WindowSettings:
+    """Window settings."""
+    def __init__(self) -> None: ...
+
+    @property
+    def size(self) -> feather_tk._feather_tk.Size2I:
+        """The size the window has when it is not maximized."""
+
+    @size.setter
+    def size(self, arg: feather_tk._feather_tk.Size2I, /) -> None: ...
+
+    @property
+    def pos(self) -> feather_tk._feather_tk.V2I:
+        """Where the window was, once it has been somewhere: until then the
+        platform places it.
+        """
+
+    @pos.setter
+    def pos(self, arg: feather_tk._feather_tk.V2I, /) -> None: ...
+
+    @property
+    def hasPos(self) -> bool: ...
+
+    @hasPos.setter
+    def hasPos(self, arg: bool, /) -> None: ...
+
+    @property
+    def maximized(self) -> bool: ...
+
+    @maximized.setter
+    def maximized(self, arg: bool, /) -> None: ...
+
+    @property
+    def fileToolBar(self) -> bool: ...
+
+    @fileToolBar.setter
+    def fileToolBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def compareToolBar(self) -> bool: ...
+
+    @compareToolBar.setter
+    def compareToolBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def windowToolBar(self) -> bool: ...
+
+    @windowToolBar.setter
+    def windowToolBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def viewToolBar(self) -> bool: ...
+
+    @viewToolBar.setter
+    def viewToolBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def toolsToolBar(self) -> bool: ...
+
+    @toolsToolBar.setter
+    def toolsToolBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def tabBar(self) -> bool: ...
+
+    @tabBar.setter
+    def tabBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def timeline(self) -> bool: ...
+
+    @timeline.setter
+    def timeline(self, arg: bool, /) -> None: ...
+
+    @property
+    def bottomToolBar(self) -> bool: ...
+
+    @bottomToolBar.setter
+    def bottomToolBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def statusToolBar(self) -> bool: ...
+
+    @statusToolBar.setter
+    def statusToolBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def tools(self) -> bool: ...
+
+    @tools.setter
+    def tools(self, arg: bool, /) -> None: ...
+
+    @property
+    def splitter(self) -> float: ...
+
+    @splitter.setter
+    def splitter(self, arg: float, /) -> None: ...
+
+    @property
+    def splitter2(self) -> float: ...
+
+    @splitter2.setter
+    def splitter2(self, arg: float, /) -> None: ...
+
+    def __eq__(self, arg: WindowSettings, /) -> bool: ...
+
+    def __ne__(self, arg: WindowSettings, /) -> bool: ...
+
+class AudioSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableAudioSettings, callback: Callable[[AudioSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableAudioSettings:
+    """Base class for observable values."""
+    def get(self) -> AudioSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableAudioSettings(IObservableAudioSettings):
+    """Observable value."""
+    def __init__(self, arg: AudioSettings, /) -> None: ...
+
+    def setAlways(self, arg: AudioSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: AudioSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> AudioSettings:
+        """Get the value."""
+
+class ExportSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableExportSettings, callback: Callable[[ExportSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableExportSettings:
+    """Base class for observable values."""
+    def get(self) -> ExportSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableExportSettings(IObservableExportSettings):
+    """Observable value."""
+    def __init__(self, arg: ExportSettings, /) -> None: ...
+
+    def setAlways(self, arg: ExportSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: ExportSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> ExportSettings:
+        """Get the value."""
+
+class FileBrowserSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableFileBrowserSettings, callback: Callable[[FileBrowserSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableFileBrowserSettings:
+    """Base class for observable values."""
+    def get(self) -> FileBrowserSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableFileBrowserSettings(IObservableFileBrowserSettings):
+    """Observable value."""
+    def __init__(self, arg: FileBrowserSettings, /) -> None: ...
+
+    def setAlways(self, arg: FileBrowserSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: FileBrowserSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> FileBrowserSettings:
+        """Get the value."""
+
+class ImageSeqSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableImageSeqSettings, callback: Callable[[ImageSeqSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableImageSeqSettings:
+    """Base class for observable values."""
+    def get(self) -> ImageSeqSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableImageSeqSettings(IObservableImageSeqSettings):
+    """Observable value."""
+    def __init__(self, arg: ImageSeqSettings, /) -> None: ...
+
+    def setAlways(self, arg: ImageSeqSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: ImageSeqSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> ImageSeqSettings:
+        """Get the value."""
+
+class OTIOSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableOTIOSettings, callback: Callable[[OTIOSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableOTIOSettings:
+    """Base class for observable values."""
+    def get(self) -> OTIOSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableOTIOSettings(IObservableOTIOSettings):
+    """Observable value."""
+    def __init__(self, arg: OTIOSettings, /) -> None: ...
+
+    def setAlways(self, arg: OTIOSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: OTIOSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> OTIOSettings:
+        """Get the value."""
+
+class MiscSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableMiscSettings, callback: Callable[[MiscSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableMiscSettings:
+    """Base class for observable values."""
+    def get(self) -> MiscSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableMiscSettings(IObservableMiscSettings):
+    """Observable value."""
+    def __init__(self, arg: MiscSettings, /) -> None: ...
+
+    def setAlways(self, arg: MiscSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: MiscSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> MiscSettings:
+        """Get the value."""
+
+class MouseSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableMouseSettings, callback: Callable[[MouseSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableMouseSettings:
+    """Base class for observable values."""
+    def get(self) -> MouseSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableMouseSettings(IObservableMouseSettings):
+    """Observable value."""
+    def __init__(self, arg: MouseSettings, /) -> None: ...
+
+    def setAlways(self, arg: MouseSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: MouseSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> MouseSettings:
+        """Get the value."""
+
+class PlaybackSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservablePlaybackSettings, callback: Callable[[PlaybackSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservablePlaybackSettings:
+    """Base class for observable values."""
+    def get(self) -> PlaybackSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservablePlaybackSettings(IObservablePlaybackSettings):
+    """Observable value."""
+    def __init__(self, arg: PlaybackSettings, /) -> None: ...
+
+    def setAlways(self, arg: PlaybackSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: PlaybackSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> PlaybackSettings:
+        """Get the value."""
+
+class ShortcutsSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableShortcutsSettings, callback: Callable[[ShortcutsSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableShortcutsSettings:
+    """Base class for observable values."""
+    def get(self) -> ShortcutsSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableShortcutsSettings(IObservableShortcutsSettings):
+    """Observable value."""
+    def __init__(self, arg: ShortcutsSettings, /) -> None: ...
+
+    def setAlways(self, arg: ShortcutsSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: ShortcutsSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> ShortcutsSettings:
+        """Get the value."""
+
+class StyleSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableStyleSettings, callback: Callable[[StyleSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableStyleSettings:
+    """Base class for observable values."""
+    def get(self) -> StyleSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableStyleSettings(IObservableStyleSettings):
+    """Observable value."""
+    def __init__(self, arg: StyleSettings, /) -> None: ...
+
+    def setAlways(self, arg: StyleSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: StyleSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> StyleSettings:
+        """Get the value."""
+
+class TimelineSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableTimelineSettings, callback: Callable[[TimelineSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableTimelineSettings:
+    """Base class for observable values."""
+    def get(self) -> TimelineSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableTimelineSettings(IObservableTimelineSettings):
+    """Observable value."""
+    def __init__(self, arg: TimelineSettings, /) -> None: ...
+
+    def setAlways(self, arg: TimelineSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: TimelineSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> TimelineSettings:
+        """Get the value."""
+
+class WindowSettingsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableWindowSettings, callback: Callable[[WindowSettings], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableWindowSettings:
+    """Base class for observable values."""
+    def get(self) -> WindowSettings:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableWindowSettings(IObservableWindowSettings):
+    """Observable value."""
+    def __init__(self, arg: WindowSettings, /) -> None: ...
+
+    def setAlways(self, arg: WindowSettings, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: WindowSettings, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> WindowSettings:
+        """Get the value."""
+
+class SettingsModel:
+    """Settings model."""
+    def __init__(self, context: feather_tk._feather_tk.Context, settings: feather_tk._feather_tk.Settings) -> None:
+        """Create a new model."""
+
+    def save(self) -> None:
+        """Save the settings. Settings are also saved on exit."""
+
+    def reset(self) -> None:
+        """Reset to default values."""
+
+    @property
+    def audio(self) -> AudioSettings: ...
+
+    @audio.setter
+    def audio(self, arg: AudioSettings, /) -> None: ...
+
+    @property
+    def observeAudio(self) -> IObservableAudioSettings: ...
+
+    @property
+    def cache(self) -> tlrender._tlrender.PlayerCacheOptions: ...
+
+    @cache.setter
+    def cache(self, arg: tlrender._tlrender.PlayerCacheOptions, /) -> None: ...
+
+    @property
+    def observeCache(self) -> tlrender._tlrender.IObservablePlayerCacheOptions: ...
+
+    @property
+    def export(self) -> ExportSettings: ...
+
+    @export.setter
+    def export(self, arg: ExportSettings, /) -> None: ...
+
+    @property
+    def observeExport(self) -> IObservableExportSettings: ...
+
+    @property
+    def fileBrowser(self) -> FileBrowserSettings: ...
+
+    @fileBrowser.setter
+    def fileBrowser(self, arg: FileBrowserSettings, /) -> None: ...
+
+    @property
+    def observeFileBrowser(self) -> IObservableFileBrowserSettings: ...
+
+    @property
+    def imageSeq(self) -> ImageSeqSettings: ...
+
+    @imageSeq.setter
+    def imageSeq(self, arg: ImageSeqSettings, /) -> None: ...
+
+    @property
+    def observeImageSeq(self) -> IObservableImageSeqSettings: ...
+
+    @property
+    def otio(self) -> OTIOSettings: ...
+
+    @otio.setter
+    def otio(self, arg: OTIOSettings, /) -> None: ...
+
+    @property
+    def observeOTIO(self) -> IObservableOTIOSettings: ...
+
+    @property
+    def misc(self) -> MiscSettings: ...
+
+    @misc.setter
+    def misc(self, arg: MiscSettings, /) -> None: ...
+
+    @property
+    def observeMisc(self) -> IObservableMiscSettings: ...
+
+    @property
+    def mouse(self) -> MouseSettings: ...
+
+    @mouse.setter
+    def mouse(self, arg: MouseSettings, /) -> None: ...
+
+    @property
+    def observeMouse(self) -> IObservableMouseSettings: ...
+
+    @property
+    def playback(self) -> PlaybackSettings: ...
+
+    @playback.setter
+    def playback(self, arg: PlaybackSettings, /) -> None: ...
+
+    @property
+    def observePlayback(self) -> IObservablePlaybackSettings: ...
+
+    @property
+    def shortcuts(self) -> ShortcutsSettings: ...
+
+    @shortcuts.setter
+    def shortcuts(self, arg: ShortcutsSettings, /) -> None: ...
+
+    @property
+    def observeShortcuts(self) -> IObservableShortcutsSettings: ...
+
+    def addShortcuts(self, shortcuts: Sequence[Shortcut]) -> None:
+        """Add keyboard shortcuts. Any saved key bindings are applied to the
+        added shortcuts.
+        """
+
+    @property
+    def style(self) -> StyleSettings: ...
+
+    @style.setter
+    def style(self, arg: StyleSettings, /) -> None: ...
+
+    @property
+    def observeStyle(self) -> IObservableStyleSettings: ...
+
+    @property
+    def timeline(self) -> TimelineSettings: ...
+
+    @timeline.setter
+    def timeline(self, arg: TimelineSettings, /) -> None: ...
+
+    @property
+    def observeTimeline(self) -> IObservableTimelineSettings: ...
+
+    @property
+    def window(self) -> WindowSettings: ...
+
+    @window.setter
+    def window(self, arg: WindowSettings, /) -> None: ...
+
+    @property
+    def observeWindow(self) -> IObservableWindowSettings: ...
+
+    @property
+    def ioOptions(self) -> dict[str, str]: ...
+
+    @property
+    def observeIOOptions(self) -> feather_tk._feather_tk.IObservableStringMap:
+        """Observe the I/O options: the image sequence, FFmpeg and USD settings
+        together, as they are given to what reads files.
+        """
+
+class Shortcut:
+    """Keyboard shortcuts."""
+    @overload
+    def __init__(self) -> None: ...
+
+    @overload
+    def __init__(self, name: str, text: str, primary: feather_tk._feather_tk.KeyShortcut = ..., secondary: feather_tk._feather_tk.KeyShortcut = ...) -> None: ...
+
+    @property
+    def name(self) -> str: ...
+
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
+
+    @property
+    def text(self) -> str: ...
+
+    @text.setter
+    def text(self, arg: str, /) -> None: ...
+
+    @property
+    def primary(self) -> feather_tk._feather_tk.KeyShortcut: ...
+
+    @primary.setter
+    def primary(self, arg: feather_tk._feather_tk.KeyShortcut, /) -> None: ...
+
+    @property
+    def secondary(self) -> feather_tk._feather_tk.KeyShortcut: ...
+
+    @secondary.setter
+    def secondary(self, arg: feather_tk._feather_tk.KeyShortcut, /) -> None: ...
+
+    def __eq__(self, arg: Shortcut, /) -> bool: ...
+
+    def __ne__(self, arg: Shortcut, /) -> bool: ...
+
+class TimeUnitsModel(tlrender._tlrender.TimeUnitsModel):
+    """Time units model."""
+    def __init__(self, context: feather_tk._feather_tk.Context, settings: feather_tk._feather_tk.Settings) -> None:
+        """Create a new model."""
+
+    def save(self) -> None:
+        """Save the settings."""
+
+class ToolInfo:
+    """Tool information."""
+    def __init__(self) -> None: ...
+
+    @property
+    def name(self) -> str: ...
+
+    @name.setter
+    def name(self, arg: str, /) -> None: ...
+
+    @property
+    def icon(self) -> str: ...
+
+    @icon.setter
+    def icon(self, arg: str, /) -> None: ...
+
+    @property
+    def sort(self) -> str: ...
+
+    @sort.setter
+    def sort(self, arg: str, /) -> None: ...
+
+    @property
+    def toolBar(self) -> bool: ...
+
+    @toolBar.setter
+    def toolBar(self, arg: bool, /) -> None: ...
+
+    @property
+    def shortcut(self) -> feather_tk._feather_tk.KeyShortcut: ...
+
+    @shortcut.setter
+    def shortcut(self, arg: feather_tk._feather_tk.KeyShortcut, /) -> None: ...
+
+class ToolsModel:
+    """Tools model."""
+    def __init__(self, settings: feather_tk._feather_tk.Settings) -> None:
+        """Create a new model."""
+
+    def save(self) -> None:
+        """Save the settings."""
+
+    @property
+    def tools(self) -> list[ToolInfo]:
+        """Get the tools."""
+
+    def addTool(self, tool: ToolInfo) -> None:
+        """Add a tool."""
+
+    @property
+    def openTools(self) -> list[str]:
+        """Get the open tools, in the order they are listed above rather than
+        the order they were opened, so that opening one does not move the
+        others around.
+        """
+
+    @property
+    def observeOpenTools(self) -> feather_tk._feather_tk.IObservableStringList:
+        """Observe the open tools."""
+
+    def isToolOpen(self, name: str) -> bool:
+        """Get whether a tool is open."""
+
+    def setToolOpen(self, name: str, open: bool) -> None:
+        """Open or close a tool."""
+
+    def closeTools(self) -> None:
+        """Close every tool."""
+
+    def showSection(self, tool: str, section: str) -> None:
+        """Open a tool and one of its sections."""
+
+class AspectRatioOptions:
+    """Aspect ratio options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def index(self) -> int: ...
+
+    @index.setter
+    def index(self, arg: int, /) -> None: ...
+
+    @property
+    def options(self) -> list[tlrender._tlrender.AspectRatioOptions]: ...
+
+    @options.setter
+    def options(self, arg: Sequence[tlrender._tlrender.AspectRatioOptions], /) -> None: ...
+
+    def __eq__(self, arg: AspectRatioOptions, /) -> bool: ...
+
+    def __ne__(self, arg: AspectRatioOptions, /) -> bool: ...
+
+class HUDItem(enum.Enum):
+    FileName = 0
+
+    Information = 1
+
+    Cache = 2
+
+    Time = 3
+
+    ViewZoom = 4
+
+    ColorPicker = 5
+
+    Render = 6
+
+    LUT = 7
+
+def getHUDItemEnums() -> list[HUDItem]: ...
+
+class HUDPos(enum.Enum):
+    TopLeft = 1
+
+    TopRight = 2
+
+    BottomLeft = 3
+
+    BottomRight = 4
+
+def getHUDPosEnums() -> list[HUDPos]: ...
+
+class HUDOptions:
+    """HUD options."""
+    def __init__(self) -> None: ...
+
+    @property
+    def enabled(self) -> bool: ...
+
+    @enabled.setter
+    def enabled(self, arg: bool, /) -> None: ...
+
+    @property
+    def items(self) -> dict[HUDItem, HUDPos]: ...
+
+    @items.setter
+    def items(self, arg: Mapping[HUDItem, HUDPos], /) -> None: ...
+
+    def __eq__(self, arg: HUDOptions, /) -> bool: ...
+
+    def __ne__(self, arg: HUDOptions, /) -> bool: ...
+
+class ImageOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableImageOptions, callback: Callable[[feather_tk._feather_tk.ImageOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableImageOptions:
+    """Base class for observable values."""
+    def get(self) -> feather_tk._feather_tk.ImageOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableImageOptions(IObservableImageOptions):
+    """Observable value."""
+    def __init__(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None: ...
+
+    def setAlways(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: feather_tk._feather_tk.ImageOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> feather_tk._feather_tk.ImageOptions:
+        """Get the value."""
+
+class AspectRatioOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableAspectRatioOptions, callback: Callable[[AspectRatioOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableAspectRatioOptions:
+    """Base class for observable values."""
+    def get(self) -> AspectRatioOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableAspectRatioOptions(IObservableAspectRatioOptions):
+    """Observable value."""
+    def __init__(self, arg: AspectRatioOptions, /) -> None: ...
+
+    def setAlways(self, arg: AspectRatioOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: AspectRatioOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> AspectRatioOptions:
+        """Get the value."""
+
+class HUDOptionsObserver:
+    """Value observer."""
+    def __init__(self, observable: IObservableHUDOptions, callback: Callable[[HUDOptions], None], action: feather_tk._feather_tk.ObserverAction = feather_tk._feather_tk.ObserverAction.Trigger) -> None: ...
+
+class IObservableHUDOptions:
+    """Base class for observable values."""
+    def get(self) -> HUDOptions:
+        """Get the value."""
+
+    def getObserversCount(self) -> int:
+        """Get the number of observers."""
+
+class ObservableHUDOptions(IObservableHUDOptions):
+    """Observable value."""
+    def __init__(self, arg: HUDOptions, /) -> None: ...
+
+    def setAlways(self, arg: HUDOptions, /) -> None:
+        """Set the value."""
+
+    def setIfChanged(self, arg: HUDOptions, /) -> bool:
+        """Set the value only if it has changed."""
+
+    def get(self) -> HUDOptions:
+        """Get the value."""
+
+class ViewportModel:
+    """Viewport model."""
+    def __init__(self, context: feather_tk._feather_tk.Context, settings: feather_tk._feather_tk.Settings) -> None:
+        """Create a new model."""
+
+    def save(self) -> None:
+        """Save the settings."""
+
+    @property
+    def imageOptions(self) -> feather_tk._feather_tk.ImageOptions: ...
+
+    @imageOptions.setter
+    def imageOptions(self, arg: feather_tk._feather_tk.ImageOptions, /) -> None: ...
+
+    @property
+    def observeImageOptions(self) -> IObservableImageOptions: ...
+
+    @property
+    def displayOptions(self) -> tlrender._tlrender.DisplayOptions: ...
+
+    @displayOptions.setter
+    def displayOptions(self, arg: tlrender._tlrender.DisplayOptions, /) -> None: ...
+
+    @property
+    def observeDisplayOptions(self) -> tlrender._tlrender.IObservableDisplayOptions: ...
+
+    @property
+    def aspectRatioOptions(self) -> AspectRatioOptions: ...
+
+    @aspectRatioOptions.setter
+    def aspectRatioOptions(self, arg: AspectRatioOptions, /) -> None: ...
+
+    @property
+    def observeAspectRatioOptions(self) -> IObservableAspectRatioOptions: ...
+
+    @property
+    def backgroundOptions(self) -> tlrender._tlrender.BackgroundOptions: ...
+
+    @backgroundOptions.setter
+    def backgroundOptions(self, arg: tlrender._tlrender.BackgroundOptions, /) -> None: ...
+
+    @property
+    def observeBackgroundOptions(self) -> tlrender._tlrender.IObservableBackgroundOptions: ...
+
+    @property
+    def foregroundOptions(self) -> tlrender._tlrender.ForegroundOptions: ...
+
+    @foregroundOptions.setter
+    def foregroundOptions(self, arg: tlrender._tlrender.ForegroundOptions, /) -> None: ...
+
+    @property
+    def observeForegroundOptions(self) -> tlrender._tlrender.IObservableForegroundOptions: ...
+
+    @property
+    def hudOptions(self) -> HUDOptions: ...
+
+    @hudOptions.setter
+    def hudOptions(self, arg: HUDOptions, /) -> None: ...
+
+    @property
+    def observeHUDOptions(self) -> IObservableHUDOptions: ...
+
+    @property
+    def hdrTransfer(self) -> tlrender._tlrender.HDR_EOTF: ...
+
+    @hdrTransfer.setter
+    def hdrTransfer(self, arg: tlrender._tlrender.HDR_EOTF, /) -> None: ...
+
+    @property
+    def hdrWhite(self) -> float: ...
+
+    @hdrWhite.setter
+    def hdrWhite(self, arg: float, /) -> None: ...
+
+    @property
+    def observeHDRWhite(self) -> feather_tk._feather_tk.IObservableFloat: ...
+
+    @property
+    def dither(self) -> bool: ...
+
+    @dither.setter
+    def dither(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeDither(self) -> feather_tk._feather_tk.IObservableBool: ...

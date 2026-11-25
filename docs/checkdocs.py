@@ -111,6 +111,16 @@ def main(argv):
                 page = line.split()[0][:-5]
                 if page not in listed:
                     errors.append("llms.txt: \"%s\" is not listed" % page)
+    # The Python API reference's files, which the build copies into
+    # docs/python (pythonstubs.py): linked from the pages and llms.txt.
+    for name in list(pages) + ["llms"]:
+        path = os.path.join(docs, name + (".txt" if name == "llms" else ".md"))
+        if not os.path.isfile(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            for link in re.findall(r"\]\((python/[\w.]+\.pyi\.txt)\)", f.read()):
+                if not os.path.isfile(os.path.join(docs, link)):
+                    errors.append("%s: no file \"%s\"" % (os.path.basename(path), link))
     for name in html:
         with open(os.path.join(docs, name + ".html"), encoding="utf-8") as f:
             text = f.read()
