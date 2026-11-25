@@ -28,6 +28,7 @@ namespace djv
             void _clearSources();
             void _undo();
             void _serialize();
+            void _liveStroke();
         };
     }
 }

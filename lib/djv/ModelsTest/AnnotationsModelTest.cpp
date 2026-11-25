@@ -48,6 +48,48 @@ namespace djv
             _clearSources();
             _undo();
             _serialize();
+            _liveStroke();
+        }
+
+        void AnnotationsModelTest::_liveStroke()
+        {
+            // The stroke being drawn is shared for the other views to draw,
+            // but is no annotation and no undo step until it is added.
+            auto model = models::AnnotationsModel::create();
+            FTK_CHECK(!model->getLiveStroke().has_value());
+            int changes = 0;
+            auto observer = ftk::Observer<std::optional<models::LiveStroke> >::create(
+                model->observeLiveStroke(),
+                [&changes](const std::optional<models::LiveStroke>&) { ++changes; });
+            changes = 0;
+
+            models::LiveStroke live{ "srcA", frame(100), makeStroke(0.F, 0.F, 10.F, 10.F) };
+            model->setLiveStroke(live);
+            FTK_CHECK(1 == changes);
+            FTK_CHECK(model->getLiveStroke() == live);
+            FTK_CHECK(model->getAnnotations().empty());
+            FTK_CHECK(!model->observeHasUndo()->get());
+
+            // The same again is no change; the stroke growing is one.
+            model->setLiveStroke(live);
+            FTK_CHECK(1 == changes);
+            live.stroke.points.push_back(ftk::V2F(20.F, 20.F));
+            model->setLiveStroke(live);
+            FTK_CHECK(2 == changes);
+
+            // The same frame at another rate is another frame, and a stroke
+            // standing in for another differs from a new one.
+            models::LiveStroke other = live;
+            other.time = OTIO_NS::RationalTime(200.0, 48.0);
+            FTK_CHECK(other != live);
+            other = live;
+            other.replaces = 0;
+            FTK_CHECK(other != live);
+
+            model->setLiveStroke(std::nullopt);
+            FTK_CHECK(3 == changes);
+            FTK_CHECK(!model->getLiveStroke().has_value());
+            FTK_CHECK(model->getAnnotations().empty());
         }
 
         void AnnotationsModelTest::_strokes()

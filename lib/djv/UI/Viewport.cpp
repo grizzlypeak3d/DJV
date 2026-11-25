@@ -36,6 +36,7 @@
 #include <ftk/Core/Timer.h>
 
 #include <algorithm>
+#include <functional>
 
 #include <chrono>
 #include <cmath>
@@ -329,6 +330,10 @@ namespace djv
             };
             std::optional<Selection> selection;
             std::optional<models::ReviewStroke> moving;
+            //! Whether this view gave the live stroke, and the other views'
+            //! as it comes.
+            bool liveStrokeOwner = false;
+            std::shared_ptr<ftk::Observer<std::optional<models::LiveStroke> > > liveStrokeObserver;
             ftk::V2F movePressPos;
             //! The handle being dragged, one of the two points of a shape,
             //! or none while the whole stroke moves.
@@ -773,6 +778,16 @@ namespace djv
                     setDrawUpdate();
                 });
 
+            p.liveStrokeObserver = ftk::Observer<std::optional<models::LiveStroke> >::create(
+                annotationsModel->observeLiveStroke(),
+                [this](const std::optional<models::LiveStroke>&)
+                {
+                    if (!_p->liveStrokeOwner)
+                    {
+                        setDrawUpdate();
+                    }
+                });
+
             p.mouseSettingsObserver = ftk::Observer<models::MouseSettings>::create(
                 settingsModel->observeMouse(),
                 [this](const models::MouseSettings& value)
@@ -801,7 +816,13 @@ namespace djv
         {}
 
         Viewport::~Viewport()
-        {}
+        {
+            FTK_P();
+            if (p.liveStrokeOwner && p.annotationsModel)
+            {
+                p.annotationsModel->setLiveStroke(std::nullopt);
+            }
+        }
 
         std::shared_ptr<Viewport> Viewport::create(
             const std::shared_ptr<ftk::Context>& context,
@@ -996,10 +1017,22 @@ namespace djv
             p.hudLayout->setGeometry(value);
         }
 
+        namespace
+        {
+            //! Runs on leaving an event handler, whichever way it returns:
+            //! the live stroke given after the event has changed it.
+            struct ScopeExit
+            {
+                std::function<void()> f;
+                ~ScopeExit() { f(); }
+            };
+        }
+
         void Viewport::mouseMoveEvent(ftk::MouseMoveEvent& event)
         {
             tl::ui::Viewport::mouseMoveEvent(event);
             FTK_P();
+            const ScopeExit liveStrokeScope{ [this] { _liveStrokeUpdate(); } };
             if (!p.wipePointerPos.has_value() || *p.wipePointerPos != event.pos)
             {
                 p.wipePointerPos = event.pos;
@@ -1056,6 +1089,7 @@ namespace djv
         void Viewport::mousePressEvent(ftk::MouseClickEvent& event)
         {
             FTK_P();
+            const ScopeExit liveStrokeScope{ [this] { _liveStrokeUpdate(); } };
 
             // The wipe's handles take the left button before the bindings
             // do, plain or with Shift, which snaps the disk: on a handle
@@ -1145,7 +1179,12 @@ namespace djv
                     }
                     _textEnd(true);
                 }
-                switch (p.drawModel->getTool())
+                // A pen turned over rubs out whatever the tool, as it does
+                // in a paint program; the tool stays as it was.
+                const models::DrawTool tool = event.eraser ?
+                    models::DrawTool::Eraser :
+                    p.drawModel->getTool();
+                switch (tool)
                 {
                 case models::DrawTool::Eraser:
                     p.mouse.mode = Private::MouseMode::Erase;
@@ -1189,6 +1228,7 @@ namespace djv
         {
             tl::ui::Viewport::mouseReleaseEvent(event);
             FTK_P();
+            const ScopeExit liveStrokeScope{ [this] { _liveStrokeUpdate(); } };
             if (Private::MouseMode::Draw == p.mouse.mode)
             {
                 // Commit the stroke as one undoable step, unless the press
@@ -1482,6 +1522,7 @@ namespace djv
         void Viewport::keyPressEvent(ftk::KeyEvent& event)
         {
             FTK_P();
+            const ScopeExit liveStrokeScope{ [this] { _liveStrokeUpdate(); } };
             if (p.textEditing)
             {
                 // A key with Ctrl or Cmd types nothing, so it is the
@@ -1571,6 +1612,7 @@ namespace djv
         void Viewport::textEvent(ftk::TextEvent& event)
         {
             FTK_P();
+            const ScopeExit liveStrokeScope{ [this] { _liveStrokeUpdate(); } };
             if (p.textEditing)
             {
                 event.accept = true;
@@ -1751,6 +1793,36 @@ namespace djv
             FTK_P();
             p.stroke.text = p.textModel->getText();
             setDrawUpdate();
+            _liveStrokeUpdate();
+        }
+
+        void Viewport::_liveStrokeUpdate()
+        {
+            FTK_P();
+            std::optional<models::LiveStroke> live;
+            const auto& active = p.filesModel->getActive();
+            if (p.strokeSource >= 0 &&
+                p.strokeSource < static_cast<int>(active.size()) &&
+                p.strokeTime.has_value())
+            {
+                // Drawn or typed: a new stroke, or the selected text written
+                // again in its place.
+                live = models::LiveStroke{ active[p.strokeSource]->id, *p.strokeTime, p.stroke };
+                if (p.textEditingSelection && p.selection.has_value())
+                {
+                    live->replaces = p.selection->index;
+                }
+            }
+            else if (p.selection.has_value() && p.moving.has_value())
+            {
+                live = models::LiveStroke{ p.selection->sourceId, p.selection->time, *p.moving };
+                live->replaces = p.selection->index;
+            }
+            if (live.has_value() || p.liveStrokeOwner)
+            {
+                p.liveStrokeOwner = live.has_value();
+                p.annotationsModel->setLiveStroke(live);
+            }
         }
 
         bool Viewport::_textPress(const ftk::V2I& widgetPos)
@@ -2266,6 +2338,15 @@ namespace djv
             // The strokes already committed: this frame's, and faded, the
             // frames' on either side where the onion skin is on.
             const auto& annotations = p.annotationsModel->getAnnotations();
+            std::optional<models::LiveStroke> live;
+            if (!p.liveStrokeOwner)
+            {
+                live = p.annotationsModel->getLiveStroke();
+                if (live.has_value() && !models::sameTime(live->time, p.currentTime))
+                {
+                    live.reset();
+                }
+            }
             std::optional<OTIO_NS::RationalTime> prev;
             std::optional<OTIO_NS::RationalTime> next;
             if (p.currentTime.has_value() && p.drawModel->isOnionSkin())
@@ -2305,6 +2386,16 @@ namespace djv
                 {
                     const auto& stroke = annotation.strokes[i];
                     const bool selected = selectedHere && p.selection->index == i;
+                    // The stroke another view is moving or writing again is
+                    // drawn from the live stroke, where it is now.
+                    if (live.has_value() &&
+                        live->replaces.has_value() &&
+                        *live->replaces == i &&
+                        live->sourceId == annotation.sourceId &&
+                        models::sameTime(live->time, annotation.time))
+                    {
+                        continue;
+                    }
                     // A stroke being moved or written again is drawn from
                     // the copy below, not from here.
                     if (selected && (p.moving.has_value() || p.textEditingSelection))
@@ -2316,6 +2407,17 @@ namespace djv
                     {
                         _drawSelection(event, index, stroke, scale);
                     }
+                }
+            }
+
+            // What another view is drawing, moving or typing, as it goes;
+            // this view draws its own from its own state below.
+            if (live.has_value())
+            {
+                const int index = sourceIndex(live->sourceId);
+                if (index >= 0 && _sourceShown(index))
+                {
+                    _drawStroke(event, index, live->stroke, sourceScale(index), 1.F, models::TextCaret());
                 }
             }
 

@@ -22,6 +22,22 @@ namespace djv
 {
     namespace models
     {
+        //! A stroke as it is drawn, before it is added: what one view is
+        //! drawing, for the other views of the same files to draw as well
+        //! (a secondary window on a reference monitor).
+        struct DJV_MODELS_API_TYPE LiveStroke
+        {
+            std::string           sourceId;
+            OTIO_NS::RationalTime time;
+            ReviewStroke          stroke;
+            //! The index in getStrokes() of the stroke it stands in for, when
+            //! one is moved or its text written again: drawn here, not there.
+            std::optional<size_t> replaces;
+
+            DJV_MODELS_API bool operator == (const LiveStroke&) const;
+            DJV_MODELS_API bool operator != (const LiveStroke&) const;
+        };
+
         //! The drawing annotations of a review.
         //!
         //! Adding and erasing strokes go through a command stack, so they can be
@@ -116,6 +132,17 @@ namespace djv
 
             //! Remove all the annotations, clearing the undo history.
             DJV_MODELS_API void clear();
+
+            //! \name Live Stroke
+            //! The stroke being drawn, which is not an annotation until it
+            //! is added, and no undo step.
+            ///@{
+
+            DJV_MODELS_API const std::optional<LiveStroke>& getLiveStroke() const;
+            DJV_MODELS_API std::shared_ptr<ftk::IObservable<std::optional<LiveStroke> > > observeLiveStroke() const;
+            DJV_MODELS_API void setLiveStroke(const std::optional<LiveStroke>&);
+
+            ///@}
 
             //! \name Undo
             ///@{

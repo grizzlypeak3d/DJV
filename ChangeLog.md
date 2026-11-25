@@ -8,6 +8,8 @@ Changes:
 * A marker's name and frames can be edited in the Review tool.
 * Annotations can be burned into exported images and movies.
 * Freehand annotations follow pen pressure.
+* A pen's eraser end erases annotations.
+* Annotations show on the secondary window as they are drawn.
 * Annotation widths and text sizes are given for an HD picture and scale
   with the picture, so they look the same at any resolution.
 * Exports go into a queue and run while the work goes on: the file being

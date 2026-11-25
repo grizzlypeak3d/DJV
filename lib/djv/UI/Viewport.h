@@ -170,6 +170,10 @@ namespace djv
             //! The text being typed, from its editing model, drawn again.
             void _textSync();
 
+            //! What this view is drawing, moving or typing, given to the
+            //! annotations model for the other views to draw as it changes.
+            void _liveStrokeUpdate();
+
             //! A press on the text being typed puts the caret there, and
             //! a drag from it selects. False if the press is not on it.
             bool _textPress(const ftk::V2I& widgetPos);

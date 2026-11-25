@@ -44,10 +44,25 @@ namespace djv
             };
         }
 
+        bool LiveStroke::operator == (const LiveStroke& other) const
+        {
+            return
+                sourceId == other.sourceId &&
+                sameTime(time, other.time) &&
+                stroke == other.stroke &&
+                replaces == other.replaces;
+        }
+
+        bool LiveStroke::operator != (const LiveStroke& other) const
+        {
+            return !(*this == other);
+        }
+
         struct AnnotationsModel::Private
         {
             std::shared_ptr<ftk::ObservableList<ReviewAnnotation> > annotations;
             std::shared_ptr<ftk::CommandStack> commandStack;
+            std::shared_ptr<ftk::Observable<std::optional<LiveStroke> > > liveStroke;
         };
 
         void AnnotationsModel::_init()
@@ -55,6 +70,22 @@ namespace djv
             FTK_P();
             p.annotations = ftk::ObservableList<ReviewAnnotation>::create();
             p.commandStack = ftk::CommandStack::create();
+            p.liveStroke = ftk::Observable<std::optional<LiveStroke> >::create();
+        }
+
+        const std::optional<LiveStroke>& AnnotationsModel::getLiveStroke() const
+        {
+            return _p->liveStroke->get();
+        }
+
+        std::shared_ptr<ftk::IObservable<std::optional<LiveStroke> > > AnnotationsModel::observeLiveStroke() const
+        {
+            return _p->liveStroke;
+        }
+
+        void AnnotationsModel::setLiveStroke(const std::optional<LiveStroke>& value)
+        {
+            _p->liveStroke->setIfChanged(value);
         }
 
         AnnotationsModel::AnnotationsModel() :
