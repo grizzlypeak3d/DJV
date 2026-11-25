@@ -102,7 +102,7 @@ The interface and SDR pictures are shown at the display's ordinary white, not br
 
 The [Color picker](tools.html#color-picker) shows the luminance a pixel stands for, in nits.
 
-Not supported: HLG pictures, and HDR metadata, which is neither read from a file nor written by the export.
+Not supported: HLG pictures, and HDR metadata, which is not used for showing the picture nor written by the export; a movie's mastering display and light levels are shown in the **Information** tool.
 
 ## Aspect ratio
 

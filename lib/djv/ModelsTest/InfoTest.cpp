@@ -109,6 +109,50 @@ namespace djv
             FTK_CHECK(find(items, "Audio", "Source Channels") && "6" == find(items, "Audio", "Source Channels")->value);
             FTK_CHECK(!find(items, "Audio", "Source Sample Rate"));
             FTK_CHECK(find(items, "Metadata", "Camera") && "A" == find(items, "Metadata", "Camera")->value);
+
+            // A movie reader's details of the file and its streams go with
+            // the file, the video, and the audio; the frame's HDR data is
+            // the renderer's.
+            {
+                tl::IOInfo movie = info;
+                movie.tags["File/Format"] = "QuickTime / MOV";
+                movie.tags["Video/Profile"] = "HQ";
+                movie.tags["Color Primaries"] = "bt709";
+                movie.tags["Audio/Channel Layout"] = "stereo";
+                movie.tags["hdr"] = "{}";
+                // The frame's tags come from the video, without the audio's.
+                ftk::ImageTags frameTags = movie.tags;
+                frameTags.erase("Audio/Channel Layout");
+                const auto movieItems = models::getInfo(ftk::Path("/shots/a.mov"), movie, 0, frameTags);
+                FTK_CHECK(find(movieItems, "File", "Format") &&
+                    "QuickTime / MOV" == find(movieItems, "File", "Format")->value);
+                FTK_CHECK(find(movieItems, "Video", "Profile") &&
+                    "HQ" == find(movieItems, "Video", "Profile")->value);
+                FTK_CHECK(find(movieItems, "Video", "Color Primaries"));
+                FTK_CHECK(find(movieItems, "Audio", "Channel Layout") &&
+                    "stereo" == find(movieItems, "Audio", "Channel Layout")->value);
+                for (const auto& item : movieItems)
+                {
+                    FTK_CHECK("Metadata" != item.section ||
+                        ("Camera" == item.name));
+                }
+                // Still in section order, the details after each section's
+                // own rows.
+                std::vector<std::string> order;
+                for (const auto& item : movieItems)
+                {
+                    if (order.empty() || order.back() != item.section)
+                    {
+                        order.push_back(item.section);
+                    }
+                }
+                const std::vector<std::string> result = { "File", "Video", "Audio", "Metadata" };
+                FTK_CHECK(result == order);
+                FTK_CHECK("Profile" == std::find_if(
+                    movieItems.rbegin(),
+                    movieItems.rend(),
+                    [](const models::InfoItem& value) { return "Video" == value.section; })->name);
+            }
         }
 
         void InfoTest::_header()

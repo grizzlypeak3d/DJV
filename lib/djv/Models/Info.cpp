@@ -153,7 +153,16 @@ namespace djv
             const ftk::ImageTags& frameTags)
         {
             std::vector<InfoItem> out;
-            const ftk::ImageTags& tags = !frameTags.empty() ? frameTags : info.tags;
+            // The frame's tags, and the audio's: the audio is not part of
+            // the frame.
+            ftk::ImageTags tags = !frameTags.empty() ? frameTags : info.tags;
+            for (const auto& tag : info.tags)
+            {
+                if (0 == tag.first.compare(0, 6, "Audio/"))
+                {
+                    tags[tag.first] = tag.second;
+                }
+            }
 
             // Name and directory rather than one full path: the name is
             // what somebody scanning the tool wants first, and the two
@@ -313,8 +322,65 @@ namespace djv
                     return "File" == item.section || "Header" == item.section;
                 });
 
+            // The reader's details of the file and its streams go with
+            // the file, the video, and the audio, after what is there.
+            std::vector<InfoItem> details;
             for (const auto& tag : tags)
             {
+                for (const auto& section : { "File", "Video", "Audio" })
+                {
+                    const std::string prefix = std::string(section) + "/";
+                    if (0 == tag.first.compare(0, prefix.size(), prefix))
+                    {
+                        details.push_back({ section, tag.first.substr(prefix.size()), tag.second });
+                    }
+                }
+                if ("Color Primaries" == tag.first ||
+                    "Color Transfer" == tag.first ||
+                    "Color Matrix" == tag.first)
+                {
+                    details.push_back({ "Video", tag.first, tag.second });
+                }
+            }
+            for (const auto& item : details)
+            {
+                auto i = std::find_if(
+                    out.rbegin(),
+                    out.rend(),
+                    [&item](const InfoItem& value)
+                    {
+                        return value.section == item.section;
+                    });
+                if (i != out.rend())
+                {
+                    out.insert(i.base(), item);
+                }
+                else
+                {
+                    // A section with nothing else in it goes in its place.
+                    const auto& sections = getInfoSections();
+                    const auto s = std::find(sections.begin(), sections.end(), item.section);
+                    auto j = std::find_if(
+                        out.begin(),
+                        out.end(),
+                        [&](const InfoItem& value)
+                        {
+                            return std::find(sections.begin(), sections.end(), value.section) > s;
+                        });
+                    out.insert(j, item);
+                }
+            }
+
+            for (const auto& tag : tags)
+            {
+                // Given above, or the reader's own: the HDR metadata of a
+                // movie's frame, for the renderer.
+                if (tl::isSourceTag(tag.first) ||
+                    "Color Primaries" == tag.first ||
+                    "Color Transfer" == tag.first ||
+                    "Color Matrix" == tag.first ||
+                    "hdr" == tag.first)
+                    continue;
                 if (hasHeader)
                 {
                     if (isHeaderKey(tag.first) ||

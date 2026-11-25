@@ -37,6 +37,9 @@ Changes:
 * Add View > Data Window, an outline of an OpenEXR file's data window.
 * The Information tool shows the OpenEXR header of every part of a file, for
   the current frame, and more attribute types.
+* The Information tool shows a movie's container, codec, and stream details:
+  profile, FourCC, bit rate and depth, field order, rotation, HDR mastering
+  metadata, and the audio channel layout.
 * Read WebP images, still and animated (#867).
 * Read HEIC and HEIF images on macOS.
 * Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command

@@ -28,6 +28,8 @@ The **Information** tool displays the metadata of the current file: the file nam
 
 For an OpenEXR file the **Header** section comes first: the data and display windows with their sizes, the channels, the compression, and the tiles. A file of several parts, such as render passes, lists each part with its name, and marks the one the layer shown is read from; a part's other attributes are in **Metadata**, under "Part N/". The information is the current frame's, since each frame of a sequence has its own header.
 
+For a movie, the **File**, **Video**, and **Audio** sections add what the file says of itself and its streams: the container format and bit rate, the codec's profile and FourCC, the bit depth, field order, chroma siting, rotation, HDR mastering metadata, the audio's channel layout, and each stream's own tags, such as its handler and encoder. These are not written into exported files, which have their own.
+
 Very long values, such as Cryptomatte manifests, are shortened in the tool; **Copy** copies them whole.
 
 Locations: **Tools** menu, **Tools** toolbar
