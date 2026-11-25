@@ -34,6 +34,9 @@ Changes:
 * Add a frame guide and safe areas, in the View menu and the View tool
   (#962).
 * Add a widget to control the compare wipe (#957, #966, #967).
+* Add View > Data Window, an outline of an OpenEXR file's data window.
+* The Information tool shows the OpenEXR header of every part of a file, for
+  the current frame, and more attribute types.
 * Read WebP images, still and animated (#867).
 * Read HEIC and HEIF images on macOS.
 * Movies can be exported as WebM, with AV1, or VP9 through the FFmpeg command

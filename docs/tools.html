@@ -53,6 +53,8 @@
 <p><img src="assets/tools.svg" alt="Tools"></p>
 <h2 id="information">Information</h2>
 <p>The <strong>Information</strong> tool displays the metadata of the current file: the file name and directory, video and audio format details (codec, resolution, pixel type, sample rate, and so on), and any tags embedded in the file, such as camera make and model or creation date.</p>
+<p>For an OpenEXR file the <strong>Header</strong> section comes first: the data and display windows with their sizes, the channels, the compression, and the tiles. A file of several parts, such as render passes, lists each part with its name, and marks the one the layer shown is read from; a part's other attributes are in <strong>Metadata</strong>, under "Part N/". The information is the current frame's, since each frame of a sequence has its own header.</p>
+<p>Very long values, such as Cryptomatte manifests, are shortened in the tool; <strong>Copy</strong> copies them whole.</p>
 <p>Locations: <strong>Tools</strong> menu, <strong>Tools</strong> toolbar</p>
 <p>Open it with <strong>Tools &gt; Information</strong> (<kbd>F7</kbd>).</p>
 <p>Use the search box to filter the list to matching entries: each word of the search is matched on its own against the names and values, so <strong>name duration</strong> shows both rows. The <strong>Copy</strong> button copies the information, filtered the same way, to the clipboard.</p>

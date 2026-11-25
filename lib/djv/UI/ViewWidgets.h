@@ -265,6 +265,33 @@ namespace djv
             FTK_PRIVATE();
         };
 
+        //! View data window widget: the outline of the pixels a file holds.
+        class DJV_UI_API_TYPE ViewDataWindowWidget : public ftk::IContainer
+        {
+            FTK_NON_COPYABLE(ViewDataWindowWidget);
+
+        protected:
+            void _init(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent);
+
+            ViewDataWindowWidget();
+
+        public:
+            DJV_UI_API virtual ~ViewDataWindowWidget();
+
+            DJV_UI_API static std::shared_ptr<ViewDataWindowWidget> create(
+                const std::shared_ptr<ftk::Context>&,
+                const std::shared_ptr<models::ViewportModel>&,
+                const std::shared_ptr<IWidget>& parent = nullptr);
+
+            DJV_UI_API std::shared_ptr<ftk::CheckBox> getEnabledCheckBox() const;
+
+        private:
+            FTK_PRIVATE();
+        };
+
         //! View clipping warning widget.
         class DJV_UI_API_TYPE ViewClippingWarningWidget : public ftk::IContainer
         {

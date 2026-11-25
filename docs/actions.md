@@ -175,6 +175,7 @@ The commands are how the menu items are run from outside the window: with
 | Center Marker |  | `View/CenterMarker` | Toggle the center marker. |
 | Frame Guide |  | `View/FrameGuide` | Toggle the frame guide, the frame of another aspect ratio with the rest masked. |
 | Safe Areas |  | `View/SafeAreas` | Toggle the action and title safe areas. |
+| Data Window |  | `View/DataWindow` | Toggle the data window outline: the pixels an OpenEXR file holds, which can be less than the picture or reach outside it. |
 | Clipping Warning |  | `View/ClippingWarning` | Cover pixels outside the display range with a warning color: red above, magenta below. |
 | HUD / Information Display | <kbd>Ctrl+H</kbd> | `View/HUD` | Toggle the HUD / information display. |
 | Aspect Ratio > Default |  | `View/AspectRatio_0` | Set the aspect ratio to the default. |

@@ -26,6 +26,7 @@ namespace djv
         void InfoTest::run()
         {
             _rows();
+            _header();
             _filter();
         }
 
@@ -53,7 +54,7 @@ namespace djv
             FTK_CHECK(models::getInfo(ftk::Path(), tl::IOInfo()).empty());
 
             const std::vector<std::string> sections = models::getInfoSections();
-            FTK_CHECK(4 == sections.size());
+            FTK_CHECK(5 == sections.size());
             FTK_CHECK("File" == sections.front());
             FTK_CHECK("Metadata" == sections.back());
 
@@ -72,7 +73,7 @@ namespace djv
             info.tags["Camera"] = "A";
             const auto items = models::getInfo(ftk::Path("/shots/a.mov"), info);
 
-            // In section order.
+            // In section order; a movie has no header.
             std::vector<std::string> order;
             for (const auto& item : items)
             {
@@ -81,7 +82,8 @@ namespace djv
                     order.push_back(item.section);
                 }
             }
-            FTK_CHECK(sections == order);
+            const std::vector<std::string> noHeader = { "File", "Video", "Audio", "Metadata" };
+            FTK_CHECK(noHeader == order);
 
             FTK_CHECK(find(items, "File", "Name") && "a.mov" == find(items, "File", "Name")->value);
             FTK_CHECK(!find(items, "File", "Frames"));
@@ -107,6 +109,90 @@ namespace djv
             FTK_CHECK(find(items, "Audio", "Source Channels") && "6" == find(items, "Audio", "Source Channels")->value);
             FTK_CHECK(!find(items, "Audio", "Source Sample Rate"));
             FTK_CHECK(find(items, "Metadata", "Camera") && "A" == find(items, "Metadata", "Camera")->value);
+        }
+
+        void InfoTest::_header()
+        {
+            tl::IOInfo info;
+            info.video.push_back(ftk::ImageInfo(16, 16, ftk::ImageType::RGBA_F16));
+
+            // One part: the header rows, out of the metadata.
+            info.tags["Data Window"] = "2 3 9 12";
+            info.tags["Display Window"] = "0 0 15 15";
+            info.tags["Channels"] = "A B G R";
+            info.tags["Compression"] = "PIZ";
+            info.tags["Line Order"] = "Increasing Y";
+            {
+                const auto items = models::getInfo(ftk::Path("/renders/a.exr"), info);
+                FTK_CHECK(find(items, "Header", "Data Window") &&
+                    "2 3 9 12 (8 x 10)" == find(items, "Header", "Data Window")->value);
+                FTK_CHECK(find(items, "Header", "Display Window") &&
+                    "0 0 15 15 (16 x 16)" == find(items, "Header", "Display Window")->value);
+                FTK_CHECK(find(items, "Header", "Compression"));
+                FTK_CHECK(!find(items, "Metadata", "Data Window"));
+                FTK_CHECK(!find(items, "Header", "Parts"));
+                FTK_CHECK(find(items, "Metadata", "Line Order"));
+                // After the file, before the video.
+                std::vector<std::string> order;
+                for (const auto& item : items)
+                {
+                    if (order.empty() || order.back() != item.section)
+                    {
+                        order.push_back(item.section);
+                    }
+                }
+                const std::vector<std::string> result = { "File", "Header", "Video", "Metadata" };
+                FTK_CHECK(result == order);
+            }
+
+            // Two parts, the frame from the second.
+            info.tags["Name"] = "beauty";
+            info.tags["Parts"] = "2";
+            info.tags["Part 1/Name"] = "depth";
+            info.tags["Part 1/Data Window"] = "0 0 15 15";
+            info.tags["Part 1/Display Window"] = "0 0 15 15";
+            info.tags["Part 1/Channels"] = "Z";
+            info.tags["Part 1/Compression"] = "ZIP";
+            info.tags["Part 1/renderer"] = "depth pass";
+            {
+                ftk::ImageTags frameTags = info.tags;
+                frameTags["Part"] = "1";
+                // The frame's own: it is not the file's first frame.
+                frameTags["Data Window"] = "4 4 7 7";
+                const auto items = models::getInfo(ftk::Path("/renders/a.exr"), info, 0, frameTags);
+                FTK_CHECK(find(items, "Header", "Parts") && "2" == find(items, "Header", "Parts")->value);
+                FTK_CHECK(find(items, "Header", "Part 0") && "beauty" == find(items, "Header", "Part 0")->value);
+                FTK_CHECK(find(items, "Header", "Part 1") && "depth (shown)" == find(items, "Header", "Part 1")->value);
+                FTK_CHECK(find(items, "Header", "  Data Window") &&
+                    "4 4 7 7 (4 x 4)" == find(items, "Header", "  Data Window")->value);
+                size_t channels = 0;
+                for (const auto& item : items)
+                {
+                    if ("Header" == item.section && "  Channels" == item.name)
+                    {
+                        ++channels;
+                    }
+                }
+                FTK_CHECK(2 == channels);
+                // A part's other tags stay in the metadata.
+                FTK_CHECK(find(items, "Metadata", "Part 1/renderer"));
+                FTK_CHECK(!find(items, "Metadata", "Part 1/Channels"));
+                FTK_CHECK(!find(items, "Metadata", "Part"));
+                FTK_CHECK(!find(items, "Metadata", "Parts"));
+                FTK_CHECK(!find(items, "Metadata", "Name"));
+            }
+
+            // The frame tags come from the A side's first layer.
+            {
+                FTK_CHECK(models::getFrameTags({}).empty());
+                tl::VideoFrame frame;
+                tl::VideoLayer layer;
+                layer.image = ftk::Image::create(ftk::ImageInfo(1, 1, ftk::ImageType::L_U8));
+                layer.image->setTags({ { "Part", "1" } });
+                frame.layers.push_back(layer);
+                const auto tags = models::getFrameTags({ frame });
+                FTK_CHECK(1 == tags.size() && "1" == tags.at("Part"));
+            }
         }
 
         void InfoTest::_filter()

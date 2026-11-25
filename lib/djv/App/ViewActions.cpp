@@ -315,6 +315,20 @@ namespace djv
                 });
 
             _addCheckCommand(
+                "DataWindow",
+                "Toggle the data window outline: the pixels an OpenEXR file holds, which can be less than the picture or reach outside it.",
+                [appWeak](const nlohmann::json& args)
+                {
+                    const bool value = args.at("value").get<bool>();
+                    if (auto app = appWeak.lock())
+                    {
+                        auto options = app->getViewportModel()->getForegroundOptions();
+                        options.dataWindow.enabled = value;
+                        app->getViewportModel()->setForegroundOptions(options);
+                    }
+                });
+
+            _addCheckCommand(
                 "ClippingWarning",
                 "Cover pixels outside the display range with a warning color: red above, magenta below.",
                 [appWeak](const nlohmann::json& args)
@@ -448,6 +462,9 @@ namespace djv
             _actions["SafeAreas"] = ftk::Action::create(
                 "Safe Areas",
                 _checkCommand("SafeAreas"));
+            _actions["DataWindow"] = ftk::Action::create(
+                "Data Window",
+                _checkCommand("DataWindow"));
             _actions["ClippingWarning"] = ftk::Action::create(
                 "Clipping Warning",
                 _checkCommand("ClippingWarning"));
@@ -497,6 +514,7 @@ namespace djv
             _addShortcut("CenterMarker");
             _addShortcut("FrameGuide");
             _addShortcut("SafeAreas");
+            _addShortcut("DataWindow");
             _addShortcut("ClippingWarning");
             _addShortcut("HUD");
 
@@ -559,6 +577,7 @@ namespace djv
                     _actions["CenterMarker"]->setChecked(value.centerMarker.enabled);
                     _actions["FrameGuide"]->setChecked(value.frameGuide.enabled);
                     _actions["SafeAreas"]->setChecked(value.safeAreas.enabled);
+                    _actions["DataWindow"]->setChecked(value.dataWindow.enabled);
                     _actions["ClippingWarning"]->setChecked(value.clippingWarning.enabled);
                 });
 

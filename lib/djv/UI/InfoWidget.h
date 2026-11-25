@@ -7,6 +7,8 @@
 
 #include <ftk/UI/IContainer.h>
 
+#include <ftk/Core/Image.h>
+
 namespace ftk
 {
     class Settings;
@@ -48,6 +50,7 @@ namespace djv
 
         private:
             void _saveSettings();
+            void _frameTagsUpdate(const ftk::ImageTags&);
             void _widgetUpdate();
 
             FTK_PRIVATE();

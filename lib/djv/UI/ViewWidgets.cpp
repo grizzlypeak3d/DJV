@@ -1090,6 +1090,101 @@ namespace djv
             return _p->enabledCheckBox;
         }
 
+        struct ViewDataWindowWidget::Private
+        {
+            std::shared_ptr<ftk::CheckBox> enabledCheckBox;
+            std::shared_ptr<ftk::IntEditSlider> lineWidthEdit;
+            std::shared_ptr<ftk::ColorSwatch> colorSwatch;
+            std::shared_ptr<ftk::FormLayout> layout;
+
+            std::shared_ptr<ftk::Observer<tl::ForegroundOptions> > optionsObservers;
+        };
+
+        void ViewDataWindowWidget::_init(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<ftk::IWidget>& parent)
+        {
+            ftk::IContainer::_init(context, "djv::app::ViewDataWindowWidget", parent);
+            FTK_P();
+
+            p.enabledCheckBox = ftk::CheckBox::create(context);
+            p.enabledCheckBox->setTooltip("Toggle whether the data window outline is enabled.");
+            ftk::setScreenshotTag(p.enabledCheckBox, "View.DataWindow.Enabled");
+
+            p.lineWidthEdit = ftk::IntEditSlider::create(context);
+            p.lineWidthEdit->setRange(1, 10);
+            ftk::setScreenshotTag(p.lineWidthEdit, "View.DataWindow.LineWidth");
+
+            p.colorSwatch = ftk::ColorSwatch::create(context);
+            p.colorSwatch->setEditable(true);
+            p.colorSwatch->setHAlign(ftk::HAlign::Left);
+            ftk::setScreenshotTag(p.colorSwatch, "View.DataWindow.Color");
+
+            p.layout = ftk::FormLayout::create(context);
+            _setWidget(p.layout);
+            p.layout->setMarginRole(ftk::SizeRole::Margin);
+            p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+            p.layout->addRow("Line width:", p.lineWidthEdit);
+            p.layout->addRow("Color:", p.colorSwatch);
+
+            p.optionsObservers = ftk::Observer<tl::ForegroundOptions>::create(
+                viewportModel->observeForegroundOptions(),
+                [this](const tl::ForegroundOptions& value)
+                {
+                    FTK_P();
+                    p.enabledCheckBox->setChecked(value.dataWindow.enabled);
+                    p.lineWidthEdit->setValue(value.dataWindow.lineWidth);
+                    p.colorSwatch->setColor(value.dataWindow.color);
+                });
+
+            p.enabledCheckBox->setCheckedCallback(
+                [viewportModel](bool value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.dataWindow.enabled = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.lineWidthEdit->setCallback(
+                [viewportModel](int value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.dataWindow.lineWidth = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+
+            p.colorSwatch->setCallback(
+                [viewportModel](const ftk::Color4F& value)
+                {
+                    auto options = viewportModel->getForegroundOptions();
+                    options.dataWindow.color = value;
+                    viewportModel->setForegroundOptions(options);
+                });
+        }
+
+        ViewDataWindowWidget::ViewDataWindowWidget() :
+            _p(new Private)
+        {}
+
+        ViewDataWindowWidget::~ViewDataWindowWidget()
+        {}
+
+        std::shared_ptr<ViewDataWindowWidget> ViewDataWindowWidget::create(
+            const std::shared_ptr<ftk::Context>& context,
+            const std::shared_ptr<models::ViewportModel>& viewportModel,
+            const std::shared_ptr<IWidget>& parent)
+        {
+            auto out = std::shared_ptr<ViewDataWindowWidget>(new ViewDataWindowWidget);
+            out->_init(context, viewportModel, parent);
+            return out;
+        }
+
+        std::shared_ptr<ftk::CheckBox> ViewDataWindowWidget::getEnabledCheckBox() const
+        {
+            return _p->enabledCheckBox;
+        }
+
         struct ViewFrameGuideWidget::Private
         {
             std::shared_ptr<ftk::CheckBox> enabledCheckBox;

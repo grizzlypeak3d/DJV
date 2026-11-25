@@ -3,8 +3,11 @@
 
 #include <djv/Models/Info.h>
 
+#include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
 
+#include <algorithm>
+#include <cctype>
 #include <sstream>
 
 namespace djv
@@ -51,17 +54,106 @@ namespace djv
         {
             static const std::vector<std::string> out =
             {
-                "File", "Video", "Audio", "Metadata"
+                "File", "Header", "Video", "Audio", "Metadata"
             };
+            return out;
+        }
+
+        namespace
+        {
+            //! The header tags, in the order they are shown.
+            const std::vector<std::string>& getHeaderKeys()
+            {
+                static const std::vector<std::string> out =
+                {
+                    "Name",
+                    "Type",
+                    "View",
+                    "Data Window",
+                    "Display Window",
+                    "Channels",
+                    "Compression",
+                    "Tile"
+                };
+                return out;
+            }
+
+            bool isHeaderKey(const std::string& key)
+            {
+                const auto& keys = getHeaderKeys();
+                return std::find(keys.begin(), keys.end(), key) != keys.end();
+            }
+
+            //! A window, "x0 y0 x1 y1", with its size after it.
+            std::string window(const std::string& value)
+            {
+                std::stringstream ss(value);
+                int x0 = 0;
+                int y0 = 0;
+                int x1 = 0;
+                int y1 = 0;
+                if (!(ss >> x0 >> y0 >> x1 >> y1))
+                {
+                    return value;
+                }
+                return ftk::Format("{0} ({1} x {2})").
+                    arg(value).
+                    arg(x1 - x0 + 1).
+                    arg(y1 - y0 + 1);
+            }
+
+            std::string headerValue(const std::string& key, const std::string& value)
+            {
+                return "Data Window" == key || "Display Window" == key ?
+                    window(value) :
+                    value;
+            }
+
+            //! The part a tag is of, "Part N/", and the tag without it.
+            bool splitPart(const std::string& key, int& part, std::string& name)
+            {
+                if (0 != key.compare(0, 5, "Part "))
+                {
+                    return false;
+                }
+                const size_t slash = key.find('/', 5);
+                if (std::string::npos == slash || 5 == slash)
+                {
+                    return false;
+                }
+                for (size_t i = 5; i < slash; ++i)
+                {
+                    if (!std::isdigit(static_cast<unsigned char>(key[i])))
+                    {
+                        return false;
+                    }
+                }
+                part = std::atoi(key.substr(5, slash - 5).c_str());
+                name = key.substr(slash + 1);
+                return true;
+            }
+        }
+
+        ftk::ImageTags getFrameTags(const std::vector<tl::VideoFrame>& frames)
+        {
+            ftk::ImageTags out;
+            if (!frames.empty() &&
+                !frames.front().layers.empty() &&
+                frames.front().layers.front().image)
+            {
+                out = frames.front().layers.front().image->getTags();
+            }
             return out;
         }
 
         std::vector<InfoItem> getInfo(
             const ftk::Path& path,
             const tl::IOInfo& info,
-            int videoLayer)
+            int videoLayer,
+            const ftk::ImageTags& frameTags)
         {
             std::vector<InfoItem> out;
+            const ftk::ImageTags& tags = !frameTags.empty() ? frameTags : info.tags;
 
             // Name and directory rather than one full path: the name is
             // what somebody scanning the tool wants first, and the two
@@ -157,8 +249,83 @@ namespace djv
                 }
             }
 
-            for (const auto& tag : info.tags)
+            // The header, given by the OpenEXR reader: the first part's tags,
+            // and for a file of more than one part, each other part's.
+            std::vector<InfoItem> header;
+            const bool hasHeader =
+                tags.find("Data Window") != tags.end() ||
+                tags.find("Parts") != tags.end();
+            int parts = 1;
+            if (const auto i = tags.find("Parts"); i != tags.end())
             {
+                parts = std::max(1, std::atoi(i->second.c_str()));
+            }
+            if (hasHeader)
+            {
+                int shown = -1;
+                if (const auto i = tags.find("Part"); i != tags.end())
+                {
+                    shown = std::atoi(i->second.c_str());
+                }
+                if (parts > 1)
+                {
+                    header.push_back({ "Header", "Parts", str(parts) });
+                }
+                for (int part = 0; part < parts; ++part)
+                {
+                    const std::string prefix = part > 0 ?
+                        std::string(ftk::Format("Part {0}/").arg(part)) :
+                        std::string();
+                    const std::string indent = parts > 1 ? "  " : "";
+                    if (parts > 1)
+                    {
+                        std::string value;
+                        if (const auto i = tags.find(prefix + "Name"); i != tags.end())
+                        {
+                            value = i->second;
+                        }
+                        if (part == shown)
+                        {
+                            value += value.empty() ? "(shown)" : " (shown)";
+                        }
+                        header.push_back({ "Header", ftk::Format("Part {0}").arg(part), value });
+                    }
+                    for (const auto& key : getHeaderKeys())
+                    {
+                        // The name is the part's row when there are parts.
+                        if (parts > 1 && "Name" == key)
+                            continue;
+                        const auto i = tags.find(prefix + key);
+                        if (i != tags.end())
+                        {
+                            header.push_back({ "Header", indent + key, headerValue(key, i->second) });
+                        }
+                    }
+                }
+            }
+            out.insert(out.end(), header.begin(), header.end());
+            // In section order: the header goes after the file.
+            std::stable_partition(
+                out.begin(),
+                out.end(),
+                [](const InfoItem& item)
+                {
+                    return "File" == item.section || "Header" == item.section;
+                });
+
+            for (const auto& tag : tags)
+            {
+                if (hasHeader)
+                {
+                    if (isHeaderKey(tag.first) ||
+                        "Parts" == tag.first ||
+                        "Part" == tag.first)
+                        continue;
+                    int part = 0;
+                    std::string name;
+                    if (splitPart(tag.first, part, name) && isHeaderKey(name))
+                        continue;
+                }
                 out.push_back({ "Metadata", tag.first, tag.second });
             }
             return out;

@@ -26,6 +26,10 @@ The **Files**, **View**, **Color**, **Export**, **Audio**, and **Settings** tool
 
 The **Information** tool displays the metadata of the current file: the file name and directory, video and audio format details (codec, resolution, pixel type, sample rate, and so on), and any tags embedded in the file, such as camera make and model or creation date.
 
+For an OpenEXR file the **Header** section comes first: the data and display windows with their sizes, the channels, the compression, and the tiles. A file of several parts, such as render passes, lists each part with its name, and marks the one the layer shown is read from; a part's other attributes are in **Metadata**, under "Part N/". The information is the current frame's, since each frame of a sequence has its own header.
+
+Very long values, such as Cryptomatte manifests, are shortened in the tool; **Copy** copies them whole.
+
 Locations: **Tools** menu, **Tools** toolbar
 
 Open it with **Tools > Information** (<kbd>F7</kbd>).

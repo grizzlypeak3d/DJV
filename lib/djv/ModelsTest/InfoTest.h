@@ -21,6 +21,7 @@ namespace djv
 
         private:
             void _rows();
+            void _header();
             void _filter();
         };
     }

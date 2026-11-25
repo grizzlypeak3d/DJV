@@ -174,6 +174,12 @@ Neither has a shortcut to start with; one can be given in the **Keyboard Shortcu
 
 Locations: **View** menu, **View** tool
 
+## Data window
+
+**View > Data Window** outlines the pixels an OpenEXR file holds, its data window, which a render can make smaller than the picture or reach outside it. The outline follows each frame, so a frame whose bounding box is cropped or too big shows at once, and for a file of several parts it is the part of the layer shown. Its line width and color can be customized. It has no shortcut to start with.
+
+Locations: **View** menu, **View** tool
+
 ## Clipping warning
 
 **View > Clipping Warning** covers pixels outside a range in a warning color: red above the range, magenta below it. **Mode** sets what is compared: **Any Channel** flags a pixel when any of red, green, and blue is outside the range, **All Channels** only when all three are, and **Luminance** compares the brightness of the pixel, with the Rec. 709 weights. The range is checked on the values as they are displayed, after the color management and the other adjustments. The default range of 0 to 1 marks what the display cannot show; set it to 0.063 and 0.922 (16 and 235 out of 255) to mark the video legal range. The color picker reads the pixel under the warning.

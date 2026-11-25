@@ -19,6 +19,8 @@
 #include <ftk/Core/Path.h>
 #include <ftk/Core/String.h>
 
+#include <chrono>
+
 namespace djv
 {
     namespace ui
@@ -29,6 +31,12 @@ namespace djv
 
             tl::IOInfo info;
             int videoLayer = 0;
+            //! The tags of the frame shown, and when the text was last
+            //! rebuilt for them.
+            ftk::ImageTags frameTags;
+            std::chrono::steady_clock::time_point frameTagsTime;
+            bool frameTagsPending = false;
+            std::vector<models::InfoItem> items;
             ftk::Path path;
             std::string search;
 
@@ -42,7 +50,103 @@ namespace djv
 
             std::shared_ptr<ftk::Observer<std::string> > mediaReferenceKeyObserver;
             std::shared_ptr<ftk::Observer<int> > videoLayerObserver;
+            std::shared_ptr<ftk::ListObserver<tl::VideoFrame> > currentVideoObserver;
+            std::shared_ptr<ftk::Observer<tl::Playback> > playbackObserver;
         };
+
+        namespace
+        {
+            //! The longest a value is shown at in the tool, in characters
+            //! and in lines. A Cryptomatte manifest or a framing decision
+            //! list can run to megabytes on one line. Copy gives the whole.
+            const size_t valueCharsMax = 300;
+            const size_t valueLinesMax = 20;
+
+            //! The text of each section: the values line up in one column
+            //! across the sections, so the tool and the copied text read as
+            //! one document (#37). Metadata joins the column while its keys
+            //! fit, and pads by itself when they do not: the keys are
+            //! foreign and can be very long, and a single camera tag should
+            //! not push every value to the right margin.
+            std::map<std::string, std::vector<std::string> > getText(
+                const std::vector<std::string>& sectionNames,
+                const std::vector<models::InfoItem>& items,
+                bool shorten)
+            {
+                typedef std::vector<std::pair<std::string, std::string> > Pairs;
+                std::map<std::string, Pairs> kept;
+                size_t sharedSize = 0;
+                for (const auto& item : items)
+                {
+                    kept[item.section].push_back({ item.name, item.value });
+                    if (item.section != "Metadata")
+                    {
+                        sharedSize = std::max(sharedSize, item.name.size() + 2);
+                    }
+                }
+                std::map<std::string, std::vector<std::string> > out;
+                for (const auto& name : sectionNames)
+                {
+                    size_t maxSize = sharedSize;
+                    if ("Metadata" == name)
+                    {
+                        size_t metadataSize = 0;
+                        for (const auto& i : kept[name])
+                        {
+                            metadataSize = std::max(metadataSize, i.first.size() + 2);
+                        }
+                        if (metadataSize > sharedSize)
+                        {
+                            maxSize = metadataSize;
+                        }
+                    }
+
+                    std::vector<std::string>& text = out[name];
+                    for (const auto& i : kept[name])
+                    {
+                        std::string first = i.first + ": ";
+                        first.resize(std::max(maxSize, first.size()), ' ');
+                        // A value can have newlines in it -- descriptions and
+                        // synopses do. The text edit takes one line per entry,
+                        // so give it one, with the rest lined up under the
+                        // first rather than running back to the margin and
+                        // over the following name.
+                        std::vector<std::string> lines = ftk::splitLines(i.second);
+                        if (shorten)
+                        {
+                            if (lines.size() > valueLinesMax)
+                            {
+                                const size_t more = lines.size() - valueLinesMax;
+                                lines.resize(valueLinesMax);
+                                lines.push_back(ftk::Format("... ({0} more lines)").arg(more));
+                            }
+                            for (auto& line : lines)
+                            {
+                                if (line.size() > valueCharsMax)
+                                {
+                                    const size_t size = line.size();
+                                    line.resize(valueCharsMax);
+                                    line += ftk::Format("... ({0} characters)").arg(size);
+                                }
+                            }
+                        }
+                        if (lines.empty())
+                        {
+                            text.emplace_back(first);
+                        }
+                        else
+                        {
+                            text.emplace_back(first + lines.front());
+                            for (size_t j = 1; j < lines.size(); ++j)
+                            {
+                                text.emplace_back(std::string(first.size(), ' ') + lines[j]);
+                            }
+                        }
+                    }
+                }
+                return out;
+            }
+        }
 
         void InfoWidget::_init(
             const std::shared_ptr<ftk::Context>& context,
@@ -118,12 +222,15 @@ namespace djv
                     FTK_P();
                     auto context = getContext();
                     auto clipboardSystem = context->getSystem<ftk::ClipboardSystem>();
+                    // The whole of each value, which the tool shortens.
+                    const auto sections = getText(p.sectionNames, p.items, false);
                     std::vector<std::string> text;
                     for (const auto& name : p.sectionNames)
                     {
-                        const auto& lines = p.textEdits[name]->getText();
-                        if (lines.empty())
+                        const auto i = sections.find(name);
+                        if (i == sections.end() || i->second.empty())
                             continue;
+                        const auto& lines = i->second;
                         if (!text.empty())
                         {
                             text.push_back(std::string());
@@ -179,6 +286,10 @@ namespace djv
             p.path = value ? value->getPath() : ftk::Path();
             p.mediaReferenceKeyObserver.reset();
             p.videoLayerObserver.reset();
+            p.currentVideoObserver.reset();
+            p.playbackObserver.reset();
+            p.frameTags.clear();
+            p.frameTagsPending = false;
             if (value)
             {
                 // The information describes the media reference being
@@ -191,6 +302,9 @@ namespace djv
                     {
                         FTK_P();
                         p.info = p.player->getIOInfo();
+                        // Another file's frames are on the way.
+                        p.frameTags.clear();
+                        p.frameTagsPending = false;
                         _widgetUpdate();
                     });
 
@@ -204,6 +318,27 @@ namespace djv
                         p.videoLayer = layer;
                         _widgetUpdate();
                     });
+
+                // And on the frame: each frame of a sequence has tags of
+                // its own.
+                p.currentVideoObserver = ftk::ListObserver<tl::VideoFrame>::create(
+                    value->observeCurrentVideo(),
+                    [this](const std::vector<tl::VideoFrame>& value)
+                    {
+                        _frameTagsUpdate(models::getFrameTags(value));
+                    });
+                p.playbackObserver = ftk::Observer<tl::Playback>::create(
+                    value->observePlayback(),
+                    [this](tl::Playback value)
+                    {
+                        FTK_P();
+                        if (tl::Playback::Stop == value && p.frameTagsPending)
+                        {
+                            p.frameTagsPending = false;
+                            p.frameTagsTime = std::chrono::steady_clock::now();
+                            _widgetUpdate();
+                        }
+                    });
             }
             else
             {
@@ -213,72 +348,45 @@ namespace djv
             }
         }
 
+        void InfoWidget::_frameTagsUpdate(const ftk::ImageTags& value)
+        {
+            FTK_P();
+            if (value.empty() || value == p.frameTags)
+                return;
+            p.frameTags = value;
+            // While playing the tags can change every frame, a timecode
+            // does, and the text is not rebuilt that often: a few times a
+            // second, and once more when playback stops.
+            const auto now = std::chrono::steady_clock::now();
+            if (p.player &&
+                p.player->getPlayback() != tl::Playback::Stop &&
+                now - p.frameTagsTime < std::chrono::milliseconds(250))
+            {
+                p.frameTagsPending = true;
+                return;
+            }
+            p.frameTagsTime = now;
+            p.frameTagsPending = false;
+            _widgetUpdate();
+        }
+
         void InfoWidget::_widgetUpdate()
         {
             FTK_P();
             // The rows and the search are the models', shared with the
             // iPad; the layout of the text is this widget's.
-            const std::vector<models::InfoItem> items = models::filterInfo(
-                models::getInfo(p.path, p.info, p.videoLayer),
+            p.items = models::filterInfo(
+                models::getInfo(p.path, p.info, p.videoLayer, p.frameTags),
                 p.search);
-            // The values line up in one column across the sections, so the
-            // tool and the copied text read as one document (#37). Metadata
-            // joins the column while its keys fit, and pads by itself when
-            // they do not: the keys are foreign and can be very long, and a
-            // single camera tag should not push every value to the right
-            // margin.
-            typedef std::vector<std::pair<std::string, std::string> > Pairs;
-            std::map<std::string, Pairs> kept;
-            size_t sharedSize = 0;
-            for (const auto& item : items)
-            {
-                kept[item.section].push_back({ item.name, item.value });
-                if (item.section != "Metadata")
-                {
-                    sharedSize = std::max(sharedSize, item.name.size() + 2);
-                }
-            }
+            const auto text = getText(p.sectionNames, p.items, true);
             for (const auto& name : p.sectionNames)
             {
-                size_t maxSize = sharedSize;
-                if ("Metadata" == name)
-                {
-                    size_t metadataSize = 0;
-                    for (const auto& i : kept[name])
-                    {
-                        metadataSize = std::max(metadataSize, i.first.size() + 2);
-                    }
-                    if (metadataSize > sharedSize)
-                    {
-                        maxSize = metadataSize;
-                    }
-                }
-
-                std::vector<std::string> text;
-                for (const auto& i : kept[name])
-                {
-                    std::string first = i.first + ": ";
-                    first.resize(maxSize, ' ');
-                    // A value can have newlines in it -- descriptions and
-                    // synopses do. The text edit takes one line per entry,
-                    // so give it one, with the rest lined up under the first
-                    // rather than running back to the margin and over the
-                    // following name.
-                    const std::vector<std::string> lines = ftk::splitLines(i.second);
-                    if (lines.empty())
-                    {
-                        text.emplace_back(first);
-                    }
-                    else
-                    {
-                        text.emplace_back(first + lines.front());
-                        for (size_t j = 1; j < lines.size(); ++j)
-                        {
-                            text.emplace_back(std::string(maxSize, ' ') + lines[j]);
-                        }
-                    }
-                }
-                p.textEdits[name]->setText(text);
+                const auto i = text.find(name);
+                const bool empty = i == text.end() || i->second.empty();
+                p.textEdits[name]->setText(!empty ? i->second : std::vector<std::string>());
+                // A section with nothing in it is not shown: only an
+                // OpenEXR file has a header, and a still has no audio.
+                p.bellows[name]->setVisible(!empty);
             }
         }
     }

@@ -27,6 +27,7 @@ namespace djv
             std::shared_ptr<ui::ViewCenterMarkerWidget> centerMarkerWidget;
             std::shared_ptr<ui::ViewFrameGuideWidget> frameGuideWidget;
             std::shared_ptr<ui::ViewSafeAreasWidget> safeAreasWidget;
+            std::shared_ptr<ui::ViewDataWindowWidget> dataWindowWidget;
             std::shared_ptr<ui::ViewClippingWarningWidget> clippingWarningWidget;
             std::shared_ptr<ui::ViewHUDWidget> hudWidget;
             std::map<std::string, std::shared_ptr<ftk::Bellows> > bellows;
@@ -58,6 +59,7 @@ namespace djv
             p.centerMarkerWidget = ui::ViewCenterMarkerWidget::create(context, viewportModel);
             p.frameGuideWidget = ui::ViewFrameGuideWidget::create(context, viewportModel);
             p.safeAreasWidget = ui::ViewSafeAreasWidget::create(context, viewportModel);
+            p.dataWindowWidget = ui::ViewDataWindowWidget::create(context, viewportModel);
             p.clippingWarningWidget = ui::ViewClippingWarningWidget::create(context, viewportModel);
             p.hudWidget = ui::ViewHUDWidget::create(context, viewportModel);
 
@@ -84,6 +86,9 @@ namespace djv
             p.bellows["SafeAreas"] = ftk::Bellows::create(context, "Safe Areas", layout);
             p.bellows["SafeAreas"]->setWidget(p.safeAreasWidget);
             p.bellows["SafeAreas"]->setCheckWidget(p.safeAreasWidget->getEnabledCheckBox());
+            p.bellows["DataWindow"] = ftk::Bellows::create(context, "Data Window", layout);
+            p.bellows["DataWindow"]->setWidget(p.dataWindowWidget);
+            p.bellows["DataWindow"]->setCheckWidget(p.dataWindowWidget->getEnabledCheckBox());
             p.bellows["ClippingWarning"] = ftk::Bellows::create(context, "Clipping Warning", layout);
             p.bellows["ClippingWarning"]->setWidget(p.clippingWarningWidget);
             p.bellows["ClippingWarning"]->setCheckWidget(p.clippingWarningWidget->getEnabledCheckBox());
