@@ -17,7 +17,7 @@ For the number of build jobs, export `CMAKE_BUILD_PARALLEL_LEVEL`.
 
 ## Linux
 
-Requirements: Git and CMake 3.31.
+Requirements: Git, CMake 3.31, and pkg-config.
 
 ### Debian and Ubuntu
 
