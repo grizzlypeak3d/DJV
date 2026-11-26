@@ -23,6 +23,7 @@ namespace djv
             void _resolve();
             void _labels();
             void _fitToConfig();
+            void _ocioIndexes();
         };
     }
 }

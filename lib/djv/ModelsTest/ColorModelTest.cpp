@@ -6,6 +6,7 @@
 #include <djv/ModelsTest/ModelsTestUtil.h>
 
 #include <djv/Models/ColorModel.h>
+#include <djv/Models/OCIOModel.h>
 
 #include <ftk/Core/Assert.h>
 
@@ -28,6 +29,28 @@ namespace djv
             _resolve();
             _labels();
             _fitToConfig();
+            _ocioIndexes();
+        }
+
+        // Choosing a display by its index shows in the data: its index and
+        // the views it has. Only setOptions() had updated them.
+        void ColorModelTest::_ocioIndexes()
+        {
+#if defined(TLRENDER_OCIO)
+            auto model = models::OCIOModel::create(_context);
+            tl::OCIOOptions options = model->observeOptions()->get();
+            options.enabled = true;
+            model->setOptions(options);
+            const auto data = model->observeData()->get();
+            if (data.displays.size() > 2)
+            {
+                const size_t index = data.displayIndex != 1 ? 1 : 2;
+                model->setDisplayIndex(index);
+                const auto after = model->observeData()->get();
+                FTK_CHECK(index == after.displayIndex);
+                FTK_CHECK(after.displays[index] == model->observeOptions()->get().display);
+            }
+#endif // TLRENDER_OCIO
         }
 
         // Options that name what the configuration does not have -- saved

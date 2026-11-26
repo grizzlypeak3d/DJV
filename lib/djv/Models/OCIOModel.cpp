@@ -168,6 +168,9 @@ namespace djv
                     options.look = std::string();
                 }
                 p.options->setIfChanged(options);
+                // The lists follow, as setOptions() has them: a new input or
+                // display has views of its own.
+                p.data->setIfChanged(_getData(options));
             }
         }
 
@@ -200,6 +203,9 @@ namespace djv
                     options.look = std::string();
                 }
                 p.options->setIfChanged(options);
+                // The lists follow, as setOptions() has them: a new input or
+                // display has views of its own.
+                p.data->setIfChanged(_getData(options));
             }
         }
 
@@ -218,6 +224,9 @@ namespace djv
                     options.look = std::string();
                 }
                 p.options->setIfChanged(options);
+                // The lists follow, as setOptions() has them: a new input or
+                // display has views of its own.
+                p.data->setIfChanged(_getData(options));
             }
         }
 
@@ -231,6 +240,9 @@ namespace djv
                 options.enabled = true;
                 options.look = value > 0 ? looks[value] : std::string();
                 p.options->setIfChanged(options);
+                // The lists follow, as setOptions() has them: a new input or
+                // display has views of its own.
+                p.data->setIfChanged(_getData(options));
             }
         }
 
