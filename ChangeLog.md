@@ -95,6 +95,8 @@ Fixes:
 * Fix for Ctrl+Tab not being accepted as a keyboard shortcut (#980).
 * Fix for a playlist dropped on the window, or opened with File > Open,
   playing as one timeline; it opens into the file list (#986).
+* Fix for playback popping with the GPU renderer on slower graphics cards:
+  each frame's picture came a moment after its time.
 
 ## 3.7.7
 
