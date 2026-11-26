@@ -11,7 +11,7 @@ import datetime
 import enum
 import os
 import pathlib
-from typing import overload
+from typing import TypeAlias, overload
 
 
 class IBaseSystem:
@@ -3284,7 +3284,7 @@ class Noise:
 def openURL(url: str) -> None:
     """Open a URL in an external application."""
 
-class SystInfo:
+class SysInfo:
     """Operating system information."""
     @property
     def name(self) -> str:
@@ -3292,6 +3292,13 @@ class SystInfo:
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
+
+    @property
+    def cpu(self) -> str:
+        """The CPU name."""
+
+    @cpu.setter
+    def cpu(self, arg: str, /) -> None: ...
 
     @property
     def cores(self) -> int:
@@ -3325,8 +3332,12 @@ class SystInfo:
     @desktop.setter
     def desktop(self, arg: str, /) -> None: ...
 
-def getSystInfo() -> SystInfo:
+def getSysInfo() -> SysInfo:
     """Get operating system information."""
+
+SystInfo: TypeAlias = SysInfo
+
+getSystInfo = getSysInfo
 
 def isDotFile(arg: str, /) -> bool:
     """Does the file name start with a dot?"""
@@ -6865,13 +6876,13 @@ class MonitorInfo:
     def size(self, arg: Size2I, /) -> None: ...
 
     @property
-    def refreshRate(self) -> int:
+    def refreshRate(self) -> float:
         """The refresh rate of the current display mode, in hertz; zero where
         it is not known.
         """
 
     @refreshRate.setter
-    def refreshRate(self, arg: int, /) -> None: ...
+    def refreshRate(self, arg: float, /) -> None: ...
 
     @property
     def dpi(self) -> V2F:
