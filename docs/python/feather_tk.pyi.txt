@@ -11,7 +11,7 @@ import datetime
 import enum
 import os
 import pathlib
-from typing import TypeAlias, overload
+from typing import overload
 
 
 class IBaseSystem:
@@ -3334,10 +3334,6 @@ class SysInfo:
 
 def getSysInfo() -> SysInfo:
     """Get operating system information."""
-
-SystInfo: TypeAlias = SysInfo
-
-getSystInfo = getSysInfo
 
 def isDotFile(arg: str, /) -> bool:
     """Does the file name start with a dot?"""
