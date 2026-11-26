@@ -9,7 +9,7 @@ Open it with **Tools > Export** (<kbd>F2</kbd>).
 ![Export tool](assets/export-tool.svg)
 
 - Directory — Where the export is written.
-- Render size — **Default** for the size of what is being exported with no scaling; one of the preset widths, or **Width** for a width typed in, where the height follows the aspect ratio of what is being exported so nothing is squashed to fit; or **Custom** for a width and height typed in, used as they are. A height that follows from a width is rounded to an even number for a movie, which its codecs need; the source's own size and a custom size are used as they are, and the export says if the codec cannot take them.
+- Render size — **Source** for the size of what is being exported with no scaling; one of the preset widths, or **Width** for a width typed in, where the height follows the aspect ratio of what is being exported so nothing is squashed to fit; or **Custom** for a width and height typed in, used as they are. A height that follows from a width is rounded to an even number for a movie, which its codecs need; the source's own size and a custom size are used as they are, and the export says if the codec cannot take them.
 - Size — The size the export comes out at, with the edits for what can be typed.
 - Burn in drawings — Write the review drawings into the picture, on the frames they are on (see [Review](reviews.html)).
 - File name — The name of the file to write, without its extension. A run of `#` is replaced by the frame number, as many digits wide as there are `#`: `render.####` writes `render.0023.exr`. Digits are part of the name. A name typed with one of the extensions on it takes that extension.

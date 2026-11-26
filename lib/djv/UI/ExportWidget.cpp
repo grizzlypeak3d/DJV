@@ -121,10 +121,10 @@ namespace djv
             ftk::setScreenshotTag(p.dirEdit, "Export.Dir");
 
             p.renderSizeComboBox = ftk::ComboBox::create(context, models::getExportRenderSizeLabels());
-            // "Default" is the one choice that is not a width, so it is the
+            // "Source" is the one choice that is not a width, so it is the
             // one that needs saying.
             p.renderSizeComboBox->setTooltip(
-                "\"Default\" is the size of what is being exported, with no "
+                "\"Source\" is the size of what is being exported, with no "
                 "scaling.\n"
                 "The presets and \"Width\" scale to a width, with the height "
                 "following the aspect ratio of what is being exported, "
