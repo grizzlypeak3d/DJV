@@ -933,6 +933,9 @@ namespace djv
             // The picture alone on a monitor it fills: no heads up display,
             // as presentation mode does for the main window.
             p.secondaryWindow->getViewport()->setHUDActive(!fullScreen);
+            // Playback is paced to the display showing the picture; once
+            // the window is gone, to the main window's again.
+            setPacedWindow(p.secondaryWindow);
         }
 
         void App::_secondaryMonitorUpdate()
