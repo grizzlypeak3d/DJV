@@ -530,7 +530,12 @@ namespace djv
         {
             FTK_P();
             setAudio(AudioSettings());
-            setCache(tl::PlayerCacheOptions());
+            // The cache a first start has, sized to this machine: the
+            // library's default is four gigabytes whatever it holds.
+            tl::PlayerCacheOptions cache = getDefaultCache();
+            cache.videoGB = std::min(cache.videoGB, getMaxCacheGB());
+            cache.audioGB = std::min(cache.audioGB, getMaxCacheGB());
+            setCache(cache);
             setThumbnailCache(tl::ui::ThumbnailCacheOptions());
             setExport(ExportSettings());
             setFileBrowser(FileBrowserSettings());
@@ -542,6 +547,7 @@ namespace djv
             setMisc(miscSettings);
             setMouse(MouseSettings());
             setPlayback(PlaybackSettings());
+            setReview(ReviewSettings());
             setStyle(StyleSettings());
             setTimeline(TimelineSettings());
             setWindow(WindowSettings());
@@ -1383,9 +1389,13 @@ namespace djv
         {
             for (auto i = json.at("Bindings").begin(); i != json.at("Bindings").end(); ++i)
             {
+                // An action this version does not know is skipped: it had
+                // been taken for the first one, whose binding it replaced.
                 MouseAction mouseAction = MouseAction::First;
-                from_string(i.key(), mouseAction);
-                from_json(i.value(), value.bindings[mouseAction]);
+                if (from_string(i.key(), mouseAction))
+                {
+                    from_json(i.value(), value.bindings[mouseAction]);
+                }
             }
             // Not required: settings written before the tool existed
             // still load.

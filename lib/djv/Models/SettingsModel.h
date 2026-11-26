@@ -268,7 +268,7 @@ namespace djv
             FrameShuttle,
 
             Count,
-            First = Pick
+            First = PanView
         };
         FTK_ENUM(DJV_MODELS_API, MouseAction);
 
