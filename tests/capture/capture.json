@@ -749,13 +749,17 @@
         { "open": "etc/SampleData/Counter.#.png" },
         { "tool": "Settings", "expand": ["Graphics"] },
         { "expect": "Settings.Graphics.Renderer", "text": "Metal" },
+        { "expect": "Settings.Graphics.Paced", "checked": true },
         { "click": "Settings.Graphics.Renderer" },
         { "key": "Up" },
         { "key": "Return" },
         { "expect": "Settings.Graphics.Renderer", "text": "OpenGL" },
+        { "click": "Settings.Graphics.Paced" },
+        { "expect": "Settings.Graphics.Paced", "checked": false },
         { "click": "Settings.Reset" },
         { "click": "ConfirmDialog.OK" },
-        { "expect": "Settings.Graphics.Renderer", "text": "Metal" }
+        { "expect": "Settings.Graphics.Renderer", "text": "Metal" },
+        { "expect": "Settings.Graphics.Paced", "checked": true }
       ]
     },
     {

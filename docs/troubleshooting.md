@@ -21,7 +21,7 @@ djv -renderer OpenGL
 
 The log and **Help > System Information** say what is drawing, and with which graphics device and driver.
 
-While playing, DJV presents the picture once each refresh of the display it is on and chooses each frame for the refresh it will be shown at, which keeps the motion even. If playback stutters, or uses more processor time than expected, on a system where it did not before, it can be turned off by starting DJV with the environment variable `FTK_DISPLAY_PACED` set to `0`:
+If playback stutters, try turning **Paced playback** off, or on, in the **Graphics** section of the **Settings** tool; it takes effect at once. It is on by default on macOS and Windows. The environment variable `FTK_DISPLAY_PACED`, `0` or `1`, overrides the setting:
 
 ```
 FTK_DISPLAY_PACED=0 djv

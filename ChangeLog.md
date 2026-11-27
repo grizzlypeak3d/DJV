@@ -81,7 +81,8 @@ Changes:
 
 Fixes:
 * Fix for uneven playback: the picture is now paced to the display, each
-  frame chosen for the refresh it is shown at (#178).
+  frame chosen for the refresh it is shown at; Settings > Graphics > Paced
+  playback, on by default on macOS and Windows (#178).
 * Fix for jumping one second at 23.976, 29.97, and 59.94 fps landing a frame
   short (#720).
 * Fix for jumps past the in or out point wrapping around (#659).

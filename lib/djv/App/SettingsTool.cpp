@@ -117,19 +117,19 @@ namespace djv
             p.bellows["Style"]->setWidget(vLayout2);
             ftk::setScreenshotTag(p.bellows["Style"], "Settings.Style");
 
-#if defined(FTK_GPU)
-            // Only where there is a choice of renderer to make.
             p.bellows["Graphics"] = ftk::Bellows::create(context, "Graphics", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
             vLayout2->setMarginRole(ftk::SizeRole::Margin);
+#if defined(FTK_GPU)
+            // Only where there is a choice of renderer to make.
             ftk::Label::create(
                 context,
-                "Changes are applied when the application is restarted.",
+                "The renderer changes when the application is restarted.",
                 vLayout2);
+#endif // FTK_GPU
             ui::GraphicsSettingsWidget::create(context, app, vLayout2);
             p.bellows["Graphics"]->setWidget(vLayout2);
             ftk::setScreenshotTag(p.bellows["Graphics"], "Settings.Graphics");
-#endif // FTK_GPU
 
             p.bellows["Time"] = ftk::Bellows::create(context, "Time", vLayout);
             vLayout2 = ftk::VerticalLayout::create(context, vLayout);
@@ -221,12 +221,15 @@ namespace djv
                                         if (auto app = appWeak.lock())
                                         {
                                             app->getSettingsModel()->reset();
-                                            // The renderer is the
-                                            // application's setting rather
-                                            // than the model's, so the
-                                            // model's reset cannot cover it.
+                                            // The renderer and pacing are
+                                            // the application's settings
+                                            // rather than the model's, so
+                                            // the model's reset cannot
+                                            // cover them.
                                             app->setRenderer(
                                                 ftk::getDefaultRenderer());
+                                            app->setDisplayPaced(
+                                                ftk::getDefaultDisplayPaced());
                                         }
                                     }
                                 });

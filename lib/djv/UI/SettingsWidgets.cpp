@@ -326,9 +326,11 @@ namespace djv
 
             std::shared_ptr<ftk::ComboBox> rendererComboBox;
             std::shared_ptr<ftk::Label> currentLabel;
+            std::shared_ptr<ftk::CheckBox> pacedCheckBox;
             std::shared_ptr<ftk::FormLayout> layout;
 
             std::shared_ptr<ftk::Observer<ftk::Renderer> > rendererObserver;
+            std::shared_ptr<ftk::Observer<bool> > pacedObserver;
         };
 
         void GraphicsSettingsWidget::_init(
@@ -341,6 +343,7 @@ namespace djv
 
             p.app = app;
 
+#if defined(FTK_GPU)
             // In the order of ftk::Renderer. The other renderer is named
             // for what it is here, which is one thing on each system.
             p.rendererComboBox = ftk::ComboBox::create(
@@ -368,6 +371,7 @@ namespace djv
                 "\n"
                 "Starting with \"-renderer OpenGL\" draws with OpenGL\n"
                 "whatever is set here.");
+#endif // FTK_GPU
 
             // What is drawing now, which is not always what is asked for:
             // the setting is for the next start, and OpenGL draws where
@@ -397,13 +401,29 @@ namespace djv
             p.currentLabel = ftk::Label::create(context, current);
             p.currentLabel->setHStretch(ftk::Stretch::Expanding);
 
+            p.pacedCheckBox = ftk::CheckBox::create(context);
+            p.pacedCheckBox->setHStretch(ftk::Stretch::Expanding);
+            ftk::setScreenshotTag(p.pacedCheckBox, "Settings.Graphics.Paced");
+            p.pacedCheckBox->setTooltip(
+                "Pace playback to the display: while playing, the picture is\n"
+                "presented once each refresh of the display it is on, and\n"
+                "each frame is chosen for the refresh it is shown at, which\n"
+                "keeps the motion even.\n"
+                "\n"
+                "On by default on macOS and Windows. Turn it off if playback\n"
+                "stutters with it; it takes effect at once.");
+
             p.layout = ftk::FormLayout::create(context);
 
             _setWidget(p.layout);
             p.layout->setSpacingRole(ftk::SizeRole::SpacingSmall);
+#if defined(FTK_GPU)
             p.layout->addRow("Renderer:", p.rendererComboBox);
+#endif // FTK_GPU
             p.layout->addRow("Drawing with:", p.currentLabel);
+            p.layout->addRow("Paced playback:", p.pacedCheckBox);
 
+#if defined(FTK_GPU)
             p.rendererComboBox->setIndexCallback(
                 [this](int value)
                 {
@@ -418,6 +438,23 @@ namespace djv
                 [this](ftk::Renderer value)
                 {
                     _p->rendererComboBox->setCurrentIndex(static_cast<int>(value));
+                });
+#endif // FTK_GPU
+
+            p.pacedCheckBox->setCheckedCallback(
+                [this](bool value)
+                {
+                    if (auto app = _p->app.lock())
+                    {
+                        app->setDisplayPaced(value);
+                    }
+                });
+
+            p.pacedObserver = ftk::Observer<bool>::create(
+                app->observeDisplayPaced(),
+                [this](bool value)
+                {
+                    _p->pacedCheckBox->setChecked(value);
                 });
         }
 
