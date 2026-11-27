@@ -92,7 +92,7 @@ DJV can show a PQ encoded picture, such as an HDR10 movie, as HDR on a display t
 
 It needs three things:
 
-- The newer renderer. Choose **Metal** or **Vulkan** for **Renderer** in the **Graphics** section of the **Settings** tool, and start DJV again. OpenGL cannot show HDR, and the two options below are disabled with it.
+- The newer renderer: **Metal**, the default on macOS, or **Vulkan** on Linux and Windows, chosen for **Renderer** in the **Graphics** section of the **Settings** tool (start DJV again after changing it). OpenGL cannot show HDR, and the two options below are disabled with it.
 - A display that is showing HDR: turned on in the system's display settings on macOS and Windows, and on Linux in a Wayland session with HDR turned on for the display. An X11 session has no HDR.
 - **HDR picture** set to **PQ** in the **Viewport** section of the **Displays** tool (**Tools > Displays**).
 

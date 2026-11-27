@@ -17,9 +17,10 @@ Changes:
   it (#947).
 * A ring beside the status indicator shows the export progress, a finished export can
   be opened from the queue, and the export times are shown (#964, #968, #976).
-* Add an experimental GPU renderer (Metal or Vulkan), chosen in Settings >
-  Graphics or with the -renderer command line option. On an HDR display it
-  shows HDR pictures.
+* Add a GPU renderer (Metal or Vulkan), chosen in Settings > Graphics or
+  with the -renderer command line option. On an HDR display it shows HDR
+  pictures. It is the default on macOS (Metal); on Linux and Windows it is
+  experimental and OpenGL is the default.
 * Add a Displays tool for controlling a secondary window including fullscreen
   and OpenColorIO settings.
 * Faster playback of large 10 and 12-bit movies, such as 8K DNxHR.

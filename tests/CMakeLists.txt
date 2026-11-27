@@ -42,6 +42,32 @@ if(NOT DJV_TESTS_NO_GL)
             message(STATUS "Capture shot ${shot} needs ${requiresMissing}; not a test")
             continue()
         endif()
+        # A shot for some systems only names them in "systems", as
+        # CMAKE_SYSTEM_NAME does (Darwin, Linux, Windows): what a default
+        # is differs between them (the renderer is Metal on macOS).
+        string(JSON systemsCount ERROR_VARIABLE systemsError
+            LENGTH ${DJV_CAPTURE_JSON} shots ${i} systems)
+        if(NOT systemsError AND systemsCount GREATER 0)
+            set(systemFound FALSE)
+            math(EXPR systemsLast "${systemsCount} - 1")
+            foreach(j RANGE ${systemsLast})
+                string(JSON system GET ${DJV_CAPTURE_JSON} shots ${i} systems ${j})
+                if(system STREQUAL CMAKE_SYSTEM_NAME)
+                    set(systemFound TRUE)
+                endif()
+            endforeach()
+            if(NOT systemFound)
+                continue()
+            endif()
+        endif()
+        # And a shot about one renderer names it in "renderer", for the
+        # command line: the default is not the same everywhere.
+        set(shotArgs)
+        string(JSON shotRenderer ERROR_VARIABLE rendererError
+            GET ${DJV_CAPTURE_JSON} shots ${i} renderer)
+        if(NOT rendererError)
+            list(APPEND shotArgs -renderer ${shotRenderer})
+        endif()
         add_test(
             NAME djv-capture-${shot}
             COMMAND djv
@@ -51,6 +77,7 @@ if(NOT DJV_TESTS_NO_GL)
                 -captureShot ${shot}
                 -captureOutput ${DJV_CAPTURE_OUTPUT}
                 -log
+                ${shotArgs}
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
         # The PATH entry: see djv-test/CMakeLists.txt. The audio driver: a
         # runner has no sound card, and a player that cannot open the audio

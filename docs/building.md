@@ -168,7 +168,7 @@ build-Release\bin\djv\Release\djv DJV\etc\SampleData\BART_2021-02-07.0000.jpg
 
 ## The GPU renderer {#gpu-renderer}
 
-Besides OpenGL, DJV is built with a second renderer, on Metal on macOS and Vulkan on Linux and Windows, which is what HDR needs. OpenGL draws unless the other is chosen: in the **Graphics** section of the **Settings** tool, or with `-renderer GPU` on the command line.
+Besides OpenGL, DJV is built with a second renderer, on Metal on macOS and Vulkan on Linux and Windows, which is what HDR needs. It draws by default on macOS, and OpenGL draws by default on Linux and Windows; the other is chosen in the **Graphics** section of the **Settings** tool, or with `-renderer GPU` or `-renderer OpenGL` on the command line.
 
 The build options are `ftk_GPU` and `TLRENDER_GPU`, which `etc/Config/default.cmake` turns on except for OpenGL ES. A build directory from before they existed has them in its cache as off, and a configuration file does not overwrite what is there; say them to it once:
 

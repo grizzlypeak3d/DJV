@@ -477,6 +477,7 @@
     {
       "id": "displays-hdr",
       "strict": true,
+      "renderer": "OpenGL",
       "window": { "w": 1000, "h": 700 },
       "setup": [
         { "open": "etc/SampleData/Counter.#.png" },
@@ -723,6 +724,7 @@
       "id": "settings-reset-renderer",
       "strict": true,
       "requires": ["ftk_GPU"],
+      "systems": ["Linux", "Windows"],
       "window": { "w": 1000, "h": 700 },
       "setup": [
         { "open": "etc/SampleData/Counter.#.png" },
@@ -735,6 +737,25 @@
         { "click": "Settings.Reset" },
         { "click": "ConfirmDialog.OK" },
         { "expect": "Settings.Graphics.Renderer", "text": "OpenGL" }
+      ]
+    },
+    {
+      "id": "settings-reset-renderer-macos",
+      "strict": true,
+      "requires": ["ftk_GPU"],
+      "systems": ["Darwin"],
+      "window": { "w": 1000, "h": 700 },
+      "setup": [
+        { "open": "etc/SampleData/Counter.#.png" },
+        { "tool": "Settings", "expand": ["Graphics"] },
+        { "expect": "Settings.Graphics.Renderer", "text": "Metal" },
+        { "click": "Settings.Graphics.Renderer" },
+        { "key": "Up" },
+        { "key": "Return" },
+        { "expect": "Settings.Graphics.Renderer", "text": "OpenGL" },
+        { "click": "Settings.Reset" },
+        { "click": "ConfirmDialog.OK" },
+        { "expect": "Settings.Graphics.Renderer", "text": "Metal" }
       ]
     },
     {

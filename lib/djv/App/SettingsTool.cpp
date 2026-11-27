@@ -226,7 +226,7 @@ namespace djv
                                             // than the model's, so the
                                             // model's reset cannot cover it.
                                             app->setRenderer(
-                                                ftk::Renderer::OpenGL);
+                                                ftk::getDefaultRenderer());
                                         }
                                     }
                                 });

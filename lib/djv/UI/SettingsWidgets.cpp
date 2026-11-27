@@ -348,7 +348,7 @@ namespace djv
                 std::vector<std::string>({
                     "OpenGL",
 #if defined(__APPLE__)
-                    "Metal (experimental)"
+                    "Metal"
 #else // __APPLE__
                     "Vulkan (experimental)"
 #endif // __APPLE__
@@ -356,9 +356,15 @@ namespace djv
             p.rendererComboBox->setHStretch(ftk::Stretch::Expanding);
             ftk::setScreenshotTag(p.rendererComboBox, "Settings.Graphics.Renderer");
             p.rendererComboBox->setTooltip(
+#if defined(__APPLE__)
+                "What the windows are drawn with: Metal unless OpenGL is\n"
+                "chosen. Metal is what HDR needs; where it cannot draw,\n"
+                "OpenGL does.\n"
+#else // __APPLE__
                 "What the windows are drawn with. The other renderer is\n"
                 "new, and is what HDR needs; where it cannot draw, OpenGL\n"
                 "does.\n"
+#endif // __APPLE__
                 "\n"
                 "Starting with \"-renderer OpenGL\" draws with OpenGL\n"
                 "whatever is set here.");
