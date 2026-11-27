@@ -21,6 +21,12 @@ djv -renderer OpenGL
 
 The log and **Help > System Information** say what is drawing, and with which graphics device and driver.
 
+While playing, DJV presents the picture once each refresh of the display it is on and chooses each frame for the refresh it will be shown at, which keeps the motion even. If playback stutters, or uses more processor time than expected, on a system where it did not before, it can be turned off by starting DJV with the environment variable `FTK_DISPLAY_PACED` set to `0`:
+
+```
+FTK_DISPLAY_PACED=0 djv
+```
+
 ## "Open with" on Windows
 
 If choosing DJV in the **Open with** dialog brings the dialog straight back instead of opening the file, the entry Windows keeps for DJV is naming a version that has been removed. Windows writes that entry itself the first time a file is opened with DJV and never revisits it, so it outlives the install it was written for. Clearing it lets the entry the installer writes take over:
