@@ -7057,10 +7057,10 @@ class App(IApp):
 
     @property
     def renderer(self) -> Renderer:
-        """Get the renderer that is set, which is OpenGL unless the other is
-        asked for. What draws is said by gpu::isEnabled(): this is what is kept
-        with the settings, and where the GPU renderer cannot draw OpenGL does
-        whatever was asked.
+        """Get the renderer that is set, which is getDefaultRenderer() unless
+        the other is asked for. What draws is said by gpu::isEnabled(): this is
+        what is kept with the settings, and where the GPU renderer cannot draw
+        OpenGL does whatever was asked.
         """
 
     @renderer.setter
@@ -7069,6 +7069,24 @@ class App(IApp):
     @property
     def observeRenderer(self) -> "ftk::IObservable<ftk::Renderer>":
         """Observe the renderer that is set."""
+
+    @property
+    def displayPaced(self) -> bool:
+        """Get whether playback is paced to the display: while a system is busy
+        (a player playing), the window showing the picture presents every
+        refresh, so the loop goes round once a refresh in step with its
+        display, and the frame is chosen for the refresh it will be shown at.
+        getDefaultDisplayPaced() unless set; kept with the settings. The
+        FTK_DISPLAY_PACED environment variable, 0 or 1, overrides it, for
+        testing.
+        """
+
+    @displayPaced.setter
+    def displayPaced(self, arg: bool, /) -> None: ...
+
+    @property
+    def observeDisplayPaced(self) -> IObservableBool:
+        """Observe whether playback is paced to the display."""
 
     @property
     def observeColorStyle(self) -> IObservableColorStyle:
