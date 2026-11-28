@@ -475,8 +475,9 @@ DJV_C_API int djv_compare_wipe_hit(djv_models*, float x, float y);
 DJV_C_API void djv_compare_wipe_move(djv_models*, float x, float y);
 DJV_C_API void djv_compare_wipe_end(djv_models*);
 //! A touch on the picture: the wipe's handles, faded after a rest from
-//! touches, are shown again.
-DJV_C_API void djv_compare_wipe_show(djv_models*);
+//! touches, are shown again. Nonzero when they were faded, for a tap that
+//! brought them back to do nothing else.
+DJV_C_API int djv_compare_wipe_show(djv_models*);
 
 //! How much of B the overlay shows, from zero to one.
 DJV_C_API float djv_compare_get_overlay(djv_models*);

@@ -2241,12 +2241,15 @@ int djv_compare_wipe_begin(djv_models* models, float x, float y)
     return 1;
 }
 
-void djv_compare_wipe_show(djv_models* models)
+int djv_compare_wipe_show(djv_models* models)
 {
+    int out = 0;
     if (models && tl::Compare::Wipe == models->filesModel->getCompareOptions().compare)
     {
+        out = models->wipeOpacity < 1.F ? 1 : 0;
         models->wipeShow();
     }
+    return out;
 }
 
 int djv_compare_wipe_hit(djv_models* models, float x, float y)
