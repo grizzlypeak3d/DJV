@@ -32,6 +32,7 @@
 #include <ftk/Core/FontSystem.h>
 #include <ftk/Core/Observable.h>
 #include <ftk/Core/Path.h>
+#include <ftk/Core/Timer.h>
 
 #include <algorithm>
 #include <cctype>
@@ -157,6 +158,12 @@ struct djv_models
     // from.
     ftk::V2F wipeGrabPos;
     float wipePressRotation = 0.F;
+    //! The wipe's handles fade after a rest from touches, as the desktop's
+    //! fade when the pointer rests (#957), so they do not sit over the
+    //! seam being looked at, and come back with a touch on the picture.
+    float wipeOpacity = 1.F;
+    std::shared_ptr<ftk::Timer> wipeIdleTimer;
+    std::shared_ptr<ftk::Timer> wipeFadeTimer;
     uint64_t generation = 0;
 
     // What the strings handed out point into.
@@ -495,8 +502,54 @@ struct djv_models
         return out;
     }
 
+    void wipeShow()
+    {
+        if (!wipeIdleTimer || !wipeFadeTimer)
+            return;
+        wipeFadeTimer->stop();
+        if (wipeOpacity < 1.F)
+        {
+            wipeOpacity = 1.F;
+            needsDraw();
+        }
+        // Resting for a moment, they go; not while one is held.
+        wipeIdleTimer->start(
+            std::chrono::milliseconds(2000),
+            [this]
+            {
+                if (wipeDrag != models::WipeHandle::None)
+                {
+                    wipeShow();
+                }
+                else
+                {
+                    wipeFade();
+                }
+            });
+    }
+
+    void wipeFade()
+    {
+        if (!wipeFadeTimer || wipeOpacity <= 0.F || wipeFadeTimer->isActive())
+            return;
+        // Over a quarter of a second, as the desktop's.
+        wipeFadeTimer->start(
+            std::chrono::milliseconds(16),
+            [this]
+            {
+                wipeOpacity = std::max(0.F, wipeOpacity - 16.F / 250.F);
+                if (wipeOpacity <= 0.F)
+                {
+                    wipeFadeTimer->stop();
+                }
+                needsDraw();
+            });
+    }
+
     void drawWipe(const std::shared_ptr<ftk::IRender>& render)
     {
+        if (wipeOpacity <= 0.F)
+            return;
         if (const auto widget = wipeWidget())
         {
             // The letters are sized to the ring, so the font's size here
@@ -508,7 +561,8 @@ struct djv_models
                 *widget,
                 tl::c::getViewPicture(view).displayScale,
                 models::WipeHandle::None,
-                wipeDrag);
+                wipeDrag,
+                wipeOpacity);
         }
     }
 
@@ -705,6 +759,9 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
     {
         out->engine = engine;
         out->context = context;
+        out->wipeIdleTimer = ftk::Timer::create(context);
+        out->wipeFadeTimer = ftk::Timer::create(context);
+        out->wipeFadeTimer->setRepeating(true);
         out->settings = ftk::Settings::create(context, settingsPath);
         out->colorModel = models::ColorModel::create(context, out->settings);
         out->ocioModel = models::OCIOModel::create(context);
@@ -936,6 +993,11 @@ djv_models* djv_models_create(tl_engine* engine, const char* settingsPath)
             for (tl_view* view : out->views())
             {
                 tl::c::setCompareOptions(view, value);
+            }
+            // The wipe turned on or moved: its handles shown.
+            if (tl::Compare::Wipe == value.compare)
+            {
+                out->wipeShow();
             }
             if (!out->isAShown())
             {
@@ -2174,8 +2236,17 @@ int djv_compare_wipe_begin(djv_models* models, float x, float y)
     models->wipeGrabPos = pos;
     models->wipePressRotation = models->filesModel->getCompareOptions().wipeRotation;
     djv_compare_wipe_move(models, x, y);
+    models->wipeShow();
     models->needsDraw();
     return 1;
+}
+
+void djv_compare_wipe_show(djv_models* models)
+{
+    if (models && tl::Compare::Wipe == models->filesModel->getCompareOptions().compare)
+    {
+        models->wipeShow();
+    }
 }
 
 int djv_compare_wipe_hit(djv_models* models, float x, float y)
@@ -2226,6 +2297,7 @@ void djv_compare_wipe_end(djv_models* models)
     if (!models)
         return;
     models->wipeDrag = models::WipeHandle::None;
+    models->wipeShow();
     models->needsDraw();
 }
 
